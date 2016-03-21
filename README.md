@@ -86,5 +86,4 @@ to import the projects into Eclipse.
 
   1. Select `Run As/1 gcloud-eclipse-tools` from the context menu.
 
-  1. A new instance of Eclipse should be launched with the plugin installed.
-
+  1. A new instance of Eclipse launches with the plugin installed.
