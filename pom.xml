@@ -20,9 +20,10 @@
     <tycho.version>0.24.0</tycho.version>
     <tycho-extras.version>0.24.0</tycho-extras.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>1.7</maven.compiler.source>
-    <maven.compiler.target>1.7</maven.compiler.target>
     <eclipse.target>mars</eclipse.target>
+
+    <!-- log surefire tests to stdout -->
+    <tycho.showEclipseLog>true</tycho.showEclipseLog>
 
     <!--
       `SYSTEM` means use the default JDK (necc for Travis). 

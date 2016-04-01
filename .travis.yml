@@ -5,6 +5,8 @@ jdk:
 install: true
 script:
   - mvn -Ptravis verify
+  - jdk_switcher use oraclejdk8
+  - mvn -Ptravis verify -Declipse.target=neon
 cache:  
   directories:
    - $HOME/.m2
