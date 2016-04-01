@@ -13,6 +13,7 @@
     <module>gcp-repo</module>
     <module>features/com.google.gcp.eclipse.suite.e45.feature</module>
     <module>plugins/com.google.gcp.eclipse.appengine.localserver</module>
+    <module>plugins/com.google.gcp.eclipse.appengine.localserver.test</module>
   </modules>
 
   <properties>

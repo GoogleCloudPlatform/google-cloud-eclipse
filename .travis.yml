@@ -2,9 +2,9 @@ sudo: false
 language: java
 jdk:
   - openjdk7
+install: true
 script:
   - mvn -Ptravis verify
-  - mvn -Ptravis -Declipse.target=neon verify
 cache:  
   directories:
    - $HOME/.m2

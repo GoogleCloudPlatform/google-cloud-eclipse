@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ClassPath: .
+Bundle-ManifestVersion: 2
+Bundle-Name: Test
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-SymbolicName: com.google.gcp.eclipse.appengine.localserver.test
+Bundle-Vendor: Google, Inc.
+Bundle-Version: 94.0.0.qualifier
+Fragment-Host: com.google.gcp.eclipse.appengine.localserver
+Require-Bundle: org.junit
