@@ -50,10 +50,15 @@
     <publisherReference>org.eclipse.jst.server.generic.antpublisher</publisherReference>
   </module>
 
-    <project>
-      <classpathReference>appengine</classpathReference>
-    </project>
-    
+  <classpath id="cloudsdk">
+    <archive path="${cloudSdkDirectory}/platform/google_appengine/google/appengine/tools/java/lib/shared/servlet-api.jar"/>
+    <archive path="${cloudSdkDirectory}/platform/google_appengine/google/appengine/tools/java/lib/shared/jsp-api.jar"/>
+  </classpath>
+
+  <project>
+    <classpathReference>cloudsdk</classpathReference>
+  </project>
+
   <start>
     <external>"${cloudSdkDirectory}/bin/dev_appserver.py" --port ${port} "${webappDirectory}"</external>
    <!-- TODO we may not need this; check -->
