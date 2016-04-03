@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="com.google.gcp.eclipse.suite.e45.feature"
+      id="com.google.cloud.tools.eclipse.suite.e45.feature"
       label="Google Cloud Platform for Eclipse 4.5"
       version="94.0.0.qualifier"
       provider-name="Google, Inc.">
@@ -18,7 +18,7 @@
    </license>
 
    <plugin
-         id="com.google.gcp.eclipse.appengine.localserver"
+         id="com.google.cloud.tools.eclipse.appengine.localserver"
          download-size="0"
          install-size="0"
          version="94.0.0.qualifier"

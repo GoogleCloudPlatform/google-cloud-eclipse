@@ -3,23 +3,13 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>com.google.gcp.eclipse</groupId>
+    <groupId>com.google.cloud.tools.eclipse</groupId>
     <artifactId>trunk</artifactId>
     <version>94.0.0-SNAPSHOT</version>
     <relativePath>../../</relativePath>
   </parent>
-  <groupId>com.google.gcp.eclipse</groupId>
-  <artifactId>com.google.gcp.eclipse.appengine.localserver</artifactId>
+  <groupId>com.google.cloud.tools.eclipse</groupId>
+  <artifactId>com.google.cloud.tools.eclipse.suite.e45.feature</artifactId>
   <version>94.0.0-SNAPSHOT</version>
-  <packaging>eclipse-plugin</packaging>
-  
-<dependencies>
-  <dependency>
-	<groupId>junit</groupId>
-	<artifactId>junit</artifactId>
-	<version>4.11</version>
-    <scope>test</scope>
-    </dependency>
-  </dependencies>
-        
+  <packaging>eclipse-feature</packaging>
 </project>

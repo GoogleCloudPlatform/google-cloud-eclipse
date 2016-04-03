@@ -4,12 +4,12 @@
   xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>com.google.gcp.eclipse</groupId>
+    <groupId>com.google.cloud.tools.eclipse</groupId>
     <artifactId>trunk</artifactId>
     <version>94.0.0-SNAPSHOT</version>
     <relativePath>../</relativePath>
   </parent>
-  <groupId>com.google.gcp.eclipse</groupId>
+  <groupId>com.google.cloud.tools.eclipse</groupId>
   <artifactId>google-cloud-plugin-eclipse.repo</artifactId>
   <version>94.0.0-SNAPSHOT</version>
   <packaging>eclipse-repository</packaging>

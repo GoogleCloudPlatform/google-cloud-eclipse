@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: GCloud for Eclipse App Engine Local Server
-Bundle-SymbolicName: com.google.gcp.eclipse.appengine.localserver;singleton:=true
+Bundle-SymbolicName: com.google.cloud.tools.eclipse.appengine.localserver;singleton:=true
 Bundle-Version: 94.0.0.qualifier
 Bundle-Vendor: GOOGLE
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7

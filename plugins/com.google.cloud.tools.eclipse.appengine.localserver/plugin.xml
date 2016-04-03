@@ -7,7 +7,7 @@
       <runtimeType
             class="org.eclipse.jst.server.generic.core.internal.GenericServerRuntime"
             description="GCloud based App Engine runtime"
-            id="com.google.gcp.eclipse.gcloud.runtime"
+            id="com.google.cloud.tools.eclipse.gcloud.runtime"
             name="App Engine"
             vendor="Google"
             vendorId="google"
@@ -25,13 +25,13 @@
             behaviourClass="org.eclipse.jst.server.generic.core.internal.ExternalServerBehaviour"
             class="org.eclipse.jst.server.generic.core.internal.GenericServer"
             description="App Engine server that delegates to gcloud"
-            id="com.google.gcp.eclipse.gcloud.server"
+            id="com.google.cloud.tools.eclipse.gcloud.server"
             initialState="stopped"
             launchModes="run,debug"
             launchConfigId="org.eclipse.jst.server.generic.core.ExternalLaunchConfigurationType"
             name="GCloud based App Engine Server"
             runtime="true"
-            runtimeTypeId="com.google.gcp.eclipse.gcloud.runtime"
+            runtimeTypeId="com.google.cloud.tools.eclipse.gcloud.runtime"
             startBeforePublish="true"
             startTimeout="120000"
             stopTimeout="15000">
@@ -41,27 +41,27 @@
    <extension point="org.eclipse.jst.server.core.runtimeClasspathProviders">
       <runtimeClasspathProvider
             class="org.eclipse.jst.server.generic.core.internal.GenericServerRuntimeTargetHandler"
-            id="com.google.gcp.eclipse.gcloud.runtimeClasspathProvider"
-            runtimeTypeIds="com.google.gcp.eclipse.gcloud.*" />
+            id="com.google.cloud.tools.eclipse.gcloud.runtimeClasspathProvider"
+            runtimeTypeIds="com.google.cloud.tools.eclipse.gcloud.*" />
    </extension>
    
    <extension point="org.eclipse.wst.common.project.facet.core.runtimes">
-      <runtime-component-type id="com.google.gcp.eclipse.gcloud" />
+      <runtime-component-type id="com.google.cloud.tools.eclipse.gcloud" />
       <runtime-component-version
-            type="com.google.gcp.eclipse.gcloud"
+            type="com.google.cloud.tools.eclipse.gcloud"
             version="94.0.0" />
       <supported>
          <facet id="jst.web" version="2.5" />
-         <runtime-component id="com.google.gcp.eclipse.gcloud" version="94.0.0"/>
+         <runtime-component id="com.google.cloud.tools.eclipse.gcloud" version="94.0.0"/>
       </supported>
       
       <adapter>
-         <runtime-component id="com.google.gcp.eclipse.gcloud" />
+         <runtime-component id="com.google.cloud.tools.eclipse.gcloud" />
          <factory class="org.eclipse.jst.server.core.internal.RuntimeClasspathProvider$Factory" />
          <type class="org.eclipse.jst.common.project.facet.core.IClasspathProvider" />
       </adapter>
       <adapter>
-         <runtime-component id="com.google.gcp.eclipse.gcloud" />
+         <runtime-component id="com.google.cloud.tools.eclipse.gcloud" />
          <factory class="org.eclipse.jst.server.ui.internal.RuntimeLabelProvider$Factory" />
          <type class="org.eclipse.wst.common.project.facet.ui.IRuntimeComponentLabelProvider" />
       </adapter>
@@ -69,8 +69,8 @@
    
    <extension point="org.eclipse.jst.server.core.runtimeFacetMappings">
       <runtimeFacetMapping
-            runtime-component="com.google.gcp.eclipse.gcloud"
-            runtimeTypeId="com.google.gcp.eclipse.gcloud.runtime"
+            runtime-component="com.google.cloud.tools.eclipse.gcloud"
+            runtimeTypeId="com.google.cloud.tools.eclipse.gcloud.runtime"
             version="94.0.0" />
    </extension>
    
@@ -78,18 +78,18 @@
       <fragment
             class="org.eclipse.jst.server.generic.ui.internal.GenericServerRuntimeWizardFragment"
             id="org.eclipse.jst.server.generic.runtime"
-            typeIds="com.google.gcp.eclipse.gcloud.runtime" />
+            typeIds="com.google.cloud.tools.eclipse.gcloud.runtime" />
       <fragment
             class="org.eclipse.jst.server.generic.ui.internal.GenericServerWizardFragment"
             id="org.eclipse.jst.server.generic.server"
-            typeIds="com.google.gcp.eclipse.gcloud.server" />
+            typeIds="com.google.cloud.tools.eclipse.gcloud.server" />
    </extension>
    
    <extension point="org.eclipse.wst.server.ui.serverImages">
       <image
-            id="com.google.gcp.eclipse.gcloud.serverImage"
+            id="com.google.cloud.tools.eclipse.gcloud.serverImage"
             icon="icons/gcp.png"
-            typeIds="com.google.gcp.eclipse.gcloud.server,com.google.gcp.eclipse.gcloud.runtime">
+            typeIds="com.google.cloud.tools.eclipse.gcloud.server,com.google.cloud.tools.eclipse.gcloud.runtime">
       </image>
    </extension>
    
@@ -97,7 +97,7 @@
       <!-- WTP brain damage: id attribute here is an idref, not an id -->
       <serverdefinition
             definitionfile="gcloud_serverdef.xml"
-            id="com.google.gcp.eclipse.gcloud.runtime">
+            id="com.google.cloud.tools.eclipse.gcloud.runtime">
       </serverdefinition>
    </extension>
 </plugin>

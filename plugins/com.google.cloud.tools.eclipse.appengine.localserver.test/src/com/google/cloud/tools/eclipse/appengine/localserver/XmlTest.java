@@ -1,4 +1,4 @@
-package com.google.gcp.eclipse.appengine.localserver;
+package com.google.cloud.tools.eclipse.appengine.localserver;
 
 import java.io.File;
 
@@ -26,7 +26,7 @@ public class XmlTest {
   public void testGcpXml() throws Exception {
     // test fails if malformed
     Document doc = builder.parse(
-        new File("../com.google.gcp.eclipse.appengine.localserver/gcp.xml"));
+        new File("../com.google.cloud.tools.eclipse.appengine.localserver/gcp.xml"));
     Assert.assertEquals("project", doc.getDocumentElement().getNodeName());
   }
     
@@ -34,7 +34,7 @@ public class XmlTest {
   public void testGcloudServerDef() throws Exception {
     // test fails if malformed
     Document doc = builder.parse(
-        new File("../com.google.gcp.eclipse.appengine.localserver/gcloud_serverdef.xml"));
+        new File("../com.google.cloud.tools.eclipse.appengine.localserver/gcloud_serverdef.xml"));
     Assert.assertEquals("ServerRuntime", doc.getDocumentElement().getLocalName());
   }
     
@@ -42,7 +42,7 @@ public class XmlTest {
   public void testPluginXml() throws Exception {
     // test fails if malformed
     Document doc = builder.parse(
-        new File("../com.google.gcp.eclipse.appengine.localserver/plugin.xml"));
+        new File("../com.google.cloud.tools.eclipse.appengine.localserver/plugin.xml"));
     Assert.assertEquals("plugin", doc.getDocumentElement().getNodeName());
   }
 }

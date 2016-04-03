@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>com.google.gcp.eclipse.appengine.localserver</name>
+	<name>com.google.cloud.tools.eclipse.appengine.localserver</name>
 	<comment></comment>
 	<projects>
 	</projects>
