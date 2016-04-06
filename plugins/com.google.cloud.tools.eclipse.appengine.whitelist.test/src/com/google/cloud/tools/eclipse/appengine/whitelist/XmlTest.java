@@ -26,7 +26,7 @@ public class XmlTest {
   public void testPluginXml() throws Exception {
     // test fails if malformed
     Document doc = builder.parse(
-        new File("../com.google.cloud.tools.eclipse.appengine.localserver/plugin.xml"));
+        new File("../com.google.cloud.tools.eclipse.appengine.whitelist/plugin.xml"));
     Assert.assertEquals("plugin", doc.getDocumentElement().getNodeName());
   }
 }

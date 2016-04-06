@@ -3,17 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Cloud Tools for Eclipse App Engine JRE Whitelist Checks
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.appengine.whitelist;singleton:=true
 Bundle-Version: 94.0.0.qualifier
-Bundle-Vendor: GOOGLE
+Bundle-Vendor: Google, Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Require-Bundle: org.eclipse.wst.server.core;bundle-version="1.7.0",
- org.eclipse.wst.server.ui;bundle-version="1.5.201",
- org.eclipse.wst.common.project.facet.core;bundle-version="1.4.300",
- org.eclipse.wst.common.project.facet.ui;bundle-version="1.4.600",
- org.eclipse.jst.server.core;bundle-version="1.2.400",
- org.eclipse.jst.server.ui;bundle-version="1.1.300",
- org.eclipse.jst.server.generic.core;bundle-version="1.0.900",
- org.eclipse.jst.server.generic.ui;bundle-version="1.0.600",
- org.eclipse.jst.common.project.facet.core;bundle-version="1.4.400",
- org.eclipse.jst.common.project.facet.ui;bundle-version="1.4.510",
- javax.servlet;bundle-version="3.1.0";visibility:=reexport,
+Require-Bundle: javax.servlet;bundle-version="3.1.0";visibility:=reexport,
  javax.servlet.jsp;bundle-version="2.2.0";visibility:=reexport
