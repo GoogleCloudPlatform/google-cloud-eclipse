@@ -215,8 +215,10 @@
     <profile>
       <id>travis</id>
       <properties>
-         <!-- We configure Travis to use jdk7 -->
-         <tycho.toolchains>SYSTEM</tycho.toolchains>
+        <!-- We configure Travis to use jdk7 -->
+        <tycho.toolchains>SYSTEM</tycho.toolchains>
+        <!-- Ensure we don't resolved mis-cached artifacts -->
+        <tycho.localArtifacts>ignore</tycho.localArtifacts>
       </properties>
     </profile>
   </profiles>
