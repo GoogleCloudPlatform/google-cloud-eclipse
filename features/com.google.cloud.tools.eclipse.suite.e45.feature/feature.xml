@@ -23,5 +23,11 @@
          install-size="0"
          version="94.0.0.qualifier"
          unpack="false"/>
+   <plugin
+       id="com.google.cloud.tools.eclipse.appengine.whitelist"
+       download-size="0"
+       install-size="0"
+       version="94.0.0.qualifier"
+       unpack="false"/>
 
 </feature>
