@@ -4,9 +4,9 @@ jdk:
   - openjdk7
 install: true
 script:
-  - mvn -Ptravis verify
+  - mvn -Ptravis --fail-at-end verify
   - jdk_switcher use oraclejdk8
-  - mvn -Ptravis verify -Declipse.target=neon
+  - mvn -Ptravis --fail-at-end verify -Declipse.target=neon
 cache:  
   directories:
    - $HOME/.m2
