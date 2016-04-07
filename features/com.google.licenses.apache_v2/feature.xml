@@ -1,21 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="com.google.cloud.tools.eclipse.suite.e45.feature"
-      label="Google Cloud Platform for Eclipse 4.5"
-      version="0.1.0.qualifier"
-      provider-name="Google, Inc."
-      license-feature="com.google.licenses.apache_v2">
+      id="com.google.licenses.apache_v2"
+      label="Apache License v2"
+      version="0.0.1.qualifier"
+      provider-name="Google, Inc.">
 
    <description>
-      %description
+      A shared license feature for the Apache Standard License v2
    </description>
 
    <copyright>
       %copyright.text
    </copyright>
 
-   <license url="%licenseURL">
-      %license
+   <license url="%license.url">
+      %license.text
    </license>
 
    <plugin
