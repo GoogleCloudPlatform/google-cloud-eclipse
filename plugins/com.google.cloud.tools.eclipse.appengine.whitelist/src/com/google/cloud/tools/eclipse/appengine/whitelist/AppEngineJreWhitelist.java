@@ -1910,6 +1910,8 @@ public class AppEngineJreWhitelist {
         || className.startsWith("sun.util.") 
         || className.startsWith("org.xml.sax.") 
         || className.startsWith("org.w3c.dom.") 
+        || className.startsWith("org.omg.") 
+        || className.startsWith("org.ietf.jgss") 
         || className.startsWith("com.sun.")) {
       return WHITELIST.contains(className);
     } else { // not a JRE class

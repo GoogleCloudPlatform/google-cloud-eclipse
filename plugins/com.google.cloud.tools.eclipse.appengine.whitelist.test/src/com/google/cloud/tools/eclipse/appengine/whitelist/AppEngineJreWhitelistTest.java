@@ -20,5 +20,15 @@ public class AppEngineJreWhitelistTest {
     Assert.assertTrue(AppEngineJreWhitelist.contains("com.google.Bar"));
   }
   
+  @Test
+  public void testWhitelisted_OmgClass() {
+    Assert.assertFalse(AppEngineJreWhitelist.contains("org.omg.CosNaming.BindingIterator"));
+  }
+  
+  @Test
+  public void testWhitelisted_GssClass() {
+    Assert.assertFalse(AppEngineJreWhitelist.contains("org.ietf.jgss.GSSContext"));
+  }
+  
 }
 
