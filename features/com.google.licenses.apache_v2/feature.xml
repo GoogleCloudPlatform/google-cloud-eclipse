@@ -2,7 +2,7 @@
 <feature
       id="com.google.licenses.apache_v2"
       label="Apache License v2"
-      version="0.0.1.qualifier"
+      version="0.1.0.qualifier"
       provider-name="Google, Inc.">
 
    <description>
@@ -16,19 +16,5 @@
    <license url="%license.url">
       %license.text
    </license>
-
-   <plugin
-         id="com.google.cloud.tools.eclipse.appengine.localserver"
-         download-size="0"
-         install-size="0"
-         version="0.1.0.qualifier"
-         unpack="false"/>
-
-   <plugin
-         id="com.google.cloud.tools.eclipse.appengine.whitelist"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
 
 </feature>
