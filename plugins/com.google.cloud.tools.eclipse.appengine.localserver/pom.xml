@@ -5,12 +5,12 @@
   <parent>
     <groupId>com.google.cloud.tools.eclipse</groupId>
     <artifactId>trunk</artifactId>
-    <version>94.0.0-SNAPSHOT</version>
+    <version>0.1.0-SNAPSHOT</version>
     <relativePath>../../</relativePath>
   </parent>
   <groupId>com.google.cloud.tools.eclipse</groupId>
   <artifactId>com.google.cloud.tools.eclipse.appengine.localserver</artifactId>
-  <version>94.0.0-SNAPSHOT</version>
+  <version>0.1.0-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
   
 <dependencies>

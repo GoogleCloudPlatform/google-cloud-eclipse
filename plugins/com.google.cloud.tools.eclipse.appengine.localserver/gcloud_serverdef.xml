@@ -3,7 +3,7 @@
    xmlns:tns="http://eclipse.org/jst/server/generic/ServerTypeDefinition"
    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
    xsi:schemaLocation="http://eclipse.org/jst/server/generic/ServerTypeDefinition ServerTypeDefinitionSchema.xsd"
-   name="GCloud" version="v94.0.0">
+   name="GCloud" version="v0.1.0">
 
   <property id="cloudSdkDirectory"
       label="Directory where gcloud is installed"

@@ -11,7 +11,7 @@
             name="App Engine"
             vendor="Google"
             vendorId="google"
-            version="94.0.0">
+            version="0.1.0">
          <moduleType
                types="jst.web"
                versions="2.5">
@@ -49,10 +49,10 @@
       <runtime-component-type id="com.google.cloud.tools.eclipse.gcloud" />
       <runtime-component-version
             type="com.google.cloud.tools.eclipse.gcloud"
-            version="94.0.0" />
+            version="0.1.0" />
       <supported>
          <facet id="jst.web" version="2.5" />
-         <runtime-component id="com.google.cloud.tools.eclipse.gcloud" version="94.0.0"/>
+         <runtime-component id="com.google.cloud.tools.eclipse.gcloud" version="0.1.0"/>
       </supported>
       
       <adapter>
@@ -71,7 +71,7 @@
       <runtimeFacetMapping
             runtime-component="com.google.cloud.tools.eclipse.gcloud"
             runtimeTypeId="com.google.cloud.tools.eclipse.gcloud.runtime"
-            version="94.0.0" />
+            version="0.1.0" />
    </extension>
    
    <extension point="org.eclipse.wst.server.ui.wizardFragments">

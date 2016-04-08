@@ -5,6 +5,6 @@ Bundle-Name: Test
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.appengine.whitelist.test
 Bundle-Vendor: Google, Inc.
-Bundle-Version: 94.0.0.qualifier
+Bundle-Version: 0.1.0.qualifier
 Fragment-Host: com.google.cloud.tools.eclipse.appengine.whitelist
 Require-Bundle: org.junit
