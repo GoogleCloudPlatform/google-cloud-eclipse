@@ -1901,7 +1901,7 @@ public class AppEngineJreWhitelist {
               ));
   
   /**
-   * @param className fully package qualified className
+   * @param className fully package qualified class name
    * @return true if this class is allowed in Java 7 on App Engine, false otherwise
    */
   public static boolean contains(String className) {
