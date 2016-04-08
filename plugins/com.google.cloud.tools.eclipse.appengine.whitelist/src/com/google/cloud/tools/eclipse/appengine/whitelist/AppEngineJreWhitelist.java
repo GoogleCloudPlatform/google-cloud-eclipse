@@ -1905,7 +1905,17 @@ public class AppEngineJreWhitelist {
    * @return true if this class is allowed in Java 7 on App Engine, false otherwise
    */
   public static boolean contains(String className) {
-    return WHITELIST.contains(className);
+    if (className.startsWith("java.") 
+        || className.startsWith("javax.") 
+        || className.startsWith("sun.util.") 
+        || className.startsWith("org.xml.sax.") 
+        || className.startsWith("org.w3c.dom.") 
+        || className.startsWith("com.sun.")) {
+      return WHITELIST.contains(className);
+    } else { // not a JRE class
+      return true;
+    }
+    
   }
   
 }

@@ -14,5 +14,11 @@ public class AppEngineJreWhitelistTest {
   public void testWhitelisted() {
     Assert.assertTrue(AppEngineJreWhitelist.contains("java.lang.String"));
   }
+  
+  @Test
+  public void testWhitelisted_nonJreClass() {
+    Assert.assertTrue(AppEngineJreWhitelist.contains("com.google.Bar"));
+  }
+  
 }
 
