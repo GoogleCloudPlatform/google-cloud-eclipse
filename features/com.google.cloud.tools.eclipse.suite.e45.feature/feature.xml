@@ -2,7 +2,7 @@
 <feature
       id="com.google.cloud.tools.eclipse.suite.e45.feature"
       label="Google Cloud Platform for Eclipse 4.5"
-      version="94.0.0.qualifier"
+      version="0.1.0.qualifier"
       provider-name="Google, Inc.">
 
    <description>
@@ -21,7 +21,7 @@
          id="com.google.cloud.tools.eclipse.appengine.localserver"
          download-size="0"
          install-size="0"
-         version="94.0.0.qualifier"
+         version="0.1.0.qualifier"
          unpack="false"/>
    <plugin
        id="com.google.cloud.tools.eclipse.appengine.whitelist"
