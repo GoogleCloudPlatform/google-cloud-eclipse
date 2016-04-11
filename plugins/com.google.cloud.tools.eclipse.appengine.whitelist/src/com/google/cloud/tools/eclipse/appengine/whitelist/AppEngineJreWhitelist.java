@@ -1910,6 +1910,8 @@ public class AppEngineJreWhitelist {
               "javax.naming.ldap.Rdn"
               ));
   
+  // TODO: com.sun and com.oracle packages are tricky. Some are in the JRE. Some aren't. 
+  
   /**
    * @param className fully package qualified class name
    * @return true if this class is allowed in Java 7 on App Engine Standard, false otherwise
@@ -1920,22 +1922,36 @@ public class AppEngineJreWhitelist {
         return WHITELIST.contains(className);
       }
       return true;
-    }
-    else if (className.startsWith("java.") 
+    } else if (className.startsWith("java.") 
         || className.startsWith("sun.util.") 
         || className.startsWith("org.xml.sax.") 
         || className.startsWith("org.w3c.dom.") 
         || className.startsWith("org.omg.") 
         || className.startsWith("org.ietf.jgss.") 
+        || className.startsWith("com.sun.jmx.") 
+        || className.startsWith("com.sun.jndi.") 
+        || className.startsWith("com.sun.media.") 
+        || className.startsWith("com.sun.management.") 
         || className.startsWith("com.sun.beans.") 
+        || className.startsWith("com.sun.corba.") 
+        || className.startsWith("com.sun.awt.") 
+        || className.startsWith("com.sun.swing.") 
+        || className.startsWith("com.sun.rmi.") 
+        || className.startsWith("com.sun.xml.") 
+        || className.startsWith("com.sun.java.") 
+        || className.startsWith("com.sun.org.") 
+        || className.startsWith("com.sun.rowset.") 
+        || className.startsWith("com.oracle.net.") 
+        || className.startsWith("com.oracle.nio.") 
+        || className.startsWith("com.oracle.util.") 
         || className.startsWith("com.sun.org.apache.")) {
       return WHITELIST.contains(className);
     } else { // not a JRE class
       return true;
     }
-    
   }
 
+  // javax packages are tricky. Some are in the JRE. Some aren't. 
   private static boolean isBundledInJre(String className) {
     if (className.startsWith("javax.accessibility.")
         || className.startsWith("javax.activation.")
