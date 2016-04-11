@@ -30,5 +30,15 @@ public class AppEngineJreWhitelistTest {
     Assert.assertFalse(AppEngineJreWhitelist.contains("org.ietf.jgss.GSSContext"));
   }
   
+  @Test
+  public void testWhitelisted_JavaxClass() {
+    Assert.assertTrue(AppEngineJreWhitelist.contains("javax.servlet.ServletRequest"));
+  }
+  
+  @Test
+  public void testWhitelisted_SwingClass() {
+    Assert.assertFalse(AppEngineJreWhitelist.contains("javax.swing.JFrame"));
+  }
+  
 }
 

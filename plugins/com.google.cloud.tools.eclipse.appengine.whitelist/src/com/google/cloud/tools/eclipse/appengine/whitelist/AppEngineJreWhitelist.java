@@ -1905,8 +1905,13 @@ public class AppEngineJreWhitelist {
    * @return true if this class is allowed in Java 7 on App Engine, false otherwise
    */
   public static boolean contains(String className) {
-    if (className.startsWith("java.") 
-        || className.startsWith("javax.") 
+    if (className.startsWith("javax.") ){
+      if (isBundledInJre(className)) {
+        return WHITELIST.contains(className);
+      }
+      return true;
+    }
+    else if (className.startsWith("java.") 
         || className.startsWith("sun.util.") 
         || className.startsWith("org.xml.sax.") 
         || className.startsWith("org.w3c.dom.") 
@@ -1918,6 +1923,33 @@ public class AppEngineJreWhitelist {
       return true;
     }
     
+  }
+
+  private static boolean isBundledInJre(String className) {
+    if (className.startsWith("javax.accessibility")
+        || className.startsWith("javax.activation")
+        || className.startsWith("javax.activity")
+        || className.startsWith("javax.annotation")
+        || className.startsWith("javax.crypto")
+        || className.startsWith("javax.imageio")
+        || className.startsWith("javax.jws")
+        || className.startsWith("javax.lang.model")
+        || className.startsWith("javax.management")
+        || className.startsWith("javax.naming")
+        || className.startsWith("javax.net")
+        || className.startsWith("javax.print")
+        || className.startsWith("javax.rmi")
+        || className.startsWith("javax.script")
+        || className.startsWith("javax.security.")
+        || className.startsWith("javax.sound.")
+        || className.startsWith("javax.sql.")
+        || className.startsWith("javax.swing.")
+        || className.startsWith("javax.tools.")
+        || className.startsWith("javax.transaction.")
+        || className.startsWith("javax.xml.")) {
+      return true;
+    }
+    return false;
   }
   
 }
