@@ -4,6 +4,16 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Utility to check whether a given class is directly accessible in Java programs that run
+ * in the App Engine Standard Environment. Note that just because a class is whitelisted  
+ * does not mean that all features and methods of the class are supported for an 
+ * application running in the App Engine sandbox environment.
+ * 
+ * All classes that are not bundled into the JDK are whitelisted. 
+ * 
+ * @see <a href="https://cloud.google.com/appengine/docs/java/jrewhitelist">The JRE Class Whitelist</a>
+ */
 public class AppEngineJreWhitelist {
 
   private static Set<String> WHITELIST =
@@ -1902,7 +1912,7 @@ public class AppEngineJreWhitelist {
   
   /**
    * @param className fully package qualified class name
-   * @return true if this class is allowed in Java 7 on App Engine, false otherwise
+   * @return true if this class is allowed in Java 7 on App Engine Standard, false otherwise
    */
   public static boolean contains(String className) {
     if (className.startsWith("javax.") ){
