@@ -1910,7 +1910,6 @@ public class AppEngineJreWhitelist {
               "javax.naming.ldap.Rdn"
               ));
   
-  // TODO: com.sun and com.oracle packages are tricky. Some are in the JRE. Some aren't. 
   
   /**
    * @param className fully package qualified class name
@@ -1918,16 +1917,14 @@ public class AppEngineJreWhitelist {
    */
   public static boolean contains(String className) {
     if (className.startsWith("javax.") ){
-      if (isBundledInJre(className)) {
-        return WHITELIST.contains(className);
-      }
-      return true;
+      return !isBundledInJre(className) || WHITELIST.contains(className);
     } else if (className.startsWith("java.") 
         || className.startsWith("sun.util.") 
         || className.startsWith("org.xml.sax.") 
         || className.startsWith("org.w3c.dom.") 
         || className.startsWith("org.omg.") 
         || className.startsWith("org.ietf.jgss.") 
+        // com.sun and com.oracle packages are tricky. Some are in the JRE. Some aren't. 
         || className.startsWith("com.sun.jmx.") 
         || className.startsWith("com.sun.jndi.") 
         || className.startsWith("com.sun.media.") 
@@ -1943,8 +1940,7 @@ public class AppEngineJreWhitelist {
         || className.startsWith("com.sun.rowset.") 
         || className.startsWith("com.oracle.net.") 
         || className.startsWith("com.oracle.nio.") 
-        || className.startsWith("com.oracle.util.") 
-        || className.startsWith("com.sun.org.apache.")) {
+        || className.startsWith("com.oracle.util.")) {
       return WHITELIST.contains(className);
     } else { // not a JRE class
       return true;
