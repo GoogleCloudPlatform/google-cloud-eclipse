@@ -1926,8 +1926,9 @@ public class AppEngineJreWhitelist {
         || className.startsWith("org.xml.sax.") 
         || className.startsWith("org.w3c.dom.") 
         || className.startsWith("org.omg.") 
-        || className.startsWith("org.ietf.jgss") 
-        || className.startsWith("com.sun.")) {
+        || className.startsWith("org.ietf.jgss.") 
+        || className.startsWith("com.sun.beans.") 
+        || className.startsWith("com.sun.org.apache.")) {
       return WHITELIST.contains(className);
     } else { // not a JRE class
       return true;
@@ -1936,20 +1937,20 @@ public class AppEngineJreWhitelist {
   }
 
   private static boolean isBundledInJre(String className) {
-    if (className.startsWith("javax.accessibility")
-        || className.startsWith("javax.activation")
-        || className.startsWith("javax.activity")
-        || className.startsWith("javax.annotation")
-        || className.startsWith("javax.crypto")
-        || className.startsWith("javax.imageio")
-        || className.startsWith("javax.jws")
-        || className.startsWith("javax.lang.model")
-        || className.startsWith("javax.management")
-        || className.startsWith("javax.naming")
-        || className.startsWith("javax.net")
-        || className.startsWith("javax.print")
-        || className.startsWith("javax.rmi")
-        || className.startsWith("javax.script")
+    if (className.startsWith("javax.accessibility.")
+        || className.startsWith("javax.activation.")
+        || className.startsWith("javax.activity.")
+        || className.startsWith("javax.annotation.")
+        || className.startsWith("javax.crypto.")
+        || className.startsWith("javax.imageio.")
+        || className.startsWith("javax.jws.")
+        || className.startsWith("javax.lang.model.")
+        || className.startsWith("javax.management.")
+        || className.startsWith("javax.naming.")
+        || className.startsWith("javax.net.")
+        || className.startsWith("javax.print.")
+        || className.startsWith("javax.rmi.")
+        || className.startsWith("javax.script.")
         || className.startsWith("javax.security.")
         || className.startsWith("javax.sound.")
         || className.startsWith("javax.sql.")
