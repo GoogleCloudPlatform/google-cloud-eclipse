@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 public class XmlTest {
@@ -33,12 +34,12 @@ public class XmlTest {
   }
   
   @Test
-  public void testLoadExtensionClass() {
-    Element runElement = (Element) document
+  public void testLoadCompilationParticipant() {
+    Element compilationParticipant = (Element) document
         .getDocumentElement()
         .getElementsByTagName("compilationParticipant")
         .item(0);
-    String className = runElement.getAttribute("class");
+    String className = compilationParticipant.getAttribute("class");
     try {
       Class.forName(className).newInstance();
     } catch (ClassNotFoundException ex) {
@@ -49,5 +50,16 @@ public class XmlTest {
       Assert.fail("Class " + className + " no-arg constructor is not public");
     }
   }
+  
+  @Test
+  public void testLoadExtensionElements() {
+    NodeList extensions = document.getDocumentElement().getElementsByTagName("extension");
+    for (int i = 0; i < extensions.getLength(); i++) {
+      Element extension = (Element) extensions.item(i);
+      String point = extension.getAttribute("point");
+      Assert.assertTrue(point.length() > 0);
+    }
+  }
+  
   
 }
