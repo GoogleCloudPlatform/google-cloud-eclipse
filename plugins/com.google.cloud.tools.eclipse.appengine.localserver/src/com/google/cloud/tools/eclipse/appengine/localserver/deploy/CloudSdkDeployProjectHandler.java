@@ -85,7 +85,7 @@ public class CloudSdkDeployProjectHandler extends AbstractHandler {
       return null;
     }
 
-    final IPath warLocation = getWarOutLocationOrPrompt(project);
+    final IPath warLocation = getWarLocationOrPrompt(project);
     if (warLocation == null) {
     	Activator.logAndDisplayError(null, TITLE,
           "Must select the WAR directory to deploy " + project.getName());
@@ -136,7 +136,7 @@ public class CloudSdkDeployProjectHandler extends AbstractHandler {
     return null;
   }
 
-  private IPath getWarOutLocationOrPrompt(final IProject project) {
+  private IPath getWarLocationOrPrompt(final IProject project) {
     IFolder warDir = project.getFolder(WAR_SRC_DIR_DEFAULT);
     if (warDir.exists()) {
       return warDir.getLocation();

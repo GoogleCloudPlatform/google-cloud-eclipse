@@ -12,25 +12,20 @@
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.appengine.localserver;
 
-//import com.google.common.annotations.VisibleForTesting;
-import com.google.common.io.ByteStreams;
-//import com.google.gdt.eclipse.core.OSUtilities;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.InvalidPathException;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.ILaunchManager;
-import org.eclipse.wst.server.core.util.SocketUtil;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.file.InvalidPathException;
-import java.util.regex.Pattern;
+//import com.google.common.annotations.VisibleForTesting;
+import com.google.common.io.ByteStreams;
 
 /**
  * Utility class to run gcloud commands.
