@@ -34,8 +34,8 @@ import java.util.List;
 @SuppressWarnings("restriction") // For FacetUtil
 public class CloudSdkUtils {
   public static final String APPENGINE_GROUP_ID = "com.google.appengine";
-  public static final String CLOUD_SDK_FACET_ID = "com.google.cloudsdk.facet";
-  public static final String CLOUD_SDK_RUNTIME_ID = "com.google.cloudsdk.runtime.id1";
+  public static final String CLOUD_SDK_FACET_ID = "com.google.cloud.tools.eclipse.facet";
+  public static final String CLOUD_SDK_RUNTIME_ID = "com.google.cloud.tools.eclipse.runtime.id1";
   public static final String GCLOUD_MAVEN_PLUGIN_ARTIFACT_ID  = "gcloud-maven-plugin";
 
   /**
