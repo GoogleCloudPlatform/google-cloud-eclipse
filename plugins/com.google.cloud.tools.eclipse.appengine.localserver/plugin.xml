@@ -106,7 +106,7 @@
       <runtimeType
             class="com.google.cloud.tools.eclipse.appengine.localserver.runtime.CloudSdkRuntime"
             description="%runtimeTypeDescription"
-            id="com.google.cloudsdk.runtime.id1"
+            id="com.google.cloud.tools.eclipse.runtime.id1"
             name="%runtimeTypeName"
             vendor="%runtimeTypeVendor"
             version="1">
@@ -119,16 +119,16 @@
          point="org.eclipse.wst.server.ui.wizardFragments">
       <fragment
             class="com.google.cloud.tools.eclipse.appengine.localserver.ui.CloudSdkRuntimeWizardFragment"
-            id="com.google.cloudsdk.runtime.fragment1"
-            typeIds="com.google.cloudsdk.runtime.id1">
+            id="com.google.cloud.tools.eclipse.runtime.fragment1"
+            typeIds="com.google.cloud.tools.eclipse.runtime.id1">
       </fragment>
    </extension>
    <extension point="org.eclipse.wst.common.project.facet.core.facets">
-      <project-facet id="com.google.cloudsdk.facet">
+      <project-facet id="com.google.cloud.tools.eclipse.facet">
         <label>%cloudsdkfacetlabel</label>
         <description>%cloudsdkfacetdescription</description>
       </project-facet>
-      <project-facet-version facet="com.google.cloudsdk.facet" version="1">
+      <project-facet-version facet="com.google.cloud.tools.eclipse.facet" version="1">
           <constraint>
             <and>
               <or>
@@ -144,24 +144,24 @@
          </constraint>
       </project-facet-version>
       <action
-          facet="com.google.cloudsdk.facet"
-          id="com.google.cloudsdk.facet.install"
+          facet="com.google.cloud.tools.eclipse.facet"
+          id="com.google.cloud.tools.eclipse.facet.install"
           type="install">
         <delegate class="com.google.cloud.tools.eclipse.appengine.localserver.facet.CloudSdkFacetInstallDelegate"/>
       </action>
       <action
-          facet="com.google.cloudsdk.facet"
-          id="com.google.cloudsdk.facet.uninstall"
+          facet="com.google.cloud.tools.eclipse.facet"
+          id="com.google.cloud.tools.eclipse.facet.uninstall"
           type="uninstall">
         <delegate class="com.google.cloud.tools.eclipse.appengine.localserver.facet.CloudSdkFacetUninstallDelegate"/>
       </action>
    </extension>
    <extension point="org.eclipse.wst.common.project.facet.core.runtimes">
-      <runtime-component-type id="com.google.cloudsdk.runtime.id"/>
-      <runtime-component-version type="com.google.cloudsdk.runtime.id" version="1"/>
+      <runtime-component-type id="com.google.cloud.tools.eclipse.runtime.id"/>
+      <runtime-component-version type="com.google.cloud.tools.eclipse.runtime.id" version="1"/>
       <supported>
-          <runtime-component id="com.google.cloudsdk.runtime.id" version="1"/>
-          <facet id="com.google.cloudsdk.facet" version="1"/>
+          <runtime-component id="com.google.cloud.tools.eclipse.runtime.id" version="1"/>
+          <facet id="com.google.cloud.tools.eclipse.facet" version="1"/>
           <facet id="jst.web" version="2.2,2.3,2.4,2.5,3.1"/>
           <facet id="jst.utility"  version="1.0"/>
           <facet id="jst.webfragment" version="3.0" />
@@ -169,14 +169,14 @@
       </supported>
    </extension>
    <extension point="org.eclipse.jst.server.core.runtimeFacetMappings">
-    <runtimeFacetMapping runtimeTypeId="com.google.cloudsdk.runtime.id1"
-        runtime-component="com.google.cloudsdk.runtime.id" version="1"/>
+    <runtimeFacetMapping runtimeTypeId="com.google.cloud.tools.eclipse.runtime.id1"
+        runtime-component="com.google.cloud.tools.eclipse.runtime.id" version="1"/>
    </extension>
    <extension
          point="org.eclipse.m2e.core.projectConfigurators">
       <configurator
             class="com.google.cloud.tools.eclipse.appengine.localserver.facet.CloudSdkProjectConfigurator"
-            id="com.google.cloudsdk.maven.cloudSdkConfigurator"
+            id="com.google.cloud.tools.eclipse.maven.cloudSdkConfigurator"
             name="%configurator.name"
             secondaryTo="org.maven.ide.eclipse.configuration.wtp.configurator">
       </configurator>
@@ -190,13 +190,13 @@
             behaviourClass="com.google.cloud.tools.eclipse.appengine.localserver.server.CloudSdkServerBehaviour"
             class="com.google.cloud.tools.eclipse.appengine.localserver.server.CloudSdkServer"
             description="%serverTypeDescription"
-            id="com.google.cloudsdk.server.id"
+            id="com.google.cloud.tools.eclipse.server.id"
             initialState="stopped"
-            launchConfigId="com.google.cloudsdk.CloudSdkLaunchConfigurationType"
+            launchConfigId="com.google.cloud.tools.eclipse.CloudSdkLaunchConfigurationType"
             launchModes="run,debug,profile"
             name="%serverTypeName"
             runtime="true"
-            runtimeTypeId="com.google.cloudsdk.runtime.id1"
+            runtimeTypeId="com.google.cloud.tools.eclipse.runtime.id1"
             startBeforePublish="false"
             supportsRemoteHosts="false">
       </serverType>
@@ -205,7 +205,7 @@
          point="org.eclipse.debug.core.launchConfigurationTypes">
       <launchConfigurationType
             delegate="com.google.cloud.tools.eclipse.appengine.localserver.server.CloudSdkLaunchConfigurationDelegate"
-            id="com.google.cloudsdk.CloudSdkLaunchConfigurationType"
+            id="com.google.cloud.tools.eclipse.CloudSdkLaunchConfigurationType"
             modes="run, debug, profile"
             name="%serverTypeName">
       </launchConfigurationType>
@@ -213,38 +213,38 @@
    <extension
          point="org.eclipse.debug.ui.launchConfigurationTypeImages">
       <launchConfigurationTypeImage
-            configTypeID="com.google.cloudsdk.CloudSdkLaunchConfigurationType"
+            configTypeID="com.google.cloud.tools.eclipse.CloudSdkLaunchConfigurationType"
             icon="icons/gcp.png"
-            id="com.google.cloudsdk.ExternalLaunchConfigurationTypeImage">
+            id="com.google.cloud.tools.eclipse.ExternalLaunchConfigurationTypeImage">
       </launchConfigurationTypeImage>
    </extension>
    <extension
          point="org.eclipse.debug.ui.launchConfigurationTabGroups">
       <launchConfigurationTabGroup
             class="com.google.cloud.tools.eclipse.appengine.localserver.ui.CloudSdkLaunchConfigurationTabGroup"
-            id="com.google.cloudsdk.server.launchConfigurationTabGroup"
-            type="com.google.cloudsdk.CloudSdkLaunchConfigurationType">
+            id="com.google.cloud.tools.eclipse.server.launchConfigurationTabGroup"
+            type="com.google.cloud.tools.eclipse.CloudSdkLaunchConfigurationType">
       </launchConfigurationTabGroup>
    </extension>
    <extension
          point="org.eclipse.wst.server.ui.serverImages">
       <image
             icon="icons/gcp.png"
-            id="com.google.cloudsdk.image"
-            typeIds="com.google.cloudsdk.runtime.id1,com.google.cloudsdk.server.id">
+            id="com.google.cloud.tools.eclipse.image"
+            typeIds="com.google.cloud.tools.eclipse.runtime.id1,com.google.cloud.tools.eclipse.server.id">
       </image>
    </extension>
    <extension
          point="org.eclipse.wst.common.project.facet.ui.images">
       <image
             path="icons/gcp.png"
-            facet="com.google.cloudsdk.facet">
+            facet="com.google.cloud.tools.eclipse.facet">
       </image>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
       <command
-            id="com.google.cloudsdk.deployCommand"
+            id="com.google.cloud.tools.eclipse.deployCommand"
             name="%cloudsdkdeploy">
       </command>
    </extension>
@@ -252,8 +252,8 @@
          point="org.eclipse.core.expressions.propertyTesters">
       <propertyTester
             class="com.google.cloud.tools.eclipse.appengine.localserver.deploy.CloudSdkProjectPropertyTester"
-            id="com.google.cloudsdk.deploy.CloudSdkProjectPropertyTester"
-            namespace="com.google.cloudsdk"
+            id="com.google.cloud.tools.eclipse.deploy.CloudSdkProjectPropertyTester"
+            namespace="com.google.cloud.tools.eclipse"
             properties="isCloudSdkProject"
             type="org.eclipse.core.resources.IProject">
       </propertyTester>
@@ -262,7 +262,7 @@
          point="org.eclipse.ui.handlers">
       <handler
             class="com.google.cloud.tools.eclipse.appengine.localserver.deploy.CloudSdkDeployProjectHandler"
-            commandId="com.google.cloudsdk.deployCommand">
+            commandId="com.google.cloud.tools.eclipse.deployCommand">
          <enabledWhen>
             <with
                   variable="selection">
@@ -273,7 +273,7 @@
                   <iterate
                         operator="and">
                      <test
-                           property="com.google.cloudsdk.isCloudSdkProject">
+                           property="com.google.cloud.tools.eclipse.isCloudSdkProject">
                      </test>
                   </iterate>
                </and>
@@ -287,7 +287,7 @@
             allPopups="false"
             locationURI="popup:org.eclipse.ui.popup.any?after=additions">
          <command
-               commandId="com.google.cloudsdk.deployCommand"
+               commandId="com.google.cloud.tools.eclipse.deployCommand"
                icon="icons/gcp.png"
                label="%cloudsdkdeploy">
             <visibleWhen
@@ -295,5 +295,12 @@
             </visibleWhen>
          </command>
       </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.debug.core.processFactories">
+      <processFactory
+            class="com.google.cloud.tools.eclipse.appengine.localserver.server.DevAppServerProcessFactory"
+            id="com.google.cloud.tools.eclipse.appengine.localserver.processfactory">
+      </processFactory>
    </extension>
 </plugin>

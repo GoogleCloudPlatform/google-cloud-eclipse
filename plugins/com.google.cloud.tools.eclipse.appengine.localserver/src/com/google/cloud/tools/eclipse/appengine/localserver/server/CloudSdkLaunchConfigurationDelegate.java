@@ -118,10 +118,23 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
       return;
     }
 
+    addProcessFactoryToLaunchConfiguration(configuration);
+    
     // The DebugPlugin handles the streaming of the output to the console and
     // sends notifications of debug events
     DebugPlugin.newProcess(launch, p, commands);
     sb.addProcessListener(launch.getProcesses()[0]);
+  }
+
+  /*
+   * Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=38016
+   * The custom IProcessFactory creates an IProcess object that calls the /quit handler
+   * on the dev app server
+   */
+  private void addProcessFactoryToLaunchConfiguration(ILaunchConfiguration configuration) throws CoreException {
+	ILaunchConfigurationWorkingCopy workingCopy = configuration.getWorkingCopy();
+	workingCopy.setAttribute(DebugPlugin.ATTR_PROCESS_FACTORY_ID, DevAppServerProcessFactory.ID);
+    workingCopy.doSave();
   }
 
   @Override
