@@ -3,11 +3,17 @@ language: java
 jdk:
   - openjdk7
 install: true
+before_install:
+  - export CLOUD_SDK_REPO="cloud-sdk-$(lsb_release -c -s)"
+  - echo "deb http://packages.cloud.google.com/apt $CLOUD_SDK_REPO main" | sudo tee /etc/apt/sources.list.d/google-cloud-sdk.list
+  - curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+  - sudo apt-get update -qq
+  - sudo apt-get install google-cloud-sdk
 script:
   - mvn -Ptravis verify
   - jdk_switcher use oraclejdk8
   - mvn -Ptravis verify -Declipse.target=neon
-cache:  
+cache:
   directories:
    - $HOME/.m2
 
