@@ -17,7 +17,7 @@
   <extension 
       id="blacklistedClass" 
       name="App Engine Whitelist Marker"
-      point="org.eclipse.core.resources.problemmarkers">
+      point="org.eclipse.core.resources.markers">
     <super type="org.eclipse.core.resources.problemmarker" />
     <super type="org.eclipse.core.resources.textmarker" />
     <persistent value="true" />
