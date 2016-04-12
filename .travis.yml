@@ -7,6 +7,7 @@ before_install:
   - wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-104.0.0-linux-x86_64.tar.gz
   - tar -xzvf google-cloud-sdk-104.0.0-linux-x86_64.tar.gz
   - ./google-cloud-sdk/bin/gcloud components list
+  - ./google-cloud-sdk/bin/gcloud components install app-engine-java
 script:
   - mvn -Ptravis verify
   - jdk_switcher use oraclejdk8
