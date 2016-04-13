@@ -5,7 +5,6 @@ Bundle-SymbolicName: com.google.cloud.tools.eclipse.appengine.localserver;single
 Bundle-Version: 0.1.0.qualifier
 Bundle-Vendor: Google, Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Eclipse-ExtensibleAPI: true
 Require-Bundle: org.eclipse.wst.server.core;bundle-version="1.7.0",
  org.eclipse.wst.server.ui;bundle-version="1.5.201",
  org.eclipse.wst.common.project.facet.core;bundle-version="1.4.300",
