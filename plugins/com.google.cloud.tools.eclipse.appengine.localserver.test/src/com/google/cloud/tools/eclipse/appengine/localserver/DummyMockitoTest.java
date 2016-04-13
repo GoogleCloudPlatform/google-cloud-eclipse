@@ -13,11 +13,11 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class DummyMockitoTest {
 
-	@Mock
-	private List<Integer> list;
-	
-	@Test
-	public void testMockito() {
-		assertThat(list, notNullValue());
-	}
+  @Mock
+  private List<Integer> list;
+
+  @Test
+  public void testMockito() {
+    assertThat(list, notNullValue());
+  }
 }
