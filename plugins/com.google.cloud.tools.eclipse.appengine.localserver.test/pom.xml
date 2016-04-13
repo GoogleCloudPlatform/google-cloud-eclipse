@@ -8,7 +8,6 @@
     <version>0.1.0-SNAPSHOT</version>
     <relativePath>../../</relativePath>
   </parent>
-  <groupId>com.google.cloud.tools.eclipse</groupId>
   <artifactId>com.google.cloud.tools.eclipse.appengine.localserver.test</artifactId>
   <packaging>eclipse-test-plugin</packaging>
 
@@ -18,10 +17,16 @@
       <plugin>
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>tycho-surefire-plugin</artifactId>
-        <version>${tycho.version}</version>
       </plugin>
     </plugins>
   </build>
+  
+  <dependencies>
+    <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-core</artifactId>
+        <version>1.10.19</version>
+        <scope>test</scope>
+    </dependency>
+  </dependencies>
 </project>
-
-
