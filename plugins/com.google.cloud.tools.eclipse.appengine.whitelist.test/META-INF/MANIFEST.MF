@@ -8,4 +8,4 @@ Bundle-Vendor: Google, Inc.
 Bundle-Version: 0.1.0.qualifier
 Fragment-Host: com.google.cloud.tools.eclipse.appengine.whitelist
 Require-Bundle: org.junit,
- org.eclipse.core.runtime
+ org.eclipse.equinox.registry
