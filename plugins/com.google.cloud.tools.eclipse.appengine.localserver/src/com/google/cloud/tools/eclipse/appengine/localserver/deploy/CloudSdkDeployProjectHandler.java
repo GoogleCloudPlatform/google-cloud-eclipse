@@ -51,7 +51,7 @@ public class CloudSdkDeployProjectHandler extends AbstractHandler {
   @Override
   public Object execute(ExecutionEvent event) throws ExecutionException {
     // Get initial project selection
-    final IProject project = ActiveProjectFinder.getInstance().getProject();
+    final IProject project = ActiveProjectFinder.getSelectedProject(event);
     if (project == null) {
       Activator.logAndDisplayError(null, TITLE, "Cannot find selected project");
       return null;
