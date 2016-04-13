@@ -21,9 +21,9 @@ import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.ILaunchManager;
 
+import com.google.cloud.tools.eclipse.util.OSUtilities;
 //import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.ByteStreams;
 
@@ -32,7 +32,7 @@ import com.google.common.io.ByteStreams;
  */
 public class GCloudCommandDelegate {
   public static final String APP_ENGINE_COMPONENT_NAME = "app-engine-java";
-  public static final String GCLOUD_CMD = Platform.getOS().equals(Platform.OS_WIN32) ? "gcloud.cmd" : "gcloud";
+  public static final String GCLOUD_CMD = OSUtilities.isWindows() ? "gcloud.cmd" : "gcloud";
   public static final String GCLOUD_DIR = File.separator + "bin" + File.separator + GCLOUD_CMD;
   public static final String GET_VERSION_CMD = GCLOUD_DIR + " version";
   public static final String GET_COMPONENTS_LIST_CMD = GCLOUD_DIR + " components list --format=value(id,state.name)";

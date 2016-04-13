@@ -75,13 +75,13 @@ public class GCloudCommandDelegateTest extends TestCase {
 
     String retVal4 =
         GCloudCommandDelegate.createAppRunCommand(sdkLocation, runnables, "run", "localhost", 1234, 2345);
-    assertEquals(sdkLocation + "/bin/gcloud preview app run " + runnables + " --api_host localhost --api_port 1234",
+    assertEquals(sdkLocation + "/bin/dev_appserver.py " + runnables + " --api_host localhost --api_port 1234",
         retVal4);
 
     String retVal5 =
         GCloudCommandDelegate.createAppRunCommand(sdkLocation, runnables, "debug", "localhost", 1234, 2345);
-    assertEquals(sdkLocation + "/bin/gcloud preview app run " + runnables + " --api-host localhost --api_port 1234 "
-        + "--jvm-flag=-Xdebug --jvm-flag=-Xrunjdwp:transport=dt_socket,server=y,suspend=y,"
+    assertEquals(sdkLocation + "/bin/dev_appserver.py " + runnables + " --api_host localhost --api_port 1234 "
+        + "--jvm_flag=-Xdebug --jvm_flag=-Xrunjdwp:transport=dt_socket,server=y,suspend=y,"
         + "address=2345", retVal5);
 
     sdkLocationFile.delete();
@@ -89,13 +89,8 @@ public class GCloudCommandDelegateTest extends TestCase {
   }
 
   private String createOutput(String status) {
-    return "------------------------------------------------------------------------------------\n"
-        + "|                                          Individual Components                   |\n"
-        + "|----------------------------------------------------------------------------------|\n"
-        + "| Status           | Name                                          | ID |     Size |\n"
-        + "|------------------+-----------------------------------------------+----------------\n"
-        + "| " + status + " | App Engine Command Line Interface (Preview)   | app  |   < 1 MB |\n"
-        + "| Update Available | BigQuery Command Line Tool                    | bq |   < 1 MB |\n"
-        + "------------------------------------------------------------------------------------";
+    return "bq	Installed\n"
+    	 + "gcloud	Installed\n"
+    	 + "app-engine-java	" + status + "\n";
   }
 }
