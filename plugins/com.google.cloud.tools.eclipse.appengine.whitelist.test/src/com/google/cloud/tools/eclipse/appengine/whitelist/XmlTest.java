@@ -7,6 +7,9 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionRegistry;
+import org.eclipse.core.runtime.RegistryFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -52,12 +55,14 @@ public class XmlTest {
   }
   
   @Test
-  public void testLoadExtensionElements() {
+  public void testLoadExtensionPoints() {
     NodeList extensions = document.getDocumentElement().getElementsByTagName("extension");
     for (int i = 0; i < extensions.getLength(); i++) {
       Element extension = (Element) extensions.item(i);
       String point = extension.getAttribute("point");
-      Assert.assertTrue(point.length() > 0);
+      IExtensionRegistry registry = RegistryFactory.getRegistry();
+      IExtensionPoint extensionPoint = registry.getExtensionPoint(point);
+      Assert.assertNotNull(extensionPoint);
     }
   }
   
