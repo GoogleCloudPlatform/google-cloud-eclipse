@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde?>
 <!-- generated with https://github.com/mbarbero/fr.obeo.releng.targetplatform -->
-<target name="GCP for Eclipse Neon" sequenceNumber="1460469315">
+<target name="GCP for Eclipse Neon" sequenceNumber="1460653414">
   <locations>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
       <unit id="org.eclipse.license.feature.group" version="1.0.1.v20140414-1359"/>
@@ -32,6 +32,7 @@
     </location>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
       <unit id="com.google.gson" version="2.2.4.v201311231704"/>
+      <unit id="org.hamcrest" version="1.1.0.v20090501071000"/>
       <repository location="http://download.eclipse.org/tools/orbit/downloads/drops/S20160308060251/repository/"/>
     </location>
   </locations>

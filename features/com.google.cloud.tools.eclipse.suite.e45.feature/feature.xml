@@ -2,26 +2,34 @@
 <feature
       id="com.google.cloud.tools.eclipse.suite.e45.feature"
       label="Google Cloud Platform for Eclipse 4.5"
-      version="94.0.0.qualifier"
-      provider-name="Google, Inc.">
+      version="0.1.0.qualifier"
+      provider-name="Google, Inc."
+      license-feature="com.google.licenses.apache_v2">
 
    <description>
-      Support development of Google Cloud Platform-based Projects in Eclipse 4.5
+      %description
    </description>
 
    <copyright>
-      Copyright 2016
+      %copyright.text
    </copyright>
 
-   <license>
-      Todo
+   <license url="%licenseURL">
+      %license
    </license>
 
    <plugin
          id="com.google.cloud.tools.eclipse.appengine.localserver"
          download-size="0"
          install-size="0"
-         version="94.0.0.qualifier"
+         version="0.1.0.qualifier"
+         unpack="false"/>
+
+   <plugin
+         id="com.google.cloud.tools.eclipse.appengine.whitelist"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
          unpack="false"/>
 
 </feature>

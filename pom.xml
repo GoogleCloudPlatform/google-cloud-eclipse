@@ -6,14 +6,18 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.google.cloud.tools.eclipse</groupId>
   <artifactId>trunk</artifactId>
-  <version>94.0.0-SNAPSHOT</version>
+  <version>0.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <modules>
     <module>gcp-repo</module>
     <module>features/com.google.cloud.tools.eclipse.suite.e45.feature</module>
+    <module>features/com.google.licenses.apache_v2</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.localserver</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.localserver.test</module>
+    <module>plugins/com.google.cloud.tools.eclipse.appengine.whitelist</module>
+    <module>plugins/com.google.cloud.tools.eclipse.appengine.whitelist.test</module>
+    <module>plugins/com.google.cloud.tools.eclipse.test.dependencies</module>
   </modules>
 
   <properties>
@@ -128,6 +132,12 @@
             <useJDK>${tycho.toolchains}</useJDK>
           </configuration>
         </plugin>
+        
+          <plugin>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>tycho-surefire-plugin</artifactId>
+            <version>${tycho.version}</version>
+          </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -215,8 +225,10 @@
     <profile>
       <id>travis</id>
       <properties>
-         <!-- We configure Travis to use jdk7 -->
-         <tycho.toolchains>SYSTEM</tycho.toolchains>
+        <!-- We configure Travis to use jdk7 -->
+        <tycho.toolchains>SYSTEM</tycho.toolchains>
+        <!-- Ensure we don't resolved mis-cached artifacts -->
+        <tycho.localArtifacts>ignore</tycho.localArtifacts>
       </properties>
     </profile>
   </profiles>

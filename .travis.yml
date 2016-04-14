@@ -9,9 +9,9 @@ before_install:
   - ./google-cloud-sdk/bin/gcloud components list
   - ./google-cloud-sdk/bin/gcloud -q components install app-engine-java
 script:
-  - mvn -Ptravis verify
+  - mvn -Ptravis --fail-at-end verify
   - jdk_switcher use oraclejdk8
-  - mvn -Ptravis verify -Declipse.target=neon
+  - mvn -Ptravis --fail-at-end verify -Declipse.target=neon
 cache:
   directories:
    - $HOME/.m2

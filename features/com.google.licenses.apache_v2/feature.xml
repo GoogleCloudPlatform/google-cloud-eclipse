@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="com.google.licenses.apache_v2"
+      label="Apache License v2"
+      version="0.1.0.qualifier"
+      provider-name="Google, Inc.">
+
+   <description>
+      A shared license feature for the Apache Standard License v2
+   </description>
+
+   <copyright>
+      %copyright.text
+   </copyright>
+
+   <license url="%license.url">
+      %license.text
+   </license>
+
+</feature>
