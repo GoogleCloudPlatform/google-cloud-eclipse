@@ -12,85 +12,130 @@
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.appengine.localserver;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.InvalidPathException;
 
-import com.google.cloud.tools.eclipse.appengine.localserver.GCloudCommandDelegate;
+import org.junit.Test;
 
 /**
  * Unit tests for {@link GCloudCommandDelegate}
  */
-public class GCloudCommandDelegateTest extends TestCase {
-  public void testIsComponentInstalled() {
-    String output1 =  createOutput("Installed");
-    assertTrue(GCloudCommandDelegate.isComponentInstalled(output1,
+public class GCloudCommandDelegateTest {
+  
+  //TODO implement integration test with gcloud to ensure that the output
+  //TODO is what we expect
+  
+  @Test
+  public void testIsComponentInstalled_installed() {
+    String output =  createOutput("Installed");
+    assertTrue(GCloudCommandDelegate.isComponentInstalled(output,
         GCloudCommandDelegate.APP_ENGINE_COMPONENT_NAME));
-
-    String output2 =  createOutput("Not Installed");
-    assertFalse(GCloudCommandDelegate.isComponentInstalled(output2,
+  }
+  
+  @Test
+  public void testIsComponentInstalled_notInstalled() {
+    String output =  createOutput("Not Installed");
+    assertFalse(GCloudCommandDelegate.isComponentInstalled(output,
         GCloudCommandDelegate.APP_ENGINE_COMPONENT_NAME));
-
-    String output3 =  createOutput("Update Available");
-    assertTrue(GCloudCommandDelegate.isComponentInstalled(output3,
+  }
+  
+  @Test
+  public void testIsComponent_updateAvailable() {
+    String output =  createOutput("Update Available");
+    assertTrue(GCloudCommandDelegate.isComponentInstalled(output,
         GCloudCommandDelegate.APP_ENGINE_COMPONENT_NAME));
-
-    assertFalse(GCloudCommandDelegate.isComponentInstalled(output1,
-        "Invalid component name"));
+  }
+  
+  @Test
+  public void testIsComponent_invalidComponent() {
+    String output =  createOutput("Installed");
+    assertFalse(GCloudCommandDelegate.isComponentInstalled(output,
+        "invalid-component-name"));
   }
 
-  public void testCreateAppRunCommand() throws IOException {
-    File sdkLocationFile = File.createTempFile("tmp-cloud-sdk-", "");
+  @Test(expected = NullPointerException.class)
+  public void testCreateAppRunCommand_nullArgs() throws IOException {
+    GCloudCommandDelegate.createAppRunCommand(null, null, null, null, 0, 0);
+  }
+
+  @Test(expected = InvalidPathException.class)
+  public void testCreateAppRunCommand_invalidSdkLocation() throws IOException {
+    GCloudCommandDelegate.createAppRunCommand("sdkLocation", null, null, null, 0, 0);
+  }
+  
+  @Test(expected = InvalidPathException.class)
+  public void testCreateAppRunCommand_invalidLocation() throws IOException {
+    File sdkLocationFile = createTmpFile("tmp-cloud-sdk-", "");
     String sdkLocation = sdkLocationFile.getAbsolutePath();
+    
+    GCloudCommandDelegate.createAppRunCommand(sdkLocation, "fakeLocation", null, null, 0, 0);
+  }
 
-    File runnablesFile = File.createTempFile("tmp-project-", "");
+  @Test(expected = NullPointerException.class)
+  public void testCreateAppRunCommand_nullApiHost() throws IOException {
+    File sdkLocationFile = createTmpFile("tmp-cloud-sdk-", "");
+    String sdkLocation = sdkLocationFile.getAbsolutePath();
+    
+    File runnablesFile = createTmpFile("tmp-project-", "");
     String runnables = runnablesFile.getAbsolutePath();
-
-    String retVal1 = "";
-    try {
-      retVal1 = GCloudCommandDelegate.createAppRunCommand(null, null, null, null, 0, 0);
-    } catch (NullPointerException e) {
-      // We're expecting the exception, so do nothing
-    }
-    assertEquals("", retVal1);
-
-    String retVal2 = "";
-    try {
-      retVal2 = GCloudCommandDelegate.createAppRunCommand(sdkLocation, "fakeLocation", null, null,
-          0, 0);
-    } catch (InvalidPathException e) {
-      // We're expecting the exception, so do nothing
-    }
-    assertEquals("", retVal2);
-
-    String retVal3 = "";
-    try {
-      retVal3 = GCloudCommandDelegate.createAppRunCommand(sdkLocation, runnables, null, null, 0, 0);
-    } catch (NullPointerException e) {
-      // We're expecting the exception, so do nothing
-    }
-    assertEquals("", retVal3);
-
-    String retVal4 =
-        GCloudCommandDelegate.createAppRunCommand(sdkLocation, runnables, "run", "localhost", 1234, 2345);
-    assertEquals(sdkLocation + "/bin/dev_appserver.py " + runnables + " --api_host localhost --api_port 1234",
-        retVal4);
-
-    String retVal5 =
-        GCloudCommandDelegate.createAppRunCommand(sdkLocation, runnables, "debug", "localhost", 1234, 2345);
-    assertEquals(sdkLocation + "/bin/dev_appserver.py " + runnables + " --api_host localhost --api_port 1234 "
+    
+    GCloudCommandDelegate.createAppRunCommand(sdkLocation, runnables, null, null, 0, 0);
+  }
+  
+  @Test
+  public void testCreateAppRunCommand_validRunCommand() throws IOException {
+    File sdkLocationFile = createTmpFile("tmp-cloud-sdk-", "");
+    String sdkLocation = sdkLocationFile.getAbsolutePath();
+    
+    File runnablesFile = createTmpFile("tmp-project-", "");
+    String runnables = runnablesFile.getAbsolutePath();
+    
+    String cmd = GCloudCommandDelegate.createAppRunCommand(sdkLocation, 
+                                                               runnables,
+                                                               "run",
+                                                               "localhost",
+                                                               1234,
+                                                               2345);
+    
+    assertEquals(sdkLocation + "/bin/dev_appserver.py " + runnables + 
+        " --api_host localhost --api_port 1234", cmd);
+  }
+  
+  @Test
+  public void testCreateAppRunCommand_validDebugCommand() throws IOException {
+    File sdkLocationFile = createTmpFile("tmp-cloud-sdk-", "");
+    String sdkLocation = sdkLocationFile.getAbsolutePath();
+    
+    File runnablesFile = createTmpFile("tmp-project-", "");
+    String runnables = runnablesFile.getAbsolutePath();
+    
+    String cmd =  GCloudCommandDelegate.createAppRunCommand(sdkLocation, 
+                                                            runnables, 
+                                                            "debug", 
+                                                            "localhost", 
+                                                            1234, 
+                                                            2345);
+    
+    assertEquals(sdkLocation + "/bin/dev_appserver.py " + runnables
+        + " --api_host localhost --api_port 1234 " 
         + "--jvm_flag=-Xdebug --jvm_flag=-Xrunjdwp:transport=dt_socket,server=y,suspend=y,"
-        + "address=2345", retVal5);
-
-    sdkLocationFile.delete();
-    runnablesFile.delete();
+        + "address=2345", cmd);
   }
 
   private String createOutput(String status) {
     return "bq	Installed\n"
     	 + "gcloud	Installed\n"
     	 + "app-engine-java	" + status + "\n";
+  }
+  
+  private File createTmpFile(String prefix, String suffix) throws IOException {
+    File sdkLocationFile = File.createTempFile(prefix, suffix);
+    sdkLocationFile.deleteOnExit();
+    return sdkLocationFile;
   }
 }

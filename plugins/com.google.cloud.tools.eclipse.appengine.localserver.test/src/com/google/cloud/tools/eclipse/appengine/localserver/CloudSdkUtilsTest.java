@@ -12,11 +12,16 @@
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.appengine.localserver;
 
-import junit.framework.TestCase;
-
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.wst.common.project.facet.core.IProjectFacet;
+import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
+import org.eclipse.wst.common.project.facet.core.internal.FacetedProject;
+import org.eclipse.wst.common.project.facet.core.internal.FacetedProjectNature;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -24,6 +29,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.cloud.tools.eclipse.appengine.localserver.CloudSdkUtils;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -33,11 +40,15 @@ import java.util.List;
  * Unit test for {@link CloudSdkUtils}.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class CloudSdkUtilsTest extends TestCase {
+public class CloudSdkUtilsTest {
   @Mock 
   private Build mockBuild;
   @Mock 
   private Model mockModel;
+  @Mock
+  private IProject mockProject;
+  @Mock
+  private IFile mockFile;
 
   /**
    * Tests that {@link CloudSdkUtils#hasGcloudMavenPlugin(Model)} returns
@@ -66,6 +77,26 @@ public class CloudSdkUtilsTest extends TestCase {
     assertTrue(CloudSdkUtils.hasGcloudMavenPlugin(mockModel));
   }
 
+  @Test
+  public void testHasGcloudMavenPlugin_wrongArtifactId() {
+    List<Plugin> plugins = createPluginList("myArtifcatId", "myGroupId", "this-is-not-gcloud-maven-plugin",
+        "com.google.appengine");
+    when(mockBuild.getPlugins()).thenReturn(plugins);
+    when(mockModel.getBuild()).thenReturn(mockBuild);
+
+    assertFalse(CloudSdkUtils.hasGcloudMavenPlugin(mockModel));
+  }
+
+  // FacetedProjectNature.NATURE_ID is not API, but used by the actual implementation 
+  // that is mocked here
+  @SuppressWarnings("restriction")
+  @Test
+  public void testhasCloudSdkFacet_nonFacetProject() throws CoreException {
+    when(mockProject.isAccessible()).thenReturn(true);
+    when(mockProject.isNatureEnabled(FacetedProjectNature.NATURE_ID)).thenReturn(false);
+    assertFalse(CloudSdkUtils.hasCloudSdkFacet(mockProject));
+  }
+  
   private List<Plugin> createPluginList(String artifactId1, String groupId1, String artifactId2,
       String groupId2) {
     Plugin plugin1 = new Plugin();
