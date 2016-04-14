@@ -17,8 +17,14 @@ import junit.framework.TestCase;
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Plugin;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.cloud.tools.eclipse.appengine.localserver.CloudSdkUtils;
+
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,35 +32,38 @@ import java.util.List;
 /**
  * Unit test for {@link CloudSdkUtils}.
  */
+@RunWith(MockitoJUnitRunner.class)
 public class CloudSdkUtilsTest extends TestCase {
-//  @Mock Build mockBuild;
-//  @Mock Model mockModel;
+  @Mock 
+  private Build mockBuild;
+  @Mock 
+  private Model mockModel;
 
   /**
    * Tests that {@link CloudSdkUtils#hasGcloudMavenPlugin(Model)} returns
    * false when {@code Model} does not have the gcloud-maven-plugin.
    */
+  @Test
   public void testHasGcloudMavenPlugin_noGcloudPlugin() {
-//    MockitoAnnotations.initMocks(this);
     List<Plugin> plugins = createPluginList("myArtifcatId1", "myGroupId1", "myArtifcatId2",
         "myGroupId2");
-//    when(mockBuild.getPlugins()).thenReturn(plugins);
-//    when(mockModel.getBuild()).thenReturn(mockBuild);
-//    assertFalse(CloudSdkUtils.hasGcloudMavenPlugin(mockModel));
+    when(mockBuild.getPlugins()).thenReturn(plugins);
+    when(mockModel.getBuild()).thenReturn(mockBuild);
+    assertFalse(CloudSdkUtils.hasGcloudMavenPlugin(mockModel));
   }
 
   /**
    * Tests that {@link CloudSdkUtils#hasGcloudMavenPlugin(Model)} returns
    * true when {@code Model} has the gcloud-maven-plugin.
    */
+  @Test
   public void testHasGcloudMavenPlugin_withGcloudPlugin() {
-//    MockitoAnnotations.initMocks(this);
     List<Plugin> plugins = createPluginList("myArtifcatId", "myGroupId", "gcloud-maven-plugin",
         "com.google.appengine");
-//    when(mockBuild.getPlugins()).thenReturn(plugins);
-//    when(mockModel.getBuild()).thenReturn(mockBuild);
+    when(mockBuild.getPlugins()).thenReturn(plugins);
+    when(mockModel.getBuild()).thenReturn(mockBuild);
 
-//    assertTrue(CloudSdkUtils.hasGcloudMavenPlugin(mockModel));
+    assertTrue(CloudSdkUtils.hasGcloudMavenPlugin(mockModel));
   }
 
   private List<Plugin> createPluginList(String artifactId1, String groupId1, String artifactId2,
