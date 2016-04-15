@@ -1,4 +1,4 @@
-package com.google.cloud.tools.eclipse.newproject;
+package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import java.io.File;
 import java.io.IOException;
