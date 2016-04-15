@@ -27,7 +27,6 @@ public abstract class TerminateAction extends Action {
   private boolean hasTerminated = false;
 
   public TerminateAction() {
-    //TODO replace this with our own copy of the image to avoid depending on internal classes
     super("Terminate", DebugPluginImages.getImageDescriptor(IDebugUIConstants.IMG_OBJS_ENVIRONMENT));
     setEnabled(true);
   }

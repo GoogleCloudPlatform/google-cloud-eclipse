@@ -96,7 +96,6 @@ public class CloudSdkDeployProjectHandler extends AbstractHandler {
       return null;
     }
 
-    // TODO: Add progress/cancellation action
     Job job = new Job("Running Cloud SDK Deploy Action") {
       @Override
       protected IStatus run(IProgressMonitor monitor) {
@@ -104,7 +103,6 @@ public class CloudSdkDeployProjectHandler extends AbstractHandler {
           List<String> commands = new ArrayList<String>();
           commands.add(sdkLocation + GCloudCommandDelegate.GCLOUD_DIR);
 
-          // TODO: remove the "preview" when gcloud app is public
           commands.add("preview");
           commands.add("app");
           commands.add("deploy");

@@ -121,7 +121,6 @@ public class ServerFlagSelectionDialog extends ElementListSelectionDialog {
    *
    * @param parent parent widget
    */
-  // TODO: Check that arguments that take a path have the correct OS specific path string
   private void createArgumentArea(Composite parent) {
     Composite container =
         SWTFactory.createComposite(parent, parent.getFont(), 2, 1, GridData.FILL_HORIZONTAL, 0, 0);

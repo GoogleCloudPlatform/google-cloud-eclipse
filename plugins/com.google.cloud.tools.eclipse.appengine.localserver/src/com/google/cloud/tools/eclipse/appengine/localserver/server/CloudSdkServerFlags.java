@@ -30,8 +30,6 @@ public class CloudSdkServerFlags {
 
   private static List<Flag> sFlags = null;
 
-  // TODO: when the json formatting option is available for "gcloud preview app run --help"
-  // replace the "server-flags.json" with its output
   public static List<Flag> getFlags() throws FileNotFoundException {
     if (sFlags == null) {
       InputStream input = CloudSdkServerFlags.class.getResourceAsStream(FLAGS_FILE);

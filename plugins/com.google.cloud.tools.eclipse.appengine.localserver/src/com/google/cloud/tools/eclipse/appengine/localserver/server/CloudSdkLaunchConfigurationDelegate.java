@@ -165,8 +165,6 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
   }
 
   private int getDebugPort() throws CoreException {
-    // TODO: add check to see if debug port was set, if not use a random free
-    // port.
     int port = SocketUtil.findFreePort();
     if (port == -1) {
       abort("Cannot find free port for remote debugger", null, IStatus.ERROR);

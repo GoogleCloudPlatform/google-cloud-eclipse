@@ -156,8 +156,6 @@ public class CloudSdkServer extends ServerDelegate {
     }
   }
 
-  // TODO: allow the user to specify API host and port and returns those if they
-  // exist.
   /**
    * @return Returns the default host on which to start the API server
    */
@@ -172,8 +170,6 @@ public class CloudSdkServer extends ServerDelegate {
     return DEFAULT_HOST;
   }
 
-  // TODO: allow the user to specify API host and port and returns those if they
-  // exist.
   /**
    * @return the default port on which to start the API server.
    */

@@ -27,9 +27,6 @@ import org.junit.Test;
  */
 public class GCloudCommandDelegateTest {
   
-  //TODO implement integration test with gcloud to ensure that the output
-  //TODO is what we expect
-  
   @Test
   public void testIsComponentInstalled_installed() {
     String output =  createOutput("Installed");

@@ -38,9 +38,6 @@ import com.google.cloud.tools.eclipse.appengine.localserver.server.CloudSdkServe
  * A launch configuration tab that displays and edits "gcloud app preview"
  * command flags for the Cloud SDK server.
  */
-// TODO: Add a button to this Launch Config UI that allows the user to either
-// pull the appropriate
-// program args from Maven into the launch config, or vice-versa..
 public class CloudSdkServerLaunchTab extends AbstractLaunchConfigurationTab {
   protected Text prgmFlagText;
 

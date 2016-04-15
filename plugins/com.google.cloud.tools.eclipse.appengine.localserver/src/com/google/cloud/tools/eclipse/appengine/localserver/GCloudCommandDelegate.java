@@ -63,11 +63,6 @@ public class GCloudCommandDelegate {
 
   @VisibleForTesting
   public static boolean isComponentInstalled(String output, String componentName) {
-    // TODO: currently works, but needs more parsing:
-    // gcloud components list --format="value(id,state.name)"
-    // TODO: soon to be implemented and easier parsing:
-    // gcloud components list --filter=id:app-engine-java
-    // --format='value(state.name)' 2>/dev/null
     // Sample output:
     // core Update Available
     // gsutil Update Available
@@ -142,8 +137,6 @@ public class GCloudCommandDelegate {
    *          the debug port
    * @return a gcloud app run command
    */
-  // TODO: update the command to include the CloudSdkServer.SERVER_PROGRAM_FLAGS
-  // set by the user.
   public static String createAppRunCommand(String sdkLocation, String runnables, String mode, String apiHost,
       int apiPort, int debugPort) throws NullPointerException, InvalidPathException {
 
