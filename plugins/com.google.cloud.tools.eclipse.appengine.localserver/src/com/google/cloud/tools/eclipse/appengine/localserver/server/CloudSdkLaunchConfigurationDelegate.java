@@ -1,13 +1,15 @@
 /*******************************************************************************
- * Copyright 2015 Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc. All Rights Reserved.
  *
- * All rights reserved. This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 which accompanies this distribution, and is available at
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which
+ * accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
  * the License.
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
@@ -53,8 +55,10 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
   private static final String DEBUGGER_HOST = "localhost";
 
   @Override
-  public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor)
-      throws CoreException {
+  public void launch(ILaunchConfiguration configuration,
+                     String mode,
+                     ILaunch launch,
+                     IProgressMonitor monitor) throws CoreException {
     final IServer server = ServerUtil.getServer(configuration);
     if (server == null) {
       return;
@@ -72,7 +76,8 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
     }
     IPath sdkLocation = runtime.getLocation();
 
-    CloudSdkServerBehaviour sb = (CloudSdkServerBehaviour) server.loadAdapter(CloudSdkServerBehaviour.class, null);
+    CloudSdkServerBehaviour sb = (CloudSdkServerBehaviour) server.loadAdapter(CloudSdkServerBehaviour.class,
+                                                                              null);
     sb.setupLaunch(mode);
 
     final CloudSdkServer cloudSdkServer = CloudSdkServer.getCloudSdkServer(server);
@@ -105,25 +110,26 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
       server.addServerListener(debugServerListener);
     }
 
-    String commands = GCloudCommandDelegate.createAppRunCommand(sdkLocation.toOSString(), runnables, mode,
-        cloudSdkServer.getApiHost(), cloudSdkServer.getApiPort(), debugPort);
-    Activator.logInfo("Executing: " + commands);
-
-    Process p = null;
     try {
+      String commands = GCloudCommandDelegate.createAppRunCommand(sdkLocation.toOSString(),
+                                                                  runnables,
+                                                                  mode,
+                                                                  cloudSdkServer.getApiHost(),
+                                                                  cloudSdkServer.getApiPort(),
+                                                                  debugPort);
+      Activator.logInfo("Executing: " + commands);
+
+      Process p = null;
       p = Runtime.getRuntime().exec(commands, null);
+      addProcessFactoryToLaunchConfiguration(configuration);
+      // The DebugPlugin handles the streaming of the output to the console and
+      // sends notifications of debug events
+      DebugPlugin.newProcess(launch, p, commands);
+      sb.addProcessListener(launch.getProcesses()[0]);
     } catch (IOException e1) {
       Activator.logError(e1);
       sb.stop(true);
-      return;
     }
-
-    addProcessFactoryToLaunchConfiguration(configuration);
-
-    // The DebugPlugin handles the streaming of the output to the console and
-    // sends notifications of debug events
-    DebugPlugin.newProcess(launch, p, commands);
-    sb.addProcessListener(launch.getProcesses()[0]);
   }
 
   /*
@@ -138,8 +144,9 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
   }
 
   @Override
-  public boolean preLaunchCheck(ILaunchConfiguration configuration, String mode, IProgressMonitor monitor)
-      throws CoreException {
+  public boolean preLaunchCheck(ILaunchConfiguration configuration,
+                                String mode,
+                                IProgressMonitor monitor) throws CoreException {
     IServer server = ServerUtil.getServer(configuration);
     if (server == null) {
       return false;
@@ -154,14 +161,22 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
 
   @Override
   protected void abort(String message, Throwable exception, int code) throws CoreException {
-    throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, code, message, exception));
+    throw new CoreException(new Status(IStatus.ERROR,
+                                       Activator.PLUGIN_ID,
+                                       code,
+                                       message,
+                                       exception));
   }
 
   private String getRunnable(IProject project, IProgressMonitor monitor) throws CoreException {
     IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().getProject(project);
     MavenProject mavenProject = facade.getMavenProject(monitor);
-    return mavenProject.getBasedir() + File.separator + "target" + File.separator + mavenProject.getArtifactId() + "-"
-        + mavenProject.getVersion();
+    return mavenProject.getBasedir() + File.separator
+           + "target"
+           + File.separator
+           + mavenProject.getArtifactId()
+           + "-"
+           + mavenProject.getVersion();
   }
 
   private int getDebugPort() throws CoreException {
@@ -172,32 +187,40 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
     return port;
   }
 
-  private void runDebugTarget(CloudSdkServer cloudSdkServer, String projectName, int port)
-      throws CoreException, InterruptedException {
+  private void runDebugTarget(CloudSdkServer cloudSdkServer,
+                              String projectName,
+                              int port) throws CoreException, InterruptedException {
     ILaunchConfigurationWorkingCopy remoteDebugLaunchConfig = createRemoteDebugLaunchConfiguration(cloudSdkServer,
-        projectName, Integer.toString(port));
+                                                                                                   projectName,
+                                                                                                   Integer.toString(port));
     remoteDebugLaunchConfig.launch(ILaunchManager.DEBUG_MODE, null);
   }
 
   private ILaunchConfigurationWorkingCopy createRemoteDebugLaunchConfiguration(CloudSdkServer cloudSdkServer,
-      final String projectName, final String port) throws CoreException {
+                                                                               final String projectName,
+                                                                               final String port) throws CoreException {
     ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
-    ILaunchConfigurationType type = manager
-        .getLaunchConfigurationType(IJavaLaunchConfigurationConstants.ID_REMOTE_JAVA_APPLICATION);
+    ILaunchConfigurationType type = manager.getLaunchConfigurationType(IJavaLaunchConfigurationConstants.ID_REMOTE_JAVA_APPLICATION);
 
     final ILaunchConfigurationWorkingCopy remoteDebugConfig = type.newInstance(null,
-        "Remote debugger for " + projectName + " (" + port + ")");
+                                                                               "Remote debugger for "
+                                                                                     + projectName
+                                                                                     + " ("
+                                                                                     + port
+                                                                                     + ")");
 
     // Set project
-    remoteDebugConfig.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, projectName);
+    remoteDebugConfig.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,
+                                   projectName);
 
     // Set JVM debugger connection parameters
     Map<String, String> connectionParameters = new HashMap<String, String>();
     connectionParameters.put("hostname", DEBUGGER_HOST);
     connectionParameters.put("port", port);
-    remoteDebugConfig.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CONNECT_MAP, connectionParameters);
+    remoteDebugConfig.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CONNECT_MAP,
+                                   connectionParameters);
     remoteDebugConfig.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_CONNECTOR,
-        "org.eclipse.jdt.launching.socketAttachConnector");
+                                   "org.eclipse.jdt.launching.socketAttachConnector");
 
     cloudSdkServer.setRemoteDebugLaunchConfig(remoteDebugConfig);
 

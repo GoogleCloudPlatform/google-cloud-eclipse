@@ -1,13 +1,15 @@
 /*******************************************************************************
- * Copyright 2015 Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc. All Rights Reserved.
  *
- * All rights reserved. This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 which accompanies this distribution, and is available at
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which
+ * accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
  * the License.
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
@@ -52,15 +54,15 @@ public class CloudSdkServer extends ServerDelegate {
    * {@code server} or a new {@link CloudSdkServer} instance if a
    * {@link CloudSdkServer} instance cannot be found for {@code server}.
    *
-   * @param server
-   *          the generic sever
+   * @param server the generic sever
    * @return a new {@link CloudSdkServer} instance or the one associated with
    *         {@code server}
    */
   public static CloudSdkServer getCloudSdkServer(IServer server) {
     CloudSdkServer cloudSdkServer = (CloudSdkServer) server.getAdapter(CloudSdkServer.class);
     if (cloudSdkServer == null) {
-      cloudSdkServer = (CloudSdkServer) server.loadAdapter(CloudSdkServer.class, new NullProgressMonitor());
+      cloudSdkServer = (CloudSdkServer) server.loadAdapter(CloudSdkServer.class,
+                                                           new NullProgressMonitor());
     }
     return cloudSdkServer;
   }
@@ -89,8 +91,8 @@ public class CloudSdkServer extends ServerDelegate {
       IModule thisModule = module[module.length - 1];
       IModuleType moduleType = thisModule.getModuleType();
       if (moduleType != null && "jst.ear".equals(moduleType.getId())) { //$NON-NLS-1$
-        IEnterpriseApplication enterpriseApplication = (IEnterpriseApplication) thisModule
-            .loadAdapter(IEnterpriseApplication.class, null);
+        IEnterpriseApplication enterpriseApplication = (IEnterpriseApplication) thisModule.loadAdapter(IEnterpriseApplication.class,
+                                                                                                       null);
         if (enterpriseApplication != null) {
           IModule[] earModules = enterpriseApplication.getModules();
           if (earModules != null) {
@@ -123,13 +125,18 @@ public class CloudSdkServer extends ServerDelegate {
 
   @SuppressWarnings("unchecked")
   @Override
-  public void modifyModules(IModule[] add, IModule[] remove, IProgressMonitor monitor) throws CoreException {
+  public void modifyModules(IModule[] add,
+                            IModule[] remove,
+                            IProgressMonitor monitor) throws CoreException {
     List<String> modules = this.getAttribute(ATTR_CLOUD_SDK_SERVER_MODULES, (List<String>) null);
 
     if (add != null && add.length > 0) {
       if (add.length > 1) {
-        throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, 0,
-            "This server instance cannot run more than one application", null));
+        throw new CoreException(new Status(IStatus.ERROR,
+                                           Activator.PLUGIN_ID,
+                                           0,
+                                           "This server instance cannot run more than one application",
+                                           null));
       }
       if (modules == null) {
         modules = new ArrayList<String>();
@@ -141,7 +148,6 @@ public class CloudSdkServer extends ServerDelegate {
       }
     }
 
-    assert(modules.size() >= remove.length);
     if (remove != null && remove.length > 0 && modules != null) {
       for (int i = 0; i < remove.length; i++) {
         modules.remove(remove[i].getId());
@@ -197,7 +203,7 @@ public class CloudSdkServer extends ServerDelegate {
     ArrayList<IModule> list = new ArrayList<IModule>();
     for (IModule earModule : earModules) {
       IEnterpriseApplication earApp = (IEnterpriseApplication) earModule.loadAdapter(IEnterpriseApplication.class,
-          null);
+                                                                                     null);
       for (IModule childModule : earApp.getModules()) {
         if (childModule.equals(module)) {
           list.add(earModule);

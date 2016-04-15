@@ -1,13 +1,15 @@
 /*******************************************************************************
- * Copyright 2015 Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc. All Rights Reserved.
  *
- * All rights reserved. This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 which accompanies this distribution, and is available at
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which
+ * accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
  * the License.
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.appengine.localserver.facet;
@@ -35,7 +37,8 @@ import com.google.cloud.tools.eclipse.appengine.localserver.CloudSdkUtils;
 @SuppressWarnings("restriction") // For WTPProjectConfigurator and FacetUtil
 public class CloudSdkProjectConfigurator extends WTPProjectConfigurator {
   @Override
-  public void configure(ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException {
+  public void configure(ProjectConfigurationRequest request,
+                        IProgressMonitor monitor) throws CoreException {
     Model pom = request.getMavenProject().getModel();
     if (CloudSdkUtils.hasGcloudMavenPlugin(pom)) {
       IFacetedProject facetedProject = ProjectFacetsManager.create(request.getProject());
@@ -48,10 +51,8 @@ public class CloudSdkProjectConfigurator extends WTPProjectConfigurator {
    * Cloud SDK runtimes to the list of targeted runtimes for
    * {@code facetedProject}.
    *
-   * @param facetedProject
-   *          the project
-   * @param monitor
-   *          to monitor the progress of the {@code facetedProject} update
+   * @param facetedProject the project
+   * @param monitor to monitor the progress of the {@code facetedProject} update
    */
   public void addCloudSdkFacet(IFacetedProject facetedProject, IProgressMonitor monitor) {
     IProjectFacet facetOfInterest = ProjectFacetsManager.getProjectFacet(CloudSdkUtils.CLOUD_SDK_FACET_ID);
@@ -75,7 +76,8 @@ public class CloudSdkProjectConfigurator extends WTPProjectConfigurator {
     try {
       workingCopy.commitChanges(monitor);
     } catch (CoreException e) {
-      Activator.logError("Error installing the Cloud SDK Facet in " + facetedProject.getProject().getName(), e);
+      Activator.logError("Error installing the Cloud SDK Facet in "
+                         + facetedProject.getProject().getName(), e);
     }
   }
 }

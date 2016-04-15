@@ -1,23 +1,26 @@
 /*******************************************************************************
- * Copyright 2015 Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc. All Rights Reserved.
  *
- * All rights reserved. This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 which accompanies this distribution, and is available at
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which
+ * accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
  * the License.
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
-import org.eclipse.wst.server.core.IServer;
-import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
-
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+
+import org.eclipse.wst.server.core.IServer;
+import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
 
 /**
  * Thread used to ping server to test when it is started.
@@ -42,15 +45,11 @@ public final class PingThread {
   /**
    * Create a new PingThread.
    *
-   * @param server
-   *          the server to be monitored
-   * @param url
-   *          the url to ping
-   * @param maxPings
-   *          the maximum number of times to try pinging, or -1 to continue
-   *          forever
-   * @param behaviour
-   *          the {@link ServerBehaviourDelegate} of {@code server}
+   * @param server the server to be monitored
+   * @param url the url to ping
+   * @param maxPings the maximum number of times to try pinging, or -1 to
+   *          continue forever
+   * @param behaviour the {@link ServerBehaviourDelegate} of {@code server}
    */
   public PingThread(IServer server, String url, int maxPings, CloudSdkServerBehaviour behaviour) {
     this.server = server;
@@ -94,11 +93,7 @@ public final class PingThread {
     while (!stop) {
       try {
         if (count == maxPings) {
-          try {
-            server.stop(false);
-          } catch (Throwable e) {
-            // ignore
-          }
+          server.stop(false);
           stop = true;
           break;
         }
@@ -113,7 +108,7 @@ public final class PingThread {
           behaviour.setServerStarted();
         }
         stop = true;
-      } catch (Throwable e) {
+      } catch (IOException e) {
         // pinging failed
         try {
           Thread.sleep(PING_INTERVAL);

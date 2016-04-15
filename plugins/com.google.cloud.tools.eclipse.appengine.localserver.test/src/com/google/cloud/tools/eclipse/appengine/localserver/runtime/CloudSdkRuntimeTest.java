@@ -2,7 +2,6 @@ package com.google.cloud.tools.eclipse.appengine.localserver.runtime;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;

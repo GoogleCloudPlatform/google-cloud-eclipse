@@ -1,17 +1,20 @@
 /*******************************************************************************
- * Copyright 2015 Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc. All Rights Reserved.
  *
- * All rights reserved. This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 which accompanies this distribution, and is available at
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which
+ * accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
  * the License.
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.appengine.localserver.deploy;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,27 +69,33 @@ public class CloudSdkDeployProjectHandler extends AbstractHandler {
     }
 
     if (runtime == null) {
-      Activator.logAndDisplayError(null, TITLE, "Must select a primary runtime for " + project.getName());
+      Activator.logAndDisplayError(null,
+                                   TITLE,
+                                   "Must select a primary runtime for " + project.getName());
       return null;
     }
 
     boolean hasLoggedInUsers;
     try {
       hasLoggedInUsers = GCloudCommandDelegate.hasLoggedInUsers(project, runtime);
-    } catch (Exception e) {
+    } catch (IOException | InterruptedException e) {
       Activator.logAndDisplayError(null, TITLE, e.getMessage());
       return null;
     }
 
     if (!hasLoggedInUsers) {
-      Activator.logAndDisplayError(null, TITLE,
-          "Please sign in to gcloud before deploying project " + project.getName());
+      Activator.logAndDisplayError(null,
+                                   TITLE,
+                                   "Please sign in to gcloud before deploying project "
+                                          + project.getName());
       return null;
     }
 
     final IPath warLocation = getWarLocationOrPrompt(project);
     if (warLocation == null) {
-      Activator.logAndDisplayError(null, TITLE, "Must select the WAR directory to deploy " + project.getName());
+      Activator.logAndDisplayError(null,
+                                   TITLE,
+                                   "Must select the WAR directory to deploy " + project.getName());
       return null;
     }
 
@@ -108,19 +117,26 @@ public class CloudSdkDeployProjectHandler extends AbstractHandler {
           commands.add("deploy");
           commands.add(warLocation.toString());
 
-          MessageConsole messageConsole = MessageConsoleUtilities.getMessageConsole(project.getName() + " - " + TITLE,
-              null);
+          MessageConsole messageConsole = MessageConsoleUtilities.getMessageConsole(project.getName()
+                                                                                    + " - "
+                                                                                    + TITLE,
+                                                                                    null);
           messageConsole.activate();
 
           IPath projectLocation = project.getLocation();
 
-          int exitCode = ProcessUtilities.launchProcessAndWaitFor(commands, projectLocation.toFile(),
-              messageConsole.newMessageStream(), null);
+          int exitCode = ProcessUtilities.launchProcessAndWaitFor(commands,
+                                                                  projectLocation.toFile(),
+                                                                  messageConsole.newMessageStream(),
+                                                                  null);
 
           if (exitCode != 0) {
-            Activator.logAndDisplayError(null, TITLE, "Cloud SDK deploy action terminated with exit code " + exitCode);
+            Activator.logAndDisplayError(null,
+                                         TITLE,
+                                         "Cloud SDK deploy action terminated with exit code "
+                                                + exitCode);
           }
-        } catch (Throwable e) {
+        } catch (IOException | InterruptedException e) {
           Activator.logError(e);
         }
         return Status.OK_STATUS;

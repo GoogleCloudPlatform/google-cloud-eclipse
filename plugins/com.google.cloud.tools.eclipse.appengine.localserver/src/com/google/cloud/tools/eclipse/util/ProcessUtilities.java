@@ -37,45 +37,45 @@ public class ProcessUtilities {
   /**
    * Launch the process specified in the commands and wait for it to terminate.
    * 
-   * @param commands
-   *          commands to pass to the {@link ProcessBuilder}
-   * @param workingDir
-   *          directory to use as the working directory
-   * @param outputStream
-   *          output stream to receive process output
-   * @param processReceiver
-   *          optional, will be given the process right after it is started
+   * @param commands commands to pass to the {@link ProcessBuilder}
+   * @param workingDir directory to use as the working directory
+   * @param outputStream output stream to receive process output
+   * @param processReceiver optional, will be given the process right after it
+   *          is started
    * @return process exit code
    * 
    * @throws IOException
    * @throws InterruptedException
    */
-  public static int launchProcessAndWaitFor(List<String> commands, File workingDir, final OutputStream outputStream,
-      IProcessReceiver processReceiver) throws InterruptedException, IOException {
+  public static int launchProcessAndWaitFor(List<String> commands,
+                                            File workingDir,
+                                            final OutputStream outputStream,
+                                            IProcessReceiver processReceiver) throws InterruptedException,
+                                                                              IOException {
     return launchProcessAndWaitFor(commands, workingDir, null, outputStream, processReceiver);
   }
 
   /**
    * Launch the process specified in the commands and wait for it to terminate.
    * 
-   * @param commands
-   *          commands to pass to the {@link ProcessBuilder}
-   * @param workingDir
-   *          directory to use as the working directory
-   * @param additionalPaths
-   *          list of additional directories to be appended to the PATH
-   *          environmental variable
-   * @param outputStream
-   *          output stream to receive process output
-   * @param processReceiver
-   *          optional, will be given the process right after it is started
+   * @param commands commands to pass to the {@link ProcessBuilder}
+   * @param workingDir directory to use as the working directory
+   * @param additionalPaths list of additional directories to be appended to the
+   *          PATH environmental variable
+   * @param outputStream output stream to receive process output
+   * @param processReceiver optional, will be given the process right after it
+   *          is started
    * @return process exit code
    * 
    * @throws IOException
    * @throws InterruptedException
    */
-  public static int launchProcessAndWaitFor(List<String> commands, File workingDir, final List<String> additionalPaths,
-      final OutputStream outputStream, IProcessReceiver processReceiver) throws InterruptedException, IOException {
+  public static int launchProcessAndWaitFor(List<String> commands,
+                                            File workingDir,
+                                            final List<String> additionalPaths,
+                                            final OutputStream outputStream,
+                                            IProcessReceiver processReceiver) throws InterruptedException,
+                                                                              IOException {
     ProcessBuilder pb = new ProcessBuilder(commands);
     pb.directory(workingDir);
     pb.redirectErrorStream(true);
@@ -89,7 +89,8 @@ public class ProcessUtilities {
       for (String path : additionalPaths) {
         // if this additional path isn't already in the new path environment
         // variable
-        String[] existingPaths = newPathEnvVar.toString().split(java.io.File.pathSeparatorChar + "");
+        String[] existingPaths = newPathEnvVar.toString()
+                                              .split(java.io.File.pathSeparatorChar + "");
         boolean pathAlreadyInPATH = false;
         for (String existingPath : existingPaths) {
           if (path.equals(existingPath)) {
@@ -138,8 +139,12 @@ public class ProcessUtilities {
             // The "Stream closed" exception is common when we destroy the
             // process (e.g. when the user requests to terminate a GWT compile)
             if (!e.getMessage().contains("Stream closed")) {
-              Activator.getDefault().getLog()
-                  .log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getLocalizedMessage(), e));
+              Activator.getDefault()
+                       .getLog()
+                       .log(new Status(IStatus.ERROR,
+                                       Activator.PLUGIN_ID,
+                                       e.getLocalizedMessage(),
+                                       e));
             }
           }
         }
@@ -167,8 +172,9 @@ public class ProcessUtilities {
           // Close all of the process' streams, and destroy the process
           cleanupProcess(process);
         } catch (InterruptedException e) {
-          Activator.getDefault().getLog()
-              .log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getLocalizedMessage(), e));
+          Activator.getDefault()
+                   .getLog()
+                   .log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getLocalizedMessage(), e));
         }
       }
     }
@@ -180,8 +186,7 @@ public class ProcessUtilities {
    * Closes the process' input stream, output stream, and error stream, and
    * finally destroys the process by calling <code>destroy()</code>.
    * 
-   * @param p
-   *          the process to cleanup
+   * @param p the process to cleanup
    */
   private static void cleanupProcess(Process p) {
     if (p == null) {
@@ -193,7 +198,9 @@ public class ProcessUtilities {
         p.getInputStream().close();
       }
     } catch (IOException e) {
-      Activator.getDefault().getLog().log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getLocalizedMessage(), e));
+      Activator.getDefault()
+               .getLog()
+               .log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getLocalizedMessage(), e));
     }
 
     try {
@@ -201,7 +208,9 @@ public class ProcessUtilities {
         p.getOutputStream().close();
       }
     } catch (IOException e) {
-      Activator.getDefault().getLog().log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getLocalizedMessage(), e));
+      Activator.getDefault()
+               .getLog()
+               .log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getLocalizedMessage(), e));
     }
 
     try {
@@ -209,7 +218,9 @@ public class ProcessUtilities {
         p.getErrorStream().close();
       }
     } catch (IOException e) {
-      Activator.getDefault().getLog().log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getLocalizedMessage(), e));
+      Activator.getDefault()
+               .getLog()
+               .log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getLocalizedMessage(), e));
     }
 
     p.destroy();
@@ -219,7 +230,8 @@ public class ProcessUtilities {
    * Put classpath argument in an environment variable so we don't overflow the
    * process command-line buffer on Windows.
    */
-  private static void moveClasspathArgToEnvironmentVariable(List<String> commandArgs, ProcessBuilder pb) {
+  private static void moveClasspathArgToEnvironmentVariable(List<String> commandArgs,
+                                                            ProcessBuilder pb) {
     int cpFlagIndex = commandArgs.indexOf("-cp");
     if (cpFlagIndex == -1) {
       cpFlagIndex = commandArgs.indexOf("-classpath");
@@ -243,7 +255,8 @@ public class ProcessUtilities {
     return copyInputStreamToString(process.getInputStream());
   }
 
-  public static String getProcessErrorOutput(Process process) throws IOException, InterruptedException {
+  public static String getProcessErrorOutput(Process process) throws IOException,
+                                                              InterruptedException {
     process.waitFor();
     return copyInputStreamToString(process.getErrorStream());
   }

@@ -14,7 +14,7 @@ public class ResourceUtils {
    * return null if the specified editor isn't an IFileEditor.
    */
   public static IFile getEditorInput(IEditorPart editor) {
-    IFileEditorInput fileEditorInput = AdapterUtilities.getAdapter(editor.getEditorInput(), 
+    IFileEditorInput fileEditorInput = AdapterUtilities.getAdapter(editor.getEditorInput(),
                                                                    IFileEditorInput.class);
     if (fileEditorInput != null) {
       return fileEditorInput.getFile();

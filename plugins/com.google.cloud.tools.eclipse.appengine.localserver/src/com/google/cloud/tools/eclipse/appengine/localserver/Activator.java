@@ -1,16 +1,16 @@
 /*******************************************************************************
- * Copyright 2011 Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc. All Rights Reserved.
  *
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which
+ * accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.appengine.localserver;
 
@@ -56,14 +56,13 @@ public class Activator extends AbstractUIPlugin {
    * message and title. Ensures that the error dialog is opened on the UI
    * thread.
    *
-   * @param parent
-   *          the parent shell of the dialog, or null if none
-   * @param title
-   *          the dialog's title
-   * @param message
-   *          the message
+   * @param parent the parent shell of the dialog, or null if none
+   * @param title the dialog's title
+   * @param message the message
    */
-  public static void logAndDisplayError(final Shell parent, final String title, final String message) {
+  public static void logAndDisplayError(final Shell parent,
+                                        final String title,
+                                        final String message) {
     logError(message);
 
     if (Display.getCurrent() != null) {
@@ -82,25 +81,22 @@ public class Activator extends AbstractUIPlugin {
    * Logs the specified message and exception to platform log file which can be
    * viewed via the PDE Error Log View.
    *
-   * @param message
-   *          the message
-   * @param exception
-   *          the exception
+   * @param message the message
+   * @param exception the exception
    */
   public static void logError(String message, Throwable exception) {
     message = message == null ? "Google Cloud SDK Error" : "Google Cloud SDK: " + message;
     Status status = new Status(IStatus.ERROR, PLUGIN_ID, 1, message, exception);
     getDefault().getLog().log(status);
   }
-  
+
   /**
    * Logs the specified message to platform log file
    *
-   * @param message
-   *          the message
+   * @param message the message
    */
   public static void logInfo(String message) {
-    if (message !=  null) {
+    if (message != null) {
       Status status = new Status(IStatus.INFO, PLUGIN_ID, message);
       getDefault().getLog().log(status);
     }
@@ -110,8 +106,7 @@ public class Activator extends AbstractUIPlugin {
    * Logs the specified exception to platform log file which can be viewed via
    * the PDE Error Log View.
    *
-   * @param exception
-   *          the exception
+   * @param exception the exception
    */
   public static void logError(Throwable exception) {
     logError(null, exception);
@@ -121,8 +116,7 @@ public class Activator extends AbstractUIPlugin {
    * Logs the specified message to platform log file which can be viewed via the
    * PDE Error Log View.
    *
-   * @param message
-   *          the message
+   * @param message the message
    */
   public static void logError(String message) {
     logError(message, null);

@@ -11,7 +11,10 @@ import org.eclipse.wst.server.core.ServerUtil;
 
 public class DevAppServerRuntimeProcess extends RuntimeProcess {
 
-  public DevAppServerRuntimeProcess(ILaunch launch, Process process, String name, Map<String, String> attributes) {
+  public DevAppServerRuntimeProcess(ILaunch launch,
+                                    Process process,
+                                    String name,
+                                    Map<String, String> attributes) {
     super(launch, process, name, attributes);
   }
 

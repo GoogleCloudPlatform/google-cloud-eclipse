@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2015 Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc. All Rights Reserved.
  *
  * All rights reserved. This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution, and is available at
@@ -12,23 +12,6 @@
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.appengine.localserver;
 
-import org.apache.maven.model.Build;
-import org.apache.maven.model.Model;
-import org.apache.maven.model.Plugin;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.wst.common.project.facet.core.IProjectFacet;
-import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
-import org.eclipse.wst.common.project.facet.core.internal.FacetedProject;
-import org.eclipse.wst.common.project.facet.core.internal.FacetedProjectNature;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import com.google.cloud.tools.eclipse.appengine.localserver.CloudSdkUtils;
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
@@ -36,19 +19,27 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.maven.model.Build;
+import org.apache.maven.model.Model;
+import org.apache.maven.model.Plugin;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.wst.common.project.facet.core.internal.FacetedProjectNature;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+
 /**
  * Unit test for {@link CloudSdkUtils}.
  */
 @RunWith(MockitoJUnitRunner.class)
 public class CloudSdkUtilsTest {
-  @Mock 
-  private Build mockBuild;
-  @Mock 
-  private Model mockModel;
-  @Mock
-  private IProject mockProject;
-  @Mock
-  private IFile mockFile;
+  @Mock private Build mockBuild;
+  @Mock private Model mockModel;
+  @Mock private IProject mockProject;
+  @Mock private IFile mockFile;
 
   /**
    * Tests that {@link CloudSdkUtils#hasGcloudMavenPlugin(Model)} returns
@@ -56,7 +47,7 @@ public class CloudSdkUtilsTest {
    */
   @Test
   public void testHasGcloudMavenPlugin_noGcloudPlugin() {
-    List<Plugin> plugins = createPluginList("myArtifcatId1", "myGroupId1", "myArtifcatId2",
+    List<Plugin> plugins = createPluginList("myArtifactId1", "myGroupId1", "myArtifactId2",
         "myGroupId2");
     when(mockBuild.getPlugins()).thenReturn(plugins);
     when(mockModel.getBuild()).thenReturn(mockBuild);
@@ -69,7 +60,7 @@ public class CloudSdkUtilsTest {
    */
   @Test
   public void testHasGcloudMavenPlugin_withGcloudPlugin() {
-    List<Plugin> plugins = createPluginList("myArtifcatId", "myGroupId", "gcloud-maven-plugin",
+    List<Plugin> plugins = createPluginList("myArtifactId", "myGroupId", "gcloud-maven-plugin",
         "com.google.appengine");
     when(mockBuild.getPlugins()).thenReturn(plugins);
     when(mockModel.getBuild()).thenReturn(mockBuild);
@@ -79,7 +70,7 @@ public class CloudSdkUtilsTest {
 
   @Test
   public void testHasGcloudMavenPlugin_wrongArtifactId() {
-    List<Plugin> plugins = createPluginList("myArtifcatId", "myGroupId", "this-is-not-gcloud-maven-plugin",
+    List<Plugin> plugins = createPluginList("myArtifactId", "myGroupId", "this-is-not-gcloud-maven-plugin",
         "com.google.appengine");
     when(mockBuild.getPlugins()).thenReturn(plugins);
     when(mockModel.getBuild()).thenReturn(mockBuild);
@@ -91,7 +82,7 @@ public class CloudSdkUtilsTest {
   // that is mocked here
   @SuppressWarnings("restriction")
   @Test
-  public void testhasCloudSdkFacet_nonFacetProject() throws CoreException {
+  public void testHasCloudSdkFacet_nonFacetProject() throws CoreException {
     when(mockProject.isAccessible()).thenReturn(true);
     when(mockProject.isNatureEnabled(FacetedProjectNature.NATURE_ID)).thenReturn(false);
     assertFalse(CloudSdkUtils.hasCloudSdkFacet(mockProject));

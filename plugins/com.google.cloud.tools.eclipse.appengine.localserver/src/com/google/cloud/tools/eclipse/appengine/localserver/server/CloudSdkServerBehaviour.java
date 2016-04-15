@@ -1,13 +1,15 @@
 /*******************************************************************************
- * Copyright 2015 Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc. All Rights Reserved.
  *
- * All rights reserved. This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 which accompanies this distribution, and is available at
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which
+ * accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
  * the License.
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
@@ -46,8 +48,11 @@ public class CloudSdkServerBehaviour extends ServerBehaviourDelegate {
     CloudSdkServer server = CloudSdkServer.getCloudSdkServer(getServer());
     int port = server.getApiPort();
     if (!isPortAvailable(port)) {
-      String message = server.getServer().getName() + " has admin port set to " + port
-          + " which is already is in use.\nTo use port " + port + " stop the processes that are using it";
+      String message = server.getServer().getName() + " has admin port set to "
+                       + port
+                       + " which is already is in use.\nTo use port "
+                       + port
+                       + " stop the processes that are using it";
       Activator.logError(message);
       return new Status(IStatus.ERROR, Activator.PLUGIN_ID, message);
     }
@@ -69,8 +74,7 @@ public class CloudSdkServerBehaviour extends ServerBehaviourDelegate {
   /**
    * Finalizes preparations to launch server.
    *
-   * @param launchMode
-   *          the mode in which a server is running
+   * @param launchMode the mode in which a server is running
    */
   protected void setupLaunch(String launchMode) {
     setServerRestartState(false);
@@ -80,13 +84,9 @@ public class CloudSdkServerBehaviour extends ServerBehaviourDelegate {
     int adminPort = CloudSdkServer.getCloudSdkServer(getServer()).getApiPort();
 
     // ping server to check for startup
-    try {
-      String url = "http://" + adminHost + ":" + adminPort;
-      pingThread = new PingThread(getServer(), url, -1, this);
-      pingThread.start();
-    } catch (Throwable e) {
-      Activator.logError("Can't ping for GAE Server startup.", e);
-    }
+    String url = "http://" + adminHost + ":" + adminPort;
+    pingThread = new PingThread(getServer(), url, -1, this);
+    pingThread.start();
   }
 
   /**
@@ -136,7 +136,7 @@ public class CloudSdkServerBehaviour extends ServerBehaviourDelegate {
       }
 
       setServerState(IServer.STATE_STOPPED);
-    } catch (Throwable e) {
+    } catch (DebugException e) {
       Activator.logError("Error terminating the Cloud SDK server", e);
     }
   }
@@ -145,8 +145,7 @@ public class CloudSdkServerBehaviour extends ServerBehaviourDelegate {
    * Sets up process listener to be able to handle debug events for
    * {@code newProcess).
    *
-   * @param newProcess
-   *          the process to be monitored
+   * @param newProcess the process to be monitored
    */
   protected void addProcessListener(final IProcess newProcess) {
     if (processListener != null || newProcess == null) {

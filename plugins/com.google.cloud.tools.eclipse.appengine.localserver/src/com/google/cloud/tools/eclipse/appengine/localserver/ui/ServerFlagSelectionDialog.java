@@ -1,13 +1,15 @@
 /*******************************************************************************
- * Copyright 2015 Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc. All Rights Reserved.
  *
- * All rights reserved. This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 which accompanies this distribution, and is available at
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which
+ * accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
  * the License.
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.appengine.localserver.ui;
@@ -29,11 +31,12 @@ import com.google.cloud.tools.eclipse.appengine.localserver.server.CloudSdkServe
 import com.google.cloud.tools.eclipse.appengine.localserver.server.ServerFlagsInfo.Flag;
 
 /**
- * A dialog that prompts the user to choose and configure a "gcloud app run" flag.
+ * A dialog that prompts the user to choose and configure a "gcloud app run"
+ * flag.
  */
 @SuppressWarnings("restriction") // For SWTFactory
 public class ServerFlagSelectionDialog extends ElementListSelectionDialog {
-  private static final String FLAG_PREFIX  = "--";
+  private static final String FLAG_PREFIX = "--";
   private Text descriptionText;
   private Text argumentText;
   private String argumentValue;
@@ -54,7 +57,7 @@ public class ServerFlagSelectionDialog extends ElementListSelectionDialog {
     try {
       flags = CloudSdkServerFlags.getFlags();
     } catch (FileNotFoundException e) {
-    	Activator.logError("Unable to populate a list of \"gcloud app run\" flags", e);
+      Activator.logError("Unable to populate a list of \"gcloud app run\" flags", e);
     }
 
     setElements(flags.toArray(new Flag[flags.size()]));
@@ -92,11 +95,11 @@ public class ServerFlagSelectionDialog extends ElementListSelectionDialog {
   }
 
   /**
-   * Returns the variable expression the user generated from this
-   * dialog, or <code>null</code> if none.
+   * Returns the variable expression the user generated from this dialog, or
+   * <code>null</code> if none.
    *
-   * @return variable expression the user generated from this
-   * dialog, or <code>null</code> if none
+   * @return variable expression the user generated from this dialog, or
+   *         <code>null</code> if none
    */
   public String getVariableExpression() {
     Object[] selected = getResult();
@@ -116,14 +119,19 @@ public class ServerFlagSelectionDialog extends ElementListSelectionDialog {
   }
 
   /**
-   * Creates an area to display a description of the selected variable
-   * and a text box to accept the variable's argument.
+   * Creates an area to display a description of the selected variable and a
+   * text box to accept the variable's argument.
    *
    * @param parent parent widget
    */
   private void createArgumentArea(Composite parent) {
-    Composite container =
-        SWTFactory.createComposite(parent, parent.getFont(), 2, 1, GridData.FILL_HORIZONTAL, 0, 0);
+    Composite container = SWTFactory.createComposite(parent,
+                                                     parent.getFont(),
+                                                     2,
+                                                     1,
+                                                     GridData.FILL_HORIZONTAL,
+                                                     0,
+                                                     0);
     SWTFactory.createWrapLabel(container, "&Argument:", 2);
 
     argumentText = new Text(container, SWT.BORDER);

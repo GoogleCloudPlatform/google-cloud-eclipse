@@ -26,11 +26,12 @@ public class MavenUtils {
         return true;
       }
     } catch (CoreException ce) {
-      Activator.getDefault().getLog()
-        .log(new Status(IStatus.ERROR, 
-                        Activator.PLUGIN_ID,
-                        "Unable to examine natures on project " + project.getName(), 
-                        ce));
+      Activator.getDefault()
+               .getLog()
+               .log(new Status(IStatus.ERROR,
+                               Activator.PLUGIN_ID,
+                               "Unable to examine natures on project " + project.getName(),
+                               ce));
     }
     return false;
   }
