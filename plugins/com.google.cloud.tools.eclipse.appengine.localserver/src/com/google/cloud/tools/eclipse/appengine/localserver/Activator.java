@@ -92,6 +92,19 @@ public class Activator extends AbstractUIPlugin {
     Status status = new Status(IStatus.ERROR, PLUGIN_ID, 1, message, exception);
     getDefault().getLog().log(status);
   }
+  
+  /**
+   * Logs the specified message to platform log file
+   *
+   * @param message
+   *          the message
+   */
+  public static void logInfo(String message) {
+    if (message !=  null) {
+      Status status = new Status(IStatus.INFO, PLUGIN_ID, message);
+      getDefault().getLog().log(status);
+    }
+  }
 
   /**
    * Logs the specified exception to platform log file which can be viewed via

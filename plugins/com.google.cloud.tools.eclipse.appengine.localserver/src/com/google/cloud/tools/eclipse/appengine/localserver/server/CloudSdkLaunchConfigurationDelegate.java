@@ -105,9 +105,9 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
       server.addServerListener(debugServerListener);
     }
 
-    // TODO: print out command in Console
     String commands = GCloudCommandDelegate.createAppRunCommand(sdkLocation.toOSString(), runnables, mode,
         cloudSdkServer.getApiHost(), cloudSdkServer.getApiPort(), debugPort);
+    Activator.logInfo("Executing: " + commands);
 
     Process p = null;
     try {
