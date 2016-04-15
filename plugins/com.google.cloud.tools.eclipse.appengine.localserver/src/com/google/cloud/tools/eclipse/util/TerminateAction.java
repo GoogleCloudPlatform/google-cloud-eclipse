@@ -15,6 +15,8 @@
 package com.google.cloud.tools.eclipse.util;
 
 
+import org.eclipse.debug.internal.ui.DebugPluginImages;
+import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jface.action.Action;
 
 /**
@@ -25,10 +27,8 @@ public abstract class TerminateAction extends Action {
   private boolean hasTerminated = false;
 
   public TerminateAction() {
-    super("Terminate");
-//    super("Terminate", CorePlugin.getDefault().getImageDescriptor(
-//            CoreImages.TERMINATE_ICON));
-
+    //TODO replace this with our own copy of the image to avoid depending on internal classes
+    super("Terminate", DebugPluginImages.getImageDescriptor(IDebugUIConstants.IMG_OBJS_ENVIRONMENT));
     setEnabled(true);
   }
 
