@@ -1,6 +1,8 @@
 sudo: false
 language: java
 install: 
+  # install the maven wrapper
+  - mvn -N io.takari:maven:wrapper -Dmaven=3.3.9
   # download Cloud SDK
   - wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-139.0.1-linux-x86_64.tar.gz
   - tar -xzf google-cloud-sdk-139.0.1-linux-x86_64.tar.gz
@@ -26,7 +28,7 @@ matrix:
     env: ECLIPSE_TARGET=neon
   - jdk: oraclejdk8
     env: ECLIPSE_TARGET=oxygen
-script: mvn -Ptravis --fail-at-end verify ${ECLIPSE_TARGET:+-Declipse.target=${ECLIPSE_TARGET}}
+script: ./mvnw -Ptravis --fail-at-end verify ${ECLIPSE_TARGET:+-Declipse.target=${ECLIPSE_TARGET}}
 addons:
   apt:
     packages:
