@@ -1,4 +1,4 @@
-package com.google.cloud.tools.eclipse.newproject.whitelist;
+package com.google.cloud.tools.eclipse.newproject;
 
 import java.io.File;
 import java.io.IOException;
