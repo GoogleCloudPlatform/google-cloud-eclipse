@@ -20,12 +20,12 @@ import com.google.cloud.tools.eclipse.appengine.localserver.server.ServerFlagsIn
  * A label provider implementation for {@link Flag}.
  */
 public class ServerFlagLabelProvider extends LabelProvider {
-    @Override
-    public String getText(Object element) {
-      if (element instanceof Flag) {
-        Flag variable = (Flag) element;
-        return variable.getName();
-      }
-      return super.getText(element);
+  @Override
+  public String getText(Object element) {
+    if (element instanceof Flag) {
+      Flag variable = (Flag) element;
+      return variable.getName();
     }
+    return super.getText(element);
+  }
 }

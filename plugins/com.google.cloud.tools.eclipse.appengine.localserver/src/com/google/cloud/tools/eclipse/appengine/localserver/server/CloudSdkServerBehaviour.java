@@ -47,8 +47,7 @@ public class CloudSdkServerBehaviour extends ServerBehaviourDelegate {
     int port = server.getApiPort();
     if (!isPortAvailable(port)) {
       String message = server.getServer().getName() + " has admin port set to " + port
-          + " which is already is in use.\nTo use port " + port
-          + " stop the processes that are using it";
+          + " which is already is in use.\nTo use port " + port + " stop the processes that are using it";
       Activator.logError(message);
       return new Status(IStatus.ERROR, Activator.PLUGIN_ID, message);
     }
@@ -70,7 +69,8 @@ public class CloudSdkServerBehaviour extends ServerBehaviourDelegate {
   /**
    * Finalizes preparations to launch server.
    *
-   * @param launchMode the mode in which a server is running
+   * @param launchMode
+   *          the mode in which a server is running
    */
   protected void setupLaunch(String launchMode) {
     setServerRestartState(false);
@@ -85,12 +85,13 @@ public class CloudSdkServerBehaviour extends ServerBehaviourDelegate {
       pingThread = new PingThread(getServer(), url, -1, this);
       pingThread.start();
     } catch (Throwable e) {
-    	Activator.logError("Can't ping for GAE Server startup.", e);
+      Activator.logError("Can't ping for GAE Server startup.", e);
     }
   }
 
   /**
-   * Terminates the Cloud SDK server instance, stops the ping thread and removes debug listener.
+   * Terminates the Cloud SDK server instance, stops the ping thread and removes
+   * debug listener.
    */
   protected void terminate() {
     int serverState = getServer().getServerState();
@@ -128,7 +129,7 @@ public class CloudSdkServerBehaviour extends ServerBehaviourDelegate {
               manager.removeLaunch(aLaunch);
               break;
             } catch (DebugException e) {
-            	Activator.logError(e);
+              Activator.logError(e);
             }
           }
         }
@@ -136,14 +137,16 @@ public class CloudSdkServerBehaviour extends ServerBehaviourDelegate {
 
       setServerState(IServer.STATE_STOPPED);
     } catch (Throwable e) {
-    	Activator.logError("Error terminating the Cloud SDK server", e);
+      Activator.logError("Error terminating the Cloud SDK server", e);
     }
   }
 
   /**
-   * Sets up process listener to be able to handle debug events for {@code newProcess).
+   * Sets up process listener to be able to handle debug events for
+   * {@code newProcess).
    *
-   * @param newProcess the process to be monitored
+   * @param newProcess
+   *          the process to be monitored
    */
   protected void addProcessListener(final IProcess newProcess) {
     if (processListener != null || newProcess == null) {
@@ -201,7 +204,7 @@ public class CloudSdkServerBehaviour extends ServerBehaviourDelegate {
       ByteStreams.toByteArray(connection.getInputStream());
       serverStopped = true;
     } catch (IOException e) {
-    	Activator.logError("Error stopping the dev app server", e);
+      Activator.logError("Error stopping the dev app server", e);
     } finally {
       if (connection != null) {
         connection.disconnect();

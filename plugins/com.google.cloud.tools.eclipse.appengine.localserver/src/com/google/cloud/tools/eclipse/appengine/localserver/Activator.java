@@ -50,17 +50,20 @@ public class Activator extends AbstractUIPlugin {
     plugin = null;
     super.stop(context);
   }
-  
+
   /**
-   * Logs the specified message and opens an error dialog with the specified message and title.
-   * Ensures that the error dialog is opened on the UI thread.
+   * Logs the specified message and opens an error dialog with the specified
+   * message and title. Ensures that the error dialog is opened on the UI
+   * thread.
    *
-   * @param parent the parent shell of the dialog, or null if none
-   * @param title the dialog's title
-   * @param message the message
+   * @param parent
+   *          the parent shell of the dialog, or null if none
+   * @param title
+   *          the dialog's title
+   * @param message
+   *          the message
    */
-  public static void logAndDisplayError(final Shell parent, final String title,
-      final String message){
+  public static void logAndDisplayError(final Shell parent, final String title, final String message) {
     logError(message);
 
     if (Display.getCurrent() != null) {
@@ -76,11 +79,13 @@ public class Activator extends AbstractUIPlugin {
   }
 
   /**
-   * Logs the specified message and exception to platform log file which can be viewed via the
-   * PDE Error Log View.
+   * Logs the specified message and exception to platform log file which can be
+   * viewed via the PDE Error Log View.
    *
-   * @param message the message
-   * @param exception the exception
+   * @param message
+   *          the message
+   * @param exception
+   *          the exception
    */
   public static void logError(String message, Throwable exception) {
     message = message == null ? "Google Cloud SDK Error" : "Google Cloud SDK: " + message;
@@ -89,20 +94,22 @@ public class Activator extends AbstractUIPlugin {
   }
 
   /**
-   * Logs the specified exception to platform log file which can be viewed via the PDE Error Log
-   * View.
+   * Logs the specified exception to platform log file which can be viewed via
+   * the PDE Error Log View.
    *
-   * @param exception the exception
+   * @param exception
+   *          the exception
    */
   public static void logError(Throwable exception) {
     logError(null, exception);
   }
 
   /**
-   * Logs the specified message to platform log file which can be viewed via the PDE Error Log
-   * View.
+   * Logs the specified message to platform log file which can be viewed via the
+   * PDE Error Log View.
    *
-   * @param message the message
+   * @param message
+   *          the message
    */
   public static void logError(String message) {
     logError(message, null);

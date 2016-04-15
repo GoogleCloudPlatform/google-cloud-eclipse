@@ -18,7 +18,8 @@ import org.eclipse.core.runtime.IAdapterManager;
 import org.eclipse.core.runtime.Platform;
 
 /**
- * Utility methods for dealing with {@link org.eclipse.core.runtime.IAdaptable} objects.
+ * Utility methods for dealing with {@link org.eclipse.core.runtime.IAdaptable}
+ * objects.
  */
 public class AdapterUtilities {
 
@@ -28,8 +29,7 @@ public class AdapterUtilities {
    * {@link IAdapterManager#getAdapter(Object, Class)}.
    */
   @SuppressWarnings("unchecked")
-  public static <T> T getAdapter(Object adaptable,
-      Class<? extends T> adapterType) {
+  public static <T> T getAdapter(Object adaptable, Class<? extends T> adapterType) {
 
     /*
      * Try a simple instanceof check. This also safeguards against a misuse of
@@ -41,9 +41,9 @@ public class AdapterUtilities {
     if (adapterType.isInstance(adaptable)) {
       return (T) adaptable;
     }
-    
+
     IAdapterManager adapterManager = Platform.getAdapterManager();
-    assert (adapterManager != null);
+    assert(adapterManager != null);
     return (T) adapterManager.getAdapter(adaptable, adapterType);
   }
 }

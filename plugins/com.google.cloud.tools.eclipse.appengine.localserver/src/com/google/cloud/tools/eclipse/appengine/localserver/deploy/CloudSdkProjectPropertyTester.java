@@ -19,8 +19,9 @@ import org.eclipse.core.runtime.CoreException;
 import com.google.cloud.tools.eclipse.appengine.localserver.CloudSdkUtils;
 
 /**
- * CloudSdkProjectPropertyTester provides a test to determine whether or not to enable the
- * "Cloud SDK Deploy Project" context menu item for an Eclipse project.
+ * CloudSdkProjectPropertyTester provides a test to determine whether or not to
+ * enable the "Cloud SDK Deploy Project" context menu item for an Eclipse
+ * project.
  */
 public class CloudSdkProjectPropertyTester extends PropertyTester {
   /**

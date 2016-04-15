@@ -20,8 +20,8 @@ import java.util.List;
  */
 public class ServerFlagsInfo {
   /**
-   * Class holding "name", "description" and "supportsArgument" members of "flags" in the
-   * server-flags.json.
+   * Class holding "name", "description" and "supportsArgument" members of
+   * "flags" in the server-flags.json.
    */
   public static class Flag {
     private String name;

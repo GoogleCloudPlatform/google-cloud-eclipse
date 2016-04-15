@@ -35,10 +35,11 @@ import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
 import com.google.cloud.tools.eclipse.appengine.localserver.server.CloudSdkServer;
 
 /**
- * A launch configuration tab that displays and edits "gcloud app preview" command flags for the
- * Cloud SDK server.
+ * A launch configuration tab that displays and edits "gcloud app preview"
+ * command flags for the Cloud SDK server.
  */
-// TODO: Add a button to this Launch Config UI that allows the user to either pull the appropriate
+// TODO: Add a button to this Launch Config UI that allows the user to either
+// pull the appropriate
 // program args from Maven into the launch config, or vice-versa..
 public class CloudSdkServerLaunchTab extends AbstractLaunchConfigurationTab {
   protected Text prgmFlagText;
@@ -68,22 +69,22 @@ public class CloudSdkServerLaunchTab extends AbstractLaunchConfigurationTab {
     prgmFlagText.addTraverseListener(new TraverseListener() {
       public void keyTraversed(TraverseEvent e) {
         switch (e.detail) {
-          case SWT.TRAVERSE_ESCAPE:
-          case SWT.TRAVERSE_PAGE_NEXT:
-          case SWT.TRAVERSE_PAGE_PREVIOUS:
+        case SWT.TRAVERSE_ESCAPE:
+        case SWT.TRAVERSE_PAGE_NEXT:
+        case SWT.TRAVERSE_PAGE_PREVIOUS:
+          e.doit = true;
+          break;
+        case SWT.TRAVERSE_RETURN:
+        case SWT.TRAVERSE_TAB_NEXT:
+        case SWT.TRAVERSE_TAB_PREVIOUS:
+          if ((prgmFlagText.getStyle() & SWT.SINGLE) != 0) {
             e.doit = true;
-            break;
-          case SWT.TRAVERSE_RETURN:
-          case SWT.TRAVERSE_TAB_NEXT:
-          case SWT.TRAVERSE_TAB_PREVIOUS:
-            if ((prgmFlagText.getStyle() & SWT.SINGLE) != 0) {
+          } else {
+            if (!prgmFlagText.isEnabled() || (e.stateMask & SWT.MODIFIER_MASK) != 0) {
               e.doit = true;
-            } else {
-              if (!prgmFlagText.isEnabled() || (e.stateMask & SWT.MODIFIER_MASK) != 0) {
-                e.doit = true;
-              }
             }
-            break;
+          }
+          break;
         }
       }
     });
@@ -122,8 +123,7 @@ public class CloudSdkServerLaunchTab extends AbstractLaunchConfigurationTab {
   @Override
   public void initializeFrom(ILaunchConfiguration configuration) {
     try {
-      prgmFlagText.setText(
-          configuration.getAttribute(CloudSdkServer.SERVER_PROGRAM_FLAGS, ""));
+      prgmFlagText.setText(configuration.getAttribute(CloudSdkServer.SERVER_PROGRAM_FLAGS, ""));
     } catch (CoreException e) {
       setErrorMessage("Exception occurred reading configuration:" + e.getStatus().getMessage());
       Activator.logError(e);
@@ -132,8 +132,7 @@ public class CloudSdkServerLaunchTab extends AbstractLaunchConfigurationTab {
 
   @Override
   public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-    configuration.setAttribute(CloudSdkServer.SERVER_PROGRAM_FLAGS,
-        getAttributeValueFrom(prgmFlagText));
+    configuration.setAttribute(CloudSdkServer.SERVER_PROGRAM_FLAGS, getAttributeValueFrom(prgmFlagText));
   }
 
   @Override
@@ -144,7 +143,8 @@ public class CloudSdkServerLaunchTab extends AbstractLaunchConfigurationTab {
   /**
    * Returns the string in the text widget, or <code>null</code> if empty.
    *
-   * @param text the widget to get the value from
+   * @param text
+   *          the widget to get the value from
    * @return text or <code>null</code>
    */
   protected String getAttributeValueFrom(Text text) {

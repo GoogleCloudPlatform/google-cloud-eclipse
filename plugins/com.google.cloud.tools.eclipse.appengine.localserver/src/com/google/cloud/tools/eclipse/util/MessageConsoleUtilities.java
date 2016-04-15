@@ -30,18 +30,18 @@ public class MessageConsoleUtilities {
    * created. The returned console is cleared; callers of this method can decide
    * when to activate it.
    * 
-   * @param consoleName name of the console
-   * @param imageDescriptor image descriptor to use
+   * @param consoleName
+   *          name of the console
+   * @param imageDescriptor
+   *          image descriptor to use
    * @return {@link CustomMessageConsole} with the given
    *         <code>consoleName</code>
    */
-  public static CustomMessageConsole getMessageConsole(String consoleName,
-      ImageDescriptor imageDescriptor) {
+  public static CustomMessageConsole getMessageConsole(String consoleName, ImageDescriptor imageDescriptor) {
     CustomMessageConsole messageConsole = null;
     IConsoleManager consoleManager = ConsolePlugin.getDefault().getConsoleManager();
     for (IConsole console : consoleManager.getConsoles()) {
-      if (console.getName().equals(consoleName)
-          && console instanceof CustomMessageConsole) {
+      if (console.getName().equals(consoleName) && console instanceof CustomMessageConsole) {
         messageConsole = (CustomMessageConsole) console;
         break;
       }
@@ -49,7 +49,7 @@ public class MessageConsoleUtilities {
 
     if (messageConsole == null) {
       messageConsole = new CustomMessageConsole(consoleName, imageDescriptor);
-      consoleManager.addConsoles(new IConsole[] {messageConsole});
+      consoleManager.addConsoles(new IConsole[] { messageConsole });
     } else {
       messageConsole.clearConsole();
     }

@@ -35,8 +35,7 @@ import com.google.cloud.tools.eclipse.appengine.localserver.CloudSdkUtils;
 @SuppressWarnings("restriction") // For WTPProjectConfigurator and FacetUtil
 public class CloudSdkProjectConfigurator extends WTPProjectConfigurator {
   @Override
-  public void configure(ProjectConfigurationRequest request, IProgressMonitor monitor)
-      throws CoreException {
+  public void configure(ProjectConfigurationRequest request, IProgressMonitor monitor) throws CoreException {
     Model pom = request.getMavenProject().getModel();
     if (CloudSdkUtils.hasGcloudMavenPlugin(pom)) {
       IFacetedProject facetedProject = ProjectFacetsManager.create(request.getProject());
@@ -45,15 +44,17 @@ public class CloudSdkProjectConfigurator extends WTPProjectConfigurator {
   }
 
   /**
-   * Adds the Cloud SDK facet to {@code facetedProject} and adds the available Cloud SDK runtimes
-   * to the list of targeted runtimes for {@code facetedProject}.
+   * Adds the Cloud SDK facet to {@code facetedProject} and adds the available
+   * Cloud SDK runtimes to the list of targeted runtimes for
+   * {@code facetedProject}.
    *
-   * @param facetedProject the project
-   * @param monitor to monitor the progress of the {@code facetedProject} update
+   * @param facetedProject
+   *          the project
+   * @param monitor
+   *          to monitor the progress of the {@code facetedProject} update
    */
   public void addCloudSdkFacet(IFacetedProject facetedProject, IProgressMonitor monitor) {
-    IProjectFacet facetOfInterest =
-        ProjectFacetsManager.getProjectFacet(CloudSdkUtils.CLOUD_SDK_FACET_ID);
+    IProjectFacet facetOfInterest = ProjectFacetsManager.getProjectFacet(CloudSdkUtils.CLOUD_SDK_FACET_ID);
     if (facetedProject.hasProjectFacet(facetOfInterest)) {
       return;
     }
@@ -74,8 +75,7 @@ public class CloudSdkProjectConfigurator extends WTPProjectConfigurator {
     try {
       workingCopy.commitChanges(monitor);
     } catch (CoreException e) {
-    	Activator.logError("Error installing the Cloud SDK Facet in "
-          + facetedProject.getProject().getName(), e);
+      Activator.logError("Error installing the Cloud SDK Facet in " + facetedProject.getProject().getName(), e);
     }
   }
 }

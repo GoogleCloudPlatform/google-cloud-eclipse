@@ -53,15 +53,15 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
   private static final String DEBUGGER_HOST = "localhost";
 
   @Override
-  public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch,
-      IProgressMonitor monitor) throws CoreException {
+  public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor)
+      throws CoreException {
     final IServer server = ServerUtil.getServer(configuration);
     if (server == null) {
       return;
     }
 
     final IModule[] modules = server.createWorkingCopy().getModules();
-    if (modules == null || modules.length == 0){
+    if (modules == null || modules.length == 0) {
       return;
     }
 
@@ -72,8 +72,7 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
     }
     IPath sdkLocation = runtime.getLocation();
 
-    CloudSdkServerBehaviour sb = (CloudSdkServerBehaviour) server.loadAdapter(
-        CloudSdkServerBehaviour.class, null);
+    CloudSdkServerBehaviour sb = (CloudSdkServerBehaviour) server.loadAdapter(CloudSdkServerBehaviour.class, null);
     sb.setupLaunch(mode);
 
     final CloudSdkServer cloudSdkServer = CloudSdkServer.getCloudSdkServer(server);
@@ -82,9 +81,10 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
       final int port = getDebugPort();
       debugPort = port;
 
-      // Create server listener so that when server has started we create a remote debugger
+      // Create server listener so that when server has started we create a
+      // remote debugger
       // and attach it to the server
-      debugServerListener = new IServerListener () {
+      debugServerListener = new IServerListener() {
         @Override
         public void serverChanged(ServerEvent event) {
           if (event != null) {
@@ -93,7 +93,7 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
                 Thread.sleep(500);
                 runDebugTarget(cloudSdkServer, modules[0].getProject().getName(), port);
               } catch (InterruptedException | CoreException e) {
-            	  Activator.logError(e);
+                Activator.logError(e);
               }
             } else if (event.getState() == IServer.STATE_STOPPING) {
               removeRemoteDebuggerListener(server);
@@ -106,8 +106,8 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
     }
 
     // TODO: print out command in Console
-    String commands = GCloudCommandDelegate.createAppRunCommand(sdkLocation.toOSString(), runnables,
-        mode, cloudSdkServer.getApiHost(), cloudSdkServer.getApiPort(), debugPort);
+    String commands = GCloudCommandDelegate.createAppRunCommand(sdkLocation.toOSString(), runnables, mode,
+        cloudSdkServer.getApiHost(), cloudSdkServer.getApiPort(), debugPort);
 
     Process p = null;
     try {
@@ -119,7 +119,7 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
     }
 
     addProcessFactoryToLaunchConfiguration(configuration);
-    
+
     // The DebugPlugin handles the streaming of the output to the console and
     // sends notifications of debug events
     DebugPlugin.newProcess(launch, p, commands);
@@ -127,19 +127,19 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
   }
 
   /*
-   * Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=38016
-   * The custom IProcessFactory creates an IProcess object that calls the /quit handler
-   * on the dev app server
+   * Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=38016 The
+   * custom IProcessFactory creates an IProcess object that calls the /quit
+   * handler on the dev app server
    */
   private void addProcessFactoryToLaunchConfiguration(ILaunchConfiguration configuration) throws CoreException {
-	ILaunchConfigurationWorkingCopy workingCopy = configuration.getWorkingCopy();
-	workingCopy.setAttribute(DebugPlugin.ATTR_PROCESS_FACTORY_ID, DevAppServerProcessFactory.ID);
+    ILaunchConfigurationWorkingCopy workingCopy = configuration.getWorkingCopy();
+    workingCopy.setAttribute(DebugPlugin.ATTR_PROCESS_FACTORY_ID, DevAppServerProcessFactory.ID);
     workingCopy.doSave();
   }
 
   @Override
-  public boolean preLaunchCheck(ILaunchConfiguration configuration, String mode,
-      IProgressMonitor monitor) throws CoreException {
+  public boolean preLaunchCheck(ILaunchConfiguration configuration, String mode, IProgressMonitor monitor)
+      throws CoreException {
     IServer server = ServerUtil.getServer(configuration);
     if (server == null) {
       return false;
@@ -154,20 +154,19 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
 
   @Override
   protected void abort(String message, Throwable exception, int code) throws CoreException {
-    throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, code,
-        message, exception));
+    throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, code, message, exception));
   }
 
   private String getRunnable(IProject project, IProgressMonitor monitor) throws CoreException {
-    IMavenProjectFacade facade =
-        MavenPlugin.getMavenProjectRegistry().getProject(project);
+    IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().getProject(project);
     MavenProject mavenProject = facade.getMavenProject(monitor);
-    return mavenProject.getBasedir() + File.separator + "target" + File.separator
-        + mavenProject.getArtifactId() + "-" + mavenProject.getVersion();
+    return mavenProject.getBasedir() + File.separator + "target" + File.separator + mavenProject.getArtifactId() + "-"
+        + mavenProject.getVersion();
   }
 
   private int getDebugPort() throws CoreException {
-    // TODO: add check to see if debug port was set, if not use a random free port.
+    // TODO: add check to see if debug port was set, if not use a random free
+    // port.
     int port = SocketUtil.findFreePort();
     if (port == -1) {
       abort("Cannot find free port for remote debugger", null, IStatus.ERROR);
@@ -177,14 +176,13 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
 
   private void runDebugTarget(CloudSdkServer cloudSdkServer, String projectName, int port)
       throws CoreException, InterruptedException {
-    ILaunchConfigurationWorkingCopy remoteDebugLaunchConfig =
-        createRemoteDebugLaunchConfiguration(cloudSdkServer, projectName, Integer.toString(port));
+    ILaunchConfigurationWorkingCopy remoteDebugLaunchConfig = createRemoteDebugLaunchConfiguration(cloudSdkServer,
+        projectName, Integer.toString(port));
     remoteDebugLaunchConfig.launch(ILaunchManager.DEBUG_MODE, null);
   }
 
-  private ILaunchConfigurationWorkingCopy createRemoteDebugLaunchConfiguration(
-      CloudSdkServer cloudSdkServer, final String projectName, final String port)
-          throws CoreException {
+  private ILaunchConfigurationWorkingCopy createRemoteDebugLaunchConfiguration(CloudSdkServer cloudSdkServer,
+      final String projectName, final String port) throws CoreException {
     ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
     ILaunchConfigurationType type = manager
         .getLaunchConfigurationType(IJavaLaunchConfigurationConstants.ID_REMOTE_JAVA_APPLICATION);
@@ -199,10 +197,9 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
     Map<String, String> connectionParameters = new HashMap<String, String>();
     connectionParameters.put("hostname", DEBUGGER_HOST);
     connectionParameters.put("port", port);
-    remoteDebugConfig.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CONNECT_MAP,
-        connectionParameters);
+    remoteDebugConfig.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CONNECT_MAP, connectionParameters);
     remoteDebugConfig.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_CONNECTOR,
-            "org.eclipse.jdt.launching.socketAttachConnector");
+        "org.eclipse.jdt.launching.socketAttachConnector");
 
     cloudSdkServer.setRemoteDebugLaunchConfig(remoteDebugConfig);
 

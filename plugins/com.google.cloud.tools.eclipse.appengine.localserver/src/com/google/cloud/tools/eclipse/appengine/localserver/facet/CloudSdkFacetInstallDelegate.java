@@ -31,16 +31,16 @@ import com.google.cloud.tools.eclipse.appengine.localserver.CloudSdkUtils;
 public class CloudSdkFacetInstallDelegate implements IDelegate {
   /**
    * When the user clicks the "Apply" or "OK" button in the Project Facet page,
-   * this function is called through {@link FacetedProject#mergeChanges} and if this function
-   * exits without an exception, the facet will be added to the project via {@link FacetedProject}.
+   * this function is called through {@link FacetedProject#mergeChanges} and if
+   * this function exits without an exception, the facet will be added to the
+   * project via {@link FacetedProject}.
    */
   @Override
-  public void execute(IProject project, IProjectFacetVersion fv, Object config,
-      IProgressMonitor monitor) throws CoreException {
+  public void execute(IProject project, IProjectFacetVersion fv, Object config, IProgressMonitor monitor)
+      throws CoreException {
     if (!CloudSdkUtils.hasGcloudMavenPlugin(project)) {
       // This exception will prevent the facet from being added to the project
-      throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID,
-          "Cannot install Cloud SDK facet.\n"
+      throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Cannot install Cloud SDK facet.\n"
           + "Cloud SDK facets can only be installed in maven projects with GCloud Maven plugin"));
     }
   }

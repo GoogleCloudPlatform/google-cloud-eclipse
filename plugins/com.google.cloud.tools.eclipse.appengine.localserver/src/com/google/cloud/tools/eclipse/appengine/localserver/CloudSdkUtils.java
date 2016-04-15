@@ -36,16 +36,18 @@ public class CloudSdkUtils {
   public static final String APPENGINE_GROUP_ID = "com.google.appengine";
   public static final String CLOUD_SDK_FACET_ID = "com.google.cloud.tools.eclipse.facet";
   public static final String CLOUD_SDK_RUNTIME_ID = "com.google.cloud.tools.eclipse.runtime.id1";
-  public static final String GCLOUD_MAVEN_PLUGIN_ARTIFACT_ID  = "gcloud-maven-plugin";
+  public static final String GCLOUD_MAVEN_PLUGIN_ARTIFACT_ID = "gcloud-maven-plugin";
 
   /**
-   * Returns true if the given project is a maven project with the gcloud-maven-plugin as one of
-   * its dependencies. Returns false otherwise.
+   * Returns true if the given project is a maven project with the
+   * gcloud-maven-plugin as one of its dependencies. Returns false otherwise.
    *
-   * @param project the project to be queried
-   * @return true if {@code project} is a maven project with the gcloud-maven-plugin and
-   *  false otherwise
-   * @throws CoreException if getting instance of MavenProject from {@code project) fails
+   * @param project
+   *          the project to be queried
+   * @return true if {@code project} is a maven project with the
+   *         gcloud-maven-plugin and false otherwise
+   * @throws CoreException
+   *           if getting instance of MavenProject from {@code project) fails
    */
   public static boolean hasGcloudMavenPlugin(IProject project) throws CoreException {
     if (!MavenUtils.hasMavenNature(project)) {
@@ -58,10 +60,13 @@ public class CloudSdkUtils {
   }
 
   /**
-   * Returns true if the specified pom has the gcloud-maven-plugin. Returns false otherwise.
+   * Returns true if the specified pom has the gcloud-maven-plugin. Returns
+   * false otherwise.
    *
-   * @param pom the maven project object model
-   * @return true if the specified pom has the gcloud-maven-plugin and false otherwise
+   * @param pom
+   *          the maven project object model
+   * @return true if the specified pom has the gcloud-maven-plugin and false
+   *         otherwise
    */
   public static boolean hasGcloudMavenPlugin(Model pom) {
     List<Plugin> plugins = pom.getBuild().getPlugins();
@@ -75,35 +80,41 @@ public class CloudSdkUtils {
   }
 
   /**
-   * Returns true if {@code project} has the Cloud SDK facet and false otherwise.
+   * Returns true if {@code project} has the Cloud SDK facet and false
+   * otherwise.
    *
-   * @param project an Eclipse project
-   * @return true if {@code project} has the Cloud SDK facet and false otherwise.
-   * @throws CoreException if error occurs when creating a {@link IFacetedProject} associated
-   *  with {@code project}
+   * @param project
+   *          an Eclipse project
+   * @return true if {@code project} has the Cloud SDK facet and false
+   *         otherwise.
+   * @throws CoreException
+   *           if error occurs when creating a {@link IFacetedProject}
+   *           associated with {@code project}
    */
   public static boolean hasCloudSdkFacet(IProject project) throws CoreException {
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);
     if (facetedProject == null) {
       return false;
     }
-    IProjectFacet facetOfInterest =
-        ProjectFacetsManager.getProjectFacet(CloudSdkUtils.CLOUD_SDK_FACET_ID);
+    IProjectFacet facetOfInterest = ProjectFacetsManager.getProjectFacet(CloudSdkUtils.CLOUD_SDK_FACET_ID);
     return facetedProject.hasProjectFacet(facetOfInterest);
   }
 
   /**
-   * Returns the primary facet runtime for {@code project} or null if none has been set.
+   * Returns the primary facet runtime for {@code project} or null if none has
+   * been set.
    *
-   * @param project an Eclipse project
-   * @return the primary facet runtime for {@code project} or null if none has been set
-   * @throws CoreException if error occurs when creating a {@link IFacetedProject} associated
-   *  with {@code project}
+   * @param project
+   *          an Eclipse project
+   * @return the primary facet runtime for {@code project} or null if none has
+   *         been set
+   * @throws CoreException
+   *           if error occurs when creating a {@link IFacetedProject}
+   *           associated with {@code project}
    */
   public static IRuntime getPrimaryRuntime(IProject project) throws CoreException {
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);
-    org.eclipse.wst.common.project.facet.core.runtime.IRuntime primaryRuntime =
-        facetedProject.getPrimaryRuntime();
+    org.eclipse.wst.common.project.facet.core.runtime.IRuntime primaryRuntime = facetedProject.getPrimaryRuntime();
     if (primaryRuntime == null) {
       return null;
     }

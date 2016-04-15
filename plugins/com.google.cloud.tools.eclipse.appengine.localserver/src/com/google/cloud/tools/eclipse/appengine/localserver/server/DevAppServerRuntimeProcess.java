@@ -11,31 +11,29 @@ import org.eclipse.wst.server.core.ServerUtil;
 
 public class DevAppServerRuntimeProcess extends RuntimeProcess {
 
-	public DevAppServerRuntimeProcess(ILaunch launch, Process process, String name, Map<String, String> attributes) {
-		super(launch, process, name, attributes);
-	}
+  public DevAppServerRuntimeProcess(ILaunch launch, Process process, String name, Map<String, String> attributes) {
+    super(launch, process, name, attributes);
+  }
 
-	@Override
-	public void terminate() throws DebugException {
-		try {
-			sendQuitRequest();
-			if (!getLaunch().isTerminated()) {
-				super.terminate();
-			}
-		} catch (CoreException e) {
-			throw new DebugException(e.getStatus());
-		}
-		
-	}
+  @Override
+  public void terminate() throws DebugException {
+    try {
+      sendQuitRequest();
+      if (!getLaunch().isTerminated()) {
+        super.terminate();
+      }
+    } catch (CoreException e) {
+      throw new DebugException(e.getStatus());
+    }
 
-	private void sendQuitRequest() throws CoreException {
-		final IServer server = ServerUtil.getServer(getLaunch().getLaunchConfiguration());
-	    if (server == null) {
-	      return;
-	    }
-	    server.stop(true);
-	}
-	
-	
+  }
+
+  private void sendQuitRequest() throws CoreException {
+    final IServer server = ServerUtil.getServer(getLaunch().getLaunchConfiguration());
+    if (server == null) {
+      return;
+    }
+    server.stop(true);
+  }
 
 }

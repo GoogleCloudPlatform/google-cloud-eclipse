@@ -94,11 +94,11 @@ public class CloudSdkRuntimeWizardFragment extends WizardFragment {
     GridData data = new GridData(GridData.FILL_HORIZONTAL);
     data.horizontalSpan = 4;
     dirTextBox.setLayoutData(data);
-    dirTextBox.addModifyListener(new ModifyListener(){
-        @Override
-        public void modifyText(ModifyEvent e) {
-          validate();
-        }
+    dirTextBox.addModifyListener(new ModifyListener() {
+      @Override
+      public void modifyText(ModifyEvent e) {
+        validate();
+      }
     });
 
     Button button = new Button(group, SWT.PUSH);
@@ -134,22 +134,22 @@ public class CloudSdkRuntimeWizardFragment extends WizardFragment {
 
   private void updateStatus(String message, int currentStatus) {
     switch (currentStatus) {
-      case Status.ERROR:
-        wizard.setMessage(message, IMessageProvider.ERROR);
-        status = Status.ERROR;
-        break;
-      case Status.OK:
-        wizard.setMessage(null, IMessageProvider.NONE);
-        status = Status.OK;
-        break;
-      case Status.INFO:
-        wizard.setMessage(message, IMessageProvider.INFORMATION);
-        status = Status.INFO;
-        break;
-      default:
-        wizard.setMessage(message, IMessageProvider.ERROR);
-        status = Status.ERROR;
-        break;
+    case Status.ERROR:
+      wizard.setMessage(message, IMessageProvider.ERROR);
+      status = Status.ERROR;
+      break;
+    case Status.OK:
+      wizard.setMessage(null, IMessageProvider.NONE);
+      status = Status.OK;
+      break;
+    case Status.INFO:
+      wizard.setMessage(message, IMessageProvider.INFORMATION);
+      status = Status.INFO;
+      break;
+    default:
+      wizard.setMessage(message, IMessageProvider.ERROR);
+      status = Status.ERROR;
+      break;
     }
   }
 
@@ -160,42 +160,42 @@ public class CloudSdkRuntimeWizardFragment extends WizardFragment {
     }
 
     updateStatus("Validating...", Status.INFO);
-    Path path = new Path (dirTextBox.getText());
+    Path path = new Path(dirTextBox.getText());
     runtime.getRuntimeWorkingCopy().setLocation(path);
 
     Job job = new Job("Validating Cloud SDK local server configuration") {
-		
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			return runtime.validate();
-		}
+
+      @Override
+      protected IStatus run(IProgressMonitor monitor) {
+        return runtime.validate();
+      }
     };
     job.setPriority(Job.SHORT);
     job.addJobChangeListener(new JobChangeAdapter() {
-		
-		@Override
-		public void done(IJobChangeEvent event) {
-	        final IStatus runtimeStatus;
-	        try {
-	          runtimeStatus = event.getResult();
-	        } catch (Exception e) {
-	          Activator.logError(e);
-	          return;
-	        }
 
-	        PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
-	          @Override
-	          public void run() {
-	            if (runtimeStatus != null && !runtimeStatus.isOK()) {
-	              updateStatus(runtimeStatus.getMessage(), Status.ERROR);
-	            } else {
-	              updateStatus(null, Status.OK);
-	            }
-	            wizard.update();
-	          }
-	        });
-		}
-	});
+      @Override
+      public void done(IJobChangeEvent event) {
+        final IStatus runtimeStatus;
+        try {
+          runtimeStatus = event.getResult();
+        } catch (Exception e) {
+          Activator.logError(e);
+          return;
+        }
+
+        PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+          @Override
+          public void run() {
+            if (runtimeStatus != null && !runtimeStatus.isOK()) {
+              updateStatus(runtimeStatus.getMessage(), Status.ERROR);
+            } else {
+              updateStatus(null, Status.OK);
+            }
+            wizard.update();
+          }
+        });
+      }
+    });
     job.schedule();
   }
 }

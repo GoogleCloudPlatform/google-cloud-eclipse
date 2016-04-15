@@ -74,27 +74,25 @@ public class CustomMessageConsole extends MessageConsole {
    * Sets the terminate action which affects the visibility of the terminate
    * button.
    * 
-   * @param terminateAction the action to invoke when the terminate button is
-   *          clicked, or null to remove the terminate button
+   * @param terminateAction
+   *          the action to invoke when the terminate button is clicked, or null
+   *          to remove the terminate button
    */
   public synchronized void setTerminateAction(TerminateAction terminateAction) {
     TerminateAction oldTerminateAction = this.terminateAction;
     this.terminateAction = terminateAction;
 
-    updateToolbarAction(oldTerminateAction, terminateAction,
-        IConsoleConstants.LAUNCH_GROUP);
+    updateToolbarAction(oldTerminateAction, terminateAction, IConsoleConstants.LAUNCH_GROUP);
   }
 
-  private synchronized void setActiveToolbarManager(
-      IToolBarManager toolBarManager) {
+  private synchronized void setActiveToolbarManager(IToolBarManager toolBarManager) {
     this.activeToolBarManager = toolBarManager;
 
     // Ensure the terminate action exists on this toolbar
     setTerminateAction(terminateAction);
   }
 
-  private synchronized void updateToolbarAction(IAction oldAction,
-      IAction newAction, String groupName) {
+  private synchronized void updateToolbarAction(IAction oldAction, IAction newAction, String groupName) {
     if (activeToolBarManager != null) {
       if (oldAction != null) {
         // Remove any existing action

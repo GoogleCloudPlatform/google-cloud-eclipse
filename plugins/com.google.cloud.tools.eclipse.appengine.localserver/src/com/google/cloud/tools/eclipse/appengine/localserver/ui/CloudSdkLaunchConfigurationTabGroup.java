@@ -25,9 +25,10 @@ import com.google.cloud.tools.eclipse.appengine.localserver.server.CloudSdkServe
 public class CloudSdkLaunchConfigurationTabGroup extends AbstractLaunchConfigurationTabGroup {
   @Override
   public void createTabs(ILaunchConfigurationDialog dialog, String mode) {
-    ILaunchConfigurationTab[] tabs = new ILaunchConfigurationTab[] {
-        new ServerLaunchConfigurationTab(new String[] {CloudSdkServer.SERVER_TYPE_ID}),
-        new CloudSdkServerLaunchTab()};
+    ILaunchConfigurationTab[] tabs = 
+        new ILaunchConfigurationTab[] {
+            new ServerLaunchConfigurationTab(new String[]{ CloudSdkServer.SERVER_TYPE_ID }),
+            new CloudSdkServerLaunchTab() };
     setTabs(tabs);
   }
 }

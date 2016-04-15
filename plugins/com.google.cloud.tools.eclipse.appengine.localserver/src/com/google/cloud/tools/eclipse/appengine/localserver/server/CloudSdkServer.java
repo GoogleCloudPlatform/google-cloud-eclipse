@@ -48,18 +48,19 @@ public class CloudSdkServer extends ServerDelegate {
   private ILaunchConfigurationWorkingCopy remoteDebugLaunchConfig;
 
   /**
-   * Returns a {@link CloudSdkServer} instance associated with the {@code server} or
-   * a new {@link CloudSdkServer} instance if a {@link CloudSdkServer} instance cannot be found
-   * for {@code server}.
+   * Returns a {@link CloudSdkServer} instance associated with the
+   * {@code server} or a new {@link CloudSdkServer} instance if a
+   * {@link CloudSdkServer} instance cannot be found for {@code server}.
    *
-   * @param server the generic sever
-   * @return a new {@link CloudSdkServer} instance or the one associated with {@code server}
+   * @param server
+   *          the generic sever
+   * @return a new {@link CloudSdkServer} instance or the one associated with
+   *         {@code server}
    */
   public static CloudSdkServer getCloudSdkServer(IServer server) {
     CloudSdkServer cloudSdkServer = (CloudSdkServer) server.getAdapter(CloudSdkServer.class);
     if (cloudSdkServer == null) {
-      cloudSdkServer =
-          (CloudSdkServer) server.loadAdapter(CloudSdkServer.class, new NullProgressMonitor());
+      cloudSdkServer = (CloudSdkServer) server.loadAdapter(CloudSdkServer.class, new NullProgressMonitor());
     }
     return cloudSdkServer;
   }
@@ -81,7 +82,8 @@ public class CloudSdkServer extends ServerDelegate {
 
   @Override
   public IModule[] getChildModules(IModule[] module) {
-    // This is the same logic as in the GaeServer. The GaeServer would be replaced by the
+    // This is the same logic as in the GaeServer. The GaeServer would be
+    // replaced by the
     // CloudSdkServer.
     if (module[0] != null && module[0].getModuleType() != null) {
       IModule thisModule = module[module.length - 1];
@@ -108,7 +110,7 @@ public class CloudSdkServer extends ServerDelegate {
 
   @Override
   public IModule[] getRootModules(IModule module) throws CoreException {
-    IStatus status = canModifyModules(new IModule[] {module}, null);
+    IStatus status = canModifyModules(new IModule[] { module }, null);
     if (status != null && !status.isOK()) {
       throw new CoreException(status);
     }
@@ -116,13 +118,12 @@ public class CloudSdkServer extends ServerDelegate {
     if (parents.length > 0) {
       return parents;
     }
-    return new IModule[] {module};
+    return new IModule[] { module };
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public void modifyModules(IModule[] add, IModule[] remove, IProgressMonitor monitor)
-      throws CoreException {
+  public void modifyModules(IModule[] add, IModule[] remove, IProgressMonitor monitor) throws CoreException {
     List<String> modules = this.getAttribute(ATTR_CLOUD_SDK_SERVER_MODULES, (List<String>) null);
 
     if (add != null && add.length > 0) {
@@ -155,8 +156,8 @@ public class CloudSdkServer extends ServerDelegate {
     }
   }
 
-
-  // TODO: allow the user to specify API host and port and returns those if they exist.
+  // TODO: allow the user to specify API host and port and returns those if they
+  // exist.
   /**
    * @return Returns the default host on which to start the API server
    */
@@ -171,7 +172,8 @@ public class CloudSdkServer extends ServerDelegate {
     return DEFAULT_HOST;
   }
 
-  // TODO: allow the user to specify API host and port and returns those if they exist.
+  // TODO: allow the user to specify API host and port and returns those if they
+  // exist.
   /**
    * @return the default port on which to start the API server.
    */
@@ -198,8 +200,8 @@ public class CloudSdkServer extends ServerDelegate {
     IModule[] earModules = ServerUtil.getModules("jst.ear");
     ArrayList<IModule> list = new ArrayList<IModule>();
     for (IModule earModule : earModules) {
-      IEnterpriseApplication earApp = (IEnterpriseApplication) earModule.loadAdapter(
-          IEnterpriseApplication.class, null);
+      IEnterpriseApplication earApp = (IEnterpriseApplication) earModule.loadAdapter(IEnterpriseApplication.class,
+          null);
       for (IModule childModule : earApp.getModules()) {
         if (childModule.equals(module)) {
           list.add(earModule);

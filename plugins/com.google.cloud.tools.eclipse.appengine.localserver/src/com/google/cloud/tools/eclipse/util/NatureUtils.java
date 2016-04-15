@@ -5,19 +5,18 @@ import org.eclipse.core.runtime.CoreException;
 
 public class NatureUtils {
 
-	/**
-	   * Returns <code>true</code> if the project is accessible and has the
-	   * specified nature ID.
-	   * 
-	   * @param project
-	   * @param natureId
-	   * 
-	   * @return <code>true</code> if the project is accessible and has the
-	   *         specified nature ID
-	   * @throws CoreException
-	   */
-	  public static boolean hasNature(IProject project, String natureId)
-	      throws CoreException {
-	    return project.isAccessible() && project.hasNature(natureId);
-	  }
+  /**
+   * Returns <code>true</code> if the project is accessible and has the
+   * specified nature ID.
+   * 
+   * @param project
+   * @param natureId
+   * 
+   * @return <code>true</code> if the project is accessible and has the
+   *         specified nature ID
+   * @throws CoreException
+   */
+  public static boolean hasNature(IProject project, String natureId) throws CoreException {
+    return project.isAccessible() && project.hasNature(natureId);
+  }
 }

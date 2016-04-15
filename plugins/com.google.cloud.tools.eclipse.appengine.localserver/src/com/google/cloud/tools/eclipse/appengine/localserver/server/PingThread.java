@@ -42,10 +42,15 @@ public final class PingThread {
   /**
    * Create a new PingThread.
    *
-   * @param server the server to be monitored
-   * @param url the url to ping
-   * @param maxPings the maximum number of times to try pinging, or -1 to continue forever
-   * @param behaviour the {@link ServerBehaviourDelegate} of {@code server}
+   * @param server
+   *          the server to be monitored
+   * @param url
+   *          the url to ping
+   * @param maxPings
+   *          the maximum number of times to try pinging, or -1 to continue
+   *          forever
+   * @param behaviour
+   *          the {@link ServerBehaviourDelegate} of {@code server}
    */
   public PingThread(IServer server, String url, int maxPings, CloudSdkServerBehaviour behaviour) {
     this.server = server;
@@ -76,7 +81,8 @@ public final class PingThread {
   }
 
   /**
-   * Ping the server until it is started. Then set the server state to STATE_STARTED.
+   * Ping the server until it is started. Then set the server state to
+   * STATE_STARTED.
    */
   private void ping() {
     int count = 0;

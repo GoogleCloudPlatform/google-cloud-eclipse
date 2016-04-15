@@ -61,13 +61,12 @@ public class CloudSdkDeployProjectHandler extends AbstractHandler {
     try {
       runtime = CloudSdkUtils.getPrimaryRuntime(project);
     } catch (CoreException e) {
-    	Activator.logAndDisplayError(null, TITLE, e.getMessage());
+      Activator.logAndDisplayError(null, TITLE, e.getMessage());
       return null;
     }
 
     if (runtime == null) {
-    	Activator.logAndDisplayError(null, TITLE,
-          "Must select a primary runtime for " + project.getName());
+      Activator.logAndDisplayError(null, TITLE, "Must select a primary runtime for " + project.getName());
       return null;
     }
 
@@ -75,27 +74,25 @@ public class CloudSdkDeployProjectHandler extends AbstractHandler {
     try {
       hasLoggedInUsers = GCloudCommandDelegate.hasLoggedInUsers(project, runtime);
     } catch (Exception e) {
-    	Activator.logAndDisplayError(null, TITLE, e.getMessage());
+      Activator.logAndDisplayError(null, TITLE, e.getMessage());
       return null;
     }
 
     if (!hasLoggedInUsers) {
-    	Activator.logAndDisplayError(null, TITLE,
+      Activator.logAndDisplayError(null, TITLE,
           "Please sign in to gcloud before deploying project " + project.getName());
       return null;
     }
 
     final IPath warLocation = getWarLocationOrPrompt(project);
     if (warLocation == null) {
-    	Activator.logAndDisplayError(null, TITLE,
-          "Must select the WAR directory to deploy " + project.getName());
+      Activator.logAndDisplayError(null, TITLE, "Must select the WAR directory to deploy " + project.getName());
       return null;
     }
 
     final IPath sdkLocation = runtime.getLocation();
     if (sdkLocation == null) {
-    	Activator.logAndDisplayError(null, TITLE,
-          "Set the location of " + runtime.getId());
+      Activator.logAndDisplayError(null, TITLE, "Set the location of " + runtime.getId());
       return null;
     }
 
@@ -113,21 +110,20 @@ public class CloudSdkDeployProjectHandler extends AbstractHandler {
           commands.add("deploy");
           commands.add(warLocation.toString());
 
-          MessageConsole messageConsole = MessageConsoleUtilities.getMessageConsole(
-              project.getName() + " - " + TITLE, null);
+          MessageConsole messageConsole = MessageConsoleUtilities.getMessageConsole(project.getName() + " - " + TITLE,
+              null);
           messageConsole.activate();
 
           IPath projectLocation = project.getLocation();
 
-          int exitCode = ProcessUtilities.launchProcessAndWaitFor(commands,
-              projectLocation.toFile(), messageConsole.newMessageStream(), null);
+          int exitCode = ProcessUtilities.launchProcessAndWaitFor(commands, projectLocation.toFile(),
+              messageConsole.newMessageStream(), null);
 
           if (exitCode != 0) {
-        	  Activator.logAndDisplayError(null, TITLE,
-                "Cloud SDK deploy action terminated with exit code " + exitCode);
+            Activator.logAndDisplayError(null, TITLE, "Cloud SDK deploy action terminated with exit code " + exitCode);
           }
         } catch (Throwable e) {
-        	Activator.logError(e);
+          Activator.logError(e);
         }
         return Status.OK_STATUS;
       }

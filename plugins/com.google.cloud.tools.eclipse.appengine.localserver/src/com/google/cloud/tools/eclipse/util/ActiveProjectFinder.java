@@ -27,7 +27,8 @@ public class ActiveProjectFinder {
   /**
    * Retrieve the selected project from a handler
    * 
-   * @param event the handler execution context
+   * @param event
+   *          the handler execution context
    * @return a project or {@code null}
    */
   public static IProject getSelectedProject(ExecutionEvent event) {
@@ -37,12 +38,13 @@ public class ActiveProjectFinder {
   /**
    * Retrieve the selected project from a selection
    * 
-   * @param event the handler execution context
+   * @param event
+   *          the handler execution context
    * @return a project or {@code null}
    */
   public static IProject getSelectedProject(ISelection selection) {
     IResource selectionResource = ResourceUtils.getSelectionResource(selection);
-    if(selectionResource == null) {
+    if (selectionResource == null) {
       return null;
     }
     return selectionResource.getProject();
