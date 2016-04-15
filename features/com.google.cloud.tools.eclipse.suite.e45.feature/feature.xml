@@ -6,30 +6,37 @@
       provider-name="Google, Inc."
       license-feature="com.google.licenses.apache_v2">
 
-   <description>
-      %description
-   </description>
+  <description>
+    %description
+  </description>
 
-   <copyright>
-      %copyright.text
-   </copyright>
+  <copyright>
+    %copyright.text
+  </copyright>
 
-   <license url="%licenseURL">
-      %license
-   </license>
+  <license url="%licenseURL">
+    %license
+  </license>
 
-   <plugin
-         id="com.google.cloud.tools.eclipse.appengine.localserver"
-         download-size="0"
-         install-size="0"
-         version="0.1.0.qualifier"
-         unpack="false"/>
+  <plugin
+      id="com.google.cloud.tools.eclipse.appengine.localserver"
+      download-size="0"
+      install-size="0"
+      version="0.1.0.qualifier"
+      unpack="false"/>
 
-   <plugin
-         id="com.google.cloud.tools.eclipse.appengine.whitelist"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+  <plugin
+      id="com.google.cloud.tools.eclipse.appengine.whitelist"
+      download-size="0"
+      install-size="0"
+      version="0.0.0"
+      unpack="false"/>
+         
+  <plugin
+      id="com.google.cloud.tools.eclipse.appengine.newproject"
+      download-size="0"
+      install-size="0"
+      version="0.1.0.qualifier"
+      unpack="false"/>
 
 </feature>
