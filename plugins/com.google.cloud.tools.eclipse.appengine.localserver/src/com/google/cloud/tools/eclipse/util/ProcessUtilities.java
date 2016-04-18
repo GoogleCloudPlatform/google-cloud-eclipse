@@ -1,13 +1,14 @@
 package com.google.cloud.tools.eclipse.util;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.PrintWriter;
+import java.io.OutputStreamWriter;
 import java.util.List;
 import java.util.Map;
 
@@ -43,9 +44,6 @@ public class ProcessUtilities {
    * @param processReceiver optional, will be given the process right after it
    *          is started
    * @return process exit code
-   * 
-   * @throws IOException
-   * @throws InterruptedException
    */
   public static int launchProcessAndWaitFor(List<String> commands,
                                             File workingDir,
@@ -66,9 +64,6 @@ public class ProcessUtilities {
    * @param processReceiver optional, will be given the process right after it
    *          is started
    * @return process exit code
-   * 
-   * @throws IOException
-   * @throws InterruptedException
    */
   public static int launchProcessAndWaitFor(List<String> commands,
                                             File workingDir,
@@ -103,7 +98,7 @@ public class ProcessUtilities {
           newPathEnvVar.append(path);
         }
       }
-      // finally, set the evn variable on the process builder
+      // finally, set the environment variable on the process builder
       pb.environment().put("PATH", newPathEnvVar.toString());
     }
 
@@ -128,12 +123,14 @@ public class ProcessUtilities {
         }
 
         public void run() {
-          BufferedReader processReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-          PrintWriter outputWriter = new PrintWriter(outputStream, true);
+          BufferedReader processReader = 
+              new BufferedReader(new InputStreamReader(process.getInputStream()));
+          BufferedWriter outputWriter = new BufferedWriter(new OutputStreamWriter(outputStream));
           try {
             String line = null;
             while ((line = processReader.readLine()) != null) {
-              outputWriter.println(line);
+              outputWriter.write(line);
+              outputWriter.newLine();
             }
           } catch (IOException e) {
             // The "Stream closed" exception is common when we destroy the
@@ -184,7 +181,7 @@ public class ProcessUtilities {
 
   /**
    * Closes the process' input stream, output stream, and error stream, and
-   * finally destroys the process by calling <code>destroy()</code>.
+   * finally destroys the process by calling {@code destroy()}.
    * 
    * @param p the process to cleanup
    */

@@ -85,7 +85,7 @@ public class CloudSdkServerBehaviour extends ServerBehaviourDelegate {
 
     // ping server to check for startup
     String url = "http://" + adminHost + ":" + adminPort;
-    cloudSdkServerStartupChecker = new CloudSdkServerStartupChecker(getServer(), url, -1, this);
+    cloudSdkServerStartupChecker = new CloudSdkServerStartupChecker(getServer(), url, Integer.MAX_VALUE, this);
     cloudSdkServerStartupChecker.start();
   }
 

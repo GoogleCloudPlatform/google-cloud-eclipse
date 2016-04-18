@@ -6,13 +6,13 @@ import org.eclipse.core.runtime.CoreException;
 public class NatureUtils {
 
   /**
-   * Returns <code>true</code> if the project is accessible and has the
+   * Returns {@code true} if the project is accessible and has the
    * specified nature ID.
    * 
    * @param project
    * @param natureId
    * 
-   * @return <code>true</code> if the project is accessible and has the
+   * @return {@code true} if the project is accessible and has the
    *         specified nature ID
    * @throws CoreException
    */

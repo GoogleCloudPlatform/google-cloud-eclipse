@@ -96,24 +96,24 @@ public class ServerFlagSelectionDialog extends ElementListSelectionDialog {
 
   /**
    * Returns the variable expression the user generated from this dialog, or
-   * <code>null</code> if none.
+   * {@code null} if none.
    *
    * @return variable expression the user generated from this dialog, or
-   *         <code>null</code> if none
+   *         {@code null} if none
    */
   public String getVariableExpression() {
     Object[] selected = getResult();
     if (selected != null && selected.length == 1) {
       Flag variable = (Flag) selected[0];
-      StringBuffer buffer = new StringBuffer();
-      buffer.append(FLAG_PREFIX);
-      buffer.append(variable.getName());
+      StringBuilder variableExpressionBuilder = new StringBuilder();
+      variableExpressionBuilder.append(FLAG_PREFIX);
+      variableExpressionBuilder.append(variable.getName());
       if (argumentValue != null && argumentValue.length() > 0) {
-        buffer.append(" ");
-        buffer.append(argumentValue);
+        variableExpressionBuilder.append(" ");
+        variableExpressionBuilder.append(argumentValue);
       }
-      buffer.append(" ");
-      return buffer.toString();
+      variableExpressionBuilder.append(" ");
+      return variableExpressionBuilder.toString();
     }
     return null;
   }

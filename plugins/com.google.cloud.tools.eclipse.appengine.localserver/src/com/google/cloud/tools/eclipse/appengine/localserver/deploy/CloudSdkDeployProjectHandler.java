@@ -31,7 +31,6 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.DirectoryDialog;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.MessageConsole;
@@ -153,9 +152,9 @@ public class CloudSdkDeployProjectHandler extends AbstractHandler {
     }
 
     final IPath[] fileSystemPath = new IPath[1];
-    Display.getDefault().syncExec(new Runnable() {
+    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
       public void run() {
-        Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+        Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
         DirectoryDialog dialog = new DirectoryDialog(shell);
         dialog.setText("WAR Directory Selection");
         dialog.setMessage("Select the WAR directory");

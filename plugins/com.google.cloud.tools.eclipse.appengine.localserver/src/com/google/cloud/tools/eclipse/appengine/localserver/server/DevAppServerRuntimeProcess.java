@@ -37,6 +37,11 @@ public class DevAppServerRuntimeProcess extends RuntimeProcess {
       return;
     }
     server.stop(true);
+    try {
+      // the stop command is async, let's give it some time to execute
+      Thread.sleep(2000L);
+    } catch (InterruptedException e) {
+    }
   }
 
 }

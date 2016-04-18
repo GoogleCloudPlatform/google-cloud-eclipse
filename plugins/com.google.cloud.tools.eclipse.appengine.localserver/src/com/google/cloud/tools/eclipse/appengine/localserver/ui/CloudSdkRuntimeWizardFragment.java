@@ -49,7 +49,7 @@ import com.google.cloud.tools.eclipse.appengine.localserver.runtime.CloudSdkRunt
 /**
  * {@link WizardFragment} for configuring Google Cloud SDK Runtime.
  */
-public class CloudSdkRuntimeWizardFragment extends WizardFragment {
+public final class CloudSdkRuntimeWizardFragment extends WizardFragment {
   private IWizardHandle wizard;
   private CloudSdkRuntime runtime;
   private Text dirTextBox;

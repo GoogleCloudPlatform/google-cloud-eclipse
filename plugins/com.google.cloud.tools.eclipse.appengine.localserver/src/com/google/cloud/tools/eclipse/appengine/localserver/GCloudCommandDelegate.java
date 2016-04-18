@@ -43,14 +43,12 @@ public class GCloudCommandDelegate {
   public static final String GET_AUTH_LIST_CMD = GCLOUD_DIR + " auth list";
 
   /**
-   * Returns true if the Cloud SDK and the App Engine component have been
-   * installed. Returns false otherwise.
+   * Returns true if the Cloud SDK and the App Engine component have been installed.
+   * Returns false otherwise.
    *
    * @param sdkLocation the location of the Cloud SDK
    * @return true if the Cloud SDK and App Engine component have been installed
    *         and false otherwise
-   * @throws IOException
-   * @throws InterruptedException
    */
   public static boolean areCloudSdkAndAppEngineInstalled(String sdkLocation) throws IOException,
                                                                              InterruptedException {
@@ -84,13 +82,13 @@ public class GCloudCommandDelegate {
   }
 
   /**
-   * Returns true if one or more accounts have been logged in to gcloud
-   * otherwise returns false.
+   * Checks if there are any accounts logged in via gcloud.
    *
    * @param project an Eclipse project
    * @param serverRuntime a Cloud SDK runtime
-   * @return
-   * @throws IOException if an I/O error occurs
+   * @return true if one or more accounts have been logged in to gcloud
+   * otherwise returns false
+   * @throws IOException if an I/O error occurs while communicating with gcloud
    * @throws InterruptedException if the thread for the gcloud process is
    *           interrupted
    */

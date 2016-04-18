@@ -64,7 +64,7 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
       return;
     }
 
-    final IModule[] modules = server.createWorkingCopy().getModules();
+    final IModule[] modules = server.getModules();
     if (modules == null || modules.length == 0) {
       return;
     }
@@ -87,8 +87,7 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
       debugPort = port;
 
       // Create server listener so that when server has started we create a
-      // remote debugger
-      // and attach it to the server
+      // remote debugger and attach it to the server
       debugServerListener = new IServerListener() {
         @Override
         public void serverChanged(ServerEvent event) {

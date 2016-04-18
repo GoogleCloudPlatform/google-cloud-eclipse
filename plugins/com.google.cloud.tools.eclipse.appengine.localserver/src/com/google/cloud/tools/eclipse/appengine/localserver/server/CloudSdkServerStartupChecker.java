@@ -47,8 +47,7 @@ public final class CloudSdkServerStartupChecker {
    *
    * @param server the server to be monitored
    * @param url the url to ping
-   * @param maxPings the maximum number of times to try pinging, or -1 to
-   *          continue forever
+   * @param maxPings the maximum number of times to try pinging
    * @param behaviour the {@link ServerBehaviourDelegate} of {@code server}
    */
   public CloudSdkServerStartupChecker(IServer server, String url, int maxPings, CloudSdkServerBehaviour behaviour) {

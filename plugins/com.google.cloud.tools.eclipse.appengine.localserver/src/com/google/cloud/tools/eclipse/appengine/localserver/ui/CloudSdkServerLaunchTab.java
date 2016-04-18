@@ -41,7 +41,7 @@ import com.google.cloud.tools.eclipse.appengine.localserver.server.CloudSdkServe
  * command flags for the Cloud SDK server.
  */
 public class CloudSdkServerLaunchTab extends AbstractLaunchConfigurationTab {
-  protected Text prgmFlagText;
+  protected Text programFlagText;
 
   @Override
   public void createControl(Composite parent) {
@@ -64,8 +64,8 @@ public class CloudSdkServerLaunchTab extends AbstractLaunchConfigurationTab {
     String controlName = ("Program &flags");
     group.setText(controlName);
 
-    prgmFlagText = new Text(group, SWT.MULTI | SWT.WRAP | SWT.BORDER | SWT.V_SCROLL);
-    prgmFlagText.addTraverseListener(new TraverseListener() {
+    programFlagText = new Text(group, SWT.MULTI | SWT.WRAP | SWT.BORDER | SWT.V_SCROLL);
+    programFlagText.addTraverseListener(new TraverseListener() {
       public void keyTraversed(TraverseEvent e) {
         switch (e.detail) {
         case SWT.TRAVERSE_ESCAPE:
@@ -76,10 +76,10 @@ public class CloudSdkServerLaunchTab extends AbstractLaunchConfigurationTab {
         case SWT.TRAVERSE_RETURN:
         case SWT.TRAVERSE_TAB_NEXT:
         case SWT.TRAVERSE_TAB_PREVIOUS:
-          if ((prgmFlagText.getStyle() & SWT.SINGLE) != 0) {
+          if ((programFlagText.getStyle() & SWT.SINGLE) != 0) {
             e.doit = true;
           } else {
-            if (!prgmFlagText.isEnabled() || (e.stateMask & SWT.MODIFIER_MASK) != 0) {
+            if (!programFlagText.isEnabled() || (e.stateMask & SWT.MODIFIER_MASK) != 0) {
               e.doit = true;
             }
           }
@@ -90,9 +90,9 @@ public class CloudSdkServerLaunchTab extends AbstractLaunchConfigurationTab {
     gd = new GridData(GridData.FILL_BOTH);
     gd.heightHint = 40;
     gd.widthHint = 100;
-    prgmFlagText.setLayoutData(gd);
-    prgmFlagText.setFont(font);
-    prgmFlagText.addModifyListener(new ModifyListener() {
+    programFlagText.setLayoutData(gd);
+    programFlagText.setFont(font);
+    programFlagText.addModifyListener(new ModifyListener() {
       public void modifyText(ModifyEvent evt) {
         scheduleUpdateJob();
       }
@@ -108,7 +108,7 @@ public class CloudSdkServerLaunchTab extends AbstractLaunchConfigurationTab {
         dialog.open();
         String variable = dialog.getVariableExpression();
         if (variable != null) {
-          prgmFlagText.insert(variable);
+          programFlagText.insert(variable);
         }
       }
     });
@@ -122,7 +122,7 @@ public class CloudSdkServerLaunchTab extends AbstractLaunchConfigurationTab {
   @Override
   public void initializeFrom(ILaunchConfiguration configuration) {
     try {
-      prgmFlagText.setText(configuration.getAttribute(CloudSdkServer.SERVER_PROGRAM_FLAGS, ""));
+      programFlagText.setText(configuration.getAttribute(CloudSdkServer.SERVER_PROGRAM_FLAGS, ""));
     } catch (CoreException e) {
       setErrorMessage("Exception occurred reading configuration:" + e.getStatus().getMessage());
       Activator.logError(e);
@@ -132,7 +132,7 @@ public class CloudSdkServerLaunchTab extends AbstractLaunchConfigurationTab {
   @Override
   public void performApply(ILaunchConfigurationWorkingCopy configuration) {
     configuration.setAttribute(CloudSdkServer.SERVER_PROGRAM_FLAGS,
-                               getAttributeValueFrom(prgmFlagText));
+                               getAttributeValueFrom(programFlagText));
   }
 
   @Override
@@ -141,10 +141,10 @@ public class CloudSdkServerLaunchTab extends AbstractLaunchConfigurationTab {
   }
 
   /**
-   * Returns the string in the text widget, or <code>null</code> if empty.
+   * Returns the string in the text widget, or {@code null} if empty.
    *
    * @param text the widget to get the value from
-   * @return text or <code>null</code>
+   * @return text or {@code null}
    */
   protected String getAttributeValueFrom(Text text) {
     String content = text.getText().trim();

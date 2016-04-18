@@ -13,7 +13,7 @@ public class MavenUtils {
   public static final String MAVEN2_NATURE_ID = "org.eclipse.m2e.core.maven2Nature";
 
   /**
-   * Returns <code>true</code> if the given project has the Maven 2 nature. This
+   * Returns {@code true} if the given project has the Maven 2 nature. This
    * checks for the old maven nature (till m2Eclipse 0.12) and the new Maven
    * nature (m2Eclipse 1.0.0 and up).
    */

@@ -26,14 +26,14 @@ public class MessageConsoleUtilities {
 
   /**
    * Returns a {@link CustomMessageConsole} with the given
-   * <code>consoleName</code>. If no console by that name exists then one is
+   * {@code consoleName}. If no console by that name exists then one is
    * created. The returned console is cleared; callers of this method can decide
    * when to activate it.
    * 
    * @param consoleName name of the console
    * @param imageDescriptor image descriptor to use
    * @return {@link CustomMessageConsole} with the given
-   *         <code>consoleName</code>
+   *         {@code consoleName}
    */
   public static CustomMessageConsole getMessageConsole(String consoleName,
                                                        ImageDescriptor imageDescriptor) {
