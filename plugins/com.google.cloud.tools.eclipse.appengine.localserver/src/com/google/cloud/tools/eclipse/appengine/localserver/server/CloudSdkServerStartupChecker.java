@@ -43,7 +43,7 @@ public final class CloudSdkServerStartupChecker {
   private final CloudSdkServerBehaviour behaviour;
 
   /**
-   * Create a new PingThread.
+   * Create a new CloudSdkServerStartupChecker.
    *
    * @param server the server to be monitored
    * @param url the url to ping
