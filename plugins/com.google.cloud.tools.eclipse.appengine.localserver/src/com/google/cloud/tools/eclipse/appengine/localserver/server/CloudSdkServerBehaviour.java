@@ -170,54 +170,26 @@ public class CloudSdkServerBehaviour extends ServerBehaviourDelegate {
   }
 
   private boolean isPortAvailable(int port) {
-    Socket socket = null;
-    try {
-      socket = new Socket("localhost", port);
+    try (Socket socket = new Socket("localhost", port)) {
+      // connection established to the port, so some process is using it
       return false;
     } catch (IOException e) {
       return true;
-    } finally {
-      if (socket != null) {
-        try {
-          socket.close();
-        } catch (IOException e) {
-          // ignore close exceptions
-        }
-      }
     }
   }
 
   private void stopDevAppServer() {
     CloudSdkServer server = CloudSdkServer.getCloudSdkServer(getServer());
-    HttpURLConnection connection = null;
-    boolean serverStopped = false;
     try {
-      String ad = server.getHostName();
-      int port = server.getAdminPort();
-
-      URL url = new URL("http", ad, port, "/quit");
-      connection = (HttpURLConnection) url.openConnection();
-      connection.setDoOutput(true);
-      connection.setDoInput(true);
-      connection.setRequestMethod("GET");
-      ByteStreams.toByteArray(connection.getInputStream());
-      serverStopped = true;
-    } catch (IOException e) {
-      Activator.logError("Error stopping the dev app server", e);
-    } finally {
-      if (connection != null) {
-        connection.disconnect();
-      }
-    }
-
-    if (serverStopped) {
+      new URL("http", server.getHostName(), server.getAdminPort(), "/quit").getContent();
       try {
         // TODO: confirm appropriate delay time
         Thread.sleep(4000);
       } catch (InterruptedException e) {
         // ignore
       }
+    } catch (IOException e) {
+      Activator.logError("Error stopping the dev app server", e);
     }
-
   }
 }
