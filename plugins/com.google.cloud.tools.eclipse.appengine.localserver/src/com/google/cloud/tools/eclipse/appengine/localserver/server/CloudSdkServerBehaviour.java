@@ -39,7 +39,7 @@ import com.google.common.io.ByteStreams;
  * A {@link ServerBehaviourDelegate} for Google Cloud SDK.
  */
 public class CloudSdkServerBehaviour extends ServerBehaviourDelegate {
-  private PingThread pingThread;
+  private CloudSdkServerStartupChecker cloudSdkServerStartupChecker;
   private IDebugEventSetListener processListener;
 
   @Override
@@ -85,8 +85,8 @@ public class CloudSdkServerBehaviour extends ServerBehaviourDelegate {
 
     // ping server to check for startup
     String url = "http://" + adminHost + ":" + adminPort;
-    pingThread = new PingThread(getServer(), url, -1, this);
-    pingThread.start();
+    cloudSdkServerStartupChecker = new CloudSdkServerStartupChecker(getServer(), url, -1, this);
+    cloudSdkServerStartupChecker.start();
   }
 
   /**
@@ -107,9 +107,9 @@ public class CloudSdkServerBehaviour extends ServerBehaviourDelegate {
         launch.terminate();
       }
 
-      if (pingThread != null) {
-        pingThread.stop();
-        pingThread = null;
+      if (cloudSdkServerStartupChecker != null) {
+        cloudSdkServerStartupChecker.stop();
+        cloudSdkServerStartupChecker = null;
       }
 
       if (processListener != null) {

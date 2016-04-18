@@ -25,7 +25,7 @@ import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
 /**
  * Thread used to ping server to test when it is started.
  */
-public final class PingThread {
+public final class CloudSdkServerStartupChecker {
   private static final String NAME = "Cloud SDK Server Ping Thread";
 
   // delay before pinging starts
@@ -35,12 +35,12 @@ public final class PingThread {
   private static final int PING_INTERVAL = 250;
 
   // maximum number of pings before giving up
-  private int maxPings;
+  private final int maxPings;
 
   private volatile boolean stop = false;
-  private String url;
-  private IServer server;
-  private CloudSdkServerBehaviour behaviour;
+  private final String url;
+  private final IServer server;
+  private final CloudSdkServerBehaviour behaviour;
 
   /**
    * Create a new PingThread.
@@ -51,7 +51,7 @@ public final class PingThread {
    *          continue forever
    * @param behaviour the {@link ServerBehaviourDelegate} of {@code server}
    */
-  public PingThread(IServer server, String url, int maxPings, CloudSdkServerBehaviour behaviour) {
+  public CloudSdkServerStartupChecker(IServer server, String url, int maxPings, CloudSdkServerBehaviour behaviour) {
     this.server = server;
     this.url = url;
     this.maxPings = maxPings;
@@ -92,7 +92,7 @@ public final class PingThread {
     }
     while (!stop) {
       try {
-        if (count == maxPings) {
+        if (count >= maxPings) {
           server.stop(false);
           stop = true;
           break;
