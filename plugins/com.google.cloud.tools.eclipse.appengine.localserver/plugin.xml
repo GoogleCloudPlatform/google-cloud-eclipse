@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?eclipse version="3.2"?>
+<?eclipse version="3.4"?>
 <!-- I think all or most classes come from 
   http://git.eclipse.org/c/servertools/webtools.servertools.git/ -->
 <plugin>
@@ -139,7 +139,7 @@
                   <requires facet="jst.web" version="3.0"/>
                   <requires facet="jst.web" version="3.1"/>
               </or>
-              <requires facet="java" version="[1.7"/>
+              <requires facet="java" version="1.7]"/>
            </and>
          </constraint>
       </project-facet-version>
@@ -165,7 +165,7 @@
           <facet id="jst.web" version="2.2,2.3,2.4,2.5,3.1"/>
           <facet id="jst.utility"  version="1.0"/>
           <facet id="jst.webfragment" version="3.0" />
-          <facet id="java" version="[1.7" />
+          <facet id="java" version="1.7]" />
       </supported>
    </extension>
    <extension point="org.eclipse.jst.server.core.runtimeFacetMappings">
