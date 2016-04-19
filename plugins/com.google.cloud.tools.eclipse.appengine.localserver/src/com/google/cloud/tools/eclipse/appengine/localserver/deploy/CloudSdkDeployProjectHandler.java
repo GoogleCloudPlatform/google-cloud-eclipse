@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.MessageConsole;
+import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.wst.server.core.IRuntime;
 
 import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
@@ -52,17 +53,19 @@ public class CloudSdkDeployProjectHandler extends AbstractHandler {
 
   @Override
   public Object execute(ExecutionEvent event) throws ExecutionException {
-    // Get initial project selection
+	Shell activeShell = HandlerUtil.getActiveShell(event);
+
+	// Get initial project selection
     final IProject project = ActiveProjectFinder.getSelectedProject(event);
     if (project == null) {
-      Activator.logAndDisplayError(null, TITLE, "Cannot find selected project");
+      Activator.logAndDisplayError(activeShell, TITLE, "Cannot find selected project");
       return null;
     }
 
     try {
       final IRuntime runtime = CloudSdkUtils.getPrimaryRuntime(project);
       if (runtime == null) {
-        Activator.logAndDisplayError(null,
+        Activator.logAndDisplayError(activeShell,
                                      TITLE,
                                      "Must select a primary runtime for " + project.getName());
         return null;
@@ -70,14 +73,14 @@ public class CloudSdkDeployProjectHandler extends AbstractHandler {
       
       boolean hasLoggedInUsers = GCloudCommandDelegate.hasLoggedInUsers(project, runtime);
       if (!hasLoggedInUsers) {
-        Activator.logAndDisplayError(null,
+        Activator.logAndDisplayError(activeShell,
                                      TITLE,
                                      "Please sign in to gcloud before deploying project "
                                             + project.getName());
         return null;
       }
 
-      final IPath warLocation = getWarLocationOrPrompt(project);
+      final IPath warLocation = getWarLocationOrPrompt(project, activeShell);
       if (warLocation == null) {
         Activator.logAndDisplayError(null,
                                      TITLE,
@@ -135,7 +138,7 @@ public class CloudSdkDeployProjectHandler extends AbstractHandler {
     }
   }
 
-  private IPath getWarLocationOrPrompt(final IProject project) {
+  private IPath getWarLocationOrPrompt(final IProject project, final Shell shell) {
     IFolder warDir = project.getFolder(WAR_SRC_DIR_DEFAULT);
     if (warDir.exists()) {
       return warDir.getLocation();
@@ -145,7 +148,6 @@ public class CloudSdkDeployProjectHandler extends AbstractHandler {
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
       @Override
       public void run() {
-        Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
         DirectoryDialog dialog = new DirectoryDialog(shell);
         dialog.setText("WAR Directory Selection");
         dialog.setMessage("Select the WAR directory");
@@ -156,7 +158,6 @@ public class CloudSdkDeployProjectHandler extends AbstractHandler {
         }
       }
     });
-
     return fileSystemPath[0];
   }
 }
