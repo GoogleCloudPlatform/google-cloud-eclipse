@@ -1,5 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-  
+   <extension point="org.eclipse.ui.newWizards">
+    <wizard
+            id="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineStandard"
+            name="App Engine Standard Java Project"
+            class="com.google.cloud.tools.eclipse.appengine.newproject.StandardProjectWizardFactory"
+            icon="icons/app_engine_standard_16x16.png"
+            project="true"
+            finalPerspective="org.eclipse.jdt.ui.JavaPerspective"
+            category="com.google.eclipse.builder.newWizardCategory">
+         <description>%wizard.description</description>
+         <selection class="org.eclipse.core.resources.IResource"/>
+      </wizard>
+      <wizard
+            id="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineStandardDotDotDot"
+            name="App Engine Standard Java Project"
+            class="com.google.cloud.tools.eclipse.appengine.newproject.StandardProjectWizardFactory"
+            icon="icons/app_engine_standard_16x16.png"
+            project="true"
+            finalPerspective="org.eclipse.jdt.ui.JavaPerspective"
+            category="org.eclipse.ui.Basic">
+         <description>%wizard.description</description>
+         <selection class="org.eclipse.core.resources.IResource"/>
+      </wizard>
+   </extension>
 </plugin>

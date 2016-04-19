@@ -38,7 +38,7 @@ public class XmlTest {
   }
   
   @Test
-  public void testLoadExtensionPoints() {
+  public void testValidExtensionPoints() {
     NodeList extensions = document.getDocumentElement().getElementsByTagName("extension");
     for (int i = 0; i < extensions.getLength(); i++) {
       Element extension = (Element) extensions.item(i);
