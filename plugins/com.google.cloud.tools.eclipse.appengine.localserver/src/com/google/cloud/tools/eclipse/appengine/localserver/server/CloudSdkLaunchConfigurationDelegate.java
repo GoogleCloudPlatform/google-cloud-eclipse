@@ -76,13 +76,13 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
     }
     IPath sdkLocation = runtime.getLocation();
 
-    CloudSdkServerBehaviour sb = (CloudSdkServerBehaviour) server.loadAdapter(CloudSdkServerBehaviour.class,
-                                                                              null);
-    sb.setupLaunch(mode);
+    CloudSdkServerBehaviour serverBehaviour = 
+    		(CloudSdkServerBehaviour) server.loadAdapter(CloudSdkServerBehaviour.class, null);
+    serverBehaviour.setupLaunch(mode);
 
     final CloudSdkServer cloudSdkServer = CloudSdkServer.getCloudSdkServer(server);
     int debugPort = -1;
-    if (mode.equals(ILaunchManager.DEBUG_MODE)) {
+    if (ILaunchManager.DEBUG_MODE.equals(mode)) {
       final int port = getDebugPort();
       debugPort = port;
 
@@ -118,16 +118,15 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
                                                                   debugPort);
       Activator.logInfo("Executing: " + commands);
 
-      Process p = null;
-      p = Runtime.getRuntime().exec(commands, null);
+      Process p = Runtime.getRuntime().exec(commands, null);
       addProcessFactoryToLaunchConfiguration(configuration);
       // The DebugPlugin handles the streaming of the output to the console and
       // sends notifications of debug events
       DebugPlugin.newProcess(launch, p, commands);
-      sb.addProcessListener(launch.getProcesses()[0]);
+      serverBehaviour.addProcessListener(launch.getProcesses()[0]);
     } catch (IOException e1) {
       Activator.logError(e1);
-      sb.stop(true);
+      serverBehaviour.stop(true);
     }
   }
 
@@ -188,7 +187,7 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
 
   private void runDebugTarget(CloudSdkServer cloudSdkServer,
                               String projectName,
-                              int port) throws CoreException, InterruptedException {
+                              int port) throws CoreException {
     ILaunchConfigurationWorkingCopy remoteDebugLaunchConfig = createRemoteDebugLaunchConfiguration(cloudSdkServer,
                                                                                                    projectName,
                                                                                                    Integer.toString(port));
@@ -213,7 +212,7 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
                                    projectName);
 
     // Set JVM debugger connection parameters
-    Map<String, String> connectionParameters = new HashMap<String, String>();
+    Map<String, String> connectionParameters = new HashMap<>();
     connectionParameters.put("hostname", DEBUGGER_HOST);
     connectionParameters.put("port", port);
     remoteDebugConfig.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CONNECT_MAP,

@@ -9,9 +9,6 @@ public class NatureUtils {
    * Returns {@code true} if the project is accessible and has the
    * specified nature ID.
    * 
-   * @param project
-   * @param natureId
-   * 
    * @return {@code true} if the project is accessible and has the
    *         specified nature ID
    * @throws CoreException

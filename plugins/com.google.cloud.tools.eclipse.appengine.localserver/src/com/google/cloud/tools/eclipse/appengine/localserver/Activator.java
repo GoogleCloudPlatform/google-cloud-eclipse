@@ -85,8 +85,8 @@ public class Activator extends AbstractUIPlugin {
    * @param exception the exception
    */
   public static void logError(String message, Throwable exception) {
-    message = message == null ? "Google Cloud SDK Error" : "Google Cloud SDK: " + message;
-    Status status = new Status(IStatus.ERROR, PLUGIN_ID, 1, message, exception);
+    String statusMessage = message == null ? "Google Cloud SDK Error" : "Google Cloud SDK: " + message;
+    Status status = new Status(IStatus.ERROR, PLUGIN_ID, 1, statusMessage, exception);
     getDefault().getLog().log(status);
   }
 

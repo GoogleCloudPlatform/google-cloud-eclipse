@@ -1,14 +1,11 @@
 package com.google.cloud.tools.eclipse.util;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 
@@ -21,36 +18,17 @@ import com.google.common.io.ByteStreams;
 public class ProcessUtilities {
 
   /**
-   * Receives {@link Process} instances.
-   * 
-   * The caller does not guarantee any thread-safety.
-   */
-  public interface IProcessReceiver {
-
-    /**
-     * @return true if the implementor has destroyed the process
-     */
-    boolean hasDestroyedProcess();
-
-    void setProcess(Process process);
-  }
-
-  /**
    * Launch the process specified in the commands and wait for it to terminate.
    * 
    * @param commands commands to pass to the {@link ProcessBuilder}
    * @param workingDir directory to use as the working directory
    * @param outputStream output stream to receive process output
-   * @param processReceiver optional, will be given the process right after it
-   *          is started
    * @return process exit code
    */
   public static int launchProcessAndWaitFor(List<String> commands,
                                             File workingDir,
-                                            final OutputStream outputStream,
-                                            IProcessReceiver processReceiver) throws InterruptedException,
-                                                                              IOException {
-    return launchProcessAndWaitFor(commands, workingDir, null, outputStream, processReceiver);
+                                            final OutputStream outputStream) throws InterruptedException, IOException {
+    return launchProcessAndWaitFor(commands, workingDir, null, outputStream);
   }
 
   /**
@@ -61,16 +39,12 @@ public class ProcessUtilities {
    * @param additionalPaths list of additional directories to be appended to the
    *          PATH environmental variable
    * @param outputStream output stream to receive process output
-   * @param processReceiver optional, will be given the process right after it
-   *          is started
    * @return process exit code
    */
   public static int launchProcessAndWaitFor(List<String> commands,
                                             File workingDir,
                                             final List<String> additionalPaths,
-                                            final OutputStream outputStream,
-                                            IProcessReceiver processReceiver) throws InterruptedException,
-                                                                              IOException {
+                                            final OutputStream outputStream) throws InterruptedException, IOException {
     ProcessBuilder pb = new ProcessBuilder(commands);
     pb.directory(workingDir);
     pb.redirectErrorStream(true);
@@ -108,9 +82,6 @@ public class ProcessUtilities {
 
     try {
       process = pb.start();
-      if (processReceiver != null) {
-        processReceiver.setProcess(process);
-      }
 
       // Local class to read the output of the process and write it to the
       // output stream
@@ -122,15 +93,14 @@ public class ProcessUtilities {
           process = p;
         }
 
-        public void run() {
-          BufferedReader processReader = 
-              new BufferedReader(new InputStreamReader(process.getInputStream()));
-          BufferedWriter outputWriter = new BufferedWriter(new OutputStreamWriter(outputStream));
+        @Override
+		public void run() {
+          InputStream inputStream = process.getInputStream();
           try {
-            String line = null;
-            while ((line = processReader.readLine()) != null) {
-              outputWriter.write(line);
-              outputWriter.newLine();
+            int bytesRead = 0;
+            byte[] buf = new byte[1024];
+			while ((bytesRead = inputStream.read(buf)) != -1) {
+              outputStream.write(buf, 0, bytesRead);
             }
           } catch (IOException e) {
             // The "Stream closed" exception is common when we destroy the
@@ -261,6 +231,6 @@ public class ProcessUtilities {
   private static String copyInputStreamToString(InputStream inputStream) throws IOException {
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     ByteStreams.copy(inputStream, bos);
-    return new String(bos.toByteArray());
+    return new String(bos.toByteArray(), Charset.forName("utf-8"));
   }
 }

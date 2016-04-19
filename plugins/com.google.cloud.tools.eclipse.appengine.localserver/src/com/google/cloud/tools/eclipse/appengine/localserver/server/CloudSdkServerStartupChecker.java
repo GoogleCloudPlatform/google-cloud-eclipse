@@ -23,7 +23,8 @@ import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
 
 /**
- * Thread used to ping server to test when it is started.
+ * Verifies if the server has started by launching a thread that pings the server and
+ * changes the state of the server to started in the provided {@link CloudSdkServerBehaviour}
  */
 public final class CloudSdkServerStartupChecker {
   private static final String NAME = "Cloud SDK Server Ping Thread";
@@ -86,7 +87,7 @@ public final class CloudSdkServerStartupChecker {
     int count = 0;
     try {
       Thread.sleep(PING_DELAY);
-    } catch (Throwable e) {
+    } catch (InterruptedException e) {
       // ignore
     }
     while (!stop) {

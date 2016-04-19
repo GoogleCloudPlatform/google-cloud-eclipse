@@ -14,14 +14,10 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class CloudSdkFacetUninstallDelegateTest {
 
-  @Mock
-  private IProject project;
-  @Mock
-  private IProjectFacetVersion fv;
-  @Mock
-  private Object config;
-  @Mock
-  private IProgressMonitor monitor;
+  @Mock private IProject project;
+  @Mock private IProjectFacetVersion fv;
+  @Mock private Object config;
+  @Mock private IProgressMonitor monitor;
 
   @Test
   public void testExecute_doesNothingWithTheArguments() throws CoreException {

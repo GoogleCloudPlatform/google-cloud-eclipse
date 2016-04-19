@@ -51,8 +51,8 @@ public class CloudSdkServerLaunchTab extends AbstractLaunchConfigurationTab {
     comp.setLayout(layout);
     comp.setFont(font);
 
-    GridData gd = new GridData(GridData.FILL_BOTH);
-    comp.setLayoutData(gd);
+    GridData gridData = new GridData(GridData.FILL_BOTH);
+    comp.setLayoutData(gridData);
     setControl(comp);
 
     Group group = new Group(comp, SWT.NONE);
@@ -66,8 +66,9 @@ public class CloudSdkServerLaunchTab extends AbstractLaunchConfigurationTab {
 
     programFlagText = new Text(group, SWT.MULTI | SWT.WRAP | SWT.BORDER | SWT.V_SCROLL);
     programFlagText.addTraverseListener(new TraverseListener() {
-      public void keyTraversed(TraverseEvent e) {
-        switch (e.detail) {
+    @Override
+	public void keyTraversed(TraverseEvent e) {
+      switch (e.detail) {
         case SWT.TRAVERSE_ESCAPE:
         case SWT.TRAVERSE_PAGE_NEXT:
         case SWT.TRAVERSE_PAGE_PREVIOUS:
@@ -87,21 +88,22 @@ public class CloudSdkServerLaunchTab extends AbstractLaunchConfigurationTab {
         }
       }
     });
-    gd = new GridData(GridData.FILL_BOTH);
-    gd.heightHint = 40;
-    gd.widthHint = 100;
-    programFlagText.setLayoutData(gd);
+    gridData = new GridData(GridData.FILL_BOTH);
+    gridData.heightHint = 40;
+    gridData.widthHint = 100;
+    programFlagText.setLayoutData(gridData);
     programFlagText.setFont(font);
     programFlagText.addModifyListener(new ModifyListener() {
+      @Override
       public void modifyText(ModifyEvent evt) {
         scheduleUpdateJob();
       }
     });
 
     String buttonLabel = "Var&iables...";
-    Button pgrmFlagVariableButton = createPushButton(group, buttonLabel, null);
-    pgrmFlagVariableButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
-    pgrmFlagVariableButton.addSelectionListener(new SelectionAdapter() {
+    Button programFlagVariableButton = createPushButton(group, buttonLabel, null);
+    programFlagVariableButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+    programFlagVariableButton.addSelectionListener(new SelectionAdapter() {
       @Override
       public void widgetSelected(SelectionEvent e) {
         ServerFlagSelectionDialog dialog = new ServerFlagSelectionDialog(getShell());

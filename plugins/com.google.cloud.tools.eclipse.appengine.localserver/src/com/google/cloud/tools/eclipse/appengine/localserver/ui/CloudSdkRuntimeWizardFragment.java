@@ -18,7 +18,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
@@ -53,7 +52,7 @@ public final class CloudSdkRuntimeWizardFragment extends WizardFragment {
   private IWizardHandle wizard;
   private CloudSdkRuntime runtime;
   private Text dirTextBox;
-  private int status = Status.ERROR;
+  private int status = IStatus.ERROR;
 
   @Override
   public Composite createComposite(Composite parent, IWizardHandle handle) {
@@ -77,7 +76,7 @@ public final class CloudSdkRuntimeWizardFragment extends WizardFragment {
 
   @Override
   public boolean isComplete() {
-    if (status == Status.OK) {
+    if (status == IStatus.OK) {
       return true;
     }
     return false;
@@ -106,7 +105,8 @@ public final class CloudSdkRuntimeWizardFragment extends WizardFragment {
     Button button = new Button(group, SWT.PUSH);
     button.setText("&Browse...");
     button.addSelectionListener(new SelectionAdapter() {
-      public void widgetSelected(SelectionEvent event) {
+      @Override
+	  public void widgetSelected(SelectionEvent event) {
         DirectoryDialog dlg = new DirectoryDialog(composite.getShell(), SWT.OPEN);
         dlg.setText("Cloud SDK's Directory");
         dlg.setMessage("Select a directory");
@@ -136,32 +136,32 @@ public final class CloudSdkRuntimeWizardFragment extends WizardFragment {
 
   private void updateStatus(String message, int currentStatus) {
     switch (currentStatus) {
-    case Status.ERROR:
+    case IStatus.ERROR:
       wizard.setMessage(message, IMessageProvider.ERROR);
-      status = Status.ERROR;
+      status = IStatus.ERROR;
       break;
-    case Status.OK:
+    case IStatus.OK:
       wizard.setMessage(null, IMessageProvider.NONE);
-      status = Status.OK;
+      status = IStatus.OK;
       break;
-    case Status.INFO:
+    case IStatus.INFO:
       wizard.setMessage(message, IMessageProvider.INFORMATION);
-      status = Status.INFO;
+      status = IStatus.INFO;
       break;
     default:
       wizard.setMessage(message, IMessageProvider.ERROR);
-      status = Status.ERROR;
+      status = IStatus.ERROR;
       break;
     }
   }
 
   private void validate() {
     if (runtime == null) {
-      updateStatus("Runtime delegate is missing or invalid", Status.ERROR);
+      updateStatus("Runtime delegate is missing or invalid", IStatus.ERROR);
       return;
     }
 
-    updateStatus("Validating...", Status.INFO);
+    updateStatus("Validating...", IStatus.INFO);
     Path path = new Path(dirTextBox.getText());
     runtime.getRuntimeWorkingCopy().setLocation(path);
 
@@ -189,9 +189,9 @@ public final class CloudSdkRuntimeWizardFragment extends WizardFragment {
           @Override
           public void run() {
             if (runtimeStatus != null && !runtimeStatus.isOK()) {
-              updateStatus(runtimeStatus.getMessage(), Status.ERROR);
+              updateStatus(runtimeStatus.getMessage(), IStatus.ERROR);
             } else {
-              updateStatus(null, Status.OK);
+              updateStatus(null, IStatus.OK);
             }
             wizard.update();
           }

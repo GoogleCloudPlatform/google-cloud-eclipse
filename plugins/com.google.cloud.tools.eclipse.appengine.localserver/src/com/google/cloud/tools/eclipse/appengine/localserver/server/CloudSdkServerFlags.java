@@ -14,8 +14,6 @@
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
@@ -30,18 +28,20 @@ import com.google.gson.GsonBuilder;
 public class CloudSdkServerFlags {
   private static final String FLAGS_FILE = "server-flags.json";
 
-  private static List<Flag> sFlags = null;
+  private static List<Flag> serverFlags = null;
 
-  public static List<Flag> getFlags() throws FileNotFoundException {
-    if (sFlags == null) {
-      InputStream input = CloudSdkServerFlags.class.getResourceAsStream(FLAGS_FILE);
-      Scanner scanner = new Scanner(input);
-      String content = scanner.useDelimiter("\\Z").next();
-      scanner.close();
-      Gson gson = new GsonBuilder().create();
-      ServerFlagsInfo serverFlagsInfo = gson.fromJson(content, ServerFlagsInfo.class);
-      sFlags = Collections.unmodifiableList(serverFlagsInfo.getFlags());
+  /**
+   * Returns an unmodifiable list of supported server flags
+   */
+  public static List<Flag> getFlags() {
+    if (serverFlags == null) {
+      try (Scanner scanner = new Scanner(CloudSdkServerFlags.class.getResourceAsStream(FLAGS_FILE))) {
+        String content = scanner.useDelimiter("\\Z").next();
+        Gson gson = new GsonBuilder().create();
+        ServerFlagsInfo serverFlagsInfo = gson.fromJson(content, ServerFlagsInfo.class);
+        serverFlags = Collections.unmodifiableList(serverFlagsInfo.getFlags());
+      }
     }
-    return sFlags;
+    return serverFlags;
   }
 }

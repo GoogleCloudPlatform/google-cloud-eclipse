@@ -15,6 +15,7 @@
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -43,10 +44,10 @@ public class ServerFlagsInfo {
     }
   }
 
-  private List<Flag> flags = new ArrayList<Flag>();
+  private List<Flag> flags = new ArrayList<>();
 
   public List<Flag> getFlags() {
-    return flags;
+    return Collections.unmodifiableList(flags);
   }
 
 }

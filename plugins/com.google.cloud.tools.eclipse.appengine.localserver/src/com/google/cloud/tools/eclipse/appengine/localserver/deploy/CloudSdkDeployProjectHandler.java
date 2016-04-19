@@ -59,90 +59,80 @@ public class CloudSdkDeployProjectHandler extends AbstractHandler {
       return null;
     }
 
-    final IRuntime runtime;
     try {
-      runtime = CloudSdkUtils.getPrimaryRuntime(project);
-    } catch (CoreException e) {
-      Activator.logAndDisplayError(null, TITLE, e.getMessage());
-      return null;
-    }
-
-    if (runtime == null) {
-      Activator.logAndDisplayError(null,
-                                   TITLE,
-                                   "Must select a primary runtime for " + project.getName());
-      return null;
-    }
-
-    boolean hasLoggedInUsers;
-    try {
-      hasLoggedInUsers = GCloudCommandDelegate.hasLoggedInUsers(project, runtime);
-    } catch (IOException | InterruptedException e) {
-      Activator.logAndDisplayError(null, TITLE, e.getMessage());
-      return null;
-    }
-
-    if (!hasLoggedInUsers) {
-      Activator.logAndDisplayError(null,
-                                   TITLE,
-                                   "Please sign in to gcloud before deploying project "
-                                          + project.getName());
-      return null;
-    }
-
-    final IPath warLocation = getWarLocationOrPrompt(project);
-    if (warLocation == null) {
-      Activator.logAndDisplayError(null,
-                                   TITLE,
-                                   "Must select the WAR directory to deploy " + project.getName());
-      return null;
-    }
-
-    final IPath sdkLocation = runtime.getLocation();
-    if (sdkLocation == null) {
-      Activator.logAndDisplayError(null, TITLE, "Set the location of " + runtime.getId());
-      return null;
-    }
-
-    Job job = new Job("Running Cloud SDK Deploy Action") {
-      @Override
-      protected IStatus run(IProgressMonitor monitor) {
-        try {
-          List<String> commands = new ArrayList<String>();
-          commands.add(sdkLocation + GCloudCommandDelegate.GCLOUD_DIR);
-
-          commands.add("preview");
-          commands.add("app");
-          commands.add("deploy");
-          commands.add(warLocation.toString());
-
-          MessageConsole messageConsole = MessageConsoleUtilities.getMessageConsole(project.getName()
-                                                                                    + " - "
-                                                                                    + TITLE,
-                                                                                    null);
-          messageConsole.activate();
-
-          IPath projectLocation = project.getLocation();
-
-          int exitCode = ProcessUtilities.launchProcessAndWaitFor(commands,
-                                                                  projectLocation.toFile(),
-                                                                  messageConsole.newMessageStream(),
-                                                                  null);
-
-          if (exitCode != 0) {
-            Activator.logAndDisplayError(null,
-                                         TITLE,
-                                         "Cloud SDK deploy action terminated with exit code "
-                                                + exitCode);
-          }
-        } catch (IOException | InterruptedException e) {
-          Activator.logError(e);
-        }
-        return Status.OK_STATUS;
+      final IRuntime runtime = CloudSdkUtils.getPrimaryRuntime(project);
+      if (runtime == null) {
+        Activator.logAndDisplayError(null,
+                                     TITLE,
+                                     "Must select a primary runtime for " + project.getName());
+        return null;
       }
-    };
-    job.schedule();
-    return null;
+      
+      boolean hasLoggedInUsers = GCloudCommandDelegate.hasLoggedInUsers(project, runtime);
+      if (!hasLoggedInUsers) {
+        Activator.logAndDisplayError(null,
+                                     TITLE,
+                                     "Please sign in to gcloud before deploying project "
+                                            + project.getName());
+        return null;
+      }
+
+      final IPath warLocation = getWarLocationOrPrompt(project);
+      if (warLocation == null) {
+        Activator.logAndDisplayError(null,
+                                     TITLE,
+                                     "Must select the WAR directory to deploy " + project.getName());
+        return null;
+      }
+
+      final IPath sdkLocation = runtime.getLocation();
+      if (sdkLocation == null) {
+        Activator.logAndDisplayError(null, TITLE, "Set the location of " + runtime.getId());
+        return null;
+      }
+
+      Job job = new Job("Running App Engine Deploy Action") {
+        @Override
+        protected IStatus run(IProgressMonitor monitor) {
+          try {
+            List<String> commands = new ArrayList<>();
+            commands.add(sdkLocation + GCloudCommandDelegate.GCLOUD_DIR);
+
+            commands.add("preview");
+            commands.add("app");
+            commands.add("deploy");
+            commands.add(warLocation.toString());
+
+            MessageConsole messageConsole = MessageConsoleUtilities.getMessageConsole(project.getName()
+                                                                                      + " - "
+                                                                                      + TITLE,
+                                                                                      null);
+            messageConsole.activate();
+
+            IPath projectLocation = project.getLocation();
+
+            int exitCode = ProcessUtilities.launchProcessAndWaitFor(commands,
+                                                                    projectLocation.toFile(),
+                                                                    messageConsole.newMessageStream());
+
+            if (exitCode != 0) {
+              Activator.logAndDisplayError(null,
+                                           TITLE,
+                                           "Cloud SDK deploy action terminated with exit code "
+                                              + exitCode);
+            }
+          } catch (IOException | InterruptedException e) {
+            Activator.logError(e);
+          }
+          return Status.OK_STATUS;
+        }
+      };
+      job.schedule();
+      return null;
+    } catch (CoreException | IOException | InterruptedException e) {
+      Activator.logAndDisplayError(null, TITLE, e.getMessage());
+      return null;
+    }
   }
 
   private IPath getWarLocationOrPrompt(final IProject project) {
@@ -153,6 +143,7 @@ public class CloudSdkDeployProjectHandler extends AbstractHandler {
 
     final IPath[] fileSystemPath = new IPath[1];
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+      @Override
       public void run() {
         Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
         DirectoryDialog dialog = new DirectoryDialog(shell);

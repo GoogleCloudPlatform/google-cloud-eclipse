@@ -14,7 +14,6 @@
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
-import java.io.FileNotFoundException;
 import java.util.List;
 
 import org.eclipse.debug.internal.ui.SWTFactory;
@@ -26,7 +25,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
-import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
 import com.google.cloud.tools.eclipse.appengine.localserver.server.CloudSdkServerFlags;
 import com.google.cloud.tools.eclipse.appengine.localserver.server.ServerFlagsInfo.Flag;
 
@@ -54,12 +52,7 @@ public class ServerFlagSelectionDialog extends ElementListSelectionDialog {
     setMultipleSelection(false);
 
     List<Flag> flags = null;
-    try {
-      flags = CloudSdkServerFlags.getFlags();
-    } catch (FileNotFoundException e) {
-      Activator.logError("Unable to populate a list of \"gcloud app run\" flags", e);
-    }
-
+    flags = CloudSdkServerFlags.getFlags();
     setElements(flags.toArray(new Flag[flags.size()]));
   }
 
@@ -127,25 +120,25 @@ public class ServerFlagSelectionDialog extends ElementListSelectionDialog {
   private void createArgumentArea(Composite parent) {
     Composite container = SWTFactory.createComposite(parent,
                                                      parent.getFont(),
-                                                     2,
-                                                     1,
+                                                     /* columns */ 2,
+                                                     /* hspan */ 1,
                                                      GridData.FILL_HORIZONTAL,
-                                                     0,
-                                                     0);
-    SWTFactory.createWrapLabel(container, "&Argument:", 2);
+                                                     /* marginWidht */ 0,
+                                                     /* marginHeight */ 0);
+    SWTFactory.createWrapLabel(container, "&Argument:", /* hspan */ 2);
 
     argumentText = new Text(container, SWT.BORDER);
     argumentText.setFont(container.getFont());
     argumentText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-    SWTFactory.createWrapLabel(container, "&Variable Description:", 2);
+    SWTFactory.createWrapLabel(container, "&Variable Description:", /* hspan */ 2);
 
     descriptionText = new Text(container, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
     descriptionText.setFont(container.getFont());
     descriptionText.setEditable(false);
-    GridData gd = new GridData(GridData.FILL_HORIZONTAL);
-    gd.horizontalSpan = 2;
-    gd.heightHint = 50;
-    descriptionText.setLayoutData(gd);
+    GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
+    gridData.horizontalSpan = 2;
+    gridData.heightHint = 50;
+    descriptionText.setLayoutData(gridData);
   }
 }

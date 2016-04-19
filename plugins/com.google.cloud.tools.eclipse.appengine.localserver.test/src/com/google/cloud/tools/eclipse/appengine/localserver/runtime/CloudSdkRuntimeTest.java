@@ -41,7 +41,7 @@ public class CloudSdkRuntimeTest {
     when(runtime.getName()).thenReturn("");
     IStatus status = cloudSdkRuntime.validate();
     assertThat(status.getSeverity(), is(IStatus.ERROR));
-    assertThat(status.getMessage(), is(org.eclipse.wst.server.core.internal.Messages.errorRuntimeName));
+    assertThat(status.getMessage(), is("Enter a name for the runtime environment."));
   }
 
   @Test

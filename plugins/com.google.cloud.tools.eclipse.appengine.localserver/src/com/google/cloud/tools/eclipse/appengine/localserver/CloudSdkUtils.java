@@ -85,7 +85,7 @@ public class CloudSdkUtils {
    *
    * @param project an Eclipse project
    * @return true if {@code project} has the Cloud SDK facet and false
-   *         otherwise.
+   *         otherwise
    * @throws CoreException if error occurs when creating a
    *           {@link IFacetedProject} associated with {@code project}
    */

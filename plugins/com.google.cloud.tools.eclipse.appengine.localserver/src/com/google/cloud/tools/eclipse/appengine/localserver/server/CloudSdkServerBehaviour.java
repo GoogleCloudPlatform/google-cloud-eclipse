@@ -15,7 +15,6 @@
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.Socket;
 import java.net.URL;
 
@@ -33,7 +32,6 @@ import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
 
 import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
-import com.google.common.io.ByteStreams;
 
 /**
  * A {@link ServerBehaviourDelegate} for Google Cloud SDK.
@@ -44,7 +42,7 @@ public class CloudSdkServerBehaviour extends ServerBehaviourDelegate {
 
   @Override
   public IStatus canStart(String launchMode) {
-    // Check that the port is not in use before can start
+    // Check that the port is not in use before start
     CloudSdkServer server = CloudSdkServer.getCloudSdkServer(getServer());
     int port = server.getApiPort();
     if (!isPortAvailable(port)) {
@@ -117,27 +115,30 @@ public class CloudSdkServerBehaviour extends ServerBehaviourDelegate {
         processListener = null;
       }
 
-      // Terminate the remote debugger
-      CloudSdkServer server = CloudSdkServer.getCloudSdkServer(getServer());
-      ILaunchConfigurationWorkingCopy remoteDebugLaunchConfig = server.getRemoteDebugLaunchConfig();
-      if (remoteDebugLaunchConfig != null) {
-        ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
-        for (ILaunch aLaunch : manager.getLaunches()) {
-          if (aLaunch.getLaunchConfiguration().equals(remoteDebugLaunchConfig)) {
-            try {
-              aLaunch.terminate();
-              manager.removeLaunch(aLaunch);
-              break;
-            } catch (DebugException e) {
-              Activator.logError(e);
-            }
-          }
-        }
-      }
+      terminateRemoteDebugger();
 
       setServerState(IServer.STATE_STOPPED);
     } catch (DebugException e) {
       Activator.logError("Error terminating the Cloud SDK server", e);
+    }
+  }
+
+  private void terminateRemoteDebugger() {
+	try {
+	  CloudSdkServer server = CloudSdkServer.getCloudSdkServer(getServer());
+      ILaunchConfigurationWorkingCopy remoteDebugLaunchConfig = server.getRemoteDebugLaunchConfig();
+      if (remoteDebugLaunchConfig != null) {
+        ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
+        for (ILaunch launch : manager.getLaunches()) {
+          if (launch.getLaunchConfiguration().equals(remoteDebugLaunchConfig)) {
+            launch.terminate();
+            manager.removeLaunch(launch);
+            return;
+          }
+        }
+      }
+	} catch (DebugException e) {
+      Activator.logError(e);
     }
   }
 
@@ -156,9 +157,8 @@ public class CloudSdkServerBehaviour extends ServerBehaviourDelegate {
       @Override
       public void handleDebugEvents(DebugEvent[] events) {
         if (events != null) {
-          int size = events.length;
-          for (int i = 0; i < size; i++) {
-            if (newProcess != null && newProcess.equals(events[i].getSource())
+          for (int i = 0; i < events.length; i++) {
+            if (newProcess.equals(events[i].getSource())
                 && events[i].getKind() == DebugEvent.TERMINATE) {
               terminate();
             }

@@ -59,7 +59,7 @@ public class CloudSdkServer extends ServerDelegate {
    *         {@code server}
    */
   public static CloudSdkServer getCloudSdkServer(IServer server) {
-    CloudSdkServer cloudSdkServer = (CloudSdkServer) server.getAdapter(CloudSdkServer.class);
+    CloudSdkServer cloudSdkServer = server.getAdapter(CloudSdkServer.class);
     if (cloudSdkServer == null) {
       cloudSdkServer = (CloudSdkServer) server.loadAdapter(CloudSdkServer.class,
                                                            new NullProgressMonitor());
@@ -85,8 +85,7 @@ public class CloudSdkServer extends ServerDelegate {
   @Override
   public IModule[] getChildModules(IModule[] module) {
     // This is the same logic as in the GaeServer. The GaeServer would be
-    // replaced by the
-    // CloudSdkServer.
+    // replaced by the CloudSdkServer.
     if (module[0] != null && module[0].getModuleType() != null) {
       IModule thisModule = module[module.length - 1];
       IModuleType moduleType = thisModule.getModuleType();
@@ -139,7 +138,7 @@ public class CloudSdkServer extends ServerDelegate {
                                            null));
       }
       if (modules == null) {
-        modules = new ArrayList<String>();
+        modules = new ArrayList<>();
       }
       for (int i = 0; i < add.length; i++) {
         if (!modules.contains(add[i].getId())) {
@@ -163,28 +162,28 @@ public class CloudSdkServer extends ServerDelegate {
   }
 
   /**
-   * @return Returns the default host on which to start the API server
+   * @return the default host on which to start the API server
    */
   public String getApiHost() {
     return DEFAULT_HOST;
   }
 
   /**
-   * @return the default host on which to start the admin server.
+   * @return the default host on which to start the admin server
    */
   public String getHostName() {
     return DEFAULT_HOST;
   }
 
   /**
-   * @return the default port on which to start the API server.
+   * @return the default port on which to start the API server
    */
   public int getApiPort() {
     return DEFAULT_API_PORT;
   }
 
   /**
-   * @return the default port on which to start the admin server.
+   * @return the default port on which to start the admin server
    */
   public int getAdminPort() {
     return DEFAULT_ADMIN_PORT;
@@ -200,7 +199,7 @@ public class CloudSdkServer extends ServerDelegate {
 
   private IModule[] doGetParentModules(IModule module) {
     IModule[] earModules = ServerUtil.getModules("jst.ear");
-    ArrayList<IModule> list = new ArrayList<IModule>();
+    ArrayList<IModule> list = new ArrayList<>();
     for (IModule earModule : earModules) {
       IEnterpriseApplication earApp = (IEnterpriseApplication) earModule.loadAdapter(IEnterpriseApplication.class,
                                                                                      null);

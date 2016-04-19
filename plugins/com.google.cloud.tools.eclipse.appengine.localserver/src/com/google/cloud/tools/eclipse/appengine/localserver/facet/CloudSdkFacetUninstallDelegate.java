@@ -27,7 +27,7 @@ import org.eclipse.wst.common.project.facet.core.internal.FacetedProject;
 @SuppressWarnings("restriction") // For the FacetedProject in the javadoc
 public class CloudSdkFacetUninstallDelegate implements IDelegate {
   /**
-   * Facet removal will already be handled by
+   * Facet removal is handled by
    * {@link FacetedProject#mergeChanges} and the additional work to manage the
    * installation of the gcloud/app engine component and the gcloud-maven plugin
    * is not yet supported.

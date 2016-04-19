@@ -43,7 +43,6 @@ public class AdapterUtilities {
     }
 
     IAdapterManager adapterManager = Platform.getAdapterManager();
-    assert(adapterManager != null);
-    return (T) adapterManager.getAdapter(adaptable, adapterType);
+    return adapterManager.getAdapter(adaptable, adapterType);
   }
 }
