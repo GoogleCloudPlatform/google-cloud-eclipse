@@ -46,7 +46,7 @@ public class CloudSdkServerBehaviour extends ServerBehaviourDelegate {
     CloudSdkServer server = CloudSdkServer.getCloudSdkServer(getServer());
     int port = server.getApiPort();
     if (!isPortAvailable(port)) {
-      String message = server.getServer().getName() + " has admin port set to "
+      String message = server.getServer().getName() + " has API port set to "
                        + port
                        + " which is already is in use.\nTo use port "
                        + port

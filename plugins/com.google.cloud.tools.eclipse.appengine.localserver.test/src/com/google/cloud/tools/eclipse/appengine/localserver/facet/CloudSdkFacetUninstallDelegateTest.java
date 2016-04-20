@@ -15,13 +15,13 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class CloudSdkFacetUninstallDelegateTest {
 
   @Mock private IProject project;
-  @Mock private IProjectFacetVersion fv;
+  @Mock private IProjectFacetVersion facetVersion;
   @Mock private Object config;
   @Mock private IProgressMonitor monitor;
 
   @Test
   public void testExecute_doesNothingWithTheArguments() throws CoreException {
-    new CloudSdkFacetUninstallDelegate().execute(project, fv, config, monitor);
-    verifyZeroInteractions(project, fv, config, monitor);
+    new CloudSdkFacetUninstallDelegate().execute(project, facetVersion, config, monitor);
+    verifyZeroInteractions(project, facetVersion, config, monitor);
   }
 }

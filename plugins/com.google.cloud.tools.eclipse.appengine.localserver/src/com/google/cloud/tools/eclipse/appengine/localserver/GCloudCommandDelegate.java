@@ -50,8 +50,8 @@ public class GCloudCommandDelegate {
    * @return true if the Cloud SDK and App Engine component have been installed
    *         and false otherwise
    */
-  public static boolean areCloudSdkAndAppEngineInstalled(String sdkLocation) throws IOException,
-                                                                             InterruptedException {
+  public static boolean areCloudSdkAndAppEngineInstalled(String sdkLocation) 
+      throws IOException, InterruptedException {
     if (!(new File(sdkLocation)).exists()) {
       throw new InvalidPathException(sdkLocation, "Path does not exist");
     }
@@ -92,9 +92,8 @@ public class GCloudCommandDelegate {
    * @throws InterruptedException if the thread for the gcloud process is
    *           interrupted
    */
-  public static boolean hasLoggedInUsers(IProject project,
-                                         IRuntime serverRuntime) throws IOException,
-                                                                 InterruptedException {
+  public static boolean hasLoggedInUsers(IProject project, IRuntime serverRuntime) 
+      throws IOException, InterruptedException {
     if (project == null) {
       throw new NullPointerException("Select a valid project");
     }
@@ -138,8 +137,7 @@ public class GCloudCommandDelegate {
                                            String mode,
                                            String apiHost,
                                            int apiPort,
-                                           int debugPort) throws NullPointerException,
-                                                          InvalidPathException {
+                                           int debugPort) throws NullPointerException, InvalidPathException {
 
     if (!(new File(sdkLocation)).exists()) {
       throw new InvalidPathException(sdkLocation, "Path does not exist");

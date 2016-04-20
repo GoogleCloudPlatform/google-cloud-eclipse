@@ -11,7 +11,6 @@ public class NatureUtils {
    * 
    * @return {@code true} if the project is accessible and has the
    *         specified nature ID
-   * @throws CoreException
    */
   public static boolean hasNature(IProject project, String natureId) throws CoreException {
     return project.isAccessible() && project.hasNature(natureId);

@@ -14,25 +14,27 @@
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.util;
 
+import java.util.Locale;
+
 /**
  * Provides helper methods for OS identification.
  */
 public class OSUtilities {
 
   public static boolean isMac() {
-    String os = System.getProperty("os.name").toLowerCase();
+    String os = System.getProperty("os.name").toLowerCase(Locale.ENGLISH);
 
     return os.indexOf("mac") >= 0;
   }
 
   public static boolean isUnix() {
-    String os = System.getProperty("os.name").toLowerCase();
+    String os = System.getProperty("os.name").toLowerCase(Locale.ENGLISH);
 
     return os.indexOf("unix") >= 0 || os.indexOf("linux") >= 0;
   }
 
   public static boolean isWindows() {
-    String os = System.getProperty("os.name").toLowerCase();
+    String os = System.getProperty("os.name").toLowerCase(Locale.ENGLISH);
 
     return os.indexOf("win") >= 0;
   }

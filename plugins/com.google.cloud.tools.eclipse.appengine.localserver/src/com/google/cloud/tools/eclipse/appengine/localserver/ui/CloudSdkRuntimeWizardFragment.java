@@ -42,7 +42,6 @@ import org.eclipse.wst.server.core.TaskModel;
 import org.eclipse.wst.server.ui.wizard.IWizardHandle;
 import org.eclipse.wst.server.ui.wizard.WizardFragment;
 
-import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
 import com.google.cloud.tools.eclipse.appengine.localserver.runtime.CloudSdkRuntime;
 
 /**
@@ -177,13 +176,7 @@ public final class CloudSdkRuntimeWizardFragment extends WizardFragment {
 
       @Override
       public void done(IJobChangeEvent event) {
-        final IStatus runtimeStatus;
-        try {
-          runtimeStatus = event.getResult();
-        } catch (Exception e) {
-          Activator.logError(e);
-          return;
-        }
+        final IStatus runtimeStatus = event.getResult();
 
         PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
           @Override

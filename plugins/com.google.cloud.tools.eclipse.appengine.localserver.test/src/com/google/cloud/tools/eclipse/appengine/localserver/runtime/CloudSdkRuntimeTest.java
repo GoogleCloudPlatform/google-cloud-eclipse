@@ -17,10 +17,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class CloudSdkRuntimeTest {
   
-  @Mock
-  private Runtime runtime;
-  @Mock
-  private IPath mockLocation;
+  @Mock private Runtime runtime;
+  @Mock private IPath mockLocation;
   
   @Test(expected = NullPointerException.class)
   public void testValidate_withoutRuntime() {

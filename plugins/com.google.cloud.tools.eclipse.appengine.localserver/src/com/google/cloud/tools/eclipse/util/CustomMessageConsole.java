@@ -36,25 +36,25 @@ public class CustomMessageConsole extends MessageConsole {
    */
   public static class ConsolePageParticipant implements IConsolePageParticipant {
     @Override
-	public void activated() {
+    public void activated() {
     }
 
     @Override
-	public void deactivated() {
+    public void deactivated() {
     }
 
     @Override
-	public void dispose() {
+    public void dispose() {
     }
 
     @Override
-	@SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked")
     public Object getAdapter(Class adapter) {
       return adapter.equals(ConsolePageParticipant.class) ? this : null;
     }
 
     @Override
-	public void init(IPageBookViewPage page, IConsole console) {
+    public void init(IPageBookViewPage page, IConsole console) {
       if (console instanceof CustomMessageConsole) {
         ((CustomMessageConsole) console).setActiveToolbarManager(page.getSite()
                                                                      .getActionBars()
@@ -118,7 +118,7 @@ public class CustomMessageConsole extends MessageConsole {
        */
       Display.getDefault().asyncExec(new Runnable() {
         @Override
-		public void run() {
+        public void run() {
           activeToolBarManager.update(false);
         }
       });

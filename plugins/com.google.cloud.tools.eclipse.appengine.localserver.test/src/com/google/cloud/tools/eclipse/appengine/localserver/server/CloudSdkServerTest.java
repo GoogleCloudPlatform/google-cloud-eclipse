@@ -16,23 +16,21 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class CloudSdkServerTest {
 
-  @Mock
-  private IServer server;
-  @Mock
-  private CloudSdkServer mockCloudSdkServer;
-  
+  @Mock private IServer server;
+  @Mock private CloudSdkServer mockCloudSdkServer;
+
   @Test
   public void testGetCloudSdkServer_hasAdapter() {
     when(server.getAdapter(CloudSdkServer.class)).thenReturn(mockCloudSdkServer);
     CloudSdkServer cloudSdkServer = CloudSdkServer.getCloudSdkServer(server);
     assertThat(cloudSdkServer, sameInstance(mockCloudSdkServer));
   }
-  
+
   @Test
   public void testGetCloudSdkServer_needsToLoadAdapter() {
     when(server.getAdapter(CloudSdkServer.class)).thenReturn(null);
-    when(server.loadAdapter(eq(CloudSdkServer.class), any(IProgressMonitor.class)))
-      .thenReturn(mockCloudSdkServer);
+    when(server.loadAdapter(eq(CloudSdkServer.class),
+                            any(IProgressMonitor.class))).thenReturn(mockCloudSdkServer);
     CloudSdkServer cloudSdkServer = CloudSdkServer.getCloudSdkServer(server);
     assertThat(cloudSdkServer, sameInstance(mockCloudSdkServer));
   }

@@ -15,15 +15,15 @@ import com.google.common.collect.Lists;
 
 public class ProcessUtilitiesTest {
 
-	@Test
-	public void testlaunchProcessAndWaitFor_additionalPathAdded() throws InterruptedException, IOException {
-		List<String> commands = Lists.newArrayList("/bin/bash", "-c", "echo $PATH");
-		File workingDir = new File("/tmp");
-		List<String> additionalPaths = Lists.newArrayList("/tmp/foo", "/tmp/bar");
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-		ProcessUtilities.launchProcessAndWaitFor(commands, workingDir, additionalPaths, outputStream);
-		String result = outputStream.toString("utf-8");
-		assertThat(result, containsString("/tmp/foo"));
-		assertThat(result, containsString("/tmp/bar"));
-	}
+  @Test
+  public void testlaunchProcessAndWaitFor_additionalPathAdded() throws InterruptedException, IOException {
+    List<String> commands = Lists.newArrayList("/bin/bash", "-c", "echo $PATH");
+    File workingDir = new File("/tmp");
+    List<String> additionalPaths = Lists.newArrayList("/tmp/foo", "/tmp/bar");
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    ProcessUtilities.launchProcessAndWaitFor(commands, workingDir, additionalPaths, outputStream);
+    String result = outputStream.toString("UTF-8");
+    assertThat(result, containsString("/tmp/foo"));
+    assertThat(result, containsString("/tmp/bar"));
+  }
 }

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -37,7 +38,7 @@ public class ProcessUtilities {
    * @param commands commands to pass to the {@link ProcessBuilder}
    * @param workingDir directory to use as the working directory
    * @param additionalPaths list of additional directories to be appended to the
-   *          PATH environmental variable
+   *          PATH environment variable
    * @param outputStream output stream to receive process output
    * @return process exit code
    */
@@ -51,7 +52,7 @@ public class ProcessUtilities {
     moveClasspathArgToEnvironmentVariable(commands, pb);
 
     // if given a non-null, non-empty list of paths, then append to the PATH
-    // environmental variable
+    // environment variable
     if (additionalPaths != null && additionalPaths.size() >= 1) {
       StringBuilder newPathEnvVar = new StringBuilder(pb.environment().get("PATH"));
       // for each additional path, add it- if it isn't already in the path list
@@ -94,12 +95,12 @@ public class ProcessUtilities {
         }
 
         @Override
-		public void run() {
+        public void run() {
           InputStream inputStream = process.getInputStream();
           try {
             int bytesRead = 0;
             byte[] buf = new byte[1024];
-			while ((bytesRead = inputStream.read(buf)) != -1) {
+            while ((bytesRead = inputStream.read(buf)) != -1) {
               outputStream.write(buf, 0, bytesRead);
             }
           } catch (IOException e) {
@@ -231,6 +232,6 @@ public class ProcessUtilities {
   private static String copyInputStreamToString(InputStream inputStream) throws IOException {
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     ByteStreams.copy(inputStream, bos);
-    return new String(bos.toByteArray(), Charset.forName("utf-8"));
+    return new String(bos.toByteArray(), StandardCharsets.UTF_8);
   }
 }

@@ -51,8 +51,7 @@ public class ServerFlagSelectionDialog extends ElementListSelectionDialog {
     setMessage("&Choose a variable (? = any character, * = any string):");
     setMultipleSelection(false);
 
-    List<Flag> flags = null;
-    flags = CloudSdkServerFlags.getFlags();
+    List<Flag> flags = CloudSdkServerFlags.getFlags();
     setElements(flags.toArray(new Flag[flags.size()]));
   }
 

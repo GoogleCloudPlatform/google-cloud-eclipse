@@ -37,7 +37,7 @@ import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
 import com.google.cloud.tools.eclipse.appengine.localserver.server.CloudSdkServer;
 
 /**
- * A launch configuration tab that displays and edits "gcloud app preview"
+ * A launch configuration tab that displays and edits "dev_appserver.py"
  * command flags for the Cloud SDK server.
  */
 public class CloudSdkServerLaunchTab extends AbstractLaunchConfigurationTab {

@@ -22,12 +22,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class CloudSdkServerBehaviourTest {
 
-  @Mock
-  private Server mockServer;
-  @Mock
-  private CloudSdkServer mockCloudSdkServer;
-  @Captor
-  private ArgumentCaptor<Integer> serverStateArgumentCaptor;
+  @Mock private Server mockServer;
+  @Mock private CloudSdkServer mockCloudSdkServer;
+  @Captor private ArgumentCaptor<Integer> serverStateArgumentCaptor;
   
   @Test
   public void testCanStart_portInUse() throws Exception {

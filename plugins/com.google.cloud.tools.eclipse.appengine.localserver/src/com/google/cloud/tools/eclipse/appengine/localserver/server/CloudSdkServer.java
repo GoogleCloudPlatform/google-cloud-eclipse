@@ -85,8 +85,6 @@ public class CloudSdkServer extends ServerDelegate {
 
   @Override
   public IModule[] getChildModules(IModule[] module) {
-    // This is the same logic as in the GaeServer. The GaeServer would be
-    // replaced by the CloudSdkServer.
     if (module[0] != null && module[0].getModuleType() != null) {
       IModule thisModule = module[module.length - 1];
       IModuleType moduleType = thisModule.getModuleType();
