@@ -144,7 +144,7 @@ public class CloudSdkServerBehaviour extends ServerBehaviourDelegate {
 
   /**
    * Sets up process listener to be able to handle debug events for
-   * {@code newProcess).
+   * {@code newProcess}.
    *
    * @param newProcess the process to be monitored
    */

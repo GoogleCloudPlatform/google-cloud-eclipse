@@ -48,7 +48,7 @@ public class CloudSdkUtils {
    * @return true if {@code project} is a maven project with the
    *         gcloud-maven-plugin and false otherwise
    * @throws CoreException if getting instance of MavenProject from
-   *           {@code project) fails
+   *           {@code project} fails
    */
   public static boolean hasGcloudMavenPlugin(IProject project) throws CoreException {
     if (!MavenUtils.hasMavenNature(project)) {
