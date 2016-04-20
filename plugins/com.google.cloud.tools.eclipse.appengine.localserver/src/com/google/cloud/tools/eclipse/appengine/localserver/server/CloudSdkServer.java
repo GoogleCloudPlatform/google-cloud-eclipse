@@ -39,7 +39,8 @@ import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
  */
 @SuppressWarnings("restriction") // For FacetUtil
 public class CloudSdkServer extends ServerDelegate {
-  public static final String SERVER_TYPE_ID = "com.google.cloudsdk.server.id";
+  // must match the value used in plugin.xml in org.eclipse.wst.server.core.serverTypes
+  public static final String SERVER_TYPE_ID = "com.google.cloud.tools.eclipse.server.id";
   public static final String SERVER_PROGRAM_FLAGS = Activator.PLUGIN_ID + ".SERVER_FLAGS";
   public static final String DEFAULT_HOST = "localhost";
   public static final int DEFAULT_API_PORT = 8188;
