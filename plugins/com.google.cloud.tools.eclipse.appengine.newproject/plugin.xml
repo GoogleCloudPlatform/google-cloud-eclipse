@@ -8,7 +8,6 @@
             class="com.google.cloud.tools.eclipse.appengine.newproject.StandardProjectWizardFactory"
             icon="icons/app_engine_standard_16x16.png"
             project="true"
-            finalPerspective="org.eclipse.jdt.ui.JavaPerspective"
             category="com.google.eclipse.builder.newWizardCategory">
          <description>%wizard.description</description>
          <selection class="org.eclipse.core.resources.IResource"/>
@@ -19,7 +18,6 @@
             class="com.google.cloud.tools.eclipse.appengine.newproject.StandardProjectWizardFactory"
             icon="icons/app_engine_standard_16x16.png"
             project="true"
-            finalPerspective="org.eclipse.jdt.ui.JavaPerspective"
             category="org.eclipse.ui.Basic">
          <description>%wizard.description</description>
          <selection class="org.eclipse.core.resources.IResource"/>
