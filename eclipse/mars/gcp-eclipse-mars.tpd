@@ -1,12 +1,15 @@
 /* 
  * Target Platform Definition created using Mikael Barbero's TPD editor 
  * <https://github.com/mbarbero/fr.obeo.releng.targetplatform/>
+ * which you need to install into Eclipse.
  * 
  * If you make changes to this file, either:
  * 
- *    * Right-click in the editor and choose 'Create Target Definition File'
+ *    * Open the context menu somewhere in this file in 
+ *      Eclipse and choose 'Create Target Definition File'
  *      to update the corresponding .target file.
- *    * Right-lick in the editor and choose 'Set as Target Platform'
+ *    * Open the context menu somewhere in this file in 
+ *      Eclipse and choose choose 'Set as Target Platform'
  *      to update your IDE's target platform (regenerates the .target too)
  */
 target "GCP for Eclipse Mars" with source requirements
@@ -18,6 +21,7 @@ location "http://download.eclipse.org/cbi/updates/license" {
 location "http://download.eclipse.org/releases/mars/" {
 	org.eclipse.sdk.feature.group
 	org.eclipse.jdt.feature.group
+  org.eclipse.platform.feature.group
 	org.eclipse.m2e.feature.feature.group
 	org.eclipse.m2e.wtp.feature.feature.group
 	org.eclipse.mylyn.commons.feature.group
