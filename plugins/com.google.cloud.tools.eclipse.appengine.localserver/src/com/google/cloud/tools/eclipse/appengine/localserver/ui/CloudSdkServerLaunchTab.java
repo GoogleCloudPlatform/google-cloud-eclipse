@@ -37,8 +37,8 @@ import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
 import com.google.cloud.tools.eclipse.appengine.localserver.server.CloudSdkServer;
 
 /**
- * A launch configuration tab that displays and edits "dev_appserver.py"
- * command flags for the Cloud SDK server.
+ * A launch configuration tab that displays and edits "dev_appserver.py" command
+ * flags for the Cloud SDK server.
  */
 public class CloudSdkServerLaunchTab extends AbstractLaunchConfigurationTab {
   protected Text programFlagText;
@@ -66,9 +66,9 @@ public class CloudSdkServerLaunchTab extends AbstractLaunchConfigurationTab {
 
     programFlagText = new Text(group, SWT.MULTI | SWT.WRAP | SWT.BORDER | SWT.V_SCROLL);
     programFlagText.addTraverseListener(new TraverseListener() {
-    @Override
-	public void keyTraversed(TraverseEvent e) {
-      switch (e.detail) {
+      @Override
+      public void keyTraversed(TraverseEvent e) {
+        switch (e.detail) {
         case SWT.TRAVERSE_ESCAPE:
         case SWT.TRAVERSE_PAGE_NEXT:
         case SWT.TRAVERSE_PAGE_PREVIOUS:
