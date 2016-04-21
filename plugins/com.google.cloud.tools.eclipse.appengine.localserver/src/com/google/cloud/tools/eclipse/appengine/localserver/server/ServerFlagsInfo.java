@@ -29,7 +29,7 @@ public class ServerFlagsInfo {
   public static class Flag {
     private String name;
     private String description;
-    private FlagType type = FlagType.STRING;
+    private FlagType type;
     
     public String getName() {
       return name;
