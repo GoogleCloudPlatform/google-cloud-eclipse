@@ -16,6 +16,7 @@ package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.InvalidPathException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -124,8 +125,8 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
       // sends notifications of debug events
       DebugPlugin.newProcess(launch, p, commands);
       serverBehaviour.addProcessListener(launch.getProcesses()[0]);
-    } catch (IOException e1) {
-      Activator.logError(e1);
+    } catch (IOException | NullPointerException | IllegalStateException | InvalidPathException e) {
+      Activator.logError(e);
       serverBehaviour.stop(true);
     }
   }

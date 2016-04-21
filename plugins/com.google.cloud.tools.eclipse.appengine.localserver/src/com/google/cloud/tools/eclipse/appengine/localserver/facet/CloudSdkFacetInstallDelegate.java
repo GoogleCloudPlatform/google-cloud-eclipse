@@ -39,7 +39,7 @@ public class CloudSdkFacetInstallDelegate implements IDelegate {
    */
   @Override
   public void execute(IProject project,
-                      IProjectFacetVersion fv,
+                      IProjectFacetVersion facetVersion,
                       Object config,
                       IProgressMonitor monitor) throws CoreException {
     if (!CloudSdkUtils.hasGcloudMavenPlugin(project)) {
@@ -47,7 +47,8 @@ public class CloudSdkFacetInstallDelegate implements IDelegate {
       throw new CoreException(new Status(IStatus.ERROR,
                                          Activator.PLUGIN_ID,
                                          "Cannot install Cloud SDK facet.\n"
-                                                              + "Cloud SDK facets can only be installed in maven projects with GCloud Maven plugin"));
+                                           + "Cloud SDK facets can only be installed in "
+                                           + "maven projects with GCloud Maven plugin"));
     }
   }
 }

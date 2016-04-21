@@ -34,7 +34,7 @@ public class CloudSdkFacetUninstallDelegate implements IDelegate {
    */
   @Override
   public void execute(IProject project,
-                      IProjectFacetVersion fv,
+                      IProjectFacetVersion facetVersion,
                       Object config,
                       IProgressMonitor monitor) throws CoreException {
     // Do nothing

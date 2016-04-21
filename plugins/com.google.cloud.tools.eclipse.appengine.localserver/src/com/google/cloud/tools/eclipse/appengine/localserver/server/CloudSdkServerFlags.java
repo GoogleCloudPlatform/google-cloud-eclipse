@@ -23,7 +23,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 /**
- * Holds the list of "gcloud app run" flags for the Cloud SDK server.
+ * Holds the list of "dev_appserver.py" flags for the App Engine local dev server.
  */
 public class CloudSdkServerFlags {
   private static final String FLAGS_FILE = "server-flags.json";

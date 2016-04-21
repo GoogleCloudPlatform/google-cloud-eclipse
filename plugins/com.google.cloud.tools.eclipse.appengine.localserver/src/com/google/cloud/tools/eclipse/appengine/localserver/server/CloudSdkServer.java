@@ -39,6 +39,10 @@ import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
  */
 @SuppressWarnings("restriction") // For FacetUtil
 public class CloudSdkServer extends ServerDelegate {
+
+  private static final String SERVLET_MODULE_FACET = "jst.web";
+  private static final String EAR_MODULE_FACET = "jst.ear";
+
   // must match the value used in plugin.xml in org.eclipse.wst.server.core.serverTypes
   public static final String SERVER_TYPE_ID = "com.google.cloud.tools.eclipse.server.id";
   public static final String SERVER_PROGRAM_FLAGS = Activator.PLUGIN_ID + ".SERVER_FLAGS";
@@ -88,7 +92,7 @@ public class CloudSdkServer extends ServerDelegate {
     if (module[0] != null && module[0].getModuleType() != null) {
       IModule thisModule = module[module.length - 1];
       IModuleType moduleType = thisModule.getModuleType();
-      if (moduleType != null && "jst.ear".equals(moduleType.getId())) { //$NON-NLS-1$
+      if (moduleType != null && EAR_MODULE_FACET.equals(moduleType.getId())) {
         IEnterpriseApplication enterpriseApplication = (IEnterpriseApplication) thisModule.loadAdapter(IEnterpriseApplication.class,
                                                                                                        null);
         if (enterpriseApplication != null) {
@@ -97,7 +101,7 @@ public class CloudSdkServer extends ServerDelegate {
             return earModules;
           }
         }
-      } else if (moduleType != null && "jst.web".equals(moduleType.getId())) { //$NON-NLS-1$
+      } else if (moduleType != null && SERVLET_MODULE_FACET.equals(moduleType.getId())) { //$NON-NLS-1$
         IWebModule webModule = (IWebModule) thisModule.loadAdapter(IWebModule.class, null);
         if (webModule != null) {
           IModule[] modules = webModule.getModules();
@@ -197,7 +201,7 @@ public class CloudSdkServer extends ServerDelegate {
   }
 
   private IModule[] doGetParentModules(IModule module) {
-    IModule[] earModules = ServerUtil.getModules("jst.ear");
+    IModule[] earModules = ServerUtil.getModules(EAR_MODULE_FACET);
     ArrayList<IModule> list = new ArrayList<>();
     for (IModule earModule : earModules) {
       IEnterpriseApplication earApp = (IEnterpriseApplication) earModule.loadAdapter(IEnterpriseApplication.class,
