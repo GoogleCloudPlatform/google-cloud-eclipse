@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Cloud Tools for Eclipse App Engine New Project Generation
+Bundle-SymbolicName: com.google.cloud.tools.eclipse.appengine.newproject;singleton:=true
+Bundle-Version: 0.1.0.qualifier
+Bundle-Vendor: Google, Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Require-Bundle: org.eclipse.ui,
+  javax.servlet;bundle-version="2.5.0",
+  javax.servlet.jsp;bundle-version="2.2.0"
+
