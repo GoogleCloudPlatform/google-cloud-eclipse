@@ -182,12 +182,12 @@ public class CloudSdkServerBehaviour extends ServerBehaviourDelegate {
     CloudSdkServer server = CloudSdkServer.getCloudSdkServer(getServer());
     try {
       new URL("http", server.getHostName(), server.getAdminPort(), "/quit").getContent();
-      try {
+//      try {
         // TODO: confirm appropriate delay time
-        Thread.sleep(4000);
-      } catch (InterruptedException e) {
-        // ignore
-      }
+//        Thread.sleep(4000);
+//      } catch (InterruptedException e) {
+//        // ignore
+//      }
     } catch (IOException e) {
       Activator.logError("Error stopping the dev app server", e);
     }

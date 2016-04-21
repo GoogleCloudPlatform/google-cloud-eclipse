@@ -29,8 +29,8 @@ public class ServerFlagsInfo {
   public static class Flag {
     private String name;
     private String description;
-    private boolean supportsArgument;
-
+    private FlagType type = FlagType.STRING;
+    
     public String getName() {
       return name;
     }
@@ -39,11 +39,15 @@ public class ServerFlagsInfo {
       return description;
     }
 
-    public boolean getSupportsArgument() {
-      return supportsArgument;
+    public FlagType getType() {
+      return type;
     }
   }
 
+  public static enum FlagType {
+    BOOLEAN, STRING
+  }
+  
   private List<Flag> flags = new ArrayList<>();
 
   public List<Flag> getFlags() {

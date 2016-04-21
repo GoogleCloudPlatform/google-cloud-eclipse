@@ -15,18 +15,28 @@
 package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
 import java.util.List;
+import java.util.Set;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.internal.ui.SWTFactory;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
+import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 
+import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
 import com.google.cloud.tools.eclipse.appengine.localserver.server.CloudSdkServerFlags;
+import com.google.cloud.tools.eclipse.appengine.localserver.server.ServerFlagsInfo;
 import com.google.cloud.tools.eclipse.appengine.localserver.server.ServerFlagsInfo.Flag;
+import com.google.cloud.tools.eclipse.appengine.localserver.server.ServerFlagsInfo.FlagType;
+import com.google.common.collect.Sets;
 
 /**
  * A dialog that prompts the user to choose and configure a "gcloud app run"
@@ -34,6 +44,10 @@ import com.google.cloud.tools.eclipse.appengine.localserver.server.ServerFlagsIn
  */
 @SuppressWarnings("restriction") // For SWTFactory
 public class ServerFlagSelectionDialog extends ElementListSelectionDialog {
+  
+  private static final Set<String> VALID_BOOLEAN_VALUES =
+    Sets.newHashSet("true", "yes", "1", "false", "no", "0");
+  
   private static final String FLAG_PREFIX = "--";
   private Text descriptionText;
   private Text argumentText;
@@ -50,6 +64,7 @@ public class ServerFlagSelectionDialog extends ElementListSelectionDialog {
     setTitle("Select Variable");
     setMessage("&Choose a variable (? = any character, * = any string):");
     setMultipleSelection(false);
+    setStatusLineAboveButtons(true);
 
     List<Flag> flags = CloudSdkServerFlags.getFlags();
     setElements(flags.toArray(new Flag[flags.size()]));
@@ -59,24 +74,60 @@ public class ServerFlagSelectionDialog extends ElementListSelectionDialog {
   protected Control createDialogArea(Composite parent) {
     Control control = super.createDialogArea(parent);
     createArgumentArea((Composite) control);
+    setValidator(new ISelectionStatusValidator() {
+
+      @Override
+      public IStatus validate(Object[] selection) {
+        if (selection.length == 1) {
+          if (selection[0] instanceof ServerFlagsInfo.Flag) {
+            ServerFlagsInfo.Flag flag = (ServerFlagsInfo.Flag) selection[0];
+            String argumentValue = argumentText.getText().trim();
+            if (argumentValue.isEmpty()) {
+              return new Status(IStatus.ERROR,
+                                Activator.PLUGIN_ID,
+                                "Argument value cannot be empty");
+            }
+            if (flag.getType() == FlagType.BOOLEAN) {
+              return validBooleanValue(argumentValue);
+            }
+          } else {
+            return new Status(IStatus.ERROR,
+                              Activator.PLUGIN_ID,
+                              "Unexpected selection type");
+          }
+        } else if (selection.length > 1) {
+          return new Status(IStatus.ERROR,
+                            Activator.PLUGIN_ID,
+                            "Single selection is expected");
+        }
+        return new Status(OK, Activator.PLUGIN_ID, "");
+      }
+
+      private IStatus validBooleanValue(String argumentValue) {
+        if (VALID_BOOLEAN_VALUES.contains(argumentValue)) {
+          return new Status(OK, Activator.PLUGIN_ID, "");
+        } else {
+          return new Status(IStatus.ERROR,
+                            Activator.PLUGIN_ID,
+                            String.format("Invalid boolean value"));
+        }
+      }
+    });
     return control;
   }
 
   /**
-   * Update variable description and argument button enablement.
+   * Update variable description.
    */
   @Override
   protected void handleSelectionChanged() {
     super.handleSelectionChanged();
     Object[] objects = getSelectedElements();
-    boolean argEnabled = false;
     String text = "";
     if (objects.length == 1) {
       Flag variable = (Flag) objects[0];
-      argEnabled = variable.getSupportsArgument();
       text = variable.getDescription();
     }
-    argumentText.setEnabled(argEnabled);
     descriptionText.setText(text);
   }
 
@@ -88,10 +139,10 @@ public class ServerFlagSelectionDialog extends ElementListSelectionDialog {
 
   /**
    * Returns the variable expression the user generated from this dialog, or
-   * {@code null} if none.
+   * empty string if none.
    *
-   * @return variable expression the user generated from this dialog, or
-   *         {@code null} if none
+   * @return variable expression the user generated from this dialog, or empty
+   *         string if none
    */
   public String getVariableExpression() {
     Object[] selected = getResult();
@@ -101,13 +152,13 @@ public class ServerFlagSelectionDialog extends ElementListSelectionDialog {
       variableExpressionBuilder.append(FLAG_PREFIX);
       variableExpressionBuilder.append(variable.getName());
       if (argumentValue != null && argumentValue.length() > 0) {
-        variableExpressionBuilder.append(" ");
+        variableExpressionBuilder.append("=");
         variableExpressionBuilder.append(argumentValue);
       }
       variableExpressionBuilder.append(" ");
       return variableExpressionBuilder.toString();
     }
-    return null;
+    return "";
   }
 
   /**
@@ -129,6 +180,12 @@ public class ServerFlagSelectionDialog extends ElementListSelectionDialog {
     argumentText = new Text(container, SWT.BORDER);
     argumentText.setFont(container.getFont());
     argumentText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+    argumentText.addModifyListener(new ModifyListener() {
+      @Override
+      public void modifyText(ModifyEvent e) {
+        validateCurrentSelection();
+      }
+    });
 
     SWTFactory.createWrapLabel(container, "&Variable Description:", /* hspan */ 2);
 

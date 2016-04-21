@@ -109,9 +109,7 @@ public class CloudSdkServerLaunchTab extends AbstractLaunchConfigurationTab {
         ServerFlagSelectionDialog dialog = new ServerFlagSelectionDialog(getShell());
         dialog.open();
         String variable = dialog.getVariableExpression();
-        if (variable != null) {
-          programFlagText.insert(variable);
-        }
+        programFlagText.insert(variable);
       }
     });
   }
@@ -139,7 +137,7 @@ public class CloudSdkServerLaunchTab extends AbstractLaunchConfigurationTab {
 
   @Override
   public String getName() {
-    return "Deploy Flags";
+    return "App Engine Dev Server Flags";
   }
 
   /**
