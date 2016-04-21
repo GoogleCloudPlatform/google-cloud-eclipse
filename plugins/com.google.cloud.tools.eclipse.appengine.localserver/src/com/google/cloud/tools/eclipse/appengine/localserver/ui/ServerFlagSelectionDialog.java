@@ -78,27 +78,31 @@ public class ServerFlagSelectionDialog extends ElementListSelectionDialog {
 
       @Override
       public IStatus validate(Object[] selection) {
-        if (selection.length == 1) {
+        if (selection == null || selection.length == 0) {
+          return new Status(OK, Activator.PLUGIN_ID, "");
+        } else if (selection.length == 1) {
           if (selection[0] instanceof ServerFlagsInfo.Flag) {
-            ServerFlagsInfo.Flag flag = (ServerFlagsInfo.Flag) selection[0];
-            String argumentValue = argumentText.getText().trim();
-            if (argumentValue.isEmpty()) {
-              return new Status(IStatus.ERROR,
-                                Activator.PLUGIN_ID,
-                                "Argument value cannot be empty");
-            }
-            if (flag.getType() == FlagType.BOOLEAN) {
-              return validBooleanValue(argumentValue);
-            }
+            return validateServerFlagValue(selection);
           } else {
             return new Status(IStatus.ERROR,
                               Activator.PLUGIN_ID,
                               "Unexpected selection type");
           }
-        } else if (selection.length > 1) {
+        } else {
           return new Status(IStatus.ERROR,
                             Activator.PLUGIN_ID,
                             "Single selection is expected");
+        }
+      }
+
+      private IStatus validateServerFlagValue(Object[] selection) {
+        ServerFlagsInfo.Flag flag = (ServerFlagsInfo.Flag) selection[0];
+        String argumentValue = argumentText.getText().trim();
+        if (argumentValue.isEmpty()) {
+          return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Argument value cannot be empty");
+        }
+        if (flag.getType() == FlagType.BOOLEAN) {
+          return validBooleanValue(argumentValue);
         }
         return new Status(OK, Activator.PLUGIN_ID, "");
       }
