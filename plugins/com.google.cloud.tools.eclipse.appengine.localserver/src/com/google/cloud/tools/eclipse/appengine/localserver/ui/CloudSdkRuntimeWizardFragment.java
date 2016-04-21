@@ -106,13 +106,13 @@ public final class CloudSdkRuntimeWizardFragment extends WizardFragment {
     button.addSelectionListener(new SelectionAdapter() {
       @Override
 	  public void widgetSelected(SelectionEvent event) {
-        DirectoryDialog dlg = new DirectoryDialog(composite.getShell(), SWT.OPEN);
-        dlg.setText("Cloud SDK's Directory");
-        dlg.setMessage("Select a directory");
+        DirectoryDialog dialog = new DirectoryDialog(composite.getShell(), SWT.OPEN);
+        dialog.setText("Cloud SDK's Directory");
+        dialog.setMessage("Select a directory");
 
         // It will return the selected directory, or
         // null if user cancels
-        String dir = dlg.open();
+        String dir = dialog.open();
         if (dir != null) {
           dirTextBox.setText(dir);
         }
@@ -121,11 +121,11 @@ public final class CloudSdkRuntimeWizardFragment extends WizardFragment {
   }
 
   private CloudSdkRuntime getRuntimeDelegate() {
-    IRuntimeWorkingCopy wc = (IRuntimeWorkingCopy) getTaskModel().getObject(TaskModel.TASK_RUNTIME);
-    if (wc == null) {
+    IRuntimeWorkingCopy workingCopy = (IRuntimeWorkingCopy) getTaskModel().getObject(TaskModel.TASK_RUNTIME);
+    if (workingCopy == null) {
       return null;
     }
-    return (CloudSdkRuntime) wc.loadAdapter(CloudSdkRuntime.class, new NullProgressMonitor());
+    return (CloudSdkRuntime) workingCopy.loadAdapter(CloudSdkRuntime.class, new NullProgressMonitor());
   }
 
   private String getRuntimeTitle() {

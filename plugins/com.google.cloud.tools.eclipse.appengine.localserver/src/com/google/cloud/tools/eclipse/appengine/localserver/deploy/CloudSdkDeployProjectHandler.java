@@ -145,7 +145,7 @@ public class CloudSdkDeployProjectHandler extends AbstractHandler {
     }
 
     final IPath[] fileSystemPath = new IPath[1];
-    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+    shell.getDisplay().syncExec(new Runnable() {
       @Override
       public void run() {
         DirectoryDialog dialog = new DirectoryDialog(shell);
