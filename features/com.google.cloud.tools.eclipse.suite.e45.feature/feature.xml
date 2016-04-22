@@ -14,8 +14,8 @@
     %copyright.text
   </copyright>
 
-  <license url="%licenseURL">
-    %license
+  <license url="%license.url">
+    %license.text
   </license>
 
   <plugin
