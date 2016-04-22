@@ -5,6 +5,7 @@ Bundle-SymbolicName: com.google.cloud.tools.eclipse.appengine.newproject;singlet
 Bundle-Version: 0.1.0.qualifier
 Bundle-Vendor: Google, Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-Localization: plugin
 Require-Bundle: org.eclipse.ui,
   javax.servlet;bundle-version="2.5.0",
   javax.servlet.jsp;bundle-version="2.2.0"
