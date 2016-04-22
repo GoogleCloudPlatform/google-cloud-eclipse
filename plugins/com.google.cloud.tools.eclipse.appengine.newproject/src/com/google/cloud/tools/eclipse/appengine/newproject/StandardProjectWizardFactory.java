@@ -14,8 +14,7 @@ public class StandardProjectWizardFactory extends Wizard implements INewWizard {
 
   @Override
   public boolean performFinish() {
-    // TODO Auto-generated method stub
-    return false;
+    return true;
   }
 
 }
