@@ -186,7 +186,7 @@ public class ServerFlagSelectionDialog extends ElementListSelectionDialog {
     argumentText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
     argumentText.addModifyListener(new ModifyListener() {
       @Override
-      public void modifyText(ModifyEvent e) {
+      public void modifyText(ModifyEvent event) {
         validateCurrentSelection();
       }
     });
