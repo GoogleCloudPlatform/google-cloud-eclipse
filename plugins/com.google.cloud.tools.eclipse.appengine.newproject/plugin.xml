@@ -5,7 +5,7 @@
       <wizard
             id="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineStandard"
             name="App Engine Standard Java Project"
-            class="com.google.cloud.tools.eclipse.appengine.newproject.StandardProjectWizardFactory"
+            class="com.google.cloud.tools.eclipse.appengine.newproject.StandardProjectWizard"
             icon="icons/app_engine_standard_16x16.png"
             project="true"
             category="com.google.cloud.tools.eclipse.appengine.wizards">
