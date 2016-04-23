@@ -12,4 +12,9 @@ public class StandardProjectWizardTest {
     Assert.assertTrue(wizard.canFinish());
   }
 
+  @Test
+  public void testPerformFinish() {
+    Assert.assertTrue(wizard.performFinish());
+  }
+  
 }
