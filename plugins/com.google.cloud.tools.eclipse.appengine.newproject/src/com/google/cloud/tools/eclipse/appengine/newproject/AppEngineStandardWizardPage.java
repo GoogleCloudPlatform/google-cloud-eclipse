@@ -20,6 +20,7 @@ public class AppEngineStandardWizardPage extends WizardPage implements IWizardPa
 
   private Text javaPackageField;
   private Text eclipseProjectNameField;
+  private Text projectIdField;
   
   private Button workspaceProjectDirectoryButton;
   private Button customProjectDirectoryButton;
@@ -60,13 +61,24 @@ public class AppEngineStandardWizardPage extends WizardPage implements IWizardPa
     javaPackageField.setLayoutData(javaPackagePosition);
     javaPackageField.addModifyListener(pageValidator);
     
-    createLocationGroup(container);
+    // todo enable browsing for Project IDs
+    // App Engine Project ID
+    Label projectIdLabel = new Label(container, SWT.NONE);
+    projectIdLabel.setText("App Engine Project ID: (optional)");
+    projectIdField = new Text(container, SWT.BORDER);
+    GridData projectIdPosition = new GridData(GridData.FILL_HORIZONTAL);
+    projectIdPosition.horizontalSpan = 2;
+    projectIdField.setLayoutData(projectIdPosition);
+    projectIdField.addModifyListener(pageValidator);
     
+    addLocationWidgets(container);
+
     eclipseProjectNameField.forceFocus();
   }
-  
+
   // UI to choose location of Eclipse project on local file system
-  private void createLocationGroup(Composite container) {
+  // todo should we pull this out into a separate class?
+  private void addLocationWidgets(Composite container) {
     // Eclipse project directory (defaults to subdirectory under workspace)
     Group projectDirectoryGroup = new Group(container, SWT.NULL);
     projectDirectoryGroup.setText("Location");
