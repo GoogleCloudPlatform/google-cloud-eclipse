@@ -48,7 +48,7 @@ public class CustomMessageConsole extends MessageConsole {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public Object getAdapter(Class adapter) {
       return adapter.equals(ConsolePageParticipant.class) ? this : null;
     }
