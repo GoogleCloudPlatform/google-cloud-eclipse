@@ -16,16 +16,22 @@ public class StandardProjectWizardTest {
     } catch (NullPointerException ex) {
       wizard = new StandardProjectWizard();
     }
+    wizard.init(null, null);
   }
   
   @Test
   public void testCanFinish() {
-    Assert.assertTrue(wizard.canFinish());
+    Assert.assertFalse(wizard.canFinish());
   }
   
   @Test
   public void testPerformFinish() {
     Assert.assertTrue(wizard.performFinish());
+  }
+  
+  @Test
+  public void testTitleSet() {
+    Assert.assertEquals("New App Engine Standard Project", wizard.getWindowTitle());
   }
   
 }
