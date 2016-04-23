@@ -100,6 +100,7 @@ public class AppEngineStandardWizardPage extends WizardPage implements IWizardPa
     workspaceProjectDirectoryButton.setLayoutData(gd4);
 
     customProjectDirectoryButton = new Button(projectDirectoryGroup, SWT.RADIO);
+    customProjectDirectoryButton.setSelection(false); // not by default
     customProjectDirectoryButton.setText("Create new project in:");
     GridData gd5 = new GridData();
     gd5.horizontalAlignment = GridData.FILL;
@@ -110,13 +111,16 @@ public class AppEngineStandardWizardPage extends WizardPage implements IWizardPa
     Label projectDirectoryLabel = new Label(projectDirectoryGroup, SWT.NONE);
     projectDirectoryLabel.setText("Directory:");
 
+    // todo enable these next two depending on state of radio buttons
     projectDirectoryField = new Text(projectDirectoryGroup, SWT.BORDER);
+    projectDirectoryField.setEnabled(false);
     GridData gd6 = new GridData();
     gd6.horizontalAlignment = GridData.FILL;
     gd6.grabExcessHorizontalSpace = true;
     projectDirectoryField.setLayoutData(gd6);
 
     projectDirectoryBrowseButton = new Button(projectDirectoryGroup, SWT.NONE);
+    projectDirectoryBrowseButton.setEnabled(false);
     projectDirectoryBrowseButton.setText("Browse...");
   }
   
