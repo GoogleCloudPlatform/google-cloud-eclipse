@@ -8,6 +8,8 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
@@ -19,6 +21,11 @@ public class AppEngineStandardWizardPage extends WizardPage implements IWizardPa
   private Text javaPackageField;
   private Text eclipseProjectNameField;
   
+  private Button workspaceProjectDirectoryButton;
+  private Button customProjectDirectoryButton;
+  private Text projectDirectoryField;
+  private Button projectDirectoryBrowseButton;
+
   // todo we need a model class that collects all the info for creating a project
   
   AppEngineStandardWizardPage(String pageName) {
@@ -53,9 +60,54 @@ public class AppEngineStandardWizardPage extends WizardPage implements IWizardPa
     javaPackageField.setLayoutData(javaPackagePosition);
     javaPackageField.addModifyListener(pageValidator);
     
+    createLocationGroup(container);
+    
     eclipseProjectNameField.forceFocus();
   }
+  
+  // UI to choose location of Eclipse project on local file system
+  private void createLocationGroup(Composite container) {
+    // Eclipse project directory (defaults to subdirectory under workspace)
+    Group projectDirectoryGroup = new Group(container, SWT.NULL);
+    projectDirectoryGroup.setText("Location");
+    GridData gd3 = new GridData(GridData.FILL_HORIZONTAL);
+    gd3.horizontalSpan = 2;
+    projectDirectoryGroup.setLayoutData(gd3);
 
+    GridLayout projectDirectoryLayout = new GridLayout();
+    projectDirectoryLayout.numColumns = 3;
+    projectDirectoryGroup.setLayout(projectDirectoryLayout);
+
+    workspaceProjectDirectoryButton = new Button(projectDirectoryGroup, SWT.RADIO);
+    workspaceProjectDirectoryButton.setText("Create new project in workspace");
+    workspaceProjectDirectoryButton.setSelection(true);
+    GridData gd4 = new GridData();
+    gd4.horizontalAlignment = GridData.FILL;
+    gd4.grabExcessHorizontalSpace = true;
+    gd4.horizontalSpan = 3;
+    workspaceProjectDirectoryButton.setLayoutData(gd4);
+
+    customProjectDirectoryButton = new Button(projectDirectoryGroup, SWT.RADIO);
+    customProjectDirectoryButton.setText("Create new project in:");
+    GridData gd5 = new GridData();
+    gd5.horizontalAlignment = GridData.FILL;
+    gd5.grabExcessHorizontalSpace = true;
+    gd5.horizontalSpan = 3;
+    customProjectDirectoryButton.setLayoutData(gd5);
+
+    Label projectDirectoryLabel = new Label(projectDirectoryGroup, SWT.NONE);
+    projectDirectoryLabel.setText("Directory:");
+
+    projectDirectoryField = new Text(projectDirectoryGroup, SWT.BORDER);
+    GridData gd6 = new GridData();
+    gd6.horizontalAlignment = GridData.FILL;
+    gd6.grabExcessHorizontalSpace = true;
+    projectDirectoryField.setLayoutData(gd6);
+
+    projectDirectoryBrowseButton = new Button(projectDirectoryGroup, SWT.NONE);
+    projectDirectoryBrowseButton.setText("Browse...");
+  }
+  
   private final class PageValidator implements ModifyListener {
     @Override
     public void modifyText(ModifyEvent event) {

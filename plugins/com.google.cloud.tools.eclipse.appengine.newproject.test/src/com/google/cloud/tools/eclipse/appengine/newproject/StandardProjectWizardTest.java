@@ -34,4 +34,9 @@ public class StandardProjectWizardTest {
     Assert.assertEquals("New App Engine Standard Project", wizard.getWindowTitle());
   }
   
+  @Test
+  public void testOnePage() {
+    Assert.assertEquals(1, wizard.getPageCount());
+  }
+  
 }
