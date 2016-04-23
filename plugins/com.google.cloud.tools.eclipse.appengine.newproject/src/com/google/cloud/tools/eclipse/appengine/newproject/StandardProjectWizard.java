@@ -8,17 +8,18 @@ import org.eclipse.ui.IWorkbench;
 
 public class StandardProjectWizard extends Wizard implements INewWizard {
 
+  private IWizardPage page;
+
   @Override
   public void init(IWorkbench workbench, IStructuredSelection selection) {
     this.setWindowTitle("New App Engine Standard Project");
-    // see BasicNewResourceProjectWizard which is what we need except it isn't meant to be subclassed
-    IWizardPage page = new StubWizardPage("first page");
+    page = new AppEngineStandardWizardPage("first page");
     this.addPage(page);
   }
   
   @Override
   public boolean canFinish() {
-    return true;
+    return page.isPageComplete();
   }
 
   @Override
