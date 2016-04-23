@@ -10,7 +10,7 @@ public class StandardProjectWizardTest {
   private StandardProjectWizard wizard = new StandardProjectWizard();
 
   @BeforeClass // seems to be needed on Travis to avoid race condition
-  public void loadImageRegistry() {
+  public static void loadImageRegistry() {
     JFaceResources.getImageRegistry();
   }
   
