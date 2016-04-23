@@ -11,6 +11,7 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Label;
@@ -128,8 +129,21 @@ public class AppEngineStandardWizardPage extends WizardPage implements IWizardPa
     projectDirectoryBrowseButton = new Button(projectDirectoryGroup, SWT.NONE);
     projectDirectoryBrowseButton.setEnabled(false);
     projectDirectoryBrowseButton.setText("Browse...");
+    projectDirectoryBrowseButton.addSelectionListener(new ProjectDirectoryPicker());
   }
   
+  private final class ProjectDirectoryPicker extends SelectionAdapter {
+    @Override
+    public void widgetSelected(SelectionEvent event) {
+      DirectoryDialog dialog = new DirectoryDialog(getShell(), SWT.OPEN);
+      dialog.setMessage("Choose a directory for the project contents:");
+      String userChoice = dialog.open();
+      if (userChoice != null) {
+        projectDirectoryField.setText(userChoice);
+      }
+    }
+  }
+
   private final class PageValidator implements ModifyListener {
     @Override
     public void modifyText(ModifyEvent event) {
