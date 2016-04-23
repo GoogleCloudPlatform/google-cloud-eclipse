@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="com.google.cloud.tools.eclipse.3rdparty.feature"
+      label="3rd Party Features"
+      version="0.1.0.qualifier"
+      provider-name="Google, Inc."
+      license-feature="com.google.licenses.apache_v2">
+
+   <description>
+      A collection of the 3rd Party Dependencies.
+   </description>
+
+   <copyright>
+      %copyright.text
+   </copyright>
+
+   <license url="%license.url">
+      %license.text
+   </license>
+
+   <plugin
+         id="com.google.guava"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.google.gson"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>
