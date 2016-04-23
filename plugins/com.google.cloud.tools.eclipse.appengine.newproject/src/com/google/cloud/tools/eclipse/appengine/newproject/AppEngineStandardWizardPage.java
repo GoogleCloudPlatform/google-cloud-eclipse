@@ -5,6 +5,9 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -93,6 +96,8 @@ public class AppEngineStandardWizardPage extends WizardPage implements IWizardPa
     workspaceProjectDirectoryButton = new Button(projectDirectoryGroup, SWT.RADIO);
     workspaceProjectDirectoryButton.setText("Create new project in workspace");
     workspaceProjectDirectoryButton.setSelection(true);
+    SelectionListener directorySwitcher = new DirectorySwitcher();
+    workspaceProjectDirectoryButton.addSelectionListener(directorySwitcher);
     GridData workspaceProjectDirectoryButtonPosition = new GridData();
     workspaceProjectDirectoryButtonPosition.horizontalAlignment = GridData.FILL;
     workspaceProjectDirectoryButtonPosition.grabExcessHorizontalSpace = true;
@@ -102,6 +107,7 @@ public class AppEngineStandardWizardPage extends WizardPage implements IWizardPa
     customProjectDirectoryButton = new Button(projectDirectoryGroup, SWT.RADIO);
     customProjectDirectoryButton.setSelection(false); // not by default
     customProjectDirectoryButton.setText("Create new project in:");
+    customProjectDirectoryButton.addSelectionListener(directorySwitcher);
     GridData customProjectDirectoryButtonPosition = new GridData();
     customProjectDirectoryButtonPosition.horizontalAlignment = GridData.FILL;
     customProjectDirectoryButtonPosition.grabExcessHorizontalSpace = true;
@@ -134,5 +140,15 @@ public class AppEngineStandardWizardPage extends WizardPage implements IWizardPa
       setPageComplete(complete);
     }
   }  
+  
+  private final class DirectorySwitcher extends SelectionAdapter {
+
+    @Override
+    public void widgetSelected(SelectionEvent event) {
+      projectDirectoryBrowseButton.setEnabled(event.widget == customProjectDirectoryButton);
+      projectDirectoryField.setEnabled(event.widget == customProjectDirectoryButton);
+    }
+
+  }
   
 }
