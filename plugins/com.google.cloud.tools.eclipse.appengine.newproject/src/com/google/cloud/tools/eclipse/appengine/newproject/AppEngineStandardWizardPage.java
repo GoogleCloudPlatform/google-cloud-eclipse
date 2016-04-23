@@ -82,9 +82,9 @@ public class AppEngineStandardWizardPage extends WizardPage implements IWizardPa
     // Eclipse project directory (defaults to subdirectory under workspace)
     Group projectDirectoryGroup = new Group(container, SWT.NULL);
     projectDirectoryGroup.setText("Location");
-    GridData gd3 = new GridData(GridData.FILL_HORIZONTAL);
-    gd3.horizontalSpan = 2;
-    projectDirectoryGroup.setLayoutData(gd3);
+    GridData groupPosition = new GridData(GridData.FILL_HORIZONTAL);
+    groupPosition.horizontalSpan = 2;
+    projectDirectoryGroup.setLayoutData(groupPosition);
 
     GridLayout projectDirectoryLayout = new GridLayout();
     projectDirectoryLayout.numColumns = 3;
@@ -93,20 +93,20 @@ public class AppEngineStandardWizardPage extends WizardPage implements IWizardPa
     workspaceProjectDirectoryButton = new Button(projectDirectoryGroup, SWT.RADIO);
     workspaceProjectDirectoryButton.setText("Create new project in workspace");
     workspaceProjectDirectoryButton.setSelection(true);
-    GridData gd4 = new GridData();
-    gd4.horizontalAlignment = GridData.FILL;
-    gd4.grabExcessHorizontalSpace = true;
-    gd4.horizontalSpan = 3;
-    workspaceProjectDirectoryButton.setLayoutData(gd4);
+    GridData workspaceProjectDirectoryButtonPosition = new GridData();
+    workspaceProjectDirectoryButtonPosition.horizontalAlignment = GridData.FILL;
+    workspaceProjectDirectoryButtonPosition.grabExcessHorizontalSpace = true;
+    workspaceProjectDirectoryButtonPosition.horizontalSpan = 3;
+    workspaceProjectDirectoryButton.setLayoutData(workspaceProjectDirectoryButtonPosition);
 
     customProjectDirectoryButton = new Button(projectDirectoryGroup, SWT.RADIO);
     customProjectDirectoryButton.setSelection(false); // not by default
     customProjectDirectoryButton.setText("Create new project in:");
-    GridData gd5 = new GridData();
-    gd5.horizontalAlignment = GridData.FILL;
-    gd5.grabExcessHorizontalSpace = true;
-    gd5.horizontalSpan = 3;
-    customProjectDirectoryButton.setLayoutData(gd5);
+    GridData customProjectDirectoryButtonPosition = new GridData();
+    customProjectDirectoryButtonPosition.horizontalAlignment = GridData.FILL;
+    customProjectDirectoryButtonPosition.grabExcessHorizontalSpace = true;
+    customProjectDirectoryButtonPosition.horizontalSpan = 3;
+    customProjectDirectoryButton.setLayoutData(customProjectDirectoryButtonPosition);
 
     Label projectDirectoryLabel = new Label(projectDirectoryGroup, SWT.NONE);
     projectDirectoryLabel.setText("Directory:");
@@ -114,10 +114,10 @@ public class AppEngineStandardWizardPage extends WizardPage implements IWizardPa
     // todo enable these next two depending on state of radio buttons
     projectDirectoryField = new Text(projectDirectoryGroup, SWT.BORDER);
     projectDirectoryField.setEnabled(false);
-    GridData gd6 = new GridData();
-    gd6.horizontalAlignment = GridData.FILL;
-    gd6.grabExcessHorizontalSpace = true;
-    projectDirectoryField.setLayoutData(gd6);
+    GridData projectDirectoryFieldPosition = new GridData();
+    projectDirectoryFieldPosition.horizontalAlignment = GridData.FILL;
+    projectDirectoryFieldPosition.grabExcessHorizontalSpace = true;
+    projectDirectoryField.setLayoutData(projectDirectoryFieldPosition);
 
     projectDirectoryBrowseButton = new Button(projectDirectoryGroup, SWT.NONE);
     projectDirectoryBrowseButton.setEnabled(false);
