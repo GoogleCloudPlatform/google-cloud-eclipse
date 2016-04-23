@@ -21,7 +21,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.wst.common.project.facet.core.IDelegate;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
-import org.eclipse.wst.common.project.facet.core.internal.FacetedProject;
 
 import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
 import com.google.cloud.tools.eclipse.appengine.localserver.CloudSdkUtils;
@@ -29,13 +28,12 @@ import com.google.cloud.tools.eclipse.appengine.localserver.CloudSdkUtils;
 /**
  * Google Cloud SDK facet delegate for facet install action.
  */
-@SuppressWarnings("restriction") // For the FacetedProject in the javadoc
 public class CloudSdkFacetInstallDelegate implements IDelegate {
   /**
    * When the user clicks the "Apply" or "OK" button in the Project Facet page,
    * this function is called through {@link FacetedProject#mergeChanges} and if
    * this function exits without an exception, the facet will be added to the
-   * project via {@link FacetedProject}.
+   * project via {@code FacetedProject}.
    */
   @Override
   public void execute(IProject project,

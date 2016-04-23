@@ -19,16 +19,14 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.common.project.facet.core.IDelegate;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
-import org.eclipse.wst.common.project.facet.core.internal.FacetedProject;
 
 /**
  * Google Cloud SDK facet delegate for facet uninstall action.
  */
-@SuppressWarnings("restriction") // For the FacetedProject in the javadoc
 public class CloudSdkFacetUninstallDelegate implements IDelegate {
   /**
    * Facet removal is handled by
-   * {@link FacetedProject#mergeChanges} and the additional work to manage the
+   * {@code FacetedProject#mergeChanges} and the additional work to manage the
    * installation of the gcloud/app engine component and the gcloud-maven plugin
    * is not yet supported.
    */
