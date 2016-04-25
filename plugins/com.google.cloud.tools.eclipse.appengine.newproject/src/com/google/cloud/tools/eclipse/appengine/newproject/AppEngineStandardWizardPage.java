@@ -162,5 +162,9 @@ public class AppEngineStandardWizardPage extends WizardPage implements IWizardPa
     }
 
   }
+
+  AppEngineStandardProjectConfig getAppEngineStandardProjectConfig() {
+    return null;
+  }
   
 }
