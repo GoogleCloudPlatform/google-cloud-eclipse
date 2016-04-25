@@ -16,6 +16,11 @@ public class EclipseProjectNameValidatorTest {
   }
   
   @Test
+  public void testOnlySpaces() {
+    Assert.assertFalse(EclipseProjectNameValidator.validate("    "));
+  }
+  
+  @Test
   public void testEmptyString() {
     Assert.assertFalse(EclipseProjectNameValidator.validate(""));
   }

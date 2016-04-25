@@ -8,7 +8,7 @@ public class EclipseProjectNameValidator {
    * Check if a string is a legal Eclipse project name.
    */
   public static boolean validate(String name) {
-    if (name == null || name.isEmpty()) {
+    if (name == null || name.trim().isEmpty()) {
       return false;
     } else if (name.contains("/")) {
       return false;
