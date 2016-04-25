@@ -146,7 +146,7 @@ public class AppEngineStandardWizardPage extends WizardPage implements IWizardPa
     public void modifyText(ModifyEvent event) {
       // todo more checks
       // todo add error messages
-      boolean complete = javaPackageField.getText().trim().length() > 0 
+      boolean complete = JavaPackageValidator.validate(javaPackageField.getText()) 
           && eclipseProjectNameField.getText().trim().length() > 0;
       setPageComplete(complete);
     }
