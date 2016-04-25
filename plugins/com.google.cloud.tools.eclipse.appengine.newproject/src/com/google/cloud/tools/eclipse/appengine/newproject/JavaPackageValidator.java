@@ -3,7 +3,7 @@ package com.google.cloud.tools.eclipse.appengine.newproject;
 public class JavaPackageValidator {
 
   /**
-   * Check if a string is a legal Java package name
+   * Check if a string is a legal Java package name.
    */
   public static boolean validate(String packageName) {
     if (packageName == null) {

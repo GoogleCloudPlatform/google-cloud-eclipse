@@ -144,10 +144,10 @@ public class AppEngineStandardWizardPage extends WizardPage implements IWizardPa
   private final class PageValidator implements ModifyListener {
     @Override
     public void modifyText(ModifyEvent event) {
-      // todo more checks
+      // todo add checks for project ID and directory 
       // todo add error messages
       boolean complete = JavaPackageValidator.validate(javaPackageField.getText()) 
-          && eclipseProjectNameField.getText().trim().length() > 0;
+          && EclipseProjectNameValidator.validate(eclipseProjectNameField.getText());
       setPageComplete(complete);
     }
   }  
