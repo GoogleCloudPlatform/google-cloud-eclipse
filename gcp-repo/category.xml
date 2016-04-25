@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="../features/com.google.gcp.eclipse.suite.e45.feature" id="com.google.cloud.tools.eclipse.suite.e45.feature" version="0.1.0.qualifier">
+   <feature id="com.google.cloud.tools.eclipse.suite.e45.feature" version="0.1.0.qualifier">
       <category name="GCP"/>
    </feature>
-   <feature url="features/com.google.cloud.tools.eclipse.3rdparty.feature_0.1.0.qualifier.jar" id="com.google.cloud.tools.eclipse.3rdparty.feature" version="0.1.0.qualifier"/>
+   <feature id="com.google.cloud.tools.eclipse.3rdparty.feature" version="0.1.0.qualifier"/>
    <category-def name="GCP" label="Cloud Tools for Eclipse"/>
 </site>
