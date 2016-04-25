@@ -30,8 +30,6 @@ public class AppEngineStandardWizardPage extends WizardPage implements IWizardPa
   private Button customProjectDirectoryButton;
   private Text projectDirectoryField;
   private Button projectDirectoryBrowseButton;
-
-  // todo we need a model class that collects all the info for creating a project
   
   AppEngineStandardWizardPage(String pageName) {
     super(pageName);
@@ -154,17 +152,20 @@ public class AppEngineStandardWizardPage extends WizardPage implements IWizardPa
   }  
   
   private final class DirectorySwitcher extends SelectionAdapter {
-
     @Override
     public void widgetSelected(SelectionEvent event) {
       projectDirectoryBrowseButton.setEnabled(event.widget == customProjectDirectoryButton);
       projectDirectoryField.setEnabled(event.widget == customProjectDirectoryButton);
     }
-
   }
 
   AppEngineStandardProjectConfig getAppEngineStandardProjectConfig() {
-    return null;
+    AppEngineStandardProjectConfig projectConfig = new AppEngineStandardProjectConfig();
+    projectConfig.setEclipseProjectName(eclipseProjectNameField.getText());
+    projectConfig.setPackageName(javaPackageField.getText());
+    projectConfig.setAppEngineProjectId(this.projectIdField.getText());
+    // todo: directory
+    return projectConfig;
   }
   
 }

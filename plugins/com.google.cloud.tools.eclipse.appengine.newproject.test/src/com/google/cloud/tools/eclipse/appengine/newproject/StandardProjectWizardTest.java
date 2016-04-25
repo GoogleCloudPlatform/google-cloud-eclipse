@@ -23,12 +23,7 @@ public class StandardProjectWizardTest {
   public void testCanFinish() {
     Assert.assertFalse(wizard.canFinish());
   }
-  
-  @Test
-  public void testPerformFinish() {
-    Assert.assertTrue(wizard.performFinish());
-  }
-  
+
   @Test
   public void testTitleSet() {
     Assert.assertEquals("New App Engine Standard Project", wizard.getWindowTitle());

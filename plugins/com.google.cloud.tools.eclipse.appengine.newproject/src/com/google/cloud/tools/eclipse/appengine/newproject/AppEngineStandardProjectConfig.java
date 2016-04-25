@@ -10,6 +10,7 @@ class AppEngineStandardProjectConfig {
   private String packageName;
   private String eclipseProjectDirectory;
 
+  // todo does builder pattern make more sense here?
   public void setAppEngineProjectId(String id) {
     this.appEngineProjectId = id;
   }
