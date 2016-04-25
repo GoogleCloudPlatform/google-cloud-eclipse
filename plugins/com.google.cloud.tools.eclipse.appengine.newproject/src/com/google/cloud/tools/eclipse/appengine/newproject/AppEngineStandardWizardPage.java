@@ -65,7 +65,6 @@ public class AppEngineStandardWizardPage extends WizardPage implements IWizardPa
     javaPackageField.setLayoutData(javaPackagePosition);
     javaPackageField.addModifyListener(pageValidator);
     
-    // todo enable browsing for Project IDs
     // App Engine Project ID
     Label projectIdLabel = new Label(container, SWT.NONE);
     projectIdLabel.setText("App Engine Project ID: (optional)");
@@ -118,7 +117,6 @@ public class AppEngineStandardWizardPage extends WizardPage implements IWizardPa
     Label projectDirectoryLabel = new Label(projectDirectoryGroup, SWT.NONE);
     projectDirectoryLabel.setText("Directory:");
 
-    // todo enable these next two depending on state of radio buttons
     projectDirectoryField = new Text(projectDirectoryGroup, SWT.BORDER);
     projectDirectoryField.setEnabled(false);
     GridData projectDirectoryFieldPosition = new GridData();
