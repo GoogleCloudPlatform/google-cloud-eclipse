@@ -160,13 +160,21 @@ public class AppEngineStandardWizardPage extends WizardPage implements IWizardPa
     }
   }
 
-  AppEngineStandardProjectConfig getAppEngineStandardProjectConfig() {
-    AppEngineStandardProjectConfig projectConfig = new AppEngineStandardProjectConfig();
-    projectConfig.setEclipseProjectName(eclipseProjectNameField.getText());
-    projectConfig.setPackageName(javaPackageField.getText());
-    projectConfig.setAppEngineProjectId(this.projectIdField.getText());
-    // todo: directory
-    return projectConfig;
+  String getAppEngineProjectId() {
+    return this.projectIdField.getText();
+  }
+
+  String getEclipseProjectDirectory() {
+    // todo: implement
+    return null;
+  }
+
+  String getEclipseProjectName() {
+    return this.eclipseProjectNameField.getText();
+  }
+
+  String getPackageName() {
+    return this.javaPackageField.getText();
   }
   
 }

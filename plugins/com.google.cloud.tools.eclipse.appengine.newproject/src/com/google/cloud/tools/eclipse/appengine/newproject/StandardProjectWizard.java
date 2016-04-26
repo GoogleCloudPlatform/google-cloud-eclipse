@@ -9,6 +9,7 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
 
   // visible for test
   AppEngineStandardWizardPage page;
+  private AppEngineStandardProjectConfig config = new AppEngineStandardProjectConfig();
 
   @Override
   public void init(IWorkbench workbench, IStructuredSelection selection) {
@@ -16,15 +17,15 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
     page = new AppEngineStandardWizardPage("first page");
     this.addPage(page);
   }
-  
-  @Override
-  public boolean canFinish() {
-    return page.isPageComplete();
-  }
 
   @Override
   public boolean performFinish() {
-    AppEngineStandardProjectConfig config = page.getAppEngineStandardProjectConfig();
+    // todo is this the right time/place to grab these?
+    config.setAppEngineProjectId(page.getAppEngineProjectId());
+    config.setEclipseProjectDirectory(page.getEclipseProjectDirectory());
+    config.setEclipseProjectName(page.getEclipseProjectName());
+    config.setPackageName(page.getPackageName());
+    
     EclipseProjectCreator.makeNewProject(config);
     // todo what are we supposed to do if project creation fails?
     return true;
