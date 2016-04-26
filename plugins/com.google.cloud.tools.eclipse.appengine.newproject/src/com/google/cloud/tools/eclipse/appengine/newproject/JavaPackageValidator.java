@@ -10,6 +10,9 @@ public class JavaPackageValidator {
       return false;
     } else if (packageName.isEmpty()) {
       return true;
+    } else if (packageName.endsWith(".")) {
+      // todo or allow this and strip the period
+      return false;
     } else {
       String[] parts = packageName.split("\\.");
       for (int i = 0; i < parts.length; i++) {

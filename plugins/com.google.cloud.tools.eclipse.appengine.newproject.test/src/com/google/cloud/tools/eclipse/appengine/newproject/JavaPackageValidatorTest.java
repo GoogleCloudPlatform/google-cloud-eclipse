@@ -9,6 +9,11 @@ public class JavaPackageValidatorTest {
   public void testUsualPackage() {
     Assert.assertTrue(JavaPackageValidator.validate("com.google.eclipse"));
   }
+  
+  @Test
+  public void testEndsWithPeriod() {
+    Assert.assertFalse(JavaPackageValidator.validate("com.google.eclipse."));
+  }
 
   @Test
   public void testOneWord() {
