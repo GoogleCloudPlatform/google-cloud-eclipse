@@ -20,7 +20,6 @@ import java.net.URL;
 import java.net.URLConnection;
 
 import org.eclipse.wst.server.core.IServer;
-import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
 
 /**
  * Verifies if the server has started by launching a thread that pings the server and
@@ -47,7 +46,7 @@ public final class CloudSdkServerStartupChecker {
    * Create a new CloudSdkServerStartupChecker.
    *
    * @param server the server to be monitored
-   * @param url the url to ping
+   * @param url the URL to ping
    * @param maxPings the maximum number of times to try pinging
    * @param behaviour the {@link ServerBehaviourDelegate} of {@code server}
    */
@@ -59,7 +58,7 @@ public final class CloudSdkServerStartupChecker {
   }
 
   /**
-   * Starts a thread that pings the url to be monitored.
+   * Starts a thread that pings the URL to be monitored.
    */
   public void start() {
     Thread t = new Thread(NAME) {
