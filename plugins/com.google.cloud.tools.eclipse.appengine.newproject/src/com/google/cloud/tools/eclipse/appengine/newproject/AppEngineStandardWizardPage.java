@@ -5,15 +5,8 @@ import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.DirectoryDialog;
-import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
@@ -24,11 +17,6 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage im
 
   private Text javaPackageField;
   private Text projectIdField;
-  
-  private Button workspaceProjectDirectoryButton;
-  private Button customProjectDirectoryButton;
-  private Text projectDirectoryField;
-  private Button projectDirectoryBrowseButton;
   
   AppEngineStandardWizardPage(String pageName) {
     super(pageName);
@@ -60,72 +48,7 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage im
     projectIdField.setLayoutData(projectIdPosition);
     projectIdField.addModifyListener(pageValidator);
     
-    addLocationWidgets(container);
-
     // todo what to focus on
-  }
-
-  // UI to choose location of Eclipse project on local file system
-  // todo should we pull this out into a separate class?
-  private void addLocationWidgets(Composite container) {
-    // Eclipse project directory (defaults to subdirectory under workspace)
-    Group projectDirectoryGroup = new Group(container, SWT.NULL);
-    projectDirectoryGroup.setText("Location");
-    GridData groupPosition = new GridData(GridData.FILL_HORIZONTAL);
-    groupPosition.horizontalSpan = 2;
-    projectDirectoryGroup.setLayoutData(groupPosition);
-
-    GridLayout projectDirectoryLayout = new GridLayout();
-    projectDirectoryLayout.numColumns = 3;
-    projectDirectoryGroup.setLayout(projectDirectoryLayout);
-
-    workspaceProjectDirectoryButton = new Button(projectDirectoryGroup, SWT.RADIO);
-    workspaceProjectDirectoryButton.setText("Create new project in workspace");
-    workspaceProjectDirectoryButton.setSelection(true);
-    SelectionListener directorySwitcher = new DirectorySwitcher();
-    workspaceProjectDirectoryButton.addSelectionListener(directorySwitcher);
-    GridData workspaceProjectDirectoryButtonPosition = new GridData();
-    workspaceProjectDirectoryButtonPosition.horizontalAlignment = GridData.FILL;
-    workspaceProjectDirectoryButtonPosition.grabExcessHorizontalSpace = true;
-    workspaceProjectDirectoryButtonPosition.horizontalSpan = 3;
-    workspaceProjectDirectoryButton.setLayoutData(workspaceProjectDirectoryButtonPosition);
-
-    customProjectDirectoryButton = new Button(projectDirectoryGroup, SWT.RADIO);
-    customProjectDirectoryButton.setSelection(false); // not by default
-    customProjectDirectoryButton.setText("Create new project in:");
-    customProjectDirectoryButton.addSelectionListener(directorySwitcher);
-    GridData customProjectDirectoryButtonPosition = new GridData();
-    customProjectDirectoryButtonPosition.horizontalAlignment = GridData.FILL;
-    customProjectDirectoryButtonPosition.grabExcessHorizontalSpace = true;
-    customProjectDirectoryButtonPosition.horizontalSpan = 3;
-    customProjectDirectoryButton.setLayoutData(customProjectDirectoryButtonPosition);
-
-    Label projectDirectoryLabel = new Label(projectDirectoryGroup, SWT.NONE);
-    projectDirectoryLabel.setText("Directory:");
-
-    projectDirectoryField = new Text(projectDirectoryGroup, SWT.BORDER);
-    projectDirectoryField.setEnabled(false);
-    GridData projectDirectoryFieldPosition = new GridData();
-    projectDirectoryFieldPosition.horizontalAlignment = GridData.FILL;
-    projectDirectoryFieldPosition.grabExcessHorizontalSpace = true;
-    projectDirectoryField.setLayoutData(projectDirectoryFieldPosition);
-
-    projectDirectoryBrowseButton = new Button(projectDirectoryGroup, SWT.NONE);
-    projectDirectoryBrowseButton.setEnabled(false);
-    projectDirectoryBrowseButton.setText("Browse...");
-    projectDirectoryBrowseButton.addSelectionListener(new ProjectDirectoryPicker());
-  }
-  
-  private final class ProjectDirectoryPicker extends SelectionAdapter {
-    @Override
-    public void widgetSelected(SelectionEvent event) {
-      DirectoryDialog dialog = new DirectoryDialog(getShell(), SWT.OPEN);
-      dialog.setMessage("Choose a directory for the project contents:");
-      String userChoice = dialog.open();
-      if (userChoice != null) {
-        projectDirectoryField.setText(userChoice);
-      }
-    }
   }
 
   private final class PageValidator implements ModifyListener {
@@ -138,22 +61,9 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage im
       setPageComplete(complete);
     }
   }  
-  
-  private final class DirectorySwitcher extends SelectionAdapter {
-    @Override
-    public void widgetSelected(SelectionEvent event) {
-      projectDirectoryBrowseButton.setEnabled(event.widget == customProjectDirectoryButton);
-      projectDirectoryField.setEnabled(event.widget == customProjectDirectoryButton);
-    }
-  }
 
   String getAppEngineProjectId() {
     return this.projectIdField.getText();
-  }
-
-  String getEclipseProjectDirectory() {
-    // todo: implement
-    return null;
   }
 
   String getPackageName() {
