@@ -7,8 +7,7 @@ import org.eclipse.ui.IWorkbench;
 
 public class StandardProjectWizard extends Wizard implements INewWizard {
 
-  // visible for test
-  AppEngineStandardWizardPage page;
+  private AppEngineStandardWizardPage page;
   private AppEngineStandardProjectConfig config = new AppEngineStandardProjectConfig();
 
   @Override

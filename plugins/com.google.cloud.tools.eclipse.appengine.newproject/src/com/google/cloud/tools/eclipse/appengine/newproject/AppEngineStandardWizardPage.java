@@ -13,7 +13,7 @@ import org.eclipse.swt.widgets.Text;
 /**
  * UI to collect all information necessary to create a new App Engine Standard Java Eclipse project.
  */
-public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage implements IWizardPage {
+class AppEngineStandardWizardPage extends WizardNewProjectCreationPage implements IWizardPage {
 
   private Text javaPackageField;
   private Text projectIdField;
@@ -48,17 +48,38 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage im
     projectIdField.setLayoutData(projectIdPosition);
     projectIdField.addModifyListener(pageValidator);
     
-    // todo what to focus on
+    // todo what to focus on with forceFocus
   }
 
+  @Override
+  public boolean validatePage() {
+    if (!super.validatePage()) {
+      return false;
+    }
+    
+    return validateLocalFields();
+  }
+
+  private boolean validateLocalFields() {
+    String packageName = javaPackageField.getText();
+    if (!JavaPackageValidator.validate(packageName)) {
+      setErrorMessage("Illegal Java package name: " + packageName);
+      return false;
+    }
+    
+    String projectId = projectIdField.getText();
+    if (!AppEngineProjectIdValidator.validate(projectId)) {
+      setErrorMessage("Illegal App Engine Project ID: " + projectId);
+      return false;
+    }
+    
+    return true;
+  }
+  
   private final class PageValidator implements ModifyListener {
     @Override
     public void modifyText(ModifyEvent event) {
-      // todo add checks for directory 
-      // todo add error messages
-      boolean complete = JavaPackageValidator.validate(javaPackageField.getText()) 
-          && AppEngineProjectIdValidator.validate(projectIdField.getText());
-      setPageComplete(complete);
+      setPageComplete(validatePage());
     }
   }  
 
