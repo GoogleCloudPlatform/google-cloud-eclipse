@@ -1,7 +1,7 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import org.eclipse.jface.wizard.IWizardPage;
-import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -20,10 +20,9 @@ import org.eclipse.swt.widgets.Text;
 /**
  * UI to collect all information necessary to create a new App Engine Standard Java Eclipse project.
  */
-public class AppEngineStandardWizardPage extends WizardPage implements IWizardPage {
+public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage implements IWizardPage {
 
   private Text javaPackageField;
-  private Text eclipseProjectNameField;
   private Text projectIdField;
   
   private Button workspaceProjectDirectoryButton;
@@ -33,27 +32,15 @@ public class AppEngineStandardWizardPage extends WizardPage implements IWizardPa
   
   AppEngineStandardWizardPage(String pageName) {
     super(pageName);
-    setPageComplete(false);
   }
 
   // todo is there a way to call this for a test?
   @Override
   public void createControl(Composite parent) {
-    Composite container = new Composite(parent, SWT.NULL);
-    GridLayout gridLayout = new GridLayout();
-    container.setLayout(gridLayout);
-    setControl(container);
+    super.createControl(parent);
+    Composite container = (Composite) getControl();
     
-    // Eclipse project name
-    Label projectNameLabel = new Label(container, SWT.NONE);
-    projectNameLabel.setText("Eclipse project name:");
-    
-    eclipseProjectNameField = new Text(container, SWT.BORDER);
-    GridData projectNamePosition = new GridData(GridData.FILL_HORIZONTAL);
-    projectNamePosition.horizontalSpan = 2;
-    eclipseProjectNameField.setLayoutData(projectNamePosition);
     ModifyListener pageValidator = new PageValidator();
-    eclipseProjectNameField.addModifyListener(pageValidator);
     
     // Java package name
     Label packageNameLabel = new Label(container, SWT.NONE);
@@ -75,7 +62,7 @@ public class AppEngineStandardWizardPage extends WizardPage implements IWizardPa
     
     addLocationWidgets(container);
 
-    eclipseProjectNameField.forceFocus();
+    // todo what to focus on
   }
 
   // UI to choose location of Eclipse project on local file system
@@ -147,7 +134,6 @@ public class AppEngineStandardWizardPage extends WizardPage implements IWizardPa
       // todo add checks for directory 
       // todo add error messages
       boolean complete = JavaPackageValidator.validate(javaPackageField.getText()) 
-          && EclipseProjectNameValidator.validate(eclipseProjectNameField.getText())
           && AppEngineProjectIdValidator.validate(projectIdField.getText());
       setPageComplete(complete);
     }
@@ -168,10 +154,6 @@ public class AppEngineStandardWizardPage extends WizardPage implements IWizardPa
   String getEclipseProjectDirectory() {
     // todo: implement
     return null;
-  }
-
-  String getEclipseProjectName() {
-    return this.eclipseProjectNameField.getText();
   }
 
   String getPackageName() {
