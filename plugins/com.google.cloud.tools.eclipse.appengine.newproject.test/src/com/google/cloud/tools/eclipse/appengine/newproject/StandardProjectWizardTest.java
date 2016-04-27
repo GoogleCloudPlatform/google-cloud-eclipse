@@ -16,7 +16,7 @@ public class StandardProjectWizardTest {
     } catch (NullPointerException ex) {
       wizard = new StandardProjectWizard();
     }
-    wizard.init(null, null);
+    wizard.addPages();
   }
   
   @Test
@@ -32,6 +32,11 @@ public class StandardProjectWizardTest {
   @Test
   public void testOnePage() {
     Assert.assertEquals(1, wizard.getPageCount());
+  }
+  
+  @Test
+  public void testGetPageByName() {
+    Assert.assertNotNull(wizard.getPage("first page"));
   }
   
 }

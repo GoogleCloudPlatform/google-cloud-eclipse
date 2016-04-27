@@ -12,4 +12,14 @@ public class AppEngineStandardWizardPageTest {
     Assert.assertFalse(page.isPageComplete());
   }
   
+  @Test
+  public void testGetNextPage() {
+    Assert.assertNull(page.getNextPage());
+  }
+  
+  @Test
+  public void testGetPreviousPage() {
+    Assert.assertNull(page.getPreviousPage());
+  }
+
 }

@@ -9,7 +9,7 @@ public class EclipseProjectCreatorTest {
   public void testMakeNewProject() {
     AppEngineStandardProjectConfig config = new AppEngineStandardProjectConfig();
     config.setEclipseProjectName("foo");
-    Assert.assertFalse(EclipseProjectCreator.makeNewProject(config));
+    Assert.assertTrue(EclipseProjectCreator.makeNewProject(config, null).isOK());
   }
   
 }
