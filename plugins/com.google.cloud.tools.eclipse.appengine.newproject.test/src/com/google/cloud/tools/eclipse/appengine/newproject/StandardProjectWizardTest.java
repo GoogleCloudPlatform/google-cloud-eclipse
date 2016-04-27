@@ -36,7 +36,7 @@ public class StandardProjectWizardTest {
   
   @Test
   public void testGetPageByName() {
-    Assert.assertNotNull(wizard.getPage("first page"));
+    Assert.assertNotNull(wizard.getPage("basicNewProjectPage"));
   }
   
 }

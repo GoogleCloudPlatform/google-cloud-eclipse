@@ -5,7 +5,7 @@ import org.junit.Test;
 
 public class AppEngineStandardWizardPageTest {
 
-  private AppEngineStandardWizardPage page = new AppEngineStandardWizardPage("foo");
+  private AppEngineStandardWizardPage page = new AppEngineStandardWizardPage();
   
   @Test
   public void testPageInitiallyIncomplete() {

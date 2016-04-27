@@ -18,8 +18,8 @@ class AppEngineStandardWizardPage extends WizardNewProjectCreationPage implement
   private Text javaPackageField;
   private Text projectIdField;
   
-  AppEngineStandardWizardPage(String pageName) {
-    super(pageName);
+  AppEngineStandardWizardPage() {
+    super("basicNewProjectPage");
   }
 
   // todo is there a way to call this for a test?

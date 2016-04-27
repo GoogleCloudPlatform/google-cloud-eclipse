@@ -14,7 +14,7 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
   
   StandardProjectWizard() {
     this.setWindowTitle("New App Engine Standard Project");
-    page = new AppEngineStandardWizardPage("first page");
+    page = new AppEngineStandardWizardPage();
   }
   
   @Override 
