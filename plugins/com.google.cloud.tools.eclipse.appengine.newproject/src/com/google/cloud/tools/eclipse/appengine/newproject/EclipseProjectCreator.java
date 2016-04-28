@@ -11,6 +11,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.swt.widgets.Shell;
@@ -21,7 +22,7 @@ import org.eclipse.ui.ide.undo.WorkspaceUndoUtil;
 * Utility to make a new Eclipse project with the App Engine Standard facets in the workspace.  
 */
 class EclipseProjectCreator {
-
+  
   /**
    * @return status of project creation
    */
@@ -29,9 +30,6 @@ class EclipseProjectCreator {
       AppEngineStandardProjectConfig config, IProgressMonitor monitor,
       final Shell shell, final IWizardContainer container) {
     
-    // todo submonitor????
-    
-
     URI location = null;
     if (!config.getUseDefaultProjectLocation()) {
       location = config.getEclipseProjectLocationUri();
