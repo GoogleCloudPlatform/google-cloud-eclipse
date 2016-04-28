@@ -13,7 +13,7 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
   private AppEngineStandardProjectConfig config = new AppEngineStandardProjectConfig();
   
   public StandardProjectWizard() {
-    this.setWindowTitle("New App Engine Standard Project");
+    this.setWindowTitle("New Google App Engine Standard Project");
     page = new AppEngineStandardWizardPage();
   }
   
