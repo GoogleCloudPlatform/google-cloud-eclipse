@@ -2,6 +2,7 @@ package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -44,9 +45,8 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
     config.setProject(page.getProjectHandle());
     
     // todo set up
-    IProgressMonitor monitor = null;
     IAdaptable uiInfoAdapter = WorkspaceUndoUtil.getUIInfoAdapter(getShell());
-    IRunnableWithProgress runnable = EclipseProjectCreator.makeNewProject(config, monitor, uiInfoAdapter);
+    IRunnableWithProgress runnable = EclipseProjectCreator.makeNewProject(config, uiInfoAdapter);
 
     IStatus status = Status.OK_STATUS;
     try {
@@ -56,7 +56,8 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
     } catch (InterruptedException ex) {
       status = Status.CANCEL_STATUS;
     } catch (InvocationTargetException ex) {
-      status = new Status(Status.ERROR, ex.getMessage(), 1, "", null);
+      int errorCode = 1;
+      status = new Status(Status.ERROR, "todo plugin ID", errorCode, ex.getMessage(), null);
     }
     
     // todo if fail, call setErrorMessage()
