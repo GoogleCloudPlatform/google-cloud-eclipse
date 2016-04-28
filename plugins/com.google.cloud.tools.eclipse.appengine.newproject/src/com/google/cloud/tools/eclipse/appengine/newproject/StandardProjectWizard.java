@@ -36,6 +36,7 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
     // todo set up
     IProgressMonitor monitor = null;
     IStatus status = EclipseProjectCreator.makeNewProject(config, monitor, getShell(), getContainer());
+
     // todo if fail, call  use setErrorMessage()
     return status.isOK();
   }
