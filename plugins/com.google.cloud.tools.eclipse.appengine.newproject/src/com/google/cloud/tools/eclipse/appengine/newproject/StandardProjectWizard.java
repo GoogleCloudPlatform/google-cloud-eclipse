@@ -1,11 +1,13 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.ide.undo.WorkspaceUndoUtil;
 
 public class StandardProjectWizard extends Wizard implements INewWizard {
 
@@ -39,7 +41,8 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
     
     // todo set up
     IProgressMonitor monitor = null;
-    IStatus status = EclipseProjectCreator.makeNewProject(config, monitor, getShell(), getContainer());
+    IAdaptable uiInfoAdapter = WorkspaceUndoUtil.getUIInfoAdapter(getShell());
+    IStatus status = EclipseProjectCreator.makeNewProject(config, monitor, uiInfoAdapter, getContainer());
 
     // todo if fail, call  use setErrorMessage()
     return status.isOK();

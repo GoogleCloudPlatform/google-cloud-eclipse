@@ -8,14 +8,13 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.ide.undo.CreateProjectOperation;
-import org.eclipse.ui.ide.undo.WorkspaceUndoUtil;
 
 /**
 * Utility to make a new Eclipse project with the App Engine Standard facets in the workspace.  
@@ -27,7 +26,7 @@ class EclipseProjectCreator {
    */
   static IStatus makeNewProject(
       AppEngineStandardProjectConfig config, IProgressMonitor monitor,
-      final Shell shell, final IRunnableContext container) {
+      final IAdaptable uiInfoAdapter, final IRunnableContext container) {
     
     URI location = config.getEclipseProjectLocationUri();
     
@@ -37,7 +36,7 @@ class EclipseProjectCreator {
     final IProjectDescription description = workspace.newProjectDescription(name);
     description.setLocationURI(location);
     
-    IRunnableWithProgress runnable = new CreateNewProjectOperation(description, shell);    
+    IRunnableWithProgress runnable = new CreateNewProjectOperation(description, uiInfoAdapter);    
     try {
       boolean fork = true;
       boolean cancelable = true;
@@ -52,11 +51,11 @@ class EclipseProjectCreator {
   
   private static final class CreateNewProjectOperation implements IRunnableWithProgress {
     private final IProjectDescription description;
-    private final Shell shell;
+    private final IAdaptable uiInfoAdapter;
 
-    private CreateNewProjectOperation(IProjectDescription description, Shell shell) {
+    private CreateNewProjectOperation(IProjectDescription description, IAdaptable uiInfoAdapter) {
       this.description = description;
-      this.shell = shell;
+      this.uiInfoAdapter = uiInfoAdapter;
     }
 
     @Override
@@ -64,8 +63,7 @@ class EclipseProjectCreator {
       CreateProjectOperation operation = new CreateProjectOperation(
           description, "Creating new App Engine Project");
       try {
-        // https://bugs.eclipse.org/bugs/show_bug.cgi?id=219901
-        operation.execute(monitor, WorkspaceUndoUtil.getUIInfoAdapter(shell));
+        operation.execute(monitor, uiInfoAdapter);
       } catch (ExecutionException ex) {
         throw new InvocationTargetException(ex);
       }
