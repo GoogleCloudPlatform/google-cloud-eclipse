@@ -1,8 +1,12 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
@@ -42,9 +46,20 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
     // todo set up
     IProgressMonitor monitor = null;
     IAdaptable uiInfoAdapter = WorkspaceUndoUtil.getUIInfoAdapter(getShell());
-    IStatus status = EclipseProjectCreator.makeNewProject(config, monitor, uiInfoAdapter, getContainer());
+    IRunnableWithProgress runnable = EclipseProjectCreator.makeNewProject(config, monitor, uiInfoAdapter);
 
-    // todo if fail, call  use setErrorMessage()
+    IStatus status = Status.OK_STATUS;
+    try {
+      boolean fork = true;
+      boolean cancelable = true;
+      getContainer().run(fork, cancelable, runnable);
+    } catch (InterruptedException ex) {
+      status = Status.CANCEL_STATUS;
+    } catch (InvocationTargetException ex) {
+      status = new Status(Status.ERROR, ex.getMessage(), 1, "", null);
+    }
+    
+    // todo if fail, call setErrorMessage()
     return status.isOK();
   }
 

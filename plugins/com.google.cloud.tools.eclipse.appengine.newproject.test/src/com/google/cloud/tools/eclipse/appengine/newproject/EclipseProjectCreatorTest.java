@@ -6,6 +6,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.swt.widgets.Shell;
 import org.junit.Assert;
@@ -21,7 +22,6 @@ public class EclipseProjectCreatorTest {
 
   @Mock IProject project;
   @Mock IAdaptable adapter;
-  @Mock IRunnableContext container;
   
   @Before
   public void setUp() {
@@ -35,8 +35,8 @@ public class EclipseProjectCreatorTest {
     config.setProject(project);
     
     IProgressMonitor monitor = new NullProgressMonitor();
-    IStatus status = EclipseProjectCreator.makeNewProject(config, monitor, adapter, container);
-    Assert.assertTrue(status.isOK());
+    IRunnableWithProgress runnable = EclipseProjectCreator.makeNewProject(config, monitor, adapter);
+    Assert.assertNotNull(runnable);
   }
   
 }

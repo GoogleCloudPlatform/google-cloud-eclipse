@@ -10,9 +10,6 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.ui.ide.undo.CreateProjectOperation;
 
@@ -22,11 +19,10 @@ import org.eclipse.ui.ide.undo.CreateProjectOperation;
 class EclipseProjectCreator {
   
   /**
-   * @return status of project creation
+   * @return an operation that creates a new project when run
    */
-  static IStatus makeNewProject(
-      AppEngineStandardProjectConfig config, IProgressMonitor monitor,
-      final IAdaptable uiInfoAdapter, final IRunnableContext container) {
+  static IRunnableWithProgress makeNewProject(
+      AppEngineStandardProjectConfig config, IProgressMonitor monitor, final IAdaptable uiInfoAdapter) {
     
     URI location = config.getEclipseProjectLocationUri();
     
@@ -36,17 +32,7 @@ class EclipseProjectCreator {
     final IProjectDescription description = workspace.newProjectDescription(name);
     description.setLocationURI(location);
     
-    IRunnableWithProgress runnable = new CreateNewProjectOperation(description, uiInfoAdapter);    
-    try {
-      boolean fork = true;
-      boolean cancelable = true;
-      container.run(fork, cancelable, runnable);
-      return Status.OK_STATUS;
-    } catch (InterruptedException ex) {
-      return Status.CANCEL_STATUS;
-    } catch (InvocationTargetException ex) {
-      return new Status(Status.ERROR, ex.getMessage(), 1, "", null);
-    }
+    return new CreateNewProjectOperation(description, uiInfoAdapter); 
   }
   
   private static final class CreateNewProjectOperation implements IRunnableWithProgress {
