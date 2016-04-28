@@ -15,7 +15,6 @@ class AppEngineStandardProjectConfig {
   private String eclipseProjectDirectory;
   private URI eclipseProjectLocationUri;
   private IProject project;
-  private boolean useDefaultLocation;
 
   // todo does builder pattern make more sense here?
   public void setAppEngineProjectId(String id) {
@@ -50,10 +49,16 @@ class AppEngineStandardProjectConfig {
     return this.eclipseProjectDirectory;
   }
   
+  /**
+   * @param a file URI to a local directory, or null for the default location
+   */
   public void setEclipseProjectLocationUri(URI uri) {
     this.eclipseProjectLocationUri = uri;
   }
   
+  /**
+   * @return a file URI to a local directory, or null for the default location
+   */
   public URI getEclipseProjectLocationUri() {
     return this.eclipseProjectLocationUri;
   }
@@ -64,14 +69,6 @@ class AppEngineStandardProjectConfig {
 
   public IProject getProject() {
     return this.project;
-  }
-  
-  public void setUseDefaultProjectLocation(boolean useDefaults) {
-    this.useDefaultLocation = useDefaults;
-  }
-  
-  public boolean getUseDefaultProjectLocation() {
-    return this.useDefaultLocation;
   }
 
 }

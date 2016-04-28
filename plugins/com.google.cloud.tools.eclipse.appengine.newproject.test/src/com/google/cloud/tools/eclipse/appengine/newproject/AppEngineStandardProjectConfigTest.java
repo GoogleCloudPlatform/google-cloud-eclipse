@@ -29,13 +29,6 @@ public class AppEngineStandardProjectConfigTest {
   }
   
   @Test
-  public void testUseDefaultProjectLocation() {
-    Assert.assertFalse(config.getUseDefaultProjectLocation());
-    config.setUseDefaultProjectLocation(true);
-    Assert.assertTrue(config.getUseDefaultProjectLocation());
-  }
-  
-  @Test
   public void testEclipseProjectLocationUri() throws URISyntaxException {
     config.setEclipseProjectLocationUri(new URI("file://foo/bar"));
     Assert.assertEquals(new URI("file://foo/bar"), config.getEclipseProjectLocationUri());

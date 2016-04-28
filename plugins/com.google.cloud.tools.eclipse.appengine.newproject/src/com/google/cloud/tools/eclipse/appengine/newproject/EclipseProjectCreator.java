@@ -11,7 +11,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.swt.widgets.Shell;
@@ -30,10 +29,7 @@ class EclipseProjectCreator {
       AppEngineStandardProjectConfig config, IProgressMonitor monitor,
       final Shell shell, final IWizardContainer container) {
     
-    URI location = null;
-    if (!config.getUseDefaultProjectLocation()) {
-      location = config.getEclipseProjectLocationUri();
-    }
+    URI location = config.getEclipseProjectLocationUri();
     
     IWorkspace workspace = ResourcesPlugin.getWorkspace();
     IProject newProject = config.getProject();
