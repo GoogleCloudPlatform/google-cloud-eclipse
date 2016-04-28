@@ -18,8 +18,24 @@ Manual testing of the GCloud Plugin for Eclipse.
 # Create a project
 
 1. File > New > Project...
-1. In the Wizards: text field begin typing "Goo". You should see 
-   "Google App Engine Standard Project" in a "Google Cloud Platform" category.
+1. In the Wizards: text field begin typing "Goo".  
+   "Google App Engine Standard Project" should 
+   appear in a "Google Cloud Platform" folder.
+   Also check that the App Engine logo (a cartoon plane) also appears.
+1. Click the "Next >" button.
+1. The New App Engine Standard Project dialog appears.
+1. Verify that the "Finish" button is disabled.
+1. Verify that "Use default location" button is checked.
+1. Into the project name field, type "foo". If you see 
+   "A project with that name already exists in the workspace."
+   try some other name. 
+1. Verify that the "Finish" button is now enabled.
+1. In the "Java package:" field, type "com.google.testplan".
+1. In the "App Engine Project ID" field type "testplan".
+1. Click the "Finish" button.
+1. Verify that a project named "foo" (or whatever name you picked in step 6)
+   is now created in the package explorer. 
+
 
 # Edit the project sample code
 
