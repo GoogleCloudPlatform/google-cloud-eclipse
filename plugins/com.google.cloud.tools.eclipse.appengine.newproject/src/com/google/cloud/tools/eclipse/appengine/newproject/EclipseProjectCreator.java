@@ -11,8 +11,8 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.ide.undo.CreateProjectOperation;
 import org.eclipse.ui.ide.undo.WorkspaceUndoUtil;
@@ -27,7 +27,7 @@ class EclipseProjectCreator {
    */
   static IStatus makeNewProject(
       AppEngineStandardProjectConfig config, IProgressMonitor monitor,
-      final Shell shell, final IWizardContainer container) {
+      final Shell shell, final IRunnableContext container) {
     
     URI location = config.getEclipseProjectLocationUri();
     
