@@ -49,50 +49,12 @@ class CreateAppEngineStandardWtpProject implements IRunnableWithProgress {
         description, "Creating new App Engine Project");
     try {
       operation.execute(monitor, uiInfoAdapter);
-      createCode(monitor, newProject);
+      
+      CodeTemplates.materialize(newProject, config, monitor, "helloworld");
+      
     } catch (ExecutionException | CoreException ex) {
       throw new InvocationTargetException(ex);
     }
   }
 
-  // todo design a template system for this.
-  /**
-   * Set up the sample code.
-   */
-  private void createCode(IProgressMonitor monitor, IProject newProject) throws CoreException {
-    boolean force = true;
-    boolean local = true;
-    IFolder src = newProject.getFolder("src");
-    if (!src.exists()) {
-      src.create(force, local, monitor);
-    }
-    IFolder main = createChildFolder("main", src, monitor);
-    IFolder java = createChildFolder("java", main, monitor);
-    IFolder webapp = createChildFolder("webapp", main, monitor);
-    IFile appengineWebAppXml = createChildFile("appengine-web.xml", webapp, monitor);
-    IFolder webinf = createChildFolder("WEB-INF", webapp, monitor);
-    IFolder test = createChildFolder("test", src, monitor);
-  }
-
-  private IFolder createChildFolder(String name, IFolder parent, IProgressMonitor monitor) 
-      throws CoreException {
-    boolean force = true;
-    boolean local = true;
-    IFolder child = parent.getFolder(name);
-    if (!child.exists()) {
-      child.create(force, local, monitor);
-    }
-    return child;
-  }
-  
-  private IFile createChildFile(String name, IFolder parent, IProgressMonitor monitor) 
-      throws CoreException {
-    boolean force = true;
-    IFile child = parent.getFile(name);
-    InputStream in = CreateAppEngineStandardWtpProject.class.getResourceAsStream(name);
-    if (!child.exists()) {
-      child.create(in, force, monitor);
-    }
-    return child;
-  }
 }
