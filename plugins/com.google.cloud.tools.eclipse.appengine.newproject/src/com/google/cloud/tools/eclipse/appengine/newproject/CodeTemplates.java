@@ -31,7 +31,7 @@ public class CodeTemplates {
     createCode(monitor, project, packageName);
   }
 
-  // todo replace with something that simply copies from a file system
+  // todo replace with something that simply copies from a file system while replacing tokens
   private static void createCode(IProgressMonitor monitor, IProject project, String packageName) 
       throws CoreException {
     boolean force = true;
@@ -43,6 +43,7 @@ public class CodeTemplates {
     IFolder main = createChildFolder("main", src, monitor);
     IFolder java = createChildFolder("java", main, monitor);
     IFolder test = createChildFolder("test", src, monitor);
+    IFolder testJava = createChildFolder("java", test, monitor);
 
     if (packageName != null && !packageName.isEmpty()) {
       String[] packages = packageName.split("\\.");
@@ -51,16 +52,17 @@ public class CodeTemplates {
         parent = createChildFolder(packages[i], parent, monitor);
       }
       // now set up the test directory
-      parent = test;
+      parent = testJava;
       for (int i = 0; i < packages.length; i++) {
         parent = createChildFolder(packages[i], parent, monitor);
       }
     }
     
     IFolder webapp = createChildFolder("webapp", main, monitor);
-    IFile appengineWebAppXml = createChildFile("appengine-web.xml", webapp, monitor);
-    IFile webXml = createChildFile("web.xml", webapp, monitor);
+    createChildFile("appengine-web.xml", webapp, monitor);
+    createChildFile("web.xml", webapp, monitor);
     IFolder webinf = createChildFolder("WEB-INF", webapp, monitor);
+    createChildFile("index.xhtml", webinf, monitor);
   }
 
   private static IFolder createChildFolder(String name, IFolder parent, IProgressMonitor monitor) 
@@ -78,7 +80,9 @@ public class CodeTemplates {
       throws CoreException {
     boolean force = true;
     IFile child = parent.getFile(name);
-    InputStream in = CreateAppEngineStandardWtpProject.class.getResourceAsStream(name);
+    InputStream in = CreateAppEngineStandardWtpProject.class.getResourceAsStream(
+        "com/google/cloud/tools/eclipse/appengine/newproject/templates/" + name + ".ftl");
+    // todo template processing    
     if (!child.exists()) {
       child.create(in, force, monitor);
     }
