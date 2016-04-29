@@ -47,14 +47,38 @@ class CreateAppEngineStandardWtpProject implements IRunnableWithProgress {
         description, "Creating new App Engine Project");
     try {
       operation.execute(monitor, uiInfoAdapter);
-      IFolder folder = newProject.getFolder("src");
-      if (!folder.exists()) {
-        boolean force = true;
-        boolean local = true;
-        folder.create(force, local, monitor);
-      }
+      createCode(monitor, newProject);
     } catch (ExecutionException | CoreException ex) {
       throw new InvocationTargetException(ex);
     }
+  }
+
+  // todo design a template system for this.
+  /**
+   * Set up the sample code.
+   */
+  private void createCode(IProgressMonitor monitor, IProject newProject) throws CoreException {
+    boolean force = true;
+    boolean local = true;
+    IFolder src = newProject.getFolder("src");
+    if (!src.exists()) {
+      src.create(force, local, monitor);
+    }
+    IFolder main = createChildFolder("main", src, monitor);
+    IFolder java = createChildFolder("java", main, monitor);
+    IFolder webapp = createChildFolder("webapp", main, monitor);
+    IFolder webinf = createChildFolder("WEB-INF", webapp, monitor);
+    IFolder test = createChildFolder("test", src, monitor);
+  }
+
+  private IFolder createChildFolder(String name, IFolder parent, IProgressMonitor monitor) 
+      throws CoreException {
+    boolean force = true;
+    boolean local = true;
+    IFolder child = parent.getFolder(name);
+    if (!child.exists()) {
+      child.create(force, local, monitor);
+    }
+    return child;
   }
 }
