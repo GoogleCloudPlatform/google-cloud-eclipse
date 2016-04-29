@@ -1,9 +1,11 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -67,6 +69,7 @@ class CreateAppEngineStandardWtpProject implements IRunnableWithProgress {
     IFolder main = createChildFolder("main", src, monitor);
     IFolder java = createChildFolder("java", main, monitor);
     IFolder webapp = createChildFolder("webapp", main, monitor);
+    IFile appengineWebAppXml = createChildFile("appengine-web.xml", webapp, monitor);
     IFolder webinf = createChildFolder("WEB-INF", webapp, monitor);
     IFolder test = createChildFolder("test", src, monitor);
   }
@@ -78,6 +81,17 @@ class CreateAppEngineStandardWtpProject implements IRunnableWithProgress {
     IFolder child = parent.getFolder(name);
     if (!child.exists()) {
       child.create(force, local, monitor);
+    }
+    return child;
+  }
+  
+  private IFile createChildFile(String name, IFolder parent, IProgressMonitor monitor) 
+      throws CoreException {
+    boolean force = true;
+    IFile child = parent.getFile(name);
+    InputStream in = CreateAppEngineStandardWtpProject.class.getResourceAsStream(name);
+    if (!child.exists()) {
+      child.create(in, force, monitor);
     }
     return child;
   }
