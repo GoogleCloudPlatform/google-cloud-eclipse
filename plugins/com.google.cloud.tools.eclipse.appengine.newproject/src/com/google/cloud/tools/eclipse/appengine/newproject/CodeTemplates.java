@@ -65,7 +65,8 @@ public class CodeTemplates {
     createChildFile("index.xhtml", webinf, monitor);
   }
 
-  private static IFolder createChildFolder(String name, IFolder parent, IProgressMonitor monitor) 
+  // visible for testing
+  static IFolder createChildFolder(String name, IFolder parent, IProgressMonitor monitor) 
       throws CoreException {
     boolean force = true;
     boolean local = true;
@@ -76,7 +77,8 @@ public class CodeTemplates {
     return child;
   }
   
-  private static IFile createChildFile(String name, IFolder parent, IProgressMonitor monitor) 
+  // visible for testing
+  static IFile createChildFile(String name, IFolder parent, IProgressMonitor monitor) 
       throws CoreException {
     boolean force = true;
     IFile child = parent.getFile(name);
