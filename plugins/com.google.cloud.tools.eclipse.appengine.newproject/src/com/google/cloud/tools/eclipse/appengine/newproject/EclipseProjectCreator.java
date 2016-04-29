@@ -18,52 +18,43 @@ import org.eclipse.ui.ide.undo.CreateProjectOperation;
 /**
 * Utility to make a new Eclipse project with the App Engine Standard facets in the workspace.  
 */
-class EclipseProjectCreator {
+class CreateAppEngineStandardWtpProject implements IRunnableWithProgress {
   
-  /**
-   * @return an operation that creates a new project when run
-   */
-  static IRunnableWithProgress makeNewProject(
-      AppEngineStandardProjectConfig config, final IAdaptable uiInfoAdapter) {
+  private final AppEngineStandardProjectConfig config;
+  private final IAdaptable uiInfoAdapter;
+
+  CreateAppEngineStandardWtpProject(AppEngineStandardProjectConfig config, IAdaptable uiInfoAdapter) {
+    if (config == null) {
+      throw new NullPointerException("Null App Engine configuration");
+    }
+    this.config = config;
+    this.uiInfoAdapter = uiInfoAdapter;
+  }
+
+  @Override
+  public void run(IProgressMonitor monitor) throws InvocationTargetException {
     
-    return new CreateNewProjectOperation(config, uiInfoAdapter); 
-  }
-  
-  private static final class CreateNewProjectOperation implements IRunnableWithProgress {
-    private final AppEngineStandardProjectConfig config;
-    private final IAdaptable uiInfoAdapter;
-
-    private CreateNewProjectOperation(AppEngineStandardProjectConfig config, IAdaptable uiInfoAdapter) {
-      this.config = config;
-      this.uiInfoAdapter = uiInfoAdapter;
-    }
-
-    @Override
-    public void run(IProgressMonitor monitor) throws InvocationTargetException {
-      
-      URI location = config.getEclipseProjectLocationUri();
-      
-      IWorkspace workspace = ResourcesPlugin.getWorkspace();
-      IProject newProject = config.getProject();
-      
-      String name = newProject.getName();
-      final IProjectDescription description = workspace.newProjectDescription(name);
-      description.setLocationURI(location);
-      
-      CreateProjectOperation operation = new CreateProjectOperation(
-          description, "Creating new App Engine Project");
-      try {
-        operation.execute(monitor, uiInfoAdapter);
-        IFolder folder = newProject.getFolder("src");
-        if (!folder.exists()) {
-          boolean force = true;
-          boolean local = true;
-          folder.create(force, local, monitor);
-        }
-      } catch (ExecutionException | CoreException ex) {
-        throw new InvocationTargetException(ex);
+    URI location = config.getEclipseProjectLocationUri();
+    
+    IWorkspace workspace = ResourcesPlugin.getWorkspace();
+    IProject newProject = config.getProject();
+    
+    String name = newProject.getName();
+    final IProjectDescription description = workspace.newProjectDescription(name);
+    description.setLocationURI(location);
+    
+    CreateProjectOperation operation = new CreateProjectOperation(
+        description, "Creating new App Engine Project");
+    try {
+      operation.execute(monitor, uiInfoAdapter);
+      IFolder folder = newProject.getFolder("src");
+      if (!folder.exists()) {
+        boolean force = true;
+        boolean local = true;
+        folder.create(force, local, monitor);
       }
+    } catch (ExecutionException | CoreException ex) {
+      throw new InvocationTargetException(ex);
     }
   }
-
 }

@@ -44,7 +44,8 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
     
     // todo set up
     IAdaptable uiInfoAdapter = WorkspaceUndoUtil.getUIInfoAdapter(getShell());
-    IRunnableWithProgress runnable = EclipseProjectCreator.makeNewProject(config, uiInfoAdapter);
+    final IAdaptable uiInfoAdapter1 = uiInfoAdapter;
+    IRunnableWithProgress runnable = new CreateAppEngineStandardWtpProject(config, uiInfoAdapter1);
 
     IStatus status = Status.OK_STATUS;
     try {
