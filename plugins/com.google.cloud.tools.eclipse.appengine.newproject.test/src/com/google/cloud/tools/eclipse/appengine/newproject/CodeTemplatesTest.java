@@ -1,5 +1,8 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -46,10 +49,12 @@ public class CodeTemplatesTest {
   }
   
   @Test
-  public void testCreateChildFile() throws CoreException {
+  public void testCreateChildFile() throws CoreException, IOException {
     IFile child = CodeTemplates.createChildFile("web.xml", parent, monitor);
     Assert.assertTrue(child.exists());
     Assert.assertEquals("web.xml", child.getName());
+    InputStream in = child.getContents(true);
+    Assert.assertNotEquals("File is empty", -1, in.read());
   }
 
 }
