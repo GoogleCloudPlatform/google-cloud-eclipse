@@ -7,6 +7,8 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 public class CodeTemplates {
 
@@ -82,8 +84,14 @@ public class CodeTemplates {
       throws CoreException {
     boolean force = true;
     IFile child = parent.getFile(name);
-    InputStream in = CreateAppEngineStandardWtpProject.class.getResourceAsStream(
-        "com/google/cloud/tools/eclipse/appengine/newproject/templates/" + name + ".ftl");
+    InputStream in = CodeTemplates.class.getResourceAsStream("templates/" + name + ".ftl");
+    
+    if (in == null) {
+      IStatus status = new Status(Status.ERROR, "todo plugin ID", 2, 
+          "Could not load template for " + name, null);
+      throw new CoreException(status);
+    }
+    
     // todo template processing    
     if (!child.exists()) {
       child.create(in, force, monitor);
