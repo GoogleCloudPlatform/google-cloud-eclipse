@@ -9,8 +9,8 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -19,7 +19,7 @@ import org.junit.Test;
 
 public class CodeTemplatesTest {
 
-  private IProgressMonitor monitor = new NullProgressMonitor();
+  private SubMonitor monitor = SubMonitor.convert(new NullProgressMonitor());
   private IFolder parent;
   
   @Before

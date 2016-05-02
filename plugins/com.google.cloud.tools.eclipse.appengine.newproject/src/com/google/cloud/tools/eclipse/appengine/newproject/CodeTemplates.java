@@ -9,6 +9,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 
 public class CodeTemplates {
 
@@ -19,7 +20,6 @@ public class CodeTemplates {
    * @param config replacement values
    * @param monitor progress monitor
    * @param name directory from which to load template
-   * @throws CoreException 
    */
   // todo: config details are going to vary based on type of template; need a more generic
   // solution such as key-value map or a different design
@@ -36,40 +36,47 @@ public class CodeTemplates {
   // todo replace with something that simply copies from a file system while replacing tokens
   private static void createCode(IProgressMonitor monitor, IProject project, String packageName) 
       throws CoreException {
+    
+    SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
+    subMonitor.setTaskName("Generating code");
     boolean force = true;
     boolean local = true;
     IFolder src = project.getFolder("src");
     if (!src.exists()) {
-      src.create(force, local, monitor);
+      src.create(force, local, subMonitor);
     }
-    IFolder main = createChildFolder("main", src, monitor);
-    IFolder java = createChildFolder("java", main, monitor);
-    IFolder test = createChildFolder("test", src, monitor);
-    IFolder testJava = createChildFolder("java", test, monitor);
+    IFolder main = createChildFolder("main", src, subMonitor);
+    IFolder java = createChildFolder("java", main, subMonitor);
+    IFolder test = createChildFolder("test", src, subMonitor);
+    IFolder testJava = createChildFolder("java", test, subMonitor);
 
     if (packageName != null && !packageName.isEmpty()) {
       String[] packages = packageName.split("\\.");
       IFolder parent = java;
       for (int i = 0; i < packages.length; i++) {
-        parent = createChildFolder(packages[i], parent, monitor);
+        parent = createChildFolder(packages[i], parent, subMonitor);
       }
+      
       // now set up the test directory
       parent = testJava;
       for (int i = 0; i < packages.length; i++) {
-        parent = createChildFolder(packages[i], parent, monitor);
+        parent = createChildFolder(packages[i], parent, subMonitor);
       }
     }
     
-    IFolder webapp = createChildFolder("webapp", main, monitor);
-    createChildFile("appengine-web.xml", webapp, monitor);
-    createChildFile("web.xml", webapp, monitor);
-    IFolder webinf = createChildFolder("WEB-INF", webapp, monitor);
-    createChildFile("index.xhtml", webinf, monitor);
+    IFolder webapp = createChildFolder("webapp", main, subMonitor);
+    createChildFile("appengine-web.xml", webapp, subMonitor);
+    createChildFile("web.xml", webapp, subMonitor);
+    IFolder webinf = createChildFolder("WEB-INF", webapp, subMonitor);
+    createChildFile("index.xhtml", webinf, subMonitor);
   }
 
   // visible for testing
-  static IFolder createChildFolder(String name, IFolder parent, IProgressMonitor monitor) 
+  static IFolder createChildFolder(String name, IFolder parent, SubMonitor monitor) 
       throws CoreException {
+    monitor.subTask("Creating folder " + name);
+    monitor.newChild(10);
+
     boolean force = true;
     boolean local = true;
     IFolder child = parent.getFolder(name);
@@ -80,8 +87,12 @@ public class CodeTemplates {
   }
   
   // visible for testing
-  static IFile createChildFile(String name, IFolder parent, IProgressMonitor monitor) 
+  static IFile createChildFile(String name, IFolder parent, SubMonitor monitor) 
       throws CoreException {
+     
+    monitor.subTask("Creating file " + name);
+    monitor.newChild(20);
+    
     boolean force = true;
     IFile child = parent.getFile(name);
     InputStream in = CodeTemplates.class.getResourceAsStream("templates/" + name + ".ftl");

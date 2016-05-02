@@ -49,7 +49,7 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
 
     IStatus status = Status.OK_STATUS;
     try {
-      boolean fork = true;
+      boolean fork = false;
       boolean cancelable = true;
       getContainer().run(fork, cancelable, runnable);
     } catch (InterruptedException ex) {
