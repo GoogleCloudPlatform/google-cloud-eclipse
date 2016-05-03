@@ -51,6 +51,7 @@ public class CodeTemplatesTest {
   @After
   public void cleanUp() throws CoreException {
     parent.delete(true, monitor);
+    project.delete(true, monitor);
   }
   
   @Test
