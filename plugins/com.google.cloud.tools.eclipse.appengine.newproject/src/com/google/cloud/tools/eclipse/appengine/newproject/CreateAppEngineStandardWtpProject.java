@@ -49,7 +49,7 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
     try {
       operation.execute(progress.newChild(50), uiInfoAdapter);
       
-      CodeTemplates.materialize(newProject, config, progress.newChild(50), "helloworld");
+      CodeTemplates.materialize(newProject, config, progress.newChild(50));
       
     } catch (ExecutionException ex) {
       throw new InvocationTargetException(ex);

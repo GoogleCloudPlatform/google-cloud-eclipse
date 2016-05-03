@@ -25,11 +25,12 @@ public class CodeTemplatesTest {
 
   private SubMonitor monitor = SubMonitor.convert(new NullProgressMonitor());
   private IFolder parent;
+  private IProject project;
   
   @Before
   public void setUp() throws CoreException {
     IWorkspace workspace = ResourcesPlugin.getWorkspace();
-    IProject project = workspace.getRoot().getProject("foobar");
+    project = workspace.getRoot().getProject("foobar");
     if (!project.exists()) {
       project.create(monitor);
       project.open(monitor);
@@ -43,6 +44,17 @@ public class CodeTemplatesTest {
   @After
   public void cleanUp() throws CoreException {
     parent.delete(true, monitor);
+  }
+  
+  @Test
+  public void testMaterialize() throws CoreException {
+    AppEngineStandardProjectConfig config = new AppEngineStandardProjectConfig();
+    CodeTemplates.materialize(project, config, monitor);
+    IFolder src = project.getFolder("src");
+    IFolder main = src.getFolder("main");
+    IFolder java = main.getFolder("java");
+    IFile servlet = java.getFile("HelloAppEngine.java");
+    Assert.assertTrue(servlet.exists());
   }
   
   @Test

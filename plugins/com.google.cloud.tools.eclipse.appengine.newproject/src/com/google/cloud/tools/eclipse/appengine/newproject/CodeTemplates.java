@@ -34,7 +34,7 @@ public class CodeTemplates {
   // solution such as key-value map or a different design
   // todo what if project isn't empty?
   public static void materialize(IProject project, AppEngineStandardProjectConfig config,
-      IProgressMonitor monitor, String name) throws CoreException {
+      IProgressMonitor monitor) throws CoreException {
     
     String packageName = config.getPackageName();
     createCode(monitor, project, packageName);
