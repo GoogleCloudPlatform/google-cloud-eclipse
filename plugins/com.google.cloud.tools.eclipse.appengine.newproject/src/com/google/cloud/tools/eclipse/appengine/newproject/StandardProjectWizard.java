@@ -32,7 +32,6 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
   public boolean performFinish() {
     // todo is this the right time/place to grab these?
     config.setAppEngineProjectId(page.getAppEngineProjectId());
-   // config.setEclipseProjectDirectory(page.getLocationPath());
     config.setPackageName(page.getPackageName());
     
     if (page.useDefaults()) {
