@@ -1,7 +1,5 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
-import java.lang.reflect.InvocationTargetException;
-
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -12,6 +10,8 @@ import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.ide.undo.WorkspaceUndoUtil;
 
+import java.lang.reflect.InvocationTargetException;
+
 public class StandardProjectWizard extends Wizard implements INewWizard {
 
   private AppEngineStandardWizardPage page;
@@ -20,6 +20,7 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
   public StandardProjectWizard() {
     this.setWindowTitle("New App Engine Standard Project");
     page = new AppEngineStandardWizardPage();
+    setNeedsProgressMonitor(true);
   }
   
   @Override 
@@ -49,7 +50,7 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
 
     IStatus status = Status.OK_STATUS;
     try {
-      boolean fork = false;
+      boolean fork = true;
       boolean cancelable = true;
       getContainer().run(fork, cancelable, runnable);
     } catch (InterruptedException ex) {

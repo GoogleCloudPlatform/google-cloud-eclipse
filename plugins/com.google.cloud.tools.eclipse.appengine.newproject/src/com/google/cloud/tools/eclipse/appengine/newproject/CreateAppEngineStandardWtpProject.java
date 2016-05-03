@@ -1,8 +1,5 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
-import java.lang.reflect.InvocationTargetException;
-import java.net.URI;
-
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -11,13 +8,17 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.ide.undo.CreateProjectOperation;
+
+import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
 
 /**
 * Utility to make a new Eclipse project with the App Engine Standard facets in the workspace.  
 */
-class CreateAppEngineStandardWtpProject implements IRunnableWithProgress {
+class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
   
   private final AppEngineStandardProjectConfig config;
   private final IAdaptable uiInfoAdapter;
@@ -31,7 +32,8 @@ class CreateAppEngineStandardWtpProject implements IRunnableWithProgress {
   }
 
   @Override
-  public void run(IProgressMonitor monitor) throws InvocationTargetException {
+  public void execute(IProgressMonitor monitor) throws InvocationTargetException, CoreException {
+    SubMonitor progress = SubMonitor.convert(monitor, 100);
     
     URI location = config.getEclipseProjectLocationUri();
     
@@ -45,12 +47,14 @@ class CreateAppEngineStandardWtpProject implements IRunnableWithProgress {
     CreateProjectOperation operation = new CreateProjectOperation(
         description, "Creating new App Engine Project");
     try {
-      operation.execute(monitor, uiInfoAdapter);
+      operation.execute(progress.newChild(50), uiInfoAdapter);
       
-      CodeTemplates.materialize(newProject, config, monitor, "helloworld");
+      CodeTemplates.materialize(newProject, config, progress.newChild(50), "helloworld");
       
-    } catch (ExecutionException | CoreException ex) {
+    } catch (ExecutionException ex) {
       throw new InvocationTargetException(ex);
+    } finally {
+      progress.done();
     }
   }
 
