@@ -9,8 +9,7 @@ import org.eclipse.core.resources.IProject;
  */
 class AppEngineStandardProjectConfig {
 
-  private String appEngineProjectId;
-  private String eclipseProjectName;
+  private String appEngineProjectId = "";
   private String packageName;
   private String eclipseProjectDirectory;
   private URI eclipseProjectLocationUri;
@@ -23,14 +22,6 @@ class AppEngineStandardProjectConfig {
 
   public String getAppEngineProjectId() {
     return this.appEngineProjectId;
-  }
-  
-  public void setEclipseProjectName(String name) {
-    this.eclipseProjectName = name;
-  }
-
-  public String getEclipseProjectName() {
-    return this.eclipseProjectName;
   }
   
   public void setPackageName(String name) {

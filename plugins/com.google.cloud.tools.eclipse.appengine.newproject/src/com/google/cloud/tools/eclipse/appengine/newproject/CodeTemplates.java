@@ -35,14 +35,7 @@ public class CodeTemplates {
   // todo what if project isn't empty?
   public static void materialize(IProject project, AppEngineStandardProjectConfig config,
       IProgressMonitor monitor) throws CoreException {
-    
-    String packageName = config.getPackageName();
-    createCode(monitor, project, packageName);
-  }
-
-  // todo replace with something that simply copies from a file system while replacing tokens
-  private static void createCode(IProgressMonitor monitor, IProject project, String packageName) 
-      throws CoreException {
+    // todo replace with something that simply copies from a file system while replacing tokens
     
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
     subMonitor.setTaskName("Generating code");
@@ -58,6 +51,7 @@ public class CodeTemplates {
     IFolder testJava = createChildFolder("java", test, subMonitor);
 
     Map<String, String> values = new HashMap<>();
+    String packageName = config.getPackageName();
     if (packageName != null && !packageName.isEmpty()) {
       String[] packages = packageName.split("\\.");
       for (int i = 0; i < packages.length; i++) {
@@ -79,7 +73,9 @@ public class CodeTemplates {
     }
     
     IFolder webapp = createChildFolder("webapp", main, subMonitor);
-    createChildFile("appengine-web.xml", webapp, subMonitor);
+    Map<String, String> projectId = new HashMap<>();
+    projectId.put("ProjectID", config.getAppEngineProjectId());
+    createChildFile("appengine-web.xml", webapp, subMonitor, projectId);
     createChildFile("web.xml", webapp, subMonitor);
     IFolder webinf = createChildFolder("WEB-INF", webapp, subMonitor);
     createChildFile("index.xhtml", webinf, subMonitor);

@@ -7,6 +7,10 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -19,6 +23,9 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 
 public class CodeTemplatesTest {
@@ -47,14 +54,53 @@ public class CodeTemplatesTest {
   }
   
   @Test
-  public void testMaterialize() throws CoreException {
+  public void testMaterialize() 
+      throws CoreException, ParserConfigurationException, SAXException, IOException {
     AppEngineStandardProjectConfig config = new AppEngineStandardProjectConfig();
+    config.setAppEngineProjectId("TheProjectID");
+    
     CodeTemplates.materialize(project, config, monitor);
+    
     IFolder src = project.getFolder("src");
     IFolder main = src.getFolder("main");
     IFolder java = main.getFolder("java");
     IFile servlet = java.getFile("HelloAppEngine.java");
     Assert.assertTrue(servlet.exists());
+    
+    IFolder webapp = main.getFolder("webapp");
+    IFile appengineWebXml = webapp.getFile("appengine-web.xml");
+    Assert.assertTrue(appengineWebXml.exists());
+    Document doc = buildDocument(appengineWebXml);
+    NodeList applicationElements = doc.getDocumentElement().getElementsByTagName("application");
+    Assert.assertEquals("Must have exactly one application", 1, applicationElements.getLength());
+    String projectId = applicationElements.item(0).getTextContent();
+    Assert.assertEquals("TheProjectID", projectId);
+  }
+  
+  @Test
+  public void testNoProjectId() 
+      throws CoreException, ParserConfigurationException, SAXException, IOException {
+ 
+    CodeTemplates.materialize(project, new AppEngineStandardProjectConfig(), monitor);
+    
+    IFolder src = project.getFolder("src");
+    IFolder main = src.getFolder("main");
+    IFolder webapp = main.getFolder("webapp");
+    IFile appengineWebXml = webapp.getFile("appengine-web.xml");
+    Document doc = buildDocument(appengineWebXml);
+    NodeList applicationElements = doc.getDocumentElement().getElementsByTagName("application");
+    Assert.assertEquals("Must have exactly one application", 1, applicationElements.getLength());
+    String projectId = applicationElements.item(0).getTextContent();
+    Assert.assertEquals("", projectId);
+  }
+
+  private Document buildDocument(IFile appengineWebXml)
+      throws ParserConfigurationException, SAXException, IOException, CoreException {
+    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+    factory.setNamespaceAware(true);
+    DocumentBuilder builder = factory.newDocumentBuilder();
+    Document doc = builder.parse(appengineWebXml.getContents());
+    return doc;
   }
   
   @Test

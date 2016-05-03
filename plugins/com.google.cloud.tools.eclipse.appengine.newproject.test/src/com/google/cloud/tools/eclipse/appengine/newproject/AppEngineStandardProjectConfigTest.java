@@ -15,17 +15,11 @@ public class AppEngineStandardProjectConfigTest {
     config.setAppEngineProjectId("playbook");
     Assert.assertEquals("playbook", config.getAppEngineProjectId());
   }
-  
-  @Test
-  public void testEclipseProjectName() {
-    config.setEclipseProjectName("My Cool App Engine Project");
-    Assert.assertEquals("My Cool App Engine Project", config.getEclipseProjectName());
-  }
 
   @Test
   public void testEclipseProjectDirectory() {
-    config.setEclipseProjectName("/foo/bar");
-    Assert.assertEquals("/foo/bar", config.getEclipseProjectName());
+    config.setEclipseProjectDirectory("/foo/bar");
+    Assert.assertEquals("/foo/bar", config.getEclipseProjectDirectory());
   }
   
   @Test
