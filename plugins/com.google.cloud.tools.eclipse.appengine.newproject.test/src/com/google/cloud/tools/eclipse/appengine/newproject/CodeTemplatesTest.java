@@ -24,6 +24,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -69,13 +70,22 @@ public class CodeTemplatesTest {
     Assert.assertTrue(servlet.exists());
     
     IFolder webapp = main.getFolder("webapp");
-    IFile appengineWebXml = webapp.getFile("appengine-web.xml");
+    IFolder webinf = webapp.getFolder("WEB-INF");
+    IFile appengineWebXml = webinf.getFile("appengine-web.xml");
     Assert.assertTrue(appengineWebXml.exists());
     Document doc = buildDocument(appengineWebXml);
     NodeList applicationElements = doc.getDocumentElement().getElementsByTagName("application");
     Assert.assertEquals("Must have exactly one application", 1, applicationElements.getLength());
     String projectId = applicationElements.item(0).getTextContent();
     Assert.assertEquals("TheProjectID", projectId);
+    
+    IFile webXml = webinf.getFile("web.xml");
+    Element root = buildDocument(webXml).getDocumentElement();
+    Assert.assertEquals("web-app", root.getNodeName());
+    // Oracle keeps changing the namespace URI in new versions of Java and JEE.
+    // This is the namespace URI that currently (Q2 2016) works in App Engine.
+    Assert.assertEquals("http://java.sun.com/xml/ns/javaee", root.getNamespaceURI());
+    Assert.assertEquals("2.5", root.getAttribute("version"));
   }
   
   @Test
@@ -85,9 +95,8 @@ public class CodeTemplatesTest {
     CodeTemplates.materialize(project, new AppEngineStandardProjectConfig(), monitor);
     
     IFolder src = project.getFolder("src");
-    IFolder main = src.getFolder("main");
-    IFolder webapp = main.getFolder("webapp");
-    IFile appengineWebXml = webapp.getFile("appengine-web.xml");
+    IFolder webinf = src.getFolder("main").getFolder("webapp").getFolder("WEB-INF");
+    IFile appengineWebXml = webinf.getFile("appengine-web.xml");
     Document doc = buildDocument(appengineWebXml);
     NodeList applicationElements = doc.getDocumentElement().getElementsByTagName("application");
     Assert.assertEquals("Must have exactly one application", 1, applicationElements.getLength());
