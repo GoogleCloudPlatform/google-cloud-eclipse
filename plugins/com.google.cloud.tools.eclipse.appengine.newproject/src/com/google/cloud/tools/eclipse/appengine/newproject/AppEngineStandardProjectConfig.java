@@ -10,7 +10,7 @@ import org.eclipse.core.resources.IProject;
 class AppEngineStandardProjectConfig {
 
   private String appEngineProjectId = "";
-  private String packageName;
+  private String packageName = "";
   private String eclipseProjectDirectory;
   private URI eclipseProjectLocationUri;
   private IProject project;

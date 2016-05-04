@@ -15,7 +15,7 @@
         <td colspan="2" style="font-weight:bold;">Available Servlets:</td>        
       </tr>
       <tr>
-        <td>TODO: fill this in</td>
+        <td><a href='/hello'>The servlet</a></td>
       </tr>
     </table>
   </body>

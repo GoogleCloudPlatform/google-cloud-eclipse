@@ -74,10 +74,16 @@ public class CodeTemplates {
     
     IFolder webapp = createChildFolder("webapp", main, subMonitor);
     IFolder webinf = createChildFolder("WEB-INF", webapp, subMonitor);
+    
     Map<String, String> projectId = new HashMap<>();
     projectId.put("ProjectID", config.getAppEngineProjectId());
     createChildFile("appengine-web.xml", webinf, subMonitor, projectId);
-    createChildFile("web.xml", webinf, subMonitor);
+    
+    Map<String, String> packageMap = new HashMap<>();
+    String packageValue = config.getPackageName().isEmpty() ? "" : config.getPackageName() + ".";
+    packageMap.put("Package", packageValue);
+    createChildFile("web.xml", webinf, subMonitor, packageMap);
+    
     createChildFile("index.html", webapp, subMonitor);
   }
 
