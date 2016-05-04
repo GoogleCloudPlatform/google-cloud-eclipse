@@ -11,7 +11,6 @@ class AppEngineStandardProjectConfig {
 
   private String appEngineProjectId = "";
   private String packageName;
-  private String eclipseProjectDirectory;
   private URI eclipseProjectLocationUri;
   private IProject project;
 
@@ -30,14 +29,6 @@ class AppEngineStandardProjectConfig {
 
   public String getPackageName() {
     return this.packageName;
-  }
-  
-  public void setEclipseProjectDirectory(String path) {
-    this.eclipseProjectDirectory = path;
-  }
-  
-  public String getEclipseProjectDirectory() {
-    return this.eclipseProjectDirectory;
   }
   
   /**
