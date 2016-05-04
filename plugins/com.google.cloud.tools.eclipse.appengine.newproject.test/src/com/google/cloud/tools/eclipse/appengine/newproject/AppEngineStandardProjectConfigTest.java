@@ -15,12 +15,6 @@ public class AppEngineStandardProjectConfigTest {
     config.setAppEngineProjectId("playbook");
     Assert.assertEquals("playbook", config.getAppEngineProjectId());
   }
-
-  @Test
-  public void testEclipseProjectDirectory() {
-    config.setEclipseProjectDirectory("/foo/bar");
-    Assert.assertEquals("/foo/bar", config.getEclipseProjectDirectory());
-  }
   
   @Test
   public void testEclipseProjectLocationUri() throws URISyntaxException {
