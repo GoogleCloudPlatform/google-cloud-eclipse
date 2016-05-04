@@ -11,12 +11,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.PatternSyntaxException;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 
@@ -78,6 +80,7 @@ public class CodeTemplates {
     Map<String, String> projectId = new HashMap<>();
     projectId.put("ProjectID", config.getAppEngineProjectId());
     createChildFile("appengine-web.xml", webinf, subMonitor, projectId);
+    createChildFile("pom.xml", project, subMonitor, projectId);
     
     Map<String, String> packageMap = new HashMap<>();
     String packageValue = config.getPackageName().isEmpty() ? "" : config.getPackageName() + ".";
@@ -126,14 +129,14 @@ public class CodeTemplates {
   }
   
   // visible for testing
-  static IFile createChildFile(String name, IFolder parent, SubMonitor monitor,
+  static IFile createChildFile(String name, IContainer parent, SubMonitor monitor,
       Map<String, String> values) throws CoreException {
     
     monitor.subTask("Creating file " + name);
     monitor.newChild(20);
     
     boolean force = true;
-    IFile child = parent.getFile(name);
+    IFile child = parent.getFile(new Path(name));
     InputStream in = CodeTemplates.class.getResourceAsStream("templates/" + name + ".ftl");
     if (in == null) {
       IStatus status = new Status(Status.ERROR, "todo plugin ID", 2, 

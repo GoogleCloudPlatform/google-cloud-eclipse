@@ -25,6 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -64,6 +65,11 @@ public class CodeTemplatesTest {
     CodeTemplates.materialize(project, config, monitor);
     
     IFolder src = project.getFolder("src");
+    IFile pom = project.getFile("pom.xml");
+    Element project = buildDocument(pom).getDocumentElement();
+    Node appId = project.getElementsByTagName("app.id").item(0);
+    Assert.assertEquals("TheProjectID", appId.getTextContent());
+    
     IFolder main = src.getFolder("main");
     IFolder java = main.getFolder("java");
     IFile servlet = java.getFile("HelloAppEngine.java");
