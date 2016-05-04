@@ -78,7 +78,7 @@ public class CodeTemplates {
     projectId.put("ProjectID", config.getAppEngineProjectId());
     createChildFile("appengine-web.xml", webinf, subMonitor, projectId);
     createChildFile("web.xml", webinf, subMonitor);
-    createChildFile("index.xhtml", webinf, subMonitor);
+    createChildFile("index.html", webapp, subMonitor);
   }
 
   // visible for testing
