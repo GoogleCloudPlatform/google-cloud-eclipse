@@ -11,6 +11,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.ide.undo.CreateProjectOperation;
+import org.eclipse.wst.common.project.facet.core.IFacetedProject;
+import org.eclipse.wst.common.project.facet.core.IProjectFacet;
+import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
@@ -47,9 +50,14 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
     CreateProjectOperation operation = new CreateProjectOperation(
         description, "Creating new App Engine Project");
     try {
-      operation.execute(progress.newChild(50), uiInfoAdapter);
-      
-      CodeTemplates.materialize(newProject, config, progress.newChild(50));
+      operation.execute(progress.newChild(20), uiInfoAdapter);
+      IFacetedProject facetedProject = ProjectFacetsManager.create(
+          newProject, true, progress.newChild(40));
+      IProjectFacet javaFacet = ProjectFacetsManager.getProjectFacet("jst.java");
+      // todo setup sourcepath
+      facetedProject.installProjectFacet(javaFacet.getVersion("1.7"), null, monitor);
+
+      CodeTemplates.materialize(newProject, config, progress.newChild(40));
       
     } catch (ExecutionException ex) {
       throw new InvocationTargetException(ex);
