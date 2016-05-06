@@ -13,9 +13,12 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.common.project.facet.core.JavaFacetInstallConfig;
+import org.eclipse.jst.j2ee.project.facet.IJ2EEFacetInstallDataModelProperties;
+import org.eclipse.jst.j2ee.web.project.facet.IWebFacetInstallDataModelProperties;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.ide.undo.CreateProjectOperation;
+import org.eclipse.wst.common.frameworks.datamodel.DataModelFactory;
 import org.eclipse.wst.common.frameworks.datamodel.IDataModel;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IProjectFacet;
@@ -68,13 +71,13 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
       sourcePaths.add(new Path("src/main/java"));
       sourcePaths.add(new Path("src/test/java"));
       javaConfig.setSourceFolders(sourcePaths);
-      
       facetedProject.installProjectFacet(JavaFacet.VERSION_1_7, javaConfig, monitor);
-      IDataModel model = null;
-      facetedProject.installProjectFacet(WebFacetUtils.WEB_25, model, monitor);
-
+      
       CodeTemplates.materialize(newProject, config, progress.newChild(40));
       
+      IDataModel model = DataModelFactory.createDataModel(IWebFacetInstallDataModelProperties.class);
+      model.setBooleanProperty(IJ2EEFacetInstallDataModelProperties.GENERATE_DD, false);
+      facetedProject.installProjectFacet(WebFacetUtils.WEB_25, model, monitor);
     } catch (ExecutionException ex) {
       throw new InvocationTargetException(ex);
     } finally {
