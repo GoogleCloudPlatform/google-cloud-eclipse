@@ -16,6 +16,7 @@ import org.eclipse.jst.common.project.facet.core.JavaFacetInstallConfig;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.ide.undo.CreateProjectOperation;
+import org.eclipse.wst.common.frameworks.datamodel.IDataModel;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IProjectFacet;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
@@ -69,7 +70,8 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
       javaConfig.setSourceFolders(sourcePaths);
       
       facetedProject.installProjectFacet(JavaFacet.VERSION_1_7, javaConfig, monitor);
-      facetedProject.installProjectFacet(WebFacetUtils.WEB_25, null, monitor);
+      IDataModel model = null;
+      facetedProject.installProjectFacet(WebFacetUtils.WEB_25, model, monitor);
 
       CodeTemplates.materialize(newProject, config, progress.newChild(40));
       
