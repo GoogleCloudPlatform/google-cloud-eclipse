@@ -18,6 +18,9 @@ import org.eclipse.jst.j2ee.web.project.facet.IWebFacetInstallDataModelPropertie
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.ide.undo.CreateProjectOperation;
+import org.eclipse.wst.common.componentcore.datamodel.properties.IFacetProjectCreationDataModelProperties;
+import org.eclipse.wst.common.componentcore.datamodel.properties.IFacetProjectCreationDataModelProperties.FacetDataModelMap;
+import org.eclipse.wst.common.componentcore.internal.util.IModuleConstants;
 import org.eclipse.wst.common.frameworks.datamodel.DataModelFactory;
 import org.eclipse.wst.common.frameworks.datamodel.IDataModel;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
@@ -29,6 +32,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
 * Utility to make a new Eclipse project with the App Engine Standard facets in the workspace.  
@@ -75,9 +79,23 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
       
       CodeTemplates.materialize(newProject, config, progress.newChild(40));
       
+      System.err.println(1);
       IDataModel model = DataModelFactory.createDataModel(IWebFacetInstallDataModelProperties.class);
-      model.setBooleanProperty(IJ2EEFacetInstallDataModelProperties.GENERATE_DD, false);
-      facetedProject.installProjectFacet(WebFacetUtils.WEB_25, model, monitor);
+      System.err.println(2);
+
+      //model.setProperty(IFacetDataModelProperties.FACET_PROJECT_NAME, "WebTest1");
+
+      FacetDataModelMap map = (FacetDataModelMap) model.getProperty(
+          IFacetProjectCreationDataModelProperties.FACET_DM_MAP);
+      System.err.println(3);
+
+      IDataModel webModel = (IDataModel) map.get("jst.web");
+      System.err.println(4);
+
+      webModel.setBooleanProperty(IJ2EEFacetInstallDataModelProperties.GENERATE_DD, false);
+      facetedProject.installProjectFacet(WebFacetUtils.WEB_25, webModel, monitor);
+      
+      
     } catch (ExecutionException ex) {
       throw new InvocationTargetException(ex);
     } finally {
