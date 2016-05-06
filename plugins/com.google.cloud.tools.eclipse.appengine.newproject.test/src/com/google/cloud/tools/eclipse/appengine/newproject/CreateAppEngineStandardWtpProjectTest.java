@@ -8,7 +8,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubMonitor;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -22,7 +21,7 @@ public class CreateAppEngineStandardWtpProjectTest {
 
   @Mock private IAdaptable adaptable;
 
-  private SubMonitor monitor = SubMonitor.convert(new NullProgressMonitor());
+  private NullProgressMonitor monitor = new NullProgressMonitor();
   private IProject project;
   
   @Before
