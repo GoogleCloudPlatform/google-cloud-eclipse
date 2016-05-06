@@ -16,6 +16,8 @@ import org.eclipse.jst.common.project.facet.core.JavaFacetInstallConfig;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.ide.undo.CreateProjectOperation;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
+import org.eclipse.wst.common.project.facet.core.IProjectFacet;
+import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
 import java.lang.reflect.InvocationTargetException;
@@ -28,6 +30,7 @@ import java.util.List;
 */
 class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
   
+  private static final String APP_ENGINE_SERVLET_API_VERSION = "2.5";
   private final AppEngineStandardProjectConfig config;
   private final IAdaptable uiInfoAdapter;
 
@@ -65,6 +68,9 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
       sourcePaths.add(new Path("src/test/java"));
       javaConfig.setSourceFolders(sourcePaths);
       facetedProject.installProjectFacet(JavaFacet.VERSION_1_7, javaConfig, monitor);
+      IProjectFacet jstweb = ProjectFacetsManager.getProjectFacet("jst.web");
+      IProjectFacetVersion version = jstweb.getVersion(APP_ENGINE_SERVLET_API_VERSION);
+      facetedProject.installProjectFacet(version, null, monitor);
 
       CodeTemplates.materialize(newProject, config, progress.newChild(40));
       
