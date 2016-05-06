@@ -35,7 +35,12 @@ Manual testing of the GCloud Plugin for Eclipse.
 1. Click the "Finish" button.
 1. Verify that a project named "foo" (or whatever name you picked in step 6)
    is now created in the package explorer. 
-
+1. Verify that src/main/java and src/test/java both appear to be source roots.
+1. Verify that src/main/java contains com.google.testplan.HelloAppEngineServlet
+1. Check that the pom.xml contains the project ID testplan.
+1. Check that there are no compile errors.
+1. Check that the compiler level is 1.7.
+1. Check that the servlet version is 2.5.
 
 # Edit the project sample code
 
