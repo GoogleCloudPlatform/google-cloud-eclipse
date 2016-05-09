@@ -14,25 +14,21 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.common.project.facet.core.JavaFacetInstallConfig;
 import org.eclipse.jst.j2ee.project.facet.IJ2EEFacetInstallDataModelProperties;
+import org.eclipse.jst.j2ee.project.facet.IJ2EEModuleFacetInstallDataModelProperties;
 import org.eclipse.jst.j2ee.web.project.facet.IWebFacetInstallDataModelProperties;
+import org.eclipse.jst.j2ee.web.project.facet.WebFacetInstallDataModelProvider;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.ide.undo.CreateProjectOperation;
-import org.eclipse.wst.common.componentcore.datamodel.properties.IFacetProjectCreationDataModelProperties;
-import org.eclipse.wst.common.componentcore.datamodel.properties.IFacetProjectCreationDataModelProperties.FacetDataModelMap;
-import org.eclipse.wst.common.componentcore.internal.util.IModuleConstants;
 import org.eclipse.wst.common.frameworks.datamodel.DataModelFactory;
 import org.eclipse.wst.common.frameworks.datamodel.IDataModel;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
-import org.eclipse.wst.common.project.facet.core.IProjectFacet;
-import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
 * Utility to make a new Eclipse project with the App Engine Standard facets in the workspace.  
@@ -79,23 +75,11 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
       
       CodeTemplates.materialize(newProject, config, progress.newChild(40));
       
-      System.err.println(1);
-      IDataModel model = DataModelFactory.createDataModel(IWebFacetInstallDataModelProperties.class);
-      System.err.println(2);
-
-      //model.setProperty(IFacetDataModelProperties.FACET_PROJECT_NAME, "WebTest1");
-
-      FacetDataModelMap map = (FacetDataModelMap) model.getProperty(
-          IFacetProjectCreationDataModelProperties.FACET_DM_MAP);
-      System.err.println(3);
-
-      IDataModel webModel = (IDataModel) map.get("jst.web");
-      System.err.println(4);
-
+      IDataModel webModel = DataModelFactory.createDataModel(new WebFacetInstallDataModelProvider());
+      webModel.setBooleanProperty(IJ2EEModuleFacetInstallDataModelProperties.ADD_TO_EAR, false);
       webModel.setBooleanProperty(IJ2EEFacetInstallDataModelProperties.GENERATE_DD, false);
+      webModel.setBooleanProperty(IWebFacetInstallDataModelProperties.INSTALL_WEB_LIBRARY, false);
       facetedProject.installProjectFacet(WebFacetUtils.WEB_25, webModel, monitor);
-      
-      
     } catch (ExecutionException ex) {
       throw new InvocationTargetException(ex);
     } finally {
