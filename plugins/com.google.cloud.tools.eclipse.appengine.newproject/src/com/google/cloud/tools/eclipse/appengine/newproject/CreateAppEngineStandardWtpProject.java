@@ -79,6 +79,7 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
       webModel.setBooleanProperty(IJ2EEModuleFacetInstallDataModelProperties.ADD_TO_EAR, false);
       webModel.setBooleanProperty(IJ2EEFacetInstallDataModelProperties.GENERATE_DD, false);
       webModel.setBooleanProperty(IWebFacetInstallDataModelProperties.INSTALL_WEB_LIBRARY, false);
+      webModel.setStringProperty(IWebFacetInstallDataModelProperties.CONFIG_FOLDER, "src/main/webapp");
       facetedProject.installProjectFacet(WebFacetUtils.WEB_25, webModel, monitor);
     } catch (ExecutionException ex) {
       throw new InvocationTargetException(ex);
