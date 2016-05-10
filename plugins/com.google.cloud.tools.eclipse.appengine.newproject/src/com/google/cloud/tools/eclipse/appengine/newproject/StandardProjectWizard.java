@@ -9,6 +9,7 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.ide.undo.WorkspaceUndoUtil;
+import org.eclipse.ui.statushandlers.StatusManager;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -53,30 +54,24 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
     } catch (InterruptedException ex) {
       status = Status.CANCEL_STATUS;
     } catch (InvocationTargetException ex) {
-      int errorCode = 1;
-      status = new Status(Status.ERROR, "todo plugin ID", errorCode, ex.getMessage(), null);
+      status = setErrorStatus(ex);
     }
-    
-    showErrorMessageIfNecessary(status);
     
     return status.isOK();
   }
 
-  
   // visible for testing
-  void showErrorMessageIfNecessary(IStatus status) {
-    // if fail, display error message in wizard
-    if (status == Status.CANCEL_STATUS) {
-      page.setErrorMessage("User canceled project creation");
-    } else if (!status.isOK()) {
-      String message = "Failed to create project";
-      if (status.getMessage() != null && !status.getMessage().isEmpty()) {
-        message += ": " + status.getMessage();
-      }
-      page.setErrorMessage(message);
+  static IStatus setErrorStatus(Exception ex) {
+    int errorCode = 1;
+    String message = "Failed to create project";
+    if (ex.getMessage() != null && !ex.getMessage().isEmpty()) {
+      message += ": " + ex.getMessage();
     }
+    IStatus status = new Status(Status.ERROR, "todo plugin ID", errorCode, message, null);
+    StatusManager.getManager().handle(status, StatusManager.SHOW);
+    return status;
   }
-
+  
   @Override
   public void init(IWorkbench workbench, IStructuredSelection selection) {
   }
