@@ -57,6 +57,14 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
       status = new Status(Status.ERROR, "todo plugin ID", errorCode, ex.getMessage(), null);
     }
     
+    showErrorMessageIfNecessary(status);
+    
+    return status.isOK();
+  }
+
+  
+  // visible for testing
+  void showErrorMessageIfNecessary(IStatus status) {
     // if fail, display error message in wizard
     if (status == Status.CANCEL_STATUS) {
       page.setErrorMessage("User canceled project creation");
@@ -67,8 +75,6 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
       }
       page.setErrorMessage(message);
     }
-    
-    return status.isOK();
   }
 
   @Override
