@@ -42,9 +42,8 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
     config.setProject(page.getProjectHandle());
     
     // todo set up
-    IAdaptable uiInfoAdapter = WorkspaceUndoUtil.getUIInfoAdapter(getShell());
-    final IAdaptable uiInfoAdapter1 = uiInfoAdapter;
-    IRunnableWithProgress runnable = new CreateAppEngineStandardWtpProject(config, uiInfoAdapter1);
+    final IAdaptable uiInfoAdapter = WorkspaceUndoUtil.getUIInfoAdapter(getShell());
+    IRunnableWithProgress runnable = new CreateAppEngineStandardWtpProject(config, uiInfoAdapter);
 
     IStatus status = Status.OK_STATUS;
     try {
@@ -58,7 +57,17 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
       status = new Status(Status.ERROR, "todo plugin ID", errorCode, ex.getMessage(), null);
     }
     
-    // todo if fail, call setErrorMessage()
+    // if fail, display error message in wizard
+    if (status == Status.CANCEL_STATUS) {
+      page.setErrorMessage("User canceled project creation");
+    } else if (!status.isOK()) {
+      String message = "Failed to create project";
+      if (status.getMessage() != null && !status.getMessage().isEmpty()) {
+        message += ": " + status.getMessage();
+      }
+      page.setErrorMessage(message);
+    }
+    
     return status.isOK();
   }
 
