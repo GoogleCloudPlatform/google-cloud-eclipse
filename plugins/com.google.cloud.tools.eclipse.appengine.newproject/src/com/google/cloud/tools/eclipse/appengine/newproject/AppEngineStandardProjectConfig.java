@@ -1,7 +1,5 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
-import java.net.URI;
-
 import org.eclipse.core.resources.IProject;
 
 /**
@@ -11,7 +9,6 @@ class AppEngineStandardProjectConfig {
 
   private String appEngineProjectId = "";
   private String packageName = "";
-  private URI eclipseProjectLocationUri;
   private IProject project;
 
   // todo does builder pattern make more sense here?
@@ -30,21 +27,10 @@ class AppEngineStandardProjectConfig {
   public String getPackageName() {
     return this.packageName;
   }
-  
-  /**
-   * @param a file URI to a local directory, or null for the default location
-   */
-  public void setEclipseProjectLocationUri(URI uri) {
-    this.eclipseProjectLocationUri = uri;
-  }
-  
-  /**
-   * @return a file URI to a local directory, or null for the default location
-   */
-  public URI getEclipseProjectLocationUri() {
-    return this.eclipseProjectLocationUri;
-  }
 
+  /**
+   * Null project location URI means the default location.
+   */
   public void setProject(IProject project) {
     this.project = project;
   }

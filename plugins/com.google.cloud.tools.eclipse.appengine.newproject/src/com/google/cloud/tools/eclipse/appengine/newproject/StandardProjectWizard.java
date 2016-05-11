@@ -33,12 +33,7 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
     // todo is this the right time/place to grab these?
     config.setAppEngineProjectId(page.getAppEngineProjectId());
     config.setPackageName(page.getPackageName());
-    
-    if (page.useDefaults()) {
-      config.setEclipseProjectLocationUri(null);
-    } else {
-      config.setEclipseProjectLocationUri(page.getLocationURI());
-    }
+
     config.setProject(page.getProjectHandle());
     
     // todo set up

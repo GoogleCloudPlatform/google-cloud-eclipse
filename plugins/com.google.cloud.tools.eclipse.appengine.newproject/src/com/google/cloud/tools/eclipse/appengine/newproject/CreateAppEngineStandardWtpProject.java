@@ -50,8 +50,7 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
   public void execute(IProgressMonitor monitor) throws InvocationTargetException, CoreException {
     SubMonitor progress = SubMonitor.convert(monitor, 100);
     
-    // todo just use getproject().getLocationUri()
-    URI location = config.getEclipseProjectLocationUri();
+    URI location = config.getProject().getRawLocationURI();
     
     IWorkspace workspace = ResourcesPlugin.getWorkspace();
     IProject newProject = config.getProject();
@@ -64,6 +63,7 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
         description, "Creating new App Engine Project");
     try {
       operation.execute(progress.newChild(20), uiInfoAdapter);
+      
       IFacetedProject facetedProject = ProjectFacetsManager.create(
           newProject, true, progress.newChild(40));
       JavaFacetInstallConfig javaConfig = new JavaFacetInstallConfig();
