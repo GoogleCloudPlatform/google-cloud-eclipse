@@ -9,6 +9,7 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.ide.undo.WorkspaceUndoUtil;
+import org.eclipse.ui.statushandlers.StatusManager;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -37,9 +38,8 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
     config.setProject(page.getProjectHandle());
     
     // todo set up
-    IAdaptable uiInfoAdapter = WorkspaceUndoUtil.getUIInfoAdapter(getShell());
-    final IAdaptable uiInfoAdapter1 = uiInfoAdapter;
-    IRunnableWithProgress runnable = new CreateAppEngineStandardWtpProject(config, uiInfoAdapter1);
+    final IAdaptable uiInfoAdapter = WorkspaceUndoUtil.getUIInfoAdapter(getShell());
+    IRunnableWithProgress runnable = new CreateAppEngineStandardWtpProject(config, uiInfoAdapter);
 
     IStatus status = Status.OK_STATUS;
     try {
@@ -49,14 +49,24 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
     } catch (InterruptedException ex) {
       status = Status.CANCEL_STATUS;
     } catch (InvocationTargetException ex) {
-      int errorCode = 1;
-      status = new Status(Status.ERROR, "todo plugin ID", errorCode, ex.getMessage(), null);
+      status = setErrorStatus(ex);
     }
     
-    // todo if fail, call setErrorMessage()
     return status.isOK();
   }
 
+  // visible for testing
+  static IStatus setErrorStatus(Exception ex) {
+    int errorCode = 1;
+    String message = "Failed to create project";
+    if (ex.getMessage() != null && !ex.getMessage().isEmpty()) {
+      message += ": " + ex.getMessage();
+    }
+    IStatus status = new Status(Status.ERROR, "todo plugin ID", errorCode, message, null);
+    StatusManager.getManager().handle(status, StatusManager.SHOW);
+    return status;
+  }
+  
   @Override
   public void init(IWorkbench workbench, IStructuredSelection selection) {
   }
