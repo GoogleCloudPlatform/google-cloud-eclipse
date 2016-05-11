@@ -50,7 +50,7 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
   public void execute(IProgressMonitor monitor) throws InvocationTargetException, CoreException {
     SubMonitor progress = SubMonitor.convert(monitor, 100);
     
-    URI location = config.getProject().getRawLocationURI();
+    URI location = config.getProject().getLocationURI();
     
     IWorkspace workspace = ResourcesPlugin.getWorkspace();
     IProject newProject = config.getProject();
