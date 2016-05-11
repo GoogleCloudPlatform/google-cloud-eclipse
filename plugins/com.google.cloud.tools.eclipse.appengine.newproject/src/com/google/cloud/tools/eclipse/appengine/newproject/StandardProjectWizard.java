@@ -62,7 +62,7 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
     if (ex.getMessage() != null && !ex.getMessage().isEmpty()) {
       message += ": " + ex.getMessage();
     }
-    IStatus status = new Status(Status.ERROR, "todo plugin ID", errorCode, message, null);
+    IStatus status = new Status(Status.ERROR, "todo plugin ID", errorCode, message, ex);
     StatusManager.getManager().handle(status, StatusManager.SHOW);
     return status;
   }

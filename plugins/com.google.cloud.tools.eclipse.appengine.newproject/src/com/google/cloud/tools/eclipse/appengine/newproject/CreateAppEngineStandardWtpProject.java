@@ -23,12 +23,17 @@ import org.eclipse.ui.ide.undo.CreateProjectOperation;
 import org.eclipse.wst.common.frameworks.datamodel.DataModelFactory;
 import org.eclipse.wst.common.frameworks.datamodel.IDataModel;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
+import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
+import org.eclipse.wst.common.project.facet.core.runtime.RuntimeManager;
+import org.eclipse.wst.common.project.facet.core.runtime.IRuntime;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
 * Utility to make a new Eclipse project with the App Engine Standard facets in the workspace.  
@@ -81,8 +86,17 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
       webModel.setBooleanProperty(IWebFacetInstallDataModelProperties.INSTALL_WEB_LIBRARY, false);
       webModel.setStringProperty(IWebFacetInstallDataModelProperties.CONFIG_FOLDER, "src/main/webapp");
       facetedProject.installProjectFacet(WebFacetUtils.WEB_25, webModel, monitor);
+      
+      Set<IProjectFacetVersion> facets = new HashSet<>();
+      facets.add(WebFacetUtils.WEB_25);
+      Set<IRuntime> runtimes = RuntimeManager.getRuntimes(facets);
+      IRuntime appEngineRuntime = RuntimeManager.getRuntime("App Engine");
+      
+      // these next two lines don't work????
+      facetedProject.setTargetedRuntimes(runtimes, monitor);
+      facetedProject.setPrimaryRuntime(appEngineRuntime, monitor);
     } catch (ExecutionException ex) {
-      throw new InvocationTargetException(ex);
+      throw new InvocationTargetException(ex, ex.getMessage());
     } finally {
       progress.done();
     }
