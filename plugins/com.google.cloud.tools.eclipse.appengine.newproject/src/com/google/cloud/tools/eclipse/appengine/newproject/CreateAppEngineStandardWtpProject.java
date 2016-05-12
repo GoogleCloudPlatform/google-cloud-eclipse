@@ -1,5 +1,12 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
+import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -25,15 +32,8 @@ import org.eclipse.wst.common.frameworks.datamodel.IDataModel;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
-import org.eclipse.wst.common.project.facet.core.runtime.RuntimeManager;
 import org.eclipse.wst.common.project.facet.core.runtime.IRuntime;
-
-import java.lang.reflect.InvocationTargetException;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import org.eclipse.wst.common.project.facet.core.runtime.RuntimeManager;
 
 /**
 * Utility to make a new Eclipse project with the App Engine Standard facets in the workspace.  
@@ -112,11 +112,11 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
     Set<IRuntime> runtimes = RuntimeManager.getRuntimes(facets);
     project.setTargetedRuntimes(runtimes, monitor);
     
-    try {
+    if (RuntimeManager.isRuntimeDefined("App Engine")) {
       IRuntime appEngineRuntime = RuntimeManager.getRuntime("App Engine");
       project.setPrimaryRuntime(appEngineRuntime, monitor);
-    } catch (IllegalArgumentException ex) {
-      // todo setup runtime on an additional wizard page
+    } else {
+      // todo figure out how to create a new App Engine runtime
     }
   }
 
