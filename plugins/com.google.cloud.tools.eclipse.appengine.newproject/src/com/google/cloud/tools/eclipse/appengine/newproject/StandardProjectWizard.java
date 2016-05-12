@@ -49,14 +49,14 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
     } catch (InterruptedException ex) {
       status = Status.CANCEL_STATUS;
     } catch (InvocationTargetException ex) {
-      status = setErrorStatus(ex);
+      status = setErrorStatus(ex.getCause());
     }
     
     return status.isOK();
   }
 
   // visible for testing
-  static IStatus setErrorStatus(Exception ex) {
+  static IStatus setErrorStatus(Throwable ex) {
     int errorCode = 1;
     String message = "Failed to create project";
     if (ex.getMessage() != null && !ex.getMessage().isEmpty()) {

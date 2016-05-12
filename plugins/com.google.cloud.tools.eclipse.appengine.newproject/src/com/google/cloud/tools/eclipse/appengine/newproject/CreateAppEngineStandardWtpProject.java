@@ -27,7 +27,6 @@ import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.common.project.facet.core.runtime.RuntimeManager;
 import org.eclipse.wst.common.project.facet.core.runtime.IRuntime;
-import org.eclipse.wst.common.project.facet.core.runtime.IRuntimeComponent;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
@@ -111,10 +110,14 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
     Set<IProjectFacetVersion> facets = new HashSet<>();
     facets.add(WebFacetUtils.WEB_25);
     Set<IRuntime> runtimes = RuntimeManager.getRuntimes(facets);
-    IRuntime appEngineRuntime = RuntimeManager.getRuntime("App Engine");
-    
     project.setTargetedRuntimes(runtimes, monitor);
-    project.setPrimaryRuntime(appEngineRuntime, monitor);
+    
+    try {
+      IRuntime appEngineRuntime = RuntimeManager.getRuntime("App Engine");
+      project.setPrimaryRuntime(appEngineRuntime, monitor);
+    } catch (IllegalArgumentException ex) {
+      // todo setup runtime on an additional wizard page
+    }
   }
 
 }
