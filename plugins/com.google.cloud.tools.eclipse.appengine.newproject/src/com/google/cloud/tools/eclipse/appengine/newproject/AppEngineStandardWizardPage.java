@@ -1,7 +1,9 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -20,8 +22,16 @@ class AppEngineStandardWizardPage extends WizardNewProjectCreationPage implement
   
   AppEngineStandardWizardPage() {
     super("basicNewProjectPage");
+    // todo instead of hard coding strings, read the wizard.name and wizard.description properties 
+    // from plugins/com.google.cloud.tools.eclipse.appengine.newproject/plugin.properties
     this.setTitle("App Engine Standard Project");
     this.setDescription("Create a new App Engine Standard Project in the workspace.");
+    
+    // todo get a UI designer to pick a better icon (the little plane?) and 
+    // add it to this plugin's icons folder
+    ImageDescriptor descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(
+        "com.google.cloud.tools.eclipse.appengine.localserver", "icons/gcp-32x32.png");
+    this.setImageDescriptor(descriptor);
   }
 
   // todo is there a way to call this for a test?
