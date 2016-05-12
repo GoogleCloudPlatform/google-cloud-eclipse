@@ -64,7 +64,7 @@
         <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>versions-maven-plugin</artifactId>
-            <version>2.1</version>
+            <version>2.2</version>
             <executions>
                 <execution>
                     <phase>compile</phase>
@@ -87,7 +87,7 @@
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-war-plugin</artifactId>
-            <version>2.4</version>
+            <version>2.6</version>
             <configuration>
                 <archiveClasses>true</archiveClasses>
                 <webResources>
