@@ -32,10 +32,5 @@ public class AppEngineStandardWizardPageTest {
     Assert.assertEquals("Create a new App Engine Standard Project in the workspace.", 
         page.getDescription());
   }
-  
-  @Test
-  public void testImage() {
-    Assert.assertNotNull("Image descriptor not set", page.getImage());
-  }
 
 }
