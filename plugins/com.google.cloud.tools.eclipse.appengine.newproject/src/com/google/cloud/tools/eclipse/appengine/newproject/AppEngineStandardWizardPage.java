@@ -21,16 +21,16 @@ class AppEngineStandardWizardPage extends WizardNewProjectCreationPage implement
   private Text projectIdField;
   
   AppEngineStandardWizardPage() {
-    super("basicNewProjectPage");
+    super("basicNewProjectPage"); //$NON-NLS-1$
     // todo instead of hard coding strings, read the wizard.name and wizard.description properties 
     // from plugins/com.google.cloud.tools.eclipse.appengine.newproject/plugin.properties
     this.setTitle("App Engine Standard Project");
-    this.setDescription("Create a new App Engine Standard Project in the workspace.");
+    this.setDescription("Create a new App Engine Standard Project in the workspace."); 
     
     // todo get a UI designer to pick a better icon (the little plane?) and 
     // add it to this plugin's icons folder
     ImageDescriptor descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(
-        "com.google.cloud.tools.eclipse.appengine.localserver", "icons/gcp-32x32.png");
+        "com.google.cloud.tools.eclipse.appengine.localserver", "icons/gcp-32x32.png"); //$NON-NLS-1$ //$NON-NLS-2$
     this.setImageDescriptor(descriptor);
   }
 
@@ -44,7 +44,7 @@ class AppEngineStandardWizardPage extends WizardNewProjectCreationPage implement
     
     // Java package name
     Label packageNameLabel = new Label(container, SWT.NONE);
-    packageNameLabel.setText("Java package:");
+    packageNameLabel.setText("Java package:"); //$NON-NLS-1$
     javaPackageField = new Text(container, SWT.BORDER);
     GridData javaPackagePosition = new GridData(GridData.FILL_HORIZONTAL);
     javaPackagePosition.horizontalSpan = 2;
@@ -53,7 +53,7 @@ class AppEngineStandardWizardPage extends WizardNewProjectCreationPage implement
     
     // App Engine Project ID
     Label projectIdLabel = new Label(container, SWT.NONE);
-    projectIdLabel.setText("App Engine Project ID: (optional)");
+    projectIdLabel.setText("App Engine Project ID: (optional)"); //$NON-NLS-1$
     projectIdField = new Text(container, SWT.BORDER);
     GridData projectIdPosition = new GridData(GridData.FILL_HORIZONTAL);
     projectIdPosition.horizontalSpan = 2;
@@ -75,13 +75,13 @@ class AppEngineStandardWizardPage extends WizardNewProjectCreationPage implement
   private boolean validateLocalFields() {
     String packageName = javaPackageField.getText();
     if (!JavaPackageValidator.validate(packageName)) {
-      setErrorMessage("Illegal Java package name: " + packageName);
+      setErrorMessage("Illegal Java package name: " + packageName); //$NON-NLS-1$
       return false;
     }
     
     String projectId = projectIdField.getText();
     if (!AppEngineProjectIdValidator.validate(projectId)) {
-      setErrorMessage("Illegal App Engine Project ID: " + projectId);
+      setErrorMessage("Illegal App Engine Project ID: " + projectId); //$NON-NLS-1$
       return false;
     }
     
