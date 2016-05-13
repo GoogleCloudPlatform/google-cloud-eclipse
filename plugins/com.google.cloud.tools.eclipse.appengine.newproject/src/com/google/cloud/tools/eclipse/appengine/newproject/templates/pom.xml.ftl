@@ -14,7 +14,7 @@
     <app.id>${ProjectID}</app.id>
     <app.version>1</app.version>
     <appengine.version>1.9.37</appengine.version>
-    <gcloud.plugin.version>2.0.9.90.v20151210</gcloud.plugin.version>
+    <gcloud.plugin.version>2.0.9.106.v20160420</gcloud.plugin.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.showDeprecation>true</maven.compiler.showDeprecation>
   </properties>
