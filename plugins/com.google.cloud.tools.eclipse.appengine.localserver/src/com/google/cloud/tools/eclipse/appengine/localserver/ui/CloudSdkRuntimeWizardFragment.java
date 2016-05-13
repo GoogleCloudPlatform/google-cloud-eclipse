@@ -14,6 +14,8 @@
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
+import java.io.File;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -51,7 +53,6 @@ public final class CloudSdkRuntimeWizardFragment extends WizardFragment {
   private IWizardHandle wizard;
   private CloudSdkRuntime runtime;
   private Text dirTextBox;
-  private int status = IStatus.ERROR;
 
   @Override
   public Composite createComposite(Composite parent, IWizardHandle handle) {
@@ -75,7 +76,8 @@ public final class CloudSdkRuntimeWizardFragment extends WizardFragment {
 
   @Override
   public boolean isComplete() {
-    if (status == IStatus.OK) {
+    File sdkLocation = runtime.getRuntime().getLocation().toFile();
+    if (runtime.validate().isOK() && sdkLocation.exists()) {
       return true;
     }
     return false;
@@ -96,7 +98,7 @@ public final class CloudSdkRuntimeWizardFragment extends WizardFragment {
     dirTextBox.setLayoutData(data);
     dirTextBox.addModifyListener(new ModifyListener() {
       @Override
-      public void modifyText(ModifyEvent e) {
+      public void modifyText(ModifyEvent event) {
         validate();
       }
     });
@@ -133,23 +135,19 @@ public final class CloudSdkRuntimeWizardFragment extends WizardFragment {
     return runtimeType.getName();
   }
 
-  private void updateStatus(String message, int currentStatus) {
-    switch (currentStatus) {
+  private void updateStatus(String message, int newStatus) {
+    switch (newStatus) {
     case IStatus.ERROR:
       wizard.setMessage(message, IMessageProvider.ERROR);
-      status = IStatus.ERROR;
       break;
     case IStatus.OK:
       wizard.setMessage(null, IMessageProvider.NONE);
-      status = IStatus.OK;
       break;
     case IStatus.INFO:
       wizard.setMessage(message, IMessageProvider.INFORMATION);
-      status = IStatus.INFO;
       break;
     default:
       wizard.setMessage(message, IMessageProvider.ERROR);
-      status = IStatus.ERROR;
       break;
     }
   }

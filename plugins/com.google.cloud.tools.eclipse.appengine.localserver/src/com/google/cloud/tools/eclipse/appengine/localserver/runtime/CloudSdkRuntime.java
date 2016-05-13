@@ -36,9 +36,9 @@ public class CloudSdkRuntime extends RuntimeDelegate {
     }
 
     // Check if the sdk location is a valid path
-    String sdkLocation = getRuntime().getLocation().toString();
-    if (!(new File(sdkLocation)).exists()) {
-      return new Status(IStatus.ERROR,
+    File sdkLocation = getRuntime().getLocation().toFile();
+    if (!sdkLocation.exists()) {
+      return new Status(IStatus.INFO,
                         Activator.PLUGIN_ID,
                         0,
                         "Specified Cloud SDK directory does not exist",
@@ -55,7 +55,7 @@ public class CloudSdkRuntime extends RuntimeDelegate {
                           null);
       }
     } catch (IOException | InterruptedException e) {
-      return new Status(IStatus.ERROR,
+      return new Status(IStatus.CANCEL,
                         Activator.PLUGIN_ID,
                         0,
                         "Failed to validate that the Cloud SDK/App Engine component is installed",

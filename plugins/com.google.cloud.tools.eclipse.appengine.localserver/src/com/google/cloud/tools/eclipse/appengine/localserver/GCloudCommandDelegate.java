@@ -50,10 +50,10 @@ public class GCloudCommandDelegate {
    * @return true if the Cloud SDK and App Engine component have been installed
    *         and false otherwise
    */
-  public static boolean areCloudSdkAndAppEngineInstalled(String sdkLocation) 
+  public static boolean areCloudSdkAndAppEngineInstalled(File sdkLocation) 
       throws IOException, InterruptedException {
-    if (!(new File(sdkLocation)).exists()) {
-      throw new InvalidPathException(sdkLocation, "Path does not exist");
+    if (!sdkLocation.exists()) {
+      throw new InvalidPathException(sdkLocation.getAbsolutePath(), "Path does not exist");
     }
 
     Process process = Runtime.getRuntime().exec(sdkLocation + GET_COMPONENTS_LIST_CMD);
