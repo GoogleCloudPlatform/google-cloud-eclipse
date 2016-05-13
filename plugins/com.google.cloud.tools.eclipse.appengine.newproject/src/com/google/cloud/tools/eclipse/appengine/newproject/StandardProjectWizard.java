@@ -49,21 +49,21 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
     } catch (InterruptedException ex) {
       status = Status.CANCEL_STATUS;
     } catch (InvocationTargetException ex) {
-      status = setErrorStatus(ex);
+      status = setErrorStatus(ex.getCause());
     }
     
     return status.isOK();
   }
 
   // visible for testing
-  static IStatus setErrorStatus(Exception ex) {
+  static IStatus setErrorStatus(Throwable ex) {
     int errorCode = 1;
     String message = "Failed to create project";
     if (ex.getMessage() != null && !ex.getMessage().isEmpty()) {
       message += ": " + ex.getMessage();
     }
     IStatus status = new Status(Status.ERROR, "todo plugin ID", errorCode, message, ex);
-    StatusManager.getManager().handle(status, StatusManager.SHOW);
+    StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.LOG);
     return status;
   }
   
