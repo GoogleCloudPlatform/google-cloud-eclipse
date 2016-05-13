@@ -14,15 +14,14 @@
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
-import java.io.File;
+import com.google.cloud.tools.eclipse.appengine.localserver.runtime.CloudSdkRuntime;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -37,14 +36,14 @@ import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.progress.IProgressConstants;
 import org.eclipse.wst.server.core.IRuntimeType;
 import org.eclipse.wst.server.core.IRuntimeWorkingCopy;
 import org.eclipse.wst.server.core.TaskModel;
 import org.eclipse.wst.server.ui.wizard.IWizardHandle;
 import org.eclipse.wst.server.ui.wizard.WizardFragment;
 
-import com.google.cloud.tools.eclipse.appengine.localserver.runtime.CloudSdkRuntime;
+import java.io.File;
 
 /**
  * {@link WizardFragment} for configuring Google Cloud SDK Runtime.
@@ -53,6 +52,8 @@ public final class CloudSdkRuntimeWizardFragment extends WizardFragment {
   private IWizardHandle wizard;
   private CloudSdkRuntime runtime;
   private Text dirTextBox;
+
+  private Job validateLocationJob;
 
   @Override
   public Composite createComposite(Composite parent, IWizardHandle handle) {
@@ -66,7 +67,39 @@ public final class CloudSdkRuntimeWizardFragment extends WizardFragment {
     Composite composite = new Composite(parent, SWT.NONE);
     composite.setLayout(new GridLayout());
     createContents(composite);
+
+    configureValidationJob();
     return composite;
+  }
+
+  private void configureValidationJob() {
+    validateLocationJob = new Job("Validating Cloud SDK local server configuration") {
+      @Override
+      protected IStatus run(IProgressMonitor monitor) {
+        final IStatus runtimeStatus = runtime.validate();
+        if (dirTextBox == null || dirTextBox.isDisposed()) {
+          return Status.CANCEL_STATUS;
+        }
+        dirTextBox.getDisplay().asyncExec(new Runnable() {
+          @Override
+          public void run() {
+            if (dirTextBox != null && !dirTextBox.isDisposed()) {
+              if (runtimeStatus != null && !runtimeStatus.isOK()) {
+                updateStatus(runtimeStatus.getMessage(), IStatus.ERROR);
+              } else {
+                updateStatus(null, IStatus.OK);
+              }
+              wizard.update();
+            }
+            validateLocationJob.done(Status.OK_STATUS);
+          }
+        });
+        return ASYNC_FINISH;
+      }
+    };
+    validateLocationJob.setSystem(true);
+    validateLocationJob.setProperty(IProgressConstants.NO_IMMEDIATE_ERROR_PROMPT_PROPERTY, true);
+    validateLocationJob.setPriority(Job.SHORT);
   }
 
   @Override
@@ -161,34 +194,7 @@ public final class CloudSdkRuntimeWizardFragment extends WizardFragment {
     updateStatus("Validating...", IStatus.INFO);
     Path path = new Path(dirTextBox.getText());
     runtime.getRuntimeWorkingCopy().setLocation(path);
-
-    Job job = new Job("Validating Cloud SDK local server configuration") {
-
-      @Override
-      protected IStatus run(IProgressMonitor monitor) {
-        return runtime.validate();
-      }
-    };
-    job.setPriority(Job.SHORT);
-    job.addJobChangeListener(new JobChangeAdapter() {
-
-      @Override
-      public void done(IJobChangeEvent event) {
-        final IStatus runtimeStatus = event.getResult();
-
-        PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
-          @Override
-          public void run() {
-            if (runtimeStatus != null && !runtimeStatus.isOK()) {
-              updateStatus(runtimeStatus.getMessage(), IStatus.ERROR);
-            } else {
-              updateStatus(null, IStatus.OK);
-            }
-            wizard.update();
-          }
-        });
-      }
-    });
-    job.schedule();
+    validateLocationJob.cancel();
+    validateLocationJob.schedule(20); // small wait in case of more keystrokes
   }
 }
