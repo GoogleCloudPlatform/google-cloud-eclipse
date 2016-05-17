@@ -1,13 +1,14 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import org.eclipse.jdt.core.JavaConventions;
+import org.eclipse.jdt.core.JavaCore;
 
 public class JavaPackageValidator {
 
   /**
    * Check if a string is a legal Java package name.
    */
-  // todo return an IStatus
+  // todo return an IStatus for better error reporting
   public static boolean validate(String packageName) {
     if (packageName == null) {
       return false;
@@ -20,7 +21,8 @@ public class JavaPackageValidator {
       // note very weird condition because validatePackageName allows internal white space
       return false;
     } else {
-      return JavaConventions.validatePackageName(packageName, "1.4", "1.4").isOK();
+      return JavaConventions.validatePackageName(
+          packageName, JavaCore.VERSION_1_4, JavaCore.VERSION_1_4).isOK();
     }
   }
   

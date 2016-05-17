@@ -27,8 +27,13 @@ public class JavaPackageValidatorTest {
   }
   
   @Test
-  public void testContainsSpace() {
+  public void testContainsSpaceAroundPeriod() {
     Assert.assertFalse(JavaPackageValidator.validate("com. google.eclipse"));
+  }
+  
+  @Test
+  public void testContainsInternalSpace() {
+    Assert.assertFalse(JavaPackageValidator.validate("com.goo gle.eclipse"));
   }
   
   @Test
