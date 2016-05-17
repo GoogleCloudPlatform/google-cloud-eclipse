@@ -195,6 +195,6 @@ public final class CloudSdkRuntimeWizardFragment extends WizardFragment {
     Path path = new Path(dirTextBox.getText());
     runtime.getRuntimeWorkingCopy().setLocation(path);
     validateLocationJob.cancel();
-    validateLocationJob.schedule(20); // small wait in case of more keystrokes
+    validateLocationJob.schedule(200); // small wait in case of more keystrokes
   }
 }
