@@ -36,6 +36,9 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
     config.setPackageName(page.getPackageName());
 
     config.setProject(page.getProjectHandle());
+    if (!page.useDefaults()) {
+      config.setEclipseProjectLocationUri(page.getLocationURI());
+    }
     
     // todo set up
     final IAdaptable uiInfoAdapter = WorkspaceUndoUtil.getUIInfoAdapter(getShell());

@@ -1,6 +1,7 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import java.io.File;
+import java.net.URI;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.IWizardPage;

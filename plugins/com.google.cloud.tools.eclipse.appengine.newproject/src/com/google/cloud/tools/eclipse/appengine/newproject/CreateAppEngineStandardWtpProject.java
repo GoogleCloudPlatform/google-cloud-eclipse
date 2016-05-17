@@ -57,8 +57,8 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
     
     IWorkspace workspace = ResourcesPlugin.getWorkspace();
     IProject newProject = config.getProject();
-    URI location = newProject.getLocationURI();
-        
+    URI location = config.getEclipseProjectLocationUri();
+
     String name = newProject.getName();
     final IProjectDescription description = workspace.newProjectDescription(name);
     description.setLocationURI(location);

@@ -1,5 +1,7 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
+import java.net.URI;
+
 import org.eclipse.core.resources.IProject;
 
 /**
@@ -7,6 +9,7 @@ import org.eclipse.core.resources.IProject;
  */
 class AppEngineStandardProjectConfig {
 
+  private URI eclipseProjectLocationUri = null;
   private String appEngineProjectId = "";
   private String packageName = "";
   private IProject project;
@@ -37,6 +40,14 @@ class AppEngineStandardProjectConfig {
 
   public IProject getProject() {
     return this.project;
+  }
+
+  public URI getEclipseProjectLocationUri() {
+    return this.eclipseProjectLocationUri;
+  }
+
+  public void setEclipseProjectLocationUri(URI uri) {
+    this.eclipseProjectLocationUri = uri;
   }
 
 }

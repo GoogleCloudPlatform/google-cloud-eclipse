@@ -1,5 +1,8 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -33,6 +36,12 @@ public class AppEngineStandardProjectConfigTest {
   public void testPackageName() {
     config.setPackageName("com.foo.bar");
     Assert.assertEquals("com.foo.bar", config.getPackageName());
+  }
+  
+  @Test
+  public void testEclipseProjectLocationUri() throws URISyntaxException {   
+    config.setEclipseProjectLocationUri(new URI("file://foo/bar"));   
+    Assert.assertEquals(new URI("file://foo/bar"), config.getEclipseProjectLocationUri());    
   }
 
 }
