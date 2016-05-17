@@ -14,6 +14,11 @@ public class JavaPackageValidatorTest {
   public void testEndsWithPeriod() {
     Assert.assertFalse(JavaPackageValidator.validate("com.google.eclipse."));
   }
+  
+  @Test
+  public void testStartsWithPeriod() {
+    Assert.assertFalse(JavaPackageValidator.validate(".com.google.eclipse."));
+  }
 
   @Test
   public void testOneWord() {
