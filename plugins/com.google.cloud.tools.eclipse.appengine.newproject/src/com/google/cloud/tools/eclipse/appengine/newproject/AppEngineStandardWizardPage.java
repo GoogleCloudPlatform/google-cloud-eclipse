@@ -1,5 +1,7 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
+import java.io.File;
+
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
@@ -82,6 +84,13 @@ class AppEngineStandardWizardPage extends WizardNewProjectCreationPage implement
     String projectId = projectIdField.getText();
     if (!AppEngineProjectIdValidator.validate(projectId)) {
       setErrorMessage("Illegal App Engine Project ID: " + projectId); //$NON-NLS-1$
+      return false;
+    }
+    
+    File parent = getLocationPath().toFile();
+    File projectDirectory = new File(parent, getProjectName());
+    if (projectDirectory.exists()) {
+      setErrorMessage("Project location already exists: " + projectDirectory); 
       return false;
     }
     
