@@ -1,5 +1,9 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
+import java.util.Set;
+
+import com.google.common.collect.ImmutableSet;
+
 public class JavaPackageValidator {
 
   /**
@@ -19,12 +23,31 @@ public class JavaPackageValidator {
         if (!isValidJavaName(parts[i])) {
           return false;
         }
+        if (isJavaKeyword(parts[i])) {
+          return false;
+        }
       }
     }
     return true;
   }
+  
+  private static final Set<String> KEYWORDS = ImmutableSet.of(
+      "abstract", "assert", "boolean", "break", "byte", "case", "catch", "char",
+      "class", "const", "continue", "default", "do", "double", "else", "extends",
+      "false", "final", "finally", "float", "for", "goto", "if", "implements", "import",
+      "instanceof", "int", "interface", "long", "native", "new", "null", "package",
+      "private", "protected", "public", "return", "short", "static", "strictfp",  
+      "super", "switch", "synchronized", "this", "throw", "throws", "transient",
+      "true", "try", "void", "volatile", "while");
+
+  private static boolean isJavaKeyword(String name) {
+    return KEYWORDS.contains(name);
+  }
 
   private static boolean isValidJavaName(String name) {
+    if (name == null || name.isEmpty()) {
+      return false;
+    }
     if (!Character.isJavaIdentifierStart(name.charAt(0))) {
       return false;
     }

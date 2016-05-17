@@ -25,7 +25,18 @@ public class JavaPackageValidatorTest {
   public void testContainsSpace() {
     Assert.assertFalse(JavaPackageValidator.validate("com. google.eclipse"));
   }
+  
+  @Test
+  public void testDoublePeriod() {
+    Assert.assertFalse(JavaPackageValidator.validate("com..google"));
+  }
 
+
+  @Test
+  public void testJavaKeyword() {
+    Assert.assertFalse(JavaPackageValidator.validate("com.new"));
+  }
+  
   @Test
   public void testEmptyString() {
     Assert.assertTrue(JavaPackageValidator.validate(""));
