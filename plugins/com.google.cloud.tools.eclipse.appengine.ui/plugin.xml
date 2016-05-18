@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+  <extension point="org.eclipse.ui.keywords">
+    <keyword label="GCP" id="com.google.cloud.tools.eclipse.appengine.newproject.GCPKeyword"/>
+    <keyword label="GAE" id="com.google.cloud.tools.eclipse.appengine.newproject.GAEKeyword"/>
+    <keyword label="Google" 
+             id="com.google.cloud.tools.eclipse.appengine.newproject.GoogleKeyword"/>
+    <keyword label="AppEngine" 
+             id="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineKeyword"/>
+    <keyword label="App Engine" 
+             id="com.google.cloud.tools.eclipse.appengine.newproject.AppSpaceEngineKeyword"/>
+  </extension>
+
+</plugin>
