@@ -79,7 +79,7 @@ class AppEngineStandardWizardPage extends WizardNewProjectCreationPage implement
     String packageName = javaPackageField.getText();
     IStatus packageStatus = JavaPackageValidator.validate(packageName);
     if (!packageStatus.isOK()) {
-      setErrorMessage(packageStatus.getMessage()); 
+      setErrorMessage("Illegal package name: " + packageStatus.getMessage()); 
       return false;
     }
     
