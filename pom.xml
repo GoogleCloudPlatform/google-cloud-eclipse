@@ -59,6 +59,11 @@
         <artifactId>tycho-compiler-plugin</artifactId>
         <configuration>
           <showWarnings>true</showWarnings>
+          <!--
+            avoid Access restriction on class due to restriction on
+            required library
+          -->
+          <compilerArgument>-warn:+discouraged,forbidden</compilerArgument>
         </configuration>
       </plugin>
 
