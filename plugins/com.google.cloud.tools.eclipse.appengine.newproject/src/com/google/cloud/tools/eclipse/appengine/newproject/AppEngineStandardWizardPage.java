@@ -1,8 +1,8 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import java.io.File;
-import java.net.URI;
 
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
@@ -77,8 +77,9 @@ class AppEngineStandardWizardPage extends WizardNewProjectCreationPage implement
 
   private boolean validateLocalFields() {
     String packageName = javaPackageField.getText();
-    if (!JavaPackageValidator.validate(packageName)) {
-      setErrorMessage("Illegal Java package name: " + packageName); //$NON-NLS-1$
+    IStatus packageStatus = JavaPackageValidator.validate(packageName);
+    if (!packageStatus.isOK()) {
+      setErrorMessage(packageStatus.getMessage()); 
       return false;
     }
     
