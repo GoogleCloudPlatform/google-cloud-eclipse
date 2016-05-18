@@ -34,6 +34,7 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
   private String packageName;
   private String artifactId;
   private String groupId;
+  private String version;
   private IPath location;
 
 
@@ -44,6 +45,8 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
     SubMonitor progress = SubMonitor.convert(monitor);
     monitor.beginTask("Creating Maven AppEngine archetype", 100);
 
+    // A project id shouldn't be necessary during creation, but the
+    // archetype seems to require it. Use the artifact if necessary
     String appId = appEngineProjectId;
     if (appId == null || appId.trim().isEmpty()) {
       appId = artifactId;
@@ -59,15 +62,12 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
     properties.put("application-id", appId);
 
     ProjectImportConfiguration importConfiguration = new ProjectImportConfiguration();
-    List<IProject> archetypeProjects = projectConfigurationManager
-        .createArchetypeProjects(location, getArchetypeDescriptor(), groupId, artifactId,
-            "0.0.1-SNAPSHOT",
-            packageName, properties, importConfiguration, progress.newChild(60));
+    List<IProject> archetypeProjects = projectConfigurationManager.createArchetypeProjects(location,
+        getArchetypeDescriptor(), groupId, artifactId, version, packageName, properties,
+        importConfiguration, progress.newChild(60));
 
-    if (!archetypeProjects.isEmpty()) {
-      Job job = new MappingDiscoveryJob(archetypeProjects);
-      job.schedule();
-    }
+    Job job = new MappingDiscoveryJob(archetypeProjects);
+    job.schedule();
   }
 
   @SuppressWarnings("restriction")
@@ -115,6 +115,11 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
   /** Set the Maven group identifier for the generated project */
   public void setGroupId(String groupId) {
     this.groupId = groupId;
+  }
+
+  /** Set the Maven version for the generated project */
+  public void setVersion(String version) {
+    this.version = version;
   }
 
   /**
