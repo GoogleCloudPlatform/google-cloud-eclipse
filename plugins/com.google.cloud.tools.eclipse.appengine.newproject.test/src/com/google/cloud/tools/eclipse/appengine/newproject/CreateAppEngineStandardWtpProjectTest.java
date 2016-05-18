@@ -1,7 +1,5 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
-import java.lang.reflect.InvocationTargetException;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -14,7 +12,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;;
+import org.mockito.runners.MockitoJUnitRunner;
+
+import java.lang.reflect.InvocationTargetException;;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CreateAppEngineStandardWtpProjectTest {

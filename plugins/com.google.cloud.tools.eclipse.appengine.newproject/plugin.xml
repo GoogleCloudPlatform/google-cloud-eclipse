@@ -4,7 +4,7 @@
    <extension point="org.eclipse.ui.newWizards">
       <wizard
             id="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineStandard"
-            name="Google App Engine Standard Java Project"
+            name="%wizard.name"
             class="com.google.cloud.tools.eclipse.appengine.newproject.StandardProjectWizard"
             icon="icons/app_engine_standard_16x16.png"
             project="true"
@@ -14,6 +14,6 @@
       </wizard>
       <category 
           id="com.google.cloud.tools.eclipse.appengine.wizards" 
-          name="Google Cloud Platform" />
+          name="%gcp.category" />
    </extension>
 </plugin>

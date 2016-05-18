@@ -2,8 +2,6 @@ package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.IWizardPage;
-import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
-import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -11,16 +9,18 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 /**
  * UI to collect all information necessary to create a new App Engine Standard Java Eclipse project.
  */
-class AppEngineStandardWizardPage extends WizardNewProjectCreationPage implements IWizardPage {
+public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage implements IWizardPage {
 
   private Text javaPackageField;
   private Text projectIdField;
   
-  AppEngineStandardWizardPage() {
+  public AppEngineStandardWizardPage() {
     super("basicNewProjectPage"); //$NON-NLS-1$
     // todo instead of hard coding strings, read the wizard.name and wizard.description properties 
     // from plugins/com.google.cloud.tools.eclipse.appengine.newproject/plugin.properties
@@ -95,11 +95,11 @@ class AppEngineStandardWizardPage extends WizardNewProjectCreationPage implement
     }
   }  
 
-  String getAppEngineProjectId() {
+  public String getAppEngineProjectId() {
     return this.projectIdField.getText();
   }
 
-  String getPackageName() {
+  public String getPackageName() {
     return this.javaPackageField.getText();
   }
   

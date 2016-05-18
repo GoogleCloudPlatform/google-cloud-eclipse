@@ -22,3 +22,5 @@ Import-Package: com.google.cloud.tools.eclipse.appengine.localserver.runtime,
  org.eclipse.wst.common.frameworks.datamodel,
  org.eclipse.wst.common.project.facet.core,
  org.eclipse.wst.common.project.facet.core.runtime
+Export-Package: com.google.cloud.tools.eclipse.appengine.newproject;version="0.1.0";x-friends:="com.google.cloud.tools.eclipse.appengine.newproject.maven"
+

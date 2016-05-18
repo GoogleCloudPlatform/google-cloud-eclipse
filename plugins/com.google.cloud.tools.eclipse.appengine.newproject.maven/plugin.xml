@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension point="org.eclipse.ui.newWizards">
+      <wizard
+            id="com.google.cloud.tools.eclipse.appengine.newproject.MavenAppEngineStandard"
+            name="%mavenwizard.name"
+            class="com.google.cloud.tools.eclipse.appengine.newproject.maven.MavenArchetypeProjectWizard"
+            icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.newproject/icons/app_engine_standard_16x16.png"
+            project="true"
+            category="com.google.cloud.tools.eclipse.appengine.wizards">
+         <description>%mavenwizard.description</description>
+         <selection class="org.eclipse.core.resources.IResource"/>
+      </wizard>
+   </extension>
+   
+   <extension
+         point="org.eclipse.m2e.core.lifecycleMappingMetadataSource">
+   </extension>
+   <extension
+         id="appengine"
+         point="org.eclipse.wst.validation.exclude">
+      <validator
+            id="org.eclipse.wst.xml.core.xml">
+         <exclude>
+            <rules>
+               <file
+                     name="nbactions.xml"
+                     type="full">
+               </file>
+               <file
+                     name="appengine-web.xml"
+                     type="file">
+               </file>
+            </rules>
+         </exclude>
+      </validator>
+   </extension>
+   
+</plugin>
