@@ -7,7 +7,8 @@ import org.eclipse.jdt.core.JavaCore;
 
 public class JavaPackageValidator {
 
-  private static final String PLUGIN_ID = "com.google.cloud.tools.eclipse.appengine.newproject.AppEngineStandard";
+  private static final String PLUGIN_ID = 
+      "com.google.cloud.tools.eclipse.appengine.newproject.AppEngineStandard";
   
   /**
    * Check if a string is a legal Java package name.
