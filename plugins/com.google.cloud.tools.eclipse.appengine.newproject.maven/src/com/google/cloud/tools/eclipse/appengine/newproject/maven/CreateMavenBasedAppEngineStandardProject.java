@@ -64,8 +64,10 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
             "0.0.1-SNAPSHOT",
             packageName, properties, importConfiguration, progress.newChild(60));
 
-    Job job = new MappingDiscoveryJob(archetypeProjects);
-    job.schedule();
+    if (!archetypeProjects.isEmpty()) {
+      Job job = new MappingDiscoveryJob(archetypeProjects);
+      job.schedule();
+    }
   }
 
   @SuppressWarnings("restriction")
