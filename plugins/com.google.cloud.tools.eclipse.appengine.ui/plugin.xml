@@ -2,15 +2,18 @@
 <?eclipse version="3.4"?>
 <plugin>
 
+  <!-- TODO how can we test that the properties are defined? -->
   <extension point="org.eclipse.ui.keywords">
-    <keyword label="GCP" id="com.google.cloud.tools.eclipse.appengine.newproject.GCPKeyword"/>
-    <keyword label="GAE" id="com.google.cloud.tools.eclipse.appengine.newproject.GAEKeyword"/>
-    <keyword label="Google" 
-             id="com.google.cloud.tools.eclipse.appengine.newproject.GoogleKeyword"/>
-    <keyword label="AppEngine" 
-             id="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineKeyword"/>
-    <keyword label="App Engine" 
-             id="com.google.cloud.tools.eclipse.appengine.newproject.AppSpaceEngineKeyword"/>
+    <keyword label="%googleCloudPlatformAcronym" 
+             id="com.google.cloud.tools.eclipse.appengine.ui.GCPKeyword"/>
+    <keyword label="%appEngineAcronym" 
+             id="com.google.cloud.tools.eclipse.appengine.ui.GAEKeyword"/>
+    <keyword label="%googleName" 
+             id="com.google.cloud.tools.eclipse.appengine.ui.GoogleKeyword"/>
+    <keyword label="%appEngineName" 
+             id="com.google.cloud.tools.eclipse.appengine.ui.AppEngineKeyword"/>
+    <keyword label="%appEngineNameWithSpace" 
+             id="com.google.cloud.tools.eclipse.appengine.ui.AppSpaceEngineKeyword"/>
   </extension>
 
 </plugin>
