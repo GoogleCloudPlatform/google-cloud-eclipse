@@ -16,15 +16,15 @@ public class JavaPackageValidator {
   public static IStatus validate(String packageName) {
     
     if (packageName == null) {
-      return new Status(1, PLUGIN_ID, 45, "null package name", null);
+      return new Status(IStatus.ERROR, PLUGIN_ID, 45, "null package name", null);
     } else if (packageName.isEmpty()) { // default package is allowed
       return Status.OK_STATUS;
     } else if (packageName.endsWith(".")) {
       // todo or allow this and strip the period
-      return new Status(1, PLUGIN_ID, 46, packageName + " ends with a period.", null);
+      return new Status(IStatus.ERROR, PLUGIN_ID, 46, packageName + " ends with a period.", null);
     } else if (containsWhitespace(packageName)) {
       // very weird condition because validatePackageName allows internal white space
-      return new Status(1, PLUGIN_ID, 46, packageName + " contains whitespace.", null);
+      return new Status(IStatus.ERROR, PLUGIN_ID, 46, packageName + " contains whitespace.", null);
     } else {
       return JavaConventions.validatePackageName(
           packageName, JavaCore.VERSION_1_4, JavaCore.VERSION_1_4);
