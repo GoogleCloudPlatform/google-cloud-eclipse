@@ -45,8 +45,8 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
     SubMonitor progress = SubMonitor.convert(monitor);
     monitor.beginTask("Creating Maven AppEngine archetype", 100);
 
-    // A project id shouldn't be necessary during creation, but the
-    // archetype seems to require it. Use the artifact if necessary
+    // todo: verify whether project id is be necessary during creation. The
+    // archetype seems to require it so we wse the artifact if unspecified.
     String appId = appEngineProjectId;
     if (appId == null || appId.trim().isEmpty()) {
       appId = artifactId;
@@ -66,6 +66,12 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
         getArchetypeDescriptor(), groupId, artifactId, version, packageName, properties,
         importConfiguration, progress.newChild(60));
 
+    /*
+     * invoke the Maven lifecycle mapping discovery job
+     * 
+     * todo: is this step necessary? we know the archetype contents and we handle the
+     * lifecycle-mappings and rules
+     */
     Job job = new MappingDiscoveryJob(archetypeProjects);
     job.schedule();
   }

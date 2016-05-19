@@ -35,7 +35,6 @@ public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
     operation.setGroupId(page.getGroupId());
     operation.setArtifactId(page.getArtifactId());
     operation.setVersion(page.getVersion());
-    operation.setGroupId("org.example.appengine");
     if (page.useDefaults()) {
       operation.setLocation(page.getLocationPath());
     }

@@ -63,9 +63,18 @@ public class MavenAppEngineStandardWizardPage extends WizardPage implements IWiz
   public void createControl(Composite parent) {
     Composite container = new Composite(parent, SWT.NONE);
     GridLayoutFactory.swtDefaults().numColumns(2).applyTo(container);
+
+    createLocationArea(container);
+    createMavenCoordinatesArea(container);
+    createAppEngineProjectDetailsArea(container);
+
+    setControl(container);
+  }
+
+  /** Create UI for specifying the generated location area */
+  private void createLocationArea(Composite container) {
     ModifyListener pageValidator = new PageValidator();
     
-    /**** Location ****/
     Group locationGroup = new Group(container, SWT.NONE);
     locationGroup.setText("Location");
     GridDataFactory.fillDefaults().span(2, 1).applyTo(locationGroup);
@@ -104,23 +113,25 @@ public class MavenAppEngineStandardWizardPage extends WizardPage implements IWiz
         checkPageComplete();
       }
     });
-    
+  }
 
-    /**** Maven Coordinates ****/
+  /** Create UI for specifying desired Maven Coordinates */
+  private void createMavenCoordinatesArea(Composite container) {
+    ModifyListener pageValidator = new PageValidator();
+
     Group mavenCoordinatesGroup = new Group(container, SWT.NONE);
     mavenCoordinatesGroup.setText("Maven project coordinates");
     GridDataFactory.defaultsFor(mavenCoordinatesGroup).span(2, 1).applyTo(mavenCoordinatesGroup);
     GridLayoutFactory.swtDefaults().numColumns(2).applyTo(mavenCoordinatesGroup);
 
     Label groupIdLabel = new Label(mavenCoordinatesGroup, SWT.NONE);
-    groupIdLabel.setText("Group id:"); //$NON-NLS-1$
+    groupIdLabel.setText("Group Id:"); //$NON-NLS-1$
     groupIdField = new Text(mavenCoordinatesGroup, SWT.BORDER);
-    GridDataFactory.defaultsFor(groupIdField).align(SWT.FILL, SWT.CENTER)
-        .applyTo(groupIdField);
+    GridDataFactory.defaultsFor(groupIdField).align(SWT.FILL, SWT.CENTER).applyTo(groupIdField);
     groupIdField.addModifyListener(pageValidator);
 
     Label artifactIdLabel = new Label(mavenCoordinatesGroup, SWT.NONE);
-    artifactIdLabel.setText("Artifact id:"); //$NON-NLS-1$
+    artifactIdLabel.setText("Artifact Id:"); //$NON-NLS-1$
     artifactIdField = new Text(mavenCoordinatesGroup, SWT.BORDER);
     GridDataFactory.defaultsFor(artifactIdField).align(SWT.FILL, SWT.CENTER)
         .applyTo(artifactIdField);
@@ -130,11 +141,13 @@ public class MavenAppEngineStandardWizardPage extends WizardPage implements IWiz
     versionLabel.setText("Version:"); //$NON-NLS-1$
     versionField = new Text(mavenCoordinatesGroup, SWT.BORDER);
     versionField.setText(defaultVersion);
-    GridDataFactory.defaultsFor(versionField).align(SWT.FILL, SWT.CENTER)
-    .applyTo(versionField);
+    GridDataFactory.defaultsFor(versionField).align(SWT.FILL, SWT.CENTER).applyTo(versionField);
     versionField.addModifyListener(pageValidator);
+  }
 
-    /**** App Engine project details ****/
+  /** Create UI for specifying App Engine project details */
+  private void createAppEngineProjectDetailsArea(Composite container) {
+    ModifyListener pageValidator = new PageValidator();
 
     // Java package name
     Label packageNameLabel = new Label(container, SWT.NONE);
@@ -144,7 +157,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage implements IWiz
     javaPackagePosition.horizontalSpan = 2;
     javaPackageField.setLayoutData(javaPackagePosition);
     javaPackageField.addModifyListener(pageValidator);
-    
+
     // App Engine Project ID
     Label projectIdLabel = new Label(container, SWT.NONE);
     projectIdLabel.setText("App Engine Project ID: (optional)"); //$NON-NLS-1$
@@ -153,8 +166,6 @@ public class MavenAppEngineStandardWizardPage extends WizardPage implements IWiz
     projectIdPosition.horizontalSpan = 2;
     projectIdField.setLayoutData(projectIdPosition);
     projectIdField.addModifyListener(pageValidator);
-    
-    setControl(container);
   }
 
   protected void openLocationDialog() {
@@ -180,6 +191,8 @@ public class MavenAppEngineStandardWizardPage extends WizardPage implements IWiz
     setMessage(null);
     setErrorMessage(null);
     
+    // order here should match order of the UI fields
+
     String location = locationField.getText().trim();
     if (!useDefaults() && location.isEmpty()) {
       setMessage("Please provide a location", INFORMATION);
@@ -189,56 +202,62 @@ public class MavenAppEngineStandardWizardPage extends WizardPage implements IWiz
     if (!validateMavenSettings()) {
       return false;
     }
-
-    String artifactId = getArtifactId();
-    if (!artifactId.isEmpty()) {
-      IPath path = useDefaults() ? getWorkspace().getRoot().getLocation() : new Path(location);
-      path = path.append(artifactId);
-      // don't overwrite a location
-      if (path.toFile().exists()) {
-        setErrorMessage(MessageFormat.format("Location already exists: {0}", path));
-        return false;
-      }
+    if (!validateGeneratedProjectLocation()) {
+      return false;
     }
 
     String packageName = getPackageName();
     if (!JavaPackageValidator.validate(packageName)) {
-      setErrorMessage("Illegal Java package name: " + packageName); //$NON-NLS-1$
+      setErrorMessage(MessageFormat.format("Illegal Java package name: {0}.", packageName));
       return false;
     }
 
     String projectId = getAppEngineProjectId();
     if (!AppEngineProjectIdValidator.validate(projectId)) {
-      setErrorMessage("Illegal App Engine Project ID: " + projectId); //$NON-NLS-1$
+      setErrorMessage(MessageFormat.format("Illegal App Engine Project ID: {0}.", projectId));
       return false;
     }
 
     return true;
   }
 
+  /**
+   * Check that we won't overwrite an existing location. Expects a valid Maven Artifact Id.
+   */
+  private boolean validateGeneratedProjectLocation() {
+    String artifactId = getArtifactId();
+    // assert !artifactId.isEmpty()
+    IPath path = getLocationPath().append(artifactId);
+    if (path.toFile().exists()) {
+      setErrorMessage(MessageFormat.format("Location already exists: {0}.", path));
+      return false;
+    }
+    return true;
+  }
+
   private boolean validateMavenSettings() {
     String groupId = getGroupId();
     if (groupId.isEmpty()) {
-      setMessage("Please provide Maven group id", INFORMATION);
+      setMessage("Please provide Maven Group Id.", INFORMATION);
       return false;
     } else if (!MavenCoordinatesValidator.validateGroupId(groupId)) {
-      setErrorMessage("Illegal group id: " + groupId);
+      setErrorMessage(MessageFormat.format("Illegal Maven Group Id: {0}.", groupId));
       return false;
     }
     String artifactId = getArtifactId();
     if (artifactId.isEmpty()) {
-      setMessage("Please provide Maven artifact id", INFORMATION);
+      setMessage("Please provide Maven Artifact Id.", INFORMATION);
       return false;
     } else if (!MavenCoordinatesValidator.validateArtifactId(artifactId)) {
-      setErrorMessage("Illegal artifact id: " + artifactId);
+      setErrorMessage("Illegal Maven Artifact Id: " + artifactId);
       return false;
     }
     String version = getVersion();
     if (version.isEmpty()) {
-      setMessage("Please provide Maven artifact version", INFORMATION);
+      setMessage("Please provide Maven artifact version.", INFORMATION);
       return false;
     } else if (!MavenCoordinatesValidator.validateVersion(version)) {
-      setErrorMessage("Illegal version: " + version);
+      setErrorMessage("Illegal Maven version: " + version);
       return false;
     }
     return true;
@@ -271,7 +290,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage implements IWiz
     return useDefaults.getSelection();
   }
 
-  /** Return the App Engine project id (if any) */
+  /** Return the App Engine Project ID (if any) */
   public String getAppEngineProjectId() {
     return this.projectIdField.getText();
   }
