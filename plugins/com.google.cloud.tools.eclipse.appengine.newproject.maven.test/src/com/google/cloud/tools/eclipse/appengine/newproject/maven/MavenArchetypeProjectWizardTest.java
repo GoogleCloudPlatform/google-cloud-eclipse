@@ -1,5 +1,8 @@
 package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 
+import static org.junit.Assert.assertNotNull;
+
+import org.eclipse.swt.widgets.Display;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -10,6 +13,8 @@ public class MavenArchetypeProjectWizardTest {
 
   @Before
   public void setUp() {
+    assertNotNull(Display.getDefault());
+
     wizard = new MavenArchetypeProjectWizard();
     wizard.addPages();
   }

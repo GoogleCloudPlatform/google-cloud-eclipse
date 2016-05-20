@@ -1,8 +1,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 
-import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineStandardWizardPage;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -16,7 +14,7 @@ import org.eclipse.ui.statushandlers.StatusManager;
 import java.lang.reflect.InvocationTargetException;
 
 public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
-  private AppEngineStandardWizardPage page;
+  private MavenAppEngineStandardWizardPage page;
 
   public MavenArchetypeProjectWizard() {
     setWindowTitle("New Maven-based App Engine Standard Project");
@@ -25,8 +23,7 @@ public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
 
   @Override
   public void addPages() {
-    page = new AppEngineStandardWizardPage();
-    page.setDescription("Create new Maven-based App Engine Standard Project");
+    page = new MavenAppEngineStandardWizardPage();
     this.addPage(page);
   }
 
@@ -35,8 +32,9 @@ public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
     final CreateMavenBasedAppEngineStandardProject operation = new CreateMavenBasedAppEngineStandardProject();
     operation.setAppEngineProjectId(page.getAppEngineProjectId());
     operation.setPackageName(page.getPackageName());
-    operation.setArtifactId(page.getProjectName());
-    operation.setGroupId("org.example.appengine");
+    operation.setGroupId(page.getGroupId());
+    operation.setArtifactId(page.getArtifactId());
+    operation.setVersion(page.getVersion());
     if (page.useDefaults()) {
       operation.setLocation(page.getLocationPath());
     }

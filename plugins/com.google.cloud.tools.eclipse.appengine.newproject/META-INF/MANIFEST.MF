@@ -18,9 +18,10 @@ Import-Package: com.google.cloud.tools.eclipse.appengine.localserver.runtime,
  org.eclipse.jdt.core,
  org.eclipse.jst.common.project.facet.core,
  org.eclipse.jst.j2ee.project.facet,
+ org.eclipse.jst.server.core,
  org.eclipse.wst.common.componentcore.datamodel.properties,
  org.eclipse.wst.common.frameworks.datamodel,
  org.eclipse.wst.common.project.facet.core,
- org.eclipse.wst.common.project.facet.core.runtime
+ org.eclipse.wst.common.project.facet.core.runtime,
+ org.eclipse.wst.server.core
 Export-Package: com.google.cloud.tools.eclipse.appengine.newproject;version="0.1.0";x-friends:="com.google.cloud.tools.eclipse.appengine.newproject.maven"
-

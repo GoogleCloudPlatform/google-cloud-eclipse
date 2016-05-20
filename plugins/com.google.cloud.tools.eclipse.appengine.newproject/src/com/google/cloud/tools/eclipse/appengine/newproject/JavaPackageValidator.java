@@ -1,28 +1,37 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
+import java.text.MessageFormat;
+
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 
 public class JavaPackageValidator {
 
+  private static final String PLUGIN_ID = 
+      "com.google.cloud.tools.eclipse.appengine.newproject.AppEngineStandard";
+  
   /**
    * Check if a string is a legal Java package name.
    */
-  // todo return an IStatus for better error reporting
-  public static boolean validate(String packageName) {
+  public static IStatus validate(String packageName) {
+    
     if (packageName == null) {
-      return false;
-    } else if (packageName.isEmpty()) {
-      return true;
+      return new Status(IStatus.ERROR, PLUGIN_ID, 45, "null package name", null);
+    } else if (packageName.isEmpty()) { // default package is allowed
+      return Status.OK_STATUS;
     } else if (packageName.endsWith(".")) {
       // todo or allow this and strip the period
-      return false;
+      return new Status(IStatus.ERROR, PLUGIN_ID, 46, 
+          MessageFormat.format("%s ends with a period.", packageName), null);
     } else if (containsWhitespace(packageName)) {
-      // note very weird condition because validatePackageName allows internal white space
-      return false;
+      // very weird condition because validatePackageName allows internal white space
+      return new Status(IStatus.ERROR, PLUGIN_ID, 46, 
+          MessageFormat.format("%s contains whitespace.", packageName), null);
     } else {
       return JavaConventions.validatePackageName(
-          packageName, JavaCore.VERSION_1_4, JavaCore.VERSION_1_4).isOK();
+          packageName, JavaCore.VERSION_1_4, JavaCore.VERSION_1_4);
     }
   }
   

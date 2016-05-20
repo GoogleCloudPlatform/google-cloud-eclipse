@@ -25,6 +25,7 @@ import org.eclipse.jst.j2ee.project.facet.IJ2EEModuleFacetInstallDataModelProper
 import org.eclipse.jst.j2ee.web.project.facet.IWebFacetInstallDataModelProperties;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetInstallDataModelProvider;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
+import org.eclipse.jst.server.core.FacetUtil;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.ide.undo.CreateProjectOperation;
 import org.eclipse.wst.common.frameworks.datamodel.DataModelFactory;
@@ -34,6 +35,9 @@ import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.common.project.facet.core.runtime.IRuntime;
 import org.eclipse.wst.common.project.facet.core.runtime.RuntimeManager;
+import org.eclipse.wst.server.core.IRuntimeType;
+import org.eclipse.wst.server.core.IRuntimeWorkingCopy;
+import org.eclipse.wst.server.core.ServerCore;
 
 /**
 * Utility to make a new Eclipse project with the App Engine Standard facets in the workspace.  
@@ -115,7 +119,22 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
       IRuntime appEngineRuntime = RuntimeManager.getRuntime("App Engine");
       project.setPrimaryRuntime(appEngineRuntime, monitor);
     } else {
-      // todo figure out how to create a new App Engine runtime
+      // Create a new App Engine runtime
+      IRuntimeType appEngineRuntimeType =
+        ServerCore.findRuntimeType("com.google.cloud.tools.eclipse.gcloud.runtime");
+      if (appEngineRuntimeType == null) {
+        throw new NullPointerException("Could not locate App Engine runtime");
+      }
+
+	  IRuntimeWorkingCopy appEngineRuntimeWC = appEngineRuntimeType.createRuntime(null, monitor);
+	  org.eclipse.wst.server.core.IRuntime appEngineServerRuntime = appEngineRuntimeWC.save(true, monitor);
+	  IRuntime appEngineFacetRuntime = FacetUtil.getRuntime(appEngineServerRuntime);
+	  if (appEngineFacetRuntime == null) {
+	    throw new NullPointerException("Null App Engine facet runtime");
+	  }
+
+	  project.addTargetedRuntime(appEngineFacetRuntime, monitor);
+	  project.setPrimaryRuntime(appEngineFacetRuntime, monitor);
     }
   }
 
