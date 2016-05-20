@@ -14,19 +14,19 @@
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.appengine.localserver;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.InvalidPathException;
-import java.util.regex.Pattern;
+import com.google.cloud.tools.eclipse.util.OSUtilities;
+import com.google.cloud.tools.eclipse.util.ProcessUtilities;
+import com.google.common.annotations.VisibleForTesting;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.wst.server.core.IRuntime;
 
-import com.google.cloud.tools.eclipse.util.OSUtilities;
-import com.google.cloud.tools.eclipse.util.ProcessUtilities;
-import com.google.common.annotations.VisibleForTesting;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.InvalidPathException;
+import java.util.regex.Pattern;
 
 /**
  * Utility class to run gcloud commands.
@@ -165,6 +165,10 @@ public class GCloudCommandDelegate {
            .append(apiHost)
            .append(" --api_port ")
            .append(apiPort);
+
+    // FIXME: workaround bug when running on a Java8 JVM
+    // https://github.com/GoogleCloudPlatform/gcloud-eclipse-tools/issues/181
+    builder.append(" --jvm_flag=-Dappengine.user.timezone=UTC");
 
     if ((mode != null) && mode.equals(ILaunchManager.DEBUG_MODE)) {
       if (debugPort <= 0 || debugPort > 65535) {
