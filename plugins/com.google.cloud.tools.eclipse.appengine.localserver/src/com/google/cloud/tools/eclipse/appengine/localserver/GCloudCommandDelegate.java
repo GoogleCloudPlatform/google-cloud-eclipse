@@ -176,7 +176,8 @@ public class GCloudCommandDelegate {
                                         + ", should be between 1-65535");
       }
       builder.append(" --jvm_flag=-Xdebug");
-      builder.append(" --jvm_flag=-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=");
+      builder
+          .append(" --jvm_flag=-Xrunjdwp:transport=dt_socket,server=y,suspend=y,quiet=y,address=");
       builder.append(debugPort);
     }
 
