@@ -16,9 +16,8 @@ package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
 import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
 import com.google.cloud.tools.eclipse.appengine.localserver.GCloudCommandDelegate;
+import com.google.common.collect.Lists;
 
-import org.apache.maven.project.MavenProject;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -33,8 +32,6 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.launching.AbstractJavaLaunchConfigurationDelegate;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.SocketUtil;
-import org.eclipse.m2e.core.MavenPlugin;
-import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IRuntime;
 import org.eclipse.wst.server.core.IServer;
@@ -42,10 +39,10 @@ import org.eclipse.wst.server.core.IServerListener;
 import org.eclipse.wst.server.core.ServerEvent;
 import org.eclipse.wst.server.core.ServerUtil;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.InvalidPathException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -72,10 +69,11 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
 
     CloudSdkServerBehaviour serverBehaviour =
         (CloudSdkServerBehaviour) server.loadAdapter(CloudSdkServerBehaviour.class, null);
-    // todo: dev_appserver supports >= 1 module
-    IPath deployPath = serverBehaviour.getModuleDeployDirectory(modules[0]);
-    // was: String runnables = getRunnable(modules[0].getProject(), monitor);
-    String runnables = deployPath.toOSString();
+    List<String> runnables = Lists.newArrayList();
+    for (IModule module : modules) {
+      IPath deployPath = serverBehaviour.getModuleDeployDirectory(module);
+      runnables.add(deployPath.toOSString());
+    }
 
     IRuntime runtime = server.getRuntime();
     if (runtime == null) {
@@ -116,7 +114,7 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
 
     try {
       String commands = GCloudCommandDelegate.createAppRunCommand(sdkLocation.toOSString(),
-                                                                  runnables,
+          runnables.toArray(new String[runnables.size()]),
                                                                   mode,
                                                                   cloudSdkServer.getApiHost(),
                                                                   cloudSdkServer.getApiPort(),
@@ -169,17 +167,6 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
                                        code,
                                        message,
                                        exception));
-  }
-
-  private String getRunnable(IProject project, IProgressMonitor monitor) throws CoreException {
-    IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().getProject(project);
-    MavenProject mavenProject = facade.getMavenProject(monitor);
-    return mavenProject.getBasedir() + File.separator
-           + "target"
-           + File.separator
-           + mavenProject.getArtifactId()
-           + "-"
-           + mavenProject.getVersion();
   }
 
   private int getDebugPort() throws CoreException {

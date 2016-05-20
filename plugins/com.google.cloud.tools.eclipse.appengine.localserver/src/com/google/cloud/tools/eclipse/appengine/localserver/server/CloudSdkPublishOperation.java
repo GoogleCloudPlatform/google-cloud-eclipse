@@ -99,6 +99,7 @@ public class CloudSdkPublishOperation extends PublishOperation {
       // root modules
       publishDir(deployPath, statusList, monitor);
     } else {
+      // BSD: NEED TO UNDERSTAND SITUATION FOR REMAINING CODE
       for (int i = 0; i < modules.length - 1; i++) {
         IPath deployPath = server.getModuleDeployDirectory(modules[i]);
         IWebModule webModule = (IWebModule) modules[i].loadAdapter(IWebModule.class, monitor);
@@ -118,7 +119,6 @@ public class CloudSdkPublishOperation extends PublishOperation {
           }
         }
       }
-      // BSD: NEED TO UNDERSTAND SITUATION FOR REMAINING CODE
       // BSD: Disabled saving and loading module locations
 
       // modules given as parent-child chain

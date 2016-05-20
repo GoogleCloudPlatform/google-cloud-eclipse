@@ -118,39 +118,42 @@ public class GCloudCommandDelegate {
   }
 
   /**
-   * Creates a gcloud app run command. If {@code mode} is
-   * {@link ILaunchManager#DEBUG_MODE}, it configures the server to be run in
-   * debug mode using the "--jvm-flag" and also configures a debugger to be
-   * attached to the Cloud SDK server through {@code debugPort}.
+   * Creates a gcloud app run command. If {@code mode} is {@link ILaunchManager#DEBUG_MODE}, it
+   * configures the server to be run in debug mode using the "--jvm-flag" and also configures a
+   * debugger to be attached to the Cloud SDK server through {@code debugPort}.
    *
    * @param sdkLocation the location of the Cloud SDK
-   * @param runnables the application directory of the module to be run on the
-   *          server
+   * @param runnable the application directory of the module to be run on the server
    * @param mode the launch mode
-   * @param apiHost The host and port on which to start the API server (in the
-   *          format host:port)
+   * @param apiHost The host and port on which to start the API server (in the format host:port)
    * @param debugPort the debug port
    *
    * @return a gcloud app run command
    *
    * @throws IllegalStateException if {@code debugPort} is not between 1 and 65535
-   * @throws InvalidPathException if either the {@code sdkLocation} or {@code runnables}
-   *         denotes a path that does not exist
+   * @throws InvalidPathException if either the {@code sdkLocation} or {@code runnables} denotes a
+   *         path that does not exist
    * @throws NullPointerException if {@code apiHost} is null
    */
-  public static String createAppRunCommand(String sdkLocation,
-                                           String runnables,
-                                           String mode,
-                                           String apiHost,
-                                           int apiPort,
-                                           int debugPort) throws NullPointerException, InvalidPathException, IllegalStateException {
+  public static String createAppRunCommand(String sdkLocation, String runnable, String mode,
+      String apiHost, int apiPort, int debugPort)
+      throws NullPointerException, InvalidPathException, IllegalStateException {
+    return createAppRunCommand(sdkLocation, new String[] {runnable}, mode, apiHost, apiPort,
+        debugPort);
+  }
+
+  public static String createAppRunCommand(String sdkLocation, String[] runnables, String mode,
+      String apiHost, int apiPort, int debugPort)
+      throws NullPointerException, InvalidPathException, IllegalStateException {
 
     if (!(new File(sdkLocation)).exists()) {
       throw new InvalidPathException(sdkLocation, "Path does not exist");
     }
 
-    if (!(new File(runnables)).exists()) {
-      throw new InvalidPathException(runnables, "Path does not exist");
+    for (String runnable : runnables) {
+      if (!(new File(runnable)).exists()) {
+        throw new InvalidPathException(runnable, "Path does not exist");
+      }
     }
 
     if (apiHost == null) {
@@ -159,8 +162,11 @@ public class GCloudCommandDelegate {
 
     StringBuilder builder = new StringBuilder();
     builder.append(sdkLocation)
-           .append("/bin/dev_appserver.py ")
-           .append(runnables)
+        .append("/bin/dev_appserver.py ");
+    for (String runnable : runnables) {
+      builder.append(runnable).append(' ');
+    }
+    builder
            .append(" --api_host ")
            .append(apiHost)
            .append(" --api_port ")
