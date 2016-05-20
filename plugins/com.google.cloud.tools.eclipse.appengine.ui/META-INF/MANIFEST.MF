@@ -6,3 +6,4 @@ Bundle-Version: 0.1.0.qualifier
 Bundle-Vendor: Google, Inc.
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Export-Package: com.google.cloud.tools.eclipse.appengine.ui
