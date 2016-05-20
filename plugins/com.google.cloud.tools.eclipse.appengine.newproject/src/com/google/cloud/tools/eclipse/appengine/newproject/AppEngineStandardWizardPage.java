@@ -30,10 +30,10 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage im
     this.setTitle("App Engine Standard Project");
     this.setDescription("Create a new App Engine Standard Project in the workspace."); 
     
-    // todo get a UI designer to pick a better icon (the little plane?) and 
-    // add it to this plugin's icons folder
+    // todo get a UI designer to pick a better icon (the little plane?)
+    // todo make an AppEngineImages class in the UI package
     ImageDescriptor descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(
-        "com.google.cloud.tools.eclipse.appengine.localserver", "icons/gcp-32x32.png"); //$NON-NLS-1$ //$NON-NLS-2$
+        "com.google.cloud.tools.eclipse.appengine.ui", "icons/gcp-32x32.png"); //$NON-NLS-1$ //$NON-NLS-2$
     this.setImageDescriptor(descriptor);
   }
 
