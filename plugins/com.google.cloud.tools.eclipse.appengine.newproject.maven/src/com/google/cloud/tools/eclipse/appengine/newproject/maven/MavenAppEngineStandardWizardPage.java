@@ -6,6 +6,7 @@ import com.google.cloud.tools.eclipse.appengine.newproject.JavaPackageValidator;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -255,8 +256,9 @@ public class MavenAppEngineStandardWizardPage extends WizardPage implements IWiz
 
   private boolean validateAppEngineProjectDetails() {
     String packageName = getPackageName();
-    if (!JavaPackageValidator.validate(packageName)) {
-      setErrorMessage(MessageFormat.format("Illegal Java package name: {0}.", packageName));
+    IStatus status = JavaPackageValidator.validate(packageName);
+    if (!status.isOK()) {
+      setErrorMessage(MessageFormat.format("Illegal Java package name: {0}.", status.getMessage()));
       return false;
     }
 
