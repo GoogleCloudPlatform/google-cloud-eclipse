@@ -51,9 +51,8 @@ public class MavenAppEngineStandardWizardPage extends WizardPage implements IWiz
     setTitle("Maven-based App Engine Standard Project");
     setDescription("Create new Maven-based App Engine Standard Project");
     
-    // todo: pull this from commons
     ImageDescriptor descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(
-        "com.google.cloud.tools.eclipse.appengine.localserver", "icons/gcp-32x32.png"); //$NON-NLS-1$ //$NON-NLS-2$
+        "com.google.cloud.tools.eclipse.appengine.ui", "icons/gcp-32x32.png"); //$NON-NLS-1$ //$NON-NLS-2$
     this.setImageDescriptor(descriptor);
 
     setPageComplete(false);
