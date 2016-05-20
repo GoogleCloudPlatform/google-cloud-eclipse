@@ -50,8 +50,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage implements IWiz
     setTitle("Maven-based App Engine Standard Project");
     setDescription("Create new Maven-based App Engine Standard Project");
     
-    // todo get a UI designer to pick a better icon (the little plane?) and 
-    // add it to this plugin's icons folder
+    // todo: pull this from commons
     ImageDescriptor descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(
         "com.google.cloud.tools.eclipse.appengine.localserver", "icons/gcp-32x32.png"); //$NON-NLS-1$ //$NON-NLS-2$
     this.setImageDescriptor(descriptor);
@@ -160,7 +159,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage implements IWiz
 
     // App Engine Project ID
     Label projectIdLabel = new Label(container, SWT.NONE);
-    projectIdLabel.setText("App Engine Project ID: (optional)"); //$NON-NLS-1$
+    projectIdLabel.setText("App Engine Project ID: (optional)");
     projectIdField = new Text(container, SWT.BORDER);
     GridData projectIdPosition = new GridData(GridData.FILL_HORIZONTAL);
     projectIdPosition.horizontalSpan = 2;
@@ -171,9 +170,9 @@ public class MavenAppEngineStandardWizardPage extends WizardPage implements IWiz
   protected void openLocationDialog() {
     DirectoryDialog dialog = new DirectoryDialog(getShell());
     dialog.setText("Please select the location to contain generated project");
-    String loc = dialog.open();
-    if (loc != null) {
-      locationField.setText(loc);
+    String location = dialog.open();
+    if (location != null) {
+      locationField.setText(location);
       checkPageComplete();
     }
   }
@@ -205,16 +204,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage implements IWiz
     if (!validateGeneratedProjectLocation()) {
       return false;
     }
-
-    String packageName = getPackageName();
-    if (!JavaPackageValidator.validate(packageName)) {
-      setErrorMessage(MessageFormat.format("Illegal Java package name: {0}.", packageName));
-      return false;
-    }
-
-    String projectId = getAppEngineProjectId();
-    if (!AppEngineProjectIdValidator.validate(projectId)) {
-      setErrorMessage(MessageFormat.format("Illegal App Engine Project ID: {0}.", projectId));
+    if (!validateAppEngineProjectDetails()) {
       return false;
     }
 
@@ -263,6 +253,21 @@ public class MavenAppEngineStandardWizardPage extends WizardPage implements IWiz
     return true;
   }
 
+  private boolean validateAppEngineProjectDetails() {
+    String packageName = getPackageName();
+    if (!JavaPackageValidator.validate(packageName)) {
+      setErrorMessage(MessageFormat.format("Illegal Java package name: {0}.", packageName));
+      return false;
+    }
+
+    String projectId = getAppEngineProjectId();
+    if (!AppEngineProjectIdValidator.validate(projectId)) {
+      setErrorMessage(MessageFormat.format("Illegal App Engine Project ID: {0}.", projectId));
+      return false;
+    }
+    return true;
+  }
+
   private IWorkspace getWorkspace() {
     return ResourcesPlugin.getWorkspace();
   }
@@ -283,8 +288,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage implements IWiz
   }
 
   /**
-   * If true, projects are to be generated into the workspace, otherwise placed into a specified
-   * location.
+   * If true, projects are generated into the workspace, otherwise placed into a specified location.
    */
   public boolean useDefaults() {
     return useDefaults.getSelection();
