@@ -2,6 +2,7 @@ package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectIdValidator;
 import com.google.cloud.tools.eclipse.appengine.newproject.JavaPackageValidator;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
 
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -50,10 +51,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage implements IWiz
     super("basicNewProjectPage"); //$NON-NLS-1$
     setTitle("Maven-based App Engine Standard Project");
     setDescription("Create new Maven-based App Engine Standard Project");
-    
-    ImageDescriptor descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(
-        "com.google.cloud.tools.eclipse.appengine.ui", "icons/gcp-32x32.png"); //$NON-NLS-1$ //$NON-NLS-2$
-    this.setImageDescriptor(descriptor);
+    setImageDescriptor(AppEngineImages.googleCloudPlatform(32));
 
     setPageComplete(false);
   }

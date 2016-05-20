@@ -3,7 +3,6 @@ package com.google.cloud.tools.eclipse.appengine.newproject;
 import java.io.File;
 
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -13,7 +12,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
-import org.eclipse.ui.plugin.AbstractUIPlugin;
+
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
 
 /**
  * UI to collect all information necessary to create a new App Engine Standard Java Eclipse project.
@@ -29,12 +29,8 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage im
     // from plugins/com.google.cloud.tools.eclipse.appengine.newproject/plugin.properties
     this.setTitle("App Engine Standard Project");
     this.setDescription("Create a new App Engine Standard Project in the workspace."); 
-    
-    // todo get a UI designer to pick a better icon (the little plane?)
-    // todo make an AppEngineImages class in the UI package
-    ImageDescriptor descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(
-        "com.google.cloud.tools.eclipse.appengine.ui", "icons/gcp-32x32.png"); //$NON-NLS-1$ //$NON-NLS-2$
-    this.setImageDescriptor(descriptor);
+ 
+    this.setImageDescriptor(AppEngineImages.googleCloudPlatform(32));
   }
 
   // todo is there a way to call this for a test?
