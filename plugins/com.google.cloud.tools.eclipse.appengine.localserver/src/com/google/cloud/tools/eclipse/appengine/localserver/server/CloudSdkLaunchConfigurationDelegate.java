@@ -14,11 +14,8 @@
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.InvalidPathException;
-import java.util.HashMap;
-import java.util.Map;
+import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
+import com.google.cloud.tools.eclipse.appengine.localserver.GCloudCommandDelegate;
 
 import org.apache.maven.project.MavenProject;
 import org.eclipse.core.resources.IProject;
@@ -45,8 +42,11 @@ import org.eclipse.wst.server.core.IServerListener;
 import org.eclipse.wst.server.core.ServerEvent;
 import org.eclipse.wst.server.core.ServerUtil;
 
-import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
-import com.google.cloud.tools.eclipse.appengine.localserver.GCloudCommandDelegate;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.InvalidPathException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Cloud SDK server's launch configuration delegate.
@@ -70,15 +70,19 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
       return;
     }
 
-    String runnables = getRunnable(modules[0].getProject(), monitor);
+    CloudSdkServerBehaviour serverBehaviour =
+        (CloudSdkServerBehaviour) server.loadAdapter(CloudSdkServerBehaviour.class, null);
+    // todo: dev_appserver supports >= 1 module
+    IPath deployPath = serverBehaviour.getModuleDeployDirectory(modules[0]);
+    // was: String runnables = getRunnable(modules[0].getProject(), monitor);
+    String runnables = deployPath.toOSString();
+
     IRuntime runtime = server.getRuntime();
     if (runtime == null) {
       return;
     }
     IPath sdkLocation = runtime.getLocation();
 
-    CloudSdkServerBehaviour serverBehaviour = 
-    		(CloudSdkServerBehaviour) server.loadAdapter(CloudSdkServerBehaviour.class, null);
     serverBehaviour.setupLaunch(mode);
 
     final CloudSdkServer cloudSdkServer = CloudSdkServer.getCloudSdkServer(server);
