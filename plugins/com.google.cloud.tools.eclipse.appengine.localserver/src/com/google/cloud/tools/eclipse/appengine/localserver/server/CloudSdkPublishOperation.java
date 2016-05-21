@@ -70,7 +70,8 @@ public class CloudSdkPublishOperation extends PublishOperation {
 
   @Override
   public int getOrder() {
-    // Hmm, shouldn't the publish tasks come later?
+    // TODO: shouldn't publishing tasks come later?
+    // may be necessary to work with GWT compilation
     return 0;
   }
 
@@ -79,7 +80,7 @@ public class CloudSdkPublishOperation extends PublishOperation {
    */
   public CloudSdkPublishOperation(CloudSdkServerBehaviour server, int kind, IModule[] modules,
       int deltaKind) {
-    super("Publish to server", "Publish a modules to App Engine Development Server");
+    super("Publish to server", "Publish modules to App Engine Development Server");
     this.server = server;
     this.modules = modules;
     this.kind = kind;
@@ -90,21 +91,20 @@ public class CloudSdkPublishOperation extends PublishOperation {
 
   @Override
   public void execute(IProgressMonitor monitor, IAdaptable info) throws CoreException {
-    // TODO(amitin): use more advanced key to store modules publish locations? Because a dependent
+    // TODO: use more advanced key to store modules publish locations? Because a dependent
     // java project (added as child modules and published as jar) cannot present in more than one
     // parent modules.
     List<IStatus> statusList = Lists.newArrayList();
+    IPath deployPath = server.getModuleDeployDirectory(modules[0]);
     if (modules.length == 1) {
-      IPath deployPath = server.getModuleDeployDirectory(modules[0]);
       // root modules
-      publishDir(deployPath, statusList, monitor);
+      publishDirectory(deployPath, statusList, monitor);
     } else {
-      // BSD: NEED TO UNDERSTAND SITUATION FOR REMAINING CODE
+      // TODO: Why and when does this code happen?
       for (int i = 0; i < modules.length - 1; i++) {
-        IPath deployPath = server.getModuleDeployDirectory(modules[i]);
         IWebModule webModule = (IWebModule) modules[i].loadAdapter(IWebModule.class, monitor);
         if (webModule == null) {
-          statusList.add(newErrorStatus("Not a Web modules: " + modules[i].getName()));
+          statusList.add(newErrorStatus("Not a Web module: " + modules[i].getName()));
           return;
         }
         String uri = webModule.getURI(modules[i + 1]);
@@ -114,19 +114,18 @@ public class CloudSdkPublishOperation extends PublishOperation {
           // no uri is OK for removed modules
           if (deltaKind != ServerBehaviourDelegate.REMOVED) {
             statusList
-                .add(newErrorStatus("Cannot get URI for modules: " + modules[i + 1].getName()));
+                .add(newErrorStatus("Cannot get URI for module: " + modules[i + 1].getName()));
             return;
           }
         }
       }
-      // BSD: Disabled saving and loading module locations
+      // TODO: Disabled saving and loading module locations below (marked with XXX)
 
       // modules given as parent-child chain
       // get last one, the prior modules should already be published
-      IPath deployPath = server.getModuleDeployDirectory(modules[0]);
-
       IModule childModule = modules[modules.length - 1];
-      Properties moduleUrls = new Properties(); // FIXME: server.loadModulePublishLocations();
+      // XXX: Properties moduleUrls = server.loadModulePublishLocations();
+      Properties moduleUrls = new Properties(); // XXX: = server.loadModulePublishLocations();
       // get as j2ee
       IJ2EEModule childJ2EEModule =
           (IJ2EEModule) childModule.loadAdapter(IJ2EEModule.class, monitor);
@@ -135,7 +134,7 @@ public class CloudSdkPublishOperation extends PublishOperation {
       } else {
           publishDir(deployPath, moduleUrls, statusList, monitor, childModule);
       }
-      // FIXME: server.saveModulePublishLocations(moduleUrls);
+      // XXX: server.saveModulePublishLocations(moduleUrls);
     }
     checkStatuses(statusList);
     server.setModulePublishState2(modules, IServer.PUBLISH_STATE_NONE);
@@ -152,18 +151,18 @@ public class CloudSdkPublishOperation extends PublishOperation {
       IProgressMonitor monitor, IModule childModule) {
     boolean isMoving = false;
     // check older publish
-    String oldURI = (String) mapping.get(childModule.getId());
-    String jarURI = path.toOSString();
-    if (oldURI != null && jarURI != null) {
-      isMoving = !oldURI.equals(jarURI);
+    String oldUri = (String) mapping.get(childModule.getId());
+    String jarUri = path.toOSString();
+    if (oldUri != null && jarUri != null) {
+      isMoving = !oldUri.equals(jarUri);
     }
     // setup target
     IPath jarPath = (IPath) path.clone();
     IPath deployPath = jarPath.removeLastSegments(1);
     // remove if requested or if previously published and are now serving without publishing
     if (isMoving || kind == IServer.PUBLISH_CLEAN || deltaKind == ServerBehaviourDelegate.REMOVED) {
-      if (oldURI != null) {
-        File file = new File(oldURI);
+      if (oldUri != null) {
+        File file = new File(oldUri);
         if (file.exists()) {
           file.delete();
         }
@@ -189,13 +188,13 @@ public class CloudSdkPublishOperation extends PublishOperation {
     IStatus[] publishStatus = helper.publishToPath(resources, jarPath, monitor);
     statusList.addAll(Arrays.asList(publishStatus));
     // store into mapping
-    mapping.put(childModule.getId(), jarURI);
+    mapping.put(childModule.getId(), jarUri);
   }
 
   /**
    * Publish modules as directory.
    */
-  private void publishDir(IPath path, List<IStatus> statusList, IProgressMonitor monitor)
+  private void publishDirectory(IPath path, List<IStatus> statusList, IProgressMonitor monitor)
       throws CoreException {
     // delete if needed
     if (kind == IServer.PUBLISH_CLEAN || deltaKind == ServerBehaviourDelegate.REMOVED) {
@@ -231,17 +230,17 @@ public class CloudSdkPublishOperation extends PublishOperation {
       IProgressMonitor monitor, IModule childModule) throws CoreException {
     boolean isMoving = false;
     // check older publish
-    String oldURI = (String) mapping.get(childModule.getId());
-    String dirURI = path.toOSString();
-    if (oldURI != null && dirURI != null) {
-      isMoving = !oldURI.equals(dirURI);
+    String oldUri = (String) mapping.get(childModule.getId());
+    String dirUri = path.toOSString();
+    if (oldUri != null && dirUri != null) {
+      isMoving = !oldUri.equals(dirUri);
     }
     // setup target
     IPath dirPath = (IPath) path.clone();
     // remove if needed
     if (isMoving || kind == IServer.PUBLISH_CLEAN || deltaKind == ServerBehaviourDelegate.REMOVED) {
-      if (oldURI != null) {
-        File file = new File(oldURI);
+      if (oldUri != null) {
+        File file = new File(oldUri);
         if (file.exists()) {
           IStatus[] status = PublishHelper.deleteDirectory(file, monitor);
           statusList.addAll(Arrays.asList(status));
@@ -278,7 +277,7 @@ public class CloudSdkPublishOperation extends PublishOperation {
       }
     }
     // store into mapping
-    mapping.put(childModule.getId(), dirURI);
+    mapping.put(childModule.getId(), dirUri);
   }
 
   /**

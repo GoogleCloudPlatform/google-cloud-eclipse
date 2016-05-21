@@ -31,7 +31,8 @@ public class CloudSdkPublishTaskDelegate extends PublishTaskDelegate {
 
   @Override
   @SuppressWarnings("rawtypes")
-  public PublishOperation[] getTasks(IServer server, int kind, List modules, List kindList) {
+  public PublishOperation[] getTasks(IServer server, int kind, List/* <IModule[]> */ modules,
+      List/* <Integer> */ kindList) {
     if (modules == null || modules.isEmpty()) {
       return null;
     }

@@ -14,8 +14,7 @@
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -32,7 +31,8 @@ import org.eclipse.wst.server.core.ServerUtil;
 import org.eclipse.wst.server.core.internal.facets.FacetUtil;
 import org.eclipse.wst.server.core.model.ServerDelegate;
 
-import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A {@link ServerDelegate} for Google Cloud SDK.
@@ -133,13 +133,9 @@ public class CloudSdkServer extends ServerDelegate {
     List<String> modules = this.getAttribute(ATTR_CLOUD_SDK_SERVER_MODULES, (List<String>) null);
 
     if (add != null && add.length > 0) {
-      if (add.length > 1) {
-        throw new CoreException(new Status(IStatus.ERROR,
-                                           Activator.PLUGIN_ID,
-                                           0,
-                                           "This server instance cannot run more than one application",
-                                           null));
-      }
+      // TODO: ensure modules have same Project ID
+      // throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, 0,
+      // "This server instance cannot run more than one application", null));
       if (modules == null) {
         modules = new ArrayList<>();
       }
