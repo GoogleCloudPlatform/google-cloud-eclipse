@@ -117,6 +117,12 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
           runnables.toArray(new String[runnables.size()]), mode, cloudSdkServer.getApiHost(),
           cloudSdkServer.getApiPort(), debugPort);
 
+      String additionalFlags =
+          configuration.getAttribute(CloudSdkServer.SERVER_PROGRAM_FLAGS, (String) null);
+      if (additionalFlags != null) {
+        commands += " " + additionalFlags;
+      }
+
       // FIXME: workaround bug when running on a Java8 JVM
       // https://github.com/GoogleCloudPlatform/gcloud-eclipse-tools/issues/181
       commands += " --jvm_flag=-Dappengine.user.timezone=UTC";
