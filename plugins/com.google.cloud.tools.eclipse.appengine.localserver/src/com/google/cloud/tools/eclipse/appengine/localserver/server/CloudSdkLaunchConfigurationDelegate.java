@@ -156,6 +156,9 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
     if (modules == null || modules.length == 0) {
       abort("No modules associated with this server instance.", null, 0);
       return false;
+    } else if (ILaunchManager.DEBUG_MODE.equals(mode) && modules.length > 1) {
+      abort("Can only debug a single module.", null, 0);
+      return false;
     }
     return super.preLaunchCheck(configuration, mode, monitor);
   }
