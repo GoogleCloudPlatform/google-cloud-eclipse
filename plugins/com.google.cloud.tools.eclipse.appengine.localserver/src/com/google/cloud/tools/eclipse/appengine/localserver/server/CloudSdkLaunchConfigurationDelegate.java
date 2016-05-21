@@ -114,11 +114,13 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
 
     try {
       String commands = GCloudCommandDelegate.createAppRunCommand(sdkLocation.toOSString(),
-          runnables.toArray(new String[runnables.size()]),
-                                                                  mode,
-                                                                  cloudSdkServer.getApiHost(),
-                                                                  cloudSdkServer.getApiPort(),
-                                                                  debugPort);
+          runnables.toArray(new String[runnables.size()]), mode, cloudSdkServer.getApiHost(),
+          cloudSdkServer.getApiPort(), debugPort);
+
+      // FIXME: workaround bug when running on a Java8 JVM
+      // https://github.com/GoogleCloudPlatform/gcloud-eclipse-tools/issues/181
+      commands += " --jvm_flag=-Dappengine.user.timezone=UTC";
+
       Activator.logInfo("Executing: " + commands);
 
       Process p = Runtime.getRuntime().exec(commands, null);

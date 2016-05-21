@@ -162,19 +162,15 @@ public class GCloudCommandDelegate {
 
     StringBuilder builder = new StringBuilder();
     builder.append(sdkLocation)
-        .append("/bin/dev_appserver.py ");
+        .append("/bin/dev_appserver.py");
     for (String runnable : runnables) {
-      builder.append(runnable).append(' ');
+      builder.append(' ').append(runnable);
     }
     builder
            .append(" --api_host ")
            .append(apiHost)
            .append(" --api_port ")
            .append(apiPort);
-
-    // FIXME: workaround bug when running on a Java8 JVM
-    // https://github.com/GoogleCloudPlatform/gcloud-eclipse-tools/issues/181
-    builder.append(" --jvm_flag=-Dappengine.user.timezone=UTC");
 
     if ((mode != null) && mode.equals(ILaunchManager.DEBUG_MODE)) {
       if (debugPort <= 0 || debugPort > 65535) {

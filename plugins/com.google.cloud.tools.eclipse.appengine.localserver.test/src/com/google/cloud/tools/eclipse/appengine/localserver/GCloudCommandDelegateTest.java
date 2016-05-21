@@ -121,12 +121,10 @@ public class GCloudCommandDelegateTest {
                                                            1234,
                                                            2345);
 
-    assertEquals(sdkLocation + "/bin/dev_appserver.py "
-                 + runnables
-                 + " --api_host localhost --api_port 1234 "
-                 + "--jvm_flag=-Xdebug --jvm_flag=-Xrunjdwp:transport=dt_socket,server=y,suspend=y,"
-                 + "address=2345",
-                 cmd);
+    assertEquals(sdkLocation + "/bin/dev_appserver.py " + runnables
+        + " --api_host localhost --api_port 1234 "
+        + "--jvm_flag=-Xdebug --jvm_flag=-Xrunjdwp:transport=dt_socket,server=y,suspend=y,quiet=y,"
+        + "address=2345", cmd);
   }
 
   private String createOutput(String status) {
