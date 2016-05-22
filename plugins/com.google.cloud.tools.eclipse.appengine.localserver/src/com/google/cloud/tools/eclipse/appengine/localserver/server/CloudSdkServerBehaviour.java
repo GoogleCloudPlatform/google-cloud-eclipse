@@ -219,7 +219,7 @@ public class CloudSdkServerBehaviour extends ServerBehaviourDelegate {
   }
 
   /**
-   * Convenient method allowing access to protected method in superclass.
+   * Convenience method allowing access to protected method in superclass.
    */
   @Override
   protected IModuleResourceDelta[] getPublishedResourceDelta(IModule[] module) {
@@ -227,7 +227,7 @@ public class CloudSdkServerBehaviour extends ServerBehaviourDelegate {
   }
 
   /**
-   * Convenient method allowing access to protected method in superclass.
+   * Convenience method allowing access to protected method in superclass.
    */
   @Override
   protected IModuleResource[] getResources(IModule[] module) {
@@ -235,7 +235,7 @@ public class CloudSdkServerBehaviour extends ServerBehaviourDelegate {
   }
 
   /**
-   * Convenient accessor to protected member in superclass.
+   * Convenience accessor to protected member in superclass.
    */
   public void setModulePublishState2(IModule[] module, int state) {
     setModulePublishState(module, state);

@@ -70,7 +70,7 @@ public class CloudSdkPublishOperation extends PublishOperation {
 
   @Override
   public int getOrder() {
-    // TODO: shouldn't publishing tasks come later?
+    // TODO: should publishing tasks come later?
     // may be necessary to work with GWT compilation
     return 0;
   }
@@ -94,6 +94,7 @@ public class CloudSdkPublishOperation extends PublishOperation {
     // TODO: use more advanced key to store modules publish locations? Because a dependent
     // java project (added as child modules and published as jar) cannot present in more than one
     // parent modules.
+    // (Is this TODO still valid?)
     List<IStatus> statusList = Lists.newArrayList();
     IPath deployPath = server.getModuleDeployDirectory(modules[0]);
     if (modules.length == 1) {
@@ -281,7 +282,7 @@ public class CloudSdkPublishOperation extends PublishOperation {
   }
 
   /**
-   * Publish modules by zipping it into JAR file.
+   * Publish modules by zipping them into a JAR file.
    */
   private void publishJar(IPath path, Properties mapping, List<IStatus> statusList,
       IProgressMonitor monitor, IModule childModule) throws CoreException {

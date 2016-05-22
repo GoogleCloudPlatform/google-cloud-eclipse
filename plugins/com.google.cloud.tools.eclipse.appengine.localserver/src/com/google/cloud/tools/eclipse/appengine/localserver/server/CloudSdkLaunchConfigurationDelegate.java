@@ -129,11 +129,11 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
 
       Activator.logInfo("Executing: " + commands);
 
-      Process p = Runtime.getRuntime().exec(commands, null);
+      Process process = Runtime.getRuntime().exec(commands, null);
       addProcessFactoryToLaunchConfiguration(configuration);
       // The DebugPlugin handles the streaming of the output to the console and
       // sends notifications of debug events
-      DebugPlugin.newProcess(launch, p, commands);
+      DebugPlugin.newProcess(launch, process, commands);
       serverBehaviour.addProcessListener(launch.getProcesses()[0]);
     } catch (IOException | NullPointerException | IllegalStateException | InvalidPathException e) {
       Activator.logError(e);
