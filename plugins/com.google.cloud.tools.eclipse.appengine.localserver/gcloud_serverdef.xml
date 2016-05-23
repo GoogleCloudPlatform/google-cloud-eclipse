@@ -60,7 +60,7 @@
   </project>
 
   <start>
-    <external>"${cloudSdkDirectory}/bin/dev_appserver.py" --port ${port} "${webappDirectory}"</external>
+    <external>"${cloudSdkDirectory}/bin/dev_appserver.py" --port ${port} --jvm_flag=-Dappengine.user.timezone=UTC  "${webappDirectory}"</external>
    <!-- TODO we may not need this; check -->
     <workingDirectory>${serverRootDirectory}</workingDirectory>
     <debugPort>${debugPort}</debugPort>
