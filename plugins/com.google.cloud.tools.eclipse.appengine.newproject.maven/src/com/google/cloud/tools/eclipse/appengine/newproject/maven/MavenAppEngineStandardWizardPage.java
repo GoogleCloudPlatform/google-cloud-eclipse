@@ -4,14 +4,12 @@ import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectIdVal
 import com.google.cloud.tools.eclipse.appengine.newproject.JavaPackageValidator;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
 
-import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -26,7 +24,6 @@ import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import java.text.MessageFormat;
 
@@ -265,10 +262,6 @@ public class MavenAppEngineStandardWizardPage extends WizardPage implements IWiz
       return false;
     }
     return true;
-  }
-
-  private IWorkspace getWorkspace() {
-    return ResourcesPlugin.getWorkspace();
   }
   
   /** Return the Maven group for the project */
