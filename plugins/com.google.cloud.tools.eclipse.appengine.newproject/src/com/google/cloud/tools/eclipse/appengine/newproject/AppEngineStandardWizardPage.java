@@ -1,9 +1,9 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
-import org.eclipse.jface.resource.ImageDescriptor;
+import java.io.File;
+
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.wizard.IWizardPage;
-import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
-import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -11,27 +11,26 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
+
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
 
 /**
  * UI to collect all information necessary to create a new App Engine Standard Java Eclipse project.
  */
-class AppEngineStandardWizardPage extends WizardNewProjectCreationPage implements IWizardPage {
+public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage implements IWizardPage {
 
   private Text javaPackageField;
   private Text projectIdField;
   
-  AppEngineStandardWizardPage() {
+  public AppEngineStandardWizardPage() {
     super("basicNewProjectPage"); //$NON-NLS-1$
     // todo instead of hard coding strings, read the wizard.name and wizard.description properties 
     // from plugins/com.google.cloud.tools.eclipse.appengine.newproject/plugin.properties
     this.setTitle("App Engine Standard Project");
     this.setDescription("Create a new App Engine Standard Project in the workspace."); 
-    
-    // todo get a UI designer to pick a better icon (the little plane?) and 
-    // add it to this plugin's icons folder
-    ImageDescriptor descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(
-        "com.google.cloud.tools.eclipse.appengine.localserver", "icons/gcp-32x32.png"); //$NON-NLS-1$ //$NON-NLS-2$
-    this.setImageDescriptor(descriptor);
+ 
+    this.setImageDescriptor(AppEngineImages.googleCloudPlatform(32));
   }
 
   // todo is there a way to call this for a test?
@@ -74,14 +73,22 @@ class AppEngineStandardWizardPage extends WizardNewProjectCreationPage implement
 
   private boolean validateLocalFields() {
     String packageName = javaPackageField.getText();
-    if (!JavaPackageValidator.validate(packageName)) {
-      setErrorMessage("Illegal Java package name: " + packageName); //$NON-NLS-1$
+    IStatus packageStatus = JavaPackageValidator.validate(packageName);
+    if (!packageStatus.isOK()) {
+      setErrorMessage("Illegal package name: " + packageStatus.getMessage()); 
       return false;
     }
     
     String projectId = projectIdField.getText();
     if (!AppEngineProjectIdValidator.validate(projectId)) {
       setErrorMessage("Illegal App Engine Project ID: " + projectId); //$NON-NLS-1$
+      return false;
+    }
+    
+    File parent = getLocationPath().toFile();
+    File projectDirectory = new File(parent, getProjectName());
+    if (projectDirectory.exists()) {
+      setErrorMessage("Project location already exists: " + projectDirectory); 
       return false;
     }
     
@@ -95,11 +102,11 @@ class AppEngineStandardWizardPage extends WizardNewProjectCreationPage implement
     }
   }  
 
-  String getAppEngineProjectId() {
+  public String getAppEngineProjectId() {
     return this.projectIdField.getText();
   }
 
-  String getPackageName() {
+  public String getPackageName() {
     return this.javaPackageField.getText();
   }
   

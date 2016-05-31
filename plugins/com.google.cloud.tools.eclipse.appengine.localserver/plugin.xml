@@ -88,7 +88,7 @@
    <extension point="org.eclipse.wst.server.ui.serverImages">
       <image
             id="com.google.cloud.tools.eclipse.gcloud.serverImage"
-            icon="icons/gcp-16x16.png"
+            icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gcp-16x16.png"
             typeIds="com.google.cloud.tools.eclipse.gcloud.server,com.google.cloud.tools.eclipse.gcloud.runtime">
       </image>
    </extension>
@@ -212,7 +212,7 @@
          point="org.eclipse.debug.ui.launchConfigurationTypeImages">
       <launchConfigurationTypeImage
             configTypeID="com.google.cloud.tools.eclipse.CloudSdkLaunchConfigurationType"
-            icon="icons/gcp-16x16.png"
+            icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gcp-16x16.png"
             id="com.google.cloud.tools.eclipse.ExternalLaunchConfigurationTypeImage">
       </launchConfigurationTypeImage>
    </extension>
@@ -227,7 +227,7 @@
    <extension
          point="org.eclipse.wst.server.ui.serverImages">
       <image
-            icon="icons/gcp-16x16.png"
+            icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gcp-16x16.png"
             id="com.google.cloud.tools.eclipse.image"
             typeIds="com.google.cloud.tools.eclipse.runtime.id1,com.google.cloud.tools.eclipse.server.id">
       </image>
@@ -235,7 +235,7 @@
    <extension
          point="org.eclipse.wst.common.project.facet.ui.images">
       <image
-            path="icons/gcp-16x16.png"
+            path="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gcp-16x16.png"
             facet="com.google.cloud.tools.eclipse.facet">
       </image>
    </extension>
@@ -257,36 +257,13 @@
       </propertyTester>
    </extension>
    <extension
-         point="org.eclipse.ui.handlers">
-      <handler
-            class="com.google.cloud.tools.eclipse.appengine.localserver.deploy.CloudSdkDeployProjectHandler"
-            commandId="com.google.cloud.tools.eclipse.deployCommand">
-         <enabledWhen>
-            <with
-                  variable="selection">
-               <and>
-                  <count
-                        value="1">
-                  </count>
-                  <iterate
-                        operator="and">
-                     <test
-                           property="com.google.cloud.tools.eclipse.isCloudSdkProject">
-                     </test>
-                  </iterate>
-               </and>
-            </with>
-         </enabledWhen>
-      </handler>
-   </extension>
-   <extension
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
             locationURI="popup:org.eclipse.ui.popup.any?after=additions">
          <command
                commandId="com.google.cloud.tools.eclipse.deployCommand"
-               icon="icons/gcp-16x16.png"
+               icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gcp-16x16.png"
                label="%cloudsdkdeploy">
             <visibleWhen
                   checkEnabled="true">
@@ -301,4 +278,13 @@
             id="com.google.cloud.tools.eclipse.appengine.localserver.processfactory">
       </processFactory>
    </extension>
+   
+   <extension point="org.eclipse.wst.server.core.publishTasks">
+      <publishTask
+             id="com.google.appengine.eclipse.wtp.publishTask"
+             class="com.google.cloud.tools.eclipse.appengine.localserver.server.CloudSdkPublishTaskDelegate"
+             typeIds="com.google.cloud.tools.eclipse.server.id">
+       </publishTask>
+    </extension>
+   
 </plugin>

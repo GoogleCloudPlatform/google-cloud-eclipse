@@ -18,11 +18,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Test;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.InvalidPathException;
-
-import org.junit.Test;
 
 /**
  * Unit tests for {@link GCloudCommandDelegate}
@@ -58,12 +58,12 @@ public class GCloudCommandDelegateTest {
 
   @Test(expected = NullPointerException.class)
   public void testCreateAppRunCommand_nullArgs() throws IOException {
-    GCloudCommandDelegate.createAppRunCommand(null, null, null, null, 0, 0);
+    GCloudCommandDelegate.createAppRunCommand(null, (String) null, null, null, 0, 0);
   }
 
   @Test(expected = InvalidPathException.class)
   public void testCreateAppRunCommand_invalidSdkLocation() throws IOException {
-    GCloudCommandDelegate.createAppRunCommand("sdkLocation", null, null, null, 0, 0);
+    GCloudCommandDelegate.createAppRunCommand("sdkLocation", (String) null, null, null, 0, 0);
   }
 
   @Test(expected = InvalidPathException.class)
@@ -121,12 +121,10 @@ public class GCloudCommandDelegateTest {
                                                            1234,
                                                            2345);
 
-    assertEquals(sdkLocation + "/bin/dev_appserver.py "
-                 + runnables
-                 + " --api_host localhost --api_port 1234 "
-                 + "--jvm_flag=-Xdebug --jvm_flag=-Xrunjdwp:transport=dt_socket,server=y,suspend=y,"
-                 + "address=2345",
-                 cmd);
+    assertEquals(sdkLocation + "/bin/dev_appserver.py " + runnables
+        + " --api_host localhost --api_port 1234 "
+        + "--jvm_flag=-Xdebug --jvm_flag=-Xrunjdwp:transport=dt_socket,server=y,suspend=y,quiet=y,"
+        + "address=2345", cmd);
   }
 
   private String createOutput(String status) {

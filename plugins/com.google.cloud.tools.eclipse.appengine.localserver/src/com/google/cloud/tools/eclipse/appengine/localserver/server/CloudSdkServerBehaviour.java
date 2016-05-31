@@ -14,10 +14,9 @@
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
-import java.io.IOException;
-import java.net.Socket;
-import java.net.URL;
+import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
 
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugEvent;
@@ -28,10 +27,15 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.IProcess;
+import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
+import org.eclipse.wst.server.core.model.IModuleResource;
+import org.eclipse.wst.server.core.model.IModuleResourceDelta;
 import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
 
-import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
+import java.io.IOException;
+import java.net.Socket;
+import java.net.URL;
 
 /**
  * A {@link ServerBehaviourDelegate} for Google Cloud SDK.
@@ -55,6 +59,13 @@ public class CloudSdkServerBehaviour extends ServerBehaviourDelegate {
       return new Status(IStatus.ERROR, Activator.PLUGIN_ID, message);
     }
     return Status.OK_STATUS;
+  }
+
+
+  @Override
+  public boolean canPublishModule(IModule[] module) {
+    // todo: should check module types?
+    return true;
   }
 
   @Override
@@ -192,4 +203,43 @@ public class CloudSdkServerBehaviour extends ServerBehaviourDelegate {
       Activator.logError("Error stopping the dev app server", e);
     }
   }
+
+  /**
+   * @return the directory at which module will be published.
+   */
+  public IPath getModuleDeployDirectory(IModule module) {
+    return getRuntimeBaseDirectory().append(module.getName());
+  }
+
+  /**
+   * Returns runtime base directory. Uses temp directory.
+   */
+  public IPath getRuntimeBaseDirectory() {
+    return getTempDirectory(false);
+  }
+
+  /**
+   * Convenience method allowing access to protected method in superclass.
+   */
+  @Override
+  protected IModuleResourceDelta[] getPublishedResourceDelta(IModule[] module) {
+    return super.getPublishedResourceDelta(module);
+  }
+
+  /**
+   * Convenience method allowing access to protected method in superclass.
+   */
+  @Override
+  protected IModuleResource[] getResources(IModule[] module) {
+    return super.getResources(module);
+  }
+
+  /**
+   * Convenience accessor to protected member in superclass.
+   */
+  public void setModulePublishState2(IModule[] module, int state) {
+    setModulePublishState(module, state);
+  }
+
+
 }

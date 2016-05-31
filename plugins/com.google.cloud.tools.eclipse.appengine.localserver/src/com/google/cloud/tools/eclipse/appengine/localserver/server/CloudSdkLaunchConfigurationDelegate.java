@@ -14,14 +14,10 @@
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.InvalidPathException;
-import java.util.HashMap;
-import java.util.Map;
+import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
+import com.google.cloud.tools.eclipse.appengine.localserver.GCloudCommandDelegate;
+import com.google.common.collect.Lists;
 
-import org.apache.maven.project.MavenProject;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -36,8 +32,6 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.launching.AbstractJavaLaunchConfigurationDelegate;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.SocketUtil;
-import org.eclipse.m2e.core.MavenPlugin;
-import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IRuntime;
 import org.eclipse.wst.server.core.IServer;
@@ -45,8 +39,11 @@ import org.eclipse.wst.server.core.IServerListener;
 import org.eclipse.wst.server.core.ServerEvent;
 import org.eclipse.wst.server.core.ServerUtil;
 
-import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
-import com.google.cloud.tools.eclipse.appengine.localserver.GCloudCommandDelegate;
+import java.io.IOException;
+import java.nio.file.InvalidPathException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Cloud SDK server's launch configuration delegate.
@@ -70,15 +67,20 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
       return;
     }
 
-    String runnables = getRunnable(modules[0].getProject(), monitor);
+    CloudSdkServerBehaviour serverBehaviour =
+        (CloudSdkServerBehaviour) server.loadAdapter(CloudSdkServerBehaviour.class, null);
+    List<String> runnables = Lists.newArrayList();
+    for (IModule module : modules) {
+      IPath deployPath = serverBehaviour.getModuleDeployDirectory(module);
+      runnables.add(deployPath.toOSString());
+    }
+
     IRuntime runtime = server.getRuntime();
     if (runtime == null) {
       return;
     }
     IPath sdkLocation = runtime.getLocation();
 
-    CloudSdkServerBehaviour serverBehaviour = 
-    		(CloudSdkServerBehaviour) server.loadAdapter(CloudSdkServerBehaviour.class, null);
     serverBehaviour.setupLaunch(mode);
 
     final CloudSdkServer cloudSdkServer = CloudSdkServer.getCloudSdkServer(server);
@@ -112,18 +114,26 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
 
     try {
       String commands = GCloudCommandDelegate.createAppRunCommand(sdkLocation.toOSString(),
-                                                                  runnables,
-                                                                  mode,
-                                                                  cloudSdkServer.getApiHost(),
-                                                                  cloudSdkServer.getApiPort(),
-                                                                  debugPort);
+          runnables.toArray(new String[runnables.size()]), mode, cloudSdkServer.getApiHost(),
+          cloudSdkServer.getApiPort(), debugPort);
+
+      String additionalFlags =
+          configuration.getAttribute(CloudSdkServer.SERVER_PROGRAM_FLAGS, (String) null);
+      if (additionalFlags != null) {
+        commands += " " + additionalFlags;
+      }
+
+      // FIXME: workaround bug when running on a Java8 JVM
+      // https://github.com/GoogleCloudPlatform/gcloud-eclipse-tools/issues/181
+      commands += " --jvm_flag=-Dappengine.user.timezone=UTC";
+
       Activator.logInfo("Executing: " + commands);
 
-      Process p = Runtime.getRuntime().exec(commands, null);
+      Process process = Runtime.getRuntime().exec(commands, null);
       addProcessFactoryToLaunchConfiguration(configuration);
       // The DebugPlugin handles the streaming of the output to the console and
       // sends notifications of debug events
-      DebugPlugin.newProcess(launch, p, commands);
+      DebugPlugin.newProcess(launch, process, commands);
       serverBehaviour.addProcessListener(launch.getProcesses()[0]);
     } catch (IOException | NullPointerException | IllegalStateException | InvalidPathException e) {
       Activator.logError(e);
@@ -154,6 +164,9 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
     if (modules == null || modules.length == 0) {
       abort("No modules associated with this server instance.", null, 0);
       return false;
+    } else if (ILaunchManager.DEBUG_MODE.equals(mode) && modules.length > 1) {
+      abort("Can only debug a single module.", null, 0);
+      return false;
     }
     return super.preLaunchCheck(configuration, mode, monitor);
   }
@@ -165,17 +178,6 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
                                        code,
                                        message,
                                        exception));
-  }
-
-  private String getRunnable(IProject project, IProgressMonitor monitor) throws CoreException {
-    IMavenProjectFacade facade = MavenPlugin.getMavenProjectRegistry().getProject(project);
-    MavenProject mavenProject = facade.getMavenProject(monitor);
-    return mavenProject.getBasedir() + File.separator
-           + "target"
-           + File.separator
-           + mavenProject.getArtifactId()
-           + "-"
-           + mavenProject.getVersion();
   }
 
   private int getDebugPort() throws CoreException {

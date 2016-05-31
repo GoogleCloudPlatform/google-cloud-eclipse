@@ -20,6 +20,10 @@
     <module>plugins/com.google.cloud.tools.eclipse.appengine.whitelist.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.newproject</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.newproject.test</module>
+    <module>plugins/com.google.cloud.tools.eclipse.appengine.newproject.maven</module>
+    <module>plugins/com.google.cloud.tools.eclipse.appengine.newproject.maven.test</module>
+    <module>plugins/com.google.cloud.tools.eclipse.appengine.ui</module>
+    <module>plugins/com.google.cloud.tools.eclipse.appengine.ui.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.test.dependencies</module>
   </modules>
 
@@ -57,6 +61,11 @@
         <artifactId>tycho-compiler-plugin</artifactId>
         <configuration>
           <showWarnings>true</showWarnings>
+          <!--
+            avoid Access restriction on class due to restriction on
+            required library
+          -->
+          <compilerArgument>-warn:+discouraged,forbidden</compilerArgument>
         </configuration>
       </plugin>
 

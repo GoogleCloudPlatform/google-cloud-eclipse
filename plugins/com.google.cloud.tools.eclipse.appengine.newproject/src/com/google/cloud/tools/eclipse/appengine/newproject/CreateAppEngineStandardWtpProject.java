@@ -3,8 +3,10 @@ package com.google.cloud.tools.eclipse.appengine.newproject;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.commands.ExecutionException;
@@ -25,6 +27,7 @@ import org.eclipse.jst.j2ee.project.facet.IJ2EEModuleFacetInstallDataModelProper
 import org.eclipse.jst.j2ee.web.project.facet.IWebFacetInstallDataModelProperties;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetInstallDataModelProvider;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
+import org.eclipse.jst.server.core.FacetUtil;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.ide.undo.CreateProjectOperation;
 import org.eclipse.wst.common.frameworks.datamodel.DataModelFactory;
@@ -34,6 +37,10 @@ import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.common.project.facet.core.runtime.IRuntime;
 import org.eclipse.wst.common.project.facet.core.runtime.RuntimeManager;
+import org.eclipse.wst.server.core.IRuntimeType;
+import org.eclipse.wst.server.core.IRuntimeWorkingCopy;
+import org.eclipse.wst.server.core.ServerCore;
+import org.eclipse.wst.server.core.internal.RuntimeWorkingCopy;
 
 /**
 * Utility to make a new Eclipse project with the App Engine Standard facets in the workspace.  
@@ -52,14 +59,13 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
   }
 
   @Override
-  public void execute(IProgressMonitor monitor) throws InvocationTargetException, CoreException {
+  public void execute(IProgressMonitor monitor) throws InvocationTargetException, CoreException {    
     SubMonitor progress = SubMonitor.convert(monitor, 100);
-    
-    URI location = config.getProject().getLocationURI();
     
     IWorkspace workspace = ResourcesPlugin.getWorkspace();
     IProject newProject = config.getProject();
-    
+    URI location = config.getEclipseProjectLocationUri();
+
     String name = newProject.getName();
     final IProjectDescription description = workspace.newProjectDescription(name);
     description.setLocationURI(location);
@@ -115,9 +121,38 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
     if (RuntimeManager.isRuntimeDefined("App Engine")) {
       IRuntime appEngineRuntime = RuntimeManager.getRuntime("App Engine");
       project.setPrimaryRuntime(appEngineRuntime, monitor);
-    } else {
-      // todo figure out how to create a new App Engine runtime
+    } else { // Create a new App Engine runtime
+      IRuntimeType appEngineRuntimeType =
+          ServerCore.findRuntimeType("com.google.cloud.tools.eclipse.gcloud.runtime");
+      if (appEngineRuntimeType == null) {
+        throw new NullPointerException("Could not find App Engine runtime type");
+      }
+
+      IRuntimeWorkingCopy appEngineRuntimeWorkingCopy 
+          = appEngineRuntimeType.createRuntime(null, monitor);
+      
+      // Need to use internal API to access Generic Server Framework properties
+      RuntimeWorkingCopy mutator = (RuntimeWorkingCopy) appEngineRuntimeWorkingCopy;
+      Map<String, String> map = mutator.getAttribute(
+          "generic_server_instance_properties", new HashMap<>());
+      map.put("cloudSdkDirectory", findCloudSdk());
+      mutator.setAttribute("generic_server_instance_properties", map);
+      
+      org.eclipse.wst.server.core.IRuntime appEngineServerRuntime 
+          = appEngineRuntimeWorkingCopy.save(true, monitor);
+      IRuntime appEngineFacetRuntime = FacetUtil.getRuntime(appEngineServerRuntime);
+      if (appEngineFacetRuntime == null) {
+        throw new NullPointerException("Could not locate App Engine facet runtime");
+      }
+  
+      project.addTargetedRuntime(appEngineFacetRuntime, monitor);
+      project.setPrimaryRuntime(appEngineFacetRuntime, monitor);
     }
+  }
+
+  private static String findCloudSdk() {
+    // todo: replace with PathResolver from app-tools-lib-for-java
+    return "/usr/local/google/google-cloud-sdk";
   }
 
 }

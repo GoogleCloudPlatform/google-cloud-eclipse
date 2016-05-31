@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
 import java.lang.reflect.Field;
 
 import org.eclipse.core.runtime.IPath;
@@ -70,14 +71,15 @@ public class CloudSdkRuntimeTest {
     setField(cloudSdkRuntime, "runtime", runtime);
     when(runtime.getName()).thenReturn("cloudSdkRuntime");
     when(mockLocation.isEmpty()).thenReturn(false);
-    when(mockLocation.toString()).thenReturn("/non/existent/path");
+    when(mockLocation.toFile()).thenReturn(new File("/non/existent/path"));
     when(runtime.getLocation()).thenReturn(mockLocation);
     IStatus status = cloudSdkRuntime.validate();
-    assertThat(status.getSeverity(), is(IStatus.ERROR));
+    assertThat(status.getSeverity(), is(IStatus.INFO));
     assertThat(status.getMessage(), is("Specified Cloud SDK directory does not exist"));
   }
 
-  private <T, V> void setField(T obj, String fieldName, V value) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+  private <T, V> void setField(T obj, String fieldName, V value) 
+      throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
     Field field = getField(obj.getClass(), fieldName);
     if (field == null) {
       throw new NoSuchFieldException(fieldName);

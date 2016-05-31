@@ -4,7 +4,18 @@
    basedir=".">
    
   <target name="deploy.appengine">
-    <echo message="TODO: deploy this"/>
+    <echo message="Project working directory: ${project.working.dir}"/>
+    <echo message="War file: ${module.name}.war"/>
+    <jar destfile="${project.working.dir}/${module.name}.war">
+      <zipfileset dir="${module.dir}">
+        <include name="**/*.*"/>
+        <exclude name="**/jsp_servlet/*.class"/>
+        <exclude name="**/*.war"/>
+      </zipfileset>
+    </jar>
+    <echo message="Server publish directory: ${server.publish.dir}"/>
+    <move file="${project.working.dir}/${module.name}.war"
+          todir="${server.publish.dir}"/>
   </target>
   
   <target name="undeploy.appengine">
