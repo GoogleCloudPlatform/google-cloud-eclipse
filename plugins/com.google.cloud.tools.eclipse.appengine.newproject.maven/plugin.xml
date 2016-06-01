@@ -11,6 +11,13 @@
             category="com.google.cloud.tools.eclipse.appengine.wizards">
          <description>%mavenwizard.description</description>
          <selection class="org.eclipse.core.resources.IResource"/>
+         <keywordReference id="com.google.cloud.tools.eclipse.appengine.ui.GCPKeyword"/>
+         <keywordReference id="com.google.cloud.tools.eclipse.appengine.ui.GAEKeyword"/>
+         <keywordReference id="com.google.cloud.tools.eclipse.appengine.ui.GoogleKeyword"/>
+         <keywordReference 
+             id="com.google.cloud.tools.eclipse.appengine.ui.AppEngineKeyword"/>
+         <keywordReference 
+             id="com.google.cloud.tools.eclipse.appengine.ui.AppSpaceEngineKeyword"/>
       </wizard>
    </extension>
    
