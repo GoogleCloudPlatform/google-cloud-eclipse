@@ -9,10 +9,10 @@ This project provides an Eclipse plugin for building, debugging, and deploying G
 
 ### Requirements
 
-1. Eclipse 4.5 (Mars) or later
+1. Eclipse 4.5 (Mars) or later.  It's easiest to use the _Eclipse IDE for Java EE Developers_.
 
 1. The [m2eclipse plugin](http://www.eclipse.org/m2e/) (also called m2e) installed
-to import the projects into Eclipse. It's easiest to use the _Eclipse IDE for Java EE Developers_.
+to import the projects into Eclipse.
 
 1. JDK 7
 
