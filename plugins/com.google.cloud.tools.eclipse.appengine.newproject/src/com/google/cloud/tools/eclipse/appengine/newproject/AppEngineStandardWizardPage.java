@@ -3,6 +3,7 @@ package com.google.cloud.tools.eclipse.appengine.newproject;
 import java.io.File;
 
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -43,7 +44,7 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage im
     
     // Java package name
     Label packageNameLabel = new Label(container, SWT.NONE);
-    packageNameLabel.setText("Java package:"); //$NON-NLS-1$
+    packageNameLabel.setText("Java package:");
     javaPackageField = new Text(container, SWT.BORDER);
     GridData javaPackagePosition = new GridData(GridData.FILL_HORIZONTAL);
     javaPackagePosition.horizontalSpan = 2;
@@ -52,14 +53,14 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage im
     
     // App Engine Project ID
     Label projectIdLabel = new Label(container, SWT.NONE);
-    projectIdLabel.setText("App Engine Project ID: (optional)"); //$NON-NLS-1$
+    projectIdLabel.setText("App Engine Project ID: (optional)"); 
     projectIdField = new Text(container, SWT.BORDER);
     GridData projectIdPosition = new GridData(GridData.FILL_HORIZONTAL);
     projectIdPosition.horizontalSpan = 2;
     projectIdField.setLayoutData(projectIdPosition);
     projectIdField.addModifyListener(pageValidator);
     
-    // todo what to focus on with forceFocus
+    Dialog.applyDialogFont(container);
   }
 
   @Override
@@ -81,7 +82,7 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage im
     
     String projectId = projectIdField.getText();
     if (!AppEngineProjectIdValidator.validate(projectId)) {
-      setErrorMessage("Illegal App Engine Project ID: " + projectId); //$NON-NLS-1$
+      setErrorMessage("Illegal App Engine Project ID: " + projectId);
       return false;
     }
     
