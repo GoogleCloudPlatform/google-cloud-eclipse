@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            id="com.google.cloud.tools.eclipse.sdk.ui.preferences.cloudsdk"
+            class="com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPreferencePage"
+            name="Google Cloud SDK">
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="com.google.cloud.tools.eclipse.sdk.internal.ui.preferences.PreferenceInitializer">
+      </initializer>
+   </extension>
+
+</plugin>
