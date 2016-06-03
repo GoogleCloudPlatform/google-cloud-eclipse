@@ -43,6 +43,5 @@ location "http://download.eclipse.org/webtools/repository/mars/" {
 }
 
 location "http://download.eclipse.org/tools/orbit/downloads/drops/R20160221192158/repository/" {
-	com.google.gson
 	org.hamcrest
 }

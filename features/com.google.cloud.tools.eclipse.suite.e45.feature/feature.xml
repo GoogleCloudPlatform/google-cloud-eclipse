@@ -22,7 +22,7 @@
       id="com.google.cloud.tools.eclipse.appengine.localserver"
       download-size="0"
       install-size="0"
-      version="0.1.0.qualifier"
+      version="0.0.0"
       unpack="false"/>
 
   <plugin
@@ -31,12 +31,19 @@
       install-size="0"
       version="0.0.0"
       unpack="false"/>
-         
+
   <plugin
       id="com.google.cloud.tools.eclipse.appengine.newproject"
       download-size="0"
       install-size="0"
-      version="0.1.0.qualifier"
+      version="0.0.0"
+      unpack="false"/>
+
+  <plugin
+      id="com.google.cloud.tools.app.lib"
+      download-size="0"
+      install-size="0"
+      version="0.0.0"
       unpack="false"/>
 
 </feature>
