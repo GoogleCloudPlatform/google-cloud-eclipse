@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.cloud.tools.app.impl.cloudsdk.internal.sdk.PathResolver;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -135,7 +136,7 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
       RuntimeWorkingCopy mutator = (RuntimeWorkingCopy) appEngineRuntimeWorkingCopy;
       Map<String, String> map = mutator.getAttribute(
           "generic_server_instance_properties", new HashMap<>());
-      map.put("cloudSdkDirectory", findCloudSdk());
+      map.put("cloudSdkDirectory", findCloudSdk().toOSString());
       mutator.setAttribute("generic_server_instance_properties", map);
       
       org.eclipse.wst.server.core.IRuntime appEngineServerRuntime 
@@ -150,9 +151,8 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
     }
   }
 
-  private static String findCloudSdk() {
-    // todo: replace with PathResolver from app-tools-lib-for-java
-    return "/usr/local/google/google-cloud-sdk";
+  private static Path findCloudSdk() {
+    return PathResolver.getCloudSdkPath();
   }
 
 }
