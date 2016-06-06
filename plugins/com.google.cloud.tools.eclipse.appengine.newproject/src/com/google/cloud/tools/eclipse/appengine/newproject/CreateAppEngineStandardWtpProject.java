@@ -136,7 +136,7 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
       RuntimeWorkingCopy mutator = (RuntimeWorkingCopy) appEngineRuntimeWorkingCopy;
       Map<String, String> map = mutator.getAttribute(
           "generic_server_instance_properties", new HashMap<>());
-      map.put("cloudSdkDirectory", findCloudSdk().toOSString());
+      map.put("cloudSdkDirectory", findCloudSdk());
       mutator.setAttribute("generic_server_instance_properties", map);
       
       org.eclipse.wst.server.core.IRuntime appEngineServerRuntime 
@@ -151,8 +151,8 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
     }
   }
 
-  private static Path findCloudSdk() {
-    return PathResolver.getCloudSdkPath();
+  private static String findCloudSdk() {
+    return PathResolver.INSTANCE.getCloudSdkPath().toString();
   }
 
 }
