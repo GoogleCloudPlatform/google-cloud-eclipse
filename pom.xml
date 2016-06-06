@@ -48,6 +48,29 @@
      <org.eclipse.swtbot.search.timeout>10000</org.eclipse.swtbot.search.timeout>
   </properties>
 
+  <!--
+    Maven dependencies that are OSGi bundles
+
+    Note: simply putting these dependencies within the poms of the
+    requesting bundles and features doesn't quite work with Tycho 0.24:
+    they somehow bleed through and require being added to consumers
+    of those bundles and features too.
+  -->
+  <dependencies>
+    <dependency>
+      <!-- bundle: com.google.gson -->
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.6.2</version>
+    </dependency>
+    <dependency>
+      <!-- bundle: com.google.cloud.tools.app.lib -->
+      <groupId>com.google.cloud.tools</groupId>
+      <artifactId>app-tools-lib-for-java</artifactId>
+      <version>0.1.0-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
+
   <build>
     <plugins>
       <plugin>
@@ -62,7 +85,7 @@
         <configuration>
           <showWarnings>true</showWarnings>
           <!--
-            avoid Access restriction on class due to restriction on
+            avoid access restriction on class due to restriction on
             required library
           -->
           <compilerArgument>-warn:+discouraged,forbidden</compilerArgument>
@@ -165,7 +188,6 @@
         </plugin>
       </plugins>
     </pluginManagement>
-
   </build>
 
   <profiles>
@@ -262,4 +284,17 @@
     </profile>
   </profiles>
 
+  <repositories>
+    <repository>
+      <id>sonatype-nexus-snapshots</id>
+      <name>Sonatype Nexus Snapshots</name>
+      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
 </project>

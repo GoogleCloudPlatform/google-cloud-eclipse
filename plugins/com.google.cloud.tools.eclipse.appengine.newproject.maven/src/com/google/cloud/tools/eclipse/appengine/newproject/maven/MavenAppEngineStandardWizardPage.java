@@ -8,6 +8,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -63,6 +64,8 @@ public class MavenAppEngineStandardWizardPage extends WizardPage implements IWiz
     createAppEngineProjectDetailsArea(container);
 
     setControl(container);
+    
+    Dialog.applyDialogFont(container);
   }
 
   /** Create UI for specifying the generated location area */

@@ -9,7 +9,7 @@ This project provides an Eclipse plugin for building, debugging, and deploying G
 
 ### Requirements
 
-1. Eclipse 4.5 (Mars) or later
+1. Eclipse 4.5 (Mars) or later.  It's easiest to use the _Eclipse IDE for Java EE Developers_.
 
 1. The [m2eclipse plugin](http://www.eclipse.org/m2e/) (also called m2e) installed
 to import the projects into Eclipse.
@@ -118,6 +118,7 @@ configure Maven for a Java 7 toolchain on a Mac might be:
   </toolchain>
 </toolchains>
 ```
+
 Note that _jdkHome_ above specifies the `jre/` directory: Tycho sets
 the default boot classpath to _jdkHome_`/lib/*`, _jdkHome_`/lib/ext/*`,
 and _jdkHome_`/lib/endorsed/*`.  For many JDKs, including Oracle's JDK
@@ -125,3 +126,40 @@ and the OpenJDK, those directories are actually found in the `jre/`
 directory.  Compilation errors such as `java.lang.String` not found
 and `java.lang.Exception` not found
 indicate a misconfigured _jdkHome_.
+
+## Regenerating Target Platforms
+
+We use _Target Platform_ files (`.target`) to collect the dependencies used
+for the build.  These targets specify exact versions of the bundles and
+features being built against.  We currently maintain two target platforms,
+targeting the latest version of the current and previous release trains.
+This is currently:
+
+  - Eclipse Mars (4.5 SR2): [`eclipse/mars/gcp-eclipse-mars.target`](eclipse/mars/gcp-eclipse-mars.target) 
+  - Eclipse Neon (4.6 RC3): [`eclipse/neon/gcp-eclipse-neon.target`](eclipse/neon/gcp-eclipse-neon.target)
+
+These `.target` files are generated and *should not be manually updated*.
+Updating `.target` files directly becomes a chore once it has more than a 
+couple of dependencies.  We instead generate these `.target`s from 
+_Target Platform Definition_ `.tpd` files.
+The `.tpd` files use a simple DSL to specify the bundles and features,
+and the location of the repositories containing them.   
+The `.tpd` files are processed using the [TPD Editor](https://github.com/mbarbero/fr.obeo.releng.targetplatform)
+which resolves the specified dependencies and creates a `.target`.
+The process is:
+
+  1. Install the TPD Editor, if necessary
+     - Use _Help > Install New Software_ and specify `http://mbarbero.github.io/fr.obeo.releng.targetplatform/p2/latest/`
+       as the location.
+     - Restart Eclipse when prompted
+  2. Open the `.tpd` file in Eclipse.
+  3. Make any necessary changes and save.
+     - Note that the TPDs specify artifacts using their _p2 identifiers_.
+       Bundles are specified using their OSGi Bundle Symbolic Name (e.g.,
+       `org.eclipse.core.runtime`).
+       Features are specified using their Feature ID suffixed with `.feature.group`
+       (e.g., `org.eclipse.rcp.feature.group`).  
+  4. Right-click in the editor and choose _Create Target Definition File_
+     to update the corresponding .target file.
+
+Both the `.tpd` and `.target` files should be committed.
