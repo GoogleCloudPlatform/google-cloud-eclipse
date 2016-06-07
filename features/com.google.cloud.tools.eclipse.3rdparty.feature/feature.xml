@@ -19,14 +19,42 @@
    </license>
 
    <plugin
-         id="com.google.guava"
+         id="org.hamcrest"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
+         id="org.hamcrest.core"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.hamcrest.library"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.google.guava"
+         download-size="0"
+         install-size="0"
+         version="17.0.0"
+         unpack="false"/>
+
+   <plugin
          id="com.google.gson"
+         download-size="0"
+         install-size="0"
+         version="2.6.2"
+         unpack="false"/>
+
+   <plugin
+         id="com.google.cloud.tools.app.lib"
          download-size="0"
          install-size="0"
          version="0.0.0"

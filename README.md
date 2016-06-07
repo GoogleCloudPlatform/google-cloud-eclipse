@@ -5,14 +5,21 @@ This project provides an Eclipse plugin for building, debugging, and deploying G
 
 # Development
 
-## Import into Eclipse
+This project is built using _Maven Tycho_, a set of extensions to
+Maven for building Eclipse bundles and features.  As we also need
+to pull in some dependencies directly from Maven-style repositories,
+such as Maven Central and the Sonatype staging repository, we have
+a few hoops to jump through to set up a working development
+environment.
 
-### Requirements
+## Requirements
 
 1. Eclipse 4.5 (Mars) or later.  It's easiest to use the _Eclipse IDE for Java EE Developers_.
 
-1. The [m2eclipse plugin](http://www.eclipse.org/m2e/) (also called m2e) installed
-to import the projects into Eclipse.
+  1. The [m2eclipse plugin](http://www.eclipse.org/m2e/) (also called m2e) installed
+     to import the projects into Eclipse.
+
+1. Maven 3.3.9 or later.
 
 1. JDK 7
 
@@ -21,7 +28,22 @@ to import the projects into Eclipse.
 1. Clone the project to a local directory using `git clone
    https://github.com/GoogleCloudPlatform/gcloud-eclipse-tools.git`.
 
-### Steps to import
+## Import into Eclipse
+
+### Assemble the IDE Target Platform
+
+The Eclipse IDE and Tycho both use a _Target Platform_ to manage
+the dependencies for the source bundles and features under development.
+Although Tycho can pull dependencies directly from Maven-style
+repositories, Eclipse cannot.  So we use Tycho to cobble together
+a target platform suitable for the Eclipse IDE.
+```
+$ cd eclipse/ide-target-platform
+$ mvn package
+```
+
+### Steps to import into the Eclipse IDE
+
 
 1. Setup JDK 7 in Eclipse
 
@@ -67,17 +89,25 @@ to import the projects into Eclipse.
 
   1. Restart Eclipse when prompted.
 
+2. Set up the Target Platform
+
   1. Once Eclipse is running, open the `Preferences` again and go to `Plug-in
      Development/Target Platform`.
-
-  1. Set the checkbox next to one of the `Google Cloud Platform for Eclipse Mars`
-     target platforms (they are pointing to the same file), and click `Apply`.
-
-  1. After some time Eclipse will finish resolving and setting the target
-     platform, you can click `OK`.
-
-  1. There should be no errors in the `Markers` or `Problems` views in Eclipse. However
-      you may see several low-priority warnings.
+  2. Click _Add_ to create a new target platform.  Ignore the existing
+     _GCP_ targets listed there.
+  3. On the _Target Definition_ page, select _Nothing: Start with
+     an empty target definition_ and then click _Next_.
+  4. On the _Target Content_ page, give your target a new name like _IDE TP_.
+     Then click the _Add..._ button and choose _Directory_.
+  4. On the _Add Directory_ dialog, use _Browse..._ to navigate to
+     the `eclipse/ide-target-platform/target/repository` directory
+     found within this source repository and click _Finish_ to return to
+     the _Target Content_ page.
+  5. Click _Finish_ to complete the target platform creation.
+  6. Select your new Target Platform with a checkbox, and then click _OK_.
+  7. Eclipse will rebuild the workspace.  There should be no errors
+     in the `Markers` or `Problems` views in Eclipse. However
+     you may see several low-priority warnings.
 
 1. Check the imported project:
 
@@ -127,7 +157,9 @@ directory.  Compilation errors such as `java.lang.String` not found
 and `java.lang.Exception` not found
 indicate a misconfigured _jdkHome_.
 
-## Regenerating Target Platforms
+# Updating Target Platforms
+
+### Updating the `.target` files
 
 We use _Target Platform_ files (`.target`) to collect the dependencies used
 for the build.  These targets specify exact versions of the bundles and
@@ -163,3 +195,18 @@ The process is:
      to update the corresponding .target file.
 
 Both the `.tpd` and `.target` files should be committed.
+
+### Updating the Eclipse IDE Target Platforms
+
+The IDE Target Platform, defined in `eclipse/ide-target-platform`,
+may need to be updated when dependencies are added or removed.  The
+contents are defined in the `category.xml` file, which specifies
+the list of features and bundles that should be included.  This
+file can be edited using the Category editor in Eclipse.  Ideally
+the version should be specified as `"0.0.0"` to indicate that the
+current version found should be used.  Unlike the `.tpd` file,
+the identifiers are not p2 identifiers, and so features do not
+require the `.feature.group` suffix.
+
+
+
