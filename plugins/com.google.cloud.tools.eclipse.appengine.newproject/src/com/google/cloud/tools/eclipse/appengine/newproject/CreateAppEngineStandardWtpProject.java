@@ -46,6 +46,7 @@ import org.eclipse.wst.server.core.internal.RuntimeWorkingCopy;
 /**
 * Utility to make a new Eclipse project with the App Engine Standard facets in the workspace.  
 */
+@SuppressWarnings("restriction")
 class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
   
   private final AppEngineStandardProjectConfig config;
