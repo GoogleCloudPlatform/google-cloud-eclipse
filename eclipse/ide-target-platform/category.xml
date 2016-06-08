@@ -25,5 +25,4 @@
   <bundle id="com.google.guava" version="17.0" />
   <bundle id="com.google.gson" version="2.6.2" />
   <bundle id="com.google.cloud.tools.app.lib" version="0.0.0" />
-
 </site>

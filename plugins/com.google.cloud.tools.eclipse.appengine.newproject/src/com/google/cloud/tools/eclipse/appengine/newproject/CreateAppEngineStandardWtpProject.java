@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.cloud.tools.app.impl.cloudsdk.internal.sdk.PathResolver;
+import com.google.cloud.tools.appengine.cloudsdk.PathResolver;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
