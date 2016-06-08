@@ -1,5 +1,6 @@
 package com.google.cloud.tools.eclipse.usagetracker;
 
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.ConfigurationScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 
