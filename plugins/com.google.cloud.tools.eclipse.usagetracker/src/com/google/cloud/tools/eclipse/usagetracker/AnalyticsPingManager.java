@@ -1,6 +1,5 @@
 package com.google.cloud.tools.eclipse.usagetracker;
 
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.ConfigurationScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 
@@ -14,6 +13,7 @@ import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Provides methods that report plugin-specific events to Analytics.
@@ -65,7 +65,7 @@ public class AnalyticsPingManager {
       clientId = prefs.get(PREF_KEY_CLIENT_ID, null);
       if (clientId == null) {
         // Use the current time in milliseconds as a client ID and store it back to the preferences.
-        clientId = Long.toString(System.currentTimeMillis());
+        clientId = UUID.randomUUID().toString();
         prefs.put(PREF_KEY_CLIENT_ID, clientId);
       }
     }
