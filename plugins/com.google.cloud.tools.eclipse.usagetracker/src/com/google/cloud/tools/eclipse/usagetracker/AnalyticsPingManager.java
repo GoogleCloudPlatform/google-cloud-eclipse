@@ -1,5 +1,7 @@
 package com.google.cloud.tools.eclipse.usagetracker;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.ConfigurationScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
@@ -133,7 +135,8 @@ public class AnalyticsPingManager {
     }
   }
 
-  private static String getParametersString(Map<String, String> parametersMap) {
+  @VisibleForTesting
+  static String getParametersString(Map<String, String> parametersMap) {
     StringBuilder resultBuilder = new StringBuilder();
     boolean ampersandNeeded = false;
     for (Map.Entry<String, String> entry : parametersMap.entrySet()) {
