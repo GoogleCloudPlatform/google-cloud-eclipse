@@ -121,9 +121,7 @@ public class AnalyticsPingManager {
       connection.setRequestMethod("POST");
       connection.setRequestProperty("Content-Length", Integer.toString(parametersString.length()));
 
-      try (
-        Writer writer = new OutputStreamWriter(connection.getOutputStream(), "UTF-8")
-      ) {
+      try (Writer writer = new OutputStreamWriter(connection.getOutputStream(), "UTF-8")) {
         writer.write(parametersString);
         writer.flush();
       }
