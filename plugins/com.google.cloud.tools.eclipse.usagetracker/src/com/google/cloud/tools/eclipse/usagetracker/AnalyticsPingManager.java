@@ -112,9 +112,11 @@ public class AnalyticsPingManager {
   }
 
   private static void sendPostRequest(String parametersString) {
+    HttpURLConnection connection = null;
+
     try {
       URL url = new URL(ANALYTICS_COLLECTION_URL);
-      HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+      connection = (HttpURLConnection) url.openConnection();
       connection.setDoOutput(true);
       connection.setRequestMethod("POST");
       connection.setRequestProperty("Content-Length", Integer.toString(parametersString.length()));
@@ -124,11 +126,13 @@ public class AnalyticsPingManager {
       ) {
         writer.write(parametersString);
         writer.flush();
-      } finally {
-        connection.disconnect();
       }
     } catch (IOException ex) {
       // Don't try to recover or retry.
+    } finally {
+      if (connection != null) {
+        connection.disconnect();
+      }
     }
   }
 
