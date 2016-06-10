@@ -40,7 +40,6 @@ public class AnalyticsPingManager {
   //
   // https://github.com/google/cloud-reporting/blob/master/src/main/java/com/google/cloud/metrics/MetricsUtils.java#L183
   // https://developers.google.com/analytics/devguides/collection/protocol/v1/reference
-  @SuppressWarnings("serial")
   private static final Map<String, String> STANDARD_PARAMETERS = Collections.unmodifiableMap(
       new HashMap<String, String>() {
         {
@@ -85,8 +84,11 @@ public class AnalyticsPingManager {
 
   public static void sendPing(String eventType, String eventName,
       String metadataKey, String metadataValue) {
-    Map<String, String> parametersMap = new HashMap<>(STANDARD_PARAMETERS);
+    if (Platform.inDevelopmentMode() || !isTrackingIdDefined() || !hasUserOptedIn()) {
+      return;
+    }
 
+    Map<String, String> parametersMap = new HashMap<>(STANDARD_PARAMETERS);
     parametersMap.put("cid", getAnonymizedClientId());
     parametersMap.put("cd19", eventType);
     parametersMap.put("cd20", eventName);
@@ -106,15 +108,10 @@ public class AnalyticsPingManager {
       parametersMap.put("dt", virtualPageTitle);
     }
 
-    sendPostRequest(parametersMap);
+    sendPostRequest(getParametersString(parametersMap));
   }
 
-  private static void sendPostRequest(Map<String, String> parametersMap) {
-    if (Platform.inDevelopmentMode() || !isTrackingIdDefined() || !hasUserOptedIn()) {
-      return;
-    }
-
-    String parametersString = getParametersString(parametersMap);
+  private static void sendPostRequest(String parametersString) {
     try {
       URL url = new URL(ANALYTICS_COLLECTION_URL);
       HttpURLConnection connection = (HttpURLConnection) url.openConnection();

@@ -20,7 +20,6 @@ public class AnalyticsPingManagerTest {
   private static final String METADATA_KEY = "some-custom-key";
   private static final String METADATA_VALUE = "some-custom-value";
 
-  @SuppressWarnings("serial")
   private static final Map<String, String> RANDOM_PARAMETERS = Collections.unmodifiableMap(
       new HashMap<String, String>() {
         {
@@ -39,7 +38,6 @@ public class AnalyticsPingManagerTest {
         }
       });
 
-  @SuppressWarnings("serial")
   private static final Map<String, String> ENCODED_PARAMETERS = Collections.unmodifiableMap(
       new HashMap<String, String>() {
         {
@@ -72,19 +70,16 @@ public class AnalyticsPingManagerTest {
     }
   }
 
-  private static final String NO_ENCODE_TEXT = ".*-_abcXYZ";
-  private static final String TEXT = " ü한글+=,`~!@#$%^&()?<>{}][|:;/\\'\"";
-  private static final String TEXT_ENCODED = "+%C3%BC%ED%95%9C%EA%B8%80%2B%3D%2C%60%7E%21%40%23"
-      + "%24%25%5E%26%28%29%3F%3C%3E%7B%7D%5D%5B%7C%3A%3B%2F%5C%27%22";
-
   @Test
   public void testGetParametersString_percentEscaping() {
     Map<String, String> noEscape = new HashMap<>();
-    noEscape.put("k", NO_ENCODE_TEXT);
-    Assert.assertEquals("k=" + NO_ENCODE_TEXT, AnalyticsPingManager.getParametersString(noEscape));
+    noEscape.put("k", ".*-_abcXYZ");
+    Assert.assertEquals("k=.*-_abcXYZ", AnalyticsPingManager.getParametersString(noEscape));
 
     Map<String, String> escape = new HashMap<>();
-    escape.put("k", TEXT);
-    Assert.assertEquals("k=" + TEXT_ENCODED, AnalyticsPingManager.getParametersString(escape));
+    escape.put("k", " ü한글+=,`~!@#$%^&()?<>{}][|:;/\\'\"");
+    Assert.assertEquals("k=+%C3%BC%ED%95%9C%EA%B8%80%2B%3D%2C%60%7E%21%40%23"
+        + "%24%25%5E%26%28%29%3F%3C%3E%7B%7D%5D%5B%7C%3A%3B%2F%5C%27%22",
+        AnalyticsPingManager.getParametersString(escape));
   }
 }
