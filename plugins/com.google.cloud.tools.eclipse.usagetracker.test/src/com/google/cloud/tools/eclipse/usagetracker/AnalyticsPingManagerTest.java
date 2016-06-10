@@ -9,7 +9,7 @@ import org.junit.Test;
 
 public class AnalyticsPingManagerTest {
 
-  private static final String RANDOM_UUID = "bee5d838-c3f8-4940-a944-b56973597e74";
+  private static final String UUID = "bee5d838-c3f8-4940-a944-b56973597e74";
 
   private static final String EVENT_TYPE = "some-event-type";
   private static final String EVENT_NAME = "some-event-name";
@@ -31,7 +31,7 @@ public class AnalyticsPingManagerTest {
           put("cd21", "1");
           put("cd16", "0");
           put("cd17", "0");
-          put("cid", RANDOM_UUID);
+          put("cid", UUID);
           put("cd19", EVENT_TYPE);
           put("cd20", EVENT_NAME);
           put("dp", VIRTUAL_DOCUMENT_PAGE);
@@ -67,8 +67,24 @@ public class AnalyticsPingManagerTest {
 
     for (String pair : keyValuePairs) {
       String[] keyValue = pair.split("=");
-      Assert.assertEquals(keyValue.length, 2);
-      Assert.assertEquals(ENCODED_PARAMETERS.get(keyValue[0]), keyValue[1]);
+      Assert.assertEquals(2, keyValue.length);
+      Assert.assertEquals(keyValue[1], ENCODED_PARAMETERS.get(keyValue[0]));
     }
+  }
+
+  private static final String NO_ENCODE_TEXT = ".*-_abcXYZ";
+  private static final String TEXT = " ü한글+=,`~!@#$%^&()?<>{}][|:;/\\'\"";
+  private static final String TEXT_ENCODED = "+%C3%BC%ED%95%9C%EA%B8%80%2B%3D%2C%60%7E%21%40%23"
+      + "%24%25%5E%26%28%29%3F%3C%3E%7B%7D%5D%5B%7C%3A%3B%2F%5C%27%22";
+
+  @Test
+  public void testGetParametersString_percentEscaping() {
+    Map<String, String> noEscape = new HashMap<>();
+    noEscape.put("k", NO_ENCODE_TEXT);
+    Assert.assertEquals("k=" + NO_ENCODE_TEXT, AnalyticsPingManager.getParametersString(noEscape));
+
+    Map<String, String> escape = new HashMap<>();
+    escape.put("k", TEXT);
+    Assert.assertEquals("k=" + TEXT_ENCODED, AnalyticsPingManager.getParametersString(escape));
   }
 }
