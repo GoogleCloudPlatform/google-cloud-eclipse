@@ -6,7 +6,8 @@ Bundle-Version: 0.1.0.qualifier
 Bundle-Vendor: Google, Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Localization: plugin
-Require-Bundle: com.google.cloud.tools.eclipse.appengine.ui,
+Require-Bundle: com.google.cloud.tools.app.lib;bundle-version="0.1.0",
+ com.google.cloud.tools.eclipse.appengine.ui,
  javax.servlet;bundle-version="2.5.0",
  javax.servlet.jsp;bundle-version="2.2.0",
  org.eclipse.core.resources,
@@ -14,7 +15,8 @@ Require-Bundle: com.google.cloud.tools.eclipse.appengine.ui,
  org.eclipse.ui,
  org.eclipse.ui.ide,
  org.eclipse.jst.j2ee.web
-Import-Package: com.google.cloud.tools.eclipse.appengine.localserver.runtime,
+Import-Package: com.google.cloud.tools.appengine.cloudsdk,
+ com.google.cloud.tools.eclipse.appengine.localserver.runtime,
  org.eclipse.core.runtime;version="3.5.0",
  org.eclipse.jdt.core,
  org.eclipse.jst.common.project.facet.core,

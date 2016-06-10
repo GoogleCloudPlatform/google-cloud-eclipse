@@ -6,10 +6,10 @@
    <extension point="org.eclipse.wst.server.core.runtimeTypes">
       <runtimeType
             class="org.eclipse.jst.server.generic.core.internal.GenericServerRuntime"
-            description="GCloud based App Engine runtime"
+            description="%gsfServerTypeName"
             id="com.google.cloud.tools.eclipse.gcloud.runtime"
-            name="App Engine"
-            vendor="Google"
+            name="%gsfRuntimeTypeName"
+            vendor="%runtimeTypeVendor"
             vendorId="google"
             version="0.1.0">
          <moduleType
@@ -24,12 +24,12 @@
             hasConfiguration="false"
             behaviourClass="org.eclipse.jst.server.generic.core.internal.ExternalServerBehaviour"
             class="org.eclipse.jst.server.generic.core.internal.GenericServer"
-            description="App Engine server that delegates to gcloud"
+            description="App Engine server that delegates to gcloud (GSF)"
             id="com.google.cloud.tools.eclipse.gcloud.server"
             initialState="stopped"
             launchModes="run,debug"
             launchConfigId="org.eclipse.jst.server.generic.core.ExternalLaunchConfigurationType"
-            name="GCloud based App Engine Server"
+            name="%gsfServerTypeName"
             runtime="true"
             runtimeTypeId="com.google.cloud.tools.eclipse.gcloud.runtime"
             startBeforePublish="true"
@@ -37,7 +37,7 @@
             stopTimeout="15000">
       </serverType>
    </extension>
-   
+
    <extension point="org.eclipse.jst.server.core.runtimeClasspathProviders">
       <runtimeClasspathProvider
             class="org.eclipse.jst.server.generic.core.internal.GenericServerRuntimeTargetHandler"
@@ -54,7 +54,7 @@
          <facet id="jst.web" version="[2.2-2.5]" />
          <runtime-component id="com.google.cloud.tools.eclipse.gcloud" version="0.1.0"/>
       </supported>
-      
+
       <adapter>
          <runtime-component id="com.google.cloud.tools.eclipse.gcloud" />
          <factory class="org.eclipse.jst.server.core.internal.RuntimeClasspathProvider$Factory" />
@@ -66,14 +66,14 @@
          <type class="org.eclipse.wst.common.project.facet.ui.IRuntimeComponentLabelProvider" />
       </adapter>
    </extension>
-   
+
    <extension point="org.eclipse.jst.server.core.runtimeFacetMappings">
       <runtimeFacetMapping
             runtime-component="com.google.cloud.tools.eclipse.gcloud"
             runtimeTypeId="com.google.cloud.tools.eclipse.gcloud.runtime"
             version="0.1.0" />
    </extension>
-   
+
    <extension point="org.eclipse.wst.server.ui.wizardFragments">
       <fragment
             class="org.eclipse.jst.server.generic.ui.internal.GenericServerRuntimeWizardFragment"
@@ -84,7 +84,7 @@
             id="org.eclipse.jst.server.generic.server"
             typeIds="com.google.cloud.tools.eclipse.gcloud.server" />
    </extension>
-   
+
    <extension point="org.eclipse.wst.server.ui.serverImages">
       <image
             id="com.google.cloud.tools.eclipse.gcloud.serverImage"
@@ -92,7 +92,7 @@
             typeIds="com.google.cloud.tools.eclipse.gcloud.server,com.google.cloud.tools.eclipse.gcloud.runtime">
       </image>
    </extension>
-   
+
    <extension point="org.eclipse.jst.server.generic.core.serverdefinition">
       <!-- WTP brain damage: id attribute here is an idref, not an id -->
       <serverdefinition
@@ -100,9 +100,7 @@
             id="com.google.cloud.tools.eclipse.gcloud.runtime">
       </serverdefinition>
    </extension>
-   
-   
-   
+
    <extension
          point="org.eclipse.wst.server.core.runtimeTypes">
       <runtimeType
@@ -125,41 +123,12 @@
             typeIds="com.google.cloud.tools.eclipse.runtime.id1">
       </fragment>
    </extension>
-   <extension point="org.eclipse.wst.common.project.facet.core.facets">
-      <project-facet id="com.google.cloud.tools.eclipse.facet">
-        <label>%cloudsdkfacetlabel</label>
-        <description>%cloudsdkfacetdescription</description>
-      </project-facet>
-      <project-facet-version facet="com.google.cloud.tools.eclipse.facet" version="1">
-          <constraint>
-            <and>
-               <requires
-                     facet="jst.web"
-                     version="[2.2-2.5]">
-               </requires>
-              <requires facet="java" version="[1.4-1.7]"/>
-           </and>
-         </constraint>
-      </project-facet-version>
-      <action
-          facet="com.google.cloud.tools.eclipse.facet"
-          id="com.google.cloud.tools.eclipse.facet.install"
-          type="install">
-        <delegate class="com.google.cloud.tools.eclipse.appengine.localserver.facet.CloudSdkFacetInstallDelegate"/>
-      </action>
-      <action
-          facet="com.google.cloud.tools.eclipse.facet"
-          id="com.google.cloud.tools.eclipse.facet.uninstall"
-          type="uninstall">
-        <delegate class="com.google.cloud.tools.eclipse.appengine.localserver.facet.CloudSdkFacetUninstallDelegate"/>
-      </action>
-   </extension>
+
    <extension point="org.eclipse.wst.common.project.facet.core.runtimes">
       <runtime-component-type id="com.google.cloud.tools.eclipse.runtime.id"/>
       <runtime-component-version type="com.google.cloud.tools.eclipse.runtime.id" version="1"/>
       <supported>
           <runtime-component id="com.google.cloud.tools.eclipse.runtime.id" version="1"/>
-          <facet id="com.google.cloud.tools.eclipse.facet" version="1"/>
           <facet id="jst.web" version="[2.2-2.5]"/>
           <facet id="jst.utility"  version="1.0"/>
           <facet id="jst.webfragment" version="3.0" />
@@ -170,18 +139,7 @@
     <runtimeFacetMapping runtimeTypeId="com.google.cloud.tools.eclipse.runtime.id1"
         runtime-component="com.google.cloud.tools.eclipse.runtime.id" version="1"/>
    </extension>
-   <extension
-         point="org.eclipse.m2e.core.projectConfigurators">
-      <configurator
-            class="com.google.cloud.tools.eclipse.appengine.localserver.facet.CloudSdkProjectConfigurator"
-            id="com.google.cloud.tools.eclipse.maven.cloudSdkConfigurator"
-            name="%configurator.name"
-            secondaryTo="org.maven.ide.eclipse.configuration.wtp.configurator">
-      </configurator>
-   </extension>
-   <extension
-         point="org.eclipse.m2e.core.lifecycleMappingMetadataSource">
-   </extension>
+
    <extension
          point="org.eclipse.wst.server.core.serverTypes">
       <serverType
@@ -192,7 +150,7 @@
             initialState="stopped"
             launchConfigId="com.google.cloud.tools.eclipse.CloudSdkLaunchConfigurationType"
             launchModes="run,debug,profile"
-            name="%serverTypeName"
+            name="%customServerTypeName"
             runtime="true"
             runtimeTypeId="com.google.cloud.tools.eclipse.runtime.id1"
             startBeforePublish="false"
@@ -205,7 +163,7 @@
             delegate="com.google.cloud.tools.eclipse.appengine.localserver.server.CloudSdkLaunchConfigurationDelegate"
             id="com.google.cloud.tools.eclipse.CloudSdkLaunchConfigurationType"
             modes="run, debug, profile"
-            name="%serverTypeName">
+            name="%customServerTypeName">
       </launchConfigurationType>
    </extension>
    <extension
@@ -230,13 +188,6 @@
             icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gcp-16x16.png"
             id="com.google.cloud.tools.eclipse.image"
             typeIds="com.google.cloud.tools.eclipse.runtime.id1,com.google.cloud.tools.eclipse.server.id">
-      </image>
-   </extension>
-   <extension
-         point="org.eclipse.wst.common.project.facet.ui.images">
-      <image
-            path="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gcp-16x16.png"
-            facet="com.google.cloud.tools.eclipse.facet">
       </image>
    </extension>
    <extension

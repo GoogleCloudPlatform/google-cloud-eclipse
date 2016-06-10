@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.cloud.tools.appengine.cloudsdk.PathResolver;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -45,6 +46,7 @@ import org.eclipse.wst.server.core.internal.RuntimeWorkingCopy;
 /**
 * Utility to make a new Eclipse project with the App Engine Standard facets in the workspace.  
 */
+@SuppressWarnings("restriction")
 class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
   
   private final AppEngineStandardProjectConfig config;
@@ -151,8 +153,7 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
   }
 
   private static String findCloudSdk() {
-    // todo: replace with PathResolver from app-tools-lib-for-java
-    return "/usr/local/google/google-cloud-sdk";
+    return PathResolver.INSTANCE.getCloudSdkPath().toString();
   }
 
 }

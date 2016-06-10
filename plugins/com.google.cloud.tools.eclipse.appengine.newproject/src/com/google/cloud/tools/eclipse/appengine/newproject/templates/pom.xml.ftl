@@ -101,23 +101,14 @@
             </configuration>
         </plugin>
 
-        <plugin>
-            <groupId>com.google.appengine</groupId>
-            <artifactId>appengine-maven-plugin</artifactId>
-            <version>${appengine.version}</version>
-            <configuration>
-                <enableJarClasses>false</enableJarClasses>
-                <version>${app.version}</version>
-                <!-- Comment in the below snippet to bind to all IPs instead of just localhost -->
-                <!-- address>0.0.0.0</address>
-                <port>8080</port -->
-                <!-- Comment in the below snippet to enable local debugging with a remote debugger
-                     like those included with Eclipse or IntelliJ -->
-                <!-- jvmFlags>
-                  <jvmFlag>-agentlib:jdwp=transport=dt_socket,address=8000,server=y,suspend=n</jvmFlag>
-                </jvmFlags -->
-            </configuration>
+       <plugin>
+          <groupId>com.google.cloud.tools</groupId>
+          <artifactId>app-maven-plugin</artifactId>
+          <version>0.1.0-SNAPSHOT</version>
+          <configuration>
+          </configuration>
         </plugin>
+      
         <plugin>
           <groupId>com.google.appengine</groupId>
           <artifactId>gcloud-maven-plugin</artifactId>
@@ -128,4 +119,11 @@
         </plugin>
     </plugins>
   </build>
+  
+  <pluginRepositories>
+    <pluginRepository>
+      <id>sonatype-nexus-snapshots</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+     </pluginRepository>
+  </pluginRepositories>
 </project>
