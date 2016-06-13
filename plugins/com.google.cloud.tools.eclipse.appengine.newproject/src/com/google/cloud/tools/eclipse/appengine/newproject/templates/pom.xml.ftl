@@ -108,15 +108,6 @@
           <configuration>
           </configuration>
         </plugin>
-      
-        <plugin>
-          <groupId>com.google.appengine</groupId>
-          <artifactId>gcloud-maven-plugin</artifactId>
-          <version>${gcloud.plugin.version}</version>
-          <configuration>
-            <set_default>true</set_default>
-          </configuration>
-        </plugin>
     </plugins>
   </build>
   
