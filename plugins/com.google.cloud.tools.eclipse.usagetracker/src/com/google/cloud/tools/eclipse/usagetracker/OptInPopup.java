@@ -44,7 +44,7 @@ class OptInDialog extends Dialog {
   /**
    * Overridden in order to remove the button bar area (and the OK and CANCEL buttons) that the
    * base class creates by default. As a result, most of the code has been taken directly from
-   * the base method except for the code to create the button bar area. 
+   * the base method except for the code to create the button bar area.
    * <p/>
    * @see Dialog#createContents(Composite)
    */
