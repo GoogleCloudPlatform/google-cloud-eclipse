@@ -80,7 +80,6 @@ public class CodeTemplates {
     Map<String, String> projectId = new HashMap<>();
     projectId.put("ProjectID", config.getAppEngineProjectId());
     createChildFile("appengine-web.xml", webinf, subMonitor, projectId);
-    createChildFile("pom.xml", project, subMonitor, projectId);
     
     Map<String, String> packageMap = new HashMap<>();
     String packageValue = config.getPackageName().isEmpty() ? "" : config.getPackageName() + ".";

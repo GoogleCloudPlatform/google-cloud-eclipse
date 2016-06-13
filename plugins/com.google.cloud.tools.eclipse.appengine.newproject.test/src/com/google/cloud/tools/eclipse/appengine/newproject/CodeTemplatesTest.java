@@ -65,11 +65,6 @@ public class CodeTemplatesTest {
     CodeTemplates.materialize(project, config, monitor);
     
     IFolder src = project.getFolder("src");
-    IFile pom = project.getFile("pom.xml");
-    Element project = buildDocument(pom).getDocumentElement();
-    Node appId = project.getElementsByTagName("app.id").item(0);
-    Assert.assertEquals("TheProjectID", appId.getTextContent());
-    
     IFolder main = src.getFolder("main");
     IFolder java = main.getFolder("java");
     IFile servlet = java.getFile("HelloAppEngine.java");
@@ -137,8 +132,10 @@ public class CodeTemplatesTest {
     IFile child = CodeTemplates.createChildFile("web.xml", parent, monitor);
     Assert.assertTrue(child.exists());
     Assert.assertEquals("web.xml", child.getName());
-    InputStream in = child.getContents(true);
-    Assert.assertNotEquals("File is empty", -1, in.read());
+    
+    try (InputStream in = child.getContents(true)) {
+      Assert.assertNotEquals("File is empty", -1, in.read());
+    }
   }
   
   @Test
@@ -150,9 +147,10 @@ public class CodeTemplatesTest {
     Assert.assertTrue(child.exists());
     Assert.assertEquals("HelloAppEngine.java", child.getName());
     InputStream in = child.getContents(true);
-    BufferedReader reader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
-    Assert.assertEquals("package com.google.foo.bar;", reader.readLine());
-    Assert.assertEquals("", reader.readLine());
+    try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, "UTF-8"))) {
+      Assert.assertEquals("package com.google.foo.bar;", reader.readLine());
+      Assert.assertEquals("", reader.readLine());
+    }
   }
 
 }
