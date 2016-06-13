@@ -30,7 +30,7 @@ Maven for building Eclipse bundles and features.
 
 ##Configuring Maven/Tycho Builds
 
-The plugin is built using Maven/Tycho and targeted Java 7.
+The plugin is built using Maven/Tycho and targeted to Java 7.
 
 ### Changing the Eclipse Platform compilation and testing target
 
@@ -100,7 +100,7 @@ a target platform suitable for the Eclipse IDE.
 ```
 $ mvn -Pide-target-platform package
 ```
-This command builds the project, but also create a local copy of the
+This command builds the project, but also creates a local copy of the
 target platform, including any Maven dependencies, into
 [`eclipse/ide-target-platform/target/repository`](eclipse/ide-target-platform/target/repository).
 
