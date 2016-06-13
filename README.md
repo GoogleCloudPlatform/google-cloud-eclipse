@@ -3,14 +3,13 @@
 
 This project provides an Eclipse plugin for building, debugging, and deploying Google Cloud Platform applications.
 
+_TL;DR_: `mvn -Dtycho.toolchains=SYSTEM package` should
+generate a build into `gcp-repo/target/repository`.
+
 # Development
 
 This project is built using _Maven Tycho_, a set of extensions to
-Maven for building Eclipse bundles and features.  As we also need
-to pull in some dependencies directly from Maven-style repositories,
-such as Maven Central and the Sonatype staging repository, we have
-a few hoops to jump through to set up a working development
-environment.
+Maven for building Eclipse bundles and features. 
 
 ## Requirements
 
@@ -29,18 +28,30 @@ environment.
    https://github.com/GoogleCloudPlatform/gcloud-eclipse-tools.git`.
 
 
-## Configuring Maven/Tycho Builds
+##Configuring Maven/Tycho Builds
 
 The plugin is built using Maven/Tycho and targeted Java 7.
 
-We use Tycho's [`useJDK=BREE`](https://eclipse.org/tycho/sitedocs/tycho-compiler-plugin/compile-mojo.html)
-setting to ensure that Java 8 features do not creep into the code.
-This setting causes bundles to be compiled with a JDK that matches
+### Changing the Eclipse Platform compilation and testing target
+
+By default, the build is targeted against Eclipse Mars / 4.5. 
+You can explicitly set the `eclipse.target` property to `mars` (4.5)
+or `neon` (4.6).
+```
+$ mvn -Declipse.target=neon package
+```
+
+### Configuring Maven/Tycho Toolchains
+
+We use Tycho's support for Maven Toolchains to ensure that Java 8
+features do not creep into the code.  This support is enabled by
+compiling with the [`useJDK=BREE`](https://eclipse.org/tycho/sitedocs/tycho-compiler-plugin/compile-mojo.html)
+setting that ensures bundles are compiled with a JDK that matches
 the bundle's `Bundle-RequiredExecutionEnvironment`.  This setting
 requires configuring [Maven's toolchains](https://maven.apache.org/guides/mini/guide-using-toolchains.html)
-to point to appropriate JRE installations.  Tycho also requires
-that a toolchain provide an `id` equivalent to the specified Execution
-Environment identifier.  For example, a `~/.m2/toolchains.xml` to
+to point to appropriate JRE installations.  Tycho further requires
+that a toolchain defines an `id` for the specified _Execution
+Environment_ identifier.  For example, a `~/.m2/toolchains.xml` to
 configure Maven for a Java 7 toolchain on a Mac might be:
 
 ```
@@ -68,8 +79,16 @@ directory.  Compilation errors such as `java.lang.String` not found
 and `java.lang.Exception` not found
 indicate a misconfigured _jdkHome_.
 
+You can disable the use of toolchains by setting the `tycho.toolchains`
+property to `SYSTEM`.
+
 
 ## Import into Eclipse
+
+We pull in some dependencies directly from Maven-style repositories,
+such as Maven Central and the Sonatype staging repository, which isn't
+directly supported within Eclipse.  We have a few hoops to jump
+through to set up a working development environment.
 
 ### Assemble the IDE Target Platform
 
@@ -79,9 +98,14 @@ Although Tycho can pull dependencies directly from Maven-style
 repositories, Eclipse cannot.  So we use Tycho to cobble together
 a target platform suitable for the Eclipse IDE.
 ```
-$ cd eclipse/ide-target-platform
-$ mvn package
+$ mvn -Pide-target-platform package
 ```
+This command builds the project, but also create a local copy of the
+target platform, including any Maven dependencies, into
+[`eclipse/ide-target-platform/target/repository`](eclipse/ide-target-platform/target/repository).
+
+The target platform is affected by the `eclipse.target` property,
+described below.
 
 ### Steps to import into the Eclipse IDE
 
@@ -158,6 +182,7 @@ $ mvn package
   1. Select `Run As/1 gcloud-eclipse-tools` from the context menu.
 
   1. A new instance of Eclipse should be launched with the plugin installed.
+
 
 # Updating Target Platforms
 

@@ -282,6 +282,18 @@
     </profile>
 
     <profile>
+      <!--
+        create a copy of the build target platform, suitable for setting
+        as an Eclipse Target Platform
+      -->
+      <id>ide-target-platform</id>
+      <modules>
+        <module>eclipse/ide-target-platform</module>
+      </modules>
+    </profile>
+
+
+    <profile>
       <id>travis</id>
       <properties>
         <!-- We configure Travis to use jdk7 -->

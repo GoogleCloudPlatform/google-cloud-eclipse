@@ -9,7 +9,7 @@
     <version>0.1.0-SNAPSHOT</version>
     <relativePath>../..</relativePath>
   </parent>
-  <artifactId>maven-dependencies.repo</artifactId>
+  <artifactId>ide-target-platform.repo</artifactId>
   <version>0.1.0-SNAPSHOT</version>
   <packaging>eclipse-repository</packaging>
 
