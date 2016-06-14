@@ -1,20 +1,13 @@
 package com.google.cloud.tools.eclipse.usagetracker;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Device;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 
 /**
@@ -24,7 +17,7 @@ class OptInDialog extends Dialog {
 
   public OptInDialog(Shell parentShell) {
     super(parentShell);
-    setShellStyle(SWT.MODELESS);
+    setShellStyle(SWT.TITLE | SWT.CLOSE | SWT.MODELESS);
     setBlockOnOpen(false);
   }
 
@@ -43,94 +36,52 @@ class OptInDialog extends Dialog {
   }
 
   /**
-   * Overridden in order to remove the button bar area (and the OK and CANCEL buttons) that the
-   * base class creates by default. As a result, most of the code has been taken directly from
-   * the base method except for the code to create the button bar area.
-   * <p/>
-   * @see Dialog#createContents(Composite)
+   * Set the dialog title.
    */
   @Override
-  protected Control createContents(Composite parent) {
-    Composite composite = new Composite(parent, 0);
-    GridLayout layout = new GridLayout();
-    layout.marginHeight = 0;
-    layout.marginWidth = 0;
-    layout.verticalSpacing = 0;
-    composite.setLayout(layout);
-    composite.setLayoutData(new GridData(GridData.FILL_BOTH));
-    applyDialogFont(composite);
-    initializeDialogUnits(composite);
-    dialogArea = createDialogArea(composite);
-
-    return composite;
+  protected void configureShell(Shell shell) {
+    super.configureShell(shell);
+    shell.setText(Messages.OPT_IN_DIALOG_TITLE);
   }
 
   /**
-   * Creates one {@link #Label} and one {@link #Link} inside the dialog. Users can click on
-   * either "I agree" or "I don't agree" through the {@link #Link}.
+   * Create buttons.
    */
+  @Override
+  protected void createButtonsForButtonBar(Composite parent) {
+    createButton(parent, IDialogConstants.OK_ID, Messages.OPT_IN_BUTTON, false);
+    createButton(parent, IDialogConstants.CANCEL_ID, Messages.OPT_OUT_BUTTON, true);
+  }
+
   @Override
   protected Control createDialogArea(Composite parent) {
     Composite container = (Composite) super.createDialogArea(parent);
 
-    Label label = new Label(container, 0);
-    label.setText(Messages.OPT_IN_NOTIFICATION_TEXT);
-
-    Link link = new Link(container, 0);
-    link.setText(Messages.OPT_IN_NOTIFICATION_LINK);
-
-    // Register the opt-in status depending on user selection.
-    link.addSelectionListener(new SelectionAdapter() {
-      @Override
-      public void widgetSelected(SelectionEvent event) {
-        if ("opted-in".equals(event.text)) {
-          AnalyticsPingManager.registerOptInStatus(true);
-        } else if ("opted-out".equals(event.text)) {
-          AnalyticsPingManager.registerOptInStatus(false);
-        }
-        close();
-      }
-    });
-
-    // Now adjust fonts.
-    Font smallerFont = null;
-    Font smallerBoldFont = null;
-    try {
-      smallerFont = createSmallerFont(container.getDisplay(), label.getFont());
-      smallerBoldFont = createBoldFont(container.getDisplay(), smallerFont);
-      link.setFont(smallerFont);
-      label.setFont(smallerBoldFont);
-    } finally {
-      if (smallerFont != null) {
-        smallerFont.dispose();
-      }
-      if (smallerBoldFont != null) {
-        smallerBoldFont.dispose();
-      }
-    }
+    Label label = new Label(container, SWT.WRAP);
+    label.setText(Messages.OPT_IN_DIALOG_TEXT);
 
     return container;
   }
 
-  /**
-   * Be sure to {@link Font#dispose()} the created {@link Font}.
-   */
-  private static Font createSmallerFont(Device device, Font baseFont) {
-    FontData[] fontData = baseFont.getFontData();
-    for (FontData eachFontData : fontData) {
-      eachFontData.setHeight(eachFontData.getHeight() - 1);
-    }
-    return new Font(device, fontData);
+  @Override
+  protected void okPressed() {
+    super.okPressed();
+    AnalyticsPingManager.registerOptInStatus(true);
+  }
+
+  @Override
+  protected void cancelPressed() {
+    super.cancelPressed();
+    AnalyticsPingManager.registerOptInStatus(false);
   }
 
   /**
-   * Be sure to {@link Font#dispose()} the created {@link Font}.
+   * When the dialog closes in other ways than pressing the buttons.
    */
-  private static Font createBoldFont(Device device, Font baseFont) {
-    FontData[] fontData = baseFont.getFontData();
-    for (FontData eachFontData : fontData) {
-      eachFontData.setStyle(SWT.BOLD);
-    }
-    return new Font(device, fontData);
+  @Override
+  protected void handleShellCloseEvent() {
+    super.handleShellCloseEvent();
+    // TODO: determine if we conclusively opt out.
+    AnalyticsPingManager.registerOptInStatus(false);
   }
 }
