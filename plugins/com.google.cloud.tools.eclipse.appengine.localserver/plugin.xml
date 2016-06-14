@@ -255,5 +255,11 @@
              name="%appToolsServerTypeName">   
        </launchConfigurationType>    
     </extension>
- 
+    <extension  point="org.eclipse.debug.ui.launchConfigurationTypeImages">    
+      <launchConfigurationTypeImage
+           configTypeID="com.google.cloud.tools.eclipse.AppToolsLaunchConfigurationType"   
+           icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gcp-16x16.png"   
+           id="com.google.cloud.tools.eclipse.ExternalLaunchConfigurationTypeImage">   
+      </launchConfigurationTypeImage>   
+    </extension> 
 </plugin>
