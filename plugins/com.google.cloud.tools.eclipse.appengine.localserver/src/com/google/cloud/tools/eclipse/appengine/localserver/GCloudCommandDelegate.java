@@ -179,7 +179,7 @@ public class GCloudCommandDelegate {
       }
       builder.append(" --jvm_flag=-Xdebug");
       builder
-          .append(" --jvm_flag=-Xrunjdwp:transport=dt_socket,server=y,suspend=y,quiet=y,address=");
+          .append(" --jvm_flag=-Xrunjdwp:transport=dt_socket,server=n,suspend=y,quiet=y,address=");
       builder.append(debugPort);
     }
 

@@ -35,8 +35,6 @@ import org.eclipse.jdt.launching.SocketUtil;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IRuntime;
 import org.eclipse.wst.server.core.IServer;
-import org.eclipse.wst.server.core.IServerListener;
-import org.eclipse.wst.server.core.ServerEvent;
 import org.eclipse.wst.server.core.ServerUtil;
 
 import java.io.IOException;
@@ -49,7 +47,6 @@ import java.util.Map;
  * Cloud SDK server's launch configuration delegate.
  */
 public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfigurationDelegate {
-  private IServerListener debugServerListener;
   private static final String DEBUGGER_HOST = "localhost";
 
   @Override
@@ -89,27 +86,11 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
       final int port = getDebugPort();
       debugPort = port;
 
-      // Create server listener so that when server has started we create a
-      // remote debugger and attach it to the server
-      debugServerListener = new IServerListener() {
-        @Override
-        public void serverChanged(ServerEvent event) {
-          if (event != null) {
-            if (event.getState() == IServer.STATE_STARTED) {
-              try {
-                Thread.sleep(500);
-                runDebugTarget(cloudSdkServer, modules[0].getProject().getName(), port);
-              } catch (InterruptedException | CoreException e) {
-                Activator.logError(e);
-              }
-            } else if (event.getState() == IServer.STATE_STOPPING) {
-              removeRemoteDebuggerListener(server);
-            }
-
-          }
-        }
-      };
-      server.addServerListener(debugServerListener);
+      try {
+        runDebugTarget(cloudSdkServer, modules[0].getProject().getName(), port);
+      } catch (CoreException e) {
+        Activator.logError(e);
+      }
     }
 
     try {
@@ -221,15 +202,10 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
     remoteDebugConfig.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CONNECT_MAP,
                                    connectionParameters);
     remoteDebugConfig.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_CONNECTOR,
-                                   "org.eclipse.jdt.launching.socketAttachConnector");
+        "org.eclipse.jdt.launching.socketListenConnector");
 
     cloudSdkServer.setRemoteDebugLaunchConfig(remoteDebugConfig);
 
     return remoteDebugConfig;
-  }
-
-  private void removeRemoteDebuggerListener(IServer server) {
-    server.removeServerListener(debugServerListener);
-    debugServerListener = null;
   }
 }
