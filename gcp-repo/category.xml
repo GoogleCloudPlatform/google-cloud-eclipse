@@ -3,6 +3,5 @@
    <feature id="com.google.cloud.tools.eclipse.suite.e45.feature" version="0.1.0.qualifier">
       <category name="GCP"/>
    </feature>
-   <feature id="com.google.cloud.tools.eclipse.3rdparty.feature" version="0.1.0.qualifier"/>
    <category-def name="GCP" label="Cloud Tools for Eclipse"/>
 </site>
