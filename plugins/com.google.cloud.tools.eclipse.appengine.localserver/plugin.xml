@@ -244,37 +244,8 @@
    </extension>
    
    <!-- app-tools-lib-for-java based server and runtime -->
-   
-  <extension point="org.eclipse.wst.server.core.serverTypes">
-      <serverType
-            behaviourClass="com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerBehaviour"
-            class="com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerDelegate"
-            description="%apptoolsTypeDescription"
-            id="com.google.cloud.tools.eclipse.server.id"
-            initialState="stopped"
-            launchConfigId="com.google.cloud.tools.eclipse.CloudSdkLaunchConfigurationType"
-            launchModes="run,debug,profile"
-            name="%apptoolsTypeName"
-            runtime="true"
-            runtimeTypeId="com.google.cloud.tools.eclipse.runtime.id1"
-            startBeforePublish="false"
-            supportsRemoteHosts="false">
-      </serverType>
-  </extension>
-   <extension point="org.eclipse.debug.core.launchConfigurationTypes">
-      <launchConfigurationType
-            delegate="com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerLaunchConfigurationDelegate"
-            id="com.google.cloud.tools.eclipse.CloudSdkLaunchConfigurationType"
-            modes="run, debug, profile"
-            name="%appToolsServerTypeName">
-      </launchConfigurationType>
-   </extension>
-   <extension
-         point="org.eclipse.debug.ui.launchConfigurationTypeImages">
-      <launchConfigurationTypeImage
-            configTypeID="com.google.cloud.tools.eclipse.CloudSdkLaunchConfigurationType"
-            icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gcp-16x16.png"
-            id="com.google.cloud.tools.eclipse.ExternalLaunchConfigurationTypeImage">
-      </launchConfigurationTypeImage>
-   </extension> 
+   <!-- after adding anything here, make sure you test
+        to make sure you haven't broken the other servers.
+        It is very easy to do so. -->
+ 
 </plugin>
