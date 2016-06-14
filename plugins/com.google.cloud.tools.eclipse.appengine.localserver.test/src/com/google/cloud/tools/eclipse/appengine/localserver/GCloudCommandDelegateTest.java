@@ -123,7 +123,7 @@ public class GCloudCommandDelegateTest {
 
     assertEquals(sdkLocation + "/bin/dev_appserver.py " + runnables
         + " --api_host localhost --api_port 1234 "
-        + "--jvm_flag=-Xdebug --jvm_flag=-Xrunjdwp:transport=dt_socket,server=y,suspend=y,quiet=y,"
+        + "--jvm_flag=-Xdebug --jvm_flag=-Xrunjdwp:transport=dt_socket,server=n,suspend=y,quiet=y,"
         + "address=2345", cmd);
   }
 
