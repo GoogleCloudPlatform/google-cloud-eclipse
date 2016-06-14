@@ -4,6 +4,7 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
@@ -75,17 +76,8 @@ class OptInDialog extends Dialog {
     Label label = new Label(container, 0);
     label.setText(Messages.OPT_IN_NOTIFICATION_TEXT);
 
-    // Use a smaller font that the default.
-    FontData[] fontData = label.getFont().getFontData();
-    for (int i = 0; i < fontData.length; i++) {
-      fontData[i].setHeight(fontData[i].getHeight() - 1);
-    }
-    Font smallerFont = new Font(label.getDisplay(), fontData);
-    label.setFont(smallerFont);
-
     Link link = new Link(container, 0);
     link.setText(Messages.OPT_IN_NOTIFICATION_LINK);
-    link.setFont(smallerFont);
 
     // Register the opt-in status depending on user selection.
     link.addSelectionListener(new SelectionAdapter() {
@@ -100,6 +92,45 @@ class OptInDialog extends Dialog {
       }
     });
 
+    // Now adjust fonts.
+    Font smallerFont = null;
+    Font smallerBoldFont = null;
+    try {
+      smallerFont = createSmallerFont(container.getDisplay(), label.getFont());
+      smallerBoldFont = createBoldFont(container.getDisplay(), smallerFont);
+      link.setFont(smallerFont);
+      label.setFont(smallerBoldFont);
+    } finally {
+      if (smallerFont != null) {
+        smallerFont.dispose();
+      }
+      if (smallerBoldFont != null) {
+        smallerBoldFont.dispose();
+      }
+    }
+
     return container;
+  }
+
+  /**
+   * Be sure to {@link Font#dispose()} the created {@link Font}.
+   */
+  private static Font createSmallerFont(Device device, Font baseFont) {
+    FontData[] fontData = baseFont.getFontData();
+    for (FontData eachFontData : baseFont.getFontData()) {
+      eachFontData.setHeight(eachFontData.getHeight() - 1);
+    }
+    return new Font(device, fontData);
+  }
+
+  /**
+   * Be sure to {@link Font#dispose()} the created {@link Font}.
+   */
+  private static Font createBoldFont(Device device, Font baseFont) {
+    FontData[] fontData = baseFont.getFontData();
+    for (FontData eachFontData : baseFont.getFontData()) {
+      eachFontData.setStyle(SWT.BOLD);
+    }
+    return new Font(device, fontData);
   }
 }
