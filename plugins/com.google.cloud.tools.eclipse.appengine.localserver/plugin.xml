@@ -3,6 +3,9 @@
 <!-- I think all or most classes come from 
   http://git.eclipse.org/c/servertools/webtools.servertools.git/ -->
 <plugin>
+
+   <!-- Generic Server Framework server and runtime -->
+   
    <extension point="org.eclipse.wst.server.core.runtimeTypes">
       <runtimeType
             class="org.eclipse.jst.server.generic.core.internal.GenericServerRuntime"
@@ -100,6 +103,8 @@
             id="com.google.cloud.tools.eclipse.gcloud.runtime">
       </serverdefinition>
    </extension>
+
+   <!-- Custom server and runtime, that shells out to Cloud SDK -->
 
    <extension
          point="org.eclipse.wst.server.core.runtimeTypes">
@@ -230,12 +235,46 @@
       </processFactory>
    </extension>
    
-   <extension point="org.eclipse.wst.server.core.publishTasks">
-      <publishTask
+  <extension point="org.eclipse.wst.server.core.publishTasks">
+     <publishTask
              id="com.google.appengine.eclipse.wtp.publishTask"
              class="com.google.cloud.tools.eclipse.appengine.localserver.server.CloudSdkPublishTaskDelegate"
              typeIds="com.google.cloud.tools.eclipse.server.id">
        </publishTask>
-    </extension>
+   </extension>
    
+   <!-- app-tools-lib-for-java based server and runtime -->
+   
+  <extension point="org.eclipse.wst.server.core.serverTypes">
+      <serverType
+            behaviourClass="com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerBehaviour"
+            class="com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerDelegate"
+            description="%apptoolsTypeDescription"
+            id="com.google.cloud.tools.eclipse.server.id"
+            initialState="stopped"
+            launchConfigId="com.google.cloud.tools.eclipse.CloudSdkLaunchConfigurationType"
+            launchModes="run,debug,profile"
+            name="%apptoolsTypeName"
+            runtime="true"
+            runtimeTypeId="com.google.cloud.tools.eclipse.runtime.id1"
+            startBeforePublish="false"
+            supportsRemoteHosts="false">
+      </serverType>
+  </extension>
+   <extension point="org.eclipse.debug.core.launchConfigurationTypes">
+      <launchConfigurationType
+            delegate="com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerLaunchConfigurationDelegate"
+            id="com.google.cloud.tools.eclipse.CloudSdkLaunchConfigurationType"
+            modes="run, debug, profile"
+            name="%appToolsServerTypeName">
+      </launchConfigurationType>
+   </extension>
+   <extension
+         point="org.eclipse.debug.ui.launchConfigurationTypeImages">
+      <launchConfigurationTypeImage
+            configTypeID="com.google.cloud.tools.eclipse.CloudSdkLaunchConfigurationType"
+            icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gcp-16x16.png"
+            id="com.google.cloud.tools.eclipse.ExternalLaunchConfigurationTypeImage">
+      </launchConfigurationTypeImage>
+   </extension> 
 </plugin>
