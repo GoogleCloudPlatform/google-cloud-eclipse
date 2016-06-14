@@ -53,6 +53,8 @@ public class CloudSdkLaunchConfigurationDelegate extends AbstractJavaLaunchConfi
   private static final String DEBUGGER_HOST = "localhost";
 
   @Override
+  // TODO for https://github.com/GoogleCloudPlatform/gcloud-eclipse-tools/issues/242
+  // we want to rely on app-tools-lib-for-java here rather than shelling out to the cloud SDK.
   public void launch(ILaunchConfiguration configuration,
                      String mode,
                      ILaunch launch,

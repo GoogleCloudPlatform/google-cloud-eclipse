@@ -59,7 +59,7 @@ public class CloudSdkServer extends ServerDelegate {
    * {@code server} or a new {@link CloudSdkServer} instance if a
    * {@link CloudSdkServer} instance cannot be found for {@code server}.
    *
-   * @param server the generic sever
+   * @param server the cloud SDK server
    * @return a new {@link CloudSdkServer} instance or the one associated with
    *         {@code server}
    */

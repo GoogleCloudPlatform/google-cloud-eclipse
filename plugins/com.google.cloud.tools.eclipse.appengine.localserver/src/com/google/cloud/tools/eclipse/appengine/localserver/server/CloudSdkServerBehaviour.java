@@ -40,6 +40,10 @@ import java.net.URL;
 /**
  * A {@link ServerBehaviourDelegate} for Google Cloud SDK.
  */
+// TODO for https://github.com/GoogleCloudPlatform/gcloud-eclipse-tools/issues/242
+// replace this class with one that relies on app-tools-lib-for-java.
+// It will need most of the same operations, and probably require some
+// additions and modifications to app-tools-lib-for-java.
 public class CloudSdkServerBehaviour extends ServerBehaviourDelegate {
   private CloudSdkServerStartupChecker cloudSdkServerStartupChecker;
   private IDebugEventSetListener processListener;
