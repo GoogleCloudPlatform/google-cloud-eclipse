@@ -90,10 +90,10 @@ class OptInDialog extends Dialog {
     // Register the opt-in status depending on user selection.
     link.addSelectionListener(new SelectionAdapter() {
       @Override
-      public void widgetSelected(SelectionEvent e) {
-        if ("opted-in".equals(e.text)) {
+      public void widgetSelected(SelectionEvent event) {
+        if ("opted-in".equals(event.text)) {
           AnalyticsPingManager.registerOptInStatus(true);
-        } else if ("opted-out".equals(e.text)) {
+        } else if ("opted-out".equals(event.text)) {
           AnalyticsPingManager.registerOptInStatus(false);
         }
         close();

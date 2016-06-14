@@ -84,7 +84,7 @@ public class AnalyticsPingManager {
     return false;
   }
 
-  public static void registerOptInStatus(boolean optedIn) {
+  static void registerOptInStatus(boolean optedIn) {
     IEclipsePreferences prefs = ConfigurationScope.INSTANCE.getNode(ANALYTICS_PREFERENCE_QUALIFIER);
     if (prefs != null) {
       prefs.putBoolean(PREF_KEY_USER_CONSENT, false);
