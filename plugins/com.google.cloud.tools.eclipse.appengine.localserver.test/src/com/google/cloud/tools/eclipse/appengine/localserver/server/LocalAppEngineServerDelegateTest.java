@@ -1,5 +1,4 @@
-package com.google.cloud.tools.eclipse.appengine.localserver;
-
+package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -9,7 +8,6 @@ import org.eclipse.wst.server.core.IModule;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerDelegate;
 
 public class LocalAppEngineServerDelegateTest {
 
