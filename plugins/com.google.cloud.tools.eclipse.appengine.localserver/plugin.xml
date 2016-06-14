@@ -245,7 +245,15 @@
    
    <!-- app-tools-lib-for-java based server and runtime -->
    <!-- after adding anything here, make sure you test
-        to make sure you haven't broken the other servers.
+        that you haven't broken the other servers.
         It is very easy to do so. -->
+    <extension point="org.eclipse.debug.core.launchConfigurationTypes">   
+      <launchConfigurationType    
+             delegate="com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerLaunchConfigurationDelegate"    
+             id="com.google.cloud.tools.eclipse.AppToolsLaunchConfigurationType"   
+             modes="run, debug, profile"   
+             name="%appToolsServerTypeName">   
+       </launchConfigurationType>    
+    </extension>
  
 </plugin>
