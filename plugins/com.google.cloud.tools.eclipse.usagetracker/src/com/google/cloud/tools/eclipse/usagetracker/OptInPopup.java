@@ -117,7 +117,7 @@ class OptInDialog extends Dialog {
    */
   private static Font createSmallerFont(Device device, Font baseFont) {
     FontData[] fontData = baseFont.getFontData();
-    for (FontData eachFontData : baseFont.getFontData()) {
+    for (FontData eachFontData : fontData) {
       eachFontData.setHeight(eachFontData.getHeight() - 1);
     }
     return new Font(device, fontData);
@@ -128,7 +128,7 @@ class OptInDialog extends Dialog {
    */
   private static Font createBoldFont(Device device, Font baseFont) {
     FontData[] fontData = baseFont.getFontData();
-    for (FontData eachFontData : baseFont.getFontData()) {
+    for (FontData eachFontData : fontData) {
       eachFontData.setStyle(SWT.BOLD);
     }
     return new Font(device, fontData);
