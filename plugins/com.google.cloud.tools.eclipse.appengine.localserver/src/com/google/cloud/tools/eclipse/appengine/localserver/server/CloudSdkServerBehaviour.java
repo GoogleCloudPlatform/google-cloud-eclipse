@@ -89,7 +89,7 @@ public class CloudSdkServerBehaviour extends ServerBehaviourDelegate {
    *
    * @param launchMode the mode in which a server is running
    */
-  protected void setupLaunch(String launchMode) {
+   void setupLaunch(String launchMode) {
     setServerRestartState(false);
     setServerState(IServer.STATE_STARTING);
     setMode(launchMode);
