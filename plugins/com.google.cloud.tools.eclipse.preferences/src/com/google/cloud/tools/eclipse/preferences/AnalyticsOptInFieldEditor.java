@@ -1,15 +1,28 @@
 package com.google.cloud.tools.eclipse.preferences;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Link;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
 public class AnalyticsOptInFieldEditor extends FieldEditor {
+
+  private static final Logger logger = Logger.getLogger(AnalyticsOptInFieldEditor.class.getName());
 
   private Group group;
   private BooleanFieldEditor optInStatusEditor;
@@ -22,12 +35,30 @@ public class AnalyticsOptInFieldEditor extends FieldEditor {
     group = new Group(parent, SWT.SHADOW_OUT);
     group.setText(Messages.FIELD_EDITOR_ANALYTICS_GROUP_TITLE);
 
+    // Opt-in checkbox with a label
     optInStatusEditor =
         new BooleanFieldEditor(name, Messages.FIELD_EDITOR_ANALYTICS_OPT_IN_TEXT, group);
 
+    // The privacy policy disclaimer with a clickable link
     Link link = new Link(group, SWT.NONE);
     link.setText(Messages.FIELD_EDITOR_ANALYTICS_DISCLAIMER);
+    link.addSelectionListener(new SelectionAdapter() {
+      @Override
+      public void widgetSelected(SelectionEvent event) {
+        // Open a privacy policy web page when the link is clicked.
+        try {
+          URL url = new URL(Messages.GOOGLE_PRIVACY_POLICY_URL);
+          IWorkbenchBrowserSupport browserSupport = PlatformUI.getWorkbench().getBrowserSupport();
+          browserSupport.createBrowser(null).openURL(url);
+        } catch (MalformedURLException mue) {
+          logger.log(Level.WARNING, "URL malformed", mue);
+        } catch (PartInitException pie) {
+          logger.log(Level.WARNING, "Cannot launch a browser", pie);
+        }
+      }
+    });
 
+    // Initialize and set up this object.
     init(name, "labelless field editor");
     createControl(parent);
   }
@@ -53,6 +84,8 @@ public class AnalyticsOptInFieldEditor extends FieldEditor {
     GridData gridData = new GridData();
     gridData.horizontalSpan = numColumns;
     group.setLayoutData(gridData);
+
+    GridLayoutFactory.swtDefaults().applyTo(group);
   }
 
   @Override
