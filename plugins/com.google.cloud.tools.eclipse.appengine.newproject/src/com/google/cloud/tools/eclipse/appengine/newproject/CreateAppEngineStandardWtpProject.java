@@ -1,15 +1,7 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
-import java.lang.reflect.InvocationTargetException;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkProvider;
 
-import com.google.cloud.tools.appengine.cloudsdk.PathResolver;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -44,6 +36,16 @@ import org.eclipse.wst.server.core.IRuntimeType;
 import org.eclipse.wst.server.core.IRuntimeWorkingCopy;
 import org.eclipse.wst.server.core.ServerCore;
 import org.eclipse.wst.server.core.internal.RuntimeWorkingCopy;
+
+import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
 * Utility to make a new Eclipse project with the App Engine Standard facets in the workspace.  
@@ -169,7 +171,11 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
   }
 
   private static String findCloudSdk() {
-    return PathResolver.INSTANCE.getCloudSdkPath().toString();
+    File location = CloudSdkProvider.getDefaultSdkLocation();
+    if (location == null) {
+      throw new NullPointerException("Could not find Google Cloud SDK");
+    }
+    return location.toString();
   }
 
 }

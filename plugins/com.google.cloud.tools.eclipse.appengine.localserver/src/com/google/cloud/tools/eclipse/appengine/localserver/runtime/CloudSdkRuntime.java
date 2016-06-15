@@ -14,15 +14,15 @@
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.appengine.localserver.runtime;
 
-import java.io.File;
-import java.io.IOException;
+import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
+import com.google.cloud.tools.eclipse.appengine.localserver.GCloudCommandDelegate;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.wst.server.core.model.RuntimeDelegate;
 
-import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
-import com.google.cloud.tools.eclipse.appengine.localserver.GCloudCommandDelegate;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Cloud SDK Runtime delegate.
@@ -37,6 +37,7 @@ public class CloudSdkRuntime extends RuntimeDelegate {
 
     // Check if the sdk location is a valid path
     File sdkLocation = getRuntime().getLocation().toFile();
+    // TODO: rewrite using CloudSdk
     if (!sdkLocation.exists()) {
       return new Status(IStatus.INFO,
                         Activator.PLUGIN_ID,
