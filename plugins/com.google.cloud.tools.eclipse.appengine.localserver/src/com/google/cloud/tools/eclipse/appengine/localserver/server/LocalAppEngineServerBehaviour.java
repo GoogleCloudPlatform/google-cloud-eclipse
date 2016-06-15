@@ -19,5 +19,5 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
   void setStarting() {
     setServerState(IServer.STATE_STARTING);    
   }
-
+  
 }
