@@ -27,10 +27,10 @@ public class TargetPlatform {
   static MessageConsole findConsole(String name) {
     ConsolePlugin plugin = ConsolePlugin.getDefault();
     IConsoleManager manager = plugin.getConsoleManager();
-    IConsole[] existing = manager.getConsoles();
-    for (int i = 0; i < existing.length; i++)
-       if (name.equals(existing[i].getName())) {
-          return (MessageConsole) existing[i];
+    IConsole[] consoles = manager.getConsoles();
+    for (int i = 0; i < consoles.length; i++)
+       if (name.equals(consoles[i].getName())) {
+          return (MessageConsole) consoles[i];
        }
     // console not found, so create a new one
     MessageConsole console = new MessageConsole(name, null);
