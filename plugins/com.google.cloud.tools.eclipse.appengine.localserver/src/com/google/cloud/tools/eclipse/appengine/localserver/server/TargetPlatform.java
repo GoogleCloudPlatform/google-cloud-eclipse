@@ -18,6 +18,7 @@ public class TargetPlatform {
     IWorkbench workbench = PlatformUI.getWorkbench();
     IWorkbenchWindow window = workbench.getActiveWorkbenchWindow();
     if (window != null) { // TODO how to open when this is null?
+      // see https://wiki.eclipse.org/FAQ_How_do_I_find_the_active_workbench_page%3F
       IWorkbenchPage page = window.getActivePage();
       IConsoleView view = (IConsoleView) page.showView(IConsoleConstants.ID_CONSOLE_VIEW);
       view.display(console);
