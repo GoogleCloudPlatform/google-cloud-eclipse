@@ -10,8 +10,12 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
     // TODO Auto-generated method stub
   }
 
-  public void setStarted() {
+  void setStarted() {
     setServerState(IServer.STATE_STARTED);    
+  }
+  
+  void setStarting() {
+    setServerState(IServer.STATE_STARTING);    
   }
 
 }

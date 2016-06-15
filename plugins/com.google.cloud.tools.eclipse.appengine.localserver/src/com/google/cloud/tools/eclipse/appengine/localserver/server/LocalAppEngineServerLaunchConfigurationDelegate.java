@@ -25,6 +25,10 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     LocalAppEngineServerBehaviour serverBehaviour =
         (LocalAppEngineServerBehaviour) server.loadAdapter(LocalAppEngineServerBehaviour.class, null);
 
+    serverBehaviour.setStarting();
+    
+    // TODO actually launch the server
+    
     serverBehaviour.setStarted();
     
     MessageConsole console = TargetPlatform.findConsole("debugging");
