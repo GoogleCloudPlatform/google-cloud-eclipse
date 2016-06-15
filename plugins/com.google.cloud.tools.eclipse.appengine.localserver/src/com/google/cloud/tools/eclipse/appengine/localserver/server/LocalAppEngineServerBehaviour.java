@@ -7,7 +7,9 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
 
   @Override
   public void stop(boolean force) {
-    // TODO Auto-generated method stub
+    setServerState(IServer.STATE_STOPPING);
+    // TODO stop server
+    setServerState(IServer.STATE_STOPPED);    
   }
 
   void setStarted() {
