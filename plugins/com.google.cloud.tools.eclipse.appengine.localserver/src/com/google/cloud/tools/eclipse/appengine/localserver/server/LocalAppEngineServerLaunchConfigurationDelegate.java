@@ -1,13 +1,12 @@
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
-import java.util.List;
-
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.jdt.launching.AbstractJavaLaunchConfigurationDelegate;
+import org.eclipse.ui.console.MessageConsole;
+import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.ServerUtil;
 
@@ -28,7 +27,10 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
     serverBehaviour.setStarted();
     
-    System.out.println("Server started. (Not really)");
+    MessageConsole console = TargetPlatform.findConsole("debugging");
+    TargetPlatform.showConsole(console);
+    MessageConsoleStream out = console.newMessageStream();
+    out.println("Server started (not really)");
   }
 
 }
