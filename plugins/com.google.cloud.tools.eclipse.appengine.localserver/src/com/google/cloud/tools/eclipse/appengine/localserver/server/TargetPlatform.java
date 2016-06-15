@@ -17,7 +17,7 @@ public class TargetPlatform {
   static void showConsole(MessageConsole console) throws PartInitException {
     IWorkbench workbench = PlatformUI.getWorkbench();
     IWorkbenchWindow window = workbench.getActiveWorkbenchWindow();
-    if (window != null) {
+    if (window != null) { // TODO how to open when this is null?
       IWorkbenchPage page = window.getActivePage();
       IConsoleView view = (IConsoleView) page.showView(IConsoleConstants.ID_CONSOLE_VIEW);
       view.display(console);
