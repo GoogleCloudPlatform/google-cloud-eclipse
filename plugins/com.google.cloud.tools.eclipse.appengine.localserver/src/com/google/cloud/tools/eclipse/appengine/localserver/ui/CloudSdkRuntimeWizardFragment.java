@@ -43,8 +43,6 @@ import org.eclipse.wst.server.core.TaskModel;
 import org.eclipse.wst.server.ui.wizard.IWizardHandle;
 import org.eclipse.wst.server.ui.wizard.WizardFragment;
 
-import java.io.File;
-
 /**
  * {@link WizardFragment} for configuring Google Cloud SDK Runtime.
  */
@@ -107,15 +105,6 @@ public final class CloudSdkRuntimeWizardFragment extends WizardFragment {
     return true;
   }
 
-  @Override
-  public boolean isComplete() {
-    File sdkLocation = runtime.getRuntime().getLocation().toFile();
-    if (runtime.validate().isOK() && sdkLocation.exists()) {
-      return true;
-    }
-    return false;
-  }
-
   private void createContents(final Composite composite) {
     Group group = new Group(composite, SWT.NONE);
     group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -170,16 +159,17 @@ public final class CloudSdkRuntimeWizardFragment extends WizardFragment {
 
   private void updateStatus(String message, int newStatus) {
     switch (newStatus) {
+      case IStatus.OK:
+        setComplete(true);
+        wizard.setMessage(null, IMessageProvider.NONE);
+        break;
+      case IStatus.INFO:
+        setComplete(true);
+        wizard.setMessage(message, IMessageProvider.INFORMATION);
+        break;
     case IStatus.ERROR:
-      wizard.setMessage(message, IMessageProvider.ERROR);
-      break;
-    case IStatus.OK:
-      wizard.setMessage(null, IMessageProvider.NONE);
-      break;
-    case IStatus.INFO:
-      wizard.setMessage(message, IMessageProvider.INFORMATION);
-      break;
     default:
+        setComplete(false);
       wizard.setMessage(message, IMessageProvider.ERROR);
       break;
     }
