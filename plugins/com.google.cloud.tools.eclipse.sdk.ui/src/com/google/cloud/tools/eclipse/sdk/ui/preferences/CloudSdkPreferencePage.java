@@ -34,7 +34,6 @@ public class CloudSdkPreferencePage extends FieldEditorPreferencePage
 
   public CloudSdkPreferencePage() {
     super(GRID);
-    // setPreferenceStore(activator.getDefault().getPreferenceStore());
     setPreferenceStore(PreferenceInitializer.getPreferenceStore());
     setDescription("Google Cloud SDK Preferences");
   }
@@ -67,8 +66,7 @@ public class CloudSdkPreferencePage extends FieldEditorPreferencePage
       new CloudSdk.Builder().sdkPath(location).build().validate();
     } catch (AppEngineException e) {
       // accept a seemingly invalid location in case the SDK organization
-      // has changed and this code is out of date
-      System.out.println("No SDK found: " + e);
+      // has changed and the CloudSdk#validate() code is out of date
       setMessage("No SDK found!", WARNING);
     }
     return true;

@@ -18,47 +18,43 @@ package com.google.cloud.tools.eclipse.sdk.internal;
 
 import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.common.collect.MapMaker;
 
 import org.eclipse.e4.core.contexts.ContextFunction;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.IInjector;
 
-import java.util.ArrayList;
+import java.io.File;
+import java.nio.file.Path;
 import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.Set;
 
 /**
- * Provides an {@link CloudSdk} instance suitable for injection using the E4 DI mechanisms. As the
- * configured location may change, we fetch the path from the context to ensure that we recompute
- * the CloudSdk instance on path change.
+ * Provides a {@link CloudSdk} instance suitable for injection using the E4 dependency injection
+ * mechanisms. As the configured location may change, we fetch the path from the context to ensure
+ * that we recompute the CloudSdk instance on path change.
  */
 public class CloudSdkContextFunction extends ContextFunction {
   /**
-   * A list of IEclipseContexts that have been referenced that need to be updated on preference
-   * change
+   * A list of referenced IEclipseContexts that must be updated on preference change.
    */
-  private static final Map<IEclipseContext, IEclipseContext> referencedContexts =
-      Collections.synchronizedMap(new WeakHashMap<IEclipseContext, IEclipseContext>());
+  private static final Set<IEclipseContext> referencedContexts =
+      Collections.newSetFromMap(new MapMaker().weakKeys().makeMap());
 
   /** Cloud SDK location has been changed: trigger any necessary updates */
-  public static void sdkPathChanged(Object newPath) {
-    List<IEclipseContext> contexts;
-    synchronized (referencedContexts) {
-      contexts = new ArrayList<>(referencedContexts.keySet());
-    }
-    for (IEclipseContext c : contexts) {
-      c.set(PreferenceConstants.CLOUDSDK_PATH, newPath);
+  static void sdkPathChanged(String newPath) {
+    for (IEclipseContext context : referencedContexts) {
+      context.set(PreferenceConstants.CLOUDSDK_PATH, newPath);
     }
   }
 
   @Override
   public Object compute(IEclipseContext context, String contextKey) {
-    Object path = context.get(PreferenceConstants.CLOUDSDK_PATH);
-    referencedContexts.put(context, context);
+    referencedContexts.add(context);
 
-    CloudSdk.Builder builder = CloudSdkProvider.createBuilder(path);
+    Object path = context.get(PreferenceConstants.CLOUDSDK_PATH);
+    File location = toFile(path);
+    CloudSdk.Builder builder = CloudSdkProvider.createBuilder(location);
     if (builder == null) {
       return IInjector.NOT_A_VALUE;
     }
@@ -69,6 +65,17 @@ public class CloudSdkContextFunction extends ContextFunction {
     } catch (AppEngineException e) {
       return IInjector.NOT_A_VALUE;
     }
+  }
+
+  private static File toFile(Object path) {
+    if (path instanceof File) {
+      return (File) path;
+    } else if (path instanceof Path) {
+      return ((Path) path).toFile();
+    } else if (path instanceof String) {
+      return new File((String) path);
+    }
+    return null;
   }
 
 }

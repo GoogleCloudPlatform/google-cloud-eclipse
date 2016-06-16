@@ -36,7 +36,7 @@ public class CloudSdkProvider extends ContextFunction {
    * 
    * @return the configured {@link CloudSdk} or {@code null} if no SDK could be found
    */
-  public static CloudSdk getDefaultSdk() {
+  public static CloudSdk getCloudSdk() {
     return createBuilder(null).build();
   }
 
@@ -45,21 +45,24 @@ public class CloudSdkProvider extends ContextFunction {
    * 
    * @return the configured location or {@code null} if the SDK could not be found
    */
-  public static File getDefaultSdkLocation() {
-    return resolveSdkLocation(null);
+  public static File getCloudSdkLocation() {
+    return resolveSdkLocation();
   }
 
   /**
    * Return a {@link CloudSdk.Builder} instance, suitable for creating a {@link CloudSdk} instance.
-   * {@code path}, if not null, is used as the location to the Cloud SDK, otherwise the configured
-   * or discovered Cloud SDK will be used instead
+   * {@code location}, if not null, is used as the location to the Cloud SDK, otherwise the
+   * configured or discovered Cloud SDK will be used instead.
    * 
-   * @param path if not {@code null}, overrides the default location for the SDK; can be a
+   * @param location if not {@code null}, overrides the default location for the SDK; can be a
    *        {@linkplain String}, {@linkplain File}, or {@linkplain Path}.
    * @return a builder, or {@code null} if the Google Cloud SDK cannot be located
    */
-  public static CloudSdk.Builder createBuilder(Object path) {
-    File location = resolveSdkLocation(path);
+  public static CloudSdk.Builder createBuilder(File location) {
+    // perhaps should try to be cleverer in case location references the .../bin/gcloud
+    if (location == null || !location.exists()) {
+      location = resolveSdkLocation();
+    }
     if (location == null || !location.exists()) {
       return null;
     }
@@ -67,29 +70,20 @@ public class CloudSdkProvider extends ContextFunction {
   }
 
   /**
-   * Attempt to resolve the Google Cloud SDK from the configured or discovered Cloud SDK.
-   * {@code path}, if not {@code null}, is used as the location to the Cloud SDK, otherwise the
-   * configured default will be used instead.
-   * 
-   * @param path if not {@code null}, overrides the default location for the SDK; can be a
-   *        {@linkplain String}, {@linkplain File}, or {@linkplain Path}.
+   * Attempt to resolve the Google Cloud SDK from the configured location or try to discover its
+   * location.
    * 
    * @return the location, or {@code null} if not found
    */
-  private static File resolveSdkLocation(Object path) {
-    if (path == null) {
-      IPreferenceStore preferences = PreferenceInitializer.getPreferenceStore();
-      path = preferences.getString(PreferenceConstants.CLOUDSDK_PATH);
+  private static File resolveSdkLocation() {
+    IPreferenceStore preferences = PreferenceInitializer.getPreferenceStore();
+    String value = preferences.getString(PreferenceConstants.CLOUDSDK_PATH);
+    if (value != null) {
+      return new File(value);
     }
-    if (path == null || (path instanceof String && ((String) path).isEmpty())) {
-      path = PathResolver.INSTANCE.getCloudSdkPath();
-    }
-    if (path instanceof String) {
-      return new File((String) path);
-    } else if (path instanceof Path) {
-      return ((Path) path).toFile();
-    } else if (path instanceof File) {
-      return (File) path;
+    Path discovered = PathResolver.INSTANCE.getCloudSdkPath();
+    if (discovered != null) {
+      return discovered.toFile();
     }
     return null;
   }

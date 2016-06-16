@@ -171,7 +171,7 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
   }
 
   private static String findCloudSdk() {
-    File location = CloudSdkProvider.getDefaultSdkLocation();
+    File location = CloudSdkProvider.getCloudSdkLocation();
     if (location == null) {
       throw new NullPointerException("Could not find Google Cloud SDK");
     }
