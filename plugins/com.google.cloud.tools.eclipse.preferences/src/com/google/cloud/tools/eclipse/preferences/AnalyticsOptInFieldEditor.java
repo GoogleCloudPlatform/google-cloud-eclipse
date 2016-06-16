@@ -33,7 +33,7 @@ public class AnalyticsOptInFieldEditor extends FieldEditor {
    */
   public AnalyticsOptInFieldEditor(String name, Composite parent) {
     group = new Group(parent, SWT.SHADOW_OUT);
-    group.setText(Messages.ANALYTICS_PREF_GROUP_TITLE);
+    group.setText(Messages.ANALYTICS_PREFERENCE_GROUP_TITLE);
 
     // Opt-in checkbox with a label
     optInStatusEditor = new BooleanFieldEditor(name, Messages.ANALYTICS_OPT_IN_TEXT, group);
