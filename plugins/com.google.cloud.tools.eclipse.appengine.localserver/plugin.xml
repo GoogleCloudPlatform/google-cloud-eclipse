@@ -21,6 +21,13 @@
          </moduleType>
       </runtimeType>
    </extension>
+
+   <extension point="org.eclipse.jst.server.core.runtimeClasspathProviders">
+      <runtimeClasspathProvider
+            class="org.eclipse.jst.server.generic.core.internal.GenericServerRuntimeTargetHandler"
+            id="com.google.cloud.tools.eclipse.gcloud.runtimeClasspathProvider"
+            runtimeTypeIds="com.google.cloud.tools.eclipse.gcloud.*" />
+   </extension>
    
    <extension point="org.eclipse.wst.common.project.facet.core.runtimes">
       <runtime-component-type id="com.google.cloud.tools.eclipse.gcloud" />
@@ -49,17 +56,6 @@
             runtime-component="com.google.cloud.tools.eclipse.gcloud"
             runtimeTypeId="com.google.cloud.tools.eclipse.gcloud.runtime"
             version="0.1.0" />
-   </extension>
-
-   <extension point="org.eclipse.wst.server.ui.wizardFragments">
-      <fragment
-            class="org.eclipse.jst.server.generic.ui.internal.GenericServerRuntimeWizardFragment"
-            id="org.eclipse.jst.server.generic.runtime"
-            typeIds="com.google.cloud.tools.eclipse.gcloud.runtime" />
-      <fragment
-            class="org.eclipse.jst.server.generic.ui.internal.GenericServerWizardFragment"
-            id="org.eclipse.jst.server.generic.server"
-            typeIds="com.google.cloud.tools.eclipse.gcloud.server" />
    </extension>
 
    <extension point="org.eclipse.wst.server.ui.serverImages">
