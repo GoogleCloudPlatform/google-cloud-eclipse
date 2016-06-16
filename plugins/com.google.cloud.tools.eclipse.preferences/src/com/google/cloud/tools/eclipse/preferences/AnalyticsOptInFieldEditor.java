@@ -36,8 +36,7 @@ public class AnalyticsOptInFieldEditor extends FieldEditor {
     group.setText(Messages.ANALYTICS_PREF_GROUP_TITLE);
 
     // Opt-in checkbox with a label
-    optInStatusEditor =
-        new BooleanFieldEditor(name, Messages.ANALYTICS_OPT_IN_TEXT, group);
+    optInStatusEditor = new BooleanFieldEditor(name, Messages.ANALYTICS_OPT_IN_TEXT, group);
 
     // The privacy policy disclaimer with a clickable link
     Link link = new Link(group, SWT.NONE);
