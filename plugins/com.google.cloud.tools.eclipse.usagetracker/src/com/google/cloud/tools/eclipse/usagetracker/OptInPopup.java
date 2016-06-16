@@ -81,7 +81,6 @@ class OptInDialog extends Dialog {
   @Override
   protected void handleShellCloseEvent() {
     super.handleShellCloseEvent();
-    // TODO: determine if we conclusively opt out.
     AnalyticsPingManager.registerOptInStatus(false);
   }
 }
