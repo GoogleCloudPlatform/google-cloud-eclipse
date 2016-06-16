@@ -21,13 +21,6 @@
          </moduleType>
       </runtimeType>
    </extension>
-
-   <extension point="org.eclipse.jst.server.core.runtimeClasspathProviders">
-      <runtimeClasspathProvider
-            class="org.eclipse.jst.server.generic.core.internal.GenericServerRuntimeTargetHandler"
-            id="com.google.cloud.tools.eclipse.gcloud.runtimeClasspathProvider"
-            runtimeTypeIds="com.google.cloud.tools.eclipse.gcloud.*" />
-   </extension>
    
    <extension point="org.eclipse.wst.common.project.facet.core.runtimes">
       <runtime-component-type id="com.google.cloud.tools.eclipse.gcloud" />
