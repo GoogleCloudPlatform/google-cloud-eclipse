@@ -21,25 +21,6 @@
          </moduleType>
       </runtimeType>
    </extension>
-   
-   <extension point="org.eclipse.wst.server.core.serverTypes">
-      <serverType
-            hasConfiguration="false"
-            behaviourClass="org.eclipse.jst.server.generic.core.internal.ExternalServerBehaviour"
-            class="org.eclipse.jst.server.generic.core.internal.GenericServer"
-            description="App Engine server that delegates to gcloud (GSF)"
-            id="com.google.cloud.tools.eclipse.gcloud.server"
-            initialState="stopped"
-            launchModes="run,debug"
-            launchConfigId="org.eclipse.jst.server.generic.core.ExternalLaunchConfigurationType"
-            name="%gsfServerTypeName"
-            runtime="true"
-            runtimeTypeId="com.google.cloud.tools.eclipse.gcloud.runtime"
-            startBeforePublish="true"
-            startTimeout="120000"
-            stopTimeout="15000">
-      </serverType>
-   </extension>
 
    <extension point="org.eclipse.jst.server.core.runtimeClasspathProviders">
       <runtimeClasspathProvider
@@ -280,7 +261,7 @@
     </extension>
     <extension point="org.eclipse.wst.server.core.runtimeTypes">
       <runtimeType
-            class="com.google.cloud.tools.eclipse.appengine.localserver.runtime.AppToolsRuntime"
+            class="com.google.cloud.tools.eclipse.appengine.localserver.server.AppToolsRuntime"
             description="%runtimeTypeDescription"
             id="com.google.cloud.tools.eclipse.runtime.id2"
             name="%apptoolsRuntimeTypeName"
