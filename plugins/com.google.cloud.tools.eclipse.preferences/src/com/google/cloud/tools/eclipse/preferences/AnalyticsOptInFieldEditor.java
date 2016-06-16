@@ -33,15 +33,15 @@ public class AnalyticsOptInFieldEditor extends FieldEditor {
    */
   public AnalyticsOptInFieldEditor(String name, Composite parent) {
     group = new Group(parent, SWT.SHADOW_OUT);
-    group.setText(Messages.FIELD_EDITOR_ANALYTICS_GROUP_TITLE);
+    group.setText(Messages.ANALYTICS_PREF_GROUP_TITLE);
 
     // Opt-in checkbox with a label
     optInStatusEditor =
-        new BooleanFieldEditor(name, Messages.FIELD_EDITOR_ANALYTICS_OPT_IN_TEXT, group);
+        new BooleanFieldEditor(name, Messages.ANALYTICS_OPT_IN_TEXT, group);
 
     // The privacy policy disclaimer with a clickable link
     Link link = new Link(group, SWT.NONE);
-    link.setText(Messages.FIELD_EDITOR_ANALYTICS_DISCLAIMER);
+    link.setText(Messages.ANALYTICS_DISCLAIMER);
     link.addSelectionListener(new SelectionAdapter() {
       @Override
       public void widgetSelected(SelectionEvent event) {

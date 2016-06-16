@@ -4,9 +4,9 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
   private static final String BUNDLE_NAME = "com.google.cloud.tools.eclipse.preferences.messages";
-  public static String FIELD_EDITOR_ANALYTICS_DISCLAIMER;
-  public static String FIELD_EDITOR_ANALYTICS_GROUP_TITLE;
-  public static String FIELD_EDITOR_ANALYTICS_OPT_IN_TEXT;
+  public static String ANALYTICS_DISCLAIMER;
+  public static String ANALYTICS_PREF_GROUP_TITLE;
+  public static String ANALYTICS_OPT_IN_TEXT;
   public static String GOOGLE_PRIVACY_POLICY_URL;
   static {
     NLS.initializeMessages(BUNDLE_NAME, Messages.class);
