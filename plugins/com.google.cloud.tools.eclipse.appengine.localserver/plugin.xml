@@ -4,6 +4,14 @@
   http://git.eclipse.org/c/servertools/webtools.servertools.git/ -->
 <plugin>
 
+   <extension point="org.eclipse.wst.server.ui.serverImages">
+      <image
+            id="com.google.cloud.tools.eclipse.gcloud.serverImage"
+            icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gcp-16x16.png"
+            typeIds="com.google.cloud.tools.eclipse.gcloud.server,com.google.cloud.tools.eclipse.gcloud.runtime,com.google.cloud.tools.eclipse.appengine.localserver.server.id">
+      </image>
+   </extension>
+
    <!-- Generic Server Framework server and runtime -->
    
    <extension point="org.eclipse.wst.server.core.runtimeTypes">
@@ -56,14 +64,6 @@
             runtime-component="com.google.cloud.tools.eclipse.gcloud"
             runtimeTypeId="com.google.cloud.tools.eclipse.gcloud.runtime"
             version="0.1.0" />
-   </extension>
-
-   <extension point="org.eclipse.wst.server.ui.serverImages">
-      <image
-            id="com.google.cloud.tools.eclipse.gcloud.serverImage"
-            icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gcp-16x16.png"
-            typeIds="com.google.cloud.tools.eclipse.gcloud.server,com.google.cloud.tools.eclipse.gcloud.runtime,com.google.cloud.tools.eclipse.appengine.localserver.server.id">
-      </image>
    </extension>
 
    <extension point="org.eclipse.jst.server.generic.core.serverdefinition">
