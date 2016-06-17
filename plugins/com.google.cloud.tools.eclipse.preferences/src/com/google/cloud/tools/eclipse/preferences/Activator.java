@@ -14,7 +14,8 @@ public class Activator extends AbstractUIPlugin {
 
   public static final String PLUGIN_ID = "com.google.cloud.tools.eclipse.preferences";
 
-  private ScopedPreferenceStore preferenceStore;
+  private static final ScopedPreferenceStore preferenceStore =
+      new ScopedPreferenceStore(ConfigurationScope.INSTANCE, PLUGIN_ID);
 
   // The shared instance
   private static Activator plugin;
@@ -56,10 +57,6 @@ public class Activator extends AbstractUIPlugin {
    */
   @Override
   public IPreferenceStore getPreferenceStore() {
-    if (preferenceStore == null) {
-      preferenceStore =
-          new ScopedPreferenceStore(ConfigurationScope.INSTANCE, getBundle().getSymbolicName());
-    }
     return preferenceStore;
   }
 }

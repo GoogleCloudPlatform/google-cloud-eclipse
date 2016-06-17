@@ -180,8 +180,11 @@ public class AnalyticsPingManager {
   public static void showOptInDialog() {
     if (!hasUserOptedIn() && !hasUserRegisteredOptInStatus()) {
       IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-      Shell shell = window != null ? window.getShell() : null;
-      new OptInDialog(shell).open();
+      if (window != null) {
+        new OptInDialog(window.getShell()).open();
+      } else {
+        logger.log(Level.WARNING, "No active workbench window found.");
+      }
     }
   }
 
