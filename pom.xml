@@ -28,6 +28,7 @@
     <module>plugins/com.google.cloud.tools.eclipse.usagetracker</module>
     <module>plugins/com.google.cloud.tools.eclipse.usagetracker.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.test.dependencies</module>
+    <module>plugins/com.google.cloud.tools.eclipse.javax.annotations</module>
   </modules>
 
   <properties>
