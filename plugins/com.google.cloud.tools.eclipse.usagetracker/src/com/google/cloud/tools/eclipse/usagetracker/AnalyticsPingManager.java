@@ -5,6 +5,8 @@ import com.google.common.annotations.VisibleForTesting;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.ConfigurationScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -82,6 +84,13 @@ public class AnalyticsPingManager {
     return false;
   }
 
+  static void registerOptInStatus(boolean optedIn) {
+    IEclipsePreferences prefs = ConfigurationScope.INSTANCE.getNode(ANALYTICS_PREFERENCE_QUALIFIER);
+    if (prefs != null) {
+      prefs.putBoolean(PREF_KEY_USER_CONSENT, false);
+    }
+  }
+
   public static void sendPing(String eventType, String eventName,
       String metadataKey, String metadataValue) {
     if (Platform.inDevelopmentMode() || !isTrackingIdDefined() || !hasUserOptedIn()) {
@@ -153,5 +162,16 @@ public class AnalyticsPingManager {
       }
     }
     return resultBuilder.toString();
+  }
+
+  public static void showOptInDialog() {
+    IEclipsePreferences prefs = ConfigurationScope.INSTANCE.getNode(ANALYTICS_PREFERENCE_QUALIFIER);
+    if (prefs != null) {
+      // Show the dialog only if the user has never agreed or declined the opt-in reporting.
+      if (prefs.get(PREF_KEY_USER_CONSENT, null) == null) {
+        Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+        new OptInDialog(shell).open();
+      }
+    }
   }
 }

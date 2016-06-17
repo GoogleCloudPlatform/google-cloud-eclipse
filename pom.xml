@@ -24,6 +24,7 @@
     <module>plugins/com.google.cloud.tools.eclipse.appengine.newproject.maven.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.ui</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.ui.test</module>
+    <module>plugins/com.google.cloud.tools.eclipse.preferences</module>
     <module>plugins/com.google.cloud.tools.eclipse.usagetracker</module>
     <module>plugins/com.google.cloud.tools.eclipse.usagetracker.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.test.dependencies</module>
