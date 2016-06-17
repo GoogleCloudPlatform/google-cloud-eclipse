@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.sdk.internal;
 
 import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.eclipse.sdk.CloudSdkProvider;
 import com.google.common.collect.MapMaker;
 
 import org.eclipse.e4.core.contexts.ContextFunction;
@@ -35,11 +36,15 @@ import java.util.Set;
  * that we recompute the CloudSdk instance on path change.
  */
 public class CloudSdkContextFunction extends ContextFunction {
+
+  @SuppressWarnings("restriction")
+  private static final Object NOT_A_VALUE = IInjector.NOT_A_VALUE;
+
   /**
    * A list of referenced IEclipseContexts that must be updated on preference change.
    */
   private static final Set<IEclipseContext> referencedContexts =
-      Collections.newSetFromMap(new MapMaker().weakKeys().makeMap());
+      Collections.newSetFromMap(new MapMaker().weakKeys().<IEclipseContext, Boolean>makeMap());
 
   /** Cloud SDK location has been changed: trigger any necessary updates */
   static void sdkPathChanged(String newPath) {
@@ -56,14 +61,14 @@ public class CloudSdkContextFunction extends ContextFunction {
     File location = toFile(path);
     CloudSdk.Builder builder = CloudSdkProvider.createBuilder(location);
     if (builder == null) {
-      return IInjector.NOT_A_VALUE;
+      return NOT_A_VALUE;
     }
     CloudSdk instance = builder.build();
     try {
       instance.validate();
       return instance;
     } catch (AppEngineException e) {
-      return IInjector.NOT_A_VALUE;
+      return NOT_A_VALUE;
     }
   }
 

@@ -9,11 +9,4 @@
             name="Google Cloud SDK">
       </page>
    </extension>
-   <extension
-         point="org.eclipse.core.runtime.preferences">
-      <initializer
-            class="com.google.cloud.tools.eclipse.sdk.internal.ui.preferences.PreferenceInitializer">
-      </initializer>
-   </extension>
-
 </plugin>

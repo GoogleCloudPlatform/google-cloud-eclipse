@@ -20,15 +20,35 @@ import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.eclipse.sdk.internal.PreferenceConstants;
 import com.google.cloud.tools.eclipse.sdk.internal.PreferenceInitializer;
 
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.DirectoryFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.MessageFormat;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class CloudSdkPreferencePage extends FieldEditorPreferencePage
     implements IWorkbenchPreferencePage {
+  public static final String PAGE_ID = "com.google.cloud.tools.eclipse.sdk.ui.preferences.cloudsdk";
+  private final static Logger logger =
+      Logger.getLogger(CloudSdkPreferencePage.class.getName());
+
   private IWorkbench workbench;
   private DirectoryFieldEditor sdkLocation;
 
@@ -38,41 +58,89 @@ public class CloudSdkPreferencePage extends FieldEditorPreferencePage
     setDescription("Google Cloud SDK Preferences");
   }
 
+
+  @Override
+  protected Control createContents(Composite parent) {
+    Composite contents = new Composite(parent, SWT.NONE);
+    Link instructions = new Link(contents, SWT.WRAP);
+    instructions.setText(
+        "Google Cloud Tools for Eclipse requires the <a href=\"https://cloud.google.com/sdk/\">Google Cloud SDK</a>. "
+            + "Please <a href=\"https://cloud.google.com/sdk/\">install the SDK</a> "
+            + "and configure its location below.");
+    instructions.addSelectionListener(new SelectionAdapter() {
+      @Override
+      public void widgetSelected(SelectionEvent e) {
+        openUrl(e.text);
+      }
+    });
+
+    super.createContents(contents);
+    GridLayoutFactory.swtDefaults().generateLayout(contents);
+    return contents;
+  }
+
+
+  protected void openUrl(String urlText) {
+    try {
+      URL url = new URL(urlText);
+      IWorkbenchBrowserSupport browserSupport = workbench.getBrowserSupport();
+      browserSupport.createBrowser(null).openURL(url);
+    } catch (MalformedURLException mue) {
+      logger.log(Level.WARNING, "URL malformed", mue);
+    } catch (PartInitException pie) {
+      logger.log(Level.WARNING, "Cannot launch a browser", pie);
+    }
+  }
+
+
   /**
    * Creates the field editors. Field editors are abstractions of the common GUI blocks needed to
    * manipulate various types of preferences. Each field editor knows how to save and restore
    * itself.
    */
   public void createFieldEditors() {
-    // need to override checkState() instead of doCheckState() as checkState()
-    // wipes out any warning messages
-    sdkLocation = new DirectoryFieldEditor(PreferenceConstants.CLOUDSDK_PATH, "&SDK location:",
-        getFieldEditorParent()) {
-      @Override
-      protected boolean checkState() {
-        if (!super.checkState()) {
-          return false;
-        }
-        setMessage(null);
-        return getStringValue().isEmpty() || validateSdk(new File(getStringValue()));
-      }
-    };
-    sdkLocation.setEmptyStringAllowed(true);
+    sdkLocation = new CloudSdkDirectoryFieldEditor(PreferenceConstants.CLOUDSDK_PATH,
+        "&SDK location:", getFieldEditorParent());
     addField(sdkLocation);
   }
 
   protected boolean validateSdk(File location) {
     try {
-      new CloudSdk.Builder().sdkPath(location).build().validate();
+      CloudSdk sdk = new CloudSdk.Builder().sdkPath(location).build();
+      sdk.validate();
     } catch (AppEngineException e) {
       // accept a seemingly invalid location in case the SDK organization
       // has changed and the CloudSdk#validate() code is out of date
-      setMessage("No SDK found!", WARNING);
+      setMessage(MessageFormat.format("No SDK found: {0}", e.getMessage()), WARNING);
     }
     return true;
   }
 
   public void init(IWorkbench workbench) {
     this.workbench = workbench;
+  }
+
+  /**
+   * Check that the location holds a SDK; perform check on per keystroke to avoid wiping out the
+   * validation messages
+   */
+  class CloudSdkDirectoryFieldEditor extends DirectoryFieldEditor {
+    public CloudSdkDirectoryFieldEditor(String name, String labelText, Composite parent) {
+      init(name, labelText);
+      setErrorMessage(JFaceResources.getString("DirectoryFieldEditor.errorMessage"));//$NON-NLS-1$
+      setChangeButtonText(JFaceResources.getString("openBrowse"));//$NON-NLS-1$
+      setEmptyStringAllowed(true);
+      setValidateStrategy(VALIDATE_ON_KEY_STROKE);
+      createControl(parent);
+    }
+
+    @Override
+    protected boolean doCheckState() {
+      if (!super.doCheckState()) {
+        return false;
+      }
+      // setMessage(null);
+      return getStringValue().isEmpty() || validateSdk(new File(getStringValue()));
+    }
   }
 }

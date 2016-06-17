@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.sdk.internal;
+package com.google.cloud.tools.eclipse.sdk;
 
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.PathResolver;
+import com.google.cloud.tools.eclipse.sdk.internal.PreferenceConstants;
+import com.google.cloud.tools.eclipse.sdk.internal.PreferenceInitializer;
 
 import org.eclipse.e4.core.contexts.ContextFunction;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -78,7 +80,7 @@ public class CloudSdkProvider extends ContextFunction {
   private static File resolveSdkLocation() {
     IPreferenceStore preferences = PreferenceInitializer.getPreferenceStore();
     String value = preferences.getString(PreferenceConstants.CLOUDSDK_PATH);
-    if (value != null) {
+    if (value != null && !value.isEmpty()) {
       return new File(value);
     }
     Path discovered = PathResolver.INSTANCE.getCloudSdkPath();
@@ -87,4 +89,7 @@ public class CloudSdkProvider extends ContextFunction {
     }
     return null;
   }
+
+  // should not be instantiated
+  private CloudSdkProvider() {}
 }

@@ -1,7 +1,5 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
-import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkProvider;
-
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -37,7 +35,6 @@ import org.eclipse.wst.server.core.IRuntimeWorkingCopy;
 import org.eclipse.wst.server.core.ServerCore;
 import org.eclipse.wst.server.core.internal.RuntimeWorkingCopy;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -131,7 +128,7 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
     facetedProject.installProjectFacet(WebFacetUtils.WEB_25, webModel, monitor);
   }
 
-  static void installAppEngineRuntime(IFacetedProject project, IProgressMonitor monitor)
+  void installAppEngineRuntime(IFacetedProject project, IProgressMonitor monitor)
       throws CoreException {
     Set<IProjectFacetVersion> facets = new HashSet<>();
     facets.add(WebFacetUtils.WEB_25);
@@ -155,7 +152,7 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
       RuntimeWorkingCopy mutator = (RuntimeWorkingCopy) appEngineRuntimeWorkingCopy;
       Map<String, String> map = mutator.getAttribute(
           "generic_server_instance_properties", new HashMap<>());
-      map.put("cloudSdkDirectory", findCloudSdk());
+      map.put("cloudSdkDirectory", config.getCloudSdkLocation().toString());
       mutator.setAttribute("generic_server_instance_properties", map);
       
       org.eclipse.wst.server.core.IRuntime appEngineServerRuntime 
@@ -168,14 +165,6 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
       project.addTargetedRuntime(appEngineFacetRuntime, monitor);
       project.setPrimaryRuntime(appEngineFacetRuntime, monitor);
     }
-  }
-
-  private static String findCloudSdk() {
-    File location = CloudSdkProvider.getCloudSdkLocation();
-    if (location == null) {
-      throw new NullPointerException("Could not find Google Cloud SDK");
-    }
-    return location.toString();
   }
 
 }

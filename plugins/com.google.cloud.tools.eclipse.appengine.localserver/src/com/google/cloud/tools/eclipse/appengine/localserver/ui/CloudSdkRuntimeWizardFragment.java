@@ -15,7 +15,7 @@
 package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
 import com.google.cloud.tools.eclipse.appengine.localserver.runtime.CloudSdkRuntime;
-import com.google.cloud.tools.eclipse.sdk.internal.CloudSdkProvider;
+import com.google.cloud.tools.eclipse.sdk.CloudSdkProvider;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
