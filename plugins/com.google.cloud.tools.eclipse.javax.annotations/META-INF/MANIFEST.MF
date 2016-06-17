@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: javax.annotation fixes
+Bundle-SymbolicName: com.google.cloud.tools.eclipse.javax.annotations
+Bundle-Version: 0.1.0.qualifier
+Bundle-Vendor: Google, Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Require-Bundle: system.bundle
+Export-Package: javax.annotation;jsr305=split;version="3.0.2";uses:="javax.annotation.meta",
+ javax.annotation.concurrent;jsr305=split;version="3.0.2",
+ javax.annotation.meta;jsr305=split;version="3.0.2"
+Bundle-ClassPath: lib/org.jsr-305_3.0.1.jar
+Import-Package: javax.annotation;version="3.0.2",
+ javax.annotation.concurrent;version="3.0.2",
+ javax.annotation.meta;version="3.0.2"
