@@ -9,7 +9,7 @@ generate a build into `gcp-repo/target/repository`.
 # Development
 
 This project is built using _Maven Tycho_, a set of extensions to
-Maven for building Eclipse bundles and features. 
+Maven for building Eclipse bundles and features.
 
 ## Requirements
 
@@ -34,7 +34,7 @@ The plugin is built using Maven/Tycho and targeted to Java 7.
 
 ### Changing the Eclipse Platform compilation and testing target
 
-By default, the build is targeted against Eclipse Mars / 4.5. 
+By default, the build is targeted against Eclipse Mars / 4.5.
 You can explicitly set the `eclipse.target` property to `mars` (4.5)
 or `neon` (4.6).
 ```
@@ -186,7 +186,14 @@ described below.
 
 # Updating Target Platforms
 
-### Updating the `.target` files
+Eclipse and Tycho use _target platforms_ to specify the set of
+bundles to be built against.  A target platform is usually encoded
+as a `.target` file.  Eclipse does not know how to retrieve
+retrieving bundles from Maven-style repositories, so we have had
+to complicate our process by separately assembling a target platform
+specifically for Eclipse.
+
+## Updating the `.target` files
 
 We use _Target Platform_ files (`.target`) to collect the dependencies used
 for the build.  These targets specify exact versions of the bundles and
@@ -194,15 +201,15 @@ features being built against.  We currently maintain two target platforms,
 targeting the latest version of the current and previous release trains.
 This is currently:
 
-  - Eclipse Mars (4.5 SR2): [`eclipse/mars/gcp-eclipse-mars.target`](eclipse/mars/gcp-eclipse-mars.target) 
+  - Eclipse Mars (4.5 SR2): [`eclipse/mars/gcp-eclipse-mars.target`](eclipse/mars/gcp-eclipse-mars.target)
   - Eclipse Neon (4.6 RC3): [`eclipse/neon/gcp-eclipse-neon.target`](eclipse/neon/gcp-eclipse-neon.target)
 
 These `.target` files are generated and *should not be manually updated*.
-Updating `.target` files directly becomes a chore once it has more than a 
-couple of dependencies.  We instead generate these `.target`s from 
+Updating `.target` files directly becomes a chore once it has more than a
+couple of dependencies.  We instead generate these `.target`s from
 _Target Platform Definition_ `.tpd` files.
 The `.tpd` files use a simple DSL to specify the bundles and features,
-and the location of the repositories containing them.   
+and the location of the repositories containing them.
 The `.tpd` files are processed using the [TPD Editor](https://github.com/mbarbero/fr.obeo.releng.targetplatform)
 which resolves the specified dependencies and creates a `.target`.
 The process is:
@@ -217,13 +224,13 @@ The process is:
        Bundles are specified using their OSGi Bundle Symbolic Name (e.g.,
        `org.eclipse.core.runtime`).
        Features are specified using their Feature ID suffixed with `.feature.group`
-       (e.g., `org.eclipse.rcp.feature.group`).  
+       (e.g., `org.eclipse.rcp.feature.group`).
   4. Right-click in the editor and choose _Create Target Definition File_
      to update the corresponding .target file.
 
 Both the `.tpd` and `.target` files should be committed.
 
-### Updating the Eclipse IDE Target Platforms
+## Updating the Eclipse IDE Target Platforms
 
 The IDE Target Platform, defined in `eclipse/ide-target-platform`,
 may need to be updated when dependencies are added or removed.  The
@@ -236,4 +243,39 @@ the identifiers are not p2 identifiers, and so features do not
 require the `.feature.group` suffix.
 
 
+# Hacks and Workarounds
+
+## com.google.cloud.tools.eclipse.javax.annotation
+
+This bundle exists to work around a special case of a [split
+package](http://osgiwiki.org/wiki/Split_Packages) where we have
+3 bundles providing `javax.annotation`:
+
+  1. The bundle `org.eclipse.osgi` (aka `system.bundle`) represents
+     the Equinox OSGi framework and which exposes the standard JRE
+     packages other than `java.*`.  JavaSE 1.7 and JavaSE 1.8 provide
+     `javax.annotation`.  This package has version 0.0.0 (all packages
+     from the JVM are 0.0.0 currently)
+  2. The bundle `javax.annotation` from Eclipse, required as Java 5
+     didn’t provide `javax.annotation.PostConstruct` and
+     `javax.annotation.PreDestroy`.  This package is versioned 1.2.
+     This bundle's classes should be subset of the JRE's `javax.annotation`.
+  3. The bundle `org.jsr_305`, which appears to be from FindBugs.
+     This bundle exposes a set of source analysis annotations that have
+     never been formally approved.  This package is versioned 3.0.1.
+
+This new bundle exists to subsume the `org.jsr-305` and `javax.annotation`
+bundles. The bundle:
+
+  - explicitly pulls in the JRE's `javax.annotation` classes (via
+    `Require-Bundle: system.bundle`) to ensure that any classes it
+    provides are first looked up and resolved in the JRE;
+  - includes the FindBugs `org.jsr-305` jar and exports its packages
+    with a bumped version number of 3.0.1.9999 to ensure it 'wins' over
+    the FindBugs org.jsr-306 bundle;
+  - imports its own packages so that if it has won, its other packages win too.
+
+This bundle can be removed when (a) JSR-305 is officially accepted
+into the JRE, or (b) `org.jsr-305` bundle exports `javax.annotation`
+with modifiers so that consumers can specifically target its annotations.
 
