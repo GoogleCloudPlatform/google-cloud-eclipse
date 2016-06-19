@@ -120,7 +120,7 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
     Set<IRuntime> runtimes = RuntimeManager.getRuntimes(facets);
     project.setTargetedRuntimes(runtimes, monitor);
     
-    if (RuntimeManager.isRuntimeDefined("App Engine")) {
+    if (RuntimeManager.isRuntimeDefined("App Engine (Generic Server Framework)")) {
       IRuntime appEngineRuntime = RuntimeManager.getRuntime("App Engine");
       project.setPrimaryRuntime(appEngineRuntime, monitor);
     } else { // Create a new App Engine runtime
