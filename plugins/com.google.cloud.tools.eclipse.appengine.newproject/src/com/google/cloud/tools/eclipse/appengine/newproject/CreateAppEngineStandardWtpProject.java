@@ -49,6 +49,8 @@ import org.eclipse.wst.server.core.internal.RuntimeWorkingCopy;
 @SuppressWarnings("restriction")
 class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
   
+  private static final String DEFAULT_RUNTIME_NAME = "App Engine (Generic Server Framework)";
+
   private final AppEngineStandardProjectConfig config;
   private final IAdaptable uiInfoAdapter;
 
@@ -120,14 +122,14 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
     Set<IRuntime> runtimes = RuntimeManager.getRuntimes(facets);
     project.setTargetedRuntimes(runtimes, monitor);
     
-    if (RuntimeManager.isRuntimeDefined("App Engine (Generic Server Framework)")) {
-      IRuntime appEngineRuntime = RuntimeManager.getRuntime("App Engine");
+    if (RuntimeManager.isRuntimeDefined(DEFAULT_RUNTIME_NAME)) {
+      IRuntime appEngineRuntime = RuntimeManager.getRuntime(DEFAULT_RUNTIME_NAME);
       project.setPrimaryRuntime(appEngineRuntime, monitor);
     } else { // Create a new App Engine runtime
       IRuntimeType appEngineRuntimeType =
           ServerCore.findRuntimeType("com.google.cloud.tools.eclipse.gcloud.runtime");
       if (appEngineRuntimeType == null) {
-        throw new NullPointerException("Could not find App Engine runtime type");
+        throw new NullPointerException("Could not find " + DEFAULT_RUNTIME_NAME + " runtime type");
       }
 
       IRuntimeWorkingCopy appEngineRuntimeWorkingCopy 
