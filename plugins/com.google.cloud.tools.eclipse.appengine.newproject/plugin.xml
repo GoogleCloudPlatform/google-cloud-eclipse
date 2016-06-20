@@ -44,7 +44,7 @@
       <delegate class="com.google.cloud.tools.eclipse.appengine.newproject.FacetInstallDelegate"/>
     </action>
     <action facet="com.google.cloud.tools.eclipse.appengine.facet" type="UNINSTALL">
-      <delegate class="com.google.cloud.tools.eclipse.appengine.newproject.FacetInstallDelegate"/>
+      <delegate class="com.google.cloud.tools.eclipse.appengine.newproject.FacetUninstallDelegate"/>
     </action>
   </extension>
   
