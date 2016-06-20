@@ -16,6 +16,7 @@
     <module>features/com.google.licenses.apache_v2</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.localserver</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.localserver.test</module>
+    <module>plugins/com.google.cloud.tools.eclipse.appengine.facets</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.whitelist</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.whitelist.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.newproject</module>
