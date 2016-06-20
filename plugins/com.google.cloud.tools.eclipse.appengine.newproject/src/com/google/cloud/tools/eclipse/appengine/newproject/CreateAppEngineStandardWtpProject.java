@@ -49,7 +49,8 @@ import org.eclipse.wst.server.core.internal.RuntimeWorkingCopy;
 @SuppressWarnings("restriction")
 class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
   
-  private static final String DEFAULT_RUNTIME_NAME = "App Engine (Generic Server Framework)";
+  private static final String DEFAULT_RUNTIME_ID = "com.google.cloud.tools.eclipse.runtime.custom";
+  private static final String DEFAULT_RUNTIME_NAME = "App Engine (Custom)";
 
   private final AppEngineStandardProjectConfig config;
   private final IAdaptable uiInfoAdapter;
@@ -127,7 +128,7 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
       project.setPrimaryRuntime(appEngineRuntime, monitor);
     } else { // Create a new App Engine runtime
       IRuntimeType appEngineRuntimeType =
-          ServerCore.findRuntimeType("com.google.cloud.tools.eclipse.gcloud.runtime");
+          ServerCore.findRuntimeType(DEFAULT_RUNTIME_ID);
       if (appEngineRuntimeType == null) {
         throw new NullPointerException("Could not find " + DEFAULT_RUNTIME_NAME + " runtime type");
       }
