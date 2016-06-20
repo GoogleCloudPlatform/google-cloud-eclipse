@@ -4,8 +4,8 @@
    
    <extension point="org.eclipse.wst.common.project.facet.core.facets">        
     <project-facet id="com.google.cloud.tools.eclipse.appengine.facet">
-       <label>Google Cloud Tools for Eclipse App Engine Facet</label>
-       <description>Supply Basic App Engine Classes</description>
+       <label>%facetName</label>
+       <description>%facetDescription</description>
     </project-facet>
     <project-facet-version facet="com.google.cloud.tools.eclipse.appengine.facet" version="1">
        <constraint>
