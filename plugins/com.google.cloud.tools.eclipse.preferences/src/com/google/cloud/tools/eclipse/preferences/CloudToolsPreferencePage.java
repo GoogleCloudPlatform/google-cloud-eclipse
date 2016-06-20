@@ -19,6 +19,8 @@ public class CloudToolsPreferencePage extends FieldEditorPreferencePage
     implements IWorkbenchPreferencePage {
 
   public static final String ANALYTICS_OPT_IN = "ANALYTICS_OPT_IN";
+  public static final String ANALYTICS_OPT_IN_REGISTERED = "ANALYTICS_OPT_IN_REGISTERED";
+  public static final String ANALYTICS_CLIENT_ID = "ANALYTICS_CLIENT_ID";
 
   public CloudToolsPreferencePage() {
     super(GRID);

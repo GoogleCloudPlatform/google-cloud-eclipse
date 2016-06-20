@@ -52,7 +52,6 @@ import org.eclipse.wst.server.core.internal.RuntimeWorkingCopy;
 class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
   
   private static final String APPENGINE_FACET_ID = "com.google.cloud.tools.eclipse.appengine.facet";
-
   private static final String DEFAULT_RUNTIME_NAME = "App Engine (Generic Server Framework)";
 
   private final AppEngineStandardProjectConfig config;

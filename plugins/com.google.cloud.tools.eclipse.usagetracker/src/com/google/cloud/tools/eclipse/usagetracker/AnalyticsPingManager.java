@@ -1,12 +1,15 @@
 package com.google.cloud.tools.eclipse.usagetracker;
 
+import com.google.cloud.tools.eclipse.preferences.Activator;
+import com.google.cloud.tools.eclipse.preferences.CloudToolsPreferencePage;
 import com.google.common.annotations.VisibleForTesting;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.ConfigurationScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.osgi.service.prefs.BackingStoreException;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -19,17 +22,17 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Provides methods that report plugin-specific events to Analytics.
  */
 public class AnalyticsPingManager {
 
-  public static final String ANALYTICS_PREFERENCE_QUALIFIER =
-      AnalyticsPingManager.class.getPackage().getName();
+  private static final Logger logger = Logger.getLogger(AnalyticsPingManager.class.getName());
 
-  private static final String PREF_KEY_USER_CONSENT = "pref_key_user_consent";
-  private static final String PREF_KEY_CLIENT_ID = "pref_key_client_id";
+  private static final String PREFERENCES_PLUGIN_ID = Activator.PLUGIN_ID;
 
   private static final String ANALYTICS_COLLECTION_URL = "https://ssl.google-analytics.com/collect";
 
@@ -64,30 +67,38 @@ public class AnalyticsPingManager {
   private static String getAnonymizedClientId() {
     String clientId = "0";  // For the extremely unlikely event of getNode() failure.
 
-    IEclipsePreferences prefs = ConfigurationScope.INSTANCE.getNode(ANALYTICS_PREFERENCE_QUALIFIER);
+    IEclipsePreferences prefs = ConfigurationScope.INSTANCE.getNode(PREFERENCES_PLUGIN_ID);
     if (prefs != null) {
-      clientId = prefs.get(PREF_KEY_CLIENT_ID, null);
+      clientId = prefs.get(CloudToolsPreferencePage.ANALYTICS_CLIENT_ID, null);
       if (clientId == null) {
-        // Use the current time in milliseconds as a client ID and store it back to the preferences.
         clientId = UUID.randomUUID().toString();
-        prefs.put(PREF_KEY_CLIENT_ID, clientId);
+        prefs.put(CloudToolsPreferencePage.ANALYTICS_CLIENT_ID, clientId);
+        flushPreferences(prefs);
       }
     }
     return clientId;
   }
 
   private static boolean hasUserOptedIn() {
-    IEclipsePreferences prefs = ConfigurationScope.INSTANCE.getNode(ANALYTICS_PREFERENCE_QUALIFIER);
-    if (prefs != null) {
-      return prefs.getBoolean(PREF_KEY_USER_CONSENT, false);
-    }
-    return false;
+    return getBooleanPreference(CloudToolsPreferencePage.ANALYTICS_OPT_IN, false);
+  }
+
+  /**
+   * Returns true if a user has made a decision on the opt-in status via the opt-in dialog.
+   * Currently, dismissal of the dialog without explicit opt-in/opt-out decision counts as
+   * opting out. (Therefore, this method essentially returns true if the opt-in dialog was ever
+   * presented before.)
+   */
+  private static boolean hasUserRegisteredOptInStatus() {
+    return getBooleanPreference(CloudToolsPreferencePage.ANALYTICS_OPT_IN_REGISTERED, false);
   }
 
   static void registerOptInStatus(boolean optedIn) {
-    IEclipsePreferences prefs = ConfigurationScope.INSTANCE.getNode(ANALYTICS_PREFERENCE_QUALIFIER);
+    IEclipsePreferences prefs = ConfigurationScope.INSTANCE.getNode(PREFERENCES_PLUGIN_ID);
     if (prefs != null) {
-      prefs.putBoolean(PREF_KEY_USER_CONSENT, false);
+      prefs.putBoolean(CloudToolsPreferencePage.ANALYTICS_OPT_IN, optedIn);
+      prefs.putBoolean(CloudToolsPreferencePage.ANALYTICS_OPT_IN_REGISTERED, true);
+      flushPreferences(prefs);
     }
   }
 
@@ -136,6 +147,7 @@ public class AnalyticsPingManager {
       }
     } catch (IOException ex) {
       // Don't try to recover or retry.
+      logger.log(Level.WARNING, "Failed to send a POST request", ex);
     } finally {
       if (connection != null) {
         connection.disconnect();
@@ -165,13 +177,29 @@ public class AnalyticsPingManager {
   }
 
   public static void showOptInDialog() {
-    IEclipsePreferences prefs = ConfigurationScope.INSTANCE.getNode(ANALYTICS_PREFERENCE_QUALIFIER);
-    if (prefs != null) {
-      // Show the dialog only if the user has never agreed or declined the opt-in reporting.
-      if (prefs.get(PREF_KEY_USER_CONSENT, null) == null) {
-        Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-        new OptInDialog(shell).open();
+    if (!hasUserOptedIn() && !hasUserRegisteredOptInStatus()) {
+      IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+      if (window != null) {
+        new OptInDialog(window.getShell()).open();
+      } else {
+        logger.log(Level.WARNING, "No active workbench window found.");
       }
     }
+  }
+
+  private static void flushPreferences(IEclipsePreferences prefs) {
+    try {
+      prefs.flush();
+    } catch (BackingStoreException bse) {
+      logger.log(Level.WARNING, bse.getMessage(), bse);
+    }
+  }
+
+  private static boolean getBooleanPreference(String key, boolean defaultValue) {
+    IEclipsePreferences prefs = ConfigurationScope.INSTANCE.getNode(PREFERENCES_PLUGIN_ID);
+    if (prefs != null) {
+      return prefs.getBoolean(key, defaultValue);
+    }
+    return defaultValue;
   }
 }
