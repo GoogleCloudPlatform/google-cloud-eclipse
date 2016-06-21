@@ -31,6 +31,8 @@ import org.eclipse.ui.ide.undo.CreateProjectOperation;
 import org.eclipse.wst.common.frameworks.datamodel.DataModelFactory;
 import org.eclipse.wst.common.frameworks.datamodel.IDataModel;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
+import org.eclipse.wst.common.project.facet.core.IFacetedProjectWorkingCopy;
+import org.eclipse.wst.common.project.facet.core.IProjectFacet;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.common.project.facet.core.runtime.IRuntime;
@@ -46,6 +48,7 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
   
   private static final String DEFAULT_RUNTIME_ID = "com.google.cloud.tools.eclipse.runtime.custom";
   private static final String DEFAULT_RUNTIME_NAME = "App Engine (Custom)";
+  private static final String APPENGINE_FACET_ID = "com.google.cloud.tools.eclipse.appengine.facet";
 
   private final AppEngineStandardProjectConfig config;
   private final IAdaptable uiInfoAdapter;
@@ -83,12 +86,23 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
       CodeTemplates.materialize(newProject, config, progress.newChild(20));
       
       installWebFacet(facetedProject, progress.newChild(10));
+      
+      // must happen after other two facets because the appengine facet requires them
+      installAppEngineFacet(facetedProject, progress.newChild(10));
       installAppEngineRuntime(facetedProject, progress.newChild(20));
     } catch (ExecutionException ex) {
       throw new InvocationTargetException(ex, ex.getMessage());
     } finally {
       progress.done();
     }
+  }
+
+  private void installAppEngineFacet(IFacetedProject facetedProject, IProgressMonitor monitor) throws CoreException {
+    IFacetedProjectWorkingCopy workingCopy = facetedProject.createWorkingCopy();
+    IProjectFacet appEngineFacet = ProjectFacetsManager.getProjectFacet(APPENGINE_FACET_ID);
+    IProjectFacetVersion appEngineFacetVersion = appEngineFacet.getVersion("1");
+    workingCopy.addProjectFacet(appEngineFacetVersion);
+    workingCopy.commitChanges(monitor);
   }
 
   static void installJavaFacet(IFacetedProject facetedProject, IProgressMonitor monitor) 

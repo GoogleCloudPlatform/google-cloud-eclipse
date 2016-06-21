@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension point="org.eclipse.ui.newWizards">
-      <wizard
+  <extension point="org.eclipse.ui.newWizards">
+     <wizard
             id="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineStandard"
             name="%wizard.name"
             class="com.google.cloud.tools.eclipse.appengine.newproject.StandardProjectWizard"
@@ -18,10 +18,10 @@
              id="com.google.cloud.tools.eclipse.appengine.ui.AppEngineKeyword"/>
          <keywordReference 
              id="com.google.cloud.tools.eclipse.appengine.ui.AppSpaceEngineKeyword"/>
-      </wizard>
-      <category 
-          id="com.google.cloud.tools.eclipse.appengine.wizards" 
-          name="%gcp.category" />
-   </extension>
+    </wizard>
+    <category 
+        id="com.google.cloud.tools.eclipse.appengine.wizards" 
+        name="%gcp.category" />
+  </extension>
 
 </plugin>
