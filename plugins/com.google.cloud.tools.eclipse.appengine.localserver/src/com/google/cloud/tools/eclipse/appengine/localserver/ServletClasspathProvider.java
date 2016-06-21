@@ -1,7 +1,6 @@
 package com.google.cloud.tools.eclipse.appengine.localserver;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
@@ -16,7 +15,6 @@ import com.google.cloud.tools.appengine.cloudsdk.PathResolver;
 public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
 
   public ServletClasspathProvider() {
-    System.err.println("setting up classpath provider");
   }
 
   @Override
@@ -26,7 +24,10 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
 
   @Override
   public IClasspathEntry[] resolveClasspathContainer(IRuntime runtime) {
-    String cloudSdkPath = PathResolver.INSTANCE.getCloudSdkPath().toString();
+    java.nio.file.Path cloudSdkPath = PathResolver.INSTANCE.getCloudSdkPath();
+    if (cloudSdkPath == null) {
+      return new IClasspathEntry[0];
+    };
     String servletJar = cloudSdkPath + "/platform/google_appengine/google/appengine/tools/java/lib/shared/servlet-api.jar";
     String jspJar = cloudSdkPath + "/platform/google_appengine/google/appengine/tools/java/lib/shared/jsp-api.jar";
     IClasspathEntry servletEntry = JavaCore.newLibraryEntry(new Path(servletJar), null, null);
