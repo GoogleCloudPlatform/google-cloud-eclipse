@@ -29,12 +29,14 @@ import java.io.File;
 
 /**
  * Similar to {@link CloudSdkProvider} but will open the Cloud SDK preference page if no location is
- * found.
+ * found. Must be called from the SWT UI Thread.
  */
 public class CloudSdkPrompter {
 
   /**
    * Return the Cloud SDK. If it cannot be found, prompt the user to specify its location.
+   * <p>
+   * <b>Must be called from the SWT UI Thread.</b>
    * 
    * @param shellProvider an object that knows how to obtain a shell; may be {@code null}
    * @return the Cloud SDK, or {@code null} if unspecified
@@ -52,6 +54,8 @@ public class CloudSdkPrompter {
 
   /**
    * Return the Cloud SDK location. If it cannot be found, prompt the user to specify its location.
+   * <p>
+   * <b>Must be called from the SWT UI Thread.</b>
    * 
    * @param shellProvider an object that knows how to obtain a shell; may be {@code null}
    * @return the Cloud SDK location, or {@code null} if unspecified
