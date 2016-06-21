@@ -21,22 +21,6 @@ public class XmlTest {
     factory.setNamespaceAware(true);
     builder = factory.newDocumentBuilder();
   }
-	
-  @Test
-  public void testGcpXml() throws Exception {
-    // test fails if malformed
-    Document doc = builder.parse(
-        new File("../com.google.cloud.tools.eclipse.appengine.localserver/gcp.xml"));
-    Assert.assertEquals("project", doc.getDocumentElement().getNodeName());
-  }
-    
-  @Test
-  public void testGcloudServerDef() throws Exception {
-    // test fails if malformed
-    Document doc = builder.parse(
-        new File("../com.google.cloud.tools.eclipse.appengine.localserver/gcloud_serverdef.xml"));
-    Assert.assertEquals("ServerRuntime", doc.getDocumentElement().getLocalName());
-  }
     
   @Test
   public void testPluginXml() throws Exception {
