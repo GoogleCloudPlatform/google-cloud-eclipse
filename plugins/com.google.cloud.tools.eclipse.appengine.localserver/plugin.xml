@@ -8,7 +8,7 @@
       <image
             id="com.google.cloud.tools.eclipse.gcloud.serverImage"
             icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gcp-16x16.png"
-            typeIds="com.google.cloud.tools.eclipse.runtime.apptools,com.google.cloud.tools.eclipse.gcloud.server,com.google.cloud.tools.eclipse.gcloud.runtime,com.google.cloud.tools.eclipse.appengine.localserver.server.apptools">
+            typeIds="com.google.cloud.tools.eclipse.runtime.apptools,com.google.cloud.tools.eclipse.gcloud.server,com.google.cloud.tools.eclipse.appengine.localserver.server.apptools">
       </image>
    </extension>
 
