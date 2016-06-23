@@ -14,16 +14,20 @@
     Ensure Equinox Declarative Services is included for
     CloudSdkContextFunctionTest
   -->
-  <plugin>
-    <groupId>org.eclipse.tycho</groupId>
-    <artifactId>tycho-surefire-plugin</artifactId>
-    <configuration>
-      <dependencies>
-        <dependency>
-          <type>p2-installable-unit</type>
-          <artifactId>org.eclipse.equinox.ds</artifactId>
-        </dependency>
-      </dependencies>
-    </configuration>
-  </plugin>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-surefire-plugin</artifactId>
+        <configuration>
+          <dependencies>
+            <dependency>
+              <type>p2-installable-unit</type>
+              <artifactId>org.eclipse.equinox.ds</artifactId>
+            </dependency>
+          </dependencies>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>
