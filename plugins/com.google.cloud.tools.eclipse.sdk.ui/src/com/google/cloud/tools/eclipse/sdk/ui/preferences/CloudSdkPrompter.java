@@ -22,6 +22,7 @@ import com.google.cloud.tools.eclipse.sdk.CloudSdkProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.window.IShellProvider;
+import org.eclipse.jface.window.SameShellProvider;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
@@ -40,7 +41,21 @@ public class CloudSdkPrompter {
    * <b>Must be called from the SWT UI Thread.</b>
    * </p>
    * 
-   * @param shellProvider an object that knows how to obtain a shell; may be {@code null}
+   * @param shell the parent shell for any dialogs; may be {@code null}
+   * @return the Cloud SDK, or {@code null} if unspecified
+   */
+  public static CloudSdk getCloudSdk(Shell shell) {
+    return getCloudSdk(new SameShellProvider(shell));
+  }
+
+  /**
+   * Return the Cloud SDK. If it cannot be found, prompt the user to specify its location.
+   * 
+   * <p>
+   * <b>Must be called from the SWT UI Thread.</b>
+   * </p>
+   * 
+   * @param shellProvider an object to provide the parent shell for any dialogs; may be {@code null}
    * @return the Cloud SDK, or {@code null} if unspecified
    */
   public static CloudSdk getCloudSdk(IShellProvider shellProvider) {
@@ -61,7 +76,21 @@ public class CloudSdkPrompter {
    * <b>Must be called from the SWT UI Thread.</b>
    * </p>
    * 
-   * @param shellProvider an object that knows how to obtain a shell; may be {@code null}
+   * @param shell the parent shell for any dialogs; may be {@code null}
+   * @return the Cloud SDK location, or {@code null} if unspecified
+   */
+  public static File getCloudSdkLocation(Shell shell) {
+    return getCloudSdkLocation(new SameShellProvider(shell));
+  }
+
+  /**
+   * Return the Cloud SDK location. If it cannot be found, prompt the user to specify its location.
+   * 
+   * <p>
+   * <b>Must be called from the SWT UI Thread.</b>
+   * </p>
+   * 
+   * @param shellProvider an object to provide the parent shell for any dialogs; may be {@code null}
    * @return the Cloud SDK location, or {@code null} if unspecified
    */
   public static File getCloudSdkLocation(IShellProvider shellProvider) {

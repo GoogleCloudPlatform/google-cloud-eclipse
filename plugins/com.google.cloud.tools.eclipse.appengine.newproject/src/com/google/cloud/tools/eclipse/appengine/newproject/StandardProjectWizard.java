@@ -7,7 +7,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.window.SameShellProvider;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
@@ -36,7 +35,7 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
   @Override
   public boolean performFinish() {
     if (config.getCloudSdkLocation() == null) {
-      File location = CloudSdkPrompter.getCloudSdkLocation(new SameShellProvider(getShell()));
+      File location = CloudSdkPrompter.getCloudSdkLocation(getShell());
       if (location == null) {
         return false;
       }
