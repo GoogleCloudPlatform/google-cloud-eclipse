@@ -70,8 +70,8 @@
     <dependency>
       <!-- bundle: com.google.cloud.tools.app.lib -->
       <groupId>com.google.cloud.tools</groupId>
-      <artifactId>app-tools-lib-for-java</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
+      <artifactId>appengine-plugins-core</artifactId>
+      <version>0.1.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <!-- bundle: com.google.guava -->
