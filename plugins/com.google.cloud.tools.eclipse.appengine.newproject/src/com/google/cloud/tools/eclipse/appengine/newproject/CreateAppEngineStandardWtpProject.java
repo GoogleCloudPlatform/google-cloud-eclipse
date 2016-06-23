@@ -33,7 +33,6 @@ import org.eclipse.wst.common.project.facet.core.runtime.RuntimeManager;
 import org.eclipse.wst.server.core.IRuntimeType;
 import org.eclipse.wst.server.core.IRuntimeWorkingCopy;
 import org.eclipse.wst.server.core.ServerCore;
-import org.eclipse.wst.server.core.internal.RuntimeWorkingCopy;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
@@ -47,11 +46,11 @@ import java.util.Set;
 /**
 * Utility to make a new Eclipse project with the App Engine Standard facets in the workspace.  
 */
-@SuppressWarnings("restriction")
 class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
   
+  private static final String DEFAULT_RUNTIME_ID = "com.google.cloud.tools.eclipse.runtime.custom";
+  private static final String DEFAULT_RUNTIME_NAME = "App Engine (Custom)";
   private static final String APPENGINE_FACET_ID = "com.google.cloud.tools.eclipse.appengine.facet";
-  private static final String DEFAULT_RUNTIME_NAME = "App Engine (Generic Server Framework)";
 
   private final AppEngineStandardProjectConfig config;
   private final IAdaptable uiInfoAdapter;
@@ -140,23 +139,13 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
       project.setPrimaryRuntime(appEngineRuntime, monitor);
     } else { // Create a new App Engine runtime
       IRuntimeType appEngineRuntimeType =
-          ServerCore.findRuntimeType("com.google.cloud.tools.eclipse.gcloud.runtime");
+          ServerCore.findRuntimeType(DEFAULT_RUNTIME_ID);
       if (appEngineRuntimeType == null) {
         throw new NullPointerException("Could not find " + DEFAULT_RUNTIME_NAME + " runtime type");
       }
 
       IRuntimeWorkingCopy appEngineRuntimeWorkingCopy 
           = appEngineRuntimeType.createRuntime(null, monitor);
-      
-      // Need to use internal API to access Generic Server Framework properties
-      RuntimeWorkingCopy mutator = (RuntimeWorkingCopy) appEngineRuntimeWorkingCopy;
-      Map<String, String> map = mutator.getAttribute(
-          "generic_server_instance_properties", new HashMap<>());
-      if (config.getCloudSdkLocation() != null) {
-        map.put("cloudSdkDirectory", config.getCloudSdkLocation().toString());
-      }
-      mutator.setAttribute("generic_server_instance_properties", map);
-      
       org.eclipse.wst.server.core.IRuntime appEngineServerRuntime 
           = appEngineRuntimeWorkingCopy.save(true, monitor);
       IRuntime appEngineFacetRuntime = FacetUtil.getRuntime(appEngineServerRuntime);
@@ -168,5 +157,4 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
       project.setPrimaryRuntime(appEngineFacetRuntime, monitor);
     }
   }
-
 }

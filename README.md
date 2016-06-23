@@ -195,7 +195,7 @@ targeting the latest version of the current and previous release trains.
 This is currently:
 
   - Eclipse Mars (4.5 SR2): [`eclipse/mars/gcp-eclipse-mars.target`](eclipse/mars/gcp-eclipse-mars.target) 
-  - Eclipse Neon (4.6 RC3): [`eclipse/neon/gcp-eclipse-neon.target`](eclipse/neon/gcp-eclipse-neon.target)
+  - Eclipse Neon (4.6): [`eclipse/neon/gcp-eclipse-neon.target`](eclipse/neon/gcp-eclipse-neon.target)
 
 These `.target` files are generated and *should not be manually updated*.
 Updating `.target` files directly becomes a chore once it has more than a 
