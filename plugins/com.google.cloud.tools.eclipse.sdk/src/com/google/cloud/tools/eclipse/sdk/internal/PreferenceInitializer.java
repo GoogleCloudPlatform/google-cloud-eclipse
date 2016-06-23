@@ -22,6 +22,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
     return new ScopedPreferenceStore(InstanceScope.INSTANCE, BUNDLEID);
   }
 
+  @Override
   public void initializeDefaultPreferences() {
     Path path = PathResolver.INSTANCE.getCloudSdkPath();
     DefaultScope.INSTANCE.getNode(BUNDLEID).put(PreferenceConstants.CLOUDSDK_PATH,

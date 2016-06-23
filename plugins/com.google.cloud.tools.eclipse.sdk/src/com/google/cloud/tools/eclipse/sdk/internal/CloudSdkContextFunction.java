@@ -29,6 +29,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * Provides a {@link CloudSdk} instance suitable for injection using the E4 dependency injection
@@ -36,6 +37,7 @@ import java.util.Set;
  * that we recompute the CloudSdk instance on path change.
  */
 public class CloudSdkContextFunction extends ContextFunction {
+  private static final Logger logger = Logger.getLogger(CloudSdkContextFunction.class.getName());
 
   @SuppressWarnings("restriction")
   private static final Object NOT_A_VALUE = IInjector.NOT_A_VALUE;
@@ -46,7 +48,7 @@ public class CloudSdkContextFunction extends ContextFunction {
   private static final Set<IEclipseContext> referencedContexts =
       Collections.newSetFromMap(new MapMaker().weakKeys().<IEclipseContext, Boolean>makeMap());
 
-  /** Cloud SDK location has been changed: trigger any necessary updates */
+  /** Cloud SDK location has been changed: trigger any necessary updates. */
   static void sdkPathChanged(String newPath) {
     for (IEclipseContext context : referencedContexts) {
       context.set(PreferenceConstants.CLOUDSDK_PATH, newPath);
@@ -67,7 +69,7 @@ public class CloudSdkContextFunction extends ContextFunction {
     try {
       instance.validate();
       return instance;
-    } catch (AppEngineException e) {
+    } catch (AppEngineException ex) {
       return NOT_A_VALUE;
     }
   }
@@ -79,6 +81,8 @@ public class CloudSdkContextFunction extends ContextFunction {
       return ((Path) path).toFile();
     } else if (path instanceof String) {
       return new File((String) path);
+    } else if (path != null) {
+      logger.warning("Unsupported object for " + PreferenceConstants.CLOUDSDK_PATH + ": " + path);
     }
     return null;
   }

@@ -35,8 +35,10 @@ public class CloudSdkPrompter {
 
   /**
    * Return the Cloud SDK. If it cannot be found, prompt the user to specify its location.
+   * 
    * <p>
    * <b>Must be called from the SWT UI Thread.</b>
+   * </p>
    * 
    * @param shellProvider an object that knows how to obtain a shell; may be {@code null}
    * @return the Cloud SDK, or {@code null} if unspecified
@@ -46,7 +48,7 @@ public class CloudSdkPrompter {
     if (sdk != null) {
       return sdk;
     }
-    if (promptForSDK(shellProvider)) {
+    if (promptForSdk(shellProvider)) {
       return CloudSdkProvider.getCloudSdk();
     }
     return null;
@@ -54,8 +56,10 @@ public class CloudSdkPrompter {
 
   /**
    * Return the Cloud SDK location. If it cannot be found, prompt the user to specify its location.
+   * 
    * <p>
    * <b>Must be called from the SWT UI Thread.</b>
+   * </p>
    * 
    * @param shellProvider an object that knows how to obtain a shell; may be {@code null}
    * @return the Cloud SDK location, or {@code null} if unspecified
@@ -65,7 +69,7 @@ public class CloudSdkPrompter {
     if (location != null) {
       return location;
     }
-    if (promptForSDK(shellProvider)) {
+    if (promptForSdk(shellProvider)) {
       return CloudSdkProvider.getCloudSdkLocation();
     }
     return null;
@@ -78,9 +82,9 @@ public class CloudSdkPrompter {
    * @param shellProvider an object that knows how to obtain a shell; may be {@code null}
    * @return true if the user appears to have configured the SDK, or false if the SDK is unavailable
    */
-  static boolean promptForSDK(IShellProvider shellProvider) {
-    if (!MessageDialog.openQuestion(null, "Google Cloud SDK Not Configured",
-        "The Google Cloud SDK cannot be found!  Would you like to configure it now?")) {
+  static boolean promptForSdk(IShellProvider shellProvider) {
+    if (!MessageDialog.openQuestion(null, SdkUiMessages.CloudSdkPrompter_0,
+        SdkUiMessages.CloudSdkPrompter_1)) {
       return false;
     }
     Shell shell = shellProvider == null ? null : shellProvider.getShell();

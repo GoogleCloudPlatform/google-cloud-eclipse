@@ -6,7 +6,7 @@
       <page
             id="com.google.cloud.tools.eclipse.sdk.ui.preferences.cloudsdk"
             class="com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPreferencePage"
-            name="Google Cloud SDK">
+            name="%page.name">
       </page>
    </extension>
 </plugin>

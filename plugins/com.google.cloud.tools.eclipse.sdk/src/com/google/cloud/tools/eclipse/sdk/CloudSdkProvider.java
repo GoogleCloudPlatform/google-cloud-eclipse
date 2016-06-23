@@ -28,8 +28,8 @@ import java.io.File;
 import java.nio.file.Path;
 
 /**
- * Utililty to find the Google Cloud SDK either at locations configured by the user or otherwise
- * found in standard locations on the system.
+ * Utililty to find the Google Cloud SDK either at locations configured by the user or in standard
+ * locations on the system.
  */
 public class CloudSdkProvider extends ContextFunction {
 

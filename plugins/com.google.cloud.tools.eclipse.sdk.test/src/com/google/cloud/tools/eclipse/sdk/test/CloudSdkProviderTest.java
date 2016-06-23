@@ -20,7 +20,7 @@ import java.nio.file.Path;
 
 public class CloudSdkProviderTest {
 
-  /** Verify that the preference overrides PathResolver */
+  /** Verify that the preference overrides PathResolver. */
   @Test
   public void testSetPreferenceInvalid() throws Exception {
     // A path that almost certainly does not contain the SDK
@@ -34,7 +34,7 @@ public class CloudSdkProviderTest {
     try {
       instance.validate();
       fail("root directory should not be a valid location");
-    } catch (AppEngineException e) {
+    } catch (AppEngineException ex) {
       // ignore
     }
   }
@@ -46,18 +46,18 @@ public class CloudSdkProviderTest {
     for (int i = 0; i < paramters.length; i++) {
       parameterTypes[i] = paramters[i] == null ? Object.class : paramters[i].getClass();
     }
-    Method m = object.getClass().getDeclaredMethod(methodName, parameterTypes);
-    m.setAccessible(true);
-    return returnType.cast(m.invoke(object, paramters));
+    Method method = object.getClass().getDeclaredMethod(methodName, parameterTypes);
+    method.setAccessible(true);
+    return returnType.cast(method.invoke(object, paramters));
   }
 
 
   private <T> T getField(Object object, String fieldName, Class<T> fieldType)
       throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException,
       SecurityException {
-    Field f = object.getClass().getDeclaredField(fieldName);
-    f.setAccessible(true);
-    return fieldType.cast(f.get(object));
+    Field field = object.getClass().getDeclaredField(fieldName);
+    field.setAccessible(true);
+    return fieldType.cast(field.get(object));
   }
 
 

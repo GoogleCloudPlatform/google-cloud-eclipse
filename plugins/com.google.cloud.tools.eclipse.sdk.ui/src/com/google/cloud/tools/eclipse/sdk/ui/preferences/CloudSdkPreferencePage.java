@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.google.cloud.tools.eclipse.sdk.ui.preferences;
 
 import com.google.cloud.tools.appengine.api.AppEngineException;
@@ -27,7 +28,6 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Link;
@@ -45,17 +45,18 @@ import java.util.logging.Logger;
 
 public class CloudSdkPreferencePage extends FieldEditorPreferencePage
     implements IWorkbenchPreferencePage {
-  public static final String PAGE_ID = "com.google.cloud.tools.eclipse.sdk.ui.preferences.cloudsdk";
-  private final static Logger logger =
+  public static final String PAGE_ID = SdkUiMessages.CloudSdkPreferencePage_0;
+  private static final Logger logger =
       Logger.getLogger(CloudSdkPreferencePage.class.getName());
 
   private IWorkbench workbench;
   private DirectoryFieldEditor sdkLocation;
 
+  /** Create new page. */
   public CloudSdkPreferencePage() {
     super(GRID);
     setPreferenceStore(PreferenceInitializer.getPreferenceStore());
-    setDescription("Google Cloud SDK Preferences");
+    setDescription(SdkUiMessages.CloudSdkPreferencePage_1);
   }
 
 
@@ -64,13 +65,11 @@ public class CloudSdkPreferencePage extends FieldEditorPreferencePage
     Composite contents = new Composite(parent, SWT.NONE);
     Link instructions = new Link(contents, SWT.WRAP);
     instructions.setText(
-        "Google Cloud Tools for Eclipse requires the <a href=\"https://cloud.google.com/sdk/\">Google Cloud SDK</a>. "
-            + "Please <a href=\"https://cloud.google.com/sdk/\">install the SDK</a> "
-            + "and configure its location below.");
+        SdkUiMessages.CloudSdkPreferencePage_2);
     instructions.addSelectionListener(new SelectionAdapter() {
       @Override
-      public void widgetSelected(SelectionEvent e) {
-        openUrl(e.text);
+      public void widgetSelected(SelectionEvent event) {
+        openUrl(event.text);
       }
     });
 
@@ -86,9 +85,9 @@ public class CloudSdkPreferencePage extends FieldEditorPreferencePage
       IWorkbenchBrowserSupport browserSupport = workbench.getBrowserSupport();
       browserSupport.createBrowser(null).openURL(url);
     } catch (MalformedURLException mue) {
-      logger.log(Level.WARNING, "URL malformed", mue);
+      logger.log(Level.WARNING, SdkUiMessages.CloudSdkPreferencePage_3, mue);
     } catch (PartInitException pie) {
-      logger.log(Level.WARNING, "Cannot launch a browser", pie);
+      logger.log(Level.WARNING, SdkUiMessages.CloudSdkPreferencePage_4, pie);
     }
   }
 
@@ -100,7 +99,7 @@ public class CloudSdkPreferencePage extends FieldEditorPreferencePage
    */
   public void createFieldEditors() {
     sdkLocation = new CloudSdkDirectoryFieldEditor(PreferenceConstants.CLOUDSDK_PATH,
-        "&SDK location:", getFieldEditorParent());
+        SdkUiMessages.CloudSdkPreferencePage_5, getFieldEditorParent());
     addField(sdkLocation);
   }
 
@@ -108,10 +107,11 @@ public class CloudSdkPreferencePage extends FieldEditorPreferencePage
     try {
       CloudSdk sdk = new CloudSdk.Builder().sdkPath(location).build();
       sdk.validate();
-    } catch (AppEngineException e) {
+    } catch (AppEngineException ex) {
       // accept a seemingly invalid location in case the SDK organization
       // has changed and the CloudSdk#validate() code is out of date
-      setMessage(MessageFormat.format("No SDK found: {0}", e.getMessage()), WARNING);
+      setMessage(MessageFormat.format(SdkUiMessages.CloudSdkPreferencePage_6, ex.getMessage()),
+          WARNING);
     }
     return true;
   }
@@ -121,11 +121,13 @@ public class CloudSdkPreferencePage extends FieldEditorPreferencePage
   }
 
   /**
-   * Check that the location holds a SDK; perform check on per keystroke to avoid wiping out the
-   * validation messages
+   * Check that the location holds a SDK. Uses {@code VALIDATE_ON_KEY_STROKE} to perform check on
+   * per keystroke to avoid wiping out the validation messages.
    */
   class CloudSdkDirectoryFieldEditor extends DirectoryFieldEditor {
     public CloudSdkDirectoryFieldEditor(String name, String labelText, Composite parent) {
+      // unfortunately cannot use super(name,labelText,parent) as must specify the
+      // validateStrategy before the createControl()
       init(name, labelText);
       setErrorMessage(JFaceResources.getString("DirectoryFieldEditor.errorMessage"));//$NON-NLS-1$
       setChangeButtonText(JFaceResources.getString("openBrowse"));//$NON-NLS-1$
@@ -136,10 +138,10 @@ public class CloudSdkPreferencePage extends FieldEditorPreferencePage
 
     @Override
     protected boolean doCheckState() {
+      setMessage(null);
       if (!super.doCheckState()) {
         return false;
       }
-      // setMessage(null);
       return getStringValue().isEmpty() || validateSdk(new File(getStringValue()));
     }
   }
