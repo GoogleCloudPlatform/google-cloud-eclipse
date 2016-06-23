@@ -40,7 +40,7 @@ public class CloudSdkContextFunction extends ContextFunction {
   private static final Logger logger = Logger.getLogger(CloudSdkContextFunction.class.getName());
 
   @SuppressWarnings("restriction")
-  private static final Object NOT_A_VALUE = IInjector.NOT_A_VALUE;
+  static final Object NOT_A_VALUE = IInjector.NOT_A_VALUE;
 
   /**
    * A list of referenced IEclipseContexts that must be updated on preference change.
