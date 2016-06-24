@@ -60,6 +60,8 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
     properties.put("application-id", appId);
 
     ProjectImportConfiguration importConfiguration = new ProjectImportConfiguration();
+    String packageName = this.packageName == null || this.packageName.isEmpty() 
+        ? groupId : this.packageName;
     List<IProject> archetypeProjects = projectConfigurationManager.createArchetypeProjects(location,
         getArchetypeDescriptor(), groupId, artifactId, version, packageName, properties,
         importConfiguration, progress.newChild(60));

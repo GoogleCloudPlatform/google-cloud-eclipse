@@ -166,7 +166,7 @@ described below.
      Then click the _Add..._ button and choose _Directory_.
   4. On the _Add Directory_ dialog, use _Browse..._ to navigate to
      the `eclipse/ide-target-platform/target/repository` directory
-     found within this source repository and click _Finish_ to return to
+     found within this source repository and click _OK_ to return to
      the _Target Content_ page.
   5. Click _Finish_ to complete the target platform creation.
   6. Select your new Target Platform with a checkbox, and then click _OK_.

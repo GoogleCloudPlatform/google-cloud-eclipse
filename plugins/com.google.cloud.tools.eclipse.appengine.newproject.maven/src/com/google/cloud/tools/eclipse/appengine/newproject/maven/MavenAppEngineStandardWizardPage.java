@@ -148,7 +148,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage implements IWiz
 
     // Java package name
     Label packageNameLabel = new Label(container, SWT.NONE);
-    packageNameLabel.setText("Java package:");
+    packageNameLabel.setText("Java package: (defaults to group ID)");
     javaPackageField = new Text(container, SWT.BORDER);
     GridData javaPackagePosition = new GridData(GridData.FILL_HORIZONTAL);
     javaPackagePosition.horizontalSpan = 2;
