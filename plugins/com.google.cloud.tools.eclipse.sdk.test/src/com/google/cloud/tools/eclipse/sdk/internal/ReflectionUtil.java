@@ -35,15 +35,15 @@ public class ReflectionUtil {
 
   /** Invoke a method. */
   public static <T> T invoke(Object object, String methodName, Class<T> returnType,
-      Object... paramters)
+      Object... parameters)
       throws NoSuchMethodException, SecurityException, IllegalAccessException,
       IllegalArgumentException, InvocationTargetException {
-    Class<?>[] parameterTypes = new Class<?>[paramters.length];
-    for (int i = 0; i < paramters.length; i++) {
-      parameterTypes[i] = paramters[i] == null ? Object.class : paramters[i].getClass();
+    Class<?>[] parameterTypes = new Class<?>[parameters.length];
+    for (int i = 0; i < parameters.length; i++) {
+      parameterTypes[i] = parameters[i] == null ? Object.class : parameters[i].getClass();
     }
     Method method = object.getClass().getDeclaredMethod(methodName, parameterTypes);
     method.setAccessible(true);
-    return returnType.cast(method.invoke(object, paramters));
+    return returnType.cast(method.invoke(object, parameters));
   }
 }

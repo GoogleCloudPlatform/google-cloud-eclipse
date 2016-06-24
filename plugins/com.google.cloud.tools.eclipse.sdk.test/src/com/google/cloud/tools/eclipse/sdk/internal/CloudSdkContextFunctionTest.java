@@ -33,7 +33,7 @@ import org.osgi.framework.FrameworkUtil;
 import java.nio.file.Path;
 
 public class CloudSdkContextFunctionTest {
-  IEclipseContext context;
+  private IEclipseContext context;
   private Path mockSdk;
 
   /** Set up. */
