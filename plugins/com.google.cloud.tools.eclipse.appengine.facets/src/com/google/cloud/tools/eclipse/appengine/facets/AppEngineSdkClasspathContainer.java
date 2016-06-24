@@ -1,4 +1,4 @@
-package com.google.cloud.tools.eclipse.appengine.sdk;
+package com.google.cloud.tools.eclipse.appengine.facets;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -8,14 +8,18 @@ import org.eclipse.jdt.core.JavaCore;
 
 import com.google.cloud.tools.appengine.cloudsdk.PathResolver;
 
-public final class AppEngineSDKClasspathContainer implements IClasspathContainer {
+public final class AppEngineSdkClasspathContainer implements IClasspathContainer {
 
+  // TODO should be changed once app-tools-lib can provide the directory
+  // https://github.com/GoogleCloudPlatform/app-tools-lib-for-java/issues/134
   private static final String SDK_JAR = "/platform/google_appengine/google/appengine/tools/java/lib/appengine-tools-api.jar";
   public static final String CONTAINER_ID = "AppEngineSDK";
 
+  private PathResolver pathResolver = PathResolver.INSTANCE;
+
   @Override
   public IPath getPath() {
-    return new Path(AppEngineSDKClasspathContainer.CONTAINER_ID);
+    return new Path(AppEngineSdkClasspathContainer.CONTAINER_ID);
   }
 
   @Override
@@ -30,7 +34,7 @@ public final class AppEngineSDKClasspathContainer implements IClasspathContainer
 
   @Override
   public IClasspathEntry[] getClasspathEntries() {
-    java.nio.file.Path cloudSdkPath = PathResolver.INSTANCE.getCloudSdkPath();
+    java.nio.file.Path cloudSdkPath = pathResolver.getCloudSdkPath();
     if (cloudSdkPath != null) {
       String appEngineToolsApiJar = cloudSdkPath + SDK_JAR;
       IClasspathEntry appEngineToolsEntry =
@@ -41,5 +45,10 @@ public final class AppEngineSDKClasspathContainer implements IClasspathContainer
     } else {
       return new IClasspathEntry[0];
     }
+  }
+
+  // Visible for testing
+  void setPathResolver(PathResolver pathResolver) {
+    this.pathResolver = pathResolver;
   }
 }

@@ -1,4 +1,4 @@
-package com.google.cloud.tools.eclipse.appengine.sdk;
+package com.google.cloud.tools.eclipse.appengine.facets;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -8,14 +8,14 @@ import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
-public class AppEngineSDKClasspathInitializer extends ClasspathContainerInitializer {
+public class AppEngineSdkClasspathInitializer extends ClasspathContainerInitializer {
 
   @Override
   public void initialize(final IPath containerPath, IJavaProject project) throws CoreException {
     if (containerPath.segmentCount() > 0 &&
-        containerPath.segment(0).equals(AppEngineSDKClasspathContainer.CONTAINER_ID)) {
-      IClasspathContainer container = new AppEngineSDKClasspathContainer();
-      JavaCore.setClasspathContainer(new Path(AppEngineSDKClasspathContainer.CONTAINER_ID),
+        containerPath.segment(0).equals(AppEngineSdkClasspathContainer.CONTAINER_ID)) {
+      IClasspathContainer container = new AppEngineSdkClasspathContainer();
+      JavaCore.setClasspathContainer(new Path(AppEngineSdkClasspathContainer.CONTAINER_ID),
                                      new IJavaProject[]{ project },
                                      new IClasspathContainer[]{ container },
                                      null /* progressMonitor */);

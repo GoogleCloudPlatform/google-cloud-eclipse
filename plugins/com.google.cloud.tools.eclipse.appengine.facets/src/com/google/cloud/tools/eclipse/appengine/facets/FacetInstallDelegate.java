@@ -10,8 +10,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.wst.common.project.facet.core.IDelegate;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 
-import com.google.cloud.tools.eclipse.appengine.sdk.AppEngineSDKClasspathContainer;
-
 public class FacetInstallDelegate implements IDelegate {
 
   @Override
@@ -24,7 +22,7 @@ public class FacetInstallDelegate implements IDelegate {
     IClasspathEntry[] newClasspath = new IClasspathEntry[rawClasspath.length + 1];
     System.arraycopy(rawClasspath, 0, newClasspath, 0, rawClasspath.length);
     newClasspath[newClasspath.length - 1] =
-        JavaCore.newContainerEntry(new Path(AppEngineSDKClasspathContainer.CONTAINER_ID));
+        JavaCore.newContainerEntry(new Path(AppEngineSdkClasspathContainer.CONTAINER_ID));
     javaProject.setRawClasspath(newClasspath, monitor);
   }
 
