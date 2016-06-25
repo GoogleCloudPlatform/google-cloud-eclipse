@@ -1,5 +1,7 @@
 package com.google.cloud.tools.eclipse.appengine.facets;
 
+import java.io.File;
+
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathContainer;
@@ -12,7 +14,7 @@ public final class AppEngineSdkClasspathContainer implements IClasspathContainer
 
   // TODO should be changed once app-tools-lib can provide the directory
   // https://github.com/GoogleCloudPlatform/app-tools-lib-for-java/issues/134
-  private static final String SDK_JAR = "/platform/google_appengine/google/appengine/tools/java/lib/appengine-tools-api.jar";
+  private static final String SDK_JAR = "platform/google_appengine/google/appengine/tools/java/lib/appengine-tools-api.jar";
   public static final String CONTAINER_ID = "AppEngineSDK";
 
   private PathResolver pathResolver = PathResolver.INSTANCE;
@@ -36,15 +38,17 @@ public final class AppEngineSdkClasspathContainer implements IClasspathContainer
   public IClasspathEntry[] getClasspathEntries() {
     java.nio.file.Path cloudSdkPath = pathResolver.getCloudSdkPath();
     if (cloudSdkPath != null) {
-      String appEngineToolsApiJar = cloudSdkPath + SDK_JAR;
-      IClasspathEntry appEngineToolsEntry =
-          JavaCore.newLibraryEntry(new Path(appEngineToolsApiJar),
-                                   null /* sourceAttachmentPath */,
-                                   null /* sourceAttachmentRootPath */);
-      return new IClasspathEntry[]{ appEngineToolsEntry };
-    } else {
-      return new IClasspathEntry[0];
+      File jarFile = cloudSdkPath.resolve(SDK_JAR).toFile();
+      if (jarFile.exists()) {
+        String appEngineToolsApiJar = jarFile.getPath();
+        IClasspathEntry appEngineToolsEntry =
+            JavaCore.newLibraryEntry(new Path(appEngineToolsApiJar),
+                                     null /* sourceAttachmentPath */,
+                                     null /* sourceAttachmentRootPath */);
+        return new IClasspathEntry[]{ appEngineToolsEntry };
+      }
     }
+    return new IClasspathEntry[0];
   }
 
   // Visible for testing
