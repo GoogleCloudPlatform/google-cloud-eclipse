@@ -1,9 +1,10 @@
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
 import java.io.File;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
@@ -81,11 +82,12 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
 
   /**
    * Starts the development server.
-   *
-   * @param runnables the path to directories that contain configuration files like appengine-web.xml
+   * @param runnables the path to configuration files and/or directories that contain configuration files 
    * @param stream the stream to send development server process output to
+   * @param mode the mode of the server launch defined by ILaunchManager - RUN_MODE or DEBUG_MODE
+   * @param debugPort the port to attach a debugger to if launch is in debug mode
    */
-  void startDevServer(List<File> runnables, MessageConsoleStream stream) {
+  void startDevServer(List<File> runnables, MessageConsoleStream stream, String mode, int debugPort) {
     setServerState(IServer.STATE_STARTING);
     LocalAppEngineOutputLineListener outputListener =
         new LocalAppEngineOutputLineListener(stream);
@@ -102,9 +104,20 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
     DefaultRunConfiguration devServerRunConfiguration = new DefaultRunConfiguration();
     devServerRunConfiguration.setAppYamls(runnables);
 
+    List<String> jvmFlags = new ArrayList<String>();
     // FIXME: workaround bug when running on a Java8 JVM
     // https://github.com/GoogleCloudPlatform/gcloud-eclipse-tools/issues/181
-    devServerRunConfiguration.setJvmFlags(Arrays.asList("-Dappengine.user.timezone=UTC"));
+    jvmFlags.add("-Dappengine.user.timezone=UTC");
+
+    if ((mode != null) && mode.equals(ILaunchManager.DEBUG_MODE)) {
+      if (debugPort <= 0 || debugPort > 65535) {
+        throw new IllegalArgumentException("Debug port is set to " + debugPort
+                                        + ", should be between 1-65535");
+      }
+      jvmFlags.add("-Xdebug");
+      jvmFlags.add("-Xrunjdwp:transport=dt_socket,server=n,suspend=y,quiet=y,address=" + debugPort);
+    }
+    devServerRunConfiguration.setJvmFlags(jvmFlags);
 
     // Run server
     try {
