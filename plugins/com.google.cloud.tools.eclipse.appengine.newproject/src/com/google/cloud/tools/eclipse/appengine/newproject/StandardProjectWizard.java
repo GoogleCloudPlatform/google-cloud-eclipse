@@ -1,5 +1,7 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
+import com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPrompter;
+
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -11,6 +13,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.ide.undo.WorkspaceUndoUtil;
 import org.eclipse.ui.statushandlers.StatusManager;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 
 public class StandardProjectWizard extends Wizard implements INewWizard {
@@ -31,6 +34,13 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
 
   @Override
   public boolean performFinish() {
+    if (config.getCloudSdkLocation() == null) {
+      File location = CloudSdkPrompter.getCloudSdkLocation(getShell());
+      if (location == null) {
+        return false;
+      }
+      config.setCloudSdkLocation(location);
+    }
     // todo is this the right time/place to grab these?
     config.setAppEngineProjectId(page.getAppEngineProjectId());
     config.setPackageName(page.getPackageName());

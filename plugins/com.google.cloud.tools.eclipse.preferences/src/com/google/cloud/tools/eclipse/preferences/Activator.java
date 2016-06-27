@@ -8,7 +8,7 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.osgi.framework.BundleContext;
 
 /**
- * The activator class controls the plug-in life cycle
+ * The activator class controls the plug-in life cycle.
  */
 public class Activator extends AbstractUIPlugin {
 
@@ -23,11 +23,13 @@ public class Activator extends AbstractUIPlugin {
   public Activator() {
   }
 
+  @Override
   public void start(BundleContext context) throws Exception {
     super.start(context);
     plugin = this;
   }
 
+  @Override
   public void stop(BundleContext context) throws Exception {
     plugin = null;
     super.stop(context);
@@ -49,7 +51,7 @@ public class Activator extends AbstractUIPlugin {
   }
 
   /**
-   * This methods is not supposed to be overridden, but we couldn't find any alternative
+   * This method is not supposed to be overridden, but we couldn't find any alternative
    * to replace the Instance-scoped {@link AbstractUIPlugin#preferenceStore} in the base
    * class with a Configuration-scoped {@link ScopedPreferenceStore}. As such, this class
    * defines its own {@link preferenceStore} field that is distinct from the field by the

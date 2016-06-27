@@ -1,12 +1,5 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
-import java.lang.reflect.InvocationTargetException;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -40,6 +33,15 @@ import org.eclipse.wst.common.project.facet.core.runtime.RuntimeManager;
 import org.eclipse.wst.server.core.IRuntimeType;
 import org.eclipse.wst.server.core.IRuntimeWorkingCopy;
 import org.eclipse.wst.server.core.ServerCore;
+
+import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
 * Utility to make a new Eclipse project with the App Engine Standard facets in the workspace.  
@@ -125,7 +127,7 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
     facetedProject.installProjectFacet(WebFacetUtils.WEB_25, webModel, monitor);
   }
 
-  static void installAppEngineRuntime(IFacetedProject project, IProgressMonitor monitor)
+  void installAppEngineRuntime(IFacetedProject project, IProgressMonitor monitor)
       throws CoreException {
     Set<IProjectFacetVersion> facets = new HashSet<>();
     facets.add(WebFacetUtils.WEB_25);
@@ -155,5 +157,4 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
       project.setPrimaryRuntime(appEngineFacetRuntime, monitor);
     }
   }
-
 }
