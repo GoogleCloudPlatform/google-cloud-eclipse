@@ -17,6 +17,8 @@
     <module>plugins/com.google.cloud.tools.eclipse.sdk</module>
     <module>plugins/com.google.cloud.tools.eclipse.sdk.ui</module>
     <module>plugins/com.google.cloud.tools.eclipse.sdk.test</module>
+    <module>plugins/com.google.cloud.tools.eclipse.appengine.deploy</module>
+    <module>plugins/com.google.cloud.tools.eclipse.appengine.deploy.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.localserver</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.localserver.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.facets</module>
