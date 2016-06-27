@@ -1,6 +1,8 @@
 package com.google.cloud.tools.eclipse.appengine.facets;
 
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -11,20 +13,20 @@ public class AppEngineSdkClasspathContainerTest {
   @Test
   public void testGetPath() {
     IPath path = new AppEngineSdkClasspathContainer().getPath();
-    assertEquals(1, path.segmentCount());
-    assertEquals("AppEngineSDK", path.segment(0));
+    assertThat(path.segmentCount(), is(1));
+    assertThat(path.segment(0), is("AppEngineSDK"));
   }
 
   @Test
   public void testGetKind() {
-    assertEquals(IClasspathEntry.CPE_CONTAINER, 
-        new AppEngineSdkClasspathContainer().getKind());
+    assertThat(new AppEngineSdkClasspathContainer().getKind(),
+               is(IClasspathEntry.CPE_CONTAINER));
   }
 
   @Test
   public void testGetDescription() {
-    assertEquals("App Engine SDKs", 
-        new AppEngineSdkClasspathContainer().getDescription());
+    assertThat(new AppEngineSdkClasspathContainer().getDescription(),
+               is("App Engine SDKs"));
   }
 
   @Test
