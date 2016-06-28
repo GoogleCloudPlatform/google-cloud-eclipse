@@ -199,4 +199,11 @@
             <moduleType types="jst.utility"  versions="1.0"/>
       </runtimeType>
    </extension>
+     <extension point="org.eclipse.wst.server.core.publishTasks">
+     <publishTask
+             id="com.google.cloud.tools.eclipse.appengine.localserver.publishTask"
+             class="com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEnginePublishTaskDelegate"
+             typeIds="com.google.cloud.tools.eclipse.appengine.localserver.server.apptools">
+       </publishTask>
+   </extension>
 </plugin>
