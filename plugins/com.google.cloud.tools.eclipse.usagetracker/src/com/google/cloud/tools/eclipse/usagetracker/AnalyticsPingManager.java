@@ -140,10 +140,16 @@ public class AnalyticsPingManager {
       connection.setDoOutput(true);
       connection.setRequestMethod("POST");
       connection.setRequestProperty("Content-Length", Integer.toString(parametersString.length()));
+      connection.setReadTimeout(3000);  // milliseconds
 
       try (Writer writer = new OutputStreamWriter(connection.getOutputStream(), "UTF-8")) {
         writer.write(parametersString);
         writer.flush();
+      }
+
+      int responseCode = connection.getResponseCode();
+      if (responseCode != 200) {
+        logger.log(Level.WARNING, "Response code not 200: " + responseCode);
       }
     } catch (IOException ex) {
       // Don't try to recover or retry.
