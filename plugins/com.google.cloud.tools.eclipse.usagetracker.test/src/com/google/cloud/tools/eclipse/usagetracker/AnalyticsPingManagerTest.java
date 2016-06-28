@@ -82,4 +82,12 @@ public class AnalyticsPingManagerTest {
         + "%24%25%5E%26%28%29%3F%3C%3E%7B%7D%5D%5B%7C%3A%3B%2F%5C%27%22",
         AnalyticsPingManager.getParametersString(escape));
   }
+
+  @Test
+  public void testEventTypeEventNameConvention() {
+    Map<String, String> parameters =
+        AnalyticsPingManager.buildParametersMap("some.event-name", null, null);
+    Assert.assertEquals("/virtual/" + AnalyticsPingManager.APPLICATION_NAME + "/some.event-name",
+        parameters.get("dp"));
+  }
 }

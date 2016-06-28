@@ -37,7 +37,8 @@ public class AnalyticsPingManager {
   private static final String ANALYTICS_COLLECTION_URL = "https://ssl.google-analytics.com/collect";
 
   // This name will be recorded as an originating app on Google Analytics.
-  private static final String APPLICATION_NAME = "gcloud-eclipse-tools";
+  @VisibleForTesting
+  static final String APPLICATION_NAME = "gcloud-eclipse-tools";
 
   // Fixed-value query parameters present in every ping, and their fixed values:
   //
@@ -107,26 +108,7 @@ public class AnalyticsPingManager {
       return;
     }
 
-    Map<String, String> parametersMap = new HashMap<>(STANDARD_PARAMETERS);
-    parametersMap.put("cid", getAnonymizedClientId());
-    parametersMap.put("cd19", APPLICATION_NAME);
-    parametersMap.put("cd20", eventName);
-
-    String virtualPageUrl = "/virtual/" + APPLICATION_NAME + "/" + eventName;
-    parametersMap.put("dp", virtualPageUrl);
-
-    if (metadataKey != null) {
-      // Event metadata are passed as a (virtual) page title.
-      String virtualPageTitle = metadataKey + "=";
-      if (metadataValue != null) {
-        virtualPageTitle += metadataValue;
-      } else {
-        virtualPageTitle += "null";
-      }
-
-      parametersMap.put("dt", virtualPageTitle);
-    }
-
+    Map<String, String> parametersMap = buildParametersMap(eventName, metadataKey, metadataValue);
     sendPostRequest(getParametersString(parametersMap));
   }
 
@@ -152,6 +134,33 @@ public class AnalyticsPingManager {
         connection.disconnect();
       }
     }
+  }
+
+  @VisibleForTesting
+  static Map<String, String> buildParametersMap(
+      String eventName, String metadataKey, String metadataValue) {
+    Map<String, String> parametersMap = new HashMap<>(STANDARD_PARAMETERS);
+    parametersMap.put("cid", getAnonymizedClientId());
+    parametersMap.put("cd19", APPLICATION_NAME);  // cd19: "event type"
+    parametersMap.put("cd20", eventName);
+
+    String virtualPageUrl = "/virtual/" + APPLICATION_NAME + "/" + eventName;
+    parametersMap.put("dp", virtualPageUrl);
+    parametersMap.put("dh", "virtual.eclipse");
+
+    if (metadataKey != null) {
+      // Event metadata are passed as a (virtual) page title.
+      String virtualPageTitle = metadataKey + "=";
+      if (metadataValue != null) {
+        virtualPageTitle += metadataValue;
+      } else {
+        virtualPageTitle += "null";
+      }
+
+      parametersMap.put("dt", virtualPageTitle);
+    }
+
+    return parametersMap;
   }
 
   @VisibleForTesting
