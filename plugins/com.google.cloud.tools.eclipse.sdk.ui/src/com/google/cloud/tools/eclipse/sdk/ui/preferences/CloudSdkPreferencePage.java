@@ -59,7 +59,6 @@ public class CloudSdkPreferencePage extends FieldEditorPreferencePage
     setDescription(SdkUiMessages.CloudSdkPreferencePage_1);
   }
 
-
   @Override
   protected Control createContents(Composite parent) {
     Composite contents = new Composite(parent, SWT.NONE);
@@ -78,7 +77,6 @@ public class CloudSdkPreferencePage extends FieldEditorPreferencePage
     return contents;
   }
 
-
   protected void openUrl(String urlText) {
     try {
       URL url = new URL(urlText);
@@ -91,12 +89,12 @@ public class CloudSdkPreferencePage extends FieldEditorPreferencePage
     }
   }
 
-
   /**
    * Creates the field editors. Field editors are abstractions of the common GUI blocks needed to
    * manipulate various types of preferences. Each field editor knows how to save and restore
    * itself.
    */
+  @Override
   public void createFieldEditors() {
     sdkLocation = new CloudSdkDirectoryFieldEditor(PreferenceConstants.CLOUDSDK_PATH,
         SdkUiMessages.CloudSdkPreferencePage_5, getFieldEditorParent());
@@ -116,6 +114,7 @@ public class CloudSdkPreferencePage extends FieldEditorPreferencePage
     return true;
   }
 
+  @Override
   public void init(IWorkbench workbench) {
     this.workbench = workbench;
   }

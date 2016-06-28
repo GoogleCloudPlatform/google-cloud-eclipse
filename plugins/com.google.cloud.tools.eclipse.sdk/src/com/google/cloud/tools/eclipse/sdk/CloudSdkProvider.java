@@ -28,17 +28,26 @@ import java.io.File;
 import java.nio.file.Path;
 
 /**
- * Utililty to find the Google Cloud SDK either at locations configured by the user or in standard
+ * Utility to find the Google Cloud SDK either at locations configured by the user or in standard
  * locations on the system.
  */
 public class CloudSdkProvider extends ContextFunction {
+
+  private final IPreferenceStore preferences;
+
+   public CloudSdkProvider(IPreferenceStore preferences) {
+     if (preferences == null) {
+       preferences = PreferenceInitializer.getPreferenceStore();
+     }
+     this.preferences = preferences;
+   }
 
   /**
    * Return the {@link CloudSdk} instance from the configured or discovered Cloud SDK.
    * 
    * @return the configured {@link CloudSdk} or {@code null} if no SDK could be found
    */
-  public static CloudSdk getCloudSdk() {
+  public CloudSdk getCloudSdk() {
     return createBuilder(null).build();
   }
 
@@ -47,7 +56,7 @@ public class CloudSdkProvider extends ContextFunction {
    * 
    * @return the configured location or {@code null} if the SDK could not be found
    */
-  public static File getCloudSdkLocation() {
+  public File getCloudSdkLocation() {
     return resolveSdkLocation();
   }
 
@@ -60,7 +69,7 @@ public class CloudSdkProvider extends ContextFunction {
    *        {@linkplain String}, {@linkplain File}, or {@linkplain Path}.
    * @return a builder, or {@code null} if the Google Cloud SDK cannot be located
    */
-  public static CloudSdk.Builder createBuilder(File location) {
+  public CloudSdk.Builder createBuilder(File location) {
     // perhaps should try to be cleverer in case location references the .../bin/gcloud
     if (location == null || !location.exists()) {
       location = resolveSdkLocation();
@@ -77,8 +86,7 @@ public class CloudSdkProvider extends ContextFunction {
    * 
    * @return the location, or {@code null} if not found
    */
-  private static File resolveSdkLocation() {
-    IPreferenceStore preferences = PreferenceInitializer.getPreferenceStore();
+  private File resolveSdkLocation() {
     String value = preferences.getString(PreferenceConstants.CLOUDSDK_PATH);
     if (value != null && !value.isEmpty()) {
       return new File(value);
@@ -89,7 +97,4 @@ public class CloudSdkProvider extends ContextFunction {
     }
     return null;
   }
-
-  // should not be instantiated
-  private CloudSdkProvider() {}
 }

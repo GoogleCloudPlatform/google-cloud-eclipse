@@ -61,7 +61,7 @@ public class CloudSdkContextFunction extends ContextFunction {
 
     Object path = context.get(PreferenceConstants.CLOUDSDK_PATH);
     File location = toFile(path);
-    CloudSdk.Builder builder = CloudSdkProvider.createBuilder(location);
+    CloudSdk.Builder builder = new CloudSdkProvider(null).createBuilder(location);
     if (builder == null) {
       return NOT_A_VALUE;
     }

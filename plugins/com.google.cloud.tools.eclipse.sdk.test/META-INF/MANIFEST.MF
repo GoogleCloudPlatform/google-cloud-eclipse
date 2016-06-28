@@ -7,5 +7,6 @@ Bundle-Vendor: Google, Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Fragment-Host: com.google.cloud.tools.eclipse.sdk
-Require-Bundle:  org.junit
+Require-Bundle: org.junit,
+ org.eclipse.jface
 Import-Package: org.eclipse.jface.preference

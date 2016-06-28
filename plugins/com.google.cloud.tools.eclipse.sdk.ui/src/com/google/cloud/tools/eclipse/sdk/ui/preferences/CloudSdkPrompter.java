@@ -59,12 +59,13 @@ public class CloudSdkPrompter {
    * @return the Cloud SDK, or {@code null} if unspecified
    */
   public static CloudSdk getCloudSdk(IShellProvider shellProvider) {
-    CloudSdk sdk = CloudSdkProvider.getCloudSdk();
+    CloudSdkProvider cloudSdkProvider = new CloudSdkProvider(null);
+    CloudSdk sdk = cloudSdkProvider.getCloudSdk();
     if (sdk != null) {
       return sdk;
     }
     if (promptForSdk(shellProvider)) {
-      return CloudSdkProvider.getCloudSdk();
+      return cloudSdkProvider.getCloudSdk();
     }
     return null;
   }
@@ -94,15 +95,15 @@ public class CloudSdkPrompter {
    * @return the Cloud SDK location, or {@code null} if unspecified
    */
   public static File getCloudSdkLocation(IShellProvider shellProvider) {
-    File location = CloudSdkProvider.getCloudSdkLocation();
+    CloudSdkProvider cloudSdkProvider = new CloudSdkProvider(null);
+    File location = cloudSdkProvider.getCloudSdkLocation();
     if (location != null) {
       return location;
     }
     if (promptForSdk(shellProvider)) {
-      return CloudSdkProvider.getCloudSdkLocation();
+      return cloudSdkProvider.getCloudSdkLocation();
     }
     return null;
-
   }
 
   /**
