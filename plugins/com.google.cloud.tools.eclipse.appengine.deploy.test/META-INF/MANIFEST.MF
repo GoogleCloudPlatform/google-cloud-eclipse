@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ClassPath: .
 Bundle-ManifestVersion: 2
-Bundle-Name: Test
+Bundle-Name: Tests for GCloud for Eclipse App Engine Deployment Support
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.appengine.deploy.test
 Bundle-Vendor: Google, Inc.
