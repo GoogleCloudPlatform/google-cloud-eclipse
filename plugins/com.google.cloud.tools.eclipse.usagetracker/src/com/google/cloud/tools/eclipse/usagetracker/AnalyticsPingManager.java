@@ -139,15 +139,13 @@ public class AnalyticsPingManager {
       connection = (HttpURLConnection) url.openConnection();
       connection.setDoOutput(true);
       connection.setRequestMethod("POST");
-      connection.setRequestProperty("Content-Length", Integer.toString(parametersString.length()));
+      connection.setFixedLengthStreamingMode(parametersString.length());
       connection.setReadTimeout(3000);  // milliseconds
 
       try (Writer writer = new OutputStreamWriter(connection.getOutputStream(), "UTF-8")) {
         writer.write(parametersString);
         writer.flush();
       }
-
-      connection.getResponseCode();  // This call is important to ensure posting the request.
     } catch (IOException ex) {
       // Don't try to recover or retry.
       logger.log(Level.WARNING, "Failed to send a POST request", ex);
