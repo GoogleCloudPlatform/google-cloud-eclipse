@@ -9,6 +9,7 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
 
 import com.google.cloud.tools.appengine.cloudsdk.PathResolver;
+import com.google.common.annotations.VisibleForTesting;
 
 public final class AppEngineSdkClasspathContainer implements IClasspathContainer {
 
@@ -51,7 +52,7 @@ public final class AppEngineSdkClasspathContainer implements IClasspathContainer
     return new IClasspathEntry[0];
   }
 
-  // Visible for testing
+  @VisibleForTesting
   void setPathResolver(PathResolver pathResolver) {
     this.pathResolver = pathResolver;
   }
