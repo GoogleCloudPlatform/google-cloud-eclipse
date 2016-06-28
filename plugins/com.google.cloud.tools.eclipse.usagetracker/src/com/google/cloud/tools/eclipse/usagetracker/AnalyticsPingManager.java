@@ -147,10 +147,7 @@ public class AnalyticsPingManager {
         writer.flush();
       }
 
-      int responseCode = connection.getResponseCode();
-      if (responseCode != 200) {
-        logger.log(Level.WARNING, "Response code not 200: " + responseCode);
-      }
+      connection.getResponseCode();  // Important: ensure this request posted.
     } catch (IOException ex) {
       // Don't try to recover or retry.
       logger.log(Level.WARNING, "Failed to send a POST request", ex);
