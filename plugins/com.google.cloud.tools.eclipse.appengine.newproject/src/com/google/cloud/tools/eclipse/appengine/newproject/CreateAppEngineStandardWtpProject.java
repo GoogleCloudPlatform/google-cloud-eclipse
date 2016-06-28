@@ -35,6 +35,7 @@ import org.eclipse.wst.server.core.IRuntimeWorkingCopy;
 import org.eclipse.wst.server.core.ServerCore;
 
 import com.google.cloud.tools.appengine.cloudsdk.PathResolver;
+import com.google.cloud.tools.eclipse.sdk.CloudSdkProvider;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -146,7 +147,7 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
 
       IRuntimeWorkingCopy appEngineRuntimeWorkingCopy 
           = appEngineRuntimeType.createRuntime(null, monitor);
-      File sdkLocation = PathResolver.INSTANCE.getCloudSdkPath().toFile();
+      File sdkLocation = new CloudSdkProvider(null).getCloudSdkLocation();
       if (sdkLocation != null) {
         IPath sdkPath = Path.fromOSString(sdkLocation.getAbsolutePath());
         appEngineRuntimeWorkingCopy.setLocation(sdkPath);
