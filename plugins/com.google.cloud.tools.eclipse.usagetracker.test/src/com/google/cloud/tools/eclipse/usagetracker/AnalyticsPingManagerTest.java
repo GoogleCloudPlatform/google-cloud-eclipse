@@ -87,7 +87,14 @@ public class AnalyticsPingManagerTest {
   public void testEventTypeEventNameConvention() {
     Map<String, String> parameters =
         AnalyticsPingManager.buildParametersMap("some.event-name", null, null);
-    Assert.assertEquals("/virtual/" + AnalyticsPingManager.APPLICATION_NAME + "/some.event-name",
+    Assert.assertEquals("/virtual/gcloud-eclipse-tools/some.event-name",
         parameters.get("dp"));
+  }
+
+  @Test
+  public void testMetadataConvention() {
+    Map<String, String> parameters =
+        AnalyticsPingManager.buildParametersMap("some.event-name", "times-happened", "1234");
+    Assert.assertEquals("times-happened=1234", parameters.get("dt"));
   }
 }

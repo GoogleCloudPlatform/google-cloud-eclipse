@@ -37,8 +37,7 @@ public class AnalyticsPingManager {
   private static final String ANALYTICS_COLLECTION_URL = "https://ssl.google-analytics.com/collect";
 
   // This name will be recorded as an originating app on Google Analytics.
-  @VisibleForTesting
-  static final String APPLICATION_NAME = "gcloud-eclipse-tools";
+  private static final String APPLICATION_NAME = "gcloud-eclipse-tools";
 
   // Fixed-value query parameters present in every ping, and their fixed values:
   //
