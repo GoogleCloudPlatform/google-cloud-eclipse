@@ -102,18 +102,17 @@ public class AnalyticsPingManager {
     }
   }
 
-  public static void sendPing(String eventType, String eventName,
-      String metadataKey, String metadataValue) {
+  public static void sendPing(String eventName, String metadataKey, String metadataValue) {
     if (Platform.inDevelopmentMode() || !isTrackingIdDefined() || !hasUserOptedIn()) {
       return;
     }
 
     Map<String, String> parametersMap = new HashMap<>(STANDARD_PARAMETERS);
     parametersMap.put("cid", getAnonymizedClientId());
-    parametersMap.put("cd19", eventType);
+    parametersMap.put("cd19", APPLICATION_NAME);
     parametersMap.put("cd20", eventName);
 
-    String virtualPageUrl = "/virtual/" + APPLICATION_NAME + "/" + eventType + "/" + eventName;
+    String virtualPageUrl = "/virtual/" + APPLICATION_NAME + "/" + eventName;
     parametersMap.put("dp", virtualPageUrl);
 
     if (metadataKey != null) {
