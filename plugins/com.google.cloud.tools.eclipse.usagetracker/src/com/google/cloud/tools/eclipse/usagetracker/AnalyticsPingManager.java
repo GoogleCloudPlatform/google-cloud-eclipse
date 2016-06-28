@@ -147,7 +147,7 @@ public class AnalyticsPingManager {
         writer.flush();
       }
 
-      connection.getResponseCode();  // Important: ensure this request posted.
+      connection.getResponseCode();  // This call is important to ensure posting the request.
     } catch (IOException ex) {
       // Don't try to recover or retry.
       logger.log(Level.WARNING, "Failed to send a POST request", ex);
