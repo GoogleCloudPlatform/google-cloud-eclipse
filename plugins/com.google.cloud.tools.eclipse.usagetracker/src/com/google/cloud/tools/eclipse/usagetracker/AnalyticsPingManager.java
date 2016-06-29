@@ -7,6 +7,7 @@ import com.google.common.annotations.VisibleForTesting;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.ConfigurationScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.osgi.service.prefs.BackingStoreException;
@@ -102,10 +103,26 @@ public class AnalyticsPingManager {
     }
   }
 
+  /**
+   * Sends a usage metric to Google Analytics.
+   * <p/>
+   * If the user has never seen the opt-in dialog or set the opt-in preference beforehand,
+   * this method can potentially present an opt-in dialog at the top workbench level. If you
+   * are calling this method inside another modal dialog, consider using {@link #sendPing(
+   * String, String, String, Shell)} and pass the {@Shell} of currently open modal dialog.
+   * (Otherwise, the opt-in dialog won't be able to get input until the workbench can get input.)
+   */
   public static void sendPing(String eventName, String metadataKey, String metadataValue) {
+    sendPing(eventName, metadataKey, metadataValue, null);
+  }
+
+  public static void sendPing(String eventName, String metadataKey, String metadataValue,
+      Shell parentShell) {
     if (Platform.inDevelopmentMode() || !isTrackingIdDefined() || !hasUserOptedIn()) {
       return;
     }
+
+    showOptInDialog(parentShell);
 
     Map<String, String> parametersMap = buildParametersMap(eventName, metadataKey, metadataValue);
     sendPostRequest(getParametersString(parametersMap));
@@ -183,13 +200,21 @@ public class AnalyticsPingManager {
     return resultBuilder.toString();
   }
 
-  public static void showOptInDialog() {
+  /**
+   * @param parentShell if null, shows the dialog at the workbench level.
+   */
+  public static void showOptInDialog(Shell parentShell) {
     if (!hasUserOptedIn() && !hasUserRegisteredOptInStatus()) {
-      IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-      if (window != null) {
-        new OptInDialog(window.getShell()).open();
+      if (parentShell != null) {
+        new OptInDialog(parentShell).open();
       } else {
-        logger.log(Level.WARNING, "No active workbench window found.");
+        // Show the dialog at the workbench level, if it exists.
+        IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+        if (window != null) {
+          new OptInDialog(window.getShell()).open();
+        } else {
+          logger.log(Level.WARNING, "No active workbench window found.");
+        }
       }
     }
   }

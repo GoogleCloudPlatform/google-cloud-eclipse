@@ -9,6 +9,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 
 /**
  * A one-time dialog to suggest opt-in for sending client-side usage metrics.
@@ -26,11 +28,16 @@ class OptInDialog extends Dialog {
    */
   @Override
   protected Point getInitialLocation(Point initialSize) {
-    Rectangle parentBounds = getParentShell().getBounds();
-    Rectangle parentClientArea = getParentShell().getClientArea();
+    // Prefer showing at the top-right corner of the currently active workbench, but
+    // if we can't get a workbench for any reason, fall back to the parent shell.
+    IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+    Shell targetShell = window != null ? window.getShell() : getParentShell();
+
+    Rectangle parentBounds = targetShell.getBounds();
+    Rectangle parentClientArea = targetShell.getClientArea();
 
     int heightCaptionAndUpperBorder =
-        parentBounds.height - parentClientArea.height - getParentShell().getBorderWidth();
+        parentBounds.height - parentClientArea.height - targetShell.getBorderWidth();
     return new Point(parentBounds.x + parentClientArea.width - initialSize.x,
         parentBounds.y + heightCaptionAndUpperBorder);
   }
