@@ -70,8 +70,7 @@ public class CloudSdkServer extends ServerDelegate {
   public static CloudSdkServer getCloudSdkServer(IServer server) {
     CloudSdkServer cloudSdkServer = server.getAdapter(CloudSdkServer.class);
     if (cloudSdkServer == null) {
-      cloudSdkServer = (CloudSdkServer) server.loadAdapter(CloudSdkServer.class,
-                                                           new NullProgressMonitor());
+      cloudSdkServer = (CloudSdkServer) server.loadAdapter(CloudSdkServer.class, null);
     }
     return cloudSdkServer;
   }
