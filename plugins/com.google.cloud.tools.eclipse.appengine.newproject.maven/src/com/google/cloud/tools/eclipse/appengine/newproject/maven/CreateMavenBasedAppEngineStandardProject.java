@@ -15,6 +15,10 @@ import org.eclipse.m2e.core.project.IProjectConfigurationManager;
 import org.eclipse.m2e.core.project.ProjectImportConfiguration;
 import org.eclipse.m2e.core.ui.internal.wizards.MappingDiscoveryJob;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
+import org.eclipse.wst.common.project.facet.core.IFacetedProject;
+import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
+
+import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineStandardWtpProject;
 
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
@@ -24,6 +28,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOperation {
+  
   private static final Logger logger =
       Logger.getLogger(CreateMavenBasedAppEngineStandardProject.class.getName());
 
@@ -66,6 +71,12 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
         getArchetypeDescriptor(), groupId, artifactId, version, packageName, properties,
         importConfiguration, progress.newChild(60));
 
+    for (IProject project : archetypeProjects) {
+      IFacetedProject facetedProject = ProjectFacetsManager.create(
+          project, true, progress.newChild(20));
+      CreateAppEngineStandardWtpProject.installAppEngineFacet(facetedProject, monitor);  
+    }
+    
     /*
      * invoke the Maven lifecycle mapping discovery job
      * 

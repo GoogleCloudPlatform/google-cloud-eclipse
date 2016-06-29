@@ -44,11 +44,11 @@ import java.util.Set;
 /**
 * Utility to make a new Eclipse project with the App Engine Standard facets in the workspace.  
 */
-class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
+public class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
   
   private static final String DEFAULT_RUNTIME_ID = "com.google.cloud.tools.eclipse.runtime.custom";
   private static final String DEFAULT_RUNTIME_NAME = "App Engine (Custom)";
-  private static final String APPENGINE_FACET_ID = "com.google.cloud.tools.eclipse.appengine.facet";
+  public static final String APPENGINE_FACET_ID = "com.google.cloud.tools.eclipse.appengine.facet";
 
   private final AppEngineStandardProjectConfig config;
   private final IAdaptable uiInfoAdapter;
@@ -97,7 +97,8 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
     }
   }
 
-  private void installAppEngineFacet(IFacetedProject facetedProject, IProgressMonitor monitor) throws CoreException {
+  public static void installAppEngineFacet(IFacetedProject facetedProject, IProgressMonitor monitor)
+      throws CoreException {
     IFacetedProjectWorkingCopy workingCopy = facetedProject.createWorkingCopy();
     IProjectFacet appEngineFacet = ProjectFacetsManager.getProjectFacet(APPENGINE_FACET_ID);
     IProjectFacetVersion appEngineFacetVersion = appEngineFacet.getVersion("1");
