@@ -69,11 +69,11 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
         ? groupId : this.packageName;
     List<IProject> archetypeProjects = projectConfigurationManager.createArchetypeProjects(location,
         getArchetypeDescriptor(), groupId, artifactId, version, packageName, properties,
-        importConfiguration, progress.newChild(60));
+        importConfiguration, progress.newChild(40));
 
     for (IProject project : archetypeProjects) {
       IFacetedProject facetedProject = ProjectFacetsManager.create(
-          project, true, progress.newChild(20));
+          project, true, progress.newChild(10));
       CreateAppEngineStandardWtpProject.installAppEngineFacet(facetedProject, monitor);  
       CreateAppEngineStandardWtpProject.installAppEngineRuntime(facetedProject, monitor);  
     }
