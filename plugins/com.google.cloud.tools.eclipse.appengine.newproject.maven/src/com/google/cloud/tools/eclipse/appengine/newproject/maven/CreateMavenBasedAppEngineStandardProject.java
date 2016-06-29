@@ -75,6 +75,7 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
       IFacetedProject facetedProject = ProjectFacetsManager.create(
           project, true, progress.newChild(20));
       CreateAppEngineStandardWtpProject.installAppEngineFacet(facetedProject, monitor);  
+      CreateAppEngineStandardWtpProject.installAppEngineRuntime(facetedProject, monitor);  
     }
     
     /*

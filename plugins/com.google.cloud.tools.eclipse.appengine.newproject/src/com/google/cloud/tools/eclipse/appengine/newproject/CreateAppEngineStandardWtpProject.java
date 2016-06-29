@@ -126,7 +126,7 @@ public class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation 
     facetedProject.installProjectFacet(WebFacetUtils.WEB_25, webModel, monitor);
   }
 
-  void installAppEngineRuntime(IFacetedProject project, IProgressMonitor monitor)
+  public static void installAppEngineRuntime(IFacetedProject project, IProgressMonitor monitor)
       throws CoreException {
     Set<IProjectFacetVersion> facets = new HashSet<>();
     facets.add(WebFacetUtils.WEB_25);
