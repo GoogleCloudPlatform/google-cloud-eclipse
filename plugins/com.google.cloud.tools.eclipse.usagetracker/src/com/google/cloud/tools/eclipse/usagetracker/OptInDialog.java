@@ -28,18 +28,28 @@ public class OptInDialog extends Dialog {
    */
   @Override
   protected Point getInitialLocation(Point initialSize) {
-    // Prefer showing at the top-right corner of the currently active workbench, but
-    // if we can't get a workbench for any reason, fall back to the parent shell.
-    IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-    Shell targetShell = window != null ? window.getShell() : getParentShell();
+    Shell targetShell = null;
+    try {
+      // Prefer showing at the top-right corner of the currently active workbench, but
+      // if we can't get a workbench for any reason, fall back to the parent shell.
+      IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+      targetShell = window != null ? window.getShell() : getParentShell();
+    } catch (IllegalStateException ise) {  // getWorkbench() might throw this.
+      // No special handling. targetShell will be null.
+    }
 
-    Rectangle parentBounds = targetShell.getBounds();
-    Rectangle parentClientArea = targetShell.getClientArea();
+    if (targetShell == null) {
+      return super.getInitialLocation(initialSize);
+    } else {
+      // Position the dialog at the top-right corner of the targetShell window.
+      Rectangle parentBounds = targetShell.getBounds();
+      Rectangle parentClientArea = targetShell.getClientArea();
 
-    int heightCaptionAndUpperBorder =
-        parentBounds.height - parentClientArea.height - targetShell.getBorderWidth();
-    return new Point(parentBounds.x + parentClientArea.width - initialSize.x,
-        parentBounds.y + heightCaptionAndUpperBorder);
+      int heightCaptionAndUpperBorder =
+          parentBounds.height - parentClientArea.height - targetShell.getBorderWidth();
+      return new Point(parentBounds.x + parentClientArea.width - initialSize.x,
+          parentBounds.y + heightCaptionAndUpperBorder);
+    }
   }
 
   /**

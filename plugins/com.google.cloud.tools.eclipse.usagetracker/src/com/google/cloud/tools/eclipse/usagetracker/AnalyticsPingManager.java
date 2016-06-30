@@ -7,6 +7,7 @@ import com.google.common.annotations.VisibleForTesting;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.ConfigurationScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
@@ -223,21 +224,24 @@ public class AnalyticsPingManager {
   }
 
   /**
-   * @param parentShell if null, shows the dialog at the workbench level.
+   * @param parentShell if null, tries to show the dialog at the workbench level.
    */
   public void showOptInDialog(Shell parentShell) {
     if (!hasUserOptedIn() && !hasUserRegisteredOptInStatus()) {
-      if (parentShell != null) {
-        optInDialogCreator.create(parentShell).open();
-      } else {
-        // Show the dialog at the workbench level, if it exists.
-        IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-        if (window != null) {
-          optInDialogCreator.create(window.getShell()).open();
-        } else {
-          logger.log(Level.WARNING, "No active workbench window found.");
-        }
-      }
+      optInDialogCreator.create(findShell(parentShell)).open();
+    }
+  }
+
+  private Shell findShell(Shell parentShell) {
+    if (parentShell != null) {
+      return parentShell;
+    }
+
+    try {
+      IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+      return window == null ? null : window.getShell();
+    } catch (IllegalStateException ise) {  // getWorkbench() might throw this.
+      return null;
     }
   }
 
