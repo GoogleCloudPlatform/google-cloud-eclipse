@@ -51,7 +51,7 @@ import java.util.Set;
 class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
   
   private static final String DEFAULT_RUNTIME_ID = "com.google.cloud.tools.eclipse.runtime.custom";
-  private static final String DEFAULT_RUNTIME_NAME = "App Engine (Custom)";
+  private static final String DEFAULT_RUNTIME_NAME = "App Engine Standard (Custom)";
   private static final String APPENGINE_FACET_ID = "com.google.cloud.tools.eclipse.appengine.facet";
 
   private final AppEngineStandardProjectConfig config;
