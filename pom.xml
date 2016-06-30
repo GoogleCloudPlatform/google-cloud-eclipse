@@ -14,26 +14,29 @@
     <module>features/com.google.cloud.tools.eclipse.suite.e45.feature</module>
     <module>features/com.google.cloud.tools.eclipse.3rdparty.feature</module>
     <module>features/com.google.licenses.apache_v2</module>
-    <module>plugins/com.google.cloud.tools.eclipse.sdk</module>
-    <module>plugins/com.google.cloud.tools.eclipse.sdk.ui</module>
-    <module>plugins/com.google.cloud.tools.eclipse.sdk.test</module>
+    
     <module>plugins/com.google.cloud.tools.eclipse.appengine.deploy</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.deploy.test</module>
+    <module>plugins/com.google.cloud.tools.eclipse.appengine.facets</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.localserver</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.localserver.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.facets</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.whitelist</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.whitelist.test</module>
+    <module>plugins/com.google.cloud.tools.eclipse.appengine.login</module>
+    <module>plugins/com.google.cloud.tools.eclipse.appengine.login.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.newproject</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.newproject.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.newproject.maven</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.newproject.maven.test</module>
+    <module>plugins/com.google.cloud.tools.eclipse.appengine.whitelist</module>
+    <module>plugins/com.google.cloud.tools.eclipse.appengine.whitelist.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.ui</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.ui.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.preferences</module>
+    <module>plugins/com.google.cloud.tools.eclipse.sdk</module>
+    <module>plugins/com.google.cloud.tools.eclipse.sdk.ui</module>
+    <module>plugins/com.google.cloud.tools.eclipse.sdk.test</module>
+    <module>plugins/com.google.cloud.tools.eclipse.test.dependencies</module>
     <module>plugins/com.google.cloud.tools.eclipse.usagetracker</module>
     <module>plugins/com.google.cloud.tools.eclipse.usagetracker.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.test.dependencies</module>
   </modules>
 
   <properties>

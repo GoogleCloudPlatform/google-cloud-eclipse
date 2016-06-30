@@ -34,6 +34,10 @@ import org.eclipse.wst.server.core.IRuntimeType;
 import org.eclipse.wst.server.core.IRuntimeWorkingCopy;
 import org.eclipse.wst.server.core.ServerCore;
 
+import com.google.cloud.tools.appengine.cloudsdk.PathResolver;
+import com.google.cloud.tools.eclipse.sdk.CloudSdkProvider;
+
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -136,14 +140,18 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
       IRuntime appEngineRuntime = RuntimeManager.getRuntime(DEFAULT_RUNTIME_NAME);
       project.setPrimaryRuntime(appEngineRuntime, monitor);
     } else { // Create a new App Engine runtime
-      IRuntimeType appEngineRuntimeType =
-          ServerCore.findRuntimeType(DEFAULT_RUNTIME_ID);
+      IRuntimeType appEngineRuntimeType = ServerCore.findRuntimeType(DEFAULT_RUNTIME_ID);
       if (appEngineRuntimeType == null) {
         throw new NullPointerException("Could not find " + DEFAULT_RUNTIME_NAME + " runtime type");
       }
 
       IRuntimeWorkingCopy appEngineRuntimeWorkingCopy 
           = appEngineRuntimeType.createRuntime(null, monitor);
+      File sdkLocation = new CloudSdkProvider(null).getCloudSdkLocation();
+      if (sdkLocation != null) {
+        IPath sdkPath = Path.fromOSString(sdkLocation.getAbsolutePath());
+        appEngineRuntimeWorkingCopy.setLocation(sdkPath);
+      }
       org.eclipse.wst.server.core.IRuntime appEngineServerRuntime 
           = appEngineRuntimeWorkingCopy.save(true, monitor);
       IRuntime appEngineFacetRuntime = FacetUtil.getRuntime(appEngineServerRuntime);

@@ -42,6 +42,7 @@ public class LocalAppEnginePublishOperation extends PublishOperation {
   private int deltaKind;
   private PublishHelper helper;
 
+  @Override
   public int getKind() {
     return REQUIRED;
   }
