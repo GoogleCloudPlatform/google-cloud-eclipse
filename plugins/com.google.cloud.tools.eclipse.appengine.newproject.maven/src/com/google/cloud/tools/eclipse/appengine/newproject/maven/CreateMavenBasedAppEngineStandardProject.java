@@ -71,11 +71,12 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
         getArchetypeDescriptor(), groupId, artifactId, version, packageName, properties,
         importConfiguration, progress.newChild(40));
 
+    SubMonitor loopMonitor = progress.newChild(30).setWorkRemaining(3 * archetypeProjects.size());
     for (IProject project : archetypeProjects) {
       IFacetedProject facetedProject = ProjectFacetsManager.create(
-          project, true, progress.newChild(10));
-      CreateAppEngineStandardWtpProject.installAppEngineFacet(facetedProject, progress.newChild(10));  
-      CreateAppEngineStandardWtpProject.installAppEngineRuntime(facetedProject, progress.newChild(10));  
+          project, true, loopMonitor.newChild(1));
+      CreateAppEngineStandardWtpProject.installAppEngineFacet(facetedProject, loopMonitor.newChild(1));  
+      CreateAppEngineStandardWtpProject.installAppEngineRuntime(facetedProject, loopMonitor.newChild(1));  
     }
     
     /*
