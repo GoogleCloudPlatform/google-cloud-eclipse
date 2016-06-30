@@ -10,6 +10,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jst.server.core.IWebModule;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IModuleType;
+import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.internal.facets.FacetUtil;
 import org.eclipse.wst.server.core.model.ServerDelegate;
 
@@ -17,6 +18,23 @@ import org.eclipse.wst.server.core.model.ServerDelegate;
 public class LocalAppEngineServerDelegate extends ServerDelegate {
   private static final String SERVLET_MODULE_FACET = "jst.web";
   private static final String ATTR_APP_ENGINE_SERVER_MODULES = "app-engine-server-modules-list";
+
+  /**
+   * Returns a {@link LocalAppEngineServerDelegate} instance associated with the
+   * {@code server} or a new {@link LocalAppEngineServerDelegate} instance if a
+   * {@link LocalAppEngineServerDelegate} instance cannot be found for {@code server}.
+   *
+   * @param server the App Engine server
+   * @return a new {@link LocalAppEngineServerDelegate} instance or the one associated with
+   *         {@code server}
+   */
+  public static LocalAppEngineServerDelegate getAppEngineServer(IServer server) {
+    LocalAppEngineServerDelegate serverDelegate = server.getAdapter(LocalAppEngineServerDelegate.class);
+    if (serverDelegate == null) {
+      serverDelegate = (LocalAppEngineServerDelegate) server.loadAdapter(LocalAppEngineServerDelegate.class, null);
+    }
+    return serverDelegate;
+  }
 
   /**
    * Returns OK status if the projects associated with modules to be added support the App Engine
