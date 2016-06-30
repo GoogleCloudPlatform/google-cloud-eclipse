@@ -165,7 +165,7 @@ public class AnalyticsPingManagerTest {
     OptInDialogCreator dialogCreator = mock(OptInDialogCreator.class);
     when(dialogCreator.create(any(Shell.class))).thenReturn(optInDialog);
 
-    new AnalyticsPingManager(preferences, dialogCreator).showOptInDialog(new Shell());
+    new AnalyticsPingManager(preferences, dialogCreator).showOptInDialog(null);
     verify(optInDialog, verificationMode).open();
   }
 }
