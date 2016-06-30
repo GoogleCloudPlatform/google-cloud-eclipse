@@ -21,6 +21,8 @@ import org.eclipse.wst.server.core.ServerCore;
 public class AppEngineFacet {
 
   public static final String APP_ENGINE_FACET_ID = "com.google.cloud.tools.eclipse.appengine.facet";
+
+  private static final String APP_ENGINE_FACET_VERSION = "1";
   private static final String DEFAULT_RUNTIME_ID = "com.google.cloud.tools.eclipse.runtime.custom";
   private static final String DEFAULT_RUNTIME_NAME = "App Engine Standard (Custom)";
   
@@ -35,8 +37,7 @@ public class AppEngineFacet {
       IRuntime appEngineRuntime = RuntimeManager.getRuntime(DEFAULT_RUNTIME_NAME);
       project.setPrimaryRuntime(appEngineRuntime, monitor);
     } else { // Create a new App Engine runtime
-      IRuntimeType appEngineRuntimeType =
-          ServerCore.findRuntimeType(DEFAULT_RUNTIME_ID);
+      IRuntimeType appEngineRuntimeType = ServerCore.findRuntimeType(DEFAULT_RUNTIME_ID);
       if (appEngineRuntimeType == null) {
         throw new NullPointerException("Could not find " + DEFAULT_RUNTIME_NAME + " runtime type");
       }
@@ -59,7 +60,7 @@ public class AppEngineFacet {
       throws CoreException {
     IFacetedProjectWorkingCopy workingCopy = facetedProject.createWorkingCopy();
     IProjectFacet appEngineFacet = ProjectFacetsManager.getProjectFacet(APP_ENGINE_FACET_ID);
-    IProjectFacetVersion appEngineFacetVersion = appEngineFacet.getVersion("1");
+    IProjectFacetVersion appEngineFacetVersion = appEngineFacet.getVersion(APP_ENGINE_FACET_VERSION);
     workingCopy.addProjectFacet(appEngineFacetVersion);
     workingCopy.commitChanges(monitor);
   }
