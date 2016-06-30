@@ -33,8 +33,8 @@ import java.util.List;
 /**
 * Utility to make a new Eclipse project with the App Engine Standard facets in the workspace.  
 */
-public class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
-  
+class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
+
   private final AppEngineStandardProjectConfig config;
   private final IAdaptable uiInfoAdapter;
 
