@@ -102,32 +102,12 @@ public class AnalyticsPingManager {
     }
   }
 
-  public static void sendPing(String eventType, String eventName,
-      String metadataKey, String metadataValue) {
+  public static void sendPing(String eventName, String metadataKey, String metadataValue) {
     if (Platform.inDevelopmentMode() || !isTrackingIdDefined() || !hasUserOptedIn()) {
       return;
     }
 
-    Map<String, String> parametersMap = new HashMap<>(STANDARD_PARAMETERS);
-    parametersMap.put("cid", getAnonymizedClientId());
-    parametersMap.put("cd19", eventType);
-    parametersMap.put("cd20", eventName);
-
-    String virtualPageUrl = "/virtual/" + APPLICATION_NAME + "/" + eventType + "/" + eventName;
-    parametersMap.put("dp", virtualPageUrl);
-
-    if (metadataKey != null) {
-      // Event metadata are passed as a (virtual) page title.
-      String virtualPageTitle = metadataKey + "=";
-      if (metadataValue != null) {
-        virtualPageTitle += metadataValue;
-      } else {
-        virtualPageTitle += "null";
-      }
-
-      parametersMap.put("dt", virtualPageTitle);
-    }
-
+    Map<String, String> parametersMap = buildParametersMap(eventName, metadataKey, metadataValue);
     sendPostRequest(getParametersString(parametersMap));
   }
 
@@ -153,6 +133,33 @@ public class AnalyticsPingManager {
         connection.disconnect();
       }
     }
+  }
+
+  @VisibleForTesting
+  static Map<String, String> buildParametersMap(
+      String eventName, String metadataKey, String metadataValue) {
+    Map<String, String> parametersMap = new HashMap<>(STANDARD_PARAMETERS);
+    parametersMap.put("cid", getAnonymizedClientId());
+    parametersMap.put("cd19", APPLICATION_NAME);  // cd19: "event type"
+    parametersMap.put("cd20", eventName);
+
+    String virtualPageUrl = "/virtual/" + APPLICATION_NAME + "/" + eventName;
+    parametersMap.put("dp", virtualPageUrl);
+    parametersMap.put("dh", "virtual.eclipse");
+
+    if (metadataKey != null) {
+      // Event metadata are passed as a (virtual) page title.
+      String virtualPageTitle = metadataKey + "=";
+      if (metadataValue != null) {
+        virtualPageTitle += metadataValue;
+      } else {
+        virtualPageTitle += "null";
+      }
+
+      parametersMap.put("dt", virtualPageTitle);
+    }
+
+    return parametersMap;
   }
 
   @VisibleForTesting
