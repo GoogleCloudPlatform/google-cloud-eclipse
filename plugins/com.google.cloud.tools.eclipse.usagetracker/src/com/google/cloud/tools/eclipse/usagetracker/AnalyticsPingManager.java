@@ -12,6 +12,7 @@ import org.eclipse.ui.PlatformUI;
 import org.osgi.service.prefs.BackingStoreException;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
@@ -122,8 +123,11 @@ public class AnalyticsPingManager {
       connection.setReadTimeout(3000);  // milliseconds
       byte[] bytesToWrite = parametersString.getBytes("UTF-8");
       connection.setFixedLengthStreamingMode(bytesToWrite.length);
-      connection.getOutputStream().write(bytesToWrite);
-      connection.getOutputStream().flush();
+
+      try (OutputStream out = connection.getOutputStream()) {
+        out.write(bytesToWrite);
+        out.flush();
+      }
     } catch (IOException ex) {
       // Don't try to recover or retry.
       logger.log(Level.WARNING, "Failed to send a POST request", ex);
