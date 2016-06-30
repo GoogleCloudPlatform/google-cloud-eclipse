@@ -119,7 +119,7 @@ public class AnalyticsPingManager {
       connection = (HttpURLConnection) url.openConnection();
       connection.setDoOutput(true);
       connection.setRequestMethod("POST");
-      connection.setFixedLengthStreamingMode(parametersString.length());
+      connection.setFixedLengthStreamingMode(parametersString.getBytes("UTF-8").length);
       connection.setReadTimeout(3000);  // milliseconds
 
       try (Writer writer = new OutputStreamWriter(connection.getOutputStream(), "UTF-8")) {
