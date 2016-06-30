@@ -232,6 +232,9 @@ public class AnalyticsPingManager {
     }
   }
 
+  /**
+   * May return null. (However, dialogs can have null as a parent shell.)
+   */
   private Shell findShell(Shell parentShell) {
     if (parentShell != null) {
       return parentShell;
@@ -239,10 +242,15 @@ public class AnalyticsPingManager {
 
     try {
       IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-      return window == null ? null : window.getShell();
+      if (window != null) {
+        return window.getShell();
+      }
     } catch (IllegalStateException ise) {  // getWorkbench() might throw this.
-      return null;
+      // Fall through.
     }
+
+    Display display = Display.getCurrent();
+    return display != null ? display.getActiveShell() : null;
   }
 
   private void flushPreferences() {
