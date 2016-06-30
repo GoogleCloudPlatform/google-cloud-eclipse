@@ -15,7 +15,7 @@ import org.eclipse.ui.PlatformUI;
 /**
  * A one-time dialog to suggest opt-in for sending client-side usage metrics.
  */
-class OptInDialog extends Dialog {
+public class OptInDialog extends Dialog {
 
   public OptInDialog(Shell parentShell) {
     super(parentShell);
@@ -73,13 +73,13 @@ class OptInDialog extends Dialog {
   @Override
   protected void okPressed() {
     super.okPressed();
-    AnalyticsPingManager.registerOptInStatus(true);
+    AnalyticsPingManager.getInstance().registerOptInStatus(true);
   }
 
   @Override
   protected void cancelPressed() {
     super.cancelPressed();
-    AnalyticsPingManager.registerOptInStatus(false);
+    AnalyticsPingManager.getInstance().registerOptInStatus(false);
   }
 
   /**
@@ -88,6 +88,6 @@ class OptInDialog extends Dialog {
   @Override
   protected void handleShellCloseEvent() {
     super.handleShellCloseEvent();
-    AnalyticsPingManager.registerOptInStatus(false);
+    AnalyticsPingManager.getInstance().registerOptInStatus(false);
   }
 }

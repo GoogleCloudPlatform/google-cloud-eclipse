@@ -60,28 +60,50 @@ public class AnalyticsPingManager {
         }
       });
 
+  private static AnalyticsPingManager instance;
+
+  // Preference store (should be ConfigurationScope-d) from which we get UUID, opt-in status, etc.
+  private IEclipsePreferences preferences;
+
+  private OptInDialogCreator optInDialogCreator;
+
+  @VisibleForTesting
+  AnalyticsPingManager(
+      IEclipsePreferences preferences, OptInDialogCreator optInDialogCreator) {
+    this.preferences = preferences;
+    this.optInDialogCreator = optInDialogCreator;
+  }
+
+  public static AnalyticsPingManager getInstance() {
+    if (instance == null) {
+      IEclipsePreferences preferences = ConfigurationScope.INSTANCE.getNode(PREFERENCES_PLUGIN_ID);
+      if (preferences == null) {
+        throw new RuntimeException("Preference store cannot be null.");
+      }
+      instance = new AnalyticsPingManager(preferences, new OptInDialogCreator());
+    }
+    return instance;
+  }
+
   private static boolean isTrackingIdDefined() {
     return Constants.ANALYTICS_TRACKING_ID != null
         && Constants.ANALYTICS_TRACKING_ID.startsWith("UA-");
   }
 
-  private static String getAnonymizedClientId() {
+  private String getAnonymizedClientId() {
     String clientId = "0";  // For the extremely unlikely event of getNode() failure.
 
-    IEclipsePreferences prefs = ConfigurationScope.INSTANCE.getNode(PREFERENCES_PLUGIN_ID);
-    if (prefs != null) {
-      clientId = prefs.get(CloudToolsPreferencePage.ANALYTICS_CLIENT_ID, null);
-      if (clientId == null) {
-        clientId = UUID.randomUUID().toString();
-        prefs.put(CloudToolsPreferencePage.ANALYTICS_CLIENT_ID, clientId);
-        flushPreferences(prefs);
-      }
+    clientId = preferences.get(CloudToolsPreferencePage.ANALYTICS_CLIENT_ID, null);
+    if (clientId == null) {
+      clientId = UUID.randomUUID().toString();
+      preferences.put(CloudToolsPreferencePage.ANALYTICS_CLIENT_ID, clientId);
+      flushPreferences();
     }
     return clientId;
   }
 
-  private static boolean hasUserOptedIn() {
-    return getBooleanPreference(CloudToolsPreferencePage.ANALYTICS_OPT_IN, false);
+  private boolean hasUserOptedIn() {
+    return preferences.getBoolean(CloudToolsPreferencePage.ANALYTICS_OPT_IN, false);
   }
 
   /**
@@ -90,17 +112,14 @@ public class AnalyticsPingManager {
    * opting out. (Therefore, this method essentially returns true if the opt-in dialog was ever
    * presented before.)
    */
-  private static boolean hasUserRegisteredOptInStatus() {
-    return getBooleanPreference(CloudToolsPreferencePage.ANALYTICS_OPT_IN_REGISTERED, false);
+  private boolean hasUserRegisteredOptInStatus() {
+    return preferences.getBoolean(CloudToolsPreferencePage.ANALYTICS_OPT_IN_REGISTERED, false);
   }
 
-  static void registerOptInStatus(boolean optedIn) {
-    IEclipsePreferences prefs = ConfigurationScope.INSTANCE.getNode(PREFERENCES_PLUGIN_ID);
-    if (prefs != null) {
-      prefs.putBoolean(CloudToolsPreferencePage.ANALYTICS_OPT_IN, optedIn);
-      prefs.putBoolean(CloudToolsPreferencePage.ANALYTICS_OPT_IN_REGISTERED, true);
-      flushPreferences(prefs);
-    }
+  void registerOptInStatus(boolean optedIn) {
+    preferences.putBoolean(CloudToolsPreferencePage.ANALYTICS_OPT_IN, optedIn);
+    preferences.putBoolean(CloudToolsPreferencePage.ANALYTICS_OPT_IN_REGISTERED, true);
+    flushPreferences();
   }
 
   /**
@@ -112,23 +131,26 @@ public class AnalyticsPingManager {
    * String, String, String, Shell)} and pass the {@Shell} of currently open modal dialog.
    * (Otherwise, the opt-in dialog won't be able to get input until the workbench can get input.)
    */
-  public static void sendPing(String eventName, String metadataKey, String metadataValue) {
+  public void sendPing(String eventName, String metadataKey, String metadataValue) {
     sendPing(eventName, metadataKey, metadataValue, null);
   }
 
-  public static void sendPing(String eventName, String metadataKey, String metadataValue,
+  public void sendPing(String eventName, String metadataKey, String metadataValue,
       Shell parentShell) {
+    // Non-modal and non-blocking dialog (if presented). This implies that the very first
+    // sendPing() may drop this event.
+    showOptInDialog(parentShell);
+
     if (Platform.inDevelopmentMode() || !isTrackingIdDefined() || !hasUserOptedIn()) {
       return;
     }
 
-    showOptInDialog(parentShell);
-
-    Map<String, String> parametersMap = buildParametersMap(eventName, metadataKey, metadataValue);
+    Map<String, String> parametersMap =
+        buildParametersMap(getAnonymizedClientId(), eventName, metadataKey, metadataValue);
     sendPostRequest(getParametersString(parametersMap));
   }
 
-  private static void sendPostRequest(String parametersString) {
+  private void sendPostRequest(String parametersString) {
     HttpURLConnection connection = null;
 
     try {
@@ -154,9 +176,9 @@ public class AnalyticsPingManager {
 
   @VisibleForTesting
   static Map<String, String> buildParametersMap(
-      String eventName, String metadataKey, String metadataValue) {
+      String clientId, String eventName, String metadataKey, String metadataValue) {
     Map<String, String> parametersMap = new HashMap<>(STANDARD_PARAMETERS);
-    parametersMap.put("cid", getAnonymizedClientId());
+    parametersMap.put("cid", clientId);
     parametersMap.put("cd19", APPLICATION_NAME);  // cd19: "event type"
     parametersMap.put("cd20", eventName);
 
@@ -203,15 +225,15 @@ public class AnalyticsPingManager {
   /**
    * @param parentShell if null, shows the dialog at the workbench level.
    */
-  public static void showOptInDialog(Shell parentShell) {
+  public void showOptInDialog(Shell parentShell) {
     if (!hasUserOptedIn() && !hasUserRegisteredOptInStatus()) {
       if (parentShell != null) {
-        new OptInDialog(parentShell).open();
+        optInDialogCreator.create(parentShell).open();
       } else {
         // Show the dialog at the workbench level, if it exists.
         IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
         if (window != null) {
-          new OptInDialog(window.getShell()).open();
+          optInDialogCreator.create(window.getShell()).open();
         } else {
           logger.log(Level.WARNING, "No active workbench window found.");
         }
@@ -219,19 +241,11 @@ public class AnalyticsPingManager {
     }
   }
 
-  private static void flushPreferences(IEclipsePreferences prefs) {
+  private void flushPreferences() {
     try {
-      prefs.flush();
+      preferences.flush();
     } catch (BackingStoreException bse) {
       logger.log(Level.WARNING, bse.getMessage(), bse);
     }
-  }
-
-  private static boolean getBooleanPreference(String key, boolean defaultValue) {
-    IEclipsePreferences prefs = ConfigurationScope.INSTANCE.getNode(PREFERENCES_PLUGIN_ID);
-    if (prefs != null) {
-      return prefs.getBoolean(key, defaultValue);
-    }
-    return defaultValue;
   }
 }
