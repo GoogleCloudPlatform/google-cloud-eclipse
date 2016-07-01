@@ -7,7 +7,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jst.server.core.RuntimeClasspathProviderDelegate;
 import org.eclipse.wst.server.core.IRuntime;
 
-import com.google.cloud.tools.appengine.cloudsdk.PathResolver;
+import com.google.cloud.tools.eclipse.sdk.CloudSdkProvider;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
 
 /**
@@ -30,7 +30,7 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
 
   @Override
   public IClasspathEntry[] resolveClasspathContainer(IRuntime runtime) {
-    java.nio.file.Path cloudSdkPath = PathResolver.INSTANCE.getCloudSdkPath();
+    java.nio.file.Path cloudSdkPath = new CloudSdkProvider(null).getCloudSdkLocation().toPath();
     if (cloudSdkPath == null) {
       return new IClasspathEntry[0];
     };
