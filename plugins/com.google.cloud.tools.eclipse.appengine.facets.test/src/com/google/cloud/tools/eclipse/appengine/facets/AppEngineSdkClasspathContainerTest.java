@@ -1,7 +1,6 @@
 package com.google.cloud.tools.eclipse.appengine.facets;
 
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 import org.eclipse.core.runtime.IPath;

@@ -1,11 +1,25 @@
 package com.google.cloud.tools.eclipse.usagetracker;
 
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyBoolean;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.swt.widgets.Shell;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.verification.VerificationMode;
+
+import com.google.cloud.tools.eclipse.preferences.CloudToolsPreferencePage;
 
 public class AnalyticsPingManagerTest {
 
@@ -85,16 +99,73 @@ public class AnalyticsPingManagerTest {
 
   @Test
   public void testEventTypeEventNameConvention() {
-    Map<String, String> parameters =
-        AnalyticsPingManager.buildParametersMap("some.event-name", null, null);
+    Map<String, String> parameters = AnalyticsPingManager.buildParametersMap(
+        "clientId", "some.event-name", null, null);
     Assert.assertEquals("/virtual/gcloud-eclipse-tools/some.event-name",
         parameters.get("dp"));
   }
 
   @Test
   public void testMetadataConvention() {
-    Map<String, String> parameters =
-        AnalyticsPingManager.buildParametersMap("some.event-name", "times-happened", "1234");
+    Map<String, String> parameters = AnalyticsPingManager.buildParametersMap(
+        "clientId", "some.event-name", "times-happened", "1234");
     Assert.assertEquals("times-happened=1234", parameters.get("dt"));
+  }
+
+  @Test
+  public void testOptInDialogShown_optInNotRegisteredAndNotYetOptedIn() {
+    IEclipsePreferences preferences = mock(IEclipsePreferences.class);
+    mockOptIn(preferences, false);
+    mockOptInRegistered(preferences, false);
+
+    verifyOptInDialogOpen(preferences, times(1));
+  }
+
+  @Test
+  public void testOptInDialogSkipped_optInNotRegisteredAndAlreadyOptedIn() {
+    IEclipsePreferences preferences = mock(IEclipsePreferences.class);
+    mockOptIn(preferences, true);
+    mockOptInRegistered(preferences, false);
+
+    verifyOptInDialogOpen(preferences, never());
+  }
+
+  @Test
+  public void testOptInDialogSkipped_optInRegisteredAndNotYetOptedIn() {
+    IEclipsePreferences preferences = mock(IEclipsePreferences.class);
+    mockOptIn(preferences, false);
+    mockOptInRegistered(preferences, true);
+
+    verifyOptInDialogOpen(preferences, never());
+  }
+
+  @Test
+  public void testOptInDialogSkipped_optInRegisteredAndAlreadyOptedIn() {
+    IEclipsePreferences preferences = mock(IEclipsePreferences.class);
+    mockOptIn(preferences, true);
+    mockOptInRegistered(preferences, true);
+
+    verifyOptInDialogOpen(preferences, never());
+  }
+
+  private void mockOptIn(IEclipsePreferences preferences, boolean optIn) {
+    when(preferences.getBoolean(eq(CloudToolsPreferencePage.ANALYTICS_OPT_IN), anyBoolean()))
+        .thenReturn(optIn);
+  }
+
+  private void mockOptInRegistered(IEclipsePreferences preferences, boolean registered) {
+    when(preferences.getBoolean(eq(CloudToolsPreferencePage.ANALYTICS_OPT_IN_REGISTERED),
+                                anyBoolean()))
+        .thenReturn(registered);
+  }
+
+  private void verifyOptInDialogOpen(
+      IEclipsePreferences preferences, VerificationMode verificationMode) {
+    OptInDialog optInDialog = mock(OptInDialog.class);
+    OptInDialogCreator dialogCreator = mock(OptInDialogCreator.class);
+    when(dialogCreator.create(any(Shell.class))).thenReturn(optInDialog);
+
+    new AnalyticsPingManager(preferences, dialogCreator).showOptInDialog(null);
+    verify(optInDialog, verificationMode).open();
   }
 }

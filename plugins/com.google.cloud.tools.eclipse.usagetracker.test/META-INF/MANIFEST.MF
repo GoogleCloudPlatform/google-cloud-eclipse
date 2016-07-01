@@ -6,4 +6,7 @@ Bundle-SymbolicName: com.google.cloud.tools.eclipse.usagetracker.test
 Bundle-Vendor: Google, Inc.
 Bundle-Version: 0.1.0.qualifier
 Fragment-Host: com.google.cloud.tools.eclipse.usagetracker
-Require-Bundle: org.junit
+Require-Bundle: org.junit,
+ org.eclipse.equinox.preferences,
+ com.google.cloud.tools.eclipse.test.dependencies;bundle-version="0.1.0",
+ org.eclipse.swt
