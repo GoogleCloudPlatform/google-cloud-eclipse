@@ -51,13 +51,10 @@ public class OptInDialog extends Dialog {
   private Shell findTargetShell() {
     try {
       IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-      if (window != null) {
-        return window.getShell();
-      }
+      return window != null ? window.getShell() : getParentShell();
     } catch (IllegalStateException ise) {  // getWorkbench() might throw this.
-      // Fall through.
+      return getParentShell();
     }
-    return getParentShell();
   }
 
   /**
