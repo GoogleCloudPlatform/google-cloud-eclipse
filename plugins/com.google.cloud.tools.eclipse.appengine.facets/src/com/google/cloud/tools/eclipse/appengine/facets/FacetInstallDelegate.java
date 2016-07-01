@@ -31,9 +31,9 @@ public class FacetInstallDelegate implements IDelegate {
           JavaCore.newContainerEntry(new Path(AppEngineSdkClasspathContainer.CONTAINER_ID),
                                      new IAccessRule[0],
                                      new IClasspathAttribute[]{
-                                         UpdateClasspathAttributeUtil.createDependencyAttribute(true)
+                                         UpdateClasspathAttributeUtil.createDependencyAttribute(true /*isWebApp */)
                                      },
-                                     true);
+                                     true /* isExported */);
       javaProject.setRawClasspath(newClasspath, monitor);
     }
   }
