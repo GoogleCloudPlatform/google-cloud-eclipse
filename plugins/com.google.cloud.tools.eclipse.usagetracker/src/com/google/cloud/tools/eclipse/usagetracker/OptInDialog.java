@@ -24,31 +24,36 @@ public class OptInDialog extends Dialog {
   }
 
   /**
-   * Show this dialog at the top-right corner.
+   * Show this dialog at the top-right corner of some target window.
    */
   @Override
   protected Point getInitialLocation(Point initialSize) {
-    Shell targetShell = null;
-    try {
-      // Prefer showing at the top-right corner of the currently active workbench, but
-      // if we can't get a workbench for any reason, fall back to the parent shell.
-      IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-      targetShell = window != null ? window.getShell() : getParentShell();
-    } catch (IllegalStateException ise) {  // getWorkbench() might throw this.
-      // No special handling. targetShell will be null.
-    }
-
+    Shell targetShell = findTargetShell();
     if (targetShell == null) {
       return super.getInitialLocation(initialSize);
-    } else {
-      // Position the dialog at the top-right corner of the targetShell window.
-      Rectangle parentBounds = targetShell.getBounds();
-      Rectangle parentClientArea = targetShell.getClientArea();
+    }
 
-      int heightCaptionAndUpperBorder =
-          parentBounds.height - parentClientArea.height - targetShell.getBorderWidth();
-      return new Point(parentBounds.x + parentClientArea.width - initialSize.x,
-          parentBounds.y + heightCaptionAndUpperBorder);
+    // Position the dialog at the top-right corner of the targetShell window.
+    Rectangle parentBounds = targetShell.getBounds();
+    Rectangle parentClientArea = targetShell.getClientArea();
+
+    int heightCaptionAndUpperBorder =
+        parentBounds.height - parentClientArea.height - targetShell.getBorderWidth();
+    return new Point(parentBounds.x + parentClientArea.width - initialSize.x,
+        parentBounds.y + heightCaptionAndUpperBorder);
+  }
+
+  /**
+   * Strongly prefer returning the shell of the currently active workbench as a target
+   * window to position the dialog at the top-right corner. If we can't get a workbench
+   * for any reason, fall back to the parent shell (which can be null).
+   */
+  private Shell findTargetShell() {
+    try {
+      IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+      return window != null ? window.getShell() : getParentShell();
+    } catch (IllegalStateException ise) {  // getWorkbench() might throw this.
+      return null;
     }
   }
 

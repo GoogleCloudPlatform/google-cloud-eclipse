@@ -62,7 +62,7 @@ public class AnalyticsPingManager {
 
   private static AnalyticsPingManager instance;
 
-  // Preference store (should be ConfigurationScope-d) from which we get UUID, opt-in status, etc.
+  // Preference store (should be configuration scoped) from which we get UUID, opt-in status, etc.
   private IEclipsePreferences preferences;
 
   private OptInDialogCreator optInDialogCreator;
@@ -74,11 +74,11 @@ public class AnalyticsPingManager {
     this.optInDialogCreator = optInDialogCreator;
   }
 
-  public static AnalyticsPingManager getInstance() {
+  public static synchronized AnalyticsPingManager getInstance() {
     if (instance == null) {
       IEclipsePreferences preferences = ConfigurationScope.INSTANCE.getNode(PREFERENCES_PLUGIN_ID);
       if (preferences == null) {
-        throw new RuntimeException("Preference store cannot be null.");
+        throw new NullPointerException("Preference store cannot be null.");
       }
       instance = new AnalyticsPingManager(preferences, new OptInDialogCreator());
     }
@@ -91,9 +91,7 @@ public class AnalyticsPingManager {
   }
 
   private String getAnonymizedClientId() {
-    String clientId = "0";  // For the extremely unlikely event of getNode() failure.
-
-    clientId = preferences.get(CloudToolsPreferencePage.ANALYTICS_CLIENT_ID, null);
+    String clientId = preferences.get(CloudToolsPreferencePage.ANALYTICS_CLIENT_ID, null);
     if (clientId == null) {
       clientId = UUID.randomUUID().toString();
       preferences.put(CloudToolsPreferencePage.ANALYTICS_CLIENT_ID, clientId);
@@ -102,7 +100,7 @@ public class AnalyticsPingManager {
     return clientId;
   }
 
-  private boolean hasUserOptedIn() {
+  private boolean userHasOptedIn() {
     return preferences.getBoolean(CloudToolsPreferencePage.ANALYTICS_OPT_IN, false);
   }
 
@@ -112,10 +110,19 @@ public class AnalyticsPingManager {
    * opting out. (Therefore, this method essentially returns true if the opt-in dialog was ever
    * presented before.)
    */
-  private boolean hasUserRegisteredOptInStatus() {
+  private boolean userHasRegisteredOptInStatus() {
     return preferences.getBoolean(CloudToolsPreferencePage.ANALYTICS_OPT_IN_REGISTERED, false);
   }
 
+  /**
+   * "Registered" here means a user made a decision through the opt-in dialog. (That is, it
+   * essentially means if the opt-in dialog was ever presented in our current setting.) Note
+   * that it is possible that a user may have already opted in/out explicitly through the
+   * preference page without ever seeing the opt-in dialog. It would have been ideal if we
+   * defined a three-valued settings (e.g., OPTED_IN | OPTED_OUT | UNDEF). However, this would
+   * require implementing a custom UI editor field class for the preference page, so here we
+   * take a simple approach to use two Boolean settings.
+   */
   void registerOptInStatus(boolean optedIn) {
     preferences.putBoolean(CloudToolsPreferencePage.ANALYTICS_OPT_IN, optedIn);
     preferences.putBoolean(CloudToolsPreferencePage.ANALYTICS_OPT_IN_REGISTERED, true);
@@ -124,7 +131,7 @@ public class AnalyticsPingManager {
 
   /**
    * Sends a usage metric to Google Analytics.
-   * <p/>
+   *
    * If the user has never seen the opt-in dialog or set the opt-in preference beforehand,
    * this method can potentially present an opt-in dialog at the top workbench level. If you
    * are calling this method inside another modal dialog, consider using {@link #sendPing(
@@ -141,7 +148,7 @@ public class AnalyticsPingManager {
     // sendPing() may drop this event.
     showOptInDialog(parentShell);
 
-    if (Platform.inDevelopmentMode() || !isTrackingIdDefined() || !hasUserOptedIn()) {
+    if (Platform.inDevelopmentMode() || !isTrackingIdDefined() || !userHasOptedIn()) {
       return;
     }
 
@@ -228,7 +235,7 @@ public class AnalyticsPingManager {
    * @param parentShell if null, tries to show the dialog at the workbench level.
    */
   public void showOptInDialog(Shell parentShell) {
-    if (!hasUserOptedIn() && !hasUserRegisteredOptInStatus()) {
+    if (!userHasOptedIn() && !userHasRegisteredOptInStatus()) {
       optInDialogCreator.create(findShell(parentShell)).open();
     }
   }

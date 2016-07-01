@@ -17,6 +17,7 @@ import org.eclipse.ui.IWorkbench;
 public class CloudToolsPreferencePage extends FieldEditorPreferencePage
     implements IWorkbenchPreferencePage {
 
+  // See AnalyticsPingManager for the details of these fields.
   public static final String ANALYTICS_OPT_IN = "ANALYTICS_OPT_IN";
   public static final String ANALYTICS_OPT_IN_REGISTERED = "ANALYTICS_OPT_IN_REGISTERED";
   public static final String ANALYTICS_CLIENT_ID = "ANALYTICS_CLIENT_ID";
