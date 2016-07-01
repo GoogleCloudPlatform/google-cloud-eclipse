@@ -14,10 +14,10 @@
     <module>features/com.google.cloud.tools.eclipse.suite.e45.feature</module>
     <module>features/com.google.cloud.tools.eclipse.3rdparty.feature</module>
     <module>features/com.google.licenses.apache_v2</module>
-    
     <module>plugins/com.google.cloud.tools.eclipse.appengine.deploy</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.deploy.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.facets</module>
+    <module>plugins/com.google.cloud.tools.eclipse.appengine.facets.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.localserver</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.localserver.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.login</module>
@@ -49,7 +49,7 @@
     <tycho.showEclipseLog>true</tycho.showEclipseLog>
 
     <!--
-      `SYSTEM` means use the default JDK (necc for Travis). 
+      `SYSTEM` means use the default JDK (necc for Travis).
       `BREE` means find a configured JDK using Maven Toolchains matching
       the Bundle-RequiredExecutionEnvironment. See `README.md` for details.
     -->

@@ -14,9 +14,8 @@ import org.eclipse.ui.PlatformUI;
 import org.osgi.service.prefs.BackingStoreException;
 
 import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -159,11 +158,13 @@ public class AnalyticsPingManager {
       connection = (HttpURLConnection) url.openConnection();
       connection.setDoOutput(true);
       connection.setRequestMethod("POST");
-      connection.setRequestProperty("Content-Length", Integer.toString(parametersString.length()));
+      connection.setReadTimeout(3000);  // milliseconds
+      byte[] bytesToWrite = parametersString.getBytes("UTF-8");
+      connection.setFixedLengthStreamingMode(bytesToWrite.length);
 
-      try (Writer writer = new OutputStreamWriter(connection.getOutputStream(), "UTF-8")) {
-        writer.write(parametersString);
-        writer.flush();
+      try (OutputStream out = connection.getOutputStream()) {
+        out.write(bytesToWrite);
+        out.flush();
       }
     } catch (IOException ex) {
       // Don't try to recover or retry.
