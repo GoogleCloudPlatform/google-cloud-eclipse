@@ -10,9 +10,9 @@ public class AppEngineStandardDeployCommandHandler extends AbstractHandler {
 
   @Override
   public Object execute(ExecutionEvent event) throws ExecutionException {
-    new MessageDialog(HandlerUtil.getActiveShell(event), "Deploying to App Engine Standard", null,
-      "The project is being deployed to App Engine Standard runtime (not really)",
-      MessageDialog.INFORMATION, new String[]{"OK"}, 0).open();
+    new MessageDialog(HandlerUtil.getActiveShell(event), Messages.getString("deploy.standard.dialog.title"), null, //$NON-NLS-1$
+      Messages.getString("deploy.standard.dialog.message"), //$NON-NLS-1$
+      MessageDialog.INFORMATION, new String[]{Messages.getString("button.ok.label")}, 0).open(); //$NON-NLS-1$
     return null;
   }
 

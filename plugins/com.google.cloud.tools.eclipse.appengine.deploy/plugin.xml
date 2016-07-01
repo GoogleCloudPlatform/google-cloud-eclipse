@@ -4,9 +4,9 @@
    <extension
          point="org.eclipse.ui.commands">
       <command
-            description="Deploy the project to App Engine Standard runtime"
+            description="%deployStandardCommandDescription"
             id="com.google.cloud.tools.eclipse.appengine.deploy.standard"
-            name="Deploy to App Engine Standard">
+            name="%deployStandardCommandName">
       </command>
    </extension>
    <extension
@@ -16,7 +16,7 @@
             locationURI="popup:org.eclipse.ui.popup.any?after=additions">
          <command
                commandId="com.google.cloud.tools.eclipse.appengine.deploy.standard"
-               label="Deploy to App Engine Standard"
+               label="%deployStandardMenuLabel"
                style="push">
          </command>
       </menuContribution>
