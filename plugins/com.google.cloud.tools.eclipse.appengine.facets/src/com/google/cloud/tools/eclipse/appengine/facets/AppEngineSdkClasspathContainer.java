@@ -8,8 +8,7 @@ import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
 
-import com.google.cloud.tools.appengine.cloudsdk.PathResolver;
-import com.google.common.annotations.VisibleForTesting;
+import com.google.cloud.tools.eclipse.sdk.CloudSdkProvider;
 
 public final class AppEngineSdkClasspathContainer implements IClasspathContainer {
 
@@ -18,7 +17,7 @@ public final class AppEngineSdkClasspathContainer implements IClasspathContainer
   private static final String SDK_JAR = "platform/google_appengine/google/appengine/tools/java/lib/appengine-tools-api.jar";
   public static final String CONTAINER_ID = "AppEngineSDK";
 
-  private PathResolver pathResolver = PathResolver.INSTANCE;
+  private File cloudSdkLocation = new CloudSdkProvider().getCloudSdkLocation();
 
   @Override
   public IPath getPath() {
@@ -37,9 +36,8 @@ public final class AppEngineSdkClasspathContainer implements IClasspathContainer
 
   @Override
   public IClasspathEntry[] getClasspathEntries() {
-    java.nio.file.Path cloudSdkPath = pathResolver.getCloudSdkPath();
-    if (cloudSdkPath != null) {
-      File jarFile = cloudSdkPath.resolve(SDK_JAR).toFile();
+    if (cloudSdkLocation != null) {
+      File jarFile = cloudSdkLocation.toPath().resolve(SDK_JAR).toFile();
       if (jarFile.exists()) {
         String appEngineToolsApiJar = jarFile.getPath();
         IClasspathEntry appEngineToolsEntry =
@@ -52,8 +50,4 @@ public final class AppEngineSdkClasspathContainer implements IClasspathContainer
     return new IClasspathEntry[0];
   }
 
-  @VisibleForTesting
-  void setPathResolver(PathResolver pathResolver) {
-    this.pathResolver = pathResolver;
-  }
 }

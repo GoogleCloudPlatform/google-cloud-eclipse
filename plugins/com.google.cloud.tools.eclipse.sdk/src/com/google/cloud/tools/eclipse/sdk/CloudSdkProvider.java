@@ -36,10 +36,15 @@ public class CloudSdkProvider extends ContextFunction {
   private final IPreferenceStore preferences;
 
    public CloudSdkProvider(IPreferenceStore preferences) {
+     // todo drop the null check and use the no args constructor instead
      if (preferences == null) {
        preferences = PreferenceInitializer.getPreferenceStore();
      }
      this.preferences = preferences;
+   }
+   
+   public CloudSdkProvider() {
+     this.preferences = PreferenceInitializer.getPreferenceStore();
    }
 
   /**
