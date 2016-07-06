@@ -36,6 +36,7 @@ location "http://download.eclipse.org/releases/neon" {
 location "http://download.eclipse.org/webtools/downloads/drops/R3.8.0/R-3.8.0-20160608130753/repository" {
     org.eclipse.jst.web_sdk.feature.feature.group
     org.eclipse.jst.server_sdk.feature.feature.group
+    org.eclipse.jst.common.fproj.enablement.jdt.sdk.feature.group
     org.eclipse.wst.common.fproj.sdk.feature.group
     org.eclipse.wst.web_sdk.feature.feature.group
     org.eclipse.wst.server_adapters.sdk.feature.feature.group

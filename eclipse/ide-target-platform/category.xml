@@ -12,6 +12,7 @@
 
   <feature id="org.eclipse.jst.web_sdk.feature" version="0.0.0"/>
   <feature id="org.eclipse.jst.server_sdk.feature" version="0.0.0"/>
+  <feature id="org.eclipse.jst.common.fproj.enablement.jdt.sdk" version="0.0.0"/>
   <feature id="org.eclipse.wst.common.fproj.sdk" version="0.0.0"/>
   <feature id="org.eclipse.wst.web_sdk.feature" version="0.0.0"/>
   <feature id="org.eclipse.wst.server_adapters.sdk.feature" version="0.0.0"/>
