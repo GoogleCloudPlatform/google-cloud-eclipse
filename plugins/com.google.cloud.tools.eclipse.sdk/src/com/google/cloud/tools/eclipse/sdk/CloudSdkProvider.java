@@ -44,7 +44,7 @@ public class CloudSdkProvider extends ContextFunction {
    }
    
    public CloudSdkProvider() {
-     this.preferences = PreferenceInitializer.getPreferenceStore();
+     this(PreferenceInitializer.getPreferenceStore());
    }
 
   /**
