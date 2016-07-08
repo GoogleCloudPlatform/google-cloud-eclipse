@@ -1,6 +1,7 @@
 package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
+import com.google.common.annotations.VisibleForTesting;
 
 import org.apache.maven.archetype.catalog.Archetype;
 import org.eclipse.jface.dialogs.Dialog;
@@ -23,7 +24,8 @@ import java.util.Collections;
  */
 public class MavenAppEngineStandardArchetypeWizardPage extends WizardPage implements IWizardPage {
 
-  private static final java.util.List<ArchetypeTuple> PRESET_ARCHETYPES =
+  @VisibleForTesting
+  static final java.util.List<ArchetypeTuple> PRESET_ARCHETYPES =
       Collections.unmodifiableList(Arrays.asList(
           new ArchetypeTuple("com.google.appengine.archetypes", //$NON-NLS-1$
               "appengine-skeleton-archetype", //$NON-NLS-1$
@@ -86,7 +88,8 @@ public class MavenAppEngineStandardArchetypeWizardPage extends WizardPage implem
     return isCurrentPage();
   }
 
-  private static class ArchetypeTuple {
+  @VisibleForTesting
+  static class ArchetypeTuple {
     Archetype archetype;
     String displayName;
     String description;

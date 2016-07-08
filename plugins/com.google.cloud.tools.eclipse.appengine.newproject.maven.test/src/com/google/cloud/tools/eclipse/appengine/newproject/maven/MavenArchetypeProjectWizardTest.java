@@ -53,4 +53,11 @@ public class MavenArchetypeProjectWizardTest {
     Assert.assertEquals(wizard.getPage("basicNewProjectPage"),
         wizard.getPage("newProjectArchetypePage").getPreviousPage());
   }
+
+  @Test
+  public void testArchetypeDefaultSelection() {
+    Assert.assertEquals("appengine-skeleton-archetype",
+        MavenAppEngineStandardArchetypeWizardPage.PRESET_ARCHETYPES.get(0)
+            .archetype.getArtifactId());
+  }
 }
