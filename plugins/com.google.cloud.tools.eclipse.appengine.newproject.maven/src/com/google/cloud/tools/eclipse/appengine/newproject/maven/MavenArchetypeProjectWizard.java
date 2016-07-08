@@ -15,6 +15,7 @@ import java.lang.reflect.InvocationTargetException;
 
 public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
   private MavenAppEngineStandardWizardPage page;
+  private MavenAppEngineStandardArchetypeWizardPage archetypePage;
 
   public MavenArchetypeProjectWizard() {
     setWindowTitle("New Maven-based App Engine Standard Project");
@@ -24,7 +25,9 @@ public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
   @Override
   public void addPages() {
     page = new MavenAppEngineStandardWizardPage();
+    archetypePage = new MavenAppEngineStandardArchetypeWizardPage();
     this.addPage(page);
+    this.addPage(archetypePage);
   }
 
   @Override
@@ -38,6 +41,7 @@ public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
     if (page.useDefaults()) {
       operation.setLocation(page.getLocationPath());
     }
+    operation.setArchetype(archetypePage.getArchetype());
 
     IRunnableWithProgress runnable = new IRunnableWithProgress() {
       @Override

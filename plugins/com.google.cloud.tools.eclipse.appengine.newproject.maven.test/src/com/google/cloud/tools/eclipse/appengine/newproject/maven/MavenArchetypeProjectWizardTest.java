@@ -25,13 +25,32 @@ public class MavenArchetypeProjectWizardTest {
   }
 
   @Test
-  public void testOnePage() {
-    Assert.assertEquals(1, wizard.getPageCount());
+  public void testTwoPages() {
+    Assert.assertEquals(2, wizard.getPageCount());
   }
   
   @Test
   public void testGetPageByName() {
-    Assert.assertNotNull(wizard.getPage("basicNewProjectPage"));
+    assertNotNull(wizard.getPage("basicNewProjectPage"));
+    assertNotNull(wizard.getPage("newProjectArchetypePage"));
   }
-  
+
+  @Test
+  public void testPageComplete() {
+    Assert.assertFalse(wizard.getPage("newProjectArchetypePage").isPageComplete());
+    Assert.assertFalse(wizard.getPage("newProjectArchetypePage").isPageComplete());
+  }
+
+  @Test
+  public void testFlipToPageTwo() {
+    Assert.assertFalse(wizard.getPage("basicNewProjectPage").canFlipToNextPage());
+  }
+
+  @Test
+  public void testPageOrder() {
+    Assert.assertEquals(wizard.getPage("newProjectArchetypePage"),
+        wizard.getPage("basicNewProjectPage").getNextPage());
+    Assert.assertEquals(wizard.getPage("basicNewProjectPage"),
+        wizard.getPage("newProjectArchetypePage").getPreviousPage());
+  }
 }

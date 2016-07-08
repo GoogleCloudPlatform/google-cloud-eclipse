@@ -44,6 +44,8 @@ public class MavenAppEngineStandardWizardPage extends WizardPage implements IWiz
   private Text versionField;
   private Text javaPackageField;
   private Text projectIdField;
+
+  private boolean canFlipPage;
   
   public MavenAppEngineStandardWizardPage() {
     super("basicNewProjectPage"); //$NON-NLS-1$
@@ -51,7 +53,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage implements IWiz
     setDescription("Create new Maven-based App Engine Standard Project");
     setImageDescriptor(AppEngineImages.googleCloudPlatform(32));
 
-    setPageComplete(false);
+    canFlipPage = false;
   }
 
   @Override
@@ -107,7 +109,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage implements IWiz
       public void widgetSelected(SelectionEvent e) {
         locationField.setEnabled(!useDefaults.getSelection());
         locationBrowseButton.setEnabled(!useDefaults.getSelection());
-        checkPageComplete();
+        checkFlipToNext();
       }
     });
   }
@@ -171,12 +173,18 @@ public class MavenAppEngineStandardWizardPage extends WizardPage implements IWiz
     String location = dialog.open();
     if (location != null) {
       locationField.setText(location);
-      checkPageComplete();
+      checkFlipToNext();
     }
   }
 
-  protected void checkPageComplete() {
-    setPageComplete(validatePage());
+  @Override
+  public boolean canFlipToNextPage() {
+    return canFlipPage;
+  }
+
+  protected void checkFlipToNext() {
+    canFlipPage = validatePage();
+    getContainer().updateButtons();
   }
 
   /**
@@ -312,7 +320,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage implements IWiz
   private final class PageValidator implements ModifyListener {
     @Override
     public void modifyText(ModifyEvent event) {
-      checkPageComplete();
+      checkFlipToNext();
     }
   }
 }

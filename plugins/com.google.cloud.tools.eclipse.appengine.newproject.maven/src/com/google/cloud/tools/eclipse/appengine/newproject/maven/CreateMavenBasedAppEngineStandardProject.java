@@ -41,6 +41,7 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
   private String groupId;
   private String version;
   private IPath location;
+  private Archetype archetype;
 
   @Override
   protected void execute(IProgressMonitor monitor)
@@ -68,7 +69,7 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
     String packageName = this.packageName == null || this.packageName.isEmpty() 
         ? groupId : this.packageName;
     List<IProject> archetypeProjects = projectConfigurationManager.createArchetypeProjects(location,
-        getArchetypeDescriptor(), groupId, artifactId, version, packageName, properties,
+        archetype, groupId, artifactId, version, packageName, properties,
         importConfiguration, progress.newChild(40));
 
     SubMonitor loopMonitor = progress.newChild(30).setWorkRemaining(3 * archetypeProjects.size());
@@ -87,15 +88,6 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
      */
     Job job = new MappingDiscoveryJob(archetypeProjects);
     job.schedule();
-  }
-
-  @SuppressWarnings("restriction")
-  Archetype getArchetypeDescriptor() {
-    Archetype archetype = new Archetype();
-    archetype.setGroupId("com.google.appengine.archetypes");
-    archetype.setArtifactId("appengine-skeleton-archetype");
-    archetype.setVersion("LATEST");
-    return archetype;
   }
 
   private String resolveLatestReleasedArtifact(SubMonitor progress, String groupId,
@@ -147,5 +139,9 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
    */
   public void setLocation(IPath location) {
     this.location = location;
+  }
+
+  public void setArchetype(Archetype archetype) {
+    this.archetype = archetype;
   }
 }
