@@ -17,15 +17,13 @@
 package com.google.cloud.tools.eclipse.sdk;
 
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-import com.google.cloud.tools.appengine.cloudsdk.PathResolver;
 import com.google.cloud.tools.eclipse.sdk.internal.PreferenceConstants;
 import com.google.cloud.tools.eclipse.sdk.internal.PreferenceInitializer;
 
 import org.eclipse.e4.core.contexts.ContextFunction;
 import org.eclipse.jface.preference.IPreferenceStore;
 
-import java.io.File;
-import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * Utility to find the Google Cloud SDK either at locations configured by the user or in standard
@@ -33,19 +31,7 @@ import java.nio.file.Path;
  */
 public class CloudSdkProvider extends ContextFunction {
 
-  private final IPreferenceStore preferences;
-
-   public CloudSdkProvider(IPreferenceStore preferences) {
-     // todo drop the null check and use the no args constructor instead
-     if (preferences == null) {
-       preferences = PreferenceInitializer.getPreferenceStore();
-     }
-     this.preferences = preferences;
-   }
-   
-   public CloudSdkProvider() {
-     this(PreferenceInitializer.getPreferenceStore());
-   }
+  private final IPreferenceStore preferences = PreferenceInitializer.getPreferenceStore();
 
   /**
    * Return the {@link CloudSdk} instance from the configured or discovered Cloud SDK.
@@ -53,53 +39,18 @@ public class CloudSdkProvider extends ContextFunction {
    * @return the configured {@link CloudSdk} or {@code null} if no SDK could be found
    */
   public CloudSdk getCloudSdk() {
-    return createBuilder(null).build();
-  }
-
-  /**
-   * Return the location of the configured or discovered Cloud SDK.
-   * 
-   * @return the configured location or {@code null} if the SDK could not be found
-   */
-  public File getCloudSdkLocation() {
-    return resolveSdkLocation();
-  }
-
-  /**
-   * Return a {@link CloudSdk.Builder} instance, suitable for creating a {@link CloudSdk} instance.
-   * {@code location}, if not null, is used as the location to the Cloud SDK, otherwise the
-   * configured or discovered Cloud SDK will be used instead.
-   * 
-   * @param location if not {@code null}, overrides the default location for the SDK; can be a
-   *        {@linkplain String}, {@linkplain File}, or {@linkplain Path}.
-   * @return a builder, or {@code null} if the Google Cloud SDK cannot be located
-   */
-  public CloudSdk.Builder createBuilder(File location) {
-    // perhaps should try to be cleverer in case location references the .../bin/gcloud
-    if (location == null || !location.exists()) {
-      location = resolveSdkLocation();
+    CloudSdk.Builder sdkBuilder = new CloudSdk.Builder();
+    
+    String configuredPath = preferences.getString(PreferenceConstants.CLOUDSDK_PATH);
+    
+    // Let's use the configured path, if there is one. Otherwise,
+    // the lib will try to discover the path.
+    if (configuredPath != null && !configuredPath.isEmpty()) {
+    	// TODO(joaomartins): What happens when the provided path is invalid? Tools lib isn't
+    	// calling validate().
+    	sdkBuilder.sdkPath(Paths.get(configuredPath));
     }
-    if (location == null || !location.exists()) {
-      return null;
-    }
-    return new CloudSdk.Builder().sdkPath(location.toPath());
-  }
-
-  /**
-   * Attempt to resolve the Google Cloud SDK from the configured location or try to discover its
-   * location.
-   * 
-   * @return the location, or {@code null} if not found
-   */
-  private File resolveSdkLocation() {
-    String value = preferences.getString(PreferenceConstants.CLOUDSDK_PATH);
-    if (value != null && !value.isEmpty()) {
-      return new File(value);
-    }
-    Path discovered = new PathResolver().getCloudSdkPath();
-    if (discovered != null) {
-      return discovered.toFile();
-    }
-    return null;
+    
+    return sdkBuilder.build();
   }
 }

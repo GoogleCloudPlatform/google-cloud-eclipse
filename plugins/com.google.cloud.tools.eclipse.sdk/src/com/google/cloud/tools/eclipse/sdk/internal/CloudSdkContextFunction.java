@@ -61,11 +61,9 @@ public class CloudSdkContextFunction extends ContextFunction {
 
     Object path = context.get(PreferenceConstants.CLOUDSDK_PATH);
     File location = toFile(path);
-    CloudSdk.Builder builder = new CloudSdkProvider(null).createBuilder(location);
-    if (builder == null) {
-      return NOT_A_VALUE;
-    }
-    CloudSdk instance = builder.build();
+    // TODO(joaomartins): When can the SDK location in the context be different from the one in the
+    // preference store?
+    CloudSdk instance = new CloudSdkProvider().getCloudSdk();
     try {
       instance.validate();
       return instance;

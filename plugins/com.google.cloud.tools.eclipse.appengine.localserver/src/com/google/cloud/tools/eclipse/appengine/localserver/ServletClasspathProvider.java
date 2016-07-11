@@ -30,7 +30,7 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
 
   @Override
   public IClasspathEntry[] resolveClasspathContainer(IRuntime runtime) {
-    java.nio.file.Path cloudSdkPath = new CloudSdkProvider().getCloudSdkLocation().toPath();
+    java.nio.file.Path cloudSdkPath = new CloudSdkProvider().getCloudSdk().getJavaAppEngineSdkPath();
     if (cloudSdkPath == null) {
       return new IClasspathEntry[0];
     };

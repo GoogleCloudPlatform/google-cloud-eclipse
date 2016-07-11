@@ -32,12 +32,10 @@ import java.io.File;
 import java.nio.file.Path;
 
 public class CloudSdkProviderTest {
-
-  private IPreferenceStore preferences;
   
   @Before
   public void setUp() {
-    preferences = new MockPreferences();
+    //preferences = new MockPreferences();
   }
   
   /** Verify that the preference overrides PathResolver. */
@@ -46,10 +44,9 @@ public class CloudSdkProviderTest {
     // A path that almost certainly does not contain the SDK
     File root = File.listRoots()[0];
     
-    CloudSdk.Builder builder = new CloudSdkProvider(preferences).createBuilder(null);
+    CloudSdk instance = new CloudSdkProvider().getCloudSdk();
     // todo we shouldn't need reflection here; use visible for testing if we must
-    assertEquals(root.toPath(), ReflectionUtil.getField(builder, "sdkPath", Path.class));
-    CloudSdk instance = builder.build();
+    assertEquals(root.toPath(), ReflectionUtil.getField(instance, "sdkPath", Path.class));
     assertEquals(root.toPath(), ReflectionUtil.invoke(instance, "getSdkPath", Path.class));
     try {
       instance.validate();

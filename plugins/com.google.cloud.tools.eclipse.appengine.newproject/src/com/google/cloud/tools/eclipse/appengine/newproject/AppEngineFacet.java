@@ -49,7 +49,7 @@ public class AppEngineFacet {
   
       IRuntimeWorkingCopy appEngineRuntimeWorkingCopy 
           = appEngineRuntimeType.createRuntime(null, monitor);
-      File sdkLocation = new CloudSdkProvider(null).getCloudSdkLocation();
+      File sdkLocation = new CloudSdkProvider().getCloudSdk().getJavaAppEngineSdkPath().toFile();
       if (sdkLocation != null) {
         IPath sdkPath = Path.fromOSString(sdkLocation.getAbsolutePath());
         appEngineRuntimeWorkingCopy.setLocation(sdkPath);
