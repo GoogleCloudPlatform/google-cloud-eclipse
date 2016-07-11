@@ -65,6 +65,7 @@ public final class CloudSdkRuntimeWizardFragment extends WizardFragment {
     wizard.setTitle("New " + title + " Runtime");
     wizard.setDescription("Define a new " + title + " runtime");
 
+    // Before createContents(), as createContents() may set the dirTextBox, triggering validation
     configureValidationJob();
 
     Composite composite = new Composite(parent, SWT.NONE);
