@@ -65,11 +65,12 @@ public final class CloudSdkRuntimeWizardFragment extends WizardFragment {
     wizard.setTitle("New " + title + " Runtime");
     wizard.setDescription("Define a new " + title + " runtime");
 
+    configureValidationJob();
+
     Composite composite = new Composite(parent, SWT.NONE);
     composite.setLayout(new GridLayout());
     createContents(composite);
 
-    configureValidationJob();
     return composite;
   }
 
