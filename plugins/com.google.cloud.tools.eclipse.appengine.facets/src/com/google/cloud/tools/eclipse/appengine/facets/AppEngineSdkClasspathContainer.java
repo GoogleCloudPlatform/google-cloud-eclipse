@@ -1,6 +1,6 @@
 package com.google.cloud.tools.eclipse.appengine.facets;
 
-import java.io.File;
+import java.nio.file.Files;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -13,7 +13,6 @@ import com.google.cloud.tools.eclipse.sdk.CloudSdkProvider;
 
 public final class AppEngineSdkClasspathContainer implements IClasspathContainer {
 
-  private static final CloudSdk CLOUD_SDK = new CloudSdkProvider().getCloudSdk();
   public static final String CONTAINER_ID = "AppEngineSDK";
 
   @Override
@@ -33,12 +32,12 @@ public final class AppEngineSdkClasspathContainer implements IClasspathContainer
 
   @Override
   public IClasspathEntry[] getClasspathEntries() {
-    if (CLOUD_SDK.getJavaAppEngineSdkPath() != null) {
-      File jarFile = CLOUD_SDK.getJavaToolsJar().toFile();
-      if (jarFile.exists()) {
-        String appEngineToolsApiJar = jarFile.getPath();
+    CloudSdk cloudSdk = new CloudSdkProvider().getCloudSdk();
+    if (cloudSdk.getJavaAppEngineSdkPath() != null) {
+      java.nio.file.Path jarFile = cloudSdk.getJavaToolsJar();
+      if (Files.exists(jarFile)) {
         IClasspathEntry appEngineToolsEntry =
-            JavaCore.newLibraryEntry(new Path(appEngineToolsApiJar),
+            JavaCore.newLibraryEntry(new Path(jarFile.toString()),
                                      null /* sourceAttachmentPath */,
                                      null /* sourceAttachmentRootPath */,
                                      true /* isExported */);

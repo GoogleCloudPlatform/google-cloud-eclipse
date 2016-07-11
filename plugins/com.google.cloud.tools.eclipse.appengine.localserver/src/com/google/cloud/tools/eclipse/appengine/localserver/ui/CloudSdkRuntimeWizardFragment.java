@@ -44,8 +44,6 @@ import org.eclipse.wst.server.core.TaskModel;
 import org.eclipse.wst.server.ui.wizard.IWizardHandle;
 import org.eclipse.wst.server.ui.wizard.WizardFragment;
 
-import java.io.File;
-
 /**
  * {@link WizardFragment} for configuring Google Cloud SDK Runtime.
  */
@@ -149,7 +147,7 @@ public final class CloudSdkRuntimeWizardFragment extends WizardFragment {
       }
     });
 
-    File location = new CloudSdkProvider().getCloudSdk().getJavaAppEngineSdkPath().toFile();
+    java.nio.file.Path location = new CloudSdkProvider().getCloudSdk().getJavaAppEngineSdkPath();
     if (location != null) {
       dirTextBox.setText(location.toString());
     }

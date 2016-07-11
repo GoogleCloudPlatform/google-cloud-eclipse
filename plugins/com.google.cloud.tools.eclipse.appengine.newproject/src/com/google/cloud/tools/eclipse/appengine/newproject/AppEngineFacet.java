@@ -1,6 +1,5 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
-import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -49,9 +48,10 @@ public class AppEngineFacet {
   
       IRuntimeWorkingCopy appEngineRuntimeWorkingCopy 
           = appEngineRuntimeType.createRuntime(null, monitor);
-      File sdkLocation = new CloudSdkProvider().getCloudSdk().getJavaAppEngineSdkPath().toFile();
+      java.nio.file.Path sdkLocation =
+          new CloudSdkProvider().getCloudSdk().getJavaAppEngineSdkPath();
       if (sdkLocation != null) {
-        IPath sdkPath = Path.fromOSString(sdkLocation.getAbsolutePath());
+        IPath sdkPath = Path.fromOSString(sdkLocation.toString());
         appEngineRuntimeWorkingCopy.setLocation(sdkPath);
       }
       org.eclipse.wst.server.core.IRuntime appEngineServerRuntime 
@@ -70,7 +70,8 @@ public class AppEngineFacet {
       throws CoreException {
     IFacetedProjectWorkingCopy workingCopy = facetedProject.createWorkingCopy();
     IProjectFacet appEngineFacet = ProjectFacetsManager.getProjectFacet(APP_ENGINE_FACET_ID);
-    IProjectFacetVersion appEngineFacetVersion = appEngineFacet.getVersion(APP_ENGINE_FACET_VERSION);
+    IProjectFacetVersion appEngineFacetVersion =
+        appEngineFacet.getVersion(APP_ENGINE_FACET_VERSION);
     workingCopy.addProjectFacet(appEngineFacetVersion);
     workingCopy.commitChanges(monitor);
   }

@@ -43,8 +43,8 @@ public class CloudSdkProvider extends ContextFunction {
     
     String configuredPath = preferences.getString(PreferenceConstants.CLOUDSDK_PATH);
     
-    // Let's use the configured path, if there is one. Otherwise,
-    // the lib will try to discover the path.
+    // Let's use the configured path, if there is one. Otherwise, the lib will try to discover the
+    // path.
     if (configuredPath != null && !configuredPath.isEmpty()) {
     	// TODO(joaomartins): What happens when the provided path is invalid? Tools lib isn't
     	// calling validate().

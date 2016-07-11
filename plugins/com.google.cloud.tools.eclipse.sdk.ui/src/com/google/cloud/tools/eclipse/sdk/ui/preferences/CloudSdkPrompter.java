@@ -61,11 +61,7 @@ public class CloudSdkPrompter {
    * @return the Cloud SDK, or {@code null} if unspecified
    */
   public static CloudSdk getCloudSdk(IShellProvider shellProvider) {
-    // Not sure I understand what's going on here...
-    if (CLOUD_SDK != null) {
-      return CLOUD_SDK;
-    }
-    if (promptForSdk(shellProvider)) {
+    if (CLOUD_SDK != null || promptForSdk(shellProvider)) {
       return CLOUD_SDK;
     }
     return null;

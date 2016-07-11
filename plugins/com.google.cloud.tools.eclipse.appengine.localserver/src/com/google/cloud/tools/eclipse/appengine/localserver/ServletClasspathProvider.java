@@ -25,17 +25,18 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
       return new IClasspathEntry[0];
     } else {
       return resolveClasspathContainer(runtime);
-    } 
+    }
   }
 
   @Override
   public IClasspathEntry[] resolveClasspathContainer(IRuntime runtime) {
-    java.nio.file.Path cloudSdkPath = new CloudSdkProvider().getCloudSdk().getJavaAppEngineSdkPath();
+    java.nio.file.Path cloudSdkPath =
+        new CloudSdkProvider().getCloudSdk().getJavaAppEngineSdkPath();
     if (cloudSdkPath == null) {
       return new IClasspathEntry[0];
     };
-    String servletJar = cloudSdkPath + "/platform/google_appengine/google/appengine/tools/java/lib/shared/servlet-api.jar";
-    String jspJar = cloudSdkPath + "/platform/google_appengine/google/appengine/tools/java/lib/shared/jsp-api.jar";
+    String servletJar = cloudSdkPath + "/shared/servlet-api.jar";
+    String jspJar = cloudSdkPath + "/shared/jsp-api.jar";
     IClasspathEntry servletEntry = JavaCore.newLibraryEntry(new Path(servletJar), null, null);
     IClasspathEntry jspEntry = JavaCore.newLibraryEntry(new Path(jspJar), null, null);
     
