@@ -19,7 +19,7 @@ public class ExclusiveProjectAccessJobRunner {
     IWorkspace workspace = project.getWorkspace();
     workspace.run(
         job,
-        workspace.getRuleFactory().createRule(project),
+        project,
         0 /* flags */,
         monitor);
   }

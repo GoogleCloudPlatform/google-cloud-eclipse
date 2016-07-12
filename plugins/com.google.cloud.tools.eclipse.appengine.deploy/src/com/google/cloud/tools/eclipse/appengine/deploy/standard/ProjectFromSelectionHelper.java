@@ -20,8 +20,8 @@ public class ProjectFromSelectionHelper {
   }
 
   public IProject getProject(ExecutionEvent event) throws CoreException, ExecutionException {
-    ISelection selection = HandlerUtil.getCurrentSelection(event);
-    if (selection != null && selection instanceof IStructuredSelection) {
+    ISelection selection = HandlerUtil.getCurrentSelectionChecked(event);
+    if (selection instanceof IStructuredSelection) {
       IStructuredSelection structuredSelection = (IStructuredSelection) selection;
       if (structuredSelection.size() == 1 && structuredSelection.getFirstElement() instanceof IProject) {
         IProject project = (IProject) structuredSelection.getFirstElement();

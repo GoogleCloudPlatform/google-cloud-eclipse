@@ -1,15 +1,11 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.standard;
 
-import java.io.File;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-
-import com.google.common.io.Files;
 
 public class StandardDeployJob implements IWorkspaceRunnable {
   
@@ -27,7 +23,6 @@ public class StandardDeployJob implements IWorkspaceRunnable {
 
   @Override
   public void run(IProgressMonitor monitor) throws CoreException {
-    File tempDir = Files.createTempDir();
     String stageDir = stagingDirectoryProvider.getStagingDirectory();
     if (stageDir == null) {
       // TODO move /com.google.cloud.tools.eclipse.appengine.localserver/src/com/google/cloud/tools/eclipse/appengine/localserver/Activator.java
