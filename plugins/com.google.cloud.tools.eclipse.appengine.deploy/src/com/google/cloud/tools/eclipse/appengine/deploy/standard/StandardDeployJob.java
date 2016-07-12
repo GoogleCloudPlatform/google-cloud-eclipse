@@ -16,8 +16,8 @@ public class StandardDeployJob extends WorkspaceJob {
   private IProject project;
 
   public StandardDeployJob(ProjectToStagingExporter exporter,
-                        StagingDirectoryProvider stagingDirectoryProvider,
-                        IProject project) {
+                           StagingDirectoryProvider stagingDirectoryProvider,
+                           IProject project) {
     super(Messages.getString("deploy.standard.runnable.name"));
     setRule(project);
     projectToStagingExporter = exporter;
