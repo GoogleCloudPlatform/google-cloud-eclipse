@@ -4,9 +4,9 @@
    <extension
          point="com.google.cloud.tools.eclipse.preferences.areas">
       <area
-            page="com.google.cloud.tools.eclipse.preferences.preferences.CloudToolsPreferencePage"
-            class="com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPreferenceArea"
+            page="com.google.cloud.tools.eclipse.preferences.main"
             title="%page.name"
+            class="com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPreferenceArea"
             preferences="instance://com.google.cloud.tools.eclipse.sdk">
       </area>
    </extension>

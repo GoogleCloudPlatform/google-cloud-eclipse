@@ -6,7 +6,7 @@
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
-            id="com.google.cloud.tools.eclipse.preferences.preferences.CloudToolsPreferencePage"
+            id="com.google.cloud.tools.eclipse.preferences.main"
             name="Google Cloud Tools"
             class="com.google.cloud.tools.eclipse.preferences.areas.AreaBasedPreferencePage">
       </page>
@@ -20,10 +20,10 @@
    <extension
          point="com.google.cloud.tools.eclipse.preferences.areas">
       <area
+            page="com.google.cloud.tools.eclipse.preferences.main"
+            title="Usage Statistics"
             class="com.google.cloud.tools.eclipse.preferences.AnalyticsOptInArea"
-            page="com.google.cloud.tools.eclipse.preferences.preferences.CloudToolsPreferencePage"
-            preferences="instance://com.google.cloud.tools.eclipse.preferences"
-            title="Usage Statistics">
+            preferences="instance://com.google.cloud.tools.eclipse.preferences">
       </area>
    </extension>
 
