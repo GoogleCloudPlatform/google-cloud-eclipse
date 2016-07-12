@@ -1,7 +1,5 @@
 package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 
-import static com.google.cloud.tools.eclipse.appengine.newproject.maven.MavenAppEngineStandardWizardPage.suggestPackageName;
-
 import static org.junit.Assert.assertNotNull;
 
 import org.eclipse.swt.widgets.Display;
@@ -65,22 +63,31 @@ public class MavenArchetypeProjectWizardTest {
 
   @Test
   public void testSuggestPackageName() {
-    Assert.assertEquals("aa.bb", suggestPackageName("aa.bb", ""));
-    Assert.assertEquals("aa.bb.cc.dd", suggestPackageName("aa.bb", "cc.dd"));
+    Assert.assertEquals("aa.bb",
+        MavenAppEngineStandardWizardPage.suggestPackageName("aa.bb", ""));
+    Assert.assertEquals("aa.bb.cc.dd",
+        MavenAppEngineStandardWizardPage.suggestPackageName("aa.bb", "cc.dd"));
 
-    Assert.assertEquals("aa.bb", suggestPackageName("aA.Bb", ""));
-    Assert.assertEquals("aa.bb.cc.dd", suggestPackageName("Aa.Bb", "Cc.DD"));
+    Assert.assertEquals("aA.Bb",
+        MavenAppEngineStandardWizardPage.suggestPackageName("aA.Bb", ""));
+    Assert.assertEquals("Aa.Bb.Cc.DD",
+        MavenAppEngineStandardWizardPage.suggestPackageName("Aa.Bb", "Cc.DD"));
 
-    Assert.assertEquals("aa.bb", suggestPackageName(" a  a\t . b\r b \n", " \t \r  "));
-    Assert.assertEquals("aa.bb.cc.dd", suggestPackageName("  A  a.\tBb", " C  c . D D  "));
+    Assert.assertEquals("aa.bb",
+        MavenAppEngineStandardWizardPage.suggestPackageName(" a  a\t . b\r b \n", " \t \r  "));
+    Assert.assertEquals("Aa.Bb.Cc.DD",
+        MavenAppEngineStandardWizardPage.suggestPackageName("  A  a.\tBb", " C  c . D D  "));
 
-    Assert.assertEquals("aa.bb", suggestPackageName("....aa....bb...", "......"));
-    Assert.assertEquals("aa.bb.cc.dd", suggestPackageName("....aa....bb...", "..cc....dd.."));
+    Assert.assertEquals("aa.bb",
+        MavenAppEngineStandardWizardPage.suggestPackageName("....aa....bb...", "......"));
+    Assert.assertEquals("aa.bb.cc.dd",
+        MavenAppEngineStandardWizardPage.suggestPackageName("....aa....bb...", "..cc....dd.."));
 
-    Assert.assertEquals("aa._01234bb",
-        suggestPackageName("aa`~!@#$%^&*()-+=[]{}<>\\|:;'\",?/._01234bb", ""));
+    Assert.assertEquals("aa._01234bb", MavenAppEngineStandardWizardPage.suggestPackageName(
+        "aa`~!@#$%^&*()-+=[]{}<>\\|:;'\",?/._01234bb", ""));
     Assert.assertEquals("aa._01234bb._c_c_0.dd01234_",
-        suggestPackageName("aa`~!@#$%^&*()-+=[]{}<>\\|:;'\",?/._01234bb",
+        MavenAppEngineStandardWizardPage.suggestPackageName(
+            "aa`~!@#$%^&*()-+=[]{}<>\\|:;'\",?/._01234bb",
             "_c_c_0.dd01234_`~!@#$%^&*()-+=[]{}<>\\|:;'\",?/"));
   }
 }
