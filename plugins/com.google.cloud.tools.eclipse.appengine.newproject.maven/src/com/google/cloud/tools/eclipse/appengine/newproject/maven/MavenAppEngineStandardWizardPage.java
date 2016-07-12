@@ -377,9 +377,9 @@ public class MavenAppEngineStandardWizardPage extends WizardPage implements IWiz
   /**
    * Helper function returning a suggested package name based on groupId and artifactId.
    *
-   * For an invalid Java package name, it does basic string filtering/manipulation, which
-   * does not completely eliminate name issues. However, users will be alerted of any
-   * slipping errors in naming by {@link #validatePage}.
+   * It does basic string filtering/manipulation, which does not completely eliminate
+   * naming issues. However, users will be alerted of any slipping errors in naming by
+   * {@link #validatePage}.
    */
   @VisibleForTesting
   protected static String suggestPackageName(String groupId, String artifactId) {
