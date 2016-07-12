@@ -6,7 +6,7 @@ import com.google.cloud.tools.eclipse.appengine.deploy.standard.DialogStagingDir
 
 public class DialogStagingDirectoryProviderTest {
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = NullPointerException.class)
   public void testGetStagingDirectory_nullShell() {
     new DialogStagingDirectoryProvider(null).get();
   }

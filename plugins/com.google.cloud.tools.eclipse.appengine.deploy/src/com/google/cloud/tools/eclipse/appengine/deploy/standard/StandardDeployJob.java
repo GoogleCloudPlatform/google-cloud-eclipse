@@ -18,7 +18,7 @@ public class StandardDeployJob extends WorkspaceJob {
   public StandardDeployJob(ProjectToStagingExporter exporter,
                            StagingDirectoryProvider stagingDirectoryProvider,
                            IProject project) {
-    super(Messages.getString("deploy.standard.runnable.name"));
+    super(Messages.getString("deploy.standard.runnable.name")); //$NON-NLS-1$
     setRule(project);
     projectToStagingExporter = exporter;
     this.stagingDirectoryProvider = stagingDirectoryProvider;
@@ -28,15 +28,14 @@ public class StandardDeployJob extends WorkspaceJob {
   @Override
   public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
     String stageDir = stagingDirectoryProvider.get();
-    if (stageDir == null) {
-      // TODO move /com.google.cloud.tools.eclipse.appengine.localserver/src/com/google/cloud/tools/eclipse/appengine/localserver/Activator.java
-      // to a bundle that can be a common dependency for all bundles, and use PLUGIN_ID instead of string literal
-      throw new CoreException(new Status(IStatus.ERROR, "pluginid", "Staging directory cannot be null"));
+    if (stageDir != null) {
+      writeProjectToStageDir(project, stageDir);
+      verifyProjectInStageDir(stageDir);
+      //TODO run stage and deploy operations
+      return Status.OK_STATUS;
+    } else {
+      return Status.CANCEL_STATUS;
     }
-    writeProjectToStageDir(project, stageDir);
-    verifyProjectInStageDir(stageDir);
-    //TODO run stage and deploy operations
-    return Status.OK_STATUS;
   }
 
   void writeProjectToStageDir(IProject project, String stageDir) throws CoreException {
