@@ -383,6 +383,15 @@ public class MavenAppEngineStandardWizardPage extends WizardPage implements IWiz
    */
   @VisibleForTesting
   protected static String suggestPackageName(String groupId, String artifactId) {
+    String naivePackageName = groupId;
+    if (!artifactId.trim().isEmpty()) {
+      naivePackageName = groupId + "." + artifactId;
+    }
+
+    if (JavaPackageValidator.validate(naivePackageName).isOK()) {
+      return naivePackageName;
+    }
+
     // 1) Remove leading and trailing dots.
     // 2) Keep only word characters ([a-zA-Z_0-9]) and dots (escaping inside [] not necessary).
     // 3) Replace consecutive dots with a single dot.
