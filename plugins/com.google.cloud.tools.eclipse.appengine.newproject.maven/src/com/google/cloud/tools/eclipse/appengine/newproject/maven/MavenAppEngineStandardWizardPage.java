@@ -3,7 +3,9 @@ package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectIdValidator;
 import com.google.cloud.tools.eclipse.appengine.newproject.JavaPackageValidator;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
+import com.google.common.annotations.VisibleForTesting;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
@@ -343,7 +345,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage implements IWiz
 
       String oldPackageName = suggestPackageName(getGroupId(), getArtifactId());
       String newPackageName = suggestPackageName(newGroupId, getArtifactId());
-      AutoSetPackageNameIfNecessary(oldPackageName, newPackageName);
+      adjustPackageName(oldPackageName, newPackageName);
     }
   }
 
@@ -358,25 +360,37 @@ public class MavenAppEngineStandardWizardPage extends WizardPage implements IWiz
 
       String oldPackageName = suggestPackageName(getGroupId(), getArtifactId());
       String newPackageName = suggestPackageName(getGroupId(), newArtifactId);
-      AutoSetPackageNameIfNecessary(oldPackageName, newPackageName);
+      adjustPackageName(oldPackageName, newPackageName);
     }
   }
 
   /**
    * See {@link AutoPackageNameSetterOnGroupIdChange#verifyText(VerifyEvent)}.
    */
-  private void AutoSetPackageNameIfNecessary(String oldPackageName, String newPackageName) {
+  private void adjustPackageName(String oldPackageName, String newPackageName) {
     if (getPackageName().isEmpty() || getPackageName().equals(oldPackageName)) {
       javaPackageField.setText(newPackageName);
     }
   }
 
   /**
-   * Helper function returning a suggested package name based on groupId and artifactId.
+   * Helper function returning a suggested package name based on groupId and artifactId. It
+   * does basic string filtering/manipulation for valid Java package names, which is not perfect.
+   * However, users will be alerted of any slipping errors in naming by {@link #validatePage}.
    */
-  private static String suggestPackageName(String groupId, String artifactId) {
-    if (!artifactId.isEmpty()) {
-      return groupId + "." + artifactId;
+  @VisibleForTesting
+  protected static String suggestPackageName(String groupId, String artifactId) {
+    // 1) Remove leading and trailing dots.
+    // 2) Keep only word characters ([a-zA-Z_0-9]) and dots (escaping inside [] not necessary).
+    // 3) Replace consecutive dots with a single dot.
+    // 4) Lower-case.
+    groupId = StringUtils.strip(groupId, ".")
+        .replaceAll("[^\\w.]", "").replaceAll("\\.+",  ".").toLowerCase();
+    artifactId = StringUtils.strip(artifactId, ".")
+        .replaceAll("[^\\w.]", "").replaceAll("\\.+",  ".").toLowerCase();
+
+    if (!artifactId.isEmpty()) {  // No whitespace at all, so isEmpty() works.
+      return groupId.toLowerCase() + "." + artifactId.toLowerCase();
     }
     return groupId;
   }
