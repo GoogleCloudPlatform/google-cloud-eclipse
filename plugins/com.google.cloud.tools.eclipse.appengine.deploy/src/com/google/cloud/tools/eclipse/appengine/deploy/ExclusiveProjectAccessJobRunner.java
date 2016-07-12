@@ -2,6 +2,7 @@ package com.google.cloud.tools.eclipse.appengine.deploy;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -11,12 +12,13 @@ import org.eclipse.core.runtime.IProgressMonitor;
  *
  */
 // Main purpose of this class is to separate Eclipse' job execution from other logic to enhance testability
-public class DeployJobRunner {
+// TODO move to common bundle to reuse across plugin
+public class ExclusiveProjectAccessJobRunner {
 
-  public void runJob(AppEngineDeployJob deployJob, IProject project, IProgressMonitor monitor) throws CoreException {
+  public void runJob(IWorkspaceRunnable job, IProject project, IProgressMonitor monitor) throws CoreException {
     IWorkspace workspace = project.getWorkspace();
     workspace.run(
-        deployJob,
+        job,
         workspace.getRuleFactory().createRule(project),
         0 /* flags */,
         monitor);

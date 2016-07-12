@@ -8,7 +8,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.ui.handlers.HandlerUtil;
 
-import com.google.cloud.tools.eclipse.appengine.deploy.DeployJobRunner;
+import com.google.cloud.tools.eclipse.appengine.deploy.ExclusiveProjectAccessJobRunner;
 import com.google.cloud.tools.eclipse.appengine.deploy.FacetedProjectHelper;
 import com.google.common.annotations.VisibleForTesting;
 
@@ -20,16 +20,16 @@ import com.google.common.annotations.VisibleForTesting;
  */
 public class StandardDeployCommandHandler extends AbstractHandler {
 
-  private DeployJobRunner jobRunner;
+  private ExclusiveProjectAccessJobRunner jobRunner;
   private ProjectFromSelectionHelper helper;
   
   public StandardDeployCommandHandler() {
-    this(new FacetedProjectHelper(), new DeployJobRunner());
+    this(new FacetedProjectHelper(), new ExclusiveProjectAccessJobRunner());
   }
   
   @VisibleForTesting
   StandardDeployCommandHandler(FacetedProjectHelper facetedProjectHelper,
-                               DeployJobRunner jobRunner) {
+                               ExclusiveProjectAccessJobRunner jobRunner) {
       this.helper = new ProjectFromSelectionHelper(facetedProjectHelper);
       this.jobRunner = jobRunner;
   }
