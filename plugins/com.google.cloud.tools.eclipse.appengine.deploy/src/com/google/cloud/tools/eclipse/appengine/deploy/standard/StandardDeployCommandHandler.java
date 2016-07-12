@@ -5,7 +5,8 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.wst.server.core.internal.ServerPlugin;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.FacetedProjectHelper;
 import com.google.common.annotations.VisibleForTesting;
@@ -17,6 +18,8 @@ import com.google.common.annotations.VisibleForTesting;
  * provided by the App Engine Plugins Core Library.
  */
 public class StandardDeployCommandHandler extends AbstractHandler {
+
+  private static final IPath defaultStagingDir = ServerPlugin.getInstance().getStateLocation();
 
   private ProjectFromSelectionHelper helper;
   
@@ -32,28 +35,17 @@ public class StandardDeployCommandHandler extends AbstractHandler {
   @Override
   public Object execute(ExecutionEvent event) throws ExecutionException {
     try {
-      IProject project = getAppEngineStandardProjectFromSelection(event);
+      IProject project = helper.getProject(event);
       if (project != null) {
-        deployProject(event, project);
+        final IProject project1 = project;
+        StandardDeployJob deploy = new StandardDeployJob(new ProjectToStagingExporter(), defaultStagingDir, project1);
+        deploy.schedule();
       }
       // return value must be null, reserved for future use
       return null;
     } catch (CoreException coreException) {
       throw new ExecutionException("Failed to export the project as exploded WAR", coreException);
     }
-  }
-
-  private IProject getAppEngineStandardProjectFromSelection(ExecutionEvent event) throws CoreException,
-                                                                                         ExecutionException {
-    return helper.getProject(event);
-  }
-
-  private void deployProject(ExecutionEvent event, final IProject project) throws CoreException, ExecutionException {
-    StandardDeployJob deploy =
-        new StandardDeployJob(new ProjectToStagingExporter(),
-                           new DialogStagingDirectoryProvider(HandlerUtil.getActiveShell(event)),
-                           project);
-    deploy.schedule();
   }
 
 }

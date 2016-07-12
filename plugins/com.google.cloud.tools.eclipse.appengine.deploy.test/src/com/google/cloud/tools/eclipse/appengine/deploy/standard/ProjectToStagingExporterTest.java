@@ -4,9 +4,8 @@ import static org.mockito.Mockito.mock;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
 import org.junit.Test;
-
-import com.google.cloud.tools.eclipse.appengine.deploy.standard.ProjectToStagingExporter;
 
 public class ProjectToStagingExporterTest {
 
@@ -22,6 +21,6 @@ public class ProjectToStagingExporterTest {
   
   @Test(expected = IllegalArgumentException.class)
   public void testWriteProjectToStageDir_emptyStagingDir() throws CoreException {
-    new ProjectToStagingExporter().writeProjectToStageDir(mock(IProject.class), "");
+    new ProjectToStagingExporter().writeProjectToStageDir(mock(IProject.class), new Path(""));
   }
 }
