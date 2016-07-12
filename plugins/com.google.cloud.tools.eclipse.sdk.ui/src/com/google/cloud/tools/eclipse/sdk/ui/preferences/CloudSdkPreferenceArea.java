@@ -18,12 +18,13 @@ package com.google.cloud.tools.eclipse.sdk.ui.preferences;
 
 import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.eclipse.preferences.areas.PreferenceArea;
 import com.google.cloud.tools.eclipse.sdk.internal.PreferenceConstants;
-import com.google.cloud.tools.eclipse.sdk.internal.PreferenceInitializer;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.DirectoryFieldEditor;
-import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -32,8 +33,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
 import java.io.File;
@@ -43,28 +44,26 @@ import java.text.MessageFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class CloudSdkPreferencePage extends FieldEditorPreferencePage
-    implements IWorkbenchPreferencePage {
-  public static final String PAGE_ID = SdkUiMessages.CloudSdkPreferencePage_0;
-  private static final Logger logger =
-      Logger.getLogger(CloudSdkPreferencePage.class.getName());
+public class CloudSdkPreferenceArea extends PreferenceArea {
+  /** Preference Page ID that hosts this area. */
+  public static final String PAGE_ID =
+      "com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPreferenceArea";
+  private static final Logger logger = Logger.getLogger(CloudSdkPreferenceArea.class.getName());
 
   private IWorkbench workbench;
   private DirectoryFieldEditor sdkLocation;
+  private IStatus status;
 
-  /** Create new page. */
-  public CloudSdkPreferencePage() {
-    super(GRID);
-    setPreferenceStore(PreferenceInitializer.getPreferenceStore());
-    setDescription(SdkUiMessages.CloudSdkPreferencePage_1);
+  public CloudSdkPreferenceArea() {
+    // Should we assume this?
+    this.workbench = PlatformUI.getWorkbench();
   }
 
   @Override
-  protected Control createContents(Composite parent) {
+  public Control createContents(Composite parent) {
     Composite contents = new Composite(parent, SWT.NONE);
     Link instructions = new Link(contents, SWT.WRAP);
-    instructions.setText(
-        SdkUiMessages.CloudSdkPreferencePage_2);
+    instructions.setText(SdkUiMessages.CloudSdkPreferencePage_2);
     instructions.addSelectionListener(new SelectionAdapter() {
       @Override
       public void widgetSelected(SelectionEvent event) {
@@ -72,10 +71,41 @@ public class CloudSdkPreferencePage extends FieldEditorPreferencePage
       }
     });
 
-    super.createContents(contents);
+    Composite fieldContents = new Composite(parent, SWT.NONE);
+    sdkLocation = new CloudSdkDirectoryFieldEditor(PreferenceConstants.CLOUDSDK_PATH,
+        SdkUiMessages.CloudSdkPreferencePage_5, fieldContents);
+    sdkLocation.setPreferenceStore(getPreferenceStore());
+    sdkLocation.setPropertyChangeListener(getPropertyChangeListener());
+    GridLayoutFactory.swtDefaults().numColumns(sdkLocation.getNumberOfControls())
+        .generateLayout(fieldContents);
+
     GridLayoutFactory.swtDefaults().generateLayout(contents);
     return contents;
   }
+
+  @Override
+  public void load() {
+    sdkLocation.load();
+  }
+
+  @Override
+  public void loadDefault() {
+    sdkLocation.loadDefault();
+  }
+
+  @Override
+  public IStatus getStatus() {
+    if (!sdkLocation.isValid()) {
+      return new Status(IStatus.ERROR, getClass().getName(), sdkLocation.getErrorMessage());
+    }
+    return status;
+  }
+
+  @Override
+  public void performApply() {
+    sdkLocation.store();
+  }
+
 
   protected void openUrl(String urlText) {
     try {
@@ -89,18 +119,6 @@ public class CloudSdkPreferencePage extends FieldEditorPreferencePage
     }
   }
 
-  /**
-   * Creates the field editors. Field editors are abstractions of the common GUI blocks needed to
-   * manipulate various types of preferences. Each field editor knows how to save and restore
-   * itself.
-   */
-  @Override
-  public void createFieldEditors() {
-    sdkLocation = new CloudSdkDirectoryFieldEditor(PreferenceConstants.CLOUDSDK_PATH,
-        SdkUiMessages.CloudSdkPreferencePage_5, getFieldEditorParent());
-    addField(sdkLocation);
-  }
-
   protected boolean validateSdk(File location) {
     try {
       CloudSdk sdk = new CloudSdk.Builder().sdkPath(location.toPath()).build();
@@ -108,20 +126,16 @@ public class CloudSdkPreferencePage extends FieldEditorPreferencePage
     } catch (AppEngineException ex) {
       // accept a seemingly invalid location in case the SDK organization
       // has changed and the CloudSdk#validate() code is out of date
-      setMessage(MessageFormat.format(SdkUiMessages.CloudSdkPreferencePage_6, ex.getMessage()),
-          WARNING);
+      status = new Status(IStatus.WARNING, getClass().getName(),
+          MessageFormat.format(SdkUiMessages.CloudSdkPreferencePage_6, ex.getMessage()));
     }
     return true;
   }
 
-  @Override
-  public void init(IWorkbench workbench) {
-    this.workbench = workbench;
-  }
-
   /**
-   * Check that the location holds a SDK. Uses {@code VALIDATE_ON_KEY_STROKE} to perform check on
-   * per keystroke to avoid wiping out the validation messages.
+   * A wrapper around DirectoryFieldEditor for performing validation checks that the location holds
+   * a SDK. Uses {@code VALIDATE_ON_KEY_STROKE} to perform check on per keystroke to avoid wiping
+   * out the validation messages.
    */
   class CloudSdkDirectoryFieldEditor extends DirectoryFieldEditor {
     public CloudSdkDirectoryFieldEditor(String name, String labelText, Composite parent) {
@@ -137,10 +151,11 @@ public class CloudSdkPreferencePage extends FieldEditorPreferencePage
 
     @Override
     protected boolean doCheckState() {
-      setMessage(null);
       if (!super.doCheckState()) {
+        status = new Status(IStatus.ERROR, getClass().getName(), "Invalid directory");
         return false;
       }
+      status = Status.OK_STATUS;
       return getStringValue().isEmpty() || validateSdk(new File(getStringValue()));
     }
   }
