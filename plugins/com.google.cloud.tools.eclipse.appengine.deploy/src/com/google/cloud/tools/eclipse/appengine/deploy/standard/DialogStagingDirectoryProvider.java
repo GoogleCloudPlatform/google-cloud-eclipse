@@ -1,5 +1,6 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.standard;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Shell;
 
@@ -18,8 +19,8 @@ public class DialogStagingDirectoryProvider implements StagingDirectoryProvider 
   }
 
   @Override
-  public String getStagingDirectory() {
-    DirectoryDialog directoryDialog = new DirectoryDialog(parentShell);
+  public String get() {
+    DirectoryDialog directoryDialog = new DirectoryDialog(parentShell, SWT.APPLICATION_MODAL | SWT.SHEET);
     directoryDialog.setText(Messages.getString("dialog.staging.directory.provider.title")); //$NON-NLS-1$
     directoryDialog.setMessage(Messages.getString("dialog.staging.directory.provider.message")); //$NON-NLS-1$
     return directoryDialog.open();

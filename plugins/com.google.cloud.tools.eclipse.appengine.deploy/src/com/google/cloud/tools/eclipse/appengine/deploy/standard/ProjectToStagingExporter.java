@@ -8,7 +8,6 @@ import org.eclipse.jst.j2ee.internal.deployables.J2EEFlexProjDeployable;
 import org.eclipse.wst.common.componentcore.ComponentCore;
 import org.eclipse.wst.server.core.util.PublishHelper;
 
-import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
 import com.google.common.base.Preconditions;
 
 /**

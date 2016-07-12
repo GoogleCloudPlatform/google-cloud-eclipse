@@ -1,4 +1,4 @@
-package com.google.cloud.tools.eclipse.appengine.deploy;
+package com.google.cloud.tools.eclipse.appengine.deploy.standard;
 
 import org.junit.Test;
 
@@ -8,7 +8,7 @@ public class DialogStagingDirectoryProviderTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void testGetStagingDirectory_nullShell() {
-    new DialogStagingDirectoryProvider(null).getStagingDirectory();
+    new DialogStagingDirectoryProvider(null).get();
   }
 
 }

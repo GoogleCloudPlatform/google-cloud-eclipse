@@ -1,4 +1,4 @@
-package com.google.cloud.tools.eclipse.appengine.deploy;
+package com.google.cloud.tools.eclipse.appengine.deploy.standard;
 
 import static org.mockito.Mockito.mock;
 
