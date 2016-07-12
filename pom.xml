@@ -311,6 +311,10 @@
         <!-- Ensure we don't resolved mis-cached artifacts -->
         <tycho.localArtifacts>ignore</tycho.localArtifacts>
       </properties>
+      <modules>
+        <module>eclipse/ide-target-platform</module>
+        <module>build/verify-feature-completeness</module>
+      </modules>
     </profile>
   </profiles>
 
