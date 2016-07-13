@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.sdk;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.eclipse.sdk.internal.PreferenceConstants;
 import com.google.cloud.tools.eclipse.sdk.internal.PreferenceInitializer;
@@ -23,6 +24,7 @@ import com.google.cloud.tools.eclipse.sdk.internal.PreferenceInitializer;
 import org.eclipse.e4.core.contexts.ContextFunction;
 import org.eclipse.jface.preference.IPreferenceStore;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
@@ -31,10 +33,27 @@ import java.nio.file.Paths;
  */
 public class CloudSdkProvider extends ContextFunction {
 
-  private final IPreferenceStore preferences = PreferenceInitializer.getPreferenceStore();
+  private IPreferenceStore preferences = PreferenceInitializer.getPreferenceStore();
+  private Path location;
+  
+  public CloudSdkProvider() {}
+  
+  @VisibleForTesting
+  public CloudSdkProvider(IPreferenceStore preferences) {
+    this.preferences = preferences;
+  }
+  
+  // Used when the SDK is being built from the context.
+  public CloudSdkProvider(Path location) {
+    this.location = location;
+  }
 
   /**
    * Return the {@link CloudSdk} instance from the configured or discovered Cloud SDK.
+   * 
+   * The used location is the one from IEclipseContext. If there is none, then it is fetched from
+   * the preference store. If there is none there, then we let the library find it in the SDK
+   * typical locations.
    * 
    * @return the configured {@link CloudSdk} or {@code null} if no SDK could be found
    */
@@ -43,12 +62,10 @@ public class CloudSdkProvider extends ContextFunction {
     
     String configuredPath = preferences.getString(PreferenceConstants.CLOUDSDK_PATH);
     
-    // Let's use the configured path, if there is one. Otherwise, the lib will try to discover the
-    // path.
-    if (configuredPath != null && !configuredPath.isEmpty()) {
-    	// TODO(joaomartins): What happens when the provided path is invalid? Tools lib isn't
-    	// calling validate().
-    	sdkBuilder.sdkPath(Paths.get(configuredPath));
+    if (location != null) {
+      sdkBuilder.sdkPath(location);
+    } else if (configuredPath != null) {
+      sdkBuilder.sdkPath(Paths.get(configuredPath));
     }
     
     return sdkBuilder.build();

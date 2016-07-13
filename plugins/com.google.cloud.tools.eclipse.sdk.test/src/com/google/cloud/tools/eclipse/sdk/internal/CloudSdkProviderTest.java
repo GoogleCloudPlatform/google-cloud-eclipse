@@ -33,30 +33,26 @@ import java.nio.file.Path;
 
 public class CloudSdkProviderTest {
   
+  private IPreferenceStore preferences;
+  
   @Before
   public void setUp() {
-    //preferences = new MockPreferences();
+    preferences = new MockPreferences();
   }
   
   /** Verify that the preference overrides PathResolver. */
-  @Test
-  public void testSetPreferenceInvalid() throws Exception {
+  @Test(expected = AppEngineException.class)
+  public void testSetPreferenceInvalid() {
     // A path that almost certainly does not contain the SDK
     File root = File.listRoots()[0];
     
-    CloudSdk instance = new CloudSdkProvider().getCloudSdk();
-    // todo we shouldn't need reflection here; use visible for testing if we must
-    assertEquals(root.toPath(), ReflectionUtil.getField(instance, "sdkPath", Path.class));
-    assertEquals(root.toPath(), ReflectionUtil.invoke(instance, "getSdkPath", Path.class));
-    try {
-      instance.validate();
-      fail("root directory should not be a valid location");
-    } catch (AppEngineException ex) {
-      // ignore
-    }
+    CloudSdk instance = new CloudSdkProvider(preferences).getCloudSdk();
+    assertEquals(root.toPath(), instance.getSdkPath());
+    instance.validate();
+    fail("root directory should not be a valid location");
   }
   
-  private static class MockPreferences implements IPreferenceStore{
+  private static class MockPreferences implements IPreferenceStore {
 
     @Override
     public void addPropertyChangeListener(IPropertyChangeListener listener) { 

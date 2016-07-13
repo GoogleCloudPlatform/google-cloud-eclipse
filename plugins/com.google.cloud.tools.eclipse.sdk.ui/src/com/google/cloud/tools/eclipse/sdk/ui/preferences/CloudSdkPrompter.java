@@ -33,8 +33,6 @@ import java.io.File;
  * found. Must be called from the SWT UI Thread.
  */
 public class CloudSdkPrompter {
-	
-  private static CloudSdk CLOUD_SDK = new CloudSdkProvider().getCloudSdk();
 
   /**
    * Return the Cloud SDK. If it cannot be found, prompt the user to specify its location.
@@ -61,8 +59,10 @@ public class CloudSdkPrompter {
    * @return the Cloud SDK, or {@code null} if unspecified
    */
   public static CloudSdk getCloudSdk(IShellProvider shellProvider) {
-    if (CLOUD_SDK != null || promptForSdk(shellProvider)) {
-      return CLOUD_SDK;
+    CloudSdk cloudSdk = new CloudSdkProvider().getCloudSdk();
+    
+    if (cloudSdk != null || promptForSdk(shellProvider)) {
+      return cloudSdk;
     }
     return null;
   }

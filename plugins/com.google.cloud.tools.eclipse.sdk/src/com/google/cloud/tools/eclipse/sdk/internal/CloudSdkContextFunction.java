@@ -57,13 +57,14 @@ public class CloudSdkContextFunction extends ContextFunction {
 
   @Override
   public Object compute(IEclipseContext context, String contextKey) {
-    referencedContexts.add(context);
-
     Object path = context.get(PreferenceConstants.CLOUDSDK_PATH);
-    File location = toFile(path);
-    // TODO(joaomartins): When can the SDK location in the context be different from the one in the
-    // preference store?
-    CloudSdk instance = new CloudSdkProvider().getCloudSdk();
+    if (path == null) {
+      // record this context as using the preference value
+      referencedContexts.add(context);
+    }
+    
+    Path location = toFile(path).toPath();
+    CloudSdk instance = new CloudSdkProvider(location).getCloudSdk();
     try {
       instance.validate();
       return instance;
