@@ -230,7 +230,7 @@
       </activation>
       <properties>
          <jettyMinVersion>9.1</jettyMinVersion>
-          <jettyMaxVersion>9.3</jettyMaxVersion>
+         <jettyMaxVersion>9.3</jettyMaxVersion>
       </properties>
       <!-- build against a known target platform -->
       <modules>
@@ -264,8 +264,8 @@
         </property>
       </activation>
       <properties>
-         <jettyMinVersion>9.1</jettyMinVersion>
-         <jettyMaxVersion>9.3</jettyMaxVersion>
+         <jettyMinVersion>9.3</jettyMinVersion>
+         <jettyMaxVersion>9.4</jettyMaxVersion>
       </properties>
       <!-- build against a known target platform -->
       <modules>
@@ -308,7 +308,7 @@
       <properties>
         <!-- We configure Travis to use jdk7 -->
         <tycho.toolchains>SYSTEM</tycho.toolchains>
-        <!-- Ensure we don't resolved mis-cached artifacts -->
+        <!-- Ensure we don't resolve previous versions of our artifacts -->
         <tycho.localArtifacts>ignore</tycho.localArtifacts>
       </properties>
       <modules>

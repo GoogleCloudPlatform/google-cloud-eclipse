@@ -71,7 +71,7 @@
           </appArgLine>
           <repositories>
             <repository>
-              <id>juno</id>
+              <id>eclipse</id>
               <layout>p2</layout>
               <url>${eclipse.repoUrl}</url>
             </repository>
