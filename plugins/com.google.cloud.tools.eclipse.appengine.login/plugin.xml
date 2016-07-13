@@ -23,7 +23,7 @@
    <extension
          point="org.eclipse.ui.menus">
       <menuContribution
-            locationURI="menu:project?after=additions">
+            locationURI="menu:file?after=additions">
          <command
                commandId="com.google.cloud.tools.eclipse.appengine.login.commands.loginCommand"
                id="com.google.cloud.tools.eclipse.appengine.login.menus.loginCommand"
@@ -31,8 +31,10 @@
                mnemonic="L">
          </command>
       </menuContribution>
+      <!-- The following blog lists some useful eclipse built-in location URIs:
+           http://industrial-tsi-wim.blogspot.com/2012/06/eclipse-base-location-uri-for-menus.html -->
       <menuContribution
-            locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
+            locationURI="toolbar:org.eclipse.ui.trim.command2?after=additions">
          <toolbar
                id="com.google.cloud.tools.eclipse.appengine.login.toolbars.loginToolbar">
             <command
