@@ -64,7 +64,7 @@ public class CloudSdkProvider extends ContextFunction {
     
     if (location != null) {
       sdkBuilder.sdkPath(location);
-    } else if (configuredPath != null) {
+    } else if (configuredPath != null && !configuredPath.isEmpty()) {
       sdkBuilder.sdkPath(Paths.get(configuredPath));
     }
     
