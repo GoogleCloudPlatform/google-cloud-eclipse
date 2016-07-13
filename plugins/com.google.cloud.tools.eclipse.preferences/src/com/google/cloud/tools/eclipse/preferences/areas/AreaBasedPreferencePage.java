@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.RegistryFactory;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.jface.preference.IPersistentPreferenceStore;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
@@ -44,6 +45,11 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * A host preference page that hosts multiple <em>preference areas</em>. These
+ * {@link PreferenceArea} are like embedded preference pages, like more complex JFace
+ * {@linkplain FieldEditor}s.
+ */
 public class AreaBasedPreferencePage extends PreferencePage
     implements IWorkbenchPreferencePage, IExecutableExtension {
   private static final Logger logger = Logger.getLogger(AreaBasedPreferencePage.class.getName());
@@ -102,7 +108,7 @@ public class AreaBasedPreferencePage extends PreferencePage
     }
 
     // apply extra space around areas
-    GridLayoutFactory.swtDefaults().extendedMargins(0, 0, 5, 5).generateLayout(container);
+    GridLayoutFactory.swtDefaults().spacing(5, 10).generateLayout(container);
     parent.layout(true, true);
     return container;
   }
