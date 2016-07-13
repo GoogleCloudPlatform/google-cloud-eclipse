@@ -3,6 +3,9 @@ package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectIdValidator;
 import com.google.cloud.tools.eclipse.appengine.newproject.JavaPackageValidator;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.CharMatcher;
+import com.google.common.base.Strings;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
@@ -18,6 +21,8 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -128,6 +133,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage implements IWiz
     groupIdField = new Text(mavenCoordinatesGroup, SWT.BORDER);
     GridDataFactory.defaultsFor(groupIdField).align(SWT.FILL, SWT.CENTER).applyTo(groupIdField);
     groupIdField.addModifyListener(pageValidator);
+    groupIdField.addVerifyListener(new AutoPackageNameSetterOnGroupIdChange());
 
     Label artifactIdLabel = new Label(mavenCoordinatesGroup, SWT.NONE);
     artifactIdLabel.setText("Artifact Id:"); //$NON-NLS-1$
@@ -135,6 +141,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage implements IWiz
     GridDataFactory.defaultsFor(artifactIdField).align(SWT.FILL, SWT.CENTER)
         .applyTo(artifactIdField);
     artifactIdField.addModifyListener(pageValidator);
+    artifactIdField.addVerifyListener(new AutoPackageNameSetterOnArtifactIdChange());
 
     Label versionLabel = new Label(mavenCoordinatesGroup, SWT.NONE);
     versionLabel.setText("Version:"); //$NON-NLS-1$
@@ -150,7 +157,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage implements IWiz
 
     // Java package name
     Label packageNameLabel = new Label(container, SWT.NONE);
-    packageNameLabel.setText("Java package: (defaults to group ID)");
+    packageNameLabel.setText("Java package:");
     javaPackageField = new Text(container, SWT.BORDER);
     GridData javaPackagePosition = new GridData(GridData.FILL_HORIZONTAL);
     javaPackagePosition.horizontalSpan = 2;
@@ -322,5 +329,80 @@ public class MavenAppEngineStandardWizardPage extends WizardPage implements IWiz
     public void modifyText(ModifyEvent event) {
       checkFlipToNext();
     }
+  }
+
+  /**
+   * Auto-fills javaPackageField as "groupId.artifactId" (or "groupId" if artifactId is empty),
+   * only when 1) javaPackageField is empty; or 2) the field matches previous auto-fill before
+   * ID modification.
+   */
+  private final class AutoPackageNameSetterOnGroupIdChange implements VerifyListener {
+    @Override
+    public void verifyText(VerifyEvent event) {
+      // Below explains how to get text after modification:
+      // http://stackoverflow.com/questions/32872249/get-text-of-swt-text-component-before-modification
+      String newGroupId =
+          getGroupId().substring(0, event.start) + event.text + getGroupId().substring(event.end);
+
+      String oldPackageName = suggestPackageName(getGroupId(), getArtifactId());
+      String newPackageName = suggestPackageName(newGroupId, getArtifactId());
+      adjustPackageName(oldPackageName, newPackageName);
+    }
+  }
+
+  /**
+   * See {@link AutoPackageNameSetterOnGroupIdChange}.
+   */
+  private final class AutoPackageNameSetterOnArtifactIdChange implements VerifyListener {
+    @Override
+    public void verifyText(VerifyEvent event) {
+      String newArtifactId = getArtifactId().substring(0, event.start)
+          + event.text + getArtifactId().substring(event.end);
+
+      String oldPackageName = suggestPackageName(getGroupId(), getArtifactId());
+      String newPackageName = suggestPackageName(getGroupId(), newArtifactId);
+      adjustPackageName(oldPackageName, newPackageName);
+    }
+  }
+
+  /**
+   * See {@link AutoPackageNameSetterOnGroupIdChange#verifyText(VerifyEvent)}.
+   */
+  private void adjustPackageName(String oldPackageName, String newPackageName) {
+    if (getPackageName().isEmpty() || getPackageName().equals(oldPackageName)) {
+      javaPackageField.setText(newPackageName);
+    }
+  }
+
+  /**
+   * Helper function returning a suggested package name based on groupId and artifactId.
+   *
+   * It does basic string filtering/manipulation, which does not completely eliminate
+   * naming issues. However, users will be alerted of any slipping errors in naming by
+   * {@link #validatePage}.
+   */
+  @VisibleForTesting
+  protected static String suggestPackageName(String groupId, String artifactId) {
+    String naivePackageName = groupId;
+    if (!artifactId.trim().isEmpty()) {
+      naivePackageName = groupId + "." + artifactId;
+    }
+
+    if (JavaPackageValidator.validate(naivePackageName).isOK()) {
+      return naivePackageName;
+    }
+
+    // 1) Remove leading and trailing dots.
+    // 2) Keep only word characters ([a-zA-Z_0-9]) and dots (escaping inside [] not necessary).
+    // 3) Replace consecutive dots with a single dot.
+    groupId = CharMatcher.is('.').trimFrom(groupId)
+        .replaceAll("[^\\w.]", "").replaceAll("\\.+",  ".");
+    artifactId = CharMatcher.is('.').trimFrom(artifactId)
+        .replaceAll("[^\\w.]", "").replaceAll("\\.+",  ".");
+
+    if (!artifactId.isEmpty()) {  // No whitespace at all, so isEmpty() works.
+      return groupId + "." + artifactId;
+    }
+    return groupId;
   }
 }

@@ -5,7 +5,7 @@
   <extension point="org.eclipse.ui.commands">
     <command
       description="%deployStandardCommandDescription"
-      id="com.google.cloud.tools.eclipse.appengine.deploy.standard"
+      id="com.google.cloud.tools.eclipse.appengine.deploy"
       name="%deployStandardCommandName">
     </command>
   </extension>
@@ -15,7 +15,7 @@
       allPopups="false"
       locationURI="popup:org.eclipse.ui.popup.any?after=additions">
       <command
-        commandId="com.google.cloud.tools.eclipse.appengine.deploy.standard"
+        commandId="com.google.cloud.tools.eclipse.appengine.deploy"
         label="%deployStandardMenuLabel"
         style="push">
         <visibleWhen checkEnabled="true" />
@@ -25,8 +25,8 @@
   
   <extension point="org.eclipse.ui.handlers">
     <handler
-      class="com.google.cloud.tools.eclipse.appengine.deploy.AppEngineStandardDeployCommandHandler"
-      commandId="com.google.cloud.tools.eclipse.appengine.deploy.standard">
+      class="com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployCommandHandler"
+      commandId="com.google.cloud.tools.eclipse.appengine.deploy">
       <enabledWhen>
         <and>
           <count value="1" />

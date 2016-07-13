@@ -149,7 +149,7 @@ public final class CloudSdkRuntimeWizardFragment extends WizardFragment {
       }
     });
 
-    File location = new CloudSdkProvider(null).getCloudSdkLocation();
+    File location = new CloudSdkProvider().getCloudSdkLocation();
     if (location != null) {
       dirTextBox.setText(location.toString());
     }

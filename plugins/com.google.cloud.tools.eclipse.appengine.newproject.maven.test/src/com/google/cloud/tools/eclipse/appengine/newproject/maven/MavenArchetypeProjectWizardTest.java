@@ -60,4 +60,34 @@ public class MavenArchetypeProjectWizardTest {
         MavenAppEngineStandardArchetypeWizardPage.PRESET_ARCHETYPES.get(0)
             .archetype.getArtifactId());
   }
+
+  @Test
+  public void testSuggestPackageName() {
+    Assert.assertEquals("aa.bb",
+        MavenAppEngineStandardWizardPage.suggestPackageName("aa.bb", ""));
+    Assert.assertEquals("aa.bb.cc.dd",
+        MavenAppEngineStandardWizardPage.suggestPackageName("aa.bb", "cc.dd"));
+
+    Assert.assertEquals("aA.Bb",
+        MavenAppEngineStandardWizardPage.suggestPackageName("aA.Bb", ""));
+    Assert.assertEquals("Aa.Bb.Cc.DD",
+        MavenAppEngineStandardWizardPage.suggestPackageName("Aa.Bb", "Cc.DD"));
+
+    Assert.assertEquals("aa.bb",
+        MavenAppEngineStandardWizardPage.suggestPackageName(" a  a\t . b\r b \n", " \t \r  "));
+    Assert.assertEquals("Aa.Bb.Cc.DD",
+        MavenAppEngineStandardWizardPage.suggestPackageName("  A  a.\tBb", " C  c . D D  "));
+
+    Assert.assertEquals("aa.bb",
+        MavenAppEngineStandardWizardPage.suggestPackageName("....aa....bb...", "......"));
+    Assert.assertEquals("aa.bb.cc.dd",
+        MavenAppEngineStandardWizardPage.suggestPackageName("....aa....bb...", "..cc....dd.."));
+
+    Assert.assertEquals("aa._01234bb", MavenAppEngineStandardWizardPage.suggestPackageName(
+        "aa`~!@#$%^&*()-+=[]{}<>\\|:;'\",?/._01234bb", ""));
+    Assert.assertEquals("aa._01234bb._c_c_0.dd01234_",
+        MavenAppEngineStandardWizardPage.suggestPackageName(
+            "aa`~!@#$%^&*()-+=[]{}<>\\|:;'\",?/._01234bb",
+            "_c_c_0.dd01234_`~!@#$%^&*()-+=[]{}<>\\|:;'\",?/"));
+  }
 }
