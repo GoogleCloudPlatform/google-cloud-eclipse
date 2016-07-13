@@ -5,7 +5,6 @@ import com.google.cloud.tools.eclipse.appengine.newproject.JavaPackageValidator;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.CharMatcher;
-import com.google.common.base.Strings;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
