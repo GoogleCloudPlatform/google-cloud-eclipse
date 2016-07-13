@@ -9,9 +9,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 
 public class GoogleLoginCommandHandler extends AbstractHandler {
 
-	public GoogleLoginCommandHandler() {
-	}
-
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
 		MessageDialog.openInformation(window.getShell(),
