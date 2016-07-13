@@ -28,13 +28,11 @@
                commandId="com.google.cloud.tools.eclipse.appengine.login.commands.loginCommand"
                id="com.google.cloud.tools.eclipse.appengine.login.menus.loginCommand"
                label="%loginMenuItemLabel"
-               mnemonic="L">
+               mnemonic="G">
          </command>
       </menuContribution>
-      <!-- The following blog lists some useful eclipse built-in location URIs:
-           http://industrial-tsi-wim.blogspot.com/2012/06/eclipse-base-location-uri-for-menus.html -->
       <menuContribution
-            locationURI="toolbar:org.eclipse.ui.trim.command2?after=additions">
+            locationURI="toolbar:org.eclipse.ui.trim.status?after=additions">
          <toolbar
                id="com.google.cloud.tools.eclipse.appengine.login.toolbars.loginToolbar">
             <command
