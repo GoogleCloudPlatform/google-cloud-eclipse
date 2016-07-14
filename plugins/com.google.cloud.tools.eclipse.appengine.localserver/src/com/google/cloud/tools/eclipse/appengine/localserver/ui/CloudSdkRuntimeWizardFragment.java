@@ -14,8 +14,8 @@
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.eclipse.appengine.localserver.runtime.CloudSdkRuntime;
-import com.google.cloud.tools.eclipse.sdk.CloudSdkProvider;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -43,8 +43,6 @@ import org.eclipse.wst.server.core.IRuntimeWorkingCopy;
 import org.eclipse.wst.server.core.TaskModel;
 import org.eclipse.wst.server.ui.wizard.IWizardHandle;
 import org.eclipse.wst.server.ui.wizard.WizardFragment;
-
-import java.io.File;
 
 /**
  * {@link WizardFragment} for configuring Google Cloud SDK Runtime.
@@ -149,7 +147,7 @@ public final class CloudSdkRuntimeWizardFragment extends WizardFragment {
       }
     });
 
-    File location = new CloudSdkProvider().getCloudSdkLocation();
+    java.nio.file.Path location = new CloudSdk.Builder().build().getSdkPath();
     if (location != null) {
       dirTextBox.setText(location.toString());
     }

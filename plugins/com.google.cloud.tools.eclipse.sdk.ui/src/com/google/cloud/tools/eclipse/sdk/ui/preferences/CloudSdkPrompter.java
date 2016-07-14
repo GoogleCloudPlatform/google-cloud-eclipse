@@ -16,8 +16,8 @@
 
 package com.google.cloud.tools.eclipse.sdk.ui.preferences;
 
+import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-import com.google.cloud.tools.eclipse.sdk.CloudSdkProvider;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.PreferenceDialog;
@@ -27,6 +27,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import java.io.File;
+import java.nio.file.Path;
 
 /**
  * Similar to {@link CloudSdkProvider} but will open the Cloud SDK preference page if no location is
@@ -59,13 +60,15 @@ public class CloudSdkPrompter {
    * @return the Cloud SDK, or {@code null} if unspecified
    */
   public static CloudSdk getCloudSdk(IShellProvider shellProvider) {
-    CloudSdkProvider cloudSdkProvider = new CloudSdkProvider(null);
-    CloudSdk sdk = cloudSdkProvider.getCloudSdk();
-    if (sdk != null) {
+    CloudSdk sdk = new CloudSdk.Builder().build();
+    try {
+      sdk.validate();
       return sdk;
+    } catch (AppEngineException e) {
+      /* fall through */
     }
     if (promptForSdk(shellProvider)) {
-      return cloudSdkProvider.getCloudSdk();
+      return new CloudSdk.Builder().build();
     }
     return null;
   }
@@ -95,13 +98,17 @@ public class CloudSdkPrompter {
    * @return the Cloud SDK location, or {@code null} if unspecified
    */
   public static File getCloudSdkLocation(IShellProvider shellProvider) {
-    CloudSdkProvider cloudSdkProvider = new CloudSdkProvider(null);
-    File location = cloudSdkProvider.getCloudSdkLocation();
+    CloudSdk sdk = new CloudSdk.Builder().build();
+    Path location = sdk.getSdkPath();
     if (location != null) {
-      return location;
+      return location.toFile();
     }
     if (promptForSdk(shellProvider)) {
-      return cloudSdkProvider.getCloudSdkLocation();
+      sdk = new CloudSdk.Builder().build();
+      location = sdk.getSdkPath();
+      if (location != null) {
+        return location.toFile();
+      }
     }
     return null;
   }

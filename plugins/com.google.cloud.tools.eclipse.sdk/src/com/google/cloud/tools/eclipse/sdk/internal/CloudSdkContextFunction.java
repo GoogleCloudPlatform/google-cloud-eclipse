@@ -18,7 +18,6 @@ package com.google.cloud.tools.eclipse.sdk.internal;
 
 import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-import com.google.cloud.tools.eclipse.sdk.CloudSdkProvider;
 import com.google.common.collect.MapMaker;
 
 import org.eclipse.e4.core.contexts.ContextFunction;
@@ -61,9 +60,9 @@ public class CloudSdkContextFunction extends ContextFunction {
 
     Object path = context.get(PreferenceConstants.CLOUDSDK_PATH);
     File location = toFile(path);
-    CloudSdk.Builder builder = new CloudSdkProvider(null).createBuilder(location);
-    if (builder == null) {
-      return NOT_A_VALUE;
+    CloudSdk.Builder builder = new CloudSdk.Builder();
+    if (location != null) {
+      builder.sdkPath(location);
     }
     CloudSdk instance = builder.build();
     try {

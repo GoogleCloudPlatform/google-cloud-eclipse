@@ -1,8 +1,6 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
-import java.io.File;
-import java.util.HashSet;
-import java.util.Set;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -21,7 +19,8 @@ import org.eclipse.wst.server.core.IRuntimeType;
 import org.eclipse.wst.server.core.IRuntimeWorkingCopy;
 import org.eclipse.wst.server.core.ServerCore;
 
-import com.google.cloud.tools.eclipse.sdk.CloudSdkProvider;
+import java.util.HashSet;
+import java.util.Set;
 
 public class AppEngineFacet {
 
@@ -49,9 +48,9 @@ public class AppEngineFacet {
   
       IRuntimeWorkingCopy appEngineRuntimeWorkingCopy 
           = appEngineRuntimeType.createRuntime(null, monitor);
-      File sdkLocation = new CloudSdkProvider(null).getCloudSdkLocation();
+      java.nio.file.Path sdkLocation = new CloudSdk.Builder().build().getSdkPath();
       if (sdkLocation != null) {
-        IPath sdkPath = Path.fromOSString(sdkLocation.getAbsolutePath());
+        IPath sdkPath = Path.fromOSString(sdkLocation.toString());
         appEngineRuntimeWorkingCopy.setLocation(sdkPath);
       }
       org.eclipse.wst.server.core.IRuntime appEngineServerRuntime 
