@@ -30,8 +30,9 @@ import java.io.File;
 import java.nio.file.Path;
 
 /**
- * Similar to {@link CloudSdkProvider} but will open the Cloud SDK preference page if no location is
- * found. Must be called from the SWT UI Thread.
+ * A special Google Cloud SDK provider that will open the Cloud SDK
+ * preference page if no location is found. Must be called from the
+ * SWT UI Thread.
  */
 public class CloudSdkPrompter {
 
