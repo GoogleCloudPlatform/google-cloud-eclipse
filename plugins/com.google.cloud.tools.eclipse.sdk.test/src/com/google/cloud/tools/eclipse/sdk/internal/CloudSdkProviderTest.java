@@ -29,7 +29,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
-import java.nio.file.Path;
 
 public class CloudSdkProviderTest {
   
@@ -40,7 +39,7 @@ public class CloudSdkProviderTest {
     preferences = new MockPreferences();
   }
   
-  /** Verify that the preference overrides PathResolver. */
+  /** Verify that the preference overrides auto discovery. */
   @Test(expected = AppEngineException.class)
   public void testSetPreferenceInvalid() {
     // A path that almost certainly does not contain the SDK

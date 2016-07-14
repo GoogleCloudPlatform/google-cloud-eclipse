@@ -33,16 +33,14 @@ public final class AppEngineSdkClasspathContainer implements IClasspathContainer
   @Override
   public IClasspathEntry[] getClasspathEntries() {
     CloudSdk cloudSdk = new CloudSdkProvider().getCloudSdk();
-    if (cloudSdk.getJavaAppEngineSdkPath() != null) {
-      java.nio.file.Path jarFile = cloudSdk.getJavaToolsJar();
-      if (Files.exists(jarFile)) {
-        IClasspathEntry appEngineToolsEntry =
-            JavaCore.newLibraryEntry(new Path(jarFile.toString()),
-                                     null /* sourceAttachmentPath */,
-                                     null /* sourceAttachmentRootPath */,
-                                     true /* isExported */);
-        return new IClasspathEntry[]{ appEngineToolsEntry };
-      }
+    java.nio.file.Path jarFile = cloudSdk.getJarPath("appengine-tools-api.jar");
+    if (jarFile != null && Files.exists(jarFile)) {
+      IClasspathEntry appEngineToolsEntry =
+          JavaCore.newLibraryEntry(new Path(jarFile.toString()),
+              null /* sourceAttachmentPath */,
+              null /* sourceAttachmentRootPath */,
+              true /* isExported */);
+      return new IClasspathEntry[]{ appEngineToolsEntry };
     }
     return new IClasspathEntry[0];
   }

@@ -16,10 +16,11 @@
 
 package com.google.cloud.tools.eclipse.sdk;
 
-import com.google.common.annotations.VisibleForTesting;
+import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.eclipse.sdk.internal.PreferenceConstants;
 import com.google.cloud.tools.eclipse.sdk.internal.PreferenceInitializer;
+import com.google.common.annotations.VisibleForTesting;
 
 import org.eclipse.e4.core.contexts.ContextFunction;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -51,11 +52,14 @@ public class CloudSdkProvider extends ContextFunction {
   /**
    * Return the {@link CloudSdk} instance from the configured or discovered Cloud SDK.
    * 
-   * The used location is the one from IEclipseContext. If there is none, then it is fetched from
+   * <p>The used location is the one from IEclipseContext. If there is none, then it is fetched from
    * the preference store. If there is none there, then we let the library find it in the SDK
    * typical locations.
    * 
-   * @return the configured {@link CloudSdk} or {@code null} if no SDK could be found
+   * <p>This method ensures that the return SDK is valid, i.e., it contains the most important
+   * files.
+   * 
+   * @return the configured {@link CloudSdk} or {@code null} if no valid SDK could be found
    */
   public CloudSdk getCloudSdk() {
     CloudSdk.Builder sdkBuilder = new CloudSdk.Builder();
@@ -67,7 +71,15 @@ public class CloudSdkProvider extends ContextFunction {
     } else if (configuredPath != null && !configuredPath.isEmpty()) {
       sdkBuilder.sdkPath(Paths.get(configuredPath));
     }
+    // If no location is set, let library discover the location.
     
-    return sdkBuilder.build();
+    try {
+      CloudSdk sdk = sdkBuilder.build();
+      sdk.validate();
+      return sdk;
+    } catch (AppEngineException aee) {
+      // If no SDK could be discovered, let the caller prompt the user for a new one.
+      return null;
+    }
   }
 }

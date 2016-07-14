@@ -1,7 +1,9 @@
 
 package com.google.cloud.tools.eclipse.sdk.internal;
 
-import com.google.cloud.tools.appengine.cloudsdk.PathResolver;
+import com.google.cloud.tools.appengine.api.AppEngineException;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.eclipse.sdk.CloudSdkProvider;
 
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.core.runtime.preferences.DefaultScope;
@@ -9,8 +11,6 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
-
-import java.nio.file.Path;
 
 /**
  * Class used to initialize default preference values.
@@ -24,9 +24,15 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 
   @Override
   public void initializeDefaultPreferences() {
-    Path path = new PathResolver().getCloudSdkPath();
+    CloudSdk sdk = null;
+    try {
+      sdk = new CloudSdkProvider().getCloudSdk();
+    } catch(AppEngineException aee) {
+      // No SDK could be found.
+    }
+    
     DefaultScope.INSTANCE.getNode(BUNDLEID).put(PreferenceConstants.CLOUDSDK_PATH,
-        path == null ? "" : path.toString());
+        sdk == null ? "" : sdk.getJavaAppEngineSdkPath().toAbsolutePath().toString());
   }
 
   public static IEclipsePreferences getPreferenceNode() {

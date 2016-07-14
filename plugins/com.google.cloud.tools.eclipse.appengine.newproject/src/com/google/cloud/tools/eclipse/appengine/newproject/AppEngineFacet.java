@@ -51,7 +51,7 @@ public class AppEngineFacet {
       java.nio.file.Path sdkLocation =
           new CloudSdkProvider().getCloudSdk().getJavaAppEngineSdkPath();
       if (sdkLocation != null) {
-        IPath sdkPath = Path.fromOSString(sdkLocation.toString());
+        IPath sdkPath = Path.fromOSString(sdkLocation.toAbsolutePath().toString());
         appEngineRuntimeWorkingCopy.setLocation(sdkPath);
       }
       org.eclipse.wst.server.core.IRuntime appEngineServerRuntime 
