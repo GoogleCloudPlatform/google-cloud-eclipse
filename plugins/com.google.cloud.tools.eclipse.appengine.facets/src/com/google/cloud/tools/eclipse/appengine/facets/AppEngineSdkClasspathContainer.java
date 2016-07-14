@@ -14,6 +14,7 @@ import com.google.cloud.tools.eclipse.sdk.CloudSdkProvider;
 public final class AppEngineSdkClasspathContainer implements IClasspathContainer {
 
   public static final String CONTAINER_ID = "AppEngineSDK";
+  private static final String TOOLS_JAR_NAME = "appengine-tools-api.jar";
 
   @Override
   public IPath getPath() {
@@ -33,14 +34,16 @@ public final class AppEngineSdkClasspathContainer implements IClasspathContainer
   @Override
   public IClasspathEntry[] getClasspathEntries() {
     CloudSdk cloudSdk = new CloudSdkProvider().getCloudSdk();
-    java.nio.file.Path jarFile = cloudSdk.getJarPath("appengine-tools-api.jar");
-    if (jarFile != null && Files.exists(jarFile)) {
-      IClasspathEntry appEngineToolsEntry =
-          JavaCore.newLibraryEntry(new Path(jarFile.toString()),
-              null /* sourceAttachmentPath */,
-              null /* sourceAttachmentRootPath */,
-              true /* isExported */);
-      return new IClasspathEntry[]{ appEngineToolsEntry };
+    if (cloudSdk != null) {
+      java.nio.file.Path jarFile = cloudSdk.getJarPath(TOOLS_JAR_NAME);
+      if (jarFile != null && Files.exists(jarFile)) {
+        IClasspathEntry appEngineToolsEntry =
+            JavaCore.newLibraryEntry(new Path(jarFile.toString()),
+                null /* sourceAttachmentPath */,
+                null /* sourceAttachmentRootPath */,
+                true /* isExported */);
+        return new IClasspathEntry[]{ appEngineToolsEntry };
+      }
     }
     return new IClasspathEntry[0];
   }

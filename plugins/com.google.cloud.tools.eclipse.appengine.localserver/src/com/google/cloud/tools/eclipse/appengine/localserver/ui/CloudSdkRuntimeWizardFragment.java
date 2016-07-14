@@ -14,6 +14,7 @@
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.eclipse.appengine.localserver.runtime.CloudSdkRuntime;
 import com.google.cloud.tools.eclipse.sdk.CloudSdkProvider;
 
@@ -147,18 +148,23 @@ public final class CloudSdkRuntimeWizardFragment extends WizardFragment {
       }
     });
 
-    java.nio.file.Path location = new CloudSdkProvider().getCloudSdk().getJavaAppEngineSdkPath();
-    if (location != null) {
-      dirTextBox.setText(location.toString());
+    CloudSdk sdk = new CloudSdkProvider().getCloudSdk();
+    if (sdk != null) {
+      java.nio.file.Path location = sdk.getJavaAppEngineSdkPath();
+      if (location != null) {
+        dirTextBox.setText(location.toString());
+      }
     }
   }
 
   private CloudSdkRuntime getRuntimeDelegate() {
-    IRuntimeWorkingCopy workingCopy = (IRuntimeWorkingCopy) getTaskModel().getObject(TaskModel.TASK_RUNTIME);
+    IRuntimeWorkingCopy workingCopy =
+        (IRuntimeWorkingCopy) getTaskModel().getObject(TaskModel.TASK_RUNTIME);
     if (workingCopy == null) {
       return null;
     }
-    return (CloudSdkRuntime) workingCopy.loadAdapter(CloudSdkRuntime.class, new NullProgressMonitor());
+    return (CloudSdkRuntime) workingCopy.loadAdapter(
+        CloudSdkRuntime.class, new NullProgressMonitor());
   }
 
   private String getRuntimeTitle() {
