@@ -26,7 +26,7 @@ public class AppEngineDeployInfo {
   public void parse(File appEngineXml) throws CoreException {
     try {
       DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-      documentBuilderFactory.setNamespaceAware(true);
+      documentBuilderFactory.setNamespaceAware(false);
       document = documentBuilderFactory.newDocumentBuilder().parse(appEngineXml);
     } catch (IOException | SAXException | ParserConfigurationException exception) {
       throw new CoreException(new Status(IStatus.ERROR, FrameworkUtil.getBundle(getClass()).getSymbolicName(),
