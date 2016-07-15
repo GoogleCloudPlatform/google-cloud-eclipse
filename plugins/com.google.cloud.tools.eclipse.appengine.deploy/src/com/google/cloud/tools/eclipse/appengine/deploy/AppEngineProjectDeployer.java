@@ -51,7 +51,7 @@ public class AppEngineProjectDeployer {
       DefaultDeployConfiguration deployConfig = new DefaultDeployConfiguration();
       deployConfig.setDeployables(Collections.singletonList(stagingDirectory.append("app.yaml").toFile())); //$NON-NLS-1$
       deployConfig.setProject(projectId);
-      deployConfig.setVersion(projectVersion + "1");
+      deployConfig.setVersion(projectVersion);
       deployConfig.setPromote(false);
 
       CloudSdkAppEngineDeployment deployment = new CloudSdkAppEngineDeployment(cloudSdk);

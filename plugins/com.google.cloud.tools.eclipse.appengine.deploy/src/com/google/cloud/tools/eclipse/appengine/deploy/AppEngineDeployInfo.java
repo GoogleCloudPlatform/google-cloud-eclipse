@@ -5,10 +5,6 @@ import java.io.IOException;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -17,16 +13,18 @@ import org.osgi.framework.FrameworkUtil;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 public class AppEngineDeployInfo {
 
+  private static final String WEB_XML_NS_URI = "http://appengine.google.com/ns/1.0";
   private Document document;
 
   public void parse(File appEngineXml) throws CoreException {
     try {
       DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-      documentBuilderFactory.setNamespaceAware(false);
+      documentBuilderFactory.setNamespaceAware(true);
       document = documentBuilderFactory.newDocumentBuilder().parse(appEngineXml);
     } catch (IOException | SAXException | ParserConfigurationException exception) {
       throw new CoreException(new Status(IStatus.ERROR, FrameworkUtil.getBundle(getClass()).getSymbolicName(),
@@ -45,15 +43,20 @@ public class AppEngineDeployInfo {
 
   private String getTopLevelValue(Document doc, String parentTagName, String childTagName) throws CoreException {
     try {
-      XPath xpath = XPathFactory.newInstance().newXPath();
-      String expression = "/" + parentTagName + "/" + childTagName;
-      Node widgetNode = (Node) xpath.evaluate(expression, doc, XPathConstants.NODE);
-      if (widgetNode != null) {
-        return widgetNode.getTextContent();
-      } else {
-        return null;
+      NodeList parentElements = doc.getElementsByTagNameNS(WEB_XML_NS_URI, parentTagName);
+      if (parentElements.getLength() > 0) {
+        Node parent = parentElements.item(0);
+        if (parent.hasChildNodes()) {
+          for (int i = 0; i < parent.getChildNodes().getLength(); ++i) {
+            Node child = parent.getChildNodes().item(i);
+            if (child.getNodeName().equals(childTagName)) {
+              return child.getTextContent();
+            }
+          }
+        }
       }
-    } catch (DOMException | XPathExpressionException exception) {
+      return null;
+    } catch (DOMException exception) {
       throw new CoreException(new Status(IStatus.ERROR, FrameworkUtil.getBundle(getClass()).getSymbolicName(),
                                          Messages.getString("missing.appengine.xml.element") + childTagName,
                                          exception)); //$NON-NLS-1$

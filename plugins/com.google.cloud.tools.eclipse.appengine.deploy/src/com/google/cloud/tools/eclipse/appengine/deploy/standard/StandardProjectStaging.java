@@ -11,12 +11,12 @@ import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
 
 public class StandardProjectStaging {
 
-  public void stage(IPath explodedWarDir, IPath stagingDir, CloudSdk cloudSdk, IProgressMonitor monitor) {
+  public void stage(IPath explodedWarDirectory, IPath stagingDir, CloudSdk cloudSdk, IProgressMonitor monitor) {
     SubMonitor progress = SubMonitor.convert(monitor, 1);
     progress.setTaskName(Messages.getString("task.name.stage.project")); //$NON-NLS-1$
 
     DefaultStageStandardConfiguration stagingConfig = new DefaultStageStandardConfiguration();
-    stagingConfig.setSourceDirectory(explodedWarDir.toFile());
+    stagingConfig.setSourceDirectory(explodedWarDirectory.toFile());
     stagingConfig.setStagingDirectory(stagingDir.toFile());
     stagingConfig.setEnableJarSplitting(true);
 

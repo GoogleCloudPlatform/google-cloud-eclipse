@@ -21,14 +21,18 @@ public class AppEngineDeployInfoTest {
   private static final String TEST_ID = "fooId";
 
   private static final String XML_SUFFIX = "</appengine-web-app>";
-  private static final String XML_DECLARATION = "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
-                                            + "<appengine-web-app xmlns=\"http://appengine.google.com/ns/1.0\">";
+  private static final String XML_DECLARATION = "<?xml version='1.0' encoding='utf-8'?>"
+                                              + "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>";
+  private static final String XML_DECLARATION_WITH_INVALID_NS =
+      "<?xml version='1.0' encoding='utf-8'?><appengine-web-app xmlns='http://foo.bar.com/ns/42'>";
   private static final String PROJECT_ID = "<application>" + TEST_ID + "</application>";
   private static final String VERSION = "<version>" + TEST_VERSION + "</version>";
 
   private static final String XML_WITHOUT_PROJECT_ID = XML_DECLARATION + XML_SUFFIX;
   private static final String XML_WITHOUT_VERSION = XML_DECLARATION + PROJECT_ID + XML_SUFFIX;
   private static final String XML_WITH_VERSION_AND_PROJECT_ID = XML_DECLARATION + PROJECT_ID + VERSION + XML_SUFFIX;
+  private static final String XML_WITH_VERSION_AND_PROJECT_ID_WRONG_NS =
+      XML_DECLARATION_WITH_INVALID_NS + PROJECT_ID + VERSION + XML_SUFFIX;
 
   @Test
   public void testParse_noProjectId() throws ParserConfigurationException, SAXException, IOException, CoreException {
@@ -57,6 +61,16 @@ public class AppEngineDeployInfoTest {
     deployInfo.parse(xml);
     assertThat(deployInfo.getProjectId(), is(TEST_ID));
     assertThat(deployInfo.getProjectVersion(), is(TEST_VERSION));
+  }
+
+  @Test
+  public void testParse_xmlWithInvalidNamespace() throws ParserConfigurationException, SAXException, IOException, CoreException {
+    File xml = createFileWithContent(XML_WITH_VERSION_AND_PROJECT_ID_WRONG_NS);
+
+    AppEngineDeployInfo deployInfo = new AppEngineDeployInfo();
+    deployInfo.parse(xml);
+    assertNull(deployInfo.getProjectId());
+    assertNull(deployInfo.getProjectVersion());
   }
 
   private File createFileWithContent(String xmlWithoutProjectId) throws IOException {

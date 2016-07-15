@@ -74,7 +74,6 @@ public class StandardDeployJob extends WorkspaceJob {
     MessageConsole messageConsole = MessageConsoleUtilities.getMessageConsole(CONSOLE_NAME, null, true /* show */);
     final MessageConsoleStream outputStream = messageConsole.newMessageStream();
     CloudSdk cloudSdk = new CloudSdkProvider().createBuilder(null)
-        // TODO LocalAppEngineOutputLineListener should be renamed, moved to the util bundle, and used it here
         .addStdErrLineListener(new ProcessOutputLineListener() {
 
           @Override
