@@ -90,6 +90,13 @@ TODO: See the PreferenceResolver class comment for details.
                </documentation>
             </annotation>
          </attribute>
+         <attribute name="rank" type="string">
+            <annotation>
+               <documentation>
+                  An integer used for ordering preference areas within a page.
+               </documentation>
+            </annotation>
+         </attribute>
       </complexType>
    </element>
 

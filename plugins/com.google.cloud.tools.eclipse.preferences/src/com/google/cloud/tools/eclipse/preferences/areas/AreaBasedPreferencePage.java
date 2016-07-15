@@ -41,6 +41,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -52,17 +54,67 @@ import java.util.logging.Logger;
  */
 public class AreaBasedPreferencePage extends PreferencePage
     implements IWorkbenchPreferencePage, IExecutableExtension {
+  /**
+   * Responsible for ordering preference areas by their rank
+   */
+  public static class AreaOrdering implements Comparator<PreferenceArea> {
+    @Override
+    public int compare(PreferenceArea o1, PreferenceArea o2) {
+      return o1.getRank() - o2.getRank();
+    }
+  }
+
+  /**
+   * Builds the contents from an extension point. Could consider making this a standalone
+   * IExtensionFactory that constructs and populates an {@linkplain AreaBasedPreferencePage}.
+   */
+  private class ExtensionBuilder {
+    private static final String PREFAREA_EXTENSION_POINT =
+        "com.google.cloud.tools.eclipse.preferences.areas";
+    private static final String NAME_AREA = "area";
+    private static final String ATTR_PAGE_ID = "page";
+    private static final String ATTR_TITLE = "title";
+    private static final String ATTR_PREF_PATH = "preferences";
+    private static final String ATTR_CLASS = "class";
+    private static final String ATTR_RANK = "rank";
+
+    private static final String ATTR_ID = "id";
+
+    private void build() {
+      for (IConfigurationElement element : getRegistry()
+          .getConfigurationElementsFor(PREFAREA_EXTENSION_POINT)) {
+        if (element.getName().equals(NAME_AREA)
+            && pageId.equals(element.getAttribute(ATTR_PAGE_ID))) {
+          try {
+            PreferenceArea area = (PreferenceArea) element.createExecutableExtension(ATTR_CLASS);
+            IPreferenceStore store = resolvePreferenceStore(element.getAttribute(ATTR_PREF_PATH));
+            if (element.getAttribute(ATTR_TITLE) != null) {
+              area.setTitle(element.getAttribute(ATTR_TITLE));
+            }
+            if (element.getAttribute(ATTR_RANK) != null) {
+              area.setRank(Integer.parseInt(element.getAttribute(ATTR_RANK)));
+            }
+            if (store != null) {
+              area.setPreferenceStore(store);
+            }
+            areas.add(area);
+          } catch (CoreException ex) {
+            logger.log(Level.SEVERE,
+                "Unable to create " + element.getAttribute(ATTR_CLASS) + " for page " + pageId, ex);
+          } catch (ClassCastException ex) {
+            logger.log(Level.SEVERE, "Class " + element.getAttribute(ATTR_CLASS) + " must extend "
+                + PreferenceArea.class, ex);
+          } catch (NumberFormatException ex) {
+            logger.log(Level.SEVERE,
+                "Preference area rank '" + element.getAttribute(ATTR_RANK) + "' is not an integer",
+                ex);
+          }
+        }
+      }
+    }
+  }
+
   private static final Logger logger = Logger.getLogger(AreaBasedPreferencePage.class.getName());
-
-  private static final String PREFAREA_EXTENSION_POINT =
-      "com.google.cloud.tools.eclipse.preferences.areas";
-  private static final String NAME_AREA = "area";
-  private static final String ATTR_PAGE_ID = "page";
-  private static final String ATTR_TITLE = "title";
-  private static final String ATTR_PREF_PATH = "preferences";
-  private static final String ATTR_CLASS = "class";
-
-  private static final String ATTR_ID = "id";
 
   private String pageId;
 
@@ -86,11 +138,26 @@ public class AreaBasedPreferencePage extends PreferencePage
   @Override
   public void setInitializationData(IConfigurationElement configElement, String propertyName,
       Object data) throws CoreException {
-    if (configElement.getAttribute(ATTR_ID) == null) {
+    if (configElement.getAttribute(ExtensionBuilder.ATTR_ID) == null) {
       throw new CoreException(new Status(IStatus.ERROR, configElement.getNamespaceIdentifier(),
-          "Missing " + ATTR_PAGE_ID));
+          "Missing " + ExtensionBuilder.ATTR_PAGE_ID));
     }
-    pageId = configElement.getAttribute(ATTR_ID);
+    pageId = configElement.getAttribute(ExtensionBuilder.ATTR_ID);
+    new ExtensionBuilder().build();
+  }
+
+  public void addArea(PreferenceArea area) {
+    areas.add(area);
+  }
+
+  public void removeArea(PreferenceArea area) {
+    areas.remove(area);
+  }
+
+  public List<PreferenceArea> getAreas() {
+    List<PreferenceArea> copy = new ArrayList<>(areas);
+    Collections.sort(copy, new AreaOrdering());
+    return copy;
   }
 
   @Override
@@ -98,51 +165,28 @@ public class AreaBasedPreferencePage extends PreferencePage
     if (pageId == null) {
       throw new IllegalStateException("No page id");
     }
+    Collections.sort(areas, new AreaOrdering());
     Composite container = new Composite(parent, SWT.NONE);
-    for (IConfigurationElement element : getRegistry()
-        .getConfigurationElementsFor(PREFAREA_EXTENSION_POINT)) {
-      if (element.getName().equals(NAME_AREA)
-          && pageId.equals(element.getAttribute(ATTR_PAGE_ID))) {
-        addArea(container, element);
+    for (PreferenceArea area : areas) {
+      if (workbench != null) {
+        area.setWorkbench(workbench);
       }
+      Composite contents;
+      if (area.getTitle() == null) {
+        contents = new Composite(container, SWT.BORDER);
+      } else {
+        contents = new Group(container, SWT.NONE);
+        ((Group) contents).setText(area.getTitle());
+      }
+      area.createContents(contents);
+      area.setPropertyChangeListener(propertyChangeListener);
+      area.load();
+      GridLayoutFactory.swtDefaults().generateLayout(contents);
     }
-
     // apply extra space around areas
     GridLayoutFactory.swtDefaults().spacing(5, 10).generateLayout(container);
     parent.layout(true, true);
     return container;
-  }
-
-  private void addArea(Composite parent, IConfigurationElement element) {
-    try {
-      PreferenceArea area = (PreferenceArea) element.createExecutableExtension(ATTR_CLASS);
-      if (workbench != null) {
-        area.setWorkbench(workbench);
-      }
-      IPreferenceStore store = resolvePreferenceStore(element.getAttribute(ATTR_PREF_PATH));
-      if (store != null) {
-        area.setPreferenceStore(store);
-      }
-      area.setPropertyChangeListener(propertyChangeListener);
-      Composite container;
-      if (element.getAttribute(ATTR_TITLE) == null) {
-        container = new Composite(parent, SWT.BORDER);
-      } else {
-        container = new Group(parent, SWT.NONE);
-        ((Group) container).setText(element.getAttribute(ATTR_TITLE));
-      }
-      area.createContents(container);
-      area.load();
-      GridLayoutFactory.swtDefaults().generateLayout(container);
-      areas.add(area);
-    } catch (ClassCastException e) {
-      logger.log(Level.SEVERE,
-          "Class " + element.getAttribute(ATTR_CLASS) + " must extend " + PreferenceArea.class,
-          e);
-    } catch (CoreException e) {
-      logger.log(Level.SEVERE,
-          "Unable to create " + element.getAttribute(ATTR_CLASS) + " for page " + pageId, e);
-    }
   }
 
   /**
@@ -166,7 +210,7 @@ public class AreaBasedPreferencePage extends PreferencePage
   }
 
   @Override
-  protected void performApply() {
+  public boolean performOk() {
     for (PreferenceArea area : areas) {
       area.performApply();
       if (area.getPreferenceStore() instanceof IPersistentPreferenceStore) {
@@ -174,15 +218,10 @@ public class AreaBasedPreferencePage extends PreferencePage
           ((IPersistentPreferenceStore) area.getPreferenceStore()).save();
         } catch (IOException ex) {
           logger.log(Level.SEVERE, "Unable to persist preferences for " + area, ex);
+          return false;
         }
       }
     }
-  }
-
-
-  @Override
-  public boolean performOk() {
-    performApply();
     return true;
   }
 
@@ -227,10 +266,10 @@ public class AreaBasedPreferencePage extends PreferencePage
   }
 
   protected void update() {
-    IStatus severest = null;
+    IStatus severest = Status.OK_STATUS;
     for (PreferenceArea area : areas) {
       IStatus status = area.getStatus();
-      if (severest == null || status.getSeverity() > severest.getSeverity()) {
+      if (status.getSeverity() > severest.getSeverity()) {
         severest = status;
       }
     }

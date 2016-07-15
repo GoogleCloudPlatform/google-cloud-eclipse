@@ -46,6 +46,12 @@ public abstract class PreferenceArea {
   /** The associated workbench. */
   private IWorkbench workbench;
 
+  /** The area title; may be {@code null}. */
+  private String title;
+
+  /** The area rank, used to rank areas within a page. */
+  private int rank = Integer.MAX_VALUE;
+
   protected PreferenceArea() {}
 
   /**
@@ -132,4 +138,32 @@ public abstract class PreferenceArea {
   public void setWorkbench(IWorkbench workbench) {
     this.workbench = workbench;
   }
+
+  /**
+   * @return the area title or {@code null} if none
+   */
+  public String getTitle() {
+    return title;
+  }
+
+  /**
+   * Set the area title. Changing the value has no effect once the area has been rendered.
+   * 
+   * @param title the new title or {@code null} if none
+   */
+  public void setTitle(String title) {
+    this.title = title;
+  }
+
+  /** Return this area's rank, used to order areas on a page */
+  public int getRank() {
+    return rank;
+  }
+
+  /** Set this area's rank, used to order areas on a page */
+  public void setRank(int rank) {
+    this.rank = rank;
+  }
+
+
 }
