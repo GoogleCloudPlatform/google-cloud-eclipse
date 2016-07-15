@@ -21,8 +21,8 @@ import com.google.common.base.Preconditions;
 
 public class StandardDeployJob extends WorkspaceJob {
 
-  private static final String STAGING_DIR_NAME = "staging";
-  private static final String EXPLODED_WAR_DIR_NAME = "exploded-war";
+  private static final String STAGING_DIRECTORY_NAME = "staging";
+  private static final String EXPLODED_WAR_DIRECTORY_NAME = "exploded-war";
   private static final String CONSOLE_NAME = "App Engine Deploy";
 
 
@@ -30,18 +30,18 @@ public class StandardDeployJob extends WorkspaceJob {
   private final StandardProjectStaging staging;
   private AppEngineProjectDeployer deployer;
   private final IProject project;
-  private final IPath workDir;
+  private final IPath workDirectory;
 
   public StandardDeployJob(ExplodedWarPublisher exporter,
                            StandardProjectStaging staging,
                            AppEngineProjectDeployer deployer,
-                           IPath workDir,
+                           IPath workDirectory,
                            IProject project) {
     super(Messages.getString("deploy.standard.runnable.name")); //$NON-NLS-1$
 
     Preconditions.checkNotNull(exporter, "exporter is null");
     Preconditions.checkNotNull(staging, "staging is null");
-    Preconditions.checkNotNull(workDir, "workDir is null");
+    Preconditions.checkNotNull(workDirectory, "workDirectory is null");
     Preconditions.checkNotNull(project, "project is null");
 
     setRule(project);
@@ -49,20 +49,20 @@ public class StandardDeployJob extends WorkspaceJob {
     this.staging = staging;
     this.deployer = deployer;
     this.project = project;
-    this.workDir = workDir;
+    this.workDirectory = workDirectory;
   }
 
   @Override
   public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
     SubMonitor progress = SubMonitor.convert(monitor, 100);
     try {
-      IPath explodedWarDir = workDir.append(EXPLODED_WAR_DIR_NAME);
-      IPath stagingDir = workDir.append(STAGING_DIR_NAME);
+      IPath explodedWarDirectory = workDirectory.append(EXPLODED_WAR_DIRECTORY_NAME);
+      IPath stagingDirectory = workDirectory.append(STAGING_DIRECTORY_NAME);
       CloudSdk cloudSdk = getCloudSdk();
 
-      exporter.publish(project, explodedWarDir, progress.newChild(10));
-      staging.stage(explodedWarDir, stagingDir, cloudSdk, progress.newChild(20));
-      deployer.deploy(stagingDir, cloudSdk, progress.newChild(70));
+      exporter.publish(project, explodedWarDirectory, progress.newChild(10));
+      staging.stage(explodedWarDirectory, stagingDirectory, cloudSdk, progress.newChild(20));
+      deployer.deploy(stagingDirectory, cloudSdk, progress.newChild(70));
 
       return Status.OK_STATUS;
     } finally {
