@@ -76,7 +76,7 @@ public class GoogleLoginTestCommandHandler extends AbstractHandler {
     } catch (IOException ex) {
       throw new RuntimeException(ex);
     }
-	}
+  }
 
   private boolean testCredentialWithGcloud(File credentialFile) {
     try {
