@@ -52,7 +52,7 @@ public class GoogleLoginService {
    */
   // Should probably be synchronized properly.
   // TODO(chanseok): consider returning a String JSON (i.e., hide Credential)
-  Credential getActiveCredential() {
+  public Credential getActiveCredential() {
     return null;
   }
 }
