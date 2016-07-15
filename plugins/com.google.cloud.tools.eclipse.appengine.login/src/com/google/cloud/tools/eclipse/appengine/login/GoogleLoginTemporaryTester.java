@@ -14,6 +14,11 @@
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.appengine.login;
 
+import com.google.api.client.auth.oauth2.Credential;
+import com.google.gson.Gson;
+
+import org.eclipse.core.commands.ExecutionException;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -23,27 +28,12 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.handlers.HandlerUtil;
-
-import com.google.api.client.auth.oauth2.Credential;
-import com.google.gson.Gson;
-
 // FIXME This class is for test-driven development of login. Remove it in the final product.
-public class GoogleLoginTestCommandHandler extends AbstractHandler {
+public class GoogleLoginTemporaryTester {
 
-  public Object execute(ExecutionEvent event) throws ExecutionException {
+  public boolean testLogin() throws ExecutionException {
     File credentialFile = getCredentialFile();
-    boolean success = credentialFile != null && testCredentialWithGcloud(credentialFile);
-
-    IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
-    MessageDialog.openInformation(window.getShell(),
-        "TESTING AUTH", success ? "SUCCESS" : "FAILURE");
-    return null;
+    return credentialFile != null && testCredentialWithGcloud(credentialFile);
   }
 
   private static final String CLIENT_ID_LABEL = "client_id";

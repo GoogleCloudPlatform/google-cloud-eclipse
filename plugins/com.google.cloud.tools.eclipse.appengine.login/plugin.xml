@@ -12,14 +12,6 @@
             id="com.google.cloud.tools.eclipse.appengine.login.commands.loginCommand"
             name="Google Login Command">
       </command>
-
-      <!-- FIXME Below is for test-driven development of login. Remove it in the final product. -->
-      <command
-            categoryId="com.google.cloud.tools.eclipse.appengine.login.commands.category"
-            id="com.google.cloud.tools.eclipse.appengine.login.commands.loginTestCommand"
-            name="Google Login Test Command">
-      </command>
-
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -27,13 +19,6 @@
             class="com.google.cloud.tools.eclipse.appengine.login.GoogleLoginCommandHandler"
             commandId="com.google.cloud.tools.eclipse.appengine.login.commands.loginCommand">
       </handler>
-
-      <!-- FIXME Below is for test-driven development of login. Remove it in the final product. -->
-      <handler
-            class="com.google.cloud.tools.eclipse.appengine.login.GoogleLoginTestCommandHandler"
-            commandId="com.google.cloud.tools.eclipse.appengine.login.commands.loginTestCommand">
-      </handler>
-
    </extension>
    <extension
          point="org.eclipse.ui.menus">
@@ -57,16 +42,6 @@
                   tooltip="%loginToolbarTooltip">
             </command>
          </toolbar>
-      </menuContribution>
-
-      <!-- FIXME Below is for test-driven development of login. Remove it in the final product. -->
-      <menuContribution
-            locationURI="menu:file?after=additions">
-         <command
-               commandId="com.google.cloud.tools.eclipse.appengine.login.commands.loginTestCommand"
-               id="com.google.cloud.tools.eclipse.appengine.login.menus.loginTestCommand"
-               label="TEST IF AUTH WORKS">
-         </command>
       </menuContribution>
    </extension>
 
