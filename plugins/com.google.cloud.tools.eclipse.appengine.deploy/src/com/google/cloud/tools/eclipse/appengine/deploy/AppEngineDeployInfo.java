@@ -3,7 +3,6 @@ package com.google.cloud.tools.eclipse.appengine.deploy;
 import java.io.File;
 import java.io.IOException;
 
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
@@ -26,9 +25,9 @@ public class AppEngineDeployInfo {
 
   public void parse(File appEngineXml) throws CoreException {
     try {
-    DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-    DocumentBuilder db = dbf.newDocumentBuilder();
-    document = db.parse(appEngineXml);
+      DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+      documentBuilderFactory.setNamespaceAware(true);
+      document = documentBuilderFactory.newDocumentBuilder().parse(appEngineXml);
     } catch (IOException | SAXException | ParserConfigurationException exception) {
       throw new CoreException(new Status(IStatus.ERROR, FrameworkUtil.getBundle(getClass()).getSymbolicName(),
                                          Messages.getString("cannot.parse.appengine.xml"),
