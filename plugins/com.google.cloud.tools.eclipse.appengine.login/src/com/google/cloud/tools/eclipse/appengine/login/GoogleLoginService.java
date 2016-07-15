@@ -48,11 +48,10 @@ public class GoogleLoginService {
   }
 
   /**
-   * Returns the credential of the active user. If there is no active user, returns a credential
-   * where the access token and the refresh token are set to {@code null}.
+   * Returns the credential of the active user. If there is no active user, returns {@code null}.
    */
   // Should probably be synchronized properly.
-  // TODO(chanseok): never return null.
+  // TODO(chanseok): consider returning a String JSON (i.e., hide Credential)
   Credential getActiveCredential() {
     return null;
   }
