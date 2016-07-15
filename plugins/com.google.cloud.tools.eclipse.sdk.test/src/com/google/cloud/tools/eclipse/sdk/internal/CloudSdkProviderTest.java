@@ -31,7 +31,7 @@ import org.junit.Test;
 import java.io.File;
 
 public class CloudSdkProviderTest {
-  
+
   private IPreferenceStore preferences;
   
   @Before

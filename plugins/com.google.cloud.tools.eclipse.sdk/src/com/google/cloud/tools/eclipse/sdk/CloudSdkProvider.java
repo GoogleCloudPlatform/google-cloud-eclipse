@@ -22,7 +22,6 @@ import com.google.cloud.tools.eclipse.sdk.internal.PreferenceConstants;
 import com.google.cloud.tools.eclipse.sdk.internal.PreferenceInitializer;
 import com.google.common.annotations.VisibleForTesting;
 
-import org.eclipse.e4.core.contexts.ContextFunction;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import java.nio.file.Path;
@@ -32,7 +31,7 @@ import java.nio.file.Paths;
  * Utility to find the Google Cloud SDK either at locations configured by the user or in standard
  * locations on the system.
  */
-public class CloudSdkProvider extends ContextFunction {
+public class CloudSdkProvider {
 
   private IPreferenceStore preferences = PreferenceInitializer.getPreferenceStore();
   private Path location;
@@ -52,12 +51,12 @@ public class CloudSdkProvider extends ContextFunction {
   /**
    * Return the {@link CloudSdk} instance from the configured or discovered Cloud SDK.
    * 
-   * <p>The used location is the one from IEclipseContext. If there is none, then it is fetched from
-   * the preference store. If there is none there, then we let the library find it in the SDK
-   * typical locations.
+   * <p>It searches for Cloud SDK in {@code location} first. If Cloud SDK isn't there, it searches
+   * for a valid location in {@code preferences}. If no valid location is found there, we let the
+   * library discover the SDK in its typical locations.
    * 
    * <p>This method ensures that the return SDK is valid, i.e., it contains the most important
-   * files.
+   * files, or that no SDK is returned.
    * 
    * @return the configured {@link CloudSdk} or {@code null} if no valid SDK could be found
    */
