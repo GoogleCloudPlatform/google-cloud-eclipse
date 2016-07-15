@@ -176,7 +176,7 @@
              delegate="com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerLaunchConfigurationDelegate"    
              id="com.google.cloud.tools.eclipse.AppToolsLaunchConfigurationType"   
              modes="run, debug, profile"   
-             name="%appToolsServerTypeName">   
+             name="%apptoolsServerTypeName">   
        </launchConfigurationType>    
     </extension>
     <extension point="org.eclipse.debug.ui.launchConfigurationTypeImages">    
