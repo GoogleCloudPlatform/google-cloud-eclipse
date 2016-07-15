@@ -33,7 +33,7 @@
       <runtimeClasspathProvider
             class="com.google.cloud.tools.eclipse.appengine.localserver.ServletClasspathProvider"
             id="com.google.cloud.tools.eclipse.appengine.localserver.runtimeClasspathProvider"
-            runtimeTypeIds="com.google.cloud.tools.eclipse.runtime.custom" />
+            runtimeTypeIds="com.google.cloud.tools.eclipse.runtime.apptools" />
    </extension>
    
    <extension point="org.eclipse.wst.server.ui.wizardFragments">

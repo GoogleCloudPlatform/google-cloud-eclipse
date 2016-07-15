@@ -28,8 +28,8 @@ public class AppEngineFacet {
   public static final String APP_ENGINE_FACET_ID = "com.google.cloud.tools.eclipse.appengine.facet";
 
   private static final String APP_ENGINE_FACET_VERSION = "1";
-  private static final String DEFAULT_RUNTIME_ID = "com.google.cloud.tools.eclipse.runtime.custom";
-  private static final String DEFAULT_RUNTIME_NAME = "App Engine Standard (Custom)";
+  private static final String DEFAULT_RUNTIME_ID = "com.google.cloud.tools.eclipse.runtime.apptools";
+  private static final String DEFAULT_RUNTIME_NAME = "App Engine Standard (app-tools-lib-for-java)";
   
   public static void installAppEngineRuntime(IFacetedProject project, IProgressMonitor monitor)
       throws CoreException {
