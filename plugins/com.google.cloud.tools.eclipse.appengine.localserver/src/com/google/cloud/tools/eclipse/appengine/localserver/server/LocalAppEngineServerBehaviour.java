@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
@@ -57,6 +59,16 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
   @Override
   protected IModuleResource[] getResources(IModule[] module) {
     return super.getResources(module);
+  }
+
+  @Override
+  public IStatus canStop() {
+    int serverState = getServer().getServerState();
+    if ((serverState != IServer.STATE_STOPPING) && (serverState != IServer.STATE_STOPPED)) {
+      return Status.OK_STATUS;
+    } else {
+      return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Stop in progress");
+    }
   }
 
   /**

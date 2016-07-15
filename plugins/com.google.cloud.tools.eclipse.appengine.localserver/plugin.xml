@@ -210,4 +210,13 @@
     <runtimeFacetMapping runtimeTypeId="com.google.cloud.tools.eclipse.runtime.apptools"
         runtime-component="com.google.cloud.tools.eclipse.runtime.component.custom" version="1"/>
    </extension>
+   <extension point="org.eclipse.ui.console.consolePageParticipants">
+     <consolePageParticipant
+            class="com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineConsolePageParticipant"
+            id="com.google.cloud.tools.appengine.LocalAppEngineConsolePagePaticipant">
+         <enablement>
+            <instanceof value="com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineConsole"/>
+         </enablement>
+     </consolePageParticipant>
+   </extension>
 </plugin>
