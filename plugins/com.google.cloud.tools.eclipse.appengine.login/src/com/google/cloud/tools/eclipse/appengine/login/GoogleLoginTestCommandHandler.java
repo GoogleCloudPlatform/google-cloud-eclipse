@@ -1,0 +1,113 @@
+/*******************************************************************************
+ * Copyright 2016 Google Inc. All Rights Reserved.
+ *
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which
+ * accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *******************************************************************************/
+package com.google.cloud.tools.eclipse.appengine.login;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.handlers.HandlerUtil;
+
+import com.google.api.client.auth.oauth2.Credential;
+import com.google.gson.Gson;
+
+// FIXME This class is for test-driven development of login. Remove it in the final product.
+public class GoogleLoginTestCommandHandler extends AbstractHandler {
+
+  public Object execute(ExecutionEvent event) throws ExecutionException {
+    File credentialFile = getCredentialFile();
+    boolean success = credentialFile != null && testCredentialWithGcloud(credentialFile);
+
+    IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
+    MessageDialog.openInformation(window.getShell(),
+        "TESTING AUTH", success ? "SUCCESS" : "FAILURE");
+    return null;
+  }
+
+  private static final String CLIENT_ID_LABEL = "client_id";
+  private static final String CLIENT_SECRET_LABEL = "client_secret";
+  private static final String REFRESH_TOKEN_LABEL = "refresh_token";
+  private static final String GCLOUD_USER_TYPE_LABEL = "type";
+  private static final String GCLOUD_USER_TYPE = "authorized_user";
+
+  private File getCredentialFile() {
+    Credential credential = GoogleLoginService.getInstance().getActiveCredential();
+    if (credential == null) {
+      return null;
+    }
+
+    Map<String, String> credentialMap = new HashMap<>();
+    credentialMap.put(CLIENT_ID_LABEL, GoogleLoginService.OAUTH_CLIENT_ID);
+    credentialMap.put(CLIENT_SECRET_LABEL, GoogleLoginService.OAUTH_CLIENT_SECRET);
+    credentialMap.put(REFRESH_TOKEN_LABEL, credential.getRefreshToken());
+    credentialMap.put(GCLOUD_USER_TYPE_LABEL, GCLOUD_USER_TYPE);
+
+    String jsonCredential = new Gson().toJson(credentialMap);
+
+    try {
+      File credentialFile = File.createTempFile("tmp_eclipse_login_test_cred", ".json");
+      credentialFile.deleteOnExit();
+      try (BufferedWriter writer = new BufferedWriter(new FileWriter(credentialFile))) {
+        writer.write(jsonCredential);
+      }
+      return credentialFile;
+    } catch (IOException ex) {
+      throw new RuntimeException(ex);
+    }
+	}
+
+  private boolean testCredentialWithGcloud(File credentialFile) {
+    try {
+      ProcessBuilder processBuilder = new ProcessBuilder(
+          "gcloud", "projects", "list", "--credential-file-override=" + credentialFile.toString());
+
+      Process process = processBuilder.start();
+      process.waitFor();
+
+      try (
+        BufferedReader outReader =
+            new BufferedReader(new InputStreamReader(process.getInputStream()));
+        BufferedReader errReader =
+            new BufferedReader(new InputStreamReader(process.getErrorStream()))
+      ) {
+        while (outReader.ready() || errReader.ready()) {
+          if (outReader.ready()) {
+            System.out.println("[stdout] " + outReader.readLine());
+          }
+          if (errReader.ready()) {
+            System.out.println("[stderr] " + errReader.readLine());
+          }
+        }
+      }
+      return process.exitValue() == 0;
+
+    } catch (IOException ioe) {
+      ioe.printStackTrace();
+    } catch (InterruptedException ie) {
+      ie.printStackTrace();
+    }
+    return false;
+  }
+}
