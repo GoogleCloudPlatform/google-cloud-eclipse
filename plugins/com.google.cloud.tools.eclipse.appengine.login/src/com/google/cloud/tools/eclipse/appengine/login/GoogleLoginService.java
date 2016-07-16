@@ -14,6 +14,10 @@
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.appengine.login;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import com.google.api.client.auth.oauth2.Credential;
 
 /**
@@ -31,9 +35,9 @@ public class GoogleLoginService {
   public static final String OAUTH_CLIENT_SECRET = "@oauth.client.secret@";
 
   // TODO(chanseok): this will be needed later.
-  //public static final String[] OAUTH_SCOPES = {
-  //    "https://www.googleapis.com/auth/userinfo#email"
-  //};
+  public static final List<String> OAUTH_SCOPES = Collections.unmodifiableList(Arrays.asList(
+      "https://www.googleapis.com/auth/userinfo#email"
+  ));
 
   private static GoogleLoginService instance;
 
