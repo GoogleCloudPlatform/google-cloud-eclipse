@@ -129,6 +129,23 @@ public class AreaBasedPreferencePage extends PreferencePage
     }
   };
 
+  /**
+   * Create new instance. {@linkplain AreaBasedPreferencePage}s require a pageId to be referenced by
+   * different {@link PreferenceArea}s.
+   * 
+   * @param pageId the identifier of this page
+   */
+  public AreaBasedPreferencePage(String pageId) {
+    this.pageId = pageId;
+  }
+
+  /**
+   * 0-argument constructor required by the Eclipse Extension Registry. Not intended for normal use.
+   * 
+   * @see AreaBasedPreferencePage(String)
+   * @noreference use {@link AreaBasedPreferencePage(String)} instead
+   */
+  public AreaBasedPreferencePage() {}
 
   @Override
   public void init(IWorkbench workbench) {
@@ -168,9 +185,12 @@ public class AreaBasedPreferencePage extends PreferencePage
     Collections.sort(areas, new AreaOrdering());
     Composite container = new Composite(parent, SWT.NONE);
     for (PreferenceArea area : areas) {
+      // configure the area
       if (workbench != null) {
         area.setWorkbench(workbench);
       }
+
+      // render the contents
       Composite contents;
       if (area.getTitle() == null) {
         contents = new Composite(container, SWT.BORDER);
@@ -179,9 +199,11 @@ public class AreaBasedPreferencePage extends PreferencePage
         ((Group) contents).setText(area.getTitle());
       }
       area.createContents(contents);
+      GridLayoutFactory.swtDefaults().generateLayout(contents);
+
+      // load the preferences
       area.setPropertyChangeListener(propertyChangeListener);
       area.load();
-      GridLayoutFactory.swtDefaults().generateLayout(contents);
     }
     // apply extra space around areas
     GridLayoutFactory.swtDefaults().spacing(5, 10).generateLayout(container);
@@ -276,5 +298,4 @@ public class AreaBasedPreferencePage extends PreferencePage
     setValid(severest.getSeverity() != IStatus.ERROR);
     show(severest);
   }
-
 }
