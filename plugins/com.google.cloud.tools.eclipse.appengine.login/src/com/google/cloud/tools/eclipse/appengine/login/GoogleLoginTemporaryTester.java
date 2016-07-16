@@ -28,12 +28,17 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
-// FIXME This class is for test-driven development of login. Remove it in the final product.
+// FIXME This class is for manual integration login test. Remove it in the final product.
 public class GoogleLoginTemporaryTester {
 
   public boolean testLogin() throws ExecutionException {
-    File credentialFile = getCredentialFile();
-    return credentialFile != null && testCredentialWithGcloud(credentialFile);
+    try {
+      File credentialFile = getCredentialFile();
+      return credentialFile != null && testCredentialWithGcloud(credentialFile);
+    } catch (IOException ioe) {
+      ioe.printStackTrace();
+      return false;
+    }
   }
 
   private static final String CLIENT_ID_LABEL = "client_id";
@@ -42,7 +47,7 @@ public class GoogleLoginTemporaryTester {
   private static final String GCLOUD_USER_TYPE_LABEL = "type";
   private static final String GCLOUD_USER_TYPE = "authorized_user";
 
-  private File getCredentialFile() {
+  private File getCredentialFile() throws IOException {
     Credential credential = GoogleLoginService.getInstance().getActiveCredential();
     if (credential == null) {
       return null;
@@ -56,19 +61,15 @@ public class GoogleLoginTemporaryTester {
 
     String jsonCredential = new Gson().toJson(credentialMap);
 
-    try {
-      File credentialFile = File.createTempFile("tmp_eclipse_login_test_cred", ".json");
-      credentialFile.deleteOnExit();
-      try (BufferedWriter writer = new BufferedWriter(new FileWriter(credentialFile))) {
-        writer.write(jsonCredential);
-      }
-      return credentialFile;
-    } catch (IOException ex) {
-      throw new RuntimeException(ex);
+    File credentialFile = File.createTempFile("tmp_eclipse_login_test_cred", ".json");
+    credentialFile.deleteOnExit();
+    try (BufferedWriter writer = new BufferedWriter(new FileWriter(credentialFile))) {
+      writer.write(jsonCredential);
     }
+    return credentialFile;
   }
 
-  private boolean testCredentialWithGcloud(File credentialFile) {
+  private boolean testCredentialWithGcloud(File credentialFile) throws IOException {
     try {
       ProcessBuilder processBuilder = new ProcessBuilder(
           "gcloud", "projects", "list", "--credential-file-override=" + credentialFile.toString());
@@ -93,11 +94,9 @@ public class GoogleLoginTemporaryTester {
       }
       return process.exitValue() == 0;
 
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
     } catch (InterruptedException ie) {
       ie.printStackTrace();
+      return false;
     }
-    return false;
   }
 }
