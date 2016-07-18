@@ -103,7 +103,7 @@ public class CloudSdkPreferencePage extends FieldEditorPreferencePage
 
   protected boolean validateSdk(File location) {
     try {
-      CloudSdk sdk = new CloudSdk.Builder().sdkPath(location).build();
+      CloudSdk sdk = new CloudSdk.Builder().sdkPath(location.toPath()).build();
       sdk.validate();
     } catch (AppEngineException ex) {
       // accept a seemingly invalid location in case the SDK organization

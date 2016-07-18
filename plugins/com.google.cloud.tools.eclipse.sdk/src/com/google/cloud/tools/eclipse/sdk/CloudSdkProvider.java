@@ -82,7 +82,7 @@ public class CloudSdkProvider extends ContextFunction {
     if (location == null || !location.exists()) {
       return null;
     }
-    return new CloudSdk.Builder().sdkPath(location);
+    return new CloudSdk.Builder().sdkPath(location.toPath());
   }
 
   /**
