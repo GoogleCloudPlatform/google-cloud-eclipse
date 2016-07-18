@@ -16,6 +16,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+/**
+ * Parses and returns project ID and version from appengine-web.xml
+ */
 public class AppEngineDeployInfo {
 
   private static final String WEB_XML_NS_URI = "http://appengine.google.com/ns/1.0";
@@ -33,10 +36,18 @@ public class AppEngineDeployInfo {
     }
   }
 
+  /**
+   * @return project ID parsed from the &lt;application&gt; element of the appengine-web.xml or null if it is missing
+   * @throws CoreException if parsing the value fails
+   */
   public String getProjectId() throws CoreException {
     return getTopLevelValue(document, "appengine-web-app", "application"); //$NON-NLS-1$ //$NON-NLS-2$
   }
 
+  /**
+   * @return project version parsed from the &lt;version&gt; element of the appengine-web.xml or null if it is missing
+   * @throws CoreException if parsing the value fails
+   */
   public String getProjectVersion() throws CoreException {
     return getTopLevelValue(document, "appengine-web-app", "version"); //$NON-NLS-1$ //$NON-NLS-2$
   }

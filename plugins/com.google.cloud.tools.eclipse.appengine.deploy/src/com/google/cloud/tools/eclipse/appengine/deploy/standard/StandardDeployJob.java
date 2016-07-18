@@ -19,6 +19,17 @@ import com.google.cloud.tools.eclipse.sdk.CloudSdkProvider;
 import com.google.cloud.tools.eclipse.util.MessageConsoleUtilities;
 import com.google.common.base.Preconditions;
 
+/**
+ * Executes a job that deploys a project to App Engine Standard.
+ * <p>
+ * Deploy steps:
+ * <ol>
+ *  <li>export exploded WAR</li>
+ *  <li>stage project for deploy</li>
+ *  <li>deploy staged project</li>
+ * </ol>
+ * It uses a work directory where it will create separate directory for the exploded WAR and the staging results.
+ */
 public class StandardDeployJob extends WorkspaceJob {
 
   private static final String STAGING_DIRECTORY_NAME = "staging";
