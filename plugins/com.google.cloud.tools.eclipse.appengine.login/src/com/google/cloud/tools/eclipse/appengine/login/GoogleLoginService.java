@@ -28,12 +28,6 @@ import com.google.api.client.auth.oauth2.Credential;
  */
 public class GoogleLoginService {
 
-  // TODO(chanseok): these constant values should be set at compile-time to hide actual values.
-  // For this purpose, we could use org.codehaus.mojo:templating-maven-plugin as in the
-  // .eclipse.usagetracker bundle.
-  public static final String OAUTH_CLIENT_ID = "@oauth.client.id@";
-  public static final String OAUTH_CLIENT_SECRET = "@oauth.client.secret@";
-
   // TODO(chanseok): this will be needed later.
   public static final List<String> OAUTH_SCOPES = Collections.unmodifiableList(Arrays.asList(
       "https://www.googleapis.com/auth/userinfo#email"
