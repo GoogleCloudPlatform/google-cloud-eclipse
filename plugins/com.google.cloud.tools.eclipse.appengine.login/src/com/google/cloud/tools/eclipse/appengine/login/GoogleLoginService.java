@@ -14,11 +14,24 @@
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.appengine.login;
 
+import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.googleapis.auth.oauth2.GoogleOAuthConstants;
+import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
+import com.google.api.client.googleapis.util.Utils;
+
+import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
+
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import com.google.api.client.auth.oauth2.Credential;
 
 /**
  * Provides service related to login, e.g., account management, getting a credential of a
@@ -34,9 +47,9 @@ public class GoogleLoginService {
   public static final String OAUTH_CLIENT_ID = "@oauth.client.id@";
   public static final String OAUTH_CLIENT_SECRET = "@oauth.client.secret@";
 
-  // TODO(chanseok): this will be needed later.
-  public static final List<String> OAUTH_SCOPES = Collections.unmodifiableList(Arrays.asList(
-      "https://www.googleapis.com/auth/userinfo#email"
+  private static final List<String> OAUTH_SCOPES = Collections.unmodifiableList(Arrays.asList(
+      "email",
+      "https://www.googleapis.com/auth/cloud-platform"
   ));
 
   /**
@@ -44,7 +57,50 @@ public class GoogleLoginService {
    */
   // Should probably be synchronized properly.
   // TODO(chanseok): consider returning a String JSON (i.e., hide Credential)
-  public Credential getActiveCredential() {
-    return null;
+  public Credential getActiveCredential() throws IOException {
+    GoogleTokenResponse authResponse = logIn();
+    return createCredential(authResponse);
+  }
+
+  private GoogleTokenResponse logIn() throws IOException {
+    // 1. Open a browser that takes care of the login.
+    GoogleAuthorizationCodeRequestUrl requestUrl = new GoogleAuthorizationCodeRequestUrl(
+        OAUTH_CLIENT_ID, GoogleOAuthConstants.OOB_REDIRECT_URI, OAUTH_SCOPES);
+
+    try {
+      IWorkbenchBrowserSupport browserSupport = PlatformUI.getWorkbench().getBrowserSupport();
+      browserSupport.createBrowser(null).openURL(requestUrl.toURL());
+    } catch (PartInitException pie) {
+      // TODO(chanseok): display error message to user
+      return null;
+    }
+
+    // 2. Show a dialog to get a verification code returned from successful browser login.
+    InputDialog dialog = new InputDialog(Display.getCurrent().getActiveShell(),
+        "Enter Verification Code", "Enter verification code from the browser login.", null, null);
+    if (dialog.open() != InputDialog.OK) {
+      return null;
+    }
+
+    String verificationCode = dialog.getValue();
+    // 3. Authorize the user with the verification code via Google Login API.
+    GoogleAuthorizationCodeTokenRequest authRequest = new GoogleAuthorizationCodeTokenRequest(
+        Utils.getDefaultTransport(), Utils.getDefaultJsonFactory(),
+        OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET,
+        verificationCode,
+        GoogleOAuthConstants.OOB_REDIRECT_URI);
+
+    return authRequest.execute();
+  }
+
+  private Credential createCredential(GoogleTokenResponse tokenResponse) {
+    GoogleCredential credential = new GoogleCredential.Builder()
+        .setTransport(Utils.getDefaultTransport())
+        .setJsonFactory(Utils.getDefaultJsonFactory())
+        .setClientSecrets(OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET)
+        .build();
+    credential.setAccessToken(tokenResponse.getRefreshToken());
+    credential.setRefreshToken(tokenResponse.getAccessToken());
+    return credential;
   }
 }

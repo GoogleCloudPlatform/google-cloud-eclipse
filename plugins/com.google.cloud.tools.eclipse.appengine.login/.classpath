@@ -4,5 +4,7 @@
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src/"/>
 	<classpathentry kind="lib" path="lib/google-oauth-client-1.22.0.jar"/>
+	<classpathentry kind="lib" path="lib/google-api-client-1.22.0.jar"/>
+	<classpathentry kind="lib" path="lib/google-http-client-1.22.0.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
