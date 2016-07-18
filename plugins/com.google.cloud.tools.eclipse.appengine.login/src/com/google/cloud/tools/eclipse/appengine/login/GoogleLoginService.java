@@ -69,7 +69,7 @@ public class GoogleLoginService {
 
     try {
       IWorkbenchBrowserSupport browserSupport = PlatformUI.getWorkbench().getBrowserSupport();
-      browserSupport.createBrowser(null).openURL(requestUrl.toURL());
+      browserSupport.getExternalBrowser().openURL(requestUrl.toURL());
     } catch (PartInitException pie) {
       // TODO(chanseok): display error message to user
       return null;
