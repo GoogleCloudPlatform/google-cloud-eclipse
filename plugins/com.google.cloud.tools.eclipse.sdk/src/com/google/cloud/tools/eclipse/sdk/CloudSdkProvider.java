@@ -96,7 +96,7 @@ public class CloudSdkProvider extends ContextFunction {
     if (value != null && !value.isEmpty()) {
       return new File(value);
     }
-    Path discovered = PathResolver.INSTANCE.getCloudSdkPath();
+    Path discovered = new PathResolver().getCloudSdkPath();
     if (discovered != null) {
       return discovered.toFile();
     }
