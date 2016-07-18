@@ -82,7 +82,7 @@ public class CloudSdkProvider extends ContextFunction {
     if (location == null || !location.exists()) {
       return null;
     }
-    return new CloudSdk.Builder().sdkPath(location);
+    return new CloudSdk.Builder().sdkPath(location.toPath());
   }
 
   /**
@@ -96,7 +96,7 @@ public class CloudSdkProvider extends ContextFunction {
     if (value != null && !value.isEmpty()) {
       return new File(value);
     }
-    Path discovered = PathResolver.INSTANCE.getCloudSdkPath();
+    Path discovered = new PathResolver().getCloudSdkPath();
     if (discovered != null) {
       return discovered.toFile();
     }

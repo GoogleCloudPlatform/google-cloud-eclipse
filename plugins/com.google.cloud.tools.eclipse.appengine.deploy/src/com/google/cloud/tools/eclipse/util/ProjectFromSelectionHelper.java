@@ -1,4 +1,4 @@
-package com.google.cloud.tools.eclipse.appengine.deploy.standard;
+package com.google.cloud.tools.eclipse.util;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -8,8 +8,6 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
-
-import com.google.cloud.tools.eclipse.appengine.deploy.FacetedProjectHelper;
 
 public class ProjectFromSelectionHelper {
 
