@@ -27,10 +27,17 @@ public class AppEngineDeployInfoTest {
       "<?xml version='1.0' encoding='utf-8'?><appengine-web-app xmlns='http://foo.bar.com/ns/42'>";
   private static final String PROJECT_ID = "<application>" + TEST_ID + "</application>";
   private static final String VERSION = "<version>" + TEST_VERSION + "</version>";
-
+  private static final String COMMENT = "<!-- this is a test comment -->";
+  private static final String COMMENT_AFTER_VERSION = "<version>" + TEST_VERSION + COMMENT + "</version>";
+  private static final String COMMENT_BEFORE_VERSION = "<version>" + COMMENT + TEST_VERSION + "</version>";
+  
   private static final String XML_WITHOUT_PROJECT_ID = XML_DECLARATION + XML_SUFFIX;
   private static final String XML_WITHOUT_VERSION = XML_DECLARATION + PROJECT_ID + XML_SUFFIX;
   private static final String XML_WITH_VERSION_AND_PROJECT_ID = XML_DECLARATION + PROJECT_ID + VERSION + XML_SUFFIX;
+  private static final String XML_WITH_COMMENT_BEFORE_VERSION =
+      XML_DECLARATION + PROJECT_ID + COMMENT_BEFORE_VERSION + XML_SUFFIX;
+  private static final String XML_WITH_COMMENT_AFTER_VERSION =
+      XML_DECLARATION + PROJECT_ID + COMMENT_AFTER_VERSION + XML_SUFFIX;
   private static final String XML_WITH_VERSION_AND_PROJECT_ID_WRONG_NS =
       XML_DECLARATION_WITH_INVALID_NS + PROJECT_ID + VERSION + XML_SUFFIX;
 
@@ -63,6 +70,27 @@ public class AppEngineDeployInfoTest {
     assertThat(deployInfo.getProjectVersion(), is(TEST_VERSION));
   }
 
+  @Test
+  public void testParse_xmlWithCommentBeforeValue() throws ParserConfigurationException, SAXException, IOException, CoreException {
+    File xml = createFileWithContent(XML_WITH_COMMENT_BEFORE_VERSION);
+
+    AppEngineDeployInfo deployInfo = new AppEngineDeployInfo();
+    deployInfo.parse(xml);
+    assertThat(deployInfo.getProjectId(), is(TEST_ID));
+    assertThat(deployInfo.getProjectVersion(), is(TEST_VERSION));
+  }
+
+  @Test
+  public void testParse_xmlWithCommentAfterValue() throws ParserConfigurationException, SAXException, IOException, CoreException {
+    File xml = createFileWithContent(XML_WITH_COMMENT_AFTER_VERSION);
+
+    AppEngineDeployInfo deployInfo = new AppEngineDeployInfo();
+    deployInfo.parse(xml);
+    assertThat(deployInfo.getProjectId(), is(TEST_ID));
+    assertThat(deployInfo.getProjectVersion(), is(TEST_VERSION));
+  }
+
+  
   @Test
   public void testParse_xmlWithInvalidNamespace() throws ParserConfigurationException, SAXException, IOException, CoreException {
     File xml = createFileWithContent(XML_WITH_VERSION_AND_PROJECT_ID_WRONG_NS);
