@@ -16,10 +16,8 @@
 
 package com.google.cloud.tools.eclipse.sdk.internal;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertTrue;
 
-import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.eclipse.sdk.CloudSdkProvider;
 
@@ -40,15 +38,11 @@ public class CloudSdkProviderTest {
   }
   
   /** Verify that the preference overrides auto discovery. */
-  @Test(expected = AppEngineException.class)
+  @Test
   public void testSetPreferenceInvalid() {
-    // A path that almost certainly does not contain the SDK
-    File root = File.listRoots()[0];
-    
     CloudSdk instance = new CloudSdkProvider(preferences).getCloudSdk();
-    assertEquals(root.toPath(), instance.getSdkPath());
-    instance.validate();
-    fail("root directory should not be a valid location");
+    assertTrue(instance == null);
+    //assertEquals(root.toPath(), instance.getSdkPath());
   }
   
   private static class MockPreferences implements IPreferenceStore {
@@ -123,6 +117,7 @@ public class CloudSdkProviderTest {
 
     @Override
     public String getString(String name) {
+      // A path that almost certainly does not contain the SDK
       return File.listRoots()[0].toString();
     }
 

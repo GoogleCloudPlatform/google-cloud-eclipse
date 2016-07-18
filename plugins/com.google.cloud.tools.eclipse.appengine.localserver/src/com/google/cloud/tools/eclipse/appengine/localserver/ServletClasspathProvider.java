@@ -10,12 +10,15 @@ import org.eclipse.wst.server.core.IRuntime;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.eclipse.sdk.CloudSdkProvider;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
+import com.google.common.annotations.VisibleForTesting;
 
 /**
  * Supply Java standard classes, specifically servlet-api.jar and jsp-api.jar,
  * to non-Maven projects.
  */
 public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
+  
+  private CloudSdkProvider cloudSdkProvider = new CloudSdkProvider();
 
   public ServletClasspathProvider() {
   }
@@ -31,8 +34,8 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
 
   @Override
   public IClasspathEntry[] resolveClasspathContainer(IRuntime runtime) {
-    CloudSdk cloudSdk = new CloudSdkProvider().getCloudSdk();
-    if (cloudSdk == null || cloudSdk.getJavaAppEngineSdkPath() == null) {
+    CloudSdk cloudSdk = cloudSdkProvider.getCloudSdk();
+    if (cloudSdk == null) {
       return new IClasspathEntry[0];
     };
     java.nio.file.Path servletJar = cloudSdk.getJarPath("servlet-api.jar");
@@ -43,6 +46,10 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
     
     IClasspathEntry[] entries = {servletEntry, jspEntry};
     return entries;
-  }  
+  }
   
+  @VisibleForTesting
+  public void setCloudSdkProvider(CloudSdkProvider cloudSdkProvider) {
+    this.cloudSdkProvider = cloudSdkProvider;
+  }
 }
