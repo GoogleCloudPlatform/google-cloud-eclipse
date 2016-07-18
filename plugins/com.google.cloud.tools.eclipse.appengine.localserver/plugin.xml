@@ -68,49 +68,11 @@
         runtime-component="com.google.cloud.tools.eclipse.runtime.component.custom" version="1"/>
    </extension>
 
-   <extension point="org.eclipse.wst.server.core.serverTypes">
-      <serverType
-            behaviourClass="com.google.cloud.tools.eclipse.appengine.localserver.server.CloudSdkServerBehaviour"
-            class="com.google.cloud.tools.eclipse.appengine.localserver.server.CloudSdkServer"
-            description="%serverTypeDescription"
-            id="com.google.cloud.tools.eclipse.server.custom"
-            initialState="stopped"
-            launchConfigId="com.google.cloud.tools.eclipse.CloudSdkLaunchConfigurationType"
-            launchModes="run,debug,profile"
-            name="%customServerTypeName"
-            runtime="true"
-            runtimeTypeId="com.google.cloud.tools.eclipse.runtime.custom"
-            startBeforePublish="false"
-            supportsRemoteHosts="false">
-      </serverType>
-   </extension>
-   <extension point="org.eclipse.debug.core.launchConfigurationTypes">
-      <launchConfigurationType
-            delegate="com.google.cloud.tools.eclipse.appengine.localserver.server.CloudSdkLaunchConfigurationDelegate"
-            id="com.google.cloud.tools.eclipse.CloudSdkLaunchConfigurationType"
-            modes="run, debug, profile"
-            name="%customServerTypeName">
-      </launchConfigurationType>
-   </extension>
-   <extension point="org.eclipse.debug.ui.launchConfigurationTypeImages">
-      <launchConfigurationTypeImage
-            configTypeID="com.google.cloud.tools.eclipse.CloudSdkLaunchConfigurationType"
-            icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gcp-16x16.png"
-            id="com.google.cloud.tools.eclipse.ExternalLaunchConfigurationTypeImage">
-      </launchConfigurationTypeImage>
-   </extension>
-   <extension point="org.eclipse.debug.ui.launchConfigurationTabGroups">
-      <launchConfigurationTabGroup
-            class="com.google.cloud.tools.eclipse.appengine.localserver.ui.CloudSdkLaunchConfigurationTabGroup"
-            id="com.google.cloud.tools.eclipse.server.launchConfigurationTabGroup"
-            type="com.google.cloud.tools.eclipse.CloudSdkLaunchConfigurationType">
-      </launchConfigurationTabGroup>
-   </extension>
    <extension point="org.eclipse.wst.server.ui.serverImages">
       <image
             icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gcp-16x16.png"
             id="com.google.cloud.tools.eclipse.image"
-            typeIds="com.google.cloud.tools.eclipse.runtime.custom,com.google.cloud.tools.eclipse.server.custom">
+            typeIds="com.google.cloud.tools.eclipse.server.custom">
       </image>
    </extension>
    <extension point="org.eclipse.ui.commands">
