@@ -27,7 +27,7 @@ import com.google.api.client.auth.oauth2.Credential;
  * Thread-safe.
  */
 public class GoogleLoginService {
-  
+
   // TODO(chanseok): these constant values should be set at compile-time to hide actual values.
   // For this purpose, we could use org.codehaus.mojo:templating-maven-plugin as in the
   // .eclipse.usagetracker bundle.
@@ -38,18 +38,6 @@ public class GoogleLoginService {
   public static final List<String> OAUTH_SCOPES = Collections.unmodifiableList(Arrays.asList(
       "https://www.googleapis.com/auth/userinfo#email"
   ));
-
-  private static GoogleLoginService instance;
-
-  private GoogleLoginService() {
-  }
-
-  public static synchronized GoogleLoginService getInstance() {
-    if (instance == null) {
-      instance = new GoogleLoginService();
-    }
-    return instance;
-  }
 
   /**
    * Returns the credential of the active user. If there is no active user, returns {@code null}.

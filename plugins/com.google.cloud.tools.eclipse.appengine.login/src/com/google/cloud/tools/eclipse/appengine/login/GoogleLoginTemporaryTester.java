@@ -48,7 +48,7 @@ public class GoogleLoginTemporaryTester {
   private static final String GCLOUD_USER_TYPE = "authorized_user";
 
   private File getCredentialFile() throws IOException {
-    Credential credential = GoogleLoginService.getInstance().getActiveCredential();
+    Credential credential = new GoogleLoginService().getActiveCredential();
     if (credential == null) {
       return null;
     }
