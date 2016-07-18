@@ -42,7 +42,6 @@ public class CloudSdkProviderTest {
   public void testSetPreferenceInvalid() {
     CloudSdk instance = new CloudSdkProvider(preferences).getCloudSdk();
     assertTrue(instance == null);
-    //assertEquals(root.toPath(), instance.getSdkPath());
   }
   
   private static class MockPreferences implements IPreferenceStore {
