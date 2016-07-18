@@ -6,9 +6,12 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.wst.server.core.internal.ServerPlugin;
+import org.eclipse.core.runtime.Platform;
 
-import com.google.cloud.tools.eclipse.appengine.deploy.FacetedProjectHelper;
+import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineProjectDeployer;
+import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
+import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
+import com.google.cloud.tools.eclipse.util.ProjectFromSelectionHelper;
 import com.google.common.annotations.VisibleForTesting;
 
 /**
@@ -18,8 +21,6 @@ import com.google.common.annotations.VisibleForTesting;
  * provided by the App Engine Plugins Core Library.
  */
 public class StandardDeployCommandHandler extends AbstractHandler {
-
-  private static final IPath defaultStagingDir = ServerPlugin.getInstance().getStateLocation();
 
   private ProjectFromSelectionHelper helper;
   
@@ -37,15 +38,23 @@ public class StandardDeployCommandHandler extends AbstractHandler {
     try {
       IProject project = helper.getProject(event);
       if (project != null) {
-        final IProject project1 = project;
-        StandardDeployJob deploy = new StandardDeployJob(new ProjectToStagingExporter(), defaultStagingDir, project1);
+        String now = Long.toString(System.currentTimeMillis());
+        StandardDeployJob deploy =
+            new StandardDeployJob(new ExplodedWarPublisher(),
+                                  new StandardProjectStaging(),
+                                  new AppEngineProjectDeployer(),
+                                  getTempDir().append(now),
+                                  project);
         deploy.schedule();
       }
       // return value must be null, reserved for future use
       return null;
     } catch (CoreException coreException) {
-      throw new ExecutionException("Failed to export the project as exploded WAR", coreException);
+      throw new ExecutionException(Messages.getString("deploy.failed.error.message"), coreException); //$NON-NLS-1$
     }
   }
 
+  private IPath getTempDir() {
+    return Platform.getStateLocation(Platform.getBundle("com.google.cloud.tools.eclipse.appengine.deploy")).append("tmp"); //$NON-NLS-1$ //$NON-NLS-2$
+  }
 }

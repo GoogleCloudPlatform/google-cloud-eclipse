@@ -6,6 +6,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.junit.Test;
 
+import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
+
 public class FacetedProjectHelperTest {
 
   @Test(expected = NullPointerException.class)

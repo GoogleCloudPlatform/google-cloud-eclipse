@@ -1,4 +1,4 @@
-package com.google.cloud.tools.eclipse.appengine.deploy;
+package com.google.cloud.tools.eclipse.util;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
