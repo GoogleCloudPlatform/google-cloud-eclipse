@@ -246,7 +246,7 @@ hard-coding these values and hamper their public visibilty.
 | Constant                     | Bundle        | System Property       |
 | ---------------------------- | ------------- | --------------------- |
 | OAuth client ID              | login         | `oauth.client.id`     |
-| OAuth client secert          | login         | `oauth.client.secret` |
+| OAuth client secret          | login         | `oauth.client.secret` |
 | Google Analytics Tracking ID | usagetracking | `ga.tracking.id`      |
 
 The Java classes that hold these constant values are auto-generated
@@ -255,7 +255,7 @@ from template Java source files, using [templating-maven-plugin]
 populated from system properties in the auto-gen process. That is, for
 example, `mvn -Doauth.client.id=id1234 templating:filter-sources` or
 `mvn -Doauth.client.id=id1234 package` will result in injecting `id1234`
-as a OAuth client ID.
+as an OAuth client ID.
 
 ### Injecting Constants for Debugging
 
