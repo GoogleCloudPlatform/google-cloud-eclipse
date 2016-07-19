@@ -40,17 +40,17 @@ public class CloudSdkProviderTest {
     preferences = new MockPreferences();
   }
   
-  /** Verify that the preference overrides PathResolver. */
+  /** Verify that the preference overrides auto discovery. */
   @Test
   public void testSetPreferenceInvalid() throws Exception {
     // A path that almost certainly does not contain the SDK
     File root = File.listRoots()[0];
-    
-    CloudSdk.Builder builder = new CloudSdkProvider(preferences).createBuilder(null);
+
+    CloudSdk.Builder builder = new CloudSdkProvider(preferences).createBuilder();
     // todo we shouldn't need reflection here; use visible for testing if we must
     assertEquals(root.toPath(), ReflectionUtil.getField(builder, "sdkPath", Path.class));
     CloudSdk instance = builder.build();
-    assertEquals(root.toPath(), ReflectionUtil.invoke(instance, "getSdkPath", Path.class));
+    assertEquals(root.toPath(), instance.getSdkPath());
     try {
       instance.validate();
       fail("root directory should not be a valid location");
@@ -59,7 +59,7 @@ public class CloudSdkProviderTest {
     }
   }
   
-  private static class MockPreferences implements IPreferenceStore{
+  private static class MockPreferences implements IPreferenceStore {
 
     @Override
     public void addPropertyChangeListener(IPropertyChangeListener listener) { 
@@ -131,6 +131,7 @@ public class CloudSdkProviderTest {
 
     @Override
     public String getString(String name) {
+      // A path that almost certainly does not contain the SDK
       return File.listRoots()[0].toString();
     }
 

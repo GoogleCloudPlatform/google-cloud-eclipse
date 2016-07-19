@@ -10,9 +10,11 @@ import org.eclipse.jface.dialogs.MessageDialog;
 public class GoogleLoginCommandHandler extends AbstractHandler {
 
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
-		MessageDialog.openInformation(window.getShell(),
-		    "GCloud Login Support", "Login: to be supported");
-		return null;
+	  boolean success = new GoogleLoginTemporaryTester().testLogin();
+
+    IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
+    MessageDialog.openInformation(window.getShell(),
+        "TESTING AUTH", success ? "SUCCESS" : "FAILURE (to be implemented)");
+    return null;
 	}
 }
