@@ -32,7 +32,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
     }
     
     DefaultScope.INSTANCE.getNode(BUNDLEID).put(PreferenceConstants.CLOUDSDK_PATH,
-        sdk == null ? "" : sdk.getJavaAppEngineSdkPath().toAbsolutePath().toString());
+        sdk == null ? "" : sdk.getSdkPath().toAbsolutePath().toString());
   }
 
   public static IEclipsePreferences getPreferenceNode() {
