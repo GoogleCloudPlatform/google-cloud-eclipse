@@ -73,10 +73,10 @@ public class CloudSdkContextFunctionTest {
     Object instance = function.compute(context, CloudSdk.class.getName());
     assertNotNull(instance);
     assertEquals(CloudSdk.class, instance.getClass());
-    assertEquals(mockSdk, ReflectionUtil.getField(instance, "sdkPath", Path.class));
+    assertEquals(mockSdk, ((CloudSdk) instance).getSdkPath());
   }
 
-  @Ignore
+  @Ignore("affected from changes in global state")
   public void testContextFunctionReinvoked() throws Exception {
     context.set(PreferenceConstants.CLOUDSDK_PATH, "path/does/not/exist");
     CloudSdk instance = context.get(CloudSdk.class);

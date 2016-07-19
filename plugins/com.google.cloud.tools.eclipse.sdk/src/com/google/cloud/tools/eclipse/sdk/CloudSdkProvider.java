@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.sdk;
 
 import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdk.Builder;
 import com.google.cloud.tools.eclipse.sdk.internal.PreferenceConstants;
 import com.google.cloud.tools.eclipse.sdk.internal.PreferenceInitializer;
 import com.google.common.annotations.VisibleForTesting;
@@ -55,14 +56,22 @@ public class CloudSdkProvider {
    * @return a builder, or {@code null} if the Google Cloud SDK cannot be located
    */
   public CloudSdk.Builder createBuilder() {
-    CloudSdk.Builder sdkBuilder = new CloudSdk.Builder();
-    String configuredPath = preferences.getString(PreferenceConstants.CLOUDSDK_PATH);
+    return createBuilder(location);
+  }
 
-    if (configuredPath != null && !configuredPath.isEmpty()) {
-      sdkBuilder.sdkPath(Paths.get(configuredPath));
+  private Builder createBuilder(Path location) {
+    CloudSdk.Builder sdkBuilder = new CloudSdk.Builder();
+    if (location != null) {
+      sdkBuilder.sdkPath(location);
+    } else {
+      String configuredPath = preferences.getString(PreferenceConstants.CLOUDSDK_PATH);
+      if (configuredPath != null && !configuredPath.isEmpty()) {
+        sdkBuilder.sdkPath(Paths.get(configuredPath));
+      }
     }
     return sdkBuilder;
   }
+
 
   /**
    * Return the {@link CloudSdk} instance from the configured or discovered Cloud SDK.
@@ -79,13 +88,11 @@ public class CloudSdkProvider {
    * @return the configured {@link CloudSdk} or {@code null} if no valid SDK could be found
    */
   public CloudSdk getCloudSdk() {
-    CloudSdk.Builder sdkBuilder = createBuilder();
+    CloudSdk.Builder sdkBuilder = createBuilder(location);
     // If no location is set, let library discover the location.
     
     try {
-      CloudSdk sdk = sdkBuilder.build();
-      sdk.validate();
-      return sdk;
+      return sdkBuilder.build();
     } catch (AppEngineException aee) {
       // If no SDK could be discovered, let the caller prompt the user for a new one.
       return null;

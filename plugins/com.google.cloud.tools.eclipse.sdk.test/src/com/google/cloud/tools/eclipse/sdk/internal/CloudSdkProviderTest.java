@@ -16,8 +16,10 @@
 
 package com.google.cloud.tools.eclipse.sdk.internal;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
+import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.eclipse.sdk.CloudSdkProvider;
 
@@ -27,6 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.nio.file.Path;
 
 public class CloudSdkProviderTest {
 
@@ -39,9 +42,21 @@ public class CloudSdkProviderTest {
   
   /** Verify that the preference overrides auto discovery. */
   @Test
-  public void testSetPreferenceInvalid() {
-    CloudSdk instance = new CloudSdkProvider(preferences).getCloudSdk();
-    assertTrue(instance == null);
+  public void testSetPreferenceInvalid() throws Exception {
+    // A path that almost certainly does not contain the SDK
+    File root = File.listRoots()[0];
+
+    CloudSdk.Builder builder = new CloudSdkProvider(preferences).createBuilder();
+    // todo we shouldn't need reflection here; use visible for testing if we must
+    assertEquals(root.toPath(), ReflectionUtil.getField(builder, "sdkPath", Path.class));
+    CloudSdk instance = builder.build();
+    assertEquals(root.toPath(), instance.getSdkPath());
+    try {
+      instance.validate();
+      fail("root directory should not be a valid location");
+    } catch (AppEngineException ex) {
+      // ignore
+    }
   }
   
   private static class MockPreferences implements IPreferenceStore {
