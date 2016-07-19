@@ -27,6 +27,7 @@ import org.eclipse.e4.core.di.IInjector;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -57,15 +58,14 @@ public class CloudSdkContextFunction extends ContextFunction {
 
   @Override
   public Object compute(IEclipseContext context, String contextKey) {
-    referencedContexts.add(context);
-
     Object path = context.get(PreferenceConstants.CLOUDSDK_PATH);
-    File location = toFile(path);
-    CloudSdk.Builder builder = new CloudSdkProvider(null).createBuilder(location);
-    if (builder == null) {
-      return NOT_A_VALUE;
+    if (path == null) {
+      // record this context as using the preference value
+      referencedContexts.add(context);
     }
-    CloudSdk instance = builder.build();
+    
+    Path location = toPath(path);
+    CloudSdk instance = new CloudSdkProvider(location).getCloudSdk();
     try {
       instance.validate();
       return instance;
@@ -74,13 +74,13 @@ public class CloudSdkContextFunction extends ContextFunction {
     }
   }
 
-  private static File toFile(Object path) {
+  private static Path toPath(Object path) {
     if (path instanceof File) {
-      return (File) path;
+      return ((File) path).toPath();
     } else if (path instanceof Path) {
-      return ((Path) path).toFile();
+      return (Path) path;
     } else if (path instanceof String) {
-      return new File((String) path);
+      return Paths.get((String) path);
     } else if (path != null) {
       logger.warning("Unsupported object for " + PreferenceConstants.CLOUDSDK_PATH + ": " + path);
     }

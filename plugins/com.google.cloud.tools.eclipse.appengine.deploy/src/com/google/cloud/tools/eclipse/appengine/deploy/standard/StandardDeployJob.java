@@ -15,7 +15,6 @@ import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
 import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineProjectDeployer;
 import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
-import com.google.cloud.tools.eclipse.sdk.CloudSdkProvider;
 import com.google.cloud.tools.eclipse.util.MessageConsoleUtilities;
 import com.google.common.base.Preconditions;
 
@@ -28,7 +27,8 @@ import com.google.common.base.Preconditions;
  *  <li>stage project for deploy</li>
  *  <li>deploy staged project</li>
  * </ol>
- * It uses a work directory where it will create separate directory for the exploded WAR and the staging results.
+ * It uses a work directory where it will create separate directories for the exploded WAR and the
+ * staging results.
  */
 public class StandardDeployJob extends WorkspaceJob {
 
@@ -82,9 +82,10 @@ public class StandardDeployJob extends WorkspaceJob {
   }
 
   private CloudSdk getCloudSdk() {
-    MessageConsole messageConsole = MessageConsoleUtilities.getMessageConsole(CONSOLE_NAME, null, true /* show */);
+    MessageConsole messageConsole =
+        MessageConsoleUtilities.getMessageConsole(CONSOLE_NAME, null, true /* show */);
     final MessageConsoleStream outputStream = messageConsole.newMessageStream();
-    CloudSdk cloudSdk = new CloudSdkProvider().createBuilder(null)
+    CloudSdk cloudSdk = new CloudSdk.Builder()
         .addStdErrLineListener(new ProcessOutputLineListener() {
 
           @Override

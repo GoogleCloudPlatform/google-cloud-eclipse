@@ -16,10 +16,8 @@
 
 package com.google.cloud.tools.eclipse.sdk.internal;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertTrue;
 
-import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.eclipse.sdk.CloudSdkProvider;
 
@@ -29,7 +27,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
-import java.nio.file.Path;
 
 public class CloudSdkProviderTest {
 
@@ -40,26 +37,14 @@ public class CloudSdkProviderTest {
     preferences = new MockPreferences();
   }
   
-  /** Verify that the preference overrides PathResolver. */
+  /** Verify that the preference overrides auto discovery. */
   @Test
-  public void testSetPreferenceInvalid() throws Exception {
-    // A path that almost certainly does not contain the SDK
-    File root = File.listRoots()[0];
-    
-    CloudSdk.Builder builder = new CloudSdkProvider(preferences).createBuilder(null);
-    // todo we shouldn't need reflection here; use visible for testing if we must
-    assertEquals(root.toPath(), ReflectionUtil.getField(builder, "sdkPath", Path.class));
-    CloudSdk instance = builder.build();
-    assertEquals(root.toPath(), ReflectionUtil.invoke(instance, "getSdkPath", Path.class));
-    try {
-      instance.validate();
-      fail("root directory should not be a valid location");
-    } catch (AppEngineException ex) {
-      // ignore
-    }
+  public void testSetPreferenceInvalid() {
+    CloudSdk instance = new CloudSdkProvider(preferences).getCloudSdk();
+    assertTrue(instance == null);
   }
   
-  private static class MockPreferences implements IPreferenceStore{
+  private static class MockPreferences implements IPreferenceStore {
 
     @Override
     public void addPropertyChangeListener(IPropertyChangeListener listener) { 
@@ -131,6 +116,7 @@ public class CloudSdkProviderTest {
 
     @Override
     public String getString(String name) {
+      // A path that almost certainly does not contain the SDK
       return File.listRoots()[0].toString();
     }
 

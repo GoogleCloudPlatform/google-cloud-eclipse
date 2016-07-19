@@ -36,9 +36,10 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
-import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -101,9 +102,9 @@ public class CloudSdkPreferencePage extends FieldEditorPreferencePage
     addField(sdkLocation);
   }
 
-  protected boolean validateSdk(File location) {
+  protected boolean validateSdk(Path location) {
     try {
-      CloudSdk sdk = new CloudSdk.Builder().sdkPath(location.toPath()).build();
+      CloudSdk sdk = new CloudSdk.Builder().sdkPath(location).build();
       sdk.validate();
     } catch (AppEngineException ex) {
       // accept a seemingly invalid location in case the SDK organization
@@ -141,7 +142,7 @@ public class CloudSdkPreferencePage extends FieldEditorPreferencePage
       if (!super.doCheckState()) {
         return false;
       }
-      return getStringValue().isEmpty() || validateSdk(new File(getStringValue()));
+      return getStringValue().isEmpty() || validateSdk(Paths.get(getStringValue()));
     }
   }
 }
