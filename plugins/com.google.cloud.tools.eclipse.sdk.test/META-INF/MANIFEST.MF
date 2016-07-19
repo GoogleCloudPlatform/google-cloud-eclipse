@@ -8,5 +8,6 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Fragment-Host: com.google.cloud.tools.eclipse.sdk
 Require-Bundle: org.junit,
- org.eclipse.jface
+ org.eclipse.jface,
+ com.google.cloud.tools.eclipse.util
 Import-Package: org.eclipse.jface.preference
