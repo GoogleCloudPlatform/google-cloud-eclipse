@@ -27,7 +27,7 @@ import com.google.common.base.Preconditions;
  *  <li>stage project for deploy</li>
  *  <li>deploy staged project</li>
  * </ol>
- * It uses a work directory where it will create separate directory for the exploded WAR and the
+ * It uses a work directory where it will create separate directories for the exploded WAR and the
  * staging results.
  */
 public class StandardDeployJob extends WorkspaceJob {
