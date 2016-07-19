@@ -96,7 +96,7 @@
       <serverType
            behaviourClass="com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerBehaviour" 
            class="com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerDelegate"    
-           description="%apptoolsTypeDescription"    
+           description="%runtimeTypeDescription"    
            id="com.google.cloud.tools.eclipse.appengine.localserver.server.apptools"   
            initialState="stopped"    
            launchConfigId="com.google.cloud.tools.eclipse.AppToolsLaunchConfigurationType"   
