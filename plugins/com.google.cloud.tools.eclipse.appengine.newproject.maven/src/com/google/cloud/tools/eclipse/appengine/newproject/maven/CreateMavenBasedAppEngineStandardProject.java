@@ -18,7 +18,8 @@ import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
-import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineFacet;
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.appengine.facets.FacetInstallDelegate;
 
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
@@ -76,8 +77,8 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
     for (IProject project : archetypeProjects) {
       IFacetedProject facetedProject = ProjectFacetsManager.create(
           project, true, loopMonitor.newChild(1));
-      AppEngineFacet.installAppEngineFacet(facetedProject, loopMonitor.newChild(1));  
-      AppEngineFacet.installAppEngineRuntime(facetedProject, loopMonitor.newChild(1));  
+      FacetInstallDelegate.installAppEngineFacet(facetedProject, loopMonitor.newChild(1));
+      FacetInstallDelegate.installAppEngineRuntime(facetedProject, loopMonitor.newChild(1));
     }
     
     /*

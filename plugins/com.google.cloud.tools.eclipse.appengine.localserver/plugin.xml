@@ -18,14 +18,6 @@
             id="com.google.cloud.tools.eclipse.appengine.localserver.runtimeClasspathProvider"
             runtimeTypeIds="com.google.cloud.tools.eclipse.runtime.apptools" />
    </extension>
-   
-   <extension point="org.eclipse.wst.server.ui.wizardFragments">
-      <fragment
-            class="com.google.cloud.tools.eclipse.appengine.localserver.ui.CloudSdkRuntimeWizardFragment"
-            id="com.google.cloud.tools.eclipse.runtime.fragment1"
-            typeIds="com.google.cloud.tools.eclipse.runtime.custom">
-      </fragment>
-   </extension>
 
    <extension point="org.eclipse.wst.common.project.facet.core.runtimes">
       <runtime-component-type id="com.google.cloud.tools.eclipse.runtime.component.custom"/>
@@ -104,7 +96,7 @@
       <serverType
            behaviourClass="com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerBehaviour" 
            class="com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerDelegate"    
-           description="%apptoolsTypeDescription"    
+           description="%runtimeTypeDescription"    
            id="com.google.cloud.tools.eclipse.appengine.localserver.server.apptools"   
            initialState="stopped"    
            launchConfigId="com.google.cloud.tools.eclipse.AppToolsLaunchConfigurationType"   

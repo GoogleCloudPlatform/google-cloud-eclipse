@@ -37,9 +37,10 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
-import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -119,9 +120,21 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     }
   }
 
-  protected boolean validateSdk(File location) {
+  /**
+   * Creates the field editors. Field editors are abstractions of the common GUI blocks needed to
+   * manipulate various types of preferences. Each field editor knows how to save and restore
+   * itself.
+   */
+  @Override
+  public void createFieldEditors() {
+    sdkLocation = new CloudSdkDirectoryFieldEditor(PreferenceConstants.CLOUDSDK_PATH,
+        SdkUiMessages.CloudSdkPreferencePage_5, getFieldEditorParent());
+    addField(sdkLocation);
+  }
+
+  protected boolean validateSdk(Path location) {
     try {
-      CloudSdk sdk = new CloudSdk.Builder().sdkPath(location.toPath()).build();
+      CloudSdk sdk = new CloudSdk.Builder().sdkPath(location).build();
       sdk.validate();
     } catch (AppEngineException ex) {
       // accept a seemingly invalid location in case the SDK organization
@@ -155,8 +168,12 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
         status = new Status(IStatus.ERROR, getClass().getName(), "Invalid directory");
         return false;
       }
+<<<<<<< HEAD:plugins/com.google.cloud.tools.eclipse.sdk.ui/src/com/google/cloud/tools/eclipse/sdk/ui/preferences/CloudSdkPreferenceArea.java
       status = Status.OK_STATUS;
       return getStringValue().isEmpty() || validateSdk(new File(getStringValue()));
+=======
+      return getStringValue().isEmpty() || validateSdk(Paths.get(getStringValue()));
+>>>>>>> origin/master:plugins/com.google.cloud.tools.eclipse.sdk.ui/src/com/google/cloud/tools/eclipse/sdk/ui/preferences/CloudSdkPreferencePage.java
     }
   }
 }
