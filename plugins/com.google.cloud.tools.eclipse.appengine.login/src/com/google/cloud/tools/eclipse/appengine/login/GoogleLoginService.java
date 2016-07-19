@@ -99,8 +99,8 @@ public class GoogleLoginService {
         .setJsonFactory(Utils.getDefaultJsonFactory())
         .setClientSecrets(OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET)
         .build();
-    credential.setAccessToken(tokenResponse.getRefreshToken());
-    credential.setRefreshToken(tokenResponse.getAccessToken());
+    credential.setAccessToken(tokenResponse.getAccessToken());
+    credential.setRefreshToken(tokenResponse.getRefreshToken());
     return credential;
   }
 }
