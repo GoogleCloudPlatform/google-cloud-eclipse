@@ -27,7 +27,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
     CloudSdk sdk = null;
     try {
       sdk = new CloudSdkProvider().getCloudSdk();
-    } catch(AppEngineException aee) {
+    } catch (AppEngineException aee) {
       // No SDK could be found.
     }
     

@@ -1,9 +1,16 @@
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import com.google.cloud.tools.appengine.api.AppEngineException;
+import com.google.cloud.tools.appengine.api.devserver.AppEngineDevServer;
+import com.google.cloud.tools.appengine.api.devserver.DefaultRunConfiguration;
+import com.google.cloud.tools.appengine.api.devserver.DefaultStopConfiguration;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineDevServer;
+import com.google.cloud.tools.appengine.cloudsdk.process.ProcessExitListener;
+import com.google.cloud.tools.appengine.cloudsdk.process.ProcessStartListener;
+import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
+import com.google.cloud.tools.eclipse.sdk.CloudSdkProvider;
+
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -14,15 +21,10 @@ import org.eclipse.wst.server.core.model.IModuleResource;
 import org.eclipse.wst.server.core.model.IModuleResourceDelta;
 import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
 
-import com.google.cloud.tools.appengine.api.AppEngineException;
-import com.google.cloud.tools.appengine.api.devserver.AppEngineDevServer;
-import com.google.cloud.tools.appengine.api.devserver.DefaultRunConfiguration;
-import com.google.cloud.tools.appengine.api.devserver.DefaultStopConfiguration;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineDevServer;
-import com.google.cloud.tools.appengine.cloudsdk.process.ProcessExitListener;
-import com.google.cloud.tools.appengine.cloudsdk.process.ProcessStartListener;
-import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * A {@link ServerBehaviourDelegate} for App Engine Server executed via the Java App Management
@@ -164,7 +166,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
     LocalAppEngineOutputLineListener outputListener =
         new LocalAppEngineOutputLineListener(stream);
 
-    CloudSdk cloudSdk = new CloudSdk.Builder()
+    CloudSdk cloudSdk = new CloudSdkProvider().createBuilder()
         .addStdOutLineListener(outputListener)
         .addStdErrLineListener(outputListener)
         .startListener(localAppEngineStartListener)
