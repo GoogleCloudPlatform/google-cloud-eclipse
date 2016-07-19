@@ -56,34 +56,31 @@ public class GoogleLoginService {
    * Returns the credential of the active user. If there is no active user, returns {@code null}.
    */
   // Should probably be synchronized properly.
-  // TODO(chanseok): consider returning a String JSON (i.e., hide Credential)
   public Credential getActiveCredential() throws IOException {
     GoogleTokenResponse authResponse = logIn();
     return createCredential(authResponse);
   }
 
   private GoogleTokenResponse logIn() throws IOException {
-    // 1. Open a browser that takes care of the login.
     GoogleAuthorizationCodeRequestUrl requestUrl = new GoogleAuthorizationCodeRequestUrl(
         OAUTH_CLIENT_ID, GoogleOAuthConstants.OOB_REDIRECT_URI, OAUTH_SCOPES);
 
     try {
       IWorkbenchBrowserSupport browserSupport = PlatformUI.getWorkbench().getBrowserSupport();
       browserSupport.getExternalBrowser().openURL(requestUrl.toURL());
-    } catch (PartInitException pie) {
+    } catch (PartInitException pie) {  // requires org.eclipse.equinox.common OSGi bundle.
       // TODO(chanseok): display error message to user
       return null;
     }
 
-    // 2. Show a dialog to get a verification code returned from successful browser login.
-    InputDialog dialog = new InputDialog(Display.getCurrent().getActiveShell(),
+    Display display = Display.getCurrent();
+    InputDialog dialog = new InputDialog(display == null ? null : display.getActiveShell(),
         "Enter Verification Code", "Enter verification code from the browser login.", null, null);
     if (dialog.open() != InputDialog.OK) {
       return null;
     }
 
     String verificationCode = dialog.getValue();
-    // 3. Authorize the user with the verification code via Google Login API.
     GoogleAuthorizationCodeTokenRequest authRequest = new GoogleAuthorizationCodeTokenRequest(
         Utils.getDefaultTransport(), Utils.getDefaultJsonFactory(),
         OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET,
