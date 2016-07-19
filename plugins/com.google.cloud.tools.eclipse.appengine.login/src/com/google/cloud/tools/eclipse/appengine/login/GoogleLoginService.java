@@ -23,7 +23,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import com.google.api.client.googleapis.util.Utils;
 
 import org.eclipse.jface.dialogs.InputDialog;
-import org.eclipse.swt.widgets.Display;
+import org.eclipse.jface.window.IShellProvider;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
@@ -56,12 +56,12 @@ public class GoogleLoginService {
    * Returns the credential of the active user. If there is no active user, returns {@code null}.
    */
   // Should probably be synchronized properly.
-  public Credential getActiveCredential() throws IOException {
-    GoogleTokenResponse authResponse = logIn();
+  public Credential getActiveCredential(IShellProvider shellProvider) throws IOException {
+    GoogleTokenResponse authResponse = logIn(shellProvider);
     return createCredential(authResponse);
   }
 
-  private GoogleTokenResponse logIn() throws IOException {
+  private GoogleTokenResponse logIn(IShellProvider shellProvider) throws IOException {
     GoogleAuthorizationCodeRequestUrl requestUrl = new GoogleAuthorizationCodeRequestUrl(
         OAUTH_CLIENT_ID, GoogleOAuthConstants.OOB_REDIRECT_URI, OAUTH_SCOPES);
 
@@ -73,8 +73,7 @@ public class GoogleLoginService {
       return null;
     }
 
-    Display display = Display.getCurrent();
-    InputDialog dialog = new InputDialog(display == null ? null : display.getActiveShell(),
+    InputDialog dialog = new InputDialog(shellProvider.getShell(),
         "Enter Verification Code", "Enter verification code from the browser login.", null, null);
     if (dialog.open() != InputDialog.OK) {
       return null;

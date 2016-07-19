@@ -18,6 +18,7 @@ import com.google.api.client.auth.oauth2.Credential;
 import com.google.gson.Gson;
 
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.jface.window.IShellProvider;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -31,9 +32,9 @@ import java.util.Map;
 // FIXME This class is for manual integration login test. Remove it in the final product.
 public class GoogleLoginTemporaryTester {
 
-  public boolean testLogin() throws ExecutionException {
+  public boolean testLogin(IShellProvider shellProvider) throws ExecutionException {
     try {
-      File credentialFile = getCredentialFile();
+      File credentialFile = getCredentialFile(shellProvider);
       return credentialFile != null && testCredentialWithGcloud(credentialFile);
     } catch (IOException ioe) {
       ioe.printStackTrace();
@@ -47,8 +48,8 @@ public class GoogleLoginTemporaryTester {
   private static final String GCLOUD_USER_TYPE_LABEL = "type";
   private static final String GCLOUD_USER_TYPE = "authorized_user";
 
-  private File getCredentialFile() throws IOException {
-    Credential credential = new GoogleLoginService().getActiveCredential();
+  private File getCredentialFile(IShellProvider shellProvider) throws IOException {
+    Credential credential = new GoogleLoginService().getActiveCredential(shellProvider);
     if (credential == null) {
       return null;
     }
