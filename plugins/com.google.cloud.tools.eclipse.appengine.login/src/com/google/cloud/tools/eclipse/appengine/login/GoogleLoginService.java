@@ -23,6 +23,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import com.google.api.client.googleapis.util.Utils;
 
 import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.IShellProvider;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
@@ -57,11 +58,10 @@ public class GoogleLoginService {
    */
   // Should probably be synchronized properly.
   public Credential getActiveCredential(IShellProvider shellProvider) throws IOException {
-    GoogleTokenResponse authResponse = logIn(shellProvider);
-    return createCredential(authResponse);
+    return logIn(shellProvider);
   }
 
-  private GoogleTokenResponse logIn(IShellProvider shellProvider) throws IOException {
+  private Credential logIn(IShellProvider shellProvider) throws IOException {
     GoogleAuthorizationCodeRequestUrl requestUrl = new GoogleAuthorizationCodeRequestUrl(
         OAUTH_CLIENT_ID, GoogleOAuthConstants.OOB_REDIRECT_URI, OAUTH_SCOPES);
 
@@ -69,7 +69,8 @@ public class GoogleLoginService {
       IWorkbenchBrowserSupport browserSupport = PlatformUI.getWorkbench().getBrowserSupport();
       browserSupport.getExternalBrowser().openURL(requestUrl.toURL());
     } catch (PartInitException pie) {  // requires org.eclipse.equinox.common OSGi bundle.
-      // TODO(chanseok): display error message to user
+      MessageDialog.openError(shellProvider.getShell(),
+          "Error launching external browser", pie.getMessage());
       return null;
     }
 
@@ -86,7 +87,7 @@ public class GoogleLoginService {
         verificationCode,
         GoogleOAuthConstants.OOB_REDIRECT_URI);
 
-    return authRequest.execute();
+    return createCredential(authRequest.execute());
   }
 
   private Credential createCredential(GoogleTokenResponse tokenResponse) {
