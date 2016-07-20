@@ -62,8 +62,10 @@ public class GoogleLoginService {
   }
 
   private Credential logIn(IShellProvider shellProvider) throws IOException {
-    GoogleAuthorizationCodeRequestUrl requestUrl = new GoogleAuthorizationCodeRequestUrl(
-        OAUTH_CLIENT_ID, GoogleOAuthConstants.OOB_REDIRECT_URI, OAUTH_SCOPES);
+    GoogleAuthorizationCodeRequestUrl requestUrl =
+        new GoogleAuthorizationCodeRequestUrl(OAUTH_CLIENT_ID,
+                                              GoogleOAuthConstants.OOB_REDIRECT_URI,
+                                              OAUTH_SCOPES);
 
     try {
       IWorkbenchBrowserSupport browserSupport = PlatformUI.getWorkbench().getBrowserSupport();
