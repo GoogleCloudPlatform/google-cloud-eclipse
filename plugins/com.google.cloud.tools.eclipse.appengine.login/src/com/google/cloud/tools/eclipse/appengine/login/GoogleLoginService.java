@@ -43,8 +43,8 @@ import java.util.List;
 public class GoogleLoginService {
 
   private static final List<String> OAUTH_SCOPES = Collections.unmodifiableList(Arrays.asList(
-      "email",
-      "https://www.googleapis.com/auth/cloud-platform"
+      "email", //$NON-NLS-1$
+      "https://www.googleapis.com/auth/cloud-platform" //$NON-NLS-1$
   ));
 
   /**
@@ -66,12 +66,13 @@ public class GoogleLoginService {
       browserSupport.getExternalBrowser().openURL(requestUrl.toURL());
     } catch (PartInitException pie) {
       MessageDialog.openError(shellProvider.getShell(),
-          "Error launching external browser", pie.getMessage());
+          Messages.ERROR_BROWSER_LAUNCHING, pie.getMessage());
       return null;
     }
 
     InputDialog dialog = new InputDialog(shellProvider.getShell(),
-        "Enter Verification Code", "Enter verification code from the browser login.", null, null);
+        Messages.ENTER_VERIFICATION_CODE_DIALOG_TITLE,
+        Messages.ENTER_VERIFICATION_CODE_DIALOG_MESSAGE, null, null);
     if (dialog.open() != InputDialog.OK) {
       return null;
     }
