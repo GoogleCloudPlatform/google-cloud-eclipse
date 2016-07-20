@@ -20,26 +20,26 @@ Provides a mini framework for hosting conceptually-related but independently-dev
       </annotation>
       <complexType>
          <choice>
-            <element ref="area"/>
+            <element ref="area" minOccurs="1" maxOccurs="unbounded"/>
          </choice>
          <attribute name="point" type="string" use="required">
             <annotation>
                <documentation>
-                  
+                  Specifies areas extension point
                </documentation>
             </annotation>
          </attribute>
          <attribute name="id" type="string">
             <annotation>
                <documentation>
-                  
+                  An optional identifier; not used by preference areas.
                </documentation>
             </annotation>
          </attribute>
          <attribute name="name" type="string">
             <annotation>
                <documentation>
-                  
+                  An optional name; not used by preference areas.
                </documentation>
                <appinfo>
                   <meta.attribute translatable="true"/>
@@ -51,7 +51,7 @@ Provides a mini framework for hosting conceptually-related but independently-dev
 
    <element name="area">
       <complexType>
-         <attribute name="page" type="string" use="required">
+         <attribute name="host" type="string" use="required">
             <annotation>
                <documentation>
                   The id of the host preference page, which must extend AreaBasedPreferencePage.
@@ -105,7 +105,7 @@ TODO: See the PreferenceResolver class comment for details.
          <meta.section type="since"/>
       </appinfo>
       <documentation>
-         [Enter the first release in which this extension point appears.]
+         0.1.0
       </documentation>
    </annotation>
 
@@ -114,7 +114,24 @@ TODO: See the PreferenceResolver class comment for details.
          <meta.section type="examples"/>
       </appinfo>
       <documentation>
-         [Enter extension point usage example here.]
+         &lt;extension
+     point=&quot;org.eclipse.ui.preferencePages&quot;&gt;
+  &lt;page
+        id=&quot;com.google.cloud.tools.eclipse.preferences.main&quot;
+        name=&quot;Google Cloud Tools&quot;
+        class=&quot;com.google.cloud.tools.eclipse.preferences.areas.AreaBasedPreferencePage&quot;&gt;
+  &lt;/page&gt;
+&lt;/extension&gt;
+&lt;extension
+     point=&quot;com.google.cloud.tools.eclipse.preferences.areas&quot;&gt;
+  &lt;area
+        host=&quot;com.google.cloud.tools.eclipse.preferences.main&quot;
+        title=&quot;Usage Statistics&quot;
+        class=&quot;com.google.cloud.tools.eclipse.preferences.AnalyticsOptInArea&quot;
+        preferences=&quot;configuration://com.google.cloud.tools.eclipse.preferences&quot;&gt;
+  &lt;/area&gt;
+&lt;/extension&gt;
+
       </documentation>
    </annotation>
 
@@ -132,9 +149,30 @@ TODO: See the PreferenceResolver class comment for details.
          <meta.section type="implementation"/>
       </appinfo>
       <documentation>
-         [Enter information about supplied implementation of this extension point.]
+         Host preference pages must extend &lt;code&gt;com.google.cloud.tools.eclipse.preferences.areas.AreaBasedPreferencePage&lt;/code&gt;.
+Areas must extend &lt;code&gt;com.google.cloud.tools.eclipse.preferences.areas.PreferenceArea&lt;/code&gt;.
       </documentation>
    </annotation>
 
+   <annotation>
+      <appinfo>
+         <meta.section type="copyright"/>
+      </appinfo>
+      <documentation>
+         Copyright 2016 Google Inc. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+      </documentation>
+   </annotation>
 
 </schema>

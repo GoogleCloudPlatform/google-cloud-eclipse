@@ -20,10 +20,10 @@
    <extension
          point="com.google.cloud.tools.eclipse.preferences.areas">
       <area
-            page="com.google.cloud.tools.eclipse.preferences.main"
+            host="com.google.cloud.tools.eclipse.preferences.main"
             title="Usage Statistics"
             class="com.google.cloud.tools.eclipse.preferences.AnalyticsOptInArea"
-            preferences="instance://com.google.cloud.tools.eclipse.preferences">
+            preferences="configuration://com.google.cloud.tools.eclipse.preferences">
       </area>
    </extension>
 

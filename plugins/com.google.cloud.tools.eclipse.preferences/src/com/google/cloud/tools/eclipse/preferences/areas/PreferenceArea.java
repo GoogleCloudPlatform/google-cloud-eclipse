@@ -1,5 +1,5 @@
 /*
- * Copyright ${year} Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,12 +29,12 @@ import org.eclipse.ui.IWorkbench;
  * Abstract base class for preference areas. A preference area is somewhat like a
  * {@link FieldEditor} except that it is expected to be configured from an extension point.
  * <p>
- * Preference areas should notify of changes using property change events.
+ * Preference areas should notify its listeners of changes using property change events.
  */
 public abstract class PreferenceArea {
   /* property values */
-  protected static final String IS_VALID = "area_is_valid";
-  protected static final String VALUE = "area_value";
+  public static final String IS_VALID = "area_is_valid";
+  public static final String VALUE = "area_value";
 
   private IPreferenceStore preferences;
 
@@ -49,7 +49,7 @@ public abstract class PreferenceArea {
   /** The area title; may be {@code null}. */
   private String title;
 
-  /** The area rank, used to rank areas within a page. */
+  /** The area rank, used to sort/order areas within a page. */
   private int rank = Integer.MAX_VALUE;
 
   protected PreferenceArea() {}

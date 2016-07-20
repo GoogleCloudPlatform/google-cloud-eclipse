@@ -42,6 +42,11 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class AreaPreferencePageTest {
   private @Mock IPersistentPreferenceStore preferences;
 
+  private AreaBasedPreferencePage page;
+  private TestPrefArea area1;
+  private TestPrefArea area2;
+  private TestPrefArea area3;
+
   private Shell shell;
 
   @After
@@ -53,8 +58,7 @@ public class AreaPreferencePageTest {
 
   @Test
   public void testWritesOnApply() {
-    // add an Area, call performApply, verify 1 call to preferences.store()
-    AreaBasedPreferencePage page = new AreaBasedPreferencePage("test");
+    page = new AreaBasedPreferencePage("test");
     page.addArea(new TestPrefArea("pref1", "value", preferences));
     show(page);
     assertTrue(page.performOk());
@@ -63,8 +67,7 @@ public class AreaPreferencePageTest {
 
   @Test
   public void testNoWritesOnCancel() {
-    // add an Area, call performCancel, verify no calls to preferences.store()
-    AreaBasedPreferencePage page = new AreaBasedPreferencePage("test");
+    page = new AreaBasedPreferencePage("test");
     page.addArea(new TestPrefArea("pref1", "value", preferences));
     show(page);
 
@@ -74,60 +77,37 @@ public class AreaPreferencePageTest {
 
   @Test
   public void testErrorStatusResults() {
-    // add an Area, trigger its VALUE property, cause its status to be error.
-    // verify showing error message
-    AreaBasedPreferencePage page = new AreaBasedPreferencePage("test");
-    TestPrefArea area = new TestPrefArea("pref1", "value", preferences);
-    page.addArea(area);
+    page = new AreaBasedPreferencePage("test");
+    area1 = new TestPrefArea("pref1", "value", preferences);
+    page.addArea(area1);
 
     show(page);
     assertTrue(page.isValid());
     assertEquals(IMessageProvider.NONE, page.getMessageType());
 
-    area.status = new Status(IStatus.ERROR, "foo", "message");
-    area.fireValueChanged(TestPrefArea.IS_VALID, true, false);
+    area1.status = new Status(IStatus.ERROR, "foo", "message");
+    area1.fireValueChanged(TestPrefArea.IS_VALID, true, false);
 
     assertFalse(page.isValid());
     assertEquals(IMessageProvider.ERROR, page.getMessageType());
     assertEquals("message", page.getMessage());
-
-    // change its status to be OK, trigger its VALUE property.
-    // verify no error message
-    area.status = Status.OK_STATUS;
-    area.fireValueChanged(TestPrefArea.IS_VALID, false, true);
-
-    assertTrue(page.isValid());
-    assertEquals(IMessageProvider.NONE, page.getMessageType());
   }
 
-  private TestPrefArea area1;
-  private TestPrefArea area2;
-  private TestPrefArea area3;
-  private AreaBasedPreferencePage page;
-
-  private void setupAreas() {
-    page = new AreaBasedPreferencePage("test");
-    area1 = new TestPrefArea("pref1", "value", preferences);
-    area2 = new TestPrefArea("pref2", "value", preferences);
-    area3 = new TestPrefArea("pref3", "value", preferences);
-    page.addArea(area1);
-    page.addArea(area2);
-    page.addArea(area3);
-
+  @Test
+  public void testStatusTransition() {
+    testErrorStatusResults();
+    // change its status to be OK, trigger its VALUE property.
+    // verify no error message
     area1.status = Status.OK_STATUS;
-    area2.status = Status.OK_STATUS;
-    area3.status = Status.OK_STATUS;
+    area1.fireValueChanged(TestPrefArea.IS_VALID, false, true);
 
-    show(page);
     assertTrue(page.isValid());
     assertEquals(IMessageProvider.NONE, page.getMessageType());
   }
 
   @Test
   public void testStatusSeverityInfo() {
-    // add three areas, status = OK, OK, INFO
-    // verify showing INFO
-    // verify can apply
+    // add three areas, status = OK, OK, INFO; verify showing INFO
     setupAreas();
 
     area3.status = new Status(IStatus.INFO, "foo", "info3");
@@ -140,9 +120,7 @@ public class AreaPreferencePageTest {
 
   @Test
   public void testStatusSeverityWarn() {
-    // add three areas, status = OK, WARN, INFO
-    // verify showing WARN
-    // verify can apply
+    // add three areas, status = OK, WARN, INFO; verify showing WARN
     setupAreas();
 
     area3.status = new Status(IStatus.INFO, "foo", "info3");
@@ -162,9 +140,7 @@ public class AreaPreferencePageTest {
 
   @Test
   public void testStatusSeverityError() {
-    // add three areas, status = WARN, ERROR, INFO
-    // verify showing ERROR
-    // verify CANNOT apply
+    // add three areas, status = WARN, ERROR, INFO; verify showing ERROR
 
     setupAreas();
 
@@ -190,11 +166,36 @@ public class AreaPreferencePageTest {
     assertEquals("error2", page.getMessage());
   }
 
+  /*************** HELPERS *******************/
+
+  private void setupAreas() {
+    page = new AreaBasedPreferencePage("test");
+    area1 = new TestPrefArea("pref1", "value", preferences);
+    area2 = new TestPrefArea("pref2", "value", preferences);
+    area3 = new TestPrefArea("pref3", "value", preferences);
+    page.addArea(area1);
+    page.addArea(area2);
+    page.addArea(area3);
+
+    area1.status = Status.OK_STATUS;
+    area2.status = Status.OK_STATUS;
+    area3.status = Status.OK_STATUS;
+
+    show(page);
+    assertTrue(page.isValid());
+    assertEquals(IMessageProvider.NONE, page.getMessageType());
+  }
+
+  private void show(AreaBasedPreferencePage page) {
+    shell = new Shell(Display.getCurrent());
+    Composite composite = new Composite(shell, SWT.NONE);
+    page.createControl(composite);
+  }
 
   /**
    * Test preference area that reads and writes a string from preferences.
    */
-  public static class TestPrefArea extends PreferenceArea {
+  private static class TestPrefArea extends PreferenceArea {
     IStatus status = Status.OK_STATUS;
     String preferenceName;
     String preferenceValue;
@@ -230,11 +231,5 @@ public class AreaPreferencePageTest {
     public void performApply() {
       getPreferenceStore().setValue(preferenceName, preferenceValue);
     }
-  }
-
-  private void show(AreaBasedPreferencePage page) {
-    shell = new Shell(Display.getCurrent());
-    Composite composite = new Composite(shell, SWT.NONE);
-    page.createControl(composite);
   }
 }

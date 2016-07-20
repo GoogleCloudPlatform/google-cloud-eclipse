@@ -1,5 +1,5 @@
 /*
- * Copyright ${year} Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,15 +38,15 @@ public class PreferenceResolver {
    * Resolve a path like <code>instance://org.example.bundle/path/to/boolean</code> to an
    * {@link IPreferenceStore}.
    * 
-   * @param preferencePath the preference path
+   * @param preferenceUri the preference path
    * @return the corresponding store
    * @throws IllegalArgumentException if unable to resolve the URI
    */
-  public static IPreferenceStore resolve(URI preferenceURI) throws IllegalArgumentException {
-    IScopeContext context = resolveScopeContext(preferenceURI.getScheme());
-    String path = preferenceURI.getHost();
-    if (preferenceURI.getPath() != null) {
-      path += preferenceURI.getPath();
+  public static IPreferenceStore resolve(URI preferenceUri) throws IllegalArgumentException {
+    IScopeContext context = resolveScopeContext(preferenceUri.getScheme());
+    String path = preferenceUri.getHost();
+    if (preferenceUri.getPath() != null) {
+      path += preferenceUri.getPath();
     }
     return new ScopedPreferenceStore(context, path);
   }

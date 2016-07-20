@@ -1,5 +1,5 @@
 /*
- * Copyright ${year} Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ public class AreaBasedPreferencePage extends PreferencePage
     private static final String PREFAREA_EXTENSION_POINT =
         "com.google.cloud.tools.eclipse.preferences.areas";
     private static final String NAME_AREA = "area";
-    private static final String ATTR_PAGE_ID = "page";
+    private static final String ATTR_HOST_PAGE_ID = "host";
     private static final String ATTR_TITLE = "title";
     private static final String ATTR_PREF_PATH = "preferences";
     private static final String ATTR_CLASS = "class";
@@ -84,7 +84,7 @@ public class AreaBasedPreferencePage extends PreferencePage
       for (IConfigurationElement element : getRegistry()
           .getConfigurationElementsFor(PREFAREA_EXTENSION_POINT)) {
         if (element.getName().equals(NAME_AREA)
-            && pageId.equals(element.getAttribute(ATTR_PAGE_ID))) {
+            && pageId.equals(element.getAttribute(ATTR_HOST_PAGE_ID))) {
           try {
             PreferenceArea area = (PreferenceArea) element.createExecutableExtension(ATTR_CLASS);
             IPreferenceStore store = resolvePreferenceStore(element.getAttribute(ATTR_PREF_PATH));
@@ -157,7 +157,7 @@ public class AreaBasedPreferencePage extends PreferencePage
       Object data) throws CoreException {
     if (configElement.getAttribute(ExtensionBuilder.ATTR_ID) == null) {
       throw new CoreException(new Status(IStatus.ERROR, configElement.getNamespaceIdentifier(),
-          "Missing " + ExtensionBuilder.ATTR_PAGE_ID));
+          "Missing " + ExtensionBuilder.ATTR_HOST_PAGE_ID));
     }
     pageId = configElement.getAttribute(ExtensionBuilder.ATTR_ID);
     new ExtensionBuilder().build();
@@ -198,11 +198,11 @@ public class AreaBasedPreferencePage extends PreferencePage
         contents = new Group(container, SWT.NONE);
         ((Group) contents).setText(area.getTitle());
       }
+      area.setPropertyChangeListener(propertyChangeListener);
       area.createContents(contents);
       GridLayoutFactory.swtDefaults().generateLayout(contents);
 
       // load the preferences
-      area.setPropertyChangeListener(propertyChangeListener);
       area.load();
     }
     // apply extra space around areas

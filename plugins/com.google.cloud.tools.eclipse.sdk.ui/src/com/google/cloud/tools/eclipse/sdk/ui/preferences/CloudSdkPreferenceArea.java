@@ -26,6 +26,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.DirectoryFieldEditor;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -48,12 +50,23 @@ import java.util.logging.Logger;
 public class CloudSdkPreferenceArea extends PreferenceArea {
   /** Preference Page ID that hosts this area. */
   public static final String PAGE_ID =
-      "com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPreferenceArea";
+      "com.google.cloud.tools.eclipse.preferences.main";
   private static final Logger logger = Logger.getLogger(CloudSdkPreferenceArea.class.getName());
 
   private IWorkbench workbench;
   private DirectoryFieldEditor sdkLocation;
-  private IStatus status;
+  private IStatus status = Status.OK_STATUS;
+  private IPropertyChangeListener wrappedPropertyChangeListener = new IPropertyChangeListener() {
+
+    @Override
+    public void propertyChange(PropertyChangeEvent event) {
+      if (event.getProperty() == DirectoryFieldEditor.IS_VALID) {
+        fireValueChanged(IS_VALID, event.getOldValue(), event.getNewValue());
+      } else if (event.getProperty() == DirectoryFieldEditor.VALUE) {
+        fireValueChanged(VALUE, event.getOldValue(), event.getNewValue());
+      }
+    }
+  };
 
   public CloudSdkPreferenceArea() {
     // Should we assume this?
@@ -76,7 +89,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     sdkLocation = new CloudSdkDirectoryFieldEditor(PreferenceConstants.CLOUDSDK_PATH,
         SdkUiMessages.CloudSdkPreferencePage_5, fieldContents);
     sdkLocation.setPreferenceStore(getPreferenceStore());
-    sdkLocation.setPropertyChangeListener(getPropertyChangeListener());
+    sdkLocation.setPropertyChangeListener(wrappedPropertyChangeListener);
     GridLayoutFactory.swtDefaults().numColumns(sdkLocation.getNumberOfControls())
         .generateLayout(fieldContents);
 
@@ -96,9 +109,6 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
 
   @Override
   public IStatus getStatus() {
-    if (!sdkLocation.isValid()) {
-      return new Status(IStatus.ERROR, getClass().getName(), sdkLocation.getErrorMessage());
-    }
     return status;
   }
 
@@ -107,6 +117,10 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     sdkLocation.store();
   }
 
+  /** Sets the new value or {@code null} for the empty string. */
+  public void setStringValue(String value) {
+    sdkLocation.setStringValue(value);
+  }
 
   protected void openUrl(String urlText) {
     try {
@@ -118,18 +132,6 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     } catch (PartInitException pie) {
       logger.log(Level.WARNING, SdkUiMessages.CloudSdkPreferencePage_4, pie);
     }
-  }
-
-  /**
-   * Creates the field editors. Field editors are abstractions of the common GUI blocks needed to
-   * manipulate various types of preferences. Each field editor knows how to save and restore
-   * itself.
-   */
-  @Override
-  public void createFieldEditors() {
-    sdkLocation = new CloudSdkDirectoryFieldEditor(PreferenceConstants.CLOUDSDK_PATH,
-        SdkUiMessages.CloudSdkPreferencePage_5, getFieldEditorParent());
-    addField(sdkLocation);
   }
 
   protected boolean validateSdk(Path location) {
@@ -168,12 +170,8 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
         status = new Status(IStatus.ERROR, getClass().getName(), "Invalid directory");
         return false;
       }
-<<<<<<< HEAD:plugins/com.google.cloud.tools.eclipse.sdk.ui/src/com/google/cloud/tools/eclipse/sdk/ui/preferences/CloudSdkPreferenceArea.java
       status = Status.OK_STATUS;
-      return getStringValue().isEmpty() || validateSdk(new File(getStringValue()));
-=======
       return getStringValue().isEmpty() || validateSdk(Paths.get(getStringValue()));
->>>>>>> origin/master:plugins/com.google.cloud.tools.eclipse.sdk.ui/src/com/google/cloud/tools/eclipse/sdk/ui/preferences/CloudSdkPreferencePage.java
     }
   }
 }
