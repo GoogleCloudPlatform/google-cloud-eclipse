@@ -28,7 +28,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 /**
- * Test {@link PreferenceResolver}
+ * Test {@link PreferenceResolver}.
  */
 public class PreferenceResolverTest {
 

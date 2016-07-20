@@ -31,12 +31,11 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Link;
-import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
 import java.net.MalformedURLException;
@@ -49,11 +48,9 @@ import java.util.logging.Logger;
 
 public class CloudSdkPreferenceArea extends PreferenceArea {
   /** Preference Page ID that hosts this area. */
-  public static final String PAGE_ID =
-      "com.google.cloud.tools.eclipse.preferences.main";
+  public static final String PAGE_ID = "com.google.cloud.tools.eclipse.preferences.main";
   private static final Logger logger = Logger.getLogger(CloudSdkPreferenceArea.class.getName());
 
-  private IWorkbench workbench;
   private DirectoryFieldEditor sdkLocation;
   private IStatus status = Status.OK_STATUS;
   private IPropertyChangeListener wrappedPropertyChangeListener = new IPropertyChangeListener() {
@@ -67,11 +64,6 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
       }
     }
   };
-
-  public CloudSdkPreferenceArea() {
-    // Should we assume this?
-    this.workbench = PlatformUI.getWorkbench();
-  }
 
   @Override
   public Control createContents(Composite parent) {
@@ -117,16 +109,22 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     sdkLocation.store();
   }
 
-  /** Sets the new value or {@code null} for the empty string. */
+  /**
+   * Sets the new value or {@code null} for the empty string.
+   */
   public void setStringValue(String value) {
     sdkLocation.setStringValue(value);
   }
 
   protected void openUrl(String urlText) {
     try {
-      URL url = new URL(urlText);
-      IWorkbenchBrowserSupport browserSupport = workbench.getBrowserSupport();
-      browserSupport.createBrowser(null).openURL(url);
+      if (getWorkbench() != null) {
+        URL url = new URL(urlText);
+        IWorkbenchBrowserSupport browserSupport = getWorkbench().getBrowserSupport();
+        browserSupport.createBrowser(null).openURL(url);
+      } else {
+        Program.launch(urlText);
+      }
     } catch (MalformedURLException mue) {
       logger.log(Level.WARNING, SdkUiMessages.CloudSdkPreferencePage_3, mue);
     } catch (PartInitException pie) {

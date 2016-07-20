@@ -52,6 +52,8 @@ public class PreferenceResolver {
   }
 
   /**
+   * Resolve the given scheme to a preference scope.
+   * 
    * @param scheme the preference scheme
    * @return the corresponding preference scope
    * @throws IllegalArgumentException if unable to resolve the scheme to a preference scope
@@ -62,7 +64,8 @@ public class PreferenceResolver {
         return InstanceScope.INSTANCE;
       case "configuration":
         return ConfigurationScope.INSTANCE;
+      default:
+        throw new IllegalArgumentException("Unknown scheme: " + scheme);
     }
-    throw new IllegalArgumentException("Unknown scheme: " + scheme);
   }
 }

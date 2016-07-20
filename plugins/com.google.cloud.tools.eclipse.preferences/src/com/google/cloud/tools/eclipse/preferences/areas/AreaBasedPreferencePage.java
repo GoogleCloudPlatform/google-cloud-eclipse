@@ -55,7 +55,7 @@ import java.util.logging.Logger;
 public class AreaBasedPreferencePage extends PreferencePage
     implements IWorkbenchPreferencePage, IExecutableExtension {
   /**
-   * Responsible for ordering preference areas by their rank
+   * Responsible for ordering preference areas by their rank.
    */
   public static class AreaOrdering implements Comparator<PreferenceArea> {
     @Override
@@ -171,6 +171,7 @@ public class AreaBasedPreferencePage extends PreferencePage
     areas.remove(area);
   }
 
+  /** Return the ordered set of preference areas. */
   public List<PreferenceArea> getAreas() {
     List<PreferenceArea> copy = new ArrayList<>(areas);
     Collections.sort(copy, new AreaOrdering());
@@ -198,11 +199,11 @@ public class AreaBasedPreferencePage extends PreferencePage
         contents = new Group(container, SWT.NONE);
         ((Group) contents).setText(area.getTitle());
       }
-      area.setPropertyChangeListener(propertyChangeListener);
       area.createContents(contents);
       GridLayoutFactory.swtDefaults().generateLayout(contents);
 
       // load the preferences
+      area.setPropertyChangeListener(propertyChangeListener);
       area.load();
     }
     // apply extra space around areas
@@ -212,7 +213,9 @@ public class AreaBasedPreferencePage extends PreferencePage
   }
 
   /**
-   * @param status
+   * Update the page messaging based on the provided status.
+   * 
+   * @param status the status to be shown
    */
   private void show(IStatus status) {
     switch (status.getSeverity()) {
@@ -277,7 +280,7 @@ public class AreaBasedPreferencePage extends PreferencePage
     try {
       URI uri = new URI(preferencePath);
       return PreferenceResolver.resolve(uri);
-    } catch (URISyntaxException | IllegalArgumentException e) {
+    } catch (URISyntaxException | IllegalArgumentException ex) {
       logger.severe("Invalid preference specification: " + preferencePath);
       return null;
     }

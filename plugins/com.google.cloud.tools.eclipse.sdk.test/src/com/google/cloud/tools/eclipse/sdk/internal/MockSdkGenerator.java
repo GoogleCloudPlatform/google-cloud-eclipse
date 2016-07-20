@@ -18,9 +18,6 @@ package com.google.cloud.tools.eclipse.sdk.internal;
 
 import static org.junit.Assert.assertTrue;
 
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -30,12 +27,12 @@ import java.nio.file.attribute.BasicFileAttributes;
 
 /**
  * Utility class to generate a mock Google Cloud SDK installation that passes
- * {@link CloudSdk#validate()}.
+ * {@link com.google.cloud.tools.appengine.cloudsdk.CloudSdk#validate()}.
  */
 public class MockSdkGenerator {
   /**
    * Create a mock Google Cloud SDK installation. It is the callers responsibility to remove this
-   * directory with {@link #deleteMockSdk(File)}.
+   * directory with {@link #deleteMockSdk(Path)}.
    */
   public static Path createMockSdk() throws Exception {
     Path mockSdk = Files.createTempDirectory("mock-gcloud-sdk");
@@ -80,7 +77,7 @@ public class MockSdkGenerator {
     Files.createDirectories(path.getParent());
     assertTrue(path.getParent().toFile().isDirectory());
     Files.createFile(path);
-    assertTrue(path.toFile().isFile());
+    assertTrue(Files.isRegularFile(path));
   }
 
   private MockSdkGenerator() {

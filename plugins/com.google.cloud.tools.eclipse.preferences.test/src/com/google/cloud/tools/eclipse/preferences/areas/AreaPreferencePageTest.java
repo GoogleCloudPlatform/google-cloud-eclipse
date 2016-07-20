@@ -166,8 +166,6 @@ public class AreaPreferencePageTest {
     assertEquals("error2", page.getMessage());
   }
 
-  /*************** HELPERS *******************/
-
   private void setupAreas() {
     page = new AreaBasedPreferencePage("test");
     area1 = new TestPrefArea("pref1", "value", preferences);

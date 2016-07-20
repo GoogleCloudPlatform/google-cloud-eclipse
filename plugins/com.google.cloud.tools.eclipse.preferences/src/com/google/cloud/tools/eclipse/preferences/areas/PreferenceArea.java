@@ -39,7 +39,7 @@ public abstract class PreferenceArea {
   private IPreferenceStore preferences;
 
   /**
-   * Listener, or <code>null</code> if none
+   * Listener, or <code>null</code> if none.
    */
   private IPropertyChangeListener propertyChangeListener;
 
@@ -62,7 +62,7 @@ public abstract class PreferenceArea {
    */
   public abstract Control createContents(Composite parent);
 
-  /** Destroy any resources held onto by this instance */
+  /** Destroy any resources held onto by this instance. */
   public void dispose() {}
 
   public IPropertyChangeListener getPropertyChangeListener() {
@@ -73,12 +73,12 @@ public abstract class PreferenceArea {
     this.propertyChangeListener = propertyChangeListener;
   }
 
-  /** Provides the specified preferences */
+  /** Provides the specified preferences. */
   public IPreferenceStore getPreferenceStore() {
     return preferences;
   }
 
-  /** Provides the specified preferences node */
+  /** Provides the specified preferences node. */
   public void setPreferenceStore(IPreferenceStore preferences) {
     this.preferences = preferences;
   }
@@ -133,13 +133,15 @@ public abstract class PreferenceArea {
   /**
    * Set the associated workbench.
    * 
-   * @param workbench
+   * @param workbench the current workbench
    */
   public void setWorkbench(IWorkbench workbench) {
     this.workbench = workbench;
   }
 
   /**
+   * Return the area title.
+   * 
    * @return the area title or {@code null} if none
    */
   public String getTitle() {
@@ -155,12 +157,12 @@ public abstract class PreferenceArea {
     this.title = title;
   }
 
-  /** Return this area's rank, used to order areas on a page */
+  /** Return this area's rank, used to order areas on a page. */
   public int getRank() {
     return rank;
   }
 
-  /** Set this area's rank, used to order areas on a page */
+  /** Set this area's rank, used to order areas on a page. */
   public void setRank(int rank) {
     this.rank = rank;
   }
