@@ -5,10 +5,10 @@ import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.List;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -22,7 +22,7 @@ import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 public class CleanupOldDeploysJob extends Job {
 
   private static String NAME = Messages.getString("cleanup.deploy.job.name"); //$NON-NLS-1$
-  private static int OLD_DIRECTORIES_TO_KEEP = 2;
+  private static int RECENT_DIRECTORIES_TO_KEEP = 2;
   private IPath parentTempDir;
 
   public CleanupOldDeploysJob(IPath parentTempDir) {
@@ -33,8 +33,7 @@ public class CleanupOldDeploysJob extends Job {
   @Override
   protected IStatus run(IProgressMonitor monitor) {
     try {
-      SortedSet<File> directories = collectDirectories();
-      removeRecentDirectories(directories);
+      List<File> directories = collectDirectories();
       deleteDirectories(directories);
       return Status.OK_STATUS;
     } catch (IOException e) {
@@ -42,29 +41,22 @@ public class CleanupOldDeploysJob extends Job {
     }
   }
 
-  private SortedSet<File> collectDirectories() throws IOException {
+  private List<File> collectDirectories() throws IOException {
     DirectoryStream<Path> newDirectoryStream = Files.newDirectoryStream(parentTempDir.toFile().toPath());
-    SortedSet<File> directories = new TreeSet<>(new ReverseLastModifiedComparator());
+    List<File> directories = new ArrayList<>();
     for (Path path : newDirectoryStream) {
       File file = path.toFile();
       if (file.isDirectory()) {
         directories.add(file);
       }
     }
+    Collections.sort(directories, new ReverseLastModifiedComparator());
     return directories;
   }
 
-  private void removeRecentDirectories(SortedSet<File> directories) {
-    Iterator<File> iterator = directories.iterator();
-    for (int i = 0; i < OLD_DIRECTORIES_TO_KEEP && iterator.hasNext(); ++i) {
-      iterator.next();
-      iterator.remove();
-    }
-  }
-
-  private void deleteDirectories(SortedSet<File> directories) throws IOException {
-    for (File file : directories) {
-      Files.walkFileTree(file.toPath(), new DeleteAllVisitor());
+  private void deleteDirectories(List<File> directories) throws IOException {
+    for (int i = RECENT_DIRECTORIES_TO_KEEP; i < directories.size(); ++i) {
+      Files.walkFileTree(directories.get(i).toPath(), new DeleteAllVisitor());
     }
   }
   /**

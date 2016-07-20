@@ -58,7 +58,6 @@ public class StandardDeployCommandHandler extends AbstractHandler {
                               new AppEngineProjectDeployer(),
                               getTempDir().append(now),
                               project);
-    deploy.schedule();
     deploy.addJobChangeListener(new JobChangeAdapter() {
 
       @Override
@@ -67,6 +66,7 @@ public class StandardDeployCommandHandler extends AbstractHandler {
         launchCleanupJob();
       }
     });
+    deploy.schedule();
   }
 
   private void launchCleanupJob() {

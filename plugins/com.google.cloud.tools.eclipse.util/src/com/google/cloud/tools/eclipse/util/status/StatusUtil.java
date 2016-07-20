@@ -18,7 +18,7 @@ public class StatusUtil {
 
   public static IStatus error(Object origin, String message) {
     if (origin instanceof Class) {
-     return error((Class<?>)origin, message);
+     return error((Class<?>) origin, message);
     } else {
       return error(origin.getClass(), message);
     }
@@ -26,7 +26,7 @@ public class StatusUtil {
 
   public static IStatus error(Object origin, String message, Throwable error) {
     if (origin instanceof Class) {
-      return error((Class<?>)origin, message, error);
+      return error((Class<?>) origin, message, error);
     } else {
       return error(origin.getClass(), message, error);
     }
