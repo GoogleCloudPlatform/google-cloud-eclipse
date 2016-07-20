@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
-<!-- I think all or most classes come from 
-  http://git.eclipse.org/c/servertools/webtools.servertools.git/ -->
 <plugin>
 
    <extension point="org.eclipse.wst.server.ui.serverImages">
       <image
             id="com.google.cloud.tools.eclipse.gcloud.serverImage"
             icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gcp-16x16.png"
-            typeIds="com.google.cloud.tools.eclipse.runtime.apptools,com.google.cloud.tools.eclipse.gcloud.server,com.google.cloud.tools.eclipse.appengine.localserver.server.apptools">
+            typeIds="com.google.cloud.tools.eclipse.runtime.apptools,com.google.cloud.tools.eclipse.appengine.localserver.server.apptools">
       </image>
    </extension>
    
@@ -43,13 +41,6 @@
         runtime-component="com.google.cloud.tools.eclipse.runtime.component.custom" version="1"/>
    </extension>
 
-   <extension point="org.eclipse.wst.server.ui.serverImages">
-      <image
-            icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gcp-16x16.png"
-            id="com.google.cloud.tools.eclipse.image"
-            typeIds="com.google.cloud.tools.eclipse.server.custom">
-      </image>
-   </extension>
    <extension point="org.eclipse.ui.commands">
       <command
             id="com.google.cloud.tools.eclipse.deployCommand"
@@ -136,17 +127,20 @@
             <moduleType types="jst.utility"  versions="1.0"/>
       </runtimeType>
    </extension>
-     <extension point="org.eclipse.wst.server.core.publishTasks">
+   
+   <extension point="org.eclipse.wst.server.core.publishTasks">
      <publishTask
              id="com.google.cloud.tools.eclipse.appengine.localserver.publishTask"
              class="com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEnginePublishTaskDelegate"
              typeIds="com.google.cloud.tools.eclipse.appengine.localserver.server.apptools">
        </publishTask>
    </extension>
+   
    <extension point="org.eclipse.jst.server.core.runtimeFacetMappings">
     <runtimeFacetMapping runtimeTypeId="com.google.cloud.tools.eclipse.runtime.apptools"
         runtime-component="com.google.cloud.tools.eclipse.runtime.component.custom" version="1"/>
    </extension>
+   
    <extension point="org.eclipse.ui.console.consolePageParticipants">
      <consolePageParticipant
             class="com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineConsolePageParticipant"

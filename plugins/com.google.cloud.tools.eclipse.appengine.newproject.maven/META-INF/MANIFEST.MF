@@ -19,7 +19,8 @@ Require-Bundle: com.google.cloud.tools.eclipse.appengine.newproject;bundle-versi
  org.eclipse.m2e.core.ui;bundle-version="1.6.2",
  com.google.guava
 Bundle-ActivationPolicy: lazy
-Import-Package: com.google.cloud.tools.eclipse.appengine.ui,
+Import-Package: com.google.cloud.tools.eclipse.appengine.facets,
+ com.google.cloud.tools.eclipse.appengine.ui,
  org.apache.maven.archetype.catalog;provider=m2e,
  org.apache.maven.artifact;provider=m2e,
  org.eclipse.wst.common.project.facet.core
