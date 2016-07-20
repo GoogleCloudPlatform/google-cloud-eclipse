@@ -42,12 +42,6 @@ import java.util.List;
  */
 public class GoogleLoginService {
 
-  // TODO(chanseok): these constant values should be set at compile-time to hide actual values.
-  // For this purpose, we could use org.codehaus.mojo:templating-maven-plugin as in the
-  // .eclipse.usagetracker bundle.
-  public static final String OAUTH_CLIENT_ID = "@oauth.client.id@";
-  public static final String OAUTH_CLIENT_SECRET = "@oauth.client.secret@";
-
   private static final List<String> OAUTH_SCOPES = Collections.unmodifiableList(Arrays.asList(
       "email",
       "https://www.googleapis.com/auth/cloud-platform"
@@ -63,14 +57,14 @@ public class GoogleLoginService {
 
   private Credential logIn(IShellProvider shellProvider) throws IOException {
     GoogleAuthorizationCodeRequestUrl requestUrl =
-        new GoogleAuthorizationCodeRequestUrl(OAUTH_CLIENT_ID,
+        new GoogleAuthorizationCodeRequestUrl(Constants.getOAuthClientId(),
                                               GoogleOAuthConstants.OOB_REDIRECT_URI,
                                               OAUTH_SCOPES);
 
     try {
       IWorkbenchBrowserSupport browserSupport = PlatformUI.getWorkbench().getBrowserSupport();
       browserSupport.getExternalBrowser().openURL(requestUrl.toURL());
-    } catch (PartInitException pie) {  // requires org.eclipse.equinox.common OSGi bundle.
+    } catch (PartInitException pie) {
       MessageDialog.openError(shellProvider.getShell(),
           "Error launching external browser", pie.getMessage());
       return null;
@@ -85,7 +79,7 @@ public class GoogleLoginService {
     String verificationCode = dialog.getValue();
     GoogleAuthorizationCodeTokenRequest authRequest = new GoogleAuthorizationCodeTokenRequest(
         Utils.getDefaultTransport(), Utils.getDefaultJsonFactory(),
-        OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET,
+        Constants.getOAuthClientId(), Constants.getOAuthClientSecret(),
         verificationCode,
         GoogleOAuthConstants.OOB_REDIRECT_URI);
 
@@ -96,7 +90,7 @@ public class GoogleLoginService {
     GoogleCredential credential = new GoogleCredential.Builder()
         .setTransport(Utils.getDefaultTransport())
         .setJsonFactory(Utils.getDefaultJsonFactory())
-        .setClientSecrets(OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET)
+        .setClientSecrets(Constants.getOAuthClientId(), Constants.getOAuthClientSecret())
         .build();
     credential.setAccessToken(tokenResponse.getAccessToken());
     credential.setRefreshToken(tokenResponse.getRefreshToken());

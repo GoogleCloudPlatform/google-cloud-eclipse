@@ -1,5 +1,13 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.standard;
 
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
+import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineProjectDeployer;
+import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
+import com.google.cloud.tools.eclipse.sdk.CloudSdkProvider;
+import com.google.cloud.tools.eclipse.util.MessageConsoleUtilities;
+import com.google.common.base.Preconditions;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
@@ -10,13 +18,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
-
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
-import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineProjectDeployer;
-import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
-import com.google.cloud.tools.eclipse.util.MessageConsoleUtilities;
-import com.google.common.base.Preconditions;
 
 /**
  * Executes a job that deploys a project to App Engine Standard.
@@ -85,7 +86,7 @@ public class StandardDeployJob extends WorkspaceJob {
     MessageConsole messageConsole =
         MessageConsoleUtilities.getMessageConsole(CONSOLE_NAME, null, true /* show */);
     final MessageConsoleStream outputStream = messageConsole.newMessageStream();
-    CloudSdk cloudSdk = new CloudSdk.Builder()
+    CloudSdk cloudSdk = new CloudSdkProvider().createBuilder()
         .addStdErrLineListener(new ProcessOutputLineListener() {
 
           @Override
