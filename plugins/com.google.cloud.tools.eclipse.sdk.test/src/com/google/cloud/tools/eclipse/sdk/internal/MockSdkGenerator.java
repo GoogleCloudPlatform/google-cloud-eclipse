@@ -53,12 +53,8 @@ public class MockSdkGenerator {
   }
 
   /** Delete a created mock SDK. */
-  public static void deleteMockSdk(Path mockSdk) {
-    try {
-      Files.walkFileTree(mockSdk, new DeleteAllVisitor());
-    } catch (IOException ex) {
-      ex.printStackTrace();
-    }
+  public static void deleteMockSdk(Path mockSdk) throws IOException {
+    Files.walkFileTree(mockSdk, new DeleteAllVisitor());
   }
 
   private static void createEmptyFile(Path path) throws Exception {
