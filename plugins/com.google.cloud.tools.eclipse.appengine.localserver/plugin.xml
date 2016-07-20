@@ -74,14 +74,6 @@
       </processFactory>
    </extension>
    
-  <extension point="org.eclipse.wst.server.core.publishTasks">
-     <publishTask
-             id="com.google.appengine.eclipse.wtp.publishTask"
-             class="com.google.cloud.tools.eclipse.appengine.localserver.server.CloudSdkPublishTaskDelegate"
-             typeIds="com.google.cloud.tools.eclipse.server.custom">
-       </publishTask>
-   </extension>
-   
     <!-- app-tools-lib-for-java based server and runtime -->
     <extension point="org.eclipse.wst.server.core.serverTypes">
       <serverType
