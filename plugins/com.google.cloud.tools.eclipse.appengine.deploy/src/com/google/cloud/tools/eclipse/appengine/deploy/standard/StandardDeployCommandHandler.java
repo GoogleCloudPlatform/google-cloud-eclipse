@@ -7,6 +7,8 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineProjectDeployer;
 import com.google.cloud.tools.eclipse.appengine.deploy.CleanupOldDeploysJob;
@@ -40,17 +42,12 @@ public class StandardDeployCommandHandler extends AbstractHandler {
       IProject project = helper.getProject(event);
       if (project != null) {
         launchDeployJob(project);
-        launchCleanupJob();
       }
       // return value must be null, reserved for future use
       return null;
     } catch (CoreException coreException) {
       throw new ExecutionException(Messages.getString("deploy.failed.error.message"), coreException); //$NON-NLS-1$
     }
-  }
-
-  private void launchCleanupJob() {
-    new CleanupOldDeploysJob(getTempDir()).schedule();
   }
 
   private void launchDeployJob(IProject project) {
@@ -62,6 +59,18 @@ public class StandardDeployCommandHandler extends AbstractHandler {
                               getTempDir().append(now),
                               project);
     deploy.schedule();
+    deploy.addJobChangeListener(new JobChangeAdapter() {
+
+      @Override
+      public void done(IJobChangeEvent event) {
+        super.done(event);
+        launchCleanupJob();
+      }
+    });
+  }
+
+  private void launchCleanupJob() {
+    new CleanupOldDeploysJob(getTempDir()).schedule();
   }
 
   private IPath getTempDir() {
