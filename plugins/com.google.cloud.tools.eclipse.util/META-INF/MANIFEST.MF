@@ -7,3 +7,6 @@ Bundle-Vendor: Google, Inc.
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
+Export-Package: com.google.cloud.tools.eclipse.util.io,
+ com.google.cloud.tools.eclipse.util.status
+Require-Bundle: org.eclipse.core.runtime

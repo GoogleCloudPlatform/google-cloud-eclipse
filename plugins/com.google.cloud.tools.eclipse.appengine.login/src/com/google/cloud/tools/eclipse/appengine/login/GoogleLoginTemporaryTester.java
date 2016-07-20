@@ -54,8 +54,8 @@ public class GoogleLoginTemporaryTester {
     }
 
     Map<String, String> credentialMap = new HashMap<>();
-    credentialMap.put(CLIENT_ID_LABEL, GoogleLoginService.OAUTH_CLIENT_ID);
-    credentialMap.put(CLIENT_SECRET_LABEL, GoogleLoginService.OAUTH_CLIENT_SECRET);
+    credentialMap.put(CLIENT_ID_LABEL, Constants.getOAuthClientId());
+    credentialMap.put(CLIENT_SECRET_LABEL, Constants.getOAuthClientSecret());
     credentialMap.put(REFRESH_TOKEN_LABEL, credential.getRefreshToken());
     credentialMap.put(GCLOUD_USER_TYPE_LABEL, GCLOUD_USER_TYPE);
 

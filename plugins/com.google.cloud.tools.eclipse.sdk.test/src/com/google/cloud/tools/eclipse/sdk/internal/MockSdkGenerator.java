@@ -18,12 +18,11 @@ package com.google.cloud.tools.eclipse.sdk.internal;
 
 import static org.junit.Assert.assertTrue;
 
+import com.google.cloud.tools.eclipse.util.io.DeleteAllVisitor;
+
 import java.io.IOException;
-import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 
 /**
  * Utility class to generate a mock Google Cloud SDK installation that passes
@@ -52,25 +51,8 @@ public class MockSdkGenerator {
   }
 
   /** Delete a created mock SDK. */
-  public static void deleteMockSdk(Path mockSdk) {
-    try {
-      Files.walkFileTree(mockSdk, new SimpleFileVisitor<Path>() {
-        @Override
-        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-          Files.delete(file);
-          return FileVisitResult.CONTINUE;
-        }
-
-        @Override
-        public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-          Files.delete(dir);
-          return FileVisitResult.CONTINUE;
-        }
-
-      });
-    } catch (IOException ex) {
-      ex.printStackTrace();
-    }
+  public static void deleteMockSdk(Path mockSdk) throws IOException {
+    Files.walkFileTree(mockSdk, new DeleteAllVisitor());
   }
 
   private static void createEmptyFile(Path path) throws Exception {
