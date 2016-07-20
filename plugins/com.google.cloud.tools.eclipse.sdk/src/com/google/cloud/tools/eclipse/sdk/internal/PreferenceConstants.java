@@ -16,13 +16,28 @@
 
 package com.google.cloud.tools.eclipse.sdk.internal;
 
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
+
 /**
  * Constant definitions for plug-in preferences.
  */
 public final class PreferenceConstants {
+  // host bundle for the preference
+  static final String BUNDLEID = "com.google.cloud.tools.eclipse.sdk";
 
   /**
    * Preference name for the path to the Google Cloud SDK.
    */
   public static final String CLOUDSDK_PATH = "cloudSdkPath";
+
+  public static IPreferenceStore getPreferenceStore() {
+    return new ScopedPreferenceStore(InstanceScope.INSTANCE, BUNDLEID);
+  }
+
+  public static IEclipsePreferences getPreferenceNode() {
+    return InstanceScope.INSTANCE.getNode(BUNDLEID);
+  }
 }

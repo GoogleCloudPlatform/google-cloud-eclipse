@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
@@ -80,6 +81,10 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     Composite fieldContents = new Composite(parent, SWT.NONE);
     sdkLocation = new CloudSdkDirectoryFieldEditor(PreferenceConstants.CLOUDSDK_PATH,
         SdkUiMessages.CloudSdkPreferencePage_5, fieldContents);
+    Path defaultLocation = getDefaultSdkLocation();
+    if (defaultLocation != null) {
+      sdkLocation.setFilterPath(defaultLocation.toFile());
+    }
     sdkLocation.setPreferenceStore(getPreferenceStore());
     sdkLocation.setPropertyChangeListener(wrappedPropertyChangeListener);
     GridLayoutFactory.swtDefaults().numColumns(sdkLocation.getNumberOfControls())
@@ -132,6 +137,14 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     }
   }
 
+  private Path getDefaultSdkLocation() {
+    try {
+      return new CloudSdk.Builder().build().getSdkPath();
+    } catch (AppEngineException ex) {
+      return null;
+    }
+  }
+
   protected boolean validateSdk(Path location) {
     try {
       CloudSdk sdk = new CloudSdk.Builder().sdkPath(location).build();
@@ -160,6 +173,14 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
       setEmptyStringAllowed(true);
       setValidateStrategy(VALIDATE_ON_KEY_STROKE);
       createControl(parent);
+    }
+
+    @Override
+    public void setFilterPath(File path) {
+      super.setFilterPath(path);
+      if (path != null) {
+        getTextControl().setMessage(path.getAbsolutePath().toString());
+      }
     }
 
     @Override
