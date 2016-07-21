@@ -15,7 +15,7 @@ import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineProjectDeployer;
 import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
 import com.google.cloud.tools.eclipse.sdk.CloudSdkProvider;
-import com.google.cloud.tools.eclipse.sdk.ui.DefaultOutputLineListener;
+import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListener;
 import com.google.cloud.tools.eclipse.util.MessageConsoleUtilities;
 import com.google.common.base.Preconditions;
 
@@ -88,8 +88,8 @@ public class StandardDeployJob extends WorkspaceJob {
     final MessageConsoleStream outputStream = messageConsole.newMessageStream();
     CloudSdk cloudSdk = new CloudSdkProvider()
                           .createBuilder()
-                          .addStdOutLineListener(new DefaultOutputLineListener(outputStream))
-                          .addStdErrLineListener(new DefaultOutputLineListener(outputStream))
+                          .addStdOutLineListener(new MessageConsoleWriterOutputLineListener(outputStream))
+                          .addStdErrLineListener(new MessageConsoleWriterOutputLineListener(outputStream))
                           .build();
     return cloudSdk;
   }

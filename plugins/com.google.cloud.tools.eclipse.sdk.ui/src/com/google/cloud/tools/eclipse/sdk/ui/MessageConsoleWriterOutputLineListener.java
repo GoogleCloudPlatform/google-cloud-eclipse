@@ -16,10 +16,10 @@ import org.eclipse.ui.console.MessageConsoleStream;
 
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
 
-public class DefaultOutputLineListener implements ProcessOutputLineListener {
+public class MessageConsoleWriterOutputLineListener implements ProcessOutputLineListener {
   private MessageConsoleStream stream;
 
-  public DefaultOutputLineListener(MessageConsoleStream stream) {
+  public MessageConsoleWriterOutputLineListener(MessageConsoleStream stream) {
     this.stream = stream;
   }
 

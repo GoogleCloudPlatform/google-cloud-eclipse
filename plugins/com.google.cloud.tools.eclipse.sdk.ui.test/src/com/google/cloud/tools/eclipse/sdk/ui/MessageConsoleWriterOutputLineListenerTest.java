@@ -22,20 +22,20 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.google.cloud.tools.eclipse.sdk.ui.DefaultOutputLineListener;
+import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListener;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DefaultOutputLineListenerTest {
+public class MessageConsoleWriterOutputLineListenerTest {
   @Mock private MessageConsoleStream mockConsoleStream;
 
   /**
-   * Tests that {@link DefaultOutputLineListener#onOutputLine(String)} appends the specified
+   * Tests that {@link MessageConsoleWriterOutputLineListener#onOutputLine(String)} appends the specified
    * message to the console stream.
    */
   @Test
   public void testOnOutputLine() {
     String message = "a message";
-    DefaultOutputLineListener listener = new DefaultOutputLineListener(mockConsoleStream);  
+    MessageConsoleWriterOutputLineListener listener = new MessageConsoleWriterOutputLineListener(mockConsoleStream);
     listener.onOutputLine(message);
     verify(mockConsoleStream, times(1)).println(eq(message));
   }
