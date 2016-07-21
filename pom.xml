@@ -81,7 +81,7 @@
       <!-- bundle: com.google.cloud.tools.app.lib -->
       <groupId>com.google.cloud.tools</groupId>
       <artifactId>appengine-plugins-core</artifactId>
-      <version>0.1.3-SNAPSHOT</version>
+      <version>0.1.4</version>
     </dependency>
     <dependency>
       <!-- bundle: com.google.guava -->
