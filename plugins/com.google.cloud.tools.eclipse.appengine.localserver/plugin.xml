@@ -36,24 +36,6 @@
       </adapter>
    </extension>
 
-   <extension point="org.eclipse.ui.commands">
-      <command
-            id="com.google.cloud.tools.eclipse.deployCommand"
-            name="%cloudsdkdeploy">
-      </command>
-   </extension>
-
-   <extension point="org.eclipse.ui.menus">
-      <menuContribution
-            allPopups="false"
-            locationURI="popup:org.eclipse.ui.popup.any?after=additions">
-         <command commandId="com.google.cloud.tools.eclipse.deployCommand"
-               icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gcp-16x16.png"
-               label="%cloudsdkdeploy">
-            <visibleWhen checkEnabled="true" />
-         </command>
-      </menuContribution>
-   </extension>
    <extension point="org.eclipse.debug.core.processFactories">
       <processFactory
             class="com.google.cloud.tools.eclipse.appengine.localserver.server.DevAppServerProcessFactory"
