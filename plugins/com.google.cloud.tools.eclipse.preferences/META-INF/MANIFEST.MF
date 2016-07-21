@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.google.cloud.tools.eclipse.preferences;singleton:=true
 Bundle-Version: 0.1.0.qualifier
 Bundle-Vendor: Google, Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Export-Package: com.google.cloud.tools.eclipse.preferences
+Export-Package: com.google.cloud.tools.eclipse.preferences,
+ com.google.cloud.tools.eclipse.preferences.areas
 Bundle-Activator: com.google.cloud.tools.eclipse.preferences.Activator
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.eclipse.ui,

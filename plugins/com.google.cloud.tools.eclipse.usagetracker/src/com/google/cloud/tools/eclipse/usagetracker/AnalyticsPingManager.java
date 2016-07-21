@@ -1,7 +1,7 @@
 package com.google.cloud.tools.eclipse.usagetracker;
 
 import com.google.cloud.tools.eclipse.preferences.Activator;
-import com.google.cloud.tools.eclipse.preferences.CloudToolsPreferencePage;
+import com.google.cloud.tools.eclipse.preferences.AnalyticsPreferences;
 import com.google.common.annotations.VisibleForTesting;
 
 import org.eclipse.core.runtime.Platform;
@@ -91,17 +91,17 @@ public class AnalyticsPingManager {
   }
 
   private String getAnonymizedClientId() {
-    String clientId = preferences.get(CloudToolsPreferencePage.ANALYTICS_CLIENT_ID, null);
+    String clientId = preferences.get(AnalyticsPreferences.ANALYTICS_CLIENT_ID, null);
     if (clientId == null) {
       clientId = UUID.randomUUID().toString();
-      preferences.put(CloudToolsPreferencePage.ANALYTICS_CLIENT_ID, clientId);
+      preferences.put(AnalyticsPreferences.ANALYTICS_CLIENT_ID, clientId);
       flushPreferences();
     }
     return clientId;
   }
 
   private boolean userHasOptedIn() {
-    return preferences.getBoolean(CloudToolsPreferencePage.ANALYTICS_OPT_IN, false);
+    return preferences.getBoolean(AnalyticsPreferences.ANALYTICS_OPT_IN, false);
   }
 
   /**
@@ -111,7 +111,7 @@ public class AnalyticsPingManager {
    * presented before.)
    */
   private boolean userHasRegisteredOptInStatus() {
-    return preferences.getBoolean(CloudToolsPreferencePage.ANALYTICS_OPT_IN_REGISTERED, false);
+    return preferences.getBoolean(AnalyticsPreferences.ANALYTICS_OPT_IN_REGISTERED, false);
   }
 
   /**
@@ -124,8 +124,8 @@ public class AnalyticsPingManager {
    * take a simple approach to use two Boolean settings.
    */
   void registerOptInStatus(boolean optedIn) {
-    preferences.putBoolean(CloudToolsPreferencePage.ANALYTICS_OPT_IN, optedIn);
-    preferences.putBoolean(CloudToolsPreferencePage.ANALYTICS_OPT_IN_REGISTERED, true);
+    preferences.putBoolean(AnalyticsPreferences.ANALYTICS_OPT_IN, optedIn);
+    preferences.putBoolean(AnalyticsPreferences.ANALYTICS_OPT_IN_REGISTERED, true);
     flushPreferences();
   }
 

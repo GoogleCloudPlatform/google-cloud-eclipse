@@ -4,7 +4,6 @@ import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
 import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineProjectDeployer;
 import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
-import com.google.cloud.tools.eclipse.sdk.CloudSdkProvider;
 import com.google.cloud.tools.eclipse.util.MessageConsoleUtilities;
 import com.google.common.base.Preconditions;
 
@@ -86,7 +85,8 @@ public class StandardDeployJob extends WorkspaceJob {
     MessageConsole messageConsole =
         MessageConsoleUtilities.getMessageConsole(CONSOLE_NAME, null, true /* show */);
     final MessageConsoleStream outputStream = messageConsole.newMessageStream();
-    CloudSdk cloudSdk = new CloudSdkProvider().createBuilder()
+    CloudSdk cloudSdk =
+        new CloudSdk.Builder()
         .addStdErrLineListener(new ProcessOutputLineListener() {
 
           @Override

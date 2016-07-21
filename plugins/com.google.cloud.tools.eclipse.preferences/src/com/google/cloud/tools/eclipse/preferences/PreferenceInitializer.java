@@ -11,7 +11,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
   @Override
   public void initializeDefaultPreferences() {
     IPreferenceStore store = Activator.getDefault().getPreferenceStore();
-    store.setDefault(CloudToolsPreferencePage.ANALYTICS_OPT_IN, false);
+    store.setDefault(AnalyticsPreferences.ANALYTICS_OPT_IN, false);
   }
 
 }

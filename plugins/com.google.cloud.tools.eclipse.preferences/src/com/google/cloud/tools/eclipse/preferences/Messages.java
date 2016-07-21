@@ -8,6 +8,7 @@ public class Messages extends NLS {
   public static String ANALYTICS_PREFERENCE_GROUP_TITLE;
   public static String ANALYTICS_OPT_IN_TEXT;
   public static String GOOGLE_PRIVACY_POLICY_URL;
+
   static {
     NLS.initializeMessages(BUNDLE_NAME, Messages.class);
   }

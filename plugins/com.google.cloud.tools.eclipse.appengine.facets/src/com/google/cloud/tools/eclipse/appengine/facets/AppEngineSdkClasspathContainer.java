@@ -1,6 +1,7 @@
 package com.google.cloud.tools.eclipse.appengine.facets;
 
-import java.nio.file.Files;
+import com.google.cloud.tools.appengine.api.AppEngineException;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -8,12 +9,10 @@ import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
 
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-import com.google.cloud.tools.eclipse.sdk.CloudSdkProvider;
-
 public final class AppEngineSdkClasspathContainer implements IClasspathContainer {
 
   public static final String CONTAINER_ID = "AppEngineSDK";
+
   private static final String TOOLS_JAR_NAME = "appengine-tools-api.jar";
 
   @Override
@@ -33,17 +32,23 @@ public final class AppEngineSdkClasspathContainer implements IClasspathContainer
 
   @Override
   public IClasspathEntry[] getClasspathEntries() {
-    CloudSdk cloudSdk = new CloudSdkProvider().getCloudSdk();
-    if (cloudSdk != null) {
-      java.nio.file.Path jarFile = cloudSdk.getJarPath(TOOLS_JAR_NAME);
-      if (jarFile != null && Files.exists(jarFile)) {
-        IClasspathEntry appEngineToolsEntry =
-            JavaCore.newLibraryEntry(new Path(jarFile.toString()),
-                null /* sourceAttachmentPath */,
-                null /* sourceAttachmentRootPath */,
-                true /* isExported */);
-        return new IClasspathEntry[]{ appEngineToolsEntry };
+    try {
+      CloudSdk cloudSdk = new CloudSdk.Builder().build();
+      if (cloudSdk != null) {
+        java.nio.file.Path jarFile = cloudSdk.getJarPath(TOOLS_JAR_NAME);
+        if (jarFile != null) {
+          //@formatter:off
+          IClasspathEntry appEngineToolsEntry = JavaCore.newLibraryEntry(
+              new Path(jarFile.toString()),
+              null /* sourceAttachmentPath */,
+              null /* sourceAttachmentRootPath */, 
+              true /* isExported */);
+          //@formatter:on
+          return new IClasspathEntry[] {appEngineToolsEntry};
+        }
       }
+    } catch (AppEngineException ex) {
+      /* fall through */
     }
     return new IClasspathEntry[0];
   }

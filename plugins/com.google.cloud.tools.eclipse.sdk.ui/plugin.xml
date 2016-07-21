@@ -2,11 +2,12 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension
-         point="org.eclipse.ui.preferencePages">
-      <page
-            id="com.google.cloud.tools.eclipse.sdk.ui.preferences.cloudsdk"
-            class="com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPreferencePage"
-            name="%page.name">
-      </page>
+         point="com.google.cloud.tools.eclipse.preferences.areas">
+      <area
+            host="com.google.cloud.tools.eclipse.preferences.main"
+            title="%page.name"
+            class="com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPreferenceArea"
+            preferences="instance://com.google.cloud.tools.eclipse.sdk">
+      </area>
    </extension>
 </plugin>

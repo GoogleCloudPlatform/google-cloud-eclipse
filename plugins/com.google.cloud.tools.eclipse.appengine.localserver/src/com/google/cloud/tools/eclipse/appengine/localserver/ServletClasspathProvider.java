@@ -1,5 +1,10 @@
 package com.google.cloud.tools.eclipse.appengine.localserver;
 
+import com.google.cloud.tools.appengine.api.AppEngineException;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.eclipse.util.MavenUtils;
+import com.google.common.annotations.VisibleForTesting;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -7,21 +12,12 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jst.server.core.RuntimeClasspathProviderDelegate;
 import org.eclipse.wst.server.core.IRuntime;
 
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-import com.google.cloud.tools.eclipse.sdk.CloudSdkProvider;
-import com.google.cloud.tools.eclipse.util.MavenUtils;
-import com.google.common.annotations.VisibleForTesting;
-
 /**
  * Supply Java standard classes, specifically servlet-api.jar and jsp-api.jar,
  * to non-Maven projects.
  */
 public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
-  
-  private CloudSdkProvider cloudSdkProvider = new CloudSdkProvider();
-
-  public ServletClasspathProvider() {
-  }
+  private CloudSdk cloudSdkForTesting;
 
   @Override
   public IClasspathEntry[] resolveClasspathContainer(IProject project, IRuntime runtime) {
@@ -34,10 +30,14 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
 
   @Override
   public IClasspathEntry[] resolveClasspathContainer(IRuntime runtime) {
-    CloudSdk cloudSdk = cloudSdkProvider.getCloudSdk();
+    CloudSdk cloudSdk = cloudSdkForTesting;
     if (cloudSdk == null) {
-      return new IClasspathEntry[0];
-    };
+      try {
+        cloudSdk = new CloudSdk.Builder().build();
+      } catch (AppEngineException ex) {
+        return new IClasspathEntry[0];
+      }
+    }
     java.nio.file.Path servletJar = cloudSdk.getJarPath("servlet-api.jar");
     java.nio.file.Path jspJar = cloudSdk.getJarPath("jsp-api.jar");
     IClasspathEntry servletEntry =
@@ -49,7 +49,7 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
   }
   
   @VisibleForTesting
-  public void setCloudSdkProvider(CloudSdkProvider cloudSdkProvider) {
-    this.cloudSdkProvider = cloudSdkProvider;
+  public void setCloudSdk(CloudSdk cloudSdk) {
+    this.cloudSdkForTesting = cloudSdk;
   }
 }

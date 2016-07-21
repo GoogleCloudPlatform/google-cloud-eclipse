@@ -16,7 +16,7 @@ Import-Package: com.google.common.annotations;version="17.0.0",
  org.eclipse.ui.preferences,
  org.osgi.framework;version="1.8.0",
  org.osgi.service.component;version="1.2.2"
+Eclipse-RegisterBuddy: com.google.cloud.tools.app.lib
 Service-Component: OSGI-INF/gcloud.xml
-Export-Package: com.google.cloud.tools.eclipse.sdk,
- com.google.cloud.tools.eclipse.sdk.internal;x-friends:="com.google.cloud.tools.eclipse.sdk.ui"
+Export-Package: com.google.cloud.tools.eclipse.sdk.internal;x-friends:="com.google.cloud.tools.eclipse.sdk.ui"
 Bundle-Activator: com.google.cloud.tools.eclipse.sdk.internal.Activator

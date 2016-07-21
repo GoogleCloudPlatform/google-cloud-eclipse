@@ -19,7 +19,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.verification.VerificationMode;
 
-import com.google.cloud.tools.eclipse.preferences.CloudToolsPreferencePage;
+import com.google.cloud.tools.eclipse.preferences.AnalyticsPreferences;
 
 public class AnalyticsPingManagerTest {
 
@@ -149,12 +149,12 @@ public class AnalyticsPingManagerTest {
   }
 
   private void mockOptIn(IEclipsePreferences preferences, boolean optIn) {
-    when(preferences.getBoolean(eq(CloudToolsPreferencePage.ANALYTICS_OPT_IN), anyBoolean()))
+    when(preferences.getBoolean(eq(AnalyticsPreferences.ANALYTICS_OPT_IN), anyBoolean()))
         .thenReturn(optIn);
   }
 
   private void mockOptInRegistered(IEclipsePreferences preferences, boolean registered) {
-    when(preferences.getBoolean(eq(CloudToolsPreferencePage.ANALYTICS_OPT_IN_REGISTERED),
+    when(preferences.getBoolean(eq(AnalyticsPreferences.ANALYTICS_OPT_IN_REGISTERED),
                                 anyBoolean()))
         .thenReturn(registered);
   }
