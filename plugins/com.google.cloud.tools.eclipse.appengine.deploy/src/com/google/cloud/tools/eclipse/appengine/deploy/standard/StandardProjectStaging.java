@@ -17,10 +17,10 @@ public class StandardProjectStaging {
 
   /**
    * @param explodedWarDirectory the input of the staging operation
-   * @param stagingDir where the result of the staging operation will be written to
+   * @param stagingDirectory where the result of the staging operation will be written to
    * @param cloudSdk executes the staging operation
    */
-  public void stage(IPath explodedWarDirectory, IPath stagingDir, CloudSdk cloudSdk, IProgressMonitor monitor) {
+  public void stage(IPath explodedWarDirectory, IPath stagingDirectory, CloudSdk cloudSdk, IProgressMonitor monitor) {
     if (monitor.isCanceled()) {
       throw new OperationCanceledException();
     }
@@ -30,7 +30,7 @@ public class StandardProjectStaging {
 
     DefaultStageStandardConfiguration stagingConfig = new DefaultStageStandardConfiguration();
     stagingConfig.setSourceDirectory(explodedWarDirectory.toFile());
-    stagingConfig.setStagingDirectory(stagingDir.toFile());
+    stagingConfig.setStagingDirectory(stagingDirectory.toFile());
     stagingConfig.setEnableJarSplitting(true);
 
     CloudSdkAppEngineStandardStaging staging = new CloudSdkAppEngineStandardStaging(cloudSdk);
