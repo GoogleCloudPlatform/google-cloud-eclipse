@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
 import com.google.api.client.googleapis.auth.oauth2.GoogleOAuthConstants;
+import com.google.cloud.tools.eclipse.appengine.login.Messages;
 import com.google.common.annotations.VisibleForTesting;
 
 import java.net.URL;
@@ -46,6 +47,8 @@ import java.util.Collection;
  */
 public class GoogleLoginBrowser extends Dialog {
 
+  public static final String REDIRECT_URI = GoogleOAuthConstants.OOB_REDIRECT_URI + ":auto";
+
   private static final String LOGOUT_URL = "https://www.google.com/accounts/Logout"; //$NON-NLS-1$
 
   private Browser browser;
@@ -57,7 +60,7 @@ public class GoogleLoginBrowser extends Dialog {
       String OAuthClientId, Collection<String> OAuthScopes) {
     super(parentShell);
     loginUrl = new GoogleAuthorizationCodeRequestUrl(
-        OAuthClientId, GoogleOAuthConstants.OOB_REDIRECT_URI + ":auto", OAuthScopes).toURL();
+        OAuthClientId, REDIRECT_URI, OAuthScopes).toURL();
   }
 
   /**
@@ -70,7 +73,7 @@ public class GoogleLoginBrowser extends Dialog {
   @Override
   protected void configureShell(Shell newShell) {
     super.configureShell(newShell);
-    newShell.setText("Sign in to Google");  // TODO(chanseok): localize after PR #386 lands.
+    newShell.setText(Messages.LOGIN_BROWSER_TITLE);
   }
 
   @Override
