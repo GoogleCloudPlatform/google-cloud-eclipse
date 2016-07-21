@@ -9,7 +9,7 @@ import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineDevServer;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessExitListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessStartListener;
 import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
-import com.google.cloud.tools.eclipse.sdk.CloudSdkProvider;
+import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListener;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
@@ -163,10 +163,10 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
   }
 
   private void initializeDevServer(MessageConsoleStream stream) {
-    LocalAppEngineOutputLineListener outputListener =
-        new LocalAppEngineOutputLineListener(stream);
+    MessageConsoleWriterOutputLineListener outputListener =
+        new MessageConsoleWriterOutputLineListener(stream);
 
-    CloudSdk cloudSdk = new CloudSdkProvider().createBuilder()
+    CloudSdk cloudSdk = new CloudSdk.Builder()
         .addStdOutLineListener(outputListener)
         .addStdErrLineListener(outputListener)
         .startListener(localAppEngineStartListener)

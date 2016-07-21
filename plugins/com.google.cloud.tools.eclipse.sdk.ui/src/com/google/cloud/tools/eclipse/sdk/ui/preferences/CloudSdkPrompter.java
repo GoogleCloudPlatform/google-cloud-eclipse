@@ -16,8 +16,8 @@
 
 package com.google.cloud.tools.eclipse.sdk.ui.preferences;
 
+import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-import com.google.cloud.tools.eclipse.sdk.CloudSdkProvider;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.PreferenceDialog;
@@ -27,16 +27,19 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import java.io.File;
+import java.nio.file.Path;
 
 /**
- * Similar to {@link CloudSdkProvider} but will open the Cloud SDK preference page if no location is
- * found. Must be called from the SWT UI Thread.
+ * A special Google Cloud SDK provider that will open the Cloud SDK
+ * preference page if no location is found. Must be called from the
+ * SWT UI Thread.
  */
 public class CloudSdkPrompter {
 
   /**
-   * Return the Cloud SDK. If it cannot be found, prompt the user to specify its location.
-   * 
+   * Return the Cloud SDK. If it cannot be found, prompt the user to specify its location. Like
+   * {@linkplain CloudSdk.Builder#build()} the caller is responsible for validating the SDK location
+   * (if desired).
    * <p>
    * <b>Must be called from the SWT UI Thread.</b>
    * </p>
@@ -49,7 +52,9 @@ public class CloudSdkPrompter {
   }
 
   /**
-   * Return the Cloud SDK. If it cannot be found, prompt the user to specify its location.
+   * Return the Cloud SDK. If it cannot be found, prompt the user to specify its location. Like
+   * {@linkplain CloudSdk.Builder#build()} the caller is responsible for validating the SDK location
+   * (if desired).
    * 
    * <p>
    * <b>Must be called from the SWT UI Thread.</b>
@@ -59,19 +64,27 @@ public class CloudSdkPrompter {
    * @return the Cloud SDK, or {@code null} if unspecified
    */
   public static CloudSdk getCloudSdk(IShellProvider shellProvider) {
-    CloudSdk cloudSdk = new CloudSdkProvider().getCloudSdk();
-    
-    // User can interrupt this cycle by clicking the cancel button.
-    while (cloudSdk == null && promptForSdk(shellProvider)) {
-      cloudSdk = new CloudSdkProvider().getCloudSdk();
+    try {
+      return new CloudSdk.Builder().build();
+    } catch (AppEngineException ex) {
+      /* fall through */
     }
-    
-    return cloudSdk;
+    // assumption here is that the CloudSdkPreferenceResolver is in place
+    if (promptForSdk(shellProvider)) {
+      try {
+        // preference was changed so try again
+        return new CloudSdk.Builder().build();
+      } catch (AppEngineException ex) {
+        /* fall through */
+      }
+    }
+    return null;
   }
 
   /**
    * Return the Cloud SDK location. If it cannot be found, prompt the user to specify its location.
-   * 
+   * Like {@linkplain CloudSdk.Builder#build()} the caller is responsible for validating the SDK
+   * location (if desired).
    * <p>
    * <b>Must be called from the SWT UI Thread.</b>
    * </p>
@@ -85,7 +98,8 @@ public class CloudSdkPrompter {
 
   /**
    * Return the Cloud SDK location. If it cannot be found, prompt the user to specify its location.
-   * 
+   * Like {@linkplain CloudSdk.Builder#build()} the caller is responsible for validating the SDK
+   * location (if desired).
    * <p>
    * <b>Must be called from the SWT UI Thread.</b>
    * </p>
@@ -94,13 +108,13 @@ public class CloudSdkPrompter {
    * @return the Cloud SDK location, or {@code null} if unspecified
    */
   public static File getCloudSdkLocation(IShellProvider shellProvider) {
-    CloudSdk cloudSdk = new CloudSdkProvider().getCloudSdk();
-    // User can interrupt this cycle by clicking the cancel button.
-    while (cloudSdk == null && promptForSdk(shellProvider)) {
-      cloudSdk = new CloudSdkProvider().getCloudSdk();
+    CloudSdk sdk = getCloudSdk(shellProvider);
+    if (sdk == null) {
+      return null;
     }
-    if (cloudSdk != null) {
-      return cloudSdk.getJavaAppEngineSdkPath().toFile();
+    Path location = sdk.getSdkPath();
+    if (location != null) {
+      return location.toFile();
     }
     return null;
   }
@@ -118,7 +132,7 @@ public class CloudSdkPrompter {
     }
     Shell shell = shellProvider == null ? null : shellProvider.getShell();
     final PreferenceDialog dialog =
-        PreferencesUtil.createPreferenceDialogOn(shell, CloudSdkPreferencePage.PAGE_ID, null, null);
+        PreferencesUtil.createPreferenceDialogOn(shell, CloudSdkPreferenceArea.PAGE_ID, null, null);
     return dialog.open() == PreferenceDialog.OK;
   }
 

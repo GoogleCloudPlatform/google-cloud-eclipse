@@ -31,6 +31,7 @@ import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 
+import java.io.IOException;
 import java.nio.file.Path;
 
 // TODO important: these tests need to not touch global static state
@@ -48,7 +49,7 @@ public class CloudSdkContextFunctionTest {
 
   /** Tear down. */
   @After
-  public void tearDown() {
+  public void tearDown() throws IOException {
     context.dispose();
     if (mockSdk != null) {
       MockSdkGenerator.deleteMockSdk(mockSdk);

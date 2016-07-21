@@ -7,8 +7,11 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineProjectDeployer;
+import com.google.cloud.tools.eclipse.appengine.deploy.CleanupOldDeploysJob;
 import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
 import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
 import com.google.cloud.tools.eclipse.util.ProjectFromSelectionHelper;
@@ -38,20 +41,36 @@ public class StandardDeployCommandHandler extends AbstractHandler {
     try {
       IProject project = helper.getProject(event);
       if (project != null) {
-        String now = Long.toString(System.currentTimeMillis());
-        StandardDeployJob deploy =
-            new StandardDeployJob(new ExplodedWarPublisher(),
-                                  new StandardProjectStaging(),
-                                  new AppEngineProjectDeployer(),
-                                  getTempDir().append(now),
-                                  project);
-        deploy.schedule();
+        launchDeployJob(project);
       }
       // return value must be null, reserved for future use
       return null;
     } catch (CoreException coreException) {
       throw new ExecutionException(Messages.getString("deploy.failed.error.message"), coreException); //$NON-NLS-1$
     }
+  }
+
+  private void launchDeployJob(IProject project) {
+    String now = Long.toString(System.currentTimeMillis());
+    StandardDeployJob deploy =
+        new StandardDeployJob(new ExplodedWarPublisher(),
+                              new StandardProjectStaging(),
+                              new AppEngineProjectDeployer(),
+                              getTempDir().append(now),
+                              project);
+    deploy.addJobChangeListener(new JobChangeAdapter() {
+
+      @Override
+      public void done(IJobChangeEvent event) {
+        super.done(event);
+        launchCleanupJob();
+      }
+    });
+    deploy.schedule();
+  }
+
+  private void launchCleanupJob() {
+    new CleanupOldDeploysJob(getTempDir()).schedule();
   }
 
   private IPath getTempDir() {
