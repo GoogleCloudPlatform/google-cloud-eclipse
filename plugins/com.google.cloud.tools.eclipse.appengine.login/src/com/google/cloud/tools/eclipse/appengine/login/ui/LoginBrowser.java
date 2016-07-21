@@ -74,6 +74,7 @@ public class LoginBrowser extends Dialog {
       if (event.title.startsWith(SUCCESS_CODE_PREFIX)) {
         verificationCode = event.title.substring(SUCCESS_CODE_PREFIX.length());
         // We don't close the browser now; rather we make the browser log out the user first.
+        browser.setVisible(false);
         browser.setUrl(LOGOUT_URL);
       }
     }
