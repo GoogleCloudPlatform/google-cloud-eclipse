@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
-	servicefactory="true"
-	name="cloud-sdk">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="cloud-sdk">
    <implementation class="com.google.cloud.tools.eclipse.sdk.internal.CloudSdkContextFunction"/>
    <service>
       <provide interface="org.eclipse.e4.core.contexts.IContextFunction"/>

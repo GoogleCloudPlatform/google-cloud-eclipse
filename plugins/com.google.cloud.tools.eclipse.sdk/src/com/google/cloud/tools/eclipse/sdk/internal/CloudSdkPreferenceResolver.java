@@ -27,7 +27,7 @@ import java.nio.file.Paths;
  * Google Cloud SDK locator that uses the user-configured location preference.
  */
 public class CloudSdkPreferenceResolver implements CloudSdkResolver {
-  private IPreferenceStore preferences = PreferenceInitializer.getPreferenceStore();
+  private IPreferenceStore preferences = PreferenceConstants.getPreferenceStore();
 
   public CloudSdkPreferenceResolver() {}
 
@@ -43,6 +43,12 @@ public class CloudSdkPreferenceResolver implements CloudSdkResolver {
       return Paths.get(value);
     }
     return null;
+  }
+
+  @Override
+  public int getRank() {
+    // since the user configures this path, this resolver should have highest priority
+    return 0;
   }
 
 

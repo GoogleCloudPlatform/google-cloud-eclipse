@@ -95,11 +95,18 @@
          version="0.0.0"
          unpack="false"/>
          
- <plugin
+  <plugin
          id="com.google.cloud.tools.eclipse.sdk.ui"
          download-size="0"
          install-size="0"
          version="0.0.0"
-         unpack="false"/>         
+         unpack="false"/>
+
+  <plugin
+         id="com.google.cloud.tools.eclipse.util"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
 
 </feature>

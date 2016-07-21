@@ -1,17 +1,5 @@
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.ui.console.MessageConsoleStream;
-import org.eclipse.wst.server.core.IModule;
-import org.eclipse.wst.server.core.IServer;
-import org.eclipse.wst.server.core.model.IModuleResource;
-import org.eclipse.wst.server.core.model.IModuleResourceDelta;
-import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
-
 import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.api.devserver.AppEngineDevServer;
 import com.google.cloud.tools.appengine.api.devserver.DefaultRunConfiguration;
@@ -21,6 +9,21 @@ import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineDevServer;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessExitListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessStartListener;
 import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
+
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.ui.console.MessageConsoleStream;
+import org.eclipse.wst.server.core.IModule;
+import org.eclipse.wst.server.core.IServer;
+import org.eclipse.wst.server.core.model.IModuleResource;
+import org.eclipse.wst.server.core.model.IModuleResourceDelta;
+import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * A {@link ServerBehaviourDelegate} for App Engine Server executed via the Java App Management
@@ -57,6 +60,16 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
   @Override
   protected IModuleResource[] getResources(IModule[] module) {
     return super.getResources(module);
+  }
+
+  @Override
+  public IStatus canStop() {
+    int serverState = getServer().getServerState();
+    if ((serverState != IServer.STATE_STOPPING) && (serverState != IServer.STATE_STOPPED)) {
+      return Status.OK_STATUS;
+    } else {
+      return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Stop in progress");
+    }
   }
 
   /**

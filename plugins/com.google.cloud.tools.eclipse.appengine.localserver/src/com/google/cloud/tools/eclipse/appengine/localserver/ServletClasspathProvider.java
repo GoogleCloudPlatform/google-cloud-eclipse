@@ -1,7 +1,9 @@
 package com.google.cloud.tools.eclipse.appengine.localserver;
 
+import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
+import com.google.common.annotations.VisibleForTesting;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Path;
@@ -15,9 +17,7 @@ import org.eclipse.wst.server.core.IRuntime;
  * to non-Maven projects.
  */
 public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
-
-  public ServletClasspathProvider() {
-  }
+  private CloudSdk cloudSdkForTesting;
 
   @Override
   public IClasspathEntry[] resolveClasspathContainer(IProject project, IRuntime runtime) {
@@ -25,22 +25,31 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
       return new IClasspathEntry[0];
     } else {
       return resolveClasspathContainer(runtime);
-    } 
+    }
   }
 
   @Override
   public IClasspathEntry[] resolveClasspathContainer(IRuntime runtime) {
-    java.nio.file.Path cloudSdkPath = new CloudSdk.Builder().build().getSdkPath();
-    if (cloudSdkPath == null) {
-      return new IClasspathEntry[0];
-    };
-    String servletJar = cloudSdkPath + "/platform/google_appengine/google/appengine/tools/java/lib/shared/servlet-api.jar";
-    String jspJar = cloudSdkPath + "/platform/google_appengine/google/appengine/tools/java/lib/shared/jsp-api.jar";
-    IClasspathEntry servletEntry = JavaCore.newLibraryEntry(new Path(servletJar), null, null);
-    IClasspathEntry jspEntry = JavaCore.newLibraryEntry(new Path(jspJar), null, null);
+    CloudSdk cloudSdk = cloudSdkForTesting;
+    if (cloudSdk == null) {
+      try {
+        cloudSdk = new CloudSdk.Builder().build();
+      } catch (AppEngineException ex) {
+        return new IClasspathEntry[0];
+      }
+    }
+    java.nio.file.Path servletJar = cloudSdk.getJarPath("servlet-api.jar");
+    java.nio.file.Path jspJar = cloudSdk.getJarPath("jsp-api.jar");
+    IClasspathEntry servletEntry =
+        JavaCore.newLibraryEntry(new Path(servletJar.toString()), null, null);
+    IClasspathEntry jspEntry = JavaCore.newLibraryEntry(new Path(jspJar.toString()), null, null);
     
     IClasspathEntry[] entries = {servletEntry, jspEntry};
     return entries;
-  }  
+  }
   
+  @VisibleForTesting
+  public void setCloudSdk(CloudSdk cloudSdk) {
+    this.cloudSdkForTesting = cloudSdk;
+  }
 }

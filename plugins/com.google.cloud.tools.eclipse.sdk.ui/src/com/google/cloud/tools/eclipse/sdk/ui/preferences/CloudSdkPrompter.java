@@ -37,8 +37,9 @@ import java.nio.file.Path;
 public class CloudSdkPrompter {
 
   /**
-   * Return the Cloud SDK. If it cannot be found, prompt the user to specify its location.
-   * 
+   * Return the Cloud SDK. If it cannot be found, prompt the user to specify its location. Like
+   * {@linkplain CloudSdk.Builder#build()} the caller is responsible for validating the SDK location
+   * (if desired).
    * <p>
    * <b>Must be called from the SWT UI Thread.</b>
    * </p>
@@ -51,7 +52,9 @@ public class CloudSdkPrompter {
   }
 
   /**
-   * Return the Cloud SDK. If it cannot be found, prompt the user to specify its location.
+   * Return the Cloud SDK. If it cannot be found, prompt the user to specify its location. Like
+   * {@linkplain CloudSdk.Builder#build()} the caller is responsible for validating the SDK location
+   * (if desired).
    * 
    * <p>
    * <b>Must be called from the SWT UI Thread.</b>
@@ -61,22 +64,27 @@ public class CloudSdkPrompter {
    * @return the Cloud SDK, or {@code null} if unspecified
    */
   public static CloudSdk getCloudSdk(IShellProvider shellProvider) {
-    CloudSdk sdk = new CloudSdk.Builder().build();
     try {
-      sdk.validate();
-      return sdk;
-    } catch (AppEngineException e) {
+      return new CloudSdk.Builder().build();
+    } catch (AppEngineException ex) {
       /* fall through */
     }
+    // assumption here is that the CloudSdkPreferenceResolver is in place
     if (promptForSdk(shellProvider)) {
-      return new CloudSdk.Builder().build();
+      try {
+        // preference was changed so try again
+        return new CloudSdk.Builder().build();
+      } catch (AppEngineException ex) {
+        /* fall through */
+      }
     }
     return null;
   }
 
   /**
    * Return the Cloud SDK location. If it cannot be found, prompt the user to specify its location.
-   * 
+   * Like {@linkplain CloudSdk.Builder#build()} the caller is responsible for validating the SDK
+   * location (if desired).
    * <p>
    * <b>Must be called from the SWT UI Thread.</b>
    * </p>
@@ -90,7 +98,8 @@ public class CloudSdkPrompter {
 
   /**
    * Return the Cloud SDK location. If it cannot be found, prompt the user to specify its location.
-   * 
+   * Like {@linkplain CloudSdk.Builder#build()} the caller is responsible for validating the SDK
+   * location (if desired).
    * <p>
    * <b>Must be called from the SWT UI Thread.</b>
    * </p>
@@ -99,17 +108,13 @@ public class CloudSdkPrompter {
    * @return the Cloud SDK location, or {@code null} if unspecified
    */
   public static File getCloudSdkLocation(IShellProvider shellProvider) {
-    CloudSdk sdk = new CloudSdk.Builder().build();
+    CloudSdk sdk = getCloudSdk(shellProvider);
+    if (sdk == null) {
+      return null;
+    }
     Path location = sdk.getSdkPath();
     if (location != null) {
       return location.toFile();
-    }
-    if (promptForSdk(shellProvider)) {
-      sdk = new CloudSdk.Builder().build();
-      location = sdk.getSdkPath();
-      if (location != null) {
-        return location.toFile();
-      }
     }
     return null;
   }
@@ -127,7 +132,7 @@ public class CloudSdkPrompter {
     }
     Shell shell = shellProvider == null ? null : shellProvider.getShell();
     final PreferenceDialog dialog =
-        PreferencesUtil.createPreferenceDialogOn(shell, CloudSdkPreferencePage.PAGE_ID, null, null);
+        PreferencesUtil.createPreferenceDialogOn(shell, CloudSdkPreferenceArea.PAGE_ID, null, null);
     return dialog.open() == PreferenceDialog.OK;
   }
 

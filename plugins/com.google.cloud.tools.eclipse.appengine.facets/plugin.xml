@@ -18,10 +18,16 @@
   </extension>
   
   <extension point="org.eclipse.wst.common.project.facet.core.facets">
-    <action facet="com.google.cloud.tools.eclipse.appengine.facet" type="INSTALL">
+    <action
+      id="com.google.cloud.tools.eclipse.appengine.facet.install.action"
+      facet="com.google.cloud.tools.eclipse.appengine.facet"
+      type="INSTALL">
       <delegate class="com.google.cloud.tools.eclipse.appengine.facets.FacetInstallDelegate"/>
     </action>
-    <action facet="com.google.cloud.tools.eclipse.appengine.facet" type="UNINSTALL">
+    <action
+      id="com.google.cloud.tools.eclipse.appengine.facet.uninstall.action"
+      facet="com.google.cloud.tools.eclipse.appengine.facet"
+      type="UNINSTALL">
       <delegate class="com.google.cloud.tools.eclipse.appengine.facets.FacetUninstallDelegate"/>
     </action>
   </extension>

@@ -19,12 +19,12 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.launching.AbstractJavaLaunchConfigurationDelegate;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.SocketUtil;
-import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.ServerUtil;
 
 import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
+import com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineConsole;
 
 public class LocalAppEngineServerLaunchConfigurationDelegate
 extends AbstractJavaLaunchConfigurationDelegate {
@@ -59,9 +59,9 @@ extends AbstractJavaLaunchConfigurationDelegate {
       runnables.add(deployPath.toFile());
     }
 
-    MessageConsole console = TargetPlatform.findConsole(configuration.getName());
+    LocalAppEngineConsole console = ConsoleUtilities.findConsole(configuration.getName(), serverBehaviour);
     console.clearConsole();
-    TargetPlatform.showConsole(console);
+    console.activate();
 
     LocalAppEngineServerDelegate serverDelegate = LocalAppEngineServerDelegate.getAppEngineServer(server);
     int debugPort = -1;

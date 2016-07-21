@@ -21,7 +21,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.google.cloud.tools.eclipse.appengine.deploy.FacetedProjectHelper;
+import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StandardDeployCommandHandlerTest {

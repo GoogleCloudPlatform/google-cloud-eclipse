@@ -50,16 +50,16 @@ public class CloudSdkPreferenceResolverTest {
     CloudSdkPreferenceResolver resolver = new CloudSdkPreferenceResolver(preferences);
     CloudSdk sdk = new CloudSdk.Builder()
         .resolvers(Collections.singletonList((CloudSdkResolver) resolver)).build();
-    assertEquals(root.toPath(), sdk.getSdkPath());
+    assertEquals("SDK should be found at invalid location", root.toPath(), sdk.getSdkPath());
     try {
       sdk.validate();
-      fail("root directory should not be a valid location");
+      fail("root directory should not validate as a valid location");
     } catch (AppEngineException ex) {
       // ignore
     }
   }
-  
-  /** Verify that the preference resolver is found by default */
+
+  /** Verify that the preference resolver is found by default. */
   @Test
   public void testPreferenceResolverFound() throws Exception {
     List<CloudSdkResolver> resolvers = new CloudSdk.Builder().getResolvers();
@@ -93,12 +93,13 @@ public class CloudSdkPreferenceResolverTest {
   }
 
 
-  private static class MockPreferences implements IPreferenceStore{
+  private static class MockPreferences implements IPreferenceStore {
     private String stringValue;
 
     MockPreferences(String stringValue) {
       this.stringValue = stringValue;
     }
+
     @Override
     public void addPropertyChangeListener(IPropertyChangeListener listener) { 
     }
