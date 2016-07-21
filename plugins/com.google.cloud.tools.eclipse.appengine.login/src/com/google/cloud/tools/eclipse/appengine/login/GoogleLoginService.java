@@ -21,6 +21,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import com.google.api.client.googleapis.util.Utils;
 import com.google.cloud.tools.eclipse.appengine.login.ui.GoogleLoginBrowser;
+import com.google.gson.Gson;
 
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.jface.window.IShellProvider;
@@ -29,7 +30,9 @@ import org.eclipse.ui.PlatformUI;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Provides service related to login, e.g., account management, getting a credential of a
@@ -51,6 +54,7 @@ public class GoogleLoginService {
    * credential.
    *
    * @param shellProvider provides a shell for the login screen if login is necessary
+   * @throws IOException can be thrown by the underlying Login API request
    */
   // TODO(chanseok); synchronize properly
   public Credential getActiveCredential(IShellProvider shellProvider) throws IOException {
@@ -89,5 +93,24 @@ public class GoogleLoginService {
     credential.setAccessToken(tokenResponse.getAccessToken());
     credential.setRefreshToken(tokenResponse.getRefreshToken());
     return credential;
+  }
+
+  private static final String CLIENT_ID_LABEL = "client_id";
+  private static final String CLIENT_SECRET_LABEL = "client_secret";
+  private static final String REFRESH_TOKEN_LABEL = "refresh_token";
+  private static final String GCLOUD_USER_TYPE_LABEL = "type";
+  private static final String GCLOUD_USER_TYPE = "authorized_user";
+
+  /**
+   * Helper method to convert a credential to the corresponding JSON string.
+   */
+  public static String getJsonCredential(Credential credential) {
+    Map<String, String> credentialMap = new HashMap<>();
+    credentialMap.put(CLIENT_ID_LABEL, Constants.getOAuthClientId());
+    credentialMap.put(CLIENT_SECRET_LABEL, Constants.getOAuthClientSecret());
+    credentialMap.put(REFRESH_TOKEN_LABEL, credential.getRefreshToken());
+    credentialMap.put(GCLOUD_USER_TYPE_LABEL, GCLOUD_USER_TYPE);
+
+    return new Gson().toJson(credentialMap);
   }
 }
