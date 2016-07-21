@@ -29,7 +29,7 @@ import org.junit.Test;
 public class GoogleLoginBrowserTest {
 
   @Test
-  public void testInvalidAuthorizationCodeExtraction() {
+  public void testTitleListener_nonCodeTitle() {
     GoogleLoginBrowser loginBrowser = mock(GoogleLoginBrowser.class);
     TitleEvent titleEvent = new TitleEvent(mock(Widget.class));
     titleEvent.title = "Arbitrary HTML Page Title";
@@ -41,7 +41,7 @@ public class GoogleLoginBrowserTest {
   }
 
   @Test
-  public void testValidAuthorizationCodeExtraction() {
+  public void testTitleListener_authorizationCodeTitle() {
     GoogleLoginBrowser loginBrowser = mock(GoogleLoginBrowser.class);
     TitleEvent titleEvent = new TitleEvent(mock(Widget.class));
     titleEvent.title = "Success code=fake_authorization_code";
