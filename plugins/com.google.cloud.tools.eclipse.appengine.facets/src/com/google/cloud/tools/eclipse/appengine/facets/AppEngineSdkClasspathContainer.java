@@ -37,9 +37,13 @@ public final class AppEngineSdkClasspathContainer implements IClasspathContainer
       if (cloudSdk != null) {
         java.nio.file.Path jarFile = cloudSdk.getJarPath(TOOLS_JAR_NAME);
         if (jarFile != null) {
+          //@formatter:off
           IClasspathEntry appEngineToolsEntry = JavaCore.newLibraryEntry(
-              new Path(jarFile.toString()), null /* sourceAttachmentPath */,
-              null /* sourceAttachmentRootPath */, true /* isExported */);
+              new Path(jarFile.toString()),
+              null /* sourceAttachmentPath */,
+              null /* sourceAttachmentRootPath */, 
+              true /* isExported */);
+          //@formatter:on
           return new IClasspathEntry[] {appEngineToolsEntry};
         }
       }
