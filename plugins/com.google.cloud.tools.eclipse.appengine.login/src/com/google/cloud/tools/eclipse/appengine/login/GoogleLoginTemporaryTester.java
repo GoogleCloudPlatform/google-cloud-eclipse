@@ -12,13 +12,15 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  *******************************************************************************/
+
 package com.google.cloud.tools.eclipse.appengine.login;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.gson.Gson;
 
-import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.window.IShellProvider;
+import org.eclipse.jface.window.SameShellProvider;
+import org.eclipse.swt.widgets.Shell;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -32,9 +34,9 @@ import java.util.Map;
 // FIXME This class is for manual integration login test. Remove it in the final product.
 public class GoogleLoginTemporaryTester {
 
-  public boolean testLogin(IShellProvider shellProvider) throws ExecutionException {
+  public boolean testLogin(Shell shell) {
     try {
-      File credentialFile = getCredentialFile(shellProvider);
+      File credentialFile = getCredentialFile(new SameShellProvider(shell));
       return credentialFile != null && testCredentialWithGcloud(credentialFile);
     } catch (IOException ioe) {
       ioe.printStackTrace();

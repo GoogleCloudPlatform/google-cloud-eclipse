@@ -12,6 +12,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  *******************************************************************************/
+
 package com.google.cloud.tools.eclipse.appengine.login;
 
 import com.google.api.client.auth.oauth2.Credential;
@@ -22,6 +23,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleOAuthConstants;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import com.google.api.client.googleapis.util.Utils;
 
+import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.IShellProvider;
@@ -42,17 +44,29 @@ import java.util.List;
  */
 public class GoogleLoginService {
 
+  private static final String STASH_OAUTH_CRED_KEY = "OAUTH_CRED";
   private static final List<String> OAUTH_SCOPES = Collections.unmodifiableList(Arrays.asList(
       "email", //$NON-NLS-1$
       "https://www.googleapis.com/auth/cloud-platform" //$NON-NLS-1$
   ));
 
   /**
-   * Returns the credential of the active user. If there is no active user, returns {@code null}.
+   * Returns the credential of an active user (among multiple logged-in users). A login screen
+   * may be presented, e.g., if no user is logged in or login is required due to an expired
+   * credential.
+   *
+   * @param shellProvider provides a shell for the login screen if login is necessary
    */
-  // Should probably be synchronized properly.
+  // TODO(chanseok); synchronize properly
   public Credential getActiveCredential(IShellProvider shellProvider) throws IOException {
-    return logIn(shellProvider);
+    MApplication app = PlatformUI.getWorkbench().getService(MApplication.class);
+    Credential credential = (Credential) app.getTransientData().get(STASH_OAUTH_CRED_KEY);
+
+    if (credential == null) {
+      credential = logIn(shellProvider);
+      app.getTransientData().put(STASH_OAUTH_CRED_KEY, credential);
+    }
+    return credential;
   }
 
   private Credential logIn(IShellProvider shellProvider) throws IOException {
