@@ -1,8 +1,7 @@
 package com.google.cloud.tools.eclipse.appengine.facets;
 
-import java.io.File;
-import java.util.HashSet;
-import java.util.Set;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.eclipse.util.MavenUtils;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -29,9 +28,8 @@ import org.eclipse.wst.server.core.IRuntimeType;
 import org.eclipse.wst.server.core.IRuntimeWorkingCopy;
 import org.eclipse.wst.server.core.ServerCore;
 
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-import com.google.cloud.tools.eclipse.sdk.CloudSdkProvider;
-import com.google.cloud.tools.eclipse.util.MavenUtils;
+import java.util.HashSet;
+import java.util.Set;
 
 public class FacetInstallDelegate implements IDelegate {
   /**
@@ -68,7 +66,7 @@ public class FacetInstallDelegate implements IDelegate {
 
       IRuntimeWorkingCopy appEngineRuntimeWorkingCopy
           = appEngineRuntimeType.createRuntime(null, monitor);
-      CloudSdk cloudSdk = new CloudSdkProvider().getCloudSdk();
+      CloudSdk cloudSdk = new CloudSdk.Builder().build();
       if (cloudSdk != null) {
         java.nio.file.Path sdkLocation = cloudSdk.getJavaAppEngineSdkPath();
         if (sdkLocation != null) {

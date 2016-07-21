@@ -18,24 +18,27 @@ package com.google.cloud.tools.eclipse.sdk.ui.preferences;
 
 import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.eclipse.preferences.areas.PreferenceArea;
 import com.google.cloud.tools.eclipse.sdk.internal.PreferenceConstants;
-import com.google.cloud.tools.eclipse.sdk.internal.PreferenceInitializer;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.DirectoryFieldEditor;
-import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Link;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
@@ -44,28 +47,30 @@ import java.text.MessageFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class CloudSdkPreferencePage extends FieldEditorPreferencePage
-    implements IWorkbenchPreferencePage {
-  public static final String PAGE_ID = SdkUiMessages.CloudSdkPreferencePage_0;
-  private static final Logger logger =
-      Logger.getLogger(CloudSdkPreferencePage.class.getName());
+public class CloudSdkPreferenceArea extends PreferenceArea {
+  /** Preference Page ID that hosts this area. */
+  public static final String PAGE_ID = "com.google.cloud.tools.eclipse.preferences.main";
+  private static final Logger logger = Logger.getLogger(CloudSdkPreferenceArea.class.getName());
 
-  private IWorkbench workbench;
   private DirectoryFieldEditor sdkLocation;
+  private IStatus status = Status.OK_STATUS;
+  private IPropertyChangeListener wrappedPropertyChangeListener = new IPropertyChangeListener() {
 
-  /** Create new page. */
-  public CloudSdkPreferencePage() {
-    super(GRID);
-    setPreferenceStore(PreferenceInitializer.getPreferenceStore());
-    setDescription(SdkUiMessages.CloudSdkPreferencePage_1);
-  }
+    @Override
+    public void propertyChange(PropertyChangeEvent event) {
+      if (event.getProperty() == DirectoryFieldEditor.IS_VALID) {
+        fireValueChanged(IS_VALID, event.getOldValue(), event.getNewValue());
+      } else if (event.getProperty() == DirectoryFieldEditor.VALUE) {
+        fireValueChanged(VALUE, event.getOldValue(), event.getNewValue());
+      }
+    }
+  };
 
   @Override
-  protected Control createContents(Composite parent) {
+  public Control createContents(Composite parent) {
     Composite contents = new Composite(parent, SWT.NONE);
     Link instructions = new Link(contents, SWT.WRAP);
-    instructions.setText(
-        SdkUiMessages.CloudSdkPreferencePage_2);
+    instructions.setText(SdkUiMessages.CloudSdkPreferencePage_2);
     instructions.addSelectionListener(new SelectionAdapter() {
       @Override
       public void widgetSelected(SelectionEvent event) {
@@ -73,16 +78,58 @@ public class CloudSdkPreferencePage extends FieldEditorPreferencePage
       }
     });
 
-    super.createContents(contents);
+    Composite fieldContents = new Composite(parent, SWT.NONE);
+    sdkLocation = new CloudSdkDirectoryFieldEditor(PreferenceConstants.CLOUDSDK_PATH,
+        SdkUiMessages.CloudSdkPreferencePage_5, fieldContents);
+    Path defaultLocation = getDefaultSdkLocation();
+    if (defaultLocation != null) {
+      sdkLocation.setFilterPath(defaultLocation.toFile());
+    }
+    sdkLocation.setPreferenceStore(getPreferenceStore());
+    sdkLocation.setPropertyChangeListener(wrappedPropertyChangeListener);
+    GridLayoutFactory.swtDefaults().numColumns(sdkLocation.getNumberOfControls())
+        .generateLayout(fieldContents);
+
     GridLayoutFactory.swtDefaults().generateLayout(contents);
     return contents;
   }
 
+  @Override
+  public void load() {
+    sdkLocation.load();
+  }
+
+  @Override
+  public void loadDefault() {
+    sdkLocation.loadDefault();
+  }
+
+  @Override
+  public IStatus getStatus() {
+    return status;
+  }
+
+  @Override
+  public void performApply() {
+    sdkLocation.store();
+  }
+
+  /**
+   * Sets the new value or {@code null} for the empty string.
+   */
+  public void setStringValue(String value) {
+    sdkLocation.setStringValue(value);
+  }
+
   protected void openUrl(String urlText) {
     try {
-      URL url = new URL(urlText);
-      IWorkbenchBrowserSupport browserSupport = workbench.getBrowserSupport();
-      browserSupport.createBrowser(null).openURL(url);
+      if (getWorkbench() != null) {
+        URL url = new URL(urlText);
+        IWorkbenchBrowserSupport browserSupport = getWorkbench().getBrowserSupport();
+        browserSupport.createBrowser(null).openURL(url);
+      } else {
+        Program.launch(urlText);
+      }
     } catch (MalformedURLException mue) {
       logger.log(Level.WARNING, SdkUiMessages.CloudSdkPreferencePage_3, mue);
     } catch (PartInitException pie) {
@@ -90,16 +137,12 @@ public class CloudSdkPreferencePage extends FieldEditorPreferencePage
     }
   }
 
-  /**
-   * Creates the field editors. Field editors are abstractions of the common GUI blocks needed to
-   * manipulate various types of preferences. Each field editor knows how to save and restore
-   * itself.
-   */
-  @Override
-  public void createFieldEditors() {
-    sdkLocation = new CloudSdkDirectoryFieldEditor(PreferenceConstants.CLOUDSDK_PATH,
-        SdkUiMessages.CloudSdkPreferencePage_5, getFieldEditorParent());
-    addField(sdkLocation);
+  private Path getDefaultSdkLocation() {
+    try {
+      return new CloudSdk.Builder().build().getSdkPath();
+    } catch (AppEngineException ex) {
+      return null;
+    }
   }
 
   protected boolean validateSdk(Path location) {
@@ -109,20 +152,16 @@ public class CloudSdkPreferencePage extends FieldEditorPreferencePage
     } catch (AppEngineException ex) {
       // accept a seemingly invalid location in case the SDK organization
       // has changed and the CloudSdk#validate() code is out of date
-      setMessage(MessageFormat.format(SdkUiMessages.CloudSdkPreferencePage_6, ex.getMessage()),
-          WARNING);
+      status = new Status(IStatus.WARNING, getClass().getName(),
+          MessageFormat.format(SdkUiMessages.CloudSdkPreferencePage_6, ex.getMessage()));
     }
     return true;
   }
 
-  @Override
-  public void init(IWorkbench workbench) {
-    this.workbench = workbench;
-  }
-
   /**
-   * Check that the location holds a SDK. Uses {@code VALIDATE_ON_KEY_STROKE} to perform check on
-   * per keystroke to avoid wiping out the validation messages.
+   * A wrapper around DirectoryFieldEditor for performing validation checks that the location holds
+   * a SDK. Uses {@code VALIDATE_ON_KEY_STROKE} to perform check on per keystroke to avoid wiping
+   * out the validation messages.
    */
   class CloudSdkDirectoryFieldEditor extends DirectoryFieldEditor {
     public CloudSdkDirectoryFieldEditor(String name, String labelText, Composite parent) {
@@ -137,11 +176,20 @@ public class CloudSdkPreferencePage extends FieldEditorPreferencePage
     }
 
     @Override
+    public void setFilterPath(File path) {
+      super.setFilterPath(path);
+      if (path != null) {
+        getTextControl().setMessage(path.getAbsolutePath().toString());
+      }
+    }
+
+    @Override
     protected boolean doCheckState() {
-      setMessage(null);
       if (!super.doCheckState()) {
+        status = new Status(IStatus.ERROR, getClass().getName(), "Invalid directory");
         return false;
       }
+      status = Status.OK_STATUS;
       return getStringValue().isEmpty() || validateSdk(Paths.get(getStringValue()));
     }
   }

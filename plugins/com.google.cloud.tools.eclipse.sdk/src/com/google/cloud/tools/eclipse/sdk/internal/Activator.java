@@ -21,11 +21,11 @@ public class Activator implements BundleActivator {
 
   @Override
   public void start(BundleContext context) throws Exception {
-    PreferenceInitializer.getPreferenceNode().addPreferenceChangeListener(listener);
+    PreferenceConstants.getPreferenceNode().addPreferenceChangeListener(listener);
   }
 
   @Override
   public void stop(BundleContext context) throws Exception {
-    PreferenceInitializer.getPreferenceNode().removePreferenceChangeListener(listener);
+    PreferenceConstants.getPreferenceNode().removePreferenceChangeListener(listener);
   }
 }

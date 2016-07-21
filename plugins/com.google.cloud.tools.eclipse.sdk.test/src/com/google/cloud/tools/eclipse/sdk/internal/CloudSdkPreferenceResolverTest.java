@@ -17,11 +17,12 @@
 package com.google.cloud.tools.eclipse.sdk.internal;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-import com.google.cloud.tools.eclipse.sdk.CloudSdkProvider;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkResolver;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -29,37 +30,75 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
-import java.nio.file.Path;
+import java.util.Collections;
+import java.util.List;
 
-public class CloudSdkProviderTest {
+public class CloudSdkPreferenceResolverTest {
 
   private IPreferenceStore preferences;
+  File root;
   
   @Before
   public void setUp() {
-    preferences = new MockPreferences();
+    // A path that almost certainly does not contain the SDK
+    root = File.listRoots()[0];
+    preferences = new MockPreferences(root.toString());
   }
   
-  /** Verify that the preference overrides auto discovery. */
   @Test
   public void testSetPreferenceInvalid() throws Exception {
-    // A path that almost certainly does not contain the SDK
-    File root = File.listRoots()[0];
-
-    CloudSdk.Builder builder = new CloudSdkProvider(preferences).createBuilder();
-    // todo we shouldn't need reflection here; use visible for testing if we must
-    assertEquals(root.toPath(), ReflectionUtil.getField(builder, "sdkPath", Path.class));
-    CloudSdk instance = builder.build();
-    assertEquals(root.toPath(), instance.getSdkPath());
+    CloudSdkPreferenceResolver resolver = new CloudSdkPreferenceResolver(preferences);
+    CloudSdk sdk = new CloudSdk.Builder()
+        .resolvers(Collections.singletonList((CloudSdkResolver) resolver)).build();
+    assertEquals("SDK should be found at invalid location", root.toPath(), sdk.getSdkPath());
     try {
-      instance.validate();
-      fail("root directory should not be a valid location");
+      sdk.validate();
+      fail("root directory should not validate as a valid location");
     } catch (AppEngineException ex) {
       // ignore
     }
   }
-  
+
+  /** Verify that the preference resolver is found by default. */
+  @Test
+  public void testPreferenceResolverFound() throws Exception {
+    List<CloudSdkResolver> resolvers = new CloudSdk.Builder().getResolvers();
+    int found = 0;
+    for (CloudSdkResolver resolver : resolvers) {
+      // Can't just compare classes as class likely loaded from
+      // different classloaders
+      if (CloudSdkPreferenceResolver.class.getName().equals(resolver.getClass().getName())) {
+        found++;
+      }
+    }
+    assertEquals(1, found);
+  }
+
+  /** Verify that the preference resolver is not last (that is, overrides PathResolver). */
+  @Test
+  public void testPreferenceResolverNotLast() throws Exception {
+    List<CloudSdkResolver> resolvers = new CloudSdk.Builder().getResolvers();
+    // we should have at least our CloudSdkPreferenceResolver, located via ServiceLoader, and
+    // the default PathResolver
+    assertTrue(resolvers.size() > 1);
+    for (int i = 0; i < resolvers.size() - 1; i++) {
+      // Can't just compare classes as class likely loaded from
+      // different classloaders
+      if (CloudSdkPreferenceResolver.class.getName()
+          .equals(resolvers.get(i).getClass().getName())) {
+        return;
+      }
+    }
+    fail("Could not find " + CloudSdkPreferenceResolver.class);
+  }
+
+
   private static class MockPreferences implements IPreferenceStore {
+    private String stringValue;
+
+    MockPreferences(String stringValue) {
+      this.stringValue = stringValue;
+    }
 
     @Override
     public void addPropertyChangeListener(IPropertyChangeListener listener) { 
@@ -131,8 +170,7 @@ public class CloudSdkProviderTest {
 
     @Override
     public String getString(String name) {
-      // A path that almost certainly does not contain the SDK
-      return File.listRoots()[0].toString();
+      return stringValue;
     }
 
     @Override
