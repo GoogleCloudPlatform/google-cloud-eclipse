@@ -1,0 +1,178 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Schema file written by PDE -->
+<schema targetNamespace="com.google.cloud.tools.eclipse.preferences" xmlns="http://www.w3.org/2001/XMLSchema">
+<annotation>
+      <appinfo>
+         <meta.schema plugin="com.google.cloud.tools.eclipse.preferences" id="com.google.cloud.tools.eclipse.preferences.areas" name="Preference Areas"/>
+      </appinfo>
+      <documentation>
+         *** EXPERIMENTAL ***
+
+Provides a mini framework for hosting conceptually-related but independently-developed preferences areas on a single page.
+      </documentation>
+   </annotation>
+
+   <element name="extension">
+      <annotation>
+         <appinfo>
+            <meta.element />
+         </appinfo>
+      </annotation>
+      <complexType>
+         <choice>
+            <element ref="area" minOccurs="1" maxOccurs="unbounded"/>
+         </choice>
+         <attribute name="point" type="string" use="required">
+            <annotation>
+               <documentation>
+                  Specifies areas extension point
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="id" type="string">
+            <annotation>
+               <documentation>
+                  An optional identifier; not used by preference areas.
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="name" type="string">
+            <annotation>
+               <documentation>
+                  An optional name; not used by preference areas.
+               </documentation>
+               <appinfo>
+                  <meta.attribute translatable="true"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="area">
+      <complexType>
+         <attribute name="host" type="string" use="required">
+            <annotation>
+               <documentation>
+                  The id of the host preference page, which must extend AreaBasedPreferencePage.
+               </documentation>
+               <appinfo>
+                  <meta.attribute kind="identifier" basedOn="org.eclipse.ui.preferencePages/page/@id"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+         <attribute name="title" type="string">
+            <annotation>
+               <documentation>
+                  The title of this preference area, to be shown in the UI.
+               </documentation>
+               <appinfo>
+                  <meta.attribute translatable="true"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+         <attribute name="class" type="string" use="required">
+            <annotation>
+               <documentation>
+                  The implementation of the Preference Area
+               </documentation>
+               <appinfo>
+                  <meta.attribute kind="java" basedOn="com.google.cloud.tools.eclipse.preferences.areas.PreferenceArea:"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+         <attribute name="preferences" type="string">
+            <annotation>
+               <documentation>
+                  A URI describing a preference store, provided to the Mini Preference Area implementation.
+
+TODO: See the PreferenceResolver class comment for details.
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="rank" type="string">
+            <annotation>
+               <documentation>
+                  An integer used for ordering preference areas within a page.
+               </documentation>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <annotation>
+      <appinfo>
+         <meta.section type="since"/>
+      </appinfo>
+      <documentation>
+         0.1.0
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appinfo>
+         <meta.section type="examples"/>
+      </appinfo>
+      <documentation>
+         &lt;extension
+     point=&quot;org.eclipse.ui.preferencePages&quot;&gt;
+  &lt;page
+        id=&quot;com.google.cloud.tools.eclipse.preferences.main&quot;
+        name=&quot;Google Cloud Tools&quot;
+        class=&quot;com.google.cloud.tools.eclipse.preferences.areas.AreaBasedPreferencePage&quot;&gt;
+  &lt;/page&gt;
+&lt;/extension&gt;
+&lt;extension
+     point=&quot;com.google.cloud.tools.eclipse.preferences.areas&quot;&gt;
+  &lt;area
+        host=&quot;com.google.cloud.tools.eclipse.preferences.main&quot;
+        title=&quot;Usage Statistics&quot;
+        class=&quot;com.google.cloud.tools.eclipse.preferences.AnalyticsOptInArea&quot;
+        preferences=&quot;configuration://com.google.cloud.tools.eclipse.preferences&quot;&gt;
+  &lt;/area&gt;
+&lt;/extension&gt;
+
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appinfo>
+         <meta.section type="apiinfo"/>
+      </appinfo>
+      <documentation>
+         Experimental: APIs may change with no notice.
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appinfo>
+         <meta.section type="implementation"/>
+      </appinfo>
+      <documentation>
+         Host preference pages must extend &lt;code&gt;com.google.cloud.tools.eclipse.preferences.areas.AreaBasedPreferencePage&lt;/code&gt;.
+Areas must extend &lt;code&gt;com.google.cloud.tools.eclipse.preferences.areas.PreferenceArea&lt;/code&gt;.
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appinfo>
+         <meta.section type="copyright"/>
+      </appinfo>
+      <documentation>
+         Copyright 2016 Google Inc. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+      </documentation>
+   </annotation>
+
+</schema>

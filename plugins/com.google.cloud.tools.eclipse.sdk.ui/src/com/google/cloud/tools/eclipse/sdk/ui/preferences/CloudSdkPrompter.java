@@ -118,7 +118,7 @@ public class CloudSdkPrompter {
     }
     Shell shell = shellProvider == null ? null : shellProvider.getShell();
     final PreferenceDialog dialog =
-        PreferencesUtil.createPreferenceDialogOn(shell, CloudSdkPreferencePage.PAGE_ID, null, null);
+        PreferencesUtil.createPreferenceDialogOn(shell, CloudSdkPreferenceArea.PAGE_ID, null, null);
     return dialog.open() == PreferenceDialog.OK;
   }
 

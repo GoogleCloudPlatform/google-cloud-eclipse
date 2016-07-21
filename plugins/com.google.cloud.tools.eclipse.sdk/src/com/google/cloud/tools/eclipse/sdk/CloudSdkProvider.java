@@ -20,7 +20,6 @@ import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk.Builder;
 import com.google.cloud.tools.eclipse.sdk.internal.PreferenceConstants;
-import com.google.cloud.tools.eclipse.sdk.internal.PreferenceInitializer;
 import com.google.common.annotations.VisibleForTesting;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -34,7 +33,7 @@ import java.nio.file.Paths;
  */
 public class CloudSdkProvider {
 
-  private IPreferenceStore preferences = PreferenceInitializer.getPreferenceStore();
+  private IPreferenceStore preferences = PreferenceConstants.getPreferenceStore();
   private Path location;
   
   public CloudSdkProvider() {}

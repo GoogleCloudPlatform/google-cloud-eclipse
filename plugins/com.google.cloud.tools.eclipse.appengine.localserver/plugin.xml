@@ -35,11 +35,6 @@
          <type class="org.eclipse.jst.common.project.facet.core.IClasspathProvider" />
       </adapter>
    </extension>
-   
-   <extension point="org.eclipse.jst.server.core.runtimeFacetMappings">
-    <runtimeFacetMapping runtimeTypeId="com.google.cloud.tools.eclipse.runtime"
-        runtime-component="com.google.cloud.tools.eclipse.runtime.component" version="1"/>
-   </extension>
 
    <extension point="org.eclipse.debug.core.processFactories">
       <processFactory
