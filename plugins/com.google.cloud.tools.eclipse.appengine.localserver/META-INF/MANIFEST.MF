@@ -34,5 +34,6 @@ Require-Bundle: com.google.cloud.tools.app.lib;bundle-version="0.1.0",
  org.eclipse.ui.console;bundle-version="3.6.100",
  org.eclipse.ui.ide;bundle-version="3.11.0",
  org.eclipse.jdt.core
-Export-Package: com.google.cloud.tools.eclipse.appengine.localserver.server,
+Export-Package: com.google.cloud.tools.eclipse.appengine.localserver.server
+Import-Package: com.google.cloud.tools.eclipse.sdk.ui,
  com.google.cloud.tools.eclipse.util

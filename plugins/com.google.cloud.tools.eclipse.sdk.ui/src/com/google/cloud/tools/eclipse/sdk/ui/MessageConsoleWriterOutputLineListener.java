@@ -10,16 +10,16 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  *******************************************************************************/
-package com.google.cloud.tools.eclipse.appengine.localserver.server;
+package com.google.cloud.tools.eclipse.sdk.ui;
 
 import org.eclipse.ui.console.MessageConsoleStream;
 
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
 
-public class LocalAppEngineOutputLineListener implements ProcessOutputLineListener {
+public class MessageConsoleWriterOutputLineListener implements ProcessOutputLineListener {
   private MessageConsoleStream stream;
 
-  public LocalAppEngineOutputLineListener(MessageConsoleStream stream) {
+  public MessageConsoleWriterOutputLineListener(MessageConsoleStream stream) {
     this.stream = stream;
   }
 

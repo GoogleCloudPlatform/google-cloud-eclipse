@@ -10,7 +10,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  *******************************************************************************/
-package com.google.cloud.tools.eclipse.appengine.localserver.server;
+package com.google.cloud.tools.eclipse.sdk.ui;
 
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
@@ -22,19 +22,20 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListener;
+
 @RunWith(MockitoJUnitRunner.class)
-public class LocalAppEngineOutputLineListenerTest {
+public class MessageConsoleWriterOutputLineListenerTest {
   @Mock private MessageConsoleStream mockConsoleStream;
 
   /**
-   * Tests that {@link LocalAppEngineOutputLineListener#onOutputLine(String)} appends the specified
+   * Tests that {@link MessageConsoleWriterOutputLineListener#onOutputLine(String)} appends the specified
    * message to the console stream.
    */
   @Test
   public void testOnOutputLine() {
     String message = "a message";
-    LocalAppEngineOutputLineListener listener =
-        new LocalAppEngineOutputLineListener(mockConsoleStream);  
+    MessageConsoleWriterOutputLineListener listener = new MessageConsoleWriterOutputLineListener(mockConsoleStream);
     listener.onOutputLine(message);
     verify(mockConsoleStream, times(1)).println(eq(message));
   }
