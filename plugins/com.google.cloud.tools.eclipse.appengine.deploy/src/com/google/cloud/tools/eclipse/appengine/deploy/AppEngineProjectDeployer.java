@@ -7,6 +7,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 
@@ -40,6 +41,10 @@ public class AppEngineProjectDeployer {
   }
 
   public void deploy(IPath stagingDirectory, CloudSdk cloudSdk, IProgressMonitor monitor) throws CoreException {
+    if (monitor.isCanceled()) {
+      throw new OperationCanceledException();
+    }
+
     SubMonitor progress = SubMonitor.convert(monitor, 1);
     progress.setTaskName(Messages.getString("task.name.deploy.project")); //$NON-NLS-1$
     try  {
