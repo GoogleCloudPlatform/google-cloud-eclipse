@@ -34,7 +34,7 @@ class AuthorizationCodeListener implements TitleListener {
 
   @Override
   public void changed(TitleEvent event) {
-    if (event.title.startsWith(SUCCESS_CODE_PREFIX)) {
+    if (event.title != null && event.title.startsWith(SUCCESS_CODE_PREFIX)) {
       loginBrowser.setAuthorizationCode(event.title.substring(SUCCESS_CODE_PREFIX.length()));
       // We don't close the browser now; rather we make the browser log out the user first.
       loginBrowser.logOutAndClose();
