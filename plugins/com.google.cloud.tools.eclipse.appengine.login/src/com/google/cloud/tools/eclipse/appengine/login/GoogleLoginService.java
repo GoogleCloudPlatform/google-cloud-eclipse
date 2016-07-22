@@ -55,6 +55,8 @@ public class GoogleLoginService {
    * For this reason, if {@code null} is returned, the caller should cancel the current
    * operation and display a general message that login is required but was cancelled or failed.
    *
+   * Must be called from a UI context.
+   *
    * @param shellProvider provides a shell for the login screen if login is necessary
    * @throws IOException can be thrown by the underlying Login API request (e.g., network
    *     error from the transport layer while sending/receiving a HTTP request/response.)
@@ -76,6 +78,8 @@ public class GoogleLoginService {
    * Returns the credential of an active user (among multiple logged-in users). Unlike {@link
    * #getActiveCredential}, this version does not involve login process or make API calls.
    * Returns {@code null} if no credential has been cached.
+   * 
+   * Safe to call from non-UI contexts.
    */
   public Credential getCachedActiveCredential() {
     MApplication application = PlatformUI.getWorkbench().getService(MApplication.class);
