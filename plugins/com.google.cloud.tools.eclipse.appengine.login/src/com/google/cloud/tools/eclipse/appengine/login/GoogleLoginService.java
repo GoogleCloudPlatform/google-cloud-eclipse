@@ -143,7 +143,7 @@ public class GoogleLoginService {
   }
 
   /**
-   * Factored out to from {@link #getJsonCredential} to enable unit testing.
+   * Factored out from {@link #getJsonCredential} to enable unit testing.
    * ({@link Credential#getRefreshToken} is {@code final}, so Mockito can't mock it.)
    */
   @VisibleForTesting
