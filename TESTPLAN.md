@@ -6,7 +6,7 @@ Manual testing of the GCloud Plugin for Eclipse.
 
 2. If necessary, remove the old version of the plugin.
   1. Help > Installation details
-  2. Click "Google Cloud Platform for Eclipse 4.5". (If this is not present,
+  2. Click "Google Cloud Platform for Eclipse 4.5 and 4.6". (If this is not present,
     move on to step 3 below.)
   3. Click the Uninstall... button.
   4. Click the Finish button.
