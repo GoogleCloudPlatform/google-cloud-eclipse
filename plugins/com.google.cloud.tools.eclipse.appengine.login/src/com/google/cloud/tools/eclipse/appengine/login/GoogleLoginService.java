@@ -20,7 +20,9 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeToken
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import com.google.api.client.googleapis.util.Utils;
+import com.google.api.client.repackaged.com.google.common.base.Preconditions;
 import com.google.cloud.tools.eclipse.appengine.login.ui.GoogleLoginBrowser;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.gson.Gson;
 
 import org.eclipse.e4.ui.model.application.MApplication;
@@ -85,13 +87,24 @@ public class GoogleLoginService {
   }
 
   private Credential createCredential(GoogleTokenResponse tokenResponse) {
+    return createCredentialHelper(tokenResponse.getAccessToken(),
+                                  tokenResponse.getRefreshToken());
+  }
+
+  /**
+   * Factored out from {@link #createCredential} to enable unit testing.
+   * ({@link GoogleTokenResponse#getRefreshToken} and {@link GoogleTokenResponse#getRefreshToken}
+   * are {@code final}, so Mockito can't mock them.)
+   */
+  @VisibleForTesting
+  Credential createCredentialHelper(String accessToken, String refreshToken) {
     GoogleCredential credential = new GoogleCredential.Builder()
         .setTransport(Utils.getDefaultTransport())
         .setJsonFactory(Utils.getDefaultJsonFactory())
         .setClientSecrets(Constants.getOAuthClientId(), Constants.getOAuthClientSecret())
         .build();
-    credential.setAccessToken(tokenResponse.getAccessToken());
-    credential.setRefreshToken(tokenResponse.getRefreshToken());
+    credential.setAccessToken(accessToken);
+    credential.setRefreshToken(refreshToken);
     return credential;
   }
 
@@ -105,10 +118,21 @@ public class GoogleLoginService {
    * Helper method to convert a credential to the corresponding JSON string.
    */
   public static String getJsonCredential(Credential credential) {
+    Preconditions.checkNotNull(credential);
+
+    return getJsonCredentialHelper(credential.getRefreshToken());
+  }
+
+  /**
+   * Factored out to from {@link #getJsonCredential} to enable unit testing.
+   * ({@link Credential#getRefreshToken} is {@code final}, so Mockito can't mock it.)
+   */
+  @VisibleForTesting
+  static String getJsonCredentialHelper(String refreshToken) {
     Map<String, String> credentialMap = new HashMap<>();
     credentialMap.put(CLIENT_ID_LABEL, Constants.getOAuthClientId());
     credentialMap.put(CLIENT_SECRET_LABEL, Constants.getOAuthClientSecret());
-    credentialMap.put(REFRESH_TOKEN_LABEL, credential.getRefreshToken());
+    credentialMap.put(REFRESH_TOKEN_LABEL, refreshToken);
     credentialMap.put(GCLOUD_USER_TYPE_LABEL, GCLOUD_USER_TYPE);
 
     return new Gson().toJson(credentialMap);
