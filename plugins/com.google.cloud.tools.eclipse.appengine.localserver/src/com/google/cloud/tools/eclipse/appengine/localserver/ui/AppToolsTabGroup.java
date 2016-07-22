@@ -1,4 +1,4 @@
-package com.google.cloud.tools.eclipse.appengine.localserver;
+package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTabGroup;
 import org.eclipse.debug.ui.ILaunchConfigurationDialog;

@@ -73,7 +73,7 @@
       <launchConfigurationTabGroup
           id="com.google.cloud.tools.eclipse.appengine.localserver.AppToolsTabGroup"
           type="com.google.cloud.tools.eclipse.AppToolsLaunchConfigurationType"
-          class="com.google.cloud.tools.eclipse.appengine.localserver.AppToolsTabGroup">
+          class="com.google.cloud.tools.eclipse.appengine.localserver.ui.AppToolsTabGroup">
       </launchConfigurationTabGroup>
     </extension>
     
