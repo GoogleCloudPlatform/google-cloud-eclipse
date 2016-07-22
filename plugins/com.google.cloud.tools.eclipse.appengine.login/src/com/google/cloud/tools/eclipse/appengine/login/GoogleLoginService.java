@@ -62,8 +62,6 @@ public class GoogleLoginService {
   public Credential getActiveCredential(IShellProvider shellProvider) throws IOException {
     MApplication application = PlatformUI.getWorkbench().getService(MApplication.class);
 
-    // get() followed by put() is not an atomic transaction, but we do our best to improve
-    // thread-safety.
     Map<String, Object> synchronizedMap =
         Collections.synchronizedMap(application.getTransientData());
     Credential credential = (Credential) synchronizedMap.get(STASH_OAUTH_CRED_KEY);
