@@ -60,17 +60,29 @@ public class GoogleLoginService {
    *     error from the transport layer while sending/receiving a HTTP request/response.)
    */
   public Credential getActiveCredential(IShellProvider shellProvider) throws IOException {
+    Credential credential = getCachedActiveCredential();
+
+    if (credential == null) {
+      credential = logIn(shellProvider);
+
+      MApplication application = PlatformUI.getWorkbench().getService(MApplication.class);
+      Collections.synchronizedMap(
+          application.getTransientData()).put(STASH_OAUTH_CRED_KEY, credential);
+    }
+    return credential;
+  }
+
+  /**
+   * Returns the credential of an active user (among multiple logged-in users). Unlike {@link
+   * #getActiveCredential}, this version does not involve login process or make API calls.
+   * Returns {@code null} if no credential has been cached.
+   */
+  public Credential getCachedActiveCredential() {
     MApplication application = PlatformUI.getWorkbench().getService(MApplication.class);
 
     Map<String, Object> synchronizedMap =
         Collections.synchronizedMap(application.getTransientData());
-    Credential credential = (Credential) synchronizedMap.get(STASH_OAUTH_CRED_KEY);
-
-    if (credential == null) {
-      credential = logIn(shellProvider);
-      synchronizedMap.put(STASH_OAUTH_CRED_KEY, credential);
-    }
-    return credential;
+    return (Credential) synchronizedMap.get(STASH_OAUTH_CRED_KEY);
   }
 
   private Credential logIn(IShellProvider shellProvider) throws IOException {
