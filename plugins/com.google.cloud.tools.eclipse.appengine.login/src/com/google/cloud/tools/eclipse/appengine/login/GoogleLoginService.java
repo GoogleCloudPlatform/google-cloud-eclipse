@@ -51,9 +51,8 @@ public class GoogleLoginService {
   /**
    * Returns the credential of an active user (among multiple logged-in users). A login screen
    * may be presented, e.g., if no user is logged in or login is required due to an expired
-   * credential. This method can still return {@code null} if a user cancels the login process.
-   * Under normal circumstances, {@code null} is returned only when a user cancelled login.
-   * For this reason, if {@code null} is return, the caller is advised to cancel the current
+   * credential. This method returns {@code null} if a user cancels the login process.
+   * For this reason, if {@code null} is returned, the caller should cancel the current
    * operation and display a general message that login is required but was cancelled or failed.
    *
    * @param shellProvider provides a shell for the login screen if login is necessary
@@ -63,7 +62,8 @@ public class GoogleLoginService {
   public Credential getActiveCredential(IShellProvider shellProvider) throws IOException {
     MApplication application = PlatformUI.getWorkbench().getService(MApplication.class);
 
-    // get() and put() are not transactional, but we do our best to improve thread-safety.
+    // get() followed by put() is not an atomic transaction, but we do our best to improve
+    // thread-safety.
     Map<String, Object> synchronizedMap =
         Collections.synchronizedMap(application.getTransientData());
     Credential credential = (Credential) synchronizedMap.get(STASH_OAUTH_CRED_KEY);
