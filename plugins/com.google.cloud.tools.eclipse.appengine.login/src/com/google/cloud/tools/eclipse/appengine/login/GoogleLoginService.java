@@ -78,7 +78,7 @@ public class GoogleLoginService {
    * Returns the credential of an active user (among multiple logged-in users). Unlike {@link
    * #getActiveCredential}, this version does not involve login process or make API calls.
    * Returns {@code null} if no credential has been cached.
-   * 
+   *
    * Safe to call from non-UI contexts.
    */
   public Credential getCachedActiveCredential() {
