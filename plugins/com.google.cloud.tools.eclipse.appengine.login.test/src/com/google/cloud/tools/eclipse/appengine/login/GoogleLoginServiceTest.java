@@ -21,7 +21,7 @@ import com.google.gson.Gson;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class GoogleLogicServiceTest {
+public class GoogleLoginServiceTest {
 
   @Test
   public void testCreateCredential() {
@@ -43,10 +43,10 @@ public class GoogleLogicServiceTest {
     Assert.assertEquals("authorized_user", credentialType.type);
   }
 
-  public class CredentialType {
-    public String client_id;
-    public String client_secret;
-    public String refresh_token;
-    public String type;
+  private class CredentialType {
+    private String client_id;
+    private String client_secret;
+    private String refresh_token;
+    private String type;
   };
 }

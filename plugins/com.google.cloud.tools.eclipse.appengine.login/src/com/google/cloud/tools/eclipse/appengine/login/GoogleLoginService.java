@@ -39,8 +39,6 @@ import java.util.Map;
 /**
  * Provides service related to login, e.g., account management, getting a credential of a
  * currently active user, etc.
- *
- * Thread-safe.
  */
 public class GoogleLoginService {
 
@@ -53,19 +51,26 @@ public class GoogleLoginService {
   /**
    * Returns the credential of an active user (among multiple logged-in users). A login screen
    * may be presented, e.g., if no user is logged in or login is required due to an expired
-   * credential.
+   * credential. This method can still return {@code null} if a user cancels the login process.
+   * Under normal circumstances, {@code null} is returned only when a user cancelled login.
+   * For this reason, if {@code null} is return, the caller is advised to cancel the current
+   * operation and display a general message that login is required but was cancelled or failed.
    *
    * @param shellProvider provides a shell for the login screen if login is necessary
-   * @throws IOException can be thrown by the underlying Login API request
+   * @throws IOException can be thrown by the underlying Login API request (e.g., network
+   *     error from the transport layer while sending/receiving a HTTP request/response.)
    */
-  // TODO(chanseok); synchronize properly
   public Credential getActiveCredential(IShellProvider shellProvider) throws IOException {
-    MApplication app = PlatformUI.getWorkbench().getService(MApplication.class);
-    Credential credential = (Credential) app.getTransientData().get(STASH_OAUTH_CRED_KEY);
+    MApplication application = PlatformUI.getWorkbench().getService(MApplication.class);
+
+    // get() and put() are not transactional, but we do our best to improve thread-safety.
+    Map<String, Object> synchronizedMap =
+        Collections.synchronizedMap(application.getTransientData());
+    Credential credential = (Credential) synchronizedMap.get(STASH_OAUTH_CRED_KEY);
 
     if (credential == null) {
       credential = logIn(shellProvider);
-      app.getTransientData().put(STASH_OAUTH_CRED_KEY, credential);
+      synchronizedMap.put(STASH_OAUTH_CRED_KEY, credential);
     }
     return credential;
   }
