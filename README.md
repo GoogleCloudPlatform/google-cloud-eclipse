@@ -133,9 +133,18 @@ described below.
      previous steps to mark it as compatible with the `JavaSE-1.7` execution
      environment.
 
-  1. Click `OK`.
+  1. Click `Apply`.
 
-1. Import the projects
+2. Set up the Target Platform
+
+  1. Keeping the _Preferences_ open, go to _Plug-in
+     Development > Target Platform_.
+  2. Check the _GCP Development Target (ide-target-repository)_.
+     _GCP_ targets listed there.
+  3. Click _OK_.
+  7. Eclipse will load the target.
+
+3. Import the projects
 
   1. Select `File/Import...` menu in Eclipse.
 
@@ -154,27 +163,9 @@ described below.
 
   1. Restart Eclipse when prompted.
 
-2. Set up the Target Platform
-
-  1. Once Eclipse is running, open the `Preferences` again and go to `Plug-in
-     Development/Target Platform`.
-  2. Click _Add_ to create a new target platform.  Ignore the existing
-     _GCP_ targets listed there.
-  3. On the _Target Definition_ page, select _Nothing: Start with
-     an empty target definition_ and then click _Next_.
-  4. On the _Target Content_ page, give your target a new name like _IDE TP_.
-     Then click the _Add..._ button and choose _Directory_.
-  4. On the _Add Directory_ dialog, use _Browse..._ to navigate to
-     the `eclipse/ide-target-platform/target/repository` directory
-     found within this source repository and click _OK_ to return to
-     the _Target Content_ page.
-  5. Click _Finish_ to complete the target platform creation.
-  6. Select your new Target Platform with a checkbox, and then click _OK_.
-  7. Eclipse will rebuild the workspace.  There should be no errors
-     in the `Markers` or `Problems` views in Eclipse. However
-     you may see several low-priority warnings.
-
-1. Check the imported project:
+4. Check the imported projects:
+  1. There should be no errors in the `Markers` or `Problems` views in Eclipse.
+    However you may see several low-priority warnings.
 
   1. Right-click the `gcloud-eclipse-tools.launch` file under the `trunk` module in the
   `Package Explorer`.
