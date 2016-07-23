@@ -198,6 +198,12 @@
 
         <plugin>
           <groupId>org.eclipse.tycho</groupId>
+          <artifactId>target-platform-configuration</artifactId>
+          <version>${tycho.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.eclipse.tycho</groupId>
           <artifactId>tycho-surefire-plugin</artifactId>
           <version>${tycho.version}</version>
           <configuration>
@@ -247,7 +253,6 @@
           <plugin>
             <groupId>org.eclipse.tycho</groupId>
             <artifactId>target-platform-configuration</artifactId>
-            <version>${tycho.version}</version>
             <configuration>
             <target>
               <artifact>
@@ -282,7 +287,6 @@
           <plugin>
             <groupId>org.eclipse.tycho</groupId>
             <artifactId>target-platform-configuration</artifactId>
-            <version>${tycho.version}</version>
             <configuration>
             <target>
               <artifact>
