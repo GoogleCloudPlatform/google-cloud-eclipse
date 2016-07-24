@@ -62,10 +62,12 @@ public class CleanupOldDeploysJobTest {
   }
 
   private void createTestDirectories(IPath tempDir, int count) throws InterruptedException {
+    long now = System.currentTimeMillis();
     // most recent directory will be "1", oldest is "<count>"
     for (int i = count; i > 0; --i) {
-      assertTrue(new File(tempDir.append(Integer.toString(i)).toOSString()).mkdir());
-      Thread.sleep(1000L); // we need at least 1 second to have different modification times
+      File testDirectory = new File(tempDir.append(Integer.toString(i)).toOSString());
+      assertTrue(testDirectory.mkdir());
+      assertTrue(testDirectory.setLastModified(now - i * 1000L)); // to ensure correct ordering
     }
   }
 
