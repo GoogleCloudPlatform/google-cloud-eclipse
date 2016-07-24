@@ -22,6 +22,9 @@ script:
   - mvn -Ptravis --fail-at-end verify
   - jdk_switcher use oraclejdk8
   - mvn -Ptravis --fail-at-end verify -Declipse.target=neon
+  - ls plugins/com.google.cloud.tools.eclipse.integration.appengine/snapshots
+  - ls plugins/com.google.cloud.tools.eclipse.integration.appengine/target/snapshots
+  - find . -name snapshots | xargs ls
 cache:
   directories:
    - $HOME/.m2
