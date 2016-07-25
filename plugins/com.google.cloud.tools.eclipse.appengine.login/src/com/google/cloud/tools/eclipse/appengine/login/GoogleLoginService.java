@@ -129,10 +129,7 @@ public class GoogleLoginService {
 
   public void clearCredential() {
     MApplication application = PlatformUI.getWorkbench().getService(MApplication.class);
-
-    Map<String, Object> synchronizedMap =
-        Collections.synchronizedMap(application.getTransientData());
-    synchronizedMap.remove(STASH_OAUTH_CRED_KEY);
+    application.getTransientData().remove(STASH_OAUTH_CRED_KEY);
   }
 
   private static final String CLIENT_ID_LABEL = "client_id";
