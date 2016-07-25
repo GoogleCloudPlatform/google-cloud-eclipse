@@ -68,6 +68,15 @@
              name="%apptoolsServerTypeName">   
        </launchConfigurationType>    
     </extension>
+    
+    <extension point="org.eclipse.debug.ui.launchConfigurationTabGroups">
+      <launchConfigurationTabGroup
+          id="com.google.cloud.tools.eclipse.appengine.localserver.AppToolsTabGroup"
+          type="com.google.cloud.tools.eclipse.AppToolsLaunchConfigurationType"
+          class="com.google.cloud.tools.eclipse.appengine.localserver.ui.AppToolsTabGroup">
+      </launchConfigurationTabGroup>
+    </extension>
+    
     <extension point="org.eclipse.debug.ui.launchConfigurationTypeImages">    
       <launchConfigurationTypeImage
            configTypeID="com.google.cloud.tools.eclipse.AppToolsLaunchConfigurationType"   

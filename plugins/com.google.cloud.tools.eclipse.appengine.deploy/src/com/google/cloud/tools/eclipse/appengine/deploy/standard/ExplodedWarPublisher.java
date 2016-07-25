@@ -4,6 +4,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jst.j2ee.internal.deployables.J2EEFlexProjDeployable;
 import org.eclipse.wst.common.componentcore.ComponentCore;
@@ -23,6 +24,9 @@ public class ExplodedWarPublisher {
    * exploded WAR.
    */
   public void publish(IProject project, IPath destination, IProgressMonitor monitor) throws CoreException {
+    if (monitor.isCanceled()) {
+      throw new OperationCanceledException();
+    }
     Preconditions.checkNotNull(project, "project is null"); //$NON-NLS-1$
     Preconditions.checkNotNull(destination, "destination is null"); //$NON-NLS-1$
     Preconditions.checkArgument(!destination.isEmpty(), "destination is empty path"); //$NON-NLS-1$

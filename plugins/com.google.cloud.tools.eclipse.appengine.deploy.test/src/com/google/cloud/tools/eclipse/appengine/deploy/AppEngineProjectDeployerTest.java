@@ -5,6 +5,7 @@ import static org.mockito.Mockito.when;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,6 +32,12 @@ public class AppEngineProjectDeployerTest {
   public void testDeploy_NoAppEngineProjectVersion() throws CoreException {
     when(deployInfo.getProjectId()).thenReturn("fooProjectId");
     when(deployInfo.getProjectVersion()).thenReturn(null);
+    new AppEngineProjectDeployer(deployInfo).deploy(new Path("/non/existing/path"), cloudSdk, monitor);
+  }
+  
+  @Test(expected = OperationCanceledException.class)
+  public void testDeploy_cancelled() throws CoreException {
+    when(monitor.isCanceled()).thenReturn(true);
     new AppEngineProjectDeployer(deployInfo).deploy(new Path("/non/existing/path"), cloudSdk, monitor);
   }
 }

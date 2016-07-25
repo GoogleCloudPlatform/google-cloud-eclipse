@@ -2,48 +2,49 @@ package com.google.cloud.tools.eclipse.appengine.deploy;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.FileTime;
 import java.util.Arrays;
 import java.util.Comparator;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.junit.Test;
-
-import com.google.common.io.Files;
 
 public class CleanupOldDeploysJobTest {
 
   @Test
-  public void testRun_withNoDirectories() throws InterruptedException {
+  public void testRun_withNoDirectories() throws InterruptedException, IOException {
     testRun(0, new String[0]);
   }
 
   @Test
-  public void testRun_withOneDirectory() throws InterruptedException {
+  public void testRun_withOneDirectory() throws InterruptedException, IOException {
     testRun(1, new String[] {"1"});
   }
 
   @Test
-  public void testRun_withTwoDirectories() throws InterruptedException {
+  public void testRun_withTwoDirectories() throws InterruptedException, IOException {
     testRun(2, new String[] {"1", "2"});
   }
 
   @Test
-  public void testRun_withThreeDirectories() throws InterruptedException {
+  public void testRun_withThreeDirectories() throws InterruptedException, IOException {
     testRun(3, new String[] {"1", "2"});
   }
 
-  private void testRun(int directoryCount, String[] expectedDirectoriesToKeep) throws InterruptedException {
-    File tempDirectory = Files.createTempDir();
-    tempDirectory.deleteOnExit();
-    IPath tempDirectoryPath = new Path(tempDirectory.getAbsolutePath());
-    createTestDirectories(tempDirectoryPath, directoryCount);
+  private void testRun(int directoryCount, String[] expectedDirectoriesToKeep) throws InterruptedException, IOException {
+    Path tempDirectory = Files.createTempDirectory("cleanupolddeploysjobtest", new FileAttribute<?>[0]);
+    tempDirectory.toFile().deleteOnExit();
+    createTestDirectories(tempDirectory, directoryCount);
 
+    IPath tempDirectoryPath = new org.eclipse.core.runtime.Path(tempDirectory.toAbsolutePath().toString());
     CleanupOldDeploysJob job = new CleanupOldDeploysJob(tempDirectoryPath);
     job.run(mock(IProgressMonitor.class));
 
@@ -61,11 +62,13 @@ public class CleanupOldDeploysJobTest {
     }
   }
 
-  private void createTestDirectories(IPath tempDir, int count) throws InterruptedException {
+  private void createTestDirectories(Path tempDirectory, int count) throws InterruptedException, IOException {
+    long now = System.currentTimeMillis();
     // most recent directory will be "1", oldest is "<count>"
     for (int i = count; i > 0; --i) {
-      assertTrue(new File(tempDir.append(Integer.toString(i)).toOSString()).mkdir());
-      Thread.sleep(1000L); // we need at least 1 second to have different modification times
+      Path path = tempDirectory.resolve(Integer.toString(i));
+      Files.createDirectories(path, new FileAttribute<?>[0]);
+      Files.setLastModifiedTime(path, FileTime.fromMillis(now - i * 1000L)); // to ensure correct ordering
     }
   }
 
