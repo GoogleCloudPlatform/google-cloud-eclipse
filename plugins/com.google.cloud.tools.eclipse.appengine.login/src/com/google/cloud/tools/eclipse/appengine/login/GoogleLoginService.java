@@ -127,6 +127,14 @@ public class GoogleLoginService {
     return credential;
   }
 
+  public void clearCredential() {
+    MApplication application = PlatformUI.getWorkbench().getService(MApplication.class);
+
+    Map<String, Object> synchronizedMap =
+        Collections.synchronizedMap(application.getTransientData());
+    synchronizedMap.remove(STASH_OAUTH_CRED_KEY);
+  }
+
   private static final String CLIENT_ID_LABEL = "client_id";
   private static final String CLIENT_SECRET_LABEL = "client_secret";
   private static final String REFRESH_TOKEN_LABEL = "refresh_token";
