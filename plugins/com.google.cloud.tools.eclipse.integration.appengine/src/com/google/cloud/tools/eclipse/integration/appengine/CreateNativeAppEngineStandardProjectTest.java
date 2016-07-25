@@ -32,11 +32,13 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
+import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.InputStream;
 
@@ -44,6 +46,7 @@ import java.io.InputStream;
  * Test creation of a new standard App Engine project.
  *
  */
+@RunWith(SWTBotJunit4ClassRunner.class)
 public class CreateNativeAppEngineStandardProjectTest {
   private static SWTWorkbenchBot bot;
   private IProject project;
