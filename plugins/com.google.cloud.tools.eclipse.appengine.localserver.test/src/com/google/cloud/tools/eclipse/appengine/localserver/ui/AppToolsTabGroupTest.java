@@ -10,7 +10,7 @@ public class AppToolsTabGroupTest {
 
   @Before 
   public void createWorkbench() {
-    if(!PlatformUI.isWorkbenchRunning()) {
+    if (!PlatformUI.isWorkbenchRunning()) {
       WorkbenchAdvisor workbenchAdvisor = new WorkbenchAdvisor() {
         @Override
         public String getInitialWindowPerspectiveId() {
