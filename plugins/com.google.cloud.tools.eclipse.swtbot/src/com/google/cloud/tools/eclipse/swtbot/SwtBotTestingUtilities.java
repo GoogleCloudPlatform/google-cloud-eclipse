@@ -39,7 +39,6 @@ import org.eclipse.swtbot.swt.finder.widgets.TimeoutException;
  */
 public class SwtBotTestingUtilities {
 
-  // TODO: Extract tree-specific functionality into a new class
   private static class TreeCollapsedCondition extends DefaultCondition {
     private final TreeItem tree;
 
@@ -128,8 +127,8 @@ public class SwtBotTestingUtilities {
    * Gets the item matching the given name from a tree item.
    * 
    * @param widget the tree item to search
-   * @param nodeText the text on the node.
-   * @return the child tree item with the specified text.
+   * @param nodeText the text on the node
+   * @return the child tree item with the specified text
    */
   public static TreeItem getTreeItem(final TreeItem widget, final String nodeText) {
     return UIThreadRunnable.syncExec(new WidgetResult<TreeItem>() {
@@ -169,10 +168,11 @@ public class SwtBotTestingUtilities {
   }
 
   /**
-   * Injects a key or character via down and up events.
+   * Injects a key or character via down and up events. Only one of {@code keyCode} or
+   * {@code character} must be provided. Use
    * 
-   * @param keyCode the keycode of the key (only this or character have to be provided.)
-   * @param character the character to press (only this or keyCode have to be provided.)
+   * @param keyCode the keycode of the key (use {@code 0} if unspecified)
+   * @param character the character to press (use {@code '\0'} if unspecified)
    */
   public static void sendKeyDownAndUp(SWTBot bot, int keyCode, char character) {
     Event ev = new Event();

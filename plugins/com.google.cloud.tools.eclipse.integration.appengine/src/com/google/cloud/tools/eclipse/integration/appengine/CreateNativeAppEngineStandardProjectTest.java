@@ -23,13 +23,13 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineDeployInfo;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.swtbot.SwtBotProjectActions;
 import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
@@ -60,7 +60,7 @@ public class CreateNativeAppEngineStandardProjectTest {
   @After
   public void tearDown() throws CoreException {
     if (project != null) {
-      project.delete(true, new NullProgressMonitor());
+      SwtBotProjectActions.deleteProject(bot, project.getName());
     }
   }
 

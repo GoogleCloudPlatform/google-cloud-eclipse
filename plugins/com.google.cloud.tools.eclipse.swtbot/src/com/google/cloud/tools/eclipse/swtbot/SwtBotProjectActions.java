@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,12 +37,12 @@ public final class SwtBotProjectActions {
   private static final String SOURCE_FOLDER = "src";
 
   /**
-   * Creates a java class with the specified name.
+   * Creates a Java class with the specified name.
    *
-   * @param bot The SWTWorkbenchBot.
-   * @param projectName The name of the project the class should be created in.
-   * @param packageName The name of the package the class should be created in.
-   * @param className The name of the java class to be created.
+   * @param bot The SWTWorkbenchBot
+   * @param projectName The name of the project the class should be created in
+   * @param packageName The name of the package the class should be created in
+   * @param className The name of the class to be created
    */
   public static void createJavaClass(final SWTWorkbenchBot bot, String projectName,
       String packageName, final String className) {
@@ -67,10 +67,10 @@ public final class SwtBotProjectActions {
   }
 
   /**
-   * Creates a java project with the specified project name.
+   * Creates a Java project with the specified name.
    *
    * @param bot the SWTWorkbenchBot
-   * @param projectName the name of the java project to create
+   * @param projectName the project name
    */
   public static void createJavaProject(SWTWorkbenchBot bot, String projectName) {
     // Open Java Perspective
@@ -114,8 +114,6 @@ public final class SwtBotProjectActions {
     });
 
     // Dialog: "New Maven Project"
-    // The Archetype project source lives here
-    // Generated with this repos generator
     bot.comboBox(0).setText(archetypeGroupId);
     bot.comboBox(1).setText(archetypeArtifactId);
     bot.comboBox(2).setText(archetypeVersion);
@@ -159,32 +157,6 @@ public final class SwtBotProjectActions {
     bot.tree().setFocus();
   }
 
-  public static void createUiBinder(final SWTWorkbenchBot bot, String projectName,
-      String packageName, String name, boolean generateSampleContent, boolean generateComments) {
-    // Open the list of new project wizards
-    bot.menu("File").menu("New").menu("Other...").click();
-
-    // Select the Web App project wizard
-    SWTBotTree projectSelectionTree = bot.tree();
-    SWTBotTreeItem projectSelectionGoogleTreeItem =
-        SwtBotWorkbenchActions.getUniqueTreeItem(bot, projectSelectionTree, "GWT",
-            "UiBinder").expand();
-    SwtBotTestingUtilities.selectTreeItem(bot, projectSelectionGoogleTreeItem, "UiBinder");
-    bot.button("Next >").click();
-
-    // Configure the UiBinder and then create it
-    String sourceFolder = projectName + "/" + SOURCE_FOLDER;
-    bot.textWithLabel("Source folder:").setText(sourceFolder);
-    bot.textWithLabel("Package:").setText(packageName);
-    bot.textWithLabel("Name:").setText(name);
-
-    SwtBotTestingUtilities.setCheckBox(bot.checkBox("Generate sample content"),
-        generateSampleContent);
-    SwtBotTestingUtilities.setCheckBox(bot.checkBox("Generate comments"), generateComments);
-
-    SwtBotTestingUtilities.clickButtonAndWaitForWindowChange(bot, bot.button("Finish"));
-  }
-
   public static void deleteProject(final SWTWorkbenchBot bot, final String projectName) {
 
     SwtBotTestingUtilities.performAndWaitForWindowChange(bot, new Runnable() {
@@ -206,16 +178,12 @@ public final class SwtBotProjectActions {
    * otherwise returns false. Throws a WidgetNotFoundException exception if the 'Package Explorer'
    * or 'Project Explorer' view cannot be found.
    *
-   * @param bot The SWTWorkbenchBot.
-   * @param projectName The name of the project to be found.
-   * @return
+   * @param bot The SWTWorkbenchBot
+   * @param projectName The name of the project to be found
+   * @return true if the project is found, and false if not found
    */
   public static boolean doesProjectExist(final SWTWorkbenchBot bot, String projectName) {
-    SWTBotView explorer = getPackageExplorer(bot);
-    if (explorer == null) {
-      throw new WidgetNotFoundException(
-          "Could not find the 'Package Explorer' or 'Project Explorer' view.");
-    }
+    SWTBotView explorer = getExplorer(bot);
 
     // Select the root of the project tree in the explorer view
     Widget explorerWidget = explorer.getWidget();
@@ -229,32 +197,27 @@ public final class SwtBotProjectActions {
     return false;
   }
 
-  /*
-   * Choose either the Package Explorer View or the Project Explorer view. Eclipse 3.3 and 3.4 start
-   * with the Java Perspective, which has the Package Explorer View open by default, whereas Eclipse
-   * 3.5 starts with the Resource Perspective, which has the Project Explorer View open.
+  /**
+   * Choose either the Package Explorer View or the Project Explorer view. Some perspectives have
+   * the Package Explorer View open by default, whereas others use the Project Explorer View.
+   * 
+   * @throws WidgetNoFoundException if an explorer is not found
    */
-  public static SWTBotView getPackageExplorer(final SWTWorkbenchBot bot) {
-    SWTBotView explorer = null;
+  public static SWTBotView getExplorer(final SWTWorkbenchBot bot) {
     for (SWTBotView view : bot.views()) {
       if (view.getTitle().equals("Package Explorer") || view.getTitle().equals("Project Explorer")) {
-        explorer = view;
-        break;
+        return view;
       }
     }
-    return explorer;
+    throw new WidgetNotFoundException(
+        "Could not find the 'Package Explorer' or 'Project Explorer' view.");
   }
 
   /**
    * Returns the project root tree in Package Explorer.
    */
   public static SWTBotTree getProjectRootTree(SWTWorkbenchBot bot) {
-    SWTBotView explorer = getPackageExplorer(bot);
-
-    if (explorer == null) {
-      throw new WidgetNotFoundException("Cannot find Package Explorer or Project Explorer");
-    }
-
+    SWTBotView explorer = getExplorer(bot);
     Tree tree = bot.widget(widgetOfType(Tree.class), explorer.getWidget());
     return new SWTBotTree(tree);
   }
@@ -301,8 +264,8 @@ public final class SwtBotProjectActions {
   /**
    * Refresh project tree.
    *
-   * @param bot The SWTWorkbenchBot.
-   * @param projectName The project name.
+   * @param bot The SWTWorkbenchBot
+   * @param projectName The project name
    */
   public static void refreshProject(final SWTWorkbenchBot bot, String projectName) {
     SWTBotTreeItem project = selectProject(bot, projectName);
@@ -313,28 +276,12 @@ public final class SwtBotProjectActions {
    * Returns the specified project. Throws a WidgetNotFoundException if the 'Package Explorer' or
    * 'Project Explorer' view cannot be found or if the specified project cannot be found.
    *
-   * @param bot The SWTWorkbenchBot.
-   * @param projectName The name of the project to select.
+   * @param bot The SWTWorkbenchBot
+   * @param projectName The name of the project to select
    * @return
    */
   public static SWTBotTreeItem selectProject(final SWTWorkbenchBot bot, String projectName) {
-    /*
-     * Choose either the Package Explorer View or the Project Explorer view. Eclipse 3.3 and 3.4
-     * start with the Java Perspective, which has the Package Explorer View open by default, whereas
-     * Eclipse 3.5 starts with the Resource Perspective, which has the Project Explorer View open.
-     */
-    SWTBotView explorer = getPackageExplorer(bot);
-    for (SWTBotView view : bot.views()) {
-      if (view.getTitle().equals("Package Explorer") || view.getTitle().equals("Project Explorer")) {
-        explorer = view;
-        break;
-      }
-    }
-
-    if (explorer == null) {
-      throw new WidgetNotFoundException(
-          "Could not find the 'Package Explorer' or 'Project Explorer' view.");
-    }
+    SWTBotView explorer = getExplorer(bot);
 
     // Select the root of the project tree in the explorer view
     Widget explorerWidget = explorer.getWidget();
@@ -346,9 +293,9 @@ public final class SwtBotProjectActions {
    * Select a file/folder by providing a parent tree, and a list folders that lead to the
    * file/folder.
    *
-   * @param item Root tree item.
-   * @param folderPath List of folder names that lead to file.
-   * @return Returns a SWTBotTreeItem of the last name in texts.
+   * @param item Root tree item
+   * @param folderPath List of folder names that lead to file
+   * @return Returns a SWTBotTreeItem of the last name in texts
    */
   public static SWTBotTreeItem selectProjectItem(SWTBotTreeItem item, String... folderPath) {
     for (String folder : folderPath) {

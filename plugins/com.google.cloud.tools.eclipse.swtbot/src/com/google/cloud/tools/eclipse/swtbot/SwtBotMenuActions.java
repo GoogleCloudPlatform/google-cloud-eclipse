@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,8 @@ import org.hamcrest.Matcher;
 public final class SwtBotMenuActions {
 
   public static String getEditorText(final SWTWorkbenchBot bot, String title) {
-    SWTBotEclipseEditor te = bot.editorByTitle(title).toTextEditor();
-    return te.getText();
+    SWTBotEclipseEditor textEditor = bot.editorByTitle(title).toTextEditor();
+    return textEditor.getText();
   }
 
   /**
@@ -53,13 +53,13 @@ public final class SwtBotMenuActions {
   }
 
   public static void openDebugPerspective(final SWTBot bot) {
-    // Set timeout low, in case the shell is not in the java perspectives
+    // Set timeout low, in case the shell is not a workbench window
     SwtBotTimeoutManager.setTimeout(500);
     try {
       bot.menu("Window").menu("Open Perspective").menu("Debug").click();
     } catch (WidgetNotFoundException e) {
-      // Just in case in a perspective that doesn't Debug listed
-      // This will occur in the Resource perspective
+      // Try "Other" in case we are in a perspective that doesn't list Debug
+      // as a perspective shortcut, such as the Resource perspective.
       bot.menu("Window").menu("Open Perspective").menu("Other...");
       bot.list().select("Debug");
       bot.button("OK").click();
