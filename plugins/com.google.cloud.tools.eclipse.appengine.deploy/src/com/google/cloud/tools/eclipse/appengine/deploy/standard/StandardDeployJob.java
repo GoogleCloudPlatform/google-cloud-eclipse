@@ -14,6 +14,7 @@ import org.eclipse.ui.console.MessageConsoleStream;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineProjectDeployer;
 import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
+import com.google.cloud.tools.eclipse.appengine.login.ui.LoginCredentialExporter;
 import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListener;
 import com.google.cloud.tools.eclipse.util.MessageConsoleUtilities;
 import com.google.common.base.Preconditions;
@@ -88,6 +89,7 @@ public class StandardDeployJob extends WorkspaceJob {
     CloudSdk cloudSdk = new CloudSdk.Builder()
                           .addStdOutLineListener(new MessageConsoleWriterOutputLineListener(outputStream))
                           .addStdErrLineListener(new MessageConsoleWriterOutputLineListener(outputStream))
+                          .appCommandCredentialFile(LoginCredentialExporter.getCredentialFilePath(workDirectory).toFile())
                           .build();
     return cloudSdk;
   }

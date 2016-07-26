@@ -2,6 +2,7 @@ package com.google.cloud.tools.eclipse.util.status;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 
 public class StatusUtil {
@@ -9,16 +10,24 @@ public class StatusUtil {
   private StatusUtil() {}
 
   public static IStatus error(Class<?> origin, String message) {
-    return new Status(IStatus.ERROR, FrameworkUtil.getBundle(origin).getSymbolicName(), message);
+    return error(origin, message, null);
   }
 
   public static IStatus error(Class<?> origin, String message, Throwable error) {
-    return new Status(IStatus.ERROR, FrameworkUtil.getBundle(origin).getSymbolicName(), message, error);
+    String bundleOrClassname = null;
+    
+    Bundle bundle = FrameworkUtil.getBundle(origin);
+    if (bundle ==  null) {
+      bundleOrClassname = origin.getName();
+    } else {
+      bundleOrClassname = bundle.getSymbolicName();
+    }
+    return errorInternal(bundleOrClassname, message, error);
   }
 
   public static IStatus error(Object origin, String message) {
     if (origin instanceof Class) {
-     return error((Class<?>) origin, message);
+      return error((Class<?>) origin, message);
     } else {
       return error(origin.getClass(), message);
     }
@@ -29,6 +38,14 @@ public class StatusUtil {
       return error((Class<?>) origin, message, error);
     } else {
       return error(origin.getClass(), message, error);
+    }
+  }
+
+  private static IStatus errorInternal(String bundleOrClassname, String message, Throwable error) {
+    if (error == null) {
+      return new Status(IStatus.ERROR, bundleOrClassname, message);
+    } else {
+      return new Status(IStatus.ERROR, bundleOrClassname, message, error);
     }
   }
 
