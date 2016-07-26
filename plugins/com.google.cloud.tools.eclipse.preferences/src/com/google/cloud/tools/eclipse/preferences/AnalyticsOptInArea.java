@@ -4,6 +4,7 @@ import com.google.cloud.tools.eclipse.preferences.areas.PreferenceArea;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -32,6 +33,7 @@ public class AnalyticsOptInArea extends PreferenceArea {
    * 
    * @noreference
    */
+  @Override
   public Control createContents(Composite container) {
     // Opt-in checkbox with a label
     optInStatusEditor = new Button(container, SWT.CHECK);
@@ -51,9 +53,10 @@ public class AnalyticsOptInArea extends PreferenceArea {
     });
 
     // The privacy policy disclaimer with a clickable link
-    Link link = new Link(container, SWT.NONE);
-    link.setText(Messages.ANALYTICS_DISCLAIMER);
-    link.addSelectionListener(new SelectionAdapter() {
+    Link privacyPolicyDisclaimer = new Link(container, SWT.NONE);
+    privacyPolicyDisclaimer.setText(Messages.ANALYTICS_DISCLAIMER);
+    privacyPolicyDisclaimer.setFont(optInStatusEditor.getFont());
+    privacyPolicyDisclaimer.addSelectionListener(new SelectionAdapter() {
       @Override
       public void widgetSelected(SelectionEvent event) {
         // Open a privacy policy web page when the link is clicked.
@@ -68,7 +71,7 @@ public class AnalyticsOptInArea extends PreferenceArea {
         }
       }
     });
-
+    
     load();
     return container;
   }
