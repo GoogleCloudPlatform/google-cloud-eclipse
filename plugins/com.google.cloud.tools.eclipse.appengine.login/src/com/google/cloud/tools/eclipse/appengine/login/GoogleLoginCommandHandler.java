@@ -6,7 +6,6 @@ import java.util.Map;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.SameShellProvider;
 import org.eclipse.swt.widgets.Shell;
@@ -43,12 +42,6 @@ public class GoogleLoginCommandHandler extends AbstractHandler implements IEleme
         (ICommandService) PlatformUI.getWorkbench().getService(ICommandService.class);
     commandService.refreshElements(
         "com.google.cloud.tools.eclipse.appengine.login.commands.loginCommand", null); //$NON-NLS-1$
-
-    if (Platform.inDevelopmentMode() && credential != null) {
-      boolean success = new GoogleLoginTemporaryTester().testLogin(credential);
-      MessageDialog.openInformation(shell,
-          "TESTING AUTH", success ? "SUCCESS" : "FAILURE (see console output)");
-    }
 
     return null;
   }

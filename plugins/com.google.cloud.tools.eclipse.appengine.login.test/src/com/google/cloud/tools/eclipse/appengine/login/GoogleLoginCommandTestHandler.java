@@ -22,15 +22,32 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.ui.handlers.HandlerUtil;
+
 import com.google.api.client.auth.oauth2.Credential;
 
-// FIXME This class is for manual integration login test. Remove it in the final product.
-public class GoogleLoginTemporaryTester {
+public class GoogleLoginCommandTestHandler extends GoogleLoginCommandHandler {
+
+  @Override
+  public Object execute(ExecutionEvent event) throws ExecutionException {
+    super.execute(event);
+
+    Credential credential = new GoogleLoginService().getCachedActiveCredential();
+    if (credential != null) {
+      boolean success = testLogin(credential);
+      MessageDialog.openInformation(HandlerUtil.getActiveShell(event),
+          "TESTING AUTH", success ? "SUCCESS" : "FAILURE (see console output)");
+    }
+
+    return null;
+  }
 
   public boolean testLogin(Credential credential) {
     try {
-      File credentialFile = getCredentialFile(credential);
-      return credentialFile != null && testCredentialWithGcloud(credentialFile);
+      return testCredentialWithGcloud(getCredentialFile(credential));
     } catch (IOException ioe) {
       ioe.printStackTrace();
       return false;
