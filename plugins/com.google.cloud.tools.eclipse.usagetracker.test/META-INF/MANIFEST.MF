@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Test
+Bundle-Name: Cloud Tools for Eclipse Usage Tracker Tests
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.usagetracker.test
 Bundle-Vendor: Google, Inc.

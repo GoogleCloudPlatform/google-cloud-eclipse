@@ -3,11 +3,11 @@ package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class AppToolsTabGroupTest {
+public class AppEngineTabGroupTest {
   
   @Test
   public void testCreateTabs() {
-    AppToolsTabGroup group = new AppToolsTabGroup();
+    AppEngineTabGroup group = new AppEngineTabGroup();
     group.createTabs(null, "");
     Assert.assertEquals(0, group.getTabs().length);
   }

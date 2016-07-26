@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ClassPath: .
 Bundle-ManifestVersion: 2
-Bundle-Name: Test
+Bundle-Name: App Engine Standard Whitelist Tests
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.appengine.whitelist.test
 Bundle-Vendor: Google, Inc.
