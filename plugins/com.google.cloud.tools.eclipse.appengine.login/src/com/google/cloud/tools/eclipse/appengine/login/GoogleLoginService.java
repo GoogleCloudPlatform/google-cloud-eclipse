@@ -68,8 +68,10 @@ public class GoogleLoginService {
       credential = logIn(shellProvider);
 
       MApplication application = PlatformUI.getWorkbench().getService(MApplication.class);
-      Collections.synchronizedMap(
-          application.getTransientData()).put(STASH_OAUTH_CRED_KEY, credential);
+      Map<String, Object> dataMap = application.getTransientData();
+      synchronized (dataMap) {
+          dataMap.put(STASH_OAUTH_CRED_KEY, credential);
+      }
     }
     return credential;
   }
@@ -83,10 +85,10 @@ public class GoogleLoginService {
    */
   public Credential getCachedActiveCredential() {
     MApplication application = PlatformUI.getWorkbench().getService(MApplication.class);
-
-    Map<String, Object> synchronizedMap =
-        Collections.synchronizedMap(application.getTransientData());
-    return (Credential) synchronizedMap.get(STASH_OAUTH_CRED_KEY);
+    Map<String, Object> dataMap = application.getTransientData();
+    synchronized (dataMap) {
+      return (Credential) dataMap.get(STASH_OAUTH_CRED_KEY);
+    }
   }
 
   private Credential logIn(IShellProvider shellProvider) throws IOException {
@@ -129,7 +131,10 @@ public class GoogleLoginService {
 
   public void clearCredential() {
     MApplication application = PlatformUI.getWorkbench().getService(MApplication.class);
-    application.getTransientData().remove(STASH_OAUTH_CRED_KEY);
+    Map<String, Object> dataMap = application.getTransientData();
+    synchronized (dataMap) {
+      dataMap.remove(STASH_OAUTH_CRED_KEY);
+    }
   }
 
   private static final String CLIENT_ID_LABEL = "client_id";
