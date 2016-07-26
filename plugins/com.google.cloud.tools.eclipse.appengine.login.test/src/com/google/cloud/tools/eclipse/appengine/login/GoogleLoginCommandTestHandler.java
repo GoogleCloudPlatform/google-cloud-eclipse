@@ -45,7 +45,7 @@ public class GoogleLoginCommandTestHandler extends GoogleLoginCommandHandler {
     return null;
   }
 
-  public boolean testLogin(Credential credential) {
+  private boolean testLogin(Credential credential) {
     try {
       return testCredentialWithGcloud(getCredentialFile(credential));
     } catch (IOException ioe) {
