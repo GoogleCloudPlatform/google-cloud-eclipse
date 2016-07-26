@@ -47,7 +47,7 @@ public class GoogleLoginCommandHandler extends AbstractHandler implements IEleme
     if (Platform.inDevelopmentMode() && credential != null) {
       boolean success = new GoogleLoginTemporaryTester().testLogin(credential);
       MessageDialog.openInformation(shell,
-          "TESTING AUTH", success ? "SUCCESS" : "FAILURE (to be implemented)");
+          "TESTING AUTH", success ? "SUCCESS" : "FAILURE (see console output)");
     }
 
     return null;
