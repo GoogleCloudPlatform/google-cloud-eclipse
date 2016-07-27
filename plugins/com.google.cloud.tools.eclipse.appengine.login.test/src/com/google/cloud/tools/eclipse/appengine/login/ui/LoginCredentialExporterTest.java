@@ -69,13 +69,15 @@ public class LoginCredentialExporterTest {
     IPath workDirectoryPath = new org.eclipse.core.runtime.Path(workDirectory.toString());
     exporter.logInAndSaveCredential(workDirectoryPath, shellProvider);
     
+    @SuppressWarnings("unchecked")
     Map<String, String> exportedCredential = new Gson().fromJson(new FileReader(workDirectory.resolve("gcloud-credentials.json").toFile()), HashMap.class);
     assertThat(exportedCredential.get("refresh_token"), is(FAKE_REFRESH_TOKEN));
   }
 
   @Test
   public void testGetCredentialFilePath() {
-    fail("Not yet implemented");
+    IPath credentialFilePath = LoginCredentialExporter.getCredentialFilePath(new org.eclipse.core.runtime.Path("/does/not/exist"));
+    assertThat(credentialFilePath.toString(), is("/does/not/exist/gcloud-credentials.json"));
   }
 
 }

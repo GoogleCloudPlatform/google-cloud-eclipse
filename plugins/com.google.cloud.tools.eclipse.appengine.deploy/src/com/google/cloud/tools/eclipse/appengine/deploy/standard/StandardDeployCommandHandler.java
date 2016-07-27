@@ -1,6 +1,8 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.standard;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.attribute.FileAttribute;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -57,8 +59,7 @@ public class StandardDeployCommandHandler extends AbstractHandler {
   }
 
   private void launchDeployJob(IProject project, IShellProvider shellProvider) throws IOException, CoreException {
-    String now = Long.toString(System.currentTimeMillis());
-    IPath workDirectory = getTempDir().append(now);
+    IPath workDirectory = createWorkDirectory();
     
     ensureLoggedInAndSaveCredential(workDirectory, shellProvider);
     
@@ -77,6 +78,13 @@ public class StandardDeployCommandHandler extends AbstractHandler {
       }
     });
     deploy.schedule();
+  }
+
+  private IPath createWorkDirectory() throws IOException {
+    String now = Long.toString(System.currentTimeMillis());
+    IPath workDirectory = getTempDir().append(now);
+    Files.createDirectories(workDirectory.toFile().toPath(), new FileAttribute<?>[0]);
+    return workDirectory;
   }
 
   private void ensureLoggedInAndSaveCredential(IPath workDirectory, IShellProvider shellProvider) throws IOException, 
