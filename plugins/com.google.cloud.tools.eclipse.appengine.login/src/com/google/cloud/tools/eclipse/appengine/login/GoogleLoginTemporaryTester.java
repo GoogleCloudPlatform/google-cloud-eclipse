@@ -36,7 +36,7 @@ public class GoogleLoginTemporaryTester {
     File credentialFile = File.createTempFile("tmp_eclipse_login_test_cred", ".json");
     credentialFile.deleteOnExit();
     try (BufferedWriter writer = new BufferedWriter(new FileWriter(credentialFile))) {
-      String jsonCredential = GoogleLoginService.getJsonCredential(credential);
+      String jsonCredential = new CredentialHelper().toJson(credential);
       writer.write(jsonCredential);
     }
     return credentialFile;

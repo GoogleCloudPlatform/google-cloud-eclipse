@@ -21,7 +21,7 @@ public class StatusUtil {
     String bundleOrClassname = null;
     
     Bundle bundle = FrameworkUtil.getBundle(origin);
-    if (bundle ==  null) {
+    if (bundle == null) {
       bundleOrClassname = origin.getName();
     } else {
       bundleOrClassname = bundle.getSymbolicName();

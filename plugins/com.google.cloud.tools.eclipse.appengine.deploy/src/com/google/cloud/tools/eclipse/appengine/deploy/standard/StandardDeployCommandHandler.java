@@ -61,7 +61,7 @@ public class StandardDeployCommandHandler extends AbstractHandler {
   private void launchDeployJob(IProject project, IShellProvider shellProvider) throws IOException, CoreException {
     IPath workDirectory = createWorkDirectory();
     
-    ensureLoggedInAndSaveCredential(workDirectory, shellProvider);
+    logInAndSaveCredential(workDirectory, shellProvider);
     
     StandardDeployJob deploy =
         new StandardDeployJob(new ExplodedWarPublisher(),
@@ -87,8 +87,8 @@ public class StandardDeployCommandHandler extends AbstractHandler {
     return workDirectory;
   }
 
-  private void ensureLoggedInAndSaveCredential(IPath workDirectory, IShellProvider shellProvider) throws IOException, 
-                                                                                                         CoreException {
+  private void logInAndSaveCredential(IPath workDirectory, IShellProvider shellProvider) throws IOException,
+                                                                                                CoreException {
     new LoginCredentialExporter().logInAndSaveCredential(workDirectory, shellProvider);
   }
 

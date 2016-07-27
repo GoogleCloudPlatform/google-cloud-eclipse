@@ -99,16 +99,19 @@ public class StandardDeployJob extends WorkspaceJob {
                           .addStdOutLineListener(new MessageConsoleWriterOutputLineListener(outputStream))
                           .addStdErrLineListener(new MessageConsoleWriterOutputLineListener(outputStream))
                           .appCommandCredentialFile(LoginCredentialExporter.getCredentialFilePath(workDirectory).toFile())
-                          .exitListener(new ProcessExitListener() {
-                            // temporary way of error handling, after #439 is fixed, it'll be cleaner
-                            @Override
-                            public void onExit(int exitCode) {
-                              if (exitCode != 0) {
-                                cloudSdkProcessError = true;
-                              }
-                            }
-                          })
+                          .exitListener(new RecordProcessError())
                           .build();
     return cloudSdk;
   }
+
+  private final class RecordProcessError implements ProcessExitListener {
+    // temporary way of error handling, after #439 is fixed, it'll be cleaner
+    @Override
+    public void onExit(int exitCode) {
+      if (exitCode != 0) {
+        cloudSdkProcessError = true;
+      }
+    }
+  }
+
 }

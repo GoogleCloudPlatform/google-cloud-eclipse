@@ -21,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.cloud.tools.eclipse.appengine.login.CredentialHelper;
 import com.google.cloud.tools.eclipse.appengine.login.GoogleLoginService;
 import com.google.gson.Gson;
 
@@ -32,12 +33,13 @@ public class LoginCredentialExporterTest {
   @Mock private GoogleLoginService loginService;
   @Mock private IShellProvider shellProvider;
   @Mock private Credential credential;
+  private CredentialHelper credentialHelper = new CredentialHelper();
 
   @Test(expected = CoreException.class)
   public void testLogInAndSaveCredential_exceptionOnFailedLogin() throws IOException, CoreException {
     when(loginService.getActiveCredential(shellProvider)).thenReturn(null);
     
-    LoginCredentialExporter exporter = new LoginCredentialExporter(loginService);
+    LoginCredentialExporter exporter = new LoginCredentialExporter(loginService, credentialHelper);
     
     Path workDirectory = Files.createTempDirectory(null, new FileAttribute<?>[0]);
     workDirectory.toFile().deleteOnExit();
@@ -47,11 +49,10 @@ public class LoginCredentialExporterTest {
 
   @Test
   public void testLogInAndSaveCredential_successful() throws IOException, CoreException {
-    Credential credential = GoogleLoginService.createCredentialHelper(
-        FAKE_ACCESS_TOKEN, FAKE_REFRESH_TOKEN);
+    Credential credential = new CredentialHelper().createCredential(FAKE_ACCESS_TOKEN, FAKE_REFRESH_TOKEN);
     when(loginService.getActiveCredential(shellProvider)).thenReturn(credential);
     
-    LoginCredentialExporter exporter = new LoginCredentialExporter(loginService);
+    LoginCredentialExporter exporter = new LoginCredentialExporter(loginService, credentialHelper);
     
     Path workDirectory = Files.createTempDirectory(null, new FileAttribute<?>[0]);
     workDirectory.toFile().deleteOnExit();

@@ -9,6 +9,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.window.IShellProvider;
 
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.cloud.tools.eclipse.appengine.login.CredentialHelper;
 import com.google.cloud.tools.eclipse.appengine.login.GoogleLoginService;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -19,14 +20,16 @@ public class LoginCredentialExporter {
   private static final String CREDENTIAL_FILENAME = "gcloud-credentials.json";
   
   private GoogleLoginService loginService;
+  private CredentialHelper credentialHelper;
   
   public LoginCredentialExporter() {
-    this(new GoogleLoginService());
+    this(new GoogleLoginService(), new CredentialHelper());
   }
   
   @VisibleForTesting
-  LoginCredentialExporter(GoogleLoginService googleLoginService) {
+  LoginCredentialExporter(GoogleLoginService googleLoginService, CredentialHelper credentialHelper) {
     this.loginService = googleLoginService;
+    this.credentialHelper = credentialHelper;
   }
 
   public void logInAndSaveCredential(IPath workDirectory, IShellProvider shellProvider) throws IOException, 
@@ -36,7 +39,7 @@ public class LoginCredentialExporter {
       throw new CoreException(StatusUtil.error(LoginCredentialExporter.class, "Login failed"));
     }
 
-    String jsonCredential = GoogleLoginService.getJsonCredential(credential);
+    String jsonCredential = credentialHelper.toJson(credential);
     Files.write(workDirectory.append(CREDENTIAL_FILENAME).toFile().toPath(), 
                 jsonCredential.getBytes(Charsets.UTF_8), 
                 new OpenOption[0]);
