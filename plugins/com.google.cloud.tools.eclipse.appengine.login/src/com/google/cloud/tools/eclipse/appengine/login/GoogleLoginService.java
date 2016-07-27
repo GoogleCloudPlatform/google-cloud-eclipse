@@ -43,8 +43,10 @@ import java.util.Map;
 public class GoogleLoginService {
 
   private static final String STASH_OAUTH_CRED_KEY = "OAUTH_CRED";
+
+  // For the detailed info about each scope, see
+  // https://github.com/GoogleCloudPlatform/gcloud-eclipse-tools/wiki/Cloud-Tools-for-Eclipse-Technical-Design#oauth-20-scopes-requested
   private static final List<String> OAUTH_SCOPES = Collections.unmodifiableList(Arrays.asList(
-      "email", //$NON-NLS-1$
       "https://www.googleapis.com/auth/cloud-platform" //$NON-NLS-1$
   ));
 
