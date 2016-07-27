@@ -2,7 +2,6 @@ package com.google.cloud.tools.eclipse.appengine.login.ui;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.OpenOption;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -41,8 +40,7 @@ public class LoginCredentialExporter {
 
     String jsonCredential = credentialHelper.toJson(credential);
     Files.write(workDirectory.append(CREDENTIAL_FILENAME).toFile().toPath(), 
-                jsonCredential.getBytes(Charsets.UTF_8), 
-                new OpenOption[0]);
+                jsonCredential.getBytes(Charsets.UTF_8));
   }
   
   public static IPath getCredentialFilePath(IPath directory) {

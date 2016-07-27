@@ -8,7 +8,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.FileTime;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -40,7 +39,7 @@ public class CleanupOldDeploysJobTest {
   }
 
   private void testRun(int directoryCount, String[] expectedDirectoriesToKeep) throws InterruptedException, IOException {
-    Path tempDirectory = Files.createTempDirectory("cleanupolddeploysjobtest", new FileAttribute<?>[0]);
+    Path tempDirectory = Files.createTempDirectory("cleanupolddeploysjobtest");
     tempDirectory.toFile().deleteOnExit();
     createTestDirectories(tempDirectory, directoryCount);
 
@@ -67,7 +66,7 @@ public class CleanupOldDeploysJobTest {
     // most recent directory will be "1", oldest is "<count>"
     for (int i = count; i > 0; --i) {
       Path path = tempDirectory.resolve(Integer.toString(i));
-      Files.createDirectories(path, new FileAttribute<?>[0]);
+      Files.createDirectories(path);
       Files.setLastModifiedTime(path, FileTime.fromMillis(now - i * 1000L)); // to ensure correct ordering
     }
   }

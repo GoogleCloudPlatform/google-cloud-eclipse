@@ -8,7 +8,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.FileAttribute;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,7 +40,7 @@ public class LoginCredentialExporterTest {
     
     LoginCredentialExporter exporter = new LoginCredentialExporter(loginService, credentialHelper);
     
-    Path workDirectory = Files.createTempDirectory(null, new FileAttribute<?>[0]);
+    Path workDirectory = Files.createTempDirectory(null);
     workDirectory.toFile().deleteOnExit();
     IPath workDirectoryPath = new org.eclipse.core.runtime.Path(workDirectory.toString());
     exporter.logInAndSaveCredential(workDirectoryPath, shellProvider);
@@ -54,7 +53,7 @@ public class LoginCredentialExporterTest {
     
     LoginCredentialExporter exporter = new LoginCredentialExporter(loginService, credentialHelper);
     
-    Path workDirectory = Files.createTempDirectory(null, new FileAttribute<?>[0]);
+    Path workDirectory = Files.createTempDirectory(null);
     workDirectory.toFile().deleteOnExit();
     IPath workDirectoryPath = new org.eclipse.core.runtime.Path(workDirectory.toString());
     exporter.logInAndSaveCredential(workDirectoryPath, shellProvider);

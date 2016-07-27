@@ -26,7 +26,7 @@ public class StatusUtil {
     } else {
       bundleOrClassname = bundle.getSymbolicName();
     }
-    return errorInternal(bundleOrClassname, message, error);
+    return error(bundleOrClassname, message, error);
   }
 
   public static IStatus error(Object origin, String message) {
@@ -45,7 +45,7 @@ public class StatusUtil {
     }
   }
 
-  private static IStatus errorInternal(String bundleOrClassname, String message, Throwable error) {
+  private static IStatus error(String bundleOrClassname, String message, Throwable error) {
     if (error == null) {
       return new Status(IStatus.ERROR, bundleOrClassname, message);
     } else {

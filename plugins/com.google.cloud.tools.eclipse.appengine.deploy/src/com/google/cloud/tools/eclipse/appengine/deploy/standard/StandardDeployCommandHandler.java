@@ -83,7 +83,7 @@ public class StandardDeployCommandHandler extends AbstractHandler {
   private IPath createWorkDirectory() throws IOException {
     String now = Long.toString(System.currentTimeMillis());
     IPath workDirectory = getTempDir().append(now);
-    Files.createDirectories(workDirectory.toFile().toPath(), new FileAttribute<?>[0]);
+    Files.createDirectories(workDirectory.toFile().toPath());
     return workDirectory;
   }
 
@@ -97,6 +97,7 @@ public class StandardDeployCommandHandler extends AbstractHandler {
   }
 
   private IPath getTempDir() {
-    return Platform.getStateLocation(Platform.getBundle("com.google.cloud.tools.eclipse.appengine.deploy")).append("tmp"); //$NON-NLS-1$ //$NON-NLS-2$
+    return Platform.getStateLocation(Platform.getBundle("com.google.cloud.tools.eclipse.appengine.deploy"))
+        .append("tmp");
   }
 }
