@@ -71,9 +71,9 @@
     
     <extension point="org.eclipse.debug.ui.launchConfigurationTabGroups">
       <launchConfigurationTabGroup
-          id="com.google.cloud.tools.eclipse.appengine.localserver.AppToolsTabGroup"
+          id="com.google.cloud.tools.eclipse.appengine.localserver.AppEngineTabGroup"
           type="com.google.cloud.tools.eclipse.AppToolsLaunchConfigurationType"
-          class="com.google.cloud.tools.eclipse.appengine.localserver.ui.AppToolsTabGroup">
+          class="com.google.cloud.tools.eclipse.appengine.localserver.ui.AppEngineTabGroup">
       </launchConfigurationTabGroup>
     </extension>
     

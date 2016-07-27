@@ -25,7 +25,7 @@ import com.google.cloud.tools.eclipse.appengine.login.ui.GoogleLoginBrowser;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.gson.Gson;
 
-import org.eclipse.e4.ui.model.application.MApplication;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.window.IShellProvider;
 import org.eclipse.ui.PlatformUI;
 
@@ -43,8 +43,10 @@ import java.util.Map;
 public class GoogleLoginService {
 
   private static final String STASH_OAUTH_CRED_KEY = "OAUTH_CRED";
+
+  // For the detailed info about each scope, see
+  // https://github.com/GoogleCloudPlatform/gcloud-eclipse-tools/wiki/Cloud-Tools-for-Eclipse-Technical-Design#oauth-20-scopes-requested
   private static final List<String> OAUTH_SCOPES = Collections.unmodifiableList(Arrays.asList(
-      "email", //$NON-NLS-1$
       "https://www.googleapis.com/auth/cloud-platform" //$NON-NLS-1$
   ));
 
@@ -67,9 +69,8 @@ public class GoogleLoginService {
     if (credential == null) {
       credential = logIn(shellProvider);
 
-      MApplication application = PlatformUI.getWorkbench().getService(MApplication.class);
-      Collections.synchronizedMap(
-          application.getTransientData()).put(STASH_OAUTH_CRED_KEY, credential);
+      IEclipseContext eclipseContext = PlatformUI.getWorkbench().getService(IEclipseContext.class);
+      eclipseContext.set(STASH_OAUTH_CRED_KEY, credential);
     }
     return credential;
   }
@@ -82,11 +83,8 @@ public class GoogleLoginService {
    * Safe to call from non-UI contexts.
    */
   public Credential getCachedActiveCredential() {
-    MApplication application = PlatformUI.getWorkbench().getService(MApplication.class);
-
-    Map<String, Object> synchronizedMap =
-        Collections.synchronizedMap(application.getTransientData());
-    return (Credential) synchronizedMap.get(STASH_OAUTH_CRED_KEY);
+    IEclipseContext eclipseContext = PlatformUI.getWorkbench().getService(IEclipseContext.class);
+    return (Credential) eclipseContext.get(STASH_OAUTH_CRED_KEY);
   }
 
   private Credential logIn(IShellProvider shellProvider) throws IOException {
@@ -125,6 +123,11 @@ public class GoogleLoginService {
     credential.setAccessToken(accessToken);
     credential.setRefreshToken(refreshToken);
     return credential;
+  }
+
+  public void clearCredential() {
+    IEclipseContext eclipseContext = PlatformUI.getWorkbench().getService(IEclipseContext.class);
+    eclipseContext.remove(STASH_OAUTH_CRED_KEY);
   }
 
   private static final String CLIENT_ID_LABEL = "client_id";
