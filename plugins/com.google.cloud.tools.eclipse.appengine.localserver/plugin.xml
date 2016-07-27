@@ -63,7 +63,7 @@
     
     <extension point="org.eclipse.debug.ui.launchConfigurationTabGroups">
       <launchConfigurationTabGroup
-          id="com.google.cloud.tools.eclipse.appengine.localserver.AppEngineTabGroup"
+          id="com.google.cloud.tools.eclipse.appengine.localserver.ui.AppEngineTabGroup"
           type="com.google.cloud.tools.eclipse.AppToolsLaunchConfigurationType"
           class="com.google.cloud.tools.eclipse.appengine.localserver.ui.AppEngineTabGroup">
       </launchConfigurationTabGroup>
@@ -80,7 +80,7 @@
              delegate="com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerLaunchConfigurationDelegate"    
              id="com.google.cloud.tools.eclipse.AppToolsLaunchConfigurationType"   
              modes="run, debug, profile"   
-             name="%apptoolsServerTypeName">   
+             name="%apptoolsLaunchTypeName">   
        </launchConfigurationType>    
     </extension>
     

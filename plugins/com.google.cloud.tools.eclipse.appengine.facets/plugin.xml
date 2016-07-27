@@ -40,7 +40,7 @@
   </extension>
 
   <extension point="org.eclipse.jdt.core.classpathContainerInitializer">
-    <containerInitializer
+    <classpathContainerInitializer
       id="AppEngineSDK"
       class="com.google.cloud.tools.eclipse.appengine.facets.AppEngineSdkClasspathInitializer"/>
   </extension>
