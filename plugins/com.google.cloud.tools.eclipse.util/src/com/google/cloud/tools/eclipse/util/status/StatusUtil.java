@@ -5,6 +5,10 @@ import org.eclipse.core.runtime.Status;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 
+/**
+ * Utility functions to simplify creating {@link Status} objects. If {@link FrameworkUtil#getBundle(Class)} does not
+ * return a bundle, then {@link Class#getName()} of the origin object will be used.
+ */
 public class StatusUtil {
 
   private StatusUtil() {}

@@ -14,9 +14,7 @@ import org.eclipse.core.runtime.SubMonitor;
 import com.google.cloud.tools.appengine.api.deploy.DefaultDeployConfiguration;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineDeployment;
-import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployJob;
 import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardProjectStaging;
-import com.google.cloud.tools.eclipse.util.MessageConsoleUtilities;
 import com.google.common.annotations.VisibleForTesting;
 
 /**

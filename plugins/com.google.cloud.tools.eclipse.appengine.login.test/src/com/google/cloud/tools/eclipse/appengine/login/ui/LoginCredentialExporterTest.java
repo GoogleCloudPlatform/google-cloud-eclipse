@@ -1,13 +1,9 @@
 package com.google.cloud.tools.eclipse.appengine.login.ui;
 
-import static org.hamcrest.CoreMatchers.any;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -25,15 +21,8 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.auth.oauth2.Credential.AccessMethod;
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.http.GenericUrl;
-import com.google.api.client.http.HttpExecuteInterceptor;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.json.JsonFactory;
 import com.google.cloud.tools.eclipse.appengine.login.GoogleLoginService;
 import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LoginCredentialExporterTest {
@@ -57,7 +46,7 @@ public class LoginCredentialExporterTest {
   }
 
   @Test
-  public void testLogInAndSaveCredential() throws IOException, CoreException {
+  public void testLogInAndSaveCredential_successful() throws IOException, CoreException {
     Credential credential = GoogleLoginService.createCredentialHelper(
         FAKE_ACCESS_TOKEN, FAKE_REFRESH_TOKEN);
     when(loginService.getActiveCredential(shellProvider)).thenReturn(credential);
