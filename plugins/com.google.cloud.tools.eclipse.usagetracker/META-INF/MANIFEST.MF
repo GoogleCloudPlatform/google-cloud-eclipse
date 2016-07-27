@@ -9,5 +9,6 @@ Export-Package: com.google.cloud.tools.eclipse.usagetracker
 Require-Bundle: org.eclipse.core.runtime;bundle-version="3.11.1",
  org.eclipse.jface,
  org.eclipse.ui.workbench,
- com.google.cloud.tools.eclipse.preferences
+ com.google.cloud.tools.eclipse.preferences,
+ com.google.cloud.tools.eclipse.util
 Import-Package: com.google.common.annotations
