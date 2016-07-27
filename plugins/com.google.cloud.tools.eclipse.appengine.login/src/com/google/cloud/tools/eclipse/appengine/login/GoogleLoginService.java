@@ -44,7 +44,6 @@ public class GoogleLoginService {
 
   private static final String STASH_OAUTH_CRED_KEY = "OAUTH_CRED";
   private static final List<String> OAUTH_SCOPES = Collections.unmodifiableList(Arrays.asList(
-      "email", //$NON-NLS-1$
       "https://www.googleapis.com/auth/cloud-platform" //$NON-NLS-1$
   ));
 
