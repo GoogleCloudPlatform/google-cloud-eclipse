@@ -116,7 +116,7 @@ public class GoogleLoginService {
    * are {@code final}, so Mockito can't mock them.)
    */
   @VisibleForTesting
-  Credential createCredentialHelper(String accessToken, String refreshToken) {
+  public static Credential createCredentialHelper(String accessToken, String refreshToken) {
     GoogleCredential credential = new GoogleCredential.Builder()
         .setTransport(Utils.getDefaultTransport())
         .setJsonFactory(Utils.getDefaultJsonFactory())
