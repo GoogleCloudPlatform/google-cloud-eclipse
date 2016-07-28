@@ -89,7 +89,7 @@ public class StandardDeployJob extends WorkspaceJob {
     CloudSdk cloudSdk = new CloudSdk.Builder()
                           .addStdOutLineListener(new MessageConsoleWriterOutputLineListener(outputStream))
                           .addStdErrLineListener(new MessageConsoleWriterOutputLineListener(outputStream))
-                          .appCommandMetricsEnvironment(CloudToolsInfo.TOOLS_NAME_FOR_METRICS)
+                          .appCommandMetricsEnvironment(CloudToolsInfo.METRICS_NAME)
                           .appCommandMetricsEnvironmentVersion(CloudToolsInfo.getToolsVersion())
                           .build();
     return cloudSdk;

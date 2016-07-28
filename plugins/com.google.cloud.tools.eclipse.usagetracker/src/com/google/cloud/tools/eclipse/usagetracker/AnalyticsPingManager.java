@@ -186,10 +186,10 @@ public class AnalyticsPingManager {
       String clientId, String eventName, String metadataKey, String metadataValue) {
     Map<String, String> parametersMap = new HashMap<>(STANDARD_PARAMETERS);
     parametersMap.put("cid", clientId);
-    parametersMap.put("cd19", CloudToolsInfo.TOOLS_NAME_FOR_METRICS);  // cd19: "event type"
+    parametersMap.put("cd19", CloudToolsInfo.METRICS_NAME);  // cd19: "event type"
     parametersMap.put("cd20", eventName);
 
-    String virtualPageUrl = "/virtual/" + CloudToolsInfo.TOOLS_NAME_FOR_METRICS + "/" + eventName;
+    String virtualPageUrl = "/virtual/" + CloudToolsInfo.METRICS_NAME + "/" + eventName;
     parametersMap.put("dp", virtualPageUrl);
     parametersMap.put("dh", "virtual.eclipse");
 

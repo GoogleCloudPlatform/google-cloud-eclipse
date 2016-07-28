@@ -15,18 +15,13 @@
 
 package com.google.cloud.tools.eclipse.util;
 
-import org.osgi.framework.FrameworkUtil;
+import org.junit.Assert;
+import org.junit.Test;
 
-/**
- * Provides generic information about the plug-in, such as a name to be used for usage
- * reporting and the current version, etc.
- */
-public class CloudToolsInfo {
+public class CloudToolsInfoTest {
 
-  // Don't change the value; this name is used as an originating "application" of usage metrics.
-  public static String METRICS_NAME = "gcloud-eclipse-tools";
-
-  public static String getToolsVersion() {
-    return FrameworkUtil.getBundle(new CloudToolsInfo().getClass()).getVersion().toString();
+  @Test
+  public void testGetToolsVersion() {
+    Assert.assertTrue(CloudToolsInfo.getToolsVersion().startsWith("0.1.0."));
   }
 }
