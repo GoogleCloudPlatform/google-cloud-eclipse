@@ -1,8 +1,8 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.standard;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,11 +22,12 @@ import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessExitListener;
 import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineProjectDeployer;
 import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
-import com.google.cloud.tools.eclipse.appengine.login.LoginCredentialExporter;
+import com.google.cloud.tools.eclipse.appengine.login.CredentialHelper;
 import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListener;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.cloud.tools.eclipse.util.MessageConsoleUtilities;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
+import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 
 /**
@@ -46,6 +47,7 @@ public class StandardDeployJob extends WorkspaceJob {
   private static final String STAGING_DIRECTORY_NAME = "staging";
   private static final String EXPLODED_WAR_DIRECTORY_NAME = "exploded-war";
   private static final String CONSOLE_NAME = "App Engine Deploy";
+  private static final String CREDENTIAL_FILENAME = "gcloud-credentials.json";
 
   private static final Logger logger = Logger.getLogger(StandardDeployJob.class.getName());
 
@@ -86,11 +88,12 @@ public class StandardDeployJob extends WorkspaceJob {
   @Override
   public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
     SubMonitor progress = SubMonitor.convert(monitor, 100);
-    File credentialFile = null;
+    Path credentialFile = null;
     try {
       IPath explodedWarDirectory = workDirectory.append(EXPLODED_WAR_DIRECTORY_NAME);
       IPath stagingDirectory = workDirectory.append(STAGING_DIRECTORY_NAME);
-      credentialFile = new LoginCredentialExporter().saveCredential(workDirectory, credential).toFile();
+      credentialFile = workDirectory.append(CREDENTIAL_FILENAME).toFile().toPath();
+      saveCredential(credentialFile, credential);
       CloudSdk cloudSdk = getCloudSdk(credentialFile);
 
       exporter.publish(project, explodedWarDirectory, progress.newChild(10));
@@ -111,7 +114,7 @@ public class StandardDeployJob extends WorkspaceJob {
     } finally {
       if (credentialFile != null) {
         try {
-          Files.delete(credentialFile.toPath());
+          Files.delete(credentialFile);
         } catch (IOException exception) {
           logger.log(Level.WARNING, "Could not delete credential file after deploy", exception);
         }
@@ -120,13 +123,18 @@ public class StandardDeployJob extends WorkspaceJob {
     }
   }
 
-  private CloudSdk getCloudSdk(File credentialFile) throws IOException {
+  private void saveCredential(Path destination, Credential credential) throws IOException {
+    String jsonCredential = new CredentialHelper().toJson(credential);
+    Files.write(destination, jsonCredential.getBytes(Charsets.UTF_8));
+  }
+
+  private CloudSdk getCloudSdk(Path credentialFile) throws IOException {
     MessageConsole messageConsole = MessageConsoleUtilities.getMessageConsole(CONSOLE_NAME, null, true /* show */);
     final MessageConsoleStream outputStream = messageConsole.newMessageStream();
     CloudSdk cloudSdk = new CloudSdk.Builder()
                           .addStdOutLineListener(new MessageConsoleWriterOutputLineListener(outputStream))
                           .addStdErrLineListener(new MessageConsoleWriterOutputLineListener(outputStream))
-                          .appCommandCredentialFile(credentialFile)
+                          .appCommandCredentialFile(credentialFile.toFile())
                           .exitListener(new RecordProcessError())
                           .appCommandMetricsEnvironment(CloudToolsInfo.METRICS_NAME)
                           .appCommandMetricsEnvironmentVersion(CloudToolsInfo.getToolsVersion())

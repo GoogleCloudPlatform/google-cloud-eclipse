@@ -21,7 +21,6 @@ import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineProjectDeployer;
 import com.google.cloud.tools.eclipse.appengine.deploy.CleanupOldDeploysJob;
 import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
 import com.google.cloud.tools.eclipse.appengine.login.GoogleLoginService;
-import com.google.cloud.tools.eclipse.appengine.login.LoginCredentialExporter;
 import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
 import com.google.cloud.tools.eclipse.util.ProjectFromSelectionHelper;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
@@ -92,7 +91,7 @@ public class StandardDeployCommandHandler extends AbstractHandler {
   private Credential login(IShellProvider shellProvider) throws IOException, CoreException {
     Credential credential = new GoogleLoginService().getActiveCredential(shellProvider);
     if (credential == null) {
-      throw new CoreException(StatusUtil.error(LoginCredentialExporter.class, Messages.getString("login.failed")));
+      throw new CoreException(StatusUtil.error(getClass(), Messages.getString("login.failed")));
     }
     return credential;
   }
