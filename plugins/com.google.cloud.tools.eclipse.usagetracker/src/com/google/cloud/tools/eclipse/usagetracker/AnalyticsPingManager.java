@@ -2,6 +2,7 @@ package com.google.cloud.tools.eclipse.usagetracker;
 
 import com.google.cloud.tools.eclipse.preferences.Activator;
 import com.google.cloud.tools.eclipse.preferences.AnalyticsPreferences;
+import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.common.annotations.VisibleForTesting;
 
 import org.eclipse.core.runtime.Platform;
@@ -36,9 +37,6 @@ public class AnalyticsPingManager {
   private static final String PREFERENCES_PLUGIN_ID = Activator.PLUGIN_ID;
 
   private static final String ANALYTICS_COLLECTION_URL = "https://ssl.google-analytics.com/collect";
-
-  // This name will be recorded as an originating app on Google Analytics.
-  private static final String APPLICATION_NAME = "gcloud-eclipse-tools";
 
   // Fixed-value query parameters present in every ping, and their fixed values:
   //
@@ -188,10 +186,10 @@ public class AnalyticsPingManager {
       String clientId, String eventName, String metadataKey, String metadataValue) {
     Map<String, String> parametersMap = new HashMap<>(STANDARD_PARAMETERS);
     parametersMap.put("cid", clientId);
-    parametersMap.put("cd19", APPLICATION_NAME);  // cd19: "event type"
+    parametersMap.put("cd19", CloudToolsInfo.METRICS_NAME);  // cd19: "event type"
     parametersMap.put("cd20", eventName);
 
-    String virtualPageUrl = "/virtual/" + APPLICATION_NAME + "/" + eventName;
+    String virtualPageUrl = "/virtual/" + CloudToolsInfo.METRICS_NAME + "/" + eventName;
     parametersMap.put("dp", virtualPageUrl);
     parametersMap.put("dh", "virtual.eclipse");
 

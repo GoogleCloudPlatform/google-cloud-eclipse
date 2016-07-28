@@ -59,24 +59,15 @@
            startBeforePublish="false"    
            supportsRemoteHosts="false">    
         </serverType>   
-    </extension>    
-    <extension point="org.eclipse.debug.core.launchConfigurationTypes">   
-      <launchConfigurationType    
-             delegate="com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerLaunchConfigurationDelegate"    
-             id="com.google.cloud.tools.eclipse.AppToolsLaunchConfigurationType"   
-             modes="run, debug, profile"   
-             name="%apptoolsServerTypeName">   
-       </launchConfigurationType>    
     </extension>
     
     <extension point="org.eclipse.debug.ui.launchConfigurationTabGroups">
       <launchConfigurationTabGroup
-          id="com.google.cloud.tools.eclipse.appengine.localserver.AppEngineTabGroup"
+          id="com.google.cloud.tools.eclipse.appengine.localserver.ui.AppEngineTabGroup"
           type="com.google.cloud.tools.eclipse.AppToolsLaunchConfigurationType"
           class="com.google.cloud.tools.eclipse.appengine.localserver.ui.AppEngineTabGroup">
       </launchConfigurationTabGroup>
     </extension>
-    
     <extension point="org.eclipse.debug.ui.launchConfigurationTypeImages">    
       <launchConfigurationTypeImage
            configTypeID="com.google.cloud.tools.eclipse.AppToolsLaunchConfigurationType"   
@@ -84,6 +75,15 @@
            id="com.google.cloud.tools.eclipse.ExternalLaunchConfigurationTypeImage">   
       </launchConfigurationTypeImage>   
     </extension>
+    <extension point="org.eclipse.debug.core.launchConfigurationTypes">   
+      <launchConfigurationType    
+             delegate="com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerLaunchConfigurationDelegate"    
+             id="com.google.cloud.tools.eclipse.AppToolsLaunchConfigurationType"   
+             modes="run, debug, profile"   
+             name="%apptoolsLaunchTypeName">   
+       </launchConfigurationType>    
+    </extension>
+    
     <extension point="org.eclipse.wst.server.core.runtimeTypes">
       <runtimeType
           class="com.google.cloud.tools.eclipse.appengine.localserver.server.AppToolsRuntime"

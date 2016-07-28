@@ -17,6 +17,7 @@ import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineProjectDeployer;
 import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
 import com.google.cloud.tools.eclipse.appengine.login.ui.LoginCredentialExporter;
 import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListener;
+import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.cloud.tools.eclipse.util.MessageConsoleUtilities;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Preconditions;
@@ -100,6 +101,8 @@ public class StandardDeployJob extends WorkspaceJob {
                           .addStdErrLineListener(new MessageConsoleWriterOutputLineListener(outputStream))
                           .appCommandCredentialFile(LoginCredentialExporter.getCredentialFilePath(workDirectory).toFile())
                           .exitListener(new RecordProcessError())
+                          .appCommandMetricsEnvironment(CloudToolsInfo.METRICS_NAME)
+                          .appCommandMetricsEnvironmentVersion(CloudToolsInfo.getToolsVersion())
                           .build();
     return cloudSdk;
   }
