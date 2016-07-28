@@ -14,6 +14,12 @@ import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 
+/**
+ * Provides helper methods to save and retrieve an OAuth refresh token obtained via using Google OAuth service
+ *
+ * @see GoogleLoginService
+ * @see CredentialHelper
+ */
 public class LoginCredentialExporter {
 
   private static final String CREDENTIAL_FILENAME = "gcloud-credentials.json";
@@ -31,6 +37,19 @@ public class LoginCredentialExporter {
     this.credentialHelper = credentialHelper;
   }
 
+  /**
+   * Retrieves the OAuth credentials via {@link GoogleLoginService#getActiveCredential(IShellProvider)} (which may
+   * initiate a web-based login process if there is no active logged in user present) and saves the credentials to
+   * a json file under <code>workDirectory</code>
+   * <p>
+   * <b>This method must be called from the UI thread.</b>
+   *
+   * @param workDirectory the destination for the json file containing the received OAuth credential
+   * @param shellProvider used if a web-based logn process is needed
+   * @throws IOException if communication with the login service fails or the json file with the credential
+   * cannot be created
+   * @throws CoreException if the login attempt was unsuccessful
+   */
   public void logInAndSaveCredential(IPath workDirectory, IShellProvider shellProvider) throws IOException, 
                                                                                                CoreException {
     Credential credential = loginService.getActiveCredential(shellProvider);
@@ -43,6 +62,15 @@ public class LoginCredentialExporter {
                 jsonCredential.getBytes(Charsets.UTF_8));
   }
   
+  /**
+   * Returns the path to the json file containing the OAuth credentials.
+   * <p>
+   * The method will not check the validity of the provided path and will not check whether the json file exists in the
+   * returned location.
+   *
+   * @param directory contains the OAuth json file
+   * @return the path to the json file with the OAuth credentials
+   */
   public static IPath getCredentialFilePath(IPath directory) {
     return directory.append(CREDENTIAL_FILENAME);
   }
