@@ -1,5 +1,7 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.standard;
 
+import java.io.File;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
@@ -94,12 +96,15 @@ public class StandardDeployJob extends WorkspaceJob {
   }
 
   private CloudSdk getCloudSdk() {
+    File credentialFile = LoginCredentialExporter.getCredentialFilePath(workDirectory).toFile();
+    Preconditions.checkState(credentialFile.exists(), Messages.getString("credential.file.not.found"));
+
     MessageConsole messageConsole = MessageConsoleUtilities.getMessageConsole(CONSOLE_NAME, null, true /* show */);
     final MessageConsoleStream outputStream = messageConsole.newMessageStream();
     CloudSdk cloudSdk = new CloudSdk.Builder()
                           .addStdOutLineListener(new MessageConsoleWriterOutputLineListener(outputStream))
                           .addStdErrLineListener(new MessageConsoleWriterOutputLineListener(outputStream))
-                          .appCommandCredentialFile(LoginCredentialExporter.getCredentialFilePath(workDirectory).toFile())
+                          .appCommandCredentialFile(credentialFile)
                           .exitListener(new RecordProcessError())
                           .appCommandMetricsEnvironment(CloudToolsInfo.METRICS_NAME)
                           .appCommandMetricsEnvironmentVersion(CloudToolsInfo.getToolsVersion())

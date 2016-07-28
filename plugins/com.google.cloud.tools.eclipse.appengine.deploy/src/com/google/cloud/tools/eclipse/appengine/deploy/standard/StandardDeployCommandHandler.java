@@ -2,7 +2,6 @@ package com.google.cloud.tools.eclipse.appengine.deploy.standard;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.attribute.FileAttribute;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -17,12 +16,15 @@ import org.eclipse.jface.window.IShellProvider;
 import org.eclipse.jface.window.SameShellProvider;
 import org.eclipse.ui.handlers.HandlerUtil;
 
+import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineProjectDeployer;
 import com.google.cloud.tools.eclipse.appengine.deploy.CleanupOldDeploysJob;
 import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
+import com.google.cloud.tools.eclipse.appengine.login.GoogleLoginService;
 import com.google.cloud.tools.eclipse.appengine.login.ui.LoginCredentialExporter;
 import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
 import com.google.cloud.tools.eclipse.util.ProjectFromSelectionHelper;
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 
 /**
@@ -89,7 +91,11 @@ public class StandardDeployCommandHandler extends AbstractHandler {
 
   private void logInAndSaveCredential(IPath workDirectory, IShellProvider shellProvider) throws IOException,
                                                                                                 CoreException {
-    new LoginCredentialExporter().logInAndSaveCredential(workDirectory, shellProvider);
+    Credential credential = new GoogleLoginService().getActiveCredential(shellProvider);
+    if (credential == null) {
+      throw new CoreException(StatusUtil.error(LoginCredentialExporter.class, Messages.getString("login.failed")));
+    }
+    new LoginCredentialExporter().saveCredential(workDirectory, credential);
   }
 
   private void launchCleanupJob() {
