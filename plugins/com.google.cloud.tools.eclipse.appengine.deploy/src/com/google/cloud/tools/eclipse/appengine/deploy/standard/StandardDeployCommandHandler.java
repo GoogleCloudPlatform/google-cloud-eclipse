@@ -62,15 +62,15 @@ public class StandardDeployCommandHandler extends AbstractHandler {
 
   private void launchDeployJob(IProject project, IShellProvider shellProvider) throws IOException, CoreException {
     IPath workDirectory = createWorkDirectory();
-    
-    logInAndSaveCredential(workDirectory, shellProvider);
+    Credential credential = login(shellProvider);
     
     StandardDeployJob deploy =
         new StandardDeployJob(new ExplodedWarPublisher(),
                               new StandardProjectStaging(),
                               new AppEngineProjectDeployer(),
                               workDirectory,
-                              project);
+                              project,
+                              credential);
     deploy.addJobChangeListener(new JobChangeAdapter() {
 
       @Override
@@ -89,13 +89,12 @@ public class StandardDeployCommandHandler extends AbstractHandler {
     return workDirectory;
   }
 
-  private void logInAndSaveCredential(IPath workDirectory, IShellProvider shellProvider) throws IOException,
-                                                                                                CoreException {
+  private Credential login(IShellProvider shellProvider) throws IOException, CoreException {
     Credential credential = new GoogleLoginService().getActiveCredential(shellProvider);
     if (credential == null) {
       throw new CoreException(StatusUtil.error(LoginCredentialExporter.class, Messages.getString("login.failed")));
     }
-    new LoginCredentialExporter().saveCredential(workDirectory, credential);
+    return credential;
   }
 
   private void launchCleanupJob() {

@@ -32,7 +32,7 @@ public class LoginCredentialExporterTest {
   private CredentialHelper credentialHelper = new CredentialHelper();
 
   @Test
-  public void testLogInAndSaveCredential_successful() throws IOException, CoreException {
+  public void testSaveCredential_successful() throws IOException, CoreException {
     Path workDirectory = Files.createTempDirectory(null);
     workDirectory.toFile().deleteOnExit();
     IPath workDirectoryPath = new org.eclipse.core.runtime.Path(workDirectory.toString());
@@ -46,11 +46,4 @@ public class LoginCredentialExporterTest {
     Map<String, String> exportedCredential = new Gson().fromJson(new FileReader(workDirectory.resolve("gcloud-credentials.json").toFile()), HashMap.class);
     assertThat(exportedCredential.get("refresh_token"), is(FAKE_REFRESH_TOKEN));
   }
-
-  @Test
-  public void testGetCredentialFilePath() {
-    IPath credentialFilePath = LoginCredentialExporter.getCredentialFilePath(new org.eclipse.core.runtime.Path("/does/not/exist"));
-    assertThat(credentialFilePath.toString(), is("/does/not/exist/gcloud-credentials.json"));
-  }
-
 }
