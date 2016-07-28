@@ -225,32 +225,3 @@ the version should be specified as `"0.0.0"` to indicate that the
 current version found should be used.  Unlike the `.tpd` file,
 the identifiers are not p2 identifiers, and so features do not
 require the `.feature.group` suffix.
-
-
-# Release
-
-## Compile-time Constant Injection
-
-We plug a few constants into code at compile-time.  We do this to avoid
-hard-coding these values and hamper their public visibilty.
-
-| Constant                     | Bundle        | System Property       |
-| ---------------------------- | ------------- | --------------------- |
-| OAuth client ID              | login         | `oauth.client.id`     |
-| OAuth client secret          | login         | `oauth.client.secret` |
-| Google Analytics Tracking ID | usagetracking | `ga.tracking.id`      |
-
-The Java classes that hold these constant values are auto-generated
-from template Java source files, using [templating-maven-plugin]
-(http://www.mojohaus.org/templating-maven-plugin/).  The values are
-populated from system properties in the auto-gen process. That is, for
-example, `mvn -Doauth.client.id=id1234 templating:filter-sources` or
-`mvn -Doauth.client.id=id1234 package` will result in injecting `id1234`
-as an OAuth client ID.
-
-### Injecting Constants for Debugging
-
-You can also easily inject values for an Eclipse debug session, since Eclipse
-auto-generates the Java classes (if configured to do auto-build).  Providing
-relevant system properties when launching a dev instance of Eclipse and deleting
-a file to re-generate will do the job.
