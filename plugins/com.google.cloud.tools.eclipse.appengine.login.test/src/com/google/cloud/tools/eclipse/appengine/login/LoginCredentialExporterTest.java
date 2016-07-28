@@ -1,8 +1,7 @@
-package com.google.cloud.tools.eclipse.appengine.login.ui;
+package com.google.cloud.tools.eclipse.appengine.login;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.when;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -20,8 +19,6 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.cloud.tools.eclipse.appengine.login.CredentialHelper;
-import com.google.cloud.tools.eclipse.appengine.login.GoogleLoginService;
 import com.google.gson.Gson;
 
 @RunWith(MockitoJUnitRunner.class)

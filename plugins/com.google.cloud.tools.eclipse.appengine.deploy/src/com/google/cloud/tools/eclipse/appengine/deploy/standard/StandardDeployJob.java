@@ -17,7 +17,7 @@ import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessExitListener;
 import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineProjectDeployer;
 import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
-import com.google.cloud.tools.eclipse.appengine.login.ui.LoginCredentialExporter;
+import com.google.cloud.tools.eclipse.appengine.login.LoginCredentialExporter;
 import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListener;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.cloud.tools.eclipse.util.MessageConsoleUtilities;
