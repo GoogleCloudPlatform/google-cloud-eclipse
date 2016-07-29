@@ -19,7 +19,7 @@ public class AppEngineSdkClasspathContainerTest {
   @Test
   public void testGetKind() {
     assertThat(new AppEngineSdkClasspathContainer().getKind(),
-               is(IClasspathEntry.CPE_CONTAINER));
+               is(IClasspathContainer.K_DEFAULT_SYSTEM));
   }
 
   @Test
