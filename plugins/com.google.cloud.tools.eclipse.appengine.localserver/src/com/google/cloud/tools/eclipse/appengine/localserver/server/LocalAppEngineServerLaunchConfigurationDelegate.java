@@ -8,6 +8,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
@@ -16,18 +17,33 @@ import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IVMConnector;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.SocketUtil;
+import org.eclipse.swt.program.Program;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
+import org.eclipse.ui.progress.UIJob;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
+import org.eclipse.wst.server.core.IServerListener;
+import org.eclipse.wst.server.core.ServerEvent;
 import org.eclipse.wst.server.core.ServerUtil;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class LocalAppEngineServerLaunchConfigurationDelegate
     extends AbstractJavaLaunchConfigurationDelegate {
+
+  private final static Logger logger =
+      Logger.getLogger(LocalAppEngineServerLaunchConfigurationDelegate.class.getName());
 
   private static final String DEBUGGER_HOST = "localhost";
 
@@ -66,6 +82,12 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
     setDefaultSourceLocator(launch, configuration);
 
+    String pageLocation = determinePageLocation(server, configuration);
+    if (pageLocation != null) {
+      // odd: addServerListener(..., IServer.SERVER_STARTED) doesn't work
+      server.addServerListener(new OpenBrowserListener(pageLocation));
+    }
+
     if (ILaunchManager.DEBUG_MODE.equals(mode)) {
       int debugPort = getDebugPort();
       setupDebugTarget(launch, configuration, debugPort, monitor);
@@ -85,6 +107,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     }
 
     // Set JVM debugger connection parameters
+    @SuppressWarnings("deprecation")
     int timeout = JavaRuntime.getPreferences().getInt(JavaRuntime.PREF_CONNECT_TIMEOUT);
     Map<String, String> connectionParameters = new HashMap<>();
     connectionParameters.put("hostname", DEBUGGER_HOST);
@@ -93,6 +116,10 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     connector.connect(connectionParameters, monitor, launch);
   }
 
+  private String determinePageLocation(IServer server, ILaunchConfiguration config) {
+    // todo: pull this from the server or launch configuration
+    return "http://" + DEBUGGER_HOST + ":8080";
+  }
 
   private int getDebugPort() throws CoreException {
     int port = SocketUtil.findFreePort();
@@ -100,5 +127,54 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       abort("Cannot find free port for remote debugger", null, IStatus.ERROR);
     }
     return port;
+  }
+
+
+  /**
+   * Open a browser on the provided page on server start. We actually wait 200 ms in case the server
+   * is subsequently stopped.
+   */
+  private class OpenBrowserListener implements IServerListener {
+    private String pageLocation;
+    private int waitTime = 1500;
+
+    public OpenBrowserListener(String pageLocation) {
+      this.pageLocation = pageLocation;
+    }
+
+    @Override
+    public void serverChanged(ServerEvent event) {
+      if (event.getState() != IServer.STATE_STARTED) {
+        return;
+      }
+      final IServer server = event.getServer();
+      final IWorkbench workbench = PlatformUI.getWorkbench();
+      Job openJob = new UIJob(workbench.getDisplay(), "Launching start page") {
+
+        @Override
+        public IStatus runInUIThread(IProgressMonitor monitor) {
+          if (server.getServerState() != IServer.STATE_STARTED) {
+            return Status.CANCEL_STATUS;
+          }
+          try {
+            URL url = new URL(pageLocation);
+            IWorkbenchBrowserSupport browserSupport = workbench.getBrowserSupport();
+            int style = IWorkbenchBrowserSupport.LOCATION_BAR
+                | IWorkbenchBrowserSupport.NAVIGATION_BAR | IWorkbenchBrowserSupport.STATUS;
+            browserSupport.createBrowser(style, server.getId(), server.getName(), server.getName())
+                .openURL(url);
+          } catch (PartInitException ex) {
+            // Unable to use the normal browser support, so punt to the OS
+            logger.log(Level.WARNING, "Cannot launch a browser", ex);
+            Program.launch(pageLocation);
+          } catch (MalformedURLException ex) {
+            logger.log(Level.WARNING, "Unable to determine dev_appserver location", ex);
+          }
+          return Status.OK_STATUS;
+        }
+      };
+      openJob.schedule(waitTime);
+      server.removeServerListener(this);
+    }
   }
 }
