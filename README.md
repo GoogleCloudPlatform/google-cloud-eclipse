@@ -17,13 +17,15 @@ Maven for building Eclipse bundles and features.
   this somewhere on your file system.
 
 1. [Eclipse 4.5 (Mars) or later](https://www.eclipse.org/downloads/eclipse-packages/). 
-  It's easiest to use the _Eclipse IDE for Java EE Developers_.
+  It's easiest to use the _Eclipse IDE for Java EE Developers_ package.
 
   1. The [m2eclipse plugin](http://www.eclipse.org/m2e/) (also called m2e) is
-     required to import the projects into Eclipse.  m2eclipse is bundled with 
-     the _Eclipse IDE for Java EE Developers_ package.
+     required to import the projects into Eclipse.  m2eclipse is included in 
+     [several packages](https://www.eclipse.org/downloads/compare.php?release=neon),
+     such as the _Eclipse IDE for Java EE Developers_ package.
 
-1. Maven 3.3.9 or later.
+1. Maven 3.3.9 or later.  Although m2eclipse is bundled with its own Maven install,
+   Maven is necessary to test command-line builds.
 
 1. JDK 7
 

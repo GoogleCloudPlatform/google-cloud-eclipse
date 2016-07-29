@@ -28,7 +28,6 @@ addons:
   apt:
     packages:
       - metacity
-      - libwebkit-dev
 cache:
   directories:
    - $HOME/.m2

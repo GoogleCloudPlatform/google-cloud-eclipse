@@ -1,5 +1,7 @@
 package com.google.cloud.tools.eclipse.appengine.deploy;
 
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -30,9 +32,8 @@ public class AppEngineDeployInfo {
     try (InputStream contents = new FileInputStream(appEngineXml)) {
       parse(contents);
     } catch (IOException exception) {
-      throw new CoreException(
-          new Status(IStatus.ERROR, FrameworkUtil.getBundle(getClass()).getSymbolicName(),
-              Messages.getString("cannot.parse.appengine.xml"), exception)); // $NON-NLS-1$
+      throw new CoreException(StatusUtil.error(getClass(),
+          Messages.getString("cannot.parse.appengine.xml"), exception)); // $NON-NLS-1$
     }
   }
 
@@ -42,9 +43,8 @@ public class AppEngineDeployInfo {
       documentBuilderFactory.setNamespaceAware(true);
       document = documentBuilderFactory.newDocumentBuilder().parse(appEngineXmlContents);
     } catch (IOException | SAXException | ParserConfigurationException exception) {
-      throw new CoreException(new Status(IStatus.ERROR, FrameworkUtil.getBundle(getClass()).getSymbolicName(),
-                                         Messages.getString("cannot.parse.appengine.xml"),
-                                         exception)); //$NON-NLS-1$
+      throw new CoreException(StatusUtil.error(getClass(),
+          Messages.getString("cannot.parse.appengine.xml"), exception)); // $NON-NLS-1$
     }
   }
 

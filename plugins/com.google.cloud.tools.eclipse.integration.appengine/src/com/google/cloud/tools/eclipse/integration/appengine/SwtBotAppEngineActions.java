@@ -17,8 +17,10 @@
 package com.google.cloud.tools.eclipse.integration.appengine;
 
 import com.google.cloud.tools.eclipse.swtbot.SwtBotTestingUtilities;
+import com.google.cloud.tools.eclipse.swtbot.SwtBotTimeoutManager;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
@@ -52,10 +54,10 @@ public class SwtBotAppEngineActions {
 
     bot.textWithLabel("Project name:").setText(projectName);
     if (location == null) {
-      bot.checkBox("Use default location").select(); // ensure it's checked
+      bot.checkBox("Use default location").select();
     } else {
-      bot.checkBox("Use default location").deselect(); // ensure it's checked
-      bot.textWithLabel("&Location:").setText(location);
+      bot.checkBox("Use default location").deselect();
+      bot.textWithLabel("Location:").setText(location);
     }
     if (javaPackage != null) {
       bot.textWithLabel("Java package:").setText(javaPackage);
@@ -64,7 +66,51 @@ public class SwtBotAppEngineActions {
       bot.textWithLabel("App Engine Project ID: (optional)").setText(projectId);
     }
     SwtBotTestingUtilities.clickButtonAndWaitForWindowChange(bot, bot.button("Finish"));
-    return ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+    return getWorkspaceRoot().getProject(projectName);
+  }
+
+  /** Create a new project with the Maven-based Google App Engine Standard Java Project wizard */
+  public static IProject createMavenWebAppProject(SWTWorkbenchBot bot, String location,
+      String groupId, String artifactId, String javaPackage, String projectId,
+      String archetypeDescription) {
+    bot.menu("File").menu("New").menu("Project...").click();
+
+    SWTBotShell shell = bot.shell("New Project");
+    shell.activate();
+
+    bot.tree().expandNode("Google Cloud Platform")
+        .select("Maven-based Google App Engine Standard Java Project");
+    bot.button("Next >").click();
+
+    if (location == null) {
+      bot.checkBox("Create project in workspace").select();
+    } else {
+      bot.checkBox("Create project in workspace").deselect();
+      bot.textWithLabel("Location:").setText(location);
+    }
+    bot.textWithLabel("Group Id:").setText(groupId);
+    bot.textWithLabel("Artifact Id:").setText(artifactId);
+    if (javaPackage != null) {
+      bot.textWithLabel("Java package:").setText(javaPackage);
+    }
+    if (projectId != null) {
+      bot.textWithLabel("App Engine Project ID: (optional)").setText(projectId);
+    }
+    bot.button("Next >").click();
+    // select an archetype; use the default
+    if (archetypeDescription != null) {
+      bot.list().select(archetypeDescription);
+    }
+
+    SwtBotTimeoutManager.setTimeout(15000); // can take a loooong time
+    SwtBotTestingUtilities.clickButtonAndWaitForWindowChange(bot, bot.button("Finish"));
+    SwtBotTimeoutManager.resetTimeout();
+    // this isn't right for location != null
+    return getWorkspaceRoot().getProject(artifactId);
+  }
+
+  private static IWorkspaceRoot getWorkspaceRoot() {
+    return ResourcesPlugin.getWorkspace().getRoot();
   }
 
   private SwtBotAppEngineActions() {}

@@ -32,10 +32,10 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
+import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,14 +47,17 @@ import java.io.InputStream;
  *
  */
 @RunWith(SWTBotJunit4ClassRunner.class)
-public class CreateNativeAppEngineStandardProjectTest {
+public class NewNativeAppEngineStandardProjectTest {
   private static SWTWorkbenchBot bot;
   private IProject project;
 
   @BeforeClass
   public static void beforeClass() throws Exception {
     bot = new SWTWorkbenchBot();
-    bot.viewByTitle("Welcome").close();
+    SWTBotView activeView = bot.activeView();
+    if (activeView != null && activeView.getTitle().equals("Welcome")) {
+      activeView.close();
+    }
   }
 
   @After
@@ -64,77 +67,54 @@ public class CreateNativeAppEngineStandardProjectTest {
     }
   }
 
-  @AfterClass
-  public static void sleep() {
-    bot.sleep(100);
+  @Test
+  public void testWithDefaults() throws Exception {
+    String[] projectFiles = {"src/main/java/HelloAppEngine.java",
+        "src/main/webapp/META-INF/MANIFEST.MF", "src/main/webapp/WEB-INF/appengine-web.xml",
+        "src/main/webapp/WEB-INF/web.xml", "src/main/webapp/index.html"};
+    createAndCheck("appWithDefault", null, null, null, projectFiles);
+    assertNull(getAppEngineProjectId(project.getFile("src/main/webapp/WEB-INF/appengine-web.xml")));
   }
 
   @Test
-  public void testCreateNewNativeProjectWithDefaults() throws Exception {
-    String projectName = "appWithDefault";
+  public void testWithPackage() throws Exception {
+    String[] projectFiles = {"src/main/java/app/engine/test/HelloAppEngine.java",
+        "src/main/webapp/META-INF/MANIFEST.MF", "src/main/webapp/WEB-INF/appengine-web.xml",
+        "src/main/webapp/WEB-INF/web.xml", "src/main/webapp/index.html",};
+    createAndCheck("appWithPackage", null, "app.engine.test", null, projectFiles);
+    assertNull(getAppEngineProjectId(project.getFile("src/main/webapp/WEB-INF/appengine-web.xml")));
+  }
+
+  @Test
+  public void testWithPackageAndProjectId() throws Exception {
+    String[] projectFiles = {"src/main/java/app/engine/test/HelloAppEngine.java",
+        "src/main/webapp/META-INF/MANIFEST.MF", "src/main/webapp/WEB-INF/appengine-web.xml",
+        "src/main/webapp/WEB-INF/web.xml", "src/main/webapp/index.html",};
+    createAndCheck("appWithPackageAndProjectId", null, "app.engine.test", "my-project-id",
+        projectFiles);
+    assertEquals("my-project-id",
+        getAppEngineProjectId(project.getFile("src/main/webapp/WEB-INF/appengine-web.xml")));
+  }
+
+  /** Create a project with the given parameters. */
+  private void createAndCheck(String projectName, String location, String packageName,
+      String projectId, String[] projectFiles) throws Exception {
     assertFalse(projectExists(projectName));
-    project = SwtBotAppEngineActions.createNativeWebAppProject(bot, projectName, null, null, null);
+    project = SwtBotAppEngineActions.createNativeWebAppProject(bot, projectName, location,
+        packageName, projectId);
     assertTrue(project.exists());
 
     IFacetedProject facetedProject = new FacetedProjectHelper().getFacetedProject(project);
     assertTrue(
         new FacetedProjectHelper().projectHasFacet(facetedProject, AppEngineStandardFacet.ID));
 
-    String[] projectFiles = {"src/main/java/HelloAppEngine.java",
-        "src/main/webapp/META-INF/MANIFEST.MF", "src/main/webapp/WEB-INF/appengine-web.xml",
-        "src/main/webapp/WEB-INF/web.xml", "src/main/webapp/index.html",};
     for (String projectFile : projectFiles) {
       Path projectFilePath = new Path(projectFile);
       assertTrue(project.exists(projectFilePath));
     }
-    assertNull(getAppEngineProjectId(project.getFile("src/main/webapp/WEB-INF/appengine-web.xml")));
+    assertFalse(SwtBotProjectActions.hasErrorsInProblemsView(bot));
   }
 
-  @Test
-  public void testCreateNewNativeProjectWithPackage() throws Exception {
-    String projectName = "appWithPackage";
-    assertFalse(projectExists(projectName));
-    project = SwtBotAppEngineActions.createNativeWebAppProject(bot, projectName, null,
-        "app.engine.test", null);
-    assertTrue(project.exists());
-
-    IFacetedProject facetedProject = new FacetedProjectHelper().getFacetedProject(project);
-    assertTrue("project doesn't have facet " + AppEngineStandardFacet.ID,
-        new FacetedProjectHelper().projectHasFacet(facetedProject, AppEngineStandardFacet.ID));
-
-    String[] projectFiles = {"src/main/java/app/engine/test/HelloAppEngine.java",
-        "src/main/webapp/META-INF/MANIFEST.MF", "src/main/webapp/WEB-INF/appengine-web.xml",
-        "src/main/webapp/WEB-INF/web.xml", "src/main/webapp/index.html",};
-    for (String projectFile : projectFiles) {
-      Path projectFilePath = new Path(projectFile);
-      assertTrue(project.exists(projectFilePath));
-    }
-    assertNull(getAppEngineProjectId(project.getFile("src/main/webapp/WEB-INF/appengine-web.xml")));
-  }
-
-  @Test
-  public void testCreateNewNativeProjectWithPackageAndProjectId() throws Exception {
-    String projectName = "appWithPackageAndProjectId";
-    assertFalse(projectExists(projectName));
-    project = SwtBotAppEngineActions.createNativeWebAppProject(bot, projectName, null,
-        "app.engine.test",
-        "my-project-id");
-    assertTrue(project.exists());
-
-    IFacetedProject facetedProject = new FacetedProjectHelper().getFacetedProject(project);
-    assertTrue("project doesn't have facet " + AppEngineStandardFacet.ID,
-        new FacetedProjectHelper().projectHasFacet(facetedProject, AppEngineStandardFacet.ID));
-
-    String[] projectFiles = {"src/main/java/app/engine/test/HelloAppEngine.java",
-        "src/main/webapp/META-INF/MANIFEST.MF", "src/main/webapp/WEB-INF/appengine-web.xml",
-        "src/main/webapp/WEB-INF/web.xml", "src/main/webapp/index.html",};
-    for (String projectFile : projectFiles) {
-      Path projectFilePath = new Path(projectFile);
-      assertTrue(project.exists(projectFilePath));
-    }
-    assertEquals("my-project-id",
-        getAppEngineProjectId(project.getFile("src/main/webapp/WEB-INF/appengine-web.xml")));
-  }
 
   /**
    * Extracts the project ID from the given file.

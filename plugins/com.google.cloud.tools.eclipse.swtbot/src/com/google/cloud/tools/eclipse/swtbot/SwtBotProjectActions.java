@@ -13,10 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.google.cloud.tools.eclipse.swtbot;
 
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.Widget;
@@ -25,7 +29,7 @@ import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.finders.ContextMenuHelper;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
-import org.eclipse.swtbot.swt.finder.widgets.SWTBotTable;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 
@@ -67,42 +71,21 @@ public final class SwtBotProjectActions {
   }
 
   /**
-   * Creates a Java project with the specified name.
-   *
-   * @param bot the SWTWorkbenchBot
-   * @param projectName the project name
+   * Create a Maven project based on an archetype.
    */
-  public static void createJavaProject(SWTWorkbenchBot bot, String projectName) {
-    // Open Java Perspective
-    bot.perspectiveById("org.eclipse.jdt.ui.JavaPerspective").activate();
-
-    // Open the list of new project wizards
+  public static IProject createMavenProject(final SWTWorkbenchBot bot, String groupId,
+      String artifactId, String archetypeGroupId, String archetypeArtifactId,
+      String archetypeVersion, String archetypeUrl, String javaPackage) {
     bot.menu("File").menu("New").menu("Project...").click();
 
-    // Select the Java project
-    SWTBotTree projectSelectionTree = bot.tree();
-    SWTBotTreeItem projectSelectionGoogleTreeItem =
-        SwtBotWorkbenchActions.getUniqueTreeItem(bot, projectSelectionTree, "Java", "Java Project");
-    SwtBotTestingUtilities.selectTreeItem(bot, projectSelectionGoogleTreeItem, "Java Project");
+    SWTBotShell shell = bot.shell("New Project");
+    shell.activate();
 
+    bot.tree().expandNode("Maven").select("Maven Project");
     bot.button("Next >").click();
 
-    // Configure the project and then create it
-    bot.textWithLabel("Project name:").setText(projectName);
-
-    SwtBotTestingUtilities.clickButtonAndWaitForWindowChange(bot, bot.button("Finish"));
-  }
-
-  /**
-   * Create a Maven project from Archetype and land in the Java perspective.
-   */
-  public static void createMavenProjectFromArchetype(final SWTWorkbenchBot bot, String groupId,
-      String artifactId, String packageName, String archetypeGroupId, String archetypeArtifactId,
-      String archetypeVersion, String archetypeUrl) {
-    // create maven project
-    SwtBotMenuActions.openNewMavenProject(bot);
-
-    // move to next step, archetype selection
+    // we want to specify an archetype
+    bot.checkBox("Create a simple project (skip archetype selection)").deselect();
     bot.button("Next >").click();
 
     // open archetype dialog
@@ -113,7 +96,6 @@ public final class SwtBotProjectActions {
       }
     });
 
-    // Dialog: "New Maven Project"
     bot.comboBox(0).setText(archetypeGroupId);
     bot.comboBox(1).setText(archetypeArtifactId);
     bot.comboBox(2).setText(archetypeVersion);
@@ -128,37 +110,23 @@ public final class SwtBotProjectActions {
       }
     });
 
-    // enable snapshots in table view
-    bot.checkBox("Include snapshot archetypes").click();
-
-    // filter so only one row shows up
-    bot.text().setText("gwt-basic-archetype");
-
-    // select first row
-    SWTBotTable table = bot.table();
-    table.setFocus();
-    table.getTableItem(0).select();
-
     // move to last wizard
     bot.button("Next >").click();
 
     // set archetype inputs
-    bot.comboBox(0).setText(groupId);
-    bot.comboBox(1).setText(artifactId);
-    bot.comboBox(3).setText(packageName);
+    bot.comboBoxWithLabel("Group Id:").setText(groupId);
+    bot.comboBoxWithLabel("Artifact Id:").setText(artifactId);
+    bot.comboBoxWithLabel("Package:").setText(javaPackage);
 
-    // finish and close dialog, and it will init
-    bot.button("Finish").click();
+    SwtBotTestingUtilities.clickButtonAndWaitForWindowChange(bot, bot.button("Finish"));
+    return getWorkspaceRoot().getProject("testartifact");
+  }
 
-    // change to the java perpective for next stage
-    SwtBotMenuActions.openJavaPerpsective(bot);
-
-    // select the first project
-    bot.tree().setFocus();
+  private static IWorkspaceRoot getWorkspaceRoot() {
+    return ResourcesPlugin.getWorkspace().getRoot();
   }
 
   public static void deleteProject(final SWTWorkbenchBot bot, final String projectName) {
-
     SwtBotTestingUtilities.performAndWaitForWindowChange(bot, new Runnable() {
       @Override
       public void run() {
@@ -174,7 +142,7 @@ public final class SwtBotProjectActions {
   }
 
   /**
-   * Returns true if the specified project can be found in the 'Package Explorer' or 'Project View',
+   * Returns true if the specified project is found in the 'Package Explorer' or 'Project View',
    * otherwise returns false. Throws a WidgetNotFoundException exception if the 'Package Explorer'
    * or 'Project Explorer' view cannot be found.
    *
@@ -205,7 +173,8 @@ public final class SwtBotProjectActions {
    */
   public static SWTBotView getExplorer(final SWTWorkbenchBot bot) {
     for (SWTBotView view : bot.views()) {
-      if (view.getTitle().equals("Package Explorer") || view.getTitle().equals("Project Explorer")) {
+      if (view.getTitle().equals("Package Explorer")
+          || view.getTitle().equals("Project Explorer")) {
         return view;
       }
     }
@@ -229,7 +198,7 @@ public final class SwtBotProjectActions {
     // Open Problems View by Window -> show view -> Problems
     bot.menu("Window").menu("Show View").menu("Problems").click();
 
-    SWTBotView view = bot.viewByTitle("Problems");
+    SWTBotView view = bot.viewByPartName("Problems");
     view.show();
     SWTBotTree tree = view.bot().tree();
 
