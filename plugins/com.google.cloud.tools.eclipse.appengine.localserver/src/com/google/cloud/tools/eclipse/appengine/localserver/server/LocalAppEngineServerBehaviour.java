@@ -139,6 +139,8 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
     // Create run configuration
     DefaultRunConfiguration devServerRunConfiguration = new DefaultRunConfiguration();
     devServerRunConfiguration.setAppYamls(runnables);
+    // we can only connect with a single JVM
+    devServerRunConfiguration.setMaxModuleInstances(1);
 
     List<String> jvmFlags = new ArrayList<String>();
     // FIXME: workaround bug when running on a Java8 JVM

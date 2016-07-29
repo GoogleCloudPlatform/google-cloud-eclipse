@@ -23,6 +23,7 @@ import com.google.cloud.tools.eclipse.sdk.internal.PreferenceConstants;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.DirectoryFieldEditor;
 import org.eclipse.jface.resource.JFaceResources;
@@ -71,6 +72,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     Composite contents = new Composite(parent, SWT.NONE);
     Link instructions = new Link(contents, SWT.WRAP);
     instructions.setText(SdkUiMessages.CloudSdkPreferencePage_2);
+    instructions.setFont(contents.getFont());
     instructions.addSelectionListener(new SelectionAdapter() {
       @Override
       public void widgetSelected(SelectionEvent event) {
@@ -87,10 +89,11 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     }
     sdkLocation.setPreferenceStore(getPreferenceStore());
     sdkLocation.setPropertyChangeListener(wrappedPropertyChangeListener);
-    GridLayoutFactory.swtDefaults().numColumns(sdkLocation.getNumberOfControls())
+    GridLayoutFactory.fillDefaults().numColumns(sdkLocation.getNumberOfControls())
         .generateLayout(fieldContents);
 
-    GridLayoutFactory.swtDefaults().generateLayout(contents);
+    GridLayoutFactory.fillDefaults().generateLayout(contents);
+    Dialog.applyDialogFont(contents);
     return contents;
   }
 

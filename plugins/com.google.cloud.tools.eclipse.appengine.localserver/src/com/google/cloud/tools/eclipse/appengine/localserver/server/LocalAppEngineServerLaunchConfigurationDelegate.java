@@ -1,33 +1,34 @@
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
+import com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineConsole;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.ILaunchConfigurationType;
-import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.launching.AbstractJavaLaunchConfigurationDelegate;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
+import org.eclipse.jdt.launching.IVMConnector;
+import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.SocketUtil;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.ServerUtil;
 
-import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
-import com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineConsole;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class LocalAppEngineServerLaunchConfigurationDelegate
-extends AbstractJavaLaunchConfigurationDelegate {
+    extends AbstractJavaLaunchConfigurationDelegate {
+
   private static final String DEBUGGER_HOST = "localhost";
 
   @Override
@@ -37,13 +38,13 @@ extends AbstractJavaLaunchConfigurationDelegate {
     if (server == null) {
       return;
     }
-
     IModule[] modules = server.getModules();
     if (modules == null || modules.length == 0) {
       return;
     }
 
     // App Engine dev server can only debug one module at a time
+    // as we cannot configure the IVMConnector to continue listening
     if (mode.equals(ILaunchManager.DEBUG_MODE) && modules.length > 1) {
       String message = "The App Engine development server supports only 1 module when running in debug mode";
       Status status = new Status(IStatus.ERROR, Activator.PLUGIN_ID, message);
@@ -63,61 +64,35 @@ extends AbstractJavaLaunchConfigurationDelegate {
     console.clearConsole();
     console.activate();
 
-    LocalAppEngineServerDelegate serverDelegate = LocalAppEngineServerDelegate.getAppEngineServer(server);
-    int debugPort = -1;
+    setDefaultSourceLocator(launch, configuration);
+
     if (ILaunchManager.DEBUG_MODE.equals(mode)) {
-      debugPort = getDebugPort();
-
-      try {
-        runDebugTarget(serverDelegate, modules[0].getProject().getName(), debugPort);
-      } catch (CoreException e) {
-        Activator.logError(e);
-      }
-    }
-
-    // Start server
-    if (mode.equals(ILaunchManager.DEBUG_MODE)) {
+      int debugPort = getDebugPort();
+      setupDebugTarget(launch, configuration, debugPort, monitor);
       serverBehaviour.startDebugDevServer(runnables, console.newMessageStream(), debugPort);
     } else {
       serverBehaviour.startDevServer(runnables, console.newMessageStream());
     }
   }
 
-  private void runDebugTarget(LocalAppEngineServerDelegate serverDelegate, String projectName, int port)
-      throws CoreException {
-    ILaunchConfigurationWorkingCopy remoteDebugLaunchConfig = createRemoteDebugLaunchConfiguration(serverDelegate,
-        projectName,
-        Integer.toString(port));
-    remoteDebugLaunchConfig.launch(ILaunchManager.DEBUG_MODE, null);
-  }
-
-  private ILaunchConfigurationWorkingCopy createRemoteDebugLaunchConfiguration(LocalAppEngineServerDelegate serverDelegate,
-      String projectName, String port) throws CoreException {
-    ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
-    ILaunchConfigurationType type = manager.getLaunchConfigurationType(IJavaLaunchConfigurationConstants.ID_REMOTE_JAVA_APPLICATION);
-
-    ILaunchConfigurationWorkingCopy remoteDebugConfig = type.newInstance(null,
-        "Remote debugger for "
-            + projectName
-            + " ("
-            + port
-            + ")");
-
-    // Set project
-    remoteDebugConfig.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,
-        projectName);
+  private void setupDebugTarget(ILaunch launch, ILaunchConfiguration configuration, int port,
+      IProgressMonitor monitor) throws CoreException {
+    IVMConnector connector =
+        JavaRuntime.getVMConnector(IJavaLaunchConfigurationConstants.ID_SOCKET_LISTEN_VM_CONNECTOR);
+    if (connector == null) {
+      abort("Cannot find Socket Listening connector", null, 0);
+      return; // keep JDT null analysis happy
+    }
 
     // Set JVM debugger connection parameters
+    int timeout = JavaRuntime.getPreferences().getInt(JavaRuntime.PREF_CONNECT_TIMEOUT);
     Map<String, String> connectionParameters = new HashMap<>();
     connectionParameters.put("hostname", DEBUGGER_HOST);
-    connectionParameters.put("port", port);
-    remoteDebugConfig.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CONNECT_MAP,
-        connectionParameters);
-    remoteDebugConfig.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_CONNECTOR,
-        "org.eclipse.jdt.launching.socketListenConnector");
-
-    return remoteDebugConfig;
+    connectionParameters.put("port", Integer.toString(port));
+    connectionParameters.put("timeout", Integer.toString(timeout));
+    connector.connect(connectionParameters, monitor, launch);
   }
+
 
   private int getDebugPort() throws CoreException {
     int port = SocketUtil.findFreePort();

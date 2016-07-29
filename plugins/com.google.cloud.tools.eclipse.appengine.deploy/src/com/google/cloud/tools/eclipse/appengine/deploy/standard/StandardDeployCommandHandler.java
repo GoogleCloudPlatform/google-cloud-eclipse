@@ -1,5 +1,8 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.standard;
 
+import java.io.IOException;
+import java.nio.file.Files;
+
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -9,12 +12,18 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.jface.window.IShellProvider;
+import org.eclipse.jface.window.SameShellProvider;
+import org.eclipse.ui.handlers.HandlerUtil;
 
+import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineProjectDeployer;
 import com.google.cloud.tools.eclipse.appengine.deploy.CleanupOldDeploysJob;
 import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
+import com.google.cloud.tools.eclipse.appengine.login.GoogleLoginService;
 import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
 import com.google.cloud.tools.eclipse.util.ProjectFromSelectionHelper;
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 
 /**
@@ -41,23 +50,26 @@ public class StandardDeployCommandHandler extends AbstractHandler {
     try {
       IProject project = helper.getProject(event);
       if (project != null) {
-        launchDeployJob(project);
+        launchDeployJob(project, new SameShellProvider(HandlerUtil.getActiveShell(event)));
       }
       // return value must be null, reserved for future use
       return null;
-    } catch (CoreException coreException) {
-      throw new ExecutionException(Messages.getString("deploy.failed.error.message"), coreException); //$NON-NLS-1$
+    } catch (CoreException | IOException exception) {
+      throw new ExecutionException(Messages.getString("deploy.failed.error.message"), exception); //$NON-NLS-1$
     }
   }
 
-  private void launchDeployJob(IProject project) {
-    String now = Long.toString(System.currentTimeMillis());
+  private void launchDeployJob(IProject project, IShellProvider shellProvider) throws IOException, CoreException {
+    IPath workDirectory = createWorkDirectory();
+    Credential credential = login(shellProvider);
+    
     StandardDeployJob deploy =
         new StandardDeployJob(new ExplodedWarPublisher(),
                               new StandardProjectStaging(),
                               new AppEngineProjectDeployer(),
-                              getTempDir().append(now),
-                              project);
+                              workDirectory,
+                              project,
+                              credential);
     deploy.addJobChangeListener(new JobChangeAdapter() {
 
       @Override
@@ -69,11 +81,27 @@ public class StandardDeployCommandHandler extends AbstractHandler {
     deploy.schedule();
   }
 
+  private IPath createWorkDirectory() throws IOException {
+    String now = Long.toString(System.currentTimeMillis());
+    IPath workDirectory = getTempDir().append(now);
+    Files.createDirectories(workDirectory.toFile().toPath());
+    return workDirectory;
+  }
+
+  private Credential login(IShellProvider shellProvider) throws IOException, CoreException {
+    Credential credential = new GoogleLoginService().getActiveCredential(shellProvider);
+    if (credential == null) {
+      throw new CoreException(StatusUtil.error(getClass(), Messages.getString("login.failed")));
+    }
+    return credential;
+  }
+
   private void launchCleanupJob() {
     new CleanupOldDeploysJob(getTempDir()).schedule();
   }
 
   private IPath getTempDir() {
-    return Platform.getStateLocation(Platform.getBundle("com.google.cloud.tools.eclipse.appengine.deploy")).append("tmp"); //$NON-NLS-1$ //$NON-NLS-2$
+    return Platform.getStateLocation(Platform.getBundle("com.google.cloud.tools.eclipse.appengine.deploy"))
+        .append("tmp");
   }
 }

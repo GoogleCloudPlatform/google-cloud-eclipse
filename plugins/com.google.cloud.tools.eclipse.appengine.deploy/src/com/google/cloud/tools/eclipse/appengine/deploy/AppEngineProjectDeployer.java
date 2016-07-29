@@ -52,13 +52,13 @@ public class AppEngineProjectDeployer {
       deployInfo.parse(new File(stagingDirectory.append(APPENGINE_WEB_XML_PATH).toOSString()));
 
       String projectId = deployInfo.getProjectId();
-      if (projectId == null) {
+      if (projectId == null || projectId.isEmpty()) {
         throw new CoreException(new Status(IStatus.ERROR, PLUGIN_ID, Messages.getString("project.id.missing"))); //$NON-NLS-1$
       }
 
       String projectVersion = deployInfo.getProjectVersion();
-      if (projectVersion == null) {
-        throw new CoreException(new Status(IStatus.ERROR, PLUGIN_ID, Messages.getString("project.version.missing"))); //$NON-NLS-1$
+      if (projectVersion == null || projectVersion.isEmpty()) {
+        // deploy will assign a default version based on the date and time
       }
 
       DefaultDeployConfiguration deployConfig = new DefaultDeployConfiguration();

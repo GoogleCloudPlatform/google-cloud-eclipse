@@ -29,12 +29,11 @@ public class AppEngineProjectDeployerTest {
   }
 
   @Test(expected = CoreException.class)
-  public void testDeploy_NoAppEngineProjectVersion() throws CoreException {
-    when(deployInfo.getProjectId()).thenReturn("fooProjectId");
-    when(deployInfo.getProjectVersion()).thenReturn(null);
+  public void testDeploy_EmptyAppEngineProjectId() throws CoreException {
+    when(deployInfo.getProjectId()).thenReturn("");
     new AppEngineProjectDeployer(deployInfo).deploy(new Path("/non/existing/path"), cloudSdk, monitor);
   }
-  
+
   @Test(expected = OperationCanceledException.class)
   public void testDeploy_cancelled() throws CoreException {
     when(monitor.isCanceled()).thenReturn(true);

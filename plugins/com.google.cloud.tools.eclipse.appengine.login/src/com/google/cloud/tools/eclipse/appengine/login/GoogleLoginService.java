@@ -17,13 +17,9 @@ package com.google.cloud.tools.eclipse.appengine.login;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import com.google.api.client.googleapis.util.Utils;
-import com.google.api.client.repackaged.com.google.common.base.Preconditions;
 import com.google.cloud.tools.eclipse.appengine.login.ui.GoogleLoginBrowser;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.gson.Gson;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.window.IShellProvider;
@@ -32,9 +28,7 @@ import org.eclipse.ui.PlatformUI;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Provides service related to login, e.g., account management, getting a credential of a
@@ -43,11 +37,15 @@ import java.util.Map;
 public class GoogleLoginService {
 
   private static final String STASH_OAUTH_CRED_KEY = "OAUTH_CRED";
+
+  // For the detailed info about each scope, see
+  // https://github.com/GoogleCloudPlatform/gcloud-eclipse-tools/wiki/Cloud-Tools-for-Eclipse-Technical-Design#oauth-20-scopes-requested
   private static final List<String> OAUTH_SCOPES = Collections.unmodifiableList(Arrays.asList(
-      "email", //$NON-NLS-1$
       "https://www.googleapis.com/auth/cloud-platform" //$NON-NLS-1$
   ));
 
+  private CredentialHelper credentialHelper = new CredentialHelper();
+  
   /**
    * Returns the credential of an active user (among multiple logged-in users). A login screen
    * may be presented, e.g., if no user is logged in or login is required due to an expired
@@ -102,59 +100,12 @@ public class GoogleLoginService {
   }
 
   private Credential createCredential(GoogleTokenResponse tokenResponse) {
-    return createCredentialHelper(tokenResponse.getAccessToken(),
-                                  tokenResponse.getRefreshToken());
-  }
-
-  /**
-   * Factored out from {@link #createCredential} to enable unit testing.
-   * ({@link GoogleTokenResponse#getRefreshToken} and {@link GoogleTokenResponse#getRefreshToken}
-   * are {@code final}, so Mockito can't mock them.)
-   */
-  @VisibleForTesting
-  Credential createCredentialHelper(String accessToken, String refreshToken) {
-    GoogleCredential credential = new GoogleCredential.Builder()
-        .setTransport(Utils.getDefaultTransport())
-        .setJsonFactory(Utils.getDefaultJsonFactory())
-        .setClientSecrets(Constants.getOAuthClientId(), Constants.getOAuthClientSecret())
-        .build();
-    credential.setAccessToken(accessToken);
-    credential.setRefreshToken(refreshToken);
-    return credential;
+    return credentialHelper.createCredential(tokenResponse.getAccessToken(),
+                                             tokenResponse.getRefreshToken());
   }
 
   public void clearCredential() {
     IEclipseContext eclipseContext = PlatformUI.getWorkbench().getService(IEclipseContext.class);
     eclipseContext.remove(STASH_OAUTH_CRED_KEY);
-  }
-
-  private static final String CLIENT_ID_LABEL = "client_id";
-  private static final String CLIENT_SECRET_LABEL = "client_secret";
-  private static final String REFRESH_TOKEN_LABEL = "refresh_token";
-  private static final String GCLOUD_USER_TYPE_LABEL = "type";
-  private static final String GCLOUD_USER_TYPE = "authorized_user";
-
-  /**
-   * Helper method to convert a credential to the corresponding JSON string.
-   */
-  public static String getJsonCredential(Credential credential) {
-    Preconditions.checkNotNull(credential);
-
-    return getJsonCredentialHelper(credential.getRefreshToken());
-  }
-
-  /**
-   * Factored out from {@link #getJsonCredential} to enable unit testing.
-   * ({@link Credential#getRefreshToken} is {@code final}, so Mockito can't mock it.)
-   */
-  @VisibleForTesting
-  static String getJsonCredentialHelper(String refreshToken) {
-    Map<String, String> credentialMap = new HashMap<>();
-    credentialMap.put(CLIENT_ID_LABEL, Constants.getOAuthClientId());
-    credentialMap.put(CLIENT_SECRET_LABEL, Constants.getOAuthClientSecret());
-    credentialMap.put(REFRESH_TOKEN_LABEL, refreshToken);
-    credentialMap.put(GCLOUD_USER_TYPE_LABEL, GCLOUD_USER_TYPE);
-
-    return new Gson().toJson(credentialMap);
   }
 }
