@@ -59,6 +59,7 @@ public class NewMavenGeneratedProjectTest {
     if (project != null) {
       SwtBotProjectActions.deleteProject(bot, project.getName());
     }
+    bot.resetWorkbench();
   }
 
   @Test

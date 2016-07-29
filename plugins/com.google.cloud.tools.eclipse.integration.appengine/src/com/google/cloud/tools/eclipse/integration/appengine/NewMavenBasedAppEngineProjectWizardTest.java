@@ -67,6 +67,7 @@ public class NewMavenBasedAppEngineProjectWizardTest {
       SwtBotProjectActions.deleteProject(bot, project.getName());
       assertFalse(project.exists());
     }
+    bot.resetWorkbench();
   }
 
   @Test
