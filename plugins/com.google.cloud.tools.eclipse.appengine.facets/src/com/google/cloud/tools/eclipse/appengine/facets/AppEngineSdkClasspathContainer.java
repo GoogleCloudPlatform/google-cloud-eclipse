@@ -5,17 +5,27 @@ import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public final class AppEngineSdkClasspathContainer implements IClasspathContainer {
 
   public static final String CONTAINER_ID = "AppEngineSDK";
 
-  private static final String API_JAR = "impl/appengine-api.jar";
-  private static final String API_JAVADOC_URL =
+  private static final String APPENGINE_API_JAR = "impl/appengine-api.jar";
+  private static final String APPENGINE_LABS_JAR = "impl/appengine-api-labs.jar";
+  private static final String APPENGINE_JSR107CACHE_JAR = "user/appengine-jsr107cache-0.0.0.jar";
+  private static final String JSR107CACHE_JAR = "user/jsr107cache-1.1.jar";
+
+  private static final String[] INCLUDED_JARS =
+      {APPENGINE_API_JAR, APPENGINE_LABS_JAR, APPENGINE_JSR107CACHE_JAR, JSR107CACHE_JAR};
+  private static final String APPENGINE_API_JAVADOC_URL =
       "https://cloud.google.com/appengine/docs/java/javadoc/";
 
   @Override
@@ -25,7 +35,7 @@ public final class AppEngineSdkClasspathContainer implements IClasspathContainer
 
   @Override
   public int getKind() {
-    return IClasspathEntry.CPE_CONTAINER;
+    return IClasspathContainer.K_DEFAULT_SYSTEM;
   }
 
   @Override
@@ -38,21 +48,27 @@ public final class AppEngineSdkClasspathContainer implements IClasspathContainer
     try {
       CloudSdk cloudSdk = new CloudSdk.Builder().build();
       if (cloudSdk != null) {
-        java.nio.file.Path jarFile = cloudSdk.getJavaAppEngineSdkPath().resolve(API_JAR);
-        if (jarFile != null) {
-          //@formatter:off
-          IClasspathAttribute javadocAttribute = 
-              JavaCore.newClasspathAttribute(IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME, API_JAVADOC_URL);
-          IClasspathEntry appEngineApisEntry = JavaCore.newLibraryEntry(
-              new Path(jarFile.toString()),
-              null /* sourceAttachmentPath */,
-              null /* sourceAttachmentRootPath */,
-              null /* accessRules */,
-              new IClasspathAttribute[] { javadocAttribute },
-              true /* isExported */);
-          //@formatter:on
-          return new IClasspathEntry[] {appEngineApisEntry};
+        List<IClasspathEntry> entries = new ArrayList<>(INCLUDED_JARS.length);
+        for (String jarLocation : INCLUDED_JARS) {
+          java.nio.file.Path jarFile = cloudSdk.getJavaAppEngineSdkPath().resolve(jarLocation);
+          if (jarFile != null) {
+            IClasspathAttribute javadocAttribute = JavaCore.newClasspathAttribute(
+                IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME, APPENGINE_API_JAVADOC_URL);
+            IAccessRule allAccessible =
+                JavaCore.newAccessRule(new Path("**"), IAccessRule.K_ACCESSIBLE);
+            //@formatter:off
+            IClasspathEntry jarEntry = JavaCore.newLibraryEntry(
+                new Path(jarFile.toString()),
+                null /* sourceAttachmentPath */,
+                null /* sourceAttachmentRootPath */,
+                new IAccessRule[] { allAccessible  } /* accessRules */,
+                new IClasspathAttribute[] { javadocAttribute },
+                false /* isExported */);
+            //@formatter:on
+            entries.add(jarEntry);
+          }
         }
+        return entries.toArray(new IClasspathEntry[entries.size()]);
       }
     } catch (AppEngineException ex) {
       /* fall through */
