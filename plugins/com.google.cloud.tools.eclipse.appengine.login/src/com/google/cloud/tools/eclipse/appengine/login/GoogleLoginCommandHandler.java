@@ -1,6 +1,6 @@
 package com.google.cloud.tools.eclipse.appengine.login;
 
-import com.google.api.client.auth.oauth2.Credential;
+import java.util.Map;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -10,7 +10,7 @@ import org.eclipse.ui.commands.IElementUpdater;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.menus.UIElement;
 
-import java.util.Map;
+import com.google.api.client.auth.oauth2.Credential;
 
 public class GoogleLoginCommandHandler extends AbstractHandler implements IElementUpdater {
 

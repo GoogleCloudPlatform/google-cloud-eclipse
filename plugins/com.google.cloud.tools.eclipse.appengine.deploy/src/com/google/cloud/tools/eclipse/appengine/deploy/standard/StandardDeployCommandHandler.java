@@ -1,14 +1,7 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.standard;
 
-import com.google.api.client.auth.oauth2.Credential;
-import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineProjectDeployer;
-import com.google.cloud.tools.eclipse.appengine.deploy.CleanupOldDeploysJob;
-import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
-import com.google.cloud.tools.eclipse.appengine.login.GoogleLoginService;
-import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
-import com.google.cloud.tools.eclipse.util.ProjectFromSelectionHelper;
-import com.google.cloud.tools.eclipse.util.status.StatusUtil;
-import com.google.common.annotations.VisibleForTesting;
+import java.io.IOException;
+import java.nio.file.Files;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -20,8 +13,15 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 
-import java.io.IOException;
-import java.nio.file.Files;
+import com.google.api.client.auth.oauth2.Credential;
+import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineProjectDeployer;
+import com.google.cloud.tools.eclipse.appengine.deploy.CleanupOldDeploysJob;
+import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
+import com.google.cloud.tools.eclipse.appengine.login.GoogleLoginService;
+import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
+import com.google.cloud.tools.eclipse.util.ProjectFromSelectionHelper;
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
+import com.google.common.annotations.VisibleForTesting;
 
 /**
  * Command handler to deploy an App Engine web application project to App Engine Standard.
@@ -32,16 +32,16 @@ import java.nio.file.Files;
 public class StandardDeployCommandHandler extends AbstractHandler {
 
   private ProjectFromSelectionHelper helper;
-
+  
   public StandardDeployCommandHandler() {
     this(new FacetedProjectHelper());
   }
-
+  
   @VisibleForTesting
   StandardDeployCommandHandler(FacetedProjectHelper facetedProjectHelper) {
       this.helper = new ProjectFromSelectionHelper(facetedProjectHelper);
   }
-
+  
   @Override
   public Object execute(ExecutionEvent event) throws ExecutionException {
     try {
@@ -59,7 +59,7 @@ public class StandardDeployCommandHandler extends AbstractHandler {
   private void launchDeployJob(IProject project) throws IOException, CoreException {
     IPath workDirectory = createWorkDirectory();
     Credential credential = login();
-
+    
     StandardDeployJob deploy =
         new StandardDeployJob(new ExplodedWarPublisher(),
                               new StandardProjectStaging(),

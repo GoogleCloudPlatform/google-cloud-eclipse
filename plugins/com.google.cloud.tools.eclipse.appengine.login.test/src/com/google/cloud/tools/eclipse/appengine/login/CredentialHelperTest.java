@@ -1,13 +1,13 @@
 package com.google.cloud.tools.eclipse.appengine.login;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson.JacksonFactory;
 import com.google.gson.Gson;
-
-import org.junit.Assert;
-import org.junit.Test;
 
 public class CredentialHelperTest {
 
