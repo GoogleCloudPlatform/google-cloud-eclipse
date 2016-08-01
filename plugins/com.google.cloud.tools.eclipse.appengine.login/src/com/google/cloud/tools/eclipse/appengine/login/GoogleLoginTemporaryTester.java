@@ -15,6 +15,8 @@
 
 package com.google.cloud.tools.eclipse.appengine.login;
 
+import com.google.api.client.auth.oauth2.Credential;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -22,14 +24,17 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import com.google.api.client.auth.oauth2.Credential;
-
 // FIXME This class is for manual integration login test. Remove it in the final product.
 public class GoogleLoginTemporaryTester {
 
-  public boolean testLogin(Credential credential) throws IOException {
-    File credentialFile = getCredentialFile(credential);
-    return credentialFile != null && testCredentialWithGcloud(credentialFile);
+  public boolean testLogin(Credential credential) {
+    try {
+      File credentialFile = getCredentialFile(credential);
+      return credentialFile != null && testCredentialWithGcloud(credentialFile);
+    } catch (IOException e) {
+      e.printStackTrace();
+      return false;
+    }
   }
 
   private File getCredentialFile(Credential credential) throws IOException {

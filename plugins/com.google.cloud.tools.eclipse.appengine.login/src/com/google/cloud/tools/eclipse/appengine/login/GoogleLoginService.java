@@ -16,36 +16,54 @@
 package com.google.cloud.tools.eclipse.appengine.login;
 
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
-import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
-import com.google.api.client.googleapis.util.Utils;
-import com.google.cloud.tools.eclipse.appengine.login.ui.GoogleLoginBrowser;
+import com.google.cloud.tools.eclipse.appengine.login.ui.LoginServiceUi;
+import com.google.cloud.tools.ide.login.GoogleLoginState;
+import com.google.cloud.tools.ide.login.LoggerFacade;
+import com.google.cloud.tools.ide.login.OAuthDataStore;
+import com.google.cloud.tools.ide.login.UiFacade;
+import com.google.common.annotations.VisibleForTesting;
 
-import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.jface.window.IShellProvider;
-import org.eclipse.ui.PlatformUI;
-
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Provides service related to login, e.g., account management, getting a credential of a
  * currently active user, etc.
  */
-public class GoogleLoginService {
-
-  private static final String STASH_OAUTH_CRED_KEY = "OAUTH_CRED";
+public final class GoogleLoginService {
 
   // For the detailed info about each scope, see
   // https://github.com/GoogleCloudPlatform/gcloud-eclipse-tools/wiki/Cloud-Tools-for-Eclipse-Technical-Design#oauth-20-scopes-requested
-  private static final List<String> OAUTH_SCOPES = Collections.unmodifiableList(Arrays.asList(
-      "https://www.googleapis.com/auth/cloud-platform" //$NON-NLS-1$
-  ));
+  private static final SortedSet<String> OAUTH_SCOPES = Collections.unmodifiableSortedSet(
+      new TreeSet<>(Arrays.asList(
+          "email", //$NON-NLS-1$
+          "https://www.googleapis.com/auth/cloud-platform" //$NON-NLS-1$
+      )));
 
-  private CredentialHelper credentialHelper = new CredentialHelper();
-  
+  private GoogleLoginState loginState;
+
+  private static GoogleLoginService instance;
+
+  @VisibleForTesting
+  GoogleLoginService(
+      OAuthDataStore dataStore, UiFacade uiFacade, LoggerFacade loggerFacade) {
+    loginState = new GoogleLoginState(
+        Constants.getOAuthClientId(), Constants.getOAuthClientSecret(), OAUTH_SCOPES,
+        dataStore, uiFacade, loggerFacade);
+  }
+
+  public static synchronized GoogleLoginService getInstance() {
+    if (instance == null) {
+      instance = new GoogleLoginService(
+          new TransientOAuthDataStore(), new LoginServiceUi(), new LoginServiceLogger());
+    }
+    return instance;
+  }
+
   /**
    * Returns the credential of an active user (among multiple logged-in users). A login screen
    * may be presented, e.g., if no user is logged in or login is required due to an expired
@@ -54,21 +72,16 @@ public class GoogleLoginService {
    * operation and display a general message that login is required but was cancelled or failed.
    *
    * Must be called from a UI context.
-   *
-   * @param shellProvider provides a shell for the login screen if login is necessary
-   * @throws IOException can be thrown by the underlying Login API request (e.g., network
-   *     error from the transport layer while sending/receiving a HTTP request/response.)
    */
-  public Credential getActiveCredential(IShellProvider shellProvider) throws IOException {
-    Credential credential = getCachedActiveCredential();
-
-    if (credential == null) {
-      credential = logIn(shellProvider);
-
-      IEclipseContext eclipseContext = PlatformUI.getWorkbench().getService(IEclipseContext.class);
-      eclipseContext.set(STASH_OAUTH_CRED_KEY, credential);
+  public Credential getActiveCredential() {
+    // TODO: holding a lock for a long period of time (especially when waiting for UI events)
+    // should be avoided. Make the login library thread-safe, and don't lock during UI events.
+    synchronized (loginState) {
+      if (loginState.logIn(null /* parameter ignored */)) {
+        return loginState.getCredential();
+      }
+      return null;
     }
-    return credential;
   }
 
   /**
@@ -79,33 +92,37 @@ public class GoogleLoginService {
    * Safe to call from non-UI contexts.
    */
   public Credential getCachedActiveCredential() {
-    IEclipseContext eclipseContext = PlatformUI.getWorkbench().getService(IEclipseContext.class);
-    return (Credential) eclipseContext.get(STASH_OAUTH_CRED_KEY);
-  }
-
-  private Credential logIn(IShellProvider shellProvider) throws IOException {
-    GoogleLoginBrowser loginBrowser = new GoogleLoginBrowser(
-        shellProvider.getShell(), Constants.getOAuthClientId(), OAUTH_SCOPES);
-    if (loginBrowser.open() != GoogleLoginBrowser.OK) {
+    synchronized (loginState) {
+      if (loginState.isLoggedIn()) {
+        return loginState.getCredential();
+      }
       return null;
     }
-
-    GoogleAuthorizationCodeTokenRequest authRequest = new GoogleAuthorizationCodeTokenRequest(
-        Utils.getDefaultTransport(), Utils.getDefaultJsonFactory(),
-        Constants.getOAuthClientId(), Constants.getOAuthClientSecret(),
-        loginBrowser.getAuthorizationCode(),
-        GoogleLoginBrowser.REDIRECT_URI);
-
-    return createCredential(authRequest.execute());
   }
 
-  private Credential createCredential(GoogleTokenResponse tokenResponse) {
-    return credentialHelper.createCredential(tokenResponse.getAccessToken(),
-                                             tokenResponse.getRefreshToken());
-  }
-
+  /**
+   * Clears all credentials. ("logging out" from user perspective.)
+   *
+   * Safe to call from non-UI contexts.
+   */
   public void clearCredential() {
-    IEclipseContext eclipseContext = PlatformUI.getWorkbench().getService(IEclipseContext.class);
-    eclipseContext.remove(STASH_OAUTH_CRED_KEY);
+    synchronized (loginState) {
+      loginState.logOut(false /* Don't prompt for logout. */);
+    }
   }
+
+  private static final Logger logger = Logger.getLogger(GoogleLoginService.class.getName());
+
+  private static class LoginServiceLogger implements LoggerFacade {
+
+    @Override
+    public void logError(String message, Throwable thrown) {
+      logger.log(Level.SEVERE, message, thrown);
+    }
+
+    @Override
+    public void logWarning(String message) {
+      logger.log(Level.WARNING, message);
+    }
+  };
 }

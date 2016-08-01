@@ -1,12 +1,10 @@
 package com.google.cloud.tools.eclipse.appengine.login;
 
+import com.google.api.client.auth.oauth2.Credential;
+import com.google.gson.Gson;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.googleapis.util.Utils;
-import com.google.gson.Gson;
 
 /**
  * Helper class to work with {@link Credential} objects
@@ -19,20 +17,6 @@ public class CredentialHelper {
   private static final String GCLOUD_USER_TYPE_LABEL = "type";
   private static final String GCLOUD_USER_TYPE = "authorized_user";
 
-  /**
-   * Creates a {@link Credential} that has its access and refresh token set
-   */
-  public Credential createCredential(String accessToken, String refreshToken) {
-    GoogleCredential credential = new GoogleCredential.Builder()
-        .setTransport(Utils.getDefaultTransport())
-        .setJsonFactory(Utils.getDefaultJsonFactory())
-        .setClientSecrets(Constants.getOAuthClientId(), Constants.getOAuthClientSecret())
-        .build();
-    credential.setAccessToken(accessToken);
-    credential.setRefreshToken(refreshToken);
-    return credential;
-  }
-  
   /**
    * Writes a {@link Credential} object in the JSON format expected by gcloud's <code>credential-file-override</code>
    * feature
