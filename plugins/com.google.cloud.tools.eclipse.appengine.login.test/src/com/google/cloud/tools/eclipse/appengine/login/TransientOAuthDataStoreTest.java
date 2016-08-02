@@ -15,10 +15,9 @@
 
 package com.google.cloud.tools.eclipse.appengine.login;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.ide.login.OAuthData;
@@ -27,10 +26,9 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TransientOAuthDataStoreTest {
@@ -49,29 +47,16 @@ public class TransientOAuthDataStoreTest {
     Assert.assertEquals(0, oAuthData.getAccessTokenExpiryTime());
   }
 
-  OAuthData singleStorageForIEclipseContext;
-
   @Test
   public void testSaveAndLoadOAuthData() {
-    // Set up IEclipseContext so that it returns OAuthData that was passed and saved.
-    doAnswer(new Answer<Void>() {
-      @Override
-      public Void answer(InvocationOnMock invocation) {
-        singleStorageForIEclipseContext = invocation.getArgumentAt(1, OAuthData.class);
-        return null;
-      }
-    }).doThrow(Exception.class).when(eclipseContext).set(anyString(), any());
-    doAnswer(new Answer<Object>() {
-      @Override
-      public Object answer(InvocationOnMock invocation) {
-        return singleStorageForIEclipseContext;
-      }
-    }).when(eclipseContext).get(anyString());
-
     OAuthData inputData = mock(OAuthData.class);
     TransientOAuthDataStore dataStore = new TransientOAuthDataStore(eclipseContext);
     dataStore.saveOAuthData(inputData);
+    dataStore.loadOAuthData();
 
-    Assert.assertEquals(inputData, dataStore.loadOAuthData());
+    ArgumentCaptor<OAuthData> argumentCaptor = ArgumentCaptor.forClass(OAuthData.class);
+    verify(eclipseContext).set(anyString(), argumentCaptor.capture());
+    verify(eclipseContext).get(anyString());
+    Assert.assertEquals(inputData, argumentCaptor.getValue());
   }
 }
