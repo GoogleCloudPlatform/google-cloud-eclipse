@@ -22,18 +22,17 @@ import com.google.cloud.tools.ide.login.VerificationCodeHolder;
 
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import org.eclipse.ui.commands.ICommandService;
 
 public class LoginServiceUi implements UiFacade {
 
   @Override
   public boolean askYesOrNo(String title, String message) {
-    throw new RuntimeException("We don't allow this to ensure non-UI threads don't prompt.");
+    throw new RuntimeException("Not allowed to ensure non-UI threads don't prompt."); //$NON-NLS-1$
   }
 
   @Override
@@ -61,27 +60,23 @@ public class LoginServiceUi implements UiFacade {
 
   @Override
   public VerificationCodeHolder obtainVerificationCodeFromExternalUserInteraction(String title) {
-    throw new RuntimeException("Not to be called.");
+    throw new RuntimeException("Not to be called."); //$NON-NLS-1$
   }
 
   @Override
   public String obtainVerificationCodeFromUserInteraction(
       String title, GoogleAuthorizationCodeRequestUrl authCodeRequestUrl) {
-    IWorkbenchBrowserSupport browserSupport = PlatformUI.getWorkbench().getBrowserSupport();
-    try {
-      browserSupport.getExternalBrowser().openURL(authCodeRequestUrl.toURL());
-
-      // TODO(chanseok): remove InputDialog and set up a web server to receive authorization code.
-      InputDialog dialog = new InputDialog(null,
-          "Enter Authorization Code", "Enter authorization code from the browser.", null, null);
-      dialog.open();
-      return dialog.getValue();
-
-    } catch (PartInitException pie) {
+    if (!Program.launch(authCodeRequestUrl.toString())) {
       Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
       MessageDialog.openError(shell,
           Messages.LOGIN_ERROR_DIALOG_TITLE, Messages.LOGIN_ERROR_CANNOT_OPEN_BROWSER);
       return null;
     }
+
+    // TODO(chanseok): remove InputDialog and set up a web server to receive authorization code.
+    InputDialog dialog = new InputDialog(null,
+        "Enter Authorization Code", "Enter authorization code from the browser.", null, null);
+    dialog.open();
+    return dialog.getValue();
   }
 }

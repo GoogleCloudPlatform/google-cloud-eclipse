@@ -17,10 +17,8 @@ package com.google.cloud.tools.eclipse.appengine.login;
 
 import com.google.cloud.tools.ide.login.OAuthData;
 import com.google.cloud.tools.ide.login.OAuthDataStore;
-import com.google.common.annotations.VisibleForTesting;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.ui.PlatformUI;
 
 /**
  * Provides a transient store for saving and loading {@link OAuthData} (a user credential).
@@ -29,31 +27,20 @@ public class TransientOAuthDataStore implements OAuthDataStore {
 
   private static final String STASH_OAUTH_CRED_KEY = "OAUTH_CRED";
 
-  private IEclipseContext mockEclipseContext;  // For unit testing
+  private IEclipseContext eclipseContext;
 
-  public TransientOAuthDataStore() {}
-
-  @VisibleForTesting
-  TransientOAuthDataStore(IEclipseContext mockEclipseContext) {
-    this.mockEclipseContext = mockEclipseContext;
-  }
-
-  private IEclipseContext getEclipseContext() {
-    if (mockEclipseContext != null) {  // In the unit testing mode.
-      return mockEclipseContext;
-    } else {
-      return PlatformUI.getWorkbench().getService(IEclipseContext.class);
-    }
+  public TransientOAuthDataStore(IEclipseContext eclipseContext) {
+    this.eclipseContext = eclipseContext;
   }
 
   @Override
   public void clearStoredOAuthData() {
-    getEclipseContext().remove(STASH_OAUTH_CRED_KEY);
+    eclipseContext.remove(STASH_OAUTH_CRED_KEY);
   }
 
   @Override
   public OAuthData loadOAuthData() {
-    OAuthData credential = (OAuthData) getEclipseContext().get(STASH_OAUTH_CRED_KEY);
+    OAuthData credential = (OAuthData) eclipseContext.get(STASH_OAUTH_CRED_KEY);
     if (credential == null) {
       return new OAuthData(null, null, null, null, 0);  // null credential
     }
@@ -62,6 +49,6 @@ public class TransientOAuthDataStore implements OAuthDataStore {
 
   @Override
   public void saveOAuthData(OAuthData credential) {
-    getEclipseContext().set(STASH_OAUTH_CRED_KEY, credential);
+    eclipseContext.set(STASH_OAUTH_CRED_KEY, credential);
   }
 }

@@ -23,6 +23,9 @@ import com.google.cloud.tools.ide.login.OAuthDataStore;
 import com.google.cloud.tools.ide.login.UiFacade;
 import com.google.common.annotations.VisibleForTesting;
 
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.ui.PlatformUI;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.SortedSet;
@@ -58,8 +61,9 @@ public final class GoogleLoginService {
 
   public static synchronized GoogleLoginService getInstance() {
     if (instance == null) {
-      instance = new GoogleLoginService(
-          new TransientOAuthDataStore(), new LoginServiceUi(), new LoginServiceLogger());
+      IEclipseContext eclipseContext = PlatformUI.getWorkbench().getService(IEclipseContext.class);
+      instance = new GoogleLoginService(new TransientOAuthDataStore(eclipseContext),
+          new LoginServiceUi(), new LoginServiceLogger());
     }
     return instance;
   }

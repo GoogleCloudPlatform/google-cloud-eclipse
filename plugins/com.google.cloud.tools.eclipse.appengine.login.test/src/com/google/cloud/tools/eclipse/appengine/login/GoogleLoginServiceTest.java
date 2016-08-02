@@ -15,7 +15,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.login;
 
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -30,7 +29,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.Arrays;
@@ -46,8 +44,6 @@ public class GoogleLoginServiceTest {
   @Mock UiFacade uiFacade;
   @Mock LoggerFacade loggerFacade;
 
-  GoogleLoginService loginService;
-
   private static final SortedSet<String> OAUTH_SCOPES = Collections.unmodifiableSortedSet(
       new TreeSet<>(Arrays.asList(
           "email",
@@ -55,12 +51,12 @@ public class GoogleLoginServiceTest {
       )));
 
   @Before
-  public void Setup() {
+  public void setUp() {
     when(dataStore.loadOAuthData()).thenReturn(savedOAuthData);
   }
 
   @Test
-  public void testClearSavedCredentialIfNullRefreshToken() {
+  public void testGoogleLoginService_clearSavedCredentialIfNullRefreshToken() {
     when(savedOAuthData.getRefreshToken()).thenReturn(null);
 
     GoogleLoginService loginService = new GoogleLoginService(dataStore, uiFacade, loggerFacade);
@@ -68,7 +64,7 @@ public class GoogleLoginServiceTest {
   }
 
   @Test
-  public void testClearSavedCredentialIfScopesChanged() {
+  public void testGoogleLoginService_clearSavedCredentialIfScopesChanged() {
     // Persisted credential in the data store has an out-dated scopes.
     SortedSet<String> newScope = new TreeSet<String>(Arrays.asList("new scope"));
     when(savedOAuthData.getStoredScopes()).thenReturn(newScope);
@@ -78,20 +74,14 @@ public class GoogleLoginServiceTest {
     Assert.assertNull(loginService.getCachedActiveCredential());
   }
 
-  OAuthData singleStorageForDataStore;
-
   @Test
-  public void testRestoreSavedCredential() {
+  public void testGoogleLoginService_restoreSavedCredential() {
     // Persisted credential in the data store is valid.
     when(savedOAuthData.getStoredScopes()).thenReturn(OAUTH_SCOPES);
     when(savedOAuthData.getRefreshToken()).thenReturn("fake_refresh_token");
 
     GoogleLoginService loginService = new GoogleLoginService(dataStore, uiFacade, loggerFacade);
-    verify(dataStore).loadOAuthData();
-    verify(savedOAuthData, Mockito.times(2)).getRefreshToken();
-    verify(savedOAuthData, Mockito.times(2)).getStoredScopes();
     verify(dataStore, never()).clearStoredOAuthData();
-    verify(loggerFacade, never()).logWarning(anyString());
     Assert.assertNotNull(loginService.getCachedActiveCredential());
   }
 }
