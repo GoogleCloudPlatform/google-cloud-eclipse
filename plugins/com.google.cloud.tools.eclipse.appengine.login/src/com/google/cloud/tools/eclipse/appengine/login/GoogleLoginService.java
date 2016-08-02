@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -48,6 +49,8 @@ public final class GoogleLoginService {
       )));
 
   private GoogleLoginState loginState;
+
+  private AtomicBoolean loginInProgress;
 
   private static GoogleLoginService instance;
 
@@ -78,13 +81,25 @@ public final class GoogleLoginService {
    * Must be called from a UI context.
    */
   public Credential getActiveCredential() {
+    if (!loginInProgress.compareAndSet(false, true)) {
+      LoginServiceUi.showErrorDialogHelper(
+          Messages.LOGIN_ERROR_DIALOG_TITLE, Messages.LOGIN_ERROR_IN_PROGRESS);
+    }
+
     // TODO: holding a lock for a long period of time (especially when waiting for UI events)
     // should be avoided. Make the login library thread-safe, and don't lock during UI events.
-    synchronized (loginState) {
-      if (loginState.logIn(null /* parameter ignored */)) {
-        return loginState.getCredential();
+    // As a workaround and temporary relief, we use the loginInProgress flag above to fail
+    // conservatively if login seems to be in progress.
+    try {
+      synchronized (loginState) {
+        if (loginState.logIn(null /* parameter ignored */)) {
+          return loginState.getCredential();
+        }
+        return null;
       }
-      return null;
+    }
+    finally {
+      loginInProgress.set(false);
     }
   }
 

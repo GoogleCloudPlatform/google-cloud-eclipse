@@ -30,6 +30,11 @@ import org.eclipse.ui.commands.ICommandService;
 
 public class LoginServiceUi implements UiFacade {
 
+  public static void showErrorDialogHelper(String title, String message) {
+    Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
+    MessageDialog.openError(shell, title, message);
+  }
+
   @Override
   public boolean askYesOrNo(String title, String message) {
     throw new RuntimeException("Not allowed to ensure non-UI threads don't prompt."); //$NON-NLS-1$
@@ -38,9 +43,7 @@ public class LoginServiceUi implements UiFacade {
   @Override
   public void showErrorDialog(String title, String message) {
     // Ignore "title" and "message", as they are non-localized hard-coded strings in the library.
-    Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
-    MessageDialog.openError(shell,
-        Messages.LOGIN_ERROR_DIALOG_TITLE, Messages.LOGIN_ERROR_DIALOG_MESSAGE);
+    showErrorDialogHelper(Messages.LOGIN_ERROR_DIALOG_TITLE, Messages.LOGIN_ERROR_DIALOG_MESSAGE);
   }
 
   @Override
