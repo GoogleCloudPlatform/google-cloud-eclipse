@@ -64,15 +64,6 @@ public class GoogleLoginService implements IGoogleLoginService {
         new LoginServiceUi(), new LoginServiceLogger());
   }
 
-  /**
-   * Returns the credential of an active user (among multiple logged-in users). A login screen
-   * may be presented, e.g., if no user is logged in or login is required due to an expired
-   * credential. This method returns {@code null} if a user cancels the login process.
-   * For this reason, if {@code null} is returned, the caller should cancel the current
-   * operation and display a general message that login is required but was cancelled or failed.
-   *
-   * Must be called from a UI context.
-   */
   @Override
   public Credential getActiveCredential() {
     if (!loginInProgress.compareAndSet(false, true)) {
@@ -97,13 +88,6 @@ public class GoogleLoginService implements IGoogleLoginService {
     }
   }
 
-  /**
-   * Returns the credential of an active user (among multiple logged-in users). Unlike {@link
-   * #getActiveCredential}, this version does not involve login process or make API calls.
-   * Returns {@code null} if no credential has been cached.
-   *
-   * Safe to call from non-UI contexts.
-   */
   @Override
   public Credential getCachedActiveCredential() {
     synchronized (loginState) {
@@ -114,11 +98,6 @@ public class GoogleLoginService implements IGoogleLoginService {
     }
   }
 
-  /**
-   * Clears all credentials. ("logging out" from user perspective.)
-   *
-   * Safe to call from non-UI contexts.
-   */
   @Override
   public void clearCredential() {
     synchronized (loginState) {
