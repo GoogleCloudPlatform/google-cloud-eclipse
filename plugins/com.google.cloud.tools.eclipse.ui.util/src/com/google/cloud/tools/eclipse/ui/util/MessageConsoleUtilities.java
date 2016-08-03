@@ -1,4 +1,4 @@
-package com.google.cloud.tools.eclipse.util;
+package com.google.cloud.tools.eclipse.ui.util;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.console.ConsolePlugin;
