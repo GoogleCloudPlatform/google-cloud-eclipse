@@ -21,8 +21,12 @@ public class ProjectFromSelectionHelper {
     ISelection selection = HandlerUtil.getCurrentSelectionChecked(event);
     if (selection instanceof IStructuredSelection) {
       IStructuredSelection structuredSelection = (IStructuredSelection) selection;
-      if (structuredSelection.size() == 1 && structuredSelection.getFirstElement() instanceof IProject) {
-        IProject project = (IProject) structuredSelection.getFirstElement();
+      if (structuredSelection.size() == 1) {
+        IProject project = AdapterUtil.adapt(structuredSelection.getFirstElement(), IProject.class);
+        if (project == null) {
+          return null;
+        }
+
         IFacetedProject facetedProject = facetedProjectHelper.getFacetedProject(project);
         // TODO replace with constant from AppEngineFacet (after possibly relocating that class)
         if (facetedProjectHelper.projectHasFacet(facetedProject, "com.google.cloud.tools.eclipse.appengine.facet")) {
