@@ -24,7 +24,6 @@ import com.google.cloud.tools.ide.login.UiFacade;
 import com.google.common.annotations.VisibleForTesting;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.ui.PlatformUI;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -38,7 +37,7 @@ import java.util.logging.Logger;
  * Provides service related to login, e.g., account management, getting a credential of a
  * currently active user, etc.
  */
-public final class GoogleLoginService {
+public class GoogleLoginService implements IGoogleLoginService {
 
   // For the detailed info about each scope, see
   // https://github.com/GoogleCloudPlatform/gcloud-eclipse-tools/wiki/Cloud-Tools-for-Eclipse-Technical-Design#oauth-20-scopes-requested
@@ -49,10 +48,7 @@ public final class GoogleLoginService {
       )));
 
   private GoogleLoginState loginState;
-
   private AtomicBoolean loginInProgress;
-
-  private static GoogleLoginService instance;
 
   @VisibleForTesting
   GoogleLoginService(
@@ -60,15 +56,12 @@ public final class GoogleLoginService {
     loginState = new GoogleLoginState(
         Constants.getOAuthClientId(), Constants.getOAuthClientSecret(), OAUTH_SCOPES,
         dataStore, uiFacade, loggerFacade);
+    loginInProgress = new AtomicBoolean(false);
   }
 
-  public static synchronized GoogleLoginService getInstance() {
-    if (instance == null) {
-      IEclipseContext eclipseContext = PlatformUI.getWorkbench().getService(IEclipseContext.class);
-      instance = new GoogleLoginService(new TransientOAuthDataStore(eclipseContext),
-          new LoginServiceUi(), new LoginServiceLogger());
-    }
-    return instance;
+  static IGoogleLoginService createDefaultInstance(IEclipseContext eclipseContext) {
+    return new GoogleLoginService(new TransientOAuthDataStore(eclipseContext),
+        new LoginServiceUi(), new LoginServiceLogger());
   }
 
   /**
@@ -80,6 +73,7 @@ public final class GoogleLoginService {
    *
    * Must be called from a UI context.
    */
+  @Override
   public Credential getActiveCredential() {
     if (!loginInProgress.compareAndSet(false, true)) {
       LoginServiceUi.showErrorDialogHelper(
@@ -110,6 +104,7 @@ public final class GoogleLoginService {
    *
    * Safe to call from non-UI contexts.
    */
+  @Override
   public Credential getCachedActiveCredential() {
     synchronized (loginState) {
       if (loginState.isLoggedIn()) {
@@ -124,6 +119,7 @@ public final class GoogleLoginService {
    *
    * Safe to call from non-UI contexts.
    */
+  @Override
   public void clearCredential() {
     synchronized (loginState) {
       loginState.logOut(false /* Don't prompt for logout. */);

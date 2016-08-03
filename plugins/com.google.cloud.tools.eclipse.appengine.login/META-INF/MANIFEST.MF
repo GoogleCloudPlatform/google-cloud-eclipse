@@ -6,7 +6,9 @@ Bundle-Version: 0.1.0.qualifier
 Bundle-Vendor: Google, Inc.
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-Activator: com.google.cloud.tools.eclipse.appengine.login.Activator
 Bundle-ActivationPolicy: lazy
+Service-Component: OGSI-INF/login.xml
 Require-Bundle: com.google.gson,
  com.google.guava;bundle-version="15.0.0",
  org.eclipse.core.runtime,
