@@ -24,6 +24,7 @@ import com.google.cloud.tools.ide.login.UiFacade;
 import com.google.common.annotations.VisibleForTesting;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.ui.PlatformUI;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -59,8 +60,8 @@ public class GoogleLoginService implements IGoogleLoginService {
     loginInProgress = new AtomicBoolean(false);
   }
 
-  static IGoogleLoginService createDefaultInstance(IEclipseContext eclipseContext) {
-    return new GoogleLoginService(new TransientOAuthDataStore(eclipseContext),
+  public GoogleLoginService() {
+    this(new TransientOAuthDataStore(PlatformUI.getWorkbench().getService(IEclipseContext.class)),
         new LoginServiceUi(), new LoginServiceLogger());
   }
 
