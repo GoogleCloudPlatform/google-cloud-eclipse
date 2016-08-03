@@ -5,7 +5,6 @@ import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -48,20 +47,20 @@ public final class AppEngineSdkClasspathContainer implements IClasspathContainer
     try {
       CloudSdk cloudSdk = new CloudSdk.Builder().build();
       if (cloudSdk != null) {
+        // todo: INCLUDED_JARS should be pulled from appengine-plugins-core
+        // https://github.com/GoogleCloudPlatform/appengine-plugins-core/issues/186
         List<IClasspathEntry> entries = new ArrayList<>(INCLUDED_JARS.length);
         for (String jarLocation : INCLUDED_JARS) {
           java.nio.file.Path jarFile = cloudSdk.getJavaAppEngineSdkPath().resolve(jarLocation);
           if (jarFile != null) {
             IClasspathAttribute javadocAttribute = JavaCore.newClasspathAttribute(
                 IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME, APPENGINE_API_JAVADOC_URL);
-            IAccessRule allAccessible =
-                JavaCore.newAccessRule(new Path("**"), IAccessRule.K_ACCESSIBLE);
             //@formatter:off
             IClasspathEntry jarEntry = JavaCore.newLibraryEntry(
                 new Path(jarFile.toString()),
                 null /* sourceAttachmentPath */,
                 null /* sourceAttachmentRootPath */,
-                new IAccessRule[] { allAccessible  } /* accessRules */,
+                null /* accessRules */,
                 new IClasspathAttribute[] { javadocAttribute },
                 false /* isExported */);
             //@formatter:on
