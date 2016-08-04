@@ -33,7 +33,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class TransientOAuthDataStoreTest {
 
-  @Mock IEclipseContext eclipseContext;
+  @Mock private IEclipseContext eclipseContext;
 
   @Test
   public void testLoadOAuthData_emptyStoreReturnsNonNullOAuthData() {
