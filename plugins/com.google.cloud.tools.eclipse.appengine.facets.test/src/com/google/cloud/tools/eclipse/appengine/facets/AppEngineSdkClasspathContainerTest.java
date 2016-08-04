@@ -4,7 +4,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IClasspathContainer;
 import org.junit.Test;
 
 public class AppEngineSdkClasspathContainerTest {
@@ -19,7 +19,7 @@ public class AppEngineSdkClasspathContainerTest {
   @Test
   public void testGetKind() {
     assertThat(new AppEngineSdkClasspathContainer().getKind(),
-               is(IClasspathEntry.CPE_CONTAINER));
+               is(IClasspathContainer.K_DEFAULT_SYSTEM));
   }
 
   @Test
