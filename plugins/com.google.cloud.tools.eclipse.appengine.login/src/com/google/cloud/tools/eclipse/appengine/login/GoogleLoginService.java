@@ -70,6 +70,7 @@ public class GoogleLoginService implements IGoogleLoginService {
     if (!loginInProgress.compareAndSet(false, true)) {
       LoginServiceUi.showErrorDialogHelper(
           Messages.LOGIN_ERROR_DIALOG_TITLE, Messages.LOGIN_ERROR_IN_PROGRESS);
+      return null;
     }
 
     // TODO: holding a lock for a long period of time (especially when waiting for UI events)
