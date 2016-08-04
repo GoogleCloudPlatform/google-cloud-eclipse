@@ -19,10 +19,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.cloud.tools.eclipse.appengine.login.ui.LoginServiceUi;
 import com.google.cloud.tools.ide.login.LoggerFacade;
 import com.google.cloud.tools.ide.login.OAuthData;
 import com.google.cloud.tools.ide.login.OAuthDataStore;
-import com.google.cloud.tools.ide.login.UiFacade;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -39,10 +39,10 @@ import java.util.TreeSet;
 @RunWith(MockitoJUnitRunner.class)
 public class GoogleLoginServiceTest {
 
-  @Mock OAuthDataStore dataStore;
-  @Mock OAuthData savedOAuthData;
-  @Mock UiFacade uiFacade;
-  @Mock LoggerFacade loggerFacade;
+  @Mock private OAuthDataStore dataStore;
+  @Mock private OAuthData savedOAuthData;
+  @Mock private LoginServiceUi uiFacade;
+  @Mock private LoggerFacade loggerFacade;
 
   private static final SortedSet<String> OAUTH_SCOPES = Collections.unmodifiableSortedSet(
       new TreeSet<>(Arrays.asList(

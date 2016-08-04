@@ -23,16 +23,21 @@ import com.google.cloud.tools.ide.login.VerificationCodeHolder;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.program.Program;
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
 
 public class LoginServiceUi implements UiFacade {
 
-  public static void showErrorDialogHelper(String title, String message) {
-    Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
-    MessageDialog.openError(shell, title, message);
+  private Display display;
+
+  public LoginServiceUi(Display display) {
+    this.display = display;
+  }
+
+  public void showErrorDialogHelper(String title, String message) {
+    MessageDialog.openError(display.getActiveShell(), title, message);
   }
 
   @Override
@@ -47,7 +52,6 @@ public class LoginServiceUi implements UiFacade {
   }
 
   @Override
-  // TODO(chanseok): the login library doesn't call this method for logging in. Fix the library.
   public void notifyStatusIndicator() {
     // Update and refresh the menu, toolbar button, and tooltip.
     final IWorkbench workbench = PlatformUI.getWorkbench();
@@ -70,8 +74,7 @@ public class LoginServiceUi implements UiFacade {
   public String obtainVerificationCodeFromUserInteraction(
       String title, GoogleAuthorizationCodeRequestUrl authCodeRequestUrl) {
     if (!Program.launch(authCodeRequestUrl.toString())) {
-      Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
-      MessageDialog.openError(shell,
+      MessageDialog.openError(display.getActiveShell(),
           Messages.LOGIN_ERROR_DIALOG_TITLE, Messages.LOGIN_ERROR_CANNOT_OPEN_BROWSER);
       return null;
     }

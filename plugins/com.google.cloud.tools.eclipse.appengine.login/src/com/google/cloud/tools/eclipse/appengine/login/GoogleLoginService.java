@@ -20,7 +20,6 @@ import com.google.cloud.tools.eclipse.appengine.login.ui.LoginServiceUi;
 import com.google.cloud.tools.ide.login.GoogleLoginState;
 import com.google.cloud.tools.ide.login.LoggerFacade;
 import com.google.cloud.tools.ide.login.OAuthDataStore;
-import com.google.cloud.tools.ide.login.UiFacade;
 import com.google.common.annotations.VisibleForTesting;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
@@ -51,24 +50,28 @@ public class GoogleLoginService implements IGoogleLoginService {
   private GoogleLoginState loginState;
   private AtomicBoolean loginInProgress;
 
+  private LoginServiceUi loginServiceUi;
+
   @VisibleForTesting
   GoogleLoginService(
-      OAuthDataStore dataStore, UiFacade uiFacade, LoggerFacade loggerFacade) {
+      OAuthDataStore dataStore, LoginServiceUi uiFacade, LoggerFacade loggerFacade) {
     loginState = new GoogleLoginState(
         Constants.getOAuthClientId(), Constants.getOAuthClientSecret(), OAUTH_SCOPES,
         dataStore, uiFacade, loggerFacade);
     loginInProgress = new AtomicBoolean(false);
+    loginServiceUi = uiFacade;
   }
 
   public GoogleLoginService() {
     this(new TransientOAuthDataStore(PlatformUI.getWorkbench().getService(IEclipseContext.class)),
-        new LoginServiceUi(), new LoginServiceLogger());
+         new LoginServiceUi(PlatformUI.getWorkbench().getDisplay()),
+         new LoginServiceLogger());
   }
 
   @Override
   public Credential getActiveCredential() {
     if (!loginInProgress.compareAndSet(false, true)) {
-      LoginServiceUi.showErrorDialogHelper(
+      loginServiceUi.showErrorDialogHelper(
           Messages.LOGIN_ERROR_DIALOG_TITLE, Messages.LOGIN_ERROR_IN_PROGRESS);
       return null;
     }

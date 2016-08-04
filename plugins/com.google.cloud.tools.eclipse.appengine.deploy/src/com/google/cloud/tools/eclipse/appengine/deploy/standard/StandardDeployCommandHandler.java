@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright 2016 Google Inc. All Rights Reserved.
+ *
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which
+ * accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *******************************************************************************/
+
 package com.google.cloud.tools.eclipse.appengine.deploy.standard;
 
 import com.google.api.client.auth.oauth2.Credential;
@@ -7,6 +22,7 @@ import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
 import com.google.cloud.tools.eclipse.appengine.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
 import com.google.cloud.tools.eclipse.util.ProjectFromSelectionHelper;
+import com.google.cloud.tools.eclipse.util.ServiceUtils;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 
@@ -19,7 +35,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
-import org.eclipse.ui.PlatformUI;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -48,7 +63,7 @@ public class StandardDeployCommandHandler extends AbstractHandler {
     try {
       IProject project = helper.getProject(event);
       if (project != null) {
-        launchDeployJob(project);
+        launchDeployJob(project, ServiceUtils.getService(event, IGoogleLoginService.class));
       }
       // return value must be null, reserved for future use
       return null;
@@ -57,9 +72,10 @@ public class StandardDeployCommandHandler extends AbstractHandler {
     }
   }
 
-  private void launchDeployJob(IProject project) throws IOException, CoreException {
+  private void launchDeployJob(IProject project, IGoogleLoginService loginService)
+      throws IOException, CoreException {
     IPath workDirectory = createWorkDirectory();
-    Credential credential = login();
+    Credential credential = login(loginService);
 
     StandardDeployJob deploy =
         new StandardDeployJob(new ExplodedWarPublisher(),
@@ -86,9 +102,7 @@ public class StandardDeployCommandHandler extends AbstractHandler {
     return workDirectory;
   }
 
-  private Credential login() throws CoreException {
-    IGoogleLoginService loginService =
-        PlatformUI.getWorkbench().getService(IGoogleLoginService.class);
+  private Credential login(IGoogleLoginService loginService) throws CoreException {
     Credential credential = loginService.getActiveCredential();
     if (credential == null) {
       throw new CoreException(StatusUtil.error(getClass(), Messages.getString("login.failed")));
