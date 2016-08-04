@@ -24,7 +24,6 @@ import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
 
@@ -54,11 +53,10 @@ public class LoginServiceUi implements UiFacade {
   @Override
   public void notifyStatusIndicator() {
     // Update and refresh the menu, toolbar button, and tooltip.
-    final IWorkbench workbench = PlatformUI.getWorkbench();
-    workbench.getDisplay().asyncExec(new Runnable() {
+    display.asyncExec(new Runnable() {
       @Override
       public void run() {
-        workbench.getService(ICommandService.class).refreshElements(
+        PlatformUI.getWorkbench().getService(ICommandService.class).refreshElements(
             "com.google.cloud.tools.eclipse.appengine.login.commands.loginCommand", //$NON-NLS-1$
             null);
       }
