@@ -42,6 +42,7 @@ import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -297,6 +298,17 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
         Arrays.asList(DebugPlugin.parseArguments(programArgumentString));
     if (!programArguments.isEmpty()) {
       devServerRunConfiguration.setAdditionalArguments(programArguments);
+    }
+
+    boolean environmentAppend =
+        configuration.getAttribute(ILaunchManager.ATTR_APPEND_ENVIRONMENT_VARIABLES, true);
+    if (!environmentAppend) {
+      throw new CoreException(StatusUtil.error(this, "'Replace environment' not yet supported"));
+    }
+    Map<String, String> environment = configuration.getAttribute(
+        ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, Collections.<String, String>emptyMap());
+    if (!environment.isEmpty() || !environmentAppend) {
+      devServerRunConfiguration.setEnvironment(environment);
     }
 
     return devServerRunConfiguration;
