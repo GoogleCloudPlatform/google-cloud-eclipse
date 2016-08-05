@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.google.cloud.tools.eclipse.swtbot;
 
 import org.eclipse.swt.SWT;
@@ -32,6 +33,7 @@ public class SwtBotTestingUtilities {
    */
   public static final int EVENT_DOWN_UP_DELAY_MS = 100;
 
+  /** Click the button, wait for the window change. */
   public static void clickButtonAndWaitForWindowChange(SWTBot bot, final SWTBotButton button) {
     performAndWaitForWindowChange(bot, new Runnable() {
       public void run() {
@@ -40,6 +42,10 @@ public class SwtBotTestingUtilities {
     });
   }
 
+  /**
+   * Click on all table cells in column {@code col} with the contents {@code value}. Selection
+   * should be the last cell clicked upon.
+   */
   public static void clickOnTableCellValue(SWTBotTable table, int col, String value) {
     String column = table.columns().get(col);
     for (int row = 0; row < table.rowCount(); row++) {
@@ -52,7 +58,7 @@ public class SwtBotTestingUtilities {
   }
 
   /**
-   * @return true if the operating system is Mac
+   * Return true if the operating system is Mac.
    */
   public static boolean isMac() {
     String platform = SWT.getPlatform();

@@ -27,7 +27,7 @@ public class MavenUtils {
 
   private static final Logger logger = Logger.getLogger(MavenUtils.class.getName());
 
-  private static final String POM_XML_NS_URI = "http://maven.apache.org/POM/4.0.0";
+  private static final String POM_XML_NAMESPACE_URI = "http://maven.apache.org/POM/4.0.0";
   
   /**
    * Returns {@code true} if the given project has the Maven 2 nature. This
@@ -62,13 +62,14 @@ public class MavenUtils {
   private String getTopLevelValue(Document doc, String parentTagName, String childTagName)
       throws CoreException {
     try {
-      NodeList parentElements = doc.getElementsByTagNameNS(POM_XML_NS_URI, parentTagName);
+      NodeList parentElements = doc.getElementsByTagNameNS(POM_XML_NAMESPACE_URI, parentTagName);
       if (parentElements.getLength() > 0) {
         Node parent = parentElements.item(0);
         if (parent.hasChildNodes()) {
           for (int i = 0; i < parent.getChildNodes().getLength(); ++i) {
             Node child = parent.getChildNodes().item(i);
-            if (child.getNodeName().equals(childTagName)) {
+            if (child.getNodeName().equals(childTagName) && (child.getNamespaceURI() == null
+                || POM_XML_NAMESPACE_URI.equals(child.getNamespaceURI()))) {
               return child.getTextContent();
             }
           }

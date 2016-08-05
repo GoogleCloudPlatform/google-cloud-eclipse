@@ -43,10 +43,9 @@ public final class SwtBotProjectActions {
   /**
    * Creates a Java class with the specified name.
    *
-   * @param bot The SWTWorkbenchBot
-   * @param projectName The name of the project the class should be created in
-   * @param packageName The name of the package the class should be created in
-   * @param className The name of the class to be created
+   * @param projectName the name of the project the class should be created in
+   * @param packageName the name of the package the class should be created in
+   * @param className the name of the class to be created
    */
   public static void createJavaClass(final SWTWorkbenchBot bot, String projectName,
       String packageName, final String className) {
@@ -126,6 +125,11 @@ public final class SwtBotProjectActions {
     return ResourcesPlugin.getWorkspace().getRoot();
   }
 
+  /**
+   * Delete the specified project using the delete option from the project context menu.
+   * 
+   * @param projectName the name of the project
+   */
   public static void deleteProject(final SWTWorkbenchBot bot, final String projectName) {
     SwtBotTestingUtilities.performAndWaitForWindowChange(bot, new Runnable() {
       @Override
@@ -146,8 +150,7 @@ public final class SwtBotProjectActions {
    * otherwise returns false. Throws a WidgetNotFoundException exception if the 'Package Explorer'
    * or 'Project Explorer' view cannot be found.
    *
-   * @param bot The SWTWorkbenchBot
-   * @param projectName The name of the project to be found
+   * @param projectName the name of the project to be found
    * @return true if the project is found, and false if not found
    */
   public static boolean doesProjectExist(final SWTWorkbenchBot bot, String projectName) {
@@ -233,8 +236,7 @@ public final class SwtBotProjectActions {
   /**
    * Refresh project tree.
    *
-   * @param bot The SWTWorkbenchBot
-   * @param projectName The project name
+   * @param projectName the project name
    */
   public static void refreshProject(final SWTWorkbenchBot bot, String projectName) {
     SWTBotTreeItem project = selectProject(bot, projectName);
@@ -242,12 +244,12 @@ public final class SwtBotProjectActions {
   }
 
   /**
-   * Returns the specified project. Throws a WidgetNotFoundException if the 'Package Explorer' or
-   * 'Project Explorer' view cannot be found or if the specified project cannot be found.
+   * Returns the specified project.
    *
-   * @param bot The SWTWorkbenchBot
-   * @param projectName The name of the project to select
-   * @return
+   * @param projectName the name of the project to select
+   * @return the selected tree item
+   * @throws WidgetNoFoundException if the 'Package Explorer' or 'Project Explorer' view cannot be
+   *         found or if the specified project cannot be found.
    */
   public static SWTBotTreeItem selectProject(final SWTWorkbenchBot bot, String projectName) {
     SWTBotView explorer = getExplorer(bot);
@@ -262,8 +264,8 @@ public final class SwtBotProjectActions {
    * Select a file/folder by providing a parent tree, and a list folders that lead to the
    * file/folder.
    *
-   * @param item Root tree item
-   * @param folderPath List of folder names that lead to file
+   * @param item root tree item
+   * @param folderPath list of folder names that lead to file
    * @return Returns a SWTBotTreeItem of the last name in texts
    */
   public static SWTBotTreeItem selectProjectItem(SWTBotTreeItem item, String... folderPath) {

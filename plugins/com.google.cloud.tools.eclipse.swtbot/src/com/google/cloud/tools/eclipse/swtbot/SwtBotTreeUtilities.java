@@ -48,7 +48,7 @@ public class SwtBotTreeUtilities {
    *         direct child with <code>subchildName</code>. If there are multiple tree items that
    *         satisfy this criteria, then the first one (in the UI) will be returned
    *
-   * @throws IllegalStateException if no such node can be found
+   * @throws WidgetNotFoundException if no such node can be found
    */
   public static SWTBotTreeItem getUniqueTreeItem(final SWTBot bot, final SWTBotTree mainTree,
       String itemName, String subchildName) {
@@ -60,20 +60,20 @@ public class SwtBotTreeUtilities {
           if (item.getNode(subchildName) != null) {
             return item;
           }
-        } catch (WidgetNotFoundException e) {
+        } catch (WidgetNotFoundException ex) {
           // Ignore
         }
       }
     }
 
-    throw new IllegalStateException(
+    throw new WidgetNotFoundException(
         "The " + itemName + " node with a child of " + subchildName + " must exist in the tree.");
   }
 
   /**
    * Given a tree that contains an entry with one of <code>itemNames</code> and a direct child with
    * a name matching <code>subchildName</code>, return its tree item.
-   *
+   * <p>
    * This method is useful when the top-level names are ambiguous and/or variable.
    *
    * @param mainTree the tree
@@ -84,7 +84,7 @@ public class SwtBotTreeUtilities {
    *         that has a direct child with <code>subchildName</code>. If there are multiple tree
    *         items that satisfy this criteria, then the first one (in the UI) will be returned
    *
-   * @throws IllegalStateException if no such node can be found
+   * @throws WidgetNotFoundException if no such node can be found
    */
   public static SWTBotTreeItem getUniqueTreeItem(final SWTBot bot, final SWTBotTree mainTree,
       String[] itemNames, String subchildName) {
@@ -92,16 +92,14 @@ public class SwtBotTreeUtilities {
     for (String itemName : itemNames) {
       try {
         return getUniqueTreeItem(bot, mainTree, itemName, subchildName);
-      } catch (IllegalStateException e) {
+      } catch (IllegalStateException ex) {
         // Ignore
       }
     }
 
-    throw new IllegalStateException("One of the " + itemNames + " nodes with a child of "
+    throw new WidgetNotFoundException("One of the " + itemNames + " nodes with a child of "
         + subchildName + " must exist in the tree.");
   }
-
-
 
   private static class TreeCollapsedCondition extends DefaultCondition {
     private final TreeItem tree;
@@ -110,10 +108,12 @@ public class SwtBotTreeUtilities {
       this.tree = tree;
     }
 
+    @Override
     public String getFailureMessage() {
       return "Could not collapse the tree of " + tree.getText();
     }
 
+    @Override
     public boolean test() throws Exception {
       return !isTreeExpanded(tree);
     }
@@ -126,15 +126,22 @@ public class SwtBotTreeUtilities {
       this.tree = tree;
     }
 
+    @Override
     public String getFailureMessage() {
       return "Could not expand the tree of " + tree.getText();
     }
 
+    @Override
     public boolean test() throws Exception {
       return isTreeExpanded(tree);
     }
   }
 
+  /**
+   * Set the selection in the tree to the item with the given label text.
+   * 
+   * @return the current node
+   */
   public static SWTBotTreeItem selectTreeItem(SWTBot bot, SWTBotTreeItem tree, String itemText) {
     waitUntilTreeItemHasItem(bot, tree, itemText);
     SWTBotTreeItem item = tree.select(itemText);
@@ -145,15 +152,15 @@ public class SwtBotTreeUtilities {
    * Blocks the caller until all of the direct children of the tree have text. The assumption is
    * that the tree does not have any "empty" children.
    * 
-   * TODO: Refactor some of this logic; it follows the same general pattern as
-   * {@link #waitUntilTreeItemHasItem(SWTBot, SWTBotTreeItem, String)}.
-   * 
    * @param tree the tree to search
    * @throws TimeoutException if all of the direct children of the tree do not have text within the
    *         timeout period
    */
   public static void waitUntilTreeHasText(SWTBot bot, final SWTBotTreeItem tree)
       throws TimeoutException {
+    // TODO: Refactor some of this logic; it follows the same general pattern as
+    // {@link #waitUntilTreeItemHasItem(SWTBot, SWTBotTreeItem, String)}.
+
     // Attempt #1
     if (!waitUntilTreeHasTextImpl(bot, tree.widget)) {
       // Attempt #2: Something went wrong, try to cautiously reopen it.
@@ -176,7 +183,7 @@ public class SwtBotTreeUtilities {
     }
   }
 
-  private static boolean doesTreeItemHaveText(final TreeItem widget) {
+  private static boolean treeItemHasText(final TreeItem widget) {
     return UIThreadRunnable.syncExec(new Result<Boolean>() {
       public Boolean run() {
         TreeItem[] items = widget.getItems();
@@ -224,7 +231,7 @@ public class SwtBotTreeUtilities {
           return getTreeItem(tree, nodeText) != null;
         }
       });
-    } catch (TimeoutException e) {
+    } catch (TimeoutException ex) {
       return false;
     }
 
@@ -234,15 +241,17 @@ public class SwtBotTreeUtilities {
   private static boolean waitUntilTreeHasTextImpl(SWTBot bot, final TreeItem tree) {
     try {
       bot.waitUntil(new DefaultCondition() {
+        @Override
         public String getFailureMessage() {
           return "Not all of the nodes in the tree have text.";
         }
 
+        @Override
         public boolean test() throws Exception {
-          return doesTreeItemHaveText(tree);
+          return treeItemHasText(tree);
         }
       });
-    } catch (TimeoutException e) {
+    } catch (TimeoutException ex) {
       return false;
     }
 
@@ -291,6 +300,7 @@ public class SwtBotTreeUtilities {
    */
   public static TreeItem getTreeItem(final TreeItem widget, final String nodeText) {
     return UIThreadRunnable.syncExec(new WidgetResult<TreeItem>() {
+      @Override
       public TreeItem run() {
         TreeItem[] items = widget.getItems();
         for (TreeItem item : items) {
