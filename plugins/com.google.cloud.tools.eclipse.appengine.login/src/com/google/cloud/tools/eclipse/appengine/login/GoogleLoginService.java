@@ -24,7 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.window.IShellProvider;
-import org.eclipse.jface.window.SameShellProvider;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 
@@ -60,9 +60,14 @@ public class GoogleLoginService implements IGoogleLoginService {
    * as an OSGi service.
    */
   protected void activate() {
-    IWorkbench workbench = PlatformUI.getWorkbench();
+    final IWorkbench workbench = PlatformUI.getWorkbench();
     IEclipseContext eclipseContext = workbench.getService(IEclipseContext.class);
-    IShellProvider shellProvider = new SameShellProvider(workbench.getDisplay().getActiveShell());
+    IShellProvider shellProvider = new IShellProvider() {
+      @Override
+      public Shell getShell() {
+        return workbench.getDisplay().getActiveShell();
+      }
+    };
 
     loginServiceUi = new LoginServiceUi(workbench, shellProvider);
     loginState = new GoogleLoginState(
