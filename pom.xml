@@ -16,6 +16,8 @@
     <module>features/com.google.licenses.apache_v2</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.deploy</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.deploy.test</module>
+    <module>plugins/com.google.cloud.tools.eclipse.appengine.deploy.ui</module>
+    <module>plugins/com.google.cloud.tools.eclipse.appengine.deploy.ui.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.facets</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.facets.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.localserver</module>

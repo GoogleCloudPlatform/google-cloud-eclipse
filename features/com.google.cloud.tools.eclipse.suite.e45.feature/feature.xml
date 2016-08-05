@@ -24,62 +24,69 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
+
   <plugin
          id="com.google.cloud.tools.eclipse.appengine.deploy"
          download-size="0"
          install-size="0"
          version="0.0.0"
-         unpack="false"/>       
-         
+         unpack="false"/>
+
+ <plugin
+         id="com.google.cloud.tools.eclipse.appengine.deploy.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
   <plugin
          id="com.google.cloud.tools.eclipse.appengine.facets"
          download-size="0"
          install-size="0"
          version="0.0.0"
-         unpack="false"/>   
- 
+         unpack="false"/>
+
    <plugin
          id="com.google.cloud.tools.eclipse.appengine.localserver"
          download-size="0"
          install-size="0"
          version="0.0.0"
-         unpack="false"/>       
-                  
+         unpack="false"/>
+
   <plugin
          id="com.google.cloud.tools.eclipse.appengine.login"
          download-size="0"
          install-size="0"
          version="0.0.0"
-         unpack="false"/>   
- 
+         unpack="false"/>
+
    <plugin
          id="com.google.cloud.tools.eclipse.appengine.newproject"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
+
    <plugin
          id="com.google.cloud.tools.eclipse.appengine.newproject.maven"
          download-size="0"
          install-size="0"
          version="0.0.0"
-         unpack="false"/> 
-          
+         unpack="false"/>
+
   <plugin
          id="com.google.cloud.tools.eclipse.appengine.ui"
          download-size="0"
          install-size="0"
          version="0.0.0"
-         unpack="false"/>    
-            
+         unpack="false"/>
+
   <plugin
          id="com.google.cloud.tools.eclipse.appengine.whitelist"
          download-size="0"
          install-size="0"
          version="0.0.0"
-         unpack="false"/>  
+         unpack="false"/>
 
   <plugin
          id="com.google.cloud.tools.eclipse.preferences"
@@ -87,14 +94,14 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
+
   <plugin
          id="com.google.cloud.tools.eclipse.sdk"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
+
   <plugin
          id="com.google.cloud.tools.eclipse.sdk.ui"
          download-size="0"
