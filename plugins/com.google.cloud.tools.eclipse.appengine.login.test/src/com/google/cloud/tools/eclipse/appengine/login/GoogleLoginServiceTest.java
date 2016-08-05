@@ -59,8 +59,7 @@ public class GoogleLoginServiceTest {
   public void testGoogleLoginService_clearSavedCredentialIfNullRefreshToken() {
     when(savedOAuthData.getRefreshToken()).thenReturn(null);
 
-    GoogleLoginService loginService = new GoogleLoginService();
-    loginService.initialize(dataStore, uiFacade, loggerFacade);
+    GoogleLoginService loginService = new GoogleLoginService(dataStore, uiFacade, loggerFacade);
     Assert.assertNull(loginService.getCachedActiveCredential());
   }
 
@@ -71,8 +70,7 @@ public class GoogleLoginServiceTest {
     when(savedOAuthData.getStoredScopes()).thenReturn(newScope);
     when(savedOAuthData.getRefreshToken()).thenReturn("fake_refresh_token");
 
-    GoogleLoginService loginService = new GoogleLoginService();
-    loginService.initialize(dataStore, uiFacade, loggerFacade);
+    GoogleLoginService loginService = new GoogleLoginService(dataStore, uiFacade, loggerFacade);
     Assert.assertNull(loginService.getCachedActiveCredential());
   }
 
@@ -82,8 +80,7 @@ public class GoogleLoginServiceTest {
     when(savedOAuthData.getStoredScopes()).thenReturn(OAUTH_SCOPES);
     when(savedOAuthData.getRefreshToken()).thenReturn("fake_refresh_token");
 
-    GoogleLoginService loginService = new GoogleLoginService();
-    loginService.initialize(dataStore, uiFacade, loggerFacade);
+    GoogleLoginService loginService = new GoogleLoginService(dataStore, uiFacade, loggerFacade);
     verify(dataStore, never()).clearStoredOAuthData();
     Assert.assertNotNull(loginService.getCachedActiveCredential());
   }

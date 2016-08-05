@@ -27,7 +27,6 @@ import org.eclipse.jface.window.IShellProvider;
 import org.eclipse.jface.window.SameShellProvider;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
-import org.osgi.service.component.ComponentContext;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -65,18 +64,27 @@ public class GoogleLoginService implements IGoogleLoginService {
     IEclipseContext eclipseContext = workbench.getService(IEclipseContext.class);
     IShellProvider shellProvider = new SameShellProvider(workbench.getDisplay().getActiveShell());
 
-    initialize(new TransientOAuthDataStore(eclipseContext),
-        new LoginServiceUi(workbench, shellProvider), new LoginServiceLogger());
+    loginServiceUi = new LoginServiceUi(workbench, shellProvider);
+    loginState = new GoogleLoginState(
+        Constants.getOAuthClientId(), Constants.getOAuthClientSecret(), OAUTH_SCOPES,
+        new TransientOAuthDataStore(eclipseContext), loginServiceUi, new LoginServiceLogger());
+    loginInProgress = new AtomicBoolean(false);
   }
 
+  /**
+   * 0-arg constructor is necessary for OSGi Declarative Services. Initialization will be done
+   * by {@link activate()}.
+   */
+  public GoogleLoginService() {}
+
   @VisibleForTesting
-  void initialize(
+  GoogleLoginService(
       OAuthDataStore dataStore, LoginServiceUi uiFacade, LoggerFacade loggerFacade) {
+    loginServiceUi = uiFacade;
     loginState = new GoogleLoginState(
         Constants.getOAuthClientId(), Constants.getOAuthClientSecret(), OAUTH_SCOPES,
         dataStore, uiFacade, loggerFacade);
     loginInProgress = new AtomicBoolean(false);
-    loginServiceUi = uiFacade;
   }
 
   @Override
