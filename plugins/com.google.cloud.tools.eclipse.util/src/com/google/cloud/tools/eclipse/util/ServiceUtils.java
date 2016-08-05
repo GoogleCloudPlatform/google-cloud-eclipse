@@ -24,8 +24,21 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 
+/**
+ * Utility class for using OSGi services, such as locating OSGi services from a desired context.
+ */
 public class ServiceUtils {
 
+  /**
+   * Returns an OSGi service from {@link ExecutionEvent}. It looks up a service in the following
+   * locations (if exist) in the given order:
+   *
+   * {@code HandlerUtil.getActiveSite(event)}
+   * {@code HandlerUtil.getActiveEditor(event).getEditorSite()}
+   * {@code HandlerUtil.getActiveEditor(event).getSite()}
+   * {@code HandlerUtil.getActiveWorkbenchWindow(event)}
+   * {@code PlatformUI.getWorkbench()}
+   */
   public static <T> T getService(ExecutionEvent event, Class<T> api) {
     IWorkbenchSite activeSite = HandlerUtil.getActiveSite(event);
     if (activeSite != null) {

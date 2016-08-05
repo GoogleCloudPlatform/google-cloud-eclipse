@@ -22,21 +22,23 @@ import com.google.cloud.tools.ide.login.VerificationCodeHolder;
 
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.window.IShellProvider;
 import org.eclipse.swt.program.Program;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
+import org.eclipse.ui.services.IServiceLocator;
 
 public class LoginServiceUi implements UiFacade {
 
-  private Display display;
+  private IServiceLocator serviceLocator;
+  private IShellProvider shellProvider;
 
-  public LoginServiceUi(Display display) {
-    this.display = display;
+  public LoginServiceUi(IServiceLocator serviceLocator, IShellProvider shellProvider) {
+    this.serviceLocator = serviceLocator;
+    this.shellProvider = shellProvider;
   }
 
   public void showErrorDialogHelper(String title, String message) {
-    MessageDialog.openError(display.getActiveShell(), title, message);
+    MessageDialog.openError(shellProvider.getShell(), title, message);
   }
 
   @Override
@@ -53,10 +55,10 @@ public class LoginServiceUi implements UiFacade {
   @Override
   public void notifyStatusIndicator() {
     // Update and refresh the menu, toolbar button, and tooltip.
-    display.asyncExec(new Runnable() {
+    shellProvider.getShell().getDisplay().asyncExec(new Runnable() {
       @Override
       public void run() {
-        PlatformUI.getWorkbench().getService(ICommandService.class).refreshElements(
+        serviceLocator.getService(ICommandService.class).refreshElements(
             "com.google.cloud.tools.eclipse.appengine.login.commands.loginCommand", //$NON-NLS-1$
             null);
       }
@@ -72,7 +74,7 @@ public class LoginServiceUi implements UiFacade {
   public String obtainVerificationCodeFromUserInteraction(
       String title, GoogleAuthorizationCodeRequestUrl authCodeRequestUrl) {
     if (!Program.launch(authCodeRequestUrl.toString())) {
-      MessageDialog.openError(display.getActiveShell(),
+      MessageDialog.openError(shellProvider.getShell(),
           Messages.LOGIN_ERROR_DIALOG_TITLE, Messages.LOGIN_ERROR_CANNOT_OPEN_BROWSER);
       return null;
     }

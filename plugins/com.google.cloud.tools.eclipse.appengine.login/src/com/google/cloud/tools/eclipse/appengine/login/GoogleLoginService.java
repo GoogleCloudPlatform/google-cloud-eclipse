@@ -23,7 +23,11 @@ import com.google.cloud.tools.ide.login.OAuthDataStore;
 import com.google.common.annotations.VisibleForTesting;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.jface.window.IShellProvider;
+import org.eclipse.jface.window.SameShellProvider;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
+import org.osgi.service.component.ComponentContext;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -52,20 +56,27 @@ public class GoogleLoginService implements IGoogleLoginService {
 
   private LoginServiceUi loginServiceUi;
 
+  /**
+   * Called by OSGi Declarative Services Runtime when the {@link GoogleLoginService} is activated
+   * as an OSGi service.
+   */
+  protected void activate(ComponentContext context) {
+    IWorkbench workbench = PlatformUI.getWorkbench();
+    IEclipseContext eclipseContext = workbench.getService(IEclipseContext.class);
+    IShellProvider shellProvider = new SameShellProvider(workbench.getDisplay().getActiveShell());
+
+    initialize(new TransientOAuthDataStore(eclipseContext),
+        new LoginServiceUi(workbench, shellProvider), new LoginServiceLogger());
+  }
+
   @VisibleForTesting
-  GoogleLoginService(
+  void initialize(
       OAuthDataStore dataStore, LoginServiceUi uiFacade, LoggerFacade loggerFacade) {
     loginState = new GoogleLoginState(
         Constants.getOAuthClientId(), Constants.getOAuthClientSecret(), OAUTH_SCOPES,
         dataStore, uiFacade, loggerFacade);
     loginInProgress = new AtomicBoolean(false);
     loginServiceUi = uiFacade;
-  }
-
-  public GoogleLoginService() {
-    this(new TransientOAuthDataStore(PlatformUI.getWorkbench().getService(IEclipseContext.class)),
-         new LoginServiceUi(PlatformUI.getWorkbench().getDisplay()),
-         new LoginServiceLogger());
   }
 
   @Override
