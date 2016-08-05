@@ -60,7 +60,7 @@ public class GoogleLoginService implements IGoogleLoginService {
    * Called by OSGi Declarative Services Runtime when the {@link GoogleLoginService} is activated
    * as an OSGi service.
    */
-  protected void activate(ComponentContext context) {
+  protected void activate() {
     IWorkbench workbench = PlatformUI.getWorkbench();
     IEclipseContext eclipseContext = workbench.getService(IEclipseContext.class);
     IShellProvider shellProvider = new SameShellProvider(workbench.getDisplay().getActiveShell());
