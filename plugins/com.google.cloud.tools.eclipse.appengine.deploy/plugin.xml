@@ -43,4 +43,28 @@
     </handler>
   </extension>
 
+  <extension
+    point="org.eclipse.ui.console.consolePatternMatchListeners">
+    <consolePatternMatchListener
+      class="com.google.cloud.tools.eclipse.ui.util.console.PatternToHyperlinkConverter"
+      id="com.google.cloud.tools.eclipse.appengine.deploy.consolePatternMatchListener"
+      regex="https://.+\.appspot\.com">
+      <enablement>
+        <test
+          property="com.google.cloud.tools.eclipse.ui.util.console.name"
+          value="App Engine Deploy">
+        </test>
+      </enablement>
+    </consolePatternMatchListener>
+  </extension>
+
+  <extension point="org.eclipse.core.expressions.propertyTesters">
+    <propertyTester
+      id="com.google.cloud.tools.eclipse.ui.util.console.consolePropertyTester"
+      namespace="com.google.cloud.tools.eclipse.ui.util.console"
+      properties="name"
+      type="org.eclipse.ui.console.IConsole"
+      class="com.google.cloud.tools.eclipse.ui.util.console.ConsolePropertyTester">
+    </propertyTester>
+  </extension>
 </plugin>
