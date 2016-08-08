@@ -16,96 +16,136 @@
 package com.google.cloud.tools.eclipse.appengine.login;
 
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
-import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
-import com.google.api.client.googleapis.util.Utils;
-import com.google.cloud.tools.eclipse.appengine.login.ui.GoogleLoginBrowser;
+import com.google.cloud.tools.eclipse.appengine.login.ui.LoginServiceUi;
+import com.google.cloud.tools.ide.login.GoogleLoginState;
+import com.google.cloud.tools.ide.login.LoggerFacade;
+import com.google.cloud.tools.ide.login.OAuthDataStore;
+import com.google.common.annotations.VisibleForTesting;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.window.IShellProvider;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Provides service related to login, e.g., account management, getting a credential of a
  * currently active user, etc.
  */
-public class GoogleLoginService {
-
-  private static final String STASH_OAUTH_CRED_KEY = "OAUTH_CRED";
+public class GoogleLoginService implements IGoogleLoginService {
 
   // For the detailed info about each scope, see
   // https://github.com/GoogleCloudPlatform/gcloud-eclipse-tools/wiki/Cloud-Tools-for-Eclipse-Technical-Design#oauth-20-scopes-requested
-  private static final List<String> OAUTH_SCOPES = Collections.unmodifiableList(Arrays.asList(
-      "https://www.googleapis.com/auth/cloud-platform" //$NON-NLS-1$
-  ));
+  private static final SortedSet<String> OAUTH_SCOPES = Collections.unmodifiableSortedSet(
+      new TreeSet<>(Arrays.asList(
+          "email", //$NON-NLS-1$
+          "https://www.googleapis.com/auth/cloud-platform" //$NON-NLS-1$
+      )));
 
-  private CredentialHelper credentialHelper = new CredentialHelper();
-  
+  private GoogleLoginState loginState;
+  private AtomicBoolean loginInProgress;
+
+  private LoginServiceUi loginServiceUi;
+
   /**
-   * Returns the credential of an active user (among multiple logged-in users). A login screen
-   * may be presented, e.g., if no user is logged in or login is required due to an expired
-   * credential. This method returns {@code null} if a user cancels the login process.
-   * For this reason, if {@code null} is returned, the caller should cancel the current
-   * operation and display a general message that login is required but was cancelled or failed.
-   *
-   * Must be called from a UI context.
-   *
-   * @param shellProvider provides a shell for the login screen if login is necessary
-   * @throws IOException can be thrown by the underlying Login API request (e.g., network
-   *     error from the transport layer while sending/receiving a HTTP request/response.)
+   * Called by OSGi Declarative Services Runtime when the {@link GoogleLoginService} is activated
+   * as an OSGi service.
    */
-  public Credential getActiveCredential(IShellProvider shellProvider) throws IOException {
-    Credential credential = getCachedActiveCredential();
+  protected void activate() {
+    final IWorkbench workbench = PlatformUI.getWorkbench();
+    IEclipseContext eclipseContext = workbench.getService(IEclipseContext.class);
+    IShellProvider shellProvider = new IShellProvider() {
+      @Override
+      public Shell getShell() {
+        return workbench.getDisplay().getActiveShell();
+      }
+    };
 
-    if (credential == null) {
-      credential = logIn(shellProvider);
-
-      IEclipseContext eclipseContext = PlatformUI.getWorkbench().getService(IEclipseContext.class);
-      eclipseContext.set(STASH_OAUTH_CRED_KEY, credential);
-    }
-    return credential;
+    loginServiceUi = new LoginServiceUi(workbench, shellProvider);
+    loginState = new GoogleLoginState(
+        Constants.getOAuthClientId(), Constants.getOAuthClientSecret(), OAUTH_SCOPES,
+        new TransientOAuthDataStore(eclipseContext), loginServiceUi, new LoginServiceLogger());
+    loginInProgress = new AtomicBoolean(false);
   }
 
   /**
-   * Returns the credential of an active user (among multiple logged-in users). Unlike {@link
-   * #getActiveCredential}, this version does not involve login process or make API calls.
-   * Returns {@code null} if no credential has been cached.
-   *
-   * Safe to call from non-UI contexts.
+   * 0-arg constructor is necessary for OSGi Declarative Services. Initialization will be done
+   * by {@link activate()}.
    */
-  public Credential getCachedActiveCredential() {
-    IEclipseContext eclipseContext = PlatformUI.getWorkbench().getService(IEclipseContext.class);
-    return (Credential) eclipseContext.get(STASH_OAUTH_CRED_KEY);
+  public GoogleLoginService() {}
+
+  @VisibleForTesting
+  GoogleLoginService(
+      OAuthDataStore dataStore, LoginServiceUi uiFacade, LoggerFacade loggerFacade) {
+    loginServiceUi = uiFacade;
+    loginState = new GoogleLoginState(
+        Constants.getOAuthClientId(), Constants.getOAuthClientSecret(), OAUTH_SCOPES,
+        dataStore, uiFacade, loggerFacade);
+    loginInProgress = new AtomicBoolean(false);
   }
 
-  private Credential logIn(IShellProvider shellProvider) throws IOException {
-    GoogleLoginBrowser loginBrowser = new GoogleLoginBrowser(
-        shellProvider.getShell(), Constants.getOAuthClientId(), OAUTH_SCOPES);
-    if (loginBrowser.open() != GoogleLoginBrowser.OK) {
+  @Override
+  public Credential getActiveCredential() {
+    if (!loginInProgress.compareAndSet(false, true)) {
+      loginServiceUi.showErrorDialogHelper(
+          Messages.LOGIN_ERROR_DIALOG_TITLE, Messages.LOGIN_ERROR_IN_PROGRESS);
       return null;
     }
 
-    GoogleAuthorizationCodeTokenRequest authRequest = new GoogleAuthorizationCodeTokenRequest(
-        Utils.getDefaultTransport(), Utils.getDefaultJsonFactory(),
-        Constants.getOAuthClientId(), Constants.getOAuthClientSecret(),
-        loginBrowser.getAuthorizationCode(),
-        GoogleLoginBrowser.REDIRECT_URI);
-
-    return createCredential(authRequest.execute());
+    // TODO: holding a lock for a long period of time (especially when waiting for UI events)
+    // should be avoided. Make the login library thread-safe, and don't lock during UI events.
+    // As a workaround and temporary relief, we use the loginInProgress flag above to fail
+    // conservatively if login seems to be in progress.
+    try {
+      synchronized (loginState) {
+        if (loginState.logIn(null /* parameter ignored */)) {
+          return loginState.getCredential();
+        }
+        return null;
+      }
+    }
+    finally {
+      loginInProgress.set(false);
+    }
   }
 
-  private Credential createCredential(GoogleTokenResponse tokenResponse) {
-    return credentialHelper.createCredential(tokenResponse.getAccessToken(),
-                                             tokenResponse.getRefreshToken());
+  @Override
+  public Credential getCachedActiveCredential() {
+    synchronized (loginState) {
+      if (loginState.isLoggedIn()) {
+        return loginState.getCredential();
+      }
+      return null;
+    }
   }
 
+  @Override
   public void clearCredential() {
-    IEclipseContext eclipseContext = PlatformUI.getWorkbench().getService(IEclipseContext.class);
-    eclipseContext.remove(STASH_OAUTH_CRED_KEY);
+    synchronized (loginState) {
+      loginState.logOut(false /* Don't prompt for logout. */);
+    }
   }
+
+  private static final Logger logger = Logger.getLogger(GoogleLoginService.class.getName());
+
+  private static class LoginServiceLogger implements LoggerFacade {
+
+    @Override
+    public void logError(String message, Throwable thrown) {
+      logger.log(Level.SEVERE, message, thrown);
+    }
+
+    @Override
+    public void logWarning(String message) {
+      logger.log(Level.WARNING, message);
+    }
+  };
 }

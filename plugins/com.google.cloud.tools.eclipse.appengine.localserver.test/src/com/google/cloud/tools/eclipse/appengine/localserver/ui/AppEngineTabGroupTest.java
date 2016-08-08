@@ -9,7 +9,8 @@ public class AppEngineTabGroupTest {
   public void testCreateTabs() {
     AppEngineTabGroup group = new AppEngineTabGroup();
     group.createTabs(null, "");
-    Assert.assertEquals(1, group.getTabs().length);
+    Assert.assertEquals("Server", group.getTabs()[0].getName());
+    Assert.assertEquals("Environment", group.getTabs()[1].getName());
   }
 
 }

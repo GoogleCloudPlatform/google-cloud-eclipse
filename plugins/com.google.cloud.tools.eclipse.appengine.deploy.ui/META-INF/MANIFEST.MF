@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: GCloud for Eclipse App Engine Deployment Support UI
+Bundle-SymbolicName: com.google.cloud.tools.eclipse.appengine.deploy.ui;singleton:=true
+Bundle-Version: 0.1.0.qualifier
+Bundle-Vendor: Google, Inc.
+Bundle-Localization: plugin
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ActivationPolicy: lazy
+Require-Bundle: org.eclipse.ui.workbench
+Import-Package: org.eclipse.core.resources,
+ org.eclipse.core.runtime;common="split",
+ org.eclipse.jface.preference,
+ org.eclipse.swt,
+ org.eclipse.swt.graphics,
+ org.eclipse.swt.widgets

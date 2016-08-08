@@ -4,10 +4,11 @@
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="generated-sources"/>
+	<classpathentry exported="true" kind="lib" path="lib/com.google.cloud.tools.ide.login-0.0.0-SNAPSHOT.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-api-client-1.22.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-api-services-oauth2-v2-rev114-1.22.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-http-client-1.22.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/google-http-client-jackson2-1.22.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-http-client-jackson-1.22.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-oauth-client-1.22.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jackson-core-2.1.3.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
