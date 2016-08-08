@@ -77,8 +77,12 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
   private void setupDebugTarget(ILaunch launch, ILaunchConfiguration configuration, int port,
       IProgressMonitor monitor) throws CoreException {
-    IVMConnector connector =
-        JavaRuntime.getVMConnector(IJavaLaunchConfigurationConstants.ID_SOCKET_LISTEN_VM_CONNECTOR);
+    IVMConnector connector = JavaRuntime.getVMConnector(
+        "com.google.cloud.tools.eclipse.launching.jdt.socketListenerMultipleConnector");
+    if (connector == null) {
+      connector = JavaRuntime
+          .getVMConnector(IJavaLaunchConfigurationConstants.ID_SOCKET_LISTEN_VM_CONNECTOR);
+    }
     if (connector == null) {
       abort("Cannot find Socket Listening connector", null, 0);
       return; // keep JDT null analysis happy
@@ -89,6 +93,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     Map<String, String> connectionParameters = new HashMap<>();
     connectionParameters.put("hostname", DEBUGGER_HOST);
     connectionParameters.put("port", Integer.toString(port));
+    connectionParameters.put("multiple", "true");
     connectionParameters.put("timeout", Integer.toString(timeout));
     connector.connect(connectionParameters, monitor, launch);
   }

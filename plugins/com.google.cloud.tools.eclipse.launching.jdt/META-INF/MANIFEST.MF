@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Launching Utilities for Cloud Tools for Eclipse
+Bundle-SymbolicName: com.google.cloud.tools.eclipse.jdt.launching;singleton:=true
+Bundle-Version: 0.1.0.qualifier
+Bundle-Vendor: Google, Inc.
+Fragment-Host: org.eclipse.jdt.launching
+Bundle-Localization: plugin
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ActivationPolicy: lazy
+Export-Package: com.google.cloud.tools.eclipse.jdt.internal.launching

@@ -45,6 +45,7 @@
     <module>plugins/com.google.cloud.tools.eclipse.ui.util.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.util</module>
     <module>plugins/com.google.cloud.tools.eclipse.util.test</module>
+    <module>plugins/com.google.cloud.tools.eclipse.launching.jdt</module>
   </modules>
 
   <properties>
