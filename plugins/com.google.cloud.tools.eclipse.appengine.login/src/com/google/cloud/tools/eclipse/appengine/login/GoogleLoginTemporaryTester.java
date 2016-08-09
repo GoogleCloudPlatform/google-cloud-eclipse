@@ -15,6 +15,8 @@
 
 package com.google.cloud.tools.eclipse.appengine.login;
 
+import com.google.api.client.auth.oauth2.Credential;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -22,19 +24,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import com.google.api.client.auth.oauth2.Credential;
-
 // FIXME This class is for manual integration login test. Remove it in the final product.
 public class GoogleLoginTemporaryTester {
 
-  public boolean testLogin(Credential credential) {
-    try {
-      File credentialFile = getCredentialFile(credential);
-      return credentialFile != null && testCredentialWithGcloud(credentialFile);
-    } catch (IOException e) {
-      e.printStackTrace();
-      return false;
-    }
+  public void testLogin(Credential credential) throws IOException {
+    File credentialFile = getCredentialFile(credential);
+    testCredentialWithGcloud(credentialFile);
   }
 
   private File getCredentialFile(Credential credential) throws IOException {
@@ -47,7 +42,7 @@ public class GoogleLoginTemporaryTester {
     return credentialFile;
   }
 
-  private boolean testCredentialWithGcloud(File credentialFile) throws IOException {
+  private void testCredentialWithGcloud(File credentialFile) throws IOException {
     try {
       ProcessBuilder processBuilder = new ProcessBuilder(
           "gcloud", "projects", "list", "--credential-file-override=" + credentialFile.toString());
@@ -55,6 +50,8 @@ public class GoogleLoginTemporaryTester {
       Process process = processBuilder.start();
       process.waitFor();
 
+      String stdOut = new String();
+      String stdErr = new String();
       try (
         BufferedReader outReader =
             new BufferedReader(new InputStreamReader(process.getInputStream()));
@@ -63,18 +60,24 @@ public class GoogleLoginTemporaryTester {
       ) {
         while (outReader.ready() || errReader.ready()) {
           if (outReader.ready()) {
-            System.out.println("[stdout] " + outReader.readLine());
+            String line = outReader.readLine();
+            stdOut += line;
+            System.out.println("[stdout] " + line);
           }
           if (errReader.ready()) {
-            System.out.println("[stderr] " + errReader.readLine());
+            String line = outReader.readLine();
+            stdErr += line;
+            System.out.println("[stderr] " + line);
           }
         }
       }
-      return process.exitValue() == 0;
+
+      if (process.exitValue() != 0) {
+        throw new IOException("non-zero exit code from gcloud:\n\n" + stdOut + "\n\n" + stdErr);
+      }
 
     } catch (InterruptedException ie) {
-      ie.printStackTrace();
-      return false;
+      throw new IOException(ie);
     }
   }
 }
