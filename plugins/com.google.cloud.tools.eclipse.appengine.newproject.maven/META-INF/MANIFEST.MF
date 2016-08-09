@@ -22,6 +22,7 @@ Require-Bundle: com.google.cloud.tools.eclipse.appengine.newproject;bundle-versi
 Bundle-ActivationPolicy: lazy
 Import-Package: com.google.cloud.tools.eclipse.appengine.facets,
  com.google.cloud.tools.eclipse.appengine.ui,
+ com.google.cloud.tools.eclipse.usagetracker,
  org.apache.maven.archetype.catalog;provider=m2e,
  org.apache.maven.artifact;provider=m2e,
  org.eclipse.wst.common.project.facet.core

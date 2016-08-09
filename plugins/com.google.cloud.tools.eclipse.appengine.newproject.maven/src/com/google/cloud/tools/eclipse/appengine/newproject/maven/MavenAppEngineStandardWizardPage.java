@@ -3,6 +3,8 @@ package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectIdValidator;
 import com.google.cloud.tools.eclipse.appengine.newproject.JavaPackageValidator;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.CharMatcher;
 
@@ -50,7 +52,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage implements IWiz
   private Text projectIdField;
 
   private boolean canFlipPage;
-  
+
   public MavenAppEngineStandardWizardPage() {
     super("basicNewProjectPage"); //$NON-NLS-1$
     setTitle("Maven-based App Engine Standard Project");
@@ -62,6 +64,9 @@ public class MavenAppEngineStandardWizardPage extends WizardPage implements IWiz
 
   @Override
   public void createControl(Composite parent) {
+    AnalyticsPingManager.getInstance().sendPing(
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD, null, null, parent.getShell());
+
     Composite container = new Composite(parent, SWT.NONE);
     GridLayoutFactory.swtDefaults().numColumns(2).applyTo(container);
 
@@ -70,14 +75,14 @@ public class MavenAppEngineStandardWizardPage extends WizardPage implements IWiz
     createAppEngineProjectDetailsArea(container);
 
     setControl(container);
-    
+
     Dialog.applyDialogFont(container);
   }
 
   /** Create UI for specifying the generated location area */
   private void createLocationArea(Composite container) {
     ModifyListener pageValidator = new PageValidator();
-    
+
     Group locationGroup = new Group(container, SWT.NONE);
     locationGroup.setText("Location");
     GridDataFactory.fillDefaults().span(2, 1).applyTo(locationGroup);
@@ -195,13 +200,13 @@ public class MavenAppEngineStandardWizardPage extends WizardPage implements IWiz
 
   /**
    * Validate and report on the contents of this page
-   * 
+   *
    * @return true if valid, false if there is a problem
    */
   public boolean validatePage() {
     setMessage(null);
     setErrorMessage(null);
-    
+
     // order here should match order of the UI fields
 
     String location = locationField.getText().trim();
@@ -282,7 +287,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage implements IWiz
     }
     return true;
   }
-  
+
   /** Return the Maven group for the project */
   public String getGroupId() {
     return groupIdField.getText().trim();

@@ -1,6 +1,8 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPrompter;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
@@ -20,20 +22,23 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
 
   private AppEngineStandardWizardPage page;
   private AppEngineStandardProjectConfig config = new AppEngineStandardProjectConfig();
-  
+
   public StandardProjectWizard() {
     this.setWindowTitle("New App Engine Standard Project");
     page = new AppEngineStandardWizardPage();
     setNeedsProgressMonitor(true);
   }
-  
-  @Override 
+
+  @Override
   public void addPages() {
     this.addPage(page);
   }
 
   @Override
   public boolean performFinish() {
+    AnalyticsPingManager.getInstance().sendPing(
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_COMPLETE, null, null);
+
     if (config.getCloudSdkLocation() == null) {
       File location = CloudSdkPrompter.getCloudSdkLocation(getShell());
       if (location == null) {
@@ -49,7 +54,7 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
     if (!page.useDefaults()) {
       config.setEclipseProjectLocationUri(page.getLocationURI());
     }
-    
+
     // todo set up
     final IAdaptable uiInfoAdapter = WorkspaceUndoUtil.getUIInfoAdapter(getShell());
     IRunnableWithProgress runnable = new CreateAppEngineStandardWtpProject(config, uiInfoAdapter);
@@ -64,7 +69,7 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
     } catch (InvocationTargetException ex) {
       status = setErrorStatus(ex.getCause());
     }
-    
+
     return status.isOK();
   }
 
@@ -79,7 +84,7 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
     StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.LOG);
     return status;
   }
-  
+
   @Override
   public void init(IWorkbench workbench, IStructuredSelection selection) {
   }
