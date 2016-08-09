@@ -23,5 +23,6 @@ Bundle-Classpath: lib/com.google.cloud.tools.ide.login-0.0.0-SNAPSHOT.jar,
  .
 Export-Package: com.google.api.client.auth.oauth2;x-friends:="com.google.cloud.tools.eclipse.appengine.deploy",
  com.google.cloud.tools.eclipse.appengine.login
-Import-Package: com.google.cloud.tools.eclipse.util,
+Import-Package: com.google.cloud.tools.eclipse.ui.util,
+ com.google.cloud.tools.eclipse.util,
  org.osgi.service.component

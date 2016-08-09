@@ -1,7 +1,7 @@
 package com.google.cloud.tools.eclipse.appengine.login;
 
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.cloud.tools.eclipse.util.ServiceUtils;
+import com.google.cloud.tools.eclipse.ui.util.ServiceUtils;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;

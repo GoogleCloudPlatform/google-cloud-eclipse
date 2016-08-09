@@ -13,7 +13,7 @@
  * the License.
  *******************************************************************************/
 
-package com.google.cloud.tools.eclipse.util;
+package com.google.cloud.tools.eclipse.ui.util;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.ui.IEditorPart;
