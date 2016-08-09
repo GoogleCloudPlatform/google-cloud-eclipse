@@ -15,14 +15,14 @@
 
 package com.google.cloud.tools.eclipse.appengine.login;
 
-import com.google.api.client.auth.oauth2.Credential;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+
+import com.google.api.client.auth.oauth2.Credential;
 
 // FIXME This class is for manual integration login test. Remove it in the final product.
 public class GoogleLoginTemporaryTester {
@@ -60,14 +60,10 @@ public class GoogleLoginTemporaryTester {
       ) {
         while (outReader.ready() || errReader.ready()) {
           if (outReader.ready()) {
-            String line = outReader.readLine();
-            stdOut += line;
-            System.out.println("[stdout] " + line);
+            stdOut += outReader.readLine();
           }
           if (errReader.ready()) {
-            String line = outReader.readLine();
-            stdErr += line;
-            System.out.println("[stderr] " + line);
+            stdErr += errReader.readLine();
           }
         }
       }
