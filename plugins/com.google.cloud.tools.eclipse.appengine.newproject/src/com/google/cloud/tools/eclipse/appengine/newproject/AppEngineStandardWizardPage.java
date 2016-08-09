@@ -1,6 +1,8 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
-import java.io.File;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.Dialog;
@@ -14,9 +16,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 
-import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
-import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
-import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
+import java.io.File;
 
 /**
  * UI to collect all information necessary to create a new App Engine Standard Java Eclipse project.
@@ -41,7 +41,9 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage im
   public void createControl(Composite parent) {
     super.createControl(parent);
     AnalyticsPingManager.getInstance().sendPing(
-        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD, null, null, parent.getShell());
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD,
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE, parent.getShell());
 
     Composite container = (Composite) getControl();
 

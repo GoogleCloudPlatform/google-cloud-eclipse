@@ -65,7 +65,9 @@ public class MavenAppEngineStandardWizardPage extends WizardPage implements IWiz
   @Override
   public void createControl(Composite parent) {
     AnalyticsPingManager.getInstance().sendPing(
-        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD, null, null, parent.getShell());
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD,
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_MAVEN, parent.getShell());
 
     Composite container = new Composite(parent, SWT.NONE);
     GridLayoutFactory.swtDefaults().numColumns(2).applyTo(container);
