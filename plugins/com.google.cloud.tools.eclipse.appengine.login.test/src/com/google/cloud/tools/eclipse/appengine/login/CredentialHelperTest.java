@@ -4,23 +4,17 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.jackson.JacksonFactory;
 import com.google.gson.Gson;
 
 public class CredentialHelperTest {
 
   @Test
-  public void testCreateCredential() {
-    Credential credential = new CredentialHelper().createCredential("fake_access_token", "fake_refresh_token");
-
-    Assert.assertEquals(credential.getAccessToken(), "fake_access_token");
-    Assert.assertEquals(credential.getRefreshToken(), "fake_refresh_token");
-  }
-
-  @Test
   public void testGetJsonCredential() {
-    CredentialHelper credentialHelper = new CredentialHelper();
-    Credential credential = credentialHelper.createCredential("fake_access_token", "fake_refresh_token");
-    String jsonCredential = credentialHelper.toJson(credential);
+    Credential credential = createCredential("fake_access_token", "fake_refresh_token");
+    String jsonCredential = new CredentialHelper().toJson(credential);
 
     CredentialType credentialType = new Gson().fromJson(jsonCredential, CredentialType.class);
     Assert.assertEquals(credentialType.client_id, Constants.getOAuthClientId());
@@ -35,4 +29,15 @@ public class CredentialHelperTest {
     private String refresh_token;
     private String type;
   };
+
+  private Credential createCredential(String accessToken, String refreshToken) {
+    GoogleCredential credential = new GoogleCredential.Builder()
+        .setTransport(new NetHttpTransport())
+        .setJsonFactory(new JacksonFactory())
+        .setClientSecrets(Constants.getOAuthClientId(), Constants.getOAuthClientSecret())
+        .build();
+    credential.setAccessToken(accessToken);
+    credential.setRefreshToken(refreshToken);
+    return credential;
+  }
 }

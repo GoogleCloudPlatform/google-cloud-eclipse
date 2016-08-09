@@ -1,58 +1,47 @@
 package com.google.cloud.tools.eclipse.appengine.login;
 
-import java.io.IOException;
-import java.util.Map;
+import com.google.api.client.auth.oauth2.Credential;
+import com.google.cloud.tools.eclipse.util.ServiceUtils;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.window.SameShellProvider;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.commands.IElementUpdater;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.menus.UIElement;
 
-import com.google.api.client.auth.oauth2.Credential;
+import java.util.Map;
 
 public class GoogleLoginCommandHandler extends AbstractHandler implements IElementUpdater {
 
   @Override
   public Object execute(ExecutionEvent event) throws ExecutionException {
-    Shell shell = HandlerUtil.getActiveShell(event);
-    GoogleLoginService loginService = new GoogleLoginService();
+    IGoogleLoginService loginService = ServiceUtils.getService(event, IGoogleLoginService.class);
 
     Credential credential = loginService.getCachedActiveCredential();
     if (credential == null) {
-      try {
-        credential = loginService.getActiveCredential(new SameShellProvider(shell));
-
-        boolean success = new GoogleLoginTemporaryTester().testLogin(credential);
-        MessageDialog.openInformation(shell,
-            "TESTING AUTH", success ? "SUCCESS" : "FAILURE (to be implemented)");
-      } catch (IOException ioe) {
-        throw new ExecutionException(ioe.getMessage());
-      }
+      credential = loginService.getActiveCredential();
     } else {
-      if (MessageDialog.openConfirm(shell,
+      if (MessageDialog.openConfirm(HandlerUtil.getActiveShell(event),
           Messages.LOGOUT_CONFIRM_DIALOG_TITILE, Messages.LOGOUT_CONFIRM_DIALOG_MESSAGE)) {
         loginService.clearCredential();
       }
     }
 
-    ICommandService commandService =
-        (ICommandService) PlatformUI.getWorkbench().getService(ICommandService.class);
-    commandService.refreshElements(
-        "com.google.cloud.tools.eclipse.appengine.login.commands.loginCommand", null); //$NON-NLS-1$
-
+    if (credential != null) {
+      boolean success = new GoogleLoginTemporaryTester().testLogin(credential);
+      MessageDialog.openInformation(HandlerUtil.getActiveShell(event),
+          "TESTING AUTH", success ? "WORKING CREDENTIAL" : "FAILURE (See console)");
+    }
     return null;
   }
 
   @Override
   public void updateElement(UIElement element, @SuppressWarnings("rawtypes") Map parameters) {
-    boolean loggedIn = new GoogleLoginService().getCachedActiveCredential() != null;
+    IGoogleLoginService loginService =
+        element.getServiceLocator().getService(IGoogleLoginService.class);
+    boolean loggedIn = loginService.getCachedActiveCredential() != null;
 
     element.setText(
         loggedIn ? Messages.LOGIN_MENU_LOGGED_IN : Messages.LOGIN_MENU_LOGGED_OUT);
