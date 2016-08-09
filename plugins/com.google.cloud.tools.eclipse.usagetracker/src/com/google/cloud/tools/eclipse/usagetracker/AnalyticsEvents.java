@@ -16,7 +16,7 @@ public class AnalyticsEvents {
   // Metadata keys
   public static final String APP_ENGINE_NEW_PROJECT_WIZARD_TYPE = "type";
 
-  // Metatata values
+  // Metadata values
   public static final String APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE = "native";
-  public static final String APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_MAVEN = "maven-based";
+  public static final String APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_MAVEN = "maven";
 }
