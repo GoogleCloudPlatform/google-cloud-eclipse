@@ -133,15 +133,30 @@ public class AnalyticsPingManager {
    * If the user has never seen the opt-in dialog or set the opt-in preference beforehand,
    * this method can potentially present an opt-in dialog at the top workbench level. If you
    * are calling this method inside another modal dialog, consider using {@link #sendPing(
-   * String, String, String, Shell)} and pass the {@Shell} of currently open modal dialog.
+   * String, String, String, Shell)} and pass the {@Shell} of the currently open modal dialog.
    * (Otherwise, the opt-in dialog won't be able to get input until the workbench can get input.)
+   *
+   * Safe to call from non-UI contexts.
    */
   public void sendPing(String eventName, String metadataKey, String metadataValue) {
     sendPing(eventName, metadataKey, metadataValue, null);
   }
 
-  public void sendPing(String eventName, String metadataKey, String metadataValue,
-      Shell parentShell) {
+  public void sendPing(final String eventName,
+      final String metadataKey, final String metadataValue, final Shell parentShell) {
+    if (Display.getCurrent() != null) {
+      sendPingHelper(eventName, metadataKey, metadataValue, parentShell);
+    } else {
+      Display.getDefault().asyncExec(new Runnable() {
+        @Override
+        public void run() {
+          sendPingHelper(eventName, metadataKey, metadataValue, parentShell);
+        }
+      });
+    }
+  }
+
+  private void sendPingHelper(String eventName, String metadataKey, String metadataValue, Shell parentShell) {
     // Non-modal and non-blocking dialog (if presented). This implies that the very first
     // sendPing() may drop this event.
     showOptInDialog(parentShell);

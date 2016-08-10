@@ -2,6 +2,8 @@ package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
 import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
 import com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineConsole;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -66,7 +68,9 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
     setDefaultSourceLocator(launch, configuration);
 
-    if (ILaunchManager.DEBUG_MODE.equals(mode)) {
+    boolean debugMode = ILaunchManager.DEBUG_MODE.equals(mode);
+    sendAnalyticsPing(debugMode);
+    if (debugMode) {
       int debugPort = getDebugPort();
       setupDebugTarget(launch, configuration, debugPort, monitor);
       serverBehaviour.startDebugDevServer(runnables, console.newMessageStream(), debugPort);
@@ -100,5 +104,13 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       abort("Cannot find free port for remote debugger", null, IStatus.ERROR);
     }
     return port;
+  }
+
+  private void sendAnalyticsPing(boolean debugMode) {
+    AnalyticsPingManager.getInstance().sendPing(
+        AnalyticsEvents.APP_ENGINE_LOCAL_SERVER,
+        AnalyticsEvents.APP_ENGINE_LOCAL_SERVER_TYPE,
+        debugMode ? AnalyticsEvents.APP_ENGINE_LOCAL_SERVER_TYPE_DEBUG
+                  : AnalyticsEvents.APP_ENGINE_LOCAL_SERVER_TYPE_NO_DEBUG);
   }
 }
