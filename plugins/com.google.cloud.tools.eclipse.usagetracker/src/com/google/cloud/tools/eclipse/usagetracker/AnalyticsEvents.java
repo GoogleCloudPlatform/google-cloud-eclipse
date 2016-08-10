@@ -14,12 +14,10 @@ public class AnalyticsEvents {
       "appengine.new.project.wizard.complete";
 
   // Metadata keys
-  public static final String APP_ENGINE_LOCAL_SERVER_TYPE = "type";
+  public static final String APP_ENGINE_LOCAL_SERVER_MODE = "mode";
   public static final String APP_ENGINE_NEW_PROJECT_WIZARD_TYPE = "type";
 
   // Metadata values
-  public static final String APP_ENGINE_LOCAL_SERVER_TYPE_NO_DEBUG = "no-debug";
-  public static final String APP_ENGINE_LOCAL_SERVER_TYPE_DEBUG = "debug";
   public static final String APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE = "native";
   public static final String APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_MAVEN = "maven";
 }

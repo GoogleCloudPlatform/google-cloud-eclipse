@@ -147,7 +147,7 @@ public class AnalyticsPingManager {
     if (Display.getCurrent() != null) {
       sendPingHelper(eventName, metadataKey, metadataValue, parentShell);
     } else {
-      Display.getDefault().asyncExec(new Runnable() {
+      PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
         @Override
         public void run() {
           sendPingHelper(eventName, metadataKey, metadataValue, parentShell);

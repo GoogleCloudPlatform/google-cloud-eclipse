@@ -36,6 +36,9 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
   @Override
   public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch,
       IProgressMonitor monitor) throws CoreException {
+    AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.APP_ENGINE_LOCAL_SERVER,
+        AnalyticsEvents.APP_ENGINE_LOCAL_SERVER_MODE, mode);
+
     IServer server = ServerUtil.getServer(configuration);
     if (server == null) {
       return;
@@ -68,9 +71,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
     setDefaultSourceLocator(launch, configuration);
 
-    boolean debugMode = ILaunchManager.DEBUG_MODE.equals(mode);
-    sendAnalyticsPing(debugMode);
-    if (debugMode) {
+    if (ILaunchManager.DEBUG_MODE.equals(mode)) {
       int debugPort = getDebugPort();
       setupDebugTarget(launch, configuration, debugPort, monitor);
       serverBehaviour.startDebugDevServer(runnables, console.newMessageStream(), debugPort);
@@ -104,13 +105,5 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       abort("Cannot find free port for remote debugger", null, IStatus.ERROR);
     }
     return port;
-  }
-
-  private void sendAnalyticsPing(boolean debugMode) {
-    AnalyticsPingManager.getInstance().sendPing(
-        AnalyticsEvents.APP_ENGINE_LOCAL_SERVER,
-        AnalyticsEvents.APP_ENGINE_LOCAL_SERVER_TYPE,
-        debugMode ? AnalyticsEvents.APP_ENGINE_LOCAL_SERVER_TYPE_DEBUG
-                  : AnalyticsEvents.APP_ENGINE_LOCAL_SERVER_TYPE_NO_DEBUG);
   }
 }
