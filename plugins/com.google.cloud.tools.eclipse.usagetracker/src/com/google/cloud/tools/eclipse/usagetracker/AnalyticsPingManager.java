@@ -144,7 +144,7 @@ public class AnalyticsPingManager {
 
   public void sendPing(final String eventName,
       final String metadataKey, final String metadataValue, final Shell parentShell) {
-    if (Display.getCurrent() != null) {
+    if (Display.getCurrent() != null) {  // Check if we are in the UI thread.
       sendPingHelper(eventName, metadataKey, metadataValue, parentShell);
     } else {
       PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
