@@ -9,174 +9,224 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.ExpandBar;
+import org.eclipse.swt.widgets.ExpandItem;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbenchPropertyPage;
 import org.eclipse.ui.dialogs.PropertyPage;
 
+import com.google.cloud.tools.eclipse.ui.util.FontUtil;
+
 public class DeployPropertyPage extends PropertyPage implements IWorkbenchPropertyPage {
 
-  private Text version;
+  private static final int INDENT_CHECKBOX_ENABLED_WIDGET = 10;
+  private Button promptForProjectIdButton;
+  private Label projectIdLabel;
   private Text projectId;
-  private Text bucket;
-  private Button defaultVersionButton;
-  private Button customVersionButton;
+  private Button browseProjectButton;
+  
+  private Button overrideDefaultVersionButton;
+  private Label versionLabel;
+  private Text version;
+  
   private Button autoPromoteButton;
-  private Button manualPromoteButton;
-  private Button defaultBucketButton;
-  private Button customBucketButton;
-
-  private RadioSelectionListener versionSelectionListener;
-  private RadioSelectionListener bucketSelectionListener;
-
-  public class RadioSelectionListener implements SelectionListener {
-
-    private Text text;
-    private Button button;
-
-    public RadioSelectionListener(Text text, Button button) {
-      this.text = text;
-      this.button = button;
-    }
-
-    @Override
-    public void widgetSelected(SelectionEvent e) {
-      doSelection(e);
-    }
-
-    @Override
-    public void widgetDefaultSelected(SelectionEvent e) {
-      doSelection(e);
-    }
-
-    private void doSelection(SelectionEvent e) {
-      text.setEnabled(e.getSource() == button);
-    }
-  }
+  
+  private Button overrideDefaultBucketButton;
+  private Label bucketLabel;
+  private Text bucket;
+  private Button browseBucketButton;
+  
 
   @Override
   protected Control createContents(Composite parent) {
     Composite container = new Composite(parent, SWT.NONE);
     container.setLayout(new GridLayout(1, false));
 
-    // project ID
-    Composite projectIdComp = new Composite(container, SWT.NONE);
-    projectIdComp.setLayout(new GridLayout(3, false));
-    projectIdComp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    createProjectIdSection(container);
 
-    Label projectIdLabel = new Label(projectIdComp, SWT.LEFT);
-    projectIdLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
-    projectIdLabel.setText(Messages.getString("project.id"));
+    createProjectVersionSection(container);
 
-    projectId = new Text(projectIdComp, SWT.LEFT | SWT.SINGLE | SWT.BORDER);
-    projectId.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    createPromoteSection(container);
 
-    Button browseProjectButton = new Button(projectIdComp, SWT.PUSH);
-    browseProjectButton.setText("...");
-    browseProjectButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+    ExpandBar expandBar = createCollapsibleAdvancedSection(container);
 
-    // version
-    Composite versionComp = new Composite(container, SWT.NONE);
-    versionComp.setLayout(new GridLayout(3, false));
-    versionComp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    Composite defaultBucketComp = createBucketSection(expandBar);
 
-    Label versionLabel = new Label(versionComp, SWT.LEFT);
-    versionLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
-    versionLabel.setText(Messages.getString("project.version"));
-
-    defaultVersionButton = new Button(versionComp, SWT.RADIO);
-    defaultVersionButton.setText(Messages.getString("use.default.versioning"));
-    defaultVersionButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
-
-    // custom version
-    Label emptyLabel = new Label(versionComp, SWT.LEFT);
-    emptyLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
-
-    customVersionButton = new Button(versionComp, SWT.RADIO);
-    customVersionButton.setText(Messages.getString("use.custom.versioning"));
-    customVersionButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
-
-    version = new Text(versionComp, SWT.LEFT | SWT.SINGLE | SWT.BORDER);
-    version.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-
-    versionSelectionListener = new RadioSelectionListener(version, customVersionButton);
-    defaultVersionButton.addSelectionListener(versionSelectionListener);
-    customVersionButton.addSelectionListener(versionSelectionListener);
-
-    selectVersionButton();
-
-    // promote
-    Composite promoteComp = new Composite(container, SWT.NONE);
-    promoteComp.setLayout(new GridLayout(3, false));
-    promoteComp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-
-    Label promoteLabel = new Label(promoteComp, SWT.LEFT);
-    promoteLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
-    promoteLabel.setText(Messages.getString("promote.policy"));
-
-    autoPromoteButton = new Button(promoteComp, SWT.RADIO);
-    autoPromoteButton.setText(Messages.getString("auto.promote"));
-    autoPromoteButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
-
-    manualPromoteButton = new Button(promoteComp, SWT.RADIO);
-    manualPromoteButton.setText(Messages.getString("manual.promote"));
-    manualPromoteButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
-
-    selectPromoteButton();
-
-    // bucket
-    Composite bucketComp = new Composite(container, SWT.NONE);
-    bucketComp.setLayout(new GridLayout(3, false));
-    bucketComp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-
-    Label bucketLabel = new Label(bucketComp, SWT.LEFT);
-    bucketLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
-    bucketLabel.setText(Messages.getString("bucket.name"));
-
-    defaultBucketButton = new Button(bucketComp, SWT.RADIO);
-    defaultBucketButton.setText(Messages.getString("use.default.bucket"));
-    defaultBucketButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 2, 1));
-
-    // custom version
-    Label emptyLabel2 = new Label(bucketComp, SWT.LEFT);
-    emptyLabel2.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
-
-    customBucketButton = new Button(bucketComp, SWT.RADIO);
-    customBucketButton.setText(Messages.getString("use.custom.bucket"));
-    customBucketButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
-
-    Composite bucketTextComp = new Composite(bucketComp, SWT.NONE);
-    bucketTextComp.setLayout(new GridLayout(2, false));
-    bucketTextComp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-
-    bucket = new Text(bucketTextComp, SWT.LEFT | SWT.SINGLE | SWT.BORDER);
-    bucket.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-
-    Button browseBucketButton = new Button(bucketTextComp, SWT.PUSH);
-    browseBucketButton.setText("...");
-    browseBucketButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-
-    bucketSelectionListener = new RadioSelectionListener(bucket, customBucketButton);
-    defaultBucketButton.addSelectionListener(bucketSelectionListener);
-    customBucketButton.addSelectionListener(bucketSelectionListener);
-
-    selectBucketButton();
-
+    addBucketSectionToAdvancedSettings(expandBar, defaultBucketComp);
+    
     return container;
   }
 
-  private void selectBucketButton() {
-    defaultBucketButton.setSelection(true);
-    bucket.setEnabled(false);
+  private void createProjectIdSection(Composite parent) {
+    Composite projectIdComp = new Composite(parent, SWT.NONE);
+    projectIdComp.setLayout(new GridLayout(3, false));
+    projectIdComp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+  
+    promptForProjectIdButton = new Button(projectIdComp, SWT.CHECK);
+    promptForProjectIdButton.setText(Messages.getString("deploy.prompt.projectid"));
+    promptForProjectIdButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 3, 1));
+    promptForProjectIdButton.addSelectionListener(new SelectionListener() {
+      
+      @Override
+      public void widgetSelected(SelectionEvent e) {
+        enableProjectIdWidgets();
+      }
+      
+      @Override
+      public void widgetDefaultSelected(SelectionEvent e) {
+        enableProjectIdWidgets();
+      }
+    });
+    
+    projectIdLabel = new Label(projectIdComp, SWT.LEFT);
+    GridData layoutData = new GridData(SWT.LEFT, SWT.CENTER, false, false);
+    layoutData.horizontalIndent = INDENT_CHECKBOX_ENABLED_WIDGET;
+    projectIdLabel.setLayoutData(layoutData);
+    projectIdLabel.setText(Messages.getString("project.id"));
+  
+    projectId = new Text(projectIdComp, SWT.LEFT | SWT.SINGLE | SWT.BORDER);
+    projectId.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+  
+    browseProjectButton = new Button(projectIdComp, SWT.PUSH);
+    browseProjectButton.setText("...");
+    browseProjectButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+  
+    selectProjectIdButton();
   }
 
-  private void selectPromoteButton() {
-    autoPromoteButton.setSelection(true);
+  private void createProjectVersionSection(Composite parent) {
+    Composite versionComp = new Composite(parent, SWT.NONE);
+    versionComp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    versionComp.setLayout(new GridLayout(2, false));
+  
+    overrideDefaultVersionButton = new Button(versionComp, SWT.CHECK);
+    overrideDefaultVersionButton.setText(Messages.getString("use.custom.versioning"));
+    overrideDefaultVersionButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1));
+  
+    versionLabel = new Label(versionComp, SWT.NONE);
+    versionLabel.setText(Messages.getString("project.version"));
+    GridData layoutData = new GridData(SWT.LEFT, SWT.CENTER, false, false);
+    layoutData.horizontalIndent = INDENT_CHECKBOX_ENABLED_WIDGET;
+    versionLabel.setLayoutData(layoutData);
+  
+    version = new Text(versionComp, SWT.LEFT | SWT.SINGLE | SWT.BORDER);
+    version.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+  
+    overrideDefaultVersionButton.addSelectionListener(new SelectionListener() {
+      
+      @Override
+      public void widgetSelected(SelectionEvent e) {
+        enableVersionWidgets();
+      }
+      
+      @Override
+      public void widgetDefaultSelected(SelectionEvent e) {
+        enableVersionWidgets();
+      }
+    });
+  
+    selectVersionButton();
+  }
+
+  private void createPromoteSection(Composite parent) {
+    Composite promoteComp = new Composite(parent, SWT.NONE);
+    promoteComp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    promoteComp.setLayout(new GridLayout(1, false));
+    autoPromoteButton = new Button(promoteComp, SWT.CHECK);
+    autoPromoteButton.setText(Messages.getString("auto.promote"));
+    autoPromoteButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+    
+    Link manualPromoteLabel = new Link(promoteComp, SWT.NONE);
+    manualPromoteLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+    manualPromoteLabel.setText(Messages.getString("deploy.manual.link", "https://console.developers.google.com/appengine"));
+  }
+
+  private ExpandBar createCollapsibleAdvancedSection(Composite parent) {
+    ExpandBar expandBar = new ExpandBar(parent, SWT.V_SCROLL);
+    expandBar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+    FontUtil.convertFontToBold(expandBar);
+    return expandBar;
+  }
+
+  private Composite createBucketSection(Composite parent) {
+    Composite defaultBucketComp = new Composite(parent, SWT.NONE);
+    defaultBucketComp.setLayout(new GridLayout(1, true));
+    
+    overrideDefaultBucketButton = new Button(defaultBucketComp, SWT.CHECK);
+    overrideDefaultBucketButton.setText(Messages.getString("use.custom.bucket"));
+    overrideDefaultBucketButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+    overrideDefaultBucketButton.addSelectionListener(new SelectionListener() {
+      
+      @Override
+      public void widgetSelected(SelectionEvent e) {
+        enableCustomBucketWidgets();
+      }
+      
+      @Override
+      public void widgetDefaultSelected(SelectionEvent e) {
+        enableCustomBucketWidgets();
+      }
+    });
+  
+    Composite customBucketComp = new Composite(defaultBucketComp, SWT.NONE);
+    customBucketComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+    customBucketComp.setLayout(new GridLayout(3, false));
+    
+    bucketLabel = new Label(customBucketComp, SWT.RADIO);
+    bucketLabel.setText(Messages.getString("bucket.name"));
+    bucketLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+  
+    bucket = new Text(customBucketComp, SWT.LEFT | SWT.SINGLE | SWT.BORDER);
+    bucket.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+  
+    browseBucketButton = new Button(customBucketComp, SWT.PUSH);
+    browseBucketButton.setText("...");
+    browseBucketButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+  
+    selectBucketButton();
+    
+    return defaultBucketComp;
+  }
+
+  private void addBucketSectionToAdvancedSettings(ExpandBar parent, Composite child) {
+    ExpandItem expandItem = new ExpandItem(parent, SWT.NONE, 0);
+    expandItem.setText(Messages.getString("settings.advanced"));
+    expandItem.setHeight(child.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
+    expandItem.setControl(child);
+  }
+
+  private void selectProjectIdButton() {
+    promptForProjectIdButton.setSelection(true);
+    enableProjectIdWidgets();
+  }
+
+  private void enableProjectIdWidgets() {
+    projectIdLabel.setEnabled(!promptForProjectIdButton.getSelection());
+    projectId.setEnabled(!promptForProjectIdButton.getSelection());
+    browseProjectButton.setEnabled(!promptForProjectIdButton.getSelection());
   }
 
   private void selectVersionButton() {
-    defaultVersionButton.setSelection(true);
-    version.setEnabled(false);
+    overrideDefaultVersionButton.setSelection(false);
+    enableVersionWidgets();
+  }
+
+  private void enableVersionWidgets() {
+    version.setEnabled(overrideDefaultVersionButton.getSelection());
+    versionLabel.setEnabled(overrideDefaultVersionButton.getSelection());
+  }
+
+  private void selectBucketButton() {
+    overrideDefaultBucketButton.setSelection(false);
+    enableCustomBucketWidgets();
+  }
+
+  private void enableCustomBucketWidgets() {
+    bucket.setEnabled(overrideDefaultBucketButton.getSelection());
+    bucketLabel.setEnabled(overrideDefaultBucketButton.getSelection());
+    browseBucketButton.setEnabled(overrideDefaultBucketButton.getSelection());
   }
 
 }
