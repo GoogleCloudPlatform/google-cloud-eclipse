@@ -156,7 +156,8 @@ public class AnalyticsPingManager {
     }
   }
 
-  private void sendPingHelper(String eventName, String metadataKey, String metadataValue, Shell parentShell) {
+  private void sendPingHelper(String eventName, String metadataKey, String metadataValue,
+      Shell parentShell) {
     // Non-modal and non-blocking dialog (if presented). This implies that the very first
     // sendPing() may drop this event.
     showOptInDialog(parentShell);
