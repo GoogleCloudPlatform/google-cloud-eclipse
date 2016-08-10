@@ -36,6 +36,7 @@ public class SwtBotTestingUtilities {
   /** Click the button, wait for the window change. */
   public static void clickButtonAndWaitForWindowChange(SWTBot bot, final SWTBotButton button) {
     performAndWaitForWindowChange(bot, new Runnable() {
+      @Override
       public void run() {
         button.click();
       }
@@ -97,10 +98,12 @@ public class SwtBotTestingUtilities {
    */
   public static void waitUntilShellIsNotActive(SWTBot bot, final SWTBotShell shell) {
     bot.waitUntil(new DefaultCondition() {
+      @Override
       public String getFailureMessage() {
         return "Shell " + shell.getText() + " did not close"; //$NON-NLS-1$
       }
 
+      @Override
       public boolean test() throws Exception {
         return !shell.isActive();
       }

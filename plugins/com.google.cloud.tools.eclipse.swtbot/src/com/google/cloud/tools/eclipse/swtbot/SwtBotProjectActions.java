@@ -38,19 +38,20 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
  */
 public final class SwtBotProjectActions {
 
-  private static final String SOURCE_FOLDER = "src";
-
   /**
    * Creates a Java class with the specified name.
    *
    * @param projectName the name of the project the class should be created in
+   * @param sourceFolder the name of the source folder in which the class should be created.
+   *        Typically "src" for normal Java projects, or "src/main/java" for Maven projects
    * @param packageName the name of the package the class should be created in
    * @param className the name of the class to be created
    */
-  public static void createJavaClass(final SWTWorkbenchBot bot, String projectName,
+  public static void createJavaClass(final SWTWorkbenchBot bot, String sourceFolder,
+      String projectName,
       String packageName, final String className) {
     SWTBotTreeItem project = SwtBotProjectActions.selectProject(bot, projectName);
-    selectProjectItem(project, SOURCE_FOLDER, packageName).select();
+    selectProjectItem(project, sourceFolder, packageName).select();
     SwtBotTestingUtilities.performAndWaitForWindowChange(bot, new Runnable() {
       @Override
       public void run() {
@@ -153,15 +154,14 @@ public final class SwtBotProjectActions {
    * @param projectName the name of the project to be found
    * @return true if the project is found, and false if not found
    */
-  public static boolean doesProjectExist(final SWTWorkbenchBot bot, String projectName) {
+  public static boolean projectFound(final SWTWorkbenchBot bot, String projectName) {
     SWTBotView explorer = getExplorer(bot);
 
     // Select the root of the project tree in the explorer view
     Widget explorerWidget = explorer.getWidget();
     Tree explorerTree = bot.widget(widgetOfType(Tree.class), explorerWidget);
-    SWTBotTreeItem[] allItems = new SWTBotTree(explorerTree).getAllItems();
-    for (int i = 0; i < allItems.length; i++) {
-      if (allItems[i].getText().equals(projectName)) {
+    for (SWTBotTreeItem item : new SWTBotTree(explorerTree).getAllItems()) {
+      if (item.getText().equals(projectName)) {
         return true;
       }
     }
@@ -261,12 +261,12 @@ public final class SwtBotProjectActions {
   }
 
   /**
-   * Select a file/folder by providing a parent tree, and a list folders that lead to the
+   * Select a file/folder by providing a parent tree, and a list of folders that leads to the
    * file/folder.
    *
    * @param item root tree item
    * @param folderPath list of folder names that lead to file
-   * @return Returns a SWTBotTreeItem of the last name in texts
+   * @return the SWTBotTreeItem of the final selected item, or {@code null} if not found
    */
   public static SWTBotTreeItem selectProjectItem(SWTBotTreeItem item, String... folderPath) {
     for (String folder : folderPath) {

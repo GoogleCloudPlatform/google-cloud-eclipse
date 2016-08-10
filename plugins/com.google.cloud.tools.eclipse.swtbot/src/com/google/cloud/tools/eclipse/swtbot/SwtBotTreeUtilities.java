@@ -185,10 +185,11 @@ public class SwtBotTreeUtilities {
 
   private static boolean treeItemHasText(final TreeItem widget) {
     return UIThreadRunnable.syncExec(new Result<Boolean>() {
+      @Override
       public Boolean run() {
         TreeItem[] items = widget.getItems();
         for (TreeItem item : items) {
-          if (item.getText() == null || item.getText().length() == 0) {
+          if (item.getText() == null || item.getText().isEmpty()) {
             return false;
           }
         }
@@ -202,6 +203,7 @@ public class SwtBotTreeUtilities {
    */
   private static boolean isTreeExpanded(final TreeItem tree) {
     return UIThreadRunnable.syncExec(new Result<Boolean>() {
+      @Override
       public Boolean run() {
         return tree.getExpanded();
       }
@@ -210,6 +212,7 @@ public class SwtBotTreeUtilities {
 
   private static void printTree(final TreeItem tree) {
     UIThreadRunnable.syncExec(new VoidResult() {
+      @Override
       public void run() {
         System.err.println(String.format("%s has %d items:", tree.getText(), tree.getItemCount()));
         for (TreeItem item : tree.getItems()) {
@@ -223,10 +226,12 @@ public class SwtBotTreeUtilities {
       final String nodeText) {
     try {
       bot.waitUntil(new DefaultCondition() {
+        @Override
         public String getFailureMessage() {
           return "Could not find node with text " + nodeText;
         }
 
+        @Override
         public boolean test() throws Exception {
           return getTreeItem(tree, nodeText) != null;
         }

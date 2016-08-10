@@ -16,14 +16,20 @@
 
 package com.google.cloud.tools.eclipse.integration.appengine;
 
+import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineDeployInfo;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotTestingUtilities;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotTimeoutManager;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Useful App Engine-related actions for Google Cloud Tools for Eclipse
@@ -102,7 +108,8 @@ public class SwtBotAppEngineActions {
       bot.list().select(archetypeDescription);
     }
 
-    SwtBotTimeoutManager.setTimeout(15000); // can take a loooong time
+    int mavenCompletionTimeoutSeconds = 15000; // can take a loooong time
+    SwtBotTimeoutManager.setTimeout(mavenCompletionTimeoutSeconds);
     SwtBotTestingUtilities.clickButtonAndWaitForWindowChange(bot, bot.button("Finish"));
     SwtBotTimeoutManager.resetTimeout();
     // this isn't right for location != null
@@ -114,4 +121,21 @@ public class SwtBotAppEngineActions {
   }
 
   private SwtBotAppEngineActions() {}
+
+  /**
+   * Extracts the project ID from the given file.
+   * 
+   * @return the project ID or {@code null} if none found
+   */
+  public static String getAppEngineProjectId(IFile appEngineXml) throws IOException, CoreException {
+    try (InputStream contents = appEngineXml.getContents()) {
+      AppEngineDeployInfo info = new AppEngineDeployInfo();
+      info.parse(contents);
+      String projectId = info.getProjectId();
+      if (projectId == null || projectId.trim().isEmpty()) {
+        return null;
+      }
+      return projectId;
+    }
+  }
 }

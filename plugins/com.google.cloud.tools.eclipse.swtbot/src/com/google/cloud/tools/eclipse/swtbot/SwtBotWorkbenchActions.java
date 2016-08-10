@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.eclipse.finder.matchers.WidgetMatcherFactory;
+import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotView;
 import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.waits.ICondition;
@@ -67,7 +68,7 @@ public final class SwtBotWorkbenchActions {
    */
   public static void waitForIdle(SWTBot bot) {
     while (!Job.getJobManager().isIdle()) {
-      bot.sleep(1000);
+      bot.sleep(300);
     }
   }
 
@@ -87,7 +88,7 @@ public final class SwtBotWorkbenchActions {
           @SuppressWarnings("unchecked")
           Matcher<ProgressBar> matcher =
               org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory
-                  .allOf(WidgetMatcherFactory.widgetOfType(ProgressBar.class));
+                  .allOf(org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType(ProgressBar.class));
           List<? extends ProgressBar> bars = bot.widgets(matcher);
           // keep polling until there are no progress bars found
           return bars == null || bars.isEmpty();
@@ -148,6 +149,15 @@ public final class SwtBotWorkbenchActions {
     bot.sleep(OPEN_PREFERENCES_DIALOG_DELAY_MS);
   }
 
-  private SwtBotWorkbenchActions() {
+  /**
+   * Close the Welcome/Intro view, if found. Usually required on the first launch.
+   */
+  public static void closeWelcome(SWTWorkbenchBot bot) {
+    SWTBotView activeView = bot.activeView();
+    if (activeView != null && activeView.getTitle().equals("Welcome")) {
+      activeView.close();
+    }
   }
+
+  private SwtBotWorkbenchActions() {}
 }
