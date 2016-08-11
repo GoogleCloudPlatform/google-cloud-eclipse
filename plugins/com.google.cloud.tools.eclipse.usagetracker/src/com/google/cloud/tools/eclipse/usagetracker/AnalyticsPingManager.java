@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -251,6 +252,9 @@ public class AnalyticsPingManager {
     return resultBuilder.toString();
   }
 
+  // To prevent showing multiple opt-in dialogs. See OptInDialog#open() and OptInDialog#close().
+  private AtomicBoolean dialogOpenStatus = new AtomicBoolean(false);
+
   /**
    * @param parentShell if null, tries to show the dialog at the workbench level.
    */
@@ -259,7 +263,7 @@ public class AnalyticsPingManager {
       display.syncExec(new Runnable() {
         @Override
         public void run() {
-          new OptInDialog(findShell(parentShell)).open();
+          new OptInDialog(findShell(parentShell), dialogOpenStatus).open();
         }
       });
     }
