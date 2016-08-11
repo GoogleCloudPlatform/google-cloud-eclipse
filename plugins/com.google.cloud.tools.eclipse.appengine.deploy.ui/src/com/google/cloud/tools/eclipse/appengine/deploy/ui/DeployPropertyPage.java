@@ -15,7 +15,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.IWorkbenchPropertyPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
@@ -24,9 +23,9 @@ import org.eclipse.ui.forms.widgets.ExpandableComposite;
 
 import com.google.cloud.tools.eclipse.ui.util.FontUtil;
 
-public class DeployPropertyPage extends PropertyPage implements IWorkbenchPropertyPage {
+public class DeployPropertyPage extends PropertyPage {
 
-  private static final String APPENGINE_DASHBOARD_URL = "https://console.developers.google.com/appengine";
+  private static final String APPENGINE_DASHBOARD_URL = "https://console.cloud.google.com/appengine";
   private static final int INDENT_CHECKBOX_ENABLED_WIDGET = 10;
 
   private Button promptForProjectIdButton;
