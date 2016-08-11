@@ -3,6 +3,7 @@ package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -57,6 +58,8 @@ public class DeployPropertyPage extends PropertyPage implements IWorkbenchProper
 
     createAdvancedSection(container);
     
+    Dialog.applyDialogFont(container); 
+    
     return container;
   }
 
@@ -71,12 +74,12 @@ public class DeployPropertyPage extends PropertyPage implements IWorkbenchProper
     promptForProjectIdButton.addSelectionListener(new SelectionListener() {
       
       @Override
-      public void widgetSelected(SelectionEvent e) {
+      public void widgetSelected(SelectionEvent event) {
         updateProjectIdWidgetsEnablement();
       }
       
       @Override
-      public void widgetDefaultSelected(SelectionEvent e) {
+      public void widgetDefaultSelected(SelectionEvent event) {
         updateProjectIdWidgetsEnablement();
       }
     });
@@ -118,12 +121,12 @@ public class DeployPropertyPage extends PropertyPage implements IWorkbenchProper
     overrideDefaultVersionButton.addSelectionListener(new SelectionListener() {
       
       @Override
-      public void widgetSelected(SelectionEvent e) {
+      public void widgetSelected(SelectionEvent event) {
         updateVersionWidgetsEnablement();
       }
       
       @Override
-      public void widgetDefaultSelected(SelectionEvent e) {
+      public void widgetDefaultSelected(SelectionEvent event) {
         updateVersionWidgetsEnablement();
       }
     });
@@ -147,12 +150,12 @@ public class DeployPropertyPage extends PropertyPage implements IWorkbenchProper
     manualPromoteLabel.addSelectionListener(new SelectionListener() {
 
       @Override
-      public void widgetSelected(SelectionEvent e) {
+      public void widgetSelected(SelectionEvent event) {
         openAppEngineDashboard();
       }
 
       @Override
-      public void widgetDefaultSelected(SelectionEvent e) {
+      public void widgetDefaultSelected(SelectionEvent event) {
         openAppEngineDashboard();
       }
 
@@ -193,12 +196,12 @@ public class DeployPropertyPage extends PropertyPage implements IWorkbenchProper
     overrideDefaultBucketButton.addSelectionListener(new SelectionListener() {
       
       @Override
-      public void widgetSelected(SelectionEvent e) {
+      public void widgetSelected(SelectionEvent event) {
         updateCustomBucketWidgetsEnablement();
       }
       
       @Override
-      public void widgetDefaultSelected(SelectionEvent e) {
+      public void widgetDefaultSelected(SelectionEvent event) {
         updateCustomBucketWidgetsEnablement();
       }
     });
