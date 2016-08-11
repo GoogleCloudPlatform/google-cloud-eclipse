@@ -187,6 +187,7 @@ public class AnalyticsPingManager {
       connection = (HttpURLConnection) url.openConnection();
       connection.setDoOutput(true);
       connection.setRequestMethod("POST");
+      connection.setRequestProperty("User-Agent", "Automated");
       connection.setReadTimeout(3000);  // milliseconds
       byte[] bytesToWrite = parametersString.getBytes("UTF-8");
       connection.setFixedLengthStreamingMode(bytesToWrite.length);
