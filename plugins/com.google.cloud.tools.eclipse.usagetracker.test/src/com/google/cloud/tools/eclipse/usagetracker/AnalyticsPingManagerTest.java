@@ -17,7 +17,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.verification.VerificationMode;
 
@@ -76,9 +75,9 @@ public class AnalyticsPingManagerTest {
         }
       });
 
-  @Mock IEclipsePreferences preferences;
+  @Mock private IEclipsePreferences preferences;
   @Mock private Display display;
-  @Spy private ConcurrentLinkedQueue<PingEvent> pingEventQueue;
+  @Mock private ConcurrentLinkedQueue<PingEvent> pingEventQueue;
 
   @Test
   public void testGetParametersString() {
@@ -162,7 +161,7 @@ public class AnalyticsPingManagerTest {
   }
 
   private void verifyOptInDialogOpen(VerificationMode verificationMode) {
-    new AnalyticsPingManager(preferences, display, pingEventQueue).showOptInDialog(null);
+    new AnalyticsPingManager(preferences, display, pingEventQueue).showOptInDialogIfNeeded(null);
     verify(display, verificationMode).syncExec(any(Runnable.class));
   }
 
@@ -195,6 +194,7 @@ public class AnalyticsPingManagerTest {
   }
 
   private void verifyPingQueued(VerificationMode verificationMode) {
+    when(pingEventQueue.isEmpty()).thenReturn(true);
     new AnalyticsPingManager(preferences, display, pingEventQueue)
         .sendPing("eventName", "metadataKey", "metadataValue");
     verify(pingEventQueue, verificationMode).add(any(PingEvent.class));

@@ -76,7 +76,7 @@ public class AnalyticsPingManager {
     protected IStatus run(IProgressMonitor monitor) {
       while (!pingEventQueue.isEmpty()) {
         PingEvent event = pingEventQueue.poll();
-        showOptInDialog(event.shell);
+        showOptInDialogIfNeeded(event.shell);
         sendPingHelper(event);
       }
       return Status.OK_STATUS;
@@ -252,20 +252,23 @@ public class AnalyticsPingManager {
     return resultBuilder.toString();
   }
 
-  // To prevent showing multiple opt-in dialogs. See OptInDialog#open() and OptInDialog#close().
-  private AtomicBoolean dialogOpenStatus = new AtomicBoolean(false);
+  // To prevent showing multiple opt-in dialogs. Assumes that once a dialog is opened,
+  // implicit closure is considered opting out.
+  private AtomicBoolean optInDialogOpened = new AtomicBoolean(false);
 
   /**
    * @param parentShell if null, tries to show the dialog at the workbench level.
    */
-  public void showOptInDialog(final Shell parentShell) {
+  public void showOptInDialogIfNeeded(final Shell parentShell) {
     if (!userHasOptedIn() && !userHasRegisteredOptInStatus()) {
-      display.syncExec(new Runnable() {
-        @Override
-        public void run() {
-          new OptInDialog(findShell(parentShell), dialogOpenStatus).open();
-        }
-      });
+      if (optInDialogOpened.compareAndSet(false, true)) {
+        display.syncExec(new Runnable() {
+          @Override
+          public void run() {
+            new OptInDialog(findShell(parentShell)).open();
+          }
+        });
+      }
     }
   }
 

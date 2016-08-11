@@ -12,28 +12,15 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 /**
  * A one-time dialog to suggest opt-in for sending client-side usage metrics.
  */
 public class OptInDialog extends Dialog {
 
-  private AtomicBoolean dialogOpenStatus;
-
-  public OptInDialog(Shell parentShell, AtomicBoolean dialogOpenStatus) {
+  public OptInDialog(Shell parentShell) {
     super(parentShell);
     setShellStyle(SWT.TITLE | SWT.CLOSE | SWT.MODELESS);
     setBlockOnOpen(false);
-    this.dialogOpenStatus = dialogOpenStatus;
-  }
-
-  @Override
-  public int open() {
-    if (dialogOpenStatus.compareAndSet(false, true)) {
-      return super.open();
-    }
-    return CANCEL;
   }
 
   /**
@@ -117,11 +104,5 @@ public class OptInDialog extends Dialog {
   protected void handleShellCloseEvent() {
     super.handleShellCloseEvent();
     AnalyticsPingManager.getInstance().registerOptInStatus(false);
-  }
-
-  @Override
-  public boolean close() {
-    dialogOpenStatus.set(false);
-    return super.close();
   }
 }
