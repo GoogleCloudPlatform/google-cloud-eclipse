@@ -52,7 +52,7 @@
            id="com.google.cloud.tools.eclipse.appengine.localserver.server.apptools"   
            initialState="stopped"    
            launchConfigId="com.google.cloud.tools.eclipse.AppToolsLaunchConfigurationType"   
-           launchModes="run,debug,profile"   
+           launchModes="run,debug"   
            name="%apptoolsTypeName"    
            runtime="true"    
            runtimeTypeId="com.google.cloud.tools.eclipse.runtime.apptools"    
@@ -79,7 +79,7 @@
       <launchConfigurationType    
              delegate="com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerLaunchConfigurationDelegate"    
              id="com.google.cloud.tools.eclipse.AppToolsLaunchConfigurationType"   
-             modes="run, debug, profile"   
+             modes="run, debug"   
              name="%apptoolsLaunchTypeName">   
        </launchConfigurationType>    
     </extension>
