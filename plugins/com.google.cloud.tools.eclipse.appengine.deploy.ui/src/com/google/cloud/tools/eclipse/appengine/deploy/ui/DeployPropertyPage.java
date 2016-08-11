@@ -1,5 +1,7 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -9,19 +11,23 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.ExpandBar;
-import org.eclipse.swt.widgets.ExpandItem;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbenchPropertyPage;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import org.eclipse.ui.dialogs.PropertyPage;
+import org.eclipse.ui.forms.widgets.ExpandableComposite;
 
 import com.google.cloud.tools.eclipse.ui.util.FontUtil;
 
 public class DeployPropertyPage extends PropertyPage implements IWorkbenchPropertyPage {
 
+  private static final String APPENGINE_DASHBOARD_URL = "https://console.developers.google.com/appengine";
   private static final int INDENT_CHECKBOX_ENABLED_WIDGET = 10;
+
   private Button promptForProjectIdButton;
   private Label projectIdLabel;
   private Text projectId;
@@ -38,7 +44,6 @@ public class DeployPropertyPage extends PropertyPage implements IWorkbenchProper
   private Text bucket;
   private Button browseBucketButton;
   
-
   @Override
   protected Control createContents(Composite parent) {
     Composite container = new Composite(parent, SWT.NONE);
@@ -50,11 +55,7 @@ public class DeployPropertyPage extends PropertyPage implements IWorkbenchProper
 
     createPromoteSection(container);
 
-    ExpandBar expandBar = createCollapsibleAdvancedSection(container);
-
-    Composite defaultBucketComp = createBucketSection(expandBar);
-
-    addBucketSectionToAdvancedSettings(expandBar, defaultBucketComp);
+    createAdvancedSection(container);
     
     return container;
   }
@@ -71,12 +72,12 @@ public class DeployPropertyPage extends PropertyPage implements IWorkbenchProper
       
       @Override
       public void widgetSelected(SelectionEvent e) {
-        enableProjectIdWidgets();
+        updateProjectIdWidgetsEnablement();
       }
       
       @Override
       public void widgetDefaultSelected(SelectionEvent e) {
-        enableProjectIdWidgets();
+        updateProjectIdWidgetsEnablement();
       }
     });
     
@@ -93,7 +94,7 @@ public class DeployPropertyPage extends PropertyPage implements IWorkbenchProper
     browseProjectButton.setText("...");
     browseProjectButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
   
-    selectProjectIdButton();
+    initProjectIdButtonSelection();
   }
 
   private void createProjectVersionSection(Composite parent) {
@@ -118,16 +119,16 @@ public class DeployPropertyPage extends PropertyPage implements IWorkbenchProper
       
       @Override
       public void widgetSelected(SelectionEvent e) {
-        enableVersionWidgets();
+        updateVersionWidgetsEnablement();
       }
       
       @Override
       public void widgetDefaultSelected(SelectionEvent e) {
-        enableVersionWidgets();
+        updateVersionWidgetsEnablement();
       }
     });
   
-    selectVersionButton();
+    initVersionButtonSelection();
   }
 
   private void createPromoteSection(Composite parent) {
@@ -139,15 +140,47 @@ public class DeployPropertyPage extends PropertyPage implements IWorkbenchProper
     autoPromoteButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
     
     Link manualPromoteLabel = new Link(promoteComp, SWT.NONE);
-    manualPromoteLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
-    manualPromoteLabel.setText(Messages.getString("deploy.manual.link", "https://console.developers.google.com/appengine"));
+    GridData layoutData = new GridData(SWT.LEFT, SWT.CENTER, true, false);
+    layoutData.horizontalIndent = INDENT_CHECKBOX_ENABLED_WIDGET;
+    manualPromoteLabel.setLayoutData(layoutData);
+    manualPromoteLabel.setText(Messages.getString("deploy.manual.link", APPENGINE_DASHBOARD_URL));
+    manualPromoteLabel.addSelectionListener(new SelectionListener() {
+
+      @Override
+      public void widgetSelected(SelectionEvent e) {
+        openAppEngineDashboard();
+      }
+
+      @Override
+      public void widgetDefaultSelected(SelectionEvent e) {
+        openAppEngineDashboard();
+      }
+
+      private void openAppEngineDashboard() {
+        try {
+          IWorkbenchBrowserSupport browserSupport = PlatformUI.getWorkbench().getBrowserSupport();
+          browserSupport.getExternalBrowser().openURL(new URL(APPENGINE_DASHBOARD_URL));
+        } catch (PartInitException | MalformedURLException ex) {
+          setMessage(Messages.getString("cannot.open.browser", ex.getLocalizedMessage()), WARNING);
+        }
+      }
+    });
   }
 
-  private ExpandBar createCollapsibleAdvancedSection(Composite parent) {
-    ExpandBar expandBar = new ExpandBar(parent, SWT.V_SCROLL);
-    expandBar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-    FontUtil.convertFontToBold(expandBar);
-    return expandBar;
+  private void createAdvancedSection(Composite parent) {
+    ExpandableComposite expandableComposite = createExpandableComposite(parent);
+    Composite defaultBucketComp = createBucketSection(expandableComposite);
+    expandableComposite.setClient(defaultBucketComp);
+  }
+
+  private ExpandableComposite createExpandableComposite(Composite parent) {
+    ExpandableComposite expandableComposite =
+        new ExpandableComposite(parent, SWT.NONE, ExpandableComposite.TWISTIE | ExpandableComposite.CLIENT_INDENT);
+    expandableComposite.setText(Messages.getString("settings.advanced"));
+    expandableComposite.setExpanded(false);
+    expandableComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+    FontUtil.convertFontToBold(expandableComposite);
+    return expandableComposite;
   }
 
   private Composite createBucketSection(Composite parent) {
@@ -161,12 +194,12 @@ public class DeployPropertyPage extends PropertyPage implements IWorkbenchProper
       
       @Override
       public void widgetSelected(SelectionEvent e) {
-        enableCustomBucketWidgets();
+        updateCustomBucketWidgetsEnablement();
       }
       
       @Override
       public void widgetDefaultSelected(SelectionEvent e) {
-        enableCustomBucketWidgets();
+        updateCustomBucketWidgetsEnablement();
       }
     });
   
@@ -185,45 +218,38 @@ public class DeployPropertyPage extends PropertyPage implements IWorkbenchProper
     browseBucketButton.setText("...");
     browseBucketButton.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
   
-    selectBucketButton();
+    initBucketButtonSelection();
     
     return defaultBucketComp;
   }
 
-  private void addBucketSectionToAdvancedSettings(ExpandBar parent, Composite child) {
-    ExpandItem expandItem = new ExpandItem(parent, SWT.NONE, 0);
-    expandItem.setText(Messages.getString("settings.advanced"));
-    expandItem.setHeight(child.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
-    expandItem.setControl(child);
-  }
-
-  private void selectProjectIdButton() {
+  private void initProjectIdButtonSelection() {
     promptForProjectIdButton.setSelection(true);
-    enableProjectIdWidgets();
+    updateProjectIdWidgetsEnablement();
   }
 
-  private void enableProjectIdWidgets() {
+  private void updateProjectIdWidgetsEnablement() {
     projectIdLabel.setEnabled(!promptForProjectIdButton.getSelection());
     projectId.setEnabled(!promptForProjectIdButton.getSelection());
     browseProjectButton.setEnabled(!promptForProjectIdButton.getSelection());
   }
 
-  private void selectVersionButton() {
+  private void initVersionButtonSelection() {
     overrideDefaultVersionButton.setSelection(false);
-    enableVersionWidgets();
+    updateVersionWidgetsEnablement();
   }
 
-  private void enableVersionWidgets() {
+  private void updateVersionWidgetsEnablement() {
     version.setEnabled(overrideDefaultVersionButton.getSelection());
     versionLabel.setEnabled(overrideDefaultVersionButton.getSelection());
   }
 
-  private void selectBucketButton() {
+  private void initBucketButtonSelection() {
     overrideDefaultBucketButton.setSelection(false);
-    enableCustomBucketWidgets();
+    updateCustomBucketWidgetsEnablement();
   }
 
-  private void enableCustomBucketWidgets() {
+  private void updateCustomBucketWidgetsEnablement() {
     bucket.setEnabled(overrideDefaultBucketButton.getSelection());
     bucketLabel.setEnabled(overrideDefaultBucketButton.getSelection());
     browseBucketButton.setEnabled(overrideDefaultBucketButton.getSelection());
