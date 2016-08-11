@@ -16,6 +16,8 @@
 
 package com.google.cloud.tools.eclipse.swtbot;
 
+import com.google.common.base.Preconditions;
+
 import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
 
 /**
@@ -30,6 +32,7 @@ import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
  */
 public class SwtBotTimeoutManager {
 
+  /* Milliseconds */
   private static final int TYPICAL_TIMEOUT = 30000;
 
   private static long UNSET_TIMEOUT_VALUE = -1;
@@ -41,9 +44,7 @@ public class SwtBotTimeoutManager {
    * {@link #setTimeout(long)} was called.
    */
   public static void resetTimeout() {
-    if (oldTimeoutSwtPrefs != UNSET_TIMEOUT_VALUE) {
-      setSwtBotPrefsTimeoutFieldValue(oldTimeoutSwtPrefs);
-    }
+    setSwtBotPrefsTimeoutFieldValue(oldTimeoutSwtPrefs);
   }
 
   /**
@@ -60,6 +61,7 @@ public class SwtBotTimeoutManager {
    * @param timeout the timeout value, in milliseconds
    */
   public static void setTimeout(long timeout) {
+    Preconditions.checkArgument(timeout > 0);
     oldTimeoutSwtPrefs = getSwtBotPrefsTimeoutFieldValue();
     setSwtBotPrefsTimeoutFieldValue(timeout);
   }

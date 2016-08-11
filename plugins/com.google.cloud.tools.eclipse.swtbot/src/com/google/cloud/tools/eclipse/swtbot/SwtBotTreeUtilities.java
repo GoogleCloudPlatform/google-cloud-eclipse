@@ -92,7 +92,7 @@ public class SwtBotTreeUtilities {
     for (String itemName : itemNames) {
       try {
         return getUniqueTreeItem(bot, mainTree, itemName, subchildName);
-      } catch (IllegalStateException ex) {
+      } catch (WidgetNotFoundException ex) {
         // Ignore
       }
     }
@@ -153,7 +153,7 @@ public class SwtBotTreeUtilities {
    * that the tree does not have any "empty" children.
    * 
    * @param tree the tree to search
-   * @throws TimeoutException if all of the direct children of the tree do not have text within the
+   * @throws TimeoutException if any of the direct children of the tree do not have text within the
    *         timeout period
    */
   public static void waitUntilTreeHasText(SWTBot bot, final SWTBotTreeItem tree)
