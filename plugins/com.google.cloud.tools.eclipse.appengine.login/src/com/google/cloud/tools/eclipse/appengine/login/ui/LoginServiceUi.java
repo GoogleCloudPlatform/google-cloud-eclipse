@@ -109,14 +109,14 @@ public class LoginServiceUi implements UiFacade {
       // Don't show an error dialog if a user pressed the cancel button.
       if (!ioe.getMessage().contains(ERROR_MARKER_USER_CANCELLED_LOGIN)) {
         showErrorDialogHelper(Messages.LOGIN_ERROR_DIALOG_TITLE,
-            Messages.LOGIN_ERROR_LOCAL_SERVER_RUN + ioe.getCause().getLocalizedMessage());
+            Messages.LOGIN_ERROR_LOCAL_SERVER_RUN + ioe.getLocalizedMessage());
       }
       return null;
     }
   }
 
   private String showProgressDialogAndWaitForCode(
-      LocalServerReceiver codeReceiver, String redirectUrl) throws IOException {
+      LocalServerReceiver codeReceiver, final String redirectUrl) throws IOException {
     final Semaphore checkingIn = new Semaphore(0);  // Ensures memory consistency between threads.
 
     final ProgressMonitorDialog dialog = new ProgressMonitorDialog(shellProvider.getShell()) {
@@ -127,6 +127,7 @@ public class LoginServiceUi implements UiFacade {
       }
       @Override
       protected void cancelPressed() {
+        stopCodeWaitingJob(redirectUrl);
         checkingIn.release();  // Self-unlocking when a user pressed the cancel button.
         super.cancelPressed();
       }
@@ -142,7 +143,6 @@ public class LoginServiceUi implements UiFacade {
 
     scheduleCodeWaitingJob(codeReceiver, dialog, checkingIn, codeHolder, exceptionHolder);
     dialog.open();  // Blocked, but not by the job. Resumes as soon as the dialog closes.
-    stopCodeWaitingJob(redirectUrl);
     checkingIn.acquireUninterruptibly();  // Synchronize here for memory consistency.
 
     if (exceptionHolder[0] != null) {
@@ -152,9 +152,9 @@ public class LoginServiceUi implements UiFacade {
   }
 
   // We don't use the ProgressMonitorDialog's built-in support for running a job
-  // (ProgressMonitorDialog.run()), because the dialog will be blocked forever (regardless of
-  // closing the dialog) if the job fails to terminate. This method is a workaround as we don't
-  // have 100% guarantee that we can cancel LocalServerReceiver.waitForCode().
+  // (ProgressMonitorDialog.run()), because the main thread will be blocked forever (regardless
+  // of closing the dialog) if the job fails to terminate. This method is a workaround as we
+  // don't have 100% guarantee that we can cancel LocalServerReceiver.waitForCode().
   //
   // However, under normal circumstances, stopCodeWaitingJob() will succeed and this job will
   // terminate.
@@ -172,19 +172,18 @@ public class LoginServiceUi implements UiFacade {
         }
         finally {
           try {
+            // Close the progress dialog so that Eclipse can move forward.
+            display.syncExec(new Runnable() {
+              @Override public void run() {
+                dialog.close();
+              }
+            });
+
             checkingIn.release();  // Ensure the UI thread can see the writes from this thread.
             codeReceiver.stop();
           } catch (IOException ioe) {
             logger.log(Level.WARNING, "Failed to stop the local web server.", ioe); //$NON-NLS-1$
           }
-
-          // Close the progress dialog so that Eclipse can move forward.
-          display.syncExec(new Runnable() {
-            @Override
-            public void run() {
-              dialog.close();
-            }
-          });
         }
         return Status.OK_STATUS;
       }
