@@ -10,5 +10,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/google-http-client-1.22.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-http-client-jackson-1.22.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-oauth-client-1.22.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-oauth-client-java6-1.22.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-oauth-client-jetty-1.22.0.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
