@@ -116,7 +116,7 @@ public class LoginServiceUi implements UiFacade {
   }
 
   private String showProgressDialogAndWaitForCode(
-      final LocalServerReceiver codeReceiver, final String redirectUrl) throws IOException {
+      LocalServerReceiver codeReceiver, String redirectUrl) throws IOException {
     final Semaphore checkingIn = new Semaphore(0);  // Ensures memory consistency between threads.
 
     final ProgressMonitorDialog dialog = new ProgressMonitorDialog(shellProvider.getShell()) {
@@ -127,7 +127,7 @@ public class LoginServiceUi implements UiFacade {
       }
       @Override
       protected void cancelPressed() {
-        checkingIn.release();  // Self unlocking when a user pressed the cancel button.
+        checkingIn.release();  // Self-unlocking when a user pressed the cancel button.
         super.cancelPressed();
       }
     };
@@ -206,11 +206,13 @@ public class LoginServiceUi implements UiFacade {
         HttpURLConnection connection = null;
 
         try {
-          URL url = new URL(redirectUrl + "?error=" + ERROR_MARKER_USER_CANCELLED_LOGIN); //$NON-NLS-1$
+          URL url = new URL(redirectUrl
+              + "?error=" + ERROR_MARKER_USER_CANCELLED_LOGIN); //$NON-NLS-1$
           connection = (HttpURLConnection) url.openConnection();
           int responseCode = connection.getResponseCode();
           if (responseCode != HttpURLConnection.HTTP_OK) {
-            logger.log(Level.WARNING, "Error terminating local server. Response: " + responseCode); //$NON-NLS-1$
+            logger.log(Level.WARNING,
+                "Error terminating local server. Response: " + responseCode); //$NON-NLS-1$
           }
         } catch (IOException ex) {
           logger.log(Level.WARNING, "Error terminating local server", ex); //$NON-NLS-1$
