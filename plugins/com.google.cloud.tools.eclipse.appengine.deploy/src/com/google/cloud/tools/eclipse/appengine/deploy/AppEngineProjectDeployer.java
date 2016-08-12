@@ -18,8 +18,7 @@ import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardProjectS
 import com.google.common.annotations.VisibleForTesting;
 
 /**
- * Deploys a staged App Enginge project.
- * <p>
+ * Deploys a staged App Engine project.
  * The project must be staged first (e.g. in case of App Engine Standard project using {@link StandardProjectStaging})
  * This class will take the staged project and deploy it to App Engine using {@link CloudSdk}
  *
