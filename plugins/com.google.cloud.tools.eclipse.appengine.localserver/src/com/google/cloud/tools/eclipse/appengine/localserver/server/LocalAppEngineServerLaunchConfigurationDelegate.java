@@ -1,3 +1,18 @@
+/*
+ * Copyright 2016 Google Inc. All Rights Reserved.
+ *
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which
+ * accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
 import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
@@ -7,6 +22,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunch;
@@ -82,10 +98,12 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
     setDefaultSourceLocator(launch, configuration);
 
-    String pageLocation = determinePageLocation(server, configuration);
-    if (pageLocation != null) {
-      // odd: addServerListener(..., IServer.SERVER_STARTED) doesn't work
-      server.addServerListener(new OpenBrowserListener(pageLocation));
+    if (shouldOpenStartPage()) {
+      String pageLocation = determinePageLocation(server, configuration);
+      if (pageLocation != null) {
+        // odd: addServerListener(..., IServer.SERVER_STARTED) doesn't work
+        server.addServerListener(new OpenBrowserListener(pageLocation));
+      }
     }
 
     if (ILaunchManager.DEBUG_MODE.equals(mode)) {
@@ -95,6 +113,14 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     } else {
       serverBehaviour.startDevServer(runnables, console.newMessageStream());
     }
+  }
+
+  /**
+   * @return true if we should open a browser on the start page on successful launch
+   */
+  private boolean shouldOpenStartPage() {
+    return Platform.getPreferencesService().getBoolean(
+        "com.google.cloud.tools.eclipse.appengine.localserver", "launchBrowser", true, null);
   }
 
   private void setupDebugTarget(ILaunch launch, ILaunchConfiguration configuration, int port,
@@ -131,12 +157,12 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
 
   /**
-   * Open a browser on the provided page on server start. We actually wait 200 ms in case the server
-   * is subsequently stopped.
+   * Open a browser on the provided page on server start.
    */
   private class OpenBrowserListener implements IServerListener {
     private String pageLocation;
-    private int waitTime = 1500;
+    /* todo: we actually wait a fixed in case the server is subsequently stopped. */
+    private int waitTime = 1500/* ms */;
 
     public OpenBrowserListener(String pageLocation) {
       this.pageLocation = pageLocation;
@@ -149,6 +175,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       }
       final IServer server = event.getServer();
       final IWorkbench workbench = PlatformUI.getWorkbench();
+
       Job openJob = new UIJob(workbench.getDisplay(), "Launching start page") {
 
         @Override

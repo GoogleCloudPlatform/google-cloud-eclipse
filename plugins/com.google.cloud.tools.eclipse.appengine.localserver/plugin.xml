@@ -120,4 +120,27 @@
          </enablement>
      </consolePageParticipant>
    </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="com.google.cloud.tools.eclipse.appengine.localserver.PreferencesInitializer">
+      </initializer>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            category="com.google.cloud.tools.eclipse.preferences.main"
+            class="com.google.cloud.tools.eclipse.preferences.areas.AreaBasedPreferencePage"
+            id="com.google.cloud.tools.eclipse.preferences.appengine.localserver"
+            name="Run/Debug">
+      </page>
+   </extension>
+   <extension
+         point="com.google.cloud.tools.eclipse.preferences.areas">
+         <area
+               host="com.google.cloud.tools.eclipse.preferences.appengine.localserver"
+               title="Launch Behaviors"
+               class="com.google.cloud.tools.eclipse.appengine.localserver.ui.LaunchBehaviorsArea"
+               preferences="instance://com.google.cloud.tools.eclipse.appengine.localserver"/>
+   </extension>
 </plugin>
