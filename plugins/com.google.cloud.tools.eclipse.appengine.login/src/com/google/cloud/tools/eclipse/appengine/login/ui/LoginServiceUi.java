@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.IShellProvider;
 import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Display;
@@ -36,6 +37,7 @@ import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.services.IServiceLocator;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.concurrent.Semaphore;
@@ -113,56 +115,72 @@ public class LoginServiceUi implements UiFacade {
       }
       return null;
     }
+    finally {
+      try {
+        codeReceiver.stop();
+      } catch (IOException ioe) {
+        logger.log(Level.WARNING, "Failed to stop the local web server for login.", ioe); //$NON-NLS-1$
+      }
+    }
   }
 
   private String showProgressDialogAndWaitForCode(
-      LocalServerReceiver codeReceiver, final String redirectUrl) throws IOException {
-    final Semaphore checkingIn = new Semaphore(0);  // Ensures memory consistency between threads.
+      final LocalServerReceiver codeReceiver, final String redirectUrl) throws IOException {
+    try {
+      final String[] codeHolder = new String[1];
+      final IOException[] exceptionHolder = new IOException[1];
+      final Semaphore wait = new Semaphore(0 /* initially zero permit */);
 
-    final ProgressMonitorDialog dialog = new ProgressMonitorDialog(shellProvider.getShell()) {
-      @Override
-      protected void configureShell(Shell shell) {
-        super.configureShell(shell);
-        shell.setText(Messages.LOGIN_PROGRESS_DIALOG_TITLE);
+      new ProgressMonitorDialog(shellProvider.getShell()) {
+        @Override
+        protected void configureShell(Shell shell) {
+          super.configureShell(shell);
+          shell.setText(Messages.LOGIN_PROGRESS_DIALOG_TITLE);
+        }
+        @Override
+        protected void cancelPressed() {
+          stopCodeWaitingJob(redirectUrl);
+          wait.release();  // Allow termination of the attached task.
+          decrementNestingDepth();  // Pretend that the attached task is gone.
+          super.cancelPressed();
+        }
+      }.run(true /* fork */, true /* cancelable */, new IRunnableWithProgress() {
+        @Override
+        public void run(IProgressMonitor monitor)
+            throws InvocationTargetException, InterruptedException {
+          monitor.beginTask(Messages.LOGIN_PROGRESS_DIALOG_MESSAGE, IProgressMonitor.UNKNOWN);
+          // Fork another sub-job to circumvent the limitation of LocalServerReceiver.
+          // (See the comments of scheduleCodeWaitingJob().)
+          scheduleCodeWaitingJob(codeReceiver, wait, codeHolder, exceptionHolder);
+          wait.acquire();  // Block until signaled.
+        }
+      });
+
+      if (exceptionHolder[0] != null) {
+        throw exceptionHolder[0];
       }
-      @Override
-      protected void cancelPressed() {
-        stopCodeWaitingJob(redirectUrl);
-        checkingIn.release();  // Self-unlocking when a user pressed the cancel button.
-        super.cancelPressed();
-      }
-    };
-    dialog.setBlockOnOpen(true);
-    dialog.setCancelable(true);
-    dialog.create();
-    dialog.getProgressMonitor()
-        .beginTask(Messages.LOGIN_PROGRESS_DIALOG_MESSAGE, IProgressMonitor.UNKNOWN);
+      return codeHolder[0];
 
-    String[] codeHolder = new String[1];
-    IOException[] exceptionHolder = new IOException[1];
-
-    scheduleCodeWaitingJob(codeReceiver, dialog, checkingIn, codeHolder, exceptionHolder);
-    dialog.open();  // Blocked, but not by the job. Resumes as soon as the dialog closes.
-    checkingIn.acquireUninterruptibly();  // Synchronize here for memory consistency.
-
-    if (exceptionHolder[0] != null) {
-      throw exceptionHolder[0];
+    } catch (InvocationTargetException | InterruptedException ex) {
+      // Never thrown from the attached task.
+      return null;
     }
-    return codeHolder[0];
   }
 
-  // We don't use the ProgressMonitorDialog's built-in support for running a job
-  // (ProgressMonitorDialog.run()), because the main thread will be blocked forever (regardless
-  // of closing the dialog) if the job fails to terminate. This method is a workaround as we
-  // don't have 100% guarantee that we can cancel LocalServerReceiver.waitForCode().
-  //
-  // However, under normal circumstances, stopCodeWaitingJob() will succeed and this job will
-  // terminate.
+  /**
+   * Schedule and run a job that calls {@link LocalServerReciever#waitForCode}. The reason for
+   * creating another job inside the job of {@link showProgressDialogAndWaitForCode} is that we
+   * cannot have a 100%-guarantee that {@link LocalServerReciever#waitForCode} will eventually
+   * return. (If {@link stopCodeWaitingJob} fails to stop {@link LocalServerReciever#waitForCode}
+   * gracefully, users will be stuck and the IDE has to be killed forcibly.)
+   *
+   * However, under normal circumstances, {@link stopCodeWaitingJob} will succeed to terminate
+   * this sub-job.
+   */
   private void scheduleCodeWaitingJob(
-      final LocalServerReceiver codeReceiver, final ProgressMonitorDialog dialog,
-      final Semaphore checkingIn, final String[] codeHolder, final IOException[] exceptionHolder) {
-    final Display display = dialog.getShell().getDisplay();
-    Job codeWaitingJob = new Job("Waiting for Authorization Code") {
+      final LocalServerReceiver codeReceiver, final Semaphore wait,
+      final String[] codeHolder, final IOException[] exceptionHolder) {
+    Job codeWaitingJob = new Job("Waiting for Authorization Code") { //$NON-NLS-1$
       @Override
       protected IStatus run(IProgressMonitor monitor) {
         try {
@@ -171,19 +189,7 @@ public class LoginServiceUi implements UiFacade {
           exceptionHolder[0] = ioe;
         }
         finally {
-          try {
-            // Close the progress dialog so that Eclipse can move forward.
-            display.syncExec(new Runnable() {
-              @Override public void run() {
-                dialog.close();
-              }
-            });
-
-            checkingIn.release();  // Ensure the UI thread can see the writes from this thread.
-            codeReceiver.stop();
-          } catch (IOException ioe) {
-            logger.log(Level.WARNING, "Failed to stop the local web server.", ioe); //$NON-NLS-1$
-          }
+          wait.release();  // Terminate the task attached to the ProgressMonitorDialog.
         }
         return Status.OK_STATUS;
       }
@@ -199,7 +205,7 @@ public class LoginServiceUi implements UiFacade {
    */
   private void stopCodeWaitingJob(final String redirectUrl) {
     // Wrap in a Job for the case where making HTTP connections takes a long time.
-    new Job("Terminate Authorization Code Receiver") {
+    new Job("Terminating Authorization Code Receiver") { //$NON-NLS-1$
       @Override
       protected IStatus run(IProgressMonitor monitor) {
         HttpURLConnection connection = null;
@@ -211,10 +217,10 @@ public class LoginServiceUi implements UiFacade {
           int responseCode = connection.getResponseCode();
           if (responseCode != HttpURLConnection.HTTP_OK) {
             logger.log(Level.WARNING,
-                "Error terminating local server. Response: " + responseCode); //$NON-NLS-1$
+                "Error terminating code waiting job. Response: " + responseCode); //$NON-NLS-1$
           }
-        } catch (IOException ex) {
-          logger.log(Level.WARNING, "Error terminating local server", ex); //$NON-NLS-1$
+        } catch (IOException ioe) {
+          logger.log(Level.WARNING, "Error terminating code waiting job", ioe); //$NON-NLS-1$
         } finally {
           if (connection != null) {
             connection.disconnect();
