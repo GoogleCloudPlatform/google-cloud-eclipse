@@ -103,8 +103,13 @@ public class LoginServiceUiTest {
         ) {
           String input = new String();
           while (true) {
-            input += (char) reader.read();
-            if (input.endsWith("?error=cancelled-by-user")) {
+            int ch = reader.read();
+            if (ch == -1) {
+              break;
+            }
+
+            input += (char) ch;
+            if (input.endsWith("?error=canceled-by-user")) {
               cancelRequestReceived = true;
               writer.write("HTTP/1.1 200 OK\n\n");
               break;

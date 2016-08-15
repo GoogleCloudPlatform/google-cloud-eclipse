@@ -49,7 +49,7 @@ public class LoginServiceUi implements UiFacade {
 
   private static final Logger logger = Logger.getLogger(LoginServiceUi.class.getName());
 
-  private static final String ERROR_MARKER_USER_CANCELLED_LOGIN = "cancelled-by-user"; //$NON-NLS-1$
+  private static final String ERROR_MARKER_USER_CANCELED_LOGIN = "canceled-by-user"; //$NON-NLS-1$
 
   private IServiceLocator serviceLocator;
   private IShellProvider shellProvider;
@@ -110,7 +110,7 @@ public class LoginServiceUi implements UiFacade {
 
     } catch (IOException ioe) {
       // Don't show an error dialog if a user pressed the cancel button.
-      if (!ioe.getMessage().contains(ERROR_MARKER_USER_CANCELLED_LOGIN)) {
+      if (!ioe.getMessage().contains(ERROR_MARKER_USER_CANCELED_LOGIN)) {
         showErrorDialogHelper(Messages.LOGIN_ERROR_DIALOG_TITLE,
             Messages.LOGIN_ERROR_LOCAL_SERVER_RUN + ioe.getLocalizedMessage());
       }
@@ -161,16 +161,16 @@ public class LoginServiceUi implements UiFacade {
   }
 
   /**
-   * Schedule and run a job that calls {@link LocalServerReciever#waitForCode}. The reason for
+   * Schedule and run a job that calls {@link LocalServerReceiver#waitForCode}. The reason for
    * creating another job inside the job of {@link showProgressDialogAndWaitForCode} is that we
-   * cannot have a 100%-guarantee that {@link LocalServerReciever#waitForCode} will eventually
-   * return. (If {@link stopCodeWaitingJob} fails to stop {@link LocalServerReciever#waitForCode}
+   * cannot have a 100%-guarantee that {@link LocalServerReceiver#waitForCode} will eventually
+   * return. (If {@link stopCodeWaitingJob} fails to stop {@link LocalServerReceiver#waitForCode}
    * gracefully, users will be stuck and the IDE has to be killed forcibly.)
    *
    * However, under normal circumstances, {@link stopCodeWaitingJob} will succeed to terminate
    * this sub-job.
    *
-   * @return scheduled job. Returning only for unit testing
+   * @return scheduled job
    */
   @VisibleForTesting
   Job scheduleCodeWaitingJob(
@@ -216,7 +216,7 @@ public class LoginServiceUi implements UiFacade {
 
         try {
           URL url = new URL(redirectUrl
-              + "?error=" + ERROR_MARKER_USER_CANCELLED_LOGIN); //$NON-NLS-1$
+              + "?error=" + ERROR_MARKER_USER_CANCELED_LOGIN); //$NON-NLS-1$
           connection = (HttpURLConnection) url.openConnection();
           int responseCode = connection.getResponseCode();
           if (responseCode != HttpURLConnection.HTTP_OK) {
