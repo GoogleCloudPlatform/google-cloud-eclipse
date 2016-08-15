@@ -77,8 +77,8 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
     for (IProject project : archetypeProjects) {
       IFacetedProject facetedProject = ProjectFacetsManager.create(
           project, true, loopMonitor.newChild(1));
-      FacetInstallDelegate.installAppEngineFacet(facetedProject, loopMonitor.newChild(1));
-      FacetInstallDelegate.installAppEngineRuntime(facetedProject, loopMonitor.newChild(1));
+      AppEngineStandardFacet.installAppEngineFacet(facetedProject, true /* installDependentFacets */, loopMonitor.newChild(1));
+      AppEngineStandardFacet.installAllAppEngineRuntimes(facetedProject, true /* force */, loopMonitor.newChild(1));
     }
     
     /*
