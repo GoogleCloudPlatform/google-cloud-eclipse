@@ -24,11 +24,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.logging.Logger;
 
 public class LoginServiceUiTest {
-
-  private static final Logger logger = Logger.getLogger(LoginServiceUiTest.class.getName());
 
   private boolean cancelRequestReceived;
 
@@ -52,21 +49,19 @@ public class LoginServiceUiTest {
     return new Thread(new Runnable() {
       @Override
       public void run() {
-        try {
-          try (
-            Socket socket = serverSocket.accept();
-            InputStreamReader reader = new InputStreamReader(socket.getInputStream());
-            OutputStreamWriter writer = new OutputStreamWriter(socket.getOutputStream());
-          ) {
-            String input = new String();
-            while (true) {
-              input += (char) reader.read();
-              if (input.endsWith("?error=cancelled-by-user")) {
-                cancelRequestReceived = true;
-                break;
-              }
+        try (
+          Socket socket = serverSocket.accept();
+          InputStreamReader reader = new InputStreamReader(socket.getInputStream());
+          OutputStreamWriter writer = new OutputStreamWriter(socket.getOutputStream());
+        ) {
+          String input = new String();
+          while (true) {
+            input += (char) reader.read();
+            if (input.endsWith("?error=cancelled-by-user")) {
+              cancelRequestReceived = true;
+              writer.write("HTTP/1.1 200 OK\n\n");
+              break;
             }
-            writer.write("HTTP/1.1 200 OK\n\n");
           }
         } catch (IOException ioe) {}
       }
