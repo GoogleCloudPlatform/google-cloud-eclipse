@@ -134,8 +134,6 @@ public class LoginServiceUi implements UiFacade {
         protected void cancelPressed() {
           stopCodeWaitingJob(redirectUrl);
           wait.release();  // Allow termination of the attached task.
-          decrementNestingDepth();  // Pretend that the attached task is gone.
-          super.cancelPressed();
         }
       }.run(true /* fork */, true /* cancelable */, new IRunnableWithProgress() {
         @Override
@@ -198,8 +196,8 @@ public class LoginServiceUi implements UiFacade {
   }
 
   /**
-   * Stops the background task inside {@link showProgressDialogAndWaitForCode} by sending a login
-   * error (as an HTTP request} to the local server. {@link LocalServerReceiver#waitForCode} will
+   * Stops the background task of {@link showProgressDialogAndWaitForCode} by sending a login
+   * error (as an HTTP request) to the local server. {@link LocalServerReceiver#waitForCode} will
    * subsequently throw an {@link IOException}.
    */
   private void stopCodeWaitingJob(final String redirectUrl) {
