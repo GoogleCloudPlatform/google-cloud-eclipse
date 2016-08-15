@@ -101,15 +101,10 @@ public class LoginServiceUiTest {
           InputStreamReader reader = new InputStreamReader(socket.getInputStream(), "UTF-8");
           OutputStreamWriter writer = new OutputStreamWriter(socket.getOutputStream(), "UTF-8");
         ) {
-          String input = new String();
-          while (true) {
-            int ch = reader.read();
-            if (ch == -1) {
-              break;
-            }
-
-            input += (char) ch;
-            if (input.endsWith("?error=canceled-by-user")) {
+          StringBuilder input = new StringBuilder();
+          for (int ch = reader.read(); ch != -1; ch = reader.read()) {
+            input.append((char) ch);
+            if (input.lastIndexOf("?error=canceled-by-user") != -1) {
               cancelRequestReceived = true;
               writer.write("HTTP/1.1 200 OK\n\n");
               break;
