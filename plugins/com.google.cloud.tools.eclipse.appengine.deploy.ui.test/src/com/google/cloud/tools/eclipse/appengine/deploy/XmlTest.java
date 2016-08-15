@@ -36,10 +36,10 @@ public class XmlTest {
     Assert.assertEquals(2, pages.getLength());
     NodeList enabledWhen = doc.getElementsByTagName("enabledWhen");
     Assert.assertEquals(2, enabledWhen.getLength());
-    NodeList tests = doc.getElementsByTagName("enabledWhen");
-    Assert.assertEquals(2, tests.getLength());
+    NodeList tests = doc.getElementsByTagName("test");
+    Assert.assertEquals(1, tests.getLength());
     NodeList adapts = doc.getElementsByTagName("adapt");
-    Assert.assertEquals(2, adapts.getLength());
+    Assert.assertEquals(1, adapts.getLength());
     
     for (int i = 0; i < enabledWhen.getLength(); i++) {
       Element element = (Element) enabledWhen.item(i);
@@ -47,9 +47,7 @@ public class XmlTest {
       Assert.assertEquals("page", parent.getNodeName());
     }
     
-    for (int i = 0; i < adapts.getLength(); i++) {
-      Element element = (Element) adapts.item(i);
-      Assert.assertEquals("org.eclipse.core.resources.IProject", element.getAttribute("type"));
-    }
+    Element adapt = (Element) adapts.item(0);
+    Assert.assertEquals("org.eclipse.core.resources.IProject", adapt.getAttribute("type"));
   }
 }
