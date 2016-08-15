@@ -115,13 +115,6 @@ public class LoginServiceUi implements UiFacade {
       }
       return null;
     }
-    finally {
-      try {
-        codeReceiver.stop();
-      } catch (IOException ioe) {
-        logger.log(Level.WARNING, "Failed to stop the local web server for login.", ioe); //$NON-NLS-1$
-      }
-    }
   }
 
   private String showProgressDialogAndWaitForCode(
@@ -190,6 +183,12 @@ public class LoginServiceUi implements UiFacade {
         }
         finally {
           wait.release();  // Terminate the task attached to the ProgressMonitorDialog.
+          try {
+            codeReceiver.stop();
+          } catch (IOException ioe) {
+            logger.log(Level.WARNING,
+                "Failed to stop the local web server for login.", ioe); //$NON-NLS-1$
+          }
         }
         return Status.OK_STATUS;
       }
