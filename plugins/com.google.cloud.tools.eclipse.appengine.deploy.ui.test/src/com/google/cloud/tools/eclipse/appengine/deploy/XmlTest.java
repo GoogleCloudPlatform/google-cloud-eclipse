@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -37,17 +38,17 @@ public class XmlTest {
     Assert.assertEquals(2, enabledWhen.getLength());
     NodeList tests = doc.getElementsByTagName("enabledWhen");
     Assert.assertEquals(2, tests.getLength());
-    NodeList adapts = doc.getElementsByTagName("enabledWhen");
+    NodeList adapts = doc.getElementsByTagName("adapt");
     Assert.assertEquals(2, adapts.getLength());
     
     for (int i = 0; i < enabledWhen.getLength(); i++) {
-      Element element = (Element) enabledWhen.item(0);
-      Assert.assertEquals("page", element.getParentNode().getNodeName());
-      Assert.fail("no enabledWhen test");
+      Element element = (Element) enabledWhen.item(i);
+      Node parent = element.getParentNode();
+      Assert.assertEquals("page", parent.getNodeName());
     }
     
     for (int i = 0; i < adapts.getLength(); i++) {
-      Element element = (Element) adapts.item(0);
+      Element element = (Element) adapts.item(i);
       Assert.assertEquals("org.eclipse.core.resources.IProject", element.getAttribute("type"));
     }
   }
