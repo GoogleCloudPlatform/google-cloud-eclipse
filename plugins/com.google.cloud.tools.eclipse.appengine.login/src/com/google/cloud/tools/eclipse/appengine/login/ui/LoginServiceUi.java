@@ -17,6 +17,7 @@ package com.google.cloud.tools.eclipse.appengine.login.ui;
 
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
+import com.google.api.client.repackaged.com.google.common.annotations.VisibleForTesting;
 import com.google.cloud.tools.eclipse.appengine.login.GoogleLoginService;
 import com.google.cloud.tools.eclipse.appengine.login.Messages;
 import com.google.cloud.tools.ide.login.UiFacade;
@@ -200,7 +201,8 @@ public class LoginServiceUi implements UiFacade {
    * error (as an HTTP request) to the local server. {@link LocalServerReceiver#waitForCode} will
    * subsequently throw an {@link IOException}.
    */
-  private void stopCodeWaitingJob(final String redirectUrl) {
+  @VisibleForTesting
+  void stopCodeWaitingJob(final String redirectUrl) {
     // Wrap in a Job for the case where making HTTP connections takes a long time.
     new Job("Terminating Authorization Code Receiver") { //$NON-NLS-1$
       @Override
