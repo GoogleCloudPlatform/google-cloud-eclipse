@@ -33,12 +33,11 @@ public class LoginServiceUiTest {
   public void testStopCodeWaitingJob() throws IOException, InterruptedException {
     try (ServerSocket serverSocket = new ServerSocket()) {
       serverSocket.bind(null);
-      int port = serverSocket.getLocalPort();
       Thread serverThread = createListenerThread(serverSocket);
       serverThread.start();
 
       LoginServiceUi loginServiceUi = new LoginServiceUi(null, null, null);
-      loginServiceUi.stopCodeWaitingJob("http://127.0.0.1:" + port);
+      loginServiceUi.stopCodeWaitingJob("http://127.0.0.1:" + serverSocket.getLocalPort());
 
       serverThread.join(5000);  // Test should pass right away. Don't wait for too long.
       Assert.assertTrue(cancelRequestReceived);
