@@ -19,21 +19,16 @@ public class GoogleLoginCommandHandler extends AbstractHandler implements IEleme
   public Object execute(ExecutionEvent event) throws ExecutionException {
     IGoogleLoginService loginService = ServiceUtils.getService(event, IGoogleLoginService.class);
 
-    Credential credential = loginService.getCachedActiveCredential();
+    Credential credential = loginService.getCachedActiveCredential();  // See if already logged in.
     if (credential == null) {
-      credential = loginService.getActiveCredential();
+      loginService.getActiveCredential();  // Log in.
     } else {
       if (MessageDialog.openConfirm(HandlerUtil.getActiveShell(event),
           Messages.LOGOUT_CONFIRM_DIALOG_TITILE, Messages.LOGOUT_CONFIRM_DIALOG_MESSAGE)) {
-        loginService.clearCredential();
+        loginService.clearCredential();  // Log out on confirmation.
       }
     }
 
-    if (credential != null) {
-      boolean success = new GoogleLoginTemporaryTester().testLogin(credential);
-      MessageDialog.openInformation(HandlerUtil.getActiveShell(event),
-          "TESTING AUTH", success ? "WORKING CREDENTIAL" : "FAILURE (See console)");
-    }
     return null;
   }
 

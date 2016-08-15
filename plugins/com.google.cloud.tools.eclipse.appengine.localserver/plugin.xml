@@ -1,123 +1,166 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-
-   <extension point="org.eclipse.wst.server.ui.serverImages">
-      <image
-            id="com.google.cloud.tools.eclipse.gcloud.serverImage"
-            icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gcp-16x16.png"
-            typeIds="com.google.cloud.tools.eclipse.runtime.apptools,com.google.cloud.tools.eclipse.appengine.localserver.server.apptools">
-      </image>
+   <extension
+         point="org.eclipse.wst.server.core.runtimeTypes">
+      <runtimeType
+            class="com.google.cloud.tools.eclipse.appengine.localserver.server.AppToolsRuntime"
+            description="%runtimeTypeDescription"
+            id="com.google.cloud.tools.eclipse.appengine.standard.runtime"
+            name="%apptoolsRuntimeTypeName"
+            vendor="%runtimeTypeVendor"
+            version="1">
+         <moduleType
+               types="jst.web"
+               versions="2.5">
+         </moduleType>
+         <moduleType
+               types="java"
+               versions="1.7">
+         </moduleType>
+      </runtimeType>
    </extension>
-   
-   <extension point="org.eclipse.jst.server.core.runtimeClasspathProviders">
+   <extension
+         point="org.eclipse.wst.server.core.serverTypes">
+      <serverType
+            behaviourClass="com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerBehaviour"
+            class="com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerDelegate"
+            description="%runtimeTypeDescription"
+            id="com.google.cloud.tools.eclipse.appengine.standard.server"
+            initialState="stopped"
+            launchConfigId="com.google.cloud.tools.eclipse.appengine.AppToolsLaunchConfigurationType"
+            launchModes="run,debug,profile"
+            name="%apptoolsTypeName"
+            runtime="true"
+            runtimeTypeId="com.google.cloud.tools.eclipse.appengine.standard.runtime"
+            startBeforePublish="false"
+            supportsRemoteHosts="false">
+      </serverType>
+   </extension>
+   <extension
+         point="org.eclipse.jst.server.core.runtimeClasspathProviders">
       <runtimeClasspathProvider
             class="com.google.cloud.tools.eclipse.appengine.localserver.ServletClasspathProvider"
-            id="com.google.cloud.tools.eclipse.appengine.localserver.runtimeClasspathProvider"
-            runtimeTypeIds="com.google.cloud.tools.eclipse.runtime.apptools" />
+            id="com.google.cloud.tools.eclipse.appengine.standard.runtimeClasspathProvider"
+            runtimeTypeIds="com.google.cloud.tools.eclipse.appengine.standard.runtime">
+      </runtimeClasspathProvider>
    </extension>
-
-   <extension point="org.eclipse.wst.common.project.facet.core.runtimes">
-      <runtime-component-type id="com.google.cloud.tools.eclipse.runtime.component"/>
-      <runtime-component-version type="com.google.cloud.tools.eclipse.runtime.component" version="1"/>
+   <extension
+         point="org.eclipse.wst.common.project.facet.core.runtimes">
+      <runtime-component-type
+            id="com.google.cloud.tools.eclipse.appengine.standard.runtime">
+      </runtime-component-type>
+      <runtime-component-version
+            type="com.google.cloud.tools.eclipse.appengine.standard.runtime"
+            version="1">
+      </runtime-component-version>
       <supported>
-          <runtime-component id="com.google.cloud.tools.eclipse.runtime.component" version="1"/>
-          <facet id="jst.web" version="[2.2-2.5]"/>
-          <facet id="jst.utility"  version="1.0"/>
-          <facet id="jst.webfragment" version="3.0" />
-          <facet id="java" version="[1.4-1.7]" />
+         <runtime-component
+               id="com.google.cloud.tools.eclipse.appengine.standard.runtime"
+               version="1"></runtime-component>
+         <facet
+               id="com.google.cloud.tools.eclipse.appengine.facet"
+               version="1">
+         </facet>
+         <facet
+               id="jst.web"
+               version="2.5">
+         </facet>
+         <facet
+               id="java"
+               version="1.7">
+         </facet>
       </supported>
-      
       <adapter>
-         <runtime-component id="com.google.cloud.tools.eclipse.runtime.component" />
+         <runtime-component
+               id="com.google.cloud.tools.eclipse.appengine.standard.runtime">
+         </runtime-component>
          <!-- TODO non-internal class to use here for factory -->
-         <factory class="org.eclipse.jst.server.core.internal.RuntimeClasspathProvider$Factory" />
-         <type class="org.eclipse.jst.common.project.facet.core.IClasspathProvider" />
+         <factory
+               class="org.eclipse.jst.server.core.internal.RuntimeClasspathProvider$Factory">
+         </factory>
+         <type
+               class="org.eclipse.jst.common.project.facet.core.IClasspathProvider">
+         </type>
       </adapter>
    </extension>
-
-   <extension point="org.eclipse.debug.core.processFactories">
+   <extension
+         point="org.eclipse.jst.server.core.runtimeFacetMappings">
+      <runtimeFacetMapping
+            id="com.google.cloud.tools.eclipse.appengineruntimeFacetMapping"
+            runtime-component="com.google.cloud.tools.eclipse.appengine.standard.runtime"
+            runtimeTypeId="com.google.cloud.tools.eclipse.appengine.standard.runtime"
+            version="1">
+      </runtimeFacetMapping>
+   </extension>
+   <extension
+         point="org.eclipse.wst.server.ui.serverImages">
+      <image
+            icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gcp-16x16.png"
+            id="com.google.cloud.tools.eclipse.appengine.standard.serverImage"
+            typeIds="com.google.cloud.tools.eclipse.appengine.standard.runtime, com.google.cloud.tools.eclipse.appengine.standard.server">
+      </image>
+   </extension>
+   <extension
+         point="org.eclipse.wst.server.core.publishTasks">
+      <publishTask
+            class="com.google.cloud.tools.eclipse.appengine.localserver.server.CloudSdkPublishTaskDelegate"
+            id="com.google.cloud.tools.eclipse.appengine.publishTask"
+            typeIds="com.google.cloud.tools.eclipse.appengine.standard.server">
+      </publishTask>
+   </extension>
+   <extension
+         point="org.eclipse.debug.core.launchConfigurationTypes">
+      <launchConfigurationType
+            delegate="com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerLaunchConfigurationDelegate"
+            id="com.google.cloud.tools.eclipse.appengine.AppToolsLaunchConfigurationType"
+            modes="run, debug, profile"
+            name="%apptoolsServerTypeName">
+      </launchConfigurationType>
+   </extension>
+   <extension
+         point="org.eclipse.debug.ui.launchConfigurationTypeImages">
+      <launchConfigurationTypeImage
+            configTypeID="com.google.cloud.tools.eclipse.appengine.AppToolsLaunchConfigurationType"
+            icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gcp-16x16.png"
+            id="com.google.cloud.tools.eclipse.appengine.launchConfigurationTypeImages">
+      </launchConfigurationTypeImage>
+   </extension>
+   <extension
+         point="org.eclipse.debug.ui.launchConfigurationTabGroups">
+      <launchConfigurationTabGroup
+            class="com.google.cloud.tools.eclipse.appengine.localserver.ui.AppEngineTabGroup"
+            id="com.google.cloud.tools.eclipse.appengine.localserver.ui.AppEngineTabGroup"
+            type="com.google.cloud.tools.eclipse.appengine.AppToolsLaunchConfigurationType">
+      </launchConfigurationTabGroup>
+   </extension>
+   <extension
+         point="org.eclipse.ui.console.consolePageParticipants">
+      <consolePageParticipant
+            class="com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineConsolePageParticipant"
+            id="com.google.cloud.tools.eclipse.appengine.consolePageParticipant">
+      </consolePageParticipant>
+   </extension>
+   <extension
+         id="com.google.cloud.tools.eclipse.appenginedefaultFacet"
+         point="org.eclipse.wst.common.project.facet.core.defaultFacets">
+      <default-facets>
+         <facet
+               id="com.google.cloud.tools.eclipse.appengine.facet"
+               version="1">
+         </facet>
+         <runtime-component
+               id="com.google.cloud.tools.eclipse.appengine.standard.runtime"
+               version="1">
+         </runtime-component>
+      </default-facets>
+   </extension>
+   <extension
+         point="org.eclipse.debug.core.processFactories">
       <processFactory
             class="com.google.cloud.tools.eclipse.appengine.localserver.server.DevAppServerProcessFactory"
             id="com.google.cloud.tools.eclipse.appengine.localserver.processfactory">
       </processFactory>
    </extension>
-   
-    <!-- app-tools-lib-for-java based server and runtime -->
-    <extension point="org.eclipse.wst.server.core.serverTypes">
-      <serverType
-           behaviourClass="com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerBehaviour" 
-           class="com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerDelegate"    
-           description="%runtimeTypeDescription"    
-           id="com.google.cloud.tools.eclipse.appengine.localserver.server.apptools"   
-           initialState="stopped"    
-           launchConfigId="com.google.cloud.tools.eclipse.AppToolsLaunchConfigurationType"   
-           launchModes="run,debug"   
-           name="%apptoolsTypeName"    
-           runtime="true"    
-           runtimeTypeId="com.google.cloud.tools.eclipse.runtime.apptools"    
-           startBeforePublish="false"    
-           supportsRemoteHosts="false">    
-        </serverType>   
-    </extension>
-    
-    <extension point="org.eclipse.debug.ui.launchConfigurationTabGroups">
-      <launchConfigurationTabGroup
-          id="com.google.cloud.tools.eclipse.appengine.localserver.ui.AppEngineTabGroup"
-          type="com.google.cloud.tools.eclipse.AppToolsLaunchConfigurationType"
-          class="com.google.cloud.tools.eclipse.appengine.localserver.ui.AppEngineTabGroup">
-      </launchConfigurationTabGroup>
-    </extension>
-    <extension point="org.eclipse.debug.ui.launchConfigurationTypeImages">    
-      <launchConfigurationTypeImage
-           configTypeID="com.google.cloud.tools.eclipse.AppToolsLaunchConfigurationType"   
-           icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gcp-16x16.png"   
-           id="com.google.cloud.tools.eclipse.ExternalLaunchConfigurationTypeImage">   
-      </launchConfigurationTypeImage>   
-    </extension>
-    <extension point="org.eclipse.debug.core.launchConfigurationTypes">   
-      <launchConfigurationType    
-             delegate="com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerLaunchConfigurationDelegate"    
-             id="com.google.cloud.tools.eclipse.AppToolsLaunchConfigurationType"   
-             modes="run, debug"   
-             name="%apptoolsLaunchTypeName">   
-       </launchConfigurationType>    
-    </extension>
-    
-    <extension point="org.eclipse.wst.server.core.runtimeTypes">
-      <runtimeType
-          class="com.google.cloud.tools.eclipse.appengine.localserver.server.AppToolsRuntime"
-          description="%runtimeTypeDescription"
-          id="com.google.cloud.tools.eclipse.runtime.apptools"
-          name="%apptoolsRuntimeTypeName"
-          vendor="%runtimeTypeVendor"
-          version="1">
-            <moduleType types="jst.web" versions="2.2, 2.3, 2.4, 2.5"/>
-            <moduleType types="jst.connector" versions="1.0, 1.5, 1.6"/>
-            <moduleType types="jst.utility"  versions="1.0"/>
-      </runtimeType>
-   </extension>
-   
-   <extension point="org.eclipse.wst.server.core.publishTasks">
-     <publishTask
-             id="com.google.cloud.tools.eclipse.appengine.localserver.publishTask"
-             class="com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEnginePublishTaskDelegate"
-             typeIds="com.google.cloud.tools.eclipse.appengine.localserver.server.apptools">
-       </publishTask>
-   </extension>
-   
-   <extension point="org.eclipse.jst.server.core.runtimeFacetMappings">
-    <runtimeFacetMapping runtimeTypeId="com.google.cloud.tools.eclipse.runtime.apptools"
-        runtime-component="com.google.cloud.tools.eclipse.runtime.component" version="1"/>
-   </extension>
-   
-   <extension point="org.eclipse.ui.console.consolePageParticipants">
-     <consolePageParticipant
-            class="com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineConsolePageParticipant"
-            id="com.google.cloud.tools.appengine.LocalAppEngineConsolePagePaticipant">
-         <enablement>
-            <instanceof value="com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineConsole"/>
-         </enablement>
-     </consolePageParticipant>
-   </extension>
+
 </plugin>
