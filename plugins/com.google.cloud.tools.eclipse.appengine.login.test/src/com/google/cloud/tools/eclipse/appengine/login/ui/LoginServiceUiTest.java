@@ -16,6 +16,13 @@
 
 package com.google.cloud.tools.eclipse.appengine.login.ui;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import com.google.cloud.tools.eclipse.appengine.login.ui.LoginServiceUi.LocalServerReceiverWrapper;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -24,8 +31,49 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.Semaphore;
 
 public class LoginServiceUiTest {
+
+  @Test
+  public void testScheduleCodeWaitingJob_successfulLogin()
+      throws IOException, InterruptedException {
+    LocalServerReceiverWrapper codeReceiver = mock(LocalServerReceiverWrapper.class);
+    when(codeReceiver.waitForCode()).thenReturn("some valid authorization code");
+
+    Semaphore wait = new Semaphore(0);
+    String[] codeHolder = new String[1];
+    IOException[] exceptionHolder = new IOException[1];
+
+    new LoginServiceUi(null, null, null)
+        .scheduleCodeWaitingJob(codeReceiver, wait, codeHolder, exceptionHolder)
+        .join();
+
+    verify(codeReceiver, times(1)).stop();
+    Assert.assertEquals("some valid authorization code", codeHolder[0]);
+    Assert.assertNull(exceptionHolder[0]);
+    Assert.assertEquals(1, wait.availablePermits());
+  }
+
+  @Test
+  public void testScheduleCodeWaitingJob_failedLogin()
+      throws IOException, InterruptedException {
+    LocalServerReceiverWrapper codeReceiver = mock(LocalServerReceiverWrapper.class);
+    when(codeReceiver.waitForCode()).thenThrow(new IOException("some IOException"));
+
+    Semaphore wait = new Semaphore(0);
+    String[] codeHolder = new String[1];
+    IOException[] exceptionHolder = new IOException[1];
+
+    new LoginServiceUi(null, null, null)
+        .scheduleCodeWaitingJob(codeReceiver, wait, codeHolder, exceptionHolder)
+        .join();
+
+    verify(codeReceiver, times(1)).stop();
+    Assert.assertNull(codeHolder[0]);
+    Assert.assertEquals("some IOException", exceptionHolder[0].getMessage());
+    Assert.assertEquals(1, wait.availablePermits());
+  }
 
   private boolean cancelRequestReceived;
 
@@ -36,8 +84,8 @@ public class LoginServiceUiTest {
       Thread serverThread = createListenerThread(serverSocket);
       serverThread.start();
 
-      LoginServiceUi loginServiceUi = new LoginServiceUi(null, null, null);
-      loginServiceUi.stopCodeWaitingJob("http://127.0.0.1:" + serverSocket.getLocalPort());
+      new LoginServiceUi(null, null, null)
+          .stopCodeWaitingJob("http://127.0.0.1:" + serverSocket.getLocalPort());
 
       serverThread.join(5000);  // Test should pass right away. Don't wait for too long.
       Assert.assertTrue(cancelRequestReceived);
@@ -50,8 +98,8 @@ public class LoginServiceUiTest {
       public void run() {
         try (
           Socket socket = serverSocket.accept();
-          InputStreamReader reader = new InputStreamReader(socket.getInputStream());
-          OutputStreamWriter writer = new OutputStreamWriter(socket.getOutputStream());
+          InputStreamReader reader = new InputStreamReader(socket.getInputStream(), "UTF-8");
+          OutputStreamWriter writer = new OutputStreamWriter(socket.getOutputStream(), "UTF-8");
         ) {
           String input = new String();
           while (true) {

@@ -143,7 +143,8 @@ public class LoginServiceUi implements UiFacade {
           monitor.beginTask(Messages.LOGIN_PROGRESS_DIALOG_MESSAGE, IProgressMonitor.UNKNOWN);
           // Fork another sub-job to circumvent the limitation of LocalServerReceiver.
           // (See the comments of scheduleCodeWaitingJob().)
-          scheduleCodeWaitingJob(codeReceiver, wait, codeHolder, exceptionHolder);
+          scheduleCodeWaitingJob(
+              new LocalServerReceiverWrapper(codeReceiver), wait, codeHolder, exceptionHolder);
           wait.acquire();  // Block until signaled.
         }
       });
@@ -168,9 +169,12 @@ public class LoginServiceUi implements UiFacade {
    *
    * However, under normal circumstances, {@link stopCodeWaitingJob} will succeed to terminate
    * this sub-job.
+   *
+   * @return scheduled job. Returning only for unit testing
    */
-  private void scheduleCodeWaitingJob(
-      final LocalServerReceiver codeReceiver, final Semaphore wait,
+  @VisibleForTesting
+  Job scheduleCodeWaitingJob(
+      final LocalServerReceiverWrapper codeReceiver, final Semaphore wait,
       final String[] codeHolder, final IOException[] exceptionHolder) {
     Job codeWaitingJob = new Job("Waiting for Authorization Code") { //$NON-NLS-1$
       @Override
@@ -194,6 +198,7 @@ public class LoginServiceUi implements UiFacade {
     };
     codeWaitingJob.setSystem(true);  // Hide the job from UI.
     codeWaitingJob.schedule();
+    return codeWaitingJob;
   }
 
   /**
@@ -235,4 +240,25 @@ public class LoginServiceUi implements UiFacade {
       String title, GoogleAuthorizationCodeRequestUrl authCodeRequestUrl) {
     throw new RuntimeException("Not to be called."); //$NON-NLS-1$
   }
+
+  /**
+   * A wrapper class that delegates methods to {@link LocalServerReceiver}. Defined only to allow
+   * unit testing, since Mockito cannot mock {@link LocalServerReceiver}, which is {@code final}.
+   */
+  public static class LocalServerReceiverWrapper {
+
+    private LocalServerReceiver receiver;
+
+    public LocalServerReceiverWrapper(LocalServerReceiver receiver) {
+      this.receiver = receiver;
+    }
+
+    public String waitForCode() throws IOException {
+      return receiver.waitForCode();
+    }
+
+    public void stop() throws IOException {
+      receiver.stop();
+    }
+  };
 }
