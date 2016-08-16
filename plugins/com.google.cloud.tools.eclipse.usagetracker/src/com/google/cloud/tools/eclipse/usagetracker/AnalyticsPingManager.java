@@ -42,9 +42,6 @@ public class AnalyticsPingManager {
 
   private static final String PREFERENCES_PLUGIN_ID = Activator.PLUGIN_ID;
 
-  // This prevent Analytics from identifying our pings as spam or bot.
-  private static final String ANALYTICS_USER_AGENT = "Automated";
-
   private static final String ANALYTICS_COLLECTION_URL = "https://ssl.google-analytics.com/collect";
 
   // Fixed-value query parameters present in every ping, and their fixed values:
@@ -190,7 +187,8 @@ public class AnalyticsPingManager {
       connection = (HttpURLConnection) url.openConnection();
       connection.setDoOutput(true);
       connection.setRequestMethod("POST");
-      connection.setRequestProperty("User-Agent", ANALYTICS_USER_AGENT);
+      // This prevent Analytics from identifying our pings as spam.
+      connection.setRequestProperty("User-Agent", CloudToolsInfo.ANALYTICS_USER_AGENT);
       connection.setReadTimeout(3000);  // milliseconds
       byte[] bytesToWrite = parametersString.getBytes("UTF-8");
       connection.setFixedLengthStreamingMode(bytesToWrite.length);
