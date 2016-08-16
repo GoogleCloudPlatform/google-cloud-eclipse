@@ -115,7 +115,7 @@ public class StandardDeployCommandHandler extends AbstractHandler {
     if (MessageDialog.openQuestion(HandlerUtil.getActiveShell(event),
         Messages.getString("prompt.login.dialog.title"),
         Messages.getString("prompt.login.dialog.message"))) {
-      // GoogleLoginService takes care of displaying error messages; so no need to check errors.
+      // GoogleLoginService takes care of displaying error messages; no need to check errors.
       return loginService.getActiveCredential();
     }
     return null;
