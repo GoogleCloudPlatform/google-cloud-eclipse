@@ -23,7 +23,6 @@ import com.google.cloud.tools.eclipse.appengine.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.ui.util.ProjectFromSelectionHelper;
 import com.google.cloud.tools.eclipse.ui.util.ServiceUtils;
 import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
-import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 
 import org.eclipse.core.commands.AbstractHandler;
@@ -35,6 +34,8 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.ui.handlers.HandlerUtil;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -63,7 +64,10 @@ public class StandardDeployCommandHandler extends AbstractHandler {
     try {
       IProject project = helper.getProject(event);
       if (project != null) {
-        launchDeployJob(project, ServiceUtils.getService(event, IGoogleLoginService.class));
+        Credential credential = loginIfNeeded(event);
+        if (credential != null) {
+          launchDeployJob(project, credential);
+        }
       }
       // return value must be null, reserved for future use
       return null;
@@ -72,10 +76,9 @@ public class StandardDeployCommandHandler extends AbstractHandler {
     }
   }
 
-  private void launchDeployJob(IProject project, IGoogleLoginService loginService)
+  private void launchDeployJob(IProject project, Credential credential)
       throws IOException, CoreException {
     IPath workDirectory = createWorkDirectory();
-    Credential credential = login(loginService);
 
     StandardDeployJob deploy =
         new StandardDeployJob(new ExplodedWarPublisher(),
@@ -102,12 +105,20 @@ public class StandardDeployCommandHandler extends AbstractHandler {
     return workDirectory;
   }
 
-  private Credential login(IGoogleLoginService loginService) throws CoreException {
-    Credential credential = loginService.getActiveCredential();
-    if (credential == null) {
-      throw new CoreException(StatusUtil.error(getClass(), Messages.getString("login.failed")));
+  private Credential loginIfNeeded(ExecutionEvent event) {
+    IGoogleLoginService loginService = ServiceUtils.getService(event, IGoogleLoginService.class);
+    Credential credential = loginService.getCachedActiveCredential();
+    if (credential != null) {
+      return credential;
     }
-    return credential;
+
+    if (MessageDialog.openQuestion(HandlerUtil.getActiveShell(event),
+        Messages.getString("prompt.login.dialog.title"),
+        Messages.getString("prompt.login.dialog.message"))) {
+      // GoogleLoginService takes care of displaying error messages; so no need to check errors.
+      return loginService.getActiveCredential();
+    }
+    return null;
   }
 
   private void launchCleanupJob() {
