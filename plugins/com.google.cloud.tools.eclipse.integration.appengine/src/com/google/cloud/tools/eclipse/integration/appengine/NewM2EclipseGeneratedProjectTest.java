@@ -17,9 +17,10 @@
 package com.google.cloud.tools.eclipse.integration.appengine;
 
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotProjectActions;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotWorkbenchActions;
 import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
@@ -31,8 +32,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
- * Test that Maven com.google.appengine.archetypes archetype projects <del>have our App Engine
- * facet</del> <ins>do not have our App Engine facets</ins>.
+ * Test that Maven com.google.appengine.archetypes archetype projects have our App Engine
+ * facet.
  */
 @RunWith(SWTBotJunit4ClassRunner.class)
 public class NewM2EclipseGeneratedProjectTest extends AbstractProjectTests {
@@ -47,14 +48,11 @@ public class NewM2EclipseGeneratedProjectTest extends AbstractProjectTests {
 
     assertTrue(project.exists());
 
-    /*** Commented as it's not true at the moment. ***/
-    // IFacetedProject facetedProject = new FacetedProjectHelper().getFacetedProject(project);
-    // assertNotNull("Project should be faceted", facetedProject);
-    // assertTrue( new FacetedProjectHelper().projectHasFacet(facetedProject,
-    // AppEngineStandardFacet.ID));
-
     IFacetedProject facetedProject = new FacetedProjectHelper().getFacetedProject(project);
-    assertNull("Project should not be faceted", facetedProject);
+    assertNotNull("Project should be faceted", facetedProject);
+    assertTrue(new FacetedProjectHelper().projectHasFacet(facetedProject,
+        AppEngineStandardFacet.ID));
+
     assertFalse(SwtBotProjectActions.hasErrorsInProblemsView(bot));
   }
 
