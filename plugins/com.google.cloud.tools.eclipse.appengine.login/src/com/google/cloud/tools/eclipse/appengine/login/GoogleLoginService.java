@@ -16,6 +16,7 @@
 package com.google.cloud.tools.eclipse.appengine.login;
 
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
 import com.google.cloud.tools.eclipse.appengine.login.ui.LoginServiceUi;
 import com.google.cloud.tools.ide.login.GoogleLoginState;
 import com.google.cloud.tools.ide.login.LoggerFacade;
@@ -50,6 +51,17 @@ public class GoogleLoginService implements IGoogleLoginService {
           "https://www.googleapis.com/auth/cloud-platform" //$NON-NLS-1$
       )));
 
+  /**
+   * Returns a URL through which users can login.
+   *
+   * @param redirectUrl URL to which the login result is directed. For example, a local web
+   *     server listening on the URL can receive an authorization code from it.
+   */
+  public static String getGoogleLoginUrl(String redirectUrl) {
+    return new GoogleAuthorizationCodeRequestUrl(Constants.getOAuthClientId(), redirectUrl,
+        GoogleLoginService.OAUTH_SCOPES).toString();
+  }
+
   private GoogleLoginState loginState;
   private AtomicBoolean loginInProgress;
 
@@ -69,7 +81,7 @@ public class GoogleLoginService implements IGoogleLoginService {
       }
     };
 
-    loginServiceUi = new LoginServiceUi(workbench, shellProvider);
+    loginServiceUi = new LoginServiceUi(workbench, shellProvider, workbench.getDisplay());
     loginState = new GoogleLoginState(
         Constants.getOAuthClientId(), Constants.getOAuthClientSecret(), OAUTH_SCOPES,
         new TransientOAuthDataStore(eclipseContext), loginServiceUi, new LoginServiceLogger());
@@ -106,7 +118,7 @@ public class GoogleLoginService implements IGoogleLoginService {
     // conservatively if login seems to be in progress.
     try {
       synchronized (loginState) {
-        if (loginState.logIn(null /* parameter ignored */)) {
+        if (loginState.logInWithLocalServer(null /* parameter ignored */)) {
           return loginState.getCredential();
         }
         return null;

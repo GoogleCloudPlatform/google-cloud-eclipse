@@ -45,6 +45,8 @@
     <module>plugins/com.google.cloud.tools.eclipse.ui.util.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.util</module>
     <module>plugins/com.google.cloud.tools.eclipse.util.test</module>
+    <module>plugins/com.google.cloud.tools.eclipse.integration.appengine</module>
+    <module>plugins/com.google.cloud.tools.eclipse.swtbot</module>
   </modules>
 
   <properties>
@@ -100,6 +102,18 @@
       <groupId>org.codehaus.jackson</groupId>
       <artifactId>jackson-core-asl</artifactId>
       <version>1.9.13</version>
+    </dependency>
+    <dependency>
+      <!-- bundle: org.mortbay.jetty.server -->
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty</artifactId>
+      <version>6.1.26</version>
+    </dependency>
+    <dependency>
+      <!-- bundle: org.mortbay.jetty.util -->
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty-util</artifactId>
+      <version>6.1.26</version>
     </dependency>
   </dependencies>
 
@@ -206,10 +220,16 @@
 
         <plugin>
           <groupId>org.eclipse.tycho</groupId>
+          <artifactId>target-platform-configuration</artifactId>
+          <version>${tycho.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.eclipse.tycho</groupId>
           <artifactId>tycho-surefire-plugin</artifactId>
           <version>${tycho.version}</version>
           <configuration>
-            <argLine>-Dorg.eclipse.swtbot.search.timeout=${org.eclipse.swtbot.search.timeout} -Xms40m -Xmx1G ${os-jvm-flags}</argLine>
+            <argLine>-Dorg.eclipse.swtbot.search.timeout=${org.eclipse.swtbot.search.timeout} -Xms40m -Xmx1G -XX:MaxPermSize=512m ${os-jvm-flags}</argLine>
           </configuration>
         </plugin>
 
@@ -255,7 +275,6 @@
           <plugin>
             <groupId>org.eclipse.tycho</groupId>
             <artifactId>target-platform-configuration</artifactId>
-            <version>${tycho.version}</version>
             <configuration>
             <target>
               <artifact>
@@ -290,7 +309,6 @@
           <plugin>
             <groupId>org.eclipse.tycho</groupId>
             <artifactId>target-platform-configuration</artifactId>
-            <version>${tycho.version}</version>
             <configuration>
             <target>
               <artifact>

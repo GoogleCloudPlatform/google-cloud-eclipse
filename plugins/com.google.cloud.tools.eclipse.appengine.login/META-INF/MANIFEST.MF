@@ -13,15 +13,20 @@ Require-Bundle: com.google.gson,
  jackson-core-asl,
  org.eclipse.core.runtime,
  org.eclipse.e4.core.contexts,
- org.eclipse.ui
+ org.eclipse.ui,
+ org.mortbay.jetty.server,
+ org.mortbay.jetty.util
 Bundle-Classpath: lib/com.google.cloud.tools.ide.login-0.0.0-SNAPSHOT.jar,
  lib/google-api-client-1.22.0.jar,
  lib/google-api-services-oauth2-v2-rev114-1.22.0.jar,
  lib/google-http-client-1.22.0.jar,
  lib/google-http-client-jackson-1.22.0.jar,
  lib/google-oauth-client-1.22.0.jar,
+ lib/google-oauth-client-java6-1.22.0.jar,
+ lib/google-oauth-client-jetty-1.22.0.jar,
  .
 Export-Package: com.google.api.client.auth.oauth2;x-friends:="com.google.cloud.tools.eclipse.appengine.deploy",
  com.google.cloud.tools.eclipse.appengine.login
 Import-Package: com.google.cloud.tools.eclipse.ui.util,
+ javax.servlet.http;version="3.1.0",
  org.osgi.service.component

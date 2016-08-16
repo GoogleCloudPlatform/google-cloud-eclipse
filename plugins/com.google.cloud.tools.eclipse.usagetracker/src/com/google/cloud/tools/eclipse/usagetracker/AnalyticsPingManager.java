@@ -69,6 +69,7 @@ public class AnalyticsPingManager {
   // Preference store (should be configuration scoped) from which we get UUID, opt-in status, etc.
   private IEclipsePreferences preferences;
   private Display display;
+  private boolean analyticsEnabled;
 
   private ConcurrentLinkedQueue<PingEvent> pingEventQueue;
   private Job eventFlushJob = new Job("Analytics Event Submission") {
@@ -85,10 +86,11 @@ public class AnalyticsPingManager {
 
   @VisibleForTesting
   AnalyticsPingManager(IEclipsePreferences preferences, Display display,
-      ConcurrentLinkedQueue<PingEvent> concurrentLinkedQueue) {
+      ConcurrentLinkedQueue<PingEvent> concurrentLinkedQueue, boolean analyticsEnabled) {
     this.preferences = preferences;
     this.display = display;
     this.pingEventQueue = concurrentLinkedQueue;
+    this.analyticsEnabled = analyticsEnabled;
   }
 
   public static synchronized AnalyticsPingManager getInstance() {
@@ -98,7 +100,8 @@ public class AnalyticsPingManager {
         throw new NullPointerException("Preference store cannot be null.");
       }
       instance = new AnalyticsPingManager(preferences,
-          PlatformUI.getWorkbench().getDisplay(), new ConcurrentLinkedQueue<PingEvent>());
+          PlatformUI.getWorkbench().getDisplay(), new ConcurrentLinkedQueue<PingEvent>(),
+          !Platform.inDevelopmentMode() && isTrackingIdDefined());
     }
     return instance;
   }
@@ -162,18 +165,22 @@ public class AnalyticsPingManager {
     sendPing(eventName, metadataKey, metadataValue, null);
   }
 
+  @VisibleForTesting
+  boolean unitTestMode;
   public void sendPing(String eventName,
       String metadataKey, String metadataValue, Shell parentShell) {
-    // Note: always enqueue if a user has not seen the opt-in dialog yet; enqueuing itself
-    // doesn't mean that the event ping will be posted.
-    if (userHasOptedIn() || !userHasRegisteredOptInStatus()) {
-      pingEventQueue.add(new PingEvent(eventName, metadataKey, metadataValue, parentShell));
-      eventFlushJob.schedule();
+    if (analyticsEnabled || unitTestMode) {
+      // Note: always enqueue if a user has not seen the opt-in dialog yet; enqueuing itself
+      // doesn't mean that the event ping will be posted.
+      if (userHasOptedIn() || !userHasRegisteredOptInStatus()) {
+        pingEventQueue.add(new PingEvent(eventName, metadataKey, metadataValue, parentShell));
+        eventFlushJob.schedule();
+      }
     }
   }
 
   private void sendPingHelper(PingEvent pingEvent) {
-    if (!Platform.inDevelopmentMode() && isTrackingIdDefined() && userHasOptedIn()) {
+    if (analyticsEnabled && userHasOptedIn()) {
       Map<String, String> parametersMap = buildParametersMap(getAnonymizedClientId(), pingEvent);
       sendPostRequest(getParametersString(parametersMap));
     }

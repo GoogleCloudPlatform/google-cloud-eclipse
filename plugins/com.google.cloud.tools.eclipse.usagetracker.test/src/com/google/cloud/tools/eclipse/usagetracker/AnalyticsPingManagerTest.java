@@ -161,7 +161,10 @@ public class AnalyticsPingManagerTest {
   }
 
   private void verifyOptInDialogOpen(VerificationMode verificationMode) {
-    new AnalyticsPingManager(preferences, display, pingEventQueue).showOptInDialogIfNeeded(null);
+    AnalyticsPingManager pingManager =
+        new AnalyticsPingManager(preferences, display, pingEventQueue, true);
+    pingManager.unitTestMode = true;
+    pingManager.showOptInDialogIfNeeded(null);
     verify(display, verificationMode).syncExec(any(Runnable.class));
   }
 
@@ -195,8 +198,10 @@ public class AnalyticsPingManagerTest {
 
   private void verifyPingQueued(VerificationMode verificationMode) {
     when(pingEventQueue.isEmpty()).thenReturn(true);
-    new AnalyticsPingManager(preferences, display, pingEventQueue)
-        .sendPing("eventName", "metadataKey", "metadataValue");
+    AnalyticsPingManager pingManager =
+        new AnalyticsPingManager(preferences, display, pingEventQueue, true);
+    pingManager.unitTestMode = true;
+    pingManager.sendPing("eventName", "metadataKey", "metadataValue");
     verify(pingEventQueue, verificationMode).add(any(PingEvent.class));
   }
 }
