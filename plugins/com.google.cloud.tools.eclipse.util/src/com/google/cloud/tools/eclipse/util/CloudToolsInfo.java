@@ -26,7 +26,7 @@ public class CloudToolsInfo {
   // Don't change the value; this name is used as an originating "application" of usage metrics.
   public static String METRICS_NAME = "gcloud-eclipse-tools";
 
-  public static String ANALYTICS_USER_AGENT = "GoogleCloudTools/" + getToolsVersion();
+  public static String ANALYTICS_USER_AGENT = METRICS_NAME + getToolsVersion();
 
   public static String getToolsVersion() {
     return FrameworkUtil.getBundle(new CloudToolsInfo().getClass()).getVersion().toString();
