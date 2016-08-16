@@ -195,7 +195,7 @@ public class AnalyticsPingManager {
       connection.setDoOutput(true);
       connection.setRequestMethod("POST");
       // This prevent Analytics from identifying our pings as spam.
-      connection.setRequestProperty("User-Agent", CloudToolsInfo.ANALYTICS_USER_AGENT);
+      connection.setRequestProperty("User-Agent", CloudToolsInfo.USER_AGENT);
       connection.setReadTimeout(3000);  // milliseconds
       byte[] bytesToWrite = parametersString.getBytes("UTF-8");
       connection.setFixedLengthStreamingMode(bytesToWrite.length);
