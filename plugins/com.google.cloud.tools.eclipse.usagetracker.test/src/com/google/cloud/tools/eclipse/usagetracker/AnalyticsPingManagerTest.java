@@ -1,17 +1,15 @@
 package com.google.cloud.tools.eclipse.usagetracker;
 
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyBoolean;
-import static org.mockito.Mockito.eq;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import com.google.cloud.tools.eclipse.preferences.AnalyticsPreferences;
 
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.swt.widgets.Shell;
@@ -19,7 +17,9 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.verification.VerificationMode;
 
-import com.google.cloud.tools.eclipse.preferences.AnalyticsPreferences;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AnalyticsPingManagerTest {
 
@@ -165,7 +165,7 @@ public class AnalyticsPingManagerTest {
     OptInDialogCreator dialogCreator = mock(OptInDialogCreator.class);
     when(dialogCreator.create(any(Shell.class))).thenReturn(optInDialog);
 
-    new AnalyticsPingManager(preferences, dialogCreator).showOptInDialog(null);
+    new AnalyticsPingManager(preferences, dialogCreator, true).showOptInDialog(null);
     verify(optInDialog, verificationMode).open();
   }
 }

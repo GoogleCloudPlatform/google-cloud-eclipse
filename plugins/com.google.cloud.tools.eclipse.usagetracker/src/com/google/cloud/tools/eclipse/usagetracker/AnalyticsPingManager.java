@@ -64,12 +64,14 @@ public class AnalyticsPingManager {
   private IEclipsePreferences preferences;
 
   private OptInDialogCreator optInDialogCreator;
+  private boolean analyticsEnabled;
 
   @VisibleForTesting
-  AnalyticsPingManager(
-      IEclipsePreferences preferences, OptInDialogCreator optInDialogCreator) {
+  AnalyticsPingManager(IEclipsePreferences preferences,
+      OptInDialogCreator optInDialogCreator, boolean analyticsEnabled) {
     this.preferences = preferences;
     this.optInDialogCreator = optInDialogCreator;
+    this.analyticsEnabled = analyticsEnabled;
   }
 
   public static synchronized AnalyticsPingManager getInstance() {
@@ -78,7 +80,8 @@ public class AnalyticsPingManager {
       if (preferences == null) {
         throw new NullPointerException("Preference store cannot be null.");
       }
-      instance = new AnalyticsPingManager(preferences, new OptInDialogCreator());
+      instance = new AnalyticsPingManager(preferences, new OptInDialogCreator(),
+          !Platform.inDevelopmentMode() && isTrackingIdDefined());
     }
     return instance;
   }
@@ -142,17 +145,19 @@ public class AnalyticsPingManager {
 
   public void sendPing(String eventName, String metadataKey, String metadataValue,
       Shell parentShell) {
+    if (!analyticsEnabled) {
+      return;
+    }
+
     // Non-modal and non-blocking dialog (if presented). This implies that the very first
     // sendPing() may drop this event.
     showOptInDialog(parentShell);
 
-    if (Platform.inDevelopmentMode() || !isTrackingIdDefined() || !userHasOptedIn()) {
-      return;
+    if (userHasOptedIn()) {
+      Map<String, String> parametersMap =
+          buildParametersMap(getAnonymizedClientId(), eventName, metadataKey, metadataValue);
+      sendPostRequest(getParametersString(parametersMap));
     }
-
-    Map<String, String> parametersMap =
-        buildParametersMap(getAnonymizedClientId(), eventName, metadataKey, metadataValue);
-    sendPostRequest(getParametersString(parametersMap));
   }
 
   private void sendPostRequest(String parametersString) {
