@@ -4,15 +4,17 @@ import org.eclipse.core.databinding.conversion.Converter;
 
 public abstract class BooleanConverter extends Converter {
 
+  private static BooleanConverter NEGATE_INSTANCE = new BooleanConverter() {
+    public Object convert(Object fromObject) {
+      return !(Boolean)fromObject;
+    }
+  };
+
   public static BooleanConverter negate() {
-     return new BooleanConverter() {
-        public Object convert(Object fromObject) {
-           return !(Boolean)fromObject;
-        }
-     };
+    return NEGATE_INSTANCE;
   }
-  
+
   protected BooleanConverter() {
-     super(Boolean.class, Boolean.class);
+    super(Boolean.class, Boolean.class);
   }
 }

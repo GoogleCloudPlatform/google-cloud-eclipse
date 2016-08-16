@@ -1,8 +1,6 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,10 +12,9 @@ import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.jface.databinding.preference.PreferencePageSupport;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -26,16 +23,15 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import org.eclipse.ui.dialogs.PropertyPage;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 import com.google.cloud.tools.eclipse.ui.util.FontUtil;
 import com.google.cloud.tools.eclipse.ui.util.databinding.BooleanConverter;
+import com.google.cloud.tools.eclipse.ui.util.databinding.BucketNameValidator;
 import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectIdValidator;
+import com.google.cloud.tools.eclipse.ui.util.event.OpenUrlSelectionListener;
 import com.google.cloud.tools.eclipse.util.AdapterUtil;
 
 public class DeployPropertyPage extends PropertyPage {
@@ -104,11 +100,18 @@ public class DeployPropertyPage extends PropertyPage {
   }
 
   private void setupProjectIdDataBinding(DataBindingContext dbc) {
+    ProjectIdValidator projectIdValidator = new ProjectIdValidator(new ProjectIdValidator.ValidationPredicate() {
+      @Override
+      public boolean shouldValidate() {
+        return !model.isPromptForProjectId();
+      }
+    });
+
     dbc.bindValue(WidgetProperties.selection().observe(promptForProjectIdButton), model.promptForProjectId);
     dbc.bindValue(WidgetProperties.text(SWT.Modify).observe(projectId),
                   model.projectId,
-                  new UpdateValueStrategy().setAfterGetValidator(new ProjectIdValidator()),
-                  null);
+                  new UpdateValueStrategy().setAfterGetValidator(projectIdValidator),
+                  new UpdateValueStrategy().setAfterGetValidator(projectIdValidator));
     dbc.bindValue(model.promptForProjectId,
                   WidgetProperties.enabled().observe(projectId),
                   new UpdateValueStrategy().setConverter(BooleanConverter.negate()),
@@ -122,14 +125,8 @@ public class DeployPropertyPage extends PropertyPage {
   private void setupProjectVersionDataBinding(DataBindingContext dbc) {
     dbc.bindValue(WidgetProperties.selection().observe(overrideDefaultVersionButton), model.overrideDefaultVersioning);
     dbc.bindValue(WidgetProperties.text(SWT.Modify).observe(version), model.version);
-    dbc.bindValue(model.overrideDefaultVersioning,
-                  WidgetProperties.enabled().observe(versionLabel),
-                  new UpdateValueStrategy().setConverter(BooleanConverter.negate()),
-                  new UpdateValueStrategy().setConverter(BooleanConverter.negate()));
-    dbc.bindValue(model.overrideDefaultVersioning,
-                  WidgetProperties.enabled().observe(version),
-                  new UpdateValueStrategy().setConverter(BooleanConverter.negate()),
-                  new UpdateValueStrategy().setConverter(BooleanConverter.negate()));
+    dbc.bindValue(model.overrideDefaultVersioning, WidgetProperties.enabled().observe(versionLabel));
+    dbc.bindValue(model.overrideDefaultVersioning, WidgetProperties.enabled().observe(version));
   }
 
   private void setupAutoPromoteDataBinding(DataBindingContext dbc) {
@@ -138,15 +135,18 @@ public class DeployPropertyPage extends PropertyPage {
 
   private void setupBucketDataBinding(DataBindingContext dbc) {
     dbc.bindValue(WidgetProperties.selection().observe(overrideDefaultBucketButton), model.overrideDefaultBucket);
-    dbc.bindValue(WidgetProperties.text(SWT.Modify).observe(bucket), model.bucket);
-    dbc.bindValue(model.overrideDefaultBucket,
-                  WidgetProperties.enabled().observe(bucketLabel),
-                  new UpdateValueStrategy().setConverter(BooleanConverter.negate()),
-                  new UpdateValueStrategy().setConverter(BooleanConverter.negate()));
-    dbc.bindValue(model.overrideDefaultBucket,
-                  WidgetProperties.enabled().observe(bucket),
-                  new UpdateValueStrategy().setConverter(BooleanConverter.negate()),
-                  new UpdateValueStrategy().setConverter(BooleanConverter.negate()));
+    BucketNameValidator bucketNameValidator = new BucketNameValidator(new BucketNameValidator.ValidationPredicate() {
+      @Override
+      public boolean shouldValidate() {
+        return model.isOverrideDefaultBucket();
+      }
+    });
+    dbc.bindValue(WidgetProperties.text(SWT.Modify).observe(bucket),
+                  model.bucket,
+                  new UpdateValueStrategy().setAfterGetValidator(bucketNameValidator),
+                  new UpdateValueStrategy().setAfterGetValidator(bucketNameValidator));
+    dbc.bindValue(model.overrideDefaultBucket, WidgetProperties.enabled().observe(bucketLabel));
+    dbc.bindValue(model.overrideDefaultBucket, WidgetProperties.enabled().observe(bucket));
   }
 
   @Override
@@ -245,32 +245,18 @@ public class DeployPropertyPage extends PropertyPage {
     autoPromoteButton.setText(Messages.getString("auto.promote"));
     autoPromoteButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 
-    Link manualPromoteLabel = new Link(promoteComp, SWT.NONE);
+    Link manualPromoteLink = new Link(promoteComp, SWT.NONE);
     GridData layoutData = new GridData(SWT.LEFT, SWT.CENTER, true, false);
     layoutData.horizontalIndent = INDENT_CHECKBOX_ENABLED_WIDGET;
-    manualPromoteLabel.setLayoutData(layoutData);
-    manualPromoteLabel.setText(Messages.getString("deploy.manual.link", APPENGINE_DASHBOARD_URL));
-    manualPromoteLabel.addSelectionListener(new SelectionListener() {
-
+    manualPromoteLink.setLayoutData(layoutData);
+    manualPromoteLink.setText(Messages.getString("deploy.manual.link", APPENGINE_DASHBOARD_URL));
+    manualPromoteLink.setFont(promoteComp.getFont());
+    manualPromoteLink.addSelectionListener(new OpenUrlSelectionListener(new OpenUrlSelectionListener.ErrorHandler() {
       @Override
-      public void widgetSelected(SelectionEvent event) {
-        openAppEngineDashboard();
+      public void handle(Exception ex) {
+        setMessage(Messages.getString("cannot.open.browser", ex.getLocalizedMessage()), IMessageProvider.WARNING);
       }
-
-      @Override
-      public void widgetDefaultSelected(SelectionEvent event) {
-        openAppEngineDashboard();
-      }
-
-      private void openAppEngineDashboard() {
-        try {
-          IWorkbenchBrowserSupport browserSupport = PlatformUI.getWorkbench().getBrowserSupport();
-          browserSupport.getExternalBrowser().openURL(new URL(APPENGINE_DASHBOARD_URL));
-        } catch (PartInitException | MalformedURLException ex) {
-          setMessage(Messages.getString("cannot.open.browser", ex.getLocalizedMessage()), WARNING);
-        }
-      }
-    });
+    }));
   }
 
   private void createAdvancedSection(Composite parent) {
