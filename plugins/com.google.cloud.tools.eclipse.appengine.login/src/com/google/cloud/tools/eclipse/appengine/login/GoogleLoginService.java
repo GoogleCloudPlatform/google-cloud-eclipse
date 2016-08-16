@@ -105,7 +105,7 @@ public class GoogleLoginService implements IGoogleLoginService {
   }
 
   @Override
-  public Credential getActiveCredential() {
+  public Credential getActiveCredential(String dialogMessage) {
     if (!loginInProgress.compareAndSet(false, true)) {
       loginServiceUi.showErrorDialogHelper(
           Messages.LOGIN_ERROR_DIALOG_TITLE, Messages.LOGIN_ERROR_IN_PROGRESS);
@@ -118,7 +118,7 @@ public class GoogleLoginService implements IGoogleLoginService {
     // conservatively if login seems to be in progress.
     try {
       synchronized (loginState) {
-        if (loginState.logInWithLocalServer(null /* parameter ignored */)) {
+        if (loginState.logInWithLocalServer(dialogMessage)) {
           return loginState.getCredential();
         }
         return null;

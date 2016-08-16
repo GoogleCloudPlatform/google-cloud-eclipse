@@ -91,7 +91,7 @@ public class LoginServiceUi implements UiFacade {
   }
 
   @Override
-  public VerificationCodeHolder obtainVerificationCodeFromExternalUserInteraction(String title) {
+  public VerificationCodeHolder obtainVerificationCodeFromExternalUserInteraction(String message) {
     LocalServerReceiver codeReceiver = new LocalServerReceiver();
 
     try {
@@ -102,7 +102,8 @@ public class LoginServiceUi implements UiFacade {
         return null;
       }
 
-      String authorizationCode = showProgressDialogAndWaitForCode(codeReceiver, redirectUrl);
+      String authorizationCode = showProgressDialogAndWaitForCode(
+          message, codeReceiver, redirectUrl);
       if (authorizationCode != null) {
         return new VerificationCodeHolder(authorizationCode, redirectUrl);
       }
@@ -118,7 +119,7 @@ public class LoginServiceUi implements UiFacade {
     }
   }
 
-  private String showProgressDialogAndWaitForCode(
+  private String showProgressDialogAndWaitForCode(final String message,
       final LocalServerReceiver codeReceiver, final String redirectUrl) throws IOException {
     try {
       final String[] codeHolder = new String[1];
@@ -140,7 +141,8 @@ public class LoginServiceUi implements UiFacade {
         @Override
         public void run(IProgressMonitor monitor)
             throws InvocationTargetException, InterruptedException {
-          monitor.beginTask(Messages.LOGIN_PROGRESS_DIALOG_MESSAGE, IProgressMonitor.UNKNOWN);
+          monitor.beginTask(message != null ? message : Messages.LOGIN_PROGRESS_DIALOG_MESSAGE,
+              IProgressMonitor.UNKNOWN);
           // Fork another sub-job to circumvent the limitation of LocalServerReceiver.
           // (See the comments of scheduleCodeWaitingJob().)
           scheduleCodeWaitingJob(

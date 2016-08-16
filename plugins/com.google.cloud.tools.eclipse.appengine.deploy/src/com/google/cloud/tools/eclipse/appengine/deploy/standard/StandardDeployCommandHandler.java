@@ -34,8 +34,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.ui.handlers.HandlerUtil;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -112,17 +110,8 @@ public class StandardDeployCommandHandler extends AbstractHandler {
       return credential;
     }
 
-    new MessageDialog(HandlerUtil.getActiveShell(event),
-                      Messages.getString("prompt.login.dialog.title"),
-                      null /* no image */,
-                      Messages.getString("prompt.login.dialog.message"),
-                      MessageDialog.INFORMATION,
-                      new String[]{ "Launch Browser" },
-                      0 /* default button index */)
-        .open();
-
     // GoogleLoginService takes care of displaying error messages; no need to check errors.
-    return loginService.getActiveCredential();
+    return loginService.getActiveCredential(Messages.getString("deploy.login.dialog.message"));
   }
 
   private void launchCleanupJob() {
