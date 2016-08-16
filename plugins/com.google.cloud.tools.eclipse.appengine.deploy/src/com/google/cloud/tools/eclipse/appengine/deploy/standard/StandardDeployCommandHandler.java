@@ -112,13 +112,17 @@ public class StandardDeployCommandHandler extends AbstractHandler {
       return credential;
     }
 
-    if (MessageDialog.openQuestion(HandlerUtil.getActiveShell(event),
-        Messages.getString("prompt.login.dialog.title"),
-        Messages.getString("prompt.login.dialog.message"))) {
-      // GoogleLoginService takes care of displaying error messages; no need to check errors.
-      return loginService.getActiveCredential();
-    }
-    return null;
+    new MessageDialog(HandlerUtil.getActiveShell(event),
+                      Messages.getString("prompt.login.dialog.title"),
+                      null /* no image */,
+                      Messages.getString("prompt.login.dialog.message"),
+                      MessageDialog.INFORMATION,
+                      new String[]{ "Launch Browser" },
+                      0 /* default button index */)
+        .open();
+
+    // GoogleLoginService takes care of displaying error messages; no need to check errors.
+    return loginService.getActiveCredential();
   }
 
   private void launchCleanupJob() {
