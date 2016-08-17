@@ -103,17 +103,16 @@ public class DebugNativeAppEngineStandardProject extends AbstractProjectTests {
         "Starting module \"default\" running at: http://localhost:8080", consoleContents);
 
     assertEquals("Hello App Engine!",
-        getUrlContents(new URL("http://localhost:8080/hello"), SWTBotPreferences.TIMEOUT));
+        getUrlContents(new URL("http://localhost:8080/hello"), (int) SWTBotPreferences.TIMEOUT));
 
-    for (SWTBotToolbarButton b : consoleView.getToolbarButtons()) {
-      if ("Stop the server".equals(b.getToolTipText())) {
-        b.click();
+    for (SWTBotToolbarButton button : consoleView.getToolbarButtons()) {
+      if ("Stop the server".equals(button.getToolTipText())) {
+        button.click();
       }
     }
     SwtBotTreeUtilities.waitUntilTreeContainsText(bot, allItems[0], "<terminated>");
     assertNoService(new URL("http://localhost:8080/hello"));
   }
-
 
   /**
    * Check that there is no remote service for the URL.
@@ -133,17 +132,17 @@ public class DebugNativeAppEngineStandardProject extends AbstractProjectTests {
    * 
    * @throws IOException if cannot connect or timeout
    */
-  private String getUrlContents(URL url, long timeoutInMilliseconds) throws IOException {
+  private String getUrlContents(URL url, int timeoutInMilliseconds) throws IOException {
     StringBuilder content = new StringBuilder();
     URLConnection conn = url.openConnection();
-    conn.setConnectTimeout(5); // ms
-    conn.setReadTimeout((int) timeoutInMilliseconds); // ms
+    conn.setConnectTimeout(100); // ms
+    conn.setReadTimeout(timeoutInMilliseconds); // ms
     try (InputStreamReader reader =
         new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8)) {
       char[] buf = new char[1024];
-      int rc;
-      while ((rc = reader.read(buf)) > 0) {
-        content.append(buf, 0, rc);
+      int length;
+      while ((length = reader.read(buf)) >= 0) {
+        content.append(buf, 0, length);
       }
     }
     return content.toString().trim();
