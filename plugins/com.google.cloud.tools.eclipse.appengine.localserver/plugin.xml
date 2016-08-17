@@ -29,7 +29,7 @@
             id="com.google.cloud.tools.eclipse.appengine.standard.server"
             initialState="stopped"
             launchConfigId="com.google.cloud.tools.eclipse.appengine.AppToolsLaunchConfigurationType"
-            launchModes="run,debug,profile"
+            launchModes="run,debug"
             name="%apptoolsTypeName"
             runtime="true"
             runtimeTypeId="com.google.cloud.tools.eclipse.appengine.standard.runtime"
@@ -104,7 +104,7 @@
    <extension
          point="org.eclipse.wst.server.core.publishTasks">
       <publishTask
-            class="com.google.cloud.tools.eclipse.appengine.localserver.server.CloudSdkPublishTaskDelegate"
+            class="com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEnginePublishTaskDelegate"
             id="com.google.cloud.tools.eclipse.appengine.publishTask"
             typeIds="com.google.cloud.tools.eclipse.appengine.standard.server">
       </publishTask>
@@ -114,7 +114,7 @@
       <launchConfigurationType
             delegate="com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerLaunchConfigurationDelegate"
             id="com.google.cloud.tools.eclipse.appengine.AppToolsLaunchConfigurationType"
-            modes="run, debug, profile"
+            modes="run, debug"
             name="%apptoolsServerTypeName">
       </launchConfigurationType>
    </extension>

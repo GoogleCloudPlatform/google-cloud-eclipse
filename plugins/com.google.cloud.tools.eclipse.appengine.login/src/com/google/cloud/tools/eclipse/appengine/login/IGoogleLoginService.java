@@ -27,8 +27,10 @@ public interface IGoogleLoginService {
    * operation and display a general message that login is required but was cancelled or failed.
    *
    * Must be called from a UI context.
+   *
+   * @param dialogMessage custom login dialog message. Can be null
    */
-  public Credential getActiveCredential();
+  public Credential getActiveCredential(String dialogMessage);
 
   /**
    * Returns the credential of an active user (among multiple logged-in users). Unlike {@link

@@ -17,6 +17,8 @@ package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
 import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
 import com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineConsole;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -66,6 +68,9 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
   @Override
   public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch,
       IProgressMonitor monitor) throws CoreException {
+    AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.APP_ENGINE_LOCAL_SERVER,
+        AnalyticsEvents.APP_ENGINE_LOCAL_SERVER_MODE, mode);
+
     IServer server = ServerUtil.getServer(configuration);
     if (server == null) {
       return;

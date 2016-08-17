@@ -21,7 +21,7 @@ public class GoogleLoginCommandHandler extends AbstractHandler implements IEleme
 
     Credential credential = loginService.getCachedActiveCredential();  // See if already logged in.
     if (credential == null) {
-      loginService.getActiveCredential();  // Log in.
+      loginService.getActiveCredential(null /* no custom dialog message */);  // Log in.
     } else {
       if (MessageDialog.openConfirm(HandlerUtil.getActiveShell(event),
           Messages.LOGOUT_CONFIRM_DIALOG_TITILE, Messages.LOGOUT_CONFIRM_DIALOG_MESSAGE)) {

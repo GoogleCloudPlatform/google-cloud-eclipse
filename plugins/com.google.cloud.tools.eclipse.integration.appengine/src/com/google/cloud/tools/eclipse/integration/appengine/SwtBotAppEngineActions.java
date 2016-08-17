@@ -108,8 +108,8 @@ public class SwtBotAppEngineActions {
       bot.list().select(archetypeDescription);
     }
 
-    int mavenCompletionTimeoutSeconds = 15000; // can take a loooong time
-    SwtBotTimeoutManager.setTimeout(mavenCompletionTimeoutSeconds);
+    int mavenCompletionTimeout = 45000/* ms */; // can take a loooong time to fetch archetypes
+    SwtBotTimeoutManager.setTimeout(mavenCompletionTimeout);
     SwtBotTestingUtilities.clickButtonAndWaitForWindowChange(bot, bot.button("Finish"));
     SwtBotTimeoutManager.resetTimeout();
     // this isn't right for location != null

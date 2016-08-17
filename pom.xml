@@ -103,6 +103,18 @@
       <artifactId>jackson-core-asl</artifactId>
       <version>1.9.13</version>
     </dependency>
+    <dependency>
+      <!-- bundle: org.mortbay.jetty.server -->
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty</artifactId>
+      <version>6.1.26</version>
+    </dependency>
+    <dependency>
+      <!-- bundle: org.mortbay.jetty.util -->
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty-util</artifactId>
+      <version>6.1.26</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -217,7 +229,7 @@
           <artifactId>tycho-surefire-plugin</artifactId>
           <version>${tycho.version}</version>
           <configuration>
-            <argLine>-Dorg.eclipse.swtbot.search.timeout=${org.eclipse.swtbot.search.timeout} -Xms40m -Xmx1G ${os-jvm-flags}</argLine>
+            <argLine>-Dorg.eclipse.swtbot.search.timeout=${org.eclipse.swtbot.search.timeout} -Xms40m -Xmx1G -XX:MaxPermSize=512m ${os-jvm-flags}</argLine>
           </configuration>
         </plugin>
 
