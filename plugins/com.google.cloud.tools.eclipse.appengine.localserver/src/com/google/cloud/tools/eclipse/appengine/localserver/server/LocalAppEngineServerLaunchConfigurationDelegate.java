@@ -69,8 +69,6 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     console.clearConsole();
     console.activate();
 
-    setDefaultSourceLocator(launch, configuration);
-
     if (ILaunchManager.DEBUG_MODE.equals(mode)) {
       int debugPort = getDebugPort();
       setupDebugTarget(launch, configuration, debugPort, monitor);
