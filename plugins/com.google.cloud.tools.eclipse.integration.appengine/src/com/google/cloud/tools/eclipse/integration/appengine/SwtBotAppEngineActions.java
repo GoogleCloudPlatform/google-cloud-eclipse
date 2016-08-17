@@ -114,7 +114,6 @@ public class SwtBotAppEngineActions {
     SwtBotTimeoutManager.setTimeout(mavenCompletionTimeout);
     SwtBotTestingUtilities.clickButtonAndWaitForWindowChange(bot, bot.button("Finish"));
     SwtBotTimeoutManager.resetTimeout();
-
     return waitUntilProjectExists(bot, getWorkspaceRoot().getProject(artifactId));
   }
 
