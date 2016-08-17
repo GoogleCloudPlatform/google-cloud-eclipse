@@ -16,6 +16,7 @@
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
 import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
+import com.google.cloud.tools.eclipse.appengine.localserver.PreferencesInitializer;
 import com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineConsole;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
@@ -120,14 +121,6 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     }
   }
 
-  /**
-   * @return true if we should open a browser on the start page on successful launch
-   */
-  private boolean shouldOpenStartPage() {
-    return Platform.getPreferencesService().getBoolean(
-        "com.google.cloud.tools.eclipse.appengine.localserver", "launchBrowser", true, null);
-  }
-
   private void setupDebugTarget(ILaunch launch, ILaunchConfiguration configuration, int port,
       IProgressMonitor monitor) throws CoreException {
     IVMConnector connector =
@@ -147,11 +140,6 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     connector.connect(connectionParameters, monitor, launch);
   }
 
-  private String determinePageLocation(IServer server, ILaunchConfiguration config) {
-    // todo: pull this from the server or launch configuration
-    return "http://" + DEBUGGER_HOST + ":8080";
-  }
-
   private int getDebugPort() throws CoreException {
     int port = SocketUtil.findFreePort();
     if (port == -1) {
@@ -160,14 +148,26 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     return port;
   }
 
+  /**
+   * @return true if we should open a browser on the start page on successful launch
+   */
+  private boolean shouldOpenStartPage() {
+    return Platform.getPreferencesService().getBoolean(Activator.PLUGIN_ID,
+        PreferencesInitializer.LAUNCH_BROWSER, true, null);
+  }
+
+  private String determinePageLocation(IServer server, ILaunchConfiguration config) {
+    // todo[issue #259]: pull this from the server or launch configuration
+    return "http://" + DEBUGGER_HOST + ":8080";
+  }
 
   /**
    * Open a browser on the provided page on server start.
    */
   private class OpenBrowserListener implements IServerListener {
     private String pageLocation;
-    /* todo: we actually wait a fixed in case the server is subsequently stopped. */
-    private int waitTime = 1500/* ms */;
+    // todo[issue #556]: must wait a fixed time in case the server is subsequently stopped
+    private int waitTime = 1500;// ms
 
     public OpenBrowserListener(String pageLocation) {
       this.pageLocation = pageLocation;
@@ -200,7 +200,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
             logger.log(Level.WARNING, "Cannot launch a browser", ex);
             Program.launch(pageLocation);
           } catch (MalformedURLException ex) {
-            logger.log(Level.WARNING, "Unable to determine dev_appserver location", ex);
+            logger.log(Level.WARNING, "Unable to determine dev_appserver URL", ex);
           }
           return Status.OK_STATUS;
         }

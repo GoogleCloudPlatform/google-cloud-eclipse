@@ -175,7 +175,7 @@
             category="com.google.cloud.tools.eclipse.preferences.main"
             class="com.google.cloud.tools.eclipse.preferences.areas.AreaBasedPreferencePage"
             id="com.google.cloud.tools.eclipse.preferences.appengine.localserver"
-            name="Run/Debug">
+            name="App Engine Run/Debug">
       </page>
    </extension>
    <extension

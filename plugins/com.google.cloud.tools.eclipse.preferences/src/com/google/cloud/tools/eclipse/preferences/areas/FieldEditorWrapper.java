@@ -34,6 +34,8 @@ import org.eclipse.swt.widgets.Control;
  * @param <FET> the type of wrapped {@linkplain FieldEditor}
  */
 public abstract class FieldEditorWrapper<FET extends FieldEditor> extends PreferenceArea {
+  private static final String PLUGIN_ID = "com.google.cloud.tools.eclipse.preferences";
+
   /**
    * A dummy page that exists for its #setMessage() and #setErrorMessage().
    */
@@ -84,29 +86,22 @@ public abstract class FieldEditorWrapper<FET extends FieldEditor> extends Prefer
 
   @Override
   public IStatus getStatus() {
-    // DialogPage has an unnecessarily complex set of message possibilities
-    int messageType = messages.getMessageType();
+    // DialogPage has an unfortunately complex set of message possibilities
     String message = messages.getErrorMessage();
     if (message != null) {
-      messageType = IMessageProvider.ERROR;
-    } else {
-      message = messages.getMessage();
+      return new Status(IStatus.ERROR, PLUGIN_ID, message);
     }
-    int severity;
+    int messageType = messages.getMessageType();
     switch (messageType) {
       case IMessageProvider.INFORMATION:
-        severity = IStatus.INFO;
-        break;
+        return new Status(IStatus.INFO, PLUGIN_ID, messages.getMessage());
       case IMessageProvider.WARNING:
-        severity = IStatus.WARNING;
-        break;
+        return new Status(IStatus.WARNING, PLUGIN_ID, messages.getMessage());
       case IMessageProvider.ERROR:
-        severity = IStatus.ERROR;
-        break;
+        return new Status(IStatus.ERROR, PLUGIN_ID, messages.getMessage());
       default:
         return Status.OK_STATUS;
     }
-    return new Status(severity, "com.google.cloud.tools.eclipse.preferences", message);
   }
 
   @Override

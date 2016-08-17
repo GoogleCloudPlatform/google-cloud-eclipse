@@ -20,8 +20,10 @@ import org.eclipse.core.runtime.preferences.DefaultScope;
 
 public class PreferencesInitializer extends AbstractPreferenceInitializer {
 
+  public static final String LAUNCH_BROWSER = "launchBrowser";
+
   @Override
   public void initializeDefaultPreferences() {
-    DefaultScope.INSTANCE.getNode(Activator.PLUGIN_ID).putBoolean("launchBrowser", true);
+    DefaultScope.INSTANCE.getNode(Activator.PLUGIN_ID).putBoolean(LAUNCH_BROWSER, true);
   }
 }
