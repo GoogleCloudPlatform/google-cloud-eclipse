@@ -42,6 +42,7 @@ public abstract class FieldEditorWrapper<FET extends FieldEditor> extends Prefer
   private static class MessageGatheringDialogPage extends DialogPage {
     @Override
     public void createControl(Composite parent) {
+      // should never ever be called
     }
   }
 
