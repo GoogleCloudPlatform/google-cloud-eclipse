@@ -140,7 +140,7 @@
             class="com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineConsolePageParticipant"
             id="com.google.cloud.tools.eclipse.appengine.consolePageParticipant">
               <enablement>
-                <instanceof value="com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineConsolePageParticipant"/>
+                <instanceof value="com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineConsole"/>
               </enablement>    
       </consolePageParticipant>
    </extension>
