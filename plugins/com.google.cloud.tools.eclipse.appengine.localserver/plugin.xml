@@ -175,14 +175,14 @@
             category="com.google.cloud.tools.eclipse.preferences.main"
             class="com.google.cloud.tools.eclipse.preferences.areas.AreaBasedPreferencePage"
             id="com.google.cloud.tools.eclipse.preferences.appengine.localserver"
-            name="App Engine Run/Debug">
+            name="Launching">
       </page>
    </extension>
    <extension
          point="com.google.cloud.tools.eclipse.preferences.areas">
          <area
                host="com.google.cloud.tools.eclipse.preferences.appengine.localserver"
-               title="Launch Behaviors"
+               title="App Engine"
                class="com.google.cloud.tools.eclipse.appengine.localserver.ui.LaunchBehaviorsArea"
                preferences="instance://com.google.cloud.tools.eclipse.appengine.localserver"/>
    </extension>

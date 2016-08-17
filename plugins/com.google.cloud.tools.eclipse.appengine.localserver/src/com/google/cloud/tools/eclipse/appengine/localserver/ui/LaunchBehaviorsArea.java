@@ -15,6 +15,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
+import com.google.cloud.tools.eclipse.appengine.localserver.PreferencesInitializer;
 import com.google.cloud.tools.eclipse.preferences.areas.FieldEditorWrapper;
 
 import org.eclipse.jface.preference.BooleanFieldEditor;
@@ -23,6 +24,7 @@ import org.eclipse.swt.widgets.Composite;
 public class LaunchBehaviorsArea extends FieldEditorWrapper<BooleanFieldEditor> {
   @Override
   protected BooleanFieldEditor createFieldEditor(Composite container) {
-    return new BooleanFieldEditor("launchBrowser", "Open start page on launch", container);
+    return new BooleanFieldEditor(PreferencesInitializer.LAUNCH_BROWSER,
+        "Open start page on launch", container);
   }
 }

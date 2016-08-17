@@ -39,10 +39,9 @@ public abstract class FieldEditorWrapper<FET extends FieldEditor> extends Prefer
   /**
    * A dummy page that exists for its #setMessage() and #setErrorMessage().
    */
-  public class MessageGatheringDialogPage extends DialogPage {
+  private static class MessageGatheringDialogPage extends DialogPage {
     @Override
     public void createControl(Composite parent) {
-      throw new UnsupportedOperationException();
     }
   }
 
