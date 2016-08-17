@@ -58,6 +58,7 @@ public class DebugNativeAppEngineStandardProject extends AbstractProjectTests {
    */
   @Test
   public void testDebugLaunch() throws Exception {
+    // Disable WTP's download-server-bindings
     // Equivalent to: ServerUIPreferences.getInstance().setCacheFrequency(0);
     Preferences prefs = InstanceScope.INSTANCE.getNode("org.eclipse.wst.server.ui");
     prefs.putInt("cache-frequency", 0);
