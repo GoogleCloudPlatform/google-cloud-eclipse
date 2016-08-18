@@ -40,6 +40,20 @@
          unpack="false"/>
 
    <plugin
+         id="org.mortbay.jetty.server"
+         download-size="0"
+         install-size="0"
+         version="6.1.26"
+         unpack="false"/>
+
+   <plugin
+         id="org.mortbay.jetty.util"
+         download-size="0"
+         install-size="0"
+         version="6.1.26"
+         unpack="false"/>
+
+   <plugin
          id="com.google.guava"
          download-size="0"
          install-size="0"

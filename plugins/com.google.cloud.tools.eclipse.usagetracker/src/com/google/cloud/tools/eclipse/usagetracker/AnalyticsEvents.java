@@ -8,12 +8,13 @@ public class AnalyticsEvents {
 
   public static final String APP_ENGINE_DEPLOY = "appengine.deploy";
   public static final String APP_ENGINE_DEPLOY_SUCCESS = "appengine.deploy.success";
-  public static final String APP_ENGINE_LOCAL_SERVER = "appengine.local.dev.run";
+  public static final String APP_ENGINE_LOCAL_SERVER = "appengine.local.server";
   public static final String APP_ENGINE_NEW_PROJECT_WIZARD = "appengine.new.project.wizard";
   public static final String APP_ENGINE_NEW_PROJECT_WIZARD_COMPLETE =
       "appengine.new.project.wizard.complete";
 
   // Metadata keys
+  public static final String APP_ENGINE_LOCAL_SERVER_MODE = "mode";
   public static final String APP_ENGINE_NEW_PROJECT_WIZARD_TYPE = "type";
 
   // Metadata values

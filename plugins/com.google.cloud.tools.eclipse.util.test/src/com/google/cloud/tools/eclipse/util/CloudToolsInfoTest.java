@@ -24,4 +24,9 @@ public class CloudToolsInfoTest {
   public void testGetToolsVersion() {
     Assert.assertTrue(CloudToolsInfo.getToolsVersion().startsWith("0.1.0."));
   }
+
+  @Test
+  public void testUserAgent() {
+    Assert.assertTrue(CloudToolsInfo.USER_AGENT.startsWith("gcloud-eclipse-tools/0.1.0"));
+  }
 }

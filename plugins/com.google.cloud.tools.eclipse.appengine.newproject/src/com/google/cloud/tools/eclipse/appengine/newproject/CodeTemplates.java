@@ -32,9 +32,6 @@ public class CodeTemplates {
    * @param monitor progress monitor
    * @param name directory from which to load template
    */
-  // todo: config details are going to vary based on type of template; need a more generic
-  // solution such as key-value map or a different design
-  // todo what if project isn't empty?
   public static void materialize(IProject project, AppEngineStandardProjectConfig config,
       IProgressMonitor monitor) throws CoreException {
     // todo replace with something that simply copies from a file system while replacing tokens

@@ -44,5 +44,11 @@
       id="AppEngineSDK"
       class="com.google.cloud.tools.eclipse.appengine.facets.AppEngineSdkClasspathInitializer"/>
   </extension>
+  <extension point="org.eclipse.wst.common.project.facet.core.listeners">
+    <listener
+      class="com.google.cloud.tools.eclipse.appengine.facets.AppEngineRuntimeChangeListener"
+      eventTypes="PRIMARY_RUNTIME_CHANGED">
+    </listener>
+  </extension>
 
 </plugin>
