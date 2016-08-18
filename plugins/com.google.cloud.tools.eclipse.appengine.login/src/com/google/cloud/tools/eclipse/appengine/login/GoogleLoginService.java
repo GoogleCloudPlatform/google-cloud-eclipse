@@ -19,11 +19,11 @@ import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
 import com.google.cloud.tools.eclipse.appengine.login.ui.LoginServiceUi;
 import com.google.cloud.tools.ide.login.GoogleLoginState;
+import com.google.cloud.tools.ide.login.JavaPreferenceOAuthDataStore;
 import com.google.cloud.tools.ide.login.LoggerFacade;
 import com.google.cloud.tools.ide.login.OAuthDataStore;
 import com.google.common.annotations.VisibleForTesting;
 
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.window.IShellProvider;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbench;
@@ -42,6 +42,9 @@ import java.util.logging.Logger;
  * currently active user, etc.
  */
 public class GoogleLoginService implements IGoogleLoginService {
+
+  private static final String OAUTH_DATA_STORE_PREFERENCE_PATH =
+      "/com/google/cloud/tools/eclipse/login";
 
   // For the detailed info about each scope, see
   // https://github.com/GoogleCloudPlatform/gcloud-eclipse-tools/wiki/Cloud-Tools-for-Eclipse-Technical-Design#oauth-20-scopes-requested
@@ -73,7 +76,7 @@ public class GoogleLoginService implements IGoogleLoginService {
    */
   protected void activate() {
     final IWorkbench workbench = PlatformUI.getWorkbench();
-    IEclipseContext eclipseContext = workbench.getService(IEclipseContext.class);
+    LoginServiceLogger logger = new LoginServiceLogger();
     IShellProvider shellProvider = new IShellProvider() {
       @Override
       public Shell getShell() {
@@ -84,7 +87,8 @@ public class GoogleLoginService implements IGoogleLoginService {
     loginServiceUi = new LoginServiceUi(workbench, shellProvider, workbench.getDisplay());
     loginState = new GoogleLoginState(
         Constants.getOAuthClientId(), Constants.getOAuthClientSecret(), OAUTH_SCOPES,
-        new TransientOAuthDataStore(eclipseContext), loginServiceUi, new LoginServiceLogger());
+        new JavaPreferenceOAuthDataStore(OAUTH_DATA_STORE_PREFERENCE_PATH, logger),
+        loginServiceUi, logger);
     loginInProgress = new AtomicBoolean(false);
   }
 

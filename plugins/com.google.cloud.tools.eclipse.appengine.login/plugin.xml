@@ -2,6 +2,17 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension
+         point="org.eclipse.core.expressions.propertyTesters">
+      <propertyTester
+            class="com.google.cloud.tools.eclipse.appengine.login.TriggerMenuUpdate"
+            id="com.google.cloud.tools.eclipse.appengine.login.TriggerMenuUpdate"
+            namespace="com.google.cloud.tools.eclipse.appengine.login"
+            properties="triggerMenuUpdate"
+            type="java.lang.Object">
+      </propertyTester>
+   </extension>
+
+   <extension
          point="org.eclipse.ui.commands">
       <category
             id="com.google.cloud.tools.eclipse.appengine.login.commands.category"
@@ -27,8 +38,13 @@
          <command
                commandId="com.google.cloud.tools.eclipse.appengine.login.commands.loginCommand"
                id="com.google.cloud.tools.eclipse.appengine.login.menus.loginCommand"
-               label="%loginMenuItemLabel"
                mnemonic="G">
+            <visibleWhen>
+              <test
+                    property="com.google.cloud.tools.eclipse.appengine.login.triggerMenuUpdate"
+                    forcePluginActivation="true">
+              </test>
+            </visibleWhen>
          </command>
       </menuContribution>
       <menuContribution
@@ -38,8 +54,7 @@
             <command
                   commandId="com.google.cloud.tools.eclipse.appengine.login.commands.loginCommand"
                   icon="icons/googleFavicon.png"
-                  id="com.google.cloud.tools.eclipse.appengine.login.toolbars.loginCommand"
-                  tooltip="%loginToolbarTooltip">
+                  id="com.google.cloud.tools.eclipse.appengine.login.toolbars.loginCommand">
             </command>
          </toolbar>
       </menuContribution>
