@@ -102,8 +102,6 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     console.clearConsole();
     console.activate();
 
-    setDefaultSourceLocator(launch, configuration);
-
     if (shouldOpenStartPage()) {
       String pageLocation = determinePageLocation(server, configuration);
       if (pageLocation != null) {

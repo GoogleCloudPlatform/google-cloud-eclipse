@@ -22,6 +22,7 @@ import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotButton;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotStyledText;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTable;
 
 /**
@@ -106,6 +107,24 @@ public class SwtBotTestingUtilities {
       @Override
       public boolean test() throws Exception {
         return !shell.isActive();
+      }
+    });
+  }
+
+  /**
+   * Wait until the given text widget contains the provided string
+   */
+  public static void waitUntilStyledTextContains(SWTBot bot, final String text,
+      final SWTBotStyledText widget) {
+    bot.waitUntil(new DefaultCondition() {
+      @Override
+      public boolean test() throws Exception {
+        return widget.getText().contains(text);
+      }
+
+      @Override
+      public String getFailureMessage() {
+        return "Text not found!";
       }
     });
   }

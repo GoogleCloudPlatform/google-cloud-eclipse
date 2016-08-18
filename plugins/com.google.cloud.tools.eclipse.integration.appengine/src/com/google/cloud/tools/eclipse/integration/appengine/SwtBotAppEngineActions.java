@@ -26,6 +26,8 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
+import org.eclipse.swtbot.swt.finder.SWTBot;
+import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 
 import java.io.IOException;
@@ -72,7 +74,7 @@ public class SwtBotAppEngineActions {
       bot.textWithLabel("App Engine Project ID: (optional)").setText(projectId);
     }
     SwtBotTestingUtilities.clickButtonAndWaitForWindowChange(bot, bot.button("Finish"));
-    return getWorkspaceRoot().getProject(projectName);
+    return waitUntilProjectExists(bot, getWorkspaceRoot().getProject(projectName));
   }
 
   /** Create a new project with the Maven-based Google App Engine Standard Java Project wizard */
@@ -112,8 +114,29 @@ public class SwtBotAppEngineActions {
     SwtBotTimeoutManager.setTimeout(mavenCompletionTimeout);
     SwtBotTestingUtilities.clickButtonAndWaitForWindowChange(bot, bot.button("Finish"));
     SwtBotTimeoutManager.resetTimeout();
-    // this isn't right for location != null
-    return getWorkspaceRoot().getProject(artifactId);
+    return waitUntilProjectExists(bot, getWorkspaceRoot().getProject(artifactId));
+  }
+
+
+
+  /**
+   * Spin until the given project actually exists.
+   * 
+   * @return the project
+   */
+  private static IProject waitUntilProjectExists(SWTBot bot, final IProject project) {
+    bot.waitUntil(new DefaultCondition() {
+      @Override
+      public String getFailureMessage() {
+        return "Project does not exist! " + project;
+      }
+
+      @Override
+      public boolean test() throws Exception {
+        return project.exists();
+      }
+    });
+    return project;
   }
 
   private static IWorkspaceRoot getWorkspaceRoot() {

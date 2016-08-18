@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.swtbot;
 
 import org.eclipse.swt.widgets.TreeItem;
+import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.finders.UIThreadRunnable;
@@ -314,6 +315,44 @@ public class SwtBotTreeUtilities {
           }
         }
         return null;
+      }
+    });
+  }
+
+  /**
+   * Wait until the given tree has items, and return the first item.
+   * 
+   * @throws TimeoutException if no items appear within the default timeout
+   */
+  public static SWTBotTreeItem waitUntilTreeHasItems(SWTWorkbenchBot bot, final SWTBotTree tree) {
+    bot.waitUntil(new DefaultCondition() {
+      @Override
+      public String getFailureMessage() {
+        return "Tree items never appeared";
+      }
+
+      @Override
+      public boolean test() throws Exception {
+        return tree.hasItems();
+      }
+    });
+    return tree.getAllItems()[0];
+  }
+
+  /**
+   * Wait until the tree item contains the given text
+   */
+  public static void waitUntilTreeContainsText(SWTWorkbenchBot bot, final SWTBotTreeItem treeItem,
+      final String text) {
+    bot.waitUntil(new DefaultCondition() {
+      @Override
+      public boolean test() throws Exception {
+        return treeItem.getText().contains(text);
+      }
+
+      @Override
+      public String getFailureMessage() {
+        return "Text never appeared";
       }
     });
   }
