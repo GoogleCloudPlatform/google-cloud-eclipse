@@ -16,17 +16,22 @@
 
 package com.google.cloud.tools.eclipse.appengine.login;
 
-import org.eclipse.core.expressions.PropertyTester;
+import org.eclipse.ui.IStartup;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.commands.ICommandService;
 
-/**
- * When combined with {@code forcePluginActivation="true"} in plugin.xml, this triggers
- * {@link GoogleLoginCommandHandler#updateElement} at Eclipse startup.
- */
-public class TriggerMenuUpdate extends PropertyTester {
+public class MenuContributionInitializer implements IStartup {
 
   @Override
-  public boolean test(Object receiver, String property, Object[] args, Object expectedValue) {
-    return true;
+  public void earlyStartup() {
+    final IWorkbench workbench = PlatformUI.getWorkbench();
+    workbench.getDisplay().asyncExec(new Runnable() {
+      @Override
+      public void run() {
+        workbench.getService(ICommandService.class).refreshElements(
+            "com.google.cloud.tools.eclipse.appengine.login.commands.loginCommand", null); //$NON-NLS-1$
+      }
+    });
   }
-
 }
