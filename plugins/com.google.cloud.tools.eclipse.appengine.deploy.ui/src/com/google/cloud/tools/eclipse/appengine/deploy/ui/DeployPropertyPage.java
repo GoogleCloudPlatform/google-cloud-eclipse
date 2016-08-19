@@ -1,15 +1,25 @@
+
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.google.cloud.tools.eclipse.ui.util.FontUtil;
+import com.google.cloud.tools.eclipse.ui.util.databinding.BucketNameValidator;
+import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectIdValidator;
+import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectVersionValidator;
+import com.google.cloud.tools.eclipse.ui.util.event.OpenUrlSelectionListener;
+import com.google.cloud.tools.eclipse.util.AdapterUtil;
 
 import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.databinding.UpdateValueStrategy;
+import org.eclipse.core.databinding.ObservablesManager;
+import org.eclipse.core.databinding.observable.value.IValueChangeListener;
+import org.eclipse.core.databinding.observable.value.ValueChangeEvent;
 import org.eclipse.core.databinding.observable.value.WritableValue;
+import org.eclipse.core.databinding.validation.MultiValidator;
+import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.databinding.preference.PreferencePageSupport;
+import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IMessageProvider;
@@ -27,19 +37,32 @@ import org.eclipse.ui.dialogs.PropertyPage;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
-import com.google.cloud.tools.eclipse.ui.util.FontUtil;
-import com.google.cloud.tools.eclipse.ui.util.databinding.BooleanConverter;
-import com.google.cloud.tools.eclipse.ui.util.databinding.BucketNameValidator;
-import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectIdValidator;
-import com.google.cloud.tools.eclipse.ui.util.event.OpenUrlSelectionListener;
-import com.google.cloud.tools.eclipse.util.AdapterUtil;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class DeployPropertyPage extends PropertyPage {
 
-  private static final String APPENGINE_DASHBOARD_URL = "https://console.cloud.google.com/appengine";
+  public static class VCL implements IValueChangeListener {
+    private String name;
+
+    public VCL(String name) {
+      this.name = name;
+    }
+
+    @Override
+    public void handleValueChange(ValueChangeEvent event) {
+      System.out.println(
+          "VCL[" + name + "]: " + event.diff.getOldValue() + " -> " + event.diff.getNewValue());
+    }
+  }
+
+  private static final String APPENGINE_DASHBOARD_URL =
+      "https://console.cloud.google.com/appengine";
   private static final int INDENT_CHECKBOX_ENABLED_WIDGET = 10;
 
-  private static final String PREFERENCE_STORE_QUALIFIER = "com.google.cloud.tools.eclipse.appengine.deploy";
+  private static final String PREFERENCE_STORE_QUALIFIER =
+      "com.google.cloud.tools.eclipse.appengine.deploy";
   private static final String PREF_PROMPT_FOR_PROJECT_ID = "project.id.prompt"; // boolean
   private static final String PREF_PROJECT_ID = "project.id";
   private static final String PREF_OVERRIDE_DEFAULT_VERSIONING = "project.version.default"; // boolean
@@ -50,7 +73,7 @@ public class DeployPropertyPage extends PropertyPage {
 
   private static Logger logger = Logger.getLogger(DeployPropertyPage.class.getName());
 
-  private Button promptForProjectIdButton;
+  private Button overrideProjectIdButton;
   private Label projectIdLabel;
   private Text projectId;
 
@@ -65,6 +88,8 @@ public class DeployPropertyPage extends PropertyPage {
   private Text bucket;
 
   private Model model = new Model();
+  private ObservablesManager observables;
+  private DataBindingContext bindingContext;
 
   @Override
   protected Control createContents(Composite parent) {
@@ -81,52 +106,77 @@ public class DeployPropertyPage extends PropertyPage {
 
     Dialog.applyDialogFont(container);
 
-    setupDataBinding();
-
     loadPreferences();
+
+    setupDataBinding();
 
     return container;
   }
 
   private void setupDataBinding() {
-    DataBindingContext dbc = new DataBindingContext();
+    bindingContext = new DataBindingContext();
 
-    setupProjectIdDataBinding(dbc);
-    setupProjectVersionDataBinding(dbc);
-    setupAutoPromoteDataBinding(dbc);
-    setupBucketDataBinding(dbc);
+    setupProjectIdDataBinding(bindingContext);
+    setupProjectVersionDataBinding(bindingContext);
+    setupAutoPromoteDataBinding(bindingContext);
+    setupBucketDataBinding(bindingContext);
 
-    PreferencePageSupport.create(this, dbc);
+    PreferencePageSupport.create(this, bindingContext);
+    bindingContext.updateTargets();
+    observables = new ObservablesManager();
+    observables.addObservablesFromContext(bindingContext, true, true);
   }
 
   private void setupProjectIdDataBinding(DataBindingContext dbc) {
-    ProjectIdValidator projectIdValidator = new ProjectIdValidator(new ProjectIdValidator.ValidationPredicate() {
+    final ISWTObservableValue overrideObservable =
+        WidgetProperties.selection().observe(overrideProjectIdButton);
+    final ISWTObservableValue projectIdObservable =
+        WidgetProperties.text(SWT.Modify).observe(projectId);
+
+    dbc.addValidationStatusProvider(new MultiValidator(overrideObservable.getRealm()) {
       @Override
-      public boolean shouldValidate() {
-        return !model.isPromptForProjectId();
+      protected IStatus validate() {
+        if (overrideObservable.getValue() == Boolean.FALSE) {
+          System.out.println("VALIDATE: OK");
+          return ValidationStatus.ok();
+        }
+        System.out.println(
+            "VALIDATE: " + new ProjectIdValidator().validate(projectIdObservable.getValue()));
+        return new ProjectIdValidator().validate(projectIdObservable.getValue());
       }
     });
+    dbc.bindValue(overrideObservable, model.overrideProjectId);
+    dbc.bindValue(projectIdObservable, model.projectId);
+    dbc.bindValue(WidgetProperties.enabled().observe(projectId), model.overrideProjectId);
+    dbc.bindValue(WidgetProperties.enabled().observe(projectIdLabel), model.overrideProjectId);
 
-    dbc.bindValue(WidgetProperties.selection().observe(promptForProjectIdButton), model.promptForProjectId);
-    dbc.bindValue(WidgetProperties.text(SWT.Modify).observe(projectId),
-                  model.projectId,
-                  new UpdateValueStrategy().setAfterGetValidator(projectIdValidator),
-                  new UpdateValueStrategy().setAfterGetValidator(projectIdValidator));
-    dbc.bindValue(model.promptForProjectId,
-                  WidgetProperties.enabled().observe(projectId),
-                  new UpdateValueStrategy().setConverter(BooleanConverter.negate()),
-                  new UpdateValueStrategy().setConverter(BooleanConverter.negate()));
-    dbc.bindValue(model.promptForProjectId,
-                  WidgetProperties.enabled().observe(projectIdLabel),
-                  new UpdateValueStrategy().setConverter(BooleanConverter.negate()),
-                  new UpdateValueStrategy().setConverter(BooleanConverter.negate()));
+    model.overrideProjectId.addValueChangeListener(new VCL("overrideProjectId"));
+    model.projectId.addValueChangeListener(new VCL("projectId"));
   }
 
   private void setupProjectVersionDataBinding(DataBindingContext dbc) {
-    dbc.bindValue(WidgetProperties.selection().observe(overrideDefaultVersionButton), model.overrideDefaultVersioning);
-    dbc.bindValue(WidgetProperties.text(SWT.Modify).observe(version), model.version);
-    dbc.bindValue(model.overrideDefaultVersioning, WidgetProperties.enabled().observe(versionLabel));
-    dbc.bindValue(model.overrideDefaultVersioning, WidgetProperties.enabled().observe(version));
+    final ISWTObservableValue overrideObservable =
+        WidgetProperties.selection().observe(overrideDefaultVersionButton);
+    final ISWTObservableValue versionObservable =
+        WidgetProperties.text(SWT.Modify).observe(version);
+    dbc.bindValue(overrideObservable,
+        model.overrideDefaultVersioning);
+    dbc.bindValue(versionObservable, model.version);
+    dbc.bindValue(WidgetProperties.enabled().observe(versionLabel),
+        model.overrideDefaultVersioning);
+    dbc.bindValue(WidgetProperties.enabled().observe(version), model.overrideDefaultVersioning);
+
+    dbc.addValidationStatusProvider(new MultiValidator(overrideObservable.getRealm()) {
+      @Override
+      protected IStatus validate() {
+        if (overrideObservable.getValue() == Boolean.FALSE) {
+          System.out.println("VALIDATE: OK");
+          return ValidationStatus.ok();
+        }
+        return new ProjectVersionValidator().validate(versionObservable.getValue());
+      }
+    });
+
   }
 
   private void setupAutoPromoteDataBinding(DataBindingContext dbc) {
@@ -134,19 +184,27 @@ public class DeployPropertyPage extends PropertyPage {
   }
 
   private void setupBucketDataBinding(DataBindingContext dbc) {
-    dbc.bindValue(WidgetProperties.selection().observe(overrideDefaultBucketButton), model.overrideDefaultBucket);
-    BucketNameValidator bucketNameValidator = new BucketNameValidator(new BucketNameValidator.ValidationPredicate() {
+    final ISWTObservableValue overrideObservable =
+        WidgetProperties.selection().observe(overrideDefaultBucketButton);
+    final ISWTObservableValue bucketObservable = WidgetProperties.text(SWT.Modify).observe(bucket);
+
+    dbc.addValidationStatusProvider(new MultiValidator(overrideObservable.getRealm()) {
       @Override
-      public boolean shouldValidate() {
-        return model.isOverrideDefaultBucket();
+      protected IStatus validate() {
+        if (overrideObservable.getValue() == Boolean.FALSE) {
+          System.out.println("VALIDATE: OK");
+          return ValidationStatus.ok();
+        }
+        System.out.println(
+            "VALIDATE: " + new BucketNameValidator().validate(bucketObservable.getValue()));
+        return new BucketNameValidator().validate(bucketObservable.getValue());
       }
     });
-    dbc.bindValue(WidgetProperties.text(SWT.Modify).observe(bucket),
-                  model.bucket,
-                  new UpdateValueStrategy().setAfterGetValidator(bucketNameValidator),
-                  new UpdateValueStrategy().setAfterGetValidator(bucketNameValidator));
-    dbc.bindValue(model.overrideDefaultBucket, WidgetProperties.enabled().observe(bucketLabel));
-    dbc.bindValue(model.overrideDefaultBucket, WidgetProperties.enabled().observe(bucket));
+
+    dbc.bindValue(overrideObservable, model.overrideDefaultBucket);
+    dbc.bindValue(bucketObservable, model.bucket);
+    dbc.bindValue(WidgetProperties.enabled().observe(bucketLabel), model.overrideDefaultBucket);
+    dbc.bindValue(WidgetProperties.enabled().observe(bucket), model.overrideDefaultBucket);
   }
 
   @Override
@@ -175,7 +233,7 @@ public class DeployPropertyPage extends PropertyPage {
     preferenceStore.setValue(PREF_OVERRIDE_DEFAULT_BUCKET, model.isOverrideDefaultBucket());
     preferenceStore.setValue(PREF_CUSTOM_BUCKET, model.getBucket());
 
-    ScopedPreferenceStore scopedPreferenceStore = (ScopedPreferenceStore)preferenceStore;
+    ScopedPreferenceStore scopedPreferenceStore = (ScopedPreferenceStore) preferenceStore;
     if (scopedPreferenceStore.needsSaving()) {
       scopedPreferenceStore.save();
     }
@@ -186,7 +244,8 @@ public class DeployPropertyPage extends PropertyPage {
 
     model.setProjectId(preferenceStore.getString(PREF_PROJECT_ID));
     model.setPromptForProjectId(preferenceStore.getBoolean(PREF_PROMPT_FOR_PROJECT_ID));
-    model.setOverrideDefaultVersioning(preferenceStore.getBoolean(PREF_OVERRIDE_DEFAULT_VERSIONING));
+    model
+        .setOverrideDefaultVersioning(preferenceStore.getBoolean(PREF_OVERRIDE_DEFAULT_VERSIONING));
     model.setVersion(preferenceStore.getString(PREF_CUSTOM_VERSION));
     model.setAutoPromote(preferenceStore.getBoolean(PREF_ENABLE_AUTO_PROMOTE));
     model.setOverrideDefaultBucket(preferenceStore.getBoolean(PREF_OVERRIDE_DEFAULT_BUCKET));
@@ -204,9 +263,9 @@ public class DeployPropertyPage extends PropertyPage {
     projectIdComp.setLayout(new GridLayout(2, false));
     projectIdComp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-    promptForProjectIdButton = new Button(projectIdComp, SWT.CHECK);
-    promptForProjectIdButton.setText(Messages.getString("deploy.prompt.projectid"));
-    promptForProjectIdButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1));
+    overrideProjectIdButton = new Button(projectIdComp, SWT.CHECK);
+    overrideProjectIdButton.setText(Messages.getString("deploy.override.projectid"));
+    overrideProjectIdButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1));
 
     projectIdLabel = new Label(projectIdComp, SWT.LEFT);
     GridData layoutData = new GridData(SWT.LEFT, SWT.CENTER, false, false);
@@ -225,7 +284,8 @@ public class DeployPropertyPage extends PropertyPage {
 
     overrideDefaultVersionButton = new Button(versionComp, SWT.CHECK);
     overrideDefaultVersionButton.setText(Messages.getString("use.custom.versioning"));
-    overrideDefaultVersionButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1));
+    overrideDefaultVersionButton
+        .setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1));
 
     versionLabel = new Label(versionComp, SWT.NONE);
     versionLabel.setText(Messages.getString("project.version"));
@@ -251,12 +311,14 @@ public class DeployPropertyPage extends PropertyPage {
     manualPromoteLink.setLayoutData(layoutData);
     manualPromoteLink.setText(Messages.getString("deploy.manual.link", APPENGINE_DASHBOARD_URL));
     manualPromoteLink.setFont(promoteComp.getFont());
-    manualPromoteLink.addSelectionListener(new OpenUrlSelectionListener(new OpenUrlSelectionListener.ErrorHandler() {
-      @Override
-      public void handle(Exception ex) {
-        setMessage(Messages.getString("cannot.open.browser", ex.getLocalizedMessage()), IMessageProvider.WARNING);
-      }
-    }));
+    manualPromoteLink.addSelectionListener(
+        new OpenUrlSelectionListener(new OpenUrlSelectionListener.ErrorHandler() {
+          @Override
+          public void handle(Exception ex) {
+            setMessage(Messages.getString("cannot.open.browser", ex.getLocalizedMessage()),
+                IMessageProvider.WARNING);
+          }
+        }));
   }
 
   private void createAdvancedSection(Composite parent) {
@@ -266,8 +328,8 @@ public class DeployPropertyPage extends PropertyPage {
   }
 
   private ExpandableComposite createExpandableComposite(Composite parent) {
-    ExpandableComposite expandableComposite =
-        new ExpandableComposite(parent, SWT.NONE, ExpandableComposite.TWISTIE | ExpandableComposite.CLIENT_INDENT);
+    ExpandableComposite expandableComposite = new ExpandableComposite(parent, SWT.NONE,
+        ExpandableComposite.TWISTIE | ExpandableComposite.CLIENT_INDENT);
     expandableComposite.setText(Messages.getString("settings.advanced"));
     expandableComposite.setExpanded(false);
     expandableComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -299,20 +361,21 @@ public class DeployPropertyPage extends PropertyPage {
 
   private static class Model {
 
-    private WritableValue promptForProjectId = new WritableValue(); //boolean
-    private WritableValue projectId = new WritableValue(); //string
-    private WritableValue overrideDefaultVersioning = new WritableValue(); //boolean
-    private WritableValue version = new WritableValue(); //string
-    private WritableValue autoPromote = new WritableValue(); //boolean
-    private WritableValue overrideDefaultBucket = new WritableValue(); //boolean
-    private WritableValue bucket = new WritableValue(); //string
+    private WritableValue overrideProjectId = new WritableValue(Boolean.TRUE, Boolean.class); // boolean
+    private WritableValue projectId = new WritableValue(); // string
+    private WritableValue overrideDefaultVersioning =
+        new WritableValue(Boolean.FALSE, Boolean.class); // boolean
+    private WritableValue version = new WritableValue(); // string
+    private WritableValue autoPromote = new WritableValue(Boolean.TRUE, Boolean.class); // boolean
+    private WritableValue overrideDefaultBucket = new WritableValue(Boolean.FALSE, Boolean.class); // boolean
+    private WritableValue bucket = new WritableValue(); // string
 
     public boolean isPromptForProjectId() {
-      return (boolean) promptForProjectId.getValue();
+      return (boolean) overrideProjectId.getValue();
     }
 
     public void setPromptForProjectId(boolean promptForProjectId) {
-      this.promptForProjectId.setValue(promptForProjectId);
+      this.overrideProjectId.setValue(promptForProjectId);
     }
 
     public String getProjectId() {
@@ -324,7 +387,7 @@ public class DeployPropertyPage extends PropertyPage {
     }
 
     public boolean isOverrideDefaultVersioning() {
-      return (boolean) overrideDefaultVersioning.getValue();
+      return Boolean.TRUE == overrideDefaultVersioning.getValue();
     }
 
     public void setOverrideDefaultVersioning(boolean overrideDefaultVersioning) {
@@ -363,4 +426,17 @@ public class DeployPropertyPage extends PropertyPage {
       this.bucket.setValue(bucket);
     }
   }
+
+  @Override
+  public void dispose() {
+    if (bindingContext != null) {
+      bindingContext.dispose();
+    }
+    if (observables != null) {
+      observables.dispose();
+    }
+    super.dispose();
+  }
+
+
 }

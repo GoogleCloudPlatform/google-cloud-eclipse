@@ -1,11 +1,13 @@
 package com.google.cloud.tools.eclipse.ui.util.databinding;
 
+import com.google.cloud.tools.eclipse.ui.util.Messages;
+
 import org.eclipse.core.databinding.validation.IValidator;
+import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
-import com.google.cloud.tools.eclipse.ui.util.Messages;
-import com.google.cloud.tools.eclipse.util.status.StatusUtil;
+import java.util.regex.Pattern;
 
 /**
  * Implements a simplified bucket name validation.
@@ -19,31 +21,21 @@ import com.google.cloud.tools.eclipse.util.status.StatusUtil;
  * for more information: https://cloud.google.com/storage/docs/naming
  */
 public class BucketNameValidator implements IValidator {
-  private static final String CLOUD_STORAGE_BUCKET_NAME_PATTERN = "^[a-z0-9][a-z0-9_.-]{1,61}[a-z0-9]$"; //$NON-NLS-1$
-  private ValidationPredicate validationPredicate;
-
-  public BucketNameValidator(ValidationPredicate validationPredicate) {
-    this.validationPredicate = validationPredicate;
-  }
+  private static final Pattern CLOUD_STORAGE_BUCKET_NAME_PATTERN =
+      Pattern.compile("^[a-z0-9][a-z0-9_.-]{1,61}[a-z0-9]$"); //$NON-NLS-1$
 
   @Override
-  public IStatus validate(Object value) {
-    if (!validationPredicate.shouldValidate()) {
-      return Status.OK_STATUS;
+  public IStatus validate(Object input) {
+    if (!(input instanceof String)) {
+      return ValidationStatus.error(Messages.getString("bucket.name.invalid")); //$NON-NLS-1$
     }
-    String projectId = (String) value;
-    if (projectId.matches(CLOUD_STORAGE_BUCKET_NAME_PATTERN)) {
+    String value = (String) input;
+    if (value.isEmpty()) {
+      return ValidationStatus.warning(Messages.getString("bucket.name.invalid")); //$NON-NLS-1$
+    } else if (CLOUD_STORAGE_BUCKET_NAME_PATTERN.matcher((String) value).matches()) {
       return Status.OK_STATUS;
     } else {
-      return StatusUtil.error(this, Messages.getString("bucket.name.invalid"));  //$NON-NLS-1$
+      return ValidationStatus.error(Messages.getString("bucket.name.invalid")); //$NON-NLS-1$
     }
-  }
-
-  /**
-   * If returns false, then the actual validation is skipped and {@link Status#OK_STATUS} is returned as validation
-   * result.
-   */
-  public static interface ValidationPredicate {
-    boolean shouldValidate();
   }
 }
