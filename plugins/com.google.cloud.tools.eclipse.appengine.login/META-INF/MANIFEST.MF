@@ -12,7 +12,6 @@ Require-Bundle: com.google.gson,
  com.google.guava;bundle-version="15.0.0",
  jackson-core-asl,
  org.eclipse.core.runtime,
- org.eclipse.e4.core.contexts,
  org.eclipse.ui,
  org.mortbay.jetty.server,
  org.mortbay.jetty.util
