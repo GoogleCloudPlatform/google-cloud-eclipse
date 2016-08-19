@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.integration.appengine;
 import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineDeployInfo;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotTestingUtilities;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotTimeoutManager;
+import com.google.cloud.tools.eclipse.swtbot.SwtBotWorkbenchActions;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -74,6 +75,7 @@ public class SwtBotAppEngineActions {
       bot.textWithLabel("App Engine Project ID: (optional)").setText(projectId);
     }
     SwtBotTestingUtilities.clickButtonAndWaitForWindowChange(bot, bot.button("Finish"));
+    SwtBotWorkbenchActions.waitForIdle(bot);
     return waitUntilProjectExists(bot, getWorkspaceRoot().getProject(projectName));
   }
 
@@ -114,6 +116,7 @@ public class SwtBotAppEngineActions {
     SwtBotTimeoutManager.setTimeout(mavenCompletionTimeout);
     SwtBotTestingUtilities.clickButtonAndWaitForWindowChange(bot, bot.button("Finish"));
     SwtBotTimeoutManager.resetTimeout();
+    SwtBotWorkbenchActions.waitForIdle(bot);
     return waitUntilProjectExists(bot, getWorkspaceRoot().getProject(artifactId));
   }
 

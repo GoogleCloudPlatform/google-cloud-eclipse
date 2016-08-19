@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.integration.appengine;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
@@ -99,6 +100,7 @@ public class NewMavenBasedAppEngineProjectWizardTest extends AbstractProjectTest
     assertTrue(project.exists());
 
     IFacetedProject facetedProject = new FacetedProjectHelper().getFacetedProject(project);
+    assertNotNull("m2e-wtp should create a faceted project", facetedProject);
     assertTrue(
         new FacetedProjectHelper().projectHasFacet(facetedProject, AppEngineStandardFacet.ID));
 
