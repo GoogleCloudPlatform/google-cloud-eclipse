@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.integration.appengine;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -75,6 +76,7 @@ public class NewNativeAppEngineStandardProjectTest extends AbstractProjectTests 
     assertTrue(project.exists());
 
     IFacetedProject facetedProject = new FacetedProjectHelper().getFacetedProject(project);
+    assertNotNull("Native App Engine projects should be faceted", facetedProject);
     assertTrue(
         new FacetedProjectHelper().projectHasFacet(facetedProject, AppEngineStandardFacet.ID));
 
