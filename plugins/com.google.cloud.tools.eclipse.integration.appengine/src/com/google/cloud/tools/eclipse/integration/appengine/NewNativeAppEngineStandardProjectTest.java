@@ -76,7 +76,7 @@ public class NewNativeAppEngineStandardProjectTest extends AbstractProjectTests 
     assertTrue(project.exists());
 
     IFacetedProject facetedProject = new FacetedProjectHelper().getFacetedProject(project);
-    assertNotNull("Native App Engine projects are faceted", facetedProject);
+    assertNotNull("Native App Engine projects should be faceted", facetedProject);
     assertTrue(
         new FacetedProjectHelper().projectHasFacet(facetedProject, AppEngineStandardFacet.ID));
 
