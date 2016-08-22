@@ -20,8 +20,11 @@ import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -220,10 +223,15 @@ public class DeployPropertyPage extends PropertyPage {
     projectId.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
     promptForProjectIdButton = new Button(projectIdComp, SWT.CHECK);
-    promptForProjectIdButton.setText(Messages.getString("deploy.override.projectid"));
+    promptForProjectIdButton.setText(Messages.getString("deploy.prompt.projectid"));
     GridData layoutData = new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1);
     layoutData.horizontalIndent = INDENT_CHECKBOX_ENABLED_WIDGET;
     promptForProjectIdButton.setLayoutData(layoutData);
+
+    ControlDecoration controlDecoration = new ControlDecoration(promptForProjectIdButton, SWT.RIGHT | SWT.TOP);
+    controlDecoration.setDescriptionText(Messages.getString("deploy.prompt.projectid.long"));
+    Image decorationImage = getInfoDecorationImage();
+    controlDecoration.setImage(decorationImage);
   }
 
   private void createProjectVersionSection(Composite parent) {
@@ -275,8 +283,8 @@ public class DeployPropertyPage extends PropertyPage {
   }
 
   private ExpandableComposite createExpandableComposite(Composite parent) {
-    ExpandableComposite expandableComposite = new ExpandableComposite(parent, SWT.NONE,
-                                                                      ExpandableComposite.TWISTIE | ExpandableComposite.CLIENT_INDENT);
+    ExpandableComposite expandableComposite =
+        new ExpandableComposite(parent, SWT.NONE, ExpandableComposite.TWISTIE | ExpandableComposite.CLIENT_INDENT);
     expandableComposite.setText(Messages.getString("settings.advanced"));
     expandableComposite.setExpanded(false);
     expandableComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -304,6 +312,11 @@ public class DeployPropertyPage extends PropertyPage {
     bucket.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
     return defaultBucketComp;
+  }
+
+  private Image getInfoDecorationImage() {
+    return FieldDecorationRegistry.getDefault()
+        .getFieldDecoration(FieldDecorationRegistry.DEC_CONTENT_PROPOSAL).getImage();
   }
 
   private static class Model {
