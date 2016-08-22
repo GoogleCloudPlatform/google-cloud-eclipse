@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.ui.util.databinding;
 
 import com.google.cloud.tools.eclipse.ui.util.Messages;
 
+import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -27,7 +28,7 @@ import java.util.regex.Pattern;
 /**
  * Validate a project version.
  */
-public class ProjectVersionValidator {
+public class ProjectVersionValidator implements IValidator {
   private static final Pattern APPENGINE_PROJECT_VERSION_PATTERN =
       Pattern.compile("^[a-z\\d][a-z\\d\\-]{0,61}[a-z\\d]$");
 
@@ -35,6 +36,7 @@ public class ProjectVersionValidator {
    * @param value the prospective version string
    * @return OK status if valid, or an ERROR status with a description why invalid
    */
+  @Override
   public IStatus validate(Object input) {
     // https://cloud.google.com/appengine/docs/java/config/appref
     // "The version specifier can contain lowercase letters, digits, and hyphens.
