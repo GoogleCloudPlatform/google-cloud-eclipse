@@ -9,12 +9,21 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
+import com.google.common.annotations.VisibleForTesting;
+
 public class OpenUrlSelectionListener implements SelectionListener {
 
   private ErrorHandler errorHandler;
+  private IWorkbenchBrowserSupport browserSupport;
 
   public OpenUrlSelectionListener(ErrorHandler errorHandler) {
+    this(errorHandler, PlatformUI.getWorkbench().getBrowserSupport());
+  }
+
+  @VisibleForTesting
+  OpenUrlSelectionListener(ErrorHandler errorHandler, IWorkbenchBrowserSupport browserSupport) {
     this.errorHandler = errorHandler;
+    this.browserSupport = browserSupport;
   }
 
   @Override
@@ -29,7 +38,6 @@ public class OpenUrlSelectionListener implements SelectionListener {
 
   private void openAppEngineDashboard(String url) {
     try {
-      IWorkbenchBrowserSupport browserSupport = PlatformUI.getWorkbench().getBrowserSupport();
       browserSupport.getExternalBrowser().openURL(new URL(url));
     } catch (PartInitException | MalformedURLException ex) {
       errorHandler.handle(ex);
