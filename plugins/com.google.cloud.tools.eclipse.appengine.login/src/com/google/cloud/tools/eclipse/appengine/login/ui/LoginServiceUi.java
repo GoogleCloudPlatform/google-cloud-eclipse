@@ -20,6 +20,8 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeReque
 import com.google.api.client.repackaged.com.google.common.annotations.VisibleForTesting;
 import com.google.cloud.tools.eclipse.appengine.login.GoogleLoginService;
 import com.google.cloud.tools.eclipse.appengine.login.Messages;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.cloud.tools.ide.login.UiFacade;
 import com.google.cloud.tools.ide.login.VerificationCodeHolder;
 
@@ -105,6 +107,9 @@ public class LoginServiceUi implements UiFacade {
       String authorizationCode = showProgressDialogAndWaitForCode(
           message, codeReceiver, redirectUrl);
       if (authorizationCode != null) {
+        AnalyticsPingManager.getInstance().sendPing(
+            AnalyticsEvents.LOGIN_SUCCESS, null, null, shellProvider.getShell());
+
         return new VerificationCodeHolder(authorizationCode, redirectUrl);
       }
       return null;
@@ -126,16 +131,23 @@ public class LoginServiceUi implements UiFacade {
       final IOException[] exceptionHolder = new IOException[1];
       final Semaphore wait = new Semaphore(0 /* initially zero permit */);
 
-      new ProgressMonitorDialog(shellProvider.getShell()) {
+      final Shell parentShell = shellProvider.getShell();
+      new ProgressMonitorDialog(parentShell) {
         @Override
         protected void configureShell(Shell shell) {
           super.configureShell(shell);
           shell.setText(Messages.LOGIN_PROGRESS_DIALOG_TITLE);
+
+          AnalyticsPingManager.getInstance().sendPing(
+              AnalyticsEvents.LOGIN_START, null, null, shell);
         }
         @Override
         protected void cancelPressed() {
           stopCodeWaitingJob(redirectUrl);
           wait.release();  // Allow termination of the attached task.
+
+          AnalyticsPingManager.getInstance().sendPing(
+              AnalyticsEvents.LOGIN_CANCELED, null, null, parentShell);
         }
       }.run(true /* fork */, true /* cancelable */, new IRunnableWithProgress() {
         @Override
