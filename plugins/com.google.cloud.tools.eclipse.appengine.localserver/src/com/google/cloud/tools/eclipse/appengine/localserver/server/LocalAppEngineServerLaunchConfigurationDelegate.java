@@ -78,7 +78,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
   private void setupDebugTarget(ILaunch launch, ILaunchConfiguration configuration, int port,
       IProgressMonitor monitor) throws CoreException {
     IVMConnector connector = JavaRuntime.getVMConnector(
-        "com.google.cloud.tools.eclipse.launching.jdt.socketListenerMultipleConnector");
+        "com.google.cloud.tools.eclipse.jdt.launching.socketListenerMultipleConnector");
     if (connector == null) {
       connector = JavaRuntime
           .getVMConnector(IJavaLaunchConfigurationConstants.ID_SOCKET_LISTEN_VM_CONNECTOR);

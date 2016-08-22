@@ -4,7 +4,7 @@
 	<extension point="org.eclipse.jdt.launching.vmConnectors">
 		<vmConnector
 			class="com.google.cloud.tools.eclipse.jdt.internal.launching.SocketListenMultiConnector"
-			id="com.google.cloud.tools.eclipse.launching.jdt.socketListemerMultipleConnector">
+			id="com.google.cloud.tools.eclipse.jdt.launching.socketListenerMultipleConnector">
 		</vmConnector>
 	</extension>
 </plugin>

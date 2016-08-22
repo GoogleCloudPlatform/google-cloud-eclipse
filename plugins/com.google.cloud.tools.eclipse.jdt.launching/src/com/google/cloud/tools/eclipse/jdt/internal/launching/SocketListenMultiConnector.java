@@ -67,7 +67,7 @@ public class SocketListenMultiConnector implements IVMConnector {
 	public String getIdentifier() {
 		// return
 		// IJavaLaunchConfigurationConstants.ID_SOCKET_LISTEN_VM_CONNECTOR;
-		return "com.google.cloud.tools.eclipse.launching.jdt.socketListenerMultipleConnector";
+		return "com.google.cloud.tools.eclipse.jdt.launching.socketListenerMultipleConnector";
 	}
 
 	/*
