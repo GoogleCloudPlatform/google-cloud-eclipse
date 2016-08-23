@@ -25,7 +25,7 @@ public class ProjectIdValidator implements IValidator {
     String value = (String) input;
     if (value.isEmpty()) {
       return ValidationStatus.warning(Messages.getString("project.id.invalid")); //$NON-NLS-1$
-    } else if (APPENGINE_PROJECTID_PATTERN.matcher((String) value).matches()) {
+    } else if (APPENGINE_PROJECTID_PATTERN.matcher(value).matches()) {
       return ValidationStatus.ok();
     } else {
       return ValidationStatus.error(Messages.getString("project.id.invalid")); //$NON-NLS-1$

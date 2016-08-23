@@ -33,7 +33,7 @@ public class BucketNameValidator implements IValidator {
     String value = (String) input;
     if (value.isEmpty()) {
       return ValidationStatus.warning(Messages.getString("bucket.name.invalid")); //$NON-NLS-1$
-    } else if (CLOUD_STORAGE_BUCKET_NAME_PATTERN.matcher((String) value).matches()) {
+    } else if (CLOUD_STORAGE_BUCKET_NAME_PATTERN.matcher(value).matches()) {
       return allComponentsLengthAreValid(value);
     } else {
       return ValidationStatus.error(Messages.getString("bucket.name.invalid")); //$NON-NLS-1$

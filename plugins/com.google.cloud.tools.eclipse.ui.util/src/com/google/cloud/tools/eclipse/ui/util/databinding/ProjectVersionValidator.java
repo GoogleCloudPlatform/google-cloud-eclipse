@@ -16,6 +16,8 @@
 
 package com.google.cloud.tools.eclipse.ui.util.databinding;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.databinding.validation.IValidator;
@@ -33,7 +35,7 @@ public class ProjectVersionValidator implements IValidator {
       Pattern.compile("^[a-z0-9][a-z0-9-]{0,62}$");
 
   private static final String RESERVED_PREFIX = "ah-";
-  private static final String[] RESERVED_VALUES = new String[]{ "default", "latest" };
+  private static final List<String> RESERVED_VALUES = Arrays.asList("default", "latest");
   
   /**
    * @param value the prospective version string
@@ -53,7 +55,7 @@ public class ProjectVersionValidator implements IValidator {
       return ValidationStatus.warning(Messages.getString("project.version.invalid")); //$NON-NLS-1$
     } else if (APPENGINE_PROJECT_VERSION_PATTERN.matcher(value).matches() 
                && !value.endsWith("-")) {
-      if (value.startsWith(RESERVED_PREFIX) || isReservedWord(value)) {
+      if (value.startsWith(RESERVED_PREFIX) || RESERVED_VALUES.contains(value)) {
         return ValidationStatus.error(Messages.getString("project.version.reserved")); //$NON-NLS-1$
       }
       return Status.OK_STATUS;
@@ -61,14 +63,4 @@ public class ProjectVersionValidator implements IValidator {
       return ValidationStatus.error(Messages.getString("project.version.invalid")); //$NON-NLS-1$
     }
   }
-  
-  private boolean isReservedWord(String value) {
-    for (String reserved : RESERVED_VALUES) {
-      if (reserved.equals(value)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
 }
