@@ -32,7 +32,7 @@ import com.google.cloud.tools.eclipse.ui.util.Messages;
  */
 public class ProjectVersionValidator implements IValidator {
   private static final Pattern APPENGINE_PROJECT_VERSION_PATTERN =
-      Pattern.compile("^[a-z0-9][a-z0-9-]{0,62}$");
+      Pattern.compile("^([a-z0-9][a-z0-9-]{0,61}[a-z0-9]|[a-z0-9])$");
 
   private static final String RESERVED_PREFIX = "ah-";
   private static final List<String> RESERVED_VALUES = Arrays.asList("default", "latest");
@@ -53,8 +53,7 @@ public class ProjectVersionValidator implements IValidator {
     String value = (String) input;
     if (value.isEmpty()) {
       return ValidationStatus.warning(Messages.getString("project.version.invalid")); //$NON-NLS-1$
-    } else if (APPENGINE_PROJECT_VERSION_PATTERN.matcher(value).matches() 
-               && !value.endsWith("-")) {
+    } else if (APPENGINE_PROJECT_VERSION_PATTERN.matcher(value).matches()) {
       if (value.startsWith(RESERVED_PREFIX) || RESERVED_VALUES.contains(value)) {
         return ValidationStatus.error(Messages.getString("project.version.reserved")); //$NON-NLS-1$
       }
