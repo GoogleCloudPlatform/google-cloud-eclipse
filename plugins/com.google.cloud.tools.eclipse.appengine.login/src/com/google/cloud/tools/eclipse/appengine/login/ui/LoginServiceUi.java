@@ -137,8 +137,8 @@ public class LoginServiceUi implements UiFacade {
         }
         @Override
         protected void cancelPressed() {
-          stopCodeWaitingJob(redirectUrl);
           wait.release();  // Allow termination of the attached task.
+          stopCodeWaitingJob(redirectUrl);
 
           AnalyticsPingManager.getInstance().sendPing(
               AnalyticsEvents.LOGIN_CANCELED, null, null, getParentShell());
