@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     Ivan Popov - Bug 184211: JDI connectors throw NullPointerException if used separately
  *     			from Eclipse
- *     Google Inc - modify to support multiple incoming connections
+ *     Google Inc - add support for accepting multiple connections
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.jdi.internal.connect;
 
@@ -28,6 +28,11 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * A fork of
+ * {@link org.eclipse.jdi.internal.connect.SocketListeningConnectorImpl} that
+ * uses our modified SocketTransportImpl.
+ */
 public class SocketMultiListeningConnectorImpl extends ConnectorImpl implements ListeningConnector {
 	/** Port to which is attached. */
 	private int fPort;

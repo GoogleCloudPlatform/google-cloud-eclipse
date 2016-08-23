@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2015 IBM Corporation and others.
+ * Copyright (c) 2007, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Google Inc - modify to support multiple incoming connections
+ *     Google Inc - add support for accepting multiple connections
  *******************************************************************************/
 
 package com.google.cloud.tools.eclipse.jdt.internal.launching;
@@ -39,6 +39,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Fork of {@link org.eclipse.jdt.internal.launching.SocketListenConnector}.
+ * This connector knows how to interpret the "acceptCount" parameter.
+ * 
  * A standard socket listening connector. Starts a launch that waits for a VM to
  * connect at a specific port.
  * 
@@ -102,7 +105,12 @@ public class SocketListenMultiConnector implements IVMConnector {
 			abort(LaunchingMessages.SocketAttachConnector_Port_unspecified_for_remote_connection__2, null,
 					IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_PORT);
 		}
-		boolean multiple = Boolean.valueOf(arguments.get("multiple"));
+
+		// retain default behaviour to accept 1 connection only
+		int acceptCount = 1;
+		if (arguments.containsKey("acceptCount")) {
+			acceptCount = Integer.valueOf(arguments.get("acceptCount"));
+		}
 
 		Map<String, Connector.Argument> acceptArguments = connector.defaultArguments();
 
@@ -113,7 +121,7 @@ public class SocketListenMultiConnector implements IVMConnector {
 			monitor.subTask(NLS.bind(LaunchingMessages.SocketListenConnector_3, new String[] { portNumberString }));
 			connector.startListening(acceptArguments);
 			SocketListenMultiConnectorProcess process = new SocketListenMultiConnectorProcess(launch, portNumberString,
-					multiple);
+					acceptCount);
 			process.waitForConnection(connector, acceptArguments);
 		} catch (IOException e) {
 			abort(LaunchingMessages.SocketListenConnector_4, e,
@@ -134,8 +142,6 @@ public class SocketListenMultiConnector implements IVMConnector {
 		Map<String, Connector.Argument> def = getListeningConnector().defaultArguments();
 		Connector.IntegerArgument arg = (Connector.IntegerArgument) def.get("port"); //$NON-NLS-1$
 		arg.setValue(8000);
-		Connector.BooleanArgument multipleArg = (Connector.BooleanArgument) def.get("multiple"); //$NON-NLS-1$
-		multipleArg.setValue(false); // perform as previous versions
 		return def;
 	}
 
@@ -149,7 +155,7 @@ public class SocketListenMultiConnector implements IVMConnector {
 	public List<String> getArgumentOrder() {
 		List<String> list = new ArrayList<String>(1);
 		list.add("port"); //$NON-NLS-1$
-		list.add("multiple"); //$NON-NLS-1$
+		list.add("acceptCount"); //$NON-NLS-1$
 		return list;
 	}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2015 IBM Corporation and others.
+ * Copyright (c) 2007, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,6 +45,10 @@ import java.io.IOException;
 import java.util.Map;
 
 /**
+ * Fork of
+ * {@link org.eclipse.jdt.internal.launching.SocketListenConnectorProcess}.
+ * Knows how to handle "acceptCount" count.
+ * 
  * A process that represents a VM listening connector that is waiting for a VM
  * to remotely connect. Allows the user to see the status of the connection and
  * terminate it. If a successful connection occurs, the debug target is added to
@@ -56,9 +60,12 @@ import java.util.Map;
  */
 public class SocketListenMultiConnectorProcess implements IProcess {
 	/**
-	 * Whether this process accepts multiple connections.
+	 * The number of incoming connections to accept (0 = unlimited). This number
+	 * is decremented after every accepted connection. If 0, technically means
+	 * we can only accept up to |Integer.MIN_VALUE| connections, but that should
+	 * be plenty for a debug connector.
 	 */
-	private boolean fMultipleConnections = true;
+	private int fAcceptCount;
 
     /**
      * Whether this process has been terminated.
@@ -76,7 +83,7 @@ public class SocketListenMultiConnectorProcess implements IProcess {
      * The system job that will wait for incoming VM connections.
      */
     private WaitForConnectionJob fWaitForConnectionJob;
-    
+
     /**
 	 * Creates this process. The label for this process will state the port the
 	 * connector is listening at.
@@ -85,13 +92,13 @@ public class SocketListenMultiConnectorProcess implements IProcess {
 	 *            the launch this process belongs to
 	 * @param port
 	 *            the port the connector will wait on
-	 * @param multiple
-	 *            if true, accept multiple connections
+	 * @param acceptCount
+	 *            the number of incoming connections to accept (0 = unlimited)
 	 */
-	public SocketListenMultiConnectorProcess(ILaunch launch, String port, boolean multiple) {
+	public SocketListenMultiConnectorProcess(ILaunch launch, String port, int acceptCount) {
         fLaunch = launch;
         fPort = port;
-		fMultipleConnections = multiple;
+		fAcceptCount = acceptCount;
     }
     
     /**
@@ -110,15 +117,14 @@ public class SocketListenMultiConnectorProcess implements IProcess {
         if (isTerminated()){
             throw new CoreException(getStatus(LaunchingMessages.SocketListenConnectorProcess_0, null, IJavaLaunchConfigurationConstants.ERR_REMOTE_VM_CONNECTION_FAILED));
         }
-		boolean connectorSupportsMultipleConnections = false;
+        // If the connector does not support multiple connections, accept a single connection
 		try {
-			if (fMultipleConnections) {
-				connectorSupportsMultipleConnections = connector.supportsMultipleConnections();
+			if (!connector.supportsMultipleConnections()) {
+				fAcceptCount = 1;
 			}
 		} catch (IOException | IllegalConnectorArgumentsException ex) {
-			ex.printStackTrace();
+			fAcceptCount = 1;
 		}
-		final boolean rescheduleOnCompletion = connectorSupportsMultipleConnections;
 		fLaunch.addProcess(this);
 		fWaitForConnectionJob = new WaitForConnectionJob(connector, arguments);
         fWaitForConnectionJob.setPriority(Job.SHORT);
@@ -129,7 +135,7 @@ public class SocketListenMultiConnectorProcess implements IProcess {
             }
             @Override
             public void done(IJobChangeEvent event) {
-				if (event.getResult().isOK() && rescheduleOnCompletion) {
+				if (event.getResult().isOK() && fAcceptCount != 0) {
 					fWaitForConnectionJob.schedule();
 				} else if (event.getResult().equals(Status.CANCEL_STATUS)) {
                     try{
@@ -325,6 +331,7 @@ public class SocketListenMultiConnectorProcess implements IProcess {
                 String vmLabel = constructVMLabel(vm, portArg.value(), fLaunch.getLaunchConfiguration());
                 IDebugTarget debugTarget= JDIDebugModel.newDebugTarget(fLaunch, vm, vmLabel, null, allowTerminate, true);
                 fLaunch.addDebugTarget(debugTarget);
+				--fAcceptCount;
 				System.out.println(">>> added new debug target: " + vmLabel);
                 return Status.OK_STATUS;
             } catch (IOException e) {
@@ -335,7 +342,7 @@ public class SocketListenMultiConnectorProcess implements IProcess {
             } catch (IllegalConnectorArgumentsException e) {
                 return getStatus(LaunchingMessages.SocketListenConnectorProcess_4, e, IJavaLaunchConfigurationConstants.ERR_REMOTE_VM_CONNECTION_FAILED); 
             } finally {
-				if (!fMultipleConnections) {
+				if (fAcceptCount == 0) {
 					// Always try to close the socket
 					stopListening();
 				}

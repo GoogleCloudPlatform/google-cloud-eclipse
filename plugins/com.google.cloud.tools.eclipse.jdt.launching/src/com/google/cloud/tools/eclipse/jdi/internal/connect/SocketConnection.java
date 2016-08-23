@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Google Inc - add support for accepting multiple connections
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.jdi.internal.connect;
 
@@ -19,6 +20,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
+/**
+ * A fork of {@link org.eclipse.jdi.internal.connect.SocketConnection} that
+ * stores the socket, input stream, and output stream.
+ */
 public class SocketConnection extends Connection {
 
 	// for attaching connector

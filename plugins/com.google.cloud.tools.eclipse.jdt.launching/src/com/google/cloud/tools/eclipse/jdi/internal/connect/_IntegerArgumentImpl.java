@@ -1,12 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2016 Google Inc and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     Google Inc - initial API and implementation
+ *     IBM Corporation - initial API and implementation
+ *     Google Inc - add support for accepting multiple connections
  *******************************************************************************/
 
 package com.google.cloud.tools.eclipse.jdi.internal.connect;
@@ -14,7 +15,8 @@ package com.google.cloud.tools.eclipse.jdi.internal.connect;
 import com.sun.jdi.connect.Connector.IntegerArgument;
 
 /**
- * Simple replacement for IntegerArgumentImpl
+ * A fork of {@link org.eclipse.jdi.internal.connect.IntegerArgumentImpl},
+ * required as the original has package protection.
  */
 public class _IntegerArgumentImpl implements IntegerArgument {
 	private String fLabel;

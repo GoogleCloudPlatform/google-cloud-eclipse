@@ -4,7 +4,7 @@ Bundle-Name: Launching Utilities for Cloud Tools for Eclipse
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.jdt.launching;singleton:=true
 Bundle-Version: 0.1.0.qualifier
 Bundle-Vendor: Google, Inc.
-Fragment-Host: org.eclipse.jdt.launching
+Fragment-Host: org.eclipse.jdt.launching;bundle-version="[3.7,3.8.200]"
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy

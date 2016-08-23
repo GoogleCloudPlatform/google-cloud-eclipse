@@ -7,7 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Google Inc - modify to support multiple incoming connections
+ *     Google Inc - add support for accepting multiple connections
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.jdi.internal.connect;
 
@@ -17,6 +17,10 @@ import com.sun.jdi.connect.spi.TransportService.ListenKey;
 
 import java.io.IOException;
 
+/**
+ * A fork of org.eclipse.jdi.internal.connect.SocketTransportImpl that uses our
+ * SocketTransportService.
+ */
 public class SocketTransportImpl implements Transport {
 	public static final String TRANSPORT_NAME = "dt_socket"; //$NON-NLS-1$
 	public static final int MIN_PORTNR = 0;

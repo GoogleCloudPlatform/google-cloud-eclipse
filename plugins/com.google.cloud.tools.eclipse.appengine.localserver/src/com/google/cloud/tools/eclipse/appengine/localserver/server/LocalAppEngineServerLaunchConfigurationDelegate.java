@@ -77,9 +77,12 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
   private void setupDebugTarget(ILaunch launch, ILaunchConfiguration configuration, int port,
       IProgressMonitor monitor) throws CoreException {
+    // Attempt to retrieve our socketListenerMultipleConnector first: our fragment versions are
+    // setup to ensure that it will not be installed on 4.7 (Oxygen) or beyond
     IVMConnector connector = JavaRuntime.getVMConnector(
         "com.google.cloud.tools.eclipse.jdt.launching.socketListenerMultipleConnector");
     if (connector == null) {
+      // The 4.7 listen connector supports an acceptCount
       connector = JavaRuntime
           .getVMConnector(IJavaLaunchConfigurationConstants.ID_SOCKET_LISTEN_VM_CONNECTOR);
     }
@@ -93,8 +96,8 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     Map<String, String> connectionParameters = new HashMap<>();
     connectionParameters.put("hostname", DEBUGGER_HOST);
     connectionParameters.put("port", Integer.toString(port));
-    connectionParameters.put("multiple", "true");
     connectionParameters.put("timeout", Integer.toString(timeout));
+    connectionParameters.put("acceptCount", Integer.toString(0));
     connector.connect(connectionParameters, monitor, launch);
   }
 
