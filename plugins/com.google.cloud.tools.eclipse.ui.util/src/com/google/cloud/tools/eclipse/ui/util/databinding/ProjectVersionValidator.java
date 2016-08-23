@@ -16,22 +16,25 @@
 
 package com.google.cloud.tools.eclipse.ui.util.databinding;
 
-import com.google.cloud.tools.eclipse.ui.util.Messages;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
-import java.util.regex.Pattern;
+import com.google.cloud.tools.eclipse.ui.util.Messages;
 
 /**
  * Validate a project version.
  */
 public class ProjectVersionValidator implements IValidator {
   private static final Pattern APPENGINE_PROJECT_VERSION_PATTERN =
-      Pattern.compile("^[a-z\\d][a-z\\d\\-]{0,61}[a-z\\d]$");
+      Pattern.compile("^[a-z0-9][a-z0-9-]{0,62}$");
 
+  private static final String RESERVED_PREFIX = "ah-";
+  private static final String[] RESERVED_VALUES = new String[]{ "default", "latest" };
+  
   /**
    * @param value the prospective version string
    * @return OK status if valid, or an ERROR status with a description why invalid
@@ -48,14 +51,24 @@ public class ProjectVersionValidator implements IValidator {
     String value = (String) input;
     if (value.isEmpty()) {
       return ValidationStatus.warning(Messages.getString("project.version.invalid")); //$NON-NLS-1$
-    } else if (APPENGINE_PROJECT_VERSION_PATTERN.matcher(value).matches()) {
-      if (value.startsWith("ah-") || "default".equals(value) || "latest".equals(value)) {
+    } else if (APPENGINE_PROJECT_VERSION_PATTERN.matcher(value).matches() 
+               && !value.endsWith("-")) {
+      if (value.startsWith(RESERVED_PREFIX) || isReservedWord(value)) {
         return ValidationStatus.error(Messages.getString("project.version.reserved")); //$NON-NLS-1$
       }
       return Status.OK_STATUS;
     } else {
       return ValidationStatus.error(Messages.getString("project.version.invalid")); //$NON-NLS-1$
     }
+  }
+  
+  private boolean isReservedWord(String value) {
+    for (String reserved : RESERVED_VALUES) {
+      if (reserved.equals(value)) {
+        return true;
+      }
+    }
+    return false;
   }
 
 }
