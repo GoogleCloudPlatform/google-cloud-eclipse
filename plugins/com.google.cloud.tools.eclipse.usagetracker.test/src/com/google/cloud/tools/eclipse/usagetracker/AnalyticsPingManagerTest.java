@@ -1,26 +1,31 @@
 package com.google.cloud.tools.eclipse.usagetracker;
 
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyBoolean;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.cloud.tools.eclipse.preferences.AnalyticsPreferences;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager.PingEvent;
+
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.swt.widgets.Display;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.verification.VerificationMode;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.swt.widgets.Shell;
-import org.junit.Assert;
-import org.junit.Test;
-import org.mockito.verification.VerificationMode;
-
-import com.google.cloud.tools.eclipse.preferences.AnalyticsPreferences;
-
+@RunWith(MockitoJUnitRunner.class)
 public class AnalyticsPingManagerTest {
 
   private static final String UUID = "bee5d838-c3f8-4940-a944-b56973597e74";
@@ -70,6 +75,10 @@ public class AnalyticsPingManagerTest {
         }
       });
 
+  @Mock private IEclipsePreferences preferences;
+  @Mock private Display display;
+  @Mock private ConcurrentLinkedQueue<PingEvent> pingEventQueue;
+
   @Test
   public void testGetParametersString() {
     String urlEncodedParameters = AnalyticsPingManager.getParametersString(RANDOM_PARAMETERS);
@@ -99,73 +108,100 @@ public class AnalyticsPingManagerTest {
 
   @Test
   public void testEventTypeEventNameConvention() {
-    Map<String, String> parameters = AnalyticsPingManager.buildParametersMap(
-        "clientId", "some.event-name", null, null);
+    PingEvent event = new PingEvent("some.event-name", null, null, null);
+    Map<String, String> parameters = AnalyticsPingManager.buildParametersMap("clientId", event);
     Assert.assertEquals("/virtual/gcloud-eclipse-tools/some.event-name",
         parameters.get("dp"));
   }
 
   @Test
   public void testMetadataConvention() {
-    Map<String, String> parameters = AnalyticsPingManager.buildParametersMap(
-        "clientId", "some.event-name", "times-happened", "1234");
+    PingEvent event = new PingEvent("some.event-name", "times-happened", "1234", null);
+    Map<String, String> parameters = AnalyticsPingManager.buildParametersMap("clientId", event);
     Assert.assertEquals("times-happened=1234", parameters.get("dt"));
   }
 
   @Test
   public void testOptInDialogShown_optInNotRegisteredAndNotYetOptedIn() {
-    IEclipsePreferences preferences = mock(IEclipsePreferences.class);
-    mockOptIn(preferences, false);
-    mockOptInRegistered(preferences, false);
-
-    verifyOptInDialogOpen(preferences, times(1));
+    mockOptIn(false);
+    mockOptInRegistered(false);
+    verifyOptInDialogOpen(times(1));
   }
 
   @Test
   public void testOptInDialogSkipped_optInNotRegisteredAndAlreadyOptedIn() {
-    IEclipsePreferences preferences = mock(IEclipsePreferences.class);
-    mockOptIn(preferences, true);
-    mockOptInRegistered(preferences, false);
-
-    verifyOptInDialogOpen(preferences, never());
+    mockOptIn(true);
+    mockOptInRegistered(false);
+    verifyOptInDialogOpen(never());
   }
 
   @Test
   public void testOptInDialogSkipped_optInRegisteredAndNotYetOptedIn() {
-    IEclipsePreferences preferences = mock(IEclipsePreferences.class);
-    mockOptIn(preferences, false);
-    mockOptInRegistered(preferences, true);
-
-    verifyOptInDialogOpen(preferences, never());
+    mockOptIn(false);
+    mockOptInRegistered(true);
+    verifyOptInDialogOpen(never());
   }
 
   @Test
   public void testOptInDialogSkipped_optInRegisteredAndAlreadyOptedIn() {
-    IEclipsePreferences preferences = mock(IEclipsePreferences.class);
-    mockOptIn(preferences, true);
-    mockOptInRegistered(preferences, true);
-
-    verifyOptInDialogOpen(preferences, never());
+    mockOptIn(true);
+    mockOptInRegistered(true);
+    verifyOptInDialogOpen(never());
   }
 
-  private void mockOptIn(IEclipsePreferences preferences, boolean optIn) {
+  private void mockOptIn(boolean optIn) {
     when(preferences.getBoolean(eq(AnalyticsPreferences.ANALYTICS_OPT_IN), anyBoolean()))
         .thenReturn(optIn);
   }
 
-  private void mockOptInRegistered(IEclipsePreferences preferences, boolean registered) {
+  private void mockOptInRegistered(boolean registered) {
     when(preferences.getBoolean(eq(AnalyticsPreferences.ANALYTICS_OPT_IN_REGISTERED),
                                 anyBoolean()))
         .thenReturn(registered);
   }
 
-  private void verifyOptInDialogOpen(
-      IEclipsePreferences preferences, VerificationMode verificationMode) {
-    OptInDialog optInDialog = mock(OptInDialog.class);
-    OptInDialogCreator dialogCreator = mock(OptInDialogCreator.class);
-    when(dialogCreator.create(any(Shell.class))).thenReturn(optInDialog);
+  private void verifyOptInDialogOpen(VerificationMode verificationMode) {
+    AnalyticsPingManager pingManager =
+        new AnalyticsPingManager(preferences, display, pingEventQueue, true);
+    pingManager.unitTestMode = true;
+    pingManager.showOptInDialogIfNeeded(null);
+    verify(display, verificationMode).syncExec(any(Runnable.class));
+  }
 
-    new AnalyticsPingManager(preferences, dialogCreator).showOptInDialog(null);
-    verify(optInDialog, verificationMode).open();
+  @Test
+  public void testSendPingScheduled_optInNotRegisteredAndNotYetOptedIn() {
+    mockOptIn(false);
+    mockOptInRegistered(false);
+    verifyPingQueued(times(1));
+  }
+
+  @Test
+  public void testSendPingScheduled_optInNotRegisteredAndAlreadyOptedIn() {
+    mockOptIn(true);
+    mockOptInRegistered(false);
+    verifyPingQueued(times(1));
+  }
+
+  @Test
+  public void testSendPingDiscarded_optInRegisteredAndNotYetOptedIn() {
+    mockOptIn(false);
+    mockOptInRegistered(true);
+    verifyPingQueued(never());
+  }
+
+  @Test
+  public void testSendPingScheduled_optInRegisteredAndAlreadyOptedIn() {
+    mockOptIn(true);
+    mockOptInRegistered(true);
+    verifyPingQueued(times(1));
+  }
+
+  private void verifyPingQueued(VerificationMode verificationMode) {
+    when(pingEventQueue.isEmpty()).thenReturn(true);
+    AnalyticsPingManager pingManager =
+        new AnalyticsPingManager(preferences, display, pingEventQueue, true);
+    pingManager.unitTestMode = true;
+    pingManager.sendPing("eventName", "metadataKey", "metadataValue");
+    verify(pingEventQueue, verificationMode).add(any(PingEvent.class));
   }
 }

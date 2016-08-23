@@ -16,13 +16,14 @@
 package com.google.cloud.tools.eclipse.appengine.login;
 
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
 import com.google.cloud.tools.eclipse.appengine.login.ui.LoginServiceUi;
 import com.google.cloud.tools.ide.login.GoogleLoginState;
+import com.google.cloud.tools.ide.login.JavaPreferenceOAuthDataStore;
 import com.google.cloud.tools.ide.login.LoggerFacade;
 import com.google.cloud.tools.ide.login.OAuthDataStore;
 import com.google.common.annotations.VisibleForTesting;
 
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.window.IShellProvider;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbench;
@@ -42,6 +43,9 @@ import java.util.logging.Logger;
  */
 public class GoogleLoginService implements IGoogleLoginService {
 
+  private static final String OAUTH_DATA_STORE_PREFERENCE_PATH =
+      "/com/google/cloud/tools/eclipse/login";
+
   // For the detailed info about each scope, see
   // https://github.com/GoogleCloudPlatform/gcloud-eclipse-tools/wiki/Cloud-Tools-for-Eclipse-Technical-Design#oauth-20-scopes-requested
   private static final SortedSet<String> OAUTH_SCOPES = Collections.unmodifiableSortedSet(
@@ -49,6 +53,17 @@ public class GoogleLoginService implements IGoogleLoginService {
           "email", //$NON-NLS-1$
           "https://www.googleapis.com/auth/cloud-platform" //$NON-NLS-1$
       )));
+
+  /**
+   * Returns a URL through which users can login.
+   *
+   * @param redirectUrl URL to which the login result is directed. For example, a local web
+   *     server listening on the URL can receive an authorization code from it.
+   */
+  public static String getGoogleLoginUrl(String redirectUrl) {
+    return new GoogleAuthorizationCodeRequestUrl(Constants.getOAuthClientId(), redirectUrl,
+        GoogleLoginService.OAUTH_SCOPES).toString();
+  }
 
   private GoogleLoginState loginState;
   private AtomicBoolean loginInProgress;
@@ -61,7 +76,7 @@ public class GoogleLoginService implements IGoogleLoginService {
    */
   protected void activate() {
     final IWorkbench workbench = PlatformUI.getWorkbench();
-    IEclipseContext eclipseContext = workbench.getService(IEclipseContext.class);
+    LoginServiceLogger logger = new LoginServiceLogger();
     IShellProvider shellProvider = new IShellProvider() {
       @Override
       public Shell getShell() {
@@ -69,10 +84,11 @@ public class GoogleLoginService implements IGoogleLoginService {
       }
     };
 
-    loginServiceUi = new LoginServiceUi(workbench, shellProvider);
+    loginServiceUi = new LoginServiceUi(workbench, shellProvider, workbench.getDisplay());
     loginState = new GoogleLoginState(
         Constants.getOAuthClientId(), Constants.getOAuthClientSecret(), OAUTH_SCOPES,
-        new TransientOAuthDataStore(eclipseContext), loginServiceUi, new LoginServiceLogger());
+        new JavaPreferenceOAuthDataStore(OAUTH_DATA_STORE_PREFERENCE_PATH, logger),
+        loginServiceUi, logger);
     loginInProgress = new AtomicBoolean(false);
   }
 
@@ -93,7 +109,7 @@ public class GoogleLoginService implements IGoogleLoginService {
   }
 
   @Override
-  public Credential getActiveCredential() {
+  public Credential getActiveCredential(String dialogMessage) {
     if (!loginInProgress.compareAndSet(false, true)) {
       loginServiceUi.showErrorDialogHelper(
           Messages.LOGIN_ERROR_DIALOG_TITLE, Messages.LOGIN_ERROR_IN_PROGRESS);
@@ -106,7 +122,7 @@ public class GoogleLoginService implements IGoogleLoginService {
     // conservatively if login seems to be in progress.
     try {
       synchronized (loginState) {
-        if (loginState.logIn(null /* parameter ignored */)) {
+        if (loginState.logInWithLocalServer(dialogMessage)) {
           return loginState.getCredential();
         }
         return null;

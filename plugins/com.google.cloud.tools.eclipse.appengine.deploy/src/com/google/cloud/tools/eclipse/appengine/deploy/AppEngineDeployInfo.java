@@ -1,10 +1,6 @@
 package com.google.cloud.tools.eclipse.appengine.deploy;
 
-import java.io.File;
-import java.io.IOException;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -16,6 +12,14 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 /**
  * Parses and returns project ID and version from appengine-web.xml
  */
@@ -25,14 +29,22 @@ public class AppEngineDeployInfo {
   private Document document;
 
   public void parse(File appEngineXml) throws CoreException {
+    try (InputStream contents = new FileInputStream(appEngineXml)) {
+      parse(contents);
+    } catch (IOException exception) {
+      throw new CoreException(StatusUtil.error(getClass(),
+          Messages.getString("cannot.parse.appengine.xml"), exception)); // $NON-NLS-1$
+    }
+  }
+
+  public void parse(InputStream appEngineXmlContents) throws CoreException {
     try {
       DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
       documentBuilderFactory.setNamespaceAware(true);
-      document = documentBuilderFactory.newDocumentBuilder().parse(appEngineXml);
+      document = documentBuilderFactory.newDocumentBuilder().parse(appEngineXmlContents);
     } catch (IOException | SAXException | ParserConfigurationException exception) {
-      throw new CoreException(new Status(IStatus.ERROR, FrameworkUtil.getBundle(getClass()).getSymbolicName(),
-                                         Messages.getString("cannot.parse.appengine.xml"),
-                                         exception)); //$NON-NLS-1$
+      throw new CoreException(StatusUtil.error(getClass(),
+          Messages.getString("cannot.parse.appengine.xml"), exception)); // $NON-NLS-1$
     }
   }
 

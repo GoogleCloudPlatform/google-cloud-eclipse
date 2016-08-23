@@ -5,7 +5,11 @@ import com.google.cloud.tools.eclipse.preferences.AnalyticsPreferences;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.common.annotations.VisibleForTesting;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.ConfigurationScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.swt.widgets.Display;
@@ -24,6 +28,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -62,14 +68,29 @@ public class AnalyticsPingManager {
 
   // Preference store (should be configuration scoped) from which we get UUID, opt-in status, etc.
   private IEclipsePreferences preferences;
+  private Display display;
+  private boolean analyticsEnabled;
 
-  private OptInDialogCreator optInDialogCreator;
+  private ConcurrentLinkedQueue<PingEvent> pingEventQueue;
+  private Job eventFlushJob = new Job("Analytics Event Submission") {
+    @Override
+    protected IStatus run(IProgressMonitor monitor) {
+      while (!pingEventQueue.isEmpty()) {
+        PingEvent event = pingEventQueue.poll();
+        showOptInDialogIfNeeded(event.shell);
+        sendPingHelper(event);
+      }
+      return Status.OK_STATUS;
+    }
+  };
 
   @VisibleForTesting
-  AnalyticsPingManager(
-      IEclipsePreferences preferences, OptInDialogCreator optInDialogCreator) {
+  AnalyticsPingManager(IEclipsePreferences preferences, Display display,
+      ConcurrentLinkedQueue<PingEvent> concurrentLinkedQueue, boolean analyticsEnabled) {
     this.preferences = preferences;
-    this.optInDialogCreator = optInDialogCreator;
+    this.display = display;
+    this.pingEventQueue = concurrentLinkedQueue;
+    this.analyticsEnabled = analyticsEnabled;
   }
 
   public static synchronized AnalyticsPingManager getInstance() {
@@ -78,7 +99,9 @@ public class AnalyticsPingManager {
       if (preferences == null) {
         throw new NullPointerException("Preference store cannot be null.");
       }
-      instance = new AnalyticsPingManager(preferences, new OptInDialogCreator());
+      instance = new AnalyticsPingManager(preferences,
+          PlatformUI.getWorkbench().getDisplay(), new ConcurrentLinkedQueue<PingEvent>(),
+          !Platform.inDevelopmentMode() && isTrackingIdDefined());
     }
     return instance;
   }
@@ -133,26 +156,34 @@ public class AnalyticsPingManager {
    * If the user has never seen the opt-in dialog or set the opt-in preference beforehand,
    * this method can potentially present an opt-in dialog at the top workbench level. If you
    * are calling this method inside another modal dialog, consider using {@link #sendPing(
-   * String, String, String, Shell)} and pass the {@Shell} of currently open modal dialog.
+   * String, String, String, Shell)} and pass the {@Shell} of the currently open modal dialog.
    * (Otherwise, the opt-in dialog won't be able to get input until the workbench can get input.)
+   *
+   * Safe to call from non-UI contexts.
    */
   public void sendPing(String eventName, String metadataKey, String metadataValue) {
     sendPing(eventName, metadataKey, metadataValue, null);
   }
 
-  public void sendPing(String eventName, String metadataKey, String metadataValue,
-      Shell parentShell) {
-    // Non-modal and non-blocking dialog (if presented). This implies that the very first
-    // sendPing() may drop this event.
-    showOptInDialog(parentShell);
-
-    if (Platform.inDevelopmentMode() || !isTrackingIdDefined() || !userHasOptedIn()) {
-      return;
+  @VisibleForTesting
+  boolean unitTestMode;
+  public void sendPing(String eventName,
+      String metadataKey, String metadataValue, Shell parentShell) {
+    if (analyticsEnabled || unitTestMode) {
+      // Note: always enqueue if a user has not seen the opt-in dialog yet; enqueuing itself
+      // doesn't mean that the event ping will be posted.
+      if (userHasOptedIn() || !userHasRegisteredOptInStatus()) {
+        pingEventQueue.add(new PingEvent(eventName, metadataKey, metadataValue, parentShell));
+        eventFlushJob.schedule();
+      }
     }
+  }
 
-    Map<String, String> parametersMap =
-        buildParametersMap(getAnonymizedClientId(), eventName, metadataKey, metadataValue);
-    sendPostRequest(getParametersString(parametersMap));
+  private void sendPingHelper(PingEvent pingEvent) {
+    if (analyticsEnabled && userHasOptedIn()) {
+      Map<String, String> parametersMap = buildParametersMap(getAnonymizedClientId(), pingEvent);
+      sendPostRequest(getParametersString(parametersMap));
+    }
   }
 
   private void sendPostRequest(String parametersString) {
@@ -163,6 +194,8 @@ public class AnalyticsPingManager {
       connection = (HttpURLConnection) url.openConnection();
       connection.setDoOutput(true);
       connection.setRequestMethod("POST");
+      // This prevent Analytics from identifying our pings as spam.
+      connection.setRequestProperty("User-Agent", CloudToolsInfo.USER_AGENT);
       connection.setReadTimeout(3000);  // milliseconds
       byte[] bytesToWrite = parametersString.getBytes("UTF-8");
       connection.setFixedLengthStreamingMode(bytesToWrite.length);
@@ -182,22 +215,21 @@ public class AnalyticsPingManager {
   }
 
   @VisibleForTesting
-  static Map<String, String> buildParametersMap(
-      String clientId, String eventName, String metadataKey, String metadataValue) {
+  static Map<String, String> buildParametersMap(String clientId, PingEvent pingEvent) {
     Map<String, String> parametersMap = new HashMap<>(STANDARD_PARAMETERS);
     parametersMap.put("cid", clientId);
     parametersMap.put("cd19", CloudToolsInfo.METRICS_NAME);  // cd19: "event type"
-    parametersMap.put("cd20", eventName);
+    parametersMap.put("cd20", pingEvent.eventName);
 
-    String virtualPageUrl = "/virtual/" + CloudToolsInfo.METRICS_NAME + "/" + eventName;
+    String virtualPageUrl = "/virtual/" + CloudToolsInfo.METRICS_NAME + "/" + pingEvent.eventName;
     parametersMap.put("dp", virtualPageUrl);
     parametersMap.put("dh", "virtual.eclipse");
 
-    if (metadataKey != null) {
+    if (pingEvent.metadataKey != null) {
       // Event metadata are passed as a (virtual) page title.
-      String virtualPageTitle = metadataKey + "=";
-      if (metadataValue != null) {
-        virtualPageTitle += metadataValue;
+      String virtualPageTitle = pingEvent.metadataKey + "=";
+      if (pingEvent.metadataValue != null) {
+        virtualPageTitle += pingEvent.metadataValue;
       } else {
         virtualPageTitle += "null";
       }
@@ -229,12 +261,23 @@ public class AnalyticsPingManager {
     return resultBuilder.toString();
   }
 
+  // To prevent showing multiple opt-in dialogs. Assumes that once a dialog is opened,
+  // implicit closure is considered opting out.
+  private AtomicBoolean optInDialogOpened = new AtomicBoolean(false);
+
   /**
    * @param parentShell if null, tries to show the dialog at the workbench level.
    */
-  public void showOptInDialog(Shell parentShell) {
+  public void showOptInDialogIfNeeded(final Shell parentShell) {
     if (!userHasOptedIn() && !userHasRegisteredOptInStatus()) {
-      optInDialogCreator.create(findShell(parentShell)).open();
+      if (optInDialogOpened.compareAndSet(false, true)) {
+        display.syncExec(new Runnable() {
+          @Override
+          public void run() {
+            new OptInDialog(findShell(parentShell)).open();
+          }
+        });
+      }
     }
   }
 
@@ -242,7 +285,7 @@ public class AnalyticsPingManager {
    * May return null. (However, dialogs can have null as a parent shell.)
    */
   private Shell findShell(Shell parentShell) {
-    if (parentShell != null) {
+    if (parentShell != null && !parentShell.isDisposed()) {
       return parentShell;
     }
 
@@ -266,4 +309,19 @@ public class AnalyticsPingManager {
       logger.log(Level.WARNING, bse.getMessage(), bse);
     }
   }
+
+  @VisibleForTesting
+  static class PingEvent {
+    private String eventName;
+    private String metadataKey;
+    private String metadataValue;
+    private Shell shell;
+
+    public PingEvent(String eventName, String metadataKey, String metadataValue, Shell shell) {
+      this.eventName = eventName;
+      this.metadataKey = metadataKey;
+      this.metadataValue = metadataValue;
+      this.shell = shell;
+    }
+  };
 }

@@ -84,4 +84,13 @@ public class GoogleLoginServiceTest {
     verify(dataStore, never()).clearStoredOAuthData();
     Assert.assertNotNull(loginService.getCachedActiveCredential());
   }
+
+  @Test
+  public void testGetGoogleLoginUrl() {
+    String customRedirectUrl = "http://127.0.0.1:12345/Callback";
+
+    String loginUrl = GoogleLoginService.getGoogleLoginUrl(customRedirectUrl);
+    Assert.assertTrue(loginUrl.startsWith("https://accounts.google.com/o/oauth2/auth?"));
+    Assert.assertTrue(loginUrl.contains("redirect_uri=" + customRedirectUrl));
+  }
 }

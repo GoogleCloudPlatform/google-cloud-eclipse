@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+   <extension point="org.eclipse.ui.startup">
+     <startup class="com.google.cloud.tools.eclipse.appengine.login.MenuContributionInitializer"/>
+   </extension>
+
    <extension
          point="org.eclipse.ui.commands">
       <category
@@ -27,7 +31,6 @@
          <command
                commandId="com.google.cloud.tools.eclipse.appengine.login.commands.loginCommand"
                id="com.google.cloud.tools.eclipse.appengine.login.menus.loginCommand"
-               label="%loginMenuItemLabel"
                mnemonic="G">
          </command>
       </menuContribution>
@@ -38,8 +41,7 @@
             <command
                   commandId="com.google.cloud.tools.eclipse.appengine.login.commands.loginCommand"
                   icon="icons/googleFavicon.png"
-                  id="com.google.cloud.tools.eclipse.appengine.login.toolbars.loginCommand"
-                  tooltip="%loginToolbarTooltip">
+                  id="com.google.cloud.tools.eclipse.appengine.login.toolbars.loginCommand">
             </command>
          </toolbar>
       </menuContribution>

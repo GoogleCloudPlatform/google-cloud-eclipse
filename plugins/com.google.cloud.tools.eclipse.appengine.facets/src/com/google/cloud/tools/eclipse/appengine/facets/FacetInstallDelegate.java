@@ -1,114 +1,126 @@
+/*******************************************************************************
+ * Copyright 2016 Google Inc. All Rights Reserved.
+ *
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which
+ * accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *******************************************************************************/
+
 package com.google.cloud.tools.eclipse.appengine.facets;
 
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jst.j2ee.classpathdep.UpdateClasspathAttributeUtil;
-import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
-import org.eclipse.jst.server.core.FacetUtil;
 import org.eclipse.wst.common.project.facet.core.IDelegate;
-import org.eclipse.wst.common.project.facet.core.IFacetedProject;
-import org.eclipse.wst.common.project.facet.core.IFacetedProjectWorkingCopy;
-import org.eclipse.wst.common.project.facet.core.IProjectFacet;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
-import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
-import org.eclipse.wst.common.project.facet.core.runtime.IRuntime;
-import org.eclipse.wst.common.project.facet.core.runtime.RuntimeManager;
-import org.eclipse.wst.server.core.IRuntimeType;
-import org.eclipse.wst.server.core.IRuntimeWorkingCopy;
-import org.eclipse.wst.server.core.ServerCore;
-
-import java.util.HashSet;
-import java.util.Set;
+import java.io.InputStream;
 
 public class FacetInstallDelegate implements IDelegate {
-  /**
-   * When the user clicks the "Apply" or "OK" button in the Project Facet page,
-   * this function is called through {@link FacetedProject#mergeChanges} and if this function
-   * exits without an exception, the facet will be added to the project via {@link FacetedProject}.
-   */
+  private final static String APPENGINE_WEB_XML = "appengine-web.xml";
+  // TODO Change directory for dynamic web module.
+  // Differentiate between project with web facets vs 'true' dynamic web modules?
+  private final static String APPENGINE_WEB_XML_DIR = "src/main/webapp/WEB-INF/";
+  private final static String APPENGINE_WEB_XML_PATH = APPENGINE_WEB_XML_DIR + APPENGINE_WEB_XML;
+
   @Override
   public void execute(IProject project,
                       IProjectFacetVersion version,
                       Object config,
                       IProgressMonitor monitor) throws CoreException {
     if (!MavenUtils.hasMavenNature(project)) { // Maven handles classpath in maven projects.
-      updateClasspath(project, monitor);
-    }
-
-  }
-
-  public static void installAppEngineRuntime(IFacetedProject project, IProgressMonitor monitor)
-      throws CoreException {
-    Set<IProjectFacetVersion> facets = new HashSet<>();
-    facets.add(WebFacetUtils.WEB_25);
-    Set<IRuntime> runtimes = RuntimeManager.getRuntimes(facets);
-    project.setTargetedRuntimes(runtimes, monitor);
-
-    if (RuntimeManager.isRuntimeDefined(AppEngineStandardFacet.DEFAULT_RUNTIME_NAME)) {
-      IRuntime appEngineRuntime = RuntimeManager.getRuntime(AppEngineStandardFacet.DEFAULT_RUNTIME_NAME);
-      project.setPrimaryRuntime(appEngineRuntime, monitor);
-    } else { // Create a new App Engine runtime
-      IRuntimeType appEngineRuntimeType = ServerCore.findRuntimeType(AppEngineStandardFacet.DEFAULT_RUNTIME_ID);
-      if (appEngineRuntimeType == null) {
-        throw new NullPointerException("Could not find " + AppEngineStandardFacet.DEFAULT_RUNTIME_NAME + " runtime type");
-      }
-
-      IRuntimeWorkingCopy appEngineRuntimeWorkingCopy
-          = appEngineRuntimeType.createRuntime(null, monitor);
-      CloudSdk cloudSdk = new CloudSdk.Builder().build();
-      if (cloudSdk != null) {
-        java.nio.file.Path sdkLocation = cloudSdk.getJavaAppEngineSdkPath();
-        if (sdkLocation != null) {
-          IPath sdkPath = Path.fromOSString(sdkLocation.toAbsolutePath().toString());
-          appEngineRuntimeWorkingCopy.setLocation(sdkPath);
-        }
-      }
-
-      org.eclipse.wst.server.core.IRuntime appEngineServerRuntime
-          = appEngineRuntimeWorkingCopy.save(true, monitor);
-      IRuntime appEngineFacetRuntime = FacetUtil.getRuntime(appEngineServerRuntime);
-      if (appEngineFacetRuntime == null) {
-        throw new NullPointerException("Could not locate App Engine facet runtime");
-      }
-
-      project.addTargetedRuntime(appEngineFacetRuntime, monitor);
-      project.setPrimaryRuntime(appEngineFacetRuntime, monitor);
+      SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
+      addAppEngineJarsToClasspath(project, subMonitor.newChild(50));
+      createConfigFiles(project, subMonitor.newChild(50));
     }
   }
 
-  public static void installAppEngineFacet(IFacetedProject facetedProject, IProgressMonitor monitor)
+  /**
+   * Adds jars associated with the App Engine facet if they don't already exist in
+   * <code>project</code>
+   */
+  private void addAppEngineJarsToClasspath(IProject project, IProgressMonitor monitor)
       throws CoreException {
-    IFacetedProjectWorkingCopy workingCopy = facetedProject.createWorkingCopy();
-    IProjectFacet appEngineFacet = ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID);
-    IProjectFacetVersion appEngineFacetVersion = appEngineFacet.getVersion(AppEngineStandardFacet.VERSION);
-    workingCopy.addProjectFacet(appEngineFacetVersion);
-    workingCopy.commitChanges(monitor);
-  }
-
-  private void updateClasspath(IProject project, IProgressMonitor monitor) throws CoreException {
     IJavaProject javaProject = JavaCore.create(project);
     IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
+    IClasspathEntry appEngineContainer = JavaCore.newContainerEntry(
+        new Path(AppEngineSdkClasspathContainer.CONTAINER_ID),
+        new IAccessRule[0],
+        new IClasspathAttribute[]{
+            UpdateClasspathAttributeUtil.createDependencyAttribute(true /*isWebApp */)
+        },
+        true /* isExported */);
+
+    // Check if App Engine container entry already exists
+    for (int i = 0; i < rawClasspath.length; i++) {
+      if (rawClasspath[i].equals(appEngineContainer)) {
+        return;
+      }
+    }
+
     IClasspathEntry[] newClasspath = new IClasspathEntry[rawClasspath.length + 1];
     System.arraycopy(rawClasspath, 0, newClasspath, 0, rawClasspath.length);
-    newClasspath[newClasspath.length - 1] =
-        JavaCore.newContainerEntry(new Path(AppEngineSdkClasspathContainer.CONTAINER_ID),
-                                   new IAccessRule[0],
-                                   new IClasspathAttribute[]{
-                                       UpdateClasspathAttributeUtil.createDependencyAttribute(true /*isWebApp */)
-                                   },
-                                   true /* isExported */);
+    newClasspath[newClasspath.length - 1] = appEngineContainer;
     javaProject.setRawClasspath(newClasspath, monitor);
   }
 
+  /**
+   * Creates an appengine-web.xml file in the WEB-INF folder if it doesn't exist
+   */
+  private static void createConfigFiles(IProject project, IProgressMonitor monitor)
+      throws CoreException {
+    IFile appEngineWebXml = project.getFile(APPENGINE_WEB_XML_PATH);
+    if (appEngineWebXml.exists()) {
+      return;
+    }
+
+    IFolder configDir = project.getFolder(APPENGINE_WEB_XML_DIR);
+    if (!configDir.exists()) {
+      Path configDirPath = new Path(APPENGINE_WEB_XML_DIR);
+      IContainer current = project;
+      for (int i = 0; i < configDirPath.segmentCount(); i++) {
+        final String segment = configDirPath.segment( i );
+        IFolder folder = current.getFolder(new Path(segment));
+
+        if (!folder.exists()) {
+          folder.create( true, true, monitor );
+        }
+        current = folder;
+      }
+      configDir = (IFolder) current;
+    }
+
+    InputStream in = FacetInstallDelegate.class.getResourceAsStream("templates/" + APPENGINE_WEB_XML + ".ftl");
+    if (in == null) {
+      IStatus status = StatusUtil.error(FacetInstallDelegate.class,
+          "Could not load template for " + APPENGINE_WEB_XML);
+      throw new CoreException(status);
+    }
+
+    IFile configFile = configDir.getFile(APPENGINE_WEB_XML);
+    if (!configFile.exists()) {
+      configFile.create(in, true, monitor);
+    }
+  }
 }
