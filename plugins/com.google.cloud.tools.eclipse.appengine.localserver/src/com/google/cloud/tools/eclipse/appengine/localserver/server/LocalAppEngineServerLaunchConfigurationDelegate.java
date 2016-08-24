@@ -142,7 +142,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     connectionParameters.put("hostname", DEBUGGER_HOST);
     connectionParameters.put("port", Integer.toString(port));
     connectionParameters.put("timeout", Integer.toString(timeout));
-    connectionParameters.put("acceptCount", Integer.toString(0));
+    connectionParameters.put("acceptCount", "0");
     connector.connect(connectionParameters, monitor, launch);
   }
 
