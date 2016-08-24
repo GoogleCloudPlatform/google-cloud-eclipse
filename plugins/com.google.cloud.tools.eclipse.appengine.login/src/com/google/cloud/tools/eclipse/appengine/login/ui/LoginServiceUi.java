@@ -161,7 +161,7 @@ public class LoginServiceUi implements UiFacade {
           // (See the comments of scheduleCodeWaitingJob().)
           scheduleCodeWaitingJob(
               new LocalServerReceiverWrapper(codeReceiver), wait, codeHolder, exceptionHolder);
-          wait.acquire();  // Block until signaled.
+          wait.acquireUninterruptibly();  // Block until signaled.
         }
       });
 
