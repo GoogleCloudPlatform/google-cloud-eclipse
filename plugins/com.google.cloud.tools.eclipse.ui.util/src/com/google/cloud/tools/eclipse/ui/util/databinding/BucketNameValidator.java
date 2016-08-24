@@ -9,7 +9,7 @@ import org.eclipse.core.runtime.IStatus;
 import com.google.cloud.tools.eclipse.ui.util.Messages;
 
 /**
- * Implements a simplified bucket name validation.
+ * Implements a simplified (more permissive) bucket name validation for Google Cloud Storage.
  * <p>
  * The following rules are verified:
  * <p>

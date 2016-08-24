@@ -53,10 +53,10 @@ public class DeployPropertyPage extends PropertyPage {
   private static final String PREFERENCE_STORE_QUALIFIER = "com.google.cloud.tools.eclipse.appengine.deploy";
   private static final String PREF_PROMPT_FOR_PROJECT_ID = "project.id.prompt"; // boolean
   private static final String PREF_PROJECT_ID = "project.id";
-  private static final String PREF_OVERRIDE_DEFAULT_VERSIONING = "project.version.default"; // boolean
+  private static final String PREF_OVERRIDE_DEFAULT_VERSIONING = "project.version.overrideDefault"; // boolean
   private static final String PREF_CUSTOM_VERSION = "project.version";
   private static final String PREF_ENABLE_AUTO_PROMOTE = "project.promote"; // boolean
-  private static final String PREF_OVERRIDE_DEFAULT_BUCKET = "project.bucket.default"; // boolean
+  private static final String PREF_OVERRIDE_DEFAULT_BUCKET = "project.bucket.overrideDefault"; // boolean
   private static final String PREF_CUSTOM_BUCKET = "project.bucket";
 
   private static Logger logger = Logger.getLogger(DeployPropertyPage.class.getName());
