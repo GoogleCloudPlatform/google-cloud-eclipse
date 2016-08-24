@@ -33,7 +33,7 @@ import java.util.Map;
  * {@link org.eclipse.jdi.internal.connect.SocketListeningConnectorImpl} that
  * uses our modified SocketTransportImpl.
  */
-public class SocketMultiListeningConnectorImpl extends ConnectorImpl implements ListeningConnector {
+public class SocketListeningMultiConnectorImpl extends ConnectorImpl implements ListeningConnector {
 	/** Port to which is attached. */
 	private int fPort;
 	/** Timeout before accept returns. */
@@ -42,7 +42,7 @@ public class SocketMultiListeningConnectorImpl extends ConnectorImpl implements 
 	/**
 	 * Creates new SocketAttachingConnectorImpl.
 	 */
-	public SocketMultiListeningConnectorImpl(VirtualMachineManagerImpl virtualMachineManager) {
+	public SocketListeningMultiConnectorImpl(VirtualMachineManagerImpl virtualMachineManager) {
 		super(virtualMachineManager);
 
 		// Create communication protocol specific transport.
@@ -64,6 +64,7 @@ public class SocketMultiListeningConnectorImpl extends ConnectorImpl implements 
 	/**
 	 * @return Returns the default arguments.
 	 */
+	@SuppressWarnings("restriction")
 	@Override
 	public Map<String, Connector.Argument> defaultArguments() {
 		HashMap<String, Connector.Argument> arguments = new HashMap<String, Connector.Argument>(1);
@@ -79,6 +80,14 @@ public class SocketMultiListeningConnectorImpl extends ConnectorImpl implements 
 		intArg = new _IntegerArgumentImpl("timeout", //$NON-NLS-1$
 				ConnectMessages.SocketListeningConnectorImpl_Timeout_before_accept_returns_3,
 				ConnectMessages.SocketListeningConnectorImpl_Timeout_4, false, 0, Integer.MAX_VALUE);
+		arguments.put(intArg.name(), intArg);
+
+		// FIXME: this doesn't feel like the right place, but
+		// IntegerArgumentImpl is package restricted
+		intArg = new _IntegerArgumentImpl("acceptCount", //$NON-NLS-1$
+				"Limit incoming connections (0 = no limit)", "Connection limit:", false, 0,
+				Integer.MAX_VALUE);
+		intArg.setValue(1); // mimics previous behaviour
 		arguments.put(intArg.name(), intArg);
 
 		return arguments;

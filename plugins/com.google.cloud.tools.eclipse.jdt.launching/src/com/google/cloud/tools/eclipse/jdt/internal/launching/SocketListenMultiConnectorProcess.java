@@ -43,6 +43,7 @@ import org.eclipse.osgi.util.NLS;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Fork of
@@ -65,7 +66,7 @@ public class SocketListenMultiConnectorProcess implements IProcess {
      * we can only accept up to |Integer.MIN_VALUE| connections, but that should
      * be plenty for a debug connector.
      */
-    private int fAcceptCount;
+	final private AtomicInteger fAcceptCount;
 
     /**
      * Whether this process has been terminated.
@@ -98,7 +99,7 @@ public class SocketListenMultiConnectorProcess implements IProcess {
     public SocketListenMultiConnectorProcess(ILaunch launch, String port, int acceptCount) {
         fLaunch = launch;
         fPort = port;
-        fAcceptCount = acceptCount;
+		fAcceptCount = new AtomicInteger(acceptCount);
     }
     
     /**
@@ -120,10 +121,10 @@ public class SocketListenMultiConnectorProcess implements IProcess {
         // If the connector does not support multiple connections, accept a single connection
         try {
             if (!connector.supportsMultipleConnections()) {
-                fAcceptCount = 1;
+				fAcceptCount.set(1);
             }
         } catch (IOException | IllegalConnectorArgumentsException ex) {
-            fAcceptCount = 1;
+			fAcceptCount.set(1);
         }
         fLaunch.addProcess(this);
         fWaitForConnectionJob = new WaitForConnectionJob(connector, arguments);
@@ -135,9 +136,9 @@ public class SocketListenMultiConnectorProcess implements IProcess {
             }
             @Override
             public void done(IJobChangeEvent event) {
-                if (event.getResult().isOK() && fAcceptCount != 0) {
+				if (event.getResult().isOK() && !isTerminated() && fAcceptCount.get() != 0) {
                     fWaitForConnectionJob.schedule();
-                } else if (event.getResult().equals(Status.CANCEL_STATUS)) {
+				} else {
                     try{
                         terminate();
                     } catch (DebugException e){}
@@ -329,7 +330,7 @@ public class SocketListenMultiConnectorProcess implements IProcess {
                 String vmLabel = constructVMLabel(vm, portArg.value(), fLaunch.getLaunchConfiguration());
                 IDebugTarget debugTarget= JDIDebugModel.newDebugTarget(fLaunch, vm, vmLabel, null, allowTerminate, true);
                 fLaunch.addDebugTarget(debugTarget);
-                --fAcceptCount;
+				fAcceptCount.decrementAndGet();
                 return Status.OK_STATUS;
             } catch (IOException e) {
                 if (fListeningStopped){
@@ -338,11 +339,6 @@ public class SocketListenMultiConnectorProcess implements IProcess {
                 return getStatus(LaunchingMessages.SocketListenConnectorProcess_4, e, IJavaLaunchConfigurationConstants.ERR_REMOTE_VM_CONNECTION_FAILED);
             } catch (IllegalConnectorArgumentsException e) {
                 return getStatus(LaunchingMessages.SocketListenConnectorProcess_4, e, IJavaLaunchConfigurationConstants.ERR_REMOTE_VM_CONNECTION_FAILED); 
-            } finally {
-                if (fAcceptCount == 0) {
-                    // Always try to close the socket
-                    stopListening();
-                }
             }
         }
         

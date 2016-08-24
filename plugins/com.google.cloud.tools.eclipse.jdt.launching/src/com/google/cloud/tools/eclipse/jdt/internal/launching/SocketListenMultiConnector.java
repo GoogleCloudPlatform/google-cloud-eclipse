@@ -12,7 +12,7 @@
 
 package com.google.cloud.tools.eclipse.jdt.internal.launching;
 
-import com.google.cloud.tools.eclipse.jdi.internal.connect.SocketMultiListeningConnectorImpl;
+import com.google.cloud.tools.eclipse.jdi.internal.connect.SocketListeningMultiConnectorImpl;
 
 import com.sun.jdi.connect.Connector;
 import com.sun.jdi.connect.IllegalConnectorArgumentsException;
@@ -48,6 +48,7 @@ import java.util.Map;
  * @since 3.4
  * @see SocketListenConnectorProcess
  */
+@SuppressWarnings("restriction")
 public class SocketListenMultiConnector implements IVMConnector {
 
 	/**
@@ -58,7 +59,7 @@ public class SocketListenMultiConnector implements IVMConnector {
 	 *                if unable to locate the connector
 	 */
 	private static ListeningConnector getListeningConnector() {
-		return new SocketMultiListeningConnectorImpl((VirtualMachineManagerImpl) Bootstrap.virtualMachineManager());
+		return new SocketListeningMultiConnectorImpl((VirtualMachineManagerImpl) Bootstrap.virtualMachineManager());
 	}
 
 	/*
@@ -140,8 +141,10 @@ public class SocketListenMultiConnector implements IVMConnector {
 	@Override
 	public Map<String, Connector.Argument> getDefaultArguments() throws CoreException {
 		Map<String, Connector.Argument> def = getListeningConnector().defaultArguments();
+
 		Connector.IntegerArgument arg = (Connector.IntegerArgument) def.get("port"); //$NON-NLS-1$
 		arg.setValue(8000);
+		
 		return def;
 	}
 

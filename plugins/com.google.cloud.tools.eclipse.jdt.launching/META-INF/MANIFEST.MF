@@ -9,3 +9,5 @@ Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Export-Package: com.google.cloud.tools.eclipse.jdt.internal.launching
+Import-Package: com.sun.jdi.connect,
+ org.junit;version="4.12.0";resolution:=optional
