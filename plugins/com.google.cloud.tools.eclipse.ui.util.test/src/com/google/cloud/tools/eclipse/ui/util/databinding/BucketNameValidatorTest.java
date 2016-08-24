@@ -23,7 +23,7 @@ public class BucketNameValidatorTest {
 
   @Test
   public void testValidation_emptyString() {
-    assertThat(new BucketNameValidator().validate("").getSeverity(), is(IStatus.WARNING));
+    assertThat(new BucketNameValidator().validate("").getSeverity(), is(IStatus.ERROR));
   }
 
   @Test

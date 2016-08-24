@@ -17,7 +17,7 @@ public class ProjectVersionValidatorTest {
 
   @Test
   public void testValidate_emptyString() {
-    assertThat(new ProjectVersionValidator().validate("").getSeverity(), is(IStatus.WARNING));
+    assertThat(new ProjectVersionValidator().validate("").getSeverity(), is(IStatus.ERROR));
   }
 
   @Test

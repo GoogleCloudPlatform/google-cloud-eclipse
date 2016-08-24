@@ -7,7 +7,6 @@ import java.util.logging.Logger;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.ObservablesManager;
-import org.eclipse.core.databinding.UpdateValueStrategy;
 import org.eclipse.core.databinding.observable.value.WritableValue;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.MultiValidator;
@@ -15,6 +14,7 @@ import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.jface.databinding.preference.PreferencePageSupport;
 import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
@@ -50,6 +50,8 @@ public class DeployPropertyPage extends PropertyPage {
 
   private static final int INDENT_CHECKBOX_ENABLED_WIDGET = 10;
 
+  private static final String PREFERENCE_STORE_DEFAULTS_QUALIFIER =
+      "com.google.cloud.tools.eclipse.appengine.deploy.defaults";
   private static final String PREFERENCE_STORE_QUALIFIER = "com.google.cloud.tools.eclipse.appengine.deploy";
   private static final String PREF_PROMPT_FOR_PROJECT_ID = "project.id.promptOnDeploy"; // boolean
   private static final String PREF_PROJECT_ID = "project.id";
@@ -79,10 +81,20 @@ public class DeployPropertyPage extends PropertyPage {
   private ObservablesManager observables;
   private DataBindingContext bindingContext;
 
+
+  public DeployPropertyPage() {
+    super();
+    DefaultScope.INSTANCE.getNode(PREFERENCE_STORE_DEFAULTS_QUALIFIER).putBoolean(PREF_PROMPT_FOR_PROJECT_ID, true);
+  }
+
   @Override
   protected Control createContents(Composite parent) {
     Composite container = new Composite(parent, SWT.NONE);
-    container.setLayout(new GridLayout(1, false));
+    GridLayout layout = new GridLayout(1, false);
+    // set margin to 0 to meet expectations of super.createContents(Composite)
+    layout.marginHeight = 0;
+    layout.marginWidth = 0;
+    container.setLayout(layout);
 
     noDefaultButton();
 
@@ -117,13 +129,12 @@ public class DeployPropertyPage extends PropertyPage {
   }
 
   private void setupProjectIdDataBinding(DataBindingContext context) {
-    context.bindValue(WidgetProperties.selection().observe(promptForProjectIdButton),
-                      model.promptForProjectId);
-    ProjectIdValidator projectIdValidator = new ProjectIdValidator();
-    context.bindValue(WidgetProperties.text(SWT.Modify).observe(projectId),
-                      model.projectId,
-                      new UpdateValueStrategy().setAfterGetValidator(projectIdValidator),
-                      new UpdateValueStrategy().setAfterGetValidator(projectIdValidator));
+    ISWTObservableValue promptObservable = WidgetProperties.selection().observe(promptForProjectIdButton);
+    ISWTObservableValue projectIdObservable = WidgetProperties.text(SWT.Modify).observe(projectId);
+
+    context.bindValue(promptObservable, model.promptForProjectId);
+
+    context.addValidationStatusProvider(new ProjectIdMultiValidator(promptObservable, projectIdObservable));
   }
 
   private void setupProjectVersionDataBinding(DataBindingContext context) {
@@ -136,9 +147,8 @@ public class DeployPropertyPage extends PropertyPage {
     context.bindValue(WidgetProperties.enabled().observe(version), model.overrideDefaultVersioning);
 
     context.addValidationStatusProvider(new OverrideValidator(overrideObservable,
-                                                              overrideObservable,
+                                                              versionObservable,
                                                               new ProjectVersionValidator()));
-
   }
 
   private void setupAutoPromoteDataBinding(DataBindingContext context) {
@@ -204,7 +214,9 @@ public class DeployPropertyPage extends PropertyPage {
   @Override
   protected IPreferenceStore doGetPreferenceStore() {
     IProject project = AdapterUtil.adapt(getElement(), IProject.class);
-    return new ScopedPreferenceStore(new ProjectScope(project), PREFERENCE_STORE_QUALIFIER);
+    return new ScopedPreferenceStore(new ProjectScope(project),
+                                     PREFERENCE_STORE_QUALIFIER,
+                                     PREFERENCE_STORE_DEFAULTS_QUALIFIER);
   }
 
   private void createProjectIdSection(Composite parent) {
@@ -424,6 +436,40 @@ public class DeployPropertyPage extends PropertyPage {
         return ValidationStatus.ok();
       }
       return validator.validate(textObservable.getValue());
+    }
+  }
+
+  /**
+   * Validates a checkbox and text field as follows:
+   * <ol>
+   * <li>if the checkbox is unselected -> the text field cannot contain the empty string
+   * <li>if the checkbox is selected -> the text field can contain the empty string
+   * <li>if the text field is not empty, the result is determined by {@link ProjectIdValidator} applied to the value
+   * </ol>
+   *
+   * <i>The class does not enforce the {@link ISWTObservableValue}s passed in to the constructor to be of a
+   * checkbox and a text field</i>
+   *
+   */
+  private static class ProjectIdMultiValidator extends MultiValidator {
+
+    private ISWTObservableValue selectionObservable;
+    private ISWTObservableValue textObservable;
+    private ProjectIdValidator validator = new ProjectIdValidator();
+
+    public ProjectIdMultiValidator(ISWTObservableValue selection,
+                                   ISWTObservableValue text) {
+      super(selection.getRealm());
+      this.selectionObservable = selection;
+      this.textObservable = text;
+    }
+
+    @Override
+    protected IStatus validate() {
+      if (Boolean.FALSE.equals(selectionObservable.getValue())) {
+        return validator.validate(textObservable.getValue(), ProjectIdValidator.ValidationPolicy.EMPTY_IS_INVALID);
+      }
+      return validator.validate(textObservable.getValue(), ProjectIdValidator.ValidationPolicy.EMPTY_IS_VALID);
     }
   }
 }
