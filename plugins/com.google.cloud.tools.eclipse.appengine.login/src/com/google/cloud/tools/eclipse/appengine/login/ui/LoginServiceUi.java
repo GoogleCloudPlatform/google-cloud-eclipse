@@ -20,6 +20,8 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeReque
 import com.google.api.client.repackaged.com.google.common.annotations.VisibleForTesting;
 import com.google.cloud.tools.eclipse.appengine.login.GoogleLoginService;
 import com.google.cloud.tools.eclipse.appengine.login.Messages;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.cloud.tools.ide.login.UiFacade;
 import com.google.cloud.tools.ide.login.VerificationCodeHolder;
 
@@ -105,6 +107,9 @@ public class LoginServiceUi implements UiFacade {
       String authorizationCode = showProgressDialogAndWaitForCode(
           message, codeReceiver, redirectUrl);
       if (authorizationCode != null) {
+        AnalyticsPingManager.getInstance().sendPing(
+            AnalyticsEvents.LOGIN_SUCCESS, null, null, shellProvider.getShell());
+
         return new VerificationCodeHolder(authorizationCode, redirectUrl);
       }
       return null;
@@ -122,11 +127,9 @@ public class LoginServiceUi implements UiFacade {
   private String showProgressDialogAndWaitForCode(final String message,
       final LocalServerReceiver codeReceiver, final String redirectUrl) throws IOException {
     try {
-      final String[] codeHolder = new String[1];
-      final IOException[] exceptionHolder = new IOException[1];
       final Semaphore wait = new Semaphore(0 /* initially zero permit */);
 
-      new ProgressMonitorDialog(shellProvider.getShell()) {
+      final ProgressMonitorDialog dialog = new ProgressMonitorDialog(shellProvider.getShell()) {
         @Override
         protected void configureShell(Shell shell) {
           super.configureShell(shell);
@@ -134,13 +137,24 @@ public class LoginServiceUi implements UiFacade {
         }
         @Override
         protected void cancelPressed() {
-          stopCodeWaitingJob(redirectUrl);
           wait.release();  // Allow termination of the attached task.
+          stopCodeWaitingJob(redirectUrl);
+
+          AnalyticsPingManager.getInstance().sendPing(
+              AnalyticsEvents.LOGIN_CANCELED, null, null, getParentShell());
         }
-      }.run(true /* fork */, true /* cancelable */, new IRunnableWithProgress() {
+      };
+
+      final String[] codeHolder = new String[1];
+      final IOException[] exceptionHolder = new IOException[1];
+
+      dialog.run(true /* fork */, true /* cancelable */, new IRunnableWithProgress() {
         @Override
         public void run(IProgressMonitor monitor)
             throws InvocationTargetException, InterruptedException {
+          AnalyticsPingManager.getInstance().sendPing(
+              AnalyticsEvents.LOGIN_START, null, null, dialog.getShell());
+
           monitor.beginTask(message != null ? message : Messages.LOGIN_PROGRESS_DIALOG_MESSAGE,
               IProgressMonitor.UNKNOWN);
           // Fork another sub-job to circumvent the limitation of LocalServerReceiver.
