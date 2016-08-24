@@ -249,7 +249,7 @@
         <os><family>mac</family></os>
       </activation>
       <properties>
-        <os-jvm-flags>-XstartOnFirstThread</os-jvm-flags>
+        <os-jvm-flags>-Djava.awt.headless=true -XstartOnFirstThread</os-jvm-flags>
       </properties>
     </profile>
 
