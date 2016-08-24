@@ -51,7 +51,7 @@ public class DeployPropertyPage extends PropertyPage {
   private static final int INDENT_CHECKBOX_ENABLED_WIDGET = 10;
 
   private static final String PREFERENCE_STORE_QUALIFIER = "com.google.cloud.tools.eclipse.appengine.deploy";
-  private static final String PREF_PROMPT_FOR_PROJECT_ID = "project.id.prompt"; // boolean
+  private static final String PREF_PROMPT_FOR_PROJECT_ID = "project.id.promptOnDeploy"; // boolean
   private static final String PREF_PROJECT_ID = "project.id";
   private static final String PREF_OVERRIDE_DEFAULT_VERSIONING = "project.version.overrideDefault"; // boolean
   private static final String PREF_CUSTOM_VERSION = "project.version";
@@ -112,7 +112,6 @@ public class DeployPropertyPage extends PropertyPage {
     setupBucketDataBinding(bindingContext);
 
     PreferencePageSupport.create(this, bindingContext);
-    bindingContext.updateTargets();
     observables = new ObservablesManager();
     observables.addObservablesFromContext(bindingContext, true, true);
   }
@@ -162,17 +161,15 @@ public class DeployPropertyPage extends PropertyPage {
 
   @Override
   public boolean performOk() {
-    try {
-      if (isValid()) {
+    if (isValid()) {
+      try {
         savePreferences();
         return true;
-      } else {
-        return false;
+      } catch (IOException exception) {
+        logger.log(Level.SEVERE, "Could not save deploy preferences", exception);
       }
-    } catch (IOException exception) {
-      logger.log(Level.SEVERE, "Could not save deploy preferences", exception);
-      return false;
     }
+    return false;
   }
 
   private void savePreferences() throws IOException {
