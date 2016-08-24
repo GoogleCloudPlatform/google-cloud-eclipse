@@ -14,6 +14,9 @@ public class ProjectIdValidator implements IValidator {
   // Project ID must be between 6 and 30 characters.
   // Project ID can have lowercase letters, digits or hyphens and must start with a letter and 
   // end with letter or digit
+  // https://cloud.google.com/resource-manager/reference/rest/v1/projects
+  // "It must be 6 to 30 lowercase letters, digits, or hyphens. It must start with a letter. 
+  // Trailing hyphens are prohibited."
   private static final Pattern APPENGINE_PROJECTID_PATTERN =
       Pattern.compile("^[a-z][a-z0-9-]{4,28}[a-z0-9]$"); //$NON-NLS-1$
 
