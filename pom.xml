@@ -229,7 +229,7 @@
           <artifactId>tycho-surefire-plugin</artifactId>
           <version>${tycho.version}</version>
           <configuration>
-            <argLine>-Dorg.eclipse.swtbot.search.timeout=${org.eclipse.swtbot.search.timeout} -Xms40m -Xmx1G -XX:MaxPermSize=512m ${os-jvm-flags}</argLine>
+            <argLine>-Dorg.eclipse.swtbot.search.timeout=${org.eclipse.swtbot.search.timeout} -Xms40m -Xmx1G -XX:MaxPermSize=512m -Djava.awt.headless=true ${os-jvm-flags}</argLine>
           </configuration>
         </plugin>
 
@@ -249,7 +249,7 @@
         <os><family>mac</family></os>
       </activation>
       <properties>
-        <os-jvm-flags>-Djava.awt.headless=true -XstartOnFirstThread</os-jvm-flags>
+        <os-jvm-flags>-XstartOnFirstThread</os-jvm-flags>
       </properties>
     </profile>
 
