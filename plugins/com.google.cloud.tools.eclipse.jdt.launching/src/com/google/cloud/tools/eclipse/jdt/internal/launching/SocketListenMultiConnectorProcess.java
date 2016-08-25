@@ -429,7 +429,11 @@ public class SocketListenMultiConnectorProcess implements IProcess {
                 }
             }
             StringBuffer buffer = new StringBuffer(name);
-			buffer.append("<").append(getRunningTime()).append(">");
+			if (fAcceptCount != 1) {
+				// if we're accepting multiple incoming connections,
+				// append the time when each connection was accepted
+				buffer.append("<").append(getRunningTime()).append(">");
+			}
             buffer.append('['); 
             buffer.append(port);
             buffer.append(']'); 
