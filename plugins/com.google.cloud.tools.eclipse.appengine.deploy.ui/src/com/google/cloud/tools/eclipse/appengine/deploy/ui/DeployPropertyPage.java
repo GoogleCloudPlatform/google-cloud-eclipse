@@ -20,6 +20,7 @@ import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -43,6 +44,7 @@ import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectIdValidator;
 import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectVersionValidator;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUrlSelectionListener;
 import com.google.cloud.tools.eclipse.util.AdapterUtil;
+import com.google.common.base.Preconditions;
 
 public class DeployPropertyPage extends PropertyPage {
 
@@ -83,7 +85,6 @@ public class DeployPropertyPage extends PropertyPage {
 
 
   public DeployPropertyPage() {
-    super();
     DefaultScope.INSTANCE.getNode(PREFERENCE_STORE_DEFAULTS_QUALIFIER).putBoolean(PREF_PROMPT_FOR_PROJECT_ID, true);
   }
 
@@ -177,6 +178,10 @@ public class DeployPropertyPage extends PropertyPage {
         return true;
       } catch (IOException exception) {
         logger.log(Level.SEVERE, "Could not save deploy preferences", exception);
+        MessageDialog.openError(getShell(),
+                                Messages.getString("deploy.preferences.save.error.title"),
+                                Messages.getString("deploy.preferences.save.error.message",
+                                                   exception.getLocalizedMessage()));
       }
     }
     return false;
@@ -414,8 +419,6 @@ public class DeployPropertyPage extends PropertyPage {
    * on the value of the text field
    * </ol>
    *
-   * <i>The class does not enforce the {@link ISWTObservableValue}s passed in to the constructor to be of a
-   * checkbox and a text field</i>
    */
   private static class OverrideValidator extends MultiValidator {
 
@@ -423,8 +426,23 @@ public class DeployPropertyPage extends PropertyPage {
     private ISWTObservableValue textObservable;
     private IValidator validator;
 
+    /**
+     * @param selection must be an observable for a checkbox, i.e. a {@link Button} with {@link SWT#CHECK} style
+     * @param text must be an observable for a {@link Text}
+     * @param validator must be a validator for String values, will be applied to <code>text.getValue()</code>
+     */
     public OverrideValidator(ISWTObservableValue selection, ISWTObservableValue text, IValidator validator) {
       super(selection.getRealm());
+      Preconditions.checkArgument(text.getWidget() instanceof Text,
+                                  "Constructor argument text is an observable for {0}, should be for {1}",
+                                  text.getWidget().getClass().getName(),
+                                  Text.class.getName());
+      Preconditions.checkArgument(selection.getWidget() instanceof Button,
+                                  "Constructor argument selection is an observable for {0}, should be for {1}",
+                                  selection.getWidget().getClass().getName(),
+                                  Button.class.getName());
+      Preconditions.checkArgument((selection.getWidget().getStyle() & SWT.CHECK) != 0,
+                                  "Constructor argument selection must be an observable for a checkbox");
       this.selectionObservable = selection;
       this.textObservable = text;
       this.validator = validator;
@@ -446,10 +464,6 @@ public class DeployPropertyPage extends PropertyPage {
    * <li>if the checkbox is selected -> the text field can contain the empty string
    * <li>if the text field is not empty, the result is determined by {@link ProjectIdValidator} applied to the value
    * </ol>
-   *
-   * <i>The class does not enforce the {@link ISWTObservableValue}s passed in to the constructor to be of a
-   * checkbox and a text field</i>
-   *
    */
   private static class ProjectIdMultiValidator extends MultiValidator {
 
@@ -457,9 +471,22 @@ public class DeployPropertyPage extends PropertyPage {
     private ISWTObservableValue textObservable;
     private ProjectIdValidator validator = new ProjectIdValidator();
 
-    public ProjectIdMultiValidator(ISWTObservableValue selection,
-                                   ISWTObservableValue text) {
+    /**
+     * @param selection must be an observable for a checkbox, i.e. a {@link Button} with {@link SWT#CHECK} style
+     * @param text must be an observable for a {@link Text}
+     */
+    public ProjectIdMultiValidator(ISWTObservableValue selection, ISWTObservableValue text) {
       super(selection.getRealm());
+      Preconditions.checkArgument(text.getWidget() instanceof Text,
+                                  "Constructor argument text is an observable for {0}, should be for {1}",
+                                  text.getWidget().getClass().getName(),
+                                  Text.class.getName());
+      Preconditions.checkArgument(selection.getWidget() instanceof Button,
+                                  "Constructor argument selection is an observable for {0}, should be for {1}",
+                                  selection.getWidget().getClass().getName(),
+                                  Button.class.getName());
+      Preconditions.checkArgument((selection.getWidget().getStyle() & SWT.CHECK) != 0,
+                                  "Constructor argument selection must be an observable for a checkbox");
       this.selectionObservable = selection;
       this.textObservable = text;
     }
