@@ -41,7 +41,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Test the Socket(Multi,Listener}Connector
+ * Test the SocketListen*Multi*Connector*
  */
 @SuppressWarnings("restriction")
 public class MultipleConnectionsTest {
@@ -72,13 +72,13 @@ public class MultipleConnectionsTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testDefaultBehaviour() throws CoreException {
+	public void testDefaultBehaviour() throws CoreException, InterruptedException {
 		connector = new SocketListenMultiConnector();
 		Map<String, String> arguments = new HashMap<>();
 		arguments.put("port", Integer.toString(port));
 		arguments.put("acceptCount", "1");
 		connector.connect(arguments, new NullProgressMonitor(), launch);
-		Thread.yield();
+		Thread.sleep(200);
 
 		assertTrue("first connect should succeed", connect());
 		assertFalse("second connect should fail", connect());
@@ -148,6 +148,8 @@ public class MultipleConnectionsTest {
 
 	private boolean connect() {
 		boolean result = true;
+		// Two try blocks to distinguish between exceptions from socket close
+		// (ignorable) and from dealing with the remote (errors)
 		try (Socket s = new Socket()) {
 			try {
 				s.connect(new InetSocketAddress(InetAddress.getLocalHost(), port));
@@ -156,8 +158,10 @@ public class MultipleConnectionsTest {
 				assertEquals("JDWP-Handshake", new String(buffer));
 				s.getOutputStream().write("JDWP-Handshake".getBytes());
 				s.getOutputStream().flush();
-				// could respond to JDWP to try to bring down the connections
-				// gracefully, but it's a bit involved
+				// Closing gracelessly like this produces
+				// com.sun.jdi.VMDisconnectedExceptions on the log. Could
+				// respond to JDWP to try to bring down the connections
+				// gracefully, but it's a bit involved.
 			} catch (IOException e) {
 				result = false;
 			}
