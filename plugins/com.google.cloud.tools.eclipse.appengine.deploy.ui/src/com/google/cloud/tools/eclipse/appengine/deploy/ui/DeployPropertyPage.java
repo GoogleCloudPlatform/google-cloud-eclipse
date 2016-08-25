@@ -7,6 +7,8 @@ import java.util.logging.Logger;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.ObservablesManager;
+import org.eclipse.core.databinding.observable.Observables;
+import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.value.WritableValue;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.MultiValidator;
@@ -434,15 +436,15 @@ public class DeployPropertyPage extends PropertyPage {
     public OverrideValidator(ISWTObservableValue selection, ISWTObservableValue text, IValidator validator) {
       super(selection.getRealm());
       Preconditions.checkArgument(text.getWidget() instanceof Text,
-                                  "Constructor argument text is an observable for {0}, should be for {1}",
+                                  "text is an observable for {0}, should be for {1}",
                                   text.getWidget().getClass().getName(),
                                   Text.class.getName());
       Preconditions.checkArgument(selection.getWidget() instanceof Button,
-                                  "Constructor argument selection is an observable for {0}, should be for {1}",
+                                  "selection is an observable for {0}, should be for {1}",
                                   selection.getWidget().getClass().getName(),
                                   Button.class.getName());
       Preconditions.checkArgument((selection.getWidget().getStyle() & SWT.CHECK) != 0,
-                                  "Constructor argument selection must be an observable for a checkbox");
+                                  "selection must be an observable for a checkbox");
       this.selectionObservable = selection;
       this.textObservable = text;
       this.validator = validator;
@@ -454,6 +456,17 @@ public class DeployPropertyPage extends PropertyPage {
         return ValidationStatus.ok();
       }
       return validator.validate(textObservable.getValue());
+    }
+
+    @Override
+    public IObservableList getTargets() {
+      /**
+       * BUGFIX: https://bugs.eclipse.org/bugs/show_bug.cgi?id=312785
+       */
+      if( isDisposed() ) {
+        return Observables.emptyObservableList();
+      }
+      return super.getTargets();
     }
   }
 
@@ -478,15 +491,15 @@ public class DeployPropertyPage extends PropertyPage {
     public ProjectIdMultiValidator(ISWTObservableValue selection, ISWTObservableValue text) {
       super(selection.getRealm());
       Preconditions.checkArgument(text.getWidget() instanceof Text,
-                                  "Constructor argument text is an observable for {0}, should be for {1}",
+                                  "text is an observable for {0}, should be for {1}",
                                   text.getWidget().getClass().getName(),
                                   Text.class.getName());
       Preconditions.checkArgument(selection.getWidget() instanceof Button,
-                                  "Constructor argument selection is an observable for {0}, should be for {1}",
+                                  "selection is an observable for {0}, should be for {1}",
                                   selection.getWidget().getClass().getName(),
                                   Button.class.getName());
       Preconditions.checkArgument((selection.getWidget().getStyle() & SWT.CHECK) != 0,
-                                  "Constructor argument selection must be an observable for a checkbox");
+                                  "selection must be an observable for a checkbox");
       this.selectionObservable = selection;
       this.textObservable = text;
     }
@@ -497,6 +510,17 @@ public class DeployPropertyPage extends PropertyPage {
         return validator.validate(textObservable.getValue(), ProjectIdValidator.ValidationPolicy.EMPTY_IS_INVALID);
       }
       return validator.validate(textObservable.getValue(), ProjectIdValidator.ValidationPolicy.EMPTY_IS_VALID);
+    }
+
+    @Override
+    public IObservableList getTargets() {
+      /**
+       * BUGFIX: https://bugs.eclipse.org/bugs/show_bug.cgi?id=312785
+       */
+      if( isDisposed() ) {
+        return Observables.emptyObservableList();
+      }
+      return super.getTargets();
     }
   }
 }

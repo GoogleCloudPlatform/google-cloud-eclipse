@@ -20,15 +20,15 @@ public class ProjectIdValidatorTest {
 
   @Test
   public void testValidate_emptyStringInvalid() {
-    assertThat(new ProjectIdValidator().validate("",
-                                                 ProjectIdValidator.ValidationPolicy.EMPTY_IS_INVALID).getSeverity(),
+    assertThat(new ProjectIdValidator()
+                 .validate("", ProjectIdValidator.ValidationPolicy.EMPTY_IS_INVALID).getSeverity(),
                is(IStatus.ERROR));
   }
 
   @Test
   public void testValidate_emptyStringValid() {
-    assertThat(new ProjectIdValidator().validate("",
-                                                 ProjectIdValidator.ValidationPolicy.EMPTY_IS_VALID).getSeverity(),
+    assertThat(new ProjectIdValidator()
+                 .validate("", ProjectIdValidator.ValidationPolicy.EMPTY_IS_VALID).getSeverity(),
                is(IStatus.OK));
   }
 
