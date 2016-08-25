@@ -42,8 +42,9 @@ import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.osgi.util.NLS;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Fork of
@@ -59,14 +60,19 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @since 3.4
  * @see SocketListenConnector
  */
+@SuppressWarnings("restriction")
 public class SocketListenMultiConnectorProcess implements IProcess {
     /**
-     * The number of incoming connections to accept (0 = unlimited). This number
-     * is decremented after every accepted connection. If 0, technically means
-     * we can only accept up to |Integer.MIN_VALUE| connections, but that should
-     * be plenty for a debug connector.
-     */
-	final private AtomicInteger fAcceptCount;
+	 * The number of incoming connections to accept (0 = unlimited). Setting to
+	 * 1 mimics previous behaviour.
+	 */
+	private int fAcceptCount;
+
+	/** The number of connections accepted so far. */
+	private int fAccepted = 0;
+
+	/** Time when this instance was created (milliseconds) */
+	private long fStartTime;
 
     /**
      * Whether this process has been terminated.
@@ -99,7 +105,7 @@ public class SocketListenMultiConnectorProcess implements IProcess {
     public SocketListenMultiConnectorProcess(ILaunch launch, String port, int acceptCount) {
         fLaunch = launch;
         fPort = port;
-		fAcceptCount = new AtomicInteger(acceptCount);
+		fAcceptCount = acceptCount;
     }
     
     /**
@@ -114,21 +120,25 @@ public class SocketListenMultiConnectorProcess implements IProcess {
      * @throws CoreException if a problem occurs trying to accept a connection
      * @see SocketListenConnector
      */
-    public void waitForConnection(ListeningConnector connector, Map<String, Connector.Argument> arguments) throws CoreException{
+	public void waitForConnection(ListeningConnector connector, Map<String, Connector.Argument> arguments)
+			throws CoreException {
         if (isTerminated()){
             throw new CoreException(getStatus(LaunchingMessages.SocketListenConnectorProcess_0, null, IJavaLaunchConfigurationConstants.ERR_REMOTE_VM_CONNECTION_FAILED));
         }
+		fStartTime = System.currentTimeMillis();
+		fAccepted = 0;
         // If the connector does not support multiple connections, accept a single connection
         try {
             if (!connector.supportsMultipleConnections()) {
-				fAcceptCount.set(1);
+				fAcceptCount = 1;
             }
         } catch (IOException | IllegalConnectorArgumentsException ex) {
-			fAcceptCount.set(1);
+			fAcceptCount = 1;
         }
         fLaunch.addProcess(this);
         fWaitForConnectionJob = new WaitForConnectionJob(connector, arguments);
-        fWaitForConnectionJob.setPriority(Job.SHORT);
+		fWaitForConnectionJob.setPriority(Job.SHORT);
+		fWaitForConnectionJob.setSystem(true);
         fWaitForConnectionJob.addJobChangeListener(new JobChangeAdapter(){
             @Override
             public void running(IJobChangeEvent event) {
@@ -136,7 +146,7 @@ public class SocketListenMultiConnectorProcess implements IProcess {
             }
             @Override
             public void done(IJobChangeEvent event) {
-				if (event.getResult().isOK() && !isTerminated() && fAcceptCount.get() != 0) {
+				if (event.getResult().isOK() && continueListening()) {
                     fWaitForConnectionJob.schedule();
 				} else {
                     try{
@@ -149,14 +159,25 @@ public class SocketListenMultiConnectorProcess implements IProcess {
     }
 
     /**
-     * Returns an error status using the passed parameters.
-     * 
-     * @param message the status message
-     * @param exception lower level exception associated with the
-     *  error, or <code>null</code> if none
-     * @param code error code
-     * @return the new {@link IStatus}
-     */
+	 * Return true if this connector should continue listening for further
+	 * connections.
+	 */
+	protected boolean continueListening() {
+		return !isTerminated() && (fAcceptCount <= 0 || fAcceptCount - fAccepted > 0);
+	}
+
+	/**
+	 * Returns an error status using the passed parameters.
+	 * 
+	 * @param message
+	 *            the status message
+	 * @param exception
+	 *            lower level exception associated with the error, or
+	 *            <code>null</code> if none
+	 * @param code
+	 *            error code
+	 * @return the new {@link IStatus}
+	 */
     protected static IStatus getStatus(String message, Throwable exception, int code) {
         return new Status(IStatus.ERROR, LaunchingPlugin.getUniqueIdentifier(), code, message, exception);
     }
@@ -270,6 +291,21 @@ public class SocketListenMultiConnectorProcess implements IProcess {
         return null;
     }
 
+	/**
+	 * Return the time since this connector started.
+	 */
+	private String getRunningTime() {
+		long total = System.currentTimeMillis() - fStartTime;
+		StringWriter result = new StringWriter();
+		PrintWriter writer = new PrintWriter(result);
+		int minutes = (int) (total / 60 / 1000);
+		int seconds = (int) (total / 1000) % 60;
+		int milliseconds = (int) (total / 1000) % 1000;
+		writer.printf("%02d:%02d.%03d", minutes, seconds, milliseconds).close();
+		return result.toString();
+	}
+
+
     /**
      * Job that waits for incoming VM connections.  When a remote
      * VM connection is accepted, a debug target is created and 
@@ -330,7 +366,7 @@ public class SocketListenMultiConnectorProcess implements IProcess {
                 String vmLabel = constructVMLabel(vm, portArg.value(), fLaunch.getLaunchConfiguration());
                 IDebugTarget debugTarget= JDIDebugModel.newDebugTarget(fLaunch, vm, vmLabel, null, allowTerminate, true);
                 fLaunch.addDebugTarget(debugTarget);
-				fAcceptCount.decrementAndGet();
+				fAccepted++;
                 return Status.OK_STATUS;
             } catch (IOException e) {
                 if (fListeningStopped){
@@ -393,12 +429,11 @@ public class SocketListenMultiConnectorProcess implements IProcess {
                 }
             }
             StringBuffer buffer = new StringBuffer(name);
-            buffer.append("<").append(System.identityHashCode(vm)).append(">");
+			buffer.append("<").append(getRunningTime()).append(">");
             buffer.append('['); 
             buffer.append(port);
             buffer.append(']'); 
             return buffer.toString();
         }
-        
     }
 }
