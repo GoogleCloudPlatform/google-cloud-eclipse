@@ -6,8 +6,11 @@ import java.util.logging.Logger;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.ObservablesManager;
+import org.eclipse.core.databinding.beans.PojoProperties;
 import org.eclipse.core.databinding.observable.Observables;
 import org.eclipse.core.databinding.observable.list.IObservableList;
+import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.core.databinding.observable.value.WritableValue;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
@@ -111,66 +114,92 @@ public class DeployPropertyPage extends PropertyPage {
   }
 
   private void setupProjectIdDataBinding(DataBindingContext context) {
-    ISWTObservableValue promptObservable = WidgetProperties.selection().observe(promptForProjectIdButton);
-    ISWTObservableValue projectIdObservable = WidgetProperties.text(SWT.Modify).observe(projectId);
+    ISWTObservableValue promptButton = WidgetProperties.selection().observe(promptForProjectIdButton);
+    ISWTObservableValue projectIdField = WidgetProperties.text(SWT.Modify).observe(projectId);
 
-    context.bindValue(promptObservable, model.observablePromptForProjectId());
-    context.bindValue(projectIdObservable, model.observableProjectId());
+    IObservableValue promptModel = PojoProperties.value("promptForProjectId").observe(model);
+    IObservableValue projectIdModel = PojoProperties.value("projectId").observe(model);
 
-    context.addValidationStatusProvider(new ProjectIdMultiValidator(promptObservable, projectIdObservable));
+    context.bindValue(promptButton, promptModel);
+    context.bindValue(projectIdField, projectIdModel);
+
+    context.addValidationStatusProvider(new ProjectIdMultiValidator(promptButton, projectIdField));
   }
 
   private void setupProjectVersionDataBinding(DataBindingContext context) {
-    final ISWTObservableValue overrideObservable = WidgetProperties.selection().observe(overrideDefaultVersionButton);
-    final ISWTObservableValue versionObservable = WidgetProperties.text(SWT.Modify).observe(version);
+    ISWTObservableValue overrideButton = WidgetProperties.selection().observe(overrideDefaultVersionButton);
+    ISWTObservableValue versionField = WidgetProperties.text(SWT.Modify).observe(version);
+    ISWTObservableValue versionLabelEnablement = WidgetProperties.enabled().observe(versionLabel);
+    ISWTObservableValue versionFieldEnablement = WidgetProperties.enabled().observe(version);
 
-    context.bindValue(overrideObservable, model.observableOverrideDefaultVersioning());
-    context.bindValue(versionObservable, model.observableVersion());
-    context.bindValue(WidgetProperties.enabled().observe(versionLabel), model.observableOverrideDefaultVersioning());
-    context.bindValue(WidgetProperties.enabled().observe(version), model.observableOverrideDefaultVersioning());
+    // use an intermediary value to control the enabled state of the label and the field based on the override
+    // checkbox's state
+    WritableValue enablement = new WritableValue();
+    context.bindValue(overrideButton, enablement);
+    context.bindValue(versionLabelEnablement, enablement);
+    context.bindValue(versionFieldEnablement, enablement);
 
-    context.addValidationStatusProvider(new OverrideValidator(overrideObservable,
-                                                              versionObservable,
+    IObservableValue overrideModel = PojoProperties.value("overrideDefaultVersioning").observe(model);
+    IObservableValue versionModel = PojoProperties.value("version").observe(model);
+
+    context.bindValue(enablement, overrideModel);
+    context.bindValue(versionField, versionModel);
+
+    context.addValidationStatusProvider(new OverrideValidator(overrideButton,
+                                                              versionField,
                                                               new ProjectVersionValidator()));
   }
 
   private void setupAutoPromoteDataBinding(DataBindingContext context) {
-    context.bindValue(WidgetProperties.selection().observe(autoPromoteButton), model.observableAutoPromote());
+    ISWTObservableValue promoteObservable = WidgetProperties.selection().observe(autoPromoteButton);
+    IObservableValue promoteModelObservable = PojoProperties.value("autoPromote").observe(model);
+    context.bindValue(promoteObservable, promoteModelObservable);
   }
 
   private void setupBucketDataBinding(DataBindingContext context) {
-    final ISWTObservableValue overrideObservable = WidgetProperties.selection().observe(overrideDefaultBucketButton);
-    final ISWTObservableValue bucketObservable = WidgetProperties.text(SWT.Modify).observe(bucket);
+    ISWTObservableValue overrideButton = WidgetProperties.selection().observe(overrideDefaultBucketButton);
+    ISWTObservableValue bucketField = WidgetProperties.text(SWT.Modify).observe(bucket);
+    ISWTObservableValue bucketLabelEnablement = WidgetProperties.enabled().observe(bucketLabel);
+    ISWTObservableValue bucketFieldEnablement = WidgetProperties.enabled().observe(bucket);
 
-    context.bindValue(overrideObservable, model.observableOverrideDefaultBucket());
-    context.bindValue(bucketObservable, model.observableBucket());
-    context.bindValue(WidgetProperties.enabled().observe(bucketLabel), model.observableOverrideDefaultBucket());
-    context.bindValue(WidgetProperties.enabled().observe(bucket), model.observableOverrideDefaultBucket());
+    // use an intermediary value to control the enabled state of the label and the field based on the override
+    // checkbox's state
+    WritableValue enablement = new WritableValue();
+    context.bindValue(overrideButton, enablement);
+    context.bindValue(bucketLabelEnablement, enablement);
+    context.bindValue(bucketFieldEnablement, enablement);
 
-    context.addValidationStatusProvider(new OverrideValidator(overrideObservable,
-                                                              bucketObservable,
+    IObservableValue overrideModelObservable = PojoProperties.value("overrideDefaultBucket").observe(model);
+    IObservableValue bucketModelObservable = PojoProperties.value("bucket").observe(model);
+
+    context.bindValue(enablement, overrideModelObservable);
+    context.bindValue(bucketField, bucketModelObservable);
+
+    context.addValidationStatusProvider(new OverrideValidator(overrideButton,
+                                                              bucketField,
                                                               new BucketNameValidator()));
   }
 
   @Override
   public boolean performOk() {
     if (isValid()) {
-      try {
-        savePreferences();
-        return true;
-      } catch (BackingStoreException exception) {
-        logger.log(Level.SEVERE, "Could not save deploy preferences", exception);
-        MessageDialog.openError(getShell(),
-                                Messages.getString("deploy.preferences.save.error.title"),
-                                Messages.getString("deploy.preferences.save.error.message",
-                                                   exception.getLocalizedMessage()));
-      }
+      return savePreferences();
     }
     return false;
   }
 
-  private void savePreferences() throws BackingStoreException {
-    model.savePreferences();
+  private boolean savePreferences() {
+    try {
+      model.savePreferences();
+      return true;
+    } catch (BackingStoreException exception) {
+      logger.log(Level.SEVERE, "Could not save deploy preferences", exception);
+      MessageDialog.openError(getShell(),
+                              Messages.getString("deploy.preferences.save.error.title"),
+                              Messages.getString("deploy.preferences.save.error.message",
+                                                 exception.getLocalizedMessage()));
+      return false;
+    }
   }
 
   private void loadPreferences() {

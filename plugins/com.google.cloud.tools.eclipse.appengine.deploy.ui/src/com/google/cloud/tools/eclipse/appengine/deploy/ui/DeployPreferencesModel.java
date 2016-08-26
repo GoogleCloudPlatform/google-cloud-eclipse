@@ -1,6 +1,5 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
-import org.eclipse.core.databinding.observable.value.WritableValue;
 import org.eclipse.core.resources.IProject;
 import org.osgi.service.prefs.BackingStoreException;
 
@@ -8,15 +7,15 @@ import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployPr
 
 public class DeployPreferencesModel {
 
-  private WritableValue promptForProjectId = new WritableValue(Boolean.TRUE, Boolean.class);
-  private WritableValue projectId = new WritableValue();
-  private WritableValue overrideDefaultVersioning = new WritableValue(Boolean.FALSE, Boolean.class);
-  private WritableValue version = new WritableValue();
-  private WritableValue autoPromote = new WritableValue(Boolean.TRUE, Boolean.class);
-  private WritableValue overrideDefaultBucket = new WritableValue(Boolean.FALSE, Boolean.class);
-  private WritableValue bucket = new WritableValue();
-
   private StandardDeployPreferences preferences;
+
+  private boolean promptForProjectId;
+  private String projectId;
+  private boolean overrideDefaultVersioning;
+  private String version;
+  private boolean autoPromote;
+  private boolean overrideDefaultBucket;
+  private String bucket;
 
   public DeployPreferencesModel(IProject project) {
     preferences = new StandardDeployPreferences(project);
@@ -45,86 +44,58 @@ public class DeployPreferencesModel {
   }
 
   public boolean isPromptForProjectId() {
-    return (boolean) promptForProjectId.getValue();
-  }
-
-  public void setPromptForProjectId(boolean promptForProjectId) {
-    this.promptForProjectId.setValue(promptForProjectId);
-  }
-
-  public String getProjectId() {
-    return (String) projectId.getValue();
-  }
-
-  public void setProjectId(String projectId) {
-    this.projectId.setValue(projectId);
-  }
-
-  public boolean isOverrideDefaultVersioning() {
-    return (boolean) overrideDefaultVersioning.getValue();
-  }
-
-  public void setOverrideDefaultVersioning(boolean overrideDefaultVersioning) {
-    this.overrideDefaultVersioning.setValue(overrideDefaultVersioning);
-  }
-
-  public String getVersion() {
-    return (String) version.getValue();
-  }
-
-  public void setVersion(String version) {
-    this.version.setValue(version);
-  }
-
-  public boolean isAutoPromote() {
-    return (boolean) autoPromote.getValue();
-  }
-
-  public void setAutoPromote(boolean autoPromote) {
-    this.autoPromote.setValue(autoPromote);
-  }
-
-  public boolean isOverrideDefaultBucket() {
-    return (boolean) overrideDefaultBucket.getValue();
-  }
-
-  public void setOverrideDefaultBucket(boolean overrideDefaultBucket) {
-    this.overrideDefaultBucket.setValue(overrideDefaultBucket);
-  }
-
-  public String getBucket() {
-    return (String) bucket.getValue();
-  }
-
-  public void setBucket(String bucket) {
-    this.bucket.setValue(bucket);
-  }
-
-  public WritableValue observablePromptForProjectId() {
     return promptForProjectId;
   }
 
-  public WritableValue observableProjectId() {
+  public void setPromptForProjectId(boolean promptForProjectId) {
+    this.promptForProjectId = promptForProjectId;
+  }
+
+  public String getProjectId() {
     return projectId;
   }
 
-  public WritableValue observableOverrideDefaultVersioning() {
+  public void setProjectId(String projectId) {
+    this.projectId = projectId;
+  }
+
+  public boolean isOverrideDefaultVersioning() {
     return overrideDefaultVersioning;
   }
 
-  public WritableValue observableVersion() {
+  public void setOverrideDefaultVersioning(boolean overrideDefaultVersioning) {
+    this.overrideDefaultVersioning = overrideDefaultVersioning;
+  }
+
+  public String getVersion() {
     return version;
   }
 
-  public WritableValue observableAutoPromote() {
+  public void setVersion(String version) {
+    this.version = version;
+  }
+
+  public boolean isAutoPromote() {
     return autoPromote;
   }
 
-  public WritableValue observableOverrideDefaultBucket() {
+  public void setAutoPromote(boolean autoPromote) {
+    this.autoPromote = autoPromote;
+  }
+
+  public boolean isOverrideDefaultBucket() {
     return overrideDefaultBucket;
   }
 
-  public WritableValue observableBucket() {
+  public void setOverrideDefaultBucket(boolean overrideDefaultBucket) {
+    this.overrideDefaultBucket = overrideDefaultBucket;
+  }
+
+  public String getBucket() {
     return bucket;
+  }
+
+  public void setBucket(String bucket) {
+    this.bucket = bucket;
   }
 }

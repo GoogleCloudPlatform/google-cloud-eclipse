@@ -26,12 +26,6 @@ public class StandardDeployPreferences {
   }
 
   public void save() throws BackingStoreException {
-    preferenceStore.put(PREF_PROJECT_ID, getProjectId());
-    preferenceStore.putBoolean(PREF_OVERRIDE_DEFAULT_VERSIONING, isOverrideDefaultVersioning());
-    preferenceStore.put(PREF_CUSTOM_VERSION, getVersion());
-    preferenceStore.putBoolean(PREF_ENABLE_AUTO_PROMOTE, isAutoPromote());
-    preferenceStore.putBoolean(PREF_OVERRIDE_DEFAULT_BUCKET, isOverrideDefaultBucket());
-    preferenceStore.put(PREF_CUSTOM_BUCKET, getBucket());
     preferenceStore.flush();
   }
 
