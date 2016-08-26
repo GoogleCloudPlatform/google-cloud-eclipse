@@ -1,6 +1,7 @@
 package com.google.cloud.tools.eclipse.ui.util.databinding;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
 import org.eclipse.core.runtime.IStatus;
@@ -70,5 +71,15 @@ public class ProjectIdValidatorTest {
   @Test
   public void testValidate_tooShortName() {
     assertThat(new ProjectIdValidator().validate("a2345").getSeverity(), is(IStatus.ERROR));
+  }
+
+  @Test
+  public void testIsValid_validName() {
+    assertNull(new ProjectIdValidator().isValid("asdfghjk"));
+  }
+
+  @Test
+  public void testIsValid_emptyName() {
+    assertThat(new ProjectIdValidator().isValid(""), is("Empty project ID"));
   }
 }

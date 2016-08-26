@@ -43,7 +43,7 @@
     <consolePatternMatchListener
       class="com.google.cloud.tools.eclipse.ui.util.console.PatternToHyperlinkConverter"
       id="com.google.cloud.tools.eclipse.appengine.deploy.consolePatternMatchListener"
-      regex="https://[a-zA-Z][a-zA-Z0-9-.]*[a-zA-Z0-9]?\.appspot\.com">
+      regex="https://[a-zA-Z0-9][a-zA-Z0-9-.]*[a-zA-Z0-9]?\.appspot\.com">
       <enablement>
         <test
           property="com.google.cloud.tools.eclipse.ui.util.console.name"

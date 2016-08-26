@@ -1,6 +1,12 @@
 package com.google.cloud.tools.eclipse.appengine.deploy;
 
-import com.google.cloud.tools.eclipse.util.status.StatusUtil;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -12,17 +18,14 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 
 /**
  * Parses and returns project ID and version from appengine-web.xml
+ *
+ * @deprecated Deployment should not rely on the project Id and version set in the appengine-web.xml
  */
+@Deprecated
 public class AppEngineDeployInfo {
 
   private static final String WEB_XML_NS_URI = "http://appengine.google.com/ns/1.0";

@@ -1,7 +1,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
-import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -9,14 +8,11 @@ import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.ObservablesManager;
 import org.eclipse.core.databinding.observable.Observables;
 import org.eclipse.core.databinding.observable.list.IObservableList;
-import org.eclipse.core.databinding.observable.value.WritableValue;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.jface.databinding.preference.PreferencePageSupport;
 import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
@@ -25,7 +21,6 @@ import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
@@ -38,7 +33,7 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.PropertyPage;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
-import org.eclipse.ui.preferences.ScopedPreferenceStore;
+import org.osgi.service.prefs.BackingStoreException;
 
 import com.google.cloud.tools.eclipse.ui.util.FontUtil;
 import com.google.cloud.tools.eclipse.ui.util.databinding.BucketNameValidator;
@@ -53,17 +48,6 @@ public class DeployPropertyPage extends PropertyPage {
   private static final String APPENGINE_DASHBOARD_URL = "https://console.cloud.google.com/appengine";
 
   private static final int INDENT_CHECKBOX_ENABLED_WIDGET = 10;
-
-  private static final String PREFERENCE_STORE_DEFAULTS_QUALIFIER =
-      "com.google.cloud.tools.eclipse.appengine.deploy.defaults";
-  private static final String PREFERENCE_STORE_QUALIFIER = "com.google.cloud.tools.eclipse.appengine.deploy";
-  private static final String PREF_PROMPT_FOR_PROJECT_ID = "project.id.promptOnDeploy"; // boolean
-  private static final String PREF_PROJECT_ID = "project.id";
-  private static final String PREF_OVERRIDE_DEFAULT_VERSIONING = "project.version.overrideDefault"; // boolean
-  private static final String PREF_CUSTOM_VERSION = "project.version";
-  private static final String PREF_ENABLE_AUTO_PROMOTE = "project.promote"; // boolean
-  private static final String PREF_OVERRIDE_DEFAULT_BUCKET = "project.bucket.overrideDefault"; // boolean
-  private static final String PREF_CUSTOM_BUCKET = "project.bucket";
 
   private static Logger logger = Logger.getLogger(DeployPropertyPage.class.getName());
 
@@ -81,14 +65,9 @@ public class DeployPropertyPage extends PropertyPage {
   private Label bucketLabel;
   private Text bucket;
 
-  private Model model = new Model();
+  private DeployPreferencesModel model;
   private ObservablesManager observables;
   private DataBindingContext bindingContext;
-
-
-  public DeployPropertyPage() {
-    DefaultScope.INSTANCE.getNode(PREFERENCE_STORE_DEFAULTS_QUALIFIER).putBoolean(PREF_PROMPT_FOR_PROJECT_ID, true);
-  }
 
   @Override
   protected Control createContents(Composite parent) {
@@ -135,7 +114,8 @@ public class DeployPropertyPage extends PropertyPage {
     ISWTObservableValue promptObservable = WidgetProperties.selection().observe(promptForProjectIdButton);
     ISWTObservableValue projectIdObservable = WidgetProperties.text(SWT.Modify).observe(projectId);
 
-    context.bindValue(promptObservable, model.promptForProjectId);
+    context.bindValue(promptObservable, model.observablePromptForProjectId());
+    context.bindValue(projectIdObservable, model.observableProjectId());
 
     context.addValidationStatusProvider(new ProjectIdMultiValidator(promptObservable, projectIdObservable));
   }
@@ -144,10 +124,10 @@ public class DeployPropertyPage extends PropertyPage {
     final ISWTObservableValue overrideObservable = WidgetProperties.selection().observe(overrideDefaultVersionButton);
     final ISWTObservableValue versionObservable = WidgetProperties.text(SWT.Modify).observe(version);
 
-    context.bindValue(overrideObservable, model.overrideDefaultVersioning);
-    context.bindValue(versionObservable, model.version);
-    context.bindValue(WidgetProperties.enabled().observe(versionLabel), model.overrideDefaultVersioning);
-    context.bindValue(WidgetProperties.enabled().observe(version), model.overrideDefaultVersioning);
+    context.bindValue(overrideObservable, model.observableOverrideDefaultVersioning());
+    context.bindValue(versionObservable, model.observableVersion());
+    context.bindValue(WidgetProperties.enabled().observe(versionLabel), model.observableOverrideDefaultVersioning());
+    context.bindValue(WidgetProperties.enabled().observe(version), model.observableOverrideDefaultVersioning());
 
     context.addValidationStatusProvider(new OverrideValidator(overrideObservable,
                                                               versionObservable,
@@ -155,17 +135,17 @@ public class DeployPropertyPage extends PropertyPage {
   }
 
   private void setupAutoPromoteDataBinding(DataBindingContext context) {
-    context.bindValue(WidgetProperties.selection().observe(autoPromoteButton), model.autoPromote);
+    context.bindValue(WidgetProperties.selection().observe(autoPromoteButton), model.observableAutoPromote());
   }
 
   private void setupBucketDataBinding(DataBindingContext context) {
     final ISWTObservableValue overrideObservable = WidgetProperties.selection().observe(overrideDefaultBucketButton);
     final ISWTObservableValue bucketObservable = WidgetProperties.text(SWT.Modify).observe(bucket);
 
-    context.bindValue(overrideObservable, model.overrideDefaultBucket);
-    context.bindValue(bucketObservable, model.bucket);
-    context.bindValue(WidgetProperties.enabled().observe(bucketLabel), model.overrideDefaultBucket);
-    context.bindValue(WidgetProperties.enabled().observe(bucket), model.overrideDefaultBucket);
+    context.bindValue(overrideObservable, model.observableOverrideDefaultBucket());
+    context.bindValue(bucketObservable, model.observableBucket());
+    context.bindValue(WidgetProperties.enabled().observe(bucketLabel), model.observableOverrideDefaultBucket());
+    context.bindValue(WidgetProperties.enabled().observe(bucket), model.observableOverrideDefaultBucket());
 
     context.addValidationStatusProvider(new OverrideValidator(overrideObservable,
                                                               bucketObservable,
@@ -178,7 +158,7 @@ public class DeployPropertyPage extends PropertyPage {
       try {
         savePreferences();
         return true;
-      } catch (IOException exception) {
+      } catch (BackingStoreException exception) {
         logger.log(Level.SEVERE, "Could not save deploy preferences", exception);
         MessageDialog.openError(getShell(),
                                 Messages.getString("deploy.preferences.save.error.title"),
@@ -189,41 +169,13 @@ public class DeployPropertyPage extends PropertyPage {
     return false;
   }
 
-  private void savePreferences() throws IOException {
-    IPreferenceStore preferenceStore = getPreferenceStore();
-
-    preferenceStore.setValue(PREF_PROJECT_ID, model.getProjectId());
-    preferenceStore.setValue(PREF_PROMPT_FOR_PROJECT_ID, model.isPromptForProjectId());
-    preferenceStore.setValue(PREF_OVERRIDE_DEFAULT_VERSIONING, model.isOverrideDefaultVersioning());
-    preferenceStore.setValue(PREF_CUSTOM_VERSION, model.getVersion());
-    preferenceStore.setValue(PREF_ENABLE_AUTO_PROMOTE, model.isAutoPromote());
-    preferenceStore.setValue(PREF_OVERRIDE_DEFAULT_BUCKET, model.isOverrideDefaultBucket());
-    preferenceStore.setValue(PREF_CUSTOM_BUCKET, model.getBucket());
-
-    ScopedPreferenceStore scopedPreferenceStore = (ScopedPreferenceStore) preferenceStore;
-    if (scopedPreferenceStore.needsSaving()) {
-      scopedPreferenceStore.save();
-    }
+  private void savePreferences() throws BackingStoreException {
+    model.savePreferences();
   }
 
   private void loadPreferences() {
-    IPreferenceStore preferenceStore = getPreferenceStore();
-
-    model.setProjectId(preferenceStore.getString(PREF_PROJECT_ID));
-    model.setPromptForProjectId(preferenceStore.getBoolean(PREF_PROMPT_FOR_PROJECT_ID));
-    model.setOverrideDefaultVersioning(preferenceStore.getBoolean(PREF_OVERRIDE_DEFAULT_VERSIONING));
-    model.setVersion(preferenceStore.getString(PREF_CUSTOM_VERSION));
-    model.setAutoPromote(preferenceStore.getBoolean(PREF_ENABLE_AUTO_PROMOTE));
-    model.setOverrideDefaultBucket(preferenceStore.getBoolean(PREF_OVERRIDE_DEFAULT_BUCKET));
-    model.setBucket(preferenceStore.getString(PREF_CUSTOM_BUCKET));
-  }
-
-  @Override
-  protected IPreferenceStore doGetPreferenceStore() {
     IProject project = AdapterUtil.adapt(getElement(), IProject.class);
-    return new ScopedPreferenceStore(new ProjectScope(project),
-                                     PREFERENCE_STORE_QUALIFIER,
-                                     PREFERENCE_STORE_DEFAULTS_QUALIFIER);
+    model = new DeployPreferencesModel(project);
   }
 
   private void createProjectIdSection(Composite parent) {
@@ -333,73 +285,6 @@ public class DeployPropertyPage extends PropertyPage {
   private Image getInfoDecorationImage() {
     return FieldDecorationRegistry.getDefault()
         .getFieldDecoration(FieldDecorationRegistry.DEC_CONTENT_PROPOSAL).getImage();
-  }
-
-  private static class Model {
-
-    private WritableValue promptForProjectId = new WritableValue(Boolean.TRUE, Boolean.class);
-    private WritableValue projectId = new WritableValue();
-    private WritableValue overrideDefaultVersioning = new WritableValue(Boolean.FALSE, Boolean.class);
-    private WritableValue version = new WritableValue();
-    private WritableValue autoPromote = new WritableValue(Boolean.TRUE, Boolean.class);
-    private WritableValue overrideDefaultBucket = new WritableValue(Boolean.FALSE, Boolean.class);
-    private WritableValue bucket = new WritableValue();
-
-    public boolean isPromptForProjectId() {
-      return (boolean) promptForProjectId.getValue();
-    }
-
-    public void setPromptForProjectId(boolean promptForProjectId) {
-      this.promptForProjectId.setValue(promptForProjectId);
-    }
-
-    public String getProjectId() {
-      return (String) projectId.getValue();
-    }
-
-    public void setProjectId(String projectId) {
-      this.projectId.setValue(projectId);
-    }
-
-    public boolean isOverrideDefaultVersioning() {
-      return (boolean) overrideDefaultVersioning.getValue();
-    }
-
-    public void setOverrideDefaultVersioning(boolean overrideDefaultVersioning) {
-      this.overrideDefaultVersioning.setValue(overrideDefaultVersioning);
-    }
-
-    public String getVersion() {
-      return (String) version.getValue();
-    }
-
-    public void setVersion(String version) {
-      this.version.setValue(version);
-    }
-
-    public boolean isAutoPromote() {
-      return (boolean) autoPromote.getValue();
-    }
-
-    public void setAutoPromote(boolean autoPromote) {
-      this.autoPromote.setValue(autoPromote);
-    }
-
-    public boolean isOverrideDefaultBucket() {
-      return (boolean) overrideDefaultBucket.getValue();
-    }
-
-    public void setOverrideDefaultBucket(boolean overrideDefaultBucket) {
-      this.overrideDefaultBucket.setValue(overrideDefaultBucket);
-    }
-
-    public String getBucket() {
-      return (String) bucket.getValue();
-    }
-
-    public void setBucket(String bucket) {
-      this.bucket.setValue(bucket);
-    }
   }
 
   @Override

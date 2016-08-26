@@ -16,21 +16,8 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.ui.standard;
 
-import com.google.api.client.auth.oauth2.Credential;
-import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineProjectDeployer;
-import com.google.cloud.tools.eclipse.appengine.deploy.CleanupOldDeploysJob;
-import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
-import com.google.cloud.tools.eclipse.appengine.deploy.standard.ExplodedWarPublisher;
-import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployJob;
-import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployJobConfig;
-import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardProjectStaging;
-import com.google.cloud.tools.eclipse.appengine.login.IGoogleLoginService;
-import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListener;
-import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities;
-import com.google.cloud.tools.eclipse.ui.util.ProjectFromSelectionHelper;
-import com.google.cloud.tools.eclipse.ui.util.ServiceUtils;
-import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
-import com.google.common.annotations.VisibleForTesting;
+import java.io.IOException;
+import java.nio.file.Files;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -41,11 +28,32 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.jface.window.Window;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
+import org.eclipse.ui.handlers.HandlerUtil;
 
-import java.io.IOException;
-import java.nio.file.Files;
+import com.google.api.client.auth.oauth2.Credential;
+import com.google.cloud.tools.appengine.api.deploy.DefaultDeployConfiguration;
+import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineProjectDeployer;
+import com.google.cloud.tools.eclipse.appengine.deploy.CleanupOldDeploysJob;
+import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
+import com.google.cloud.tools.eclipse.appengine.deploy.standard.ExplodedWarPublisher;
+import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployJob;
+import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployJobConfig;
+import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployPreferences;
+import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployPreferencesConverter;
+import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardProjectStaging;
+import com.google.cloud.tools.eclipse.appengine.login.IGoogleLoginService;
+import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListener;
+import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities;
+import com.google.cloud.tools.eclipse.ui.util.ProjectFromSelectionHelper;
+import com.google.cloud.tools.eclipse.ui.util.ServiceUtils;
+import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectIdValidator;
+import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
+import com.google.common.annotations.VisibleForTesting;
 
 /**
  * Command handler to deploy an App Engine web application project to App Engine Standard.
@@ -75,7 +83,7 @@ public class StandardDeployCommandHandler extends AbstractHandler {
       if (project != null) {
         Credential credential = loginIfNeeded(event);
         if (credential != null) {
-          launchDeployJob(project, credential);
+          launchDeployJob(project, credential, event);
         }
       }
       // return value must be null, reserved for future use
@@ -85,32 +93,78 @@ public class StandardDeployCommandHandler extends AbstractHandler {
     }
   }
 
-  private void launchDeployJob(IProject project, Credential credential)
-      throws IOException, CoreException {
-    IPath workDirectory = createWorkDirectory();
-    MessageConsole messageConsole = MessageConsoleUtilities.getMessageConsole(CONSOLE_NAME, null, true /* show */);
-    final MessageConsoleStream outputStream = messageConsole.newMessageStream();
+  private void launchDeployJob(IProject project, Credential credential, ExecutionEvent event) 
+      throws IOException, ExecutionException {
+    try {
+      IPath workDirectory = createWorkDirectory();
+      MessageConsole messageConsole = MessageConsoleUtilities.getMessageConsole(CONSOLE_NAME, null, true /* show */);
+      final MessageConsoleStream outputStream = messageConsole.newMessageStream();
 
+      StandardDeployJobConfig config = getDeployJobConfig(project, credential, event, workDirectory, outputStream);
+      StandardDeployJob deploy = new StandardDeployJob(new ExplodedWarPublisher(),
+                                                       new StandardProjectStaging(),
+                                                       new AppEngineProjectDeployer(),
+                                                       config);
+      deploy.addJobChangeListener(new JobChangeAdapter() {
+
+        @Override
+        public void done(IJobChangeEvent event) {
+          super.done(event);
+          launchCleanupJob();
+        }
+      });
+      deploy.schedule();
+    } catch (DeployCancelledException ex) {
+      // nothing to do
+    }
+  }
+
+  private StandardDeployJobConfig getDeployJobConfig(IProject project,
+                                                     Credential credential,
+                                                     ExecutionEvent event,
+                                                     IPath workDirectory,
+                                                     final MessageConsoleStream outputStream) throws ExecutionException,
+                                                                                              DeployCancelledException {
     StandardDeployJobConfig config = new StandardDeployJobConfig();
-    config.setProject(project);
-    config.setCredential(credential);
-    config.setWorkDirectory(workDirectory);
-    config.setStdoutLineListener(new MessageConsoleWriterOutputLineListener(outputStream));
-    config.setStderrLineListener(new MessageConsoleWriterOutputLineListener(outputStream));
-    StandardDeployJob deploy =
-        new StandardDeployJob(new ExplodedWarPublisher(),
-                              new StandardProjectStaging(),
-                              new AppEngineProjectDeployer(),
-                              config);
-    deploy.addJobChangeListener(new JobChangeAdapter() {
+    config.setProject(project)
+      .setCredential(credential)
+      .setWorkDirectory(workDirectory)
+      .setStdoutLineListener(new MessageConsoleWriterOutputLineListener(outputStream))
+      .setStderrLineListener(new MessageConsoleWriterOutputLineListener(outputStream))
+      .setDeployConfiguration(getDeployConfiguration(project, event));
+    return config;
+  }
 
-      @Override
-      public void done(IJobChangeEvent event) {
-        super.done(event);
-        launchCleanupJob();
-      }
-    });
-    deploy.schedule();
+  private DefaultDeployConfiguration getDeployConfiguration(IProject project, ExecutionEvent event)
+      throws ExecutionException, DeployCancelledException {
+    StandardDeployPreferences deployPreferences = new StandardDeployPreferences(project);
+    if (deployPreferences.isPromptForProjectId()
+        || deployPreferences.getProjectId() == null
+        || deployPreferences.getProjectId().isEmpty()) {
+      String projectId = promptForProjectId(HandlerUtil.getActiveShellChecked(event), deployPreferences.getProjectId());
+      deployPreferences.setProjectId(projectId);
+    }
+
+    if (deployPreferences.getProjectId() == null || deployPreferences.getProjectId().isEmpty()) {
+      throw new ExecutionException(Messages.getString("error.projectId.missing"));
+    }
+    return new StandardDeployPreferencesConverter(deployPreferences).toDeployConfiguration();
+  }
+
+  private String promptForProjectId(Shell shell, String initialValue) throws DeployCancelledException {
+    InputDialog dialog = new InputDialog(shell,
+                    Messages.getString("dialog.prompt.projectId.title"),
+                    Messages.getString("dialog.prompt.projectId.message"),
+                    initialValue,
+                    new ProjectIdValidator());
+    int result = dialog.open();
+    if (result == Window.OK) {
+      return dialog.getValue();
+    } else if (result == Window.CANCEL) {
+      throw new DeployCancelledException();
+    } else {
+      return null;
+    }
   }
 
   private IPath createWorkDirectory() throws IOException {
@@ -138,5 +192,8 @@ public class StandardDeployCommandHandler extends AbstractHandler {
   private IPath getTempDir() {
     return Platform.getStateLocation(Platform.getBundle("com.google.cloud.tools.eclipse.appengine.deploy"))
         .append("tmp");
+  }
+
+  private static class DeployCancelledException extends Exception {
   }
 }

@@ -88,7 +88,7 @@ public class StandardDeployJob extends WorkspaceJob {
       if (cloudSdkProcessError) { // temporary way of error handling, after #439 is fixed, it'll be cleaner
         return StatusUtil.error(getClass(), "Staging failed, check the error message in the Console View");
       }
-      deployer.deploy(stagingDirectory, cloudSdk, progress.newChild(70));
+      deployer.deploy(stagingDirectory, cloudSdk, config.getDeployConfiguration(), progress.newChild(70));
       if (cloudSdkProcessError) { // temporary way of error handling, after #439 is fixed, it'll be cleaner
         return StatusUtil.error(getClass(), "Deploy failed, check the error message in the Console View");
       }
@@ -115,7 +115,7 @@ public class StandardDeployJob extends WorkspaceJob {
     Files.write(destination, jsonCredential.getBytes(Charsets.UTF_8));
   }
 
-  private CloudSdk getCloudSdk(Path credentialFile) throws IOException {
+  private CloudSdk getCloudSdk(Path credentialFile) {
     CloudSdk cloudSdk = new CloudSdk.Builder()
                           .addStdOutLineListener(config.getStdoutLineListener())
                           .addStdErrLineListener(config.getStderrLineListener())
