@@ -81,14 +81,6 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       return;
     }
 
-    // App Engine dev server can only debug one module at a time
-    // as we cannot configure the IVMConnector to continue listening
-    if (mode.equals(ILaunchManager.DEBUG_MODE) && modules.length > 1) {
-      String message = "The App Engine development server supports only 1 module when running in debug mode";
-      Status status = new Status(IStatus.ERROR, Activator.PLUGIN_ID, message);
-      throw new CoreException(status);
-    }
-
     LocalAppEngineServerBehaviour serverBehaviour =
         (LocalAppEngineServerBehaviour) server.loadAdapter(LocalAppEngineServerBehaviour.class, null);
 
