@@ -1,4 +1,8 @@
-package com.google.cloud.tools.eclipse.appengine.deploy;
+package com.google.cloud.tools.eclipse.appengine.deploy.ui;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.either;
+import static org.junit.Assert.assertThat;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,9 +21,9 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 public class XmlTest {
-    
+
   private Document doc;
-	
+
   @Before
   public void setUp() throws ParserConfigurationException, SAXException, IOException {
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -29,24 +33,24 @@ public class XmlTest {
     doc = builder.parse(
         new File("../com.google.cloud.tools.eclipse.appengine.deploy.ui/plugin.xml"));
   }
-  
+
   @Test
   public void testLimitedVisibility() {
     NodeList pages = doc.getElementsByTagName("page");
     Assert.assertEquals(2, pages.getLength());
     NodeList enabledWhen = doc.getElementsByTagName("enabledWhen");
-    Assert.assertEquals(2, enabledWhen.getLength());
+    Assert.assertEquals(3, enabledWhen.getLength());
     NodeList tests = doc.getElementsByTagName("test");
-    Assert.assertEquals(1, tests.getLength());
+    Assert.assertEquals(2, tests.getLength());
     NodeList adapts = doc.getElementsByTagName("adapt");
     Assert.assertEquals(1, adapts.getLength());
-    
+
     for (int i = 0; i < enabledWhen.getLength(); i++) {
       Element element = (Element) enabledWhen.item(i);
       Node parent = element.getParentNode();
-      Assert.assertEquals("page", parent.getNodeName());
+      assertThat(parent.getNodeName(), either(is("page")).or(is("handler")));
     }
-    
+
     Element adapt = (Element) adapts.item(0);
     Assert.assertEquals("org.eclipse.core.resources.IProject", adapt.getAttribute("type"));
   }
