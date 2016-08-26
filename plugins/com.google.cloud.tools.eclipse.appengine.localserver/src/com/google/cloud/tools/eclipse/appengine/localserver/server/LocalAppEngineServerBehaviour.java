@@ -25,15 +25,21 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A {@link ServerBehaviourDelegate} for App Engine Server executed via the Java App Management
  * Client Library.
  */
 public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
+  private static final Logger logger =
+      Logger.getLogger(LocalAppEngineServerBehaviour.class.getName());
+
   private LocalAppEngineStartListener localAppEngineStartListener;
   private LocalAppEngineExitListener localAppEngineExitListener;
   private AppEngineDevServer devServer;
+  private Process devProcess;
 
   public LocalAppEngineServerBehaviour () {
     localAppEngineStartListener = new LocalAppEngineStartListener();
@@ -42,9 +48,31 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
 
   @Override
   public void stop(boolean force) {
-    setServerState(IServer.STATE_STOPPING);
-    terminate();
-    setServerState(IServer.STATE_STOPPED);    
+    int serverState = getServer().getServerState();
+    if (serverState == IServer.STATE_STOPPED) {
+      return;
+    }
+    // If the server seems to be running, and we haven't already tried to stop it,
+    // then try to shut it down nicely
+    if (devServer != null && (!force || serverState != IServer.STATE_STOPPING)) {
+      setServerState(IServer.STATE_STOPPING);
+      // TODO: when available configure the host and port specified in the server
+      DefaultStopConfiguration stopConfig = new DefaultStopConfiguration();
+      try {
+        devServer.stop(stopConfig);
+      } catch (AppEngineException ex) {
+        logger.log(Level.WARNING, "Error terminating server: " + ex.getMessage(), ex);
+      }
+    } else {
+      // we've already given it a chance
+      logger.info("forced stop: destroying associated processes");
+      if (devProcess != null) {
+        devProcess.destroy();
+        devProcess = null;
+      }
+      devServer = null;
+      setServerState(IServer.STATE_STOPPED);
+    }
   }
 
   /**
@@ -179,27 +207,16 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
     devServer = new CloudSdkAppEngineDevServer(cloudSdk);
   }
 
-  private void terminate() {
-    if (devServer != null) {
-      // TODO: when available configure the host and port specified in the server
-      DefaultStopConfiguration stopConfig = new DefaultStopConfiguration();
-      try {
-        devServer.stop(stopConfig);
-      } catch (AppEngineException ex) {
-        // TODO what do we need to do here
-        Activator.logError("Error terminating server: " + ex.getMessage());
-      }
-      devServer = null;
-    }
-  }
-
   /**
    * A {@link ProcessExitListener} for the App Engine server.
    */
   public class LocalAppEngineExitListener implements ProcessExitListener {
     @Override
     public void onExit(int exitCode) {
-      stop(true);
+      logger.log(Level.FINE, "Process exit: code=" + exitCode);
+      devServer = null;
+      devProcess = null;
+      setServerState(IServer.STATE_STOPPED);
     }
   }
 
@@ -209,6 +226,8 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
   public class LocalAppEngineStartListener implements ProcessStartListener {
     @Override
     public void onStart(Process process) {
+      logger.log(Level.FINE, "New Process: " + process);
+      devProcess = process;
       setServerState(IServer.STATE_STARTED);
     }
   }

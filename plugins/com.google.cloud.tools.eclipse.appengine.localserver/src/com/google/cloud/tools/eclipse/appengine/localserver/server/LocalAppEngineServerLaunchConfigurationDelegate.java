@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
@@ -67,20 +68,21 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
   private static final String DEBUGGER_HOST = "localhost";
 
   @Override
-  public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch,
+  public void launch(ILaunchConfiguration configuration, String mode, final ILaunch launch,
       IProgressMonitor monitor) throws CoreException {
     AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.APP_ENGINE_LOCAL_SERVER,
         AnalyticsEvents.APP_ENGINE_LOCAL_SERVER_MODE, mode);
 
     IServer server = ServerUtil.getServer(configuration);
     if (server == null) {
-      return;
+      String message = "There is no App Engine development server available";
+      Status status = new Status(IStatus.ERROR, Activator.PLUGIN_ID, message);
+      throw new CoreException(status);
     }
     IModule[] modules = server.getModules();
     if (modules == null || modules.length == 0) {
       return;
     }
-
     // App Engine dev server can only debug one module at a time
     // as we cannot configure the IVMConnector to continue listening
     if (mode.equals(ILaunchManager.DEBUG_MODE) && modules.length > 1) {
@@ -109,7 +111,20 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
         server.addServerListener(new OpenBrowserListener(pageLocation));
       }
     }
-
+    // If the server is stopped, then terminate any ancillary processes
+    server.addServerListener(new IServerListener() {
+      @Override
+      public void serverChanged(ServerEvent event) {
+        if (event.getState() == IServer.STATE_STOPPED) {
+          event.getServer().removeServerListener(this);
+          try {
+            launch.terminate();
+          } catch (DebugException ex) {
+            logger.log(Level.WARNING, "Unable to terminate launch", ex);
+          }
+        }
+      }
+    });
     if (ILaunchManager.DEBUG_MODE.equals(mode)) {
       int debugPort = getDebugPort();
       setupDebugTarget(launch, configuration, debugPort, monitor);
