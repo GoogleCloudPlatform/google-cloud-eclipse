@@ -8,7 +8,6 @@
     <version>0.1.0-SNAPSHOT</version>
     <relativePath>../../</relativePath>
   </parent>
-  <groupId>com.google.cloud.tools.eclipse</groupId>
   <artifactId>com.google.cloud.tools.eclipse.appengine.ui.test</artifactId>
   <packaging>eclipse-test-plugin</packaging>
 
