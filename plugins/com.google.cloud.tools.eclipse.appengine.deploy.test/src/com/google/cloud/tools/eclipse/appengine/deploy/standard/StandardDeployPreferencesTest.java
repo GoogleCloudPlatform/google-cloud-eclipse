@@ -1,8 +1,10 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.standard;
 
-import static org.junit.Assert.*;
-
 import static org.hamcrest.text.IsEmptyString.isEmptyString;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
 
 public class StandardDeployPreferencesTest {
