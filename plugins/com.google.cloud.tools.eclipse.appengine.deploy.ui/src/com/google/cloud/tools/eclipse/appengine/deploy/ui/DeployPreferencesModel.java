@@ -19,7 +19,21 @@ public class DeployPreferencesModel {
 
   public DeployPreferencesModel(IProject project) {
     preferences = new StandardDeployPreferences(project);
-    loadPreferences();
+    applyPreferences(preferences);
+  }
+
+  private void applyPreferences(StandardDeployPreferences preferences) {
+    setProjectId(preferences.getProjectId());
+    setPromptForProjectId(preferences.isPromptForProjectId());
+    setOverrideDefaultVersioning(preferences.isOverrideDefaultVersioning());
+    setVersion(preferences.getVersion());
+    setAutoPromote(preferences.isAutoPromote());
+    setOverrideDefaultBucket(preferences.isOverrideDefaultBucket());
+    setBucket(preferences.getBucket());
+  }
+
+  public void resetToDefaults() {
+    applyPreferences(StandardDeployPreferences.DEFAULT);
   }
 
   public void savePreferences() throws BackingStoreException {
@@ -31,16 +45,6 @@ public class DeployPreferencesModel {
     preferences.setOverrideDefaultBucket(isOverrideDefaultBucket());
     preferences.setBucket(getBucket());
     preferences.save();
-  }
-
-  private void loadPreferences() {
-    setProjectId(preferences.getProjectId());
-    setPromptForProjectId(preferences.isPromptForProjectId());
-    setOverrideDefaultVersioning(preferences.isOverrideDefaultVersioning());
-    setVersion(preferences.getVersion());
-    setAutoPromote(preferences.isAutoPromote());
-    setOverrideDefaultBucket(preferences.isOverrideDefaultBucket());
-    setBucket(preferences.getBucket());
   }
 
   public boolean isPromptForProjectId() {

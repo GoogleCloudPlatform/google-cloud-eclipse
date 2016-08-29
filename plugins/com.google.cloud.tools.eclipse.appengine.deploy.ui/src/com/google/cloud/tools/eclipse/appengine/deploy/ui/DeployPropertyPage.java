@@ -81,8 +81,6 @@ public class DeployPropertyPage extends PropertyPage {
     layout.marginWidth = 0;
     container.setLayout(layout);
 
-    noDefaultButton();
-
     createProjectIdSection(container);
 
     createProjectVersionSection(container);
@@ -205,6 +203,13 @@ public class DeployPropertyPage extends PropertyPage {
   private void loadPreferences() {
     IProject project = AdapterUtil.adapt(getElement(), IProject.class);
     model = new DeployPreferencesModel(project);
+  }
+
+  @Override
+  protected void performDefaults() {
+    model.resetToDefaults();
+    bindingContext.updateTargets();
+    super.performDefaults();
   }
 
   private void createProjectIdSection(Composite parent) {
