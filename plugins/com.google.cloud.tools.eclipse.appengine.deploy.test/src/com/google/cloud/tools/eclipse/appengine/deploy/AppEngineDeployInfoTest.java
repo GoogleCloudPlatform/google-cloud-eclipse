@@ -9,11 +9,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.eclipse.core.runtime.CoreException;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 
 public class AppEngineDeployInfoTest {
 
@@ -42,7 +39,7 @@ public class AppEngineDeployInfoTest {
       XML_DECLARATION_WITH_INVALID_NS + PROJECT_ID + VERSION + XML_SUFFIX;
 
   @Test
-  public void testParse_noProjectId() throws ParserConfigurationException, SAXException, IOException, CoreException {
+  public void testParse_noProjectId() throws IOException, CoreException {
     File xml = createFileWithContent(XML_WITHOUT_PROJECT_ID);
 
     AppEngineDeployInfo deployInfo = new AppEngineDeployInfo();
@@ -51,7 +48,7 @@ public class AppEngineDeployInfoTest {
   }
 
   @Test
-  public void testParse_noVersion() throws ParserConfigurationException, SAXException, IOException, CoreException {
+  public void testParse_noVersion() throws IOException, CoreException {
     File xml = createFileWithContent(XML_WITHOUT_VERSION);
 
     AppEngineDeployInfo deployInfo = new AppEngineDeployInfo();
@@ -61,7 +58,7 @@ public class AppEngineDeployInfoTest {
   }
 
   @Test
-  public void testParse_properXml() throws ParserConfigurationException, SAXException, IOException, CoreException {
+  public void testParse_properXml() throws IOException, CoreException {
     File xml = createFileWithContent(XML_WITH_VERSION_AND_PROJECT_ID);
 
     AppEngineDeployInfo deployInfo = new AppEngineDeployInfo();
@@ -71,7 +68,7 @@ public class AppEngineDeployInfoTest {
   }
 
   @Test
-  public void testParse_xmlWithCommentBeforeValue() throws ParserConfigurationException, SAXException, IOException, CoreException {
+  public void testParse_xmlWithCommentBeforeValue() throws IOException, CoreException {
     File xml = createFileWithContent(XML_WITH_COMMENT_BEFORE_VERSION);
 
     AppEngineDeployInfo deployInfo = new AppEngineDeployInfo();
@@ -81,7 +78,7 @@ public class AppEngineDeployInfoTest {
   }
 
   @Test
-  public void testParse_xmlWithCommentAfterValue() throws ParserConfigurationException, SAXException, IOException, CoreException {
+  public void testParse_xmlWithCommentAfterValue() throws IOException, CoreException {
     File xml = createFileWithContent(XML_WITH_COMMENT_AFTER_VERSION);
 
     AppEngineDeployInfo deployInfo = new AppEngineDeployInfo();
@@ -92,7 +89,7 @@ public class AppEngineDeployInfoTest {
 
   
   @Test
-  public void testParse_xmlWithInvalidNamespace() throws ParserConfigurationException, SAXException, IOException, CoreException {
+  public void testParse_xmlWithInvalidNamespace() throws IOException, CoreException {
     File xml = createFileWithContent(XML_WITH_VERSION_AND_PROJECT_ID_WRONG_NS);
 
     AppEngineDeployInfo deployInfo = new AppEngineDeployInfo();

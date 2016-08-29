@@ -84,7 +84,7 @@ public class LocalAppEnginePublishOperation extends PublishOperation {
   /**
    * Publish modules as directory.
    */
-  private void publishDirectory(IPath path, List<IStatus> statusList, IProgressMonitor monitor) throws CoreException {
+  private void publishDirectory(IPath path, List<IStatus> statusList, IProgressMonitor monitor) {
     // delete if needed
     if (kind == IServer.PUBLISH_CLEAN || deltaKind == ServerBehaviourDelegate.REMOVED) {
       File file = path.toFile();

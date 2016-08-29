@@ -1,13 +1,12 @@
 package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 
-import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
-import com.google.common.annotations.VisibleForTesting;
+import java.util.Arrays;
+import java.util.Collections;
 
 import org.apache.maven.archetype.catalog.Archetype;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
@@ -16,13 +15,13 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.List;
 
-import java.util.Arrays;
-import java.util.Collections;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
+import com.google.common.annotations.VisibleForTesting;
 
 /**
  * UI to select an archetype in creating a new Maven-based App Engine Standard Java project.
  */
-public class MavenAppEngineStandardArchetypeWizardPage extends WizardPage implements IWizardPage {
+public class MavenAppEngineStandardArchetypeWizardPage extends WizardPage {
 
   @VisibleForTesting
   static final java.util.List<ArchetypeTuple> PRESET_ARCHETYPES =

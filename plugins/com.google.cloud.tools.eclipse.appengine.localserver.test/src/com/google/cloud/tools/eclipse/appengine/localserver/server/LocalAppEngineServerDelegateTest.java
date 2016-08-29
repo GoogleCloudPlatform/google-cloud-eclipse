@@ -23,7 +23,7 @@ public class LocalAppEngineServerDelegateTest {
   private @Mock IWebModule webModule;
 
   @Test
-  public void testCanModifyModules() throws CoreException {
+  public void testCanModifyModules() {
     IModule[] remove = new IModule[0];
     IModule[] add = new IModule[0];
     Assert.assertEquals(Status.OK_STATUS, delegate.canModifyModules(add, remove));

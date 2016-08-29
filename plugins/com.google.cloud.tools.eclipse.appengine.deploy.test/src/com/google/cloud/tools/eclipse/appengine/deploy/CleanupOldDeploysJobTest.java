@@ -19,26 +19,26 @@ import org.junit.Test;
 public class CleanupOldDeploysJobTest {
 
   @Test
-  public void testRun_withNoDirectories() throws InterruptedException, IOException {
+  public void testRun_withNoDirectories() throws IOException {
     testRun(0, new String[0]);
   }
 
   @Test
-  public void testRun_withOneDirectory() throws InterruptedException, IOException {
+  public void testRun_withOneDirectory() throws IOException {
     testRun(1, new String[] {"1"});
   }
 
   @Test
-  public void testRun_withTwoDirectories() throws InterruptedException, IOException {
+  public void testRun_withTwoDirectories() throws IOException {
     testRun(2, new String[] {"1", "2"});
   }
 
   @Test
-  public void testRun_withThreeDirectories() throws InterruptedException, IOException {
+  public void testRun_withThreeDirectories() throws IOException {
     testRun(3, new String[] {"1", "2"});
   }
 
-  private void testRun(int directoryCount, String[] expectedDirectoriesToKeep) throws InterruptedException, IOException {
+  private void testRun(int directoryCount, String[] expectedDirectoriesToKeep) throws IOException {
     Path tempDirectory = Files.createTempDirectory("cleanupolddeploysjobtest");
     tempDirectory.toFile().deleteOnExit();
     createTestDirectories(tempDirectory, directoryCount);
@@ -61,7 +61,7 @@ public class CleanupOldDeploysJobTest {
     }
   }
 
-  private void createTestDirectories(Path tempDirectory, int count) throws InterruptedException, IOException {
+  private void createTestDirectories(Path tempDirectory, int count) throws IOException {
     long now = System.currentTimeMillis();
     // most recent directory will be "1", oldest is "<count>"
     for (int i = count; i > 0; --i) {

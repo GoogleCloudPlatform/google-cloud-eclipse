@@ -91,14 +91,14 @@ public class OpenUrlSelectionListenerTest {
   }
 
   @Test
-  public void testWidgetSelected_successful() throws PartInitException {
+  public void testWidgetSelected_successful() {
     SelectionEvent selectionEvent = getEvent(VALID_URL);
     new OpenUrlSelectionListener(errorHandler, browserSupport).widgetSelected(selectionEvent);
     verify(errorHandler, never()).handle(captor.capture());
   }
 
   @Test
-  public void testWidgetDefaultSelected_successful() throws PartInitException {
+  public void testWidgetDefaultSelected_successful() {
     SelectionEvent selectionEvent = getEvent(VALID_URL);
     new OpenUrlSelectionListener(errorHandler, browserSupport).widgetDefaultSelected(selectionEvent);
     verify(errorHandler, never()).handle(captor.capture());

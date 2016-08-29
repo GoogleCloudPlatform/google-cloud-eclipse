@@ -1,12 +1,6 @@
 package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 
-import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectIdValidator;
-import com.google.cloud.tools.eclipse.appengine.newproject.JavaPackageValidator;
-import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
-import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
-import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.CharMatcher;
+import java.text.MessageFormat;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
@@ -15,7 +9,6 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -32,13 +25,19 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import java.text.MessageFormat;
+import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectIdValidator;
+import com.google.cloud.tools.eclipse.appengine.newproject.JavaPackageValidator;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.CharMatcher;
 
 /**
  * UI to collect all information necessary to create a new Maven-based App Engine Standard Java
  * project.
  */
-public class MavenAppEngineStandardWizardPage extends WizardPage implements IWizardPage {
+public class MavenAppEngineStandardWizardPage extends WizardPage {
 
   private String defaultVersion = "0.1.0-SNAPSHOT";
 

@@ -19,11 +19,11 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
+
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Preconditions;
 
@@ -54,7 +54,7 @@ public class AppEngineTemplateUtility {
       Writer fileWriter = new FileWriter(outputFile);
       Template template = configuration.getTemplate(templateName);
       template.process(dataMap, fileWriter);
-    } catch (IOException | TemplateException | URISyntaxException e) {
+    } catch (IOException | TemplateException e) {
       throw new CoreException(StatusUtil.error(AppEngineTemplateUtility.class, e.getMessage()));
     }
   }
@@ -62,7 +62,7 @@ public class AppEngineTemplateUtility {
   private AppEngineTemplateUtility() {
   }
 
-  private static Configuration createConfiguration() throws IOException, URISyntaxException{
+  private static Configuration createConfiguration() {
     Configuration cfg = new Configuration(Configuration.VERSION_2_3_25);
     cfg.setClassForTemplateLoading(AppEngineTemplateUtility.class, "/templates/appengine");
     cfg.setDefaultEncoding(StandardCharsets.UTF_8.name());

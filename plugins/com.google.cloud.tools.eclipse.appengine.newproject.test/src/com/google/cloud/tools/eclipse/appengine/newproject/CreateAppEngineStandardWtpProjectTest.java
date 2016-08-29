@@ -12,9 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import java.lang.reflect.InvocationTargetException;;
+import org.mockito.runners.MockitoJUnitRunner;;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CreateAppEngineStandardWtpProjectTest {
@@ -25,7 +23,7 @@ public class CreateAppEngineStandardWtpProjectTest {
   private IProject project;
   
   @Before
-  public void setUp() throws CoreException {
+  public void setUp() {
     IWorkspace workspace = ResourcesPlugin.getWorkspace();
     project = workspace.getRoot().getProject("foobar");
   }
@@ -36,7 +34,7 @@ public class CreateAppEngineStandardWtpProjectTest {
   }
   
   @Test
-  public void testConstructor() throws InvocationTargetException, CoreException {
+  public void testConstructor() {
     AppEngineStandardProjectConfig config = new AppEngineStandardProjectConfig();
     config.setProject(project);
     new CreateAppEngineStandardWtpProject(config, adaptable);

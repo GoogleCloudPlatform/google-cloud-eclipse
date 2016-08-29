@@ -22,7 +22,6 @@ import com.google.cloud.tools.eclipse.swtbot.SwtBotWorkbenchActions;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.junit.After;
 import org.junit.BeforeClass;
@@ -45,7 +44,7 @@ public class AbstractProjectTests {
   }
 
   @After
-  public void tearDown() throws CoreException {
+  public void tearDown() {
     if (project != null) {
       // ensure there are no jobs
       SwtBotWorkbenchActions.waitForIdle(bot);
