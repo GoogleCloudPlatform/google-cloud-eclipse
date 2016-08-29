@@ -1,4 +1,4 @@
-package com.google.cloud.tools.eclipse.appengine.deploy.standard;
+package com.google.cloud.tools.eclipse.appengine.deploy.ui.standard;
 
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.mock;
@@ -21,20 +21,21 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.google.cloud.tools.eclipse.appengine.deploy.ui.standard.StandardDeployCommandHandler;
 import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StandardDeployCommandHandlerTest {
 
   @Mock private FacetedProjectHelper facetedProjectHelper;
-  
+
   @Test(expected = ExecutionException.class)
   public void testExecute_facetedProjectCreationThrowsException() throws ExecutionException, CoreException {
     StandardDeployCommandHandler handler = new StandardDeployCommandHandler(facetedProjectHelper);
-    
+
     when(facetedProjectHelper.getFacetedProject(isA(IProject.class))).thenThrow(getFakeCoreException());
     ExecutionEvent event = getTestExecutionEvent(mock(IProject.class));
-    
+
     handler.execute(event);
   }
 

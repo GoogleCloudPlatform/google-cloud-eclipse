@@ -57,7 +57,7 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
       appId = artifactId;
     }
     String appengineArtifactVersion = resolveLatestReleasedArtifact(progress.newChild(20),
-        "com.google.appengine", "appengine-api-1.0-sdk", "jar", "1.9.37");
+        "com.google.appengine", "appengine-api-1.0-sdk", "jar", "1.9.42");
     String gcloudArtifactVersion = resolveLatestReleasedArtifact(progress.newChild(20),
         "com.google.appengine", "gcloud-maven-plugin", "maven-plugin", "2.0.9.106.v20160420");
 

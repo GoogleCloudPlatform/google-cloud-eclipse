@@ -4,7 +4,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Check if a string is a legal App Engine Project ID.
+ * Check if a string is a legal App Engine Project ID. Source: com.google.apphosting.base.AppId
  * 
  * <pre>
  * app-id ::= [(domain):](display-app-id)

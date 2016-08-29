@@ -91,7 +91,7 @@
       <!-- bundle: com.google.cloud.tools.app.lib -->
       <groupId>com.google.cloud.tools</groupId>
       <artifactId>appengine-plugins-core</artifactId>
-      <version>0.1.4</version>
+      <version>0.1.6</version>
     </dependency>
     <dependency>
       <!-- bundle: com.google.guava -->
@@ -231,7 +231,7 @@
           <artifactId>tycho-surefire-plugin</artifactId>
           <version>${tycho.version}</version>
           <configuration>
-            <argLine>-Dorg.eclipse.swtbot.search.timeout=${org.eclipse.swtbot.search.timeout} -Xms40m -Xmx1G -XX:MaxPermSize=512m ${os-jvm-flags}</argLine>
+            <argLine>-Dorg.eclipse.swtbot.search.timeout=${org.eclipse.swtbot.search.timeout} -Xms40m -Xmx1G -XX:MaxPermSize=512m -Djava.awt.headless=true ${os-jvm-flags}</argLine>
           </configuration>
         </plugin>
 

@@ -1,26 +1,34 @@
+/*******************************************************************************
+ * Copyright 2016 Google Inc. All Rights Reserved.
+ *
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which
+ * accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *******************************************************************************/
+
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.regex.PatternSyntaxException;
-
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
+
+import com.google.cloud.tools.eclipse.util.templates.appengine.AppEngineTemplateUtility;
 
 public class CodeTemplates {
 
@@ -34,8 +42,6 @@ public class CodeTemplates {
    */
   public static void materialize(IProject project, AppEngineStandardProjectConfig config,
       IProgressMonitor monitor) throws CoreException {
-    // todo replace with something that simply copies from a file system while replacing tokens
-    
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
     subMonitor.setTaskName("Generating code");
     boolean force = true;
@@ -56,11 +62,11 @@ public class CodeTemplates {
       for (int i = 0; i < packages.length; i++) {
         java = createChildFolder(packages[i], java, subMonitor);
       }
-      values.put("Package", "package " + packageName + ";");
+      values.put("package", packageName);
     } else {
-      values.put("Package", "");
+      values.put("package", "");
     }
-    createChildFile("HelloAppEngine.java", java, subMonitor, values);
+    createChildFile("HelloAppEngine.java", AppEngineTemplateUtility.HELLO_APPENGINE_TEMPLATE, java, subMonitor, values);
     
     // now set up the test directory
     if (packageName != null && !packageName.isEmpty()) {
@@ -75,15 +81,15 @@ public class CodeTemplates {
     IFolder webinf = createChildFolder("WEB-INF", webapp, subMonitor);
     
     Map<String, String> projectId = new HashMap<>();
-    projectId.put("ProjectID", config.getAppEngineProjectId());
-    createChildFile("appengine-web.xml", webinf, subMonitor, projectId);
+    projectId.put("projectId", config.getAppEngineProjectId());
+    createChildFile("appengine-web.xml", AppEngineTemplateUtility.APPENGINE_WEB_XML_TEMPLATE, webinf, subMonitor, projectId);
     
     Map<String, String> packageMap = new HashMap<>();
     String packageValue = config.getPackageName().isEmpty() ? "" : config.getPackageName() + ".";
-    packageMap.put("Package", packageValue);
-    createChildFile("web.xml", webinf, subMonitor, packageMap);
+    packageMap.put("package", packageValue);
+    createChildFile("web.xml", AppEngineTemplateUtility.WEB_XML_TEMPLATE, webinf, subMonitor, packageMap);
     
-    createChildFile("index.html", webapp, subMonitor);
+    createChildFile("index.html", AppEngineTemplateUtility.INDEX_HTML_TEMPLATE, webapp, subMonitor, Collections.<String, String> emptyMap());
   }
 
   // visible for testing
@@ -102,67 +108,17 @@ public class CodeTemplates {
   }
   
   // visible for testing
-  static IFile createChildFile(String name, IFolder parent, SubMonitor monitor) 
-      throws CoreException {
-     
-    monitor.subTask("Creating file " + name);
-    monitor.newChild(20);
-    
-    boolean force = true;
-    IFile child = parent.getFile(name);
-    InputStream in = CodeTemplates.class.getResourceAsStream("templates/" + name + ".ftl");
-    
-    if (in == null) {
-      IStatus status = new Status(Status.ERROR, "todo plugin ID", 2, 
-          "Could not load template for " + name, null);
-      throw new CoreException(status);
-    }
-    
-    if (!child.exists()) {
-      child.create(in, force, monitor);
-    }
-    return child;
-  }
-  
-  // visible for testing
-  static IFile createChildFile(String name, IContainer parent, SubMonitor monitor,
+  static IFile createChildFile(String name, String template, IContainer parent, SubMonitor monitor,
       Map<String, String> values) throws CoreException {
-    
+
     monitor.subTask("Creating file " + name);
     monitor.newChild(20);
-    
-    boolean force = true;
+
     IFile child = parent.getFile(new Path(name));
-    InputStream in = CodeTemplates.class.getResourceAsStream("templates/" + name + ".ftl");
-    if (in == null) {
-      IStatus status = new Status(Status.ERROR, "todo plugin ID", 2, 
-          "Could not load template for " + name, null);
-      throw new CoreException(status);
-    }
-    
     if (!child.exists()) {
-      // todo total hack; lots of problems with edge conditions and performance;
-      // replace this with FreeMarker or better
-      try {
-        Reader reader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
-        StringBuilder builder = new StringBuilder();
-        for (int c = reader.read(); c != -1; c = reader.read()) {
-          builder.append((char) c);
-        }
-        String template = builder.toString();
-        
-        for (Entry<String, String> entry : values.entrySet()) {
-          String token = "\\$\\{" + entry.getKey() + "\\}";
-          template = template.replaceAll(token, entry.getValue());
-        }
-        
-        byte[] data = template.getBytes("UTF-8"); 
-        child.create(new ByteArrayInputStream(data), force, monitor);
-      } catch (IOException | PatternSyntaxException ex) {
-        IStatus status = new Status(Status.ERROR, "todo plugin ID", 3, 
-            "Could not process template for " + name, null);
-        throw new CoreException(status);
-      }
+      child.create(new ByteArrayInputStream(new byte[0]), true /* force */, monitor);
+      AppEngineTemplateUtility.createFileContent(
+          child.getLocation().toString(), template, values);
     }
     return child;
   }

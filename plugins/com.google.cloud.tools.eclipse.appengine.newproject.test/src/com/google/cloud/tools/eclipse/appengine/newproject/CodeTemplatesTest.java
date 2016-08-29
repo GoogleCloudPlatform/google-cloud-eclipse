@@ -1,9 +1,25 @@
+/*******************************************************************************
+ * Copyright 2016 Google Inc. All Rights Reserved.
+ *
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0 which
+ * accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *******************************************************************************/
+
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,10 +41,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import com.google.cloud.tools.eclipse.util.templates.appengine.AppEngineTemplateUtility;
 
 public class CodeTemplatesTest {
 
@@ -126,28 +142,17 @@ public class CodeTemplatesTest {
     Assert.assertTrue(child.exists());
     Assert.assertEquals("testchild", child.getName());
   }
-  
+
   @Test
   public void testCreateChildFile() throws CoreException, IOException {
-    IFile child = CodeTemplates.createChildFile("web.xml", parent, monitor);
-    Assert.assertTrue(child.exists());
-    Assert.assertEquals("web.xml", child.getName());
-    
-    try (InputStream in = child.getContents(true)) {
-      Assert.assertNotEquals("File is empty", -1, in.read());
-    }
-  }
-  
-  @Test
-  public void testCreateChildFileWithTemplates() throws CoreException, IOException {
     Map<String, String> values = new HashMap<>();
-    values.put("Package", "package com.google.foo.bar;");
+    values.put("package", "com.google.foo.bar");
     
-    IFile child = CodeTemplates.createChildFile("HelloAppEngine.java", parent, monitor, values);
+    IFile child = CodeTemplates.createChildFile("HelloAppEngine.java", AppEngineTemplateUtility.HELLO_APPENGINE_TEMPLATE, parent, monitor, values);
     Assert.assertTrue(child.exists());
     Assert.assertEquals("HelloAppEngine.java", child.getName());
     InputStream in = child.getContents(true);
-    try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, "UTF-8"))) {
+    try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8.name()))) {
       Assert.assertEquals("package com.google.foo.bar;", reader.readLine());
       Assert.assertEquals("", reader.readLine());
     }

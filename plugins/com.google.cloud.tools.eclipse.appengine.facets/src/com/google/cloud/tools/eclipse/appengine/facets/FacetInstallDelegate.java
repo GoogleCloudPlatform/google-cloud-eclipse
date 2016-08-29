@@ -16,7 +16,7 @@
 package com.google.cloud.tools.eclipse.appengine.facets;
 
 import com.google.cloud.tools.eclipse.util.MavenUtils;
-import com.google.cloud.tools.eclipse.util.status.StatusUtil;
+import com.google.cloud.tools.eclipse.util.templates.appengine.AppEngineTemplateUtility;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -24,7 +24,6 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.IAccessRule;
@@ -35,7 +34,9 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jst.j2ee.classpathdep.UpdateClasspathAttributeUtil;
 import org.eclipse.wst.common.project.facet.core.IDelegate;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
-import java.io.InputStream;
+
+import java.io.ByteArrayInputStream;
+import java.util.Collections;
 
 public class FacetInstallDelegate implements IDelegate {
   private final static String APPENGINE_WEB_XML = "appengine-web.xml";
@@ -111,16 +112,10 @@ public class FacetInstallDelegate implements IDelegate {
       configDir = (IFolder) current;
     }
 
-    InputStream in = FacetInstallDelegate.class.getResourceAsStream("templates/" + APPENGINE_WEB_XML + ".ftl");
-    if (in == null) {
-      IStatus status = StatusUtil.error(FacetInstallDelegate.class,
-          "Could not load template for " + APPENGINE_WEB_XML);
-      throw new CoreException(status);
-    }
-
-    IFile configFile = configDir.getFile(APPENGINE_WEB_XML);
-    if (!configFile.exists()) {
-      configFile.create(in, true, monitor);
-    }
+    appEngineWebXml.create(new ByteArrayInputStream(new byte[0]), true, monitor);
+    String configFileLocation = appEngineWebXml.getLocation().toString();
+    AppEngineTemplateUtility.createFileContent(
+        configFileLocation, AppEngineTemplateUtility.APPENGINE_WEB_XML_TEMPLATE, Collections.<String, String> emptyMap());
   }
+
 }
