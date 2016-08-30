@@ -36,7 +36,7 @@ public class StandardDeployPreferencesTest {
 
   @Test
   public void testDefaultOverrideDefaultBucket() {
-    assertTrue(StandardDeployPreferences.DEFAULT.isOverrideDefaultBucket());
+    assertFalse(StandardDeployPreferences.DEFAULT.isOverrideDefaultBucket());
   }
 
   @Test
