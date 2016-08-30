@@ -63,7 +63,7 @@ public class NewNativeAppEngineStandardProjectTest extends AbstractProjectTests 
         "src/main/webapp/WEB-INF/web.xml", "src/main/webapp/index.html",};
     createAndCheck("appWithPackageAndProjectId", null, "app.engine.test", "my-project-id",
         projectFiles);
-    assertEquals("",
+    assertNull(
         SwtBotAppEngineActions.getAppEngineProjectId(project.getFile("src/main/webapp/WEB-INF/appengine-web.xml")));
   }
 
