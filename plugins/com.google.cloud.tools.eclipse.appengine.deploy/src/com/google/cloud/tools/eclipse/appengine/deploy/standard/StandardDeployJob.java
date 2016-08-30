@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.SubMonitor;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessExitListener;
+import com.google.cloud.tools.appengine.cloudsdk.process.ProcessStartListener;
 import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineProjectDeployer;
 import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
 import com.google.cloud.tools.eclipse.appengine.login.CredentialHelper;
@@ -50,7 +51,9 @@ public class StandardDeployJob extends WorkspaceJob {
   private AppEngineProjectDeployer deployer;
   
   //temporary way of error handling, after #439 is fixed, it'll be cleaner
-  protected boolean cloudSdkProcessError;
+  protected IStatus cloudSdkProcessStatus = Status.OK_STATUS;
+  private Process process;
+
   private StandardDeployJobConfig config;
 
   public StandardDeployJob(ExplodedWarPublisher exporter,
@@ -68,7 +71,6 @@ public class StandardDeployJob extends WorkspaceJob {
     this.staging = staging;
     this.deployer = deployer;
     this.config = config;
-    setRule(config.getProject());
   }
 
   @Override
@@ -83,17 +85,28 @@ public class StandardDeployJob extends WorkspaceJob {
       saveCredential(credentialFile, config.getCredential());
       CloudSdk cloudSdk = getCloudSdk(credentialFile);
 
-      exporter.publish(config.getProject(), explodedWarDirectory, progress.newChild(10));
-      staging.stage(explodedWarDirectory, stagingDirectory, cloudSdk, progress.newChild(20));
-      if (cloudSdkProcessError) { // temporary way of error handling, after #439 is fixed, it'll be cleaner
+      try {
+        getJobManager().beginRule(config.getProject(), progress);
+        exporter.publish(config.getProject(), explodedWarDirectory, progress.newChild(10));
+        staging.stage(explodedWarDirectory, stagingDirectory, cloudSdk, progress.newChild(20));
+      } finally {
+        getJobManager().endRule(config.getProject());
+      }
+
+      if (!cloudSdkProcessStatus.isOK()) {
+        if (cloudSdkProcessStatus == Status.CANCEL_STATUS) {
+          return cloudSdkProcessStatus;
+        }
+        // temporary way of error handling, after #439 is fixed, it'll be cleaner
         return StatusUtil.error(getClass(), "Staging failed, check the error message in the Console View");
       }
       deployer.deploy(stagingDirectory, cloudSdk, config.getDeployConfiguration(), progress.newChild(70));
-      if (cloudSdkProcessError) { // temporary way of error handling, after #439 is fixed, it'll be cleaner
+      if (!cloudSdkProcessStatus.isOK() && cloudSdkProcessStatus != Status.CANCEL_STATUS) {
+        // temporary way of error handling, after #439 is fixed, it'll be cleaner
         return StatusUtil.error(getClass(), "Deploy failed, check the error message in the Console View");
       }
 
-      return Status.OK_STATUS;
+      return cloudSdkProcessStatus;
     } catch (IOException exception) {
       throw new CoreException(StatusUtil.error(getClass(),
                                                Messages.getString("save.credential.failed"),
@@ -110,6 +123,16 @@ public class StandardDeployJob extends WorkspaceJob {
     }
   }
 
+
+  @Override
+  protected void canceling() {
+    cloudSdkProcessStatus = Status.CANCEL_STATUS;
+    if (process != null) {
+      process.destroy();
+    }
+    super.canceling();
+  }
+
   private void saveCredential(Path destination, Credential credential) throws IOException {
     String jsonCredential = new CredentialHelper().toJson(credential);
     Files.write(destination, jsonCredential.getBytes(Charsets.UTF_8));
@@ -120,6 +143,7 @@ public class StandardDeployJob extends WorkspaceJob {
                           .addStdOutLineListener(config.getStdoutLineListener())
                           .addStdErrLineListener(config.getStderrLineListener())
                           .appCommandCredentialFile(credentialFile.toFile())
+                          .startListener(new StoreProcessObjectListener())
                           .exitListener(new RecordProcessError())
                           .appCommandMetricsEnvironment(CloudToolsInfo.METRICS_NAME)
                           .appCommandMetricsEnvironmentVersion(CloudToolsInfo.getToolsVersion())
@@ -127,12 +151,21 @@ public class StandardDeployJob extends WorkspaceJob {
     return cloudSdk;
   }
 
+  private final class StoreProcessObjectListener implements ProcessStartListener {
+    @Override
+    public void onStart(Process proces) {
+      process = proces;
+    }
+  }
+
   private final class RecordProcessError implements ProcessExitListener {
     // temporary way of error handling, after #439 is fixed, it'll be cleaner
     @Override
     public void onExit(int exitCode) {
-      if (exitCode != 0) {
-        cloudSdkProcessError = true;
+      // if it's cancelled we don't need to record the exit code from the process, it would be the exit code
+      // that corresponds to the process.destroy()
+      if (cloudSdkProcessStatus != Status.CANCEL_STATUS && exitCode != 0) {
+        cloudSdkProcessStatus = StatusUtil.error(this, Messages.getString("cloudsdk.process.failed", exitCode));
       }
     }
   }
