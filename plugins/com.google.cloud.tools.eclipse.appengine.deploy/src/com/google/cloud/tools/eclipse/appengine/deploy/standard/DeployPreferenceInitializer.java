@@ -16,6 +16,7 @@ public class DeployPreferenceInitializer extends AbstractPreferenceInitializer {
   static final boolean DEFAULT_ENABLE_AUTO_PROMOTE = true;
   static final boolean DEFAULT_OVERRIDE_DEFAULT_BUCKET = false;
   static final String DEFAULT_CUSTOM_BUCKET = "";
+  static final boolean DEFAULT_STOP_PREVIOUS_VERSION = true;
 
   @Override
   public void initializeDefaultPreferences() {
@@ -35,6 +36,8 @@ public class DeployPreferenceInitializer extends AbstractPreferenceInitializer {
                            DEFAULT_OVERRIDE_DEFAULT_BUCKET);
     preferences.put(StandardDeployPreferences.PREF_CUSTOM_BUCKET,
                     DEFAULT_CUSTOM_BUCKET);
+    preferences.putBoolean(StandardDeployPreferences.PREF_STOP_PREVIOUS_VERSION,
+                    DEFAULT_STOP_PREVIOUS_VERSION);
   }
 
   public static IEclipsePreferences getDefaultPreferences() {

@@ -14,6 +14,7 @@ public class DeployPreferencesModel {
   private boolean overrideDefaultVersioning;
   private String version;
   private boolean autoPromote;
+  private boolean stopPreviousVersion;
   private boolean overrideDefaultBucket;
   private String bucket;
 
@@ -28,6 +29,7 @@ public class DeployPreferencesModel {
     setOverrideDefaultVersioning(preferences.isOverrideDefaultVersioning());
     setVersion(preferences.getVersion());
     setAutoPromote(preferences.isAutoPromote());
+    setStopPreviousVersion(preferences.isStopPreviousVersion());
     setOverrideDefaultBucket(preferences.isOverrideDefaultBucket());
     setBucket(preferences.getBucket());
   }
@@ -42,6 +44,7 @@ public class DeployPreferencesModel {
     preferences.setOverrideDefaultVersioning(isOverrideDefaultVersioning());
     preferences.setVersion(getVersion());
     preferences.setAutoPromote(isAutoPromote());
+    preferences.setStopPreviousVersion(isStopPreviousVersion());
     preferences.setOverrideDefaultBucket(isOverrideDefaultBucket());
     preferences.setBucket(getBucket());
     preferences.save();
@@ -85,6 +88,14 @@ public class DeployPreferencesModel {
 
   public void setAutoPromote(boolean autoPromote) {
     this.autoPromote = autoPromote;
+  }
+
+  public boolean isStopPreviousVersion() {
+    return stopPreviousVersion;
+  }
+
+  public void setStopPreviousVersion(boolean stopPreviousVersion) {
+    this.stopPreviousVersion = stopPreviousVersion;
   }
 
   public boolean isOverrideDefaultBucket() {

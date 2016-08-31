@@ -16,6 +16,7 @@ public class StandardDeployPreferences {
   static final String PREF_ENABLE_AUTO_PROMOTE = "project.promote"; // boolean
   static final String PREF_OVERRIDE_DEFAULT_BUCKET = "project.bucket.overrideDefault"; // boolean
   static final String PREF_CUSTOM_BUCKET = "project.bucket";
+  static final String PREF_STOP_PREVIOUS_VERSION = "project.previousVersion.stop";
 
   private IEclipsePreferences preferenceStore;
   public static final StandardDeployPreferences DEFAULT;
@@ -95,4 +96,14 @@ public class StandardDeployPreferences {
   public void setBucket(String bucket) {
     preferenceStore.put(PREF_CUSTOM_BUCKET, bucket);
   }
+
+  public boolean isStopPreviousVersion() {
+    return preferenceStore.getBoolean(PREF_STOP_PREVIOUS_VERSION,
+                                      DeployPreferenceInitializer.DEFAULT_STOP_PREVIOUS_VERSION);
+  }
+
+  public void setStopPreviousVersion(boolean stopPreviousVersion) {
+    preferenceStore.putBoolean(PREF_STOP_PREVIOUS_VERSION, stopPreviousVersion);
+  }
+
 }

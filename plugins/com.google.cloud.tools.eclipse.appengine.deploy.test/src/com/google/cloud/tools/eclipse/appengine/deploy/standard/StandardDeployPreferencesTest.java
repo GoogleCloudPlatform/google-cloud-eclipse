@@ -44,4 +44,9 @@ public class StandardDeployPreferencesTest {
     assertThat(StandardDeployPreferences.DEFAULT.getBucket(), isEmptyString());
   }
 
+  @Test
+  public void testDefaultStopPreviousVersion() {
+    assertTrue(StandardDeployPreferences.DEFAULT.isStopPreviousVersion());
+  }
+
 }

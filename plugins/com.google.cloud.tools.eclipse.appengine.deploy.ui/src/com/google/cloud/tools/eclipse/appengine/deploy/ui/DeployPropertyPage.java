@@ -64,6 +64,8 @@ public class DeployPropertyPage extends PropertyPage {
 
   private Button autoPromoteButton;
 
+  private Button stopPreviousVersionButton;
+
   private Button overrideDefaultBucketButton;
   private Label bucketLabel;
   private Text bucket;
@@ -87,6 +89,8 @@ public class DeployPropertyPage extends PropertyPage {
 
     createPromoteSection(container);
 
+    createStopPreviousVersionSection(container);
+
     createAdvancedSection(container);
 
     Dialog.applyDialogFont(container);
@@ -104,6 +108,7 @@ public class DeployPropertyPage extends PropertyPage {
     setupProjectIdDataBinding(bindingContext);
     setupProjectVersionDataBinding(bindingContext);
     setupAutoPromoteDataBinding(bindingContext);
+    setupStopPreviousVersionDataBinding(bindingContext);
     setupBucketDataBinding(bindingContext);
 
     PreferencePageSupport.create(this, bindingContext);
@@ -149,9 +154,15 @@ public class DeployPropertyPage extends PropertyPage {
   }
 
   private void setupAutoPromoteDataBinding(DataBindingContext context) {
-    ISWTObservableValue promoteObservable = WidgetProperties.selection().observe(autoPromoteButton);
-    IObservableValue promoteModelObservable = PojoProperties.value("autoPromote").observe(model);
-    context.bindValue(promoteObservable, promoteModelObservable);
+    ISWTObservableValue promoteButton = WidgetProperties.selection().observe(autoPromoteButton);
+    IObservableValue promoteModel = PojoProperties.value("autoPromote").observe(model);
+    context.bindValue(promoteButton, promoteModel);
+  }
+
+  private void setupStopPreviousVersionDataBinding(DataBindingContext context) {
+    ISWTObservableValue stopPreviousVersion = WidgetProperties.selection().observe(stopPreviousVersionButton);
+    IObservableValue stopPreviousVersionModel = PojoProperties.value("stopPreviousVersion").observe(model);
+    context.bindValue(stopPreviousVersion, stopPreviousVersionModel);
   }
 
   private void setupBucketDataBinding(DataBindingContext context) {
@@ -276,6 +287,16 @@ public class DeployPropertyPage extends PropertyPage {
                    IMessageProvider.WARNING);
       }
     }));
+  }
+
+  private void createStopPreviousVersionSection(Composite parent) {
+    Composite composite = new Composite(parent, SWT.NONE);
+    composite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    composite.setLayout(new GridLayout(1, false));
+
+    stopPreviousVersionButton = new Button(composite, SWT.CHECK);
+    stopPreviousVersionButton.setText(Messages.getString("stop.previous.version"));
+    stopPreviousVersionButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
   }
 
   private void createAdvancedSection(Composite parent) {
