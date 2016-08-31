@@ -51,7 +51,7 @@ public class StandardDeployJob extends WorkspaceJob {
   private AppEngineProjectDeployer deployer;
   
   //temporary way of error handling, after #439 is fixed, it'll be cleaner
-  protected IStatus cloudSdkProcessStatus = Status.OK_STATUS;
+  private IStatus cloudSdkProcessStatus = Status.OK_STATUS;
   private Process process;
 
   private StandardDeployJobConfig config;
