@@ -10,6 +10,7 @@
     <relativePath>../..</relativePath>
   </parent>
   <artifactId>ide-target-platform.repo</artifactId>
+  <version>0.1.0-SNAPSHOT</version>
   <packaging>eclipse-repository</packaging>
 
   <build>

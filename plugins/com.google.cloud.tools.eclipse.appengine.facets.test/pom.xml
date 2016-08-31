@@ -9,6 +9,7 @@
     <relativePath>../../</relativePath>
   </parent>
   <artifactId>com.google.cloud.tools.eclipse.appengine.facets.test</artifactId>
+  <version>0.1.0-SNAPSHOT</version>
   <packaging>eclipse-test-plugin</packaging>
 
   <build>
