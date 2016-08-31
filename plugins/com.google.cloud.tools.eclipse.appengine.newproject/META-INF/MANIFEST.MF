@@ -23,6 +23,7 @@ Import-Package: com.google.cloud.tools.eclipse.appengine.facets,
  com.google.cloud.tools.eclipse.util.templates.appengine,
  org.eclipse.core.runtime;version="3.5.0",
  org.eclipse.core.runtime.jobs,
+ org.eclipse.core.runtime.preferences;version="3.3.0",
  org.eclipse.jdt.core,
  org.eclipse.jst.j2ee.project.facet,
  org.eclipse.jst.server.core,
@@ -30,5 +31,6 @@ Import-Package: com.google.cloud.tools.eclipse.appengine.facets,
  org.eclipse.wst.common.project.facet.core,
  org.eclipse.wst.common.project.facet.core.runtime,
  org.eclipse.wst.server.core,
- org.eclipse.wst.server.core.internal
+ org.eclipse.wst.server.core.internal,
+ org.osgi.service.prefs;version="1.1.1"
 Export-Package: com.google.cloud.tools.eclipse.appengine.newproject;version="0.1.0";x-friends:="com.google.cloud.tools.eclipse.appengine.newproject.maven"

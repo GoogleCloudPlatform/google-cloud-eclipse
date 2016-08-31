@@ -4,10 +4,12 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.ide.undo.CreateProjectOperation;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
@@ -57,6 +59,14 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
     AppEngineStandardFacet.installAppEngineFacet(
         facetedProject, true /* installDependentFacets */, monitor);
     AppEngineStandardFacet.installAllAppEngineRuntimes(facetedProject, true /* force */, monitor);
+    
+    String projectId = config.getAppEngineProjectId();
+    if (projectId != null && !projectId.isEmpty()) {
+      IEclipsePreferences preferences = new ProjectScope(facetedProject.getProject())
+          .getNode("com.google.cloud.tools.eclipse.appengine.deploy");
+      preferences.put("project.id", projectId);
+    }
+
   }
 
 }
