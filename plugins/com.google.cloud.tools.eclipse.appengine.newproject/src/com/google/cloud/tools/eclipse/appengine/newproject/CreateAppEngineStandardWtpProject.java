@@ -60,13 +60,16 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
         facetedProject, true /* installDependentFacets */, monitor);
     AppEngineStandardFacet.installAllAppEngineRuntimes(facetedProject, true /* force */, monitor);
     
+    setProjectIdPreference(newProject);
+  }
+
+  void setProjectIdPreference(IProject project) {
     String projectId = config.getAppEngineProjectId();
     if (projectId != null && !projectId.isEmpty()) {
-      IEclipsePreferences preferences = new ProjectScope(facetedProject.getProject())
+      IEclipsePreferences preferences = new ProjectScope(project)
           .getNode("com.google.cloud.tools.eclipse.appengine.deploy");
       preferences.put("project.id", projectId);
     }
-
   }
 
 }

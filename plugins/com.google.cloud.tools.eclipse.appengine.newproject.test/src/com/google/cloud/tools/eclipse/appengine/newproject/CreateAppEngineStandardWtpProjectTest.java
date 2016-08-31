@@ -2,10 +2,12 @@ package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -38,6 +40,20 @@ public class CreateAppEngineStandardWtpProjectTest {
     AppEngineStandardProjectConfig config = new AppEngineStandardProjectConfig();
     config.setProject(project);
     new CreateAppEngineStandardWtpProject(config, adaptable);
+  }
+  
+  @Test
+  public void testSetProjectIdPreference() {
+    AppEngineStandardProjectConfig config = new AppEngineStandardProjectConfig();
+    config.setAppEngineProjectId("MyProjectId");
+    config.setProject(project);
+    CreateAppEngineStandardWtpProject creator = new CreateAppEngineStandardWtpProject(config, adaptable);
+    
+    creator.setProjectIdPreference(project);
+    
+    IEclipsePreferences preferences = new ProjectScope(project)
+        .getNode("com.google.cloud.tools.eclipse.appengine.deploy");
+    Assert.assertEquals("MyProjectId", preferences.get("project.id", "fail"));
   }
   
   @Test
