@@ -15,11 +15,15 @@
 
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
-import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
-import com.google.cloud.tools.eclipse.appengine.localserver.PreferencesInitializer;
-import com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineConsole;
-import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
-import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -49,15 +53,14 @@ import org.eclipse.wst.server.core.IServerListener;
 import org.eclipse.wst.server.core.ServerEvent;
 import org.eclipse.wst.server.core.ServerUtil;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
+import com.google.cloud.tools.eclipse.appengine.localserver.PreferencesInitializer;
+import com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineConsole;
+import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities;
+import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities.TaggedMessageConsoleFactory;
+import com.google.cloud.tools.eclipse.ui.util.console.TaggedMessageConsole;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 
 public class LocalAppEngineServerLaunchConfigurationDelegate
     extends AbstractJavaLaunchConfigurationDelegate {
@@ -93,7 +96,13 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       runnables.add(deployPath.toFile());
     }
 
-    LocalAppEngineConsole console = ConsoleUtilities.findConsole(configuration.getName(), serverBehaviour);
+    TaggedMessageConsole<LocalAppEngineServerBehaviour> console =
+        MessageConsoleUtilities.findConsole(configuration.getName(), new TaggedMessageConsoleFactory<LocalAppEngineConsole, LocalAppEngineServerBehaviour>() {
+          @Override
+          public LocalAppEngineConsole createConsole(String name, LocalAppEngineServerBehaviour tag) {
+            return new LocalAppEngineConsole(name, tag);
+          }
+        }, serverBehaviour);
     console.clearConsole();
     console.activate();
 

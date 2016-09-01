@@ -1,21 +1,12 @@
 package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
-import org.eclipse.ui.console.MessageConsole;
-
 import com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerBehaviour;
+import com.google.cloud.tools.eclipse.ui.util.console.TaggedMessageConsole;
 
-/**
- * A console that displays information for a run/debug session of the App Engine runtime
- */
-public class LocalAppEngineConsole extends MessageConsole {
-  private LocalAppEngineServerBehaviour serverBehaviour;
+public class LocalAppEngineConsole extends TaggedMessageConsole<LocalAppEngineServerBehaviour> {
 
-  public LocalAppEngineConsole(String name, LocalAppEngineServerBehaviour serverBehaviour) {
-    super(name, null);
-    this.serverBehaviour = serverBehaviour;
+  public LocalAppEngineConsole(String name, LocalAppEngineServerBehaviour tag) {
+    super(name, tag);
   }
 
-  public LocalAppEngineServerBehaviour getServerBehaviourDelegate() {
-    return serverBehaviour;
-  }
 }

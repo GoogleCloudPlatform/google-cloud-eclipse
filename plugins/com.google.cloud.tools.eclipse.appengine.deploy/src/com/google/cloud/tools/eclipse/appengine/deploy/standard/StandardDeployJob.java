@@ -6,11 +6,13 @@ import java.nio.file.Path;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 
@@ -45,6 +47,8 @@ public class StandardDeployJob extends WorkspaceJob {
   private static final String CREDENTIAL_FILENAME = "gcloud-credentials.json";
 
   private static final Logger logger = Logger.getLogger(StandardDeployJob.class.getName());
+  public static final Object FAMILY = new Object();
+  public static final QualifiedName ID_KEY = new QualifiedName("com.google.cloud.tools.eclipse.appengine", "deployJob");
 
   private final ExplodedWarPublisher exporter;
   private final StandardProjectStaging staging;
@@ -58,19 +62,16 @@ public class StandardDeployJob extends WorkspaceJob {
 
   public StandardDeployJob(ExplodedWarPublisher exporter,
                            StandardProjectStaging staging,
-                           AppEngineProjectDeployer deployer,
-                           StandardDeployJobConfig config) {
+                           AppEngineProjectDeployer deployer) {
     super(Messages.getString("deploy.standard.runnable.name")); //$NON-NLS-1$
 
     Preconditions.checkNotNull(deployer, "deployer is null");
     Preconditions.checkNotNull(exporter, "exporter is null");
     Preconditions.checkNotNull(staging, "staging is null");
-    Preconditions.checkNotNull(config, "config is null");
 
     this.exporter = exporter;
     this.staging = staging;
     this.deployer = deployer;
-    this.config = config;
   }
 
   @Override
@@ -133,6 +134,11 @@ public class StandardDeployJob extends WorkspaceJob {
     super.canceling();
   }
 
+  @Override
+  public boolean belongsTo(Object family) {
+    return family == FAMILY;
+  }
+
   private void saveCredential(Path destination, Credential credential) throws IOException {
     String jsonCredential = new CredentialHelper().toJson(credential);
     Files.write(destination, jsonCredential.getBytes(Charsets.UTF_8));
@@ -170,4 +176,11 @@ public class StandardDeployJob extends WorkspaceJob {
     }
   }
 
+  public IProject getProject() {
+    return config.getProject();
+  }
+
+  public void setConfig(StandardDeployJobConfig config) {
+    this.config = config;
+  }
 }

@@ -25,6 +25,9 @@ public class MessageConsoleWriterOutputLineListener implements ProcessOutputLine
 
   @Override
   public void onOutputLine(String line) {
-    stream.println(line);
+    if (!stream.isClosed()) {
+      // there's still a small chance that the stream will be closed and the error will be logged by the ConsolePlugin
+      stream.println(line);
+    }
   }
 }

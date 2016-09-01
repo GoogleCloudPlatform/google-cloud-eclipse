@@ -18,6 +18,10 @@ package com.google.cloud.tools.eclipse.appengine.deploy.ui.standard;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.text.DateFormat;
+import java.text.MessageFormat;
+import java.util.Date;
+import java.util.Locale;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -31,7 +35,6 @@ import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.ui.handlers.HandlerUtil;
 
@@ -45,12 +48,15 @@ import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployJo
 import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployPreferences;
 import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployPreferencesConverter;
 import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardProjectStaging;
+import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployConsole;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
 import com.google.cloud.tools.eclipse.appengine.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListener;
 import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities;
+import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities.TaggedMessageConsoleFactory;
 import com.google.cloud.tools.eclipse.ui.util.ProjectFromSelectionHelper;
 import com.google.cloud.tools.eclipse.ui.util.ServiceUtils;
+import com.google.cloud.tools.eclipse.ui.util.console.TaggedMessageConsole;
 import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectIdValidator;
 import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
 import com.google.common.annotations.VisibleForTesting;
@@ -97,19 +103,29 @@ public class StandardDeployCommandHandler extends AbstractHandler {
       throws IOException, ExecutionException {
     try {
       IPath workDirectory = createWorkDirectory();
-      MessageConsole messageConsole = MessageConsoleUtilities.getMessageConsole(CONSOLE_NAME, null, true /* show */);
-      final MessageConsoleStream outputStream = messageConsole.newMessageStream();
-
-      StandardDeployJobConfig config = getDeployJobConfig(project, credential, event, workDirectory, outputStream);
       StandardDeployJob deploy = new StandardDeployJob(new ExplodedWarPublisher(),
                                                        new StandardProjectStaging(),
-                                                       new AppEngineProjectDeployer(),
-                                                       config);
+                                                       new AppEngineProjectDeployer());
+
+      DefaultDeployConfiguration deployConfiguration = getDeployConfiguration(project, event);
+      TaggedMessageConsole<StandardDeployJob> messageConsole = 
+          MessageConsoleUtilities.findConsole(getConsoleName(deployConfiguration.getProject()), new TaggedMessageConsoleFactory<DeployConsole, StandardDeployJob>() {
+        @Override
+        public DeployConsole createConsole(String name, StandardDeployJob tag) {
+          return new DeployConsole(name, tag);
+        }
+      }, deploy);
+      final MessageConsoleStream outputStream = messageConsole.newMessageStream();
+      StandardDeployJobConfig config = getDeployJobConfig(project, credential, event, workDirectory, outputStream, deployConfiguration);
+
+      deploy.setConfig(config);
+      deploy.setProperty(StandardDeployJob.ID_KEY, deploy);
       deploy.addJobChangeListener(new JobChangeAdapter() {
 
         @Override
         public void done(IJobChangeEvent event) {
           super.done(event);
+          
           launchCleanupJob();
         }
       });
@@ -119,19 +135,26 @@ public class StandardDeployCommandHandler extends AbstractHandler {
     }
   }
 
+  private String getConsoleName(String project) {
+    Date now = new Date();
+    String dateStr = DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.getDefault()).format(now);
+    String timeStr = DateFormat.getTimeInstance(DateFormat.MEDIUM, Locale.getDefault()).format(now);
+    return MessageFormat.format("{0} - {1} - {2} {3}", CONSOLE_NAME, project, dateStr, timeStr);
+  }
+
   private StandardDeployJobConfig getDeployJobConfig(IProject project,
                                                      Credential credential,
                                                      ExecutionEvent event,
                                                      IPath workDirectory,
-                                                     final MessageConsoleStream outputStream) throws ExecutionException,
-                                                                                              DeployCancelledException {
+                                                     final MessageConsoleStream outputStream, 
+                                                     DefaultDeployConfiguration deployConfiguration) {
     StandardDeployJobConfig config = new StandardDeployJobConfig();
     config.setProject(project)
       .setCredential(credential)
       .setWorkDirectory(workDirectory)
       .setStdoutLineListener(new MessageConsoleWriterOutputLineListener(outputStream))
       .setStderrLineListener(new MessageConsoleWriterOutputLineListener(outputStream))
-      .setDeployConfiguration(getDeployConfiguration(project, event));
+      .setDeployConfiguration(deployConfiguration);
     return config;
   }
 

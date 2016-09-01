@@ -6,6 +6,8 @@ import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.MessageConsole;
 
+import com.google.cloud.tools.eclipse.ui.util.console.TaggedMessageConsole;
+
 /**
  * Helper methods for dealing with {@link MessageConsole}s.
  */
@@ -60,5 +62,23 @@ public class MessageConsoleUtilities {
       consoleManager.showConsoleView(messageConsole);
     }
     return messageConsole;
+  }
+  
+  public static <C extends TaggedMessageConsole<T>, T> C findConsole(String name, TaggedMessageConsoleFactory<C, T> factory, T tag) {
+    ConsolePlugin plugin = ConsolePlugin.getDefault();
+    IConsoleManager manager = plugin.getConsoleManager();
+    IConsole[] consoles = manager.getConsoles();
+    for (int i = 0; i < consoles.length; i++)
+       if (name.equals(consoles[i].getName())) {
+          return (C) consoles[i];
+       }
+    // console not found, so create a new one
+    C console = factory.createConsole(name, tag);
+    manager.addConsoles(new IConsole[]{console});
+    return console;
+  }
+  
+  public interface TaggedMessageConsoleFactory<C extends TaggedMessageConsole<T>, T> {
+    C createConsole(String name, T tag);
   }
 }
