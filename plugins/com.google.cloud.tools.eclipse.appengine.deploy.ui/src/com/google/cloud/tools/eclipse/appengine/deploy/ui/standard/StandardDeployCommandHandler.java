@@ -115,7 +115,6 @@ public class StandardDeployCommandHandler extends AbstractHandler {
         @Override
         public void done(IJobChangeEvent event) {
           super.done(event);
-          
           launchCleanupJob();
         }
       });

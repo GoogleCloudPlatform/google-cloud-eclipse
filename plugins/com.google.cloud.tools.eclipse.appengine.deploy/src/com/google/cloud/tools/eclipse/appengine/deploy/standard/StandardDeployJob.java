@@ -46,7 +46,6 @@ public class StandardDeployJob extends WorkspaceJob {
   private static final String CREDENTIAL_FILENAME = "gcloud-credentials.json";
 
   private static final Logger logger = Logger.getLogger(StandardDeployJob.class.getName());
-  public static final Object FAMILY = new Object();
 
   private final ExplodedWarPublisher exporter;
   private final StandardProjectStaging staging;
@@ -133,11 +132,6 @@ public class StandardDeployJob extends WorkspaceJob {
       process.destroy();
     }
     super.canceling();
-  }
-
-  @Override
-  public boolean belongsTo(Object family) {
-    return family == FAMILY;
   }
 
   private void saveCredential(Path destination, Credential credential) throws IOException {
