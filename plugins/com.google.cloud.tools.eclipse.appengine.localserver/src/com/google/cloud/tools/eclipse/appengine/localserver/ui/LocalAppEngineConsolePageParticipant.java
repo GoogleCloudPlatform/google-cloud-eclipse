@@ -8,6 +8,7 @@ import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleConstants;
 import org.eclipse.ui.console.IConsolePageParticipant;
 import org.eclipse.ui.part.IPageBookViewPage;
+import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.ui.internal.ImageResource;
 import org.eclipse.wst.server.ui.internal.Messages;
 
@@ -57,7 +58,9 @@ public class LocalAppEngineConsolePageParticipant implements IConsolePagePartici
         //code to execute when button is pressed
         LocalAppEngineServerBehaviour serverBehaviour = console.getServerBehaviourDelegate();
         if (serverBehaviour != null) {
-          serverBehaviour.stop(true);
+          // try to initiate a nice shutdown
+          boolean force = serverBehaviour.getServer().getServerState() == IServer.STATE_STOPPING;
+          serverBehaviour.stop(force);
         }
         update();
       }
