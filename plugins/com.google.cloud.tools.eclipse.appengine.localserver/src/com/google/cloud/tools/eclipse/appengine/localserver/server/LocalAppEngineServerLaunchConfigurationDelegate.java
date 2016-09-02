@@ -32,6 +32,7 @@ import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.core.ILaunchesListener2;
 import org.eclipse.jdt.launching.AbstractJavaLaunchConfigurationDelegate;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IVMConnector;
@@ -61,6 +62,22 @@ import java.util.logging.Logger;
 
 public class LocalAppEngineServerLaunchConfigurationDelegate
     extends AbstractJavaLaunchConfigurationDelegate {
+
+  /**
+   * Encapsulates monitoring state for the server and its corresponding launch configuration.
+   */
+  public class LaunchMonitor {
+
+    /**
+     * @param configuration
+     * @param server
+     * @param launch
+     */
+    public LaunchMonitor(ILaunchConfiguration configuration, IServer server, ILaunch launch) {
+      // TODO Auto-generated constructor stub
+    }
+
+  }
 
   private final static Logger logger =
       Logger.getLogger(LocalAppEngineServerLaunchConfigurationDelegate.class.getName());
@@ -97,13 +114,28 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     console.clearConsole();
     console.activate();
 
-    if (shouldOpenStartPage()) {
-      String pageLocation = determinePageLocation(server, configuration);
-      if (pageLocation != null) {
-        // odd: addServerListener(..., IServer.SERVER_STARTED) doesn't work
-        server.addServerListener(new OpenBrowserListener(pageLocation));
-      }
+    stopServerOnLaunchTerminate(launch, server);
+    terminateLaunchOnServerStop(server, launch);
+    addPageOpenListener(configuration, server);
+
+    if (ILaunchManager.DEBUG_MODE.equals(mode)) {
+      int debugPort = getDebugPort();
+      setupDebugTarget(launch, configuration, debugPort, monitor);
+      serverBehaviour.startDebugDevServer(runnables, console.newMessageStream(), debugPort);
+    } else {
+      serverBehaviour.startDevServer(runnables, console.newMessageStream());
     }
+  }
+
+  /**
+   * Hook launch-termination so that it stops the server.
+   */
+  private void stopServerOnLaunchTerminate(ILaunch launch, IServer server) {
+    getLaunchManager().addLaunchListener(new StopServerOnLaunchTermination(launch, server));
+  }
+
+  /** Listen for server STOPPED state and terminate the launch */
+  private void terminateLaunchOnServerStop(IServer server, final ILaunch launch) {
     // If the server is stopped, then terminate any ancillary processes
     server.addServerListener(new IServerListener() {
       @Override
@@ -118,12 +150,18 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
         }
       }
     });
-    if (ILaunchManager.DEBUG_MODE.equals(mode)) {
-      int debugPort = getDebugPort();
-      setupDebugTarget(launch, configuration, debugPort, monitor);
-      serverBehaviour.startDebugDevServer(runnables, console.newMessageStream(), debugPort);
-    } else {
-      serverBehaviour.startDevServer(runnables, console.newMessageStream());
+  }
+
+  /**
+   * Listen for the server to enter STARTED and open a web browser on the server's main page
+   */
+  private void addPageOpenListener(ILaunchConfiguration configuration, IServer server) {
+    if (shouldOpenStartPage()) {
+      String pageLocation = determinePageLocation(server, configuration);
+      if (pageLocation != null) {
+        // odd: addServerListener(..., IServer.SERVER_STARTED) doesn't work
+        server.addServerListener(new OpenBrowserListener(pageLocation));
+      }
     }
   }
 
@@ -220,5 +258,39 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       openJob.schedule();
       server.removeServerListener(this);
     }
+  }
+
+  /**
+   * Stop the given server when the given launch is terminated
+   */
+  class StopServerOnLaunchTermination implements ILaunchesListener2 {
+    final private IServer server;
+    final private ILaunch launch;
+
+    StopServerOnLaunchTermination(ILaunch launch, IServer server) {
+      this.server = server;
+      this.launch = launch;
+    }
+
+    @Override
+    public void launchesTerminated(ILaunch[] launches) {
+      for (ILaunch l : launches) {
+        if (l == launch) {
+          getLaunchManager().removeLaunchListener(this);
+          if (server.getServerState() == IServer.STATE_STARTED) {
+            server.stop(false);
+          }
+        }
+      }
+    }
+
+    @Override
+    public void launchesRemoved(ILaunch[] launches) {}
+
+    @Override
+    public void launchesChanged(ILaunch[] launches) {}
+
+    @Override
+    public void launchesAdded(ILaunch[] launches) {}
   }
 }
