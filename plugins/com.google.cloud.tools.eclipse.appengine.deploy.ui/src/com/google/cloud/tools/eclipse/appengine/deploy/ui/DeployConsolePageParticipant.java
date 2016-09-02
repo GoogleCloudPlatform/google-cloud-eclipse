@@ -4,8 +4,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -28,78 +28,37 @@ public class DeployConsolePageParticipant implements IConsolePageParticipant {
   private DeployConsole console;
   private Action terminateAction;
   private Action closeAction;
-  protected boolean closeVisible = false;
-
-  @Override
-  public <C> C getAdapter(Class<C> required) {
-    return null;
-  }
 
   @Override
   public void init(IPageBookViewPage page, IConsole console) {
     if (console instanceof DeployConsole) {
       this.console = (DeployConsole) console;
     } else {
-      logger.log(Level.SEVERE, "console is instance of "
-          + console.getClass().getName()
-          + ", expected was "
-          + DeployConsole.class.getName());
+      logger.log(Level.SEVERE,
+                 "console is instance of {0}, expected was {1}",
+                 new Object[]{ console.getClass().getName(), DeployConsole.class.getName() });
     }
-    // contribute to toolbar
     IActionBars actionBars = page.getSite().getActionBars();
     configureToolBar(actionBars.getToolBarManager());
-    initInternal();
-    update();
-  }
-
-  @Override
-  public void dispose() {
-    terminateAction = null;
-    closeAction = null;
-  }
-
-  @Override
-  public void activated() {
-    update();
-  }
-
-  @Override
-  public void deactivated() {
+    addJobchangeListener();
     update();
   }
 
   private void configureToolBar(IToolBarManager toolbarManager) {
-    terminateAction = new Action(Messages.getString("action.stop")) {
-      @Override
-      public void run() {
-        StandardDeployJob deployJob = findJob();
-        if (deployJob != null) {
-          deployJob.cancel();
-        }
-        update();
-      }
-    };
-    terminateAction.setToolTipText(Messages.getString("action.stop"));
-    terminateAction.setImageDescriptor(getSharedImage(ISharedImages.IMG_ELCL_STOP));
-    terminateAction.setHoverImageDescriptor(getSharedImage(ISharedImages.IMG_ELCL_STOP));
-    terminateAction.setDisabledImageDescriptor(getSharedImage(ISharedImages.IMG_ELCL_STOP_DISABLED));
+    terminateAction = createTerminateAction();
     toolbarManager.appendToGroup(IConsoleConstants.LAUNCH_GROUP, terminateAction);
 
-    closeAction = new Action(Messages.getString("action.close")) {
-      @Override
-      public void run() {
-        ConsolePlugin.getDefault().getConsoleManager().removeConsoles(new IConsole[] { console });
-      }
-    };
-    closeAction.setToolTipText(Messages.getString("action.close"));
-    closeAction.setImageDescriptor(getSharedImage(ISharedImages.IMG_ELCL_REMOVE));
-    closeAction.setHoverImageDescriptor(getSharedImage(ISharedImages.IMG_ELCL_REMOVE));
-    closeAction.setDisabledImageDescriptor(getSharedImage(ISharedImages.IMG_ELCL_REMOVE_DISABLED));
+    closeAction = createCloseAction();
     toolbarManager.appendToGroup(IConsoleConstants.LAUNCH_GROUP, closeAction);
   }
 
-  private ImageDescriptor getSharedImage(String image) {
-    return PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(image);
+  private void addJobchangeListener() {
+    console.getJob().addJobChangeListener(new JobChangeAdapter() {
+      public void done(IJobChangeEvent event) {
+        System.out.println("done update");
+        update();
+      }
+    });
   }
 
   private void update() {
@@ -114,57 +73,56 @@ public class DeployConsolePageParticipant implements IConsolePageParticipant {
     }
   }
 
-  private StandardDeployJob findJob() {
-    Job[] jobs = Job.getJobManager().find(StandardDeployJob.FAMILY);
-    for (Job job : jobs) {
-      StandardDeployJob deployJob = (StandardDeployJob) job;
-      if (getConsole().getJob().equals(deployJob)) {
-        return deployJob;
+  private Action createCloseAction() {
+    Action close = new Action(Messages.getString("action.close")) {
+      @Override
+      public void run() {
+        ConsolePlugin.getDefault().getConsoleManager().removeConsoles(new IConsole[] { console });
       }
-    }
+    };
+    close.setToolTipText(Messages.getString("action.close"));
+    close.setImageDescriptor(getSharedImage(ISharedImages.IMG_ELCL_REMOVE));
+    close.setHoverImageDescriptor(getSharedImage(ISharedImages.IMG_ELCL_REMOVE));
+    close.setDisabledImageDescriptor(getSharedImage(ISharedImages.IMG_ELCL_REMOVE_DISABLED));
+    return close;
+  }
+
+  private Action createTerminateAction() {
+    Action terminate = new Action(Messages.getString("action.stop")) {
+      @Override
+      public void run() {
+        console.getJob().cancel();
+        update();
+      }
+    };
+    terminate.setToolTipText(Messages.getString("action.stop"));
+    terminate.setImageDescriptor(getSharedImage(ISharedImages.IMG_ELCL_STOP));
+    terminate.setHoverImageDescriptor(getSharedImage(ISharedImages.IMG_ELCL_STOP));
+    terminate.setDisabledImageDescriptor(getSharedImage(ISharedImages.IMG_ELCL_STOP_DISABLED));
+    return terminate;
+  }
+
+  private ImageDescriptor getSharedImage(String image) {
+    return PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(image);
+  }
+
+  @Override
+  public void activated() {
+    // nothing to do
+  }
+
+  @Override
+  public void deactivated() {
+    // nothing to do
+  }
+
+  @Override
+  public void dispose() {
+  }
+
+  @Override
+  public <C> C getAdapter(Class<C> required) {
     return null;
-  }
-
-  protected void initInternal() {
-    StandardDeployJob deployJob = findJob();
-    if (deployJob != null) {
-      deployJob.addJobChangeListener(new IJobChangeListener() {
-
-        @Override
-        public void sleeping(IJobChangeEvent event) {
-          update();
-        }
-
-        @Override
-        public void scheduled(IJobChangeEvent event) {
-          update();
-        }
-
-        @Override
-        public void running(IJobChangeEvent event) {
-          update();
-        }
-
-        @Override
-        public void done(IJobChangeEvent event) {
-          update();
-        }
-
-        @Override
-        public void awake(IJobChangeEvent event) {
-          update();
-        }
-
-        @Override
-        public void aboutToRun(IJobChangeEvent event) {
-          update();
-        }
-      });
-    }
-  }
-
-  private DeployConsole getConsole() {
-    return console;
   }
 
 }
