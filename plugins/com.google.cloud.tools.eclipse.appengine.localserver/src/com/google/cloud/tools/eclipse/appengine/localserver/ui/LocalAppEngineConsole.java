@@ -1,25 +1,37 @@
 package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
+import org.eclipse.ui.console.MessageConsole;
+
 import com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerBehaviour;
-import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities.TaggedMessageConsoleFactory;
-import com.google.cloud.tools.eclipse.ui.util.console.TaggedMessageConsole;
+import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities.ConsoleFactory;
 
-public class LocalAppEngineConsole extends TaggedMessageConsole<LocalAppEngineServerBehaviour> {
+/**
+ * A console that displays information for a run/debug session of the App Engine runtime
+ */
+public class LocalAppEngineConsole extends MessageConsole {
+  private LocalAppEngineServerBehaviour serverBehaviour;
 
-  public LocalAppEngineConsole(String name, LocalAppEngineServerBehaviour tag) {
-    super(name, tag);
+  public LocalAppEngineConsole(String name, LocalAppEngineServerBehaviour serverBehaviour) {
+    super(name, null);
+    this.serverBehaviour = serverBehaviour;
   }
 
-  public static class Factory implements TaggedMessageConsoleFactory<LocalAppEngineConsole,
-                                                                     LocalAppEngineServerBehaviour> {
-    @Override
-    public LocalAppEngineConsole createConsole(String name) {
-      return new LocalAppEngineConsole(name, null);
+  public LocalAppEngineServerBehaviour getServerBehaviourDelegate() {
+    return serverBehaviour;
+  }
+
+  public static class Factory implements ConsoleFactory<LocalAppEngineConsole> {
+
+    private LocalAppEngineServerBehaviour serverBehaviour;
+
+    public Factory(LocalAppEngineServerBehaviour serverBehaviour) {
+      this.serverBehaviour = serverBehaviour;
     }
 
     @Override
-    public LocalAppEngineConsole createConsole(String name, LocalAppEngineServerBehaviour tag) {
-      return new LocalAppEngineConsole(name, tag);
+    public LocalAppEngineConsole createConsole(String name) {
+      return new LocalAppEngineConsole(name, serverBehaviour);
     }
+
   }
 }

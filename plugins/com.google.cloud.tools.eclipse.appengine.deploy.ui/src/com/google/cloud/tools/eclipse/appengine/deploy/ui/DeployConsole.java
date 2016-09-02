@@ -1,27 +1,33 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
-import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployJob;
-import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities.TaggedMessageConsoleFactory;
-import com.google.cloud.tools.eclipse.ui.util.console.TaggedMessageConsole;
+import org.eclipse.ui.console.MessageConsole;
 
-public class DeployConsole extends TaggedMessageConsole<StandardDeployJob> {
+import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployJob;
+import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities.ConsoleFactory;
+
+public class DeployConsole extends MessageConsole {
 
   private static final String TYPE = "com.google.cloud.tools.eclipse.appengine.deploy.consoleType";
+  private StandardDeployJob job;
 
-  public DeployConsole(String name, StandardDeployJob tag) {
-    super(name, tag);
+  public DeployConsole(String name) {
+    super(name, null);
     setType(TYPE);
   }
 
-  public static class Factory implements TaggedMessageConsoleFactory<DeployConsole, StandardDeployJob> {
+  public StandardDeployJob getJob() {
+    return job;
+  }
+
+  public void setJob(StandardDeployJob deployJob) {
+    this.job = deployJob;
+  }
+
+  public static class Factory implements ConsoleFactory<DeployConsole> {
     @Override
     public DeployConsole createConsole(String name) {
-      return new DeployConsole(name, null);
-    }
-
-    @Override
-    public DeployConsole createConsole(String name, StandardDeployJob tag) {
-      return new DeployConsole(name, tag);
+      return new DeployConsole(name);
     }
   }
+
 }

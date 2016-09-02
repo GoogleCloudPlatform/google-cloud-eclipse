@@ -6,8 +6,6 @@ import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.MessageConsole;
 
-import com.google.cloud.tools.eclipse.ui.util.console.TaggedMessageConsole;
-
 /**
  * Helper methods for dealing with {@link MessageConsole}s.
  */
@@ -64,7 +62,7 @@ public class MessageConsoleUtilities {
     return messageConsole;
   }
   
-  public static <C extends TaggedMessageConsole<T>, T> C findConsole(String name, TaggedMessageConsoleFactory<C, T> factory, T tag) {
+  public static <C extends MessageConsole> C findOrCreateConsole(String name, ConsoleFactory<C> factory) {
     ConsolePlugin plugin = ConsolePlugin.getDefault();
     IConsoleManager manager = plugin.getConsoleManager();
     IConsole[] consoles = manager.getConsoles();
@@ -74,21 +72,20 @@ public class MessageConsoleUtilities {
        }
     }
     // console not found, so create a new one
-    C console = factory.createConsole(name, tag);
+    C console = factory.createConsole(name);
     manager.addConsoles(new IConsole[]{console});
     return console;
   }
 
-  public static <C extends TaggedMessageConsole<T>, T> C createConsole(String name, TaggedMessageConsoleFactory<C, T> factory) {
+  public static <C extends MessageConsole> C createConsole(String name, ConsoleFactory<C> factory) {
     ConsolePlugin plugin = ConsolePlugin.getDefault();
     IConsoleManager manager = plugin.getConsoleManager();
-    C console = factory.createConsole(name, null);
+    C console = factory.createConsole(name);
     manager.addConsoles(new IConsole[]{console});
     return console;
   }
 
-  public interface TaggedMessageConsoleFactory<C extends TaggedMessageConsole<T>, T> {
+  public interface ConsoleFactory<C extends MessageConsole> {
     C createConsole(String name);
-    C createConsole(String name, T tag);
   }
 }

@@ -52,7 +52,6 @@ import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListe
 import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities;
 import com.google.cloud.tools.eclipse.ui.util.ProjectFromSelectionHelper;
 import com.google.cloud.tools.eclipse.ui.util.ServiceUtils;
-import com.google.cloud.tools.eclipse.ui.util.console.TaggedMessageConsole;
 import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectIdValidator;
 import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
 import com.google.common.annotations.VisibleForTesting;
@@ -101,7 +100,7 @@ public class StandardDeployCommandHandler extends AbstractHandler {
       IPath workDirectory = createWorkDirectory();
 
       DefaultDeployConfiguration deployConfiguration = getDeployConfiguration(project, event);
-      TaggedMessageConsole<StandardDeployJob> messageConsole = 
+      DeployConsole messageConsole =
           MessageConsoleUtilities.createConsole(getConsoleName(deployConfiguration.getProject()),
                                                 new DeployConsole.Factory());
 
@@ -110,6 +109,7 @@ public class StandardDeployCommandHandler extends AbstractHandler {
                                                           workDirectory, outputStream, deployConfiguration);
 
       StandardDeployJob deploy = new StandardDeployJob.Builder().config(config).build();
+      messageConsole.setJob(deploy);
       deploy.addJobChangeListener(new JobChangeAdapter() {
 
         @Override
