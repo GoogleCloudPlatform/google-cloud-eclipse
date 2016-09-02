@@ -41,7 +41,7 @@ public class XmlTest {
     NodeList enabledWhen = doc.getElementsByTagName("enabledWhen");
     Assert.assertEquals(3, enabledWhen.getLength());
     NodeList tests = doc.getElementsByTagName("test");
-    Assert.assertEquals(2, tests.getLength());
+    Assert.assertEquals(3, tests.getLength());
     NodeList adapts = doc.getElementsByTagName("adapt");
     Assert.assertEquals(1, adapts.getLength());
 
