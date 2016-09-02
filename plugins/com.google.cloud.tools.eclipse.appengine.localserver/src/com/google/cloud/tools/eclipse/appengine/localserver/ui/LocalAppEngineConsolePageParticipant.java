@@ -1,5 +1,7 @@
 package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
+import com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerBehaviour;
+
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IToolBarManager;
@@ -11,8 +13,6 @@ import org.eclipse.ui.part.IPageBookViewPage;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.ui.internal.ImageResource;
 import org.eclipse.wst.server.ui.internal.Messages;
-
-import com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerBehaviour;
 
 /**
  * Adds a stop button for the App Engine runtime to the {@link LocalAppEngineConsole}
