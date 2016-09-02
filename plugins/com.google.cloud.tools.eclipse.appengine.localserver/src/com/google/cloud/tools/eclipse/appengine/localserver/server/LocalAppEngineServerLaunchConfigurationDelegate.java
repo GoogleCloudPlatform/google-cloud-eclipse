@@ -20,6 +20,7 @@ import com.google.cloud.tools.eclipse.appengine.localserver.PreferencesInitializ
 import com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineConsole;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
+import com.google.common.base.Preconditions;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -117,7 +118,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       return;
     }
     final String pageLocation = determinePageLocation(server, configuration);
-    if (pageLocation != null) {
+    if (pageLocation == null) {
       return;
     }
     final IWorkbench workbench = PlatformUI.getWorkbench();
@@ -141,7 +142,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
           logger.log(Level.WARNING, "Cannot launch a browser", ex);
           Program.launch(pageLocation);
         } catch (MalformedURLException ex) {
-          logger.log(Level.WARNING, "Unable to determine dev_appserver URL", ex);
+          logger.log(Level.SEVERE, "Invalid dev_appserver URL", ex);
         }
         return Status.OK_STATUS;
       }
@@ -222,11 +223,13 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       this.server = server;
     }
 
+    /** Add required listeners */
     private void engage() {
       getLaunchManager().addLaunchListener(this);
       server.addServerListener(this);
     }
 
+    /** Remove any installed listeners */
     private void disengage() {
       getLaunchManager().removeLaunchListener(this);
       server.removeServerListener(this);
@@ -234,7 +237,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
     @Override
     public void serverChanged(ServerEvent event) {
-      assert server == event.getServer();
+      Preconditions.checkState(server == event.getServer());
       switch (event.getState()) {
         case IServer.STATE_STARTED:
           openBrowserPage(configuration, server);
@@ -253,8 +256,8 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
     @Override
     public void launchesTerminated(ILaunch[] launches) {
-      for (ILaunch l : launches) {
-        if (l == launch) {
+      for (ILaunch terminated : launches) {
+        if (terminated == launch) {
           disengage();
           if (server.getServerState() == IServer.STATE_STARTED) {
             logger.fine("Launch terminated; stopping server");//$NON-NLS-1$
