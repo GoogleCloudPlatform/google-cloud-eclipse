@@ -68,17 +68,27 @@ public class MessageConsoleUtilities {
     ConsolePlugin plugin = ConsolePlugin.getDefault();
     IConsoleManager manager = plugin.getConsoleManager();
     IConsole[] consoles = manager.getConsoles();
-    for (int i = 0; i < consoles.length; i++)
-       if (name.equals(consoles[i].getName())) {
-          return (C) consoles[i];
+    for (IConsole console : consoles) {
+      if (name.equals(console.getName())) {
+          return (C) console;
        }
+    }
     // console not found, so create a new one
     C console = factory.createConsole(name, tag);
     manager.addConsoles(new IConsole[]{console});
     return console;
   }
-  
+
+  public static <C extends TaggedMessageConsole<T>, T> C createConsole(String name, TaggedMessageConsoleFactory<C, T> factory) {
+    ConsolePlugin plugin = ConsolePlugin.getDefault();
+    IConsoleManager manager = plugin.getConsoleManager();
+    C console = factory.createConsole(name, null);
+    manager.addConsoles(new IConsole[]{console});
+    return console;
+  }
+
   public interface TaggedMessageConsoleFactory<C extends TaggedMessageConsole<T>, T> {
+    C createConsole(String name);
     C createConsole(String name, T tag);
   }
 }

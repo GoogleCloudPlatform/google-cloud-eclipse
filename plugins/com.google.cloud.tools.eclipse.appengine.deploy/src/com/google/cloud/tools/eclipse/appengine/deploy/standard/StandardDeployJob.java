@@ -12,7 +12,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 
@@ -48,7 +47,6 @@ public class StandardDeployJob extends WorkspaceJob {
 
   private static final Logger logger = Logger.getLogger(StandardDeployJob.class.getName());
   public static final Object FAMILY = new Object();
-  public static final QualifiedName ID_KEY = new QualifiedName("com.google.cloud.tools.eclipse.appengine", "deployJob");
 
   private final ExplodedWarPublisher exporter;
   private final StandardProjectStaging staging;
@@ -60,18 +58,21 @@ public class StandardDeployJob extends WorkspaceJob {
 
   private StandardDeployJobConfig config;
 
-  public StandardDeployJob(ExplodedWarPublisher exporter,
+  StandardDeployJob(ExplodedWarPublisher exporter,
                            StandardProjectStaging staging,
-                           AppEngineProjectDeployer deployer) {
+                           AppEngineProjectDeployer deployer,
+                           StandardDeployJobConfig config) {
     super(Messages.getString("deploy.standard.runnable.name")); //$NON-NLS-1$
 
     Preconditions.checkNotNull(deployer, "deployer is null");
     Preconditions.checkNotNull(exporter, "exporter is null");
     Preconditions.checkNotNull(staging, "staging is null");
+    Preconditions.checkNotNull(config, "config is null");
 
     this.exporter = exporter;
     this.staging = staging;
     this.deployer = deployer;
+    this.config = config;
   }
 
   @Override
@@ -182,5 +183,51 @@ public class StandardDeployJob extends WorkspaceJob {
 
   public void setConfig(StandardDeployJobConfig config) {
     this.config = config;
+  }
+
+  public static class Builder {
+    private ExplodedWarPublisher exporter;
+    private StandardProjectStaging staging;
+    private AppEngineProjectDeployer deployer;
+    private StandardDeployJobConfig config;
+
+    public Builder exporter(ExplodedWarPublisher exporter) {
+      this.exporter = exporter;
+      return this;
+    }
+
+    public Builder staging(StandardProjectStaging staging) {
+      this.staging = staging;
+      return this;
+    }
+
+    public Builder deployer(AppEngineProjectDeployer deployer) {
+      this.deployer = deployer;
+      return this;
+    }
+
+    public Builder config(StandardDeployJobConfig config) {
+      this.config = config;
+      return this;
+    }
+
+    public StandardDeployJob build() {
+      Preconditions.checkNotNull(config, "config is null");
+
+      if (exporter == null) {
+        exporter = new ExplodedWarPublisher();
+      }
+
+      if (staging == null) {
+        staging = new StandardProjectStaging();
+      }
+
+      if (deployer == null) {
+        deployer = new AppEngineProjectDeployer();
+      }
+
+      return new StandardDeployJob(exporter, staging, deployer, config);
+    }
+
   }
 }

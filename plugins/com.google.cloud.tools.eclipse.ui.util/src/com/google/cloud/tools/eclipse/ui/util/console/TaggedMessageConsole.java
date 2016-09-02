@@ -8,6 +8,10 @@ import org.eclipse.ui.console.MessageConsole;
 public class TaggedMessageConsole<T> extends MessageConsole {
   private T tag;
 
+  public TaggedMessageConsole(String name) {
+    super(name, null);
+  }
+
   public TaggedMessageConsole(String name, T tag) {
     super(name, null);
     this.tag = tag;
@@ -15,5 +19,9 @@ public class TaggedMessageConsole<T> extends MessageConsole {
 
   public T getTag() {
     return tag;
+  }
+
+  public void setTag(T tag) {
+    this.tag = tag;
   }
 }

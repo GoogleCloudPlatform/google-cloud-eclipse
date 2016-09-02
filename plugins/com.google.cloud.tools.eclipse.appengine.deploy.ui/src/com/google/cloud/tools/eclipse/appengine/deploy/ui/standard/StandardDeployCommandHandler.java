@@ -40,20 +40,16 @@ import org.eclipse.ui.handlers.HandlerUtil;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.appengine.api.deploy.DefaultDeployConfiguration;
-import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineProjectDeployer;
 import com.google.cloud.tools.eclipse.appengine.deploy.CleanupOldDeploysJob;
-import com.google.cloud.tools.eclipse.appengine.deploy.standard.ExplodedWarPublisher;
 import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployJob;
 import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployJobConfig;
 import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployPreferences;
 import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployPreferencesConverter;
-import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardProjectStaging;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployConsole;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
 import com.google.cloud.tools.eclipse.appengine.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListener;
 import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities;
-import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities.TaggedMessageConsoleFactory;
 import com.google.cloud.tools.eclipse.ui.util.ProjectFromSelectionHelper;
 import com.google.cloud.tools.eclipse.ui.util.ServiceUtils;
 import com.google.cloud.tools.eclipse.ui.util.console.TaggedMessageConsole;
@@ -103,23 +99,17 @@ public class StandardDeployCommandHandler extends AbstractHandler {
       throws IOException, ExecutionException {
     try {
       IPath workDirectory = createWorkDirectory();
-      StandardDeployJob deploy = new StandardDeployJob(new ExplodedWarPublisher(),
-                                                       new StandardProjectStaging(),
-                                                       new AppEngineProjectDeployer());
 
       DefaultDeployConfiguration deployConfiguration = getDeployConfiguration(project, event);
       TaggedMessageConsole<StandardDeployJob> messageConsole = 
-          MessageConsoleUtilities.findConsole(getConsoleName(deployConfiguration.getProject()), new TaggedMessageConsoleFactory<DeployConsole, StandardDeployJob>() {
-        @Override
-        public DeployConsole createConsole(String name, StandardDeployJob tag) {
-          return new DeployConsole(name, tag);
-        }
-      }, deploy);
-      final MessageConsoleStream outputStream = messageConsole.newMessageStream();
-      StandardDeployJobConfig config = getDeployJobConfig(project, credential, event, workDirectory, outputStream, deployConfiguration);
+          MessageConsoleUtilities.createConsole(getConsoleName(deployConfiguration.getProject()),
+                                                new DeployConsole.Factory());
 
-      deploy.setConfig(config);
-      deploy.setProperty(StandardDeployJob.ID_KEY, deploy);
+      final MessageConsoleStream outputStream = messageConsole.newMessageStream();
+      StandardDeployJobConfig config = getDeployJobConfig(project, credential, event,
+                                                          workDirectory, outputStream, deployConfiguration);
+
+      StandardDeployJob deploy = new StandardDeployJob.Builder().config(config).build();
       deploy.addJobChangeListener(new JobChangeAdapter() {
 
         @Override

@@ -57,7 +57,6 @@ import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
 import com.google.cloud.tools.eclipse.appengine.localserver.PreferencesInitializer;
 import com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineConsole;
 import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities;
-import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities.TaggedMessageConsoleFactory;
 import com.google.cloud.tools.eclipse.ui.util.console.TaggedMessageConsole;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
@@ -97,12 +96,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     }
 
     TaggedMessageConsole<LocalAppEngineServerBehaviour> console =
-        MessageConsoleUtilities.findConsole(configuration.getName(), new TaggedMessageConsoleFactory<LocalAppEngineConsole, LocalAppEngineServerBehaviour>() {
-          @Override
-          public LocalAppEngineConsole createConsole(String name, LocalAppEngineServerBehaviour tag) {
-            return new LocalAppEngineConsole(name, tag);
-          }
-        }, serverBehaviour);
+        MessageConsoleUtilities.findConsole(configuration.getName(), new LocalAppEngineConsole.Factory(), serverBehaviour);
     console.clearConsole();
     console.activate();
 
