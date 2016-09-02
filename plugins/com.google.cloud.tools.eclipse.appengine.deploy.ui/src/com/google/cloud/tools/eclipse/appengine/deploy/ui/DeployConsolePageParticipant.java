@@ -38,6 +38,8 @@ public class DeployConsolePageParticipant implements IConsolePageParticipant {
       @Override
       public void propertyChange(PropertyChangeEvent event) {
         if (event.getProperty().equals(DeployConsole.PROPERTY_JOB)) {
+          // keep the order of adding a listener and then calling update() to ensure update is called regardless of when the
+          // job finishes
           addJobchangeListener();
           update();
         }
@@ -45,6 +47,8 @@ public class DeployConsolePageParticipant implements IConsolePageParticipant {
     });
     IActionBars actionBars = page.getSite().getActionBars();
     configureToolBar(actionBars.getToolBarManager());
+    // keep the order of adding a listener and then calling update() to ensure update is called regardless of when the
+    // job finishes
     addJobchangeListener();
     update();
   }
