@@ -6,7 +6,6 @@ import java.nio.file.Path;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -169,14 +168,6 @@ public class StandardDeployJob extends WorkspaceJob {
         cloudSdkProcessStatus = StatusUtil.error(this, Messages.getString("cloudsdk.process.failed", exitCode));
       }
     }
-  }
-
-  public IProject getProject() {
-    return config.getProject();
-  }
-
-  public void setConfig(StandardDeployJobConfig config) {
-    this.config = config;
   }
 
   public static class Builder {

@@ -1,14 +1,13 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
@@ -20,10 +19,9 @@ import org.eclipse.ui.part.IPageBookViewPage;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployJob;
 import com.google.cloud.tools.eclipse.ui.util.Messages;
+import com.google.common.base.Preconditions;
 
 public class DeployConsolePageParticipant implements IConsolePageParticipant {
-
-  private static final Logger logger = Logger.getLogger(DeployConsolePageParticipant.class.getName());
 
   private DeployConsole console;
   private Action terminateAction;
@@ -31,13 +29,20 @@ public class DeployConsolePageParticipant implements IConsolePageParticipant {
 
   @Override
   public void init(IPageBookViewPage page, IConsole console) {
-    if (console instanceof DeployConsole) {
-      this.console = (DeployConsole) console;
-    } else {
-      logger.log(Level.SEVERE,
-                 "console is instance of {0}, expected was {1}",
-                 new Object[]{ console.getClass().getName(), DeployConsole.class.getName() });
-    }
+    Preconditions.checkArgument(console instanceof DeployConsole,
+                                "console should be instance of %s",
+                                DeployConsole.class.getName());
+    this.console = (DeployConsole) console;
+
+    console.addPropertyChangeListener(new IPropertyChangeListener() {
+      @Override
+      public void propertyChange(PropertyChangeEvent event) {
+        if (event.getProperty().equals(DeployConsole.PROPERTY_JOB)) {
+          addJobchangeListener();
+          update();
+        }
+      }
+    });
     IActionBars actionBars = page.getSite().getActionBars();
     configureToolBar(actionBars.getToolBarManager());
     addJobchangeListener();
@@ -53,34 +58,37 @@ public class DeployConsolePageParticipant implements IConsolePageParticipant {
   }
 
   private void addJobchangeListener() {
-    console.getJob().addJobChangeListener(new JobChangeAdapter() {
-      public void done(IJobChangeEvent event) {
-        System.out.println("done update");
-        update();
-      }
-    });
+    StandardDeployJob job = console.getJob();
+    if (job != null) {
+      job.addJobChangeListener(new JobChangeAdapter() {
+        public void done(IJobChangeEvent event) {
+          update();
+        }
+      });
+    }
   }
 
   private void update() {
-    StandardDeployJob tag = console.getJob();
+    StandardDeployJob job = console.getJob();
+    if (job != null) {
+      if (terminateAction != null) {
+        terminateAction.setEnabled(job.getState() != Job.NONE);
+      }
 
-    if (terminateAction != null) {
-      terminateAction.setEnabled(tag.getState() != Job.NONE);
-    }
-
-    if (closeAction != null) {
-      closeAction.setEnabled(tag.getState() == Job.NONE);
+      if (closeAction != null) {
+        closeAction.setEnabled(job.getState() == Job.NONE);
+      }
     }
   }
 
   private Action createCloseAction() {
-    Action close = new Action(Messages.getString("action.close")) {
+    Action close = new Action(Messages.getString("action.remove")) {
       @Override
       public void run() {
         ConsolePlugin.getDefault().getConsoleManager().removeConsoles(new IConsole[] { console });
       }
     };
-    close.setToolTipText(Messages.getString("action.close"));
+    close.setToolTipText(Messages.getString("action.remove"));
     close.setImageDescriptor(getSharedImage(ISharedImages.IMG_ELCL_REMOVE));
     close.setHoverImageDescriptor(getSharedImage(ISharedImages.IMG_ELCL_REMOVE));
     close.setDisabledImageDescriptor(getSharedImage(ISharedImages.IMG_ELCL_REMOVE_DISABLED));
@@ -91,8 +99,11 @@ public class DeployConsolePageParticipant implements IConsolePageParticipant {
     Action terminate = new Action(Messages.getString("action.stop")) {
       @Override
       public void run() {
-        console.getJob().cancel();
-        update();
+        StandardDeployJob job = console.getJob();
+        if (job != null) {
+          job.cancel();
+          update();
+        }
       }
     };
     terminate.setToolTipText(Messages.getString("action.stop"));

@@ -95,7 +95,10 @@
         class="com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployConsolePageParticipant"
         id="com.google.cloud.tools.eclipse.appengine.deploy.consolePageParticipant">
       <enablement>
-        <instanceof value="com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployConsole"/>
+        <test
+          property="org.eclipse.ui.console.consoleTypeTest"
+          value="com.google.cloud.tools.eclipse.appengine.deploy.consoleType">
+        </test>
       </enablement>    
     </consolePageParticipant>
   </extension>
