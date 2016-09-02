@@ -40,7 +40,7 @@ public class DeployConsolePageParticipant implements IConsolePageParticipant {
         if (event.getProperty().equals(DeployConsole.PROPERTY_JOB)) {
           // keep the order of adding a listener and then calling update() to ensure update is called regardless of when the
           // job finishes
-          addJobchangeListener();
+          addJobChangeListener();
           update();
         }
       }
@@ -49,7 +49,7 @@ public class DeployConsolePageParticipant implements IConsolePageParticipant {
     configureToolBar(actionBars.getToolBarManager());
     // keep the order of adding a listener and then calling update() to ensure update is called regardless of when the
     // job finishes
-    addJobchangeListener();
+    addJobChangeListener();
     update();
   }
 
@@ -61,7 +61,7 @@ public class DeployConsolePageParticipant implements IConsolePageParticipant {
     toolbarManager.appendToGroup(IConsoleConstants.LAUNCH_GROUP, closeAction);
   }
 
-  private void addJobchangeListener() {
+  private void addJobChangeListener() {
     StandardDeployJob job = console.getJob();
     if (job != null) {
       job.addJobChangeListener(new JobChangeAdapter() {
