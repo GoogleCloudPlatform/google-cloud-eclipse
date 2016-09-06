@@ -8,7 +8,7 @@ set -x
 # create a timestamp file
 date +%s > timestamp.txt
 
-cd git/kokoro-codelab-elharo
+cd git/google-cloud-eclipse
 ./build.sh
 
 
