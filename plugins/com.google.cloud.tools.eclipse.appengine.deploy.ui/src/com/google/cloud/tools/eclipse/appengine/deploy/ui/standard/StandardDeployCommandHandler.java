@@ -126,9 +126,9 @@ public class StandardDeployCommandHandler extends AbstractHandler {
 
   private String getConsoleName(String project) {
     Date now = new Date();
-    String nowStr =
+    String nowString =
         DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, Locale.getDefault()).format(now);
-    return MessageFormat.format("{0} - {1} ({2})", CONSOLE_NAME, project, nowStr);
+    return MessageFormat.format("{0} - {1} ({2})", CONSOLE_NAME, project, nowString);
   }
 
   private StandardDeployJobConfig getDeployJobConfig(IProject project,
