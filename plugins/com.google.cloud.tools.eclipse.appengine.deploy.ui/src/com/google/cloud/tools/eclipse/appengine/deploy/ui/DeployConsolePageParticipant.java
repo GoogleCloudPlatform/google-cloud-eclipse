@@ -65,6 +65,7 @@ public class DeployConsolePageParticipant implements IConsolePageParticipant {
     StandardDeployJob job = console.getJob();
     if (job != null) {
       job.addJobChangeListener(new JobChangeAdapter() {
+        @Override
         public void done(IJobChangeEvent event) {
           update();
         }
