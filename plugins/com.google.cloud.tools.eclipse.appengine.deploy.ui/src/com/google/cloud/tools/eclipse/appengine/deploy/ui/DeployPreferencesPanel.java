@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.ObservablesManager;
+import org.eclipse.core.databinding.UpdateValueStrategy;
 import org.eclipse.core.databinding.beans.PojoProperties;
 import org.eclipse.core.databinding.observable.Observables;
 import org.eclipse.core.databinding.observable.list.IObservableList;
@@ -34,11 +35,8 @@ import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.fieldassist.ControlDecoration;
-import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -69,7 +67,6 @@ public class DeployPreferencesPanel extends Composite {
 
   private Label projectIdLabel;
   private Text projectId;
-  private Button promptForProjectIdButton;
 
   private Button overrideDefaultVersionButton;
   private Label versionLabel;
@@ -126,16 +123,13 @@ public class DeployPreferencesPanel extends Composite {
   }
 
   private void setupProjectIdDataBinding(DataBindingContext context) {
-    ISWTObservableValue promptButton = WidgetProperties.selection().observe(promptForProjectIdButton);
     ISWTObservableValue projectIdField = WidgetProperties.text(SWT.Modify).observe(projectId);
 
-    IObservableValue promptModel = PojoProperties.value("promptForProjectId").observe(model);
     IObservableValue projectIdModel = PojoProperties.value("projectId").observe(model);
 
-    context.bindValue(promptButton, promptModel);
-    context.bindValue(projectIdField, projectIdModel);
-
-    context.addValidationStatusProvider(new ProjectIdMultiValidator(promptButton, projectIdField));
+    context.bindValue(projectIdField, projectIdModel,
+                      new UpdateValueStrategy().setAfterGetValidator(new ProjectIdValidator()),
+                      new UpdateValueStrategy().setAfterGetValidator(new ProjectIdValidator()));
   }
 
   private void setupProjectVersionDataBinding(DataBindingContext context) {
@@ -227,17 +221,6 @@ public class DeployPreferencesPanel extends Composite {
 
     projectId = new Text(projectIdComp, SWT.LEFT | SWT.SINGLE | SWT.BORDER);
     projectId.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-
-    promptForProjectIdButton = new Button(projectIdComp, SWT.CHECK);
-    promptForProjectIdButton.setText(Messages.getString("deploy.prompt.projectid"));
-    GridData layoutData = new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1);
-    layoutData.horizontalIndent = INDENT_CHECKBOX_ENABLED_WIDGET;
-    promptForProjectIdButton.setLayoutData(layoutData);
-
-    ControlDecoration controlDecoration = new ControlDecoration(promptForProjectIdButton, SWT.RIGHT | SWT.TOP);
-    controlDecoration.setDescriptionText(Messages.getString("deploy.prompt.projectid.long"));
-    Image decorationImage = getInfoDecorationImage();
-    controlDecoration.setImage(decorationImage);
   }
 
   private void createProjectVersionSection() {
@@ -349,11 +332,6 @@ public class DeployPreferencesPanel extends Composite {
     return defaultBucketComp;
   }
 
-  private Image getInfoDecorationImage() {
-    return FieldDecorationRegistry.getDefault()
-        .getFieldDecoration(FieldDecorationRegistry.DEC_CONTENT_PROPOSAL).getImage();
-  }
-
   /**
    * Validates a checkbox and text field as follows:
    * <ol>
@@ -410,61 +388,6 @@ public class DeployPreferencesPanel extends Composite {
       return super.getTargets();
     }
   }
-
-  /**
-   * Validates a checkbox and text field as follows:
-   * <ol>
-   * <li>if the checkbox is unselected -> the text field cannot contain the empty string
-   * <li>if the checkbox is selected -> the text field can contain the empty string
-   * <li>if the text field is not empty, the result is determined by {@link ProjectIdValidator} applied to the value
-   * </ol>
-   */
-  private static class ProjectIdMultiValidator extends MultiValidator {
-
-    private ISWTObservableValue selectionObservable;
-    private ISWTObservableValue textObservable;
-    private ProjectIdValidator validator = new ProjectIdValidator();
-
-    /**
-     * @param selection must be an observable for a checkbox, i.e. a {@link Button} with {@link SWT#CHECK} style
-     * @param text must be an observable for a {@link Text}
-     */
-    public ProjectIdMultiValidator(ISWTObservableValue selection, ISWTObservableValue text) {
-      super(selection.getRealm());
-      Preconditions.checkArgument(text.getWidget() instanceof Text,
-                                  "text is an observable for {0}, should be for {1}",
-                                  text.getWidget().getClass().getName(),
-                                  Text.class.getName());
-      Preconditions.checkArgument(selection.getWidget() instanceof Button,
-                                  "selection is an observable for {0}, should be for {1}",
-                                  selection.getWidget().getClass().getName(),
-                                  Button.class.getName());
-      Preconditions.checkArgument((selection.getWidget().getStyle() & SWT.CHECK) != 0,
-          "selection must be an observable for a checkbox");
-      this.selectionObservable = selection;
-      this.textObservable = text;
-    }
-
-    @Override
-    protected IStatus validate() {
-      if (Boolean.FALSE.equals(selectionObservable.getValue())) {
-        return validator.validate(textObservable.getValue(), ProjectIdValidator.ValidationPolicy.EMPTY_IS_INVALID);
-      }
-      return validator.validate(textObservable.getValue(), ProjectIdValidator.ValidationPolicy.EMPTY_IS_VALID);
-    }
-
-    @Override
-    public IObservableList getTargets() {
-      /**
-       * BUGFIX: https://bugs.eclipse.org/bugs/show_bug.cgi?id=312785
-       */
-      if( isDisposed() ) {
-        return Observables.emptyObservableList();
-      }
-      return super.getTargets();
-    }
-  }
-
 
   public DataBindingContext getDataBindingContext() {
     return bindingContext;

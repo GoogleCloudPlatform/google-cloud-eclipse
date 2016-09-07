@@ -13,6 +13,8 @@ import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
+import org.eclipse.swt.events.ShellAdapter;
+import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
@@ -93,19 +95,13 @@ public class DeployPreferencesDialog extends Dialog {
   private void updateValidationStatus(String errorMessage) {
     Preconditions.checkNotNull(errorMessage, "errorMessage is null");
     
-    getButton(IDialogConstants.OK_ID).setEnabled(errorMessage.isEmpty());
-    validationMessage.setText(errorMessage);
-    validationMessage.setImage(errorMessage.isEmpty() ? null : ERROR_ICON);
-    validationMessage.setVisible(!errorMessage.isEmpty());
-    ((GridData)validationMessage.getLayoutData()).exclude = errorMessage.isEmpty();
-    validationMessage.getParent().layout();
+    if (!validationMessage.isDisposed()) {
+      getButton(IDialogConstants.OK_ID).setEnabled(errorMessage.isEmpty());
+      validationMessage.setText(errorMessage);
+      validationMessage.setImage(errorMessage.isEmpty() ? null : ERROR_ICON);
+      validationMessage.setVisible(!errorMessage.isEmpty());
+      ((GridData)validationMessage.getLayoutData()).exclude = errorMessage.isEmpty();
+      validationMessage.getParent().layout();
+    }
   }
-
-  @Override
-  protected Control createContents(Composite parent) {
-    Control control = super.createContents(parent);
-    updateValidationStatus("");
-    return control;
-  }
-
 }
