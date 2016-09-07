@@ -15,12 +15,8 @@
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
-import com.google.cloud.tools.eclipse.ui.util.FontUtil;
-import com.google.cloud.tools.eclipse.ui.util.databinding.BucketNameValidator;
-import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectIdValidator;
-import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectVersionValidator;
-import com.google.cloud.tools.eclipse.ui.util.event.OpenUrlSelectionListener;
-import com.google.common.base.Preconditions;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.ObservablesManager;
@@ -42,7 +38,6 @@ import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -57,8 +52,12 @@ import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.osgi.service.prefs.BackingStoreException;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.google.cloud.tools.eclipse.ui.util.FontUtil;
+import com.google.cloud.tools.eclipse.ui.util.databinding.BucketNameValidator;
+import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectIdValidator;
+import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectVersionValidator;
+import com.google.cloud.tools.eclipse.ui.util.event.OpenUrlSelectionListener;
+import com.google.common.base.Preconditions;
 
 public class DeployPreferencesPanel extends Composite {
 
@@ -294,7 +293,6 @@ public class DeployPreferencesPanel extends Composite {
 
   private void createAdvancedSection() {
     final ExpandableComposite expandableComposite = createExpandableComposite();
-    expandableComposite.setBackground(new Color(getDisplay(), 255,0,0));
     final Composite defaultBucketComp = createBucketSection(expandableComposite);
     expandableComposite.setClient(defaultBucketComp);
     expandableComposite.addExpansionListener(new ExpansionAdapter() {
