@@ -19,7 +19,7 @@
    </license>
 
    <plugin
-         id="com.google.cloud.tools.app.lib"
+         id="com.google.cloud.tools.appengine"
          download-size="0"
          install-size="0"
          version="0.0.0"
