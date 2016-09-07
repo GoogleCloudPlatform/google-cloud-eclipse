@@ -46,6 +46,7 @@ import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployJo
 import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployPreferences;
 import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployPreferencesConverter;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployConsole;
+import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPreferencesDialog;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
 import com.google.cloud.tools.eclipse.appengine.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListener;
@@ -84,6 +85,8 @@ public class StandardDeployCommandHandler extends AbstractHandler {
       if (project != null) {
         Credential credential = loginIfNeeded(event);
         if (credential != null) {
+          new DeployPreferencesDialog(HandlerUtil.getActiveShell(event), project).open();
+if (false)
           launchDeployJob(project, credential, event);
         }
       }

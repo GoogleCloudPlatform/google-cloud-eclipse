@@ -85,7 +85,6 @@ public class DeployPreferencesPanel extends Composite {
 
   public DeployPreferencesPanel(Composite parent, IProject project) {
     super(parent, SWT.NONE);
-
     GridLayout layout = new GridLayout(1, false);
     // set margin to 0 to meet expectations of super.createContents(Composite)
     layout.marginHeight = 0;
