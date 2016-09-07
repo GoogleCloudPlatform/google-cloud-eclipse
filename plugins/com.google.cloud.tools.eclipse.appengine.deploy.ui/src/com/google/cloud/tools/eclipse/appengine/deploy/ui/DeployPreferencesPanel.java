@@ -15,8 +15,12 @@
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.google.cloud.tools.eclipse.ui.util.FontUtil;
+import com.google.cloud.tools.eclipse.ui.util.databinding.BucketNameValidator;
+import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectIdValidator;
+import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectVersionValidator;
+import com.google.cloud.tools.eclipse.ui.util.event.OpenUrlSelectionListener;
+import com.google.common.base.Preconditions;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.ObservablesManager;
@@ -37,12 +41,14 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
@@ -51,12 +57,8 @@ import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.osgi.service.prefs.BackingStoreException;
 
-import com.google.cloud.tools.eclipse.ui.util.FontUtil;
-import com.google.cloud.tools.eclipse.ui.util.databinding.BucketNameValidator;
-import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectIdValidator;
-import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectVersionValidator;
-import com.google.cloud.tools.eclipse.ui.util.event.OpenUrlSelectionListener;
-import com.google.common.base.Preconditions;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class DeployPreferencesPanel extends Composite {
 
@@ -298,9 +300,23 @@ public class DeployPreferencesPanel extends Composite {
     expandableComposite.addExpansionListener(new ExpansionAdapter() {
       @Override
       public void expansionStateChanged(ExpansionEvent e) {
-        expandableComposite.getParent().layout();
+        updateLayout(expandableComposite);
       }
   });
+  }
+
+  /**
+   * Update the ancestral ScrolledComposite that there's been a change.
+   */
+  protected void updateLayout(ExpandableComposite expandableComposite) {
+    Control parent = expandableComposite.getParent();
+    while (parent != null) {
+      if (parent instanceof ScrolledComposite) {
+        ScrolledComposite sc = (ScrolledComposite) parent;
+        sc.setMinSize(sc.getContent().computeSize(SWT.DEFAULT, SWT.DEFAULT));
+      }
+      parent = parent.getParent();
+    }
   }
 
   private ExpandableComposite createExpandableComposite() {
