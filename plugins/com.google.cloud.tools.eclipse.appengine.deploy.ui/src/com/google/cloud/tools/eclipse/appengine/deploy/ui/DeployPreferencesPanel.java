@@ -37,6 +37,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -45,6 +46,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.forms.events.ExpansionAdapter;
+import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.osgi.service.prefs.BackingStoreException;
 
@@ -288,9 +291,16 @@ public class DeployPreferencesPanel extends Composite {
   }
 
   private void createAdvancedSection() {
-    ExpandableComposite expandableComposite = createExpandableComposite();
-    Composite defaultBucketComp = createBucketSection(expandableComposite);
+    final ExpandableComposite expandableComposite = createExpandableComposite();
+    expandableComposite.setBackground(new Color(getDisplay(), 255,0,0));
+    final Composite defaultBucketComp = createBucketSection(expandableComposite);
     expandableComposite.setClient(defaultBucketComp);
+    expandableComposite.addExpansionListener(new ExpansionAdapter() {
+      @Override
+      public void expansionStateChanged(ExpansionEvent e) {
+        expandableComposite.getParent().layout();
+      }
+  });
   }
 
   private ExpandableComposite createExpandableComposite() {
