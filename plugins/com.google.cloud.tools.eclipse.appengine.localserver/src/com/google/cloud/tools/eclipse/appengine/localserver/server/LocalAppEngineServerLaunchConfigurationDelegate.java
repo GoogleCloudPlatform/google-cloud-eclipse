@@ -109,6 +109,8 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       setupDebugTarget(launch, configuration, debugPort, monitor);
       serverBehaviour.startDebugDevServer(runnables, console.newMessageStream(), debugPort);
     } else {
+      // A launch must have at least one debug target or process, or it otherwise becomes a zombie
+      LocalAppEngineServerTargetWrapper.addTarget(launch, serverBehaviour);
       serverBehaviour.startDevServer(runnables, console.newMessageStream());
     }
   }
