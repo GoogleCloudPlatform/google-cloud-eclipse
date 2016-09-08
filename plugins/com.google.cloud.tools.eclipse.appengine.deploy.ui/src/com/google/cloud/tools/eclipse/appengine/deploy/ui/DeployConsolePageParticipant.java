@@ -18,7 +18,6 @@ import org.eclipse.ui.console.IConsolePageParticipant;
 import org.eclipse.ui.part.IPageBookViewPage;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployJob;
-import com.google.cloud.tools.eclipse.ui.util.Messages;
 import com.google.common.base.Preconditions;
 
 public class DeployConsolePageParticipant implements IConsolePageParticipant {
