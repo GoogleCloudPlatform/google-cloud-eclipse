@@ -13,8 +13,6 @@ import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
-import org.eclipse.swt.events.ShellAdapter;
-import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
@@ -50,7 +48,10 @@ public class DeployPreferencesDialog extends Dialog {
   @Override
   protected Control createDialogArea(final Composite parent) {
     validationMessage = new CLabel(parent, SWT.LEFT);
-    validationMessage.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+    GridData layoutData = new GridData(SWT.LEFT, SWT.CENTER, true, false);
+    layoutData.exclude = true;
+    validationMessage.setLayoutData(layoutData);
+    validationMessage.setVisible(false);
 
     Composite dialogArea = (Composite) super.createDialogArea(parent);
     ScrolledComposite scrolledComposite = new ScrolledComposite(dialogArea, SWT.V_SCROLL | SWT.H_SCROLL);
@@ -103,5 +104,11 @@ public class DeployPreferencesDialog extends Dialog {
       ((GridData)validationMessage.getLayoutData()).exclude = errorMessage.isEmpty();
       validationMessage.getParent().layout();
     }
+  }
+
+  @Override
+  protected void okPressed() {
+    content.savePreferences();
+    super.okPressed();
   }
 }

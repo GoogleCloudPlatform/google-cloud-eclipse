@@ -32,9 +32,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
-import org.eclipse.jface.dialogs.InputDialog;
-import org.eclipse.jface.window.Window;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.ui.handlers.HandlerUtil;
 
@@ -53,7 +50,6 @@ import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListe
 import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities;
 import com.google.cloud.tools.eclipse.ui.util.ProjectFromSelectionHelper;
 import com.google.cloud.tools.eclipse.ui.util.ServiceUtils;
-import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectIdValidator;
 import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
 import com.google.common.annotations.VisibleForTesting;
 
@@ -86,7 +82,6 @@ public class StandardDeployCommandHandler extends AbstractHandler {
         Credential credential = loginIfNeeded(event);
         if (credential != null) {
           new DeployPreferencesDialog(HandlerUtil.getActiveShell(event), project).open();
-if (false)
           launchDeployJob(project, credential, event);
         }
       }
@@ -99,32 +94,28 @@ if (false)
 
   private void launchDeployJob(IProject project, Credential credential, ExecutionEvent event) 
       throws IOException, ExecutionException {
-    try {
-      IPath workDirectory = createWorkDirectory();
+    IPath workDirectory = createWorkDirectory();
 
-      DefaultDeployConfiguration deployConfiguration = getDeployConfiguration(project, event);
-      DeployConsole messageConsole =
-          MessageConsoleUtilities.createConsole(getConsoleName(deployConfiguration.getProject()),
-                                                new DeployConsole.Factory());
+    DefaultDeployConfiguration deployConfiguration = getDeployConfiguration(project, event);
+    DeployConsole messageConsole =
+        MessageConsoleUtilities.createConsole(getConsoleName(deployConfiguration.getProject()),
+                                              new DeployConsole.Factory());
 
-      final MessageConsoleStream outputStream = messageConsole.newMessageStream();
-      StandardDeployJobConfig config = getDeployJobConfig(project, credential, event,
-                                                          workDirectory, outputStream, deployConfiguration);
+    final MessageConsoleStream outputStream = messageConsole.newMessageStream();
+    StandardDeployJobConfig config = getDeployJobConfig(project, credential, event,
+                                                        workDirectory, outputStream, deployConfiguration);
 
-      StandardDeployJob deploy = new StandardDeployJob.Builder().config(config).build();
-      messageConsole.setJob(deploy);
-      deploy.addJobChangeListener(new JobChangeAdapter() {
+    StandardDeployJob deploy = new StandardDeployJob.Builder().config(config).build();
+    messageConsole.setJob(deploy);
+    deploy.addJobChangeListener(new JobChangeAdapter() {
 
-        @Override
-        public void done(IJobChangeEvent event) {
-          super.done(event);
-          launchCleanupJob();
-        }
-      });
-      deploy.schedule();
-    } catch (DeployCancelledException ex) {
-      // nothing to do
-    }
+      @Override
+      public void done(IJobChangeEvent event) {
+        super.done(event);
+        launchCleanupJob();
+      }
+    });
+    deploy.schedule();
   }
 
   private String getConsoleName(String project) {
@@ -150,53 +141,13 @@ if (false)
     return config;
   }
 
-  private DefaultDeployConfiguration getDeployConfiguration(IProject project, ExecutionEvent event)
-      throws ExecutionException, DeployCancelledException {
+  private DefaultDeployConfiguration getDeployConfiguration(IProject project,
+                                                            ExecutionEvent event) throws ExecutionException {
     StandardDeployPreferences deployPreferences = new StandardDeployPreferences(project);
-    if (deployPreferences.isPromptForProjectId()
-        || deployPreferences.getProjectId() == null
-        || deployPreferences.getProjectId().isEmpty()) {
-      String projectId = promptForProjectId(HandlerUtil.getActiveShellChecked(event), deployPreferences.getProjectId());
-      deployPreferences.setProjectId(projectId);
-    }
-
     if (deployPreferences.getProjectId() == null || deployPreferences.getProjectId().isEmpty()) {
       throw new ExecutionException(Messages.getString("error.projectId.missing"));
     }
     return new StandardDeployPreferencesConverter(deployPreferences).toDeployConfiguration();
-  }
-
-  private String promptForProjectId(Shell shell, String initialValue) throws DeployCancelledException {
-    InputDialog dialog = new InputDialog(shell,
-                    Messages.getString("dialog.prompt.projectId.title"),
-                    Messages.getString("dialog.prompt.projectId.message"),
-                    initialValue,
-                    new ProjectIdValidator() {
-                      @Override
-                      // The input dialog does not provide decoration for the error message,
-                      // make errors more recognizable with modified validation messages
-                      // FIXME https://github.com/GoogleCloudPlatform/cloud-tools-for-eclipse/issues/635
-                      public String isValid(String newText) {
-                        String error = super.isValid(newText);
-                        if (error != null) {
-                          if (error.isEmpty()) {
-                            return Messages.getString("error.projectId.invalid");
-                          } else {
-                            return Messages.getString("error.projectId.prefix", error);
-                          }
-                        } else {
-                          return null;
-                        }
-                      }
-    });
-    int result = dialog.open();
-    if (result == Window.OK) {
-      return dialog.getValue();
-    } else if (result == Window.CANCEL) {
-      throw new DeployCancelledException();
-    } else {
-      return null;
-    }
   }
 
   private IPath createWorkDirectory() throws IOException {
@@ -224,8 +175,5 @@ if (false)
   private IPath getTempDir() {
     return Platform.getStateLocation(Platform.getBundle("com.google.cloud.tools.eclipse.appengine.deploy"))
         .append("tmp");
-  }
-
-  private static class DeployCancelledException extends Exception {
   }
 }

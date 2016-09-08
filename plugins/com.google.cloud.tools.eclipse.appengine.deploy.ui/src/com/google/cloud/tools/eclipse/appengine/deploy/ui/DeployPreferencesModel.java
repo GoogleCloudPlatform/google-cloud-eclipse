@@ -9,7 +9,6 @@ public class DeployPreferencesModel {
 
   private StandardDeployPreferences preferences;
 
-  private boolean promptForProjectId;
   private String projectId;
   private boolean overrideDefaultVersioning;
   private String version;
@@ -25,7 +24,6 @@ public class DeployPreferencesModel {
 
   private void applyPreferences(StandardDeployPreferences preferences) {
     setProjectId(preferences.getProjectId());
-    setPromptForProjectId(preferences.isPromptForProjectId());
     setOverrideDefaultVersioning(preferences.isOverrideDefaultVersioning());
     setVersion(preferences.getVersion());
     setAutoPromote(preferences.isAutoPromote());
@@ -40,7 +38,6 @@ public class DeployPreferencesModel {
 
   public void savePreferences() throws BackingStoreException {
     preferences.setProjectId(getProjectId());
-    preferences.setPromptForProjectId(isPromptForProjectId());
     preferences.setOverrideDefaultVersioning(isOverrideDefaultVersioning());
     preferences.setVersion(getVersion());
     preferences.setAutoPromote(isAutoPromote());
@@ -48,14 +45,6 @@ public class DeployPreferencesModel {
     preferences.setOverrideDefaultBucket(isOverrideDefaultBucket());
     preferences.setBucket(getBucket());
     preferences.save();
-  }
-
-  public boolean isPromptForProjectId() {
-    return promptForProjectId;
-  }
-
-  public void setPromptForProjectId(boolean promptForProjectId) {
-    this.promptForProjectId = promptForProjectId;
   }
 
   public String getProjectId() {

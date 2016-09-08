@@ -9,7 +9,6 @@ public class StandardDeployPreferences {
 
   public static final String PREFERENCE_STORE_QUALIFIER = "com.google.cloud.tools.eclipse.appengine.deploy";
 
-  static final String PREF_PROMPT_FOR_PROJECT_ID = "project.id.promptOnDeploy"; // boolean
   static final String PREF_PROJECT_ID = "project.id";
   static final String PREF_OVERRIDE_DEFAULT_VERSIONING = "project.version.overrideDefault"; // boolean
   static final String PREF_CUSTOM_VERSION = "project.version";
@@ -35,15 +34,6 @@ public class StandardDeployPreferences {
 
   public void save() throws BackingStoreException {
     preferenceStore.flush();
-  }
-
-  public boolean isPromptForProjectId() {
-    return preferenceStore.getBoolean(PREF_PROMPT_FOR_PROJECT_ID,
-                                      DeployPreferenceInitializer.DEFAULT_PROMPT_FOR_PROJECT_ID);
-  }
-
-  public void setPromptForProjectId(boolean promptForProjectId) {
-    preferenceStore.putBoolean(PREF_PROMPT_FOR_PROJECT_ID, promptForProjectId);
   }
 
   public String getProjectId() {
