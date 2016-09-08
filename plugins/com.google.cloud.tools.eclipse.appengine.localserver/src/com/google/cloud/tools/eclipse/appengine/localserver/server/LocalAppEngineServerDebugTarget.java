@@ -19,11 +19,11 @@ package com.google.cloud.tools.eclipse.appengine.localserver.server;
 import org.eclipse.core.resources.IMarkerDelta;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchesListener;
+import org.eclipse.debug.core.model.DebugElement;
 import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IMemoryBlock;
@@ -34,13 +34,14 @@ import org.eclipse.wst.server.core.IServerListener;
 import org.eclipse.wst.server.core.ServerEvent;
 
 /**
- * Wraps our {@link LocalAppEngineServerBehaviour} as a debug target.
+ * Allow the Debug Launch framework to terminate our Dev App Server. Required for <em>Run</em>-style
+ * launches as otherwise the launch becomes a zombie launch that cannot be terminated nor removed.
  */
-public class LocalAppEngineServerTargetWrapper implements IDebugTarget {
+public class LocalAppEngineServerDebugTarget extends DebugElement implements IDebugTarget {
   private ILaunch launch;
   private LocalAppEngineServerBehaviour serverBehaviour;
 
-  // Fire a terminate debug event on server-stopped
+  // Fire a {@link DebugEvent#TERMINATED} event when the server is stopped
   private IServerListener serverEventsListener = new IServerListener() {
     @Override
     public void serverChanged(ServerEvent event) {
@@ -51,7 +52,7 @@ public class LocalAppEngineServerTargetWrapper implements IDebugTarget {
     }
   };
 
-  // Ensures all installed listeners are disconnected on remove
+  // Ensure that our listeners are disconnected on remove
   private ILaunchesListener launchesListener = new ILaunchesListener() {
     @Override
     public void launchesRemoved(ILaunch[] launches) {
@@ -75,15 +76,15 @@ public class LocalAppEngineServerTargetWrapper implements IDebugTarget {
    * Add a debug target to the specified launch.
    */
   public static void addTarget(ILaunch launch, LocalAppEngineServerBehaviour serverBehaviour) {
-    LocalAppEngineServerTargetWrapper target = new LocalAppEngineServerTargetWrapper(launch, serverBehaviour);
+    LocalAppEngineServerDebugTarget target = new LocalAppEngineServerDebugTarget(launch, serverBehaviour);
     launch.addDebugTarget(target);
     target.install();
     target.fireCreationEvent();
   }
 
-  private LocalAppEngineServerTargetWrapper(ILaunch launch,
+  private LocalAppEngineServerDebugTarget(ILaunch launch,
       LocalAppEngineServerBehaviour serverBehaviour) {
-
+    super(null);
     this.launch = launch;
     this.serverBehaviour = serverBehaviour;
   }
@@ -125,10 +126,8 @@ public class LocalAppEngineServerTargetWrapper implements IDebugTarget {
     // Could be IElementContentProvider, IElementLabelProvider, IDebugModelProvider
     if (adapter.isInstance(serverBehaviour)) {
       return adapter.cast(serverBehaviour);
-    } else if (adapter.isInstance(launch)) {
-      return adapter.cast(launch);
     }
-    return null;
+    return super.getAdapter(adapter);
   }
 
   @Override
@@ -151,13 +150,13 @@ public class LocalAppEngineServerTargetWrapper implements IDebugTarget {
   }
 
   @Override
-  public boolean canResume() {
+  public boolean canSuspend() {
     return false;
   }
 
   @Override
-  public boolean canSuspend() {
-    return false;
+  public void suspend() throws DebugException {
+    throw notSupportedException();
   }
 
   @Override
@@ -166,12 +165,12 @@ public class LocalAppEngineServerTargetWrapper implements IDebugTarget {
   }
 
   @Override
-  public void resume() throws DebugException {
-    throw notSupportedException();
+  public boolean canResume() {
+    return false;
   }
 
   @Override
-  public void suspend() throws DebugException {
+  public void resume() throws DebugException {
     throw notSupportedException();
   }
 
@@ -226,26 +225,7 @@ public class LocalAppEngineServerTargetWrapper implements IDebugTarget {
 
   @Override
   public IProcess getProcess() {
-    // return serverBehaviour.getProcess();
     return null;
-  }
-
-  /**
-   * Fires a creation event
-   */
-  private void fireCreationEvent() {
-    fireEvent(new DebugEvent(this, DebugEvent.CREATE));
-  }
-
-  /**
-   * Fires a terminate event
-   */
-  private void fireTerminateEvent() {
-    fireEvent(new DebugEvent(this, DebugEvent.TERMINATE));
-  }
-
-  public void fireEvent(DebugEvent event) {
-    DebugPlugin.getDefault().fireDebugEventSet(new DebugEvent[] {event});
   }
 
   private DebugException notSupportedException() {
