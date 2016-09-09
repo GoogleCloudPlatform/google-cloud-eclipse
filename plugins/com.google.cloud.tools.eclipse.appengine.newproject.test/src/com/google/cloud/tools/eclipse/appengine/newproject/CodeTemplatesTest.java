@@ -116,6 +116,10 @@ public class CodeTemplatesTest {
       throws ParserConfigurationException, SAXException, IOException, CoreException {
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     factory.setNamespaceAware(true);
+    factory.setValidating(false);
+    factory.setExpandEntityReferences(false);
+    factory.setAttribute("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false);
+    factory.setAttribute("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
     DocumentBuilder builder = factory.newDocumentBuilder();
     Document doc = builder.parse(appengineWebXml.getContents());
     return doc;
