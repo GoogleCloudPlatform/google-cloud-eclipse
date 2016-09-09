@@ -18,10 +18,14 @@ package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.databinding.preference.PreferencePageSupport;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.dialogs.PropertyPage;
+import org.eclipse.ui.forms.events.ExpansionEvent;
 
+import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPreferencesPanel.AdvancedSectionExpansionHandler;
 import com.google.cloud.tools.eclipse.util.AdapterUtil;
 
 public class DeployPropertyPage extends PropertyPage {
@@ -31,9 +35,27 @@ public class DeployPropertyPage extends PropertyPage {
   @Override
   protected Control createContents(Composite parent) {
     IProject project = AdapterUtil.adapt(getElement(), IProject.class);
-    content = new DeployPreferencesPanel(parent, project);
+    content = new DeployPreferencesPanel(parent, project, getExpansionHandler());
     PreferencePageSupport.create(this, content.getDataBindingContext());
     return content;
+  }
+
+  private AdvancedSectionExpansionHandler getExpansionHandler() {
+    return new AdvancedSectionExpansionHandler() {
+
+      @Override
+      public void handleExpansionEvent(ExpansionEvent e) {
+        Composite parent = ((Control)e.getSource()).getParent();
+        parent.layout();
+        while (parent != null) {
+          if (parent instanceof ScrolledComposite) {
+            ScrolledComposite sc = (ScrolledComposite) parent;
+            sc.setMinSize(sc.getContent().computeSize(SWT.DEFAULT, SWT.DEFAULT));
+          }
+          parent = parent.getParent();
+        }
+      }
+    };
   }
 
   @Override

@@ -8,7 +8,10 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.forms.events.ExpansionEvent;
+import org.eclipse.ui.forms.widgets.ExpandableComposite;
 
+import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPreferencesPanel.AdvancedSectionExpansionHandler;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
 
 public class DeployPreferencesDialog extends TitleAreaDialog {
@@ -42,12 +45,26 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
   @Override
   protected Control createDialogArea(final Composite parent) {
     Composite dialogArea = (Composite) super.createDialogArea(parent);
-    content = new DeployPreferencesPanel(dialogArea, project);
-    GridDataFactory.fillDefaults().grab(true, true).applyTo(content);
+    content = new DeployPreferencesPanel(dialogArea, project, getExpansionHandler());
+    GridDataFactory.fillDefaults().grab(true, false).applyTo(content);
     TitleAreaDialogSupport.create(this, content.getDataBindingContext());
     return dialogArea;
   }
   
+  private AdvancedSectionExpansionHandler getExpansionHandler() {
+    return new AdvancedSectionExpansionHandler() {
+
+      @Override
+      public void handleExpansionEvent(ExpansionEvent e) {
+        Shell shell = getShell();
+        shell.setMinimumSize( shell.getSize().x, 0 );
+        shell.pack();
+        ((ExpandableComposite)e.getSource()).getParent().layout();
+        shell.setMinimumSize( shell.getSize() );
+      }
+    };
+  }
+
   private String getTitleString() {
     return Messages.getString("deploy.preferences.dialog.title");
   }

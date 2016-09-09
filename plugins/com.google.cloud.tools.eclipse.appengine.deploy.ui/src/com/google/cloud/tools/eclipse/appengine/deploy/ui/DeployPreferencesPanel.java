@@ -43,7 +43,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
@@ -84,8 +83,12 @@ public class DeployPreferencesPanel extends Composite {
   private ObservablesManager observables;
   private DataBindingContext bindingContext;
 
-  public DeployPreferencesPanel(Composite parent, IProject project) {
+  private AdvancedSectionExpansionHandler expansionHandler;
+
+  public DeployPreferencesPanel(Composite parent, IProject project, AdvancedSectionExpansionHandler expansionHandler) {
     super(parent, SWT.NONE);
+
+    this.expansionHandler = expansionHandler;
 
     createProjectIdSection();
 
@@ -99,6 +102,7 @@ public class DeployPreferencesPanel extends Composite {
 
     Dialog.applyDialogFont(this);
 
+    GridDataFactory.fillDefaults().applyTo(this);
     GridLayoutFactory.fillDefaults().generateLayout(this);
 
     loadPreferences(project);
@@ -269,11 +273,7 @@ public class DeployPreferencesPanel extends Composite {
     expandableComposite.addExpansionListener(new ExpansionAdapter() {
       @Override
       public void expansionStateChanged(ExpansionEvent e) {
-        Shell shell = getShell();
-        shell.setMinimumSize( shell.getSize().x, 0 );
-        shell.pack();
-        expandableComposite.getParent().layout();
-        shell.setMinimumSize( shell.getSize() );
+        handleExpansionStateChanged(e);
       }
     });
     GridLayoutFactory.fillDefaults().generateLayout(expandableComposite);
@@ -284,6 +284,7 @@ public class DeployPreferencesPanel extends Composite {
         new ExpandableComposite(this, SWT.NONE, ExpandableComposite.TWISTIE | ExpandableComposite.CLIENT_INDENT);
     expandableComposite.setText(Messages.getString("settings.advanced"));
     expandableComposite.setExpanded(false);
+    GridDataFactory.fillDefaults().applyTo(expandableComposite);
     FontUtil.convertFontToBold(expandableComposite);
     return expandableComposite;
   }
@@ -379,5 +380,13 @@ public class DeployPreferencesPanel extends Composite {
       observables.dispose();
     }
     super.dispose();
+  }
+
+  private void handleExpansionStateChanged(final ExpansionEvent e) {
+    expansionHandler.handleExpansionEvent(e);
+  }
+
+  public static interface AdvancedSectionExpansionHandler {
+    void handleExpansionEvent(ExpansionEvent e);
   }
 }
