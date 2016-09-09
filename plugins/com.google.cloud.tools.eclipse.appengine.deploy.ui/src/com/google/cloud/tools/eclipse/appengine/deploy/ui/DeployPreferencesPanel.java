@@ -35,13 +35,12 @@ import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
@@ -87,11 +86,6 @@ public class DeployPreferencesPanel extends Composite {
 
   public DeployPreferencesPanel(Composite parent, IProject project) {
     super(parent, SWT.NONE);
-    GridLayout layout = new GridLayout(1, false);
-    // set margin to 0 to meet expectations of super.createContents(Composite)
-    layout.marginHeight = 0;
-    layout.marginWidth = 0;
-    setLayout(layout);
 
     createProjectIdSection();
 
@@ -104,6 +98,8 @@ public class DeployPreferencesPanel extends Composite {
     createAdvancedSection();
 
     Dialog.applyDialogFont(this);
+
+    GridLayoutFactory.fillDefaults().generateLayout(this);
 
     loadPreferences(project);
 
@@ -212,73 +208,64 @@ public class DeployPreferencesPanel extends Composite {
   }
 
   private void createProjectIdSection() {
-    Composite projectIdComp = new Composite(this, SWT.NONE);
-    projectIdComp.setLayout(new GridLayout(2, false));
-    projectIdComp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    Composite projectIdComposite = new Composite(this, SWT.NONE);
 
-    projectIdLabel = new Label(projectIdComp, SWT.LEFT);
-    projectIdLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+    projectIdLabel = new Label(projectIdComposite, SWT.LEFT);
     projectIdLabel.setText(Messages.getString("project.id"));
 
-    projectId = new Text(projectIdComp, SWT.LEFT | SWT.SINGLE | SWT.BORDER);
-    projectId.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    projectId = new Text(projectIdComposite, SWT.LEFT | SWT.SINGLE | SWT.BORDER);
+    GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(projectIdComposite);
   }
 
   private void createProjectVersionSection() {
-    Composite versionComp = new Composite(this, SWT.NONE);
-    versionComp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-    versionComp.setLayout(new GridLayout(2, false));
+    Composite versionComposite = new Composite(this, SWT.NONE);
 
-    overrideDefaultVersionButton = new Button(versionComp, SWT.CHECK);
+    overrideDefaultVersionButton = new Button(versionComposite, SWT.CHECK);
     overrideDefaultVersionButton.setText(Messages.getString("use.custom.versioning"));
     overrideDefaultVersionButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1));
 
-    versionLabel = new Label(versionComp, SWT.NONE);
+    versionLabel = new Label(versionComposite, SWT.NONE);
     versionLabel.setText(Messages.getString("project.version"));
-    GridData layoutData = new GridData(SWT.LEFT, SWT.CENTER, false, false);
+    GridData layoutData = GridDataFactory.swtDefaults().create();
     layoutData.horizontalIndent = INDENT_CHECKBOX_ENABLED_WIDGET;
     versionLabel.setLayoutData(layoutData);
 
-    version = new Text(versionComp, SWT.LEFT | SWT.SINGLE | SWT.BORDER);
-    version.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    version = new Text(versionComposite, SWT.LEFT | SWT.SINGLE | SWT.BORDER);
+    GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(versionComposite);
   }
 
   private void createPromoteSection() {
-    Composite promoteComp = new Composite(this, SWT.NONE);
-    promoteComp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-    promoteComp.setLayout(new GridLayout(1, false));
-    autoPromoteButton = new Button(promoteComp, SWT.CHECK);
+    Composite promoteComposite = new Composite(this, SWT.NONE);
+    autoPromoteButton = new Button(promoteComposite, SWT.CHECK);
     autoPromoteButton.setText(Messages.getString("auto.promote"));
-    autoPromoteButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 
-    Link manualPromoteLink = new Link(promoteComp, SWT.NONE);
-    GridData layoutData = new GridData(SWT.LEFT, SWT.CENTER, true, false);
+    Link manualPromoteLink = new Link(promoteComposite, SWT.NONE);
+    GridData layoutData = GridDataFactory.swtDefaults().create();
     layoutData.horizontalIndent = INDENT_CHECKBOX_ENABLED_WIDGET;
     manualPromoteLink.setLayoutData(layoutData);
     manualPromoteLink.setText(Messages.getString("deploy.manual.link", APPENGINE_DASHBOARD_URL));
-    manualPromoteLink.setFont(promoteComp.getFont());
+    manualPromoteLink.setFont(promoteComposite.getFont());
     manualPromoteLink.addSelectionListener(new OpenUrlSelectionListener(new OpenUrlSelectionListener.ErrorHandler() {
       @Override
       public void handle(Exception ex) {
         MessageDialog.openError(getShell(), Messages.getString("cannot.open.browser"), ex.getLocalizedMessage());
       }
     }));
+    GridLayoutFactory.fillDefaults().generateLayout(promoteComposite);
   }
 
   private void createStopPreviousVersionSection() {
     Composite composite = new Composite(this, SWT.NONE);
-    composite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-    composite.setLayout(new GridLayout(1, false));
 
     stopPreviousVersionButton = new Button(composite, SWT.CHECK);
     stopPreviousVersionButton.setText(Messages.getString("stop.previous.version"));
-    stopPreviousVersionButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+    GridLayoutFactory.fillDefaults().generateLayout(composite);
   }
 
   private void createAdvancedSection() {
     final ExpandableComposite expandableComposite = createExpandableComposite();
-    final Composite defaultBucketComp = createBucketSection(expandableComposite);
-    expandableComposite.setClient(defaultBucketComp);
+    final Composite bucketComposite = createBucketSection(expandableComposite);
+    expandableComposite.setClient(bucketComposite);
     expandableComposite.addExpansionListener(new ExpansionAdapter() {
       @Override
       public void expansionStateChanged(ExpansionEvent e) {
@@ -289,20 +276,7 @@ public class DeployPreferencesPanel extends Composite {
         shell.setMinimumSize( shell.getSize() );
       }
     });
-  }
-
-  /**
-   * Update the ancestral ScrolledComposite that there's been a change.
-   */
-  protected void updateLayout(ExpandableComposite expandableComposite) {
-    Control parent = expandableComposite.getParent();
-    while (parent != null) {
-      if (parent instanceof ScrolledComposite) {
-        ScrolledComposite sc = (ScrolledComposite) parent;
-        sc.setMinSize(sc.getContent().computeSize(SWT.DEFAULT, SWT.DEFAULT));
-      }
-      parent = parent.getParent();
-    }
+    GridLayoutFactory.fillDefaults().generateLayout(expandableComposite);
   }
 
   private ExpandableComposite createExpandableComposite() {
@@ -310,32 +284,24 @@ public class DeployPreferencesPanel extends Composite {
         new ExpandableComposite(this, SWT.NONE, ExpandableComposite.TWISTIE | ExpandableComposite.CLIENT_INDENT);
     expandableComposite.setText(Messages.getString("settings.advanced"));
     expandableComposite.setExpanded(false);
-    expandableComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     FontUtil.convertFontToBold(expandableComposite);
     return expandableComposite;
   }
 
   private Composite createBucketSection(Composite parent) {
-    Composite defaultBucketComp = new Composite(parent, SWT.NONE);
-    defaultBucketComp.setLayout(new GridLayout(1, true));
-    defaultBucketComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+    Composite bucketComposite = new Composite(parent, SWT.NONE);
 
-    overrideDefaultBucketButton = new Button(defaultBucketComp, SWT.CHECK);
+    overrideDefaultBucketButton = new Button(bucketComposite, SWT.CHECK);
     overrideDefaultBucketButton.setText(Messages.getString("use.custom.bucket"));
-    overrideDefaultBucketButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+    overrideDefaultBucketButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1));
 
-    Composite customBucketComp = new Composite(defaultBucketComp, SWT.NONE);
-    customBucketComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-    customBucketComp.setLayout(new GridLayout(2, false));
-
-    bucketLabel = new Label(customBucketComp, SWT.RADIO);
+    bucketLabel = new Label(bucketComposite, SWT.RADIO);
     bucketLabel.setText(Messages.getString("bucket.name"));
-    bucketLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 
-    bucket = new Text(customBucketComp, SWT.LEFT | SWT.SINGLE | SWT.BORDER);
-    bucket.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+    bucket = new Text(bucketComposite, SWT.LEFT | SWT.SINGLE | SWT.BORDER);
 
-    return defaultBucketComp;
+    GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(bucketComposite);
+    return bucketComposite;
   }
 
   /**

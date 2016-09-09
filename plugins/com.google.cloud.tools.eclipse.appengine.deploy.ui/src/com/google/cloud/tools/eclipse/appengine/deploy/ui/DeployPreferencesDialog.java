@@ -16,7 +16,7 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
 
   // if the image is smaller (e.g. 32x32, it will break the layout of the TitleAreaDialog)
   // seems like an Eclipse/JFace bug
-  private Image titleImage = AppEngineImages.googleCloudPlatform(64).createImage();
+  private Image titleImage = AppEngineImages.appEngine(64).createImage();
 
   private DeployPreferencesPanel content;
   private IProject project;
