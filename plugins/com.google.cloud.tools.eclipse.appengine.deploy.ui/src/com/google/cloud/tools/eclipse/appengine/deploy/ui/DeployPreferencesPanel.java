@@ -44,6 +44,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
@@ -281,9 +282,13 @@ public class DeployPreferencesPanel extends Composite {
     expandableComposite.addExpansionListener(new ExpansionAdapter() {
       @Override
       public void expansionStateChanged(ExpansionEvent e) {
-        updateLayout(expandableComposite);
+        Shell shell = getShell();
+        shell.setMinimumSize( shell.getSize().x, 0 );
+        shell.pack();
+        expandableComposite.getParent().layout();
+        shell.setMinimumSize( shell.getSize() );
       }
-  });
+    });
   }
 
   /**
@@ -313,6 +318,7 @@ public class DeployPreferencesPanel extends Composite {
   private Composite createBucketSection(Composite parent) {
     Composite defaultBucketComp = new Composite(parent, SWT.NONE);
     defaultBucketComp.setLayout(new GridLayout(1, true));
+    defaultBucketComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
     overrideDefaultBucketButton = new Button(defaultBucketComp, SWT.CHECK);
     overrideDefaultBucketButton.setText(Messages.getString("use.custom.bucket"));

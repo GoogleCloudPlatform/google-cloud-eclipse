@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.jface.window.Window;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.ui.handlers.HandlerUtil;
 
@@ -81,8 +82,9 @@ public class StandardDeployCommandHandler extends AbstractHandler {
       if (project != null) {
         Credential credential = loginIfNeeded(event);
         if (credential != null) {
-          new DeployPreferencesDialog(HandlerUtil.getActiveShell(event), project).open();
-          launchDeployJob(project, credential, event);
+          if (new DeployPreferencesDialog(HandlerUtil.getActiveShell(event), project).open() == Window.OK) {
+            launchDeployJob(project, credential, event);
+          }
         }
       }
       // return value must be null, reserved for future use

@@ -6,18 +6,23 @@ import org.junit.Test;
 public class AppEngineImagesTest {
 
   @Test
-  public void testLoad16() {
+  public void testLoadGCP16() {
     Assert.assertNotNull(AppEngineImages.googleCloudPlatform(16));
   }
   
   @Test
-  public void testLoad32() {
+  public void testLoadGCP32() {
     Assert.assertNotNull(AppEngineImages.googleCloudPlatform(32));
   }
 
   @Test
-  public void testLoadNonExistentSize() {
+  public void testLoadNonExistentGCPSize() {
     Assert.assertNull(AppEngineImages.googleCloudPlatform(45));
+  }
+
+  @Test
+  public void testLoadGAE64() {
+    Assert.assertNotNull(AppEngineImages.appEngine(64));
   }
 
 }
