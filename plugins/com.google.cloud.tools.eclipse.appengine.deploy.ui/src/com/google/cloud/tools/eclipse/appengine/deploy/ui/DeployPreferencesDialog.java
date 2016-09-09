@@ -3,9 +3,8 @@ package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.databinding.dialog.TitleAreaDialogSupport;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
-import org.eclipse.swt.SWT;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
@@ -27,16 +26,12 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
   }
 
   @Override
-  protected void configureShell(Shell newShell) {
-    super.configureShell(newShell);
-    newShell.setText(getTitleString());
-  }
-
-  @Override
   protected Control createContents(Composite parent) {
     Control contents = super.createContents(parent);
 
-    setTitle(getTitleString());
+    String title = getTitleString();
+    setTitle(title);
+    getShell().setText(title);
     if (titleImage != null) {
       setTitleImage(titleImage);
     }
@@ -48,7 +43,7 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
   protected Control createDialogArea(final Composite parent) {
     Composite dialogArea = (Composite) super.createDialogArea(parent);
     content = new DeployPreferencesPanel(dialogArea, project);
-    content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+    GridDataFactory.fillDefaults().grab(true, true).applyTo(content);
     TitleAreaDialogSupport.create(this, content.getDataBindingContext());
     return dialogArea;
   }
@@ -67,5 +62,10 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
   public boolean close() {
     titleImage.dispose();
     return super.close();
+  }
+
+  @Override
+  public boolean isHelpAvailable() {
+    return false;
   }
 }
