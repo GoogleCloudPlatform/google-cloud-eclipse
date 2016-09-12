@@ -57,10 +57,10 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
       @Override
       public void handleExpansionEvent(ExpansionEvent e) {
         Shell shell = getShell();
-        shell.setMinimumSize( shell.getSize().x, 0 );
+        shell.setMinimumSize(shell.getSize().x, 0);
         shell.pack();
-        ((ExpandableComposite)e.getSource()).getParent().layout();
-        shell.setMinimumSize( shell.getSize() );
+        ((ExpandableComposite) e.getSource()).getParent().layout();
+        shell.setMinimumSize(shell.getSize());
       }
     };
   }

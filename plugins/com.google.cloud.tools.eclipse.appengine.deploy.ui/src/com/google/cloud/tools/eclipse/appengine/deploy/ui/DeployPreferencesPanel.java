@@ -53,12 +53,14 @@ import com.google.cloud.tools.eclipse.ui.util.FontUtil;
 import com.google.cloud.tools.eclipse.ui.util.databinding.BucketNameValidator;
 import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectIdValidator;
 import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectVersionValidator;
-import com.google.cloud.tools.eclipse.ui.util.event.OpenUrlSelectionListener;
+import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener;
+import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.ErrorHandler;
+import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.ProjectIdProvider;
 import com.google.common.base.Preconditions;
 
 public class DeployPreferencesPanel extends Composite {
 
-  private static final String APPENGINE_DASHBOARD_URL = "https://console.cloud.google.com/appengine";
+  private static final String APPENGINE_VERSIONS_URL = "https://console.cloud.google.com/appengine/versions";
 
   private static final int INDENT_CHECKBOX_ENABLED_WIDGET = 10;
 
@@ -247,9 +249,14 @@ public class DeployPreferencesPanel extends Composite {
     GridData layoutData = GridDataFactory.swtDefaults().create();
     layoutData.horizontalIndent = INDENT_CHECKBOX_ENABLED_WIDGET;
     manualPromoteLink.setLayoutData(layoutData);
-    manualPromoteLink.setText(Messages.getString("deploy.manual.link", APPENGINE_DASHBOARD_URL));
+    manualPromoteLink.setText(Messages.getString("deploy.manual.link", APPENGINE_VERSIONS_URL));
     manualPromoteLink.setFont(promoteComposite.getFont());
-    manualPromoteLink.addSelectionListener(new OpenUrlSelectionListener(new OpenUrlSelectionListener.ErrorHandler() {
+    manualPromoteLink.addSelectionListener(new OpenUriSelectionListener(new ProjectIdProvider() {
+      @Override
+      public String getProjectId() {
+        return projectId.getText();
+      }
+    }, new ErrorHandler() {
       @Override
       public void handle(Exception ex) {
         MessageDialog.openError(getShell(), Messages.getString("cannot.open.browser"), ex.getLocalizedMessage());
