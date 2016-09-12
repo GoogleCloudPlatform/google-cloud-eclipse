@@ -18,7 +18,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 
-import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPreferencesPanel.AdvancedSectionExpansionHandler;
+import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPreferencesPanel.SectionExpansionHandler;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
 
 public class DeployPreferencesDialog extends TitleAreaDialog {
@@ -79,8 +79,8 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
     }
   }
   
-  private AdvancedSectionExpansionHandler getExpansionHandler() {
-    return new AdvancedSectionExpansionHandler() {
+  private SectionExpansionHandler getExpansionHandler() {
+    return new SectionExpansionHandler() {
 
       @Override
       public void handleExpansionEvent(ExpansionEvent event) {

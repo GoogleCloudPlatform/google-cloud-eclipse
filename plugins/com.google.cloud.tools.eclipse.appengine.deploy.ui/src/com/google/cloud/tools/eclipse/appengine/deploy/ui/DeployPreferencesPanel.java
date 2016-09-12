@@ -85,9 +85,9 @@ public class DeployPreferencesPanel extends Composite {
   private ObservablesManager observables;
   private DataBindingContext bindingContext;
 
-  private AdvancedSectionExpansionHandler expansionHandler;
+  private SectionExpansionHandler expansionHandler;
 
-  public DeployPreferencesPanel(Composite parent, IProject project, AdvancedSectionExpansionHandler expansionHandler) {
+  public DeployPreferencesPanel(Composite parent, IProject project, SectionExpansionHandler expansionHandler) {
     super(parent, SWT.NONE);
 
     this.expansionHandler = expansionHandler;
@@ -274,7 +274,7 @@ public class DeployPreferencesPanel extends Composite {
   }
 
   private void createAdvancedSection() {
-    final ExpandableComposite expandableComposite = createExpandableComposite();
+    ExpandableComposite expandableComposite = createExpandableComposite();
     final Composite bucketComposite = createBucketSection(expandableComposite);
     expandableComposite.setClient(bucketComposite);
     expandableComposite.addExpansionListener(new ExpansionAdapter() {
@@ -393,7 +393,7 @@ public class DeployPreferencesPanel extends Composite {
     expansionHandler.handleExpansionEvent(event);
   }
 
-  public static interface AdvancedSectionExpansionHandler {
+  public static interface SectionExpansionHandler {
     void handleExpansionEvent(ExpansionEvent event);
   }
 }

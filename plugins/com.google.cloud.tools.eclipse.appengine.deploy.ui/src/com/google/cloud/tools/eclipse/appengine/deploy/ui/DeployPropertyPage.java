@@ -25,7 +25,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.dialogs.PropertyPage;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 
-import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPreferencesPanel.AdvancedSectionExpansionHandler;
+import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPreferencesPanel.SectionExpansionHandler;
 import com.google.cloud.tools.eclipse.util.AdapterUtil;
 
 public class DeployPropertyPage extends PropertyPage {
@@ -40,19 +40,18 @@ public class DeployPropertyPage extends PropertyPage {
     return content;
   }
 
-  private AdvancedSectionExpansionHandler getExpansionHandler() {
-    return new AdvancedSectionExpansionHandler() {
+  private SectionExpansionHandler getExpansionHandler() {
+    return new SectionExpansionHandler() {
 
       @Override
       public void handleExpansionEvent(ExpansionEvent event) {
-        Composite expandableComposite = (Composite) event.getSource();
-        DeployPreferencesPanel panel = (DeployPreferencesPanel) expandableComposite.getParent();
-        Composite parent = panel.getParent();
+        // resize the page to work around https://bugs.eclipse.org/bugs/show_bug.cgi?id=265237
+        Composite parent = content.getParent();
         while (parent != null) {
           if (parent instanceof ScrolledComposite) {
             ScrolledComposite scrolledComposite = (ScrolledComposite) parent;
-            scrolledComposite.setMinSize(panel.getParent().computeSize(SWT.DEFAULT, SWT.DEFAULT));
-            panel.layout();
+            scrolledComposite.setMinSize(content.getParent().computeSize(SWT.DEFAULT, SWT.DEFAULT));
+            content.layout();
             return;
           }
           parent = parent.getParent();
