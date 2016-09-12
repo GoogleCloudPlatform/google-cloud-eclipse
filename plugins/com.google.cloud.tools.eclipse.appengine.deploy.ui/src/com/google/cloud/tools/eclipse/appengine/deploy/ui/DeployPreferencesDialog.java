@@ -4,6 +4,7 @@ import org.eclipse.core.databinding.ValidationStatusProvider;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.databinding.dialog.TitleAreaDialogSupport;
 import org.eclipse.jface.databinding.dialog.ValidationMessageProvider;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
@@ -20,6 +21,7 @@ import org.eclipse.ui.forms.widgets.ExpandableComposite;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPreferencesPanel.SectionExpansionHandler;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
+import com.google.common.base.Preconditions;
 
 public class DeployPreferencesDialog extends TitleAreaDialog {
 
@@ -32,6 +34,8 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
 
   public DeployPreferencesDialog(Shell parentShell, IProject project) {
     super(parentShell);
+
+    Preconditions.checkNotNull(project, "project is null");
     this.project = project;
   }
 
@@ -39,9 +43,9 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
   protected Control createContents(Composite parent) {
     Control contents = super.createContents(parent);
 
-    String title = getTitleString();
-    setTitle(title);
-    getShell().setText(title);
+    getShell().setText(Messages.getString("deploy.preferences.dialog.title"));
+    setTitle(Messages.getString("deploy.preferences.dialog.title.withProject", project.getName()));
+
     if (titleImage != null) {
       setTitleImage(titleImage);
     }
@@ -91,10 +95,6 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
         shell.setMinimumSize(shell.getSize());
       }
     };
-  }
-
-  private String getTitleString() {
-    return Messages.getString("deploy.preferences.dialog.title");
   }
 
   @Override
