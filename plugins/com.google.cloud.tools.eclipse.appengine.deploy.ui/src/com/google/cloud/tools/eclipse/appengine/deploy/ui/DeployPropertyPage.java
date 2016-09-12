@@ -45,12 +45,15 @@ public class DeployPropertyPage extends PropertyPage {
 
       @Override
       public void handleExpansionEvent(ExpansionEvent e) {
-        Composite parent = ((Control)e.getSource()).getParent();
-        parent.layout();
+        Composite expandableComposite = (Composite)e.getSource();
+        DeployPreferencesPanel panel = (DeployPreferencesPanel) expandableComposite.getParent();
+        Composite parent = panel.getParent();
         while (parent != null) {
           if (parent instanceof ScrolledComposite) {
-            ScrolledComposite sc = (ScrolledComposite) parent;
-            sc.setMinSize(sc.getContent().computeSize(SWT.DEFAULT, SWT.DEFAULT));
+            ScrolledComposite scrolledComposite = (ScrolledComposite) parent;
+            scrolledComposite.setMinSize(panel.getParent().computeSize(SWT.DEFAULT, SWT.DEFAULT));
+            panel.layout();
+            return;
           }
           parent = parent.getParent();
         }
