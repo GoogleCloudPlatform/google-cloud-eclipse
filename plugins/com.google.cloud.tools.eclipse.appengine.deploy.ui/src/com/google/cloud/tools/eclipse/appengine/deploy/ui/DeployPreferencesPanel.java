@@ -389,11 +389,11 @@ public class DeployPreferencesPanel extends Composite {
     super.dispose();
   }
 
-  private void handleExpansionStateChanged(final ExpansionEvent e) {
-    expansionHandler.handleExpansionEvent(e);
+  private void handleExpansionStateChanged(ExpansionEvent event) {
+    expansionHandler.handleExpansionEvent(event);
   }
 
   public static interface AdvancedSectionExpansionHandler {
-    void handleExpansionEvent(ExpansionEvent e);
+    void handleExpansionEvent(ExpansionEvent event);
   }
 }

@@ -44,8 +44,8 @@ public class DeployPropertyPage extends PropertyPage {
     return new AdvancedSectionExpansionHandler() {
 
       @Override
-      public void handleExpansionEvent(ExpansionEvent e) {
-        Composite expandableComposite = (Composite)e.getSource();
+      public void handleExpansionEvent(ExpansionEvent event) {
+        Composite expandableComposite = (Composite) event.getSource();
         DeployPreferencesPanel panel = (DeployPreferencesPanel) expandableComposite.getParent();
         Composite parent = panel.getParent();
         while (parent != null) {
