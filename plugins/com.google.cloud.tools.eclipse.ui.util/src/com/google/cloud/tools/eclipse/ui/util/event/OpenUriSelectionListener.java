@@ -35,15 +35,15 @@ public class OpenUriSelectionListener implements SelectionListener {
 
   @Override
   public void widgetSelected(SelectionEvent event) {
-    openAppEngineDashboard(event.text);
+    openUri(event.text);
   }
 
   @Override
   public void widgetDefaultSelected(SelectionEvent event) {
-    openAppEngineDashboard(event.text);
+    openUri(event.text);
   }
 
-  private void openAppEngineDashboard(String uriString) {
+  private void openUri(String uriString) {
     try {
       URI uri = appendQueryParameters(new URI(uriString));
       browserSupport.getExternalBrowser().openURL(uri.toURL());
