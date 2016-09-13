@@ -15,9 +15,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.forms.events.ExpansionEvent;
 
-import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPreferencesPanel.SectionExpansionHandler;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
 import com.google.common.base.Preconditions;
 
@@ -60,7 +58,7 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
 
     Composite container = new Composite(dialogArea, SWT.NONE);
 
-    content = new DeployPreferencesPanel(container, project, getExpansionHandler());
+    content = new DeployPreferencesPanel(container, project, getLayoutChangedHandler());
     GridDataFactory.fillDefaults().grab(true, false).applyTo(content);
 
     // we pull in Dialog's content margins which are zeroed out by TitleAreaDialog
@@ -83,11 +81,10 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
     return dialogArea;
   }
 
-  private SectionExpansionHandler getExpansionHandler() {
-    return new SectionExpansionHandler() {
-
+  private Runnable getLayoutChangedHandler() {
+    return new Runnable() {
       @Override
-      public void handleExpansionEvent(ExpansionEvent event) {
+      public void run() {
         Shell shell = getShell();
         shell.setMinimumSize(shell.getSize().x, 0);
         shell.pack();

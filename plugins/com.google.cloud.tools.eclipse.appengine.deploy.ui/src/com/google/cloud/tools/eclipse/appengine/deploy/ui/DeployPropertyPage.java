@@ -23,9 +23,7 @@ import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.dialogs.PropertyPage;
-import org.eclipse.ui.forms.events.ExpansionEvent;
 
-import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPreferencesPanel.SectionExpansionHandler;
 import com.google.cloud.tools.eclipse.util.AdapterUtil;
 
 public class DeployPropertyPage extends PropertyPage {
@@ -35,16 +33,16 @@ public class DeployPropertyPage extends PropertyPage {
   @Override
   protected Control createContents(Composite parent) {
     IProject project = AdapterUtil.adapt(getElement(), IProject.class);
-    content = new DeployPreferencesPanel(parent, project, getExpansionHandler());
+    content = new DeployPreferencesPanel(parent, project, getLayoutChangedHandler());
     PreferencePageSupport.create(this, content.getDataBindingContext());
     return content;
   }
 
-  private SectionExpansionHandler getExpansionHandler() {
-    return new SectionExpansionHandler() {
+  private Runnable getLayoutChangedHandler() {
+    return new Runnable() {
 
       @Override
-      public void handleExpansionEvent(ExpansionEvent event) {
+      public void run() {
         // resize the page to work around https://bugs.eclipse.org/bugs/show_bug.cgi?id=265237
         Composite parent = content.getParent();
         while (parent != null) {

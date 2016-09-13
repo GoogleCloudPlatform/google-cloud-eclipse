@@ -88,12 +88,12 @@ public class DeployPreferencesPanel extends Composite {
   private ObservablesManager observables;
   private DataBindingContext bindingContext;
 
-  private SectionExpansionHandler expansionHandler;
+  private Runnable layoutChangedHandler;
 
-  public DeployPreferencesPanel(Composite parent, IProject project, SectionExpansionHandler expansionHandler) {
+  public DeployPreferencesPanel(Composite parent, IProject project, Runnable layoutChangedHandler) {
     super(parent, SWT.NONE);
 
-    this.expansionHandler = expansionHandler;
+    this.layoutChangedHandler = layoutChangedHandler;
 
     createProjectIdSection();
 
@@ -283,7 +283,7 @@ public class DeployPreferencesPanel extends Composite {
     expandableComposite.addExpansionListener(new ExpansionAdapter() {
       @Override
       public void expansionStateChanged(ExpansionEvent e) {
-        handleExpansionStateChanged(e);
+        handleExpansionStateChanged();
       }
     });
     GridLayoutFactory.fillDefaults().generateLayout(expandableComposite);
@@ -392,11 +392,9 @@ public class DeployPreferencesPanel extends Composite {
     super.dispose();
   }
 
-  private void handleExpansionStateChanged(ExpansionEvent event) {
-    expansionHandler.handleExpansionEvent(event);
-  }
-
-  public static interface SectionExpansionHandler {
-    void handleExpansionEvent(ExpansionEvent event);
+  private void handleExpansionStateChanged() {
+    if (layoutChangedHandler != null) {
+      layoutChangedHandler.run();
+    }
   }
 }

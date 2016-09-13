@@ -38,7 +38,6 @@ public class OpenUrlSelectionListenerTest {
   private static final String INVALID_URI = "this is not an uri";
   private static final String MALFORMED_URL = "abcd://example.org";
   private static final String PROJECT_ID = "fake-project-id";
-  private static final String PROJECT_ID_WITH_COLON = "fake:project-id";
   
   @Mock private IWorkbenchBrowserSupport browserSupport;
   @Mock private IWebBrowser browser;
