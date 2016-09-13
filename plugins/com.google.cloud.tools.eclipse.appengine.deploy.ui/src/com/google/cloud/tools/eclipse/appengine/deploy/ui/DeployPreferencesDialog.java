@@ -64,6 +64,7 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
     content = new DeployPreferencesPanel(container, project, getExpansionHandler());
     GridDataFactory.fillDefaults().grab(true, false).applyTo(content);
 
+    // we pull in Dialog's content margins which are zeroed out by TitleAreaDialog
     GridDataFactory.fillDefaults().grab(true, true).applyTo(container);
     GridLayoutFactory.swtDefaults()
         .margins(convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN),
@@ -76,7 +77,7 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
       @Override
       public int getMessageType(ValidationStatusProvider statusProvider) {
         int type = super.getMessageType(statusProvider);
-        setValid(type);
+        setValid(type != IMessageProvider.ERROR);
         return type;
       }
     });
@@ -114,10 +115,10 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
     return false;
   }
 
-  private void setValid(int type) {
+  private void setValid(boolean isValid) {
     Button okButton = getButton(IDialogConstants.OK_ID);
     if (okButton != null) {
-      okButton.setEnabled(type != IMessageProvider.ERROR);
+      okButton.setEnabled(isValid);
     }
   }
 }
