@@ -52,7 +52,7 @@ public class CloudSdkPreferenceResolverTest {
         .resolvers(Collections.singletonList((CloudSdkResolver) resolver)).build();
     assertEquals("SDK should be found at invalid location", root.toPath(), sdk.getSdkPath());
     try {
-      sdk.validate();
+      sdk.validateCloudSdk();
       fail("root directory should not validate as a valid location");
     } catch (AppEngineException ex) {
       // ignore

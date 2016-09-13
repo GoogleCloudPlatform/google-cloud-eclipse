@@ -37,7 +37,7 @@ public class AbstractProjectTests {
   @BeforeClass
   public static void setUp() throws Exception {
     // verify we can find the Google Cloud SDK
-    new CloudSdk.Builder().build().validate();
+    new CloudSdk.Builder().build().validateCloudSdk();
 
     bot = new SWTWorkbenchBot();
     SwtBotWorkbenchActions.closeWelcome(bot);

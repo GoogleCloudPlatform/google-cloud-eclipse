@@ -151,7 +151,8 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
   protected boolean validateSdk(Path location) {
     try {
       CloudSdk sdk = new CloudSdk.Builder().sdkPath(location).build();
-      sdk.validate();
+      sdk.validateCloudSdk();
+      sdk.validateAppEngineJavaComponents(); 
     } catch (AppEngineException ex) {
       // accept a seemingly invalid location in case the SDK organization
       // has changed and the CloudSdk#validate() code is out of date
