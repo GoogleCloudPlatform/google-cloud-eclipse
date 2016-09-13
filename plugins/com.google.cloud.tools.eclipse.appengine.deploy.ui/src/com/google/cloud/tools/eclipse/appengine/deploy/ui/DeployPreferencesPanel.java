@@ -15,6 +15,8 @@
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -55,12 +57,13 @@ import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectIdValidator;
 import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectVersionValidator;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.ErrorHandler;
-import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.ProjectIdProvider;
+import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.QueryParameterProvider;
 import com.google.common.base.Preconditions;
 
 public class DeployPreferencesPanel extends Composite {
 
   private static final String APPENGINE_VERSIONS_URL = "https://console.cloud.google.com/appengine/versions";
+  private static final String URI_PARAM_PROJECT = "project";
 
   private static final int INDENT_CHECKBOX_ENABLED_WIDGET = 10;
 
@@ -251,10 +254,10 @@ public class DeployPreferencesPanel extends Composite {
     manualPromoteLink.setLayoutData(layoutData);
     manualPromoteLink.setText(Messages.getString("deploy.manual.link", APPENGINE_VERSIONS_URL));
     manualPromoteLink.setFont(promoteComposite.getFont());
-    manualPromoteLink.addSelectionListener(new OpenUriSelectionListener(new ProjectIdProvider() {
+    manualPromoteLink.addSelectionListener(new OpenUriSelectionListener(new QueryParameterProvider() {
       @Override
-      public String getProjectId() {
-        return projectId.getText();
+      public Map<String, String> getParameters() {
+        return Collections.singletonMap(URI_PARAM_PROJECT, projectId.getText().trim());
       }
     }, new ErrorHandler() {
       @Override

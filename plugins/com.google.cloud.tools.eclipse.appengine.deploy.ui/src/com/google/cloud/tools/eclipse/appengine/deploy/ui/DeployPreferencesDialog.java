@@ -76,10 +76,7 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
       @Override
       public int getMessageType(ValidationStatusProvider statusProvider) {
         int type = super.getMessageType(statusProvider);
-        Button okButton = getButton(IDialogConstants.OK_ID);
-        if (okButton != null) {
-          okButton.setEnabled(type != IMessageProvider.ERROR);
-        }
+        setValid(type);
         return type;
       }
     });
@@ -115,5 +112,12 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
   @Override
   public boolean isHelpAvailable() {
     return false;
+  }
+
+  private void setValid(int type) {
+    Button okButton = getButton(IDialogConstants.OK_ID);
+    if (okButton != null) {
+      okButton.setEnabled(type != IMessageProvider.ERROR);
+    }
   }
 }

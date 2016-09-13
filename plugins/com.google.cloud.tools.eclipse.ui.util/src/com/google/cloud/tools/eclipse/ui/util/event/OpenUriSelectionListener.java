@@ -3,6 +3,8 @@ package com.google.cloud.tools.eclipse.ui.util.event;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -14,18 +16,19 @@ import com.google.common.annotations.VisibleForTesting;
 
 public class OpenUriSelectionListener implements SelectionListener {
 
-  private static final String URI_PARAM_PROJECT = "project";
   private ErrorHandler errorHandler;
   private IWorkbenchBrowserSupport browserSupport;
-  private ProjectIdProvider projectIdProvider;
+  private QueryParameterProvider queryParameterProvider;
 
-  public OpenUriSelectionListener(ProjectIdProvider projectIdProvider, ErrorHandler errorHandler) {
-    this(projectIdProvider, errorHandler, PlatformUI.getWorkbench().getBrowserSupport());
+  public OpenUriSelectionListener(QueryParameterProvider queryParameterProvider, ErrorHandler errorHandler) {
+    this(queryParameterProvider, errorHandler, PlatformUI.getWorkbench().getBrowserSupport());
   }
 
   @VisibleForTesting
-  OpenUriSelectionListener(ProjectIdProvider projectIdProvider, ErrorHandler errorHandler, IWorkbenchBrowserSupport browserSupport) {
-    this.projectIdProvider = projectIdProvider;
+  OpenUriSelectionListener(QueryParameterProvider queryParameterProvider,
+                           ErrorHandler errorHandler,
+                           IWorkbenchBrowserSupport browserSupport) {
+    this.queryParameterProvider = queryParameterProvider;
     this.errorHandler = errorHandler;
     this.browserSupport = browserSupport;
   }
@@ -42,35 +45,37 @@ public class OpenUriSelectionListener implements SelectionListener {
 
   private void openAppEngineDashboard(String uriString) {
     try {
-      String projectId = projectIdProvider.getProjectId();
-      URI uri = appendProjectId(new URI(uriString), projectId);
+      URI uri = appendQueryParameters(new URI(uriString));
       browserSupport.getExternalBrowser().openURL(uri.toURL());
     } catch (PartInitException | MalformedURLException | URISyntaxException ex) {
       errorHandler.handle(ex);
     }
   }
 
-  private URI appendProjectId(URI uri, String projectId) throws URISyntaxException {
-    if (projectId != null && !projectId.isEmpty() && !projectId.trim().isEmpty()) {
-      projectId = projectId.trim();
-      String query = uri.getQuery();
-      if (query == null) {
-        query = URI_PARAM_PROJECT + "=" + projectId;
-      } else {
-        query += "&" + URI_PARAM_PROJECT + "=" + projectId;
-      }
-      return new URI(uri.getScheme(), uri.getUserInfo(), uri.getHost(),
-                     uri.getPort(), uri.getPath(), query, uri.getFragment());
-    } else {
-      return uri;
+  private URI appendQueryParameters(URI uri) throws URISyntaxException {
+    String queryString = uri.getQuery();
+    if (queryString == null) {
+      queryString = "";
     }
+    StringBuilder query = new StringBuilder(queryString);
+    for (Entry<String, String> parameter : queryParameterProvider.getParameters().entrySet()) {
+      if (query.length() > 0) {
+        query.append('&');
+      }
+      query.append(parameter.getKey())
+           .append('=')
+           .append(parameter.getValue());
+    }
+
+    return new URI(uri.getScheme(), uri.getUserInfo(), uri.getHost(),
+                   uri.getPort(), uri.getPath(), query.toString(), uri.getFragment());
   }
 
   public static interface ErrorHandler {
     void handle(Exception ex);
   }
 
-  public static interface ProjectIdProvider {
-    String getProjectId();
+  public static interface QueryParameterProvider {
+    Map<String, String> getParameters();
   }
 }
