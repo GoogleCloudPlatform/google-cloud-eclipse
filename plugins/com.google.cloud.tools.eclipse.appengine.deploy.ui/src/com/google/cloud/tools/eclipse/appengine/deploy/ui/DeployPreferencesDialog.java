@@ -1,27 +1,26 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
+import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPreferencesPanel.SectionExpansionHandler;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
+import com.google.common.base.Preconditions;
+
 import org.eclipse.core.databinding.ValidationStatusProvider;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.databinding.dialog.TitleAreaDialogSupport;
 import org.eclipse.jface.databinding.dialog.ValidationMessageProvider;
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
-
-import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPreferencesPanel.SectionExpansionHandler;
-import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
-import com.google.common.base.Preconditions;
 
 public class DeployPreferencesDialog extends TitleAreaDialog {
 
@@ -59,9 +58,20 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
   @Override
   protected Control createDialogArea(final Composite parent) {
     Composite dialogArea = (Composite) super.createDialogArea(parent);
-    setMargin(dialogArea);
-    content = new DeployPreferencesPanel(dialogArea, project, getExpansionHandler());
+
+    Composite container = new Composite(dialogArea, SWT.NONE);
+
+    content = new DeployPreferencesPanel(container, project, getExpansionHandler());
     GridDataFactory.fillDefaults().grab(true, false).applyTo(content);
+
+    GridDataFactory.fillDefaults().grab(true, true).applyTo(container);
+    GridLayoutFactory.swtDefaults()
+        .margins(convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN),
+            convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN))
+        .spacing(convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING),
+            convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING))
+        .generateLayout(container);
+
     TitleAreaDialogSupport.create(this, content.getDataBindingContext()).setValidationMessageProvider(new ValidationMessageProvider() {
       @Override
       public int getMessageType(ValidationStatusProvider statusProvider) {
@@ -76,13 +86,6 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
     return dialogArea;
   }
 
-  private void setMargin(Composite dialogArea) {
-    Layout layout = dialogArea.getLayout();
-    if (layout instanceof GridLayout) {
-      ((GridLayout)layout).marginWidth = 5;
-    }
-  }
-  
   private SectionExpansionHandler getExpansionHandler() {
     return new SectionExpansionHandler() {
 
