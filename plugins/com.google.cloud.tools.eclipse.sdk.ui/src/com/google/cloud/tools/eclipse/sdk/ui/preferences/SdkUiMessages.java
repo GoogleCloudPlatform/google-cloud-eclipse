@@ -4,6 +4,9 @@ package com.google.cloud.tools.eclipse.sdk.ui.preferences;
 import org.eclipse.osgi.util.NLS;
 
 public class SdkUiMessages extends NLS {
+  
+  // todo Ick! Mutable public fields. Use the other kind of messages.
+  
   private static final String BUNDLE_NAME =
       "com.google.cloud.tools.eclipse.sdk.ui.preferences.messages"; //$NON-NLS-1$
   public static String CloudSdkPreferencePage_0;
@@ -13,6 +16,7 @@ public class SdkUiMessages extends NLS {
   public static String CloudSdkPreferencePage_4;
   public static String CloudSdkPreferencePage_5;
   public static String CloudSdkPreferencePage_6;
+  public static String AppEngineJavaComponentsNotInstalled;
   public static String CloudSdkPrompter_0;
   public static String CloudSdkPrompter_1;
   public static String openBrowse;

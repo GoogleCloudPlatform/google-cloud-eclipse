@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.sdk.ui.preferences;
 
 import com.google.cloud.tools.appengine.api.AppEngineException;
+import com.google.cloud.tools.appengine.cloudsdk.AppEngineJavaComponentsNotInstalledException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.eclipse.preferences.areas.PreferenceArea;
 import com.google.cloud.tools.eclipse.sdk.internal.PreferenceConstants;
@@ -148,11 +149,14 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     }
   }
 
-  protected boolean validateSdk(Path location) {
+  private boolean validateSdk(Path location) {
     try {
       CloudSdk sdk = new CloudSdk.Builder().sdkPath(location).build();
       sdk.validateCloudSdk();
       sdk.validateAppEngineJavaComponents(); 
+    } catch (AppEngineJavaComponentsNotInstalledException ex) {
+      status = new Status(IStatus.WARNING, getClass().getName(),
+          MessageFormat.format(SdkUiMessages.AppEngineJavaComponentsNotInstalled, ex.getMessage()));
     } catch (AppEngineException ex) {
       // accept a seemingly invalid location in case the SDK organization
       // has changed and the CloudSdk#validate() code is out of date
