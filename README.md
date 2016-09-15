@@ -18,7 +18,7 @@ Maven for building Eclipse bundles and features.
 
 1. [Eclipse 4.5 (Mars) or later](https://www.eclipse.org/downloads/eclipse-packages/). 
   It's easiest to use the _Eclipse IDE for Java EE Developers_ package. You can use
-  Eclipse 4.6 (Neon) or 4.7 (Oxygen) as we define a target platforms to build against. 
+  Eclipse 4.6 (Neon) or 4.7 (Oxygen) as we define a target platform to build against. 
 
   1. The [m2eclipse plugin](http://www.eclipse.org/m2e/) (also called m2e) is
      required to import the projects into Eclipse.  m2eclipse is included in 
@@ -168,9 +168,9 @@ described below.
      to find a local repository. Navigate to `.../eclipse/ide-target-platform/target/repository`,
      and click `OK`.
      
-  6. Once the main content populates, tick the `Uncategorized` item to pull in all items. Click `Finish`.
+  6. Once the main content populates, check the `Uncategorized` item to pull in all items. Click `Finish`.
   
-  7. Click `Finish` to complete defining the new target platform definition.
+  7. Click `Finish` to complete the new target platform definition.
   
   8. Your new target platform should be selected in the `Target Platform` preferences.
      Click `OK` to load this new target platform.
