@@ -38,6 +38,8 @@ public class AppEngineTemplateUtility {
   public static final String HELLO_APPENGINE_TEMPLATE = "HelloAppEngine.java.ftl";
   public static final String INDEX_HTML_TEMPLATE = "index.html.ftl";
   public static final String WEB_XML_TEMPLATE = "web.xml.ftl";
+  public static final String HELLO_APPENGINE_TEST_TEMPLATE = "HelloAppEngineTest.java.ftl";
+  public static final String MOCK_HTTPSERVLETRESPONSE_TEMPLATE = "MockHttpResponse.java.ftl";
 
   private static Configuration configuration;
 
