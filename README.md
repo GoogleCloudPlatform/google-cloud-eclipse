@@ -4,7 +4,7 @@
 This project provides an Eclipse plugin for building, debugging, and deploying Google Cloud Platform applications.
 
 _TL;DR_: `mvn -Dtycho.toolchains=SYSTEM package` should
-generate a build into `gcp-repo/target/repository`.
+generate a p2-accessible repository in `gcp-repo/target/repository`.
 
 # Development
 
@@ -17,7 +17,8 @@ Maven for building Eclipse bundles and features.
   this somewhere on your file system.
 
 1. [Eclipse 4.5 (Mars) or later](https://www.eclipse.org/downloads/eclipse-packages/). 
-  It's easiest to use the _Eclipse IDE for Java EE Developers_ package.
+  It's easiest to use the _Eclipse IDE for Java EE Developers_ package. You can use
+  Eclipse 4.6 (Neon) or 4.7 (Oxygen) as we define a target platforms to build against. 
 
   1. The [m2eclipse plugin](http://www.eclipse.org/m2e/) (also called m2e) is
      required to import the projects into Eclipse.  m2eclipse is included in 
@@ -147,13 +148,33 @@ described below.
 
   1. Click `Apply`.
 
-2. Set up the Target Platform
+2. Set up the Target Platform: you will need to repeat this process whenever
+   items are changed in the target platform, such as a new release of the
+   `appengine-plugins-core`.
 
-  1. Keeping the _Preferences_ open, go to _Plug-in
-     Development > Target Platform_.
-  2. Check the _GCP Development Target (ide-target-repository)_.
-     _GCP_ targets listed there.
-  3. Click _OK_.
+  0. As described above, you must first do a Maven build to build the target platform:
+  
+     `$ mvn -Pide-target-platform package`
+     
+  1. Open the `Preferences` dialog, go to `Plug-in Development` > `Target Platform`.
+  
+  2. Click `Add...` > `Nothing` to create a new Target Platform.
+  
+  3. Name it `GCP IDE Target Platform`.
+  
+  4. Select `Add` > `Software Site`.
+  
+  5. Select the `Add...` button (found beside the `Work with:` field) and then select `Local`
+     to find a local repository. Navigate to `.../eclipse/ide-target-platform/target/repository`,
+     and click `OK`.
+     
+  6. Once the main content populates, tick the `Uncategorized` item to pull in all items. Click `Finish`.
+  
+  7. Click `Finish` to complete defining the new target platform definition.
+  
+  8. Your new target platform should be selected in the `Target Platform` preferences.
+     Click `OK` to load this new target platform.
+      
   7. Eclipse will load the target.
 
 3. Import the projects
