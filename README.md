@@ -47,8 +47,8 @@ The tests need to find the Google Cloud SDK.  You can either:
 ### Changing the Eclipse Platform compilation and testing target
 
 By default, the build is targeted against Eclipse Mars / 4.5. 
-You can explicitly set the `eclipse.target` property to `mars` (4.5)
-or `neon` (4.6).
+To test other versions, set the `eclipse.target` property.  For
+example, for `neon` (4.6):
 ```
 $ mvn -Declipse.target=neon package
 ```
@@ -259,3 +259,12 @@ the version should be specified as `"0.0.0"` to indicate that the
 current version found should be used.  Unlike the `.tpd` file,
 the identifiers are not p2 identifiers, and so features do not
 require the `.feature.group` suffix.
+
+# Travis-CI
+
+This project is automatically built and tested thanks to [Travis-CI](https://travis-ci.org/GoogleCloudPlatform/gcloud-eclipse-tools/).
+
+## Simulating and Debugging Travis-CI builds
+ 
+We have a Docker setup to simulate the Travis-CI build, found in [`build/travis-debug`](build/travis-debug).
+See the  [`README.md`](build/travis-debug/README.md) for details.
