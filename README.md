@@ -16,9 +16,9 @@ Maven for building Eclipse bundles and features.
 1. The [Google Cloud SDK](https://cloud.google.com/sdk/); install
   this somewhere on your file system.
 
-1. [Eclipse 4.5 (Mars) or later](https://www.eclipse.org/downloads/eclipse-packages/). 
+1. The [Eclipse IDE](https://www.eclipse.org/downloads/eclipse-packages/). 
   It's easiest to use the _Eclipse IDE for Java EE Developers_ package. You can use
-  Eclipse 4.6 (Neon) or 4.7 (Oxygen) as we define a target platform to build against. 
+  Eclipse 4.6 (Neon) or 4.7 (Oxygen) as we define a target platform to build and run against. 
 
   1. The [m2eclipse plugin](http://www.eclipse.org/m2e/) (also called m2e) is
      required to import the projects into Eclipse.  m2eclipse is included in 
@@ -30,7 +30,7 @@ Maven for building Eclipse bundles and features.
 
 1. JDK 7
 
-1. git
+1. git (optional: you can use EGit from within Eclipse instead)
 
 1. Clone the project to a local directory using `git clone
    https://github.com/GoogleCloudPlatform/gcloud-eclipse-tools.git`.
@@ -48,8 +48,8 @@ The tests need to find the Google Cloud SDK.  You can either:
 ### Changing the Eclipse Platform compilation and testing target
 
 By default, the build is targeted against Eclipse Mars / 4.5. 
-You can explicitly set the `eclipse.target` property to `mars` (4.5)
-or `neon` (4.6).
+You can explicitly set the `eclipse.target` property to 
+`neon` (4.6).
 ```
 $ mvn -Declipse.target=neon package
 ```
