@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotProjectActions;
@@ -36,6 +37,7 @@ import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 /**
  * Test creation of a new project with the "Maven-Based Google App Engine Standard Java Project"
@@ -108,6 +110,9 @@ public class NewMavenBasedAppEngineProjectWizardTest extends AbstractProjectTest
       Path projectFilePath = new Path(projectFile);
       assertTrue(project.exists(projectFilePath));
     }
-    assertFalse(SwtBotProjectActions.hasErrorsInProblemsView(bot));
+    List<String> errorsInProblemsView = SwtBotProjectActions.getErrorsInProblemsView(bot);
+    if (!errorsInProblemsView.isEmpty()) {
+      fail(errorsInProblemsView.get(0));
+    }
   }
 }

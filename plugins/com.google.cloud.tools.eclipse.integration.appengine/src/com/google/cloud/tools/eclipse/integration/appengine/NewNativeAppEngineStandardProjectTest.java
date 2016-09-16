@@ -20,6 +20,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotProjectActions;
@@ -30,6 +31,8 @@ import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.List;
 
 /**
  * Test creation of a new standard App Engine project.
@@ -83,6 +86,9 @@ public class NewNativeAppEngineStandardProjectTest extends AbstractProjectTests 
       Path projectFilePath = new Path(projectFile);
       assertTrue(project.exists(projectFilePath));
     }
-    assertFalse(SwtBotProjectActions.hasErrorsInProblemsView(bot));
+    List<String> errorsInProblemsView = SwtBotProjectActions.getErrorsInProblemsView(bot);
+    if (!errorsInProblemsView.isEmpty()) {
+      fail(errorsInProblemsView.get(0));
+    }
   }
 }

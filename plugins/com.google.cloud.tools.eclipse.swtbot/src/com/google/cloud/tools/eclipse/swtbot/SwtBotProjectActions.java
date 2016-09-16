@@ -18,6 +18,9 @@ package com.google.cloud.tools.eclipse.swtbot;
 
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -195,9 +198,9 @@ public final class SwtBotProjectActions {
   }
 
   /**
-   * Returns true if there are errors in the Problem view. Returns false otherwise.
+   * Returns true if there are errors in the Problems view. Returns false otherwise.
    */
-  public static boolean hasErrorsInProblemsView(SWTWorkbenchBot bot) {
+  public static List<String> getErrorsInProblemsView(SWTWorkbenchBot bot) {
     // Open Problems View by Window -> show view -> Problems
     bot.menu("Window").menu("Show View").menu("Problems").click();
 
@@ -205,14 +208,16 @@ public final class SwtBotProjectActions {
     view.show();
     SWTBotTree tree = view.bot().tree();
 
+    List<String> errors = new ArrayList<>();
+    
     for (SWTBotTreeItem item : tree.getAllItems()) {
       String text = item.getText();
       if (text != null && text.startsWith("Errors")) {
-        return true;
+        errors.add(text);
       }
     }
 
-    return false;
+    return errors;
   }
 
   /**
