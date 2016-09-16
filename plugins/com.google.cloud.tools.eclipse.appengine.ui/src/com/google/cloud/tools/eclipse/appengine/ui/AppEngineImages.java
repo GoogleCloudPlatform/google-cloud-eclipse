@@ -13,6 +13,11 @@ public class AppEngineImages {
     return getIcon(imageFilePath);
   }
 
+  public static ImageDescriptor appEngine(int size) {
+    String imageFilePath = "icons/gae-" + size + "x" + size + ".png";
+    return getIcon(imageFilePath);
+  }
+
   private static ImageDescriptor getIcon(String path) {
     return AbstractUIPlugin.imageDescriptorFromPlugin(
         "com.google.cloud.tools.eclipse.appengine.ui", path);

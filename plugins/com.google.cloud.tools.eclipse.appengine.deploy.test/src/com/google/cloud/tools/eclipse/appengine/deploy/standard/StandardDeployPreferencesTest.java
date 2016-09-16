@@ -10,11 +10,6 @@ import org.junit.Test;
 public class StandardDeployPreferencesTest {
 
   @Test
-  public void testDefaultPromptProjectId() {
-    assertTrue(StandardDeployPreferences.DEFAULT.isPromptForProjectId());
-  }
-
-  @Test
   public void testDefaultProjectId() {
     assertThat(StandardDeployPreferences.DEFAULT.getProjectId(), isEmptyString());
   }
