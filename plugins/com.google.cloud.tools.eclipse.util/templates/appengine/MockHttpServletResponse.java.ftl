@@ -7,15 +7,16 @@ import java.util.Locale;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletResponse;
 
 /**
  * This class is created only for the purpose of demonstrating unit testing of the
- * {@link HelloAppEngine} class and the only those methods have meaningful implementation
- * which are use in the unit test.
+ * {@link HelloAppEngine} class. Only those methods have meaningful implementation
+ * which are used in the unit test.
  * 
- * Feel free to change this class or replace it using other ways for testing HttpServlets,
- * e.g. Spring MVC Test or Mockito to suit your needs.
+ * Feel free to change this class or replace it using other ways for testing
+ * {@link HttpServlet}s, e.g. Spring MVC Test or Mockito to suit your needs.
  *
  */
 public class MockHttpServletResponse implements HttpServletResponse {
