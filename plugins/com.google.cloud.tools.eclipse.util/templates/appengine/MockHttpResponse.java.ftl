@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletResponse;
  * which are use in the unit test.
  * 
  * Feel free to change this class or replace it using other ways for testing HttpServlets,
- * e.g. Spring MVC Test or Mockito. 
+ * e.g. Spring MVC Test or Mockito to suit your needs.
  *
  */
 public class MockHttpResponse implements HttpServletResponse {
