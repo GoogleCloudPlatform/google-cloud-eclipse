@@ -28,6 +28,7 @@ import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.common.annotations.VisibleForTesting;
 
 /**
 * Utility to make a new Eclipse project with the App Engine Standard facets in the workspace.  
@@ -89,6 +90,7 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
     javaProject.setRawClasspath(newRawClasspath, monitor);
   }
 
+  @VisibleForTesting
   void setProjectIdPreference(IProject project) {
     String projectId = config.getAppEngineProjectId();
     if (projectId != null && !projectId.isEmpty()) {

@@ -10,7 +10,7 @@ public class HelloAppEngineTest {
 
   @Test
   public void test() throws IOException {
-    MockHttpResponse response = new MockHttpResponse();
+    MockHttpServletResponse response = new MockHttpServletResponse();
     new HelloAppEngine().doGet(null, response);
     Assert.assertThat(response.getContentType(), Is.is("text/plain"));
     Assert.assertThat(response.getWriterContent().toString(), Is.is("Hello App Engine!\n"));

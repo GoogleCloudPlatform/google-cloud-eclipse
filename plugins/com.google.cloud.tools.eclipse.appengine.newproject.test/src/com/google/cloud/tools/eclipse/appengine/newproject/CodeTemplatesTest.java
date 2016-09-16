@@ -110,6 +110,13 @@ public class CodeTemplatesTest {
     IFile htmlFile = webapp.getFile("index.html");
     Element html = buildDocument(htmlFile).getDocumentElement();
     Assert.assertEquals("html", html.getNodeName());
+
+    IFolder test = src.getFolder("test");
+    IFolder testJava = test.getFolder("java");
+    IFile servletTest = testJava.getFile("HelloAppEngineTest.java");
+    Assert.assertTrue(servletTest.exists());
+    IFile mockServletResponse = testJava.getFile("MockHttpServletResponse.java");
+    Assert.assertTrue(mockServletResponse.exists());
   }
 
   private Document buildDocument(IFile appengineWebXml)

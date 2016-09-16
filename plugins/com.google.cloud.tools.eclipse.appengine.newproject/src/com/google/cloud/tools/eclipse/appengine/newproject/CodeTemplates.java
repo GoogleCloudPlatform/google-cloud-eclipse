@@ -74,7 +74,7 @@ public class CodeTemplates {
     // now set up the test directory
     IFolder testPackageFolder = createFoldersForPackage(testJava, packageName, subMonitor);
     createChildFile("HelloAppEngineTest.java", AppEngineTemplateUtility.HELLO_APPENGINE_TEST_TEMPLATE, testPackageFolder, subMonitor, templateValues);
-    createChildFile("MockHttpResponse.java", AppEngineTemplateUtility.MOCK_HTTPSERVLETRESPONSE_TEMPLATE, testPackageFolder, subMonitor, templateValues);
+    createChildFile("MockHttpServletResponse.java", AppEngineTemplateUtility.MOCK_HTTPSERVLETRESPONSE_TEMPLATE, testPackageFolder, subMonitor, templateValues);
     
     IFolder webapp = createChildFolder("webapp", main, subMonitor);
     IFolder webinf = createChildFolder("WEB-INF", webapp, subMonitor);

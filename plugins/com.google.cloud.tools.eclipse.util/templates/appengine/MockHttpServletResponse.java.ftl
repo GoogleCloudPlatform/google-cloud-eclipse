@@ -18,7 +18,7 @@ import javax.servlet.http.HttpServletResponse;
  * e.g. Spring MVC Test or Mockito to suit your needs.
  *
  */
-public class MockHttpResponse implements HttpServletResponse {
+public class MockHttpServletResponse implements HttpServletResponse {
 
   private String contentType;
   private StringWriter writerContent = new StringWriter();
