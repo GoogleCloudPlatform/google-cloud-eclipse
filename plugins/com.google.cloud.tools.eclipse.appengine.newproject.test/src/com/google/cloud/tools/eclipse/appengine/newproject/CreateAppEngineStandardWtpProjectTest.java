@@ -12,7 +12,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -76,19 +75,8 @@ public class CreateAppEngineStandardWtpProjectTest {
   private void assertJunitAndHamcrestAreOnClasspath() throws CoreException, JavaModelException {
     assertTrue(project.hasNature(JavaCore.NATURE_ID));
     IJavaProject javaProject = JavaCore.create(project);
-    boolean junitFound = false;
-    boolean hamcrestFound = false;
-    for (IClasspathEntry iClasspathEntry : javaProject.getResolvedClasspath(false)) {
-      if (iClasspathEntry.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
-        if (iClasspathEntry.getPath().toString().contains("junit.jar")) {
-          junitFound = true;
-        } else if (iClasspathEntry.getPath().toString().contains("org.hamcrest.core")) {
-          hamcrestFound = true;
-        }
-      }
-    }
-    assertTrue(junitFound);
-    assertTrue(hamcrestFound);
+    assertTrue(javaProject.findType("org.junit.Assert").exists());
+    assertTrue(javaProject.findType("org.hamcrest.CoreMatchers").exists());
   }
 
   @Test
