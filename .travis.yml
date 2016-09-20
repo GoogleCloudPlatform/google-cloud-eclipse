@@ -26,7 +26,7 @@ matrix:
   - jdk: openjdk7
   - jdk: oraclejdk8
     env: ECLIPSE_TARGET=neon
-script: - mvn -Ptravis --fail-at-end verify ${ECLIPSE_TARGET:+-Declipse.target=${ECLIPSE_TARGET}}
+script: mvn -Ptravis --fail-at-end verify ${ECLIPSE_TARGET:+-Declipse.target=${ECLIPSE_TARGET}}
 addons:
   apt:
     packages:
