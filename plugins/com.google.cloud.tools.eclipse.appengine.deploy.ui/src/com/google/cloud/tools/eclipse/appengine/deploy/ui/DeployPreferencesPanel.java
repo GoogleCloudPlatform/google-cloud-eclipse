@@ -46,9 +46,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.forms.FormColors;
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
+import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.osgi.service.prefs.BackingStoreException;
 
 import com.google.cloud.tools.eclipse.ui.util.FontUtil;
@@ -89,11 +91,14 @@ public class DeployPreferencesPanel extends Composite {
   private DataBindingContext bindingContext;
 
   private Runnable layoutChangedHandler;
+  private FormToolkit formToolkit;
 
   public DeployPreferencesPanel(Composite parent, IProject project, Runnable layoutChangedHandler) {
     super(parent, SWT.NONE);
 
     this.layoutChangedHandler = layoutChangedHandler;
+
+    initializeFormToolkit();
 
     createProjectIdSection();
 
@@ -105,12 +110,19 @@ public class DeployPreferencesPanel extends Composite {
 
     Dialog.applyDialogFont(this);
 
-    GridDataFactory.fillDefaults().applyTo(this);
-    GridLayoutFactory.fillDefaults().generateLayout(this);
+    GridDataFactory.fillDefaults().grab(true, false).applyTo(this);
+    GridLayoutFactory.fillDefaults().spacing(0, 0).generateLayout(this);
 
     loadPreferences(project);
 
     setupDataBinding();
+  }
+
+  private void initializeFormToolkit() {
+    FormColors colors = new FormColors(getDisplay());
+    colors.setBackground(null);
+    colors.setForeground(null);
+    formToolkit = new FormToolkit(colors);
   }
 
   private void setupDataBinding() {
@@ -296,6 +308,7 @@ public class DeployPreferencesPanel extends Composite {
     expandableComposite.setExpanded(false);
     GridDataFactory.fillDefaults().applyTo(expandableComposite);
     FontUtil.convertFontToBold(expandableComposite);
+    formToolkit.adapt(expandableComposite, true, true);
     return expandableComposite;
   }
 
@@ -388,6 +401,9 @@ public class DeployPreferencesPanel extends Composite {
     }
     if (observables != null) {
       observables.dispose();
+    }
+    if (formToolkit != null) {
+      formToolkit.dispose();
     }
     super.dispose();
   }
