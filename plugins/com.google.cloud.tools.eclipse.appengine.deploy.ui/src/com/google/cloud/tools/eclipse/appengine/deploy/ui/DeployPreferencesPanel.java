@@ -110,7 +110,6 @@ public class DeployPreferencesPanel extends Composite {
 
     Dialog.applyDialogFont(this);
 
-    GridDataFactory.fillDefaults().grab(true, false).applyTo(this);
     GridLayoutFactory.fillDefaults().spacing(0, 0).generateLayout(this);
 
     loadPreferences(project);

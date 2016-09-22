@@ -58,6 +58,7 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
 
     Composite container = new Composite(dialogArea, SWT.NONE);
     content = new DeployPreferencesPanel(container, project, getLayoutChangedHandler());
+    GridDataFactory.fillDefaults().grab(true, false).applyTo(content);
 
     // we pull in Dialog's content margins which are zeroed out by TitleAreaDialog
     GridDataFactory.fillDefaults().grab(true, true).applyTo(container);

@@ -39,6 +39,7 @@ public class DeployPropertyPage extends PropertyPage {
     Composite container = new Composite(parent, SWT.NONE);
     content = new DeployPreferencesPanel(container, project, getLayoutChangedHandler());
 
+    GridDataFactory.fillDefaults().grab(true, false).applyTo(content);
     GridDataFactory.fillDefaults().grab(true, true).applyTo(container);
     GridLayoutFactory.fillDefaults().generateLayout(container);
 
