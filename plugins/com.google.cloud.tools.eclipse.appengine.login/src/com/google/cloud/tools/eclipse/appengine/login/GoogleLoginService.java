@@ -108,8 +108,7 @@ public class GoogleLoginService implements IGoogleLoginService {
   public Credential getActiveCredential(String dialogMessage) {
     // TODO: holding a lock for a long period of time (especially when waiting for UI events)
     // should be avoided. Make the login library thread-safe, and don't lock during UI events.
-    // As a workaround and temporary relief, we use the loginInProgress flag above to fail
-    // conservatively if login seems to be in progress.
+    // (https://github.com/GoogleCloudPlatform/ide-login/issues/21)
     synchronized (loginState) {
       if (loginState.logInWithLocalServer(dialogMessage)) {
         return loginState.getCredential();
