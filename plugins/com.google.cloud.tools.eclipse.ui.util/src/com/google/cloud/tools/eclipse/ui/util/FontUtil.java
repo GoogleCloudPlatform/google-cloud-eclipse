@@ -32,7 +32,7 @@ public class FontUtil {
     control.setFont(boldFont);
     control.addDisposeListener(new DisposeListener() {
       @Override
-      public void widgetDisposed(DisposeEvent e) {
+      public void widgetDisposed(DisposeEvent event) {
         boldFont.dispose();
       }
     });
