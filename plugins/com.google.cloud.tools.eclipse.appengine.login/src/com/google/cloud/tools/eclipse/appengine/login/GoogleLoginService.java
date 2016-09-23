@@ -33,7 +33,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -66,7 +65,6 @@ public class GoogleLoginService implements IGoogleLoginService {
   }
 
   private GoogleLoginState loginState;
-  private AtomicBoolean loginInProgress;
 
   private LoginServiceUi loginServiceUi;
 
@@ -89,7 +87,6 @@ public class GoogleLoginService implements IGoogleLoginService {
         Constants.getOAuthClientId(), Constants.getOAuthClientSecret(), OAUTH_SCOPES,
         new JavaPreferenceOAuthDataStore(OAUTH_DATA_STORE_PREFERENCE_PATH, logger),
         loginServiceUi, logger);
-    loginInProgress = new AtomicBoolean(false);
   }
 
   /**
@@ -105,31 +102,19 @@ public class GoogleLoginService implements IGoogleLoginService {
     loginState = new GoogleLoginState(
         Constants.getOAuthClientId(), Constants.getOAuthClientSecret(), OAUTH_SCOPES,
         dataStore, uiFacade, loggerFacade);
-    loginInProgress = new AtomicBoolean(false);
   }
 
   @Override
   public Credential getActiveCredential(String dialogMessage) {
-    if (!loginInProgress.compareAndSet(false, true)) {
-      loginServiceUi.showErrorDialogHelper(
-          Messages.LOGIN_ERROR_DIALOG_TITLE, Messages.LOGIN_ERROR_IN_PROGRESS);
-      return null;
-    }
-
     // TODO: holding a lock for a long period of time (especially when waiting for UI events)
     // should be avoided. Make the login library thread-safe, and don't lock during UI events.
     // As a workaround and temporary relief, we use the loginInProgress flag above to fail
     // conservatively if login seems to be in progress.
-    try {
-      synchronized (loginState) {
-        if (loginState.logInWithLocalServer(dialogMessage)) {
-          return loginState.getCredential();
-        }
-        return null;
+    synchronized (loginState) {
+      if (loginState.logInWithLocalServer(dialogMessage)) {
+        return loginState.getCredential();
       }
-    }
-    finally {
-      loginInProgress.set(false);
+      return null;
     }
   }
 
