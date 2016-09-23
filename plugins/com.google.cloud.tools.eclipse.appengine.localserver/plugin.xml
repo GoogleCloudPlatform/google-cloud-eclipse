@@ -59,7 +59,7 @@
                id="com.google.cloud.tools.eclipse.appengine.standard.runtime"
                version="1"></runtime-component>
          <facet
-               id="com.google.cloud.tools.eclipse.appengine.facet"
+               id="com.google.cloud.tools.eclipse.appengine.facets.standard"
                version="1">
          </facet>
          <facet
@@ -145,11 +145,11 @@
       </consolePageParticipant>
    </extension>
    <extension
-         id="com.google.cloud.tools.eclipse.appenginedefaultFacet"
+         id="com.google.cloud.tools.eclipse.appengineDefaultFacet"
          point="org.eclipse.wst.common.project.facet.core.defaultFacets">
       <default-facets>
          <facet
-               id="com.google.cloud.tools.eclipse.appengine.facet"
+               id="com.google.cloud.tools.eclipse.appengine.facets.standard"
                version="1">
          </facet>
          <runtime-component

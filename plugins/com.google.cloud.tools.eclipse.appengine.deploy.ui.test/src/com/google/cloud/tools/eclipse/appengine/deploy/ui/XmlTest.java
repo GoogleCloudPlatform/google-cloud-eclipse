@@ -20,6 +20,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+
 public class XmlTest {
 
   private Document doc;
@@ -53,5 +55,11 @@ public class XmlTest {
 
     Element adapt = (Element) adapts.item(0);
     Assert.assertEquals("org.eclipse.core.resources.IProject", adapt.getAttribute("type"));
+
+    NodeList adaptTestNodes = adapt.getElementsByTagName("test");
+    Assert.assertEquals(1, adaptTestNodes.getLength());
+    Element adaptTestEntry = (Element) adaptTestNodes.item(0);
+    Assert.assertEquals("org.eclipse.wst.common.project.facet.core.projectFacet", adaptTestEntry.getAttribute("property"));
+    Assert.assertEquals(AppEngineStandardFacet.ID, adaptTestEntry.getAttribute("value"));
   }
 }

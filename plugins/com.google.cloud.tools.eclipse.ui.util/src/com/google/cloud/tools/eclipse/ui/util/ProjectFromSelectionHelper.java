@@ -9,6 +9,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.util.AdapterUtil;
 import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
 
@@ -31,8 +32,7 @@ public class ProjectFromSelectionHelper {
         }
 
         IFacetedProject facetedProject = facetedProjectHelper.getFacetedProject(project);
-        // TODO replace with constant from AppEngineFacet (after possibly relocating that class)
-        if (facetedProjectHelper.projectHasFacet(facetedProject, "com.google.cloud.tools.eclipse.appengine.facet")) {
+        if (AppEngineStandardFacet.hasAppEngineFacet(facetedProject)) {
           return project;
         }
       }

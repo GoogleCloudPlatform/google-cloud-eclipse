@@ -13,7 +13,7 @@ import org.junit.Test;
 public class FontUtilTest {
 
   @Test
-  public void test() {
+  public void testConvertFontToBold() {
     Shell shell = new Shell();
     Label label = new Label(shell, SWT.NONE);
     for (FontData fontData : label.getFont().getFontData()) {

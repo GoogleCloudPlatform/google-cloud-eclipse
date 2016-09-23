@@ -24,6 +24,7 @@ Import-Package: com.google.cloud.tools.eclipse.appengine.facets,
  com.google.cloud.tools.eclipse.appengine.ui,
  com.google.cloud.tools.eclipse.usagetracker,
  com.google.cloud.tools.eclipse.util,
+ com.google.cloud.tools.project;version="0.1.9",
  org.apache.maven.archetype.catalog;provider=m2e,
  org.apache.maven.artifact;provider=m2e,
  org.eclipse.wst.common.project.facet.core

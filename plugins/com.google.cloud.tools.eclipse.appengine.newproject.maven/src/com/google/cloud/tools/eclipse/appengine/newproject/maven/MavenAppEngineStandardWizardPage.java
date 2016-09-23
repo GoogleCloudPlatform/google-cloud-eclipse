@@ -25,11 +25,11 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectIdValidator;
 import com.google.cloud.tools.eclipse.appengine.newproject.JavaPackageValidator;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
+import com.google.cloud.tools.project.ProjectIdValidator;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.CharMatcher;
 
@@ -282,7 +282,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     }
 
     String projectId = getAppEngineProjectId();
-    if (!AppEngineProjectIdValidator.validate(projectId)) {
+    if (!projectId.isEmpty() && !ProjectIdValidator.validate(projectId)) {
       setErrorMessage(MessageFormat.format("Illegal App Engine Project ID: {0}.", projectId));
       return false;
     }

@@ -16,6 +16,7 @@ import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
+import com.google.cloud.tools.project.ProjectIdValidator;
 
 /**
  * UI to collect all information necessary to create a new App Engine Standard Java Eclipse project.
@@ -87,9 +88,11 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
     }
 
     String projectId = projectIdField.getText();
-    if (!AppEngineProjectIdValidator.validate(projectId)) {
-      setErrorMessage("Illegal App Engine Project ID: " + projectId);
-      return false;
+    if (!projectId.isEmpty()) {
+      if (!ProjectIdValidator.validate(projectId)) {
+        setErrorMessage("Illegal App Engine Project ID: " + projectId);
+        return false;
+      }
     }
 
     File parent = getLocationPath().toFile();

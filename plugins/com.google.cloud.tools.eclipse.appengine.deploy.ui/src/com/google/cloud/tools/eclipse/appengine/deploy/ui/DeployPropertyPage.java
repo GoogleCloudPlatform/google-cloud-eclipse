@@ -18,6 +18,8 @@ package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.databinding.preference.PreferencePageSupport;
+import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.widgets.Composite;
@@ -33,7 +35,14 @@ public class DeployPropertyPage extends PropertyPage {
   @Override
   protected Control createContents(Composite parent) {
     IProject project = AdapterUtil.adapt(getElement(), IProject.class);
-    content = new DeployPreferencesPanel(parent, project, getLayoutChangedHandler());
+
+    Composite container = new Composite(parent, SWT.NONE);
+    content = new DeployPreferencesPanel(container, project, getLayoutChangedHandler());
+
+    GridDataFactory.fillDefaults().grab(true, false).applyTo(content);
+    GridDataFactory.fillDefaults().grab(true, true).applyTo(container);
+    GridLayoutFactory.fillDefaults().generateLayout(container);
+
     PreferencePageSupport.create(this, content.getDataBindingContext());
     return content;
   }
