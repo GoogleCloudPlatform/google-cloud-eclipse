@@ -6,6 +6,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.IInputValidator;
 
 import com.google.cloud.tools.eclipse.ui.util.Messages;
+import com.google.cloud.tools.project.ProjectIdValidator;
 
 public class ProjectIdInputValidator implements IValidator, IInputValidator {
 
@@ -28,7 +29,7 @@ public class ProjectIdInputValidator implements IValidator, IInputValidator {
       } else {
         return ValidationStatus.ok();
       }
-    } else if (com.google.cloud.tools.project.ProjectIdValidator.validate(value)) {
+    } else if (ProjectIdValidator.validate(value)) {
       return ValidationStatus.ok();
     } else {
       return ValidationStatus.error(Messages.getString("project.id.invalid")); //$NON-NLS-1$
