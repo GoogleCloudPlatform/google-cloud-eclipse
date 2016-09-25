@@ -22,15 +22,8 @@ public class ProjectIdInputValidatorTest {
   @Test
   public void testValidate_emptyStringInvalid() {
     assertThat(new ProjectIdInputValidator()
-                 .validate("", ProjectIdInputValidator.ValidationPolicy.EMPTY_IS_INVALID).getSeverity(),
+                 .validate("").getSeverity(),
                is(IStatus.ERROR));
-  }
-
-  @Test
-  public void testValidate_emptyStringValid() {
-    assertThat(new ProjectIdInputValidator()
-                 .validate("", ProjectIdInputValidator.ValidationPolicy.EMPTY_IS_VALID).getSeverity(),
-               is(IStatus.OK));
   }
 
   @Test

@@ -10,25 +10,18 @@ import com.google.cloud.tools.project.ProjectIdValidator;
 
 public class ProjectIdInputValidator implements IValidator, IInputValidator {
 
-  public enum ValidationPolicy {
-    EMPTY_IS_VALID, EMPTY_IS_INVALID
-  }
-
-  public IStatus validate(Object input, ValidationPolicy policy) {
+  @Override
+  public IStatus validate(Object input) {
     if (!(input instanceof String)) {
       return ValidationStatus.error(Messages.getString("project.id.invalid")); //$NON-NLS-1$
     }
     String value = (String) input;
-    return validateString(value, policy);
+    return validateString(value);
   }
 
-  private IStatus validateString(String value, ValidationPolicy policy) {
+  private IStatus validateString(String value) {
     if (value.isEmpty()) {
-      if (policy == ValidationPolicy.EMPTY_IS_INVALID) {
-        return ValidationStatus.error(Messages.getString("project.id.empty")); //$NON-NLS-1$
-      } else {
-        return ValidationStatus.ok();
-      }
+      return ValidationStatus.error(Messages.getString("project.id.empty")); //$NON-NLS-1$
     } else if (ProjectIdValidator.validate(value)) {
       return ValidationStatus.ok();
     } else {
@@ -37,13 +30,8 @@ public class ProjectIdInputValidator implements IValidator, IInputValidator {
   }
 
   @Override
-  public IStatus validate(Object input) {
-    return validate(input, ValidationPolicy.EMPTY_IS_INVALID);
-  }
-
-  @Override
   public String isValid(String newText) {
-    IStatus status = validateString(newText, ValidationPolicy.EMPTY_IS_INVALID);
+    IStatus status = validateString(newText);
     if (status.isOK()) {
       return null;
     } else {
