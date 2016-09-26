@@ -99,7 +99,8 @@ public class StandardDeployCommandHandler extends AbstractHandler {
   private void launchDeployJob(IProject project, Credential credential, ExecutionEvent event) 
       throws IOException, ExecutionException {
     
-    AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.APP_ENGINE_DEPLOY, "standard", null);
+    AnalyticsPingManager.getInstance().sendPing(
+        AnalyticsEvents.APP_ENGINE_DEPLOY, AnalyticsEvents.APP_ENGINE_DEPLOY_STANDARD, null);
     
     IPath workDirectory = createWorkDirectory();
 
