@@ -51,6 +51,8 @@ import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListe
 import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities;
 import com.google.cloud.tools.eclipse.ui.util.ProjectFromSelectionHelper;
 import com.google.cloud.tools.eclipse.ui.util.ServiceUtils;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
 import com.google.common.annotations.VisibleForTesting;
 
@@ -72,7 +74,7 @@ public class StandardDeployCommandHandler extends AbstractHandler {
 
   @VisibleForTesting
   StandardDeployCommandHandler(FacetedProjectHelper facetedProjectHelper) {
-      this.helper = new ProjectFromSelectionHelper(facetedProjectHelper);
+    this.helper = new ProjectFromSelectionHelper(facetedProjectHelper);
   }
 
   @Override
@@ -96,6 +98,9 @@ public class StandardDeployCommandHandler extends AbstractHandler {
 
   private void launchDeployJob(IProject project, Credential credential, ExecutionEvent event) 
       throws IOException, ExecutionException {
+    
+    AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.APP_ENGINE_DEPLOY, "standard", null);
+    
     IPath workDirectory = createWorkDirectory();
 
     DefaultDeployConfiguration deployConfiguration = getDeployConfiguration(project, event);
@@ -103,9 +108,9 @@ public class StandardDeployCommandHandler extends AbstractHandler {
         MessageConsoleUtilities.createConsole(getConsoleName(deployConfiguration.getProject()),
                                               new DeployConsole.Factory());
 
-    final MessageConsoleStream outputStream = messageConsole.newMessageStream();
+    MessageConsoleStream outputStream = messageConsole.newMessageStream();
     StandardDeployJobConfig config = getDeployJobConfig(project, credential, event,
-                                                        workDirectory, outputStream, deployConfiguration);
+        workDirectory, outputStream, deployConfiguration);
 
     StandardDeployJob deploy = new StandardDeployJob.Builder().config(config).build();
     messageConsole.setJob(deploy);
@@ -114,6 +119,8 @@ public class StandardDeployCommandHandler extends AbstractHandler {
       @Override
       public void done(IJobChangeEvent event) {
         super.done(event);
+        AnalyticsPingManager.getInstance()
+            .sendPing(AnalyticsEvents.APP_ENGINE_DEPLOY_SUCCESS, "standard", null);
         launchCleanupJob();
       }
     });
@@ -131,15 +138,15 @@ public class StandardDeployCommandHandler extends AbstractHandler {
                                                      Credential credential,
                                                      ExecutionEvent event,
                                                      IPath workDirectory,
-                                                     final MessageConsoleStream outputStream, 
+                                                     MessageConsoleStream outputStream, 
                                                      DefaultDeployConfiguration deployConfiguration) {
     StandardDeployJobConfig config = new StandardDeployJobConfig();
     config.setProject(project)
-      .setCredential(credential)
-      .setWorkDirectory(workDirectory)
-      .setStdoutLineListener(new MessageConsoleWriterOutputLineListener(outputStream))
-      .setStderrLineListener(new MessageConsoleWriterOutputLineListener(outputStream))
-      .setDeployConfiguration(deployConfiguration);
+        .setCredential(credential)
+        .setWorkDirectory(workDirectory)
+        .setStdoutLineListener(new MessageConsoleWriterOutputLineListener(outputStream))
+        .setStderrLineListener(new MessageConsoleWriterOutputLineListener(outputStream))
+        .setDeployConfiguration(deployConfiguration);
     return config;
   }
 
