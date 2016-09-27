@@ -59,8 +59,8 @@ import com.google.common.annotations.VisibleForTesting;
 /**
  * Command handler to deploy an App Engine web application project to App Engine Standard.
  * <p>
- * It copies the project's exploded WAR to a staging directory and then executes staging and deploy operations
- * provided by the App Engine Plugins Core Library.
+ * It copies the project's exploded WAR to a staging directory and then executes 
+ * the staging and deploy operations provided by the App Engine Plugins Core Library.
  */
 public class StandardDeployCommandHandler extends AbstractHandler {
 
@@ -99,7 +99,8 @@ public class StandardDeployCommandHandler extends AbstractHandler {
   private void launchDeployJob(IProject project, Credential credential, ExecutionEvent event) 
       throws IOException, ExecutionException {
     
-    AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.APP_ENGINE_DEPLOY, "standard", null);
+    AnalyticsPingManager.getInstance().sendPing(
+        AnalyticsEvents.APP_ENGINE_DEPLOY, AnalyticsEvents.APP_ENGINE_DEPLOY_STANDARD, null);
     
     IPath workDirectory = createWorkDirectory();
 
@@ -119,8 +120,8 @@ public class StandardDeployCommandHandler extends AbstractHandler {
       @Override
       public void done(IJobChangeEvent event) {
         super.done(event);
-        AnalyticsPingManager.getInstance()
-            .sendPing(AnalyticsEvents.APP_ENGINE_DEPLOY_SUCCESS, "standard", null);
+        AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.APP_ENGINE_DEPLOY_SUCCESS,
+            AnalyticsEvents.APP_ENGINE_DEPLOY_STANDARD, null);
         launchCleanupJob();
       }
     });
@@ -129,17 +130,14 @@ public class StandardDeployCommandHandler extends AbstractHandler {
 
   private String getConsoleName(String project) {
     Date now = new Date();
-    String nowString =
-        DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, Locale.getDefault()).format(now);
+    String nowString = DateFormat.getDateTimeInstance(
+        DateFormat.MEDIUM, DateFormat.MEDIUM, Locale.getDefault()).format(now);
     return MessageFormat.format("{0} - {1} ({2})", CONSOLE_NAME, project, nowString);
   }
 
-  private StandardDeployJobConfig getDeployJobConfig(IProject project,
-                                                     Credential credential,
-                                                     ExecutionEvent event,
-                                                     IPath workDirectory,
-                                                     MessageConsoleStream outputStream, 
-                                                     DefaultDeployConfiguration deployConfiguration) {
+  private StandardDeployJobConfig getDeployJobConfig(IProject project, Credential credential,
+      ExecutionEvent event, IPath workDirectory, MessageConsoleStream outputStream,
+      DefaultDeployConfiguration deployConfiguration) {
     StandardDeployJobConfig config = new StandardDeployJobConfig();
     config.setProject(project)
         .setCredential(credential)
