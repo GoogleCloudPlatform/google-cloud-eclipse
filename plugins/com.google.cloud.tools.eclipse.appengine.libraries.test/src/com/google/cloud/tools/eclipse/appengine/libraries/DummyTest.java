@@ -1,4 +1,4 @@
-package com.google.cloud.tools.eclipse.apimanagement;
+package com.google.cloud.tools.eclipse.appengine.libraries;
 
 import org.junit.Test;
 
