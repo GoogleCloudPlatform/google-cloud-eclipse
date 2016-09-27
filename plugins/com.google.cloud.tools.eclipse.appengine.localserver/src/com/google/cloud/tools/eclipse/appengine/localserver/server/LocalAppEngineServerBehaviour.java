@@ -10,9 +10,6 @@ import com.google.cloud.tools.appengine.cloudsdk.process.ProcessExitListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessStartListener;
 import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
-import com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerBehaviour.DevAppServerOutputListener;
-import com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerBehaviour.LocalAppEngineExitListener;
-import com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerBehaviour.LocalAppEngineStartListener;
 import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListener;
 
 import org.eclipse.core.runtime.IPath;
