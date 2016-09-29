@@ -14,6 +14,13 @@ public class MavenAppEngineFacetUtilTest {
 
     Assert.assertNotNull(dependencies);
     Assert.assertEquals(5, dependencies.size());
+    
+    Dependency servlet = dependencies.get(1);
+    Assert.assertEquals("javax.servlet", servlet.getGroupId());
+    Assert.assertEquals("provided", servlet.getScope());
+    Dependency jstl = dependencies.get(2);
+    Assert.assertEquals("jstl", jstl.getGroupId());
+    Assert.assertEquals("provided", jstl.getScope());
   }
 
   @Test

@@ -31,11 +31,12 @@ public class MavenAppEngineFacetUtil {
     servletApiDependency.setScope("provided");
     dependencies.add(servletApiDependency);
 
-    Dependency jstlDependecy = new Dependency();
-    jstlDependecy.setGroupId("jstl");
-    jstlDependecy.setArtifactId("jstl");
-    jstlDependecy.setVersion("1.2");
-    dependencies.add(jstlDependecy);
+    Dependency jstlDependency = new Dependency();
+    jstlDependency.setGroupId("jstl");
+    jstlDependency.setArtifactId("jstl");
+    jstlDependency.setVersion("1.2");
+    jstlDependency.setScope("provided");
+    dependencies.add(jstlDependency);
 
     Dependency appEngineTestingDependency = new Dependency();
     appEngineTestingDependency.setGroupId("com.google.appengine");
