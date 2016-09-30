@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
 	<name>com.google.cloud.tools.eclipse.appengine.libraries</name>
+	<comment></comment>
 	<projects>
 	</projects>
 	<buildSpec>
@@ -21,6 +22,11 @@
 		</buildCommand>
 		<buildCommand>
 			<name>org.eclipse.m2e.core.maven2Builder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
+			<name>org.eclipse.pde.ds.core.builder</name>
 			<arguments>
 			</arguments>
 		</buildCommand>

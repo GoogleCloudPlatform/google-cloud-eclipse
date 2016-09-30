@@ -35,6 +35,7 @@
       <xs:complexType>
          <xs:choice minOccurs="1" maxOccurs="unbounded">
             <xs:element ref="library" />
+            <xs:element ref="classpathContainerInitializer" />
          </xs:choice>
          <xs:attribute name="point" type="xs:string" use="required" />
          <xs:attribute name="id" type="xs:string" />
@@ -45,6 +46,13 @@
                </xs:appinfo>
             </xs:annotation>
          </xs:attribute>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="classpathContainerInitializer">
+      <xs:complexType>
+         <xs:attribute name="class" type="xs:string" />
+         <xs:attribute name="id" type="xs:string" />
       </xs:complexType>
    </xs:element>
 

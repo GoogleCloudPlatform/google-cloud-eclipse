@@ -21,4 +21,10 @@
     </library>
   </extension>
 
+  <extension
+        point="org.eclipse.jdt.core.classpathContainerInitializer">
+     <classpathContainerInitializer
+           class="com.google.cloud.tools.eclipse.appengine.libraries.AppEngineLibraryContainerInitializer"
+           id="com.google.cloud.tools.eclipse.appengine.libraries" />
+  </extension>
 </plugin>

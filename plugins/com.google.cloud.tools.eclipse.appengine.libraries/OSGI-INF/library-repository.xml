@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="ILibraryRepositoryService">
+   <implementation class="com.google.cloud.tools.eclipse.appengine.libraries.repository.M2RepositoryService"/>
+   <service>
+      <provide interface="com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService"/>
+   </service>
+</scr:component>
