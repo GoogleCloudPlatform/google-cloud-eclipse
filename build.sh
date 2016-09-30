@@ -7,7 +7,7 @@ set -x
 
 if [ "$1" == "release" ]; then
   # TODO load keys from internal storage
-  mvn clean install
+  # mvn clean install
 else
-  mvn clean install
+  # mvn clean install
 fi
