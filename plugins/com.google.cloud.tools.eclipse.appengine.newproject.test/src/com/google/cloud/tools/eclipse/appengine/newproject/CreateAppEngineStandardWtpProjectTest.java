@@ -43,7 +43,7 @@ public class CreateAppEngineStandardWtpProjectTest {
   @Before
   public void setUp() {
     IWorkspace workspace = ResourcesPlugin.getWorkspace();
-    project = workspace.getRoot().getProject("foobar");
+    project = workspace.getRoot().getProject("testproject" + Math.random());
     config.setProject(project);
   }
   
