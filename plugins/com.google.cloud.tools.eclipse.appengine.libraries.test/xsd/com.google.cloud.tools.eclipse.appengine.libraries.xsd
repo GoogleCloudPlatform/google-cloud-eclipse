@@ -11,10 +11,10 @@
 
    <xs:element name="plugin">
       <xs:complexType>
-         <xs:sequence>
+         <xs:choice minOccurs="1" maxOccurs="unbounded">
             <xs:element ref="extension-point" />
             <xs:element ref="extension" />
-         </xs:sequence>
+         </xs:choice>
       </xs:complexType>
    </xs:element>
 
@@ -72,7 +72,7 @@ will determine how to resolve the entries associated with the container.
          <xs:attribute name="name" type="xs:string">
             <xs:annotation>
                <xs:documentation>
-                  A user-friendly name for the library that can be displayed in the UI, e.g.: &quot;AppEngine Endpoints&quot;.
+                  A user-friendly name for the library that can be displayed in the UI, e.g.: "AppEngine Endpoints".
                </xs:documentation>
             </xs:annotation>
          </xs:attribute>
@@ -94,22 +94,20 @@ will determine how to resolve the entries associated with the container.
       </xs:annotation>
       <xs:complexType>
          <xs:sequence>
-            <xs:sequence minOccurs="0" maxOccurs="unbounded">
-               <xs:choice>
-                  <xs:element ref="exclusionFilter" />
-                  <xs:element ref="inclusionFilter" />
-               </xs:choice>
-            </xs:sequence>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+               <xs:element ref="exclusionFilter" />
+               <xs:element ref="inclusionFilter" />
+            </xs:choice>
             <xs:element ref="mavenCoordinates"/>
          </xs:sequence>
-         <xs:attribute name="javadocUri" type="xs:string">
+         <xs:attribute name="javadocUri" type="xs:anyURI">
             <xs:annotation>
                <xs:documentation>
                   URI that can be used by the IDE to lookup javadoc for the classes contained in this jar file.
                </xs:documentation>
             </xs:annotation>
          </xs:attribute>
-         <xs:attribute name="sourceUri" type="xs:string">
+         <xs:attribute name="sourceUri" type="xs:anyURI">
             <xs:annotation>
                <xs:documentation>
                   URI that can be used by the IDE to lookup sources for the classes contained in this jar file.
@@ -122,7 +120,7 @@ will determine how to resolve the entries associated with the container.
    <xs:element name="exclusionFilter">
       <xs:annotation>
          <xs:documentation>
-            A pattern that can be used to exclude classes and packages to be visible. Uses the same format as the JDT&apos;s build path inclusion/exclusion filters: http://ant.apache.org/manual/dirtasks.html#patterns
+            A pattern that can be used to exclude classes and packages to be visible. Uses the same format as the JDT's build path inclusion/exclusion filters: http://ant.apache.org/manual/dirtasks.html#patterns
          </xs:documentation>
       </xs:annotation>
       <xs:complexType>
@@ -133,7 +131,7 @@ will determine how to resolve the entries associated with the container.
    <xs:element name="inclusionFilter">
       <xs:annotation>
          <xs:documentation>
-            A pattern that can be used to include classes and packages to be visible. Uses the same format as the JDT&apos;s build path inclusion/exclusion filters: http://ant.apache.org/manual/dirtasks.html#patterns
+            A pattern that can be used to include classes and packages to be visible. Uses the same format as the JDT's build path inclusion/exclusion filters: http://ant.apache.org/manual/dirtasks.html#patterns
          </xs:documentation>
       </xs:annotation>
       <xs:complexType>
@@ -161,18 +159,12 @@ If the value starts with [protocol]:// then it is treated as a URI, otherwise an
          <xs:attribute name="scope">
             <xs:simpleType>
                <xs:restriction base="xs:string">
-                  <xs:enumeration value="compile">
-                  </xs:enumeration>
-                  <xs:enumeration value="provided">
-                  </xs:enumeration>
-                  <xs:enumeration value="runtime">
-                  </xs:enumeration>
-                  <xs:enumeration value="system">
-                  </xs:enumeration>
-                  <xs:enumeration value="test">
-                  </xs:enumeration>
-                  <xs:enumeration value="import">
-                  </xs:enumeration>
+                  <xs:enumeration value="compile" />
+                  <xs:enumeration value="provided" />
+                  <xs:enumeration value="runtime" />
+                  <xs:enumeration value="system" />
+                  <xs:enumeration value="test" />
+                  <xs:enumeration value="import" />
                </xs:restriction>
             </xs:simpleType>
          </xs:attribute>
@@ -204,17 +196,17 @@ If the value starts with [protocol]:// then it is treated as a URI, otherwise an
          <xs:meta.section type="xs:examples"/>
       </xs:appinfo>
       <xs:documentation>
-         &lt;extension point=&quot;com.google.cloud.tools.eclipse.appengine.libraries&quot;&gt;
+         &lt;extension point="com.google.cloud.tools.eclipse.appengine.libraries"&gt;
     &lt;library 
-          id=&quot;com.google.cloud.tools.eclipse.appengine.libraries/appengine-api&quot;
-          name=&quot;App Engine API&quot;&gt;
+          id="com.google.cloud.tools.eclipse.appengine.libraries/appengine-api"
+          name="App Engine API"&gt;
       &lt;jarFile&gt;
         &lt;mavenCoordinates
-              artifactId=&quot;appengine-api-1.0-sdk&quot;
-              groupId=&quot;com.google.appengine&quot;
-              repositoryUri=&quot;http://repo1.maven.org/maven2/&quot;&gt;
+              artifactId="appengine-api-1.0-sdk"
+              groupId="com.google.appengine"
+              repositoryUri="http://repo1.maven.org/maven2/"&gt;
         &lt;/mavenCoordinates&gt;
-        &lt;exclusionFilter pattern=&quot;com.google.appengine.repackaged.*&quot; /&gt;
+        &lt;exclusionFilter pattern="com.google.appengine.repackaged.*" /&gt;
       &lt;/jarFile&gt;
     &lt;/library&gt;
   &lt;/extension&gt;
@@ -223,7 +215,7 @@ If the value starts with [protocol]:// then it is treated as a URI, otherwise an
 
    <xs:annotation>
       <xs:appinfo>
-         <xs:meta.section type="xs:apiinfo"/>
+         <meta.section type="apiinfo"/>
       </xs:appinfo>
       <xs:documentation>
          Experimental: APIs may change with no notice.
@@ -232,7 +224,7 @@ If the value starts with [protocol]:// then it is treated as a URI, otherwise an
 
    <xs:annotation>
       <xs:appinfo>
-         <xs:meta.section type="xs:implementation"/>
+         <meta.section type="xs:implementation"/>
       </xs:appinfo>
       <xs:documentation>
          See the plugin.xml of the com.google.cloud.tools.eclipse.appengine.libraries for an example of how to contribute to the extension point.
@@ -241,19 +233,19 @@ If the value starts with [protocol]:// then it is treated as a URI, otherwise an
    
    <xs:annotation>
       <xs:appinfo>
-         <xs:meta.section type="xs:copyright"/>
+         <meta.section type="xs:copyright"/>
       </xs:appinfo>
       <xs:documentation>
          Copyright 2016 Google Inc. All Rights Reserved.
 
-Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
    http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.

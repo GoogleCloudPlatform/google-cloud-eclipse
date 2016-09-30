@@ -10,12 +10,9 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
 import org.junit.Test;
-import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 public class PluginXmlValidationTest {
-
-  private Document doc;
 
   @Test
   public void validatePluginXml() throws SAXException, IOException {
