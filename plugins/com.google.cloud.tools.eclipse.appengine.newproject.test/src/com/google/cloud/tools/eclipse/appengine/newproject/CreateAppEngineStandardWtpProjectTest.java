@@ -1,5 +1,6 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -16,6 +17,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.After;
 import org.junit.Assert;
@@ -75,14 +77,19 @@ public class CreateAppEngineStandardWtpProjectTest {
     config.setProject(project);
     CreateAppEngineStandardWtpProject creator = new CreateAppEngineStandardWtpProject(config, adaptable);
     creator.execute(new NullProgressMonitor());
+    
     assertJunitAndHamcrestAreOnClasspath();
   }
 
   private void assertJunitAndHamcrestAreOnClasspath() throws CoreException {
     assertTrue(project.hasNature(JavaCore.NATURE_ID));
     IJavaProject javaProject = JavaCore.create(project);
-    assertTrue(javaProject.findType("org.junit.Assert").exists());
-    assertTrue(javaProject.findType("org.hamcrest.CoreMatchers").exists());
+    IType junit = javaProject.findType("org.junit.Assert");
+    assertNotNull("Did not find junit", junit);
+    assertTrue(junit.exists());
+    IType hamcrest = javaProject.findType("org.hamcrest.CoreMatchers");
+    assertNotNull("Did not find hamcrest", hamcrest);
+    assertTrue(hamcrest.exists());
   }
 
   @Test
