@@ -23,8 +23,16 @@ public class GoogleLoginCommandHandler extends AbstractHandler implements IEleme
     if (credential == null) {
       loginService.getActiveCredential(null /* no custom dialog message */);  // Log in.
     } else {
-      if (MessageDialog.openConfirm(HandlerUtil.getActiveShell(event),
-          Messages.LOGOUT_CONFIRM_DIALOG_TITILE, Messages.LOGOUT_CONFIRM_DIALOG_MESSAGE)) {
+      String[] dialogButtonLabels = {"Sign Out", "Don't Sign Out"};
+      MessageDialog logoutDialog = new MessageDialog(
+          HandlerUtil.getActiveShell(event), 
+          Messages.LOGOUT_CONFIRM_DIALOG_TITLE, 
+          null, 
+          Messages.LOGOUT_CONFIRM_DIALOG_MESSAGE, 
+          MessageDialog.QUESTION, 
+          dialogButtonLabels, 0);
+      boolean shouldLogout = logoutDialog.open() == 0;
+      if (shouldLogout) {
         loginService.clearCredential();  // Log out on confirmation.
       }
     }

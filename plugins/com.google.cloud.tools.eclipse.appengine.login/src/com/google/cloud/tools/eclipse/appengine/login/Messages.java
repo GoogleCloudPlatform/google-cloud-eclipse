@@ -15,7 +15,7 @@ public class Messages extends NLS {
   public static String LOGIN_TOOLTIP_LOGGED_IN;
   public static String LOGIN_TOOLTIP_LOGGED_OUT;
   public static String LOGOUT_CONFIRM_DIALOG_MESSAGE;
-  public static String LOGOUT_CONFIRM_DIALOG_TITILE;
+  public static String LOGOUT_CONFIRM_DIALOG_TITLE;
   static {
     // initialize resource bundle
     NLS.initializeMessages(BUNDLE_NAME, Messages.class);
