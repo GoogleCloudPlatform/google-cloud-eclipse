@@ -9,6 +9,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -86,6 +87,7 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
   private void addManageLibrariesWidgets(Composite container) {
     apiGroup = new Group(container, SWT.NONE);
     apiGroup.setText(Messages.AppEngineStandardWizardPage_librariesGroupLabel);
+    apiGroup.setFont(JFaceResources.getDialogFont());
     GridDataFactory.fillDefaults().span(2, 1).applyTo(apiGroup);
 
     for (Library library : getLibraries()) {

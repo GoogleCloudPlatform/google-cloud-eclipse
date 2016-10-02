@@ -7,7 +7,6 @@ import com.google.common.base.Preconditions;
 
 /**
  * Represents a library that can be added to App Engine projects. E.g. AppEngine Endpoints library.
- *
  */
 public class Library {
   private static final String CONTAINER_PATH_PREFIX = "com.google.cloud.tools.eclipse.appengine.libraries";
