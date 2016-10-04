@@ -8,15 +8,15 @@
           id="appengine-api"
           name="App Engine API"
           siteUri="https://cloud.google.com/appengine/docs/java/" >
-      <libraryFile>
-        <exclusionFilter pattern="com.google.appengine.repackaged.**" />
-        <exclusionFilter pattern="com.google.appengine.labs.repackaged.**" />
-        <exclusionFilter pattern="com.google.apphosting.**" />
-        <inclusionFilter pattern="com.google.apphosting.api.**" />
+      <libraryFile export="true">
         <mavenCoordinates
               artifactId="appengine-api-1.0-sdk"
               groupId="com.google.appengine"
               repositoryUri="http://repo1.maven.org/maven2/" />
+        <exclusionFilter pattern="com.google.appengine.repackaged.**" />
+        <exclusionFilter pattern="com.google.appengine.labs.repackaged.**" />
+        <exclusionFilter pattern="com.google.apphosting.**" />
+        <inclusionFilter pattern="com.google.apphosting.api.**" />
       </libraryFile>
     </library>
   </extension>

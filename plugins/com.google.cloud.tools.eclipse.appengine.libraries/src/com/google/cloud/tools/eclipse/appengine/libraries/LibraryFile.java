@@ -14,8 +14,7 @@ import com.google.common.base.Preconditions;
  */
 public class LibraryFile {
 
-  private List<Filter> exclusionFilters = Collections.emptyList();
-  private List<Filter> inclusionFilters = Collections.emptyList();
+  private List<Filter> filters = Collections.emptyList();
   private MavenCoordinates mavenCoordinates;
   private URI javadocUri;
   private URI sourceUri;
@@ -29,23 +28,13 @@ public class LibraryFile {
     return mavenCoordinates;
   }
 
-  public List<Filter> getExclusionFilters() {
-    return new ArrayList<>(exclusionFilters);
+  public List<Filter> getFilters() {
+    return new ArrayList<>(filters);
   }
 
-  public void setExclusionFilters(List<Filter> exclusionFilters) {
-    if (exclusionFilters != null) {
-      this.exclusionFilters = new ArrayList<>(exclusionFilters);
-    }
-  }
-
-  public List<Filter> getInclusionFilters() {
-    return new ArrayList<>(inclusionFilters);
-  }
-
-  public void setInclusionFilters(List<Filter> inclusionFilters) {
-    if (inclusionFilters != null) {
-      this.inclusionFilters = new ArrayList<>(inclusionFilters);
+  public void setFilters(List<Filter> filters) {
+    if (filters != null) {
+      this.filters = new ArrayList<>(filters);
     }
   }
 

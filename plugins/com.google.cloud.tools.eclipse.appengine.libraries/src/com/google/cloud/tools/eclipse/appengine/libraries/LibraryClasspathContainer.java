@@ -48,23 +48,24 @@ public class LibraryClasspathContainer implements IClasspathContainer {
       entries[idx++] = JavaCore.newLibraryEntry(repositoryService.getJarLocation(libraryFile.getMavenCoordinates()),
                                                 repositoryService.getSourceJarLocation(libraryFile.getMavenCoordinates()),
                                                 null,
-                                                getAccessRules(libraryFile.getExclusionFilters(), libraryFile.getInclusionFilters()),
+                                                getAccessRules(libraryFile.getFilters()),
                                                 null,
                                                 true);
     }
     return entries;
   }
 
-  private IAccessRule[] getAccessRules(List<Filter> exclusionFilters, List<Filter> inclusionFilters) {
-    IAccessRule[] accessRules = new IAccessRule[exclusionFilters.size() + inclusionFilters.size()];
+  private IAccessRule[] getAccessRules(List<Filter> filters) {
+    IAccessRule[] accessRules = new IAccessRule[filters.size()];
     int idx = 0;
-    for (Filter exclusionFilter : exclusionFilters) {
-      IAccessRule accessRule = JavaCore.newAccessRule(new Path(exclusionFilter.getPattern()), IAccessRule.K_NON_ACCESSIBLE);
-      accessRules[idx++] = accessRule;
-    }
-    for (Filter inclusionFilter : inclusionFilters) {
-      IAccessRule accessRule = JavaCore.newAccessRule(new Path(inclusionFilter.getPattern()), IAccessRule.K_ACCESSIBLE);
-      accessRules[idx++] = accessRule;
+    for (Filter filter : filters) {
+      if (filter.isExclude()) {
+        IAccessRule accessRule = JavaCore.newAccessRule(new Path(filter.getPattern()), IAccessRule.K_NON_ACCESSIBLE);
+        accessRules[idx++] = accessRule;
+      } else {
+        IAccessRule accessRule = JavaCore.newAccessRule(new Path(filter.getPattern()), IAccessRule.K_ACCESSIBLE);
+        accessRules[idx++] = accessRule;
+      }
     }
     return accessRules;
   }

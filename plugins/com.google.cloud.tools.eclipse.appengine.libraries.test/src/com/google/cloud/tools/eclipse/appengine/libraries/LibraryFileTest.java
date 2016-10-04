@@ -1,13 +1,16 @@
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -22,52 +25,55 @@ public class LibraryFileTest {
 
   @Test
   public void testConstructor() {
-    MavenCoordinates mavenCoordinates = new MavenCoordinates("a", "b", "c");
+    MavenCoordinates mavenCoordinates = new MavenCoordinates("repoUrl", "groupId", "artifactId");
     LibraryFile libraryFile = new LibraryFile(mavenCoordinates);
     assertSame(mavenCoordinates, libraryFile.getMavenCoordinates());
   }
 
   @Test
-  public void testSetNullExclusionFilters() {
-    MavenCoordinates mavenCoordinates = new MavenCoordinates("a", "b", "c");
+  public void testSetNullFilters() {
+    MavenCoordinates mavenCoordinates = new MavenCoordinates("repoUrl", "groupId", "artifactId");
     LibraryFile libraryFile = new LibraryFile(mavenCoordinates);
-    libraryFile.setExclusionFilters(null);
-    assertNotNull(libraryFile.getExclusionFilters());
+    libraryFile.setFilters(null);
+    assertNotNull(libraryFile.getFilters());
+    assertTrue(libraryFile.getFilters().isEmpty());
   }
 
   @Test
   public void testSetExclusionFilters() {
-    MavenCoordinates mavenCoordinates = new MavenCoordinates("a", "b", "c");
+    MavenCoordinates mavenCoordinates = new MavenCoordinates("repoUrl", "groupId", "artifactId");
     LibraryFile libraryFile = new LibraryFile(mavenCoordinates);
-    List<Filter> exclusionFilters = Collections.singletonList(new Filter("d"));
-    libraryFile.setExclusionFilters(exclusionFilters);
-    assertNotNull(libraryFile.getExclusionFilters());
-    assertThat(libraryFile.getExclusionFilters().size(), is(1));
-    assertThat(libraryFile.getExclusionFilters().get(0).getPattern(), is("d"));
+    List<Filter> exclusionFilters = Collections.singletonList(Filter.exclusionFilter("filter"));
+    libraryFile.setFilters(exclusionFilters);
+    assertNotNull(libraryFile.getFilters());
+    assertThat(libraryFile.getFilters().size(), is(1));
+    assertThat(libraryFile.getFilters().get(0).getPattern(), is("filter"));
   }
 
   @Test
-  public void testSetNullInclusionFilters() {
-    MavenCoordinates mavenCoordinates = new MavenCoordinates("a", "b", "c");
+  public void testSetFilters_preservesOrder() {
+    MavenCoordinates mavenCoordinates = new MavenCoordinates("repoUrl", "groupId", "artifactId");
     LibraryFile libraryFile = new LibraryFile(mavenCoordinates);
-    libraryFile.setInclusionFilters(null);
-    assertNotNull(libraryFile.getInclusionFilters());
+    List<Filter> filters = Arrays.asList(Filter.exclusionFilter("exclusionFilter1"),
+                                         Filter.inclusionFilter("inclusionFilter1"),
+                                         Filter.inclusionFilter("inclusionFilter2"),
+                                         Filter.exclusionFilter("exclusionFilter2"));
+    libraryFile.setFilters(filters);
+    assertNotNull(libraryFile.getFilters());
+    assertThat(libraryFile.getFilters().size(), is(4));
+    assertThat(libraryFile.getFilters().get(0).getPattern(), is("exclusionFilter1"));
+    assertTrue(libraryFile.getFilters().get(0).isExclude());
+    assertThat(libraryFile.getFilters().get(1).getPattern(), is("inclusionFilter1"));
+    assertFalse(libraryFile.getFilters().get(1).isExclude());
+    assertThat(libraryFile.getFilters().get(2).getPattern(), is("inclusionFilter2"));
+    assertFalse(libraryFile.getFilters().get(2).isExclude());
+    assertThat(libraryFile.getFilters().get(3).getPattern(), is("exclusionFilter2"));
+    assertTrue(libraryFile.getFilters().get(3).isExclude());
   }
-
-  @Test
-  public void testSetInclusionFilters() {
-    MavenCoordinates mavenCoordinates = new MavenCoordinates("a", "b", "c");
-    LibraryFile libraryFile = new LibraryFile(mavenCoordinates);
-    List<Filter> inclusionFilters = Collections.singletonList(new Filter("d"));
-    libraryFile.setInclusionFilters(inclusionFilters);
-    assertNotNull(libraryFile.getInclusionFilters());
-    assertThat(libraryFile.getInclusionFilters().size(), is(1));
-    assertThat(libraryFile.getInclusionFilters().get(0).getPattern(), is("d"));
-  }
-
+  
   @Test
   public void setNullJavadocUri() {
-    MavenCoordinates mavenCoordinates = new MavenCoordinates("a", "b", "c");
+    MavenCoordinates mavenCoordinates = new MavenCoordinates("repoUrl", "groupId", "artifactId");
     LibraryFile libraryFile = new LibraryFile(mavenCoordinates);
     libraryFile.setJavadocUri(null);
     assertNull(libraryFile.getJavadocUri());
@@ -75,7 +81,7 @@ public class LibraryFileTest {
 
   @Test
   public void setJavadocUri() throws URISyntaxException {
-    MavenCoordinates mavenCoordinates = new MavenCoordinates("a", "b", "c");
+    MavenCoordinates mavenCoordinates = new MavenCoordinates("repoUrl", "groupId", "artifactId");
     LibraryFile libraryFile = new LibraryFile(mavenCoordinates);
     libraryFile.setJavadocUri(new URI("http://example.com"));
     assertThat(libraryFile.getJavadocUri().toString(), is("http://example.com"));
@@ -83,7 +89,7 @@ public class LibraryFileTest {
 
   @Test
   public void setNullSourceUri() {
-    MavenCoordinates mavenCoordinates = new MavenCoordinates("a", "b", "c");
+    MavenCoordinates mavenCoordinates = new MavenCoordinates("repoUrl", "groupId", "artifactId");
     LibraryFile libraryFile = new LibraryFile(mavenCoordinates);
     libraryFile.setSourceUri(null);
     assertNull(libraryFile.getSourceUri());
@@ -91,7 +97,7 @@ public class LibraryFileTest {
 
   @Test
   public void setSourceUri() throws URISyntaxException {
-    MavenCoordinates mavenCoordinates = new MavenCoordinates("a", "b", "c");
+    MavenCoordinates mavenCoordinates = new MavenCoordinates("repoUrl", "groupId", "artifactId");
     LibraryFile libraryFile = new LibraryFile(mavenCoordinates);
     libraryFile.setSourceUri(new URI("http://example.com"));
     assertThat(libraryFile.getSourceUri().toString(), is("http://example.com"));

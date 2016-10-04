@@ -12,6 +12,7 @@ import com.google.cloud.tools.eclipse.appengine.libraries.Filter;
 import com.google.cloud.tools.eclipse.appengine.libraries.Library;
 import com.google.cloud.tools.eclipse.appengine.libraries.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.libraries.MavenCoordinates;
+import com.google.common.base.Strings;
 
 public class LibraryBuilder {
 
@@ -55,8 +56,7 @@ public class LibraryBuilder {
       if (libraryFileElement.getName().equals(LIBRARY_FILE)) {
         MavenCoordinates mavenCoordinates = getMavenCoordinates(libraryFileElement.getChildren(MAVEN_COORDINATES));
         LibraryFile libraryFile = new LibraryFile(mavenCoordinates);
-        libraryFile.setExclusionFilters(getExclusionFilters(libraryFileElement.getChildren(EXCLUSION_FILTER)));
-        libraryFile.setInclusionFilters(getInclusionFilters(libraryFileElement.getChildren(INCLUSION_FILTER)));
+        libraryFile.setFilters(getFilters(libraryFileElement.getChildren()));
         libraryFile.setSourceUri(getUri(libraryFileElement.getAttribute(SOURCE_URI)));
         libraryFile.setJavadocUri(getUri(libraryFileElement.getAttribute(JAVADOC_URI)));
         libraryFiles.add(libraryFile);
@@ -82,26 +82,35 @@ public class LibraryBuilder {
     String groupId = mavenCoordinatesElement.getAttribute(GROUP_ID);
     String artifactId = mavenCoordinatesElement.getAttribute(ARTIFACT_ID);
     MavenCoordinates mavenCoordinates = new MavenCoordinates(repository, groupId, artifactId);
-    mavenCoordinates.setVersion(mavenCoordinatesElement.getAttribute(VERSION));
-    mavenCoordinates.setType(mavenCoordinatesElement.getAttribute(TYPE));
-    mavenCoordinates.setClassifier(mavenCoordinatesElement.getAttribute(CLASSIFIER));
+    String version = mavenCoordinatesElement.getAttribute(VERSION);
+    if (!Strings.isNullOrEmpty(version)) {
+      mavenCoordinates.setVersion(version);
+    }
+    String type = mavenCoordinatesElement.getAttribute(TYPE);
+    if (!Strings.isNullOrEmpty(type)) {
+      mavenCoordinates.setType(type);
+    }
+    String classifier = mavenCoordinatesElement.getAttribute(CLASSIFIER);
+    if (!Strings.isNullOrEmpty(classifier)) {
+      mavenCoordinates.setClassifier(classifier);
+    }
     return mavenCoordinates;
   }
 
-  private List<Filter> getInclusionFilters(IConfigurationElement[] children) {
-    List<Filter> inclusionFilters = new ArrayList<>();
-    for (IConfigurationElement inclusionFilterElement : children) {
-      inclusionFilters.add(new Filter(inclusionFilterElement.getAttribute(PATTERN)));
+  private List<Filter> getFilters(IConfigurationElement[] children) {
+    List<Filter> filters = new ArrayList<>();
+    for (IConfigurationElement childElement : children) {
+      switch (childElement.getName()) {
+      case EXCLUSION_FILTER:
+        filters.add(Filter.exclusionFilter(childElement.getAttribute(PATTERN)));
+        break;
+      case INCLUSION_FILTER:
+        filters.add(Filter.inclusionFilter(childElement.getAttribute(PATTERN)));
+      default:
+        // non-filter child element
+        break;
+      }
     }
-    return inclusionFilters;
+    return filters;
   }
-
-  private List<Filter> getExclusionFilters(IConfigurationElement[] children) {
-    List<Filter> exclusionFilters = new ArrayList<>();
-    for (IConfigurationElement exclusionFilterElement : children) {
-      exclusionFilters.add(new Filter(exclusionFilterElement.getAttribute(PATTERN)));
-    }
-    return exclusionFilters;
-  }
-
 }

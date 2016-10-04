@@ -65,6 +65,13 @@ public class MavenCoordinatesTest {
   }
 
   @Test
+  public void setVersion() {
+    MavenCoordinates mavenCoordinates = new MavenCoordinates("a", "b", "c");
+    mavenCoordinates.setVersion("1");
+    assertThat(mavenCoordinates.getVersion(), is("1"));
+  }
+
+  @Test
   public void testTypeDefaultsToJar() {
     MavenCoordinates mavenCoordinates = new MavenCoordinates("a", "b", "c");
     assertThat(mavenCoordinates.getType(), is("jar"));
@@ -80,6 +87,13 @@ public class MavenCoordinatesTest {
   public void testSetEmptyType() {
     MavenCoordinates mavenCoordinates = new MavenCoordinates("a", "b", "c");
     mavenCoordinates.setType("");
+  }
+
+  @Test
+  public void testSetType() {
+    MavenCoordinates mavenCoordinates = new MavenCoordinates("a", "b", "c");
+    mavenCoordinates.setType("war");
+    assertThat(mavenCoordinates.getType(), is("war"));
   }
 
   @Test
