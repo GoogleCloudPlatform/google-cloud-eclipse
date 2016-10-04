@@ -8,8 +8,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.InvalidRegistryObjectException;
 
-import com.google.cloud.tools.eclipse.appengine.libraries.ExclusionFilter;
-import com.google.cloud.tools.eclipse.appengine.libraries.InclusionFilter;
+import com.google.cloud.tools.eclipse.appengine.libraries.Filter;
 import com.google.cloud.tools.eclipse.appengine.libraries.Library;
 import com.google.cloud.tools.eclipse.appengine.libraries.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.libraries.MavenCoordinates;
@@ -89,18 +88,18 @@ public class LibraryBuilder {
     return mavenCoordinates;
   }
 
-  private List<InclusionFilter> getInclusionFilters(IConfigurationElement[] children) {
-    LinkedList<InclusionFilter> inclusionFilters = new LinkedList<>();
+  private List<Filter> getInclusionFilters(IConfigurationElement[] children) {
+    LinkedList<Filter> inclusionFilters = new LinkedList<>();
     for (IConfigurationElement inclusionFilterElement : children) {
-      inclusionFilters.add(new InclusionFilter(inclusionFilterElement.getAttribute(PATTERN)));
+      inclusionFilters.add(new Filter(inclusionFilterElement.getAttribute(PATTERN)));
     }
     return inclusionFilters;
   }
 
-  private List<ExclusionFilter> getExclusionFilters(IConfigurationElement[] children) {
-    LinkedList<ExclusionFilter> exclusionFilters = new LinkedList<>();
+  private List<Filter> getExclusionFilters(IConfigurationElement[] children) {
+    LinkedList<Filter> exclusionFilters = new LinkedList<>();
     for (IConfigurationElement exclusionFilterElement : children) {
-      exclusionFilters.add(new ExclusionFilter(exclusionFilterElement.getAttribute(PATTERN)));
+      exclusionFilters.add(new Filter(exclusionFilterElement.getAttribute(PATTERN)));
     }
     return exclusionFilters;
   }

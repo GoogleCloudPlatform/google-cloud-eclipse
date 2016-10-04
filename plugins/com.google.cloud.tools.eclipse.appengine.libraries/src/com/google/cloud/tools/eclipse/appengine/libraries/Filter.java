@@ -2,7 +2,7 @@ package com.google.cloud.tools.eclipse.appengine.libraries;
 
 import com.google.common.base.Preconditions;
 
-public abstract class Filter {
+public class Filter {
 
   private String pattern;
 

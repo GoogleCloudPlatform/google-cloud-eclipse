@@ -55,14 +55,14 @@ public class LibraryClasspathContainer implements IClasspathContainer {
     return entries;
   }
 
-  private IAccessRule[] getAccessRules(List<ExclusionFilter> exclusionFilters, List<InclusionFilter> inclusionFilters) {
+  private IAccessRule[] getAccessRules(List<Filter> exclusionFilters, List<Filter> inclusionFilters) {
     IAccessRule[] accessRules = new IAccessRule[exclusionFilters.size() + inclusionFilters.size()];
     int idx = 0;
-    for (final ExclusionFilter exclusionFilter : exclusionFilters) {
+    for (Filter exclusionFilter : exclusionFilters) {
       IAccessRule accessRule = JavaCore.newAccessRule(new Path(exclusionFilter.getPattern()), IAccessRule.K_NON_ACCESSIBLE);
       accessRules[idx++] = accessRule;
     }
-    for (final InclusionFilter inclusionFilter : inclusionFilters) {
+    for (Filter inclusionFilter : inclusionFilters) {
       IAccessRule accessRule = JavaCore.newAccessRule(new Path(inclusionFilter.getPattern()), IAccessRule.K_ACCESSIBLE);
       accessRules[idx++] = accessRule;
     }

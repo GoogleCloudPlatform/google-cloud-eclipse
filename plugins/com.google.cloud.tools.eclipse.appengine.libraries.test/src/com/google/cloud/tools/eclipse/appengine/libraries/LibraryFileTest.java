@@ -39,7 +39,7 @@ public class LibraryFileTest {
   public void testSetExclusionFilters() {
     MavenCoordinates mavenCoordinates = new MavenCoordinates("a", "b", "c");
     LibraryFile libraryFile = new LibraryFile(mavenCoordinates);
-    List<ExclusionFilter> exclusionFilters = Collections.singletonList(new ExclusionFilter("d"));
+    List<Filter> exclusionFilters = Collections.singletonList(new Filter("d"));
     libraryFile.setExclusionFilters(exclusionFilters);
     assertNotNull(libraryFile.getExclusionFilters());
     assertThat(libraryFile.getExclusionFilters().size(), is(1));
@@ -58,7 +58,7 @@ public class LibraryFileTest {
   public void testSetInclusionFilters() {
     MavenCoordinates mavenCoordinates = new MavenCoordinates("a", "b", "c");
     LibraryFile libraryFile = new LibraryFile(mavenCoordinates);
-    List<InclusionFilter> inclusionFilters = Collections.singletonList(new InclusionFilter("d"));
+    List<Filter> inclusionFilters = Collections.singletonList(new Filter("d"));
     libraryFile.setInclusionFilters(inclusionFilters);
     assertNotNull(libraryFile.getInclusionFilters());
     assertThat(libraryFile.getInclusionFilters().size(), is(1));
