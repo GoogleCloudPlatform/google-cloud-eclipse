@@ -52,36 +52,16 @@ public class MavenCoordinatesTest {
     assertThat(mavenCoordinates.getVersion(), is(MavenCoordinates.LATEST));
   }
 
-  @Test
+  @Test(expected = NullPointerException.class)
   public void testSetNullVersion() {
     MavenCoordinates mavenCoordinates = new MavenCoordinates("a", "b", "c");
     mavenCoordinates.setVersion(null);
-    assertThat(mavenCoordinates.getVersion(), is(MavenCoordinates.LATEST));
   }
 
-  @Test
-  public void testSetNullVersionDoesNotChangeIt() {
-    MavenCoordinates mavenCoordinates = new MavenCoordinates("a", "b", "c");
-    mavenCoordinates.setVersion("d");
-    assertThat(mavenCoordinates.getVersion(), is("d"));
-    mavenCoordinates.setVersion(null);
-    assertThat(mavenCoordinates.getVersion(), is("d"));
-  }
-
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void testSetEmptyVersion() {
     MavenCoordinates mavenCoordinates = new MavenCoordinates("a", "b", "c");
     mavenCoordinates.setVersion("");
-    assertThat(mavenCoordinates.getVersion(), is(MavenCoordinates.LATEST));
-  }
-
-  @Test
-  public void testSetEmptyVersionDoesNotChangeIt() {
-    MavenCoordinates mavenCoordinates = new MavenCoordinates("a", "b", "c");
-    mavenCoordinates.setVersion("d");
-    assertThat(mavenCoordinates.getVersion(), is("d"));
-    mavenCoordinates.setVersion("");
-    assertThat(mavenCoordinates.getVersion(), is("d"));
   }
 
   @Test
@@ -90,36 +70,16 @@ public class MavenCoordinatesTest {
     assertThat(mavenCoordinates.getType(), is("jar"));
   }
 
-  @Test
+  @Test(expected = NullPointerException.class)
   public void testSetNullType() {
     MavenCoordinates mavenCoordinates = new MavenCoordinates("a", "b", "c");
     mavenCoordinates.setType(null);
-    assertThat(mavenCoordinates.getType(), is("jar"));
   }
 
-  @Test
-  public void testSetNullTypeDoesNotChangeIt() {
-    MavenCoordinates mavenCoordinates = new MavenCoordinates("a", "b", "c");
-    mavenCoordinates.setType("d");
-    assertThat(mavenCoordinates.getType(), is("d"));
-    mavenCoordinates.setType(null);
-    assertThat(mavenCoordinates.getType(), is("d"));
-  }
-
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void testSetEmptyType() {
     MavenCoordinates mavenCoordinates = new MavenCoordinates("a", "b", "c");
     mavenCoordinates.setType("");
-    assertThat(mavenCoordinates.getType(), is("jar"));
-  }
-
-  @Test
-  public void testSetEmptyTypeDoesNotChangeIt() {
-    MavenCoordinates mavenCoordinates = new MavenCoordinates("a", "b", "c");
-    mavenCoordinates.setType("d");
-    assertThat(mavenCoordinates.getType(), is("d"));
-    mavenCoordinates.setType("");
-    assertThat(mavenCoordinates.getType(), is("d"));
   }
 
   @Test

@@ -46,13 +46,12 @@ public class MavenCoordinates {
 
   /**
    * @param version the Maven version of the artifact, defaults to special value {@link MavenCoordinates#LATEST},
-   * cannot be set to <code>null</code> or empty string, if <code>null</code> or empty string is passed it, it is 
-   * ignored and the version field remains unchanged.
+   * cannot be <code>null</code> or empty string.
    */
   public void setVersion(String version) {
-    if (version != null && !version.isEmpty()) {
-      this.version = version;
-    }
+    Preconditions.checkNotNull(version, "version is null");
+    Preconditions.checkArgument(!version.isEmpty(), "version is empty");
+    this.version = version;
   }
 
   /**
@@ -63,13 +62,13 @@ public class MavenCoordinates {
   }
 
   /**
-   * @param type the Maven packaging type, defaults to <code>jar</code>, cannot be set to <code>null</code> or empty 
-   * string, if <code>null</code> or empty string is passed it, it is ignored and the version field remains unchanged.
+   * @param type the Maven packaging type, defaults to <code>jar</code>, cannot be <code>null</code> or empty 
+   * string.
    */
   public void setType(String type) {
-    if (type != null && !type.isEmpty()) {
-      this.type = type;
-    }
+    Preconditions.checkNotNull(type, "type is null");
+    Preconditions.checkArgument(!type.isEmpty(), "type is empty");
+    this.type = type;
   }
 
   /**

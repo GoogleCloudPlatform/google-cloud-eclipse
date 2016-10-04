@@ -2,7 +2,7 @@ package com.google.cloud.tools.eclipse.appengine.libraries.config;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -35,13 +35,13 @@ public class LibraryBuilder {
 
   public Library build(IConfigurationElement configurationElement) {
     try {
-    if (configurationElement.getName().equals(LIBRARY)) {
-      Library library = new Library(configurationElement.getAttribute(ID));
-      library.setName(configurationElement.getAttribute(NAME));
-      library.setSiteUri(new URI(configurationElement.getAttribute(SITE_URI)));
-      library.setLibraryFiles(getLibraryFiles(configurationElement.getChildren(LIBRARY_FILE)));
-      return library;
-    }
+      if (configurationElement.getName().equals(LIBRARY)) {
+        Library library = new Library(configurationElement.getAttribute(ID));
+        library.setName(configurationElement.getAttribute(NAME));
+        library.setSiteUri(new URI(configurationElement.getAttribute(SITE_URI)));
+        library.setLibraryFiles(getLibraryFiles(configurationElement.getChildren(LIBRARY_FILE)));
+        return library;
+      }
     } catch (InvalidRegistryObjectException | URISyntaxException e) {
       // TODO: handle exception
     }
@@ -50,7 +50,7 @@ public class LibraryBuilder {
 
   private List<LibraryFile> getLibraryFiles(IConfigurationElement[] children) throws InvalidRegistryObjectException, 
                                                                                      URISyntaxException {
-    List<LibraryFile> libraryFiles = new LinkedList<>();
+    List<LibraryFile> libraryFiles = new ArrayList<>();
     for (IConfigurationElement libraryFileElement : children) {
       if (libraryFileElement.getName().equals(LIBRARY_FILE)) {
         MavenCoordinates mavenCoordinates = getMavenCoordinates(libraryFileElement.getChildren(MAVEN_COORDINATES));
@@ -89,7 +89,7 @@ public class LibraryBuilder {
   }
 
   private List<Filter> getInclusionFilters(IConfigurationElement[] children) {
-    LinkedList<Filter> inclusionFilters = new LinkedList<>();
+    List<Filter> inclusionFilters = new ArrayList<>();
     for (IConfigurationElement inclusionFilterElement : children) {
       inclusionFilters.add(new Filter(inclusionFilterElement.getAttribute(PATTERN)));
     }
@@ -97,7 +97,7 @@ public class LibraryBuilder {
   }
 
   private List<Filter> getExclusionFilters(IConfigurationElement[] children) {
-    LinkedList<Filter> exclusionFilters = new LinkedList<>();
+    List<Filter> exclusionFilters = new ArrayList<>();
     for (IConfigurationElement exclusionFilterElement : children) {
       exclusionFilters.add(new Filter(exclusionFilterElement.getAttribute(PATTERN)));
     }

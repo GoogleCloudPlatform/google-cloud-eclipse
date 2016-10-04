@@ -1,8 +1,8 @@
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IPath;
@@ -11,10 +11,10 @@ import org.eclipse.core.runtime.Path;
 import com.google.common.base.Preconditions;
 
 /**
- * Represents a library that can be added to App Engine projects, e.g. AppEngine Endpoints library.
+ * A library that can be added to App Engine projects, e.g. AppEngine Endpoints library.
  *
  */
-public class Library {
+public final class Library {
   private static final String CONTAINER_PATH_PREFIX = "com.google.cloud.tools.eclipse.appengine.libraries";
   
   private String id;
@@ -61,15 +61,15 @@ public class Library {
 
   public void setLibraryFiles(List<LibraryFile> libraryFiles) {
     if (libraryFiles != null) {
-      this.libraryFiles = new LinkedList<>(libraryFiles);
+      this.libraryFiles = new ArrayList<>(libraryFiles);
     }
   }
 
   public String getDescription() {
-    if (getName() == null || getName().isEmpty()) {
-      return getId();
+    if (name == null || name.isEmpty()) {
+      return id;
     } else {
-      return getName();
+      return name;
     }
   }
 }

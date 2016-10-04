@@ -1,14 +1,14 @@
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 import com.google.common.base.Preconditions;
 
 /**
- * Represent a jar file that is downloaded from the location defined by {@link MavenCoordinates}. It can have associated
+ * A jar file that is downloaded from the location defined by {@link MavenCoordinates}. It can have associated
  * filters to control visibility of classes and packages contained in the jar file.
  *
  */
@@ -30,22 +30,22 @@ public class LibraryFile {
   }
 
   public List<Filter> getExclusionFilters() {
-    return exclusionFilters;
+    return new ArrayList<>(exclusionFilters);
   }
 
   public void setExclusionFilters(List<Filter> exclusionFilters) {
     if (exclusionFilters != null) {
-      this.exclusionFilters = new LinkedList<>(exclusionFilters);
+      this.exclusionFilters = new ArrayList<>(exclusionFilters);
     }
   }
 
   public List<Filter> getInclusionFilters() {
-    return inclusionFilters;
+    return new ArrayList<>(inclusionFilters);
   }
 
   public void setInclusionFilters(List<Filter> inclusionFilters) {
     if (inclusionFilters != null) {
-      this.inclusionFilters = inclusionFilters;
+      this.inclusionFilters = new ArrayList<>(inclusionFilters);
     }
   }
 

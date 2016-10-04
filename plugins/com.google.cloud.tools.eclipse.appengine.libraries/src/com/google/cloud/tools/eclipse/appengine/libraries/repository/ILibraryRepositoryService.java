@@ -12,12 +12,12 @@ public interface ILibraryRepositoryService {
   /**
    * @return a path that points to a local file corresponding to the artifact described by <code>mavenCoordinates</code>
    */
-  public IPath getJarLocation(MavenCoordinates mavenCoordinates);
+  IPath getJarLocation(MavenCoordinates mavenCoordinates);
 
   /**
    * @return a path that points to a local file corresponding to the source artifact described
    * by <code>mavenCoordinates</code>
    */
-  public IPath getSourceJarLocation(MavenCoordinates mavenCoordinates);
+  IPath getSourceJarLocation(MavenCoordinates mavenCoordinates);
 
 }

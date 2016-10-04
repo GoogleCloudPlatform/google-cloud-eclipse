@@ -1,11 +1,32 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="unqualified">
-<xs:annotation>
+   <xs:annotation>
       <xs:appinfo>
          <meta.schema plugin="com.google.cloud.tools.eclipse.appengine.libraries" id="com.google.cloud.tools.eclipse.appengine.libraries" name="App Engine Libraries"/>
       </xs:appinfo>
       <xs:documentation>
          Provides an extension point to define libraries that will be resolved using the Maven coordinates. These libraries then can be added to App Engine projects.
+      </xs:documentation>
+   </xs:annotation>
+
+   <xs:annotation>
+      <xs:appinfo>
+         <meta.section type="xs:copyright"/>
+      </xs:appinfo>
+      <xs:documentation>
+         Copyright 2016 Google Inc. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
       </xs:documentation>
    </xs:annotation>
 
@@ -236,27 +257,6 @@ If the value starts with [protocol]:// then it is treated as a URI, otherwise an
       </xs:appinfo>
       <xs:documentation>
          See the plugin.xml of the com.google.cloud.tools.eclipse.appengine.libraries for an example of how to contribute to the extension point.
-      </xs:documentation>
-   </xs:annotation>
-   
-   <xs:annotation>
-      <xs:appinfo>
-         <meta.section type="xs:copyright"/>
-      </xs:appinfo>
-      <xs:documentation>
-         Copyright 2016 Google Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
       </xs:documentation>
    </xs:annotation>
 
