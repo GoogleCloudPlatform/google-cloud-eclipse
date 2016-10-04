@@ -9,6 +9,6 @@ set -x
 date +%s > timestamp.txt
 
 cd git/google-cloud-eclipse
-./build.sh
+./sign.sh
 
 
