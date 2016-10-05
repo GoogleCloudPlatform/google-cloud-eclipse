@@ -16,6 +16,16 @@ import org.junit.rules.ExternalResource;
 public final class TestProject extends ExternalResource {
 
   private IJavaProject javaProject;
+  private String containerPath = "default.fake.container/path";
+
+  public TestProject() {
+    super();
+  }
+
+  public TestProject withClasspathContainerPath(String containerPath) {
+    this.containerPath = containerPath;
+    return this;
+  }
 
   @Override
   protected void before() throws Throwable {
@@ -45,7 +55,7 @@ public final class TestProject extends ExternalResource {
     IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
     IClasspathEntry[] newRawClasspath = new IClasspathEntry[rawClasspath.length + 1];
     System.arraycopy(rawClasspath, 0, newRawClasspath, 0, rawClasspath.length);
-    newRawClasspath[newRawClasspath.length - 1] = JavaCore.newContainerEntry(new Path("aaa/bbb"));
+    newRawClasspath[newRawClasspath.length - 1] = JavaCore.newContainerEntry(new Path(containerPath));
     javaProject.setRawClasspath(newRawClasspath, null);
   }
 }

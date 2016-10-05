@@ -8,11 +8,12 @@
           id="appengine-api"
           name="App Engine API"
           siteUri="https://cloud.google.com/appengine/docs/java/" >
-      <libraryFile export="true">
+      <libraryFile
+            export="true"
+            javadocUri="https://cloud.google.com/appengine/docs/java/javadoc/">
         <mavenCoordinates
               artifactId="appengine-api-1.0-sdk"
-              groupId="com.google.appengine"
-              repositoryUri="http://repo1.maven.org/maven2/" />
+              groupId="com.google.appengine" />
         <exclusionFilter pattern="com.google.appengine.repackaged.**" />
         <exclusionFilter pattern="com.google.appengine.labs.repackaged.**" />
         <exclusionFilter pattern="com.google.apphosting.**" />

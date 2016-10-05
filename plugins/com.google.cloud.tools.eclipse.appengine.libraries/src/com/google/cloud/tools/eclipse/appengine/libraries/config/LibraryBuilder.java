@@ -2,6 +2,7 @@ package com.google.cloud.tools.eclipse.appengine.libraries.config;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,49 +17,55 @@ import com.google.common.base.Strings;
 
 public class LibraryBuilder {
 
-  private static final String LIBRARY = "library";
-  private static final String ID = "id";
-  private static final String NAME = "name";
-  private static final String SITE_URI = "siteUri";
-  private static final String LIBRARY_FILE = "libraryFile";
-  private static final String EXCLUSION_FILTER = "exclusionFilter";
-  private static final String INCLUSION_FILTER = "inclusionFilter";
-  private static final String MAVEN_COORDINATES = "mavenCoordinates";
-  private static final String SOURCE_URI = "sourceUri";
-  private static final String JAVADOC_URI = "javadocUri";
-  private static final String PATTERN = "pattern";
-  private static final String GROUP_ID = "groupId";
-  private static final String REPOSITORY_URI = "repositoryUri";
-  private static final String ARTIFACT_ID = "artifactId";
-  private static final String VERSION = "version";
-  private static final String TYPE = "type";
-  private static final String CLASSIFIER = "classifier";
+  private static final String ELMT_LIBRARY = "library";
+  private static final String ATTR_ID = "id";
+  private static final String ATTR_NAME = "name";
+  private static final String ATTR_SITE_URI = "siteUri";
+  private static final String ELMT_LIBRARY_FILE = "libraryFile";
+  private static final String ELMT_EXCLUSION_FILTER = "exclusionFilter";
+  private static final String ELMT_INCLUSION_FILTER = "inclusionFilter";
+  private static final String ELMT_MAVEN_COORDINATES = "mavenCoordinates";
+  private static final String ATTR_SOURCE_URI = "sourceUri";
+  private static final String ATTR_JAVADOC_URI = "javadocUri";
+  private static final String ATTR_PATTERN = "pattern";
+  private static final String ATTR_GROUP_ID = "groupId";
+  private static final String ATTR_REPOSITORY_URI = "repositoryUri";
+  private static final String ATTR_ARTIFACT_ID = "artifactId";
+  private static final String ATTR_VERSION = "version";
+  private static final String ATTR_TYPE = "type";
+  private static final String ATTR_CLASSIFIER = "classifier";
+  private static final String ATTR_EXPORT = "export";
 
-  public Library build(IConfigurationElement configurationElement) {
+  public Library build(IConfigurationElement configurationElement) throws LibraryBuilderException {
     try {
-      if (configurationElement.getName().equals(LIBRARY)) {
-        Library library = new Library(configurationElement.getAttribute(ID));
-        library.setName(configurationElement.getAttribute(NAME));
-        library.setSiteUri(new URI(configurationElement.getAttribute(SITE_URI)));
-        library.setLibraryFiles(getLibraryFiles(configurationElement.getChildren(LIBRARY_FILE)));
+      if (configurationElement.getName().equals(ELMT_LIBRARY)) {
+        Library library = new Library(configurationElement.getAttribute(ATTR_ID));
+        library.setName(configurationElement.getAttribute(ATTR_NAME));
+        library.setSiteUri(new URI(configurationElement.getAttribute(ATTR_SITE_URI)));
+        library.setLibraryFiles(getLibraryFiles(configurationElement.getChildren(ELMT_LIBRARY_FILE)));
         return library;
+      } else {
+        throw new LibraryBuilderException(MessageFormat.format("Unexpected configuration element with name: {0}. "
+                                                               + "Expected element is {1}",
+                                                               configurationElement.getName(),
+                                                               ELMT_LIBRARY));
       }
-    } catch (InvalidRegistryObjectException | URISyntaxException e) {
-      // TODO: handle exception
+    } catch (InvalidRegistryObjectException | URISyntaxException exception) {
+      throw new LibraryBuilderException("Error while creating Library instance", exception);
     }
-    return null;
   }
 
   private List<LibraryFile> getLibraryFiles(IConfigurationElement[] children) throws InvalidRegistryObjectException, 
                                                                                      URISyntaxException {
     List<LibraryFile> libraryFiles = new ArrayList<>();
     for (IConfigurationElement libraryFileElement : children) {
-      if (libraryFileElement.getName().equals(LIBRARY_FILE)) {
-        MavenCoordinates mavenCoordinates = getMavenCoordinates(libraryFileElement.getChildren(MAVEN_COORDINATES));
+      if (libraryFileElement.getName().equals(ELMT_LIBRARY_FILE)) {
+        MavenCoordinates mavenCoordinates = getMavenCoordinates(libraryFileElement.getChildren(ELMT_MAVEN_COORDINATES));
         LibraryFile libraryFile = new LibraryFile(mavenCoordinates);
         libraryFile.setFilters(getFilters(libraryFileElement.getChildren()));
-        libraryFile.setSourceUri(getUri(libraryFileElement.getAttribute(SOURCE_URI)));
-        libraryFile.setJavadocUri(getUri(libraryFileElement.getAttribute(JAVADOC_URI)));
+        libraryFile.setSourceUri(getUri(libraryFileElement.getAttribute(ATTR_SOURCE_URI)));
+        libraryFile.setJavadocUri(getUri(libraryFileElement.getAttribute(ATTR_JAVADOC_URI)));
+        libraryFile.setExport(Boolean.parseBoolean(libraryFileElement.getAttribute(ATTR_EXPORT)));
         libraryFiles.add(libraryFile);
       }
     }
@@ -78,19 +85,22 @@ public class LibraryBuilder {
       // error
     }
     IConfigurationElement mavenCoordinatesElement = children[0];
-    String repository = mavenCoordinatesElement.getAttribute(REPOSITORY_URI);
-    String groupId = mavenCoordinatesElement.getAttribute(GROUP_ID);
-    String artifactId = mavenCoordinatesElement.getAttribute(ARTIFACT_ID);
-    MavenCoordinates mavenCoordinates = new MavenCoordinates(repository, groupId, artifactId);
-    String version = mavenCoordinatesElement.getAttribute(VERSION);
+    String groupId = mavenCoordinatesElement.getAttribute(ATTR_GROUP_ID);
+    String artifactId = mavenCoordinatesElement.getAttribute(ATTR_ARTIFACT_ID);
+    MavenCoordinates mavenCoordinates = new MavenCoordinates(groupId, artifactId);
+    String repository = mavenCoordinatesElement.getAttribute(ATTR_REPOSITORY_URI);
+    if (!Strings.isNullOrEmpty(repository)) {
+      mavenCoordinates.setRepository(repository);
+    }
+    String version = mavenCoordinatesElement.getAttribute(ATTR_VERSION);
     if (!Strings.isNullOrEmpty(version)) {
       mavenCoordinates.setVersion(version);
     }
-    String type = mavenCoordinatesElement.getAttribute(TYPE);
+    String type = mavenCoordinatesElement.getAttribute(ATTR_TYPE);
     if (!Strings.isNullOrEmpty(type)) {
       mavenCoordinates.setType(type);
     }
-    String classifier = mavenCoordinatesElement.getAttribute(CLASSIFIER);
+    String classifier = mavenCoordinatesElement.getAttribute(ATTR_CLASSIFIER);
     if (!Strings.isNullOrEmpty(classifier)) {
       mavenCoordinates.setClassifier(classifier);
     }
@@ -101,16 +111,27 @@ public class LibraryBuilder {
     List<Filter> filters = new ArrayList<>();
     for (IConfigurationElement childElement : children) {
       switch (childElement.getName()) {
-      case EXCLUSION_FILTER:
-        filters.add(Filter.exclusionFilter(childElement.getAttribute(PATTERN)));
+      case ELMT_EXCLUSION_FILTER:
+        filters.add(Filter.exclusionFilter(childElement.getAttribute(ATTR_PATTERN)));
         break;
-      case INCLUSION_FILTER:
-        filters.add(Filter.inclusionFilter(childElement.getAttribute(PATTERN)));
+      case ELMT_INCLUSION_FILTER:
+        filters.add(Filter.inclusionFilter(childElement.getAttribute(ATTR_PATTERN)));
       default:
         // non-filter child element
         break;
       }
     }
     return filters;
+  }
+
+  public static class LibraryBuilderException extends Exception {
+
+    public LibraryBuilderException(String message, Throwable cause) {
+      super(message, cause);
+    }
+
+    public LibraryBuilderException(String message) {
+      super(message);
+    }
   }
 }

@@ -118,7 +118,7 @@ will determine how to resolve the entries associated with the container.
    <xs:element name="libraryFile">
       <xs:annotation>
          <xs:documentation>
-            Describes a single jar file located in a Maven repository.
+            Describes a single artifact located in a Maven repository.
          </xs:documentation>
       </xs:annotation>
       <xs:complexType>
@@ -134,7 +134,7 @@ will determine how to resolve the entries associated with the container.
          <xs:attribute name="export" type="xs:boolean" use="required">
             <xs:annotation>
                <xs:documentation>
-                  If export attribute is true, then the corresponding jar file will be included in the WAR file of the
+                  If export attribute is true, then the corresponding file will be included in the WAR file of the
 project, under WEB-INF/lib.
                </xs:documentation>
             </xs:annotation>
@@ -143,14 +143,14 @@ project, under WEB-INF/lib.
          <xs:attribute name="javadocUri" type="xs:anyURI">
             <xs:annotation>
                <xs:documentation>
-                  URI that can be used by the IDE to lookup javadoc for the classes contained in this jar file.
+                  URI that can be used by the IDE to lookup javadoc for the classes contained in this artifact.
                </xs:documentation>
             </xs:annotation>
          </xs:attribute>
          <xs:attribute name="sourceUri" type="xs:anyURI">
             <xs:annotation>
                <xs:documentation>
-                  URI that can be used by the IDE to lookup sources for the classes contained in this jar file.
+                  URI that can be used by the IDE to lookup sources for the classes contained in this artifact.
                </xs:documentation>
             </xs:annotation>
          </xs:attribute>
@@ -182,7 +182,7 @@ project, under WEB-INF/lib.
    <xs:element name="mavenCoordinates">
       <xs:annotation>
          <xs:documentation>
-            Metadata describing how the jar can be resolved by Maven/M2Eclipse.
+            Metadata describing how the artifact can be resolved by Maven/M2Eclipse.
          </xs:documentation>
       </xs:annotation>
       <xs:complexType>
@@ -215,7 +215,7 @@ expected to be defined. Defaults to 'central' denoting the Maven Central reposit
          <xs:attribute name="type" type="xs:string">
             <xs:annotation>
                <xs:documentation>
-                  The packaging type of the artifact, e.g. jar, war, zip.
+                  The packaging type of the artifact, e.g. jar, war, zip. Currently only jar is supported.
                </xs:documentation>
             </xs:annotation>
          </xs:attribute>

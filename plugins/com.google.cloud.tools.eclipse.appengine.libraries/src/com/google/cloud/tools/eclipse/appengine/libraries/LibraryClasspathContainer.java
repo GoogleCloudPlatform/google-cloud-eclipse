@@ -2,17 +2,21 @@ package com.google.cloud.tools.eclipse.appengine.libraries;
 
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IAccessRule;
+import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jst.j2ee.classpathdep.UpdateClasspathAttributeUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
+import com.google.common.base.Strings;
 
 public class LibraryClasspathContainer implements IClasspathContainer {
   private final IPath containerPath;
@@ -35,24 +39,47 @@ public class LibraryClasspathContainer implements IClasspathContainer {
 
   @Override
   public String getDescription() {
-    return library.getDescription();
+    if (!Strings.isNullOrEmpty(library.getName())) {
+      return library.getName();
+    } else {
+      return library.getId();
+    }
   }
 
   @Override
   public IClasspathEntry[] getClasspathEntries() {
-    List<LibraryFile> libraryFiles = library.getLibraryFiles();
-    IClasspathEntry[] entries = new IClasspathEntry[libraryFiles.size()];
-    int idx = 0;
-    ILibraryRepositoryService repositoryService = lookupRepositoryService();
-    for (LibraryFile libraryFile : libraryFiles) {
-      entries[idx++] = JavaCore.newLibraryEntry(repositoryService.getJarLocation(libraryFile.getMavenCoordinates()),
-                                                repositoryService.getSourceJarLocation(libraryFile.getMavenCoordinates()),
-                                                null,
-                                                getAccessRules(libraryFile.getFilters()),
-                                                null,
-                                                true);
+    ServiceReference<ILibraryRepositoryService> serviceReference = null;
+    try {
+      List<LibraryFile> libraryFiles = library.getLibraryFiles();
+      IClasspathEntry[] entries = new IClasspathEntry[libraryFiles.size()];
+      int idx = 0;
+      serviceReference = lookupRepositoryServiceReference();
+      ILibraryRepositoryService repositoryService = getBundleContext().getService(serviceReference);
+      for (LibraryFile libraryFile : libraryFiles) {
+        IClasspathAttribute[] classpathAttributes;
+        if (libraryFile.isExport()) {
+          classpathAttributes = new IClasspathAttribute[] { UpdateClasspathAttributeUtil.createDependencyAttribute() };
+        } else {
+          classpathAttributes = new IClasspathAttribute[] { UpdateClasspathAttributeUtil.createNonDependencyAttribute() };
+        }
+        entries[idx++] =
+            JavaCore.newLibraryEntry(repositoryService.getJarLocation(libraryFile.getMavenCoordinates()),
+                                     repositoryService.getSourceJarLocation(libraryFile.getMavenCoordinates()),
+                                     null,
+                                     getAccessRules(libraryFile.getFilters()),
+                                     classpathAttributes,
+                                     true);
+      }
+      return entries;
+    } catch (CoreException e) {
+      // declared on UpdateClasspathAttributeUtil.create(Non)DependencyAttribute(), but it's current implementation does
+      // not throw this exception.
+      return new IClasspathEntry[0];
+    } finally {
+      if (serviceReference != null) {
+        releaseRepositoryService(serviceReference);
+      }
     }
-    return entries;
   }
 
   private IAccessRule[] getAccessRules(List<Filter> filters) {
@@ -70,11 +97,24 @@ public class LibraryClasspathContainer implements IClasspathContainer {
     return accessRules;
   }
 
-  private ILibraryRepositoryService lookupRepositoryService() {
-    BundleContext bundleContext = FrameworkUtil.getBundle(getClass()).getBundleContext();
+  private ServiceReference<ILibraryRepositoryService> lookupRepositoryServiceReference() {
+    BundleContext bundleContext = getBundleContext();
     ServiceReference<ILibraryRepositoryService> serviceReference =
         bundleContext.getServiceReference(ILibraryRepositoryService.class);
-    ILibraryRepositoryService repositoryService = bundleContext.getService(serviceReference);
-    return repositoryService;
+    return serviceReference;
+  }
+
+  private void releaseRepositoryService(ServiceReference<ILibraryRepositoryService> serviceReference) {
+    BundleContext bundleContext = getBundleContext();
+    bundleContext.ungetService(serviceReference);
+  }
+
+  private BundleContext getBundleContext() {
+    BundleContext bundleContext = FrameworkUtil.getBundle(getClass()).getBundleContext();
+    if (bundleContext == null) {
+      throw new IllegalStateException("No bundle context was found for service lookup");
+    } else {
+      return bundleContext;
+    }
   }
 }

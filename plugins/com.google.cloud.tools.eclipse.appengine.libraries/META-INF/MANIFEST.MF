@@ -10,8 +10,10 @@ Bundle-ActivationPolicy: lazy
 Service-Component: OSGI-INF/library-repository.xml
 Require-Bundle: org.eclipse.equinox.common
 Export-Package: com.google.cloud.tools.eclipse.appengine.libraries
-Import-Package: com.google.common.annotations;version="15.0.0",
+Import-Package: com.google.cloud.tools.eclipse.util.status,
+ com.google.common.annotations;version="15.0.0",
  com.google.common.base,
  org.eclipse.core.runtime;version="3.5.0",
  org.eclipse.jdt.core,
+ org.eclipse.jst.j2ee.classpathdep,
  org.osgi.framework;version="1.8.0"

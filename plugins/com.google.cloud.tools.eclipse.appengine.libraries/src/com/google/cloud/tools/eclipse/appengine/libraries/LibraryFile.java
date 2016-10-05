@@ -18,6 +18,7 @@ public class LibraryFile {
   private MavenCoordinates mavenCoordinates;
   private URI javadocUri;
   private URI sourceUri;
+  private boolean export = true;
 
   public LibraryFile(MavenCoordinates mavenCoordinates) {
     Preconditions.checkNotNull(mavenCoordinates, "mavenCoordinates is null");
@@ -52,5 +53,13 @@ public class LibraryFile {
 
   public void setSourceUri(URI sourceUri) {
     this.sourceUri = sourceUri;
+  }
+
+  public boolean isExport() {
+    return export;
+  }
+
+  public void setExport(boolean export) {
+    this.export = export;
   }
 }

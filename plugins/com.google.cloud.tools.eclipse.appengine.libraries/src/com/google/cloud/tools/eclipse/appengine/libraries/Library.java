@@ -15,7 +15,7 @@ import com.google.common.base.Preconditions;
  *
  */
 public final class Library {
-  private static final String CONTAINER_PATH_PREFIX = "com.google.cloud.tools.eclipse.appengine.libraries";
+  public static final String CONTAINER_PATH_PREFIX = "com.google.cloud.tools.eclipse.appengine.libraries";
   
   private String id;
 
@@ -62,14 +62,6 @@ public final class Library {
   public void setLibraryFiles(List<LibraryFile> libraryFiles) {
     if (libraryFiles != null) {
       this.libraryFiles = new ArrayList<>(libraryFiles);
-    }
-  }
-
-  public String getDescription() {
-    if (name == null || name.isEmpty()) {
-      return id;
-    } else {
-      return name;
     }
   }
 }

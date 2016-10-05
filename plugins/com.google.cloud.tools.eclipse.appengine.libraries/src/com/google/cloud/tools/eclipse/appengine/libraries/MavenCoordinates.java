@@ -7,14 +7,15 @@ import com.google.common.base.Preconditions;
  */
 public class MavenCoordinates {
 
-  public static final String LATEST = "LATEST";
-  private static final String JAR = "jar";
+  public static final String LATEST_VERSION = "LATEST";
+  public static final String JAR_TYPE = "jar";
+  public static final String MAVEN_CENTRAL_REPO = "central";
 
-  private String repository;
+  private String repository = MAVEN_CENTRAL_REPO;
   private String groupId;
   private String artifactId;
-  private String version = LATEST;
-  private String type = JAR;
+  private String version = LATEST_VERSION;
+  private String type = JAR_TYPE;
   private String classifier;
 
   /**
@@ -23,21 +24,18 @@ public class MavenCoordinates {
    * @param groupId the Maven group ID, cannot be <code>null</code>
    * @param artifactId the Maven artifact ID, cannot be <code>null</code>
    */
-  public MavenCoordinates(String repository, String groupId, String artifactId) {
-    Preconditions.checkNotNull(repository, "repository null");
+  public MavenCoordinates(String groupId, String artifactId) {
     Preconditions.checkNotNull(groupId, "groupId null");
     Preconditions.checkNotNull(artifactId, "artifactId null");
-    Preconditions.checkArgument(!repository.isEmpty(), "repository empty");
     Preconditions.checkArgument(!groupId.isEmpty(), "groupId empty");
     Preconditions.checkArgument(!artifactId.isEmpty(), "artifactId empty");
 
-    this.repository = repository;
     this.groupId = groupId;
     this.artifactId = artifactId;
   }
 
   /**
-   * @return the Maven version of the artifact, defaults to special value {@link MavenCoordinates#LATEST}, never 
+   * @return the Maven version of the artifact, defaults to special value {@link MavenCoordinates#LATEST_VERSION}, never
    * <code>null</code>
    */
   public String getVersion() {
@@ -45,7 +43,7 @@ public class MavenCoordinates {
   }
 
   /**
-   * @param version the Maven version of the artifact, defaults to special value {@link MavenCoordinates#LATEST},
+   * @param version the Maven version of the artifact, defaults to special value {@link MavenCoordinates#LATEST_VERSION},
    * cannot be <code>null</code> or empty string.
    */
   public void setVersion(String version) {
@@ -90,6 +88,16 @@ public class MavenCoordinates {
    */
   public String getRepository() {
     return repository;
+  }
+
+  /**
+   * @param repository the URI or the identifier of the repository used to download the artifact from, cannot be
+   * <code>null</code> or empty string.
+   */
+  public void setRepository(String repository) {
+    Preconditions.checkNotNull(repository, "repository null");
+    Preconditions.checkArgument(!repository.isEmpty(), "repository is empty");
+    this.repository = repository;
   }
 
   /**

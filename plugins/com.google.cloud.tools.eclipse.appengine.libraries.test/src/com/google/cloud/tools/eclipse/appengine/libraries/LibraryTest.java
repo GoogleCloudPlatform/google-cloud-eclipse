@@ -75,7 +75,7 @@ public class LibraryTest {
   @Test
   public void setLibraryFilesNullDoesNotChangeIt() {
     Library library = new Library("a");
-    library.setLibraryFiles(Arrays.asList(new LibraryFile(new MavenCoordinates("a", "b", "c"))));
+    library.setLibraryFiles(Arrays.asList(new LibraryFile(new MavenCoordinates("groupId", "artifactId"))));
     assertNotNull(library.getLibraryFiles());
     assertThat(library.getLibraryFiles().size(), is(1));
 
@@ -83,8 +83,8 @@ public class LibraryTest {
     assertNotNull(library.getLibraryFiles());
     assertThat(library.getLibraryFiles().size(), is(1));
     LibraryFile actual = library.getLibraryFiles().get(0);
-    assertThat(actual.getMavenCoordinates().getRepository(), is("a"));
-    assertThat(actual.getMavenCoordinates().getGroupId(), is("b"));
-    assertThat(actual.getMavenCoordinates().getArtifactId(), is("c"));
+    assertThat(actual.getMavenCoordinates().getRepository(), is("central"));
+    assertThat(actual.getMavenCoordinates().getGroupId(), is("groupId"));
+    assertThat(actual.getMavenCoordinates().getArtifactId(), is("artifactId"));
   }
 }
