@@ -3,9 +3,11 @@ package com.google.cloud.tools.eclipse.appengine.libraries;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Hashtable;
 
@@ -85,7 +87,7 @@ public class LibraryClasspathContainerTest {
     LibraryFile notExportedlibraryFile = new LibraryFile(mavenCoordinates);
     notExportedlibraryFile.setExport(false);
     
-    library.setLibraryFiles(Collections.singletonList(exportedlibraryFile));
+    library.setLibraryFiles(Arrays.asList(exportedlibraryFile, notExportedlibraryFile));
 
     LibraryClasspathContainer classpathContainer = new LibraryClasspathContainer(new Path("container/path"), library);
     IClasspathEntry[] classpathEntries = classpathContainer.getClasspathEntries();
@@ -102,9 +104,9 @@ public class LibraryClasspathContainerTest {
     assertThat(accessRule.getKind(), is(IAccessRule.K_NON_ACCESSIBLE));
     assertThat(accessRule.getPattern().toString(), is("com.example.**"));
 
-    IClasspathEntry classpathEntry2 = classpathEntries[0];
+    IClasspathEntry classpathEntry2 = classpathEntries[1];
     assertClasspathEntry(classpathEntry2, UpdateClasspathAttributeUtil.createNonDependencyAttribute());
-    verify(repositoryService).getJarLocation(mavenCoordinates);
+    verify(repositoryService, times(2)).getJarLocation(mavenCoordinates);
   }
 
   private void assertClasspathEntry(IClasspathEntry classpathEntry, IClasspathAttribute classpathAttribute) throws CoreException {

@@ -18,6 +18,12 @@ import com.google.cloud.tools.eclipse.appengine.libraries.config.LibraryBuilder.
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 
+/**
+ * {@link ClasspathContainerInitializer} implementation that resolves containers for App Engine libraries.
+ * <p>
+ * The container path is expected to be in the form of
+ * &lt;value of {@link Library#CONTAINER_PATH_PREFIX}&gt;/&lt;library ID&gt;
+ */
 public class AppEngineLibraryContainerInitializer extends ClasspathContainerInitializer {
 
   public static final String LIBRARIES_EXTENSION_POINT = "com.google.cloud.tools.eclipse.appengine.libraries";
