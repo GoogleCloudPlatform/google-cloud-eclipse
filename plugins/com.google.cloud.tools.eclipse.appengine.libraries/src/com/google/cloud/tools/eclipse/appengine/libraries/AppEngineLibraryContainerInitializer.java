@@ -7,7 +7,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.RegistryFactory;
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IJavaProject;
@@ -40,7 +40,7 @@ public class AppEngineLibraryContainerInitializer extends ClasspathContainerInit
   public void initialize(IPath containerPath, IJavaProject project) throws CoreException {
     if (libraries == null) {
       // in tests libraries will be initialized via the test constructor, this would override mocks/stubs.
-      IConfigurationElement[] configurationElements = Platform.getExtensionRegistry().getConfigurationElementsFor(LIBRARIES_EXTENSION_POINT);
+      IConfigurationElement[] configurationElements = RegistryFactory.getRegistry().getConfigurationElementsFor(LIBRARIES_EXTENSION_POINT);
       initializeLibraries(configurationElements, new LibraryBuilder());
     }
     if (containerPath.segmentCount() == 2) {
