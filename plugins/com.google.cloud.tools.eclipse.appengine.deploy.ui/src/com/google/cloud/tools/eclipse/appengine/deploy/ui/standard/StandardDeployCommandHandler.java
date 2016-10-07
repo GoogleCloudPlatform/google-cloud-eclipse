@@ -85,7 +85,7 @@ public class StandardDeployCommandHandler extends AbstractHandler {
     try {
       IProject project = helper.getProject(event);
       if (project != null) {
-        if (!checkCompilationError(project)) {
+        if (!checkProjectErrors(project)) {
           MessageDialog.openInformation(HandlerUtil.getActiveShell(event),
                                         Messages.getString("build.error.dialog.title"),
                                         Messages.getString("build.error.dialog.message"));
@@ -106,7 +106,7 @@ public class StandardDeployCommandHandler extends AbstractHandler {
     }
   }
 
-  private static boolean checkCompilationError(IProject project) throws CoreException {
+  private static boolean checkProjectErrors(IProject project) throws CoreException {
     int severity = project.findMaxProblemSeverity(
         IMarker.PROBLEM, true /* includeSubtypes */, IResource.DEPTH_INFINITE);
     return severity != IMarker.SEVERITY_ERROR;
