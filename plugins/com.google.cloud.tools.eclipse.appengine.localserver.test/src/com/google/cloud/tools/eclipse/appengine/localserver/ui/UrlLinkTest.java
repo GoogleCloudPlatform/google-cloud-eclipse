@@ -106,4 +106,10 @@ public class UrlLinkTest {
     }
   }
 
+  @Test
+  public void testHttps() {
+    Matcher m = regexp.matcher("does this match https://localhost:8080/ and not the remainder");
+    assertTrue(m.matches());
+    assertEquals("https://localhost:8080/", m.group(1));
+  }
 }
