@@ -62,9 +62,7 @@ public class AppEngineLibraryContainerInitializerTest {
    */
   @Test
   public void testInitialize_resolvesContainerToJar() throws CoreException, LibraryBuilderException {
-    Library library = new Library(TEST_LIBRARY_ID);
-    library.setLibraryFiles(Collections.singletonList(new LibraryFile(new MavenCoordinates("groupId", "artifactId"))));
-    when(libraryBuilder.build(any(IConfigurationElement.class))).thenReturn(library);
+    setupLibraryBuilder();
 
     AppEngineLibraryContainerInitializer containerInitializer =
         new AppEngineLibraryContainerInitializer(new IConfigurationElement[]{ configurationElement },
@@ -78,5 +76,74 @@ public class AppEngineLibraryContainerInitializerTest {
     IClasspathEntry libJar = resolvedClasspath[1];
     assertTrue(libJar.getPath().toOSString().endsWith("artifactId.jar"));
     assertTrue(libJar.getSourceAttachmentPath().toOSString().endsWith("artifactId.jar"));
+  }
+
+  @Test(expected = CoreException.class)
+  public void testInitialize_containerPathConsistsOfOneSegment() throws Exception {
+    setupLibraryBuilder();
+
+    AppEngineLibraryContainerInitializer containerInitializer =
+        new AppEngineLibraryContainerInitializer(new IConfigurationElement[]{ configurationElement },
+                                                 libraryBuilder,
+                                                 TEST_CONTAINER_PATH);
+    containerInitializer.initialize(new Path("single.segment.id"),
+                                    testProject.getJavaProject());
+  }
+
+  @Test(expected = CoreException.class)
+  public void testInitialize_containerPathConsistsOfThreeSegments() throws Exception {
+    setupLibraryBuilder();
+
+    AppEngineLibraryContainerInitializer containerInitializer =
+        new AppEngineLibraryContainerInitializer(new IConfigurationElement[]{ configurationElement },
+                                                 libraryBuilder,
+                                                 TEST_CONTAINER_PATH);
+    containerInitializer.initialize(new Path("first.segment/second.segment/third.segment"),
+                                    testProject.getJavaProject());
+  }
+
+  @Test(expected = CoreException.class)
+  public void testInitialize_containerPathHasWrongFirstSegment() throws Exception {
+    setupLibraryBuilder();
+
+    AppEngineLibraryContainerInitializer containerInitializer =
+        new AppEngineLibraryContainerInitializer(new IConfigurationElement[]{ configurationElement },
+                                                 libraryBuilder,
+                                                 TEST_CONTAINER_PATH);
+    containerInitializer.initialize(new Path("first.segment/second.segment"),
+                                    testProject.getJavaProject());
+  }
+
+  @Test(expected = CoreException.class)
+  public void testInitialize_containerPathHasWrongLibraryId() throws Exception {
+    setupLibraryBuilder();
+
+    AppEngineLibraryContainerInitializer containerInitializer =
+        new AppEngineLibraryContainerInitializer(new IConfigurationElement[]{ configurationElement },
+                                                 libraryBuilder,
+                                                 TEST_CONTAINER_PATH);
+    containerInitializer.initialize(new Path(TEST_CONTAINER_PATH + "/second.segment"),
+                                    testProject.getJavaProject());
+  }
+
+  @Test
+  public void testInitialize_libraryBuilderErrorDoesNotPreventOtherLibraries() throws Exception {
+    Library library = new Library(TEST_LIBRARY_ID);
+    library.setLibraryFiles(Collections.singletonList(new LibraryFile(new MavenCoordinates("groupId", "artifactId"))));
+    when(libraryBuilder.build(any(IConfigurationElement.class))).thenThrow(LibraryBuilderException.class).thenReturn(library);
+
+    AppEngineLibraryContainerInitializer containerInitializer =
+        new AppEngineLibraryContainerInitializer(new IConfigurationElement[]{ configurationElement,
+                                                                              configurationElement },
+                                                 libraryBuilder,
+                                                 TEST_CONTAINER_PATH);
+    containerInitializer.initialize(new Path(TEST_LIBRARY_PATH),
+                                    testProject.getJavaProject());
+  }
+
+  private void setupLibraryBuilder() throws LibraryBuilderException {
+    Library library = new Library(TEST_LIBRARY_ID);
+    library.setLibraryFiles(Collections.singletonList(new LibraryFile(new MavenCoordinates("groupId", "artifactId"))));
+    when(libraryBuilder.build(any(IConfigurationElement.class))).thenReturn(library);
   }
 }

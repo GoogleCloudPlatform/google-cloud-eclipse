@@ -66,7 +66,8 @@ public class AppEngineLibraryContainerInitializer extends ClasspathContainerInit
   public void initialize(IPath containerPath, IJavaProject project) throws CoreException {
     if (libraries == null) {
       // in tests libraries will be initialized via the test constructor, this would override mocks/stubs.
-      IConfigurationElement[] configurationElements = RegistryFactory.getRegistry().getConfigurationElementsFor(LIBRARIES_EXTENSION_POINT);
+      IConfigurationElement[] configurationElements =
+          RegistryFactory.getRegistry().getConfigurationElementsFor(LIBRARIES_EXTENSION_POINT);
       initializeLibraries(configurationElements, new LibraryBuilder());
     }
     if (containerPath.segmentCount() == 2) {
@@ -74,7 +75,7 @@ public class AppEngineLibraryContainerInitializer extends ClasspathContainerInit
         throw new CoreException(StatusUtil.error(this,
                                                  MessageFormat.format("Unexpected first segment of container path, "
                                                                       + "expected: {0} was: {1}",
-                                                                      Library.CONTAINER_PATH_PREFIX,
+                                                                      this.containerPath,
                                                                       containerPath.segment(0))));
       }
       String libraryId = containerPath.lastSegment();

@@ -124,7 +124,7 @@ public class LibraryClasspathContainerTest {
     verify(repositoryService, times(2)).getJarLocation(mavenCoordinates);
   }
 
-  private void assertClasspathEntry(IClasspathEntry classpathEntry, IClasspathAttribute classpathAttribute) throws CoreException {
+  private void assertClasspathEntry(IClasspathEntry classpathEntry, IClasspathAttribute classpathAttribute) {
     IClasspathAttribute[] classpathAttributes = classpathEntry.getExtraAttributes();
     assertNotNull(classpathAttributes);
     assertThat(classpathAttributes.length, is(1));
