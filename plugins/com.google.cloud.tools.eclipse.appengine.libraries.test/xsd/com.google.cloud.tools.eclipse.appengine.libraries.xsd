@@ -139,18 +139,16 @@ project, under WEB-INF/lib.
          <xs:attribute name="javadocUri" type="xs:anyURI">
             <xs:annotation>
                <xs:documentation>
-                  URI that can be used by the IDE to lookup javadoc for the classes contained in this artifact. If
-undefined, an attempt will be made to download the javadoc artifact from the same repository where the binary artifact
-is downloaded from.
+                  URI that can be used by the IDE to lookup javadoc for the classes contained in this artifact.If
+unspecified, the javadoc will be downloaded from the artifact location if available.
                </xs:documentation>
             </xs:annotation>
          </xs:attribute>
          <xs:attribute name="sourceUri" type="xs:anyURI">
             <xs:annotation>
                <xs:documentation>
-                  URI that can be used by the IDE to lookup sources for the classes contained in this artifact.  If
-undefined, an attempt will be made to download the source artifact from the same repository where the binary artifact
-is downloaded from.
+                  URI that can be used by the IDE to lookup sources for the classes contained in this artifact. If
+unspecified, the source will be downloaded from the artifact location if available.
                </xs:documentation>
             </xs:annotation>
          </xs:attribute>
@@ -161,7 +159,7 @@ is downloaded from.
       <xs:annotation>
          <xs:documentation>
             A pattern that can be used to exclude classes and packages to be visible. Uses the same format as the JDT's
-build path inclusion/exclusion filters: http://help.eclipse.org/neon/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Forg%2Feclipse%2Fjdt%2Fcore%2FIClasspathEntry.html&amp;anchor=getExclusionPatterns--
+build path <a href="http://help.eclipse.org/neon/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Forg%2Feclipse%2Fjdt%2Fcore%2FIClasspathEntry.html&amp;anchor=getExclusionPatterns--">inclusion/exclusion filters</a>
          </xs:documentation>
       </xs:annotation>
       <xs:complexType>
@@ -173,7 +171,7 @@ build path inclusion/exclusion filters: http://help.eclipse.org/neon/index.jsp?t
       <xs:annotation>
          <xs:documentation>
             A pattern that can be used to include classes and packages to be visible. Uses the same format as the JDT's
-build path inclusion/exclusion filters: http://help.eclipse.org/neon/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Forg%2Feclipse%2Fjdt%2Fcore%2FIClasspathEntry.html&amp;anchor=getInclusionPatterns--
+build path <a href="http://help.eclipse.org/neon/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Forg%2Feclipse%2Fjdt%2Fcore%2FIClasspathEntry.html&amp;anchor=getInclusionPatterns--">inclusion/exclusion filters</a>
          </xs:documentation>
       </xs:annotation>
       <xs:complexType>
