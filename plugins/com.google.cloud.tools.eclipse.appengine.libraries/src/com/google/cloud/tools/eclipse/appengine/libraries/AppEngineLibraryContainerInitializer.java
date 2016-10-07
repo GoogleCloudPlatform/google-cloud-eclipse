@@ -18,6 +18,8 @@ package com.google.cloud.tools.eclipse.appengine.libraries;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -43,6 +45,8 @@ public class AppEngineLibraryContainerInitializer extends ClasspathContainerInit
 
   public static final String LIBRARIES_EXTENSION_POINT = "com.google.cloud.tools.eclipse.appengine.libraries";
 
+  private static final Logger logger = Logger.getLogger(AppEngineLibraryContainerInitializer.class.getName());
+
   private String containerPath = Library.CONTAINER_PATH_PREFIX;
   private Map<String, Library> libraries;
 
@@ -53,7 +57,7 @@ public class AppEngineLibraryContainerInitializer extends ClasspathContainerInit
   @VisibleForTesting
   AppEngineLibraryContainerInitializer(IConfigurationElement[] configurationElements,
                                        LibraryBuilder libraryBuilder,
-                                       String containerPath) throws CoreException {
+                                       String containerPath) {
     this.containerPath = containerPath;
     initializeLibraries(configurationElements, libraryBuilder);
   }
@@ -89,16 +93,15 @@ public class AppEngineLibraryContainerInitializer extends ClasspathContainerInit
     }
   }
 
-  private void initializeLibraries(IConfigurationElement[] configurationElements,
-                                   LibraryBuilder libraryBuilder) throws CoreException {
-    try {
+  private void initializeLibraries(IConfigurationElement[] configurationElements, LibraryBuilder libraryBuilder) {
       libraries = new HashMap<>(configurationElements.length);
       for (IConfigurationElement configurationElement : configurationElements) {
-        Library library = libraryBuilder.build(configurationElement);
-        libraries.put(library.getId(), library);
+        try {
+          Library library = libraryBuilder.build(configurationElement);
+          libraries.put(library.getId(), library);
+        } catch (LibraryBuilderException exception) {
+          logger.log(Level.SEVERE, "Failed to initialize libraries", exception);
+        }
       }
-    } catch (LibraryBuilderException exception) {
-      throw new CoreException(StatusUtil.error(this, "Failed to initialize libraries", exception));
-    }
   }
 }

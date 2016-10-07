@@ -33,7 +33,7 @@ import com.google.common.base.Strings;
 
 public class LibraryBuilder {
 
-  Logger logger = Logger.getLogger(LibraryBuilder.class.getName());
+  private static final Logger logger = Logger.getLogger(LibraryBuilder.class.getName());
 
   private static final String ELMT_LIBRARY = "library";
   private static final String ATTR_ID = "id";
