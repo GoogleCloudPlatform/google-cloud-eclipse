@@ -145,6 +145,7 @@
       </consolePageParticipant>
    </extension>
    <extension
+         id="urlLinker"
          point="org.eclipse.ui.console.consolePatternMatchListeners">
     <!-- pretty liberal URL pattern matcher -->
     <consolePatternMatchListener
