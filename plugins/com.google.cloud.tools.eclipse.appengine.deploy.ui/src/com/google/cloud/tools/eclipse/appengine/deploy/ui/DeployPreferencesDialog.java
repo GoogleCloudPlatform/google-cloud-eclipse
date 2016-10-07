@@ -46,6 +46,8 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
       setTitleImage(titleImage);
     }
 
+    getButton(IDialogConstants.OK_ID).setText(Messages.getString("deploy"));
+    
     // TitleAreaDialogSupport does not validate initially, let's trigger validation this way
     content.getDataBindingContext().updateTargets();
 
