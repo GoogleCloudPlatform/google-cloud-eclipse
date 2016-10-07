@@ -10,7 +10,6 @@ import com.google.common.base.Preconditions;
 /**
  * A jar file that is downloaded from the location defined by {@link MavenCoordinates}. It can have associated
  * filters to control visibility of classes and packages contained in the jar file.
- *
  */
 public class LibraryFile {
 

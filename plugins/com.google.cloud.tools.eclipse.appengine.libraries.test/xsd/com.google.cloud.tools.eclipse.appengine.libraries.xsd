@@ -90,11 +90,7 @@ limitations under the License.
          <xs:attribute name="id" type="xs:string">
             <xs:annotation>
                <xs:documentation>
-                  The ID of the library. The path of the classpath container defined for this library will be 
-'com.google.cloud.tools.eclipse.appengine.libraries/ID' where ID is the value defined in this attribute. 
-The classpathContainerInitializer defined to resolve the container will have the ID 
-'com.google.cloud.tools.eclipse.appengine.libraries'. The second section of the container path (the ID after the '/') 
-will determine how to resolve the entries associated with the container.
+                  The ID of the library.
                </xs:documentation>
             </xs:annotation>
          </xs:attribute>
@@ -143,14 +139,18 @@ project, under WEB-INF/lib.
          <xs:attribute name="javadocUri" type="xs:anyURI">
             <xs:annotation>
                <xs:documentation>
-                  URI that can be used by the IDE to lookup javadoc for the classes contained in this artifact.
+                  URI that can be used by the IDE to lookup javadoc for the classes contained in this artifact. If
+undefined, an attempt will be made to download the javadoc artifact from the same repository where the binary artifact
+is downloaded from.
                </xs:documentation>
             </xs:annotation>
          </xs:attribute>
          <xs:attribute name="sourceUri" type="xs:anyURI">
             <xs:annotation>
                <xs:documentation>
-                  URI that can be used by the IDE to lookup sources for the classes contained in this artifact.
+                  URI that can be used by the IDE to lookup sources for the classes contained in this artifact.  If
+undefined, an attempt will be made to download the source artifact from the same repository where the binary artifact
+is downloaded from.
                </xs:documentation>
             </xs:annotation>
          </xs:attribute>
@@ -160,7 +160,8 @@ project, under WEB-INF/lib.
    <xs:element name="exclusionFilter">
       <xs:annotation>
          <xs:documentation>
-            A pattern that can be used to exclude classes and packages to be visible. Uses the same format as the JDT's build path inclusion/exclusion filters: http://ant.apache.org/manual/dirtasks.html#patterns
+            A pattern that can be used to exclude classes and packages to be visible. Uses the same format as the JDT's
+build path inclusion/exclusion filters: http://help.eclipse.org/neon/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Forg%2Feclipse%2Fjdt%2Fcore%2FIClasspathEntry.html&anchor=getExclusionPatterns--
          </xs:documentation>
       </xs:annotation>
       <xs:complexType>
@@ -171,7 +172,8 @@ project, under WEB-INF/lib.
    <xs:element name="inclusionFilter">
       <xs:annotation>
          <xs:documentation>
-            A pattern that can be used to include classes and packages to be visible. Uses the same format as the JDT's build path inclusion/exclusion filters: http://ant.apache.org/manual/dirtasks.html#patterns
+            A pattern that can be used to include classes and packages to be visible. Uses the same format as the JDT's
+build path inclusion/exclusion filters: http://help.eclipse.org/neon/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Forg%2Feclipse%2Fjdt%2Fcore%2FIClasspathEntry.html&anchor=getInclusionPatterns--
          </xs:documentation>
       </xs:annotation>
       <xs:complexType>
@@ -252,6 +254,12 @@ expected to be defined. Defaults to 'central' denoting the Maven Central reposit
       </xs:appinfo>
       <xs:documentation>
          Experimental: APIs may change with no notice.
+
+         The path of the classpath container defined for a library will be
+'com.google.cloud.tools.eclipse.appengine.libraries/ID' where ID is the ID attribute of the library element.
+The classpathContainerInitializer defined to resolve the container will have the ID
+'com.google.cloud.tools.eclipse.appengine.libraries'. The second section of the container path (the ID after the '/')
+will determine how to resolve the entries associated with the container.
       </xs:documentation>
    </xs:annotation>
 

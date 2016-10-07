@@ -13,7 +13,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 
 import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.RegistryFactory;
 import org.junit.Test;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.config.LibraryBuilder;
@@ -30,7 +30,7 @@ public class AppEngineLibrariesInPluginXmlTest {
   @Test
   public void testAppEngineAPIConfig() throws URISyntaxException, LibraryBuilderException {
     IConfigurationElement[] configurationElements =
-        Platform.getExtensionRegistry()
+        RegistryFactory.getRegistry()
           .getConfigurationElementsFor(AppEngineLibraryContainerInitializer.LIBRARIES_EXTENSION_POINT);
     for (IConfigurationElement configurationElement : configurationElements) {
       if (configurationElement.getAttribute("id").equals(APP_ENGINE_API_LIBRARY_ID)) {
@@ -74,5 +74,6 @@ public class AppEngineLibrariesInPluginXmlTest {
     assertTrue(filters.get(2).isExclude());
     assertThat(filters.get(2).getPattern(), is("com.google.apphosting.**"));
     assertFalse(filters.get(3).isExclude());
-    assertThat(filters.get(3).getPattern(), is("com.google.apphosting.api.**"));  }
+    assertThat(filters.get(3).getPattern(), is("com.google.apphosting.api.**"));
+  }
 }

@@ -30,6 +30,10 @@ public class AppEngineLibraryContainerInitializer extends ClasspathContainerInit
 
   private Map<String, Library> libraries;
 
+  public AppEngineLibraryContainerInitializer() {
+    super();
+  }
+
   @VisibleForTesting
   AppEngineLibraryContainerInitializer(IConfigurationElement[] configurationElements,
                                        LibraryBuilder libraryBuilder) throws CoreException {

@@ -5,6 +5,8 @@ import java.net.URISyntaxException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.InvalidRegistryObjectException;
@@ -16,6 +18,8 @@ import com.google.cloud.tools.eclipse.appengine.libraries.MavenCoordinates;
 import com.google.common.base.Strings;
 
 public class LibraryBuilder {
+
+  Logger logger = Logger.getLogger(LibraryBuilder.class.getName());
 
   private static final String ELMT_LIBRARY = "library";
   private static final String ATTR_ID = "id";
@@ -82,7 +86,7 @@ public class LibraryBuilder {
 
   private MavenCoordinates getMavenCoordinates(IConfigurationElement[] children) {
     if (children.length != 1) {
-      // error
+      logger.warning("Single configuration element for MavenCoordinates was expected, found: " + children.length);
     }
     IConfigurationElement mavenCoordinatesElement = children[0];
     String groupId = mavenCoordinatesElement.getAttribute(ATTR_GROUP_ID);
@@ -117,7 +121,7 @@ public class LibraryBuilder {
       case ELMT_INCLUSION_FILTER:
         filters.add(Filter.inclusionFilter(childElement.getAttribute(ATTR_PATTERN)));
       default:
-        // non-filter child element
+        logger.warning("Unexpected element among filter elements");
         break;
       }
     }
