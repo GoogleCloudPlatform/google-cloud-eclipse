@@ -13,10 +13,12 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.junit.rules.ExternalResource;
 
+import com.google.common.base.Strings;
+
 public final class TestProject extends ExternalResource {
 
   private IJavaProject javaProject;
-  private String containerPath = "default.fake.container/path";
+  private String containerPath;
 
   public TestProject() {
     super();
@@ -52,6 +54,12 @@ public final class TestProject extends ExternalResource {
     project.create(newProjectDescription, null);
     project.open(null);
     javaProject = JavaCore.create(project);
+    if (!Strings.isNullOrEmpty(containerPath)) {
+      addContainerPathToRawClasspath();
+    }
+  }
+
+  private void addContainerPathToRawClasspath() throws JavaModelException {
     IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
     IClasspathEntry[] newRawClasspath = new IClasspathEntry[rawClasspath.length + 1];
     System.arraycopy(rawClasspath, 0, newRawClasspath, 0, rawClasspath.length);

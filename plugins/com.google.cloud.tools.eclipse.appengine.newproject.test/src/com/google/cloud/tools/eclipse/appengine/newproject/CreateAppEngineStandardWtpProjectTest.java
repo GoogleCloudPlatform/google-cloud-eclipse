@@ -32,7 +32,7 @@ import com.google.cloud.tools.eclipse.appengine.libraries.Library;;
 @RunWith(MockitoJUnitRunner.class)
 public class CreateAppEngineStandardWtpProjectTest {
 
-  private static final String FAKE_LIBRARY = "fake-library";
+  private static final String APP_ENGINE_API = "appengine-api";
 
   @Mock private IAdaptable adaptable;
 
@@ -95,7 +95,7 @@ public class CreateAppEngineStandardWtpProjectTest {
 
   @Test
   public void testAppEngineLibrariesAdded() throws InvocationTargetException, CoreException {
-    Library library = new Library(FAKE_LIBRARY);
+    Library library = new Library(APP_ENGINE_API);
     config.setAppEngineLibraries(Collections.singletonList(library));
     CreateAppEngineStandardWtpProject creator = new CreateAppEngineStandardWtpProject(config, adaptable);
     creator.execute(new NullProgressMonitor());
@@ -110,7 +110,7 @@ public class CreateAppEngineStandardWtpProjectTest {
         return;
       }
     }
-    fail("Classpath container " + FAKE_LIBRARY + " was not added to the build path");
+    fail("Classpath container " + APP_ENGINE_API + " was not added to the build path");
   }
 
   @Test

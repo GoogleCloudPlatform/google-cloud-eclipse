@@ -7,6 +7,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.RegistryFactory;
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.IClasspathContainer;
@@ -28,6 +29,7 @@ public class AppEngineLibraryContainerInitializer extends ClasspathContainerInit
 
   public static final String LIBRARIES_EXTENSION_POINT = "com.google.cloud.tools.eclipse.appengine.libraries";
 
+  private String containerPath = Library.CONTAINER_PATH_PREFIX;
   private Map<String, Library> libraries;
 
   public AppEngineLibraryContainerInitializer() {
@@ -36,7 +38,9 @@ public class AppEngineLibraryContainerInitializer extends ClasspathContainerInit
 
   @VisibleForTesting
   AppEngineLibraryContainerInitializer(IConfigurationElement[] configurationElements,
-                                       LibraryBuilder libraryBuilder) throws CoreException {
+                                       LibraryBuilder libraryBuilder,
+                                       String containerPath) throws CoreException {
+    this.containerPath = containerPath;
     initializeLibraries(configurationElements, libraryBuilder);
   }
 
@@ -48,7 +52,7 @@ public class AppEngineLibraryContainerInitializer extends ClasspathContainerInit
       initializeLibraries(configurationElements, new LibraryBuilder());
     }
     if (containerPath.segmentCount() == 2) {
-      if (!containerPath.segment(0).equals(Library.CONTAINER_PATH_PREFIX)) {
+      if (!containerPath.segment(0).equals(this.containerPath)) {
         throw new CoreException(StatusUtil.error(this,
                                                  MessageFormat.format("Unexpected first segment of container path, "
                                                                       + "expected: {0} was: {1}",

@@ -25,14 +25,26 @@ import com.google.cloud.tools.eclipse.appengine.libraries.config.LibraryBuilder.
 public class AppEngineLibraryContainerInitializerTest {
 
   private static final String TEST_LIBRARY_ID = "libraryId";
-  private static final String TEST_CONTAINER_PATH = Library.CONTAINER_PATH_PREFIX + "/" + TEST_LIBRARY_ID;
+  private static final String TEST_CONTAINER_PATH = "test.appengine.libraries";
+  private static final String TEST_LIBRARY_PATH = TEST_CONTAINER_PATH + "/" + TEST_LIBRARY_ID;
 
   @Mock private LibraryBuilder libraryBuilder;
   @Mock private IConfigurationElement configurationElement;
 
   @Rule
-  public TestProject testProject = new TestProject().withClasspathContainerPath(TEST_CONTAINER_PATH);
+  public TestProject testProject = new TestProject().withClasspathContainerPath(TEST_LIBRARY_PATH);
 
+  /**
+   * This test relies on the {@link TestAppEngineLibraryContainerInitializer} defined in the fragment.xml for
+   * <code>TEST_CONTAINER_PATH</code>. When the test is launched, the Platform will try to initialize the container
+   * defined for the test project (field <code>testProject</code>), but due to the empty implementation of
+   * {@link TestAppEngineLibraryContainerInitializer#initialize(org.eclipse.core.runtime.IPath, org.eclipse.jdt.core.IJavaProject)}
+   * the container will remain unresolved.
+   * Then the {@link AppEngineLibraryContainerInitializer} instance created in this method will initialize the container
+   * and the test will verify it.
+   * This approach is required by the fact that the production {@link AppEngineLibraryContainerInitializer} is defined
+   * in the host project's plugin.xml and it is not possible to remove/override it.
+   */
   @Test
   public void testInitialize_resolvesContainerToJar() throws CoreException, LibraryBuilderException {
     Library library = new Library(TEST_LIBRARY_ID);
@@ -40,8 +52,10 @@ public class AppEngineLibraryContainerInitializerTest {
     when(libraryBuilder.build(any(IConfigurationElement.class))).thenReturn(library);
 
     AppEngineLibraryContainerInitializer containerInitializer =
-        new AppEngineLibraryContainerInitializer(new IConfigurationElement[]{ configurationElement }, libraryBuilder);
-    containerInitializer.initialize(new Path(TEST_CONTAINER_PATH),
+        new AppEngineLibraryContainerInitializer(new IConfigurationElement[]{ configurationElement },
+                                                 libraryBuilder,
+                                                 TEST_CONTAINER_PATH);
+    containerInitializer.initialize(new Path(TEST_LIBRARY_PATH),
                                     testProject.getJavaProject());
 
     IClasspathEntry[] resolvedClasspath = testProject.getJavaProject().getResolvedClasspath(false);

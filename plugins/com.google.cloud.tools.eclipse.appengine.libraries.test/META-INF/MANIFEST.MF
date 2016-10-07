@@ -3,7 +3,7 @@ Bundle-ClassPath: .
 Bundle-ManifestVersion: 2
 Bundle-Name: Tests for Cloud Tools For Eclipse App Engine Libraries Management
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Bundle-SymbolicName: com.google.cloud.tools.eclipse.appengine.libraries.test
+Bundle-SymbolicName: com.google.cloud.tools.eclipse.appengine.libraries.test;singleton:=true
 Bundle-Vendor: Google, Inc.
 Bundle-Version: 0.1.0.qualifier
 Fragment-Host: com.google.cloud.tools.eclipse.appengine.libraries

@@ -161,7 +161,7 @@ is downloaded from.
       <xs:annotation>
          <xs:documentation>
             A pattern that can be used to exclude classes and packages to be visible. Uses the same format as the JDT's
-build path inclusion/exclusion filters: http://help.eclipse.org/neon/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Forg%2Feclipse%2Fjdt%2Fcore%2FIClasspathEntry.html&anchor=getExclusionPatterns--
+build path inclusion/exclusion filters: http://help.eclipse.org/neon/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Forg%2Feclipse%2Fjdt%2Fcore%2FIClasspathEntry.html&amp;anchor=getExclusionPatterns--
          </xs:documentation>
       </xs:annotation>
       <xs:complexType>
@@ -173,7 +173,7 @@ build path inclusion/exclusion filters: http://help.eclipse.org/neon/index.jsp?t
       <xs:annotation>
          <xs:documentation>
             A pattern that can be used to include classes and packages to be visible. Uses the same format as the JDT's
-build path inclusion/exclusion filters: http://help.eclipse.org/neon/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Forg%2Feclipse%2Fjdt%2Fcore%2FIClasspathEntry.html&anchor=getInclusionPatterns--
+build path inclusion/exclusion filters: http://help.eclipse.org/neon/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Forg%2Feclipse%2Fjdt%2Fcore%2FIClasspathEntry.html&amp;anchor=getInclusionPatterns--
          </xs:documentation>
       </xs:annotation>
       <xs:complexType>
