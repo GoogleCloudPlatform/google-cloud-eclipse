@@ -139,6 +139,12 @@ public class AppEngineLibraryContainerInitializerTest {
                                                  TEST_CONTAINER_PATH);
     containerInitializer.initialize(new Path(TEST_LIBRARY_PATH),
                                     testProject.getJavaProject());
+
+    IClasspathEntry[] resolvedClasspath = testProject.getJavaProject().getResolvedClasspath(false);
+    assertThat(resolvedClasspath.length, is(2));
+    IClasspathEntry libJar = resolvedClasspath[1];
+    assertTrue(libJar.getPath().toOSString().endsWith("artifactId.jar"));
+    assertTrue(libJar.getSourceAttachmentPath().toOSString().endsWith("artifactId.jar"));
   }
 
   private void setupLibraryBuilder() throws LibraryBuilderException {
