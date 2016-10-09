@@ -3,13 +3,16 @@ Bundle-ClassPath: .
 Bundle-ManifestVersion: 2
 Bundle-Name: Tests for Cloud Tools For Eclipse App Engine Libraries Management
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Bundle-SymbolicName: com.google.cloud.tools.eclipse.appengine.libraries.test
+Bundle-SymbolicName: com.google.cloud.tools.eclipse.appengine.libraries.test;singleton:=true
 Bundle-Vendor: Google, Inc.
 Bundle-Version: 0.1.0.qualifier
 Fragment-Host: com.google.cloud.tools.eclipse.appengine.libraries
 Require-Bundle: org.hamcrest;bundle-version="1.1.0",
  org.junit;bundle-version="4.12.0"
-Import-Package: org.mockito;provider=google;version="1.10.19",
+Import-Package: org.eclipse.core.internal.registry,
+ org.eclipse.core.resources,
+ org.eclipse.core.runtime.spi;version="3.4.0",
+ org.mockito;provider=google;version="1.10.19",
  org.mockito.runners;provider=google;version="1.10.19",
  org.mockito.stubbing;provider=google;version="1.10.19",
  org.objenesis;provider=google;version="2.2.0"

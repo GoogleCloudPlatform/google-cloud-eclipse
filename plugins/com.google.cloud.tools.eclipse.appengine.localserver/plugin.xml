@@ -145,6 +145,19 @@
       </consolePageParticipant>
    </extension>
    <extension
+         id="urlLinker"
+         point="org.eclipse.ui.console.consolePatternMatchListeners">
+    <!-- pretty liberal URL pattern matcher -->
+    <consolePatternMatchListener
+      class="com.google.cloud.tools.eclipse.ui.util.console.PatternToHyperlinkConverter"
+      id="com.google.cloud.tools.eclipse.appengine.deploy.consolePatternMatchListener"
+      regex="https?://([\w-]+\.?)+(:\w+)?(/[^\s]*)?">
+      <enablement>
+        <instanceof value="com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineConsole"/>
+      </enablement>
+    </consolePatternMatchListener>
+   </extension>
+   <extension
          id="com.google.cloud.tools.eclipse.appengineDefaultFacet"
          point="org.eclipse.wst.common.project.facet.core.defaultFacets">
       <default-facets>

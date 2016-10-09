@@ -81,9 +81,10 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
     addJunit4ToClasspath(monitor, newProject);
   }
 
-  private void addAppEngineLibrariesToBuildPath(IProject newProject, List<Library> libraries, IProgressMonitor monitor) throws CoreException {
-    SubMonitor subMonitor = SubMonitor.convert(monitor, libraries.size());
-    subMonitor.setTaskName("Adding AppEngine libraries");
+  private void addAppEngineLibrariesToBuildPath(IProject newProject,
+                                                List<Library> libraries,
+                                                IProgressMonitor monitor) throws CoreException {
+    SubMonitor subMonitor = SubMonitor.convert(monitor, "Adding App Engine libraries", libraries.size());
     IJavaProject javaProject = JavaCore.create(newProject);
     IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
     IClasspathEntry[] newRawClasspath = Arrays.copyOf(rawClasspath, rawClasspath.length + libraries.size());

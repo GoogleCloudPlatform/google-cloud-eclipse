@@ -26,12 +26,15 @@ import java.util.Locale;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.ui.handlers.HandlerUtil;
@@ -59,7 +62,7 @@ import com.google.common.annotations.VisibleForTesting;
 /**
  * Command handler to deploy an App Engine web application project to App Engine Standard.
  * <p>
- * It copies the project's exploded WAR to a staging directory and then executes 
+ * It copies the project's exploded WAR to a staging directory and then executes
  * the staging and deploy operations provided by the App Engine Plugins Core Library.
  */
 public class StandardDeployCommandHandler extends AbstractHandler {
@@ -82,6 +85,13 @@ public class StandardDeployCommandHandler extends AbstractHandler {
     try {
       IProject project = helper.getProject(event);
       if (project != null) {
+        if (!checkProjectErrors(project)) {
+          MessageDialog.openInformation(HandlerUtil.getActiveShell(event),
+                                        Messages.getString("build.error.dialog.title"),
+                                        Messages.getString("build.error.dialog.message"));
+          return null;
+        }
+
         Credential credential = loginIfNeeded(event);
         if (credential != null) {
           if (new DeployPreferencesDialog(HandlerUtil.getActiveShell(event), project).open() == Window.OK) {
@@ -96,12 +106,18 @@ public class StandardDeployCommandHandler extends AbstractHandler {
     }
   }
 
-  private void launchDeployJob(IProject project, Credential credential, ExecutionEvent event) 
+  private static boolean checkProjectErrors(IProject project) throws CoreException {
+    int severity = project.findMaxProblemSeverity(
+        IMarker.PROBLEM, true /* includeSubtypes */, IResource.DEPTH_INFINITE);
+    return severity != IMarker.SEVERITY_ERROR;
+  }
+
+  private void launchDeployJob(IProject project, Credential credential, ExecutionEvent event)
       throws IOException, ExecutionException {
-    
+
     AnalyticsPingManager.getInstance().sendPing(
         AnalyticsEvents.APP_ENGINE_DEPLOY, AnalyticsEvents.APP_ENGINE_DEPLOY_STANDARD, null);
-    
+
     IPath workDirectory = createWorkDirectory();
 
     DefaultDeployConfiguration deployConfiguration = getDeployConfiguration(project, event);

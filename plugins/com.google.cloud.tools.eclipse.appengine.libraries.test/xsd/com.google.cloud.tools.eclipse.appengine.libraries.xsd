@@ -1,0 +1,273 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="unqualified">
+   <xs:annotation>
+      <xs:appinfo>
+         <meta.schema plugin="com.google.cloud.tools.eclipse.appengine.libraries" id="com.google.cloud.tools.eclipse.appengine.libraries" name="App Engine Libraries"/>
+      </xs:appinfo>
+      <xs:documentation>
+         Provides an extension point to define libraries that will be resolved using the Maven coordinates. These libraries then can be added to App Engine projects.
+      </xs:documentation>
+   </xs:annotation>
+
+   <xs:annotation>
+      <xs:appinfo>
+         <meta.section type="xs:copyright"/>
+      </xs:appinfo>
+      <xs:documentation>
+         Copyright 2016 Google Inc. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+      </xs:documentation>
+   </xs:annotation>
+
+   <xs:element name="plugin">
+      <xs:complexType>
+         <xs:choice minOccurs="1" maxOccurs="unbounded">
+            <xs:element ref="extension-point" />
+            <xs:element ref="extension" />
+         </xs:choice>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="extension-point">
+      <xs:complexType>
+         <xs:attribute name="id" type="xs:string" />
+         <xs:attribute name="name" type="xs:string" />
+         <xs:attribute name="schema" type="xs:string" />
+      </xs:complexType>
+   </xs:element>
+   
+   <xs:element name="extension">
+      <xs:annotation>
+         <xs:appinfo>
+            <xs:meta.element />
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:choice minOccurs="1" maxOccurs="unbounded">
+            <xs:element ref="library" />
+            <xs:element ref="classpathContainerInitializer" />
+         </xs:choice>
+         <xs:attribute name="point" type="xs:string" use="required" />
+         <xs:attribute name="id" type="xs:string" />
+         <xs:attribute name="name" type="xs:string">
+            <xs:annotation>
+               <xs:appinfo>
+                  <xs:meta.attribute translatable="true" />
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:attribute>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="classpathContainerInitializer">
+      <xs:complexType>
+         <xs:attribute name="class" type="xs:string" />
+         <xs:attribute name="id" type="xs:string" />
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="library">
+      <xs:annotation>
+         <xs:documentation>
+            An App Engine library that can consist of one or more jar files with associated visibility rules and Maven coordinates.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:choice minOccurs="1" maxOccurs="unbounded">
+            <xs:element ref="libraryFile" />
+         </xs:choice>
+         <xs:attribute name="id" type="xs:string">
+            <xs:annotation>
+               <xs:documentation>
+                  The ID of the library.
+               </xs:documentation>
+            </xs:annotation>
+         </xs:attribute>
+         <xs:attribute name="name" type="xs:string">
+            <xs:annotation>
+               <xs:documentation>
+                  A user-friendly name for the library that can be displayed in the UI, e.g.: "AppEngine Endpoints".
+               </xs:documentation>
+            </xs:annotation>
+         </xs:attribute>
+         <xs:attribute name="siteUri" type="xs:string">
+            <xs:annotation>
+               <xs:documentation>
+                  URI that can be used to display a link to the user to provide more detailed information about the library, e.g. user guides, wiki, other documentation.
+               </xs:documentation>
+            </xs:annotation>
+         </xs:attribute>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="libraryFile">
+      <xs:annotation>
+         <xs:documentation>
+            Describes a single artifact located in a Maven repository.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element ref="mavenCoordinates"/>
+            <xs:sequence minOccurs="0" maxOccurs="unbounded">
+               <xs:choice minOccurs="0" maxOccurs="1">
+                  <xs:element ref="exclusionFilter" />
+                  <xs:element ref="inclusionFilter" />
+               </xs:choice>
+            </xs:sequence>
+         </xs:sequence>
+         <xs:attribute name="export" type="xs:boolean" use="required">
+            <xs:annotation>
+               <xs:documentation>
+                  If export attribute is true, then the corresponding file will be included in the WAR file of the
+project, under WEB-INF/lib.
+               </xs:documentation>
+            </xs:annotation>
+         </xs:attribute>
+
+         <xs:attribute name="javadocUri" type="xs:anyURI">
+            <xs:annotation>
+               <xs:documentation>
+                  URI that can be used by the IDE to lookup javadoc for the classes contained in this artifact.If
+unspecified, the javadoc will be downloaded from the artifact location if available.
+               </xs:documentation>
+            </xs:annotation>
+         </xs:attribute>
+         <xs:attribute name="sourceUri" type="xs:anyURI">
+            <xs:annotation>
+               <xs:documentation>
+                  URI that can be used by the IDE to lookup sources for the classes contained in this artifact. If
+unspecified, the source will be downloaded from the artifact location if available.
+               </xs:documentation>
+            </xs:annotation>
+         </xs:attribute>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="exclusionFilter">
+      <xs:annotation>
+         <xs:documentation>
+            A pattern that can be used to exclude classes and packages to be visible. Uses the same format as the JDT's
+build path <a href="http://help.eclipse.org/neon/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Forg%2Feclipse%2Fjdt%2Fcore%2FIClasspathEntry.html&amp;anchor=getExclusionPatterns--">inclusion/exclusion filters</a>
+         </xs:documentation>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:attribute name="pattern" type="xs:string" use="required" />
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="inclusionFilter">
+      <xs:annotation>
+         <xs:documentation>
+            A pattern that can be used to include classes and packages to be visible. Uses the same format as the JDT's
+build path <a href="http://help.eclipse.org/neon/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Forg%2Feclipse%2Fjdt%2Fcore%2FIClasspathEntry.html&amp;anchor=getInclusionPatterns--">inclusion/exclusion filters</a>
+         </xs:documentation>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:attribute name="pattern" type="xs:string" use="required" />
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="mavenCoordinates">
+      <xs:annotation>
+         <xs:documentation>
+            Metadata describing how the artifact can be resolved by Maven/M2Eclipse.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:complexType>
+         <!-- the original exsd contains this line
+         <xs:attribute name="repositoryUri" type="xs:string" use="default" value="central">
+         however it has an invalid attribute (value) and and invalid attribute value (default for use)
+         according to the schema, so these are removed here -->
+         <xs:attribute name="repositoryUri" type="xs:string">
+            <xs:annotation>
+               <xs:documentation>
+                  URI pointing to a repository location or an ID of a repository defined in the POM or the Maven
+settings. If the value starts with [protocol]:// then it is treated as a URI, otherwise an ID of a repository that is
+expected to be defined. Defaults to 'central' denoting the Maven Central repository.
+               </xs:documentation>
+            </xs:annotation>
+         </xs:attribute>
+         <xs:attribute name="groupId" type="xs:string" use="required" />
+         <xs:attribute name="artifactId" type="xs:string" use="required" />
+         <!-- the original exsd contains this line
+         <xs:attribute name="version" type="xs:string" use="default" value="LATEST">
+         however it has an invalid attribute (value) and and invalid attribute value (default for use)
+         according to the schema, so these are removed here -->
+         <xs:attribute name="version" type="xs:string">
+            <xs:annotation>
+               <xs:documentation>
+                  Version of the maven artifact, defaults to LATEST.
+               </xs:documentation>
+            </xs:annotation>
+         </xs:attribute>
+         <xs:attribute name="type" type="xs:string">
+            <xs:annotation>
+               <xs:documentation>
+                  The packaging type of the artifact, e.g. jar, war, zip. Currently only jar is supported.
+               </xs:documentation>
+            </xs:annotation>
+         </xs:attribute>
+         <xs:attribute name="classifier" type="xs:string" />
+      </xs:complexType>
+   </xs:element>
+
+
+   <xs:annotation>
+      <xs:appinfo>
+         <xs:meta.section type="xs:examples"/>
+      </xs:appinfo>
+      <xs:documentation>
+         &lt;extension point="com.google.cloud.tools.eclipse.appengine.libraries"&gt;
+    &lt;library 
+          id="com.google.cloud.tools.eclipse.appengine.libraries/appengine-api"
+          name="App Engine API"&gt;
+      &lt;jarFile&gt;
+        &lt;mavenCoordinates
+              artifactId="appengine-api-1.0-sdk"
+              groupId="com.google.appengine"
+              repositoryUri="http://repo1.maven.org/maven2/"&gt;
+        &lt;/mavenCoordinates&gt;
+        &lt;exclusionFilter pattern="com.google.appengine.repackaged.*" /&gt;
+      &lt;/jarFile&gt;
+    &lt;/library&gt;
+  &lt;/extension&gt;
+      </xs:documentation>
+   </xs:annotation>
+
+   <xs:annotation>
+      <xs:appinfo>
+         <meta.section type="apiinfo"/>
+      </xs:appinfo>
+      <xs:documentation>
+         Experimental: APIs may change with no notice.
+
+         The path of the classpath container defined for a library will be
+'com.google.cloud.tools.eclipse.appengine.libraries/ID' where ID is the ID attribute of the library element.
+The classpathContainerInitializer defined to resolve the container will have the ID
+'com.google.cloud.tools.eclipse.appengine.libraries'. The second section of the container path (the ID after the '/')
+will determine how to resolve the entries associated with the container.
+      </xs:documentation>
+   </xs:annotation>
+
+   <xs:annotation>
+      <xs:appinfo>
+         <meta.section type="xs:implementation"/>
+      </xs:appinfo>
+      <xs:documentation>
+         See the plugin.xml of the com.google.cloud.tools.eclipse.appengine.libraries for an example of how to contribute to the extension point.
+      </xs:documentation>
+   </xs:annotation>
+
+</xs:schema>
