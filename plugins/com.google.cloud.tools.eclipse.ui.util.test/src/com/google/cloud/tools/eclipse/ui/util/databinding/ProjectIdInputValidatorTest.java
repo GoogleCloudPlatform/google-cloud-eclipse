@@ -10,58 +10,61 @@ public class ProjectIdInputValidatorTest {
 
   @Test
   public void testValidate_nonStringInput() {
-    assertThat(new ProjectIdInputValidator().validate(new Object()).getSeverity(), is(IStatus.ERROR));
+    assertThat(new ProjectIdInputValidator(true /* emptyStringAllowed*/).validate(new Object()).getSeverity(), is(IStatus.ERROR));
+    assertThat(new ProjectIdInputValidator(false /* emptyStringAllowed*/).validate(new Object()).getSeverity(), is(IStatus.ERROR));
   }
 
   @Test
-  public void testValidate_emptyStringDefaultValidationPolicy() {
-    assertThat(new ProjectIdInputValidator().validate("").getSeverity(), is(IStatus.ERROR));
-  }
-
-  @Test
-  public void testValidate_emptyStringInvalid() {
-    assertThat(new ProjectIdInputValidator()
-                 .validate("").getSeverity(),
-               is(IStatus.ERROR));
+  public void testValidate_emptyString() {
+    assertThat(new ProjectIdInputValidator(true /* emptyStringAllowed*/).validate("").getSeverity(),is(IStatus.OK));
+    assertThat(new ProjectIdInputValidator(false /* emptyStringAllowed*/).validate("").getSeverity(),is(IStatus.ERROR));
   }
 
   @Test
   public void testValidate_upperCaseLetter() {
-    assertThat(new ProjectIdInputValidator().validate("asdfghijK").getSeverity(), is(IStatus.OK));
+    assertThat(new ProjectIdInputValidator(true /* emptyStringAllowed*/).validate("asdfghijK").getSeverity(), is(IStatus.OK));
+    assertThat(new ProjectIdInputValidator(false /* emptyStringAllowed*/).validate("asdfghijK").getSeverity(), is(IStatus.OK));
   }
 
   @Test
   public void testValidate_startWithNumber() {
-    assertThat(new ProjectIdInputValidator().validate("1asdfghij").getSeverity(), is(IStatus.OK));
+    assertThat(new ProjectIdInputValidator(true /* emptyStringAllowed*/).validate("1asdfghij").getSeverity(), is(IStatus.OK));
+    assertThat(new ProjectIdInputValidator(false /* emptyStringAllowed*/).validate("1asdfghij").getSeverity(), is(IStatus.OK));
   }
 
   @Test
   public void testValidate_startWithHyphen() {
-    assertThat(new ProjectIdInputValidator().validate("-asdfghij").getSeverity(), is(IStatus.OK));
+    assertThat(new ProjectIdInputValidator(true /* emptyStringAllowed*/).validate("-asdfghij").getSeverity(), is(IStatus.OK));
+    assertThat(new ProjectIdInputValidator(false /* emptyStringAllowed*/).validate("-asdfghij").getSeverity(), is(IStatus.OK));
   }
 
   @Test
   public void testValidate_endWithHyphen() {
-    assertThat(new ProjectIdInputValidator().validate("asdfghij-").getSeverity(), is(IStatus.OK));
+    assertThat(new ProjectIdInputValidator(true /* emptyStringAllowed*/).validate("asdfghij-").getSeverity(), is(IStatus.OK));
+    assertThat(new ProjectIdInputValidator(false /* emptyStringAllowed*/).validate("asdfghij-").getSeverity(), is(IStatus.OK));
   }
 
   @Test
   public void testValidate_validName() {
-    assertThat(new ProjectIdInputValidator().validate("asdf-1ghij-2").getSeverity(), is(IStatus.OK));
+    assertThat(new ProjectIdInputValidator(true /* emptyStringAllowed*/).validate("asdf-1ghij-2").getSeverity(), is(IStatus.OK));
+    assertThat(new ProjectIdInputValidator(false /* emptyStringAllowed*/).validate("asdf-1ghij-2").getSeverity(), is(IStatus.OK));
   }
 
   @Test
   public void testValidate_maxLengthName() {
-    assertThat(new ProjectIdInputValidator().validate("a23456789012345678901234567890").getSeverity(), is(IStatus.OK));
+    assertThat(new ProjectIdInputValidator(true /* emptyStringAllowed*/).validate("a23456789012345678901234567890").getSeverity(), is(IStatus.OK));
+    assertThat(new ProjectIdInputValidator(false /* emptyStringAllowed*/).validate("a23456789012345678901234567890").getSeverity(), is(IStatus.OK));
   }
 
   @Test
   public void testValidate_tooLongName() {
-    assertThat(new ProjectIdInputValidator().validate("a234567890123456789012345678901").getSeverity(), is(IStatus.OK));
+    assertThat(new ProjectIdInputValidator(true /* emptyStringAllowed*/).validate("a234567890123456789012345678901").getSeverity(), is(IStatus.OK));
+    assertThat(new ProjectIdInputValidator(false /* emptyStringAllowed*/).validate("a234567890123456789012345678901").getSeverity(), is(IStatus.OK));
   }
 
   @Test
   public void testValidate_tooShortName() {
-    assertThat(new ProjectIdInputValidator().validate("a2345").getSeverity(), is(IStatus.OK));
+    assertThat(new ProjectIdInputValidator(true /* emptyStringAllowed*/).validate("a2345").getSeverity(), is(IStatus.OK));
+    assertThat(new ProjectIdInputValidator(false /* emptyStringAllowed*/).validate("a2345").getSeverity(), is(IStatus.OK));
   }
 }
