@@ -26,8 +26,10 @@ public interface ILibraryRepositoryService {
 
   /**
    * @return a path that points to a local file corresponding to the artifact described by <code>mavenCoordinates</code>
+   * @throws LibraryRepositoryServiceException if the resolution of the artifact defined by 
+   * <code>mavenCoordinates</code> fails. 
    */
-  IPath getJarLocation(MavenCoordinates mavenCoordinates);
+  IPath getJarLocation(MavenCoordinates mavenCoordinates) throws LibraryRepositoryServiceException;
 
   /**
    * @return a path that points to a local file corresponding to the source artifact described

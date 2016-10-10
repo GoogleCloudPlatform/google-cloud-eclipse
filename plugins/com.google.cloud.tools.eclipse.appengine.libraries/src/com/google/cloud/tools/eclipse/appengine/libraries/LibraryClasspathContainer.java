@@ -31,6 +31,7 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
+import com.google.cloud.tools.eclipse.appengine.libraries.repository.LibraryRepositoryServiceException;
 import com.google.common.base.Strings;
 
 public class LibraryClasspathContainer implements IClasspathContainer {
@@ -86,7 +87,7 @@ public class LibraryClasspathContainer implements IClasspathContainer {
                                      true);
       }
       return entries;
-    } catch (CoreException e) {
+    } catch (CoreException | LibraryRepositoryServiceException ex) {
       // declared on UpdateClasspathAttributeUtil.create(Non)DependencyAttribute(), but it's current implementation does
       // not throw this exception.
       return new IClasspathEntry[0];
