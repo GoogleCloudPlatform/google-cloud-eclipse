@@ -36,7 +36,6 @@ import com.google.cloud.tools.eclipse.appengine.libraries.repository.M2Repositor
 @RunWith(MockitoJUnitRunner.class)
 public class M2RepositoryServiceTest {
 
-
   private static final String TEST_VERSION = "1.2.3";
   private static final String FAKE_PATH = "/fake/path";
 
@@ -193,12 +192,9 @@ public class M2RepositoryServiceTest {
     when(repositorySystem.resolveArtifact(any(RepositorySystemSession.class), artifactRequestCaptor.capture()))
     .thenReturn(getArtifactResult());
 
-
     MavenCoordinates mavenCoordinates = new MavenCoordinates("groupId", "artifactId");
     mavenCoordinates.setRepository("http://example.com");
     IPath jarLocation = service.getJarLocation(mavenCoordinates);
-
-
 
     assertThat(jarLocation.toOSString(), is(FAKE_PATH));
     assertThat(versionRangeRequestCaptor.getValue().getArtifact().getVersion(), is("[0,)"));
