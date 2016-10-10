@@ -53,6 +53,9 @@ import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.osgi.service.prefs.BackingStoreException;
 
+import com.google.api.client.auth.oauth2.Credential;
+import com.google.cloud.tools.eclipse.appengine.login.IGoogleLoginService;
+import com.google.cloud.tools.eclipse.appengine.login.ui.AccountSelector;
 import com.google.cloud.tools.eclipse.ui.util.FontUtil;
 import com.google.cloud.tools.eclipse.ui.util.databinding.BucketNameValidator;
 import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectIdInputValidator;
@@ -71,6 +74,8 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
   private static Logger logger = Logger.getLogger(DeployPropertyPage.class.getName());
 
+  private AccountSelector accountSelector;
+  
   private Label projectIdLabel;
   private Text projectId;
 
@@ -96,11 +101,13 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   private boolean childOfPropertyDialog = false;
 
   public StandardDeployPreferencesPanel(Composite parent, IProject project,
-      Runnable layoutChangedHandler, boolean childOfPropertyDialog) {
+      IGoogleLoginService loginService, Runnable layoutChangedHandler, boolean childOfPropertyDialog) {
     super(parent, SWT.NONE);
 
     this.layoutChangedHandler = layoutChangedHandler;
     this.childOfPropertyDialog = childOfPropertyDialog;
+
+    createCredentialSection(loginService);
 
     createProjectIdSection();
 
@@ -223,6 +230,21 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
   private void loadPreferences(IProject project) {
     model = new DeployPreferencesModel(project);
+  }
+
+  public Credential getSelectedCredential() {
+    return accountSelector.getSelectedCredential();
+  }
+
+  private void createCredentialSection(IGoogleLoginService loginService) {
+    Composite accountComposite = new Composite(this, SWT.NONE);
+    
+    new Label(accountComposite, SWT.LEFT).setText(
+        Messages.getString("deploy.preferences.dialog.label.selectAccount"));
+
+    accountSelector = new AccountSelector(accountComposite, loginService,
+        Messages.getString("deploy.preferences.dialog.accountSelector.login"));
+    GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(accountComposite);
   }
 
   private void createProjectIdSection() {

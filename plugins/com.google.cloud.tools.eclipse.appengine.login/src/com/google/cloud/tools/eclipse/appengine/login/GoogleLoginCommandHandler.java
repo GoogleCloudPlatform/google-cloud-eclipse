@@ -1,12 +1,27 @@
+/*******************************************************************************
+ * Copyright 2016 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+
 package com.google.cloud.tools.eclipse.appengine.login;
 
-import com.google.api.client.auth.oauth2.Credential;
+import com.google.cloud.tools.eclipse.appengine.login.ui.AccountsPanel;
 import com.google.cloud.tools.eclipse.ui.util.ServiceUtils;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.commands.IElementUpdater;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.menus.UIElement;
@@ -19,22 +34,10 @@ public class GoogleLoginCommandHandler extends AbstractHandler implements IEleme
   public Object execute(ExecutionEvent event) throws ExecutionException {
     IGoogleLoginService loginService = ServiceUtils.getService(event, IGoogleLoginService.class);
 
-    Credential credential = loginService.getCachedActiveCredential();  // See if already logged in.
-    if (credential == null) {
-      loginService.getActiveCredential(null /* no custom dialog message */);  // Log in.
+    if (!loginService.hasAccounts()) {
+      loginService.logIn(null /* no custom dialog message */);
     } else {
-      String[] dialogButtonLabels = {"Sign Out", "Don't Sign Out"};
-      MessageDialog logoutDialog = new MessageDialog(
-          HandlerUtil.getActiveShell(event), 
-          Messages.LOGOUT_CONFIRM_DIALOG_TITLE, 
-          null, 
-          Messages.LOGOUT_CONFIRM_DIALOG_MESSAGE, 
-          MessageDialog.QUESTION, 
-          dialogButtonLabels, 0);
-      boolean shouldLogout = logoutDialog.open() == 0;
-      if (shouldLogout) {
-        loginService.clearCredential();  // Log out on confirmation.
-      }
+      new AccountsPanel(HandlerUtil.getActiveShell(event), loginService).open();
     }
 
     return null;
@@ -44,11 +47,8 @@ public class GoogleLoginCommandHandler extends AbstractHandler implements IEleme
   public void updateElement(UIElement element, @SuppressWarnings("rawtypes") Map parameters) {
     IGoogleLoginService loginService =
         element.getServiceLocator().getService(IGoogleLoginService.class);
-    boolean loggedIn = loginService.getCachedActiveCredential() != null;
+    boolean loggedIn = loginService.hasAccounts();
 
-    element.setText(
-        loggedIn ? Messages.LOGIN_MENU_LOGGED_IN : Messages.LOGIN_MENU_LOGGED_OUT);
-    element.setTooltip(
-        loggedIn ? Messages.LOGIN_TOOLTIP_LOGGED_IN : Messages.LOGIN_TOOLTIP_LOGGED_OUT);
+    element.setText(loggedIn ? Messages.LOGIN_MENU_LOGGED_IN : Messages.LOGIN_MENU_LOGGED_OUT);
   }
 }

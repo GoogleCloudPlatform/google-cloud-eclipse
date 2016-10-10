@@ -29,12 +29,14 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PropertyPage;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.appengine.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.util.AdapterUtil;
 
 /**
@@ -109,10 +111,12 @@ public class DeployPropertyPage extends PropertyPage {
   private DeployPreferencesPanel getPreferencesPanel(Composite container) throws CoreException {
     IProject project = AdapterUtil.adapt(getElement(), IProject.class);
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);
+    IGoogleLoginService loginService =
+        PlatformUI.getWorkbench().getService(IGoogleLoginService.class);
 
     if (AppEngineStandardFacet.hasAppEngineFacet(facetedProject)) {
-      return new StandardDeployPreferencesPanel(container, project, getLayoutChangedHandler(),
-          true /* childOfPropertyDialog */);
+      return new StandardDeployPreferencesPanel(container, project, loginService,
+          getLayoutChangedHandler(),  true /* childOfPropertyDialog */);
     } else if (AppEngineFlexFacet.hasAppEngineFacet(facetedProject)) {
       return new FlexDeployPreferencesPanel(container);
     } else {
