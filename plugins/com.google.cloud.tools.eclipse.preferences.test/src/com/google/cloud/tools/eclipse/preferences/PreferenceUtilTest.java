@@ -20,7 +20,10 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,6 +36,11 @@ public class PreferenceUtilTest {
   public void setUp() {
     IWorkspace workspace = ResourcesPlugin.getWorkspace();
     project = workspace.getRoot().getProject("testproject" + Math.random());
+  }
+  
+  @After
+  public void tearDown() throws CoreException {
+    project.delete(true, new NullProgressMonitor());
   }
   
   @Test

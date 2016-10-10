@@ -22,10 +22,11 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 
 public class PreferenceUtil {
 
+  private static final String DEPLOY = "com.google.cloud.tools.eclipse.appengine.deploy";
+
   public static void setProjectIdPreference(IProject project, String projectId) {
     if (projectId != null && !projectId.isEmpty()) {
-      IEclipsePreferences preferences = new ProjectScope(project)
-          .getNode("com.google.cloud.tools.eclipse.appengine.deploy");
+      IEclipsePreferences preferences = new ProjectScope(project).getNode(DEPLOY);
       preferences.put("project.id", projectId);
     }
   }
