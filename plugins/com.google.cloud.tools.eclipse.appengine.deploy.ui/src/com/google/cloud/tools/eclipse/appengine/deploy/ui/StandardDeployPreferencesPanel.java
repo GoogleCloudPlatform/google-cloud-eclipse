@@ -93,11 +93,14 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   private DataBindingContext bindingContext;
 
   private Runnable layoutChangedHandler;
+  private boolean childOfPropertyDialog = false;
 
-  public StandardDeployPreferencesPanel(Composite parent, IProject project, Runnable layoutChangedHandler) {
+  public StandardDeployPreferencesPanel(Composite parent, IProject project,
+      Runnable layoutChangedHandler, boolean childOfPropertyDialog) {
     super(parent, SWT.NONE);
 
     this.layoutChangedHandler = layoutChangedHandler;
+    this.childOfPropertyDialog = childOfPropertyDialog;
 
     createProjectIdSection();
 
@@ -134,8 +137,8 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     IObservableValue projectIdModel = PojoProperties.value("projectId").observe(model);
 
     context.bindValue(projectIdField, projectIdModel,
-                      new UpdateValueStrategy().setAfterGetValidator(new ProjectIdInputValidator()),
-                      new UpdateValueStrategy().setAfterGetValidator(new ProjectIdInputValidator()));
+                      new UpdateValueStrategy().setAfterGetValidator(new ProjectIdInputValidator(childOfPropertyDialog)),
+                      new UpdateValueStrategy().setAfterGetValidator(new ProjectIdInputValidator(childOfPropertyDialog)));
   }
 
   private void setupProjectVersionDataBinding(DataBindingContext context) {

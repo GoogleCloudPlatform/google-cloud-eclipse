@@ -111,7 +111,8 @@ public class DeployPropertyPage extends PropertyPage {
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);
 
     if (AppEngineStandardFacet.hasAppEngineFacet(facetedProject)) {
-      return new StandardDeployPreferencesPanel(container, project, getLayoutChangedHandler());
+      return new StandardDeployPreferencesPanel(container, project, getLayoutChangedHandler(),
+          true /* childOfPropertyDialog */);
     } else if (AppEngineFlexFacet.hasAppEngineFacet(facetedProject)) {
       return new FlexDeployPreferencesPanel(container);
     } else {
