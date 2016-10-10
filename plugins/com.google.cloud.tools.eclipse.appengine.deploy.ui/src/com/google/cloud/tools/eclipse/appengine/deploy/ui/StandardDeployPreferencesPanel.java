@@ -48,11 +48,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.forms.FormColors;
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
-import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.osgi.service.prefs.BackingStoreException;
 
 import com.google.api.client.auth.oauth2.Credential;
@@ -100,7 +98,6 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   private DataBindingContext bindingContext;
 
   private Runnable layoutChangedHandler;
-  private FormToolkit formToolkit;
 
   public StandardDeployPreferencesPanel(Composite parent,
       IProject project, IGoogleLoginService loginService, Runnable layoutChangedHandler) {
@@ -108,8 +105,6 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
     this.layoutChangedHandler = layoutChangedHandler;
 
-    initializeFormToolkit();
-    
     createCredentialSection(loginService);
 
     createProjectIdSection();
@@ -127,13 +122,6 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     loadPreferences(project);
 
     setupDataBinding();
-  }
-
-  private void initializeFormToolkit() {
-    FormColors colors = new FormColors(getDisplay());
-    colors.setBackground(null);
-    colors.setForeground(null);
-    formToolkit = new FormToolkit(colors);
   }
 
   private void setupDataBinding() {
@@ -333,7 +321,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     expandableComposite.setExpanded(false);
     FontUtil.convertFontToBold(expandableComposite);
     GridDataFactory.fillDefaults().applyTo(expandableComposite);
-    formToolkit.adapt(expandableComposite, true, true);
+    getFormToolkit().adapt(expandableComposite, true, true);
   }
 
   private Composite createBucketSection(Composite parent) {
@@ -425,9 +413,6 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     }
     if (observables != null) {
       observables.dispose();
-    }
-    if (formToolkit != null) {
-      formToolkit.dispose();
     }
     super.dispose();
   }
