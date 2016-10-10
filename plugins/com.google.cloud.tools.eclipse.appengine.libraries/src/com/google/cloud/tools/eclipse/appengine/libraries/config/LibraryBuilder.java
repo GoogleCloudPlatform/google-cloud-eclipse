@@ -135,7 +135,7 @@ public class LibraryBuilder {
       case ELMT_INCLUSION_FILTER:
         filters.add(Filter.inclusionFilter(childElement.getAttribute(ATTR_PATTERN)));
       default:
-        logger.warning("Unexpected element among filter elements");
+        logger.warning("Unexpected element among filter elements: " + childElement.getName());
         break;
       }
     }
