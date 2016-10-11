@@ -53,7 +53,7 @@ public class NewMavenBasedAppEngineProjectWizardTest extends AbstractProjectTest
         {"src/main/webapp/WEB-INF/appengine-web.xml", "src/main/webapp/WEB-INF/web.xml", "pom.xml"};
     createAndCheck("appWithPackage", null, "app.engine.test", null, "Hello World template",
         projectFiles);
-    assertEquals("${app.id}",
+    assertEquals("not-needed",
         SwtBotAppEngineActions
             .getAppEngineProjectId(project.getFile("src/main/webapp/WEB-INF/appengine-web.xml")));
   }
