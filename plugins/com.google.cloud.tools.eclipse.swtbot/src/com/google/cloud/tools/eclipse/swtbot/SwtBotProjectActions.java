@@ -213,7 +213,9 @@ public final class SwtBotProjectActions {
     for (SWTBotTreeItem item : tree.getAllItems()) {
       String text = item.getText();
       if (text != null && text.startsWith("Errors")) {
-        errors.add(text);
+        for (SWTBotTreeItem actual : item.getItems()) {
+          errors.add(actual.getText());
+        }
       }
     }
 
