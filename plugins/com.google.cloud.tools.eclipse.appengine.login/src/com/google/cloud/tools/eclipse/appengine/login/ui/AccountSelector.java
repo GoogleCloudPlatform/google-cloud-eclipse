@@ -103,11 +103,8 @@ public class AccountSelector extends Composite {
 
     private void addAndSelectAccount(Account account) {
       // If the combo already has the email, just select it.
-      for (int i = 0; i < combo.getItemCount(); i++) {
-        if (combo.getItem(i).equals(account.getEmail())) {
-          combo.select(i);
-          return;
-        }
+      if (selectAccount(account.getEmail()) != -1) {
+        return;
       }
       combo.add(account.getEmail(), 0 /* place at top */);
       combo.setData(account.getEmail(), account.getOAuth2Credential());
