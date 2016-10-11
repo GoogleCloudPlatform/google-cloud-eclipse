@@ -146,7 +146,6 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     GridDataFactory.defaultsFor(artifactIdField).align(SWT.FILL, SWT.CENTER)
         .applyTo(artifactIdField);
     artifactIdField.addModifyListener(pageValidator);
-    artifactIdField.addVerifyListener(new AutoPackageNameSetterOnArtifactIdChange());
 
     Label versionLabel = new Label(mavenCoordinatesGroup, SWT.NONE);
     versionLabel.setText("Version:"); //$NON-NLS-1$
@@ -337,9 +336,9 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
   }
 
   /**
-   * Auto-fills javaPackageField as "groupId.artifactId" (or "groupId" if artifactId is empty),
-   * only when 1) javaPackageField is empty; or 2) the field matches previous auto-fill before
-   * ID modification.
+   * Auto-fills javaPackageField as groupId when 
+   * 1) javaPackageField is empty; or 
+   * 2) the field matches previous auto-fill before ID modification.
    */
   private final class AutoPackageNameSetterOnGroupIdChange implements VerifyListener {
     @Override
@@ -349,23 +348,8 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
       String newGroupId =
           getGroupId().substring(0, event.start) + event.text + getGroupId().substring(event.end);
 
-      String oldPackageName = suggestPackageName(getGroupId(), getArtifactId());
-      String newPackageName = suggestPackageName(newGroupId, getArtifactId());
-      adjustPackageName(oldPackageName, newPackageName);
-    }
-  }
-
-  /**
-   * See {@link AutoPackageNameSetterOnGroupIdChange}.
-   */
-  private final class AutoPackageNameSetterOnArtifactIdChange implements VerifyListener {
-    @Override
-    public void verifyText(VerifyEvent event) {
-      String newArtifactId = getArtifactId().substring(0, event.start)
-          + event.text + getArtifactId().substring(event.end);
-
-      String oldPackageName = suggestPackageName(getGroupId(), getArtifactId());
-      String newPackageName = suggestPackageName(getGroupId(), newArtifactId);
+      String oldPackageName = suggestPackageName(getGroupId());
+      String newPackageName = suggestPackageName(newGroupId);
       adjustPackageName(oldPackageName, newPackageName);
     }
   }
@@ -383,15 +367,12 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
    * Helper function returning a suggested package name based on groupId and artifactId.
    *
    * It does basic string filtering/manipulation, which does not completely eliminate
-   * naming issues. However, users will be alerted of any slipping errors in naming by
+   * naming issues. However, users will be alerted of any errors in naming by
    * {@link #validatePage}.
    */
   @VisibleForTesting
-  protected static String suggestPackageName(String groupId, String artifactId) {
+  static String suggestPackageName(String groupId) {
     String naivePackageName = groupId;
-    if (!artifactId.trim().isEmpty()) {
-      naivePackageName = groupId + "." + artifactId;
-    }
 
     if (JavaPackageValidator.validate(naivePackageName).isOK()) {
       return naivePackageName;
@@ -402,12 +383,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     // 3) Replace consecutive dots with a single dot.
     groupId = CharMatcher.is('.').trimFrom(groupId)
         .replaceAll("[^\\w.]", "").replaceAll("\\.+",  ".");
-    artifactId = CharMatcher.is('.').trimFrom(artifactId)
-        .replaceAll("[^\\w.]", "").replaceAll("\\.+",  ".");
 
-    if (!artifactId.isEmpty()) {  // No whitespace at all, so isEmpty() works.
-      return groupId + "." + artifactId;
-    }
     return groupId;
   }
 }
