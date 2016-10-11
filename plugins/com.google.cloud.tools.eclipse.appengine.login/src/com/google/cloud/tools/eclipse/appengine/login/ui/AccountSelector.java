@@ -72,11 +72,12 @@ public class AccountSelector extends Composite {
     return combo.getText();
   }
 
-  public void selectAccount(String email) {
+  public int selectAccount(String email) {
     int index = combo.indexOf(email);
     if (index != -1) {
       combo.select(index);
     }
+    return index;
   }
 
   @VisibleForTesting
