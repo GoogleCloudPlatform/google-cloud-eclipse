@@ -41,6 +41,7 @@
             <command
                   commandId="com.google.cloud.tools.eclipse.appengine.login.commands.loginCommand"
                   icon="icons/googleFavicon.png"
+                  tooltip="%loginIconTooltip"
                   id="com.google.cloud.tools.eclipse.appengine.login.toolbars.loginCommand">
             </command>
          </toolbar>

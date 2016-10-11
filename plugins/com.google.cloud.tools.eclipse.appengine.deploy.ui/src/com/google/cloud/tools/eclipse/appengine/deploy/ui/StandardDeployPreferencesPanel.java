@@ -48,13 +48,14 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.forms.FormColors;
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
-import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.osgi.service.prefs.BackingStoreException;
 
+import com.google.api.client.auth.oauth2.Credential;
+import com.google.cloud.tools.eclipse.appengine.login.IGoogleLoginService;
+import com.google.cloud.tools.eclipse.appengine.login.ui.AccountSelector;
 import com.google.cloud.tools.eclipse.ui.util.FontUtil;
 import com.google.cloud.tools.eclipse.ui.util.databinding.BucketNameValidator;
 import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectIdInputValidator;
@@ -73,6 +74,8 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
   private static Logger logger = Logger.getLogger(DeployPropertyPage.class.getName());
 
+  private AccountSelector accountSelector;
+  
   private Label projectIdLabel;
   private Text projectId;
 
@@ -95,14 +98,16 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   private DataBindingContext bindingContext;
 
   private Runnable layoutChangedHandler;
-  private FormToolkit formToolkit;
+  private boolean allowEmptyProjectId = false;
 
-  public StandardDeployPreferencesPanel(Composite parent, IProject project, Runnable layoutChangedHandler) {
+  public StandardDeployPreferencesPanel(Composite parent, IProject project,
+      IGoogleLoginService loginService, Runnable layoutChangedHandler, boolean allowEmptyProjectId) {
     super(parent, SWT.NONE);
 
     this.layoutChangedHandler = layoutChangedHandler;
+    this.allowEmptyProjectId = allowEmptyProjectId;
 
-    initializeFormToolkit();
+    createCredentialSection(loginService);
 
     createProjectIdSection();
 
@@ -119,13 +124,6 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     loadPreferences(project);
 
     setupDataBinding();
-  }
-
-  private void initializeFormToolkit() {
-    FormColors colors = new FormColors(getDisplay());
-    colors.setBackground(null);
-    colors.setForeground(null);
-    formToolkit = new FormToolkit(colors);
   }
 
   private void setupDataBinding() {
@@ -146,8 +144,8 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     IObservableValue projectIdModel = PojoProperties.value("projectId").observe(model);
 
     context.bindValue(projectIdField, projectIdModel,
-                      new UpdateValueStrategy().setAfterGetValidator(new ProjectIdInputValidator()),
-                      new UpdateValueStrategy().setAfterGetValidator(new ProjectIdInputValidator()));
+                      new UpdateValueStrategy().setAfterGetValidator(new ProjectIdInputValidator(allowEmptyProjectId)),
+                      new UpdateValueStrategy().setAfterGetValidator(new ProjectIdInputValidator(allowEmptyProjectId)));
   }
 
   private void setupProjectVersionDataBinding(DataBindingContext context) {
@@ -234,6 +232,21 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     model = new DeployPreferencesModel(project);
   }
 
+  public Credential getSelectedCredential() {
+    return accountSelector.getSelectedCredential();
+  }
+
+  private void createCredentialSection(IGoogleLoginService loginService) {
+    Composite accountComposite = new Composite(this, SWT.NONE);
+    
+    new Label(accountComposite, SWT.LEFT).setText(
+        Messages.getString("deploy.preferences.dialog.label.selectAccount"));
+
+    accountSelector = new AccountSelector(accountComposite, loginService,
+        Messages.getString("deploy.preferences.dialog.accountSelector.login"));
+    GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(accountComposite);
+  }
+
   private void createProjectIdSection() {
     Composite projectIdComposite = new Composite(this, SWT.NONE);
 
@@ -310,7 +323,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     expandableComposite.setExpanded(false);
     FontUtil.convertFontToBold(expandableComposite);
     GridDataFactory.fillDefaults().applyTo(expandableComposite);
-    formToolkit.adapt(expandableComposite, true, true);
+    getFormToolkit().adapt(expandableComposite, true, true);
   }
 
   private Composite createBucketSection(Composite parent) {
@@ -402,9 +415,6 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     }
     if (observables != null) {
       observables.dispose();
-    }
-    if (formToolkit != null) {
-      formToolkit.dispose();
     }
     super.dispose();
   }

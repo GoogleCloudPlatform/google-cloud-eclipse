@@ -39,5 +39,6 @@ Import-Package: com.google.cloud.tools.eclipse.preferences,
  com.google.cloud.tools.eclipse.preferences.areas,
  com.google.cloud.tools.eclipse.sdk.ui,
  com.google.cloud.tools.eclipse.ui.util,
+ com.google.cloud.tools.eclipse.ui.util.console,
  com.google.cloud.tools.eclipse.usagetracker,
  com.google.cloud.tools.eclipse.util

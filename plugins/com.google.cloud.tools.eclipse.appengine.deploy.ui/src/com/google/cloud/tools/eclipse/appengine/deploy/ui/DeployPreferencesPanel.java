@@ -18,11 +18,16 @@ package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.forms.FormColors;
+import org.eclipse.ui.forms.widgets.FormToolkit;
 
 abstract class DeployPreferencesPanel extends Composite {
+  private FormToolkit formToolkit;
 
   DeployPreferencesPanel(Composite parent, int style) {
     super(parent, style);
+
+    initializeFormToolkit();
   }
 
   public abstract DataBindingContext getDataBindingContext();
@@ -30,5 +35,24 @@ abstract class DeployPreferencesPanel extends Composite {
   public abstract void resetToDefaults();
 
   public abstract boolean savePreferences();
+
+  @Override
+  public void dispose() {
+    if (formToolkit != null) {
+      formToolkit.dispose();
+    }
+    super.dispose();
+  }
+
+  protected FormToolkit getFormToolkit() {
+    return formToolkit;
+  }
+
+  private void initializeFormToolkit() {
+    FormColors colors = new FormColors(getDisplay());
+    colors.setBackground(null);
+    colors.setForeground(null);
+    formToolkit = new FormToolkit(colors);
+  }
 
 }
