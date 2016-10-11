@@ -198,7 +198,7 @@ public final class SwtBotProjectActions {
   }
 
   /**
-   * Returns true if there are errors in the Problems view. Returns false otherwise.
+   * Returns the errors in the Problems view. Returns an empty list if there are no errors.
    */
   public static List<String> getErrorsInProblemsView(SWTWorkbenchBot bot) {
     // Open Problems View by Window -> show view -> Problems
