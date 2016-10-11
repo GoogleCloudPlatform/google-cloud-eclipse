@@ -26,6 +26,7 @@ import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotProjectActions;
 import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
+import com.google.common.base.Joiner;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -92,7 +93,7 @@ public class NewMavenBasedAppEngineProjectWizardTest extends AbstractProjectTest
 
     IFacetedProject facetedProject = new FacetedProjectHelper().getFacetedProject(project);
     assertNotNull("m2e-wtp should create a faceted project", facetedProject);
-    assertTrue(
+    assertTrue("Project does not have standard facet",
         new FacetedProjectHelper().projectHasFacet(facetedProject, AppEngineStandardFacet.ID));
 
     for (String projectFile : projectFiles) {
@@ -101,7 +102,8 @@ public class NewMavenBasedAppEngineProjectWizardTest extends AbstractProjectTest
     }
     List<String> errorsInProblemsView = SwtBotProjectActions.getErrorsInProblemsView(bot);
     if (!errorsInProblemsView.isEmpty()) {
-      fail(errorsInProblemsView.get(0));
+      String errorsString = Joiner.on("\n").join(errorsInProblemsView);
+      fail(errorsString);
     }
   }
 }

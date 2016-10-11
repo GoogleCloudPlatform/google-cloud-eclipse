@@ -24,6 +24,7 @@ import static org.junit.Assert.fail;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotProjectActions;
 import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
+import com.google.common.base.Joiner;
 
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
@@ -74,7 +75,7 @@ public class NewNativeAppEngineStandardProjectTest extends AbstractProjectTests 
 
     IFacetedProject facetedProject = new FacetedProjectHelper().getFacetedProject(project);
     assertNotNull("Native App Engine projects should be faceted", facetedProject);
-    assertTrue(
+    assertTrue("Project does not have standard facet",
         new FacetedProjectHelper().projectHasFacet(facetedProject, AppEngineStandardFacet.ID));
 
     for (String projectFile : projectFiles) {
@@ -83,7 +84,7 @@ public class NewNativeAppEngineStandardProjectTest extends AbstractProjectTests 
     }
     List<String> errorsInProblemsView = SwtBotProjectActions.getErrorsInProblemsView(bot);
     if (!errorsInProblemsView.isEmpty()) {
-      fail(errorsInProblemsView.get(0));
-    }
+      String errorsString = Joiner.on("\n").join(errorsInProblemsView);
+      fail(errorsString);    }
   }
 }
