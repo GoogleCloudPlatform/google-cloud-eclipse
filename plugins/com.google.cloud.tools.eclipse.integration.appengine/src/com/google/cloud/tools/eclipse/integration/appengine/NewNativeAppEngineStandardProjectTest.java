@@ -85,6 +85,7 @@ public class NewNativeAppEngineStandardProjectTest extends AbstractProjectTests 
     List<String> errorsInProblemsView = SwtBotProjectActions.getErrorsInProblemsView(bot);
     if (!errorsInProblemsView.isEmpty()) {
       String errorsString = Joiner.on("\n").join(errorsInProblemsView);
-      fail(errorsString);    }
+      fail(errorsString);
+    }
   }
 }

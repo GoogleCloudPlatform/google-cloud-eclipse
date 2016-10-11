@@ -49,7 +49,6 @@ public class NewMavenBasedAppEngineProjectWizardTest extends AbstractProjectTest
 
   @Test
   public void testHelloWorld() throws Exception {
-    // appengine-standard-archetype still missing base index.html and HelloWorld.java
     String[] projectFiles =
         {"src/main/webapp/WEB-INF/appengine-web.xml", "src/main/webapp/WEB-INF/web.xml", "pom.xml"};
     createAndCheck("appWithPackage", null, "app.engine.test", null, "Hello World template",
