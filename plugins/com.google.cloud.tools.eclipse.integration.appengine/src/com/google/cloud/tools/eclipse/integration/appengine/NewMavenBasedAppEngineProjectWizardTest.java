@@ -53,35 +53,24 @@ public class NewMavenBasedAppEngineProjectWizardTest extends AbstractProjectTest
         {"src/main/webapp/WEB-INF/appengine-web.xml", "src/main/webapp/WEB-INF/web.xml", "pom.xml"};
     createAndCheck("appWithPackage", null, "app.engine.test", null, "Hello World template",
         projectFiles);
-    assertEquals("not-needed",
-        SwtBotAppEngineActions
-            .getAppEngineProjectId(project.getFile("src/main/webapp/WEB-INF/appengine-web.xml")));
   }
 
   @Test
   public void testGuestbookExampleNoProjectId() throws Exception {
-    // appengine-standard-archetype still missing base index.html and HelloWorld.java
     String[] projectFiles = {"src/main/webapp/guestbook.jsp",
         "src/main/webapp/WEB-INF/appengine-web.xml", "src/main/webapp/WEB-INF/web.xml", "pom.xml"};
     createAndCheck("guestbookExample", null, "app.engine.test", null, "Guestbook example",
         projectFiles);
-    assertEquals("${app.id}",
-        SwtBotAppEngineActions
-            .getAppEngineProjectId(project.getFile("src/main/webapp/WEB-INF/appengine-web.xml")));
     // no projectId then archetypes use artifactID
     assertEquals("guestbookExample", getPomProperty(project, "app.id"));
   }
 
   @Test
   public void testGuestbookExampleWithProjectId() throws Exception {
-    // appengine-standard-archetype still missing base index.html and HelloWorld.java
     String[] projectFiles = {"src/main/webapp/guestbook.jsp",
         "src/main/webapp/WEB-INF/appengine-web.xml", "src/main/webapp/WEB-INF/web.xml", "pom.xml"};
     createAndCheck("guestbookExample", null, "app.engine.test", "my-project-id",
         "Guestbook example", projectFiles);
-    assertEquals("${app.id}",
-        SwtBotAppEngineActions
-            .getAppEngineProjectId(project.getFile("src/main/webapp/WEB-INF/appengine-web.xml")));
     assertEquals("my-project-id", getPomProperty(project, "app.id"));
   }
 

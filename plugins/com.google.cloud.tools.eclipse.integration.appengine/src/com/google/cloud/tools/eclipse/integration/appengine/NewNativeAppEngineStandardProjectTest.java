@@ -18,7 +18,6 @@ package com.google.cloud.tools.eclipse.integration.appengine;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -46,7 +45,6 @@ public class NewNativeAppEngineStandardProjectTest extends AbstractProjectTests 
         "src/main/webapp/META-INF/MANIFEST.MF", "src/main/webapp/WEB-INF/appengine-web.xml",
         "src/main/webapp/WEB-INF/web.xml", "src/main/webapp/index.html"};
     createAndCheck("appWithDefault", null, null, null, projectFiles);
-    assertNull(SwtBotAppEngineActions.getAppEngineProjectId(project.getFile("src/main/webapp/WEB-INF/appengine-web.xml")));
   }
 
   @Test
@@ -55,7 +53,6 @@ public class NewNativeAppEngineStandardProjectTest extends AbstractProjectTests 
         "src/main/webapp/META-INF/MANIFEST.MF", "src/main/webapp/WEB-INF/appengine-web.xml",
         "src/main/webapp/WEB-INF/web.xml", "src/main/webapp/index.html",};
     createAndCheck("appWithPackage", null, "app.engine.test", null, projectFiles);
-    assertNull(SwtBotAppEngineActions.getAppEngineProjectId(project.getFile("src/main/webapp/WEB-INF/appengine-web.xml")));
   }
 
   @Test
@@ -65,8 +62,6 @@ public class NewNativeAppEngineStandardProjectTest extends AbstractProjectTests 
         "src/main/webapp/WEB-INF/web.xml", "src/main/webapp/index.html",};
     createAndCheck("appWithPackageAndProjectId", null, "app.engine.test", "my-project-id",
         projectFiles);
-    assertNull(
-        SwtBotAppEngineActions.getAppEngineProjectId(project.getFile("src/main/webapp/WEB-INF/appengine-web.xml")));
   }
 
   /** Create a project with the given parameters. */
