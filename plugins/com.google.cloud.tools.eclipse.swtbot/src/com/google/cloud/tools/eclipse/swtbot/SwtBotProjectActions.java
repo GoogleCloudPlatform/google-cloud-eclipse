@@ -213,6 +213,10 @@ public final class SwtBotProjectActions {
     for (SWTBotTreeItem item : tree.getAllItems()) {
       String text = item.getText();
       if (text != null && text.startsWith("Errors")) {
+        errors.add(text);
+        errors.add("How many before expansion: " + item.getItems().length);
+        item = item.expand();
+        errors.add("How many after expansion: " + item.getItems().length);
         for (SWTBotTreeItem actual : item.getItems()) {
           errors.add(actual.getText());
         }
