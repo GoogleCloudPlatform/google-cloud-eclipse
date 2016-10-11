@@ -83,12 +83,12 @@ public class AppEngineLibrariesInPluginXmlTest {
     List<Filter> filters = libraryFile.getFilters();
     assertThat(filters.size(), is(4));
     assertTrue(filters.get(0).isExclude());
-    assertThat(filters.get(0).getPattern(), is("com.google.appengine.repackaged.**"));
+    assertThat(filters.get(0).getPattern(), is("com/google/appengine/repackaged/**"));
     assertTrue(filters.get(1).isExclude());
-    assertThat(filters.get(1).getPattern(), is("com.google.appengine.labs.repackaged.**"));
-    assertTrue(filters.get(2).isExclude());
-    assertThat(filters.get(2).getPattern(), is("com.google.apphosting.**"));
-    assertFalse(filters.get(3).isExclude());
-    assertThat(filters.get(3).getPattern(), is("com.google.apphosting.api.**"));
+    assertThat(filters.get(1).getPattern(), is("com/google/appengine/labs/repackaged/**"));
+    assertFalse(filters.get(2).isExclude());
+    assertThat(filters.get(2).getPattern(), is("com/google/apphosting/api/**"));
+    assertTrue(filters.get(3).isExclude());
+    assertThat(filters.get(3).getPattern(), is("com/google/apphosting/**"));
   }
 }
