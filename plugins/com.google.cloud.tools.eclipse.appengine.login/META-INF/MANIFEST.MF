@@ -32,4 +32,6 @@ Import-Package: com.google.cloud.tools.eclipse.ui.util,
  com.google.cloud.tools.eclipse.usagetracker,
  javax.servlet.http;version="3.1.0",
  org.eclipse.core.expressions,
+ org.eclipse.core.databinding.observable,
+ org.eclipse.core.databinding.observable.value,
  org.osgi.service.component
