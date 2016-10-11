@@ -48,10 +48,10 @@ public class NewMavenBasedAppEngineProjectWizardTest extends AbstractProjectTest
 
   @Test
   public void testHelloWorld() throws Exception {
-    // appengine-skeleton-archetype still missing base index.html and HelloWorld.java
+    // appengine-standard-archetype still missing base index.html and HelloWorld.java
     String[] projectFiles =
         {"src/main/webapp/WEB-INF/appengine-web.xml", "src/main/webapp/WEB-INF/web.xml", "pom.xml"};
-    createAndCheck("appWithPackage", null, "app.engine.test", null, "Hello-world template",
+    createAndCheck("appWithPackage", null, "app.engine.test", null, "Hello World template",
         projectFiles);
     assertEquals("${app.id}",
         SwtBotAppEngineActions
@@ -60,7 +60,7 @@ public class NewMavenBasedAppEngineProjectWizardTest extends AbstractProjectTest
 
   @Test
   public void testGuestbookExampleNoProjectId() throws Exception {
-    // appengine-skeleton-archetype still missing base index.html and HelloWorld.java
+    // appengine-standard-archetype still missing base index.html and HelloWorld.java
     String[] projectFiles = {"src/main/webapp/guestbook.jsp",
         "src/main/webapp/WEB-INF/appengine-web.xml", "src/main/webapp/WEB-INF/web.xml", "pom.xml"};
     createAndCheck("guestbookExample", null, "app.engine.test", null, "Guestbook example",
@@ -74,7 +74,7 @@ public class NewMavenBasedAppEngineProjectWizardTest extends AbstractProjectTest
 
   @Test
   public void testGuestbookExampleWithProjectId() throws Exception {
-    // appengine-skeleton-archetype still missing base index.html and HelloWorld.java
+    // appengine-standard-archetype still missing base index.html and HelloWorld.java
     String[] projectFiles = {"src/main/webapp/guestbook.jsp",
         "src/main/webapp/WEB-INF/appengine-web.xml", "src/main/webapp/WEB-INF/web.xml", "pom.xml"};
     createAndCheck("guestbookExample", null, "app.engine.test", "my-project-id",
