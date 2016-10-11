@@ -218,7 +218,7 @@ public class M2RepositoryService implements ILibraryRepositoryService {
   }
 
   @VisibleForTesting
-  interface RepositorySystemSessionFactory {
+  public interface RepositorySystemSessionFactory {
     RepositorySystemSession getSession(RepositorySystem system);
   }
 

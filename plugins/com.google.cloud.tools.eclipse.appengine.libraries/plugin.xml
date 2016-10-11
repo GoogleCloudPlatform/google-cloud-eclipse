@@ -14,10 +14,10 @@
         <mavenCoordinates
               artifactId="appengine-api-1.0-sdk"
               groupId="com.google.appengine" />
-        <exclusionFilter pattern="com.google.appengine.repackaged.**" />
-        <exclusionFilter pattern="com.google.appengine.labs.repackaged.**" />
-        <exclusionFilter pattern="com.google.apphosting.**" />
-        <inclusionFilter pattern="com.google.apphosting.api.**" />
+        <exclusionFilter pattern="com/google/appengine/repackaged/**" />
+        <exclusionFilter pattern="com/google/appengine/labs/repackaged/**" />
+        <inclusionFilter pattern="com/google/apphosting/api/**" />
+        <exclusionFilter pattern="com/google/apphosting/**" />
       </libraryFile>
     </library>
   </extension>

@@ -17,7 +17,6 @@ package com.google.cloud.tools.eclipse.appengine.libraries;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
@@ -27,6 +26,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,7 +47,17 @@ public class AppEngineLibraryContainerInitializerTest {
   @Mock private IConfigurationElement configurationElement;
 
   @Rule
+  public TestLibraryRepositoryService libraryRepositoryService = new TestLibraryRepositoryService();
+  @Rule
   public TestProject testProject = new TestProject().withClasspathContainerPath(TEST_LIBRARY_PATH);
+
+  @Before
+  public void setUp() throws Exception {
+    when(libraryRepositoryService.getRepositoryService().getJarLocation(any(MavenCoordinates.class)))
+      .thenReturn(new Path("/test/path/foo.jar"));
+    when(libraryRepositoryService.getRepositoryService().getSourceJarLocation(any(MavenCoordinates.class)))
+      .thenReturn(new Path("/test/path/foo-sources.jar"));
+  }
 
   /**
    * This test relies on the {@link TestAppEngineLibraryContainerInitializer} defined in the fragment.xml for
@@ -63,7 +73,6 @@ public class AppEngineLibraryContainerInitializerTest {
   @Test
   public void testInitialize_resolvesContainerToJar() throws CoreException, LibraryBuilderException {
     setupLibraryBuilder();
-
     AppEngineLibraryContainerInitializer containerInitializer =
         new AppEngineLibraryContainerInitializer(new IConfigurationElement[]{ configurationElement },
                                                  libraryBuilder,
@@ -74,8 +83,8 @@ public class AppEngineLibraryContainerInitializerTest {
     IClasspathEntry[] resolvedClasspath = testProject.getJavaProject().getResolvedClasspath(false);
     assertThat(resolvedClasspath.length, is(2));
     IClasspathEntry libJar = resolvedClasspath[1];
-    assertTrue(libJar.getPath().toOSString().endsWith("artifactId.jar"));
-    assertTrue(libJar.getSourceAttachmentPath().toOSString().endsWith("artifactId.jar"));
+    assertThat(libJar.getPath().toOSString(), is("/test/path/foo.jar"));
+    assertThat(libJar.getSourceAttachmentPath().toOSString(), is("/test/path/foo-sources.jar"));
   }
 
   @Test(expected = CoreException.class)
@@ -130,7 +139,9 @@ public class AppEngineLibraryContainerInitializerTest {
   public void testInitialize_libraryBuilderErrorDoesNotPreventOtherLibraries() throws Exception {
     Library library = new Library(TEST_LIBRARY_ID);
     library.setLibraryFiles(Collections.singletonList(new LibraryFile(new MavenCoordinates("groupId", "artifactId"))));
-    when(libraryBuilder.build(any(IConfigurationElement.class))).thenThrow(LibraryBuilderException.class).thenReturn(library);
+    when(libraryBuilder.build(any(IConfigurationElement.class)))
+      .thenThrow(LibraryBuilderException.class)
+      .thenReturn(library);
 
     AppEngineLibraryContainerInitializer containerInitializer =
         new AppEngineLibraryContainerInitializer(new IConfigurationElement[]{ configurationElement,
@@ -143,8 +154,8 @@ public class AppEngineLibraryContainerInitializerTest {
     IClasspathEntry[] resolvedClasspath = testProject.getJavaProject().getResolvedClasspath(false);
     assertThat(resolvedClasspath.length, is(2));
     IClasspathEntry libJar = resolvedClasspath[1];
-    assertTrue(libJar.getPath().toOSString().endsWith("artifactId.jar"));
-    assertTrue(libJar.getSourceAttachmentPath().toOSString().endsWith("artifactId.jar"));
+    assertThat(libJar.getPath().toOSString(), is("/test/path/foo.jar"));
+    assertThat(libJar.getSourceAttachmentPath().toOSString(), is("/test/path/foo-sources.jar"));
   }
 
   private void setupLibraryBuilder() throws LibraryBuilderException {

@@ -21,4 +21,4 @@ Import-Package: com.google.cloud.tools.eclipse.util.status,
  org.eclipse.m2e.core,
  org.eclipse.m2e.core.repository,
  org.osgi.framework;version="1.8.0",
- org.osgi.service.component.annotations;version="1.2.0";resolution:=optional
+ org.osgi.service.component.annotations;resolution:=optional
