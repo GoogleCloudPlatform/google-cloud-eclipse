@@ -36,7 +36,7 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -203,7 +203,7 @@ public final class SwtBotProjectActions {
   /** Return the list of all problems in the workspace. */
   public static List<String> getAllBuildErrors(SWTWorkbenchBot bot) {
     IWorkspaceRoot root = getWorkspaceRoot();
-    List<String> foundProblems = new LinkedList<>();
+    List<String> foundProblems = new ArrayList<>();
     for (IProject project : root.getProjects()) {
       try {
         IMarker[] problems = project.findMarkers(IMarker.PROBLEM, true /* includeSubtypes */,
