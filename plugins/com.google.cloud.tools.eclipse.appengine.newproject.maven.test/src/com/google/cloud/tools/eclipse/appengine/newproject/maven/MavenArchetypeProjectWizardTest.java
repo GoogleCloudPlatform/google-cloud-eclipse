@@ -91,11 +91,15 @@ public class MavenArchetypeProjectWizardTest {
   @Test
   public void testSuggestPackageName() {
     assertEquals("aa.bb", MavenAppEngineStandardWizardPage.suggestPackageName("aa.bb"));
+
     assertEquals("aA.Bb", MavenAppEngineStandardWizardPage.suggestPackageName("aA.Bb"));
+
     assertEquals("aa.bb",
         MavenAppEngineStandardWizardPage.suggestPackageName(" a  a\t . b\r b \n"));
+
     assertEquals("aa.bb",
         MavenAppEngineStandardWizardPage.suggestPackageName("....aa....bb..."));
+
     assertEquals("aa._01234bb", MavenAppEngineStandardWizardPage.suggestPackageName(
         "aa`~!@#$%^&*()-+=[]{}<>\\|:;'\",?/._01234bb"));
   }
