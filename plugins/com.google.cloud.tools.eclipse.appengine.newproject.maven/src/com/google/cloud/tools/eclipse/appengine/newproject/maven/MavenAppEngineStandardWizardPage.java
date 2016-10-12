@@ -134,21 +134,21 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     GridLayoutFactory.swtDefaults().numColumns(2).applyTo(mavenCoordinatesGroup);
 
     Label groupIdLabel = new Label(mavenCoordinatesGroup, SWT.NONE);
-    groupIdLabel.setText("Group Id:"); //$NON-NLS-1$
+    groupIdLabel.setText("Group ID:");
     groupIdField = new Text(mavenCoordinatesGroup, SWT.BORDER);
     GridDataFactory.defaultsFor(groupIdField).align(SWT.FILL, SWT.CENTER).applyTo(groupIdField);
     groupIdField.addModifyListener(pageValidator);
     groupIdField.addVerifyListener(new AutoPackageNameSetterOnGroupIdChange());
 
     Label artifactIdLabel = new Label(mavenCoordinatesGroup, SWT.NONE);
-    artifactIdLabel.setText("Artifact Id:"); //$NON-NLS-1$
+    artifactIdLabel.setText("Artifact ID:");
     artifactIdField = new Text(mavenCoordinatesGroup, SWT.BORDER);
     GridDataFactory.defaultsFor(artifactIdField).align(SWT.FILL, SWT.CENTER)
         .applyTo(artifactIdField);
     artifactIdField.addModifyListener(pageValidator);
 
     Label versionLabel = new Label(mavenCoordinatesGroup, SWT.NONE);
-    versionLabel.setText("Version:"); //$NON-NLS-1$
+    versionLabel.setText("Version:");
     versionField = new Text(mavenCoordinatesGroup, SWT.BORDER);
     versionField.setText(defaultVersion);
     GridDataFactory.defaultsFor(versionField).align(SWT.FILL, SWT.CENTER).applyTo(versionField);
@@ -364,26 +364,22 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
   }
 
   /**
-   * Helper function returning a suggested package name based on groupId and artifactId.
-   *
+   * Helper function returning a suggested package name based on groupId.
    * It does basic string filtering/manipulation, which does not completely eliminate
    * naming issues. However, users will be alerted of any errors in naming by
    * {@link #validatePage}.
    */
   @VisibleForTesting
   static String suggestPackageName(String groupId) {
-    String naivePackageName = groupId;
 
-    if (JavaPackageValidator.validate(naivePackageName).isOK()) {
-      return naivePackageName;
+    if (JavaPackageValidator.validate(groupId).isOK()) {
+      return groupId;
     }
 
     // 1) Remove leading and trailing dots.
     // 2) Keep only word characters ([a-zA-Z_0-9]) and dots (escaping inside [] not necessary).
     // 3) Replace consecutive dots with a single dot.
-    groupId = CharMatcher.is('.').trimFrom(groupId)
+    return CharMatcher.is('.').trimFrom(groupId)
         .replaceAll("[^\\w.]", "").replaceAll("\\.+",  ".");
-
-    return groupId;
   }
 }
