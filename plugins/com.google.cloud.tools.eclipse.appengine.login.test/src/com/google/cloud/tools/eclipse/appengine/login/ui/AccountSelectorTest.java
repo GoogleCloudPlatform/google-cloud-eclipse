@@ -149,11 +149,13 @@ public class AccountSelectorTest {
 
     assertEquals(-1, selector.combo.getSelectionIndex());
     assertTrue(selector.getSelectedEmail().isEmpty());
+    assertNull(selector.getSelectedCredential());
 
     selector.selectAccount("some-email-2@example.com");
 
     assertNotEquals(-1, selector.combo.getSelectionIndex());
     assertEquals("some-email-2@example.com", selector.getSelectedEmail());
+    assertEquals(credential2, selector.getSelectedCredential());
   }
 
   @Test
