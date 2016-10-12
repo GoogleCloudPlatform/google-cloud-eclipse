@@ -98,8 +98,8 @@ public class SwtBotAppEngineActions {
       bot.checkBox("Create project in workspace").deselect();
       bot.textWithLabel("Location:").setText(location);
     }
-    bot.textWithLabel("Group Id:").setText(groupId);
-    bot.textWithLabel("Artifact Id:").setText(artifactId);
+    bot.textWithLabel("Group ID:").setText(groupId);
+    bot.textWithLabel("Artifact ID:").setText(artifactId);
     if (javaPackage != null) {
       bot.textWithLabel("Java package:").setText(javaPackage);
     }
