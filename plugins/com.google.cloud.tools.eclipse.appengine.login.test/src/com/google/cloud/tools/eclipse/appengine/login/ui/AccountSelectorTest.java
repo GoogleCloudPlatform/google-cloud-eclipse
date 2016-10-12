@@ -33,7 +33,6 @@ import com.google.cloud.tools.ide.login.Account;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -59,7 +58,7 @@ public class AccountSelectorTest {
 
   @Before
   public void setUp() {
-    display = new Display();
+    display = Display.getDefault();
     shell = new Shell(display);
 
     when(account1.getEmail()).thenReturn("some-email-1@example.com");
@@ -68,11 +67,6 @@ public class AccountSelectorTest {
     when(account2.getOAuth2Credential()).thenReturn(credential2);
     when(account3.getEmail()).thenReturn("some-email-3@example.com");
     when(account3.getOAuth2Credential()).thenReturn(credential3);
-  }
-
-  @After
-  public void tearDown() {
-    display.dispose();
   }
 
   @Test(expected = IllegalArgumentException.class)

@@ -27,7 +27,6 @@ import com.google.cloud.tools.ide.login.Account;
 
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,15 +50,10 @@ public class AccountsPanelTest {
 
   @Before
   public void setUp() {
-    display = new Display();
+    display = Display.getDefault();
     when(account1.getEmail()).thenReturn("some-email-1@example.com");
     when(account2.getEmail()).thenReturn("some-email-2@example.com");
     when(account3.getEmail()).thenReturn("some-email-3@example.com");
-  }
-
-  @After
-  public void tearDown() {
-    display.dispose();
   }
 
   @Test
