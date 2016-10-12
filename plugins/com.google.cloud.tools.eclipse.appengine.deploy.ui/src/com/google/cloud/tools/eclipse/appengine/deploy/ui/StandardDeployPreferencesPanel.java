@@ -386,7 +386,6 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
      * @param validator must be a validator for String values, will be applied to <code>text.getValue()</code>
      */
     public OverrideValidator(ISWTObservableValue selection, ISWTObservableValue text, IValidator validator) {
-      super();
       Preconditions.checkArgument(text.getWidget() instanceof Text,
                                   "text is an observable for {0}, should be for {1}",
                                   text.getWidget().getClass().getName(),
