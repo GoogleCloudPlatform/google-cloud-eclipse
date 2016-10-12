@@ -27,6 +27,7 @@ import com.google.cloud.tools.ide.login.Account;
 
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,7 +43,7 @@ import java.util.List;
 public class AccountsPanelTest {
 
   @Mock private IGoogleLoginService loginService;
-  private Display display;
+  private Shell shell;
 
   @Mock private Account account1;
   @Mock private Account account2;
@@ -50,10 +51,15 @@ public class AccountsPanelTest {
 
   @Before
   public void setUp() {
-    display = Display.getDefault();
+    shell = new Shell(Display.getDefault());
     when(account1.getEmail()).thenReturn("some-email-1@example.com");
     when(account2.getEmail()).thenReturn("some-email-2@example.com");
     when(account3.getEmail()).thenReturn("some-email-3@example.com");
+  }
+
+  @After
+  public void tearDown() {
+    shell.dispose();
   }
 
   @Test
@@ -61,7 +67,7 @@ public class AccountsPanelTest {
     setUpLoginService();
 
     AccountsPanel panel = new AccountsPanel(null, loginService);
-    panel.createDialogArea(new Shell(display));
+    panel.createDialogArea(shell);
 
     assertNull(panel.logOutButton);
   }
@@ -71,7 +77,7 @@ public class AccountsPanelTest {
     setUpLoginService(Arrays.asList(account1));
 
     AccountsPanel panel = new AccountsPanel(null, loginService);
-    panel.createDialogArea(new Shell(display));
+    panel.createDialogArea(shell);
 
     assertNotNull(panel.logOutButton);
   }
@@ -81,7 +87,7 @@ public class AccountsPanelTest {
     setUpLoginService();
 
     AccountsPanel panel = new AccountsPanel(null, loginService);
-    panel.createDialogArea(new Shell(display));
+    panel.createDialogArea(shell);
 
     assertTrue(panel.accountLabels.isEmpty());
   }
@@ -91,7 +97,7 @@ public class AccountsPanelTest {
     setUpLoginService(Arrays.asList(account1));
 
     AccountsPanel panel = new AccountsPanel(null, loginService);
-    panel.createDialogArea(new Shell(display));
+    panel.createDialogArea(shell);
 
     assertEquals(1, panel.accountLabels.size());
     panel.accountLabels.get(0).getText().contains(account2.getEmail());
@@ -102,7 +108,7 @@ public class AccountsPanelTest {
     setUpLoginService(Arrays.asList(account1, account2, account3));
 
     AccountsPanel panel = new AccountsPanel(null, loginService);
-    panel.createDialogArea(new Shell(display));
+    panel.createDialogArea(shell);
 
     assertEquals(3, panel.accountLabels.size());
     String text1 = panel.accountLabels.get(0).getText();
