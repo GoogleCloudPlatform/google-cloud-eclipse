@@ -26,7 +26,7 @@ import org.eclipse.core.runtime.Path;
 import com.google.common.base.Preconditions;
 
 /**
- * A library that can be added to App Engine projects, e.g. AppEngine Endpoints library.
+ * A library that can be added to App Engine projects, e.g. App Engine Endpoints library.
  *
  */
 public final class Library {

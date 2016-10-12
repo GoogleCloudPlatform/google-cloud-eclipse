@@ -1,3 +1,19 @@
+/*
+ * Copyright 2016 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import java.lang.reflect.InvocationTargetException;
@@ -9,13 +25,11 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -31,7 +45,7 @@ import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.libraries.Library;
-import com.google.common.annotations.VisibleForTesting;
+import com.google.cloud.tools.eclipse.preferences.PreferenceUtil;
 
 /**
 * Utility to make a new Eclipse project with the App Engine Standard facets in the workspace.  
@@ -74,7 +88,7 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
         facetedProject, true /* installDependentFacets */, monitor);
     AppEngineStandardFacet.installAllAppEngineRuntimes(facetedProject, true /* force */, monitor);
     
-    setProjectIdPreference(newProject);
+    PreferenceUtil.setProjectIdPreference(newProject, config.getAppEngineProjectId());
 
     addAppEngineLibrariesToBuildPath(newProject, config.getAppEngineLibraries(), monitor);
 
@@ -112,16 +126,6 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
     IClasspathEntry[] newRawClasspath = Arrays.copyOf(rawClasspath, rawClasspath.length + 1);
     newRawClasspath[newRawClasspath.length - 1] = junit4Container;
     javaProject.setRawClasspath(newRawClasspath, monitor);
-  }
-
-  @VisibleForTesting
-  void setProjectIdPreference(IProject project) {
-    String projectId = config.getAppEngineProjectId();
-    if (projectId != null && !projectId.isEmpty()) {
-      IEclipsePreferences preferences = new ProjectScope(project)
-          .getNode("com.google.cloud.tools.eclipse.appengine.deploy");
-      preferences.put("project.id", projectId);
-    }
   }
 
 }
