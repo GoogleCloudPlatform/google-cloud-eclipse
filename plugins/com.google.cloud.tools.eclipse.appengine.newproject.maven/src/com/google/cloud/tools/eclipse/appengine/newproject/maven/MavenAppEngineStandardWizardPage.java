@@ -60,10 +60,10 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
   private Button useDefaults;
   private Text locationField;
   private Button locationBrowseButton;
-  private Text groupIdField;
+  @VisibleForTesting Text groupIdField;
   private Text artifactIdField;
   private Text versionField;
-  private Text javaPackageField;
+  @VisibleForTesting Text javaPackageField;
   private Text projectIdField;
 
   private boolean canFlipPage;
