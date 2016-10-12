@@ -16,7 +16,13 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 
-import java.text.MessageFormat;
+import com.google.cloud.tools.eclipse.appengine.newproject.JavaPackageValidator;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
+import com.google.cloud.tools.project.ProjectIdValidator;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.CharMatcher;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
@@ -41,13 +47,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import com.google.cloud.tools.eclipse.appengine.newproject.JavaPackageValidator;
-import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
-import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
-import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
-import com.google.cloud.tools.project.ProjectIdValidator;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.CharMatcher;
+import java.text.MessageFormat;
 
 /**
  * UI to collect all information necessary to create a new Maven-based App Engine Standard Java
@@ -352,19 +352,20 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
   }
 
   /**
-   * Auto-fills javaPackageField as groupId when 
-   * 1) javaPackageField is empty; or 
+   * Auto-fills {@link #javaPackageField} as Group ID when
+   * 1) {@link #javaPackageField} is empty; or
    * 2) the field matches previous auto-fill before ID modification.
    */
   private final class AutoPackageNameSetterOnGroupIdChange implements VerifyListener {
     @Override
     public void verifyText(VerifyEvent event) {
+      String groupId = groupIdField.getText();
       // Below explains how to get text after modification:
       // http://stackoverflow.com/questions/32872249/get-text-of-swt-text-component-before-modification
       String newGroupId =
-          getGroupId().substring(0, event.start) + event.text + getGroupId().substring(event.end);
+          groupId.substring(0, event.start) + event.text + groupId.substring(event.end);
 
-      String oldPackageName = suggestPackageName(getGroupId());
+      String oldPackageName = suggestPackageName(groupId);
       String newPackageName = suggestPackageName(newGroupId);
       adjustPackageName(oldPackageName, newPackageName);
     }
