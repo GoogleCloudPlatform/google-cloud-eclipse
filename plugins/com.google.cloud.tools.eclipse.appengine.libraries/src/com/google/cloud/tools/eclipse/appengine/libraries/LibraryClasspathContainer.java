@@ -80,7 +80,7 @@ public class LibraryClasspathContainer implements IClasspathContainer {
         }
         entries[idx++] =
             JavaCore.newLibraryEntry(repositoryService.getJarLocation(libraryFile.getMavenCoordinates()),
-                                     repositoryService.getSourceJarLocation(libraryFile.getMavenCoordinates()),
+                                     getSourceLocation(repositoryService, libraryFile),
                                      null,
                                      getAccessRules(libraryFile.getFilters()),
                                      classpathAttributes,
@@ -88,13 +88,23 @@ public class LibraryClasspathContainer implements IClasspathContainer {
       }
       return entries;
     } catch (CoreException | LibraryRepositoryServiceException ex) {
-      // declared on UpdateClasspathAttributeUtil.create(Non)DependencyAttribute(), but it's current implementation does
+      // declared on UpdateClasspathAttributeUtil.create(Non)DependencyAttribute(), but its current implementation does
       // not throw this exception.
       return new IClasspathEntry[0];
     } finally {
       if (serviceReference != null) {
         releaseRepositoryService(serviceReference);
       }
+    }
+  }
+
+  private IPath getSourceLocation(ILibraryRepositoryService repositoryService, LibraryFile libraryFile) {
+    if (libraryFile.getSourceUri() == null) {
+      return repositoryService.getSourceJarLocation(libraryFile.getMavenCoordinates());
+    } else {
+      // download the file and return path to it
+      // TODO https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/800
+      return new Path("/downloaded/source/file");
     }
   }
 

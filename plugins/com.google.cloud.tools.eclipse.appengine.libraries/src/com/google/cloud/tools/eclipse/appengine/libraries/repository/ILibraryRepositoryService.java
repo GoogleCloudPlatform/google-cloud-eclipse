@@ -37,4 +37,10 @@ public interface ILibraryRepositoryService {
    */
   IPath getSourceJarLocation(MavenCoordinates mavenCoordinates);
 
+  /**
+   * @return a path that points to a local file corresponding to the javadoc artifact described
+   * by <code>mavenCoordinates</code>
+   */
+  IPath getJavadocJarLocation(MavenCoordinates mavenCoordinates);
+
 }

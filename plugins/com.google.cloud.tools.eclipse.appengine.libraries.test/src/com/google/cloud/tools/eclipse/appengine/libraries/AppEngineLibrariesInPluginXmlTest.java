@@ -31,8 +31,8 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.RegistryFactory;
 import org.junit.Test;
 
-import com.google.cloud.tools.eclipse.appengine.libraries.config.LibraryBuilder;
-import com.google.cloud.tools.eclipse.appengine.libraries.config.LibraryBuilder.LibraryBuilderException;
+import com.google.cloud.tools.eclipse.appengine.libraries.config.LibraryFactory;
+import com.google.cloud.tools.eclipse.appengine.libraries.config.LibraryFactory.LibraryFactoryException;
 
 /**
  * This class is intended to test the App Engine libraries set in the plugin.xml to validate that their attributes
@@ -43,13 +43,13 @@ public class AppEngineLibrariesInPluginXmlTest {
   private static final String APP_ENGINE_API_LIBRARY_ID = "appengine-api";
 
   @Test
-  public void testAppEngineAPIConfig() throws URISyntaxException, LibraryBuilderException {
+  public void testAppEngineAPIConfig() throws URISyntaxException, LibraryFactoryException {
     IConfigurationElement[] configurationElements =
         RegistryFactory.getRegistry()
           .getConfigurationElementsFor(AppEngineLibraryContainerInitializer.LIBRARIES_EXTENSION_POINT);
     for (IConfigurationElement configurationElement : configurationElements) {
       if (configurationElement.getAttribute("id").equals(APP_ENGINE_API_LIBRARY_ID)) {
-        Library appEngineLibrary = new LibraryBuilder().build(configurationElement);
+        Library appEngineLibrary = new LibraryFactory().create(configurationElement);
         verifyAppEngineLibrary(appEngineLibrary);
         return;
       }

@@ -31,9 +31,9 @@ import com.google.cloud.tools.eclipse.appengine.libraries.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.libraries.MavenCoordinates;
 import com.google.common.base.Strings;
 
-public class LibraryBuilder {
+public class LibraryFactory {
 
-  private static final Logger logger = Logger.getLogger(LibraryBuilder.class.getName());
+  private static final Logger logger = Logger.getLogger(LibraryFactory.class.getName());
 
   private static final String ELMT_LIBRARY = "library";
   private static final String ATTR_ID = "id";
@@ -54,7 +54,7 @@ public class LibraryBuilder {
   private static final String ATTR_CLASSIFIER = "classifier";
   private static final String ATTR_EXPORT = "export";
 
-  public Library build(IConfigurationElement configurationElement) throws LibraryBuilderException {
+  public Library create(IConfigurationElement configurationElement) throws LibraryFactoryException {
     try {
       if (configurationElement.getName().equals(ELMT_LIBRARY)) {
         Library library = new Library(configurationElement.getAttribute(ATTR_ID));
@@ -63,13 +63,13 @@ public class LibraryBuilder {
         library.setLibraryFiles(getLibraryFiles(configurationElement.getChildren(ELMT_LIBRARY_FILE)));
         return library;
       } else {
-        throw new LibraryBuilderException(MessageFormat.format("Unexpected configuration element with name: {0}. "
+        throw new LibraryFactoryException(MessageFormat.format("Unexpected configuration element with name: {0}. "
                                                                + "Expected element is {1}",
                                                                configurationElement.getName(),
                                                                ELMT_LIBRARY));
       }
     } catch (InvalidRegistryObjectException | URISyntaxException exception) {
-      throw new LibraryBuilderException("Error while creating Library instance", exception);
+      throw new LibraryFactoryException("Error while creating Library instance", exception);
     }
   }
 
@@ -142,13 +142,13 @@ public class LibraryBuilder {
     return filters;
   }
 
-  public static class LibraryBuilderException extends Exception {
+  public static class LibraryFactoryException extends Exception {
 
-    public LibraryBuilderException(String message, Throwable cause) {
+    public LibraryFactoryException(String message, Throwable cause) {
       super(message, cause);
     }
 
-    public LibraryBuilderException(String message) {
+    public LibraryFactoryException(String message) {
       super(message);
     }
   }

@@ -33,8 +33,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.google.cloud.tools.eclipse.appengine.libraries.config.LibraryBuilder;
-import com.google.cloud.tools.eclipse.appengine.libraries.config.LibraryBuilder.LibraryBuilderException;
+import com.google.cloud.tools.eclipse.appengine.libraries.config.LibraryFactory;
+import com.google.cloud.tools.eclipse.appengine.libraries.config.LibraryFactory.LibraryFactoryException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AppEngineLibraryContainerInitializerTest {
@@ -43,19 +43,20 @@ public class AppEngineLibraryContainerInitializerTest {
   private static final String TEST_CONTAINER_PATH = "test.appengine.libraries";
   private static final String TEST_LIBRARY_PATH = TEST_CONTAINER_PATH + "/" + TEST_LIBRARY_ID;
 
-  @Mock private LibraryBuilder libraryBuilder;
+  @Mock private LibraryFactory libraryFactory;
   @Mock private IConfigurationElement configurationElement;
 
   @Rule
-  public TestLibraryRepositoryService libraryRepositoryService = new TestLibraryRepositoryService();
+  public TestLibraryRepositoryServiceRegistrator libraryRepositoryServiceRegistrator =
+      new TestLibraryRepositoryServiceRegistrator();
   @Rule
   public TestProject testProject = new TestProject().withClasspathContainerPath(TEST_LIBRARY_PATH);
 
   @Before
   public void setUp() throws Exception {
-    when(libraryRepositoryService.getRepositoryService().getJarLocation(any(MavenCoordinates.class)))
+    when(libraryRepositoryServiceRegistrator.getRepositoryService().getJarLocation(any(MavenCoordinates.class)))
       .thenReturn(new Path("/test/path/foo.jar"));
-    when(libraryRepositoryService.getRepositoryService().getSourceJarLocation(any(MavenCoordinates.class)))
+    when(libraryRepositoryServiceRegistrator.getRepositoryService().getSourceJarLocation(any(MavenCoordinates.class)))
       .thenReturn(new Path("/test/path/foo-sources.jar"));
   }
 
@@ -71,11 +72,11 @@ public class AppEngineLibraryContainerInitializerTest {
    * in the host project's plugin.xml and it is not possible to remove/override it.
    */
   @Test
-  public void testInitialize_resolvesContainerToJar() throws CoreException, LibraryBuilderException {
-    setupLibraryBuilder();
+  public void testInitialize_resolvesContainerToJar() throws CoreException, LibraryFactoryException {
+    setupLibraryFactory();
     AppEngineLibraryContainerInitializer containerInitializer =
         new AppEngineLibraryContainerInitializer(new IConfigurationElement[]{ configurationElement },
-                                                 libraryBuilder,
+                                                 libraryFactory,
                                                  TEST_CONTAINER_PATH);
     containerInitializer.initialize(new Path(TEST_LIBRARY_PATH),
                                     testProject.getJavaProject());
@@ -89,11 +90,11 @@ public class AppEngineLibraryContainerInitializerTest {
 
   @Test(expected = CoreException.class)
   public void testInitialize_containerPathConsistsOfOneSegment() throws Exception {
-    setupLibraryBuilder();
+    setupLibraryFactory();
 
     AppEngineLibraryContainerInitializer containerInitializer =
         new AppEngineLibraryContainerInitializer(new IConfigurationElement[]{ configurationElement },
-                                                 libraryBuilder,
+                                                 libraryFactory,
                                                  TEST_CONTAINER_PATH);
     containerInitializer.initialize(new Path("single.segment.id"),
                                     testProject.getJavaProject());
@@ -101,11 +102,11 @@ public class AppEngineLibraryContainerInitializerTest {
 
   @Test(expected = CoreException.class)
   public void testInitialize_containerPathConsistsOfThreeSegments() throws Exception {
-    setupLibraryBuilder();
+    setupLibraryFactory();
 
     AppEngineLibraryContainerInitializer containerInitializer =
         new AppEngineLibraryContainerInitializer(new IConfigurationElement[]{ configurationElement },
-                                                 libraryBuilder,
+                                                 libraryFactory,
                                                  TEST_CONTAINER_PATH);
     containerInitializer.initialize(new Path("first.segment/second.segment/third.segment"),
                                     testProject.getJavaProject());
@@ -113,11 +114,11 @@ public class AppEngineLibraryContainerInitializerTest {
 
   @Test(expected = CoreException.class)
   public void testInitialize_containerPathHasWrongFirstSegment() throws Exception {
-    setupLibraryBuilder();
+    setupLibraryFactory();
 
     AppEngineLibraryContainerInitializer containerInitializer =
         new AppEngineLibraryContainerInitializer(new IConfigurationElement[]{ configurationElement },
-                                                 libraryBuilder,
+                                                 libraryFactory,
                                                  TEST_CONTAINER_PATH);
     containerInitializer.initialize(new Path("first.segment/second.segment"),
                                     testProject.getJavaProject());
@@ -125,28 +126,28 @@ public class AppEngineLibraryContainerInitializerTest {
 
   @Test(expected = CoreException.class)
   public void testInitialize_containerPathHasWrongLibraryId() throws Exception {
-    setupLibraryBuilder();
+    setupLibraryFactory();
 
     AppEngineLibraryContainerInitializer containerInitializer =
         new AppEngineLibraryContainerInitializer(new IConfigurationElement[]{ configurationElement },
-                                                 libraryBuilder,
+                                                 libraryFactory,
                                                  TEST_CONTAINER_PATH);
     containerInitializer.initialize(new Path(TEST_CONTAINER_PATH + "/second.segment"),
                                     testProject.getJavaProject());
   }
 
   @Test
-  public void testInitialize_libraryBuilderErrorDoesNotPreventOtherLibraries() throws Exception {
+  public void testInitialize_libraryFactoryErrorDoesNotPreventOtherLibraries() throws Exception {
     Library library = new Library(TEST_LIBRARY_ID);
     library.setLibraryFiles(Collections.singletonList(new LibraryFile(new MavenCoordinates("groupId", "artifactId"))));
-    when(libraryBuilder.build(any(IConfigurationElement.class)))
-      .thenThrow(LibraryBuilderException.class)
+    when(libraryFactory.create(any(IConfigurationElement.class)))
+      .thenThrow(LibraryFactoryException.class)
       .thenReturn(library);
 
     AppEngineLibraryContainerInitializer containerInitializer =
         new AppEngineLibraryContainerInitializer(new IConfigurationElement[]{ configurationElement,
                                                                               configurationElement },
-                                                 libraryBuilder,
+                                                 libraryFactory,
                                                  TEST_CONTAINER_PATH);
     containerInitializer.initialize(new Path(TEST_LIBRARY_PATH),
                                     testProject.getJavaProject());
@@ -158,9 +159,9 @@ public class AppEngineLibraryContainerInitializerTest {
     assertThat(libJar.getSourceAttachmentPath().toOSString(), is("/test/path/foo-sources.jar"));
   }
 
-  private void setupLibraryBuilder() throws LibraryBuilderException {
+  private void setupLibraryFactory() throws LibraryFactoryException {
     Library library = new Library(TEST_LIBRARY_ID);
     library.setLibraryFiles(Collections.singletonList(new LibraryFile(new MavenCoordinates("groupId", "artifactId"))));
-    when(libraryBuilder.build(any(IConfigurationElement.class))).thenReturn(library);
+    when(libraryFactory.create(any(IConfigurationElement.class))).thenReturn(library);
   }
 }
