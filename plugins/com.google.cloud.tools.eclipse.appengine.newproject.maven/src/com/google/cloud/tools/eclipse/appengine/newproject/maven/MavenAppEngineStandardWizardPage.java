@@ -70,8 +70,8 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
 
   public MavenAppEngineStandardWizardPage() {
     super("basicNewProjectPage"); //$NON-NLS-1$
-    setTitle("Maven-based App Engine Standard Project");
-    setDescription("Create new Maven-based App Engine Standard Project");
+    setTitle(Messages.getString("WIZARD_TITLE")); //$NON-NLS-1$
+    setDescription(Messages.getString("WIZARD_DESCRIPTION")); //$NON-NLS-1$
     setImageDescriptor(AppEngineImages.googleCloudPlatform(32));
 
     canFlipPage = false;
