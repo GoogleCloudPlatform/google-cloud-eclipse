@@ -30,8 +30,9 @@ import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.appengine.login.IGoogleLoginService;
 import com.google.cloud.tools.ide.login.Account;
 
-import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Shell;
 import org.junit.After;
 import org.junit.Before;
@@ -220,8 +221,7 @@ public class AccountSelectorTest {
     assertFalse(selector.getSelectedEmail().isEmpty());
 
     assertEquals("<select this to login>", selector.combo.getItem(2));
-    selector.combo.select(2);
-    selector.logInOnSelect.widgetSelected(mock(SelectionEvent.class));
+    simulateSelect(selector, 2);
 
     assertEquals(3, selector.combo.getItemCount());
     assertEquals(-1, selector.combo.getSelectionIndex());
@@ -232,6 +232,6 @@ public class AccountSelectorTest {
 
   private void simulateSelect(AccountSelector selector, int index) {
     selector.combo.select(index);
-    selector.logInOnSelect.widgetSelected(mock(SelectionEvent.class));
+    selector.combo.notifyListeners(SWT.Selection, mock(Event.class));
   }
 }
