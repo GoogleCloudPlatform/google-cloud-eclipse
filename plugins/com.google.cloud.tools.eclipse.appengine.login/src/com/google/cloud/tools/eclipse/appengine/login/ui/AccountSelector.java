@@ -76,6 +76,7 @@ public class AccountSelector extends Composite {
     int index = combo.indexOf(email);
     if (index != -1) {
       combo.select(index);
+      selectedCredential = (Credential) combo.getData(email);
     }
     return index;
   }
@@ -93,12 +94,7 @@ public class AccountSelector extends Composite {
         }
       }
 
-      int selectedIndex = combo.getSelectionIndex();
-      if (selectedIndex == -1) {
-        selectedCredential = null;
-      } else {
-        selectedCredential = (Credential) combo.getData(combo.getItem(selectedIndex));
-      }
+      selectedCredential = (Credential) combo.getData(getSelectedEmail());
     }
 
     private void addAndSelectAccount(Account account) {

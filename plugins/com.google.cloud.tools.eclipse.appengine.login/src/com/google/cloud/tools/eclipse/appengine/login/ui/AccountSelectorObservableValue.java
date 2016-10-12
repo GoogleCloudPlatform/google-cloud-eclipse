@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.login.ui;
 
 import org.eclipse.core.databinding.observable.Diffs;
 import org.eclipse.core.databinding.observable.value.AbstractObservableValue;
+import org.eclipse.jface.databinding.swt.DisplayRealm;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 
@@ -32,6 +33,7 @@ public class AccountSelectorObservableValue extends AbstractObservableValue {
   private AccountSelector accountSelector;
 
   public AccountSelectorObservableValue(final AccountSelector accountSelector) {
+    super(DisplayRealm.getRealm(accountSelector.getDisplay()));
     this.accountSelector = accountSelector;
 
     accountSelector.addSelectionListener(new SelectionAdapter() {
