@@ -26,7 +26,7 @@ import org.osgi.framework.ServiceRegistration;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 
-public class TestLibraryRepositoryServiceRegistrator extends ExternalResource {
+public class TestLibraryRepositoryServiceRegistrar extends ExternalResource {
 
   private ServiceRegistration<ILibraryRepositoryService> serviceRegistration;
   private ILibraryRepositoryService repositoryService = mock(ILibraryRepositoryService.class);

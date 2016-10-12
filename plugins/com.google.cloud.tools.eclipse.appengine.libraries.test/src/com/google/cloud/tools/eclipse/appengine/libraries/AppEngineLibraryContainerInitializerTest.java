@@ -18,12 +18,15 @@ package com.google.cloud.tools.eclipse.appengine.libraries;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.junit.Before;
@@ -31,7 +34,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.config.LibraryFactory;
 import com.google.cloud.tools.eclipse.appengine.libraries.config.LibraryFactory.LibraryFactoryException;
@@ -47,17 +52,18 @@ public class AppEngineLibraryContainerInitializerTest {
   @Mock private IConfigurationElement configurationElement;
 
   @Rule
-  public TestLibraryRepositoryServiceRegistrator libraryRepositoryServiceRegistrator =
-      new TestLibraryRepositoryServiceRegistrator();
+  public TestLibraryRepositoryServiceRegistrar libraryRepositoryServiceRegistrar =
+      new TestLibraryRepositoryServiceRegistrar();
   @Rule
   public TestProject testProject = new TestProject().withClasspathContainerPath(TEST_LIBRARY_PATH);
 
   @Before
   public void setUp() throws Exception {
-    when(libraryRepositoryServiceRegistrator.getRepositoryService().getJarLocation(any(MavenCoordinates.class)))
-      .thenReturn(new Path("/test/path/foo.jar"));
-    when(libraryRepositoryServiceRegistrator.getRepositoryService().getSourceJarLocation(any(MavenCoordinates.class)))
-      .thenReturn(new Path("/test/path/foo-sources.jar"));
+    when(libraryRepositoryServiceRegistrar.getRepositoryService().getJarLocation(any(MavenCoordinates.class)))
+      .thenAnswer(fakePathFromArtifactId(""));
+    when(libraryRepositoryServiceRegistrar.getRepositoryService().getSourceJarLocation(any(MavenCoordinates.class)))
+      .thenAnswer(fakePathFromArtifactId("-sources"));
+    setupLibraryFactory();
   }
 
   /**
@@ -72,8 +78,7 @@ public class AppEngineLibraryContainerInitializerTest {
    * in the host project's plugin.xml and it is not possible to remove/override it.
    */
   @Test
-  public void testInitialize_resolvesContainerToJar() throws CoreException, LibraryFactoryException {
-    setupLibraryFactory();
+  public void testInitialize_resolvesContainerToJar() throws CoreException {
     AppEngineLibraryContainerInitializer containerInitializer =
         new AppEngineLibraryContainerInitializer(new IConfigurationElement[]{ configurationElement },
                                                  libraryFactory,
@@ -84,14 +89,12 @@ public class AppEngineLibraryContainerInitializerTest {
     IClasspathEntry[] resolvedClasspath = testProject.getJavaProject().getResolvedClasspath(false);
     assertThat(resolvedClasspath.length, is(2));
     IClasspathEntry libJar = resolvedClasspath[1];
-    assertThat(libJar.getPath().toOSString(), is("/test/path/foo.jar"));
-    assertThat(libJar.getSourceAttachmentPath().toOSString(), is("/test/path/foo-sources.jar"));
+    assertThat(libJar.getPath().toOSString(), is("/test/path/artifactId.jar"));
+    assertThat(libJar.getSourceAttachmentPath().toOSString(), is("/test/path/artifactId-sources.jar"));
   }
 
   @Test(expected = CoreException.class)
   public void testInitialize_containerPathConsistsOfOneSegment() throws Exception {
-    setupLibraryFactory();
-
     AppEngineLibraryContainerInitializer containerInitializer =
         new AppEngineLibraryContainerInitializer(new IConfigurationElement[]{ configurationElement },
                                                  libraryFactory,
@@ -102,8 +105,6 @@ public class AppEngineLibraryContainerInitializerTest {
 
   @Test(expected = CoreException.class)
   public void testInitialize_containerPathConsistsOfThreeSegments() throws Exception {
-    setupLibraryFactory();
-
     AppEngineLibraryContainerInitializer containerInitializer =
         new AppEngineLibraryContainerInitializer(new IConfigurationElement[]{ configurationElement },
                                                  libraryFactory,
@@ -114,8 +115,6 @@ public class AppEngineLibraryContainerInitializerTest {
 
   @Test(expected = CoreException.class)
   public void testInitialize_containerPathHasWrongFirstSegment() throws Exception {
-    setupLibraryFactory();
-
     AppEngineLibraryContainerInitializer containerInitializer =
         new AppEngineLibraryContainerInitializer(new IConfigurationElement[]{ configurationElement },
                                                  libraryFactory,
@@ -126,8 +125,6 @@ public class AppEngineLibraryContainerInitializerTest {
 
   @Test(expected = CoreException.class)
   public void testInitialize_containerPathHasWrongLibraryId() throws Exception {
-    setupLibraryFactory();
-
     AppEngineLibraryContainerInitializer containerInitializer =
         new AppEngineLibraryContainerInitializer(new IConfigurationElement[]{ configurationElement },
                                                  libraryFactory,
@@ -139,10 +136,10 @@ public class AppEngineLibraryContainerInitializerTest {
   @Test
   public void testInitialize_libraryFactoryErrorDoesNotPreventOtherLibraries() throws Exception {
     Library library = new Library(TEST_LIBRARY_ID);
-    library.setLibraryFiles(Collections.singletonList(new LibraryFile(new MavenCoordinates("groupId", "artifactId"))));
-    when(libraryFactory.create(any(IConfigurationElement.class)))
-      .thenThrow(LibraryFactoryException.class)
-      .thenReturn(library);
+    library.setLibraryFiles(Collections.singletonList(new LibraryFile(new MavenCoordinates("groupId",
+                                                                                           "artifactId"))));
+    // this will override what is set in setupLibraryFactory() when setUp() is executed
+    doThrow(LibraryFactoryException.class).doReturn(library).when(libraryFactory).create(any(IConfigurationElement.class));
 
     AppEngineLibraryContainerInitializer containerInitializer =
         new AppEngineLibraryContainerInitializer(new IConfigurationElement[]{ configurationElement,
@@ -155,13 +152,28 @@ public class AppEngineLibraryContainerInitializerTest {
     IClasspathEntry[] resolvedClasspath = testProject.getJavaProject().getResolvedClasspath(false);
     assertThat(resolvedClasspath.length, is(2));
     IClasspathEntry libJar = resolvedClasspath[1];
-    assertThat(libJar.getPath().toOSString(), is("/test/path/foo.jar"));
-    assertThat(libJar.getSourceAttachmentPath().toOSString(), is("/test/path/foo-sources.jar"));
+    assertThat(libJar.getPath().toOSString(), is("/test/path/artifactId.jar"));
+    assertThat(libJar.getSourceAttachmentPath().toOSString(), is("/test/path/artifactId-sources.jar"));
   }
 
   private void setupLibraryFactory() throws LibraryFactoryException {
     Library library = new Library(TEST_LIBRARY_ID);
     library.setLibraryFiles(Collections.singletonList(new LibraryFile(new MavenCoordinates("groupId", "artifactId"))));
-    when(libraryFactory.create(any(IConfigurationElement.class))).thenReturn(library);
+    doReturn(library).when(libraryFactory).create(any(IConfigurationElement.class));
   }
+
+  private Answer<IPath> fakePathFromArtifactId(final String postfix) {
+    return new Answer<IPath>() {
+      @Override
+      public IPath answer(InvocationOnMock invocation) throws Throwable {
+        String postfixToAdd = postfix;
+        if (postfixToAdd ==  null) {
+          postfixToAdd = "";
+        }
+        MavenCoordinates argument = invocation.getArgumentAt(0, MavenCoordinates.class);
+        return new Path("/test/path/" + argument.getArtifactId() + postfixToAdd + "." + argument.getType());
+      }
+    };
+  }
+
 }

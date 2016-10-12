@@ -13,6 +13,7 @@ Import-Package: org.eclipse.core.internal.registry,
  org.eclipse.core.resources,
  org.eclipse.core.runtime.spi;version="3.4.0",
  org.mockito;provider=google;version="1.10.19",
+ org.mockito.invocation;provider=google;version="1.10.19",
  org.mockito.runners;provider=google;version="1.10.19",
  org.mockito.stubbing;provider=google;version="1.10.19",
  org.objenesis;provider=google;version="2.2.0"

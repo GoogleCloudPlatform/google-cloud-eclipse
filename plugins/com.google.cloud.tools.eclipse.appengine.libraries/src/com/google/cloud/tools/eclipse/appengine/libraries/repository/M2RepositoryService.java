@@ -76,7 +76,7 @@ public class M2RepositoryService implements ILibraryRepositoryService {
 
   private List<ArtifactRepository> getRepository(MavenCoordinates mavenCoordinates) throws LibraryRepositoryServiceException {
     if (MavenCoordinates.MAVEN_CENTRAL_REPO.equals(mavenCoordinates.getRepository())) {
-      // M2Eclise will use the Maven Central repo in case null is used
+      // M2Eclipse will use the Maven Central repo in case null is used
       return null;
     } else {
       return Collections.singletonList(getCustomRepository(mavenCoordinates.getRepository()));
