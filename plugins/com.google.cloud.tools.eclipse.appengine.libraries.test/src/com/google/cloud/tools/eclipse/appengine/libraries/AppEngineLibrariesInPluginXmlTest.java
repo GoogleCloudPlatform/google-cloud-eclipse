@@ -41,6 +41,8 @@ import com.google.cloud.tools.eclipse.appengine.libraries.config.LibraryFactory.
 public class AppEngineLibrariesInPluginXmlTest {
 
   private static final String APP_ENGINE_API_LIBRARY_ID = "appengine-api";
+  private static final String APP_ENGINE_ENDPOINTS_LIBRARY_ID = "appengine-endpoints";
+  private static final String OBJECTIFY_LIBRARY_ID = "objectify";
 
   @Test
   public void testAppEngineAPIConfig() throws URISyntaxException, LibraryFactoryException {
@@ -48,13 +50,21 @@ public class AppEngineLibrariesInPluginXmlTest {
         RegistryFactory.getRegistry()
           .getConfigurationElementsFor(AppEngineLibraryContainerInitializer.LIBRARIES_EXTENSION_POINT);
     for (IConfigurationElement configurationElement : configurationElements) {
-      if (configurationElement.getAttribute("id").equals(APP_ENGINE_API_LIBRARY_ID)) {
-        Library appEngineLibrary = new LibraryFactory().create(configurationElement);
-        verifyAppEngineLibrary(appEngineLibrary);
-        return;
+      Library library = new LibraryFactory().create(configurationElement);
+      switch (configurationElement.getAttribute("id")) {
+      case APP_ENGINE_API_LIBRARY_ID:
+        verifyAppEngineLibrary(library);
+        break;
+      case APP_ENGINE_ENDPOINTS_LIBRARY_ID:
+        verifyEndpointsLibrary(library);
+        break;
+      case OBJECTIFY_LIBRARY_ID:
+        verifyObjectifyLibrary(library);
+        break;
+      default:
+        fail("Unexpected libraryId");
       }
     }
-    fail("App Engine API library with ID " + APP_ENGINE_API_LIBRARY_ID + " was not found in the plugin.xml");
   }
 
   private void verifyAppEngineLibrary(Library appEngineLibrary) throws URISyntaxException {
@@ -90,5 +100,60 @@ public class AppEngineLibrariesInPluginXmlTest {
     assertThat(filters.get(2).getPattern(), is("com/google/apphosting/api/**"));
     assertTrue(filters.get(3).isExclude());
     assertThat(filters.get(3).getPattern(), is("com/google/apphosting/**"));
+  }
+
+  private void verifyEndpointsLibrary(Library endpointsLibrary) throws URISyntaxException {
+    assertThat(endpointsLibrary.getContainerPath().toString(),
+               is(Library.CONTAINER_PATH_PREFIX + "/" + APP_ENGINE_ENDPOINTS_LIBRARY_ID));
+    assertThat(endpointsLibrary.getId(), is(APP_ENGINE_ENDPOINTS_LIBRARY_ID));
+    assertThat(endpointsLibrary.getName(), is("App Engine Endpoints"));
+    assertThat(endpointsLibrary.getSiteUri(), is(new URI("https://cloud.google.com/appengine/docs/java/endpoints/")));
+
+    assertThat(endpointsLibrary.getLibraryFiles().size(), is(1));
+    LibraryFile libraryFile = endpointsLibrary.getLibraryFiles().get(0);
+    assertThat(libraryFile.getJavadocUri(), is(new URI("https://cloud.google.com/appengine/docs/java/endpoints/javadoc/")));
+    assertNull(libraryFile.getSourceUri());
+    assertTrue(libraryFile.isExport());
+
+    assertNotNull(libraryFile.getMavenCoordinates());
+    MavenCoordinates mavenCoordinates = libraryFile.getMavenCoordinates();
+    assertThat(mavenCoordinates.getRepository(), is("central"));
+    assertThat(mavenCoordinates.getGroupId(), is("com.google.appengine"));
+    assertThat(mavenCoordinates.getArtifactId(), is("appengine-endpoints"));
+    assertThat(mavenCoordinates.getVersion(), is("LATEST"));
+    assertThat(mavenCoordinates.getType(), is("jar"));
+    assertNull(mavenCoordinates.getClassifier());
+
+    assertNotNull(libraryFile.getFilters());
+    List<Filter> filters = libraryFile.getFilters();
+    assertThat(filters.size(), is(1));
+    assertTrue(filters.get(0).isExclude());
+    assertThat(filters.get(0).getPattern(), is("com/google/appengine/repackaged/**"));
+  }
+
+  private void verifyObjectifyLibrary(Library objectifyLibrary) throws URISyntaxException {
+    assertThat(objectifyLibrary.getContainerPath().toString(),
+               is(Library.CONTAINER_PATH_PREFIX + "/" + OBJECTIFY_LIBRARY_ID));
+    assertThat(objectifyLibrary.getId(), is(OBJECTIFY_LIBRARY_ID));
+    assertThat(objectifyLibrary.getName(), is("Objectify"));
+    assertThat(objectifyLibrary.getSiteUri(), is(new URI("https://github.com/objectify/objectify/wiki")));
+
+    assertThat(objectifyLibrary.getLibraryFiles().size(), is(1));
+    LibraryFile libraryFile = objectifyLibrary.getLibraryFiles().get(0);
+    assertThat(libraryFile.getJavadocUri(), is(new URI("http://www.javadoc.io/doc/com.googlecode.objectify/objectify/")));
+    assertNull(libraryFile.getSourceUri());
+    assertTrue(libraryFile.isExport());
+
+    assertNotNull(libraryFile.getMavenCoordinates());
+    MavenCoordinates mavenCoordinates = libraryFile.getMavenCoordinates();
+    assertThat(mavenCoordinates.getRepository(), is("central"));
+    assertThat(mavenCoordinates.getGroupId(), is("com.googlecode.objectify"));
+    assertThat(mavenCoordinates.getArtifactId(), is("objectify"));
+    assertThat(mavenCoordinates.getVersion(), is("LATEST"));
+    assertThat(mavenCoordinates.getType(), is("jar"));
+    assertNull(mavenCoordinates.getClassifier());
+
+    assertNotNull(libraryFile.getFilters());
+    assertTrue(libraryFile.getFilters().isEmpty());
   }
 }
