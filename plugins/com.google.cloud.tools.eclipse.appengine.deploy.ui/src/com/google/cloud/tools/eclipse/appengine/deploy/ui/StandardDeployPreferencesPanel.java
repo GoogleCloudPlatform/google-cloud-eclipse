@@ -99,17 +99,14 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   private DataBindingContext bindingContext;
 
   private Runnable layoutChangedHandler;
-  private boolean requireProjectId = true;
-  private boolean requireAccount = true;
+  private boolean requireValues = true;
 
   public StandardDeployPreferencesPanel(Composite parent, IProject project,
-      IGoogleLoginService loginService, Runnable layoutChangedHandler,
-      boolean requireProjectId, boolean requireAccount) {
+      IGoogleLoginService loginService, Runnable layoutChangedHandler, boolean requireValues) {
     super(parent, SWT.NONE);
 
     this.layoutChangedHandler = layoutChangedHandler;
-    this.requireProjectId = requireProjectId;
-    this.requireAccount = requireAccount;
+    this.requireValues = requireValues;
 
     createCredentialSection(loginService);
 
@@ -147,7 +144,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     final IObservableValue accountEmailModel = PojoProperties.value("accountEmail").observe(model);
     context.bindValue(new AccountSelectorObservableValue(accountSelector), accountEmailModel);
 
-    if (requireAccount) {
+    if (requireValues) {
       context.addValidationStatusProvider(new FixedMultiValidator() {
         @Override
         protected IStatus validate() {
@@ -169,8 +166,8 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     IObservableValue projectIdModel = PojoProperties.value("projectId").observe(model);
 
     context.bindValue(projectIdField, projectIdModel,
-                      new UpdateValueStrategy().setAfterGetValidator(new ProjectIdInputValidator(requireProjectId)),
-                      new UpdateValueStrategy().setAfterGetValidator(new ProjectIdInputValidator(requireProjectId)));
+                      new UpdateValueStrategy().setAfterGetValidator(new ProjectIdInputValidator(requireValues)),
+                      new UpdateValueStrategy().setAfterGetValidator(new ProjectIdInputValidator(requireValues)));
   }
 
   private void setupProjectVersionDataBinding(DataBindingContext context) {
