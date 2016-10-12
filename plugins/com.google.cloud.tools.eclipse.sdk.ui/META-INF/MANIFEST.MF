@@ -1,9 +1,9 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: %Bundle-Name
+Bundle-Name: Cloud Tools for Eclipse User Interface for the Cloud SDK
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.sdk.ui;singleton:=true
 Bundle-Version: 0.1.0.qualifier
-Bundle-Vendor: %Bundle-Vendor
+Bundle-Vendor: Google Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin

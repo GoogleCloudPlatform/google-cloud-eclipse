@@ -1,9 +1,9 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: GCloud for Eclipse App Engine Shared Resources
+Bundle-Name: Cloud Tools for Eclipse App Engine Shared UI Resources
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.appengine.ui;singleton:=true
 Bundle-Version: 0.1.0.qualifier
-Bundle-Vendor: Google, Inc.
+Bundle-Vendor: Google Inc.
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: com.google.cloud.tools.eclipse.appengine.ui

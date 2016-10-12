@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Test Helpers for SWTBot
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.swtbot
 Bundle-Version: 0.1.0.qualifier
-Bundle-Vendor: Google, Inc.
+Bundle-Vendor: Google Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Require-Bundle: org.eclipse.swtbot.eclipse.core;bundle-version="2.3.0",
  org.eclipse.swtbot.eclipse.finder;bundle-version="2.3.0",

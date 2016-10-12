@@ -1,9 +1,9 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: UsageTracker (common)
+Bundle-Name: Cloud Tools for Eclipse Analytics
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.usagetracker;singleton:=true
 Bundle-Version: 0.1.0.qualifier
-Bundle-Vendor: Google, Inc.
+Bundle-Vendor: Google Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: com.google.cloud.tools.eclipse.usagetracker
 Require-Bundle: org.eclipse.core.runtime;bundle-version="3.11.1",
