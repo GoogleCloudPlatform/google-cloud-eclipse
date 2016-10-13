@@ -120,10 +120,16 @@ public class MavenArchetypeProjectWizardTest {
     page.groupIdField.setText(" a ");
     assertEquals("a", page.javaPackageField.getText());
 
-    page.groupIdField.setText(" a a");
-    assertEquals("aa", page.javaPackageField.getText());
+    page.groupIdField.setText(" a b");
+    assertEquals("a", page.javaPackageField.getText());
 
-    page.groupIdField.setText(" a a ");
-    assertEquals("aa", page.javaPackageField.getText());
+    page.groupIdField.setText(" a ");
+    assertEquals("a", page.javaPackageField.getText());
+
+    page.groupIdField.setText(" a");
+    assertEquals("a", page.javaPackageField.getText());
+
+    page.groupIdField.setText(" ac");
+    assertEquals("ac", page.javaPackageField.getText());
   }
 }

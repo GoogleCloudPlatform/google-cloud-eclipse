@@ -357,6 +357,9 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
    * 2) the field matches previous auto-fill before ID modification.
    */
   private final class AutoPackageNameSetterOnGroupIdChange implements VerifyListener {
+
+    private String previousSuggestion = "";
+
     @Override
     public void verifyText(VerifyEvent event) {
       String groupId = groupIdField.getText();
@@ -365,18 +368,18 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
       String newGroupId =
           groupId.substring(0, event.start) + event.text + groupId.substring(event.end);
 
-      String oldPackageName = suggestPackageName(groupId);
-      String newPackageName = suggestPackageName(newGroupId);
-      adjustPackageName(oldPackageName, newPackageName);
+      // getGroupId() trims whitespace, so we do the same to sync with the dialog validation error.
+      if (MavenCoordinatesValidator.validateGroupId(newGroupId.trim())) {
+        String newSuggestion = suggestPackageName(newGroupId);
+        updatePackageField(newSuggestion);
+        previousSuggestion = newSuggestion;
+      }
     }
-  }
 
-  /**
-   * See {@link AutoPackageNameSetterOnGroupIdChange#verifyText(VerifyEvent)}.
-   */
-  private void adjustPackageName(String oldPackageName, String newPackageName) {
-    if (getPackageName().isEmpty() || getPackageName().equals(oldPackageName)) {
-      javaPackageField.setText(newPackageName);
+    private void updatePackageField(String newSuggestion) {
+      if (getPackageName().isEmpty() || getPackageName().equals(previousSuggestion)) {
+        javaPackageField.setText(newSuggestion);
+      }
     }
   }
 
@@ -396,7 +399,6 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     // 1) Remove leading and trailing dots.
     // 2) Keep only word characters ([a-zA-Z_0-9]) and dots (escaping inside [] not necessary).
     // 3) Replace consecutive dots with a single dot.
-    return CharMatcher.is('.').trimFrom(groupId)
-        .replaceAll("[^\\w.]", "").replaceAll("\\.+",  ".");
+    return CharMatcher.is('.').trimFrom(groupId).replaceAll("[^\\w.]", "").replaceAll("\\.+",  ".");
   }
 }
