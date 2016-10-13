@@ -10,18 +10,4 @@
   </parent>
   <artifactId>com.google.cloud.tools.eclipse.jdt.launching</artifactId>
   <packaging>eclipse-plugin</packaging>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.eclipse.tycho</groupId>
-        <artifactId>tycho-compiler-plugin</artifactId>
-        <configuration>
-          <showWarnings>true</showWarnings>
-          <compilerArgument>-warn:-discouraged,forbidden</compilerArgument>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
-
 </project>

@@ -15,21 +15,21 @@
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.appengine.libraries.config;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.Filter;
+import com.google.cloud.tools.eclipse.appengine.libraries.Library;
+import com.google.cloud.tools.eclipse.appengine.libraries.LibraryFile;
+import com.google.cloud.tools.eclipse.appengine.libraries.MavenCoordinates;
+import com.google.common.base.Strings;
+
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.InvalidRegistryObjectException;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
-
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.InvalidRegistryObjectException;
-
-import com.google.cloud.tools.eclipse.appengine.libraries.Filter;
-import com.google.cloud.tools.eclipse.appengine.libraries.Library;
-import com.google.cloud.tools.eclipse.appengine.libraries.LibraryFile;
-import com.google.cloud.tools.eclipse.appengine.libraries.MavenCoordinates;
-import com.google.common.base.Strings;
 
 public class LibraryFactory {
 
@@ -143,6 +143,7 @@ public class LibraryFactory {
   }
 
   public static class LibraryFactoryException extends Exception {
+    private static final long serialVersionUID = 1L;
 
     public LibraryFactoryException(String message, Throwable cause) {
       super(message, cause);

@@ -21,8 +21,8 @@ import java.io.OutputStream;
 import java.net.Socket;
 
 /**
- * A fork of {@link org.eclipse.jdi.internal.connect.SocketConnection} that
- * stores the socket, input stream, and output stream.
+ * A fork of org.eclipse.jdi.internal.connect.SocketConnection that stores the
+ * socket, input stream, and output stream.
  */
 public class SocketConnection extends Connection {
 

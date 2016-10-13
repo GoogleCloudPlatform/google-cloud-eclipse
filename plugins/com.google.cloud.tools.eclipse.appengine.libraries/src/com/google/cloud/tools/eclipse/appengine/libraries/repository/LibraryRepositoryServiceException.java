@@ -16,6 +16,7 @@
 package com.google.cloud.tools.eclipse.appengine.libraries.repository;
 
 public class LibraryRepositoryServiceException extends Exception {
+  private static final long serialVersionUID = 1L;
 
   public LibraryRepositoryServiceException(String message) {
     super(message);

@@ -29,10 +29,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A fork of
- * {@link org.eclipse.jdi.internal.connect.SocketListeningConnectorImpl} that
+ * A fork of org.eclipse.jdi.internal.connect.SocketListeningConnectorImpl that
  * uses our modified SocketTransportImpl.
  */
+@SuppressWarnings("restriction")
 public class SocketListeningMultiConnectorImpl extends ConnectorImpl implements ListeningConnector {
 	/** Port to which is attached. */
 	private int fPort;
@@ -64,7 +64,6 @@ public class SocketListeningMultiConnectorImpl extends ConnectorImpl implements 
 	/**
 	 * @return Returns the default arguments.
 	 */
-	@SuppressWarnings("restriction")
 	@Override
 	public Map<String, Connector.Argument> defaultArguments() {
 		HashMap<String, Connector.Argument> arguments = new HashMap<String, Connector.Argument>(1);

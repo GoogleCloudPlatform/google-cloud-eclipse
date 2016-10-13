@@ -17,13 +17,15 @@ package com.google.cloud.tools.eclipse.appengine.libraries.repository;
 
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.File;
+import com.google.cloud.tools.eclipse.appengine.libraries.MavenCoordinates;
+import com.google.cloud.tools.eclipse.appengine.libraries.repository.M2RepositoryService.MavenHelper;
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
@@ -35,9 +37,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.google.cloud.tools.eclipse.appengine.libraries.MavenCoordinates;
-import com.google.cloud.tools.eclipse.appengine.libraries.repository.M2RepositoryService.MavenHelper;
-import com.google.cloud.tools.eclipse.util.status.StatusUtil;
+import java.io.File;
 
 @RunWith(MockitoJUnitRunner.class)
 public class M2RepositoryServiceTest {
@@ -134,5 +134,6 @@ public class M2RepositoryServiceTest {
   }
 
   private static class TestRuntimeException extends RuntimeException {
+    private static final long serialVersionUID = 1L;
   }
 }

@@ -35,6 +35,7 @@ import java.util.Arrays;
  * A fork of org.eclipse.jdi.internal.connect.SocketTransportService that
  * supports multiple socket connections.
  */
+@SuppressWarnings("restriction")
 public class SocketTransportService extends TransportService {
 	/** Handshake bytes used just after connecting VM. */
 	private static final byte[] handshakeBytes = "JDWP-Handshake".getBytes(); //$NON-NLS-1$

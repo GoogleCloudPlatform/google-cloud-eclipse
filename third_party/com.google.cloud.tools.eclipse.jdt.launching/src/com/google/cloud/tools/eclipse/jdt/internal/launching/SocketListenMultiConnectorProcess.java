@@ -47,8 +47,7 @@ import java.io.StringWriter;
 import java.util.Map;
 
 /**
- * Fork of
- * {@link org.eclipse.jdt.internal.launching.SocketListenConnectorProcess}.
+ * Fork of org.eclipse.jdt.internal.launching.SocketListenConnectorProcess.
  * Knows how to handle "acceptCount" count.
  * 
  * A process that represents a VM listening connector that is waiting for a VM
@@ -58,7 +57,7 @@ import java.util.Map;
  * connections.
  * 
  * @since 3.4
- * @see SocketListenConnector
+ * @see org.eclipse.jdt.internal.launching.SocketListenConnector
  */
 @SuppressWarnings("restriction")
 public class SocketListenMultiConnectorProcess implements IProcess {

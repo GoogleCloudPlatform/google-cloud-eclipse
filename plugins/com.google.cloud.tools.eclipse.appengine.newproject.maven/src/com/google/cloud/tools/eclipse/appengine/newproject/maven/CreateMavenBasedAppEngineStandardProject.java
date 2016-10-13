@@ -16,9 +16,10 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.List;
-import java.util.Properties;
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.preferences.PreferenceUtil;
+import com.google.cloud.tools.eclipse.util.MavenUtils;
+
 import org.apache.maven.archetype.catalog.Archetype;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -34,10 +35,11 @@ import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
-import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
-import com.google.cloud.tools.eclipse.preferences.PreferenceUtil;
-import com.google.cloud.tools.eclipse.util.MavenUtils;
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+import java.util.Properties;
 
+@SuppressWarnings("restriction")
 public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOperation {
   IProjectConfigurationManager projectConfigurationManager =
       MavenPlugin.getProjectConfigurationManager();
