@@ -53,7 +53,7 @@ public class AppEngineLibrariesInPluginXmlTest {
   }
 
   @Test
-  public void testAppEngineAPIConfig() throws URISyntaxException, LibraryFactoryException {
+  public void testAppEngineApiLibraryConfig() throws URISyntaxException, LibraryFactoryException {
         Library appEngineLibrary = getLibraryWithId(APP_ENGINE_API_LIBRARY_ID);
         assertThat(appEngineLibrary.getContainerPath().toString(),
                    is(Library.CONTAINER_PATH_PREFIX + "/" + APP_ENGINE_API_LIBRARY_ID));
