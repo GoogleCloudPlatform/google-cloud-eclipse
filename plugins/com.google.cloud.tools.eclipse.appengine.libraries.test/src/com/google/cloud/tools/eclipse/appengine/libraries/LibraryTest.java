@@ -16,6 +16,7 @@
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
@@ -101,5 +102,18 @@ public class LibraryTest {
     assertThat(actual.getMavenCoordinates().getRepository(), is("central"));
     assertThat(actual.getMavenCoordinates().getGroupId(), is("groupId"));
     assertThat(actual.getMavenCoordinates().getArtifactId(), is("artifactId"));
+  }
+
+  @Test
+  public void testExportDefaultsToTrue() {
+    Library library = new Library("a");
+    assertTrue(library.isExport());
+  }
+
+  @Test
+  public void testSetExport() {
+    Library library = new Library("a");
+    library.setExport(false);
+    assertFalse(library.isExport());
   }
 }

@@ -61,6 +61,10 @@ public class LibraryFactory {
         library.setName(configurationElement.getAttribute(ATTR_NAME));
         library.setSiteUri(new URI(configurationElement.getAttribute(ATTR_SITE_URI)));
         library.setLibraryFiles(getLibraryFiles(configurationElement.getChildren(ELMT_LIBRARY_FILE)));
+        String exportString = configurationElement.getAttribute(ATTR_EXPORT);
+        if (exportString != null) {
+          library.setExport(Boolean.parseBoolean(exportString));
+        }
         return library;
       } else {
         throw new LibraryFactoryException(MessageFormat.format("Unexpected configuration element with name: {0}. "
@@ -83,7 +87,10 @@ public class LibraryFactory {
         libraryFile.setFilters(getFilters(libraryFileElement.getChildren()));
         libraryFile.setSourceUri(getUri(libraryFileElement.getAttribute(ATTR_SOURCE_URI)));
         libraryFile.setJavadocUri(getUri(libraryFileElement.getAttribute(ATTR_JAVADOC_URI)));
-        libraryFile.setExport(Boolean.parseBoolean(libraryFileElement.getAttribute(ATTR_EXPORT)));
+        String exportString = libraryFileElement.getAttribute(ATTR_EXPORT);
+        if (exportString != null) {
+          libraryFile.setExport(Boolean.parseBoolean(exportString));
+        }
         libraryFiles.add(libraryFile);
       }
     }

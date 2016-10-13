@@ -74,7 +74,7 @@ public class LibraryClasspathContainer implements IClasspathContainer {
       for (LibraryFile libraryFile : libraryFiles) {
         IClasspathAttribute[] classpathAttributes;
         if (libraryFile.isExport()) {
-          classpathAttributes = new IClasspathAttribute[] { UpdateClasspathAttributeUtil.createDependencyAttribute() };
+          classpathAttributes = new IClasspathAttribute[] { UpdateClasspathAttributeUtil.createDependencyAttribute(true) };
         } else {
           classpathAttributes = new IClasspathAttribute[] { UpdateClasspathAttributeUtil.createNonDependencyAttribute() };
         }

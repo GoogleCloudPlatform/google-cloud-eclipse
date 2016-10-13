@@ -38,6 +38,8 @@ public final class Library {
 
   private URI siteUri;
 
+  private boolean export = true;
+
   private List<LibraryFile> libraryFiles = Collections.emptyList();
 
   public Library(String id) {
@@ -78,5 +80,13 @@ public final class Library {
     if (libraryFiles != null) {
       this.libraryFiles = new ArrayList<>(libraryFiles);
     }
+  }
+
+  public boolean isExport() {
+    return export;
+  }
+
+  public void setExport(boolean export) {
+    this.export = export;
   }
 }

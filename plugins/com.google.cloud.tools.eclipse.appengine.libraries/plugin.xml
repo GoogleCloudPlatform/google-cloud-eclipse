@@ -9,7 +9,6 @@
           name="App Engine API"
           siteUri="https://cloud.google.com/appengine/docs/java/" >
       <libraryFile
-            export="true"
             javadocUri="https://cloud.google.com/appengine/docs/java/javadoc/">
         <mavenCoordinates
               artifactId="appengine-api-1.0-sdk"
@@ -25,7 +24,6 @@
           name="App Engine Endpoints"
           siteUri="https://cloud.google.com/appengine/docs/java/endpoints/" >
       <libraryFile
-            export="true"
             javadocUri="https://cloud.google.com/appengine/docs/java/endpoints/javadoc/">
         <mavenCoordinates
               artifactId="appengine-endpoints"
@@ -38,7 +36,6 @@
           name="Objectify"
           siteUri="https://github.com/objectify/objectify/wiki" >
       <libraryFile
-            export="true"
             javadocUri="http://www.javadoc.io/doc/com.googlecode.objectify/objectify/">
         <mavenCoordinates
               artifactId="objectify"

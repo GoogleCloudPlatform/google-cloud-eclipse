@@ -54,39 +54,40 @@ public class AppEngineLibrariesInPluginXmlTest {
 
   @Test
   public void testAppEngineApiLibraryConfig() throws URISyntaxException, LibraryFactoryException {
-        Library appEngineLibrary = getLibraryWithId(APP_ENGINE_API_LIBRARY_ID);
-        assertThat(appEngineLibrary.getContainerPath().toString(),
-                   is(Library.CONTAINER_PATH_PREFIX + "/" + APP_ENGINE_API_LIBRARY_ID));
-        assertThat(appEngineLibrary.getId(), is(APP_ENGINE_API_LIBRARY_ID));
-        assertThat(appEngineLibrary.getName(), is("App Engine API"));
-        assertThat(appEngineLibrary.getSiteUri(), is(new URI("https://cloud.google.com/appengine/docs/java/")));
+    Library appEngineLibrary = getLibraryWithId(APP_ENGINE_API_LIBRARY_ID);
+    assertThat(appEngineLibrary.getContainerPath().toString(),
+               is(Library.CONTAINER_PATH_PREFIX + "/" + APP_ENGINE_API_LIBRARY_ID));
+    assertThat(appEngineLibrary.getId(), is(APP_ENGINE_API_LIBRARY_ID));
+    assertThat(appEngineLibrary.getName(), is("App Engine API"));
+    assertThat(appEngineLibrary.getSiteUri(), is(new URI("https://cloud.google.com/appengine/docs/java/")));
+    assertTrue(appEngineLibrary.isExport());
 
-        assertThat(appEngineLibrary.getLibraryFiles().size(), is(1));
-        LibraryFile libraryFile = appEngineLibrary.getLibraryFiles().get(0);
-        assertThat(libraryFile.getJavadocUri(), is(new URI("https://cloud.google.com/appengine/docs/java/javadoc/")));
-        assertNull(libraryFile.getSourceUri());
-        assertTrue(libraryFile.isExport());
+    assertThat(appEngineLibrary.getLibraryFiles().size(), is(1));
+    LibraryFile libraryFile = appEngineLibrary.getLibraryFiles().get(0);
+    assertThat(libraryFile.getJavadocUri(), is(new URI("https://cloud.google.com/appengine/docs/java/javadoc/")));
+    assertNull(libraryFile.getSourceUri());
+    assertTrue(libraryFile.isExport());
 
-        assertNotNull(libraryFile.getMavenCoordinates());
-        MavenCoordinates mavenCoordinates = libraryFile.getMavenCoordinates();
-        assertThat(mavenCoordinates.getRepository(), is("central"));
-        assertThat(mavenCoordinates.getGroupId(), is("com.google.appengine"));
-        assertThat(mavenCoordinates.getArtifactId(), is("appengine-api-1.0-sdk"));
-        assertThat(mavenCoordinates.getVersion(), is("LATEST"));
-        assertThat(mavenCoordinates.getType(), is("jar"));
-        assertNull(mavenCoordinates.getClassifier());
+    assertNotNull(libraryFile.getMavenCoordinates());
+    MavenCoordinates mavenCoordinates = libraryFile.getMavenCoordinates();
+    assertThat(mavenCoordinates.getRepository(), is("central"));
+    assertThat(mavenCoordinates.getGroupId(), is("com.google.appengine"));
+    assertThat(mavenCoordinates.getArtifactId(), is("appengine-api-1.0-sdk"));
+    assertThat(mavenCoordinates.getVersion(), is("LATEST"));
+    assertThat(mavenCoordinates.getType(), is("jar"));
+    assertNull(mavenCoordinates.getClassifier());
 
-        assertNotNull(libraryFile.getFilters());
-        List<Filter> filters = libraryFile.getFilters();
-        assertThat(filters.size(), is(4));
-        assertTrue(filters.get(0).isExclude());
-        assertThat(filters.get(0).getPattern(), is("com/google/appengine/repackaged/**"));
-        assertTrue(filters.get(1).isExclude());
-        assertThat(filters.get(1).getPattern(), is("com/google/appengine/labs/repackaged/**"));
-        assertFalse(filters.get(2).isExclude());
-        assertThat(filters.get(2).getPattern(), is("com/google/apphosting/api/**"));
-        assertTrue(filters.get(3).isExclude());
-        assertThat(filters.get(3).getPattern(), is("com/google/apphosting/**"));
+    assertNotNull(libraryFile.getFilters());
+    List<Filter> filters = libraryFile.getFilters();
+    assertThat(filters.size(), is(4));
+    assertTrue(filters.get(0).isExclude());
+    assertThat(filters.get(0).getPattern(), is("com/google/appengine/repackaged/**"));
+    assertTrue(filters.get(1).isExclude());
+    assertThat(filters.get(1).getPattern(), is("com/google/appengine/labs/repackaged/**"));
+    assertFalse(filters.get(2).isExclude());
+    assertThat(filters.get(2).getPattern(), is("com/google/apphosting/api/**"));
+    assertTrue(filters.get(3).isExclude());
+    assertThat(filters.get(3).getPattern(), is("com/google/apphosting/**"));
   }
 
   @Test
@@ -97,6 +98,7 @@ public class AppEngineLibrariesInPluginXmlTest {
     assertThat(endpointsLibrary.getId(), is(APP_ENGINE_ENDPOINTS_LIBRARY_ID));
     assertThat(endpointsLibrary.getName(), is("App Engine Endpoints"));
     assertThat(endpointsLibrary.getSiteUri(), is(new URI("https://cloud.google.com/appengine/docs/java/endpoints/")));
+    assertTrue(endpointsLibrary.isExport());
 
     assertThat(endpointsLibrary.getLibraryFiles().size(), is(1));
     LibraryFile libraryFile = endpointsLibrary.getLibraryFiles().get(0);
@@ -128,6 +130,7 @@ public class AppEngineLibrariesInPluginXmlTest {
     assertThat(objectifyLibrary.getId(), is(OBJECTIFY_LIBRARY_ID));
     assertThat(objectifyLibrary.getName(), is("Objectify"));
     assertThat(objectifyLibrary.getSiteUri(), is(new URI("https://github.com/objectify/objectify/wiki")));
+    assertTrue(objectifyLibrary.isExport());
 
     assertThat(objectifyLibrary.getLibraryFiles().size(), is(1));
     LibraryFile libraryFile = objectifyLibrary.getLibraryFiles().get(0);

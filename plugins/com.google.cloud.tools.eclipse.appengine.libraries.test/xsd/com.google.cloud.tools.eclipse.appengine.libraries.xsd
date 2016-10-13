@@ -108,6 +108,15 @@ limitations under the License.
                </xs:documentation>
             </xs:annotation>
          </xs:attribute>
+         <xs:attribute name="export" type="xs:boolean">
+            <xs:annotation>
+               <xs:documentation>
+                  If export attribute is true, then the corresponding library will be included in the WAR file of the
+project, under WEB-INF/lib. Any libraryFile item can be excluded by setting their export attribute to false.
+Defaults to true.
+               </xs:documentation>
+            </xs:annotation>
+         </xs:attribute>
       </xs:complexType>
    </xs:element>
 
@@ -127,11 +136,11 @@ limitations under the License.
                </xs:choice>
             </xs:sequence>
          </xs:sequence>
-         <xs:attribute name="export" type="xs:boolean" use="required">
+         <xs:attribute name="export" type="xs:boolean">
             <xs:annotation>
                <xs:documentation>
                   If export attribute is true, then the corresponding file will be included in the WAR file of the
-project, under WEB-INF/lib.
+project, under WEB-INF/lib if the parent library element's export attribute is also true. Defaults to true.
                </xs:documentation>
             </xs:annotation>
          </xs:attribute>

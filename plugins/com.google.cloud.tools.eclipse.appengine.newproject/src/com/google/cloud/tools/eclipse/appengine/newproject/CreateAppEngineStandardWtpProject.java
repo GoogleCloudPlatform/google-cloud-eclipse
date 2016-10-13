@@ -104,9 +104,16 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
     IClasspathEntry[] newRawClasspath = Arrays.copyOf(rawClasspath, rawClasspath.length + libraries.size());
     for (int i = 0; i < libraries.size(); i++) {
       Library library = libraries.get(i);
+      IClasspathAttribute[] classpathAttributes;
+      if (library.isExport()) {
+        classpathAttributes = new IClasspathAttribute[] { UpdateClasspathAttributeUtil.createDependencyAttribute(true) };
+      } else {
+        classpathAttributes = new IClasspathAttribute[] { UpdateClasspathAttributeUtil.createNonDependencyAttribute() };
+      }
+
       IClasspathEntry libraryContainer = JavaCore.newContainerEntry(library.getContainerPath(),
                                                                     new IAccessRule[0],
-                                                                    new IClasspathAttribute[0],
+                                                                    classpathAttributes,
                                                                     false);
       newRawClasspath[rawClasspath.length + i] = libraryContainer;
       subMonitor.worked(1);

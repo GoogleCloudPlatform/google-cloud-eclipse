@@ -118,4 +118,18 @@ public class LibraryFileTest {
     assertThat(libraryFile.getSourceUri().toString(), is("http://example.com"));
   }
 
+  @Test
+  public void testExportDefaultsToTrue() {
+    MavenCoordinates mavenCoordinates = new MavenCoordinates("groupId", "artifactId");
+    LibraryFile libraryFile = new LibraryFile(mavenCoordinates);
+    assertTrue(libraryFile.isExport());
+  }
+
+  @Test
+  public void testSetExport() {
+    MavenCoordinates mavenCoordinates = new MavenCoordinates("groupId", "artifactId");
+    LibraryFile libraryFile = new LibraryFile(mavenCoordinates);
+    libraryFile.setExport(false);
+    assertFalse(libraryFile.isExport());
+  }
 }
