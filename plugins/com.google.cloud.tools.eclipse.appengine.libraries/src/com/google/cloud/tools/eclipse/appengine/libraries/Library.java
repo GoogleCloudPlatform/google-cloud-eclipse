@@ -31,7 +31,7 @@ import com.google.common.base.Preconditions;
  */
 public final class Library {
   public static final String CONTAINER_PATH_PREFIX = "com.google.cloud.tools.eclipse.appengine.libraries";
-  
+
   private String id;
 
   private String name;
@@ -41,6 +41,9 @@ public final class Library {
   private boolean export = true;
 
   private List<LibraryFile> libraryFiles = Collections.emptyList();
+
+  // library IDs of dependencies that are also need to be added to the build path along this library
+  private List<String> libraryDependencies = new ArrayList<>();
 
   public Library(String id) {
     Preconditions.checkNotNull(id, "id null");
@@ -73,7 +76,7 @@ public final class Library {
   }
 
   public List<LibraryFile> getLibraryFiles() {
-    return libraryFiles;
+    return new ArrayList<>(libraryFiles);
   }
 
   public void setLibraryFiles(List<LibraryFile> libraryFiles) {
@@ -88,5 +91,15 @@ public final class Library {
 
   public void setExport(boolean export) {
     this.export = export;
+  }
+
+  public List<String> getLibraryDependencies() {
+    return new ArrayList<>(libraryDependencies);
+  }
+
+  public void setLibraryDependencies(List<String> libraryDependencies) {
+    if (libraryDependencies != null) {
+      this.libraryDependencies = new ArrayList<>(libraryDependencies);
+    }
   }
 }

@@ -2,10 +2,20 @@ package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.eclipse.core.databinding.DataBindingContext;
+import org.eclipse.core.databinding.UpdateValueStrategy;
+import org.eclipse.core.databinding.beans.PojoProperties;
+import org.eclipse.core.databinding.observable.Realm;
+import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.core.databinding.observable.value.WritableValue;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jface.databinding.swt.DisplayRealm;
+import org.eclipse.jface.databinding.swt.ISWTObservableValue;
+import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -22,6 +32,7 @@ import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.Library;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
+import com.google.cloud.tools.eclipse.ui.util.databinding.BooleanConverter;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.cloud.tools.project.ProjectIdValidator;
@@ -35,6 +46,7 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
   private Text projectIdField;
   private Group apiGroup;
   private List<Button> libraryButtons = new LinkedList<>();
+  private DataBindingContext bindingContext;
 
   public AppEngineStandardWizardPage() {
     super("basicNewProjectPage"); //$NON-NLS-1$
@@ -88,19 +100,69 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
     apiGroup.setText(Messages.AppEngineStandardWizardPage_librariesGroupLabel);
     GridDataFactory.fillDefaults().span(2, 1).applyTo(apiGroup);
 
-    for (Library library : getLibraries()) {
+    List<Library> libraries = getLibraries();
+    for (Library library : libraries) {
       Button libraryButton = new Button(apiGroup, SWT.CHECK);
       libraryButton.setText(library.getId());
       libraryButton.setData(library);
       libraryButtons.add(libraryButton);
     }
 
+    addDatabindingForDependencies(libraries);
+
     GridLayoutFactory.fillDefaults().applyTo(apiGroup);
+  }
+
+  private void addDatabindingForDependencies(List<Library> libraries) {
+    bindingContext = new DataBindingContext();
+    for (Button libraryButton : libraryButtons) {
+      if (!((Library) libraryButton.getData()).getLibraryDependencies().isEmpty()) {
+        addDatabindingForDependencies(libraryButton);
+      }
+    }
+  }
+
+  private void addDatabindingForDependencies(Button libraryButton) {
+    for (String libraryId : ((Library) libraryButton.getData()).getLibraryDependencies()) {
+      Button dependencyButton = getButtonForLibraryId(libraryId);
+      if (dependencyButton != null) {
+        ISWTObservableValue libraryButtonSelection = WidgetProperties.selection().observe(libraryButton);
+        IObservableValue dependencyButtonSelection =
+            PojoProperties.value(Button.class, "selection").observe(getDisplayRealm(), dependencyButton);
+        IObservableValue dependencyButtonEnablement =
+            PojoProperties.value(Button.class, "enabled").observe(getDisplayRealm(), dependencyButton);
+
+        WritableValue intermediate = new WritableValue(false, Boolean.class);
+        bindingContext.bindValue(libraryButtonSelection, intermediate);
+        bindingContext.bindValue(dependencyButtonSelection, intermediate);
+        bindingContext.bindValue(dependencyButtonEnablement, intermediate,
+                                 new UpdateValueStrategy().setConverter(BooleanConverter.negate()),
+                                 new UpdateValueStrategy().setConverter(BooleanConverter.negate()));
+      }
+    }
+  }
+
+  private Realm getDisplayRealm() {
+    return DisplayRealm.getRealm(getControl().getDisplay());
+  }
+
+  private Button getButtonForLibraryId(String libraryId) {
+    for (Button button : libraryButtons) {
+      if (((Library) button.getData()).getId().equals(libraryId)) {
+        return button;
+      }
+    }
+    return null;
   }
 
   // mock method until the libraries are defined via an extension point
   private List<Library> getLibraries() {
-    return Arrays.asList(new Library("appengine-api"), new Library("appengine-endpoints"), new Library("objectify"));
+    Library appEngine = new Library("appengine-api");
+    appEngine.setName("App Engine API");
+    Library endpoints = new Library("appengine-endpoints");
+    endpoints.setName("App Engine Endpoints");
+    endpoints.setLibraryDependencies(Collections.singletonList("appengine-api"));
+    return Arrays.asList(appEngine, endpoints);
   }
 
   @Override
