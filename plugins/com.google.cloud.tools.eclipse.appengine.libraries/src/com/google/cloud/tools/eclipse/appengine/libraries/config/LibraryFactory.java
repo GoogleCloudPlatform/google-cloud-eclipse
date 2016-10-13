@@ -134,8 +134,9 @@ public class LibraryFactory {
         break;
       case ELMT_INCLUSION_FILTER:
         filters.add(Filter.inclusionFilter(childElement.getAttribute(ATTR_PATTERN)));
+        break;
       default:
-        logger.warning("Unexpected element among filter elements: " + childElement.getName());
+        // other child element of libraryFile, e.g.: mavenCoordinates
         break;
       }
     }

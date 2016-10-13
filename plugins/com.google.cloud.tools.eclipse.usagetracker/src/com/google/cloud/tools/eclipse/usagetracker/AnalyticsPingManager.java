@@ -99,9 +99,12 @@ public class AnalyticsPingManager {
       if (preferences == null) {
         throw new NullPointerException("Preference store cannot be null.");
       }
-      instance = new AnalyticsPingManager(preferences,
-          PlatformUI.getWorkbench().getDisplay(), new ConcurrentLinkedQueue<PingEvent>(),
-          !Platform.inDevelopmentMode() && isTrackingIdDefined());
+
+      boolean analyticsEnabled = !Platform.inDevelopmentMode() && isTrackingIdDefined();
+      Display display = !analyticsEnabled ? null : PlatformUI.getWorkbench().getDisplay();
+
+      instance = new AnalyticsPingManager(preferences, display,
+          new ConcurrentLinkedQueue<PingEvent>(), analyticsEnabled);
     }
     return instance;
   }

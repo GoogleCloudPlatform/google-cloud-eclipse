@@ -16,9 +16,14 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
 
+import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,15 +31,21 @@ import org.junit.Test;
 public class MavenArchetypeProjectWizardTest {
 
   private MavenArchetypeProjectWizard wizard;
+  private Shell shell;
 
   @Before
   public void setUp() {
     assertNotNull(Display.getDefault());
-
+    shell = new Shell(Display.getDefault());
     wizard = new MavenArchetypeProjectWizard();
     wizard.addPages();
   }
-  
+
+  @After
+  public void tearDown() {
+    shell.dispose();
+  }
+
   @Test
   public void testCanFinish() {
     Assert.assertFalse(wizard.canFinish());
@@ -44,7 +55,7 @@ public class MavenArchetypeProjectWizardTest {
   public void testTwoPages() {
     Assert.assertEquals(2, wizard.getPageCount());
   }
-  
+
   @Test
   public void testGetPageByName() {
     assertNotNull(wizard.getPage("basicNewProjectPage"));
@@ -79,19 +90,46 @@ public class MavenArchetypeProjectWizardTest {
 
   @Test
   public void testSuggestPackageName() {
-    Assert.assertEquals("aa.bb",
-        MavenAppEngineStandardWizardPage.suggestPackageName("aa.bb"));
+    assertEquals("aa.bb", MavenAppEngineStandardWizardPage.suggestPackageName("aa.bb"));
 
-    Assert.assertEquals("aA.Bb",
-        MavenAppEngineStandardWizardPage.suggestPackageName("aA.Bb"));
+    assertEquals("aA.Bb", MavenAppEngineStandardWizardPage.suggestPackageName("aA.Bb"));
 
-    Assert.assertEquals("aa.bb",
+    assertEquals("aa.bb",
         MavenAppEngineStandardWizardPage.suggestPackageName(" a  a\t . b\r b \n"));
 
-    Assert.assertEquals("aa.bb",
+    assertEquals("aa.bb",
         MavenAppEngineStandardWizardPage.suggestPackageName("....aa....bb..."));
 
-    Assert.assertEquals("aa._01234bb", MavenAppEngineStandardWizardPage.suggestPackageName(
+    assertEquals("aa._01234bb", MavenAppEngineStandardWizardPage.suggestPackageName(
         "aa`~!@#$%^&*()-+=[]{}<>\\|:;'\",?/._01234bb"));
+  }
+
+  @Test
+  public void testAutoPackageNameSetterOnGroupIdChange_whitespaceInGroupId() {
+    wizard.setContainer(mock(IWizardContainer.class));
+    wizard.createPageControls(shell);
+    MavenAppEngineStandardWizardPage page =
+        (MavenAppEngineStandardWizardPage) wizard.getPage("basicNewProjectPage");
+
+    page.groupIdField.setText(" ");  // setText() triggers VerifyEvent.
+    assertEquals("", page.javaPackageField.getText());
+
+    page.groupIdField.setText(" a");
+    assertEquals("a", page.javaPackageField.getText());
+
+    page.groupIdField.setText(" a ");
+    assertEquals("a", page.javaPackageField.getText());
+
+    page.groupIdField.setText(" a b");
+    assertEquals("a", page.javaPackageField.getText());
+
+    page.groupIdField.setText(" a ");
+    assertEquals("a", page.javaPackageField.getText());
+
+    page.groupIdField.setText(" a");
+    assertEquals("a", page.javaPackageField.getText());
+
+    page.groupIdField.setText(" ac");
+    assertEquals("ac", page.javaPackageField.getText());
   }
 }
