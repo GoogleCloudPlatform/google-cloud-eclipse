@@ -35,8 +35,12 @@ public class MavenArchetypeProjectWizardTest {
 
   @Before
   public void setUp() {
+    // TODO(chanseok): use ShellTestResource (see AccountPanelTest) after fixing
+    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/771.
+    // (Remove shell.dispose() in tearDown() too.)
     assertNotNull(Display.getDefault());
     shell = new Shell(Display.getDefault());
+
     wizard = new MavenArchetypeProjectWizard();
     wizard.addPages();
   }
