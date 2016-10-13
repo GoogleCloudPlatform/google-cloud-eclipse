@@ -1,3 +1,18 @@
+/*
+ * Copyright 2016 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 
@@ -20,6 +35,7 @@ import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.preferences.PreferenceUtil;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
 
 public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOperation {
@@ -40,15 +56,14 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
     SubMonitor progress = SubMonitor.convert(monitor);
     monitor.beginTask("Creating Maven AppEngine archetype", 100);
 
-    // todo: verify whether project ID is necessary during creation. The
-    // archetype seems to require it so we use the artifact if unspecified.
+    // The project ID is currently necessary due to tool bugs.
     String appId = appEngineProjectId;
     if (appId == null || appId.trim().isEmpty()) {
       appId = artifactId;
     }
-    String appengineArtifactVersion = MavenUtils.resolveLatestReleasedArtifact(progress.newChild(20),
+    String appengineArtifactVersion = MavenUtils.resolveLatestReleasedArtifactVersion(progress.newChild(20),
         "com.google.appengine", "appengine-api-1.0-sdk", "jar", AppEngineStandardFacet.DEFAULT_APPENGINE_SDK_VERSION);
-    String gcloudArtifactVersion = MavenUtils.resolveLatestReleasedArtifact(progress.newChild(20),
+    String gcloudArtifactVersion = MavenUtils.resolveLatestReleasedArtifactVersion(progress.newChild(20),
         "com.google.appengine", "gcloud-maven-plugin", "maven-plugin", AppEngineStandardFacet.DEFAULT_GCLOUD_PLUGIN_VERSION);
 
     Properties properties = new Properties();
@@ -69,6 +84,7 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
           project, true, loopMonitor.newChild(1));
       AppEngineStandardFacet.installAppEngineFacet(facetedProject, true /* installDependentFacets */, loopMonitor.newChild(1));
       AppEngineStandardFacet.installAllAppEngineRuntimes(facetedProject, true /* force */, loopMonitor.newChild(1));
+      PreferenceUtil.setProjectIdPreference(project, appId);
     }
     
     /*

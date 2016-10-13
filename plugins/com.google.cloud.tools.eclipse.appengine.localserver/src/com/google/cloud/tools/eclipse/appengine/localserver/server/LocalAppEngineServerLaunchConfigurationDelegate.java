@@ -107,11 +107,12 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     if (ILaunchManager.DEBUG_MODE.equals(mode)) {
       int debugPort = getDebugPort();
       setupDebugTarget(launch, configuration, debugPort, monitor);
-      serverBehaviour.startDebugDevServer(runnables, console.newMessageStream(), debugPort);
+      serverBehaviour.startDebugDevServer(
+          runnables, console.newMessageStream(), server.getHost(), debugPort);
     } else {
       // A launch must have at least one debug target or process, or it otherwise becomes a zombie
       LocalAppEngineServerDebugTarget.addTarget(launch, serverBehaviour);
-      serverBehaviour.startDevServer(runnables, console.newMessageStream());
+      serverBehaviour.startDevServer(runnables, console.newMessageStream(), server.getHost());
     }
   }
 

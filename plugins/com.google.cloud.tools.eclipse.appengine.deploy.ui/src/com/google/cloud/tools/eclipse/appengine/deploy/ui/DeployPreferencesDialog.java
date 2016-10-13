@@ -16,6 +16,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
+import com.google.api.client.auth.oauth2.Credential;
+import com.google.cloud.tools.eclipse.appengine.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
 import com.google.common.base.Preconditions;
 
@@ -25,14 +27,18 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
   // seems like an Eclipse/JFace bug
   private Image titleImage = AppEngineImages.appEngine(64).createImage();
 
-  private DeployPreferencesPanel content;
+  private StandardDeployPreferencesPanel content;
   private IProject project;
+  private IGoogleLoginService loginService;
 
-  public DeployPreferencesDialog(Shell parentShell, IProject project) {
+  public DeployPreferencesDialog(Shell parentShell, IProject project,
+                                 IGoogleLoginService loginService) {
     super(parentShell);
 
     Preconditions.checkNotNull(project, "project is null");
+    Preconditions.checkNotNull(loginService, "loginService is null");
     this.project = project;
+    this.loginService = loginService;
   }
 
   @Override
@@ -46,18 +52,21 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
       setTitleImage(titleImage);
     }
 
+    getButton(IDialogConstants.OK_ID).setText(Messages.getString("deploy"));
+    
     // TitleAreaDialogSupport does not validate initially, let's trigger validation this way
     content.getDataBindingContext().updateTargets();
 
     return contents;
   }
-  
+
   @Override
   protected Control createDialogArea(final Composite parent) {
     Composite dialogArea = (Composite) super.createDialogArea(parent);
 
     Composite container = new Composite(dialogArea, SWT.NONE);
-    content = new DeployPreferencesPanel(container, project, getLayoutChangedHandler());
+    content = new StandardDeployPreferencesPanel(container, project, loginService,
+        getLayoutChangedHandler(), true /* requireValues */);
     GridDataFactory.fillDefaults().grab(true, false).applyTo(content);
 
     // we pull in Dialog's content margins which are zeroed out by TitleAreaDialog
@@ -114,5 +123,9 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
     if (okButton != null) {
       okButton.setEnabled(isValid);
     }
+  }
+
+  public Credential getCredential() {
+    return content.getSelectedCredential();
   }
 }

@@ -8,6 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Localization: plugin
 Require-Bundle: com.google.cloud.tools.eclipse.appengine.newproject;bundle-version="0.1.0",
  com.google.cloud.tools.eclipse.appengine.ui,
+ com.google.guava,
  javax.servlet;bundle-version="2.5.0",
  javax.servlet.jsp;bundle-version="2.2.0",
  org.eclipse.core.resources,
@@ -17,11 +18,11 @@ Require-Bundle: com.google.cloud.tools.eclipse.appengine.newproject;bundle-versi
  org.eclipse.core.jobs,
  org.eclipse.m2e.core;bundle-version="1.6.2",
  org.eclipse.m2e.core.ui;bundle-version="1.6.2",
- com.google.guava,
  org.eclipse.m2e.maven.runtime
 Bundle-ActivationPolicy: lazy
 Import-Package: com.google.cloud.tools.eclipse.appengine.facets,
  com.google.cloud.tools.eclipse.appengine.ui,
+ com.google.cloud.tools.eclipse.preferences,
  com.google.cloud.tools.eclipse.usagetracker,
  com.google.cloud.tools.eclipse.util,
  com.google.cloud.tools.project;version="0.1.9",

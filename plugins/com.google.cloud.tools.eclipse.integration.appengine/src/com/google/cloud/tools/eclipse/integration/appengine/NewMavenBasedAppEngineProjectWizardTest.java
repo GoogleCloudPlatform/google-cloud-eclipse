@@ -110,9 +110,9 @@ public class NewMavenBasedAppEngineProjectWizardTest extends AbstractProjectTest
       Path projectFilePath = new Path(projectFile);
       assertTrue(project.exists(projectFilePath));
     }
-    List<String> errorsInProblemsView = SwtBotProjectActions.getErrorsInProblemsView(bot);
-    if (!errorsInProblemsView.isEmpty()) {
-      fail(errorsInProblemsView.get(0));
+    List<String> buildErrors = SwtBotProjectActions.getAllBuildErrors(bot);
+    if (!buildErrors.isEmpty()) {
+      fail(buildErrors.get(0));
     }
   }
 }

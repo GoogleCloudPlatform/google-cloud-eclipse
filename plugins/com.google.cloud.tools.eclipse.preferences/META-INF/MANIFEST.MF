@@ -11,3 +11,4 @@ Bundle-Activator: com.google.cloud.tools.eclipse.preferences.Activator
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime
+Import-Package: org.eclipse.core.resources
