@@ -63,9 +63,9 @@ public class MavenAppEngineFacetUtil {
    * @return a map where the keys and values are the property fields and values respectively
    */
   public static Map<String, String> getAppEnginePomProperties(IProgressMonitor monitor) {
-    String appengineArtifactVersion = MavenUtils.resolveLatestReleasedArtifact(monitor,
+    String appengineArtifactVersion = MavenUtils.resolveLatestReleasedArtifactVersion(monitor,
         "com.google.appengine", "appengine-api-1.0-sdk", "jar", AppEngineStandardFacet.DEFAULT_APPENGINE_SDK_VERSION);
-    String gcloudArtifactVersion = MavenUtils.resolveLatestReleasedArtifact(monitor,
+    String gcloudArtifactVersion = MavenUtils.resolveLatestReleasedArtifactVersion(monitor,
         "com.google.appengine", "gcloud-maven-plugin", "maven-plugin", AppEngineStandardFacet.DEFAULT_GCLOUD_PLUGIN_VERSION);
 
     Map<String, String> allProperties = new HashMap<String, String>();

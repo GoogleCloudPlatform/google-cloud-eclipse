@@ -116,7 +116,7 @@ public class DeployPropertyPage extends PropertyPage {
 
     if (AppEngineStandardFacet.hasAppEngineFacet(facetedProject)) {
       return new StandardDeployPreferencesPanel(container, project, loginService,
-          getLayoutChangedHandler(),  true /* allowEmptyProjectId */);
+          getLayoutChangedHandler(), false /* requireValues */);
     } else if (AppEngineFlexFacet.hasAppEngineFacet(facetedProject)) {
       return new FlexDeployPreferencesPanel(container);
     } else {

@@ -1,9 +1,25 @@
+/*******************************************************************************
+ * Copyright 2016 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package com.google.cloud.tools.eclipse.util;
 
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Objects;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.model.Dependency;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -91,17 +107,29 @@ public class MavenUtils {
    * <code>artifactId</code> or the <code>defaultVersion</code> if an error occurs while fetching
    * the latest version.
    */
-  public static String resolveLatestReleasedArtifact(IProgressMonitor monitor, String groupId,
-      String artifactId, String type, String defaultVersion) {
+  public static String resolveLatestReleasedArtifactVersion(IProgressMonitor monitor, String groupId,
+                                                            String artifactId, String type, String defaultVersion) {
     try {
-      Artifact artifact = MavenPlugin.getMaven().resolve(groupId, artifactId, "LATEST", type,
-          null /* classifier */, null /* artifactRepositories */, monitor);
+      Artifact artifact = resolveArtifact(monitor, groupId, artifactId, type, "LATEST");
       return artifact.getVersion();
     } catch (CoreException ex) {
       logger.log(Level.WARNING,
-          MessageFormat.format("Unable to resolve artifact {0}:{1}", groupId, artifactId), ex);
+                 MessageFormat.format("Unable to resolve artifact {0}:{1}", groupId, artifactId), ex);
       return defaultVersion;
     }
+  }
+
+  public static Artifact resolveArtifact(IProgressMonitor monitor, String groupId, String artifactId,
+                                         String type, String version) throws CoreException {
+    return resolveArtifact(monitor, groupId, artifactId, type, version, null, null);
+  }
+
+  public static Artifact resolveArtifact(IProgressMonitor monitor, String groupId, String artifactId,
+                                         String type, String version, String classifier,
+                                         List<ArtifactRepository> repositories) throws CoreException {
+    Artifact artifact = MavenPlugin.getMaven().resolve(groupId, artifactId, version, type,
+                                                       classifier, repositories, monitor);
+    return artifact;
   }
 
   public String getProperty(InputStream pomXml, String propertyName) throws CoreException {
@@ -140,6 +168,10 @@ public class MavenUtils {
           new Status(IStatus.ERROR, FrameworkUtil.getBundle(getClass()).getSymbolicName(),
               "Missing pom.xml element: " + childTagName, exception));
     }
+  }
+
+  public static ArtifactRepository createRepository(String id, String url) throws CoreException {
+    return MavenPlugin.getMaven().createArtifactRepository(id, url);
   }
 
 }

@@ -30,8 +30,8 @@ import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
-import com.google.cloud.tools.eclipse.appengine.libraries.config.LibraryBuilder;
-import com.google.cloud.tools.eclipse.appengine.libraries.config.LibraryBuilder.LibraryBuilderException;
+import com.google.cloud.tools.eclipse.appengine.libraries.config.LibraryFactory;
+import com.google.cloud.tools.eclipse.appengine.libraries.config.LibraryFactory.LibraryFactoryException;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 
@@ -56,10 +56,10 @@ public class AppEngineLibraryContainerInitializer extends ClasspathContainerInit
 
   @VisibleForTesting
   AppEngineLibraryContainerInitializer(IConfigurationElement[] configurationElements,
-                                       LibraryBuilder libraryBuilder,
+                                       LibraryFactory libraryFactory,
                                        String containerPath) {
     this.containerPath = containerPath;
-    initializeLibraries(configurationElements, libraryBuilder);
+    initializeLibraries(configurationElements, libraryFactory);
   }
 
   @Override
@@ -68,7 +68,7 @@ public class AppEngineLibraryContainerInitializer extends ClasspathContainerInit
       // in tests libraries will be initialized via the test constructor, this would override mocks/stubs.
       IConfigurationElement[] configurationElements =
           RegistryFactory.getRegistry().getConfigurationElementsFor(LIBRARIES_EXTENSION_POINT);
-      initializeLibraries(configurationElements, new LibraryBuilder());
+      initializeLibraries(configurationElements, new LibraryFactory());
     }
     if (containerPath.segmentCount() == 2) {
       if (!containerPath.segment(0).equals(this.containerPath)) {
@@ -94,13 +94,13 @@ public class AppEngineLibraryContainerInitializer extends ClasspathContainerInit
     }
   }
 
-  private void initializeLibraries(IConfigurationElement[] configurationElements, LibraryBuilder libraryBuilder) {
+  private void initializeLibraries(IConfigurationElement[] configurationElements, LibraryFactory libraryFactory) {
       libraries = new HashMap<>(configurationElements.length);
       for (IConfigurationElement configurationElement : configurationElements) {
         try {
-          Library library = libraryBuilder.build(configurationElement);
+          Library library = libraryFactory.create(configurationElement);
           libraries.put(library.getId(), library);
-        } catch (LibraryBuilderException exception) {
+        } catch (LibraryFactoryException exception) {
           logger.log(Level.SEVERE, "Failed to initialize libraries", exception);
         }
       }

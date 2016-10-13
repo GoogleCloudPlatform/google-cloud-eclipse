@@ -17,24 +17,29 @@ package com.google.cloud.tools.eclipse.appengine.libraries;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 
-import com.google.cloud.tools.eclipse.appengine.libraries.config.LibraryBuilder;
-import com.google.cloud.tools.eclipse.appengine.libraries.config.LibraryBuilder.LibraryBuilderException;
+import com.google.cloud.tools.eclipse.appengine.libraries.config.LibraryFactory;
+import com.google.cloud.tools.eclipse.appengine.libraries.config.LibraryFactory.LibraryFactoryException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AppEngineLibraryContainerInitializerTest {
@@ -43,11 +48,23 @@ public class AppEngineLibraryContainerInitializerTest {
   private static final String TEST_CONTAINER_PATH = "test.appengine.libraries";
   private static final String TEST_LIBRARY_PATH = TEST_CONTAINER_PATH + "/" + TEST_LIBRARY_ID;
 
-  @Mock private LibraryBuilder libraryBuilder;
+  @Mock private LibraryFactory libraryFactory;
   @Mock private IConfigurationElement configurationElement;
 
   @Rule
+  public TestLibraryRepositoryServiceRegistrar libraryRepositoryServiceRegistrar =
+      new TestLibraryRepositoryServiceRegistrar();
+  @Rule
   public TestProject testProject = new TestProject().withClasspathContainerPath(TEST_LIBRARY_PATH);
+
+  @Before
+  public void setUp() throws Exception {
+    when(libraryRepositoryServiceRegistrar.getRepositoryService().getJarLocation(any(MavenCoordinates.class)))
+      .thenAnswer(fakePathFromArtifactId(""));
+    when(libraryRepositoryServiceRegistrar.getRepositoryService().getSourceJarLocation(any(MavenCoordinates.class)))
+      .thenAnswer(fakePathFromArtifactId("-sources"));
+    setupLibraryFactory();
+  }
 
   /**
    * This test relies on the {@link TestAppEngineLibraryContainerInitializer} defined in the fragment.xml for
@@ -61,12 +78,10 @@ public class AppEngineLibraryContainerInitializerTest {
    * in the host project's plugin.xml and it is not possible to remove/override it.
    */
   @Test
-  public void testInitialize_resolvesContainerToJar() throws CoreException, LibraryBuilderException {
-    setupLibraryBuilder();
-
+  public void testInitialize_resolvesContainerToJar() throws CoreException {
     AppEngineLibraryContainerInitializer containerInitializer =
         new AppEngineLibraryContainerInitializer(new IConfigurationElement[]{ configurationElement },
-                                                 libraryBuilder,
+                                                 libraryFactory,
                                                  TEST_CONTAINER_PATH);
     containerInitializer.initialize(new Path(TEST_LIBRARY_PATH),
                                     testProject.getJavaProject());
@@ -74,17 +89,15 @@ public class AppEngineLibraryContainerInitializerTest {
     IClasspathEntry[] resolvedClasspath = testProject.getJavaProject().getResolvedClasspath(false);
     assertThat(resolvedClasspath.length, is(2));
     IClasspathEntry libJar = resolvedClasspath[1];
-    assertTrue(libJar.getPath().toOSString().endsWith("artifactId.jar"));
-    assertTrue(libJar.getSourceAttachmentPath().toOSString().endsWith("artifactId.jar"));
+    assertThat(libJar.getPath().toOSString(), is("/test/path/artifactId.jar"));
+    assertThat(libJar.getSourceAttachmentPath().toOSString(), is("/test/path/artifactId-sources.jar"));
   }
 
   @Test(expected = CoreException.class)
   public void testInitialize_containerPathConsistsOfOneSegment() throws Exception {
-    setupLibraryBuilder();
-
     AppEngineLibraryContainerInitializer containerInitializer =
         new AppEngineLibraryContainerInitializer(new IConfigurationElement[]{ configurationElement },
-                                                 libraryBuilder,
+                                                 libraryFactory,
                                                  TEST_CONTAINER_PATH);
     containerInitializer.initialize(new Path("single.segment.id"),
                                     testProject.getJavaProject());
@@ -92,11 +105,9 @@ public class AppEngineLibraryContainerInitializerTest {
 
   @Test(expected = CoreException.class)
   public void testInitialize_containerPathConsistsOfThreeSegments() throws Exception {
-    setupLibraryBuilder();
-
     AppEngineLibraryContainerInitializer containerInitializer =
         new AppEngineLibraryContainerInitializer(new IConfigurationElement[]{ configurationElement },
-                                                 libraryBuilder,
+                                                 libraryFactory,
                                                  TEST_CONTAINER_PATH);
     containerInitializer.initialize(new Path("first.segment/second.segment/third.segment"),
                                     testProject.getJavaProject());
@@ -104,11 +115,9 @@ public class AppEngineLibraryContainerInitializerTest {
 
   @Test(expected = CoreException.class)
   public void testInitialize_containerPathHasWrongFirstSegment() throws Exception {
-    setupLibraryBuilder();
-
     AppEngineLibraryContainerInitializer containerInitializer =
         new AppEngineLibraryContainerInitializer(new IConfigurationElement[]{ configurationElement },
-                                                 libraryBuilder,
+                                                 libraryFactory,
                                                  TEST_CONTAINER_PATH);
     containerInitializer.initialize(new Path("first.segment/second.segment"),
                                     testProject.getJavaProject());
@@ -116,26 +125,26 @@ public class AppEngineLibraryContainerInitializerTest {
 
   @Test(expected = CoreException.class)
   public void testInitialize_containerPathHasWrongLibraryId() throws Exception {
-    setupLibraryBuilder();
-
     AppEngineLibraryContainerInitializer containerInitializer =
         new AppEngineLibraryContainerInitializer(new IConfigurationElement[]{ configurationElement },
-                                                 libraryBuilder,
+                                                 libraryFactory,
                                                  TEST_CONTAINER_PATH);
     containerInitializer.initialize(new Path(TEST_CONTAINER_PATH + "/second.segment"),
                                     testProject.getJavaProject());
   }
 
   @Test
-  public void testInitialize_libraryBuilderErrorDoesNotPreventOtherLibraries() throws Exception {
+  public void testInitialize_libraryFactoryErrorDoesNotPreventOtherLibraries() throws Exception {
     Library library = new Library(TEST_LIBRARY_ID);
-    library.setLibraryFiles(Collections.singletonList(new LibraryFile(new MavenCoordinates("groupId", "artifactId"))));
-    when(libraryBuilder.build(any(IConfigurationElement.class))).thenThrow(LibraryBuilderException.class).thenReturn(library);
+    library.setLibraryFiles(Collections.singletonList(new LibraryFile(new MavenCoordinates("groupId",
+                                                                                           "artifactId"))));
+    // this will override what is set in setupLibraryFactory() when setUp() is executed
+    doThrow(LibraryFactoryException.class).doReturn(library).when(libraryFactory).create(any(IConfigurationElement.class));
 
     AppEngineLibraryContainerInitializer containerInitializer =
         new AppEngineLibraryContainerInitializer(new IConfigurationElement[]{ configurationElement,
                                                                               configurationElement },
-                                                 libraryBuilder,
+                                                 libraryFactory,
                                                  TEST_CONTAINER_PATH);
     containerInitializer.initialize(new Path(TEST_LIBRARY_PATH),
                                     testProject.getJavaProject());
@@ -143,13 +152,28 @@ public class AppEngineLibraryContainerInitializerTest {
     IClasspathEntry[] resolvedClasspath = testProject.getJavaProject().getResolvedClasspath(false);
     assertThat(resolvedClasspath.length, is(2));
     IClasspathEntry libJar = resolvedClasspath[1];
-    assertTrue(libJar.getPath().toOSString().endsWith("artifactId.jar"));
-    assertTrue(libJar.getSourceAttachmentPath().toOSString().endsWith("artifactId.jar"));
+    assertThat(libJar.getPath().toOSString(), is("/test/path/artifactId.jar"));
+    assertThat(libJar.getSourceAttachmentPath().toOSString(), is("/test/path/artifactId-sources.jar"));
   }
 
-  private void setupLibraryBuilder() throws LibraryBuilderException {
+  private void setupLibraryFactory() throws LibraryFactoryException {
     Library library = new Library(TEST_LIBRARY_ID);
     library.setLibraryFiles(Collections.singletonList(new LibraryFile(new MavenCoordinates("groupId", "artifactId"))));
-    when(libraryBuilder.build(any(IConfigurationElement.class))).thenReturn(library);
+    doReturn(library).when(libraryFactory).create(any(IConfigurationElement.class));
   }
+
+  private Answer<IPath> fakePathFromArtifactId(final String postfix) {
+    return new Answer<IPath>() {
+      @Override
+      public IPath answer(InvocationOnMock invocation) throws Throwable {
+        String postfixToAdd = postfix;
+        if (postfixToAdd ==  null) {
+          postfixToAdd = "";
+        }
+        MavenCoordinates argument = invocation.getArgumentAt(0, MavenCoordinates.class);
+        return new Path("/test/path/" + argument.getArtifactId() + postfixToAdd + "." + argument.getType());
+      }
+    };
+  }
+
 }

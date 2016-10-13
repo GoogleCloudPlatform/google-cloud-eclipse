@@ -56,6 +56,7 @@ import org.osgi.service.prefs.BackingStoreException;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.appengine.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.appengine.login.ui.AccountSelector;
+import com.google.cloud.tools.eclipse.appengine.login.ui.AccountSelectorObservableValue;
 import com.google.cloud.tools.eclipse.ui.util.FontUtil;
 import com.google.cloud.tools.eclipse.ui.util.databinding.BucketNameValidator;
 import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectIdInputValidator;
@@ -75,7 +76,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   private static Logger logger = Logger.getLogger(DeployPropertyPage.class.getName());
 
   private AccountSelector accountSelector;
-  
+
   private Label projectIdLabel;
   private Text projectId;
 
@@ -98,14 +99,14 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   private DataBindingContext bindingContext;
 
   private Runnable layoutChangedHandler;
-  private boolean allowEmptyProjectId = false;
+  private boolean requireValues = true;
 
   public StandardDeployPreferencesPanel(Composite parent, IProject project,
-      IGoogleLoginService loginService, Runnable layoutChangedHandler, boolean allowEmptyProjectId) {
+      IGoogleLoginService loginService, Runnable layoutChangedHandler, boolean requireValues) {
     super(parent, SWT.NONE);
 
     this.layoutChangedHandler = layoutChangedHandler;
-    this.allowEmptyProjectId = allowEmptyProjectId;
+    this.requireValues = requireValues;
 
     createCredentialSection(loginService);
 
@@ -129,6 +130,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   private void setupDataBinding() {
     bindingContext = new DataBindingContext();
 
+    setupAccountEmailDataBinding(bindingContext);
     setupProjectIdDataBinding(bindingContext);
     setupProjectVersionDataBinding(bindingContext);
     setupAutoPromoteDataBinding(bindingContext);
@@ -138,14 +140,34 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     observables.addObservablesFromContext(bindingContext, true, true);
   }
 
+  private void setupAccountEmailDataBinding(DataBindingContext context) {
+    final IObservableValue accountEmailModel = PojoProperties.value("accountEmail").observe(model);
+    context.bindValue(new AccountSelectorObservableValue(accountSelector), accountEmailModel);
+
+    if (requireValues) {
+      context.addValidationStatusProvider(new FixedMultiValidator() {
+        @Override
+        protected IStatus validate() {
+          String email = (String) accountEmailModel.getValue();
+          // It's possible that no account is selected while a valid email has been saved in the
+          // model (if the corresponding account is signed out), so check the actual selection too.
+          if (email.isEmpty() || accountSelector.getSelectedEmail().isEmpty()) {
+            return ValidationStatus.error(Messages.getString("error.account.missing"));
+          }
+          return ValidationStatus.ok();
+        }
+      });
+    }
+  }
+
   private void setupProjectIdDataBinding(DataBindingContext context) {
     ISWTObservableValue projectIdField = WidgetProperties.text(SWT.Modify).observe(projectId);
 
     IObservableValue projectIdModel = PojoProperties.value("projectId").observe(model);
 
     context.bindValue(projectIdField, projectIdModel,
-                      new UpdateValueStrategy().setAfterGetValidator(new ProjectIdInputValidator(allowEmptyProjectId)),
-                      new UpdateValueStrategy().setAfterGetValidator(new ProjectIdInputValidator(allowEmptyProjectId)));
+                      new UpdateValueStrategy().setAfterGetValidator(new ProjectIdInputValidator(requireValues)),
+                      new UpdateValueStrategy().setAfterGetValidator(new ProjectIdInputValidator(requireValues)));
   }
 
   private void setupProjectVersionDataBinding(DataBindingContext context) {
@@ -214,6 +236,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
                                                               new BucketNameValidator()));
   }
 
+  @Override
   public boolean savePreferences() {
     try {
       model.savePreferences();
@@ -238,7 +261,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
   private void createCredentialSection(IGoogleLoginService loginService) {
     Composite accountComposite = new Composite(this, SWT.NONE);
-    
+
     new Label(accountComposite, SWT.LEFT).setText(
         Messages.getString("deploy.preferences.dialog.label.selectAccount"));
 
@@ -351,7 +374,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
    * </ol>
    *
    */
-  private static class OverrideValidator extends MultiValidator {
+  private static class OverrideValidator extends FixedMultiValidator {
 
     private ISWTObservableValue selectionObservable;
     private ISWTObservableValue textObservable;
@@ -363,7 +386,6 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
      * @param validator must be a validator for String values, will be applied to <code>text.getValue()</code>
      */
     public OverrideValidator(ISWTObservableValue selection, ISWTObservableValue text, IValidator validator) {
-      super(selection.getRealm());
       Preconditions.checkArgument(text.getWidget() instanceof Text,
                                   "text is an observable for {0}, should be for {1}",
                                   text.getWidget().getClass().getName(),
@@ -386,23 +408,25 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
       }
       return validator.validate(textObservable.getValue());
     }
+  }
 
+  // BUGFIX: https://bugs.eclipse.org/bugs/show_bug.cgi?id=312785
+  private abstract static class FixedMultiValidator extends MultiValidator {
     @Override
     public IObservableList getTargets() {
-      /**
-       * BUGFIX: https://bugs.eclipse.org/bugs/show_bug.cgi?id=312785
-       */
-      if( isDisposed() ) {
+      if (isDisposed()) {
         return Observables.emptyObservableList();
       }
       return super.getTargets();
     }
-  }
+  };
 
+  @Override
   public DataBindingContext getDataBindingContext() {
     return bindingContext;
   }
 
+  @Override
   public void resetToDefaults() {
     model.resetToDefaults();
     bindingContext.updateTargets();

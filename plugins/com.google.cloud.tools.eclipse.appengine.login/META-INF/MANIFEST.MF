@@ -31,5 +31,8 @@ Export-Package: com.google.api.client.auth.oauth2;x-friends:="com.google.cloud.t
 Import-Package: com.google.cloud.tools.eclipse.ui.util,
  com.google.cloud.tools.eclipse.usagetracker,
  javax.servlet.http;version="3.1.0",
+ org.eclipse.core.databinding.observable,
+ org.eclipse.core.databinding.observable.value,
  org.eclipse.core.expressions,
+ org.eclipse.jface.databinding.swt,
  org.osgi.service.component

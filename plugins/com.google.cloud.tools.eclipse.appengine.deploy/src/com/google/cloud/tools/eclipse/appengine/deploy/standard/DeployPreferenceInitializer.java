@@ -9,6 +9,7 @@ public class DeployPreferenceInitializer extends AbstractPreferenceInitializer {
   private static final String PREFERENCE_STORE_DEFAULTS_QUALIFIER =
       "com.google.cloud.tools.eclipse.appengine.deploy.defaults";
 
+  static final String DEFAULT_ACCOUNT_EMAIL = "";
   static final String DEFAULT_PROJECT_ID = "";
   static final boolean DEFAULT_OVERRIDE_DEFAULT_VERSIONING = false;
   static final String DEFAULT_CUSTOM_VERSION = "";
@@ -21,6 +22,7 @@ public class DeployPreferenceInitializer extends AbstractPreferenceInitializer {
   public void initializeDefaultPreferences() {
     IEclipsePreferences preferences =
         DefaultScope.INSTANCE.getNode(PREFERENCE_STORE_DEFAULTS_QUALIFIER);
+    preferences.put(StandardDeployPreferences.PREF_ACCOUNT_EMAIL, DEFAULT_ACCOUNT_EMAIL);
     preferences.put(StandardDeployPreferences.PREF_PROJECT_ID,
                     DEFAULT_PROJECT_ID);
     preferences.putBoolean(StandardDeployPreferences.PREF_OVERRIDE_DEFAULT_VERSIONING,

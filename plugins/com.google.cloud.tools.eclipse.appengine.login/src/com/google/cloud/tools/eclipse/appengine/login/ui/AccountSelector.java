@@ -26,6 +26,7 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 
@@ -67,6 +68,19 @@ public class AccountSelector extends Composite {
     return selectedCredential;
   }
 
+  public String getSelectedEmail() {
+    return combo.getText();
+  }
+
+  public int selectAccount(String email) {
+    int index = combo.indexOf(email);
+    if (index != -1) {
+      combo.select(index);
+      selectedCredential = (Credential) combo.getData(email);
+    }
+    return index;
+  }
+
   @VisibleForTesting
   class LogInOnSelect extends SelectionAdapter {
     @Override
@@ -76,29 +90,29 @@ public class AccountSelector extends Composite {
         if (account != null) {
           addAndSelectAccount(account);
         } else {
-          combo.deselect(combo.getSelectionIndex());
+          combo.deselectAll();
         }
       }
 
-      int selectedIndex = combo.getSelectionIndex();
-      if (selectedIndex == -1) {
-        selectedCredential = null;
-      } else {
-        selectedCredential = (Credential) combo.getData(combo.getItem(selectedIndex));
-      }
+      selectedCredential = (Credential) combo.getData(getSelectedEmail());
     }
 
     private void addAndSelectAccount(Account account) {
       // If the combo already has the email, just select it.
-      for (int i = 0; i < combo.getItemCount(); i++) {
-        if (combo.getItem(i).equals(account.getEmail())) {
-          combo.select(i);
-          return;
-        }
+      if (selectAccount(account.getEmail()) != -1) {
+        return;
       }
       combo.add(account.getEmail(), 0 /* place at top */);
       combo.setData(account.getEmail(), account.getOAuth2Credential());
       combo.select(0);
     }
+  }
+
+  public void addSelectionListener(SelectionListener listener) {
+    combo.addSelectionListener(listener);
+  }
+
+  public void removeSelectionListener(SelectionListener listener) {
+    combo.removeSelectionListener(listener);
   }
 }

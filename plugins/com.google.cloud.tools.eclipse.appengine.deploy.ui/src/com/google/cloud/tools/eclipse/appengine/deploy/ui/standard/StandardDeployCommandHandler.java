@@ -95,18 +95,8 @@ public class StandardDeployCommandHandler extends AbstractHandler {
         IGoogleLoginService loginService = ServiceUtils.getService(event, IGoogleLoginService.class);
         DeployPreferencesDialog dialog =
             new DeployPreferencesDialog(HandlerUtil.getActiveShell(event), project, loginService);
-        // TODO(chanseok): remove the condition (dialog.getCredential() != null) after fixing
-        // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/759. The fix will
-        // make the condition redundant. Also remove the stopgap message dialog.
         if (dialog.open() == Window.OK) {
-          if (dialog.getCredential() != null) {
-            launchDeployJob(project, dialog.getCredential(), event);
-          } else {
-            // Stopgap (https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/759)
-            MessageDialog.openInformation(HandlerUtil.getActiveShell(event),
-                Messages.getString("deploy.account.missing.dialog.title"),
-                Messages.getString("deploy.account.missing.dialog.message"));
-          }
+          launchDeployJob(project, dialog.getCredential(), event);
         }
       }
       // return value must be null, reserved for future use

@@ -61,9 +61,9 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
     if (appId == null || appId.trim().isEmpty()) {
       appId = artifactId;
     }
-    String appengineArtifactVersion = MavenUtils.resolveLatestReleasedArtifact(progress.newChild(20),
+    String appengineArtifactVersion = MavenUtils.resolveLatestReleasedArtifactVersion(progress.newChild(20),
         "com.google.appengine", "appengine-api-1.0-sdk", "jar", AppEngineStandardFacet.DEFAULT_APPENGINE_SDK_VERSION);
-    String gcloudArtifactVersion = MavenUtils.resolveLatestReleasedArtifact(progress.newChild(20),
+    String gcloudArtifactVersion = MavenUtils.resolveLatestReleasedArtifactVersion(progress.newChild(20),
         "com.google.appengine", "gcloud-maven-plugin", "maven-plugin", AppEngineStandardFacet.DEFAULT_GCLOUD_PLUGIN_VERSION);
 
     Properties properties = new Properties();

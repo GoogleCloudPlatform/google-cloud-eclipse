@@ -31,6 +31,7 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
+import com.google.cloud.tools.eclipse.appengine.libraries.repository.LibraryRepositoryServiceException;
 import com.google.common.base.Strings;
 
 public class LibraryClasspathContainer implements IClasspathContainer {
@@ -79,21 +80,31 @@ public class LibraryClasspathContainer implements IClasspathContainer {
         }
         entries[idx++] =
             JavaCore.newLibraryEntry(repositoryService.getJarLocation(libraryFile.getMavenCoordinates()),
-                                     repositoryService.getSourceJarLocation(libraryFile.getMavenCoordinates()),
+                                     getSourceLocation(repositoryService, libraryFile),
                                      null,
                                      getAccessRules(libraryFile.getFilters()),
                                      classpathAttributes,
                                      true);
       }
       return entries;
-    } catch (CoreException e) {
-      // declared on UpdateClasspathAttributeUtil.create(Non)DependencyAttribute(), but it's current implementation does
+    } catch (CoreException | LibraryRepositoryServiceException ex) {
+      // declared on UpdateClasspathAttributeUtil.create(Non)DependencyAttribute(), but its current implementation does
       // not throw this exception.
       return new IClasspathEntry[0];
     } finally {
       if (serviceReference != null) {
         releaseRepositoryService(serviceReference);
       }
+    }
+  }
+
+  private IPath getSourceLocation(ILibraryRepositoryService repositoryService, LibraryFile libraryFile) {
+    if (libraryFile.getSourceUri() == null) {
+      return repositoryService.getSourceJarLocation(libraryFile.getMavenCoordinates());
+    } else {
+      // download the file and return path to it
+      // TODO https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/800
+      return new Path("/downloaded/source/file");
     }
   }
 

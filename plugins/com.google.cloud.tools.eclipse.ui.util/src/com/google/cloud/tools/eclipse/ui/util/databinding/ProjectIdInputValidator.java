@@ -8,10 +8,10 @@ import com.google.cloud.tools.eclipse.ui.util.Messages;
 import com.google.cloud.tools.project.ProjectIdValidator;
 
 public class ProjectIdInputValidator implements IValidator {
-  private boolean allowEmptyProjectId = false;
+  private boolean requireProjectId = true;
 
-  public ProjectIdInputValidator(boolean allowEmptyProjectId) {
-    this.allowEmptyProjectId = allowEmptyProjectId;
+  public ProjectIdInputValidator(boolean requireProjectId) {
+    this.requireProjectId = requireProjectId;
   }
 
   @Override
@@ -25,8 +25,9 @@ public class ProjectIdInputValidator implements IValidator {
 
   private IStatus validateString(String value) {
     if (value.isEmpty()) {
-      return allowEmptyProjectId ? ValidationStatus.ok() :
-        ValidationStatus.error(Messages.getString("project.id.empty")); //$NON-NLS-1$
+      return requireProjectId ?
+          ValidationStatus.error(Messages.getString("project.id.empty")) : //$NON-NLS-1$
+          ValidationStatus.ok();
     } else if (ProjectIdValidator.validate(value)) {
       return ValidationStatus.ok();
     } else {

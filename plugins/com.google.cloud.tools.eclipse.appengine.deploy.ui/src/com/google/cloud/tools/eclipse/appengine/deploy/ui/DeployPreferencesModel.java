@@ -9,6 +9,7 @@ public class DeployPreferencesModel {
 
   private StandardDeployPreferences preferences;
 
+  private String accountEmail;
   private String projectId;
   private boolean overrideDefaultVersioning;
   private String version;
@@ -23,6 +24,7 @@ public class DeployPreferencesModel {
   }
 
   private void applyPreferences(StandardDeployPreferences preferences) {
+    setAccountEmail(preferences.getAccountEmail());
     setProjectId(preferences.getProjectId());
     setOverrideDefaultVersioning(preferences.isOverrideDefaultVersioning());
     setVersion(preferences.getVersion());
@@ -37,6 +39,7 @@ public class DeployPreferencesModel {
   }
 
   public void savePreferences() throws BackingStoreException {
+    preferences.setAccountEmail(getAccountEmail());
     preferences.setProjectId(getProjectId());
     preferences.setOverrideDefaultVersioning(isOverrideDefaultVersioning());
     preferences.setVersion(getVersion());
@@ -45,6 +48,14 @@ public class DeployPreferencesModel {
     preferences.setOverrideDefaultBucket(isOverrideDefaultBucket());
     preferences.setBucket(getBucket());
     preferences.save();
+  }
+
+  public String getAccountEmail() {
+    return accountEmail;
+  }
+
+  public void setAccountEmail(String accountEmail) {
+    this.accountEmail = accountEmail;
   }
 
   public String getProjectId() {

@@ -43,6 +43,7 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
+import com.google.cloud.tools.eclipse.appengine.libraries.repository.LibraryRepositoryServiceException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LibraryClasspathContainerTest {
@@ -82,27 +83,45 @@ public class LibraryClasspathContainerTest {
   }
 
   @Test
-  public void testGetKing_returnsApplication() throws Exception {
+  public void testGetKind_returnsApplication() throws Exception {
     LibraryClasspathContainer classpathContainer = new LibraryClasspathContainer(new Path("container/path"),
                                                                                  new Library("id"));
     assertThat(classpathContainer.getKind(), is(IClasspathContainer.K_APPLICATION));
   }
 
   @Test
-  public void testGetClasspathEntries() throws CoreException {
+  public void testGetClasspathEntries_repoServiceThrowsException() throws LibraryRepositoryServiceException {
+    MavenCoordinates mavenCoordinates = new MavenCoordinates("groupId", "artifactId");
+    when(repositoryService.getJarLocation(mavenCoordinates))
+      .thenThrow(new LibraryRepositoryServiceException("test exception"));
+    registerMockService();
+
+    Library library = new Library("id");
+    LibraryFile libraryFile = new LibraryFile(mavenCoordinates);
+    libraryFile.setFilters(Collections.singletonList(Filter.exclusionFilter("com.example.**")));
+    library.setLibraryFiles(Collections.singletonList(libraryFile));
+
+    IClasspathEntry[] classpathEntries =
+        new LibraryClasspathContainer(new Path("container/path"), library).getClasspathEntries();
+    assertNotNull(classpathEntries);
+    assertThat(classpathEntries.length, is(0));
+  }
+
+  @Test
+  public void testGetClasspathEntries() throws CoreException, LibraryRepositoryServiceException {
     MavenCoordinates mavenCoordinates = new MavenCoordinates("groupId", "artifactId");
     when(repositoryService.getJarLocation(mavenCoordinates)).thenReturn(new Path("/path/to/jar/file.jar"));
     registerMockService();
 
     Library library = new Library("id");
-    LibraryFile exportedlibraryFile = new LibraryFile(mavenCoordinates);
-    exportedlibraryFile.setFilters(Collections.singletonList(Filter.exclusionFilter("com.example.**")));
-    exportedlibraryFile.setExport(true);
+    LibraryFile exportedLibraryFile = new LibraryFile(mavenCoordinates);
+    exportedLibraryFile.setFilters(Collections.singletonList(Filter.exclusionFilter("com.example.**")));
+    exportedLibraryFile.setExport(true);
     
-    LibraryFile notExportedlibraryFile = new LibraryFile(mavenCoordinates);
-    notExportedlibraryFile.setExport(false);
+    LibraryFile notExportedLibraryFile = new LibraryFile(mavenCoordinates);
+    notExportedLibraryFile.setExport(false);
     
-    library.setLibraryFiles(Arrays.asList(exportedlibraryFile, notExportedlibraryFile));
+    library.setLibraryFiles(Arrays.asList(exportedLibraryFile, notExportedLibraryFile));
 
     LibraryClasspathContainer classpathContainer = new LibraryClasspathContainer(new Path("container/path"), library);
     IClasspathEntry[] classpathEntries = classpathContainer.getClasspathEntries();

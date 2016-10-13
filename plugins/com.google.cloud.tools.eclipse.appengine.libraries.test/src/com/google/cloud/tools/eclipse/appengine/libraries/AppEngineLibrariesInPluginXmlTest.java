@@ -31,8 +31,8 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.RegistryFactory;
 import org.junit.Test;
 
-import com.google.cloud.tools.eclipse.appengine.libraries.config.LibraryBuilder;
-import com.google.cloud.tools.eclipse.appengine.libraries.config.LibraryBuilder.LibraryBuilderException;
+import com.google.cloud.tools.eclipse.appengine.libraries.config.LibraryFactory;
+import com.google.cloud.tools.eclipse.appengine.libraries.config.LibraryFactory.LibraryFactoryException;
 
 /**
  * This class is intended to test the App Engine libraries set in the plugin.xml to validate that their attributes
@@ -41,32 +41,66 @@ import com.google.cloud.tools.eclipse.appengine.libraries.config.LibraryBuilder.
 public class AppEngineLibrariesInPluginXmlTest {
 
   private static final String APP_ENGINE_API_LIBRARY_ID = "appengine-api";
+  private static final String APP_ENGINE_ENDPOINTS_LIBRARY_ID = "appengine-endpoints";
+  private static final String OBJECTIFY_LIBRARY_ID = "objectify";
 
   @Test
-  public void testAppEngineAPIConfig() throws URISyntaxException, LibraryBuilderException {
+  public void testThereAreOnlyThreeLibraries() {
     IConfigurationElement[] configurationElements =
         RegistryFactory.getRegistry()
           .getConfigurationElementsFor(AppEngineLibraryContainerInitializer.LIBRARIES_EXTENSION_POINT);
-    for (IConfigurationElement configurationElement : configurationElements) {
-      if (configurationElement.getAttribute("id").equals(APP_ENGINE_API_LIBRARY_ID)) {
-        Library appEngineLibrary = new LibraryBuilder().build(configurationElement);
-        verifyAppEngineLibrary(appEngineLibrary);
-        return;
-      }
-    }
-    fail("App Engine API library with ID " + APP_ENGINE_API_LIBRARY_ID + " was not found in the plugin.xml");
+    assertThat(configurationElements.length, is(3));
   }
 
-  private void verifyAppEngineLibrary(Library appEngineLibrary) throws URISyntaxException {
-    assertThat(appEngineLibrary.getContainerPath().toString(),
-               is(Library.CONTAINER_PATH_PREFIX + "/" + APP_ENGINE_API_LIBRARY_ID));
-    assertThat(appEngineLibrary.getId(), is(APP_ENGINE_API_LIBRARY_ID));
-    assertThat(appEngineLibrary.getName(), is("App Engine API"));
-    assertThat(appEngineLibrary.getSiteUri(), is(new URI("https://cloud.google.com/appengine/docs/java/")));
+  @Test
+  public void testAppEngineApiLibraryConfig() throws URISyntaxException, LibraryFactoryException {
+        Library appEngineLibrary = getLibraryWithId(APP_ENGINE_API_LIBRARY_ID);
+        assertThat(appEngineLibrary.getContainerPath().toString(),
+                   is(Library.CONTAINER_PATH_PREFIX + "/" + APP_ENGINE_API_LIBRARY_ID));
+        assertThat(appEngineLibrary.getId(), is(APP_ENGINE_API_LIBRARY_ID));
+        assertThat(appEngineLibrary.getName(), is("App Engine API"));
+        assertThat(appEngineLibrary.getSiteUri(), is(new URI("https://cloud.google.com/appengine/docs/java/")));
 
-    assertThat(appEngineLibrary.getLibraryFiles().size(), is(1));
-    LibraryFile libraryFile = appEngineLibrary.getLibraryFiles().get(0);
-    assertThat(libraryFile.getJavadocUri(), is(new URI("https://cloud.google.com/appengine/docs/java/javadoc/")));
+        assertThat(appEngineLibrary.getLibraryFiles().size(), is(1));
+        LibraryFile libraryFile = appEngineLibrary.getLibraryFiles().get(0);
+        assertThat(libraryFile.getJavadocUri(), is(new URI("https://cloud.google.com/appengine/docs/java/javadoc/")));
+        assertNull(libraryFile.getSourceUri());
+        assertTrue(libraryFile.isExport());
+
+        assertNotNull(libraryFile.getMavenCoordinates());
+        MavenCoordinates mavenCoordinates = libraryFile.getMavenCoordinates();
+        assertThat(mavenCoordinates.getRepository(), is("central"));
+        assertThat(mavenCoordinates.getGroupId(), is("com.google.appengine"));
+        assertThat(mavenCoordinates.getArtifactId(), is("appengine-api-1.0-sdk"));
+        assertThat(mavenCoordinates.getVersion(), is("LATEST"));
+        assertThat(mavenCoordinates.getType(), is("jar"));
+        assertNull(mavenCoordinates.getClassifier());
+
+        assertNotNull(libraryFile.getFilters());
+        List<Filter> filters = libraryFile.getFilters();
+        assertThat(filters.size(), is(4));
+        assertTrue(filters.get(0).isExclude());
+        assertThat(filters.get(0).getPattern(), is("com/google/appengine/repackaged/**"));
+        assertTrue(filters.get(1).isExclude());
+        assertThat(filters.get(1).getPattern(), is("com/google/appengine/labs/repackaged/**"));
+        assertFalse(filters.get(2).isExclude());
+        assertThat(filters.get(2).getPattern(), is("com/google/apphosting/api/**"));
+        assertTrue(filters.get(3).isExclude());
+        assertThat(filters.get(3).getPattern(), is("com/google/apphosting/**"));
+  }
+
+  @Test
+  public void testEndpointsLibraryConfig() throws URISyntaxException, LibraryFactoryException {
+    Library endpointsLibrary = getLibraryWithId(APP_ENGINE_ENDPOINTS_LIBRARY_ID);
+    assertThat(endpointsLibrary.getContainerPath().toString(),
+               is(Library.CONTAINER_PATH_PREFIX + "/" + APP_ENGINE_ENDPOINTS_LIBRARY_ID));
+    assertThat(endpointsLibrary.getId(), is(APP_ENGINE_ENDPOINTS_LIBRARY_ID));
+    assertThat(endpointsLibrary.getName(), is("App Engine Endpoints"));
+    assertThat(endpointsLibrary.getSiteUri(), is(new URI("https://cloud.google.com/appengine/docs/java/endpoints/")));
+
+    assertThat(endpointsLibrary.getLibraryFiles().size(), is(1));
+    LibraryFile libraryFile = endpointsLibrary.getLibraryFiles().get(0);
+    assertThat(libraryFile.getJavadocUri(), is(new URI("https://cloud.google.com/appengine/docs/java/endpoints/javadoc/")));
     assertNull(libraryFile.getSourceUri());
     assertTrue(libraryFile.isExport());
 
@@ -74,21 +108,57 @@ public class AppEngineLibrariesInPluginXmlTest {
     MavenCoordinates mavenCoordinates = libraryFile.getMavenCoordinates();
     assertThat(mavenCoordinates.getRepository(), is("central"));
     assertThat(mavenCoordinates.getGroupId(), is("com.google.appengine"));
-    assertThat(mavenCoordinates.getArtifactId(), is("appengine-api-1.0-sdk"));
+    assertThat(mavenCoordinates.getArtifactId(), is("appengine-endpoints"));
     assertThat(mavenCoordinates.getVersion(), is("LATEST"));
     assertThat(mavenCoordinates.getType(), is("jar"));
     assertNull(mavenCoordinates.getClassifier());
 
     assertNotNull(libraryFile.getFilters());
     List<Filter> filters = libraryFile.getFilters();
-    assertThat(filters.size(), is(4));
+    assertThat(filters.size(), is(1));
     assertTrue(filters.get(0).isExclude());
-    assertThat(filters.get(0).getPattern(), is("com.google.appengine.repackaged.**"));
-    assertTrue(filters.get(1).isExclude());
-    assertThat(filters.get(1).getPattern(), is("com.google.appengine.labs.repackaged.**"));
-    assertTrue(filters.get(2).isExclude());
-    assertThat(filters.get(2).getPattern(), is("com.google.apphosting.**"));
-    assertFalse(filters.get(3).isExclude());
-    assertThat(filters.get(3).getPattern(), is("com.google.apphosting.api.**"));
+    assertThat(filters.get(0).getPattern(), is("com/google/appengine/repackaged/**"));
+  }
+
+  @Test
+  public void testObjectifyLibraryConfig() throws URISyntaxException, LibraryFactoryException {
+    Library objectifyLibrary = getLibraryWithId(OBJECTIFY_LIBRARY_ID);
+    assertThat(objectifyLibrary.getContainerPath().toString(),
+               is(Library.CONTAINER_PATH_PREFIX + "/" + OBJECTIFY_LIBRARY_ID));
+    assertThat(objectifyLibrary.getId(), is(OBJECTIFY_LIBRARY_ID));
+    assertThat(objectifyLibrary.getName(), is("Objectify"));
+    assertThat(objectifyLibrary.getSiteUri(), is(new URI("https://github.com/objectify/objectify/wiki")));
+
+    assertThat(objectifyLibrary.getLibraryFiles().size(), is(1));
+    LibraryFile libraryFile = objectifyLibrary.getLibraryFiles().get(0);
+    assertThat(libraryFile.getJavadocUri(), is(new URI("http://www.javadoc.io/doc/com.googlecode.objectify/objectify/")));
+    assertNull(libraryFile.getSourceUri());
+    assertTrue(libraryFile.isExport());
+
+    assertNotNull(libraryFile.getMavenCoordinates());
+    MavenCoordinates mavenCoordinates = libraryFile.getMavenCoordinates();
+    assertThat(mavenCoordinates.getRepository(), is("central"));
+    assertThat(mavenCoordinates.getGroupId(), is("com.googlecode.objectify"));
+    assertThat(mavenCoordinates.getArtifactId(), is("objectify"));
+    assertThat(mavenCoordinates.getVersion(), is("LATEST"));
+    assertThat(mavenCoordinates.getType(), is("jar"));
+    assertNull(mavenCoordinates.getClassifier());
+
+    assertNotNull(libraryFile.getFilters());
+    assertTrue(libraryFile.getFilters().isEmpty());
+  }
+
+  private Library getLibraryWithId(String libraryId) throws LibraryFactoryException {
+    IConfigurationElement[] configurationElements =
+        RegistryFactory.getRegistry()
+          .getConfigurationElementsFor(AppEngineLibraryContainerInitializer.LIBRARIES_EXTENSION_POINT);
+    for (IConfigurationElement configurationElement : configurationElements) {
+      if (configurationElement.getAttribute("id").equals(libraryId)) {
+        return new LibraryFactory().create(configurationElement);
+      }
+    }
+    fail("Could not find library with id: " + libraryId);
+    // make the compiler happy to return something
+    return null;
   }
 }
