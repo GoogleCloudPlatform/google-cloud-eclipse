@@ -130,7 +130,7 @@ public class LibraryClasspathContainerTest {
     IClasspathEntry classpathEntry = classpathEntries[0];
     assertThat(classpathEntry.getEntryKind(), is(IClasspathEntry.CPE_LIBRARY));
     assertThat(classpathEntry.getPath().toString(), is("/path/to/jar/file.jar"));
-    assertClasspathEntry(classpathEntry, UpdateClasspathAttributeUtil.createDependencyAttribute(true));
+    assertClasspathEntry(classpathEntry, UpdateClasspathAttributeUtil.createDependencyAttribute(true /* isWebApp */));
     IAccessRule[] accessRules = classpathEntry.getAccessRules();
     assertNotNull(accessRules);
     assertThat(accessRules.length, is(1));

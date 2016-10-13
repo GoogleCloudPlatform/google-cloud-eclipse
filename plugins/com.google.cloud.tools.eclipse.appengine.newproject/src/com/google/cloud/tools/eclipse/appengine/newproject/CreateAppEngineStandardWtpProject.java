@@ -106,9 +106,11 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
       Library library = libraries.get(i);
       IClasspathAttribute[] classpathAttributes;
       if (library.isExport()) {
-        classpathAttributes = new IClasspathAttribute[] { UpdateClasspathAttributeUtil.createDependencyAttribute(true) };
+        classpathAttributes =
+            new IClasspathAttribute[] { UpdateClasspathAttributeUtil.createDependencyAttribute(true /* isWebApp */) };
       } else {
-        classpathAttributes = new IClasspathAttribute[] { UpdateClasspathAttributeUtil.createNonDependencyAttribute() };
+        classpathAttributes =
+            new IClasspathAttribute[] { UpdateClasspathAttributeUtil.createNonDependencyAttribute() };
       }
 
       IClasspathEntry libraryContainer = JavaCore.newContainerEntry(library.getContainerPath(),

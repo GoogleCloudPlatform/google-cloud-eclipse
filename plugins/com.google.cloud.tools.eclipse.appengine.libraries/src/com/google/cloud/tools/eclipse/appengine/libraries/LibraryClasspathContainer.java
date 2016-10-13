@@ -74,9 +74,11 @@ public class LibraryClasspathContainer implements IClasspathContainer {
       for (LibraryFile libraryFile : libraryFiles) {
         IClasspathAttribute[] classpathAttributes;
         if (libraryFile.isExport()) {
-          classpathAttributes = new IClasspathAttribute[] { UpdateClasspathAttributeUtil.createDependencyAttribute(true) };
+          classpathAttributes =
+              new IClasspathAttribute[] { UpdateClasspathAttributeUtil.createDependencyAttribute(true /* isWebApp */) };
         } else {
-          classpathAttributes = new IClasspathAttribute[] { UpdateClasspathAttributeUtil.createNonDependencyAttribute() };
+          classpathAttributes =
+              new IClasspathAttribute[] { UpdateClasspathAttributeUtil.createNonDependencyAttribute() };
         }
         entries[idx++] =
             JavaCore.newLibraryEntry(repositoryService.getJarLocation(libraryFile.getMavenCoordinates()),
