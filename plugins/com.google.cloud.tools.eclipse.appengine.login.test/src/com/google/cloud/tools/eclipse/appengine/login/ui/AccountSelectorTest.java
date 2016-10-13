@@ -31,11 +31,10 @@ import com.google.cloud.tools.eclipse.appengine.login.IGoogleLoginService;
 import com.google.cloud.tools.ide.login.Account;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Shell;
-import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -47,9 +46,10 @@ import java.util.HashSet;
 @RunWith(MockitoJUnitRunner.class)
 public class AccountSelectorTest {
 
-  @Mock private IGoogleLoginService loginService;
+  @Rule public ShellTestResource shellTestResource = new ShellTestResource();
   private Shell shell;
 
+  @Mock private IGoogleLoginService loginService;
   @Mock private Account account1;
   @Mock private Account account2;
   @Mock private Account account3;
@@ -59,19 +59,13 @@ public class AccountSelectorTest {
 
   @Before
   public void setUp() {
-    shell = new Shell(Display.getDefault());
-
+    shell = shellTestResource.getShell();
     when(account1.getEmail()).thenReturn("some-email-1@example.com");
     when(account1.getOAuth2Credential()).thenReturn(credential1);
     when(account2.getEmail()).thenReturn("some-email-2@example.com");
     when(account2.getOAuth2Credential()).thenReturn(credential2);
     when(account3.getEmail()).thenReturn("some-email-3@example.com");
     when(account3.getOAuth2Credential()).thenReturn(credential3);
-  }
-
-  @After
-  public void tearDown() {
-    shell.dispose();
   }
 
   @Test(expected = IllegalArgumentException.class)
