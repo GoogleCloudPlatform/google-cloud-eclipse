@@ -45,7 +45,7 @@ public class AppEngineLibrariesInPluginXmlTest {
   private static final String OBJECTIFY_LIBRARY_ID = "objectify";
 
   @Test
-  public void testThereAreOnlyThreeLibraries() throws Exception {
+  public void testThereAreOnlyThreeLibraries() {
     IConfigurationElement[] configurationElements =
         RegistryFactory.getRegistry()
           .getConfigurationElementsFor(AppEngineLibraryContainerInitializer.LIBRARIES_EXTENSION_POINT);
