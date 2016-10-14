@@ -89,14 +89,16 @@ public class LibraryTest {
     assertTrue(library.getLibraryFiles().isEmpty());
   }
 
-  @Test
+  @Test(expected = NullPointerException.class)
   public void setLibraryFilesNullDoesNotChangeIt() {
     Library library = new Library("a");
-    library.setLibraryFiles(Arrays.asList(new LibraryFile(new MavenCoordinates("groupId", "artifactId"))));
-    assertNotNull(library.getLibraryFiles());
-    assertThat(library.getLibraryFiles().size(), is(1));
-
     library.setLibraryFiles(null);
+  }
+
+  @Test
+  public void setLibraryFiles() {
+    Library library = new Library("a");
+    library.setLibraryFiles(Arrays.asList(new LibraryFile(new MavenCoordinates("groupId", "artifactId"))));
     assertNotNull(library.getLibraryFiles());
     assertThat(library.getLibraryFiles().size(), is(1));
     LibraryFile actual = library.getLibraryFiles().get(0);
@@ -125,11 +127,10 @@ public class LibraryTest {
     assertTrue(library.getLibraryDependencies().isEmpty());
   }
 
-  @Test
-  public void testSetLibraryDependencies_nullDoesNotChangeIt() {
+  @Test(expected = NullPointerException.class)
+  public void testSetLibraryDependencies_null() {
     Library library = new Library("a");
     library.setLibraryDependencies(null);
-    assertNotNull(library.getLibraryDependencies());
   }
 
   @Test
@@ -154,10 +155,9 @@ public class LibraryTest {
     assertThat(library.getRecommendation(), is(LibraryRecommendation.REQUIRED));
   }
 
-  @Test
-  public void testSetRecommendation_null_DoesNotChangeIt() {
+  @Test(expected = NullPointerException.class)
+  public void testSetRecommendation_null() {
     Library library = new Library("a");
     library.setRecommendation(null);
-    assertThat(library.getRecommendation(), is(LibraryRecommendation.OPTIONAL));
   }
 }
