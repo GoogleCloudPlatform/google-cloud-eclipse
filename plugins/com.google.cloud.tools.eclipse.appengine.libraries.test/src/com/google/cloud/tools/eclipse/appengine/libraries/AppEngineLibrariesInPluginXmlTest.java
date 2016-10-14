@@ -99,6 +99,9 @@ public class AppEngineLibrariesInPluginXmlTest {
     assertThat(endpointsLibrary.getName(), is("App Engine Endpoints"));
     assertThat(endpointsLibrary.getSiteUri(), is(new URI("https://cloud.google.com/appengine/docs/java/endpoints/")));
     assertTrue(endpointsLibrary.isExport());
+    assertNotNull(endpointsLibrary.getLibraryDependencies());
+    assertThat(endpointsLibrary.getLibraryDependencies().size(), is(1));
+    assertThat(endpointsLibrary.getLibraryDependencies().get(0), is("appengine-api"));
 
     assertThat(endpointsLibrary.getLibraryFiles().size(), is(1));
     LibraryFile libraryFile = endpointsLibrary.getLibraryFiles().get(0);

@@ -71,7 +71,7 @@ public class LibraryFactory {
         }
         String recommendationString = configurationElement.getAttribute(ATTR_RECOMMENDATION);
         if (recommendationString != null) {
-          library.setRecommendation(LibraryRecommendation.valueOf(recommendationString));
+          library.setRecommendation(LibraryRecommendation.valueOf(recommendationString.toUpperCase()));
         }
         library.setLibraryDependencies(getLibraryDependencies(configurationElement.getChildren(ELMT_LIBRARY_DEPENDENCY)));
         return library;
@@ -81,7 +81,7 @@ public class LibraryFactory {
                                                                configurationElement.getName(),
                                                                ELMT_LIBRARY));
       }
-    } catch (InvalidRegistryObjectException | URISyntaxException exception) {
+    } catch (InvalidRegistryObjectException | URISyntaxException | IllegalArgumentException exception) {
       throw new LibraryFactoryException("Error while creating Library instance", exception);
     }
   }
@@ -163,6 +163,10 @@ public class LibraryFactory {
     List<String> libraryDependencies = new ArrayList<>();
     for (IConfigurationElement libraryDependencyElement : children) {
       if (libraryDependencyElement.getName().equals(ELMT_LIBRARY_DEPENDENCY)) {
+        String libraryId = libraryDependencyElement.getAttribute(ATTR_ID);
+        if (!Strings.isNullOrEmpty(libraryId)) {
+          libraryDependencies.add(libraryId);
+        }
       }
     }
     return libraryDependencies;
