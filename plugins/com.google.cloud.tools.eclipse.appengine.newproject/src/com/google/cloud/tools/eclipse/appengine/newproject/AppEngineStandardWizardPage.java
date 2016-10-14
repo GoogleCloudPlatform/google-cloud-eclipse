@@ -123,12 +123,12 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
       libraryButtons.add(libraryButton);
     }
 
-    addDatabindingForDependencies(libraries);
+    addDatabindingForDependencies();
 
     GridLayoutFactory.fillDefaults().applyTo(apiGroup);
   }
 
-  private void addDatabindingForDependencies(List<Library> libraries) {
+  private void addDatabindingForDependencies() {
     bindingContext = new DataBindingContext();
     for (Button libraryButton : libraryButtons) {
       Library library = (Library) libraryButton.getData();
@@ -244,4 +244,11 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
     return selected;
   }
 
+  @Override
+  public void dispose() {
+    if (bindingContext != null) {
+      bindingContext.dispose();
+    }
+    super.dispose();
+  }
 }

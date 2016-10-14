@@ -31,7 +31,7 @@ public abstract class BooleanConverter extends Converter {
         if (fromObject == null) {
           return Boolean.TRUE;
         } else {
-          return !(Boolean)fromObject;
+          return !(Boolean) fromObject;
         }
       }
     };
