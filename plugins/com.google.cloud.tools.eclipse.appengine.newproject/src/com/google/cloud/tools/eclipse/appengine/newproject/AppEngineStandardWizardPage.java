@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright 2016 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import java.io.File;
@@ -116,14 +131,16 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
   private void addDatabindingForDependencies(List<Library> libraries) {
     bindingContext = new DataBindingContext();
     for (Button libraryButton : libraryButtons) {
-      if (!((Library) libraryButton.getData()).getLibraryDependencies().isEmpty()) {
+      Library library = (Library) libraryButton.getData();
+      if (!library.getLibraryDependencies().isEmpty()) {
         addDatabindingForDependencies(libraryButton);
       }
     }
   }
 
   private void addDatabindingForDependencies(Button libraryButton) {
-    for (String libraryId : ((Library) libraryButton.getData()).getLibraryDependencies()) {
+    Library library = (Library) libraryButton.getData();
+    for (String libraryId : library.getLibraryDependencies()) {
       Button dependencyButton = getButtonForLibraryId(libraryId);
       if (dependencyButton != null) {
         ISWTObservableValue libraryButtonSelection = WidgetProperties.selection().observe(libraryButton);
@@ -148,14 +165,16 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
 
   private Button getButtonForLibraryId(String libraryId) {
     for (Button button : libraryButtons) {
-      if (((Library) button.getData()).getId().equals(libraryId)) {
+      Library library = (Library) button.getData();
+      if (library.getId().equals(libraryId)) {
         return button;
       }
     }
     return null;
   }
 
-  // mock method until the libraries are defined via an extension point
+  // TODO obtain libraries from extension registry
+  // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/819
   private List<Library> getLibraries() {
     Library appEngine = new Library("appengine-api");
     appEngine.setName("App Engine API");
