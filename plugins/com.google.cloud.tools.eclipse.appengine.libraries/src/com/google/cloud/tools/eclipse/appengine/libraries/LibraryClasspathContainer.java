@@ -37,10 +37,17 @@ import com.google.common.base.Strings;
 public class LibraryClasspathContainer implements IClasspathContainer {
   private final IPath containerPath;
   private Library library;
+  private IClasspathEntry[] classpathEntries;
 
   LibraryClasspathContainer(IPath containerPath, Library library) {
     this.containerPath = containerPath;
     this.library = library;
+  }
+
+  public LibraryClasspathContainer(IPath containerPath, Library library, IClasspathEntry[] classpathEntries) {
+    this.containerPath = containerPath;
+    this.library = library;
+    this.classpathEntries = classpathEntries;
   }
 
   @Override
@@ -64,40 +71,45 @@ public class LibraryClasspathContainer implements IClasspathContainer {
 
   @Override
   public IClasspathEntry[] getClasspathEntries() {
-    ServiceReference<ILibraryRepositoryService> serviceReference = null;
-    try {
-      List<LibraryFile> libraryFiles = library.getLibraryFiles();
-      IClasspathEntry[] entries = new IClasspathEntry[libraryFiles.size()];
-      int idx = 0;
-      serviceReference = lookupRepositoryServiceReference();
-      ILibraryRepositoryService repositoryService = getBundleContext().getService(serviceReference);
-      for (LibraryFile libraryFile : libraryFiles) {
-        IClasspathAttribute[] classpathAttributes;
-        if (libraryFile.isExport()) {
-          classpathAttributes =
-              new IClasspathAttribute[] { UpdateClasspathAttributeUtil.createDependencyAttribute(true /* isWebApp */) };
-        } else {
-          classpathAttributes =
-              new IClasspathAttribute[] { UpdateClasspathAttributeUtil.createNonDependencyAttribute() };
-        }
-        entries[idx++] =
-            JavaCore.newLibraryEntry(repositoryService.getJarLocation(libraryFile.getMavenCoordinates()),
-                                     getSourceLocation(repositoryService, libraryFile),
-                                     null,
-                                     getAccessRules(libraryFile.getFilters()),
-                                     classpathAttributes,
-                                     true);
-      }
-      return entries;
-    } catch (CoreException | LibraryRepositoryServiceException ex) {
-      // declared on UpdateClasspathAttributeUtil.create(Non)DependencyAttribute(), but its current implementation does
-      // not throw this exception.
+    if (classpathEntries != null) {
+      return classpathEntries;
+    } else {
       return new IClasspathEntry[0];
-    } finally {
-      if (serviceReference != null) {
-        releaseRepositoryService(serviceReference);
-      }
     }
+//    ServiceReference<ILibraryRepositoryService> serviceReference = null;
+//    try {
+//      List<LibraryFile> libraryFiles = library.getLibraryFiles();
+//      IClasspathEntry[] entries = new IClasspathEntry[libraryFiles.size()];
+//      int idx = 0;
+//      serviceReference = lookupRepositoryServiceReference();
+//      ILibraryRepositoryService repositoryService = getBundleContext().getService(serviceReference);
+//      for (LibraryFile libraryFile : libraryFiles) {
+//        IClasspathAttribute[] classpathAttributes;
+//        if (libraryFile.isExport()) {
+//          classpathAttributes =
+//              new IClasspathAttribute[] { UpdateClasspathAttributeUtil.createDependencyAttribute(true /* isWebApp */) };
+//        } else {
+//          classpathAttributes =
+//              new IClasspathAttribute[] { UpdateClasspathAttributeUtil.createNonDependencyAttribute() };
+//        }
+//        entries[idx++] =
+//            JavaCore.newLibraryEntry(repositoryService.getJarLocation(libraryFile.getMavenCoordinates()),
+//                                     getSourceLocation(repositoryService, libraryFile),
+//                                     null,
+//                                     getAccessRules(libraryFile.getFilters()),
+//                                     classpathAttributes,
+//                                     true);
+//      }
+//      return entries;
+//    } catch (CoreException | LibraryRepositoryServiceException ex) {
+//      // declared on UpdateClasspathAttributeUtil.create(Non)DependencyAttribute(), but its current implementation does
+//      // not throw this exception.
+//      return new IClasspathEntry[0];
+//    } finally {
+//      if (serviceReference != null) {
+//        releaseRepositoryService(serviceReference);
+//      }
+//    }
   }
 
   private IPath getSourceLocation(ILibraryRepositoryService repositoryService, LibraryFile libraryFile) {
