@@ -21,6 +21,7 @@ import java.net.URISyntaxException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -60,7 +61,7 @@ public class LibraryFactory {
 
   public Library create(IConfigurationElement configurationElement) throws LibraryFactoryException {
     try {
-      if (configurationElement.getName().equals(ELMT_LIBRARY)) {
+      if (ELMT_LIBRARY.equals(configurationElement.getName())) {
         Library library = new Library(configurationElement.getAttribute(ATTR_ID));
         library.setName(configurationElement.getAttribute(ATTR_NAME));
         library.setSiteUri(new URI(configurationElement.getAttribute(ATTR_SITE_URI)));
@@ -71,7 +72,7 @@ public class LibraryFactory {
         }
         String recommendationString = configurationElement.getAttribute(ATTR_RECOMMENDATION);
         if (recommendationString != null) {
-          library.setRecommendation(LibraryRecommendation.valueOf(recommendationString.toUpperCase()));
+          library.setRecommendation(LibraryRecommendation.valueOf(recommendationString.toUpperCase(Locale.US)));
         }
         library.setLibraryDependencies(getLibraryDependencies(configurationElement.getChildren(ELMT_LIBRARY_DEPENDENCY)));
         return library;
@@ -90,7 +91,7 @@ public class LibraryFactory {
                                                                                      URISyntaxException {
     List<LibraryFile> libraryFiles = new ArrayList<>();
     for (IConfigurationElement libraryFileElement : children) {
-      if (libraryFileElement.getName().equals(ELMT_LIBRARY_FILE)) {
+      if (ELMT_LIBRARY_FILE.equals(libraryFileElement.getName())) {
         MavenCoordinates mavenCoordinates = getMavenCoordinates(libraryFileElement.getChildren(ELMT_MAVEN_COORDINATES));
         LibraryFile libraryFile = new LibraryFile(mavenCoordinates);
         libraryFile.setFilters(getFilters(libraryFileElement.getChildren()));
@@ -162,7 +163,7 @@ public class LibraryFactory {
   private List<String> getLibraryDependencies(IConfigurationElement[] children) {
     List<String> libraryDependencies = new ArrayList<>();
     for (IConfigurationElement libraryDependencyElement : children) {
-      if (libraryDependencyElement.getName().equals(ELMT_LIBRARY_DEPENDENCY)) {
+      if (ELMT_LIBRARY_DEPENDENCY.equals(libraryDependencyElement.getName())) {
         String libraryId = libraryDependencyElement.getAttribute(ATTR_ID);
         if (!Strings.isNullOrEmpty(libraryId)) {
           libraryDependencies.add(libraryId);
