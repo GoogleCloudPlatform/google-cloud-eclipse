@@ -129,7 +129,7 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
     GridLayoutFactory.fillDefaults().applyTo(apiGroup);
   }
 
-  private String getLibraryName(Library library) {
+  private static String getLibraryName(Library library) {
     if (!Strings.isNullOrEmpty(library.getName())) {
       return library.getName();
     } else {
