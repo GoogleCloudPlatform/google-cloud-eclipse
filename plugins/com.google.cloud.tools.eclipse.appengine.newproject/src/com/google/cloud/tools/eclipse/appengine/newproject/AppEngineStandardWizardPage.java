@@ -51,6 +51,7 @@ import com.google.cloud.tools.eclipse.ui.util.databinding.BooleanConverter;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.cloud.tools.project.ProjectIdValidator;
+import com.google.common.base.Strings;
 
 /**
  * UI to collect all information necessary to create a new App Engine Standard Java Eclipse project.
@@ -118,7 +119,7 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
     List<Library> libraries = getLibraries();
     for (Library library : libraries) {
       Button libraryButton = new Button(apiGroup, SWT.CHECK);
-      libraryButton.setText(library.getId());
+      libraryButton.setText(getLibraryName(library));
       libraryButton.setData(library);
       libraryButtons.add(libraryButton);
     }
@@ -126,6 +127,14 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
     addDatabindingForDependencies();
 
     GridLayoutFactory.fillDefaults().applyTo(apiGroup);
+  }
+
+  private String getLibraryName(Library library) {
+    if (!Strings.isNullOrEmpty(library.getName())) {
+      return library.getName();
+    } else {
+      return library.getId();
+    }
   }
 
   private void addDatabindingForDependencies() {
