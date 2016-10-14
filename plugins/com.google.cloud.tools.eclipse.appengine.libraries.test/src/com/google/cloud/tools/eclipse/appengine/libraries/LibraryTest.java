@@ -25,6 +25,7 @@ import static org.junit.Assert.assertTrue;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.Collections;
 
 import org.junit.Test;
 
@@ -115,5 +116,48 @@ public class LibraryTest {
     Library library = new Library("a");
     library.setExport(false);
     assertFalse(library.isExport());
+  }
+
+  @Test
+  public void testLibraryDependenciesDefaultsToEmptyList() {
+    Library library = new Library("a");
+    assertNotNull(library.getLibraryDependencies());
+    assertTrue(library.getLibraryDependencies().isEmpty());
+  }
+
+  @Test
+  public void testSetLibraryDependencies_nullDoesNotChangeIt() {
+    Library library = new Library("a");
+    library.setLibraryDependencies(null);
+    assertNotNull(library.getLibraryDependencies());
+  }
+
+  @Test
+  public void testSetLibraryDependencies() {
+    Library library = new Library("a");
+    library.setLibraryDependencies(Collections.singletonList("libraryId"));
+    assertNotNull(library.getLibraryDependencies());
+    assertThat(library.getLibraryDependencies().size(), is(1));
+    assertThat(library.getLibraryDependencies().get(0), is("libraryId"));
+  }
+
+  @Test
+  public void testRecommendationDefaultsToOptional() {
+    Library library = new Library("a");
+    assertThat(library.getRecommendation(), is(LibraryRecommendation.OPTIONAL));
+  }
+
+  @Test
+  public void testSetRecommendation() {
+    Library library = new Library("a");
+    library.setRecommendation(LibraryRecommendation.REQUIRED);
+    assertThat(library.getRecommendation(), is(LibraryRecommendation.REQUIRED));
+  }
+
+  @Test
+  public void testSetRecommendation_null_DoesNotChangeIt() {
+    Library library = new Library("a");
+    library.setRecommendation(null);
+    assertThat(library.getRecommendation(), is(LibraryRecommendation.OPTIONAL));
   }
 }

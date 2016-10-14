@@ -45,6 +45,8 @@ public final class Library {
   // library IDs of dependencies that are also need to be added to the build path along this library
   private List<String> libraryDependencies = new ArrayList<>();
 
+  private LibraryRecommendation recommendation = LibraryRecommendation.OPTIONAL;
+
   public Library(String id) {
     Preconditions.checkNotNull(id, "id null");
     Preconditions.checkArgument(!id.isEmpty(), "id empty");
@@ -101,5 +103,15 @@ public final class Library {
     if (libraryDependencies != null) {
       this.libraryDependencies = new ArrayList<>(libraryDependencies);
     }
+  }
+
+  public void setRecommendation(LibraryRecommendation recommendation) {
+    if (recommendation != null) {
+      this.recommendation = recommendation;
+    }
+  }
+
+  public LibraryRecommendation getRecommendation() {
+    return recommendation;
   }
 }
