@@ -4,7 +4,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: New Maven Project Test
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.appengine.newproject.maven.test
-Bundle-Vendor: Google, Inc.
+Bundle-Vendor: Google Inc.
 Bundle-Version: 0.1.0.qualifier
 Fragment-Host: com.google.cloud.tools.eclipse.appengine.newproject.maven
 Require-Bundle: org.junit;bundle-version="4.12.0",

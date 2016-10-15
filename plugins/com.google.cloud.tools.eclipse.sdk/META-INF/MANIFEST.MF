@@ -1,9 +1,9 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Support for Google Cloud SDK within the Eclipse IDE
+Bundle-Name: Cloud Tools for Eclipse Support for Google Cloud SDK
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.sdk;singleton:=true
 Bundle-Version: 0.1.0.qualifier
-Bundle-Vendor: Google, Inc.
+Bundle-Vendor: Google Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.google.cloud.tools.appengine;bundle-version="0.1.0",

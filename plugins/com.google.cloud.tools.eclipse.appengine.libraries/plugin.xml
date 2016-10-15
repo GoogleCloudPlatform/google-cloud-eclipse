@@ -9,15 +9,38 @@
           name="App Engine API"
           siteUri="https://cloud.google.com/appengine/docs/java/" >
       <libraryFile
-            export="true"
             javadocUri="https://cloud.google.com/appengine/docs/java/javadoc/">
         <mavenCoordinates
               artifactId="appengine-api-1.0-sdk"
               groupId="com.google.appengine" />
-        <exclusionFilter pattern="com.google.appengine.repackaged.**" />
-        <exclusionFilter pattern="com.google.appengine.labs.repackaged.**" />
-        <exclusionFilter pattern="com.google.apphosting.**" />
-        <inclusionFilter pattern="com.google.apphosting.api.**" />
+        <exclusionFilter pattern="com/google/appengine/repackaged/**" />
+        <exclusionFilter pattern="com/google/appengine/labs/repackaged/**" />
+        <inclusionFilter pattern="com/google/apphosting/api/**" />
+        <exclusionFilter pattern="com/google/apphosting/**" />
+      </libraryFile>
+    </library>
+    <library
+          id="appengine-endpoints"
+          name="App Engine Endpoints"
+          siteUri="https://cloud.google.com/appengine/docs/java/endpoints/" >
+      <libraryDependency id="appengine-api" />
+      <libraryFile
+            javadocUri="https://cloud.google.com/appengine/docs/java/endpoints/javadoc/">
+        <mavenCoordinates
+              artifactId="appengine-endpoints"
+              groupId="com.google.appengine" />
+        <exclusionFilter pattern="com/google/appengine/repackaged/**" />
+      </libraryFile>
+    </library>
+    <library
+          id="objectify"
+          name="Objectify"
+          siteUri="https://github.com/objectify/objectify/wiki" >
+      <libraryFile
+            javadocUri="http://www.javadoc.io/doc/com.googlecode.objectify/objectify/">
+        <mavenCoordinates
+              artifactId="objectify"
+              groupId="com.googlecode.objectify" />
       </libraryFile>
     </library>
   </extension>

@@ -36,6 +36,7 @@ import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -53,6 +54,19 @@ public class NewMavenBasedAppEngineProjectWizardTest extends AbstractProjectTest
         {"src/main/webapp/WEB-INF/appengine-web.xml", "src/main/webapp/WEB-INF/web.xml", "pom.xml"};
     createAndCheck("appWithPackage", null, "app.engine.test", null, "Hello World template",
         projectFiles);
+  }
+
+  @Test
+  public void testHelloWorldInTemp() throws Exception {
+    File location = File.createTempFile("maven", "dir");
+    assertTrue("Unable to remove temp file", location.delete());
+    assertTrue("Unable to turn temp location -> dir", location.mkdir());
+
+    // appengine-skeleton-archetype still missing base index.html and HelloWorld.java
+    String[] projectFiles =
+        {"src/main/webapp/WEB-INF/appengine-web.xml", "src/main/webapp/WEB-INF/web.xml", "pom.xml"};
+    createAndCheck("appWithPackage", location.getAbsolutePath(), "app.engine.test", null,
+        "Hello-world template", projectFiles);
   }
 
   @Test
@@ -89,6 +103,10 @@ public class NewMavenBasedAppEngineProjectWizardTest extends AbstractProjectTest
     project = SwtBotAppEngineActions.createMavenWebAppProject(bot, location, "test", projectName,
         packageName, projectId, archetypeDescription);
     assertTrue(project.exists());
+    if (location != null) {
+      assertEquals(new File(location).getCanonicalPath(),
+          project.getLocation().toFile().getParentFile().getCanonicalPath());
+    }
 
     IFacetedProject facetedProject = new FacetedProjectHelper().getFacetedProject(project);
     assertNotNull("m2e-wtp should create a faceted project", facetedProject);
@@ -99,11 +117,9 @@ public class NewMavenBasedAppEngineProjectWizardTest extends AbstractProjectTest
       Path projectFilePath = new Path(projectFile);
       assertTrue(project.exists(projectFilePath));
     }
-    List<String> errorsInProblemsView = SwtBotProjectActions.getErrorsInProblemsView(bot);
-    if (!errorsInProblemsView.isEmpty()) {
-      String errorsString = Joiner.on("\n").join(errorsInProblemsView);
-      // because tycho doesn't log this by default
-      System.out.println("Failure message: " + errorsString);
+    List<String> buildErrors = SwtBotProjectActions.getAllBuildErrors(bot);
+    if (!buildErrors.isEmpty()) {
+      String errorsString = Joiner.on("\n").join(buildErrors);
       fail(errorsString);
     }
   }

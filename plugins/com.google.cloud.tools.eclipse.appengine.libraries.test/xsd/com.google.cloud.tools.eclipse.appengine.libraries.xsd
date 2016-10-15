@@ -84,9 +84,14 @@ limitations under the License.
          </xs:documentation>
       </xs:annotation>
       <xs:complexType>
-         <xs:choice minOccurs="1" maxOccurs="unbounded">
-            <xs:element ref="libraryFile" />
-         </xs:choice>
+         <xs:sequence>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+               <xs:element ref="libraryDependency" />
+            </xs:choice>
+            <xs:choice minOccurs="1" maxOccurs="unbounded">
+               <xs:element ref="libraryFile" />
+            </xs:choice>
+         </xs:sequence>
          <xs:attribute name="id" type="xs:string">
             <xs:annotation>
                <xs:documentation>
@@ -101,10 +106,29 @@ limitations under the License.
                </xs:documentation>
             </xs:annotation>
          </xs:attribute>
+         <xs:attribute name="recommendation" type="recommendationType">
+            <xs:annotation>
+               <xs:documentation>
+                  Recommendation of the library, e.g.: if the library is required, it must always be added to the
+classpath of projects. Defaults to &lt;tt&gt;optional&lt;/tt&gt;.
+               </xs:documentation>
+            </xs:annotation>
+         </xs:attribute>
          <xs:attribute name="siteUri" type="xs:string">
             <xs:annotation>
                <xs:documentation>
                   URI that can be used to display a link to the user to provide more detailed information about the library, e.g. user guides, wiki, other documentation.
+               </xs:documentation>
+            </xs:annotation>
+         </xs:attribute>
+         <xs:attribute name="export" type="xs:boolean">
+            <xs:annotation>
+               <xs:documentation>
+                  If &lt;tt&gt;export&lt;/tt&gt; attribute is true, then the corresponding library will be included in
+the WAR file of the project, under &lt;tt&gt;WEB-INF/lib&lt;/tt&gt;. Any &lt;tt&gt;libraryFile&lt;/tt&gt; item can be
+excluded from export by setting its &lt;tt&gt;export&lt;/tt&gt; attribute to false. If the &lt;tt&gt;library&lt;/tt&gt;
+element's &lt;tt&gt;export&lt;/tt&gt; attribute is false, the &lt;tt&gt;export&lt;/tt&gt; attribute of
+&lt;tt&gt;libraryFile&lt;/tt&gt; is disregarded. Defaults to true.
                </xs:documentation>
             </xs:annotation>
          </xs:attribute>
@@ -127,11 +151,13 @@ limitations under the License.
                </xs:choice>
             </xs:sequence>
          </xs:sequence>
-         <xs:attribute name="export" type="xs:boolean" use="required">
+         <xs:attribute name="export" type="xs:boolean">
             <xs:annotation>
                <xs:documentation>
-                  If export attribute is true, then the corresponding file will be included in the WAR file of the
-project, under WEB-INF/lib.
+                  If &lt;tt&gt;export&lt;/tt&gt; attribute is true, then the corresponding file will be included in the
+WAR file of the project, under &lt;tt&gt;WEB-INF/lib&lt;/tt&gt; if the parent &lt;tt&gt;library&lt;/tt&gt; element's
+&lt;tt&gt;export&lt;/tt&gt; attribute is also true. If the parent &lt;tt&gt;library&lt;/tt&gt; element's
+&lt;tt&gt;export&lt;/tt&gt; attribute is false, this attribute will be disregarded. Defaults to true.
                </xs:documentation>
             </xs:annotation>
          </xs:attribute>
@@ -152,6 +178,18 @@ unspecified, the source will be downloaded from the artifact location if availab
                </xs:documentation>
             </xs:annotation>
          </xs:attribute>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="libraryDependency">
+      <xs:annotation>
+         <xs:documentation>
+            An id of another library defined through this extension point that must be also added to the classpath of
+the project, if this library is added.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:attribute name="id" type="xs:string" use="required" />
       </xs:complexType>
    </xs:element>
 
@@ -270,4 +308,20 @@ will determine how to resolve the entries associated with the container.
       </xs:documentation>
    </xs:annotation>
 
+
+   <xs:simpleType name="recommendationType">
+        <xs:annotation>
+          <xs:documentation>
+             Currently supported values are &lt;tt&gt;required&lt;/tt&gt; - the library must always be added to the
+classpath of the project, &lt;tt&gt;suggested&lt;/tt&gt; the library is not required but in general useful to add to the
+project's classpath, however the user can opt-out of this, &lt;tt&gt;optional&lt;/tt&gt; the library is optional, the
+user can opt-in to add it to the classpath of the project.
+           </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+       <xs:enumeration value="required" />
+       <xs:enumeration value="suggested" />
+       <xs:enumeration value="optional" />
+     </xs:restriction>
+   </xs:simpleType>
 </xs:schema>

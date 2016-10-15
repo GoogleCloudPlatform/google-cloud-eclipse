@@ -82,8 +82,8 @@ public class NewNativeAppEngineStandardProjectTest extends AbstractProjectTests 
       Path projectFilePath = new Path(projectFile);
       assertTrue(project.exists(projectFilePath));
     }
-    List<String> errorsInProblemsView = SwtBotProjectActions.getErrorsInProblemsView(bot);
-    if (!errorsInProblemsView.isEmpty()) {
+    List<String> buildErrors = SwtBotProjectActions.getAllBuildErrors(bot);
+    if (!buildErrors.isEmpty()) {
       String errorsString = Joiner.on("\n").join(errorsInProblemsView);
       fail(errorsString);
     }

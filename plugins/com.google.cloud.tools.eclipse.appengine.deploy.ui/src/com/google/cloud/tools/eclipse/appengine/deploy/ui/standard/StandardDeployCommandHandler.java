@@ -60,7 +60,7 @@ import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
 import com.google.common.annotations.VisibleForTesting;
 
 /**
- * Command handler to deploy an App Engine web application project to App Engine Standard.
+ * Command handler to deploy a web application project to App Engine Standard.
  * <p>
  * It copies the project's exploded WAR to a staging directory and then executes
  * the staging and deploy operations provided by the App Engine Plugins Core Library.
@@ -92,11 +92,11 @@ public class StandardDeployCommandHandler extends AbstractHandler {
           return null;
         }
 
-        Credential credential = loginIfNeeded(event);
-        if (credential != null) {
-          if (new DeployPreferencesDialog(HandlerUtil.getActiveShell(event), project).open() == Window.OK) {
-            launchDeployJob(project, credential, event);
-          }
+        IGoogleLoginService loginService = ServiceUtils.getService(event, IGoogleLoginService.class);
+        DeployPreferencesDialog dialog =
+            new DeployPreferencesDialog(HandlerUtil.getActiveShell(event), project, loginService);
+        if (dialog.open() == Window.OK) {
+          launchDeployJob(project, dialog.getCredential(), event);
         }
       }
       // return value must be null, reserved for future use
@@ -178,17 +178,6 @@ public class StandardDeployCommandHandler extends AbstractHandler {
     IPath workDirectory = getTempDir().append(now);
     Files.createDirectories(workDirectory.toFile().toPath());
     return workDirectory;
-  }
-
-  private Credential loginIfNeeded(ExecutionEvent event) {
-    IGoogleLoginService loginService = ServiceUtils.getService(event, IGoogleLoginService.class);
-    Credential credential = loginService.getCachedActiveCredential();
-    if (credential != null) {
-      return credential;
-    }
-
-    // GoogleLoginService takes care of displaying error messages; no need to check errors.
-    return loginService.getActiveCredential(Messages.getString("deploy.login.dialog.message"));
   }
 
   private void launchCleanupJob() {

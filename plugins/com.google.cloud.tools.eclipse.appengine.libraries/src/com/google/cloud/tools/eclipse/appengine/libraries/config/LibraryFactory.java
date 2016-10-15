@@ -21,6 +21,7 @@ import java.net.URISyntaxException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -29,21 +30,24 @@ import org.eclipse.core.runtime.InvalidRegistryObjectException;
 import com.google.cloud.tools.eclipse.appengine.libraries.Filter;
 import com.google.cloud.tools.eclipse.appengine.libraries.Library;
 import com.google.cloud.tools.eclipse.appengine.libraries.LibraryFile;
+import com.google.cloud.tools.eclipse.appengine.libraries.LibraryRecommendation;
 import com.google.cloud.tools.eclipse.appengine.libraries.MavenCoordinates;
 import com.google.common.base.Strings;
 
-public class LibraryBuilder {
+public class LibraryFactory {
 
-  private static final Logger logger = Logger.getLogger(LibraryBuilder.class.getName());
+  private static final Logger logger = Logger.getLogger(LibraryFactory.class.getName());
 
   private static final String ELEMENT_NAME_LIBRARY = "library";
-  private static final String ATTRIBUTE_NAME_ID = "id";
-  private static final String ATTRIBUTE_NAME_NAME = "name";
-  private static final String ATTRIBUTE_NAME_SITE_URI = "siteUri";
   private static final String ELEMENT_NAME_LIBRARY_FILE = "libraryFile";
   private static final String ELEMENT_NAME_EXCLUSION_FILTER = "exclusionFilter";
   private static final String ELEMENT_NAME_INCLUSION_FILTER = "inclusionFilter";
   private static final String ELEMENT_NAME_MAVEN_COORDINATES = "mavenCoordinates";
+  private static final String ELEMENT_NAME_LIBRARY_DEPENDENCY = "libraryDependency";
+
+  private static final String ATTRIBUTE_NAME_ID = "id";
+  private static final String ATTRIBUTE_NAME_NAME = "name";
+  private static final String ATTRIBUTE_NAME_SITE_URI = "siteUri";
   private static final String ATTRIBUTE_NAME_SOURCE_URI = "sourceUri";
   private static final String ATTRIBUTE_NAME_JAVADOC_URI = "javadocUri";
   private static final String ATTRIBUTE_NAME_PATTERN = "pattern";
@@ -54,23 +58,33 @@ public class LibraryBuilder {
   private static final String ATTRIBUTE_NAME_TYPE = "type";
   private static final String ATTRIBUTE_NAME_CLASSIFIER = "classifier";
   private static final String ATTRIBUTE_NAME_EXPORT = "export";
+  private static final String ATTRIBUTE_NAME_RECOMMENDATION = "recommendation";
 
-  public Library build(IConfigurationElement configurationElement) throws LibraryBuilderException {
+  public Library create(IConfigurationElement configurationElement) throws LibraryFactoryException {
     try {
-      if (configurationElement.getName().equals(ELEMENT_NAME_LIBRARY)) {
+      if (ELEMENT_NAME_LIBRARY.equals(configurationElement.getName())) {
         Library library = new Library(configurationElement.getAttribute(ATTRIBUTE_NAME_ID));
         library.setName(configurationElement.getAttribute(ATTRIBUTE_NAME_NAME));
         library.setSiteUri(new URI(configurationElement.getAttribute(ATTRIBUTE_NAME_SITE_URI)));
         library.setLibraryFiles(getLibraryFiles(configurationElement.getChildren(ELEMENT_NAME_LIBRARY_FILE)));
+        String exportString = configurationElement.getAttribute(ATTRIBUTE_NAME_EXPORT);
+        if (exportString != null) {
+          library.setExport(Boolean.parseBoolean(exportString));
+        }
+        String recommendationString = configurationElement.getAttribute(ATTRIBUTE_NAME_RECOMMENDATION);
+        if (recommendationString != null) {
+          library.setRecommendation(LibraryRecommendation.valueOf(recommendationString.toUpperCase(Locale.US)));
+        }
+        library.setLibraryDependencies(getLibraryDependencies(configurationElement.getChildren(ELEMENT_NAME_LIBRARY_DEPENDENCY)));
         return library;
       } else {
-        throw new LibraryBuilderException(MessageFormat.format("Unexpected configuration element with name: {0}. "
+        throw new LibraryFactoryException(MessageFormat.format("Unexpected configuration element with name: {0}. "
                                                                + "Expected element is {1}",
                                                                configurationElement.getName(),
                                                                ELEMENT_NAME_LIBRARY));
       }
-    } catch (InvalidRegistryObjectException | URISyntaxException exception) {
-      throw new LibraryBuilderException("Error while creating Library instance", exception);
+    } catch (InvalidRegistryObjectException | URISyntaxException | IllegalArgumentException exception) {
+      throw new LibraryFactoryException("Error while creating Library instance", exception);
     }
   }
 
@@ -85,13 +99,17 @@ public class LibraryBuilder {
         libraryFile.setSourceUri(getUri(libraryFileElement.getAttribute(ATTRIBUTE_NAME_SOURCE_URI)));
         libraryFile.setJavadocUri(getUri(libraryFileElement.getAttribute(ATTRIBUTE_NAME_JAVADOC_URI)));
         libraryFile.setExport(Boolean.parseBoolean(libraryFileElement.getAttribute(ATTRIBUTE_NAME_EXPORT)));
+        String exportString = libraryFileElement.getAttribute(ATTRIBUTE_NAME_EXPORT);
+        if (exportString != null) {
+          libraryFile.setExport(Boolean.parseBoolean(exportString));
+        }
         libraryFiles.add(libraryFile);
       }
     }
     return libraryFiles;
   }
 
-  private URI getUri(String uriString) throws URISyntaxException {
+  private static URI getUri(String uriString) throws URISyntaxException {
     if (uriString == null || uriString.isEmpty()) {
       return null;
     } else {
@@ -138,21 +156,21 @@ public class LibraryBuilder {
       case ELEMENT_NAME_MAVEN_COORDINATES:
         break; // ignore
       default:
-        logger.warning("Unexpected element among filter elements: " + childElement.getName());
+        // other child element of libraryFile, e.g.: mavenCoordinates
         break;
       }
     }
     return filters;
   }
 
-  public static class LibraryBuilderException extends Exception {
-
-    public LibraryBuilderException(String message, Throwable cause) {
-      super(message, cause);
+  private List<String> getLibraryDependencies(IConfigurationElement[] children) {
+    List<String> libraryDependencies = new ArrayList<>();
+    for (IConfigurationElement libraryDependencyElement : children) {
+      String libraryId = libraryDependencyElement.getAttribute(ATTRIBUTE_NAME_ID);
+      if (!Strings.isNullOrEmpty(libraryId)) {
+        libraryDependencies.add(libraryId);
+      }
     }
-
-    public LibraryBuilderException(String message) {
-      super(message);
-    }
+    return libraryDependencies;
   }
 }

@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Cloud Tools for Eclipse Common Test Dependencies
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.test.dependencies;singleton:=true
 Bundle-Version: 0.1.0.qualifier
-Bundle-Vendor: Google, Inc.
+Bundle-Vendor: Google Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ClassPath: lib/mockito-core-1.10.19.jar,
  lib/objenesis-2.2.jar

@@ -2,8 +2,8 @@ sudo: false
 language: java
 install: 
   # download Cloud SDK
-  - wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-128.0.0-linux-x86_64.tar.gz
-  - tar -xzf google-cloud-sdk-128.0.0-linux-x86_64.tar.gz
+  - wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-129.0.0-linux-x86_64.tar.gz
+  - tar -xzf google-cloud-sdk-129.0.0-linux-x86_64.tar.gz
   # update all Cloud SDK components
   - gcloud components update --quiet
   # add App Engine component to Cloud SDK

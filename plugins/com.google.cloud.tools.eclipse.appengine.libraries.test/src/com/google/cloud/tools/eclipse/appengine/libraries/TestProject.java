@@ -35,10 +35,6 @@ public final class TestProject extends ExternalResource {
   private IJavaProject javaProject;
   private String containerPath;
 
-  public TestProject() {
-    super();
-  }
-
   public TestProject withClasspathContainerPath(String containerPath) {
     this.containerPath = containerPath;
     return this;

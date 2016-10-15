@@ -33,7 +33,7 @@ Maven for building Eclipse bundles and features.
 1. git (optional: you can use EGit from within Eclipse instead)
 
 1. Clone the project to a local directory using `git clone
-   https://github.com/GoogleCloudPlatform/cloud-eclipse-for-tools.git`.
+   https://github.com/GoogleCloudPlatform/google-cloud-eclipse.git`.
 
 
 ##Configuring Maven/Tycho Builds

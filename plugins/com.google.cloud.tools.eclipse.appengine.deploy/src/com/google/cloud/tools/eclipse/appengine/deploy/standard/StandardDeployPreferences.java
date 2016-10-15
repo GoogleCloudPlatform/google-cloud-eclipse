@@ -11,6 +11,7 @@ public class StandardDeployPreferences {
 
   public static final String PREFERENCE_STORE_QUALIFIER = "com.google.cloud.tools.eclipse.appengine.deploy";
 
+  static final String PREF_ACCOUNT_EMAIL = "account.email";
   static final String PREF_PROJECT_ID = "project.id";
   static final String PREF_OVERRIDE_DEFAULT_VERSIONING = "project.version.overrideDefault"; // boolean
   static final String PREF_CUSTOM_VERSION = "project.version";
@@ -37,6 +38,15 @@ public class StandardDeployPreferences {
 
   public void save() throws BackingStoreException {
     preferenceStore.flush();
+  }
+
+  public String getAccountEmail() {
+    return preferenceStore.get(PREF_ACCOUNT_EMAIL,
+                               DeployPreferenceInitializer.DEFAULT_ACCOUNT_EMAIL);
+  }
+
+  public void setAccountEmail(String accountEmail) {
+    preferenceStore.put(PREF_ACCOUNT_EMAIL, accountEmail);
   }
 
   public String getProjectId() {

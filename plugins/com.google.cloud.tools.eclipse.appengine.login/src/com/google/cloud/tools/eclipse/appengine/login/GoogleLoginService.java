@@ -16,9 +16,9 @@
 
 package com.google.cloud.tools.eclipse.appengine.login;
 
-import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
 import com.google.cloud.tools.eclipse.appengine.login.ui.LoginServiceUi;
+import com.google.cloud.tools.ide.login.Account;
 import com.google.cloud.tools.ide.login.GoogleLoginState;
 import com.google.cloud.tools.ide.login.JavaPreferenceOAuthDataStore;
 import com.google.cloud.tools.ide.login.LoggerFacade;
@@ -32,24 +32,23 @@ import org.eclipse.ui.PlatformUI;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Provides service related to login, e.g., account management, getting a credential of a
- * currently active user, etc.
+ * Provides service related to login, e.g., account management, getting a credential, etc.
  */
 public class GoogleLoginService implements IGoogleLoginService {
 
-  private static final String OAUTH_DATA_STORE_PREFERENCE_PATH =
-      "/com/google/cloud/tools/eclipse/login";
+  private static final String PREFERENCE_PATH_OAUTH_DATA_STORE =
+      "/com/google/cloud/tools/eclipse/login/datastore";
 
   // For the detailed info about each scope, see
   // https://github.com/GoogleCloudPlatform/gcloud-eclipse-tools/wiki/Cloud-Tools-for-Eclipse-Technical-Design#oauth-20-scopes-requested
-  private static final SortedSet<String> OAUTH_SCOPES = Collections.unmodifiableSortedSet(
-      new TreeSet<>(Arrays.asList(
+  private static final Set<String> OAUTH_SCOPES = Collections.unmodifiableSet(
+      new HashSet<>(Arrays.asList(
           "email", //$NON-NLS-1$
           "https://www.googleapis.com/auth/cloud-platform" //$NON-NLS-1$
       )));
@@ -65,6 +64,11 @@ public class GoogleLoginService implements IGoogleLoginService {
         GoogleLoginService.OAUTH_SCOPES).toString();
   }
 
+  // We expose the reference 'accounts' to callers as-is. That is, we simply transfer references
+  // coming from 'GoogleLoginState' to callers. Therefore, 'GoogleLoginService' must not modify
+  // the states of the objects pointed to by the reference (as opposed to updating the reference
+  // itself, e.g., as in 'logOutAll()').
+  private Set<Account> accounts = new HashSet<>();
   private GoogleLoginState loginState;
 
   private LoginServiceUi loginServiceUi;
@@ -86,8 +90,9 @@ public class GoogleLoginService implements IGoogleLoginService {
     loginServiceUi = new LoginServiceUi(workbench, shellProvider, workbench.getDisplay());
     loginState = new GoogleLoginState(
         Constants.getOAuthClientId(), Constants.getOAuthClientSecret(), OAUTH_SCOPES,
-        new JavaPreferenceOAuthDataStore(OAUTH_DATA_STORE_PREFERENCE_PATH, logger),
+        new JavaPreferenceOAuthDataStore(PREFERENCE_PATH_OAUTH_DATA_STORE, logger),
         loginServiceUi, logger);
+    accounts = loginState.listAccounts();
   }
 
   /**
@@ -97,41 +102,56 @@ public class GoogleLoginService implements IGoogleLoginService {
   public GoogleLoginService() {}
 
   @VisibleForTesting
-  GoogleLoginService(
+  GoogleLoginService(OAuthDataStore dataStore, LoginServiceUi uiFacade, LoggerFacade loggerFacade) {
+    this(new GoogleLoginState(Constants.getOAuthClientId(), Constants.getOAuthClientSecret(),
+                              OAUTH_SCOPES, dataStore, uiFacade, loggerFacade),
+         dataStore, uiFacade, loggerFacade);
+  }
+
+  @VisibleForTesting
+  GoogleLoginService(GoogleLoginState loginState,
       OAuthDataStore dataStore, LoginServiceUi uiFacade, LoggerFacade loggerFacade) {
     loginServiceUi = uiFacade;
-    loginState = new GoogleLoginState(
-        Constants.getOAuthClientId(), Constants.getOAuthClientSecret(), OAUTH_SCOPES,
-        dataStore, uiFacade, loggerFacade);
+    this.loginState = loginState;
+    accounts = loginState.listAccounts();
   }
 
   @Override
-  public Credential getActiveCredential(String dialogMessage) {
+  public Account logIn(String dialogMessage) {
     // TODO: holding a lock for a long period of time (especially when waiting for UI events)
     // should be avoided. Make the login library thread-safe, and don't lock during UI events.
     // (https://github.com/GoogleCloudPlatform/ide-login/issues/21)
     synchronized (loginState) {
-      if (loginState.logInWithLocalServer(dialogMessage)) {
-        return loginState.getCredential();
+      Account account = loginState.logInWithLocalServer(dialogMessage);
+      if (account != null) {
+        accounts = loginState.listAccounts();
       }
-      return null;
+      return account;
     }
   }
 
   @Override
-  public Credential getCachedActiveCredential() {
+  public void logOutAll() {
     synchronized (loginState) {
-      if (loginState.isLoggedIn()) {
-        return loginState.getCredential();
-      }
-      return null;
+      loginState.logOutAll(false /* Don't prompt for logout. */);
+      accounts = new HashSet<>();
     }
   }
 
   @Override
-  public void clearCredential() {
+  public boolean hasAccounts() {
     synchronized (loginState) {
-      loginState.logOut(false /* Don't prompt for logout. */);
+      return !accounts.isEmpty();
+    }
+  }
+
+  @Override
+  public Set<Account> getAccounts() {
+    synchronized (loginState) {
+      // 'accounts' is a reference to a copy of Accounts maintained in 'loginState'.
+      // ('loginState.listAccounts()' returns a copy.) We intend to return this
+      // reference to callers, while never modifying the set itself.
+      return accounts;
     }
   }
 
@@ -148,5 +168,5 @@ public class GoogleLoginService implements IGoogleLoginService {
     public void logWarning(String message) {
       logger.log(Level.WARNING, message);
     }
-  };
+  }
 }

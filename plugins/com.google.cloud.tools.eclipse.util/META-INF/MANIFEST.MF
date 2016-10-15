@@ -1,9 +1,9 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: GCloud for Eclipse App Engine Common Utilities 
+Bundle-Name: Cloud Tools for Eclipse Common Utilities 
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.util;singleton:=true
 Bundle-Version: 0.1.0.qualifier
-Bundle-Vendor: Google, Inc.
+Bundle-Vendor: Google Inc.
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
