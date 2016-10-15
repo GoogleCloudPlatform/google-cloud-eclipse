@@ -38,6 +38,7 @@ import com.google.cloud.tools.eclipse.appengine.libraries.config.LibraryFactoryE
  * This class is intended to test the App Engine libraries set in the plugin.xml to validate that their attributes
  * are correctly set.
  */
+
 public class AppEngineLibrariesInPluginXmlTest {
 
   private static final String APP_ENGINE_API_LIBRARY_ID = "appengine-api";
@@ -66,7 +67,7 @@ public class AppEngineLibrariesInPluginXmlTest {
     LibraryFile libraryFile = appEngineLibrary.getLibraryFiles().get(0);
     assertThat(libraryFile.getJavadocUri(), is(new URI("https://cloud.google.com/appengine/docs/java/javadoc/")));
     assertNull(libraryFile.getSourceUri());
-    assertTrue(libraryFile.isExport());
+    assertTrue("App Engine API not exported", libraryFile.isExport());
 
     assertNotNull(libraryFile.getMavenCoordinates());
     MavenCoordinates mavenCoordinates = libraryFile.getMavenCoordinates();
@@ -107,7 +108,7 @@ public class AppEngineLibrariesInPluginXmlTest {
     LibraryFile libraryFile = endpointsLibrary.getLibraryFiles().get(0);
     assertThat(libraryFile.getJavadocUri(), is(new URI("https://cloud.google.com/appengine/docs/java/endpoints/javadoc/")));
     assertNull(libraryFile.getSourceUri());
-    assertTrue(libraryFile.isExport());
+    assertTrue("Endpoints library not exported", libraryFile.isExport());
 
     assertNotNull(libraryFile.getMavenCoordinates());
     MavenCoordinates mavenCoordinates = libraryFile.getMavenCoordinates();
@@ -139,7 +140,7 @@ public class AppEngineLibrariesInPluginXmlTest {
     LibraryFile libraryFile = objectifyLibrary.getLibraryFiles().get(0);
     assertThat(libraryFile.getJavadocUri(), is(new URI("http://www.javadoc.io/doc/com.googlecode.objectify/objectify/")));
     assertNull(libraryFile.getSourceUri());
-    assertTrue(libraryFile.isExport());
+    assertTrue("Objectify not exported", libraryFile.isExport());
 
     assertNotNull(libraryFile.getMavenCoordinates());
     MavenCoordinates mavenCoordinates = libraryFile.getMavenCoordinates();
