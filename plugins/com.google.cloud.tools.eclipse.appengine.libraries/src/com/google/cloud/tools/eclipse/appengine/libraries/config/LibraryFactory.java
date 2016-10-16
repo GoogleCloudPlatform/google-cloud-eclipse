@@ -88,8 +88,8 @@ public class LibraryFactory {
     }
   }
 
-  private List<LibraryFile> getLibraryFiles(IConfigurationElement[] children) throws InvalidRegistryObjectException, 
-                                                                                     URISyntaxException {
+  private List<LibraryFile> getLibraryFiles(IConfigurationElement[] children) 
+      throws InvalidRegistryObjectException, URISyntaxException {
     List<LibraryFile> libraryFiles = new ArrayList<>();
     for (IConfigurationElement libraryFileElement : children) {
       if (ELEMENT_NAME_LIBRARY_FILE.equals(libraryFileElement.getName())) {
@@ -98,7 +98,6 @@ public class LibraryFactory {
         libraryFile.setFilters(getFilters(libraryFileElement.getChildren()));
         libraryFile.setSourceUri(getUri(libraryFileElement.getAttribute(ATTRIBUTE_NAME_SOURCE_URI)));
         libraryFile.setJavadocUri(getUri(libraryFileElement.getAttribute(ATTRIBUTE_NAME_JAVADOC_URI)));
-        libraryFile.setExport(Boolean.parseBoolean(libraryFileElement.getAttribute(ATTRIBUTE_NAME_EXPORT)));
         String exportString = libraryFileElement.getAttribute(ATTRIBUTE_NAME_EXPORT);
         if (exportString != null) {
           libraryFile.setExport(Boolean.parseBoolean(exportString));
@@ -153,8 +152,6 @@ public class LibraryFactory {
         break;
       case ELEMENT_NAME_INCLUSION_FILTER:
         filters.add(Filter.inclusionFilter(childElement.getAttribute(ATTRIBUTE_NAME_PATTERN)));
-      case ELEMENT_NAME_MAVEN_COORDINATES:
-        break; // ignore
       default:
         // other child element of libraryFile, e.g.: mavenCoordinates
         break;

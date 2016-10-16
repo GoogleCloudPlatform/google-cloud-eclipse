@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
+
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
 import static org.hamcrest.Matchers.is;
@@ -28,6 +29,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.RegistryFactory;
 import org.junit.Test;
 
@@ -38,7 +40,6 @@ import com.google.cloud.tools.eclipse.appengine.libraries.config.LibraryFactoryE
  * This class is intended to test the App Engine libraries set in the plugin.xml to validate that their attributes
  * are correctly set.
  */
-
 public class AppEngineLibrariesInPluginXmlTest {
 
   private static final String APP_ENGINE_API_LIBRARY_ID = "appengine-api";
@@ -155,9 +156,9 @@ public class AppEngineLibrariesInPluginXmlTest {
     assertTrue(libraryFile.getFilters().isEmpty());
   }
 
-  private Library getLibraryWithId(String libraryId) throws LibraryFactoryException {
-    IConfigurationElement[] configurationElements =
-        RegistryFactory.getRegistry()
+  private static Library getLibraryWithId(String libraryId) throws LibraryFactoryException {
+    IExtensionRegistry registry = RegistryFactory.getRegistry();
+    IConfigurationElement[] configurationElements = registry
           .getConfigurationElementsFor(AppEngineLibraryContainerInitializer.LIBRARIES_EXTENSION_POINT);
     for (IConfigurationElement configurationElement : configurationElements) {
       if (configurationElement.getAttribute("id").equals(libraryId)) {
