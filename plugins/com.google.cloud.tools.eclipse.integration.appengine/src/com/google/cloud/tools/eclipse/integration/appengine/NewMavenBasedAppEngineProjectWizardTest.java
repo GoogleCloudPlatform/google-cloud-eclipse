@@ -75,7 +75,7 @@ public class NewMavenBasedAppEngineProjectWizardTest extends AbstractProjectTest
     createAndCheck("guestbookExampleProject", null, "app.engine.test", null, "Guestbook example",
         projectFiles);
     // no projectId then archetypes use artifactID
-    assertEquals("guestbookExample", getPomProperty(project, "app.id"));
+    assertEquals("guestbookExampleProject", getPomProperty(project, "app.id"));
   }
 
   @Test
