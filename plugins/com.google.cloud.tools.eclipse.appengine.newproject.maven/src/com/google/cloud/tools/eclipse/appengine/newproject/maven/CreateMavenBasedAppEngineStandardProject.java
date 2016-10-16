@@ -46,7 +46,6 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
   private String packageName;
   private String artifactId;
   private String groupId;
-  private String version;
   private IPath location;
   private Archetype archetype;
 
@@ -75,7 +74,7 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
     String packageName = this.packageName == null || this.packageName.isEmpty() 
         ? groupId : this.packageName;
     List<IProject> archetypeProjects = projectConfigurationManager.createArchetypeProjects(location,
-        archetype, groupId, artifactId, version, packageName, properties,
+        archetype, groupId, artifactId, "LATEST", packageName, properties,
         importConfiguration, progress.newChild(40));
 
     SubMonitor loopMonitor = progress.newChild(30).setWorkRemaining(3 * archetypeProjects.size());
@@ -115,11 +114,6 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
   /** Set the Maven group identifier for the generated project */
   public void setGroupId(String groupId) {
     this.groupId = groupId;
-  }
-
-  /** Set the Maven version for the generated project */
-  public void setVersion(String version) {
-    this.version = version;
   }
 
   /**

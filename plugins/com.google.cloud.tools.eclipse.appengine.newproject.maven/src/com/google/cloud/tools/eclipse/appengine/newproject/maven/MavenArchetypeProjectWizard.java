@@ -60,7 +60,6 @@ public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
     operation.setPackageName(page.getPackageName());
     operation.setGroupId(page.getGroupId());
     operation.setArtifactId(page.getArtifactId());
-    operation.setVersion(page.getVersion());
     operation.setLocation(page.getLocationPath());
     operation.setArchetype(archetypePage.getArchetype());
 
