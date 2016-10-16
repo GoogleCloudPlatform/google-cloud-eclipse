@@ -62,11 +62,10 @@ public class NewMavenBasedAppEngineProjectWizardTest extends AbstractProjectTest
     assertTrue("Unable to remove temp file", location.delete());
     assertTrue("Unable to turn temp location -> dir", location.mkdir());
 
-    // appengine-skeleton-archetype still missing base index.html and HelloWorld.java
     String[] projectFiles =
         {"src/main/webapp/WEB-INF/appengine-web.xml", "src/main/webapp/WEB-INF/web.xml", "pom.xml"};
     createAndCheck("appWithPackage", location.getAbsolutePath(), "app.engine.test", null,
-        "Hello-world template", projectFiles);
+        "Hello World template", projectFiles);
   }
 
   @Test
