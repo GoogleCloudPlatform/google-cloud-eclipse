@@ -52,7 +52,7 @@ public class NewMavenBasedAppEngineProjectWizardTest extends AbstractProjectTest
   public void testHelloWorld() throws Exception {
     String[] projectFiles =
         {"src/main/webapp/WEB-INF/appengine-web.xml", "src/main/webapp/WEB-INF/web.xml", "pom.xml"};
-    createAndCheck("appWithPackageProject", null, "app.engine.test", null, "Hello World template",
+    createAndCheck("appWithPackageProject", null, "com.example.baz", null, "Hello World template",
         projectFiles);
   }
 
@@ -64,7 +64,7 @@ public class NewMavenBasedAppEngineProjectWizardTest extends AbstractProjectTest
 
     String[] projectFiles =
         {"src/main/webapp/WEB-INF/appengine-web.xml", "src/main/webapp/WEB-INF/web.xml", "pom.xml"};
-    createAndCheck("appWithPackageProjectInTemp", location.getAbsolutePath(), "app.engine.test", null,
+    createAndCheck("appWithPackageProjectInTemp", location.getAbsolutePath(), "com.example.foo", null,
         "Hello World template", projectFiles);
   }
 
@@ -72,7 +72,7 @@ public class NewMavenBasedAppEngineProjectWizardTest extends AbstractProjectTest
   public void testGuestbookExampleNoProjectId() throws Exception {
     String[] projectFiles = {"src/main/webapp/guestbook.jsp",
         "src/main/webapp/WEB-INF/appengine-web.xml", "src/main/webapp/WEB-INF/web.xml", "pom.xml"};
-    createAndCheck("guestbookExampleProject", null, "app.engine.test", null, "Guestbook example",
+    createAndCheck("guestbookExampleProject", null, "com.example.bar", null, "Guestbook example",
         projectFiles);
     // no projectId then archetypes use artifactID
     assertEquals("guestbookExampleProject", getPomProperty(project, "app.id"));
@@ -95,11 +95,11 @@ public class NewMavenBasedAppEngineProjectWizardTest extends AbstractProjectTest
   }
 
   /** Create a project with the given parameters. */
-  private void createAndCheck(String projectName, String location,
+  private void createAndCheck(String artifactId, String location,
       String packageName, String projectId, String archetypeDescription, String[] projectFiles)
       throws CoreException, IOException {
-    assertFalse(projectExists(projectName));
-    project = SwtBotAppEngineActions.createMavenWebAppProject(bot, location, "test", projectName,
+    assertFalse(projectExists(artifactId));
+    project = SwtBotAppEngineActions.createMavenWebAppProject(bot, location, "test", artifactId,
         packageName, projectId, archetypeDescription);
     assertTrue(project.exists());
     if (location != null) {
