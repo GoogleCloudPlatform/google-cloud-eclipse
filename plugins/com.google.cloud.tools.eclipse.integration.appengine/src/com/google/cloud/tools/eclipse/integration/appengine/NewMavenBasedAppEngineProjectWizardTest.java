@@ -52,7 +52,7 @@ public class NewMavenBasedAppEngineProjectWizardTest extends AbstractProjectTest
   public void testHelloWorld() throws Exception {
     String[] projectFiles =
         {"src/main/webapp/WEB-INF/appengine-web.xml", "src/main/webapp/WEB-INF/web.xml", "pom.xml"};
-    createAndCheck("appWithPackage", null, "app.engine.test", null, "Hello World template",
+    createAndCheck("appWithPackageProject", null, "app.engine.test", null, "Hello World template",
         projectFiles);
   }
 
@@ -64,7 +64,7 @@ public class NewMavenBasedAppEngineProjectWizardTest extends AbstractProjectTest
 
     String[] projectFiles =
         {"src/main/webapp/WEB-INF/appengine-web.xml", "src/main/webapp/WEB-INF/web.xml", "pom.xml"};
-    createAndCheck("appWithPackage", location.getAbsolutePath(), "app.engine.test", null,
+    createAndCheck("appWithPackageProjectInTemp", location.getAbsolutePath(), "app.engine.test", null,
         "Hello World template", projectFiles);
   }
 
@@ -72,7 +72,7 @@ public class NewMavenBasedAppEngineProjectWizardTest extends AbstractProjectTest
   public void testGuestbookExampleNoProjectId() throws Exception {
     String[] projectFiles = {"src/main/webapp/guestbook.jsp",
         "src/main/webapp/WEB-INF/appengine-web.xml", "src/main/webapp/WEB-INF/web.xml", "pom.xml"};
-    createAndCheck("guestbookExample", null, "app.engine.test", null, "Guestbook example",
+    createAndCheck("guestbookExampleProject", null, "app.engine.test", null, "Guestbook example",
         projectFiles);
     // no projectId then archetypes use artifactID
     assertEquals("guestbookExample", getPomProperty(project, "app.id"));
@@ -82,7 +82,7 @@ public class NewMavenBasedAppEngineProjectWizardTest extends AbstractProjectTest
   public void testGuestbookExampleWithProjectId() throws Exception {
     String[] projectFiles = {"src/main/webapp/guestbook.jsp",
         "src/main/webapp/WEB-INF/appengine-web.xml", "src/main/webapp/WEB-INF/web.xml", "pom.xml"};
-    createAndCheck("guestbookExample", null, "app.engine.test", "my-project-id",
+    createAndCheck("guestbookExampleProjectWithProjectId", null, "app.engine.test", "my-project-id",
         "Guestbook example", projectFiles);
     assertEquals("my-project-id", getPomProperty(project, "app.id"));
   }
