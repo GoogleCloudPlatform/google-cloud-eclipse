@@ -16,17 +16,17 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
-import org.eclipse.core.resources.IProject;
-import org.osgi.service.prefs.BackingStoreException;
-
 import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployPreferences;
 import com.google.common.annotations.VisibleForTesting;
 
+import org.eclipse.core.resources.IProject;
+import org.osgi.service.prefs.BackingStoreException;
+
 public class DeployPreferencesModel {
 
-  // We set the email in this model to this value right after the associated control is sync'ed
-  // (through databinding) with the actual email. By doing this, we can always force dialog
-  // validation whenever a value in the associated control is changed.
+  // After the Account Selector is set up with a correct email, we set the email value in this
+  // model to this special value. By doing this, we can always force dialog validation whenever
+  // an email value in the Account Selector is changed.
   public static final String REVALIDATION_TRICK_EMAIL_VALUE = "Marker: don't save this value";
 
   private StandardDeployPreferences preferences;
