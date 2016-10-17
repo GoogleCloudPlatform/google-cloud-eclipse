@@ -78,7 +78,7 @@ configure Maven for a Java 7 toolchain on a Mac might be:
       <vendor>oracle</vendor>
     </provides>
     <configuration>
-      <jdkHome>/Library/Java/JavaVirtualMachines/jdk1.7.0_75.jdk/Contents/Home/jre</jdkHome>
+      <jdkHome>/Library/Java/JavaVirtualMachines/jdk1.7.0_79.jdk/Contents/Home/jre</jdkHome>
     </configuration>
   </toolchain>
 </toolchains>
