@@ -1,11 +1,33 @@
+/*******************************************************************************
+ * Copyright 2016 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
 import org.eclipse.core.resources.IProject;
 import org.osgi.service.prefs.BackingStoreException;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployPreferences;
+import com.google.common.annotations.VisibleForTesting;
 
 public class DeployPreferencesModel {
+
+  // We set the email in this model to this value right after the associated control is sync'ed
+  // (through databinding) with the actual email. By doing this, we can always force dialog
+  // validation whenever a value in the associated control is changed.
+  public static final String REVALIDATION_TRICK_EMAIL_VALUE = "Marker: don't save this value";
 
   private StandardDeployPreferences preferences;
 
@@ -19,7 +41,12 @@ public class DeployPreferencesModel {
   private String bucket;
 
   public DeployPreferencesModel(IProject project) {
-    preferences = new StandardDeployPreferences(project);
+    this(new StandardDeployPreferences(project));
+  }
+
+  @VisibleForTesting
+  DeployPreferencesModel(StandardDeployPreferences preferences) {
+    this.preferences = preferences;
     applyPreferences(preferences);
   }
 
@@ -39,7 +66,9 @@ public class DeployPreferencesModel {
   }
 
   public void savePreferences() throws BackingStoreException {
-    preferences.setAccountEmail(getAccountEmail());
+    if (!REVALIDATION_TRICK_EMAIL_VALUE.equals(getAccountEmail())) {
+      preferences.setAccountEmail(getAccountEmail());
+    }
     preferences.setProjectId(getProjectId());
     preferences.setOverrideDefaultVersioning(isOverrideDefaultVersioning());
     preferences.setVersion(getVersion());

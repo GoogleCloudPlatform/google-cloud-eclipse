@@ -145,6 +145,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     context.bindValue(new AccountSelectorObservableValue(accountSelector), accountEmailModel);
 
     if (requireValues) {
+      model.setAccountEmail(DeployPreferencesModel.REVALIDATION_TRICK_EMAIL_VALUE);
       context.addValidationStatusProvider(new FixedMultiValidator() {
         @Override
         protected IStatus validate() {
