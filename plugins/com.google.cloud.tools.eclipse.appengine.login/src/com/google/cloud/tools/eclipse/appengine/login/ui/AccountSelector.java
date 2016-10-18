@@ -17,7 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.login.ui;
 
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.repackaged.com.google.common.base.Strings;
+import com.google.api.client.util.Strings;
 import com.google.cloud.tools.eclipse.appengine.login.IGoogleLoginService;
 import com.google.cloud.tools.ide.login.Account;
 import com.google.common.annotations.VisibleForTesting;
@@ -56,6 +56,14 @@ public class AccountSelector extends Composite {
     }
     combo.add(loginMessage);
     combo.addSelectionListener(logInOnSelect);
+  }
+
+  /**
+   * @return true if this selector has (non-null and non-empty) {@code email} as an item;
+   *     false otherwise
+   */
+  public boolean isEmailAvailable(String email) {
+    return !Strings.isNullOrEmpty(email) && combo.indexOf(email) != -1;
   }
 
   /**

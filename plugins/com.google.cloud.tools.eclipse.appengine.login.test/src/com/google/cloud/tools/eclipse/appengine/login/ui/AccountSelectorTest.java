@@ -117,6 +117,28 @@ public class AccountSelectorTest {
   }
 
   @Test
+  public void testIsEmailAvailable_noAccount() {
+    when(loginService.getAccounts()).thenReturn(new HashSet<Account>());
+
+    AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
+    assertFalse(selector.isEmailAvailable(null));
+    assertFalse(selector.isEmailAvailable(""));
+  }
+
+  @Test
+  public void testIsEmailAvailable_threeAccounts() {
+    when(loginService.getAccounts())
+        .thenReturn(new HashSet<>(Arrays.asList(account1, account2, account3)));
+
+    AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
+    assertFalse(selector.isEmailAvailable(null));
+    assertFalse(selector.isEmailAvailable(""));
+    assertTrue(selector.isEmailAvailable("some-email-1@example.com"));
+    assertTrue(selector.isEmailAvailable("some-email-2@example.com"));
+    assertTrue(selector.isEmailAvailable("some-email-3@example.com"));
+  }
+
+  @Test
   public void testGetSelectedCredential() {
     when(loginService.getAccounts())
         .thenReturn(new HashSet<>(Arrays.asList(account1, account2, account3)));
@@ -160,6 +182,25 @@ public class AccountSelectorTest {
     assertTrue(selector.getSelectedEmail().isEmpty());
 
     selector.selectAccount("non-existing-email@example.com");
+
+    assertEquals(-1, selector.combo.getSelectionIndex());
+    assertTrue(selector.getSelectedEmail().isEmpty());
+  }
+
+  @Test
+  public void testSelectAccount_nullOrEmptyEmail() {
+    when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1, account2)));
+    AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
+
+    assertEquals(-1, selector.combo.getSelectionIndex());
+    assertTrue(selector.getSelectedEmail().isEmpty());
+
+    selector.selectAccount(null);
+
+    assertEquals(-1, selector.combo.getSelectionIndex());
+    assertTrue(selector.getSelectedEmail().isEmpty());
+
+    selector.selectAccount("");
 
     assertEquals(-1, selector.combo.getSelectionIndex());
     assertTrue(selector.getSelectedEmail().isEmpty());

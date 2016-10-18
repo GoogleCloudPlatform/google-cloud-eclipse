@@ -26,7 +26,6 @@ import org.eclipse.core.databinding.ObservablesManager;
 import org.eclipse.core.databinding.UpdateValueStrategy;
 import org.eclipse.core.databinding.beans.PojoProperties;
 import org.eclipse.core.databinding.conversion.Converter;
-import org.eclipse.core.databinding.conversion.IConverter;
 import org.eclipse.core.databinding.observable.Observables;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
@@ -66,7 +65,6 @@ import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectVersionValidato
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.ErrorHandler;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.QueryParameterProvider;
-import com.google.cloud.tools.ide.login.Account;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 
@@ -147,30 +145,27 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   }
 
   private void setupAccountEmailDataBinding(DataBindingContext context) {
-    final IObservableValue accountEmailModel = PojoProperties.value("accountEmail").observe(model);
-    UpdateValueStrategy modelToTarget = new UpdateValueStrategy();
-    modelToTarget.setBeforeSetValidator(new IValidator() {
+    IValidator checker = new IValidator() {
       @Override
-      public IStatus validate(Object value) {
+      public IStatus validate(Object value /* email */) {
         if (requireValues && Strings.isNullOrEmpty((String) value)) {
           return ValidationStatus.error(Messages.getString("error.account.missing"));
         }
         return ValidationStatus.ok();
       }
-    });
+    };
+    UpdateValueStrategy targetToModel = new UpdateValueStrategy().setBeforeSetValidator(checker);
+    UpdateValueStrategy modelToTarget = new UpdateValueStrategy().setBeforeSetValidator(checker);
     modelToTarget.setConverter(new Converter(String.class, String.class) {
       @Override
-      public Object convert(Object fromObject) {
-        for (Account account : loginService.getAccounts()) {
-          if (account.getEmail().equals(fromObject)) {
-            return fromObject;
-          }
-        }
-        return null;
+      public Object convert(Object fromObject /* email */) {
+        return accountSelector.isEmailAvailable((String) fromObject) ? fromObject : null;
       }
     });
-    context.bindValue(new AccountSelectorObservableValue(accountSelector), accountEmailModel, null,
-        modelToTarget);
+
+    final IObservableValue accountEmailModel = PojoProperties.value("accountEmail").observe(model);
+    context.bindValue(new AccountSelectorObservableValue(accountSelector), accountEmailModel,
+        targetToModel, modelToTarget);
   }
 
   private void setupProjectIdDataBinding(DataBindingContext context) {
