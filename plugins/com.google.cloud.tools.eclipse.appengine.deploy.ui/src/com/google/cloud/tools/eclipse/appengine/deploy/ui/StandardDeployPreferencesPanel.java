@@ -25,6 +25,8 @@ import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.ObservablesManager;
 import org.eclipse.core.databinding.UpdateValueStrategy;
 import org.eclipse.core.databinding.beans.PojoProperties;
+import org.eclipse.core.databinding.conversion.Converter;
+import org.eclipse.core.databinding.conversion.IConverter;
 import org.eclipse.core.databinding.observable.Observables;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
@@ -64,7 +66,9 @@ import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectVersionValidato
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.ErrorHandler;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.QueryParameterProvider;
+import com.google.cloud.tools.ide.login.Account;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 
 public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
@@ -100,6 +104,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
   private Runnable layoutChangedHandler;
   private boolean requireValues = true;
+  private IGoogleLoginService loginService;
 
   public StandardDeployPreferencesPanel(Composite parent, IProject project,
       IGoogleLoginService loginService, Runnable layoutChangedHandler, boolean requireValues) {
@@ -107,6 +112,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
     this.layoutChangedHandler = layoutChangedHandler;
     this.requireValues = requireValues;
+    this.loginService = loginService;
 
     createCredentialSection(loginService);
 
@@ -142,22 +148,29 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
   private void setupAccountEmailDataBinding(DataBindingContext context) {
     final IObservableValue accountEmailModel = PojoProperties.value("accountEmail").observe(model);
-    context.bindValue(new AccountSelectorObservableValue(accountSelector), accountEmailModel);
-
-    if (requireValues) {
-      context.addValidationStatusProvider(new FixedMultiValidator() {
-        @Override
-        protected IStatus validate() {
-          String email = (String) accountEmailModel.getValue();
-          // It's possible that no account is selected while a valid email has been saved in the
-          // model (if the corresponding account is signed out), so check the actual selection too.
-          if (email.isEmpty() || accountSelector.getSelectedEmail().isEmpty()) {
-            return ValidationStatus.error(Messages.getString("error.account.missing"));
-          }
-          return ValidationStatus.ok();
+    UpdateValueStrategy modelToTarget = new UpdateValueStrategy();
+    modelToTarget.setBeforeSetValidator(new IValidator() {
+      @Override
+      public IStatus validate(Object value) {
+        if (requireValues && Strings.isNullOrEmpty((String) value)) {
+          return ValidationStatus.error(Messages.getString("error.account.missing"));
         }
-      });
-    }
+        return ValidationStatus.ok();
+      }
+    });
+    modelToTarget.setConverter(new Converter(String.class, String.class) {
+      @Override
+      public Object convert(Object fromObject) {
+        for (Account account : loginService.getAccounts()) {
+          if (account.getEmail().equals(fromObject)) {
+            return fromObject;
+          }
+        }
+        return null;
+      }
+    });
+    context.bindValue(new AccountSelectorObservableValue(accountSelector), accountEmailModel, null,
+        modelToTarget);
   }
 
   private void setupProjectIdDataBinding(DataBindingContext context) {

@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.login.ui;
 
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.cloud.tools.eclipse.appengine.login.IGoogleLoginService;
 import com.google.cloud.tools.ide.login.Account;
 import com.google.common.annotations.VisibleForTesting;
@@ -73,7 +74,7 @@ public class AccountSelector extends Composite {
   }
 
   public int selectAccount(String email) {
-    int index = combo.indexOf(email);
+    int index = Strings.isNullOrEmpty(email) ? -1 : combo.indexOf(email);
     if (index != -1) {
       combo.select(index);
       selectedCredential = (Credential) combo.getData(email);
