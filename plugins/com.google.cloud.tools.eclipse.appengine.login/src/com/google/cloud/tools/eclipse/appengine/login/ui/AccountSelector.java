@@ -59,8 +59,8 @@ public class AccountSelector extends Composite {
   }
 
   /**
-   * @return true if this selector has (non-null and non-empty) {@code email} as an item;
-   *     false otherwise
+   * @return true if this selector lists an account with {@code email}. For convenience of
+   *     callers, {@code email} may be {@code null} or empty, which always returns false
    */
   public boolean isEmailAvailable(String email) {
     return !Strings.isNullOrEmpty(email) && combo.indexOf(email) != -1;
@@ -83,13 +83,13 @@ public class AccountSelector extends Composite {
 
   /**
    * Selects an account corresponding to the given {@code email} and returns its index of the
-   * combo item. If there doesn't exist an account corresponding to the {@code email}, returns -1
-   * while retaining current selection (if any).
+   * combo item. If there is no account corresponding to the {@code email}, returns -1 while
+   * retaining current selection (if any).
    *
-   * @param email to use to select an account. If {@code null} or the empty string, or
-   *     if there doesn't exist a matching account, this method does nothing
+   * @param email email address to use to select an account. If {@code null} or the empty string,
+   *     or if there is no matching account, this method does nothing
    * @return index of the newly selected combo item; -1 if {@code email} is {@code null} or
-   *     the empty string, or if there doesn't exist a matching account
+   *     the empty string, or if there is no matching account
    */
   public int selectAccount(String email) {
     int index = Strings.isNullOrEmpty(email) ? -1 : combo.indexOf(email);

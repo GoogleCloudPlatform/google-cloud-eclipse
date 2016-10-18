@@ -152,11 +152,11 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
         return ValidationStatus.ok();
       }
     };
-    UpdateValueStrategy targetToModel =
-        new UpdateValueStrategy().setBeforeSetValidator(accountSelectedChecker);
-    UpdateValueStrategy modelToTarget =
-        new UpdateValueStrategy().setBeforeSetValidator(accountSelectedChecker);
-    modelToTarget.setConverter(new Converter(String.class, String.class) {
+    UpdateValueStrategy targetToModel = new UpdateValueStrategy()
+        .setBeforeSetValidator(accountSelectedChecker);
+    UpdateValueStrategy modelToTarget = new UpdateValueStrategy()
+        .setBeforeSetValidator(accountSelectedChecker)
+        .setConverter(new Converter(String.class, String.class) {
       @Override
       public Object convert(Object fromObject /* email */) {
         return accountSelector.isEmailAvailable((String) fromObject) ? fromObject : null;
