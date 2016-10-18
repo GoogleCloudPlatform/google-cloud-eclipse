@@ -15,6 +15,7 @@
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
+import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,6 +33,7 @@ import org.eclipse.jdt.core.JavaCore;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.config.LibraryFactory;
 import com.google.cloud.tools.eclipse.appengine.libraries.config.LibraryFactory.LibraryFactoryException;
+import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 
@@ -50,15 +52,20 @@ public class AppEngineLibraryContainerInitializer extends ClasspathContainerInit
   private String containerPath = Library.CONTAINER_PATH_PREFIX;
   private Map<String, Library> libraries;
 
+  private LibraryClasspathContainerSerializer serializer;
+
   public AppEngineLibraryContainerInitializer() {
     super();
+    serializer = new LibraryClasspathContainerSerializer();
   }
 
   @VisibleForTesting
   AppEngineLibraryContainerInitializer(IConfigurationElement[] configurationElements,
                                        LibraryFactory libraryFactory,
-                                       String containerPath) {
+                                       String containerPath,
+                                       LibraryClasspathContainerSerializer serializer) {
     this.containerPath = containerPath;
+    this.serializer = serializer;
     initializeLibraries(configurationElements, libraryFactory);
   }
 
@@ -74,35 +81,35 @@ public class AppEngineLibraryContainerInitializer extends ClasspathContainerInit
       if (!containerPath.segment(0).equals(this.containerPath)) {
         throw new CoreException(StatusUtil.error(this,
                                                  MessageFormat.format("Unexpected first segment of container path, "
-                                                                      + "expected: {0} was: {1}",
-                                                                      this.containerPath,
-                                                                      containerPath.segment(0))));
+                                                     + "expected: {0} was: {1}",
+                                                     this.containerPath,
+                                                     containerPath.segment(0))));
       }
-      String libraryId = containerPath.lastSegment();
-      Library library = libraries.get(libraryId);
-      if (library != null) {
-        LibraryClasspathContainer container = new LibraryClasspathContainer(containerPath, library);
-        JavaCore.setClasspathContainer(containerPath, new IJavaProject[] {project},
-                                       new IClasspathContainer[] {container}, null);
-      } else {
-        throw new CoreException(StatusUtil.error(this, "library not found for ID: " + libraryId));
+      try {
+        LibraryClasspathContainer container = serializer.loadContainer(project, containerPath);
+        if (container != null) {
+          JavaCore.setClasspathContainer(containerPath, new IJavaProject[] {project},
+                                         new IClasspathContainer[] {container}, null);
+        }
+      } catch (IOException ex) {
+        throw new CoreException(StatusUtil.error(this, "Failed to load persisted container descriptor", ex));
       }
     } else {
       throw new CoreException(StatusUtil.error(this,
                                                "containerPath does not have exactly 2 segments: "
-                                               + containerPath.toString()));
+                                                   + containerPath.toString()));
     }
   }
 
   private void initializeLibraries(IConfigurationElement[] configurationElements, LibraryFactory libraryFactory) {
-      libraries = new HashMap<>(configurationElements.length);
-      for (IConfigurationElement configurationElement : configurationElements) {
-        try {
-          Library library = libraryFactory.create(configurationElement);
-          libraries.put(library.getId(), library);
-        } catch (LibraryFactoryException exception) {
-          logger.log(Level.SEVERE, "Failed to initialize libraries", exception);
-        }
+    libraries = new HashMap<>(configurationElements.length);
+    for (IConfigurationElement configurationElement : configurationElements) {
+      try {
+        Library library = libraryFactory.create(configurationElement);
+        libraries.put(library.getId(), library);
+      } catch (LibraryFactoryException exception) {
+        logger.log(Level.SEVERE, "Failed to initialize libraries", exception);
       }
+    }
   }
 }

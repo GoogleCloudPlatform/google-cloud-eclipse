@@ -45,6 +45,15 @@ public class M2RepositoryService implements ILibraryRepositoryService {
 
   @Override
   public IPath getJarLocation(MavenCoordinates mavenCoordinates) throws LibraryRepositoryServiceException {
+    
+    //TODO remove this
+    try {
+      Thread.sleep(5000L);
+    } catch (InterruptedException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    
     Preconditions.checkState(mavenHelper != null, "mavenHelper is null");
     try {
       List<ArtifactRepository> repository = getRepository(mavenCoordinates);

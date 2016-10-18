@@ -15,38 +15,23 @@
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
-import java.util.List;
+import java.io.Serializable;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.jdt.core.IAccessRule;
-import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jst.j2ee.classpathdep.UpdateClasspathAttributeUtil;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.ServiceReference;
 
-import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
-import com.google.cloud.tools.eclipse.appengine.libraries.repository.LibraryRepositoryServiceException;
-import com.google.common.base.Strings;
+public class LibraryClasspathContainer implements IClasspathContainer, Serializable {
 
-public class LibraryClasspathContainer implements IClasspathContainer {
+  private static final long serialVersionUID = 2434038872899176357L;
+  
   private final IPath containerPath;
-  private Library library;
-  private IClasspathEntry[] classpathEntries;
+  private final String description;
+  private final IClasspathEntry[] classpathEntries;
 
-  LibraryClasspathContainer(IPath containerPath, Library library) {
-    this.containerPath = containerPath;
-    this.library = library;
-  }
-
-  public LibraryClasspathContainer(IPath containerPath, Library library, IClasspathEntry[] classpathEntries) {
-    this.containerPath = containerPath;
-    this.library = library;
+  public LibraryClasspathContainer(IPath path, String description, IClasspathEntry[] classpathEntries) {
+    containerPath = path;
+    this.description = description;
     this.classpathEntries = classpathEntries;
   }
 
@@ -62,99 +47,11 @@ public class LibraryClasspathContainer implements IClasspathContainer {
 
   @Override
   public String getDescription() {
-    if (!Strings.isNullOrEmpty(library.getName())) {
-      return library.getName();
-    } else {
-      return library.getId();
-    }
+    return description;
   }
 
   @Override
   public IClasspathEntry[] getClasspathEntries() {
-    if (classpathEntries != null) {
-      return classpathEntries;
-    } else {
-      return new IClasspathEntry[0];
-    }
-//    ServiceReference<ILibraryRepositoryService> serviceReference = null;
-//    try {
-//      List<LibraryFile> libraryFiles = library.getLibraryFiles();
-//      IClasspathEntry[] entries = new IClasspathEntry[libraryFiles.size()];
-//      int idx = 0;
-//      serviceReference = lookupRepositoryServiceReference();
-//      ILibraryRepositoryService repositoryService = getBundleContext().getService(serviceReference);
-//      for (LibraryFile libraryFile : libraryFiles) {
-//        IClasspathAttribute[] classpathAttributes;
-//        if (libraryFile.isExport()) {
-//          classpathAttributes =
-//              new IClasspathAttribute[] { UpdateClasspathAttributeUtil.createDependencyAttribute(true /* isWebApp */) };
-//        } else {
-//          classpathAttributes =
-//              new IClasspathAttribute[] { UpdateClasspathAttributeUtil.createNonDependencyAttribute() };
-//        }
-//        entries[idx++] =
-//            JavaCore.newLibraryEntry(repositoryService.getJarLocation(libraryFile.getMavenCoordinates()),
-//                                     getSourceLocation(repositoryService, libraryFile),
-//                                     null,
-//                                     getAccessRules(libraryFile.getFilters()),
-//                                     classpathAttributes,
-//                                     true);
-//      }
-//      return entries;
-//    } catch (CoreException | LibraryRepositoryServiceException ex) {
-//      // declared on UpdateClasspathAttributeUtil.create(Non)DependencyAttribute(), but its current implementation does
-//      // not throw this exception.
-//      return new IClasspathEntry[0];
-//    } finally {
-//      if (serviceReference != null) {
-//        releaseRepositoryService(serviceReference);
-//      }
-//    }
-  }
-
-  private IPath getSourceLocation(ILibraryRepositoryService repositoryService, LibraryFile libraryFile) {
-    if (libraryFile.getSourceUri() == null) {
-      return repositoryService.getSourceJarLocation(libraryFile.getMavenCoordinates());
-    } else {
-      // download the file and return path to it
-      // TODO https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/800
-      return new Path("/downloaded/source/file");
-    }
-  }
-
-  private IAccessRule[] getAccessRules(List<Filter> filters) {
-    IAccessRule[] accessRules = new IAccessRule[filters.size()];
-    int idx = 0;
-    for (Filter filter : filters) {
-      if (filter.isExclude()) {
-        IAccessRule accessRule = JavaCore.newAccessRule(new Path(filter.getPattern()), IAccessRule.K_NON_ACCESSIBLE);
-        accessRules[idx++] = accessRule;
-      } else {
-        IAccessRule accessRule = JavaCore.newAccessRule(new Path(filter.getPattern()), IAccessRule.K_ACCESSIBLE);
-        accessRules[idx++] = accessRule;
-      }
-    }
-    return accessRules;
-  }
-
-  private ServiceReference<ILibraryRepositoryService> lookupRepositoryServiceReference() {
-    BundleContext bundleContext = getBundleContext();
-    ServiceReference<ILibraryRepositoryService> serviceReference =
-        bundleContext.getServiceReference(ILibraryRepositoryService.class);
-    return serviceReference;
-  }
-
-  private void releaseRepositoryService(ServiceReference<ILibraryRepositoryService> serviceReference) {
-    BundleContext bundleContext = getBundleContext();
-    bundleContext.ungetService(serviceReference);
-  }
-
-  private BundleContext getBundleContext() {
-    BundleContext bundleContext = FrameworkUtil.getBundle(getClass()).getBundleContext();
-    if (bundleContext == null) {
-      throw new IllegalStateException("No bundle context was found for service lookup");
-    } else {
-      return bundleContext;
-    }
+    return classpathEntries;
   }
 }
