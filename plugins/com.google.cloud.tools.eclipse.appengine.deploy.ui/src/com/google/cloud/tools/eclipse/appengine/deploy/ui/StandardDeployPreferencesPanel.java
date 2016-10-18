@@ -143,7 +143,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   }
 
   private void setupAccountEmailDataBinding(DataBindingContext context) {
-    IValidator checker = new IValidator() {
+    IValidator accountSelectedChecker = new IValidator() {
       @Override
       public IStatus validate(Object value /* email */) {
         if (requireValues && Strings.isNullOrEmpty((String) value)) {
@@ -152,8 +152,10 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
         return ValidationStatus.ok();
       }
     };
-    UpdateValueStrategy targetToModel = new UpdateValueStrategy().setBeforeSetValidator(checker);
-    UpdateValueStrategy modelToTarget = new UpdateValueStrategy().setBeforeSetValidator(checker);
+    UpdateValueStrategy targetToModel =
+        new UpdateValueStrategy().setBeforeSetValidator(accountSelectedChecker);
+    UpdateValueStrategy modelToTarget =
+        new UpdateValueStrategy().setBeforeSetValidator(accountSelectedChecker);
     modelToTarget.setConverter(new Converter(String.class, String.class) {
       @Override
       public Object convert(Object fromObject /* email */) {

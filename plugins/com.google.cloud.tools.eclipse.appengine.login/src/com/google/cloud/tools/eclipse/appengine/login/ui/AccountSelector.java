@@ -81,6 +81,16 @@ public class AccountSelector extends Composite {
     return combo.getText();
   }
 
+  /**
+   * Selects an account corresponding to the given {@code email} and returns its index of the
+   * combo item. If there doesn't exist an account corresponding to the {@code email}, returns -1
+   * while retaining current selection (if any).
+   *
+   * @param email to use to select an account. If {@code null} or the empty string, or
+   *     if there doesn't exist a matching account, this method does nothing
+   * @return index of the newly selected combo item; -1 if {@code email} is {@code null} or
+   *     the empty string, or if there doesn't exist a matching account
+   */
   public int selectAccount(String email) {
     int index = Strings.isNullOrEmpty(email) ? -1 : combo.indexOf(email);
     if (index != -1) {
