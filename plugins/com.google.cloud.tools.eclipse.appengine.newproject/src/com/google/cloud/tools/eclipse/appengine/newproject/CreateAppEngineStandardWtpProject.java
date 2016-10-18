@@ -45,7 +45,6 @@ import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.libraries.Library;
-import com.google.cloud.tools.eclipse.preferences.PreferenceUtil;
 
 /**
 * Utility to make a new Eclipse project with the App Engine Standard facets in the workspace.  
@@ -88,8 +87,6 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
         facetedProject, true /* installDependentFacets */, monitor);
     AppEngineStandardFacet.installAllAppEngineRuntimes(facetedProject, true /* force */, monitor);
     
-    PreferenceUtil.setProjectIdPreference(newProject, config.getAppEngineProjectId());
-
     addAppEngineLibrariesToBuildPath(newProject, config.getAppEngineLibraries(), monitor);
 
     addJunit4ToClasspath(monitor, newProject);

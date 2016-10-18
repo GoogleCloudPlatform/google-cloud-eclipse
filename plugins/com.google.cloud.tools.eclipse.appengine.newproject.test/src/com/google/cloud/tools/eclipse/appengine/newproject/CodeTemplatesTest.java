@@ -77,7 +77,6 @@ public class CodeTemplatesTest {
   public void testMaterialize() 
       throws CoreException, ParserConfigurationException, SAXException, IOException {
     AppEngineStandardProjectConfig config = new AppEngineStandardProjectConfig();
-    config.setAppEngineProjectId("TheProjectID");
     
     CodeTemplates.materialize(project, config, monitor);
     
@@ -92,10 +91,14 @@ public class CodeTemplatesTest {
     IFile appengineWebXml = webinf.getFile("appengine-web.xml");
     Assert.assertTrue(appengineWebXml.exists());
     Document doc = buildDocument(appengineWebXml);
-    NodeList applicationElements = doc.getDocumentElement().getElementsByTagName("application");
-    Assert.assertEquals("Must have exactly one application", 1, applicationElements.getLength());
-    String projectId = applicationElements.item(0).getTextContent();
-    Assert.assertEquals("", projectId);
+    NodeList threadsafeElements = doc.getDocumentElement().getElementsByTagName("threadsafe");
+    Assert.assertEquals("Must have exactly one threadsafe", 1, threadsafeElements.getLength());
+    String threadsafe = threadsafeElements.item(0).getTextContent();
+    Assert.assertEquals("true", threadsafe);
+    NodeList sessionsEnabledElements = doc.getDocumentElement().getElementsByTagName("sessions-enabled");
+    Assert.assertEquals("Must have exactly one threadsafe", 1, sessionsEnabledElements.getLength());
+    String sessionsEnabled = sessionsEnabledElements.item(0).getTextContent();
+    Assert.assertEquals("false", sessionsEnabled);
     
     IFile webXml = webinf.getFile("web.xml");
     Element root = buildDocument(webXml).getDocumentElement();

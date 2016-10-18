@@ -16,7 +16,6 @@ import java.util.List;
 class AppEngineStandardProjectConfig {
   private File cloudSdkLocation = null;
   private URI eclipseProjectLocationUri = null;
-  private String appEngineProjectId = "";
   private String packageName = "";
   private IProject project;
   private List<Library> appEngineLibraries = Collections.emptyList();
@@ -28,15 +27,6 @@ class AppEngineStandardProjectConfig {
 
   public void setCloudSdkLocation(File cloudSdkLocation) {
     this.cloudSdkLocation = cloudSdkLocation;
-  }
-
-  // todo does builder pattern make more sense here?
-  public void setAppEngineProjectId(String id) {
-    this.appEngineProjectId = id;
-  }
-
-  public String getAppEngineProjectId() {
-    return this.appEngineProjectId;
   }
   
   public void setPackageName(String name) {

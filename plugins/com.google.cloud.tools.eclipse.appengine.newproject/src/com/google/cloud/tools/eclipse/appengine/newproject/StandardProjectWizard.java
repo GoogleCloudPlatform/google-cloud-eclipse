@@ -48,8 +48,6 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
       }
       config.setCloudSdkLocation(location);
     }
-    // todo is this the right time/place to grab these?
-    config.setAppEngineProjectId(page.getAppEngineProjectId());
     config.setPackageName(page.getPackageName());
 
     config.setProject(page.getProjectHandle());

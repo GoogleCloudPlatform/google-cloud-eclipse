@@ -31,12 +31,6 @@ public class AppEngineStandardProjectConfigTest {
       config.getProject().delete(true, new NullProgressMonitor());
     }
   }
-
-  @Test
-  public void testProjectId() {
-    config.setAppEngineProjectId("playbook");
-    Assert.assertEquals("playbook", config.getAppEngineProjectId());
-  }
   
   @Test
   public void testPackageName() {
