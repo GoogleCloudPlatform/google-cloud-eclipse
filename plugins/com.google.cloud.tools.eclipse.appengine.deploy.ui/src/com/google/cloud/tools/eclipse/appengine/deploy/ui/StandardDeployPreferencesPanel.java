@@ -102,7 +102,6 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
   private Runnable layoutChangedHandler;
   private boolean requireValues = true;
-  private IGoogleLoginService loginService;
 
   public StandardDeployPreferencesPanel(Composite parent, IProject project,
       IGoogleLoginService loginService, Runnable layoutChangedHandler, boolean requireValues) {
@@ -110,7 +109,6 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
     this.layoutChangedHandler = layoutChangedHandler;
     this.requireValues = requireValues;
-    this.loginService = loginService;
 
     createCredentialSection(loginService);
 
