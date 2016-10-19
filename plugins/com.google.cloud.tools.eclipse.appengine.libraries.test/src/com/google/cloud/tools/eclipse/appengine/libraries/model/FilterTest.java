@@ -20,7 +20,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import com.google.cloud.tools.eclipse.appengine.libraries.model.Filter;
 import org.junit.Test;
 
 public class FilterTest {

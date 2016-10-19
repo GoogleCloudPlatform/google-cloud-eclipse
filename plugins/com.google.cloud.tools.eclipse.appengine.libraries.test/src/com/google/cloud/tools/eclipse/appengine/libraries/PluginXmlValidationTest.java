@@ -17,13 +17,11 @@ package com.google.cloud.tools.eclipse.appengine.libraries;
 
 import java.io.File;
 import java.io.IOException;
-
 import javax.xml.XMLConstants;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
-
 import org.junit.Test;
 import org.xml.sax.SAXException;
 

@@ -19,7 +19,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
-import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
 import org.junit.Test;
 
 public class MavenCoordinatesTest {

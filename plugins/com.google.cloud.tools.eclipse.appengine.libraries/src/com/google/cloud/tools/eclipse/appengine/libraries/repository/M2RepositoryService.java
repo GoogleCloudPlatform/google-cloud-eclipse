@@ -15,11 +15,14 @@
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.appengine.libraries.repository;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
+import com.google.cloud.tools.eclipse.util.MavenUtils;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
-
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.eclipse.core.runtime.CoreException;
@@ -28,10 +31,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
-import com.google.cloud.tools.eclipse.util.MavenUtils;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 
 /**
  * Implementation of {@link ILibraryRepositoryService} that relies on M2Eclipse to download the artifacts and store

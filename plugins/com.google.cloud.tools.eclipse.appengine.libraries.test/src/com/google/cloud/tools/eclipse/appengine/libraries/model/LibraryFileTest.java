@@ -23,15 +23,11 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import com.google.cloud.tools.eclipse.appengine.libraries.model.Filter;
-import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
-import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
 import org.junit.Test;
 
 public class LibraryFileTest {

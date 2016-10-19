@@ -19,7 +19,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.mock;
 
 import org.eclipse.core.runtime.IPath;
