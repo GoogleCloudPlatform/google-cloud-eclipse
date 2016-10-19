@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,8 +95,10 @@ public class CodeTemplatesTest {
     Assert.assertEquals("Must have exactly one threadsafe", 1, threadsafeElements.getLength());
     String threadsafe = threadsafeElements.item(0).getTextContent();
     Assert.assertEquals("true", threadsafe);
-    NodeList sessionsEnabledElements = doc.getDocumentElement().getElementsByTagName("sessions-enabled");
-    Assert.assertEquals("Must have exactly one threadsafe", 1, sessionsEnabledElements.getLength());
+    NodeList sessionsEnabledElements 
+        = doc.getDocumentElement().getElementsByTagName("sessions-enabled");
+    Assert.assertEquals("Must have exactly one sessions-enabled", 
+        1, sessionsEnabledElements.getLength());
     String sessionsEnabled = sessionsEnabledElements.item(0).getTextContent();
     Assert.assertEquals("false", sessionsEnabled);
     
