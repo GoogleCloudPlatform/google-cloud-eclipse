@@ -63,7 +63,7 @@
     <tycho.showEclipseLog>true</tycho.showEclipseLog>
 
     <!--
-      `SYSTEM` means use the default JDK (necc for Travis).
+      `SYSTEM` means use the default JDK (necessary for Travis).
       `BREE` means find a configured JDK using Maven Toolchains matching
       the Bundle-RequiredExecutionEnvironment. See `README.md` for details.
     -->

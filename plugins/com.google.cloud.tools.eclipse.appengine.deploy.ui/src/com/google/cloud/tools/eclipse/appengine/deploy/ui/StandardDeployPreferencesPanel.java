@@ -25,6 +25,7 @@ import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.ObservablesManager;
 import org.eclipse.core.databinding.UpdateValueStrategy;
 import org.eclipse.core.databinding.beans.PojoProperties;
+import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.Observables;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
@@ -65,6 +66,7 @@ import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.ErrorHandler;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.QueryParameterProvider;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 
 public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
@@ -141,23 +143,29 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   }
 
   private void setupAccountEmailDataBinding(DataBindingContext context) {
-    final IObservableValue accountEmailModel = PojoProperties.value("accountEmail").observe(model);
-    context.bindValue(new AccountSelectorObservableValue(accountSelector), accountEmailModel);
-
-    if (requireValues) {
-      context.addValidationStatusProvider(new FixedMultiValidator() {
-        @Override
-        protected IStatus validate() {
-          String email = (String) accountEmailModel.getValue();
-          // It's possible that no account is selected while a valid email has been saved in the
-          // model (if the corresponding account is signed out), so check the actual selection too.
-          if (email.isEmpty() || accountSelector.getSelectedEmail().isEmpty()) {
-            return ValidationStatus.error(Messages.getString("error.account.missing"));
-          }
-          return ValidationStatus.ok();
+    IValidator accountSelectedChecker = new IValidator() {
+      @Override
+      public IStatus validate(Object value /* email */) {
+        if (requireValues && Strings.isNullOrEmpty((String) value)) {
+          return ValidationStatus.error(Messages.getString("error.account.missing"));
         }
-      });
-    }
+        return ValidationStatus.ok();
+      }
+    };
+    UpdateValueStrategy targetToModel = new UpdateValueStrategy()
+        .setBeforeSetValidator(accountSelectedChecker);
+    UpdateValueStrategy modelToTarget = new UpdateValueStrategy()
+        .setBeforeSetValidator(accountSelectedChecker)
+        .setConverter(new Converter(String.class, String.class) {
+      @Override
+      public Object convert(Object fromObject /* email */) {
+        return accountSelector.isEmailAvailable((String) fromObject) ? fromObject : null;
+      }
+    });
+
+    final IObservableValue accountEmailModel = PojoProperties.value("accountEmail").observe(model);
+    context.bindValue(new AccountSelectorObservableValue(accountSelector), accountEmailModel,
+        targetToModel, modelToTarget);
   }
 
   private void setupProjectIdDataBinding(DataBindingContext context) {

@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.login.ui;
 
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.util.Strings;
 import com.google.cloud.tools.eclipse.appengine.login.IGoogleLoginService;
 import com.google.cloud.tools.ide.login.Account;
 import com.google.common.annotations.VisibleForTesting;
@@ -58,6 +59,14 @@ public class AccountSelector extends Composite {
   }
 
   /**
+   * @return true if this selector lists an account with {@code email}. For convenience of
+   *     callers, {@code email} may be {@code null} or empty, which always returns false
+   */
+  public boolean isEmailAvailable(String email) {
+    return !Strings.isNullOrEmpty(email) && combo.indexOf(email) != -1;
+  }
+
+  /**
    * Returns a {@link Credential} object associated with the account, if selected. Otherwise,
    * {@code null}.
    *
@@ -72,8 +81,18 @@ public class AccountSelector extends Composite {
     return combo.getText();
   }
 
+  /**
+   * Selects an account corresponding to the given {@code email} and returns its index of the
+   * combo item. If there is no account corresponding to the {@code email}, returns -1 while
+   * retaining current selection (if any).
+   *
+   * @param email email address to use to select an account. If {@code null} or the empty string,
+   *     or if there is no matching account, this method does nothing
+   * @return index of the newly selected combo item; -1 if {@code email} is {@code null} or
+   *     the empty string, or if there is no matching account
+   */
   public int selectAccount(String email) {
-    int index = combo.indexOf(email);
+    int index = Strings.isNullOrEmpty(email) ? -1 : combo.indexOf(email);
     if (index != -1) {
       combo.select(index);
       selectedCredential = (Credential) combo.getData(email);

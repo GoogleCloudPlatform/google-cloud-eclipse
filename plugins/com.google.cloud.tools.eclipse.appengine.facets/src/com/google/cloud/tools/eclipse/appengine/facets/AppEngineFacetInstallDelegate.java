@@ -22,12 +22,27 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.common.project.facet.core.IDelegate;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 
-public class FlexFacetUninstallDelegate implements IDelegate {
+import com.google.cloud.tools.appengine.cloudsdk.AppEngineJavaComponentsNotInstalledException;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 
+public abstract class AppEngineFacetInstallDelegate implements IDelegate   {
   @Override
-  public void execute(IProject project, IProjectFacetVersion facetVersion, Object config, IProgressMonitor monitor)
-      throws CoreException {
-    
+  public void execute(IProject project,
+      IProjectFacetVersion version,
+      Object config,
+      IProgressMonitor monitor) throws CoreException {
+    validateAppEngineJavaComponents();
   }
 
+  private void validateAppEngineJavaComponents() throws CoreException {
+    CloudSdk cloudSdk = new CloudSdk.Builder().build();
+    try {
+      cloudSdk.validateAppEngineJavaComponents();
+    } catch (AppEngineJavaComponentsNotInstalledException ex) {
+      // to properly display error in message box
+      throw new CoreException(StatusUtil.error(getClass(),
+          Messages.getString("appengine.java.component.missing"), ex));
+    }
+  }
 }

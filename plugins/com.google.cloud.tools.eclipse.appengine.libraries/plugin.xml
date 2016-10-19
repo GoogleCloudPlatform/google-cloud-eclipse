@@ -23,6 +23,7 @@
           id="appengine-endpoints"
           name="App Engine Endpoints"
           siteUri="https://cloud.google.com/appengine/docs/java/endpoints/" >
+      <libraryDependency id="appengine-api" />
       <libraryFile
             javadocUri="https://cloud.google.com/appengine/docs/java/endpoints/javadoc/">
         <mavenCoordinates

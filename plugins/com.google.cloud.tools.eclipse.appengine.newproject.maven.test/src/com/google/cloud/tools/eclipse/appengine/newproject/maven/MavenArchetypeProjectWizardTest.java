@@ -87,7 +87,7 @@ public class MavenArchetypeProjectWizardTest {
 
   @Test
   public void testArchetypeDefaultSelection() {
-    Assert.assertEquals("appengine-skeleton-archetype",
+    Assert.assertEquals("appengine-standard-archetype",
         MavenAppEngineStandardArchetypeWizardPage.PRESET_ARCHETYPES.get(0)
             .archetype.getArtifactId());
   }

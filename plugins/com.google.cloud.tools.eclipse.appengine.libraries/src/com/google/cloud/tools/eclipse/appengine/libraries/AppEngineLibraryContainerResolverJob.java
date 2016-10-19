@@ -1,12 +1,23 @@
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.model.Filter;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFactory;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFactoryException;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
+import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer;
+import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
+import com.google.cloud.tools.eclipse.appengine.libraries.repository.LibraryRepositoryServiceException;
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IPath;
@@ -27,18 +38,6 @@ import org.eclipse.jst.j2ee.classpathdep.UpdateClasspathAttributeUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
-import com.google.cloud.tools.eclipse.appengine.libraries.model.Filter;
-import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
-import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFactory;
-import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
-import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFactory.LibraryFactoryException;
-import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer;
-import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
-import com.google.cloud.tools.eclipse.appengine.libraries.repository.LibraryRepositoryServiceException;
-import com.google.cloud.tools.eclipse.util.status.StatusUtil;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 
 public class AppEngineLibraryContainerResolverJob extends Job {
   //TODO duplicate of com.google.cloud.tools.eclipse.appengine.libraries.AppEngineLibraryContainerInitializer.LIBRARIES_EXTENSION_POINT

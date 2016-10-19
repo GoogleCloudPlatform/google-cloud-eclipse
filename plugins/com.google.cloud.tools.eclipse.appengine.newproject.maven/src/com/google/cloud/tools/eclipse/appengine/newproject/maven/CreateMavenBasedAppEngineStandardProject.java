@@ -98,39 +98,42 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
   }
 
   /** Set the App Engine project identifier; may be {@code null} */
-  public void setAppEngineProjectId(String appEngineProjectId) {
+  void setAppEngineProjectId(String appEngineProjectId) {
     this.appEngineProjectId = appEngineProjectId;
   }
 
   /** Set the package for any generated code; may be {@code null} */
-  public void setPackageName(String packageName) {
+  void setPackageName(String packageName) {
     this.packageName = packageName;
   }
 
   /** Set the Maven artifact identifier for the generated project */
-  public void setArtifactId(String artifactId) {
+  void setArtifactId(String artifactId) {
     this.artifactId = artifactId;
   }
 
   /** Set the Maven group identifier for the generated project */
-  public void setGroupId(String groupId) {
+  void setGroupId(String groupId) {
     this.groupId = groupId;
-  }
-
-  /** Set the Maven version for the generated project */
-  public void setVersion(String version) {
-    this.version = version;
   }
 
   /**
    * Set the location where the project is to be generated; may be {@code null} to indicate the
    * workspace
    */
-  public void setLocation(IPath location) {
+  void setLocation(IPath location) {
     this.location = location;
   }
-
-  public void setArchetype(Archetype archetype) {
+  
+  /**
+   * Set the version of the project to be created.
+   */
+  void setVersion(String version) {
+    this.version = version;
+  }
+  
+  void setArchetype(Archetype archetype) {
     this.archetype = archetype;
   }
+
 }

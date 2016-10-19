@@ -43,9 +43,9 @@ public class MavenAppEngineStandardArchetypeWizardPage extends WizardPage {
   static final java.util.List<ArchetypeTuple> PRESET_ARCHETYPES =
       Collections.unmodifiableList(Arrays.asList(
           new ArchetypeTuple("com.google.appengine.archetypes", //$NON-NLS-1$
-              "appengine-skeleton-archetype", //$NON-NLS-1$
-              Messages.getString("APPENGINE_SKELETON_ARCHETYPE_DISPLAY_NAME"), //$NON-NLS-1$
-              Messages.getString("APPENGINE_SKELETON_ARCHETYPE_DESCRIPTION")), //$NON-NLS-1$
+              "appengine-standard-archetype", //$NON-NLS-1$
+              Messages.getString("APPENGINE_STANDARD_ARCHETYPE_DISPLAY_NAME"), //$NON-NLS-1$
+              Messages.getString("APPENGINE_STANDARD_ARCHETYPE_DESCRIPTION")), //$NON-NLS-1$
           new ArchetypeTuple("com.google.appengine.archetypes", //$NON-NLS-1$
               "guestbook-archetype", //$NON-NLS-1$
               Messages.getString("APPENGINE_GUESTBOOK_ARCHETYPE_DISPLAY_NAME"), //$NON-NLS-1$

@@ -25,13 +25,12 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.wst.common.project.facet.core.IDelegate;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 
 import java.io.ByteArrayInputStream;
 import java.util.Collections;
 
-public class StandardFacetInstallDelegate implements IDelegate {
+public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate {
   private final static String APPENGINE_WEB_XML = "appengine-web.xml";
   // TODO Change directory for dynamic web module.
   // Differentiate between project with web facets vs 'true' dynamic web modules?
@@ -43,6 +42,7 @@ public class StandardFacetInstallDelegate implements IDelegate {
                       IProjectFacetVersion version,
                       Object config,
                       IProgressMonitor monitor) throws CoreException {
+    super.execute(project, version, config, monitor);
     createConfigFiles(project, monitor);
   }
 
