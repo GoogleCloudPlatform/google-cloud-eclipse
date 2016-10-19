@@ -70,7 +70,6 @@ public class AppEngineLibraryContainerInitializerTest {
       new TestLibraryRepositoryServiceRegistrar();
   @Rule
   public TestProject testProject = new TestProject().withClasspathContainerPath(TEST_LIBRARY_PATH);
-
   @Rule
   public TemporaryFolder stateLocationFolder = new TemporaryFolder();
   
@@ -102,8 +101,7 @@ public class AppEngineLibraryContainerInitializerTest {
                                                  libraryFactory,
                                                  TEST_CONTAINER_PATH,
                                                  serializer);
-    containerInitializer.initialize(new Path(TEST_LIBRARY_PATH),
-                                    testProject.getJavaProject());
+    containerInitializer.initialize(new Path(TEST_LIBRARY_PATH), testProject.getJavaProject());
 
     IClasspathEntry[] resolvedClasspath = testProject.getJavaProject().getResolvedClasspath(false);
     assertThat(resolvedClasspath.length, is(2));
@@ -119,8 +117,7 @@ public class AppEngineLibraryContainerInitializerTest {
                                                  libraryFactory,
                                                  TEST_CONTAINER_PATH,
                                                  serializer);
-    containerInitializer.initialize(new Path("single.segment.id"),
-                                    testProject.getJavaProject());
+    containerInitializer.initialize(new Path("single.segment.id"), testProject.getJavaProject());
   }
 
   @Test(expected = CoreException.class)
@@ -141,8 +138,7 @@ public class AppEngineLibraryContainerInitializerTest {
                                                  libraryFactory,
                                                  TEST_CONTAINER_PATH,
                                                  serializer);
-    containerInitializer.initialize(new Path("first.segment/second.segment"),
-                                    testProject.getJavaProject());
+    containerInitializer.initialize(new Path("first.segment/second.segment"), testProject.getJavaProject());
   }
 
   @Test
@@ -152,8 +148,7 @@ public class AppEngineLibraryContainerInitializerTest {
                                                  libraryFactory,
                                                  TEST_CONTAINER_PATH,
                                                  serializer);
-    containerInitializer.initialize(new Path(TEST_CONTAINER_PATH + "/second.segment"),
-                                    testProject.getJavaProject());
+    containerInitializer.initialize(new Path(TEST_CONTAINER_PATH + "/second.segment"), testProject.getJavaProject());
     IClasspathEntry[] resolvedClasspath = testProject.getJavaProject().getResolvedClasspath(false);
     assertThat(resolvedClasspath.length, is(1));
   }
@@ -164,7 +159,9 @@ public class AppEngineLibraryContainerInitializerTest {
     library.setLibraryFiles(Collections.singletonList(new LibraryFile(new MavenCoordinates("groupId",
                                                                                            "artifactId"))));
     // this will override what is set in setupLibraryFactory() when setUp() is executed
-    doThrow(LibraryFactoryException.class).doReturn(library).when(libraryFactory).create(any(IConfigurationElement.class));
+    doThrow(LibraryFactoryException.class)
+      .doReturn(library)
+      .when(libraryFactory).create(any(IConfigurationElement.class));
 
     AppEngineLibraryContainerInitializer containerInitializer =
         new AppEngineLibraryContainerInitializer(new IConfigurationElement[]{ configurationElement,
@@ -172,8 +169,7 @@ public class AppEngineLibraryContainerInitializerTest {
                                                  libraryFactory,
                                                  TEST_CONTAINER_PATH,
                                                  serializer);
-    containerInitializer.initialize(new Path(TEST_LIBRARY_PATH),
-                                    testProject.getJavaProject());
+    containerInitializer.initialize(new Path(TEST_LIBRARY_PATH), testProject.getJavaProject());
 
     IClasspathEntry[] resolvedClasspath = testProject.getJavaProject().getResolvedClasspath(false);
     assertThat(resolvedClasspath.length, is(2));
@@ -185,14 +181,14 @@ public class AppEngineLibraryContainerInitializerTest {
   @Test(expected = CoreException.class)
   public void testInitialize_deserializingContainerThrowsError() throws Exception {
     LibraryClasspathContainerSerializer mockSerializer = mock(LibraryClasspathContainerSerializer.class);
-    doThrow(new IOException("test exception")).when(mockSerializer).loadContainer(any(IJavaProject.class), any(IPath.class));
+    doThrow(new IOException("test exception"))
+      .when(mockSerializer).loadContainer(any(IJavaProject.class), any(IPath.class));
     AppEngineLibraryContainerInitializer containerInitializer =
         new AppEngineLibraryContainerInitializer(new IConfigurationElement[]{ configurationElement },
                                                  libraryFactory,
                                                  TEST_CONTAINER_PATH,
                                                  mockSerializer);
-    containerInitializer.initialize(new Path(TEST_LIBRARY_PATH),
-                                    testProject.getJavaProject());
+    containerInitializer.initialize(new Path(TEST_LIBRARY_PATH), testProject.getJavaProject());
   }
   
   private void setupLibraryFactory() throws LibraryFactoryException {
@@ -208,8 +204,12 @@ public class AppEngineLibraryContainerInitializerTest {
                                                       eq(new Path(TEST_LIBRARY_PATH)),
                                                       anyBoolean()))
       .thenReturn(new Path(stateFile.getAbsolutePath()));
-    IClasspathEntry[] classpathEntries = new IClasspathEntry[] { JavaCore.newLibraryEntry(new Path("/test/path/artifactId.jar"), new Path("/test/path/artifactId-sources.jar"), null) };
-    LibraryClasspathContainer container = new LibraryClasspathContainer(new Path(TEST_LIBRARY_PATH), "Test API", classpathEntries);
+    IClasspathEntry[] classpathEntries =
+        new IClasspathEntry[] { JavaCore.newLibraryEntry(new Path("/test/path/artifactId.jar"),
+                                                         new Path("/test/path/artifactId-sources.jar"),
+                                                         null /* sourceAttachmentRootPath */) };
+    LibraryClasspathContainer container =
+        new LibraryClasspathContainer(new Path(TEST_LIBRARY_PATH), "Test API", classpathEntries);
     serializer.saveContainer(null, container);
   }
 

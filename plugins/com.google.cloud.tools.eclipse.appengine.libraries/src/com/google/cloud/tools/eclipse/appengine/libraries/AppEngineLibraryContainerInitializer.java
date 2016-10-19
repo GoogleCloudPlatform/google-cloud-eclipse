@@ -81,13 +81,14 @@ public class AppEngineLibraryContainerInitializer extends ClasspathContainerInit
       if (!containerPath.segment(0).equals(this.containerPath)) {
         throw new CoreException(StatusUtil.error(this,
                                                  MessageFormat.format("Unexpected first segment of container path, "
-                                                     + "expected: {0} was: {1}",
-                                                     this.containerPath,
-                                                     containerPath.segment(0))));
+                                                                      + "expected: {0} was: {1}",
+                                                                      this.containerPath,
+                                                                      containerPath.segment(0))));
       }
       try {
         LibraryClasspathContainer container = serializer.loadContainer(project, containerPath);
         // TODO validate libraryFile paths and request resolution via ILibraryRepositoryService if they're invalid
+        // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/855
         if (container != null) {
           JavaCore.setClasspathContainer(containerPath, new IJavaProject[] {project},
                                          new IClasspathContainer[] {container}, null);
@@ -98,7 +99,7 @@ public class AppEngineLibraryContainerInitializer extends ClasspathContainerInit
     } else {
       throw new CoreException(StatusUtil.error(this,
                                                "containerPath does not have exactly 2 segments: "
-                                                   + containerPath.toString()));
+                                               + containerPath.toString()));
     }
   }
 

@@ -25,39 +25,71 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
+@RunWith(MockitoJUnitRunner.class)
 public class LibraryClasspathContainerTest {
+
+  @Mock private IClasspathEntry mockClasspathEntry = mock(IClasspathEntry.class);
+
+  private LibraryClasspathContainer classpathContainer;
+
+  @Before
+  public void setUp() {
+    classpathContainer = new LibraryClasspathContainer(new Path("container/path"),
+                                                       "description",
+                                                       new IClasspathEntry[]{ mockClasspathEntry });
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void testConstructor_nullPath() {
+    new LibraryClasspathContainer(null,
+                                  "description",
+                                  new IClasspathEntry[]{ mockClasspathEntry });
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void testConstructor_nullDescription() {
+    new LibraryClasspathContainer(new Path("container/path"),
+                                  null,
+                                  new IClasspathEntry[]{ mockClasspathEntry });
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testConstructor_emptyDescription() {
+    new LibraryClasspathContainer(new Path("container/path"),
+                                  "",
+                                  new IClasspathEntry[]{ mockClasspathEntry });
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void testConstructor_nullClasspathEntries() {
+    new LibraryClasspathContainer(new Path("container/path"),
+                                  "description",
+                                  null);
+  }
 
   @Test
   public void testGetPath() {
-    LibraryClasspathContainer classpathContainer =
-        new LibraryClasspathContainer(new Path("container/path"), "description", new IClasspathEntry[0]);
     assertThat(classpathContainer.getPath(), is((IPath) new Path("container/path")));
   }
 
   @Test
   public void testGetDescription() {
-    LibraryClasspathContainer classpathContainer =
-        new LibraryClasspathContainer(new Path("container/path"), "description", new IClasspathEntry[0]);
     assertThat(classpathContainer.getDescription(), is("description"));
   }
 
   @Test
   public void testGetKind_returnsApplication() throws Exception {
-    LibraryClasspathContainer classpathContainer =
-        new LibraryClasspathContainer(new Path("container/path"), "description", new IClasspathEntry[0]);
     assertThat(classpathContainer.getKind(), is(IClasspathContainer.K_APPLICATION));
   }
 
   @Test
   public void testGetClasspathEntries() {
-    IClasspathEntry mockClasspathEntry = mock(IClasspathEntry.class);
-    LibraryClasspathContainer classpathContainer =
-        new LibraryClasspathContainer(new Path("container/path"),
-                                      "description",
-                                      new IClasspathEntry[]{ mockClasspathEntry });
-
     IClasspathEntry[] classpathEntries = classpathContainer.getClasspathEntries();
     assertNotNull(classpathEntries);
     assertThat(classpathEntries.length, is(1));

@@ -22,7 +22,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import com.google.cloud.tools.eclipse.appengine.libraries.LibraryRecommendation;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;

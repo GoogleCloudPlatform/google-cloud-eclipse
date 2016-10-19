@@ -15,7 +15,6 @@
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
-import com.google.cloud.tools.eclipse.appengine.libraries.LibraryRecommendation;
 import com.google.common.base.Preconditions;
 import java.net.URI;
 import java.util.ArrayList;

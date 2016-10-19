@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
-import com.google.cloud.tools.eclipse.appengine.libraries.LibraryRecommendation;
 import com.google.common.base.Strings;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -146,6 +145,7 @@ public class LibraryFactory {
         break;
       case ELEMENT_NAME_INCLUSION_FILTER:
         filters.add(Filter.inclusionFilter(childElement.getAttribute(ATTRIBUTE_NAME_PATTERN)));
+        break;
       default:
         // other child element of libraryFile, e.g.: mavenCoordinates
         break;

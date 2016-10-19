@@ -98,12 +98,12 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
   }
 
   private void addAppEngineLibrariesToBuildPath(IProject newProject,
-                                                final List<Library> libraries,
+                                                List<Library> libraries,
                                                 IProgressMonitor monitor) throws CoreException {
     SubMonitor subMonitor = SubMonitor.convert(monitor, "Adding App Engine libraries", libraries.size());
-    final IJavaProject javaProject = JavaCore.create(newProject);
+    IJavaProject javaProject = JavaCore.create(newProject);
     IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
-    final IClasspathEntry[] newRawClasspath = Arrays.copyOf(rawClasspath, rawClasspath.length + libraries.size());
+    IClasspathEntry[] newRawClasspath = Arrays.copyOf(rawClasspath, rawClasspath.length + libraries.size());
     for (int i = 0; i < libraries.size(); i++) {
       Library library = libraries.get(i);
       IClasspathAttribute[] classpathAttributes;

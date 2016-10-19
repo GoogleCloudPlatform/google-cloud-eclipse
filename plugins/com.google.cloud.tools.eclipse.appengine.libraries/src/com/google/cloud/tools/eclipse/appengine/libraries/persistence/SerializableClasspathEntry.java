@@ -15,7 +15,6 @@
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.appengine.libraries.persistence;
 
-import java.util.ArrayList;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IAccessRule;
@@ -25,15 +24,16 @@ import org.eclipse.jdt.core.JavaCore;
 
 public class SerializableClasspathEntry {
 
-  private ArrayList<SerializableAccessRules> accessRules;
+  private SerializableAccessRules[] accessRules;
   private String sourceAttachmentPath;
   private String path;
-  private ArrayList<SerializableAttribute> attributes;
+  private SerializableAttribute[] attributes;
 
   public void setAttributes(IClasspathAttribute[] extraAttributes) {
-    attributes = new ArrayList<>(extraAttributes.length);
-    for (IClasspathAttribute attribute : extraAttributes) {
-      attributes.add(new SerializableAttribute(attribute.getName(), attribute.getValue()));
+    attributes = new SerializableAttribute[extraAttributes.length];
+    for (int i = 0; i < extraAttributes.length; i++) {
+      IClasspathAttribute attribute = extraAttributes[i];
+      attributes[i] = new SerializableAttribute(attribute.getName(), attribute.getValue());
     }
   }
 
@@ -42,9 +42,10 @@ public class SerializableClasspathEntry {
   }
 
   public void setAccessRules(IAccessRule[] accessRules) {
-    this.accessRules = new ArrayList<>(accessRules.length);
-    for (IAccessRule rule : accessRules) {
-      this.accessRules.add(new SerializableAccessRules(rule.getKind(), rule.getPattern()));
+    this.accessRules = new SerializableAccessRules[accessRules.length];
+    for (int i = 0; i < accessRules.length; i++) {
+      IAccessRule rule = accessRules[i];
+      this.accessRules[i] = new SerializableAccessRules(rule.getKind(), rule.getPattern());
     }
   }
 
@@ -61,19 +62,19 @@ public class SerializableClasspathEntry {
                                     true);
   }
   
-  private IClasspathAttribute[] getAttributes(ArrayList<SerializableAttribute> attributes) {
-    IClasspathAttribute[] classpathAttributes = new IClasspathAttribute[attributes.size()];
-    for (int i = 0; i < attributes.size(); i++) {
-      SerializableAttribute serializableAttribute = attributes.get(i);
+  private IClasspathAttribute[] getAttributes(SerializableAttribute[] attributes) {
+    IClasspathAttribute[] classpathAttributes = new IClasspathAttribute[attributes.length];
+    for (int i = 0; i < attributes.length; i++) {
+      SerializableAttribute serializableAttribute = attributes[i];
       classpathAttributes[i] = serializableAttribute.toClasspathAttribute();
     }
     return classpathAttributes;
   }
 
-  private IAccessRule[] getAccessRules(ArrayList<SerializableAccessRules> accessRules) {
-    IAccessRule[] rules = new IAccessRule[accessRules.size()];
-    for (int i = 0; i < accessRules.size(); i++) {
-      SerializableAccessRules serializableAccessRules = accessRules.get(i);
+  private IAccessRule[] getAccessRules(SerializableAccessRules[] accessRules) {
+    IAccessRule[] rules = new IAccessRule[accessRules.length];
+    for (int i = 0; i < accessRules.length; i++) {
+      SerializableAccessRules serializableAccessRules = accessRules[i];
       rules[i] = serializableAccessRules.toAccessRule();
     }
     return rules;

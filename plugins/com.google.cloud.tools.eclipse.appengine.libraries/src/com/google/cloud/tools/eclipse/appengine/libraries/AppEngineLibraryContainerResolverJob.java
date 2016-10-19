@@ -65,23 +65,26 @@ public class AppEngineLibraryContainerResolverJob extends Job {
   private LibraryClasspathContainerSerializer serializer;
   private ServiceReference<ILibraryRepositoryService> serviceReference = null;
 
-
   public AppEngineLibraryContainerResolverJob(String name, IJavaProject javaProject) {
     this(name, javaProject, new LibraryClasspathContainerSerializer());
   }
 
   @VisibleForTesting
-  AppEngineLibraryContainerResolverJob(String name, IJavaProject javaProject, LibraryClasspathContainerSerializer serializer) {
+  AppEngineLibraryContainerResolverJob(String name, IJavaProject javaProject,
+                                       LibraryClasspathContainerSerializer serializer) {
     super(name);
-    this.serializer = serializer;
     Preconditions.checkNotNull(javaProject, "javaProject is null");
+    Preconditions.checkNotNull(serializer);
     this.javaProject = javaProject;
+    this.serializer = serializer;
     setUser(true);
     setRule(javaProject.getSchedulingRule());
   }
+
   @Override
   protected IStatus run(IProgressMonitor monitor) {
     // TODO parse library definition in ILibraryConfigService (or similar) started when the plugin/bundle starts
+    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/856
     try {
       if (libraries == null) {
         // in tests libraries will be initialized via the test constructor, this would override mocks/stubs.
@@ -91,7 +94,7 @@ public class AppEngineLibraryContainerResolverJob extends Job {
       }
       serviceReference = lookupRepositoryServiceReference();
       ILibraryRepositoryService repositoryService = getBundleContext().getService(serviceReference);
-      
+
       IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
       SubMonitor subMonitor = SubMonitor.convert(monitor, "Resolving App Engine libraries", getTotalwork(rawClasspath));
       for (int i = 0; i < rawClasspath.length; i++) {
@@ -99,7 +102,8 @@ public class AppEngineLibraryContainerResolverJob extends Job {
         String libraryId = classpathEntry.getPath().segment(1);
         Library library = libraries.get(libraryId);
         if (library != null) {
-          LibraryClasspathContainer container = resolveLibraryFiles(repositoryService, classpathEntry, library, subMonitor.newChild(1));
+          LibraryClasspathContainer container = resolveLibraryFiles(repositoryService, classpathEntry,
+                                                                    library, subMonitor.newChild(1));
           JavaCore.setClasspathContainer(classpathEntry.getPath(), new IJavaProject[] {javaProject},
                                          new IClasspathContainer[] {container}, null);
           serializer.saveContainer(javaProject, container);
@@ -122,7 +126,7 @@ public class AppEngineLibraryContainerResolverJob extends Job {
     SubMonitor subMonitor = SubMonitor.convert(monitor, libraryFiles.size());
     subMonitor.subTask("Resolving artifacts for " + getLibraryDescription(library));
     SubMonitor child = subMonitor.newChild(libraryFiles.size());
-    
+
     IClasspathEntry[] entries = new IClasspathEntry[libraryFiles.size()];
     int idx = 0;
     for (LibraryFile libraryFile : libraryFiles) {
@@ -137,7 +141,9 @@ public class AppEngineLibraryContainerResolverJob extends Job {
       child.worked(1);
     }
     monitor.done();
-    LibraryClasspathContainer container = new LibraryClasspathContainer(classpathEntry.getPath(), getLibraryDescription(library), entries);
+    LibraryClasspathContainer container = new LibraryClasspathContainer(classpathEntry.getPath(),
+                                                                        getLibraryDescription(library),
+                                                                        entries);
     return container;
   }
 
@@ -196,6 +202,7 @@ public class AppEngineLibraryContainerResolverJob extends Job {
       }
     }
   }
+
   private IAccessRule[] getAccessRules(List<Filter> filters) {
     IAccessRule[] accessRules = new IAccessRule[filters.size()];
     int idx = 0;
