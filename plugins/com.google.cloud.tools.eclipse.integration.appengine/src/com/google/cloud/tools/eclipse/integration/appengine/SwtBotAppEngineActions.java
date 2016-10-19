@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,11 +41,10 @@ public class SwtBotAppEngineActions {
    * @param projectName the name of the project
    * @param location can be {@code null}
    * @param javaPackage can be {@code null} or empty
-   * @param projectId can be {@code null}
    * @return the project
    */
   public static IProject createNativeWebAppProject(SWTWorkbenchBot bot, String projectName,
-      String location, String javaPackage, String projectId) {
+      String location, String javaPackage) {
     bot.menu("File").menu("New").menu("Project...").click();
 
     SWTBotShell shell = bot.shell("New Project");
@@ -64,9 +63,6 @@ public class SwtBotAppEngineActions {
     }
     if (javaPackage != null) {
       bot.textWithLabel("Java package:").setText(javaPackage);
-    }
-    if (projectId != null) {
-      bot.textWithLabel("App Engine Project ID: (optional)").setText(projectId);
     }
     SwtBotTestingUtilities.clickButtonAndWaitForWindowChange(bot, bot.button("Finish"));
     SwtBotWorkbenchActions.waitForIdle(bot);

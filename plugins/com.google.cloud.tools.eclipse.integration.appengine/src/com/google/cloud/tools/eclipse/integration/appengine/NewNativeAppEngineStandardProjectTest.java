@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ public class NewNativeAppEngineStandardProjectTest extends AbstractProjectTests 
     String[] projectFiles = {"src/main/java/HelloAppEngine.java",
         "src/main/webapp/META-INF/MANIFEST.MF", "src/main/webapp/WEB-INF/appengine-web.xml",
         "src/main/webapp/WEB-INF/web.xml", "src/main/webapp/index.html"};
-    createAndCheck("appWithDefault", null, null, projectFiles);
+    createAndCheck("appWithDefault", null, projectFiles);
   }
 
   @Test
@@ -55,24 +55,15 @@ public class NewNativeAppEngineStandardProjectTest extends AbstractProjectTests 
     String[] projectFiles = {"src/main/java/app/engine/test/HelloAppEngine.java",
         "src/main/webapp/META-INF/MANIFEST.MF", "src/main/webapp/WEB-INF/appengine-web.xml",
         "src/main/webapp/WEB-INF/web.xml", "src/main/webapp/index.html",};
-    createAndCheck("appWithPackage", "app.engine.test", null, projectFiles);
-  }
-
-  @Test
-  public void testWithPackageAndProjectId() throws Exception {
-    String[] projectFiles = {"src/main/java/app/engine/test/HelloAppEngine.java",
-        "src/main/webapp/META-INF/MANIFEST.MF", "src/main/webapp/WEB-INF/appengine-web.xml",
-        "src/main/webapp/WEB-INF/web.xml", "src/main/webapp/index.html",};
-    createAndCheck("appWithPackageAndProjectId", "app.engine.test", "my-project-id",
-        projectFiles);
+    createAndCheck("appWithPackage", "app.engine.test", projectFiles);
   }
 
   /** Create a project with the given parameters. */
   private void createAndCheck(String projectName, String packageName,
-      String projectId, String[] projectFiles) throws IOException, CoreException {
+      String[] projectFiles) throws IOException, CoreException {
     assertFalse(projectExists(projectName));
     project = SwtBotAppEngineActions.createNativeWebAppProject(bot, projectName, null,
-        packageName, projectId);
+        packageName);
     assertTrue(project.exists());
 
     IFacetedProject facetedProject = new FacetedProjectHelper().getFacetedProject(project);
