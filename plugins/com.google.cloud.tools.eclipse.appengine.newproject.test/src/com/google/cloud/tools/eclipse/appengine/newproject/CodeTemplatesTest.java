@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +77,6 @@ public class CodeTemplatesTest {
   public void testMaterialize() 
       throws CoreException, ParserConfigurationException, SAXException, IOException {
     AppEngineStandardProjectConfig config = new AppEngineStandardProjectConfig();
-    config.setAppEngineProjectId("TheProjectID");
     
     CodeTemplates.materialize(project, config, monitor);
     
@@ -92,10 +91,16 @@ public class CodeTemplatesTest {
     IFile appengineWebXml = webinf.getFile("appengine-web.xml");
     Assert.assertTrue(appengineWebXml.exists());
     Document doc = buildDocument(appengineWebXml);
-    NodeList applicationElements = doc.getDocumentElement().getElementsByTagName("application");
-    Assert.assertEquals("Must have exactly one application", 1, applicationElements.getLength());
-    String projectId = applicationElements.item(0).getTextContent();
-    Assert.assertEquals("", projectId);
+    NodeList threadsafeElements = doc.getDocumentElement().getElementsByTagName("threadsafe");
+    Assert.assertEquals("Must have exactly one threadsafe", 1, threadsafeElements.getLength());
+    String threadsafe = threadsafeElements.item(0).getTextContent();
+    Assert.assertEquals("true", threadsafe);
+    NodeList sessionsEnabledElements 
+        = doc.getDocumentElement().getElementsByTagName("sessions-enabled");
+    Assert.assertEquals("Must have exactly one sessions-enabled", 
+        1, sessionsEnabledElements.getLength());
+    String sessionsEnabled = sessionsEnabledElements.item(0).getTextContent();
+    Assert.assertEquals("false", sessionsEnabled);
     
     IFile webXml = webinf.getFile("web.xml");
     Element root = buildDocument(webXml).getDocumentElement();
@@ -144,11 +149,13 @@ public class CodeTemplatesTest {
     Map<String, String> values = new HashMap<>();
     values.put("package", "com.google.foo.bar");
     
-    IFile child = CodeTemplates.createChildFile("HelloAppEngine.java", AppEngineTemplateUtility.HELLO_APPENGINE_TEMPLATE, parent, monitor, values);
+    IFile child = CodeTemplates.createChildFile("HelloAppEngine.java", 
+        AppEngineTemplateUtility.HELLO_APPENGINE_TEMPLATE, parent, monitor, values);
     Assert.assertTrue(child.exists());
     Assert.assertEquals("HelloAppEngine.java", child.getName());
     InputStream in = child.getContents(true);
-    try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8.name()))) {
+    try (BufferedReader reader = new BufferedReader(
+        new InputStreamReader(in, StandardCharsets.UTF_8.name()))) {
       Assert.assertEquals("package com.google.foo.bar;", reader.readLine());
       Assert.assertEquals("", reader.readLine());
     }

@@ -16,11 +16,13 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.appengine.libraries.AppEngineLibraryContainerResolverJob;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
-
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -43,11 +45,6 @@ import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.ide.undo.CreateProjectOperation;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
-
-import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
-import com.google.cloud.tools.eclipse.appengine.libraries.AppEngineLibraryContainerResolverJob;
-import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
-import com.google.cloud.tools.eclipse.preferences.PreferenceUtil;
 
 /**
 * Utility to make a new Eclipse project with the App Engine Standard facets in the workspace.  
@@ -90,8 +87,6 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
         facetedProject, true /* installDependentFacets */, monitor);
     AppEngineStandardFacet.installAllAppEngineRuntimes(facetedProject, true /* force */, monitor);
     
-    PreferenceUtil.setProjectIdPreference(newProject, config.getAppEngineProjectId());
-
     addAppEngineLibrariesToBuildPath(newProject, config.getAppEngineLibraries(), monitor);
 
     addJunit4ToClasspath(monitor, newProject);

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
+
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import java.io.File;
@@ -49,7 +50,6 @@ import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
 import com.google.cloud.tools.eclipse.ui.util.databinding.BooleanConverter;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
-import com.google.cloud.tools.project.ProjectIdValidator;
 import com.google.common.base.Strings;
 
 /**
@@ -58,7 +58,6 @@ import com.google.common.base.Strings;
 public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
 
   private Text javaPackageField;
-  private Text projectIdField;
   private Group apiGroup;
   private List<Button> libraryButtons = new LinkedList<>();
   private DataBindingContext bindingContext;
@@ -94,15 +93,6 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
     javaPackagePosition.horizontalSpan = 2;
     javaPackageField.setLayoutData(javaPackagePosition);
     javaPackageField.addModifyListener(pageValidator);
-
-    // App Engine Project ID
-    Label projectIdLabel = new Label(container, SWT.NONE);
-    projectIdLabel.setText("App Engine Project ID: (optional)");
-    projectIdField = new Text(container, SWT.BORDER);
-    GridData projectIdPosition = new GridData(GridData.FILL_HORIZONTAL);
-    projectIdPosition.horizontalSpan = 2;
-    projectIdField.setLayoutData(projectIdPosition);
-    projectIdField.addModifyListener(pageValidator);
 
     // Manage APIs
     addManageLibrariesWidgets(container);
@@ -209,14 +199,6 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
       return false;
     }
 
-    String projectId = projectIdField.getText();
-    if (!projectId.isEmpty()) {
-      if (!ProjectIdValidator.validate(projectId)) {
-        setErrorMessage("Illegal App Engine Project ID: " + projectId);
-        return false;
-      }
-    }
-
     File parent = getLocationPath().toFile();
     File projectDirectory = new File(parent, getProjectName());
     if (projectDirectory.exists()) {
@@ -232,10 +214,6 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
     public void modifyText(ModifyEvent event) {
       setPageComplete(validatePage());
     }
-  }
-
-  public String getAppEngineProjectId() {
-    return this.projectIdField.getText();
   }
 
   public String getPackageName() {
