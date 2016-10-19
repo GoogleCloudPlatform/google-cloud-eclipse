@@ -149,11 +149,13 @@ public class CodeTemplatesTest {
     Map<String, String> values = new HashMap<>();
     values.put("package", "com.google.foo.bar");
     
-    IFile child = CodeTemplates.createChildFile("HelloAppEngine.java", AppEngineTemplateUtility.HELLO_APPENGINE_TEMPLATE, parent, monitor, values);
+    IFile child = CodeTemplates.createChildFile("HelloAppEngine.java", 
+        AppEngineTemplateUtility.HELLO_APPENGINE_TEMPLATE, parent, monitor, values);
     Assert.assertTrue(child.exists());
     Assert.assertEquals("HelloAppEngine.java", child.getName());
     InputStream in = child.getContents(true);
-    try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8.name()))) {
+    try (BufferedReader reader = new BufferedReader(
+        new InputStreamReader(in, StandardCharsets.UTF_8.name()))) {
       Assert.assertEquals("package com.google.foo.bar;", reader.readLine());
       Assert.assertEquals("", reader.readLine());
     }
