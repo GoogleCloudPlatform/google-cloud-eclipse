@@ -15,6 +15,7 @@
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
+import com.google.common.base.Preconditions;
 import java.io.Serializable;
 
 import org.eclipse.core.runtime.IPath;
@@ -30,6 +31,10 @@ public class LibraryClasspathContainer implements IClasspathContainer, Serializa
   private final IClasspathEntry[] classpathEntries;
 
   public LibraryClasspathContainer(IPath path, String description, IClasspathEntry[] classpathEntries) {
+    Preconditions.checkNotNull(path, "path is null");
+    Preconditions.checkNotNull(description, "description is null");
+    Preconditions.checkArgument(!description.isEmpty(), "description is empty");
+    Preconditions.checkNotNull(classpathEntries, "classpathEntries is null");
     containerPath = path;
     this.description = description;
     this.classpathEntries = classpathEntries;

@@ -1,9 +1,7 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import org.eclipse.core.resources.IProject;
-
-import com.google.cloud.tools.eclipse.appengine.libraries.Library;
-
+import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import java.io.File;
 import java.net.URI;
 import java.util.Collections;

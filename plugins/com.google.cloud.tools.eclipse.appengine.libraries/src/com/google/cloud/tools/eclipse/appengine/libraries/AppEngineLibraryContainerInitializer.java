@@ -15,13 +15,18 @@
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFactory;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFactory.LibraryFactoryException;
+import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer;
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
+import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IPath;
@@ -30,12 +35,6 @@ import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-
-import com.google.cloud.tools.eclipse.appengine.libraries.config.LibraryFactory;
-import com.google.cloud.tools.eclipse.appengine.libraries.config.LibraryFactory.LibraryFactoryException;
-import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer;
-import com.google.cloud.tools.eclipse.util.status.StatusUtil;
-import com.google.common.annotations.VisibleForTesting;
 
 /**
  * {@link ClasspathContainerInitializer} implementation that resolves containers for App Engine libraries.
@@ -87,6 +86,7 @@ public class AppEngineLibraryContainerInitializer extends ClasspathContainerInit
       }
       try {
         LibraryClasspathContainer container = serializer.loadContainer(project, containerPath);
+        // TODO validate libraryFile paths and request resolution via ILibraryRepositoryService if they're invalid
         if (container != null) {
           JavaCore.setClasspathContainer(containerPath, new IJavaProject[] {project},
                                          new IClasspathContainer[] {container}, null);

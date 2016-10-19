@@ -14,7 +14,7 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.google.cloud.tools.eclipse.appengine.libraries.config;
+package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -25,11 +25,6 @@ import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.InvalidRegistryObjectException;
-
-import com.google.cloud.tools.eclipse.appengine.libraries.Filter;
-import com.google.cloud.tools.eclipse.appengine.libraries.Library;
-import com.google.cloud.tools.eclipse.appengine.libraries.LibraryFile;
-import com.google.cloud.tools.eclipse.appengine.libraries.MavenCoordinates;
 import com.google.common.base.Strings;
 
 public class LibraryFactory {

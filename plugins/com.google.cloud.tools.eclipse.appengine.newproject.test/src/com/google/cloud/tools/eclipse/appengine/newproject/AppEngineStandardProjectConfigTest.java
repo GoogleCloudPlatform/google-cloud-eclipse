@@ -3,6 +3,7 @@ package com.google.cloud.tools.eclipse.appengine.newproject;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
@@ -14,8 +15,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.junit.Assert;
 import org.junit.Test;
-
-import com.google.cloud.tools.eclipse.appengine.libraries.Library;
 
 public class AppEngineStandardProjectConfigTest {
 

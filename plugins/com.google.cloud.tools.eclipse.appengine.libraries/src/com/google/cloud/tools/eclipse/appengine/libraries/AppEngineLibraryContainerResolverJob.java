@@ -27,9 +27,11 @@ import org.eclipse.jst.j2ee.classpathdep.UpdateClasspathAttributeUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
-
-import com.google.cloud.tools.eclipse.appengine.libraries.config.LibraryFactory;
-import com.google.cloud.tools.eclipse.appengine.libraries.config.LibraryFactory.LibraryFactoryException;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.Filter;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFactory;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFactory.LibraryFactoryException;
 import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.LibraryRepositoryServiceException;
@@ -38,11 +40,11 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 
-public class InitializeLibrariesJob extends Job {
+public class AppEngineLibraryContainerResolverJob extends Job {
   //TODO duplicate of com.google.cloud.tools.eclipse.appengine.libraries.AppEngineLibraryContainerInitializer.LIBRARIES_EXTENSION_POINT
   public static final String LIBRARIES_EXTENSION_POINT = "com.google.cloud.tools.eclipse.appengine.libraries";
 
-  private static final Logger logger = Logger.getLogger(InitializeLibrariesJob.class.getName());
+  private static final Logger logger = Logger.getLogger(AppEngineLibraryContainerResolverJob.class.getName());
 
   private Map<String, Library> libraries;
   private final IJavaProject javaProject;
@@ -50,12 +52,12 @@ public class InitializeLibrariesJob extends Job {
   private ServiceReference<ILibraryRepositoryService> serviceReference = null;
 
 
-  public InitializeLibrariesJob(String name, IJavaProject javaProject) {
+  public AppEngineLibraryContainerResolverJob(String name, IJavaProject javaProject) {
     this(name, javaProject, new LibraryClasspathContainerSerializer());
   }
 
   @VisibleForTesting
-  InitializeLibrariesJob(String name, IJavaProject javaProject, LibraryClasspathContainerSerializer serializer) {
+  AppEngineLibraryContainerResolverJob(String name, IJavaProject javaProject, LibraryClasspathContainerSerializer serializer) {
     super(name);
     this.serializer = serializer;
     Preconditions.checkNotNull(javaProject, "javaProject is null");

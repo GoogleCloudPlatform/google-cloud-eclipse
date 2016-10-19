@@ -15,9 +15,8 @@
  *******************************************************************************/
 package com.google.cloud.tools.eclipse.appengine.libraries.repository;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
 import org.eclipse.core.runtime.IPath;
-
-import com.google.cloud.tools.eclipse.appengine.libraries.MavenCoordinates;
 
 /**
  * Service interface for obtaining local paths for artifacts described by {@link MavenCoordinates}

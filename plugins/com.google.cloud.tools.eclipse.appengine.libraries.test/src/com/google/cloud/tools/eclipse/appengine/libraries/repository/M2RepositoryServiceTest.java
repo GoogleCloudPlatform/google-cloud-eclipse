@@ -34,8 +34,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-
-import com.google.cloud.tools.eclipse.appengine.libraries.MavenCoordinates;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.M2RepositoryService.MavenHelper;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 

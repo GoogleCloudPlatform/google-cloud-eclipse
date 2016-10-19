@@ -45,8 +45,8 @@ import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
-import com.google.cloud.tools.eclipse.appengine.libraries.InitializeLibrariesJob;
-import com.google.cloud.tools.eclipse.appengine.libraries.Library;
+import com.google.cloud.tools.eclipse.appengine.libraries.AppEngineLibraryContainerResolverJob;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.preferences.PreferenceUtil;
 
 /**
@@ -124,7 +124,7 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
     }
     javaProject.setRawClasspath(newRawClasspath, monitor);
     
-    Job job = new InitializeLibrariesJob("Initialize libraries", javaProject);
+    Job job = new AppEngineLibraryContainerResolverJob("Initialize libraries", javaProject);
     job.schedule();
   }
 

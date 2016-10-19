@@ -28,8 +28,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-
-import com.google.cloud.tools.eclipse.appengine.libraries.MavenCoordinates;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -45,15 +44,6 @@ public class M2RepositoryService implements ILibraryRepositoryService {
 
   @Override
   public IPath getJarLocation(MavenCoordinates mavenCoordinates) throws LibraryRepositoryServiceException {
-    
-    //TODO remove this
-    try {
-      Thread.sleep(5000L);
-    } catch (InterruptedException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-    
     Preconditions.checkState(mavenHelper != null, "mavenHelper is null");
     try {
       List<ArtifactRepository> repository = getRepository(mavenCoordinates);

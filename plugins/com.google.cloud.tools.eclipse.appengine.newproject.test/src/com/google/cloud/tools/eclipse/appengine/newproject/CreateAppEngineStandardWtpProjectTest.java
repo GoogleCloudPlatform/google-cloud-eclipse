@@ -20,6 +20,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 
@@ -39,9 +40,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import com.google.cloud.tools.eclipse.appengine.libraries.Library;;
+import org.mockito.runners.MockitoJUnitRunner;;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CreateAppEngineStandardWtpProjectTest {
