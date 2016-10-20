@@ -50,7 +50,7 @@ public class ServerPortExtension extends ServerCreationWizardPageExtension {
 
       portSpinner = new Spinner(parent, SWT.BORDER);
       portSpinner.setVisible(false);
-      portSpinner.setMinimum(0);
+      portSpinner.setMinimum(1);
       portSpinner.setMaximum(65535);
       portSpinner.setSelection(DEFAULT_SERVICE_PORT);
       portSpinner.addModifyListener(new ModifyListener() {
