@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
+
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Filter;
@@ -147,21 +148,21 @@ public class AppEngineLibraryContainerResolverJob extends Job {
     return container;
   }
 
-  private int getTotalwork(IClasspathEntry[] rawClasspath) {
+  private static int getTotalwork(IClasspathEntry[] rawClasspath) {
     int sum = 0;
-    for (int i = 0; i < rawClasspath.length; i++) {
-      if (isLibraryClasspathEntry(rawClasspath[i].getPath())) {
+    for (IClasspathEntry element : rawClasspath) {
+      if (isLibraryClasspathEntry(element.getPath())) {
         ++sum;
       }
     }
     return sum;
   }
 
-  private boolean isLibraryClasspathEntry(IPath path) {
+  private static boolean isLibraryClasspathEntry(IPath path) {
     return path != null && path.segmentCount() == 2 && Library.CONTAINER_PATH_PREFIX.equals(path.segment(0));
   }
 
-  private String getLibraryDescription(Library library) {
+  private static String getLibraryDescription(Library library) {
     if (!Strings.isNullOrEmpty(library.getName())) {
       return library.getName();
     } else {
@@ -169,7 +170,7 @@ public class AppEngineLibraryContainerResolverJob extends Job {
     }
   }
 
-  private IClasspathAttribute[] getClasspathAttributes(LibraryFile libraryFile) throws CoreException {
+  private static IClasspathAttribute[] getClasspathAttributes(LibraryFile libraryFile) throws CoreException {
     IClasspathAttribute[] libraryFileClasspathAttributes;
     if (libraryFile.isExport()) {
       libraryFileClasspathAttributes =
@@ -203,7 +204,7 @@ public class AppEngineLibraryContainerResolverJob extends Job {
     }
   }
 
-  private IAccessRule[] getAccessRules(List<Filter> filters) {
+  private static IAccessRule[] getAccessRules(List<Filter> filters) {
     IAccessRule[] accessRules = new IAccessRule[filters.size()];
     int idx = 0;
     for (Filter filter : filters) {

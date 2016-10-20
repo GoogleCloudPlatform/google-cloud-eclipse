@@ -140,15 +140,15 @@ public class LibraryFactory {
     List<Filter> filters = new ArrayList<>();
     for (IConfigurationElement childElement : children) {
       switch (childElement.getName()) {
-      case ELEMENT_NAME_EXCLUSION_FILTER:
-        filters.add(Filter.exclusionFilter(childElement.getAttribute(ATTRIBUTE_NAME_PATTERN)));
-        break;
-      case ELEMENT_NAME_INCLUSION_FILTER:
-        filters.add(Filter.inclusionFilter(childElement.getAttribute(ATTRIBUTE_NAME_PATTERN)));
-        break;
-      default:
-        // other child element of libraryFile, e.g.: mavenCoordinates
-        break;
+        case ELEMENT_NAME_EXCLUSION_FILTER:
+          filters.add(Filter.exclusionFilter(childElement.getAttribute(ATTRIBUTE_NAME_PATTERN)));
+          break;
+        case ELEMENT_NAME_INCLUSION_FILTER:
+          filters.add(Filter.inclusionFilter(childElement.getAttribute(ATTRIBUTE_NAME_PATTERN)));
+          break;
+        default:
+          // other child element of libraryFile, e.g.: mavenCoordinates
+          break;
       }
     }
     return filters;

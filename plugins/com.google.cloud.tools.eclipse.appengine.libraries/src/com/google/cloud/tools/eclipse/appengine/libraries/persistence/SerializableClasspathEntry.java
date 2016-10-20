@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
+
 package com.google.cloud.tools.eclipse.appengine.libraries.persistence;
 
 import org.eclipse.core.runtime.IPath;
@@ -22,6 +23,9 @@ import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
 
+/**
+ * Represents a {@link IClasspathEntry} in such a way that it can be easily transformed into JSON.
+ */
 public class SerializableClasspathEntry {
 
   private SerializableAccessRules[] accessRules;
@@ -61,7 +65,7 @@ public class SerializableClasspathEntry {
                                     getAttributes(attributes),
                                     true);
   }
-  
+
   private IClasspathAttribute[] getAttributes(SerializableAttribute[] attributes) {
     IClasspathAttribute[] classpathAttributes = new IClasspathAttribute[attributes.length];
     for (int i = 0; i < attributes.length; i++) {

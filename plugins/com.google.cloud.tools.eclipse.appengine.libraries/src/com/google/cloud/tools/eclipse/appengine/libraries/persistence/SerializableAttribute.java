@@ -13,11 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
+
 package com.google.cloud.tools.eclipse.appengine.libraries.persistence;
 
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.JavaCore;
 
+/**
+ * Represents a {@link IClasspathAttribute} in such a way that it can be easily transformed into JSON.
+ */
 public class SerializableAttribute {
 
   private String name;
@@ -27,7 +31,7 @@ public class SerializableAttribute {
     this.name = name;
     this.value = value;
   }
-  
+
   public IClasspathAttribute toClasspathAttribute() {
     return JavaCore.newClasspathAttribute(name, value);
   }

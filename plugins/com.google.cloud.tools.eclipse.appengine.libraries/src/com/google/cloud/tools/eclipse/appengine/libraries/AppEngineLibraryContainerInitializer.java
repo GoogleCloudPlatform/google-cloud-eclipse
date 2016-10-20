@@ -52,10 +52,9 @@ public class AppEngineLibraryContainerInitializer extends ClasspathContainerInit
   private String containerPath = Library.CONTAINER_PATH_PREFIX;
   private Map<String, Library> libraries;
 
-  private LibraryClasspathContainerSerializer serializer;
+  private final LibraryClasspathContainerSerializer serializer;
 
   public AppEngineLibraryContainerInitializer() {
-    super();
     serializer = new LibraryClasspathContainerSerializer();
   }
 

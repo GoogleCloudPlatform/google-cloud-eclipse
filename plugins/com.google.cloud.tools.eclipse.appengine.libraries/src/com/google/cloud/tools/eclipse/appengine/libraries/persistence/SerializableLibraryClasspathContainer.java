@@ -13,12 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
+
 package com.google.cloud.tools.eclipse.appengine.libraries.persistence;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainer;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 
+/**
+ * Represents a {@link LibraryClasspathContainer} in such a way that it can be easily transformed into JSON.
+ */
 public class SerializableLibraryClasspathContainer {
 
   private String description;

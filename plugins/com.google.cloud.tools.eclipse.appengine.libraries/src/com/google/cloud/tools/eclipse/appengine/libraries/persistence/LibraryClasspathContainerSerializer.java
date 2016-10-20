@@ -13,17 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
+
 package com.google.cloud.tools.eclipse.appengine.libraries.persistence;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainer;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Charsets;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.OutputStreamWriter;
 import java.util.logging.Logger;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -32,20 +35,39 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IJavaProject;
 import org.osgi.framework.FrameworkUtil;
 
+/**
+ * Provides functionality to save and load {@link LibraryClasspathContainer} instances to disk.
+ */
 public class LibraryClasspathContainerSerializer {
 
   private static final Logger logger = Logger.getLogger(LibraryClasspathContainerSerializer.class.getName());
 
+  /**
+   * Implementers of this interface provide a location of a file that can be used to save and load
+   * {@link LibraryClasspathContainer}s
+   */
   public interface LibraryContainerStateLocationProvider {
+
+    /**
+     * Based on the parameters <code>javaProject</code> and <code>containerPath</code> will return an {@link IPath}
+     * to a file that can be used to save and load {@link LibraryClasspathContainer} instances.
+     *
+     * @param javaProject the project the {@link LibraryClasspathContainer} belongs to
+     * @param containerPath the container path of the {@link LibraryClasspathContainer}
+     * @param create if true the file and parent folders will be created if needed, if false the location returned may
+     * not refer to an existing file.
+     *
+     * @throws CoreException if an error happens while creating the necessary folders or file
+     */
     IPath getContainerStateFile(IJavaProject javaProject, IPath containerPath, boolean create) throws CoreException;
   }
 
   private LibraryContainerStateLocationProvider stateLocationProvider;
-  
+
   public LibraryClasspathContainerSerializer() {
     this(new DefaultStateLocationProvider());
   }
-  
+
   @VisibleForTesting
   public LibraryClasspathContainerSerializer(LibraryContainerStateLocationProvider stateLocationProvider) {
     this.stateLocationProvider = stateLocationProvider;
@@ -58,9 +80,9 @@ public class LibraryClasspathContainerSerializer {
       logger.warning("Container state file cannot be created, save failed");
       return;
     }
-    try (PrintWriter outputStream = new PrintWriter(stateFile)) {
+    try (OutputStreamWriter outputStream = new OutputStreamWriter(new FileOutputStream(stateFile), Charsets.UTF_8)) {
       Gson gson = new GsonBuilder().setPrettyPrinting().create();
-      outputStream.print(gson.toJson(new SerializableLibraryClasspathContainer(container)));
+      outputStream.write(gson.toJson(new SerializableLibraryClasspathContainer(container)));
     }
   }
 
@@ -77,9 +99,9 @@ public class LibraryClasspathContainerSerializer {
       return fromJson.toLibraryClasspathContainer();
     }
   }
-  
+
   private File getContainerStateFile(IJavaProject javaProject, IPath containerPath, boolean create) 
-                                                                                                throws CoreException {
+                                                                                                  throws CoreException {
     IPath containerStateFile = stateLocationProvider.getContainerStateFile(javaProject, containerPath, create);
     if (containerStateFile != null) {
       return containerStateFile.toFile();
@@ -87,12 +109,17 @@ public class LibraryClasspathContainerSerializer {
       return null;
     }
   }
-  
+
   private static class DefaultStateLocationProvider implements LibraryContainerStateLocationProvider {
 
+    /*
+     * The IFile and IFolder methods do not validate whether the underlying resources exist, therefore if
+     * <code>create</code> is false, they will not fail or throw and error; and <code>containerFile.getLocation()</code>
+     * will return null.
+     */
     @Override
     public IPath getContainerStateFile(IJavaProject javaProject, IPath containerPath, boolean create) 
-                                                                                                throws CoreException {
+                                                                                                  throws CoreException {
       IFolder settingsFolder = javaProject.getProject().getFolder(".settings");
       IFolder folder = settingsFolder.getFolder(FrameworkUtil.getBundle(getClass()).getSymbolicName());
       if (!folder.exists() && create) {
@@ -104,6 +131,5 @@ public class LibraryClasspathContainerSerializer {
       }
       return containerFile.getLocation();
     }
-    
   }
 }
