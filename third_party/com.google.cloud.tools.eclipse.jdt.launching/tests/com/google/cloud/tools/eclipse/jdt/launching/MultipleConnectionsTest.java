@@ -76,7 +76,6 @@ public class MultipleConnectionsTest {
 		connector = new SocketListenMultiConnector();
 		Map<String, String> arguments = new HashMap<>();
 		arguments.put("port", Integer.toString(port));
-		arguments.put("acceptCount", "1");
 		connector.connect(arguments, new NullProgressMonitor(), launch);
 		Thread.sleep(200);
 
