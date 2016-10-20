@@ -24,7 +24,10 @@ import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainer;
 import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer.LibraryContainerStateLocationProvider;
+import com.google.common.base.Charsets;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -45,6 +48,34 @@ public class LibraryClasspathContainerSerializerTest {
 
   private static final String CONTAINER_DESCRIPTION = "Test container description";
   private static final String CONTAINER_PATH = "container/path";
+
+  private static final String SERIALIZED_CONTAINER =
+      "{"
+      + "  \"description\": \"Test container description\","
+      + "  \"path\": \"container/path\","
+      + "  \"entries\": ["
+      + "    {"
+      + "      \"accessRules\": ["
+      + "        {"
+      + "          \"ruleKind\": \"ACCESSIBLE\","
+      + "          \"pattern\": \"/com/example/accessible\""
+      + "        },"
+      + "        {"
+      + "          \"ruleKind\": \"FORBIDDEN\","
+      + "          \"pattern\": \"/com/example/nonaccessible\""
+      + "        }"
+      + "      ],"
+      + "      \"sourceAttachmentPath\": \"/test/path/to/src\","
+      + "      \"path\": \"/test/path/to/jar\","
+      + "      \"attributes\": ["
+      + "        {"
+      + "          \"name\": \"attrName\","
+      + "          \"value\": \"attrValue\""
+      + "        }"
+      + "      ]"
+      + "    }"
+      + "  ]"
+      + "}";
 
   @Mock private LibraryContainerStateLocationProvider stateLocationProvider;
   @Mock private IJavaProject javaProject;
@@ -79,6 +110,19 @@ public class LibraryClasspathContainerSerializerTest {
       .thenReturn(stateFilePath);
     LibraryClasspathContainerSerializer serializer = new LibraryClasspathContainerSerializer(stateLocationProvider);
     serializer.saveContainer(javaProject, container);
+    LibraryClasspathContainer containerFromFile = serializer.loadContainer(javaProject, new Path(CONTAINER_PATH));
+    compare(container, containerFromFile);
+  }
+
+  @Test
+  public void testLoadContainer() throws IOException, CoreException {
+    Path stateFilePath = new Path(stateFolder.newFile().getAbsolutePath());
+    when(stateLocationProvider.getContainerStateFile(any(IJavaProject.class), any(IPath.class), anyBoolean()))
+      .thenReturn(stateFilePath);
+    Files.write(stateFilePath.toFile().toPath(),
+                SERIALIZED_CONTAINER.getBytes(Charsets.UTF_8),
+                StandardOpenOption.TRUNCATE_EXISTING);
+    LibraryClasspathContainerSerializer serializer = new LibraryClasspathContainerSerializer(stateLocationProvider);
     LibraryClasspathContainer containerFromFile = serializer.loadContainer(javaProject, new Path(CONTAINER_PATH));
     compare(container, containerFromFile);
   }
