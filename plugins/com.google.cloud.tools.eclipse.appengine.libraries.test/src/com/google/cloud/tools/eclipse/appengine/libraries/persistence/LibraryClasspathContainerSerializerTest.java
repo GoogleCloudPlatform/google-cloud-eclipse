@@ -25,6 +25,9 @@ import static org.mockito.Mockito.when;
 import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainer;
 import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer.LibraryContainerStateLocationProvider;
 import com.google.common.base.Charsets;
+import com.google.common.base.Joiner;
+import com.google.gson.JsonParser;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
@@ -125,6 +128,18 @@ public class LibraryClasspathContainerSerializerTest {
     LibraryClasspathContainerSerializer serializer = new LibraryClasspathContainerSerializer(stateLocationProvider);
     LibraryClasspathContainer containerFromFile = serializer.loadContainer(javaProject, new Path(CONTAINER_PATH));
     compare(container, containerFromFile);
+  }
+
+  @Test
+  public void testSaveContainer() throws CoreException, IOException {
+    Path stateFilePath = new Path(stateFolder.newFile().getAbsolutePath());
+    when(stateLocationProvider.getContainerStateFile(any(IJavaProject.class), any(IPath.class), anyBoolean()))
+      .thenReturn(stateFilePath);
+    LibraryClasspathContainerSerializer serializer = new LibraryClasspathContainerSerializer(stateLocationProvider);
+    serializer.saveContainer(javaProject, container);
+    // use JsonObject.equals()
+    assertEquals(new JsonParser().parse(SERIALIZED_CONTAINER),
+                 new JsonParser().parse(new FileReader(stateFilePath.toFile())));
   }
 
   @Test
