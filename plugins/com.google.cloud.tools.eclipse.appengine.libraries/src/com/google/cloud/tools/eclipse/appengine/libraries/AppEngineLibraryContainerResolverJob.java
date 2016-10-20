@@ -51,13 +51,14 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jst.j2ee.classpathdep.UpdateClasspathAttributeUtil;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 
 public class AppEngineLibraryContainerResolverJob extends Job {
   //TODO duplicate of com.google.cloud.tools.eclipse.appengine.libraries.AppEngineLibraryContainerInitializer.LIBRARIES_EXTENSION_POINT
-  public static final String LIBRARIES_EXTENSION_POINT = "com.google.cloud.tools.eclipse.appengine.libraries";
+  public static final String LIBRARIES_EXTENSION_POINT = "com.google.cloud.tools.eclipse.appengine.libraries"; //$NON-NLS-1$
 
   private static final Logger logger = Logger.getLogger(AppEngineLibraryContainerResolverJob.class.getName());
 
@@ -74,7 +75,7 @@ public class AppEngineLibraryContainerResolverJob extends Job {
   AppEngineLibraryContainerResolverJob(String name, IJavaProject javaProject,
                                        LibraryClasspathContainerSerializer serializer) {
     super(name);
-    Preconditions.checkNotNull(javaProject, "javaProject is null");
+    Preconditions.checkNotNull(javaProject, "javaProject is null"); //$NON-NLS-1$
     Preconditions.checkNotNull(serializer);
     this.javaProject = javaProject;
     this.serializer = serializer;
@@ -97,7 +98,9 @@ public class AppEngineLibraryContainerResolverJob extends Job {
       ILibraryRepositoryService repositoryService = getBundleContext().getService(serviceReference);
 
       IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
-      SubMonitor subMonitor = SubMonitor.convert(monitor, "Resolving App Engine libraries", getTotalwork(rawClasspath));
+      SubMonitor subMonitor = SubMonitor.convert(monitor,
+                                                 Messages.TaskResolveLibraries,
+                                                 getTotalwork(rawClasspath));
       for (int i = 0; i < rawClasspath.length; i++) {
         IClasspathEntry classpathEntry = rawClasspath[i];
         String libraryId = classpathEntry.getPath().segment(1);
@@ -111,7 +114,7 @@ public class AppEngineLibraryContainerResolverJob extends Job {
         }
       }
     } catch (LibraryRepositoryServiceException | CoreException | IOException ex) {
-      return StatusUtil.error(this, "Could not resolve libraries", ex);
+      return StatusUtil.error(this, Messages.TaskResolveLibrariesError, ex);
     } finally {
       releaseRepositoryService();
     }
@@ -125,7 +128,7 @@ public class AppEngineLibraryContainerResolverJob extends Job {
                                                             throws CoreException, LibraryRepositoryServiceException {
     List<LibraryFile> libraryFiles = library.getLibraryFiles();
     SubMonitor subMonitor = SubMonitor.convert(monitor, libraryFiles.size());
-    subMonitor.subTask("Resolving artifacts for " + getLibraryDescription(library));
+    subMonitor.subTask(NLS.bind(Messages.TaskResolveArtifacts, getLibraryDescription(library)));
     SubMonitor child = subMonitor.newChild(libraryFiles.size());
 
     IClasspathEntry[] entries = new IClasspathEntry[libraryFiles.size()];
@@ -188,7 +191,7 @@ public class AppEngineLibraryContainerResolverJob extends Job {
     } else {
       // download the file and return path to it
       // TODO https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/800
-      return new Path("/downloaded/source/file");
+      return new Path("/downloaded/source/file"); //$NON-NLS-1$
     }
   }
 
@@ -199,7 +202,7 @@ public class AppEngineLibraryContainerResolverJob extends Job {
         Library library = libraryFactory.create(configurationElement);
         libraries.put(library.getId(), library);
       } catch (LibraryFactoryException exception) {
-        logger.log(Level.SEVERE, "Failed to initialize libraries", exception);
+        logger.log(Level.SEVERE, "Failed to initialize libraries", exception); //$NON-NLS-1$
       }
     }
   }
@@ -234,7 +237,7 @@ public class AppEngineLibraryContainerResolverJob extends Job {
   private BundleContext getBundleContext() {
     BundleContext bundleContext = FrameworkUtil.getBundle(getClass()).getBundleContext();
     if (bundleContext == null) {
-      throw new IllegalStateException("No bundle context was found for service lookup");
+      throw new IllegalStateException(Messages.BundleContextNotFound); 
     } else {
       return bundleContext;
     }

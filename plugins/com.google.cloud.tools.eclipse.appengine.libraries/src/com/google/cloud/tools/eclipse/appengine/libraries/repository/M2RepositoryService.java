@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.repository;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.Messages;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
 import com.google.common.annotations.VisibleForTesting;
@@ -30,6 +31,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 
@@ -44,7 +46,7 @@ public class M2RepositoryService implements ILibraryRepositoryService {
 
   @Override
   public IPath getJarLocation(MavenCoordinates mavenCoordinates) throws LibraryRepositoryServiceException {
-    Preconditions.checkState(mavenHelper != null, "mavenHelper is null");
+    Preconditions.checkState(mavenHelper != null, "mavenHelper is null"); //$NON-NLS-1$
     try {
       List<ArtifactRepository> repository = getRepository(mavenCoordinates);
 
@@ -52,7 +54,7 @@ public class M2RepositoryService implements ILibraryRepositoryService {
 
       return new Path(artifact.getFile().getAbsolutePath());
     } catch (CoreException ex) {
-      throw new LibraryRepositoryServiceException("Could not resolve maven artifact: " + mavenCoordinates, ex);
+      throw new LibraryRepositoryServiceException(NLS.bind(Messages.ResolveArtifactError, mavenCoordinates), ex);
     }
   }
 
@@ -60,16 +62,13 @@ public class M2RepositoryService implements ILibraryRepositoryService {
     try {
       URI repoUri = new URI(repository);
       if (!repoUri.isAbsolute()) {
-        throw new LibraryRepositoryServiceException("repository URI must be an absolute URI (i.e. has to have a "
-            + "schema component): " + repository);
+        throw new LibraryRepositoryServiceException(NLS.bind(Messages.RepositoryUriNotAbsolute, repository));
       }
       return mavenHelper.createArtifactRepository(repoUri.getHost(), repoUri.toString());
     } catch (URISyntaxException exception) {
-      throw new LibraryRepositoryServiceException("repository is not a valid URI and currently only 'central' is "
-          + "supported as repository ID: " + repository,
-          exception);
+      throw new LibraryRepositoryServiceException(NLS.bind(Messages.RepositoryUriInvalid, repository), exception);
     } catch (CoreException exception) {
-      throw new LibraryRepositoryServiceException("Could not locate remote repository: " + repository, exception);
+      throw new LibraryRepositoryServiceException(NLS.bind(Messages.RepositoryCannotBeLocated, repository), exception);
     }
   }
 
@@ -84,13 +83,13 @@ public class M2RepositoryService implements ILibraryRepositoryService {
 
   @Override
   public IPath getSourceJarLocation(MavenCoordinates mavenCoordinates) {
-    return new Path("/path/to/source/jar/file/in/m2_repo/" + mavenCoordinates.getArtifactId() + "." + mavenCoordinates.getType());
+    return new Path("/path/to/source/jar/file/in/m2_repo/" + mavenCoordinates.getArtifactId() + "." + mavenCoordinates.getType()); //$NON-NLS-1$ //$NON-NLS-2$
   }
 
   @Override
   public IPath getJavadocJarLocation(MavenCoordinates mavenCoordinates) {
-    return new Path("/path/to/javadoc/jar/file/in/m2_repo/" + mavenCoordinates.getArtifactId() +
-                    "." + mavenCoordinates.getType());
+    return new Path("/path/to/javadoc/jar/file/in/m2_repo/" + mavenCoordinates.getArtifactId() + //$NON-NLS-1$
+                    "." + mavenCoordinates.getType()); //$NON-NLS-1$
   }
 
   @Activate

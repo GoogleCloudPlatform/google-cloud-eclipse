@@ -23,7 +23,6 @@ import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryCla
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
-import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -36,6 +35,7 @@ import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.osgi.util.NLS;
 
 /**
  * {@link ClasspathContainerInitializer} implementation that resolves containers for App Engine libraries.
@@ -45,7 +45,7 @@ import org.eclipse.jdt.core.JavaCore;
  */
 public class AppEngineLibraryContainerInitializer extends ClasspathContainerInitializer {
 
-  public static final String LIBRARIES_EXTENSION_POINT = "com.google.cloud.tools.eclipse.appengine.libraries";
+  public static final String LIBRARIES_EXTENSION_POINT = "com.google.cloud.tools.eclipse.appengine.libraries"; //$NON-NLS-1$
 
   private static final Logger logger = Logger.getLogger(AppEngineLibraryContainerInitializer.class.getName());
 
@@ -79,10 +79,9 @@ public class AppEngineLibraryContainerInitializer extends ClasspathContainerInit
     if (containerPath.segmentCount() == 2) {
       if (!containerPath.segment(0).equals(this.containerPath)) {
         throw new CoreException(StatusUtil.error(this,
-                                                 MessageFormat.format("Unexpected first segment of container path, "
-                                                                      + "expected: {0} was: {1}",
-                                                                      this.containerPath,
-                                                                      containerPath.segment(0))));
+                                                 NLS.bind(Messages.ContainerPathInvalidFirstSegment,
+                                                          this.containerPath,
+                                                          containerPath.segment(0))));
       }
       try {
         LibraryClasspathContainer container = serializer.loadContainer(project, containerPath);
@@ -93,12 +92,11 @@ public class AppEngineLibraryContainerInitializer extends ClasspathContainerInit
                                          new IClasspathContainer[] {container}, null);
         }
       } catch (IOException ex) {
-        throw new CoreException(StatusUtil.error(this, "Failed to load persisted container descriptor", ex));
+        throw new CoreException(StatusUtil.error(this, Messages.LoadContainerFailed, ex));
       }
     } else {
-      throw new CoreException(StatusUtil.error(this,
-                                               "containerPath does not have exactly 2 segments: "
-                                               + containerPath.toString()));
+      throw new CoreException(StatusUtil.error(this, NLS.bind(Messages.ContainerPathNotTwoSegments,
+                                                              containerPath.toString())));
     }
   }
 
@@ -109,7 +107,7 @@ public class AppEngineLibraryContainerInitializer extends ClasspathContainerInit
         Library library = libraryFactory.create(configurationElement);
         libraries.put(library.getId(), library);
       } catch (LibraryFactoryException exception) {
-        logger.log(Level.SEVERE, "Failed to initialize libraries", exception);
+        logger.log(Level.SEVERE, "Failed to initialize libraries", exception); //$NON-NLS-1$
       }
     }
   }
