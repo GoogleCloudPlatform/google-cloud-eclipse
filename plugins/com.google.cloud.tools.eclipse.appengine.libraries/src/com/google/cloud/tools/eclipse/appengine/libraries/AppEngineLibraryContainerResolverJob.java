@@ -67,6 +67,8 @@ public class AppEngineLibraryContainerResolverJob extends Job {
   private LibraryClasspathContainerSerializer serializer;
   private ServiceReference<ILibraryRepositoryService> serviceReference = null;
 
+  private ILibraryRepositoryService repositoryService;
+
   public AppEngineLibraryContainerResolverJob(String name, IJavaProject javaProject) {
     this(name, javaProject, new LibraryClasspathContainerSerializer());
   }
@@ -95,7 +97,7 @@ public class AppEngineLibraryContainerResolverJob extends Job {
         initializeLibraries(configurationElements, new LibraryFactory());
       }
       serviceReference = lookupRepositoryServiceReference();
-      ILibraryRepositoryService repositoryService = getBundleContext().getService(serviceReference);
+      repositoryService = getBundleContext().getService(serviceReference);
 
       IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
       SubMonitor subMonitor = SubMonitor.convert(monitor,
@@ -106,7 +108,7 @@ public class AppEngineLibraryContainerResolverJob extends Job {
         String libraryId = classpathEntry.getPath().segment(1);
         Library library = libraries.get(libraryId);
         if (library != null) {
-          LibraryClasspathContainer container = resolveLibraryFiles(repositoryService, classpathEntry,
+          LibraryClasspathContainer container = resolveLibraryFiles(classpathEntry,
                                                                     library, subMonitor.newChild(1));
           JavaCore.setClasspathContainer(classpathEntry.getPath(), new IJavaProject[] {javaProject},
                                          new IClasspathContainer[] {container}, null);
@@ -121,8 +123,7 @@ public class AppEngineLibraryContainerResolverJob extends Job {
     return Status.OK_STATUS;
   }
 
-  private LibraryClasspathContainer resolveLibraryFiles(ILibraryRepositoryService repositoryService,
-                                                        IClasspathEntry classpathEntry,
+  private LibraryClasspathContainer resolveLibraryFiles(IClasspathEntry classpathEntry,
                                                         Library library,
                                                         IProgressMonitor monitor) 
                                                             throws CoreException, LibraryRepositoryServiceException {
@@ -137,7 +138,7 @@ public class AppEngineLibraryContainerResolverJob extends Job {
       IClasspathAttribute[] libraryFileClasspathAttributes = getClasspathAttributes(libraryFile);
       entries[idx++] =
           JavaCore.newLibraryEntry(repositoryService.getJarLocation(libraryFile.getMavenCoordinates()),
-                                   getSourceLocation(repositoryService, libraryFile),
+                                   getSourceLocation(libraryFile),
                                    null,
                                    getAccessRules(libraryFile.getFilters()),
                                    libraryFileClasspathAttributes,
@@ -185,7 +186,7 @@ public class AppEngineLibraryContainerResolverJob extends Job {
     return libraryFileClasspathAttributes;
   }
 
-  private IPath getSourceLocation(ILibraryRepositoryService repositoryService, LibraryFile libraryFile) {
+  private IPath getSourceLocation(LibraryFile libraryFile) {
     if (libraryFile.getSourceUri() == null) {
       return repositoryService.getSourceJarLocation(libraryFile.getMavenCoordinates());
     } else {
@@ -230,8 +231,8 @@ public class AppEngineLibraryContainerResolverJob extends Job {
   }
 
   private void releaseRepositoryService() {
-    BundleContext bundleContext = getBundleContext();
-    bundleContext.ungetService(serviceReference);
+    repositoryService = null;
+    getBundleContext().ungetService(serviceReference);
   }
 
   private BundleContext getBundleContext() {
