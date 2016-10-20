@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
+import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import java.beans.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -32,11 +33,11 @@ import org.eclipse.wst.server.ui.wizard.ServerCreationWizardPageExtension;
  */
 public class ServerPortExtension extends ServerCreationWizardPageExtension {
 
-  public static final String SERVER_ATTRIBUTE_PORT = "appEngineDevServerPort";
+  public static final String SERVER_ATTRIBUTE_PORT = "appEngineDevServerPort"; //$NON-NLS-1$
   public static final int DEFAULT_SERVICE_PORT = 8080;
 
   private static final String APP_ENGINE_SERVER_TYPE_ID =
-      "com.google.cloud.tools.eclipse.appengine.standard.server";
+      "com.google.cloud.tools.eclipse.appengine.standard.server"; //$NON-NLS-1$
 
   private Label portLabel;
   private Spinner portSpinner;
@@ -46,7 +47,7 @@ public class ServerPortExtension extends ServerCreationWizardPageExtension {
     if (position == UI_POSITION.BOTTOM) {
       portLabel = new Label(parent, SWT.NONE);
       portLabel.setVisible(false);
-      portLabel.setText("Server port:");
+      portLabel.setText(Messages.NEW_SERVER_DIALOG_PORT);
 
       portSpinner = new Spinner(parent, SWT.BORDER);
       portSpinner.setVisible(false);
