@@ -1,3 +1,19 @@
+/*******************************************************************************
+ * Copyright 2016 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
 import com.google.cloud.tools.appengine.api.AppEngineException;
@@ -10,8 +26,14 @@ import com.google.cloud.tools.appengine.cloudsdk.process.ProcessExitListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessStartListener;
 import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
+import com.google.cloud.tools.eclipse.appengine.localserver.ui.ServerPortExtension;
 import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListener;
-
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -21,13 +43,6 @@ import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.model.IModuleResource;
 import org.eclipse.wst.server.core.model.IModuleResourceDelta;
 import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * A {@link ServerBehaviourDelegate} for App Engine Server executed via the Java App Management
@@ -131,9 +146,8 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
    *
    * @param runnables the path to directories that contain configuration files like appengine-web.xml
    * @param console the stream (Eclipse console) to send development server process output to
-   * @param host the host name to which application modules should bind
    */
-  void startDevServer(List<File> runnables, MessageConsoleStream console, String host) {
+  void startDevServer(List<File> runnables, MessageConsoleStream console) {
     setServerState(IServer.STATE_STARTING);
 
     // Create dev app server instance
@@ -142,7 +156,10 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
     // Create run configuration
     DefaultRunConfiguration devServerRunConfiguration = new DefaultRunConfiguration();
     devServerRunConfiguration.setAppYamls(runnables);
-    devServerRunConfiguration.setHost(host);
+    devServerRunConfiguration.setHost(getServer().getHost());
+    int port = getServer().getAttribute(ServerPortExtension.SERVER_ATTRIBUTE_PORT,
+                                        ServerPortExtension.DEFAULT_SERVICE_PORT);
+    devServerRunConfiguration.setPort(port);
 
     // FIXME: workaround bug when running on a Java8 JVM
     // https://github.com/GoogleCloudPlatform/gcloud-eclipse-tools/issues/181
@@ -162,11 +179,9 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
    *
    * @param runnables the path to directories that contain configuration files like appengine-web.xml
    * @param console the stream (Eclipse console) to send development server process output to
-   * @param host the host name to which application modules should bind
    * @param debugPort the port to attach a debugger to if launch is in debug mode
    */
-  void startDebugDevServer(List<File> runnables, MessageConsoleStream console,
-                           String host, int debugPort) {
+  void startDebugDevServer(List<File> runnables, MessageConsoleStream console, int debugPort) {
     setServerState(IServer.STATE_STARTING);
 
     // Create dev app server instance
@@ -175,7 +190,10 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
     // Create run configuration
     DefaultRunConfiguration devServerRunConfiguration = new DefaultRunConfiguration();
     devServerRunConfiguration.setAppYamls(runnables);
-    devServerRunConfiguration.setHost(host);
+    devServerRunConfiguration.setHost(getServer().getHost());
+    int port = getServer().getAttribute(ServerPortExtension.SERVER_ATTRIBUTE_PORT,
+                                        ServerPortExtension.DEFAULT_SERVICE_PORT);
+    devServerRunConfiguration.setPort(port);
 
     // todo: make this a configurable option, but default to
     // 1 instance to simplify debugging

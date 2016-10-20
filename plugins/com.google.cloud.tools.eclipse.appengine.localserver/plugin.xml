@@ -37,6 +37,14 @@
             supportsRemoteHosts="true">
       </serverType>
    </extension>
+
+   <extension point="org.eclipse.wst.server.ui.serverCreationWizardPageExtension">
+      <serverCreationWizardPageExtension
+            class="com.google.cloud.tools.eclipse.appengine.localserver.ui.ServerPortExtension"
+            id="com.google.cloud.tools.eclipse.appengine.standard.server.wizardExtension">
+      </serverCreationWizardPageExtension>
+   </extension>
+
    <extension
          point="org.eclipse.jst.server.core.runtimeClasspathProviders">
       <runtimeClasspathProvider
