@@ -17,14 +17,11 @@
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
 import com.google.common.base.Preconditions;
-import java.io.Serializable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 
-public class LibraryClasspathContainer implements IClasspathContainer, Serializable {
-
-  private static final long serialVersionUID = 2434038872899176357L;
+public class LibraryClasspathContainer implements IClasspathContainer {
   
   private final IPath containerPath;
   private final String description;
