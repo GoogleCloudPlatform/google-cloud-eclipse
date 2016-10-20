@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
+
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -72,7 +73,7 @@ public class AppEngineLibraryContainerInitializerTest {
   public TestProject testProject = new TestProject().withClasspathContainerPath(TEST_LIBRARY_PATH);
   @Rule
   public TemporaryFolder stateLocationFolder = new TemporaryFolder();
-  
+
   @Before
   public void setUp() throws Exception {
     when(libraryRepositoryServiceRegistrar.getRepositoryService().getJarLocation(any(MavenCoordinates.class)))
@@ -190,13 +191,13 @@ public class AppEngineLibraryContainerInitializerTest {
                                                  mockSerializer);
     containerInitializer.initialize(new Path(TEST_LIBRARY_PATH), testProject.getJavaProject());
   }
-  
+
   private void setupLibraryFactory() throws LibraryFactoryException {
     Library library = new Library(TEST_LIBRARY_ID);
     library.setLibraryFiles(Collections.singletonList(new LibraryFile(new MavenCoordinates("groupId", "artifactId"))));
     doReturn(library).when(libraryFactory).create(any(IConfigurationElement.class));
   }
-  
+
   private void setupSerializer() throws IOException, CoreException {
     serializer = new LibraryClasspathContainerSerializer(containerStateProvider);
     File stateFile = stateLocationFolder.newFile();
@@ -226,5 +227,4 @@ public class AppEngineLibraryContainerInitializerTest {
       }
     };
   }
-
 }
