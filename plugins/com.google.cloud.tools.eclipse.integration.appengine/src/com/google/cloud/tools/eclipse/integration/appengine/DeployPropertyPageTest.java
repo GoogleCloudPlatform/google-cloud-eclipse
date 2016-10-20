@@ -32,15 +32,14 @@ public class DeployPropertyPageTest extends AbstractProjectTests {
   @Test
   public void testPropertyPageTitle_standardProject() throws CoreException {
     String projectName = "foo";
-    project = SwtBotAppEngineActions.createNativeWebAppProject(bot, projectName, null,
-        null, null);
+    project = SwtBotAppEngineActions.createNativeWebAppProject(bot, projectName, null, null);
     IFacetedProject facetedProject = new FacetedProjectHelper().getFacetedProject(project);
     assertNotNull("Native App Engine projects should be faceted", facetedProject);
     assertTrue(
         new FacetedProjectHelper().projectHasFacet(facetedProject, AppEngineStandardFacet.ID));
 
     SwtBotProjectActions.openProjectProperties(bot, projectName);
-    bot.tree().expandNode("Google Cloud Platform").select("App Engine Deployment"); 
+    bot.tree().expandNode("Google Cloud Platform").select("App Engine Deployment");
     bot.textWithLabel("App Engine Deployment - Standard Environment");
   }
 
