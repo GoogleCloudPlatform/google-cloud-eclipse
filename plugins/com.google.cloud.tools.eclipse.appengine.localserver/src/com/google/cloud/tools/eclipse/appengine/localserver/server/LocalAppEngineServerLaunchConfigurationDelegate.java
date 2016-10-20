@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.localserver.server;
 import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
 import com.google.cloud.tools.eclipse.appengine.localserver.PreferencesInitializer;
 import com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineConsole;
+import com.google.cloud.tools.eclipse.appengine.localserver.ui.ServerPortExtension;
 import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
@@ -68,6 +69,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       Logger.getLogger(LocalAppEngineServerLaunchConfigurationDelegate.class.getName());
 
   private static final String DEBUGGER_HOST = "localhost";
+  private static final String LOCAL_HOST = "localhost";
 
   @Override
   public void launch(ILaunchConfiguration configuration, String mode, final ILaunch launch,
@@ -198,8 +200,9 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
   }
 
   private String determinePageLocation(IServer server, ILaunchConfiguration config) {
-    // todo[issue #259]: pull this from the server or launch configuration
-    return "http://" + DEBUGGER_HOST + ":8080";
+    int port = server.getAttribute(ServerPortExtension.SERVER_ATTRIBUTE_PORT,
+                                   ServerPortExtension.DEFAULT_SERVICE_PORT);
+    return "http://" + LOCAL_HOST + ":" + port;
   }
 
 
