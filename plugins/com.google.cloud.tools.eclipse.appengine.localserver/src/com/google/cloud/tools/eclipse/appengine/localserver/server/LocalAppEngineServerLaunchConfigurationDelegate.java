@@ -163,7 +163,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     IVMConnector connector = JavaRuntime.getVMConnector(
         "com.google.cloud.tools.eclipse.jdt.launching.socketListenerMultipleConnector");
     if (connector == null) {
-      // The 4.7 listen connector supports an acceptCount
+      // The 4.7 listen connector supports an connectionLimit
       connector = JavaRuntime
           .getVMConnector(IJavaLaunchConfigurationConstants.ID_SOCKET_LISTEN_VM_CONNECTOR);
     }
@@ -179,7 +179,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     connectionParameters.put("hostname", DEBUGGER_HOST);
     connectionParameters.put("port", Integer.toString(port));
     connectionParameters.put("timeout", Integer.toString(timeout));
-    connectionParameters.put("acceptCount", "0");
+    connectionParameters.put("connectionLimit", "0");
     connector.connect(connectionParameters, monitor, launch);
   }
 

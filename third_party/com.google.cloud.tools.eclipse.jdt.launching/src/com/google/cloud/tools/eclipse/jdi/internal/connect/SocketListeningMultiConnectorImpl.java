@@ -84,7 +84,7 @@ public class SocketListeningMultiConnectorImpl extends ConnectorImpl implements 
 
 		// FIXME: this doesn't feel like the right place, but
 		// IntegerArgumentImpl is package restricted
-		intArg = new _IntegerArgumentImpl("acceptCount", //$NON-NLS-1$
+		intArg = new _IntegerArgumentImpl("connectionLimit", //$NON-NLS-1$
 				"Limit incoming connections (0 = no limit)", "Connection limit:", false, 0,
 				Integer.MAX_VALUE);
 		intArg.setValue(1); // mimics previous behaviour

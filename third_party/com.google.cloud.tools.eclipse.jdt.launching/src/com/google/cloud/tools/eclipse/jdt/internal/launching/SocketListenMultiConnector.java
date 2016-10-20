@@ -40,7 +40,7 @@ import java.util.Map;
 
 /**
  * Fork of {@link org.eclipse.jdt.internal.launching.SocketListenConnector}.
- * This connector knows how to interpret the "acceptCount" parameter.
+ * This connector knows how to interpret the "connectionLimit" parameter.
  * 
  * A standard socket listening connector. Starts a launch that waits for a VM to
  * connect at a specific port.
@@ -108,9 +108,9 @@ public class SocketListenMultiConnector implements IVMConnector {
 		}
 
 		// retain default behaviour to accept 1 connection only
-		int acceptCount = 1;
-		if (arguments.containsKey("acceptCount")) {
-			acceptCount = Integer.valueOf(arguments.get("acceptCount"));
+		int connectionLimit = 1;
+		if (arguments.containsKey("connectionLimit")) {
+			connectionLimit = Integer.valueOf(arguments.get("connectionLimit"));
 		}
 
 		Map<String, Connector.Argument> acceptArguments = connector.defaultArguments();
@@ -122,7 +122,7 @@ public class SocketListenMultiConnector implements IVMConnector {
 			monitor.subTask(NLS.bind(LaunchingMessages.SocketListenConnector_3, new String[] { portNumberString }));
 			connector.startListening(acceptArguments);
 			SocketListenMultiConnectorProcess process = new SocketListenMultiConnectorProcess(launch, portNumberString,
-					acceptCount);
+					connectionLimit);
 			process.waitForConnection(connector, acceptArguments);
 		} catch (IOException e) {
 			abort(LaunchingMessages.SocketListenConnector_4, e,
@@ -158,7 +158,7 @@ public class SocketListenMultiConnector implements IVMConnector {
 	public List<String> getArgumentOrder() {
 		List<String> list = new ArrayList<String>(1);
 		list.add("port"); //$NON-NLS-1$
-		list.add("acceptCount"); //$NON-NLS-1$
+		list.add("connectionLimit"); //$NON-NLS-1$
 		return list;
 	}
 

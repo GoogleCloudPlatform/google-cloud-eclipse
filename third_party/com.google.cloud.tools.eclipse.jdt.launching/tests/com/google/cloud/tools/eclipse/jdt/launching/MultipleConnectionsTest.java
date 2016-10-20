@@ -61,8 +61,8 @@ public class MultipleConnectionsTest {
 	public void testDefaultSettings() throws CoreException {
 		connector = new SocketListenMultiConnector();
 		Map<String, Connector.Argument> defaults = connector.getDefaultArguments();
-		assertTrue(defaults.containsKey("acceptCount"));
-		assertEquals(1, ((Connector.IntegerArgument) defaults.get("acceptCount")).intValue());
+		assertTrue(defaults.containsKey("connectionLimit"));
+		assertEquals(1, ((Connector.IntegerArgument) defaults.get("connectionLimit")).intValue());
 	}
 
 	/**
@@ -93,7 +93,7 @@ public class MultipleConnectionsTest {
 		connector = new SocketListenMultiConnector();
 		Map<String, String> arguments = new HashMap<>();
 		arguments.put("port", Integer.toString(port));
-		arguments.put("acceptCount", "1");
+		arguments.put("connectionLimit", "1");
 		connector.connect(arguments, new NullProgressMonitor(), launch);
 		Thread.sleep(200);
 
@@ -112,7 +112,7 @@ public class MultipleConnectionsTest {
 		connector = new SocketListenMultiConnector();
 		Map<String, String> arguments = new HashMap<>();
 		arguments.put("port", Integer.toString(port));
-		arguments.put("acceptCount", "2");
+		arguments.put("connectionLimit", "2");
 		connector.connect(arguments, new NullProgressMonitor(), launch);
 		Thread.sleep(200);
 
@@ -131,7 +131,7 @@ public class MultipleConnectionsTest {
 		connector = new SocketListenMultiConnector();
 		Map<String, String> arguments = new HashMap<>();
 		arguments.put("port", Integer.toString(port));
-		arguments.put("acceptCount", "0");
+		arguments.put("connectionLimit", "0");
 		connector.connect(arguments, new NullProgressMonitor(), launch);
 		Thread.sleep(200);
 

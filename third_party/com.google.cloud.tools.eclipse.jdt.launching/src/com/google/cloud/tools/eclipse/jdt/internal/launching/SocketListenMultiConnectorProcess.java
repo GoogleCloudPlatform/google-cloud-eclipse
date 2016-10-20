@@ -49,7 +49,7 @@ import java.util.Map;
 /**
  * Fork of
  * {@link org.eclipse.jdt.internal.launching.SocketListenConnectorProcess}.
- * Knows how to handle "acceptCount" count.
+ * Knows how to handle "connectionLimit" count.
  * 
  * A process that represents a VM listening connector that is waiting for a VM
  * to remotely connect. Allows the user to see the status of the connection and
@@ -66,7 +66,7 @@ public class SocketListenMultiConnectorProcess implements IProcess {
 	 * The number of incoming connections to accept (0 = unlimited). Setting to
 	 * 1 mimics previous behaviour.
 	 */
-	private int fAcceptCount;
+	private int fConnectionLimit;
 
 	/** The number of connections accepted so far. */
 	private int fAccepted = 0;
@@ -99,13 +99,13 @@ public class SocketListenMultiConnectorProcess implements IProcess {
      *            the launch this process belongs to
      * @param port
      *            the port the connector will wait on
-     * @param acceptCount
+     * @param connectionLimit
      *            the number of incoming connections to accept (0 = unlimited)
      */
-    public SocketListenMultiConnectorProcess(ILaunch launch, String port, int acceptCount) {
+    public SocketListenMultiConnectorProcess(ILaunch launch, String port, int connectionLimit) {
         fLaunch = launch;
         fPort = port;
-		fAcceptCount = acceptCount;
+		fConnectionLimit = connectionLimit;
     }
     
     /**
@@ -130,10 +130,10 @@ public class SocketListenMultiConnectorProcess implements IProcess {
         // If the connector does not support multiple connections, accept a single connection
         try {
             if (!connector.supportsMultipleConnections()) {
-				fAcceptCount = 1;
+				fConnectionLimit = 1;
             }
         } catch (IOException | IllegalConnectorArgumentsException ex) {
-			fAcceptCount = 1;
+			fConnectionLimit = 1;
         }
         fLaunch.addProcess(this);
         fWaitForConnectionJob = new WaitForConnectionJob(connector, arguments);
@@ -163,7 +163,7 @@ public class SocketListenMultiConnectorProcess implements IProcess {
 	 * connections.
 	 */
 	protected boolean continueListening() {
-		return !isTerminated() && (fAcceptCount <= 0 || fAcceptCount - fAccepted > 0);
+		return !isTerminated() && (fConnectionLimit <= 0 || fConnectionLimit - fAccepted > 0);
 	}
 
 	/**
@@ -429,7 +429,7 @@ public class SocketListenMultiConnectorProcess implements IProcess {
                 }
             }
             StringBuffer buffer = new StringBuffer(name);
-			if (fAcceptCount != 1) {
+			if (fConnectionLimit != 1) {
 				// if we're accepting multiple incoming connections,
 				// append the time when each connection was accepted
 				buffer.append("<").append(getRunningTime()).append(">");
