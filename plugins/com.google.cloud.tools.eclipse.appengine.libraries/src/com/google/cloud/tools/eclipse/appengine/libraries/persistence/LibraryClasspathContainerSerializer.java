@@ -89,7 +89,7 @@ public class LibraryClasspathContainerSerializer {
   public LibraryClasspathContainer loadContainer(IJavaProject javaProject, IPath containerPath) throws IOException,
                                                                                                        CoreException {
     File stateFile = getContainerStateFile(javaProject, containerPath, false);
-    if (stateFile == null || !stateFile.exists()) {
+    if (stateFile == null) {
       return null;
     }
     try (FileReader fileReader = new FileReader(stateFile)) {
@@ -103,7 +103,7 @@ public class LibraryClasspathContainerSerializer {
   private File getContainerStateFile(IJavaProject javaProject, IPath containerPath, boolean create) 
                                                                                                   throws CoreException {
     IPath containerStateFile = stateLocationProvider.getContainerStateFile(javaProject, containerPath, create);
-    if (containerStateFile != null) {
+    if (containerStateFile != null && containerStateFile.toFile().exists()) {
       return containerStateFile.toFile();
     } else {
       return null;
@@ -114,8 +114,7 @@ public class LibraryClasspathContainerSerializer {
 
     /*
      * The IFile and IFolder methods do not validate whether the underlying resources exist, therefore if
-     * <code>create</code> is false, they will not fail or throw and error; and <code>containerFile.getLocation()</code>
-     * will return null.
+     * <code>create</code> is false, they will not fail or throw and error.
      */
     @Override
     public IPath getContainerStateFile(IJavaProject javaProject, IPath containerPath, boolean create) 
