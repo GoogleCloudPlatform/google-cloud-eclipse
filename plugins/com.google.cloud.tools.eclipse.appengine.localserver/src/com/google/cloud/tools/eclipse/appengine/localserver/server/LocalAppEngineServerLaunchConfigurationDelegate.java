@@ -163,7 +163,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     IVMConnector connector = JavaRuntime.getVMConnector(
         "com.google.cloud.tools.eclipse.jdt.launching.socketListenerMultipleConnector");
     if (connector == null) {
-      // The 4.7 listen connector supports an connectionLimit
+      // The 4.7 listen connector supports a connectionLimit
       connector = JavaRuntime
           .getVMConnector(IJavaLaunchConfigurationConstants.ID_SOCKET_LISTEN_VM_CONNECTOR);
     }
