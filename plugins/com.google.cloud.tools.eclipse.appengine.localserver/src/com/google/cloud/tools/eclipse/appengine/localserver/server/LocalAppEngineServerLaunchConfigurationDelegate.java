@@ -23,6 +23,7 @@ import com.google.cloud.tools.eclipse.appengine.localserver.ui.ServerPortExtensi
 import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.io.File;
 import java.net.MalformedURLException;
@@ -119,11 +120,11 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
   /**
    * Listen for the server to enter STARTED and open a web browser on the server's main page
    */
-  protected void openBrowserPage(final ILaunchConfiguration configuration, final IServer server) {
+  protected void openBrowserPage(final IServer server) {
     if (!shouldOpenStartPage()) {
       return;
     }
-    final String pageLocation = determinePageLocation(server, configuration);
+    final String pageLocation = determinePageLocation(server);
     if (pageLocation == null) {
       return;
     }
@@ -199,7 +200,8 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
         PreferencesInitializer.LAUNCH_BROWSER, true, null);
   }
 
-  private String determinePageLocation(IServer server, ILaunchConfiguration config) {
+  @VisibleForTesting
+  static String determinePageLocation(IServer server) {
     int port = server.getAttribute(ServerPortExtension.SERVER_ATTRIBUTE_PORT,
                                    ServerPortExtension.DEFAULT_SERVICE_PORT);
     return "http://" + LOCAL_HOST + ":" + port;
@@ -247,7 +249,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       Preconditions.checkState(server == event.getServer());
       switch (event.getState()) {
         case IServer.STATE_STARTED:
-          openBrowserPage(configuration, server);
+          openBrowserPage(server);
           return;
 
         case IServer.STATE_STOPPED:
