@@ -24,6 +24,7 @@ import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.M2RepositoryService.MavenHelper;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
@@ -54,7 +55,7 @@ public class M2RepositoryServiceTest {
       .thenThrow(testCoreException());
 
     MavenCoordinates mavenCoordinates = new MavenCoordinates("groupId", "artifactId");
-    m2RepositoryService.getJarLocation(mavenCoordinates);
+    m2RepositoryService.getLibraryClasspathEntry(new LibraryFile(mavenCoordinates));
   }
 
   @Test(expected = LibraryRepositoryServiceException.class)
@@ -64,7 +65,7 @@ public class M2RepositoryServiceTest {
 
     MavenCoordinates mavenCoordinates = new MavenCoordinates("groupId", "artifactId");
     mavenCoordinates.setRepository("invalid_repository_id");
-    m2RepositoryService.getJarLocation(mavenCoordinates);
+    m2RepositoryService.getLibraryClasspathEntry(new LibraryFile(mavenCoordinates));
   }
 
   @Test(expected = LibraryRepositoryServiceException.class)
@@ -74,7 +75,7 @@ public class M2RepositoryServiceTest {
 
     MavenCoordinates mavenCoordinates = new MavenCoordinates("groupId", "artifactId");
     mavenCoordinates.setRepository("http://");
-    m2RepositoryService.getJarLocation(mavenCoordinates);
+    m2RepositoryService.getLibraryClasspathEntry(new LibraryFile(mavenCoordinates));
   }
 
   @Test(expected = LibraryRepositoryServiceException.class)
@@ -86,7 +87,7 @@ public class M2RepositoryServiceTest {
 
     MavenCoordinates mavenCoordinates = new MavenCoordinates("groupId", "artifactId");
     mavenCoordinates.setRepository("http://example.com");
-    m2RepositoryService.getJarLocation(mavenCoordinates);
+    m2RepositoryService.getLibraryClasspathEntry(new LibraryFile(mavenCoordinates));
   }
 
   @Test
@@ -101,14 +102,14 @@ public class M2RepositoryServiceTest {
                                      anyListOf(ArtifactRepository.class))).thenReturn(artifact);
     MavenCoordinates mavenCoordinates = new MavenCoordinates("groupId", "artifactId");
     mavenCoordinates.setRepository("http://example.com");
-    IPath jarLocation = m2RepositoryService.getJarLocation(mavenCoordinates);
+    IPath jarLocation = m2RepositoryService.getLibraryClasspathEntry(new LibraryFile(mavenCoordinates)).getPath();
 
     assertThat(jarLocation.toOSString(), is(FAKE_PATH));
   }
 
   @Test(expected = IllegalStateException.class)
   public void testMavenHelperMustBeSet() throws LibraryRepositoryServiceException {
-    new M2RepositoryService().getJarLocation(mock(MavenCoordinates.class));
+    new M2RepositoryService().getLibraryClasspathEntry(new LibraryFile(new MavenCoordinates("groupId", "artifactId")));
   }
 
   @Test(expected = TestRuntimeException.class)
@@ -118,7 +119,7 @@ public class M2RepositoryServiceTest {
     MavenCoordinates mavenCoordinates = mock(MavenCoordinates.class);
     // TestRuntimeException is thrown to verify that it was thrown because of the mock setup
     when(mavenCoordinates.getRepository()).thenThrow(new TestRuntimeException());
-    m2RepositoryService.getJarLocation(mavenCoordinates);
+    m2RepositoryService.getLibraryClasspathEntry(new LibraryFile(mavenCoordinates));
   }
 
   private Artifact getMockArtifactWithJarPath() {
