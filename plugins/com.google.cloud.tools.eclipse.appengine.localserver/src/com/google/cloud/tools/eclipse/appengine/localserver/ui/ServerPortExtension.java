@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
 import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
+import com.google.common.annotations.VisibleForTesting;
 import java.beans.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -39,8 +40,8 @@ public class ServerPortExtension extends ServerCreationWizardPageExtension {
   private static final String APP_ENGINE_SERVER_TYPE_ID =
       "com.google.cloud.tools.eclipse.appengine.standard.server"; //$NON-NLS-1$
 
-  private Label portLabel;
-  private Spinner portSpinner;
+  @VisibleForTesting Label portLabel;
+  @VisibleForTesting Spinner portSpinner;
 
   @Override
   public void createControl(UI_POSITION position, Composite parent) {
@@ -66,7 +67,7 @@ public class ServerPortExtension extends ServerCreationWizardPageExtension {
 
   @Override
   public void handlePropertyChanged(PropertyChangeEvent event) {
-    if (event.getNewValue() instanceof IServerType) {
+    if (event != null && event.getNewValue() instanceof IServerType) {
       IServerType serverType = (IServerType) event.getNewValue();
       boolean showPort = APP_ENGINE_SERVER_TYPE_ID.equals(serverType.getId());
       portLabel.setVisible(showPort);
