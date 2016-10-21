@@ -30,8 +30,9 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
   @Test
   public void testDeterminePageLocation() {
     IServer server = mock(IServer.class);
+    when(server.getHost()).thenReturn("0.0.0.0");
     when(server.getAttribute(eq("appEngineDevServerPort"), anyInt())).thenReturn(8085);
     String url = LocalAppEngineServerLaunchConfigurationDelegate.determinePageLocation(server);
-    assertEquals("http://localhost:8085", url);
+    assertEquals("http://0.0.0.0:8085", url);
   }
 }

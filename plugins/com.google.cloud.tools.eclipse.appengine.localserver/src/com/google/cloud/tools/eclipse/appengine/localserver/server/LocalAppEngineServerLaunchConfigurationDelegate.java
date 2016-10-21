@@ -70,7 +70,6 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       Logger.getLogger(LocalAppEngineServerLaunchConfigurationDelegate.class.getName());
 
   private static final String DEBUGGER_HOST = "localhost";
-  private static final String LOCAL_HOST = "localhost";
 
   @Override
   public void launch(ILaunchConfiguration configuration, String mode, final ILaunch launch,
@@ -204,7 +203,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
   static String determinePageLocation(IServer server) {
     int port = server.getAttribute(ServerPortExtension.SERVER_ATTRIBUTE_PORT,
                                    ServerPortExtension.DEFAULT_SERVICE_PORT);
-    return "http://" + LOCAL_HOST + ":" + port;
+    return "http://" + server.getHost() + ":" + port;
   }
 
 
