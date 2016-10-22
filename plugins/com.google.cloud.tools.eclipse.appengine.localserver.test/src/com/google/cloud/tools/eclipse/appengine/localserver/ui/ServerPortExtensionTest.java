@@ -32,7 +32,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ServerPortExtentionTest {
+public class ServerPortExtensionTest {
 
   private Shell shell;
   private ServerPortExtension portExtension;
