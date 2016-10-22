@@ -201,8 +201,8 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
   @VisibleForTesting
   static String determinePageLocation(IServer server) {
-    int port = server.getAttribute(ServerPortExtension.SERVER_ATTRIBUTE_PORT,
-                                   ServerPortExtension.DEFAULT_SERVICE_PORT);
+    Integer port = server.getAttribute(ServerPortExtension.SERVER_ATTRIBUTE_PORT,
+                                       ServerPortExtension.DEFAULT_SERVICE_PORT);
     return "http://" + server.getHost() + ":" + port;
   }
 

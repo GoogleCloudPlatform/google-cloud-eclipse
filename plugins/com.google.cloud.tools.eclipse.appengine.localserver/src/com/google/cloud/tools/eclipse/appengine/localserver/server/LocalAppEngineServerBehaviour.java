@@ -157,8 +157,8 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
     DefaultRunConfiguration devServerRunConfiguration = new DefaultRunConfiguration();
     devServerRunConfiguration.setAppYamls(runnables);
     devServerRunConfiguration.setHost(getServer().getHost());
-    int port = getServer().getAttribute(ServerPortExtension.SERVER_ATTRIBUTE_PORT,
-                                        ServerPortExtension.DEFAULT_SERVICE_PORT);
+    Integer port = getServer().getAttribute(ServerPortExtension.SERVER_ATTRIBUTE_PORT,
+                                            ServerPortExtension.DEFAULT_SERVICE_PORT);
     devServerRunConfiguration.setPort(port);
 
     // FIXME: workaround bug when running on a Java8 JVM
@@ -191,8 +191,8 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
     DefaultRunConfiguration devServerRunConfiguration = new DefaultRunConfiguration();
     devServerRunConfiguration.setAppYamls(runnables);
     devServerRunConfiguration.setHost(getServer().getHost());
-    int port = getServer().getAttribute(ServerPortExtension.SERVER_ATTRIBUTE_PORT,
-                                        ServerPortExtension.DEFAULT_SERVICE_PORT);
+    Integer port = getServer().getAttribute(ServerPortExtension.SERVER_ATTRIBUTE_PORT,
+                                            ServerPortExtension.DEFAULT_SERVICE_PORT);
     devServerRunConfiguration.setPort(port);
 
     // todo: make this a configurable option, but default to

@@ -20,12 +20,14 @@ import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import com.google.common.annotations.VisibleForTesting;
 import java.beans.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.FocusAdapter;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Spinner;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.wst.server.core.IServerType;
 import org.eclipse.wst.server.ui.wizard.ServerCreationWizardPageExtension;
 
@@ -35,13 +37,13 @@ import org.eclipse.wst.server.ui.wizard.ServerCreationWizardPageExtension;
 public class ServerPortExtension extends ServerCreationWizardPageExtension {
 
   public static final String SERVER_ATTRIBUTE_PORT = "appEngineDevServerPort"; //$NON-NLS-1$
-  public static final int DEFAULT_SERVICE_PORT = 8080;
+  public static final Integer DEFAULT_SERVICE_PORT = 8080;
 
   private static final String APP_ENGINE_SERVER_TYPE_ID =
       "com.google.cloud.tools.eclipse.appengine.standard.server"; //$NON-NLS-1$
 
   @VisibleForTesting Label portLabel;
-  @VisibleForTesting Spinner portSpinner;
+  @VisibleForTesting Text portText;
 
   @Override
   public void createControl(UI_POSITION position, Composite parent) {
@@ -50,18 +52,12 @@ public class ServerPortExtension extends ServerCreationWizardPageExtension {
       portLabel.setVisible(false);
       portLabel.setText(Messages.NEW_SERVER_DIALOG_PORT);
 
-      portSpinner = new Spinner(parent, SWT.BORDER);
-      portSpinner.setVisible(false);
-      portSpinner.setMinimum(1);
-      portSpinner.setMaximum(65535);
-      portSpinner.setSelection(DEFAULT_SERVICE_PORT);
-      portSpinner.addModifyListener(new ModifyListener() {
-        @Override
-        public void modifyText(ModifyEvent event) {
-          serverWc.setAttribute(SERVER_ATTRIBUTE_PORT, portSpinner.getSelection());
-        }
-      });
-      portSpinner.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+      portText = new Text(parent, SWT.SINGLE | SWT.BORDER);
+      portText.setVisible(false);
+      portText.setText(DEFAULT_SERVICE_PORT.toString());
+      portText.addVerifyListener(new NumericVerifier());
+      portText.addFocusListener(new PortValueLimiter());
+      portText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
     }
   }
 
@@ -71,7 +67,36 @@ public class ServerPortExtension extends ServerCreationWizardPageExtension {
       IServerType serverType = (IServerType) event.getNewValue();
       boolean showPort = APP_ENGINE_SERVER_TYPE_ID.equals(serverType.getId());
       portLabel.setVisible(showPort);
-      portSpinner.setVisible(showPort);
+      portText.setVisible(showPort);
     }
   }
+
+  private class NumericVerifier implements VerifyListener {
+    @Override
+    public void verifyText(VerifyEvent event) {
+      String newText = portText.getText().substring(0, event.start)
+          + event.text + portText.getText().substring(event.end);
+
+      try {
+        Integer.valueOf(newText);
+      } catch (NumberFormatException ex) {
+        event.doit = newText.isEmpty();
+      }
+    }
+  };
+
+  private class PortValueLimiter extends FocusAdapter {
+    @Override
+    public void focusLost(FocusEvent event) {
+      try {
+        Integer port = Integer.valueOf(portText.getText());
+        port = Math.max(1, Math.min(port, 65535));
+        portText.setText(port.toString());
+      } catch (NumberFormatException ex) {
+        portText.setText(DEFAULT_SERVICE_PORT.toString());
+      }
+
+      serverWc.setAttribute(SERVER_ATTRIBUTE_PORT, portText.getText());
+    }
+  };
 }

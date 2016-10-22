@@ -56,23 +56,21 @@ public class ServerPortExtensionTest {
   @Test
   public void testCreateControl() {
     assertNotNull(portExtension.portLabel);
-    assertNotNull(portExtension.portSpinner);
+    assertNotNull(portExtension.portText);
     assertFalse(portExtension.portLabel.isVisible());
-    assertFalse(portExtension.portSpinner.isVisible());
+    assertFalse(portExtension.portText.isVisible());
   }
 
   @Test
-  public void testPortSpinnerConfiguration() {
-    assertEquals(8080, portExtension.portSpinner.getSelection());
-    assertEquals(1, portExtension.portSpinner.getMinimum());
-    assertEquals(65535, portExtension.portSpinner.getMaximum());
+  public void testDefaultPort() {
+    assertEquals("8080", portExtension.portText.getText());
   }
 
   @Test
   public void testHandlePropertyChanged_nullEvent() {
     portExtension.handlePropertyChanged(null);
     assertFalse(portExtension.portLabel.isVisible());
-    assertFalse(portExtension.portSpinner.isVisible());
+    assertFalse(portExtension.portText.isVisible());
   }
 
   @Test
@@ -81,24 +79,24 @@ public class ServerPortExtensionTest {
         null /* propertyName */, null /* oldValue */, null /* newValue */);
     portExtension.handlePropertyChanged(nullPropertyValueEvent);
     assertFalse(portExtension.portLabel.isVisible());
-    assertFalse(portExtension.portSpinner.isVisible());
+    assertFalse(portExtension.portText.isVisible());
 
     PropertyChangeEvent nonServerTypePropertyEvent =
         new PropertyChangeEvent(new Object(), null, null, new Object() /* not IServerType */);
     portExtension.handlePropertyChanged(nonServerTypePropertyEvent);
     assertFalse(portExtension.portLabel.isVisible());
-    assertFalse(portExtension.portSpinner.isVisible());
+    assertFalse(portExtension.portText.isVisible());
 
     portExtension.handlePropertyChanged(newNonAppEngineServerTypeEvent());
     assertFalse(portExtension.portLabel.isVisible());
-    assertFalse(portExtension.portSpinner.isVisible());
+    assertFalse(portExtension.portText.isVisible());
   }
 
   @Test
   public void testHandlePropertyChanged_appEngineServerType() {
     portExtension.handlePropertyChanged(newAppEngineServerTypeEvent());
     assertTrue(portExtension.portLabel.isVisible());
-    assertTrue(portExtension.portSpinner.isVisible());
+    assertTrue(portExtension.portText.isVisible());
   }
 
   @Test
@@ -106,7 +104,7 @@ public class ServerPortExtensionTest {
     portExtension.handlePropertyChanged(newAppEngineServerTypeEvent());
     portExtension.handlePropertyChanged(newNonAppEngineServerTypeEvent());
     assertFalse(portExtension.portLabel.isVisible());
-    assertFalse(portExtension.portSpinner.isVisible());
+    assertFalse(portExtension.portText.isVisible());
   }
 
   private static PropertyChangeEvent newAppEngineServerTypeEvent() {
