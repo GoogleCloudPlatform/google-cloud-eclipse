@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -248,7 +248,6 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
    */
   private boolean validateGeneratedProjectLocation() {
     String artifactId = getArtifactId();
-    // assert !artifactId.isEmpty()
     IPath path = getLocationPath().append(artifactId);
     if (path.toFile().exists()) {
       String errorMessage = MessageFormat.format(Messages.getString("LOCATION_ALREADY_EXISTS"), path);

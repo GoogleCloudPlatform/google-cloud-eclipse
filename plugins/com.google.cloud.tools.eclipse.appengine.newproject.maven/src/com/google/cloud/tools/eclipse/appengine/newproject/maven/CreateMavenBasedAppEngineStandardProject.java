@@ -70,6 +70,11 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
     properties.put("appengine-version", appengineArtifactVersion);
     properties.put("gcloud-version", gcloudArtifactVersion);
     properties.put("application-id", appId);
+    properties.put("useJstl", "true");
+    properties.put("useObjectify", "false");
+    properties.put("useEndpoints1", "false");
+    properties.put("useEndpoints2", "false");
+    properties.put("useAppEngineApi", "false");
 
     ProjectImportConfiguration importConfiguration = new ProjectImportConfiguration();
     String packageName = this.packageName == null || this.packageName.isEmpty() 
