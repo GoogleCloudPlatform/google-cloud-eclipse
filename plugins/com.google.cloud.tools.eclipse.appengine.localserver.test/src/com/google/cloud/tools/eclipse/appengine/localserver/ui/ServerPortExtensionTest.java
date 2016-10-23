@@ -21,21 +21,30 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.beans.PropertyChangeEvent;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.wst.server.core.IServerType;
+import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.ui.wizard.ServerCreationWizardPageExtension.UI_POSITION;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
+@RunWith(MockitoJUnitRunner.class)
 public class ServerPortExtensionTest {
 
   private Shell shell;
   private ServerPortExtension portExtension;
+
+  @Mock private IServerWorkingCopy server;
 
   @Before
   public void setUp() {
@@ -46,6 +55,7 @@ public class ServerPortExtensionTest {
     shell.setVisible(true);
     portExtension = new ServerPortExtension();
     portExtension.createControl(UI_POSITION.BOTTOM, shell);
+    portExtension.setServerWorkingCopy(server);
   }
 
   @After
@@ -64,6 +74,75 @@ public class ServerPortExtensionTest {
   @Test
   public void testDefaultPort() {
     assertEquals("8080", portExtension.portText.getText());
+  }
+
+  @Test
+  public void testPortText_allowEmpty() {
+    portExtension.portText.setText("");
+    assertTrue(portExtension.portText.getText().isEmpty());
+  }
+
+  @Test
+  public void testPortText_preventNonNumericCharacters() {
+    portExtension.portText.setText("80A80");
+    assertEquals("8080", portExtension.portText.getText());
+
+    portExtension.portText.setText("80 clipboard pasted 80");
+    assertEquals("8080", portExtension.portText.getText());
+  }
+
+  @Test
+  public void testPortText_numericCharacters() {
+    portExtension.portText.setText("808");
+    assertEquals("808", portExtension.portText.getText());
+
+    portExtension.portText.setText("8108");
+    assertEquals("8108", portExtension.portText.getText());
+  }
+
+  @Test
+  public void testPortText_allowArbitrarilyLargeNumbers() {
+    portExtension.portText.setText("80808");
+    assertEquals("80808", portExtension.portText.getText());
+
+    portExtension.portText.setText("480808");
+    assertEquals("480808", portExtension.portText.getText());
+
+    portExtension.portText.setText("9480808");
+    assertEquals("9480808", portExtension.portText.getText());
+  }
+
+  @Test
+  public void testAttributeSetOnFocusLost() {
+    portExtension.portText.setText("12345");
+    assertEquals("12345", portExtension.portText.getText());
+
+    portExtension.portText.notifyListeners(SWT.FocusOut, null /* event */);
+    verify(server).setAttribute("appEngineDevServerPort", "12345");
+
+    portExtension.portText.setText("54321");
+    assertEquals("54321", portExtension.portText.getText());
+
+    portExtension.portText.notifyListeners(SWT.FocusOut, null /* event */);
+    verify(server).setAttribute("appEngineDevServerPort", "54321");
+  }
+
+  @Test
+  public void testPortText_limitMinimumPortOnFocusLost() {
+    portExtension.portText.setText("0");
+    assertEquals("0", portExtension.portText.getText());
+
+    portExtension.portText.notifyListeners(SWT.FocusOut, null /* event */);
+    assertEquals("1", portExtension.portText.getText());
+  }
+
+  @Test
+  public void testPortText_limitMaximumPortOnFocusLost() {
+    portExtension.portText.setText("123456");
+    assertEquals("123456", portExtension.portText.getText());
+
+    portExtension.portText.notifyListeners(SWT.FocusOut, null /* event */);
+    assertEquals("65535", portExtension.portText.getText());
   }
 
   @Test
