@@ -85,7 +85,6 @@ public class MavenArchetypeProjectWizardTest {
         wizard.getPage("newProjectArchetypePage").getPreviousPage());
   }
 
-  @SuppressWarnings("restriction")
   @Test
   public void testArchetypeDefaultSelection() {
     Assert.assertEquals("appengine-standard-archetype",

@@ -39,7 +39,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Properties;
 
-@SuppressWarnings("restriction")
 public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOperation {
   IProjectConfigurationManager projectConfigurationManager =
       MavenPlugin.getProjectConfigurationManager();

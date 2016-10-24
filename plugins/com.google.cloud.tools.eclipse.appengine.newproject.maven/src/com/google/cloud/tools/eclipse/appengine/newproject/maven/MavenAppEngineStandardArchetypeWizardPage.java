@@ -37,7 +37,6 @@ import java.util.Collections;
 /**
  * UI to select an archetype in creating a new Maven-based App Engine Standard Java project.
  */
-@SuppressWarnings("restriction")
 public class MavenAppEngineStandardArchetypeWizardPage extends WizardPage {
 
   @VisibleForTesting

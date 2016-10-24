@@ -16,7 +16,6 @@ import org.eclipse.wst.server.core.util.PublishHelper;
 /**
  * Writes the exploded WAR file of a project to a staging directory.
  */
-@SuppressWarnings("restriction")
 public class ExplodedWarPublisher {
 
   /**

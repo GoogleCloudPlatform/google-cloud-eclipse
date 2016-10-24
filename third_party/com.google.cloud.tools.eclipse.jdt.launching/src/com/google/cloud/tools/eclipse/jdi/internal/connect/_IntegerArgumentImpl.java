@@ -18,9 +18,8 @@ import com.sun.jdi.connect.Connector.IntegerArgument;
  * A fork of {@link org.eclipse.jdi.internal.connect.IntegerArgumentImpl},
  * required as the original has package protection.
  */
-@SuppressWarnings("restriction")
+@SuppressWarnings({"restriction","serial"})
 public class _IntegerArgumentImpl implements IntegerArgument {
-	private static final long serialVersionUID = 1L;
 
 	private String fLabel;
 	private String fDescription;
