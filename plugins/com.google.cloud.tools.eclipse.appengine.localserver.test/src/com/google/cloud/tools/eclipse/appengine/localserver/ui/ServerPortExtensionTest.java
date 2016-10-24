@@ -21,11 +21,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.beans.PropertyChangeEvent;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.wst.server.core.IServerType;
@@ -69,6 +69,7 @@ public class ServerPortExtensionTest {
     assertNotNull(portExtension.portText);
     assertFalse(portExtension.portLabel.isVisible());
     assertFalse(portExtension.portText.isVisible());
+    assertFalse(portExtension.portDecoration.isVisible());
   }
 
   @Test
@@ -113,27 +114,85 @@ public class ServerPortExtensionTest {
   }
 
   @Test
-  public void testAttributeSetOnFocusLost() {
+  public void testAttributeSetOnValueChange() {
     portExtension.portText.setText("12345");
     assertEquals("12345", portExtension.portText.getText());
-
-    portExtension.portText.notifyListeners(SWT.FocusOut, null /* event */);
-    verify(server).setAttribute("appEngineDevServerPort", "12345");
+    verify(server).setAttribute("appEngineDevServerPort", 12345);
 
     portExtension.portText.setText("54321");
     assertEquals("54321", portExtension.portText.getText());
+    verify(server).setAttribute("appEngineDevServerPort", 54321);
 
-    portExtension.portText.notifyListeners(SWT.FocusOut, null /* event */);
-    verify(server).setAttribute("appEngineDevServerPort", "54321");
+    portExtension.portText.setText("0");
+    assertEquals("0", portExtension.portText.getText());
+    verify(server).setAttribute("appEngineDevServerPort", 0);
+
+    portExtension.portText.setText("987654321");
+    assertEquals("987654321", portExtension.portText.getText());
+    verify(server).setAttribute("appEngineDevServerPort", 987654321);
   }
 
   @Test
-  public void testPortText_limitMaximumPortOnFocusLost() {
-    portExtension.portText.setText("123456");
-    assertEquals("123456", portExtension.portText.getText());
+  public void testAttributeDoesNotChangeOnBlockingNonNumericCharacters() {
+    portExtension.portText.setText("12345");
+    portExtension.portText.setText("12A345");
+    assertEquals("12345", portExtension.portText.getText());
+    verify(server, times(1)).setAttribute("appEngineDevServerPort", 12345);
+  }
 
-    portExtension.portText.notifyListeners(SWT.FocusOut, null /* event */);
-    assertEquals("65535", portExtension.portText.getText());
+  @Test
+  public void testAttributeSetToZeroOnEmptyField() {
+    portExtension.portText.setText("");
+    assertTrue(portExtension.portText.getText().isEmpty());
+    verify(server).setAttribute("appEngineDevServerPort", 0);
+  }
+
+  @Test
+  public void testNoPopUpDecorationForValidPorts() {
+    portExtension.portText.setVisible(true);
+
+    portExtension.portText.setText("0");
+    assertFalse(portExtension.portDecoration.isVisible());
+
+    portExtension.portText.setText("1024");
+    assertFalse(portExtension.portDecoration.isVisible());
+
+    portExtension.portText.setText("8080");
+    assertFalse(portExtension.portDecoration.isVisible());
+
+    portExtension.portText.setText("65535");
+    assertFalse(portExtension.portDecoration.isVisible());
+  }
+
+  @Test
+  public void testShowErrorDecorationOnInvalidPorts() {
+    portExtension.portText.setVisible(true);
+
+    portExtension.portText.setText("65536");
+    assertTrue(portExtension.portDecoration.isVisible());
+    assertEquals(portExtension.errorImage, portExtension.portDecoration.getImage());
+
+    portExtension.portText.setText("65535");
+    assertFalse(portExtension.portDecoration.isVisible());
+
+    portExtension.portText.setText("98765");
+    assertTrue(portExtension.portDecoration.isVisible());
+    assertEquals(portExtension.errorImage, portExtension.portDecoration.getImage());
+
+    portExtension.portText.setText("0");
+    assertFalse(portExtension.portDecoration.isVisible());
+  }
+
+  @Test
+  public void testShowInfoDecorationOnEmtpyField() {
+    portExtension.portText.setVisible(true);
+
+    portExtension.portText.setText("");
+    assertTrue(portExtension.portDecoration.isVisible());
+    assertEquals(portExtension.informationImage, portExtension.portDecoration.getImage());
+
+    portExtension.portText.setText("0");
+    assertFalse(portExtension.portDecoration.isVisible());
   }
 
   @Test
@@ -150,16 +209,19 @@ public class ServerPortExtensionTest {
     portExtension.handlePropertyChanged(nullPropertyValueEvent);
     assertFalse(portExtension.portLabel.isVisible());
     assertFalse(portExtension.portText.isVisible());
+    assertFalse(portExtension.portDecoration.isVisible());
 
     PropertyChangeEvent nonServerTypePropertyEvent =
         new PropertyChangeEvent(new Object(), null, null, new Object() /* not IServerType */);
     portExtension.handlePropertyChanged(nonServerTypePropertyEvent);
     assertFalse(portExtension.portLabel.isVisible());
     assertFalse(portExtension.portText.isVisible());
+    assertFalse(portExtension.portDecoration.isVisible());
 
     portExtension.handlePropertyChanged(newNonAppEngineServerTypeEvent());
     assertFalse(portExtension.portLabel.isVisible());
     assertFalse(portExtension.portText.isVisible());
+    assertFalse(portExtension.portDecoration.isVisible());
   }
 
   @Test
@@ -167,6 +229,7 @@ public class ServerPortExtensionTest {
     portExtension.handlePropertyChanged(newAppEngineServerTypeEvent());
     assertTrue(portExtension.portLabel.isVisible());
     assertTrue(portExtension.portText.isVisible());
+    assertFalse(portExtension.portDecoration.isVisible());  // Valid port, so not visible.
   }
 
   @Test
@@ -175,6 +238,34 @@ public class ServerPortExtensionTest {
     portExtension.handlePropertyChanged(newNonAppEngineServerTypeEvent());
     assertFalse(portExtension.portLabel.isVisible());
     assertFalse(portExtension.portText.isVisible());
+    assertFalse(portExtension.portDecoration.isVisible());
+  }
+
+  @Test
+  public void testTriggerPortDecorationOnServerTypeChanges() {
+    portExtension.portText.setVisible(true);
+
+    portExtension.portText.setText("");
+    assertTrue(portExtension.portDecoration.isVisible());
+    assertEquals(portExtension.informationImage, portExtension.portDecoration.getImage());
+
+    portExtension.handlePropertyChanged(newNonAppEngineServerTypeEvent());
+    assertFalse(portExtension.portDecoration.isVisible());
+
+    portExtension.handlePropertyChanged(newAppEngineServerTypeEvent());
+    assertTrue(portExtension.portDecoration.isVisible());
+    assertEquals(portExtension.informationImage, portExtension.portDecoration.getImage());
+
+    portExtension.portText.setText("65536");
+    assertTrue(portExtension.portDecoration.isVisible());
+    assertEquals(portExtension.errorImage, portExtension.portDecoration.getImage());
+
+    portExtension.handlePropertyChanged(newNonAppEngineServerTypeEvent());
+    assertFalse(portExtension.portDecoration.isVisible());
+
+    portExtension.handlePropertyChanged(newAppEngineServerTypeEvent());
+    assertTrue(portExtension.portDecoration.isVisible());
+    assertEquals(portExtension.errorImage, portExtension.portDecoration.getImage());
   }
 
   private static PropertyChangeEvent newAppEngineServerTypeEvent() {
