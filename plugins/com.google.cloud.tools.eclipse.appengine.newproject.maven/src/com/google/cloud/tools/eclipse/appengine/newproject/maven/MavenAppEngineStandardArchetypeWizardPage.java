@@ -38,7 +38,7 @@ import com.google.common.annotations.VisibleForTesting;
  * UI to select an archetype in creating a new Maven-based App Engine Standard Java project.
  */
 public class MavenAppEngineStandardArchetypeWizardPage extends WizardPage {
-
+  
   @VisibleForTesting
   static final java.util.List<ArchetypeTuple> PRESET_ARCHETYPES =
       Collections.unmodifiableList(Arrays.asList(
@@ -49,7 +49,8 @@ public class MavenAppEngineStandardArchetypeWizardPage extends WizardPage {
           new ArchetypeTuple("com.google.appengine.archetypes", //$NON-NLS-1$
               "guestbook-archetype", //$NON-NLS-1$
               Messages.getString("APPENGINE_GUESTBOOK_ARCHETYPE_DISPLAY_NAME"), //$NON-NLS-1$
-              Messages.getString("APPENGINE_GUESTBOOK_ARCHETYPE_DESCRIPTION")))); //$NON-NLS-1$
+              Messages.getString("APPENGINE_GUESTBOOK_ARCHETYPE_DESCRIPTION")  //$NON-NLS-1$
+           )));
 
   // UI components
   private List archetypeList;
@@ -108,7 +109,7 @@ public class MavenAppEngineStandardArchetypeWizardPage extends WizardPage {
     Archetype archetype;
     String displayName;
     String description;
-
+    
     ArchetypeTuple(String groupId, String artifactId, String displayName, String description) {
       archetype = new Archetype();
       archetype.setGroupId(groupId);

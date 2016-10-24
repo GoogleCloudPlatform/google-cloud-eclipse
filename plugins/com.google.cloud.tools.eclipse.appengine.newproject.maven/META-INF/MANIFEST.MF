@@ -6,7 +6,8 @@ Bundle-Version: 0.1.0.qualifier
 Bundle-Vendor: Google Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Localization: plugin
-Require-Bundle: com.google.cloud.tools.eclipse.appengine.newproject;bundle-version="0.1.0",
+Require-Bundle: com.google.cloud.tools.appengine,
+ com.google.cloud.tools.eclipse.appengine.newproject;bundle-version="0.1.0",
  com.google.cloud.tools.eclipse.appengine.ui,
  com.google.guava,
  javax.servlet;bundle-version="2.5.0",
@@ -22,10 +23,8 @@ Require-Bundle: com.google.cloud.tools.eclipse.appengine.newproject;bundle-versi
 Bundle-ActivationPolicy: lazy
 Import-Package: com.google.cloud.tools.eclipse.appengine.facets,
  com.google.cloud.tools.eclipse.appengine.ui,
- com.google.cloud.tools.eclipse.preferences,
  com.google.cloud.tools.eclipse.usagetracker,
  com.google.cloud.tools.eclipse.util,
- com.google.cloud.tools.project;version="0.1.9",
  org.apache.maven.archetype.catalog;provider=m2e,
  org.apache.maven.artifact;provider=m2e,
  org.eclipse.wst.common.project.facet.core
