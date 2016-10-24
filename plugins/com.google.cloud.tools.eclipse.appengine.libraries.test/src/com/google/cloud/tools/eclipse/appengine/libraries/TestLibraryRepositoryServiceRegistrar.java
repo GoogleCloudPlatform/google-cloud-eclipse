@@ -13,18 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
+
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
 import static org.mockito.Mockito.mock;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import java.util.Hashtable;
-
 import org.junit.rules.ExternalResource;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
-
-import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 
 public class TestLibraryRepositoryServiceRegistrar extends ExternalResource {
 

@@ -121,7 +121,7 @@ public class DeployPropertyPage extends PropertyPage {
           container, project, loginService, getLayoutChangedHandler(), false /* requireValues */);
     } else if (AppEngineFlexFacet.hasAppEngineFacet(facetedProject)) {
       setTitle(Messages.getString("flex.page.title"));
-      return new FlexDeployPreferencesPanel(container);
+      return new FlexDeployPreferencesPanel(container, project);
     } else {
       logger.log(Level.WARNING, "App Engine Deployment property page is only visible if project contains an App Engine facet");
       return null;

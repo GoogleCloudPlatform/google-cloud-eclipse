@@ -13,8 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package com.google.cloud.tools.eclipse.appengine.libraries;
 
-public enum LibraryRecommendation {
-  REQUIRED, SUGGESTED, OPTIONAL;
+package com.google.cloud.tools.eclipse.appengine.libraries.model;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+
+import org.junit.Test;
+
+public class LibraryRecommendationTest {
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testValueOfWithLowerCase() {
+    LibraryRecommendation.valueOf("optional");
+  }
+
+  public void testValueOf_OPTIONAL() {
+    assertThat(LibraryRecommendation.valueOf("OPTIONAL"), is(LibraryRecommendation.OPTIONAL));
+  }
 }

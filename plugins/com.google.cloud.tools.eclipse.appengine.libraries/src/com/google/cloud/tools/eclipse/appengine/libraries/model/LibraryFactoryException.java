@@ -14,17 +14,15 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.google.cloud.tools.eclipse.appengine.libraries;
+package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.jdt.core.ClasspathContainerInitializer;
-import org.eclipse.jdt.core.IJavaProject;
+public class LibraryFactoryException extends Exception {
 
-public class TestAppEngineLibraryContainerInitializer extends ClasspathContainerInitializer {
-
-  @Override
-  public void initialize(IPath containerPath, IJavaProject project) throws CoreException {
+  public LibraryFactoryException(String message, Throwable cause) {
+    super(message, cause);
   }
 
+  public LibraryFactoryException(String message) {
+    super(message);
+  }
 }

@@ -14,51 +14,45 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.google.cloud.tools.eclipse.appengine.libraries.config;
+package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.Messages;
+import com.google.common.base.Strings;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Logger;
-
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.InvalidRegistryObjectException;
-
-import com.google.cloud.tools.eclipse.appengine.libraries.Filter;
-import com.google.cloud.tools.eclipse.appengine.libraries.Library;
-import com.google.cloud.tools.eclipse.appengine.libraries.LibraryFile;
-import com.google.cloud.tools.eclipse.appengine.libraries.LibraryRecommendation;
-import com.google.cloud.tools.eclipse.appengine.libraries.MavenCoordinates;
-import com.google.common.base.Strings;
+import org.eclipse.osgi.util.NLS;
 
 public class LibraryFactory {
 
   private static final Logger logger = Logger.getLogger(LibraryFactory.class.getName());
 
-  private static final String ELEMENT_NAME_LIBRARY = "library";
-  private static final String ELEMENT_NAME_LIBRARY_FILE = "libraryFile";
-  private static final String ELEMENT_NAME_EXCLUSION_FILTER = "exclusionFilter";
-  private static final String ELEMENT_NAME_INCLUSION_FILTER = "inclusionFilter";
-  private static final String ELEMENT_NAME_MAVEN_COORDINATES = "mavenCoordinates";
-  private static final String ELEMENT_NAME_LIBRARY_DEPENDENCY = "libraryDependency";
+  private static final String ELEMENT_NAME_LIBRARY = "library"; //$NON-NLS-1$
+  private static final String ELEMENT_NAME_LIBRARY_FILE = "libraryFile"; //$NON-NLS-1$
+  private static final String ELEMENT_NAME_EXCLUSION_FILTER = "exclusionFilter"; //$NON-NLS-1$
+  private static final String ELEMENT_NAME_INCLUSION_FILTER = "inclusionFilter"; //$NON-NLS-1$
+  private static final String ELEMENT_NAME_MAVEN_COORDINATES = "mavenCoordinates"; //$NON-NLS-1$
+  private static final String ELEMENT_NAME_LIBRARY_DEPENDENCY = "libraryDependency"; //$NON-NLS-1$
 
-  private static final String ATTRIBUTE_NAME_ID = "id";
-  private static final String ATTRIBUTE_NAME_NAME = "name";
-  private static final String ATTRIBUTE_NAME_SITE_URI = "siteUri";
-  private static final String ATTRIBUTE_NAME_SOURCE_URI = "sourceUri";
-  private static final String ATTRIBUTE_NAME_JAVADOC_URI = "javadocUri";
-  private static final String ATTRIBUTE_NAME_PATTERN = "pattern";
-  private static final String ATTRIBUTE_NAME_GROUP_ID = "groupId";
-  private static final String ATTRIBUTE_NAME_REPOSITORY_URI = "repositoryUri";
-  private static final String ATTRIBUTE_NAME_ARTIFACT_ID = "artifactId";
-  private static final String ATTRIBUTE_NAME_VERSION = "version";
-  private static final String ATTRIBUTE_NAME_TYPE = "type";
-  private static final String ATTRIBUTE_NAME_CLASSIFIER = "classifier";
-  private static final String ATTRIBUTE_NAME_EXPORT = "export";
-  private static final String ATTRIBUTE_NAME_RECOMMENDATION = "recommendation";
+  private static final String ATTRIBUTE_NAME_ID = "id"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_NAME_NAME = "name"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_NAME_SITE_URI = "siteUri"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_NAME_SOURCE_URI = "sourceUri"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_NAME_JAVADOC_URI = "javadocUri"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_NAME_PATTERN = "pattern"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_NAME_GROUP_ID = "groupId"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_NAME_REPOSITORY_URI = "repositoryUri"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_NAME_ARTIFACT_ID = "artifactId"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_NAME_VERSION = "version"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_NAME_TYPE = "type"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_NAME_CLASSIFIER = "classifier"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_NAME_EXPORT = "export"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_NAME_RECOMMENDATION = "recommendation"; //$NON-NLS-1$
 
   public Library create(IConfigurationElement configurationElement) throws LibraryFactoryException {
     try {
@@ -78,13 +72,12 @@ public class LibraryFactory {
         library.setLibraryDependencies(getLibraryDependencies(configurationElement.getChildren(ELEMENT_NAME_LIBRARY_DEPENDENCY)));
         return library;
       } else {
-        throw new LibraryFactoryException(MessageFormat.format("Unexpected configuration element with name: {0}. "
-                                                               + "Expected element is {1}",
-                                                               configurationElement.getName(),
-                                                               ELEMENT_NAME_LIBRARY));
+        throw new LibraryFactoryException(NLS.bind(Messages.UnexpectedConfigurationElement,
+                                                   configurationElement.getName(),
+                                                   ELEMENT_NAME_LIBRARY));
       }
     } catch (InvalidRegistryObjectException | URISyntaxException | IllegalArgumentException exception) {
-      throw new LibraryFactoryException("Error while creating Library instance", exception);
+      throw new LibraryFactoryException(Messages.CreateLibraryError, exception);
     }
   }
 
@@ -118,7 +111,7 @@ public class LibraryFactory {
 
   private MavenCoordinates getMavenCoordinates(IConfigurationElement[] children) {
     if (children.length != 1) {
-      logger.warning("Single configuration element for MavenCoordinates was expected, found: " + children.length);
+      logger.warning("Single configuration element for MavenCoordinates was expected, found: " + children.length); //$NON-NLS-1$
     }
     IConfigurationElement mavenCoordinatesElement = children[0];
     String groupId = mavenCoordinatesElement.getAttribute(ATTRIBUTE_NAME_GROUP_ID);
@@ -147,14 +140,15 @@ public class LibraryFactory {
     List<Filter> filters = new ArrayList<>();
     for (IConfigurationElement childElement : children) {
       switch (childElement.getName()) {
-      case ELEMENT_NAME_EXCLUSION_FILTER:
-        filters.add(Filter.exclusionFilter(childElement.getAttribute(ATTRIBUTE_NAME_PATTERN)));
-        break;
-      case ELEMENT_NAME_INCLUSION_FILTER:
-        filters.add(Filter.inclusionFilter(childElement.getAttribute(ATTRIBUTE_NAME_PATTERN)));
-      default:
-        // other child element of libraryFile, e.g.: mavenCoordinates
-        break;
+        case ELEMENT_NAME_EXCLUSION_FILTER:
+          filters.add(Filter.exclusionFilter(childElement.getAttribute(ATTRIBUTE_NAME_PATTERN)));
+          break;
+        case ELEMENT_NAME_INCLUSION_FILTER:
+          filters.add(Filter.inclusionFilter(childElement.getAttribute(ATTRIBUTE_NAME_PATTERN)));
+          break;
+        default:
+          // other child element of libraryFile, e.g.: mavenCoordinates
+          break;
       }
     }
     return filters;

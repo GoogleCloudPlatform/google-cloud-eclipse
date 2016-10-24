@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package com.google.cloud.tools.eclipse.appengine.libraries;
+
+package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertFalse;
@@ -50,7 +51,7 @@ public class FilterTest {
     assertThat(filter.getPattern(), is("a.b.c"));
     assertTrue(filter.isExclude());
   }
-  
+
   @Test
   public void testNonEmptyConstructorArgument_inclusionFilter() {
     Filter filter = Filter.inclusionFilter("a.b.c");

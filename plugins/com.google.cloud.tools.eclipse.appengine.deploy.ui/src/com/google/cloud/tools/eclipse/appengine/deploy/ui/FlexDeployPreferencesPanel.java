@@ -16,7 +16,12 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
+import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexDeployPreferences;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
@@ -28,10 +33,14 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.osgi.service.prefs.BackingStoreException;
 
-// TODO: persist values
 public class FlexDeployPreferencesPanel extends DeployPreferencesPanel {
   private static final int LINKED_CHILD_INDENT = 10;
+
+  private static Logger logger = Logger.getLogger(DeployPropertyPage.class.getName());
+
+  private FlexDeployPreferences preferences;
   private Button useValuesButton;
   private Label gaeConfigFolderLabel;
   private Text gaeConfigFolderText;
@@ -40,24 +49,40 @@ public class FlexDeployPreferencesPanel extends DeployPreferencesPanel {
   private Text dockerFileText;
   private Button dockerFileBrowseButton;
 
-  public FlexDeployPreferencesPanel(Composite parent) {
+  public FlexDeployPreferencesPanel(Composite parent, IProject project) {
     super(parent, SWT.NONE);
     createConfigurationFilesSection();
+    preferences = new FlexDeployPreferences(project);
+    applyPreferences(preferences);
   }
 
   @Override
   public DataBindingContext getDataBindingContext() {
+    // provides default validation status
     return new DataBindingContext();
   }
 
   @Override
   public void resetToDefaults() {
-
+    applyPreferences(FlexDeployPreferences.DEFAULT);
   }
 
   @Override
   public boolean savePreferences() {
-    return false;
+    preferences.setUseDeploymentPreferences(useValuesButton.getSelection());
+    preferences.setAppEngineDirectory(gaeConfigFolderText.getText().trim());
+    preferences.setDockerDirectory(dockerFileText.getText().trim());
+    try {
+      preferences.save();
+      return true;
+    } catch (BackingStoreException ex) {
+      logger.log(Level.SEVERE, "Could not save deploy preferences", ex);
+      MessageDialog.openError(getShell(),
+                              Messages.getString("deploy.preferences.save.error.title"),
+                              Messages.getString("deploy.preferences.save.error.message",
+                                                 ex.getLocalizedMessage()));
+      return false;
+    }
   }
 
   private void createConfigurationFilesSection() {
@@ -100,7 +125,6 @@ public class FlexDeployPreferencesPanel extends DeployPreferencesPanel {
     linkedChildData.applyTo(dockerFileLabel);
 
     GridLayoutFactory.fillDefaults().numColumns(3).generateLayout(this);
-    updateControls();
   }
 
   private void browseForConfigFolder() {
@@ -136,6 +160,13 @@ public class FlexDeployPreferencesPanel extends DeployPreferencesPanel {
     dockerFileLabel.setEnabled(enabled);
     dockerFileText.setEnabled(enabled);
     dockerFileBrowseButton.setEnabled(enabled);
+  }
+
+  private void applyPreferences(FlexDeployPreferences preferences) {
+    useValuesButton.setSelection(preferences.getUseDeploymentPreferences());
+    gaeConfigFolderText.setText(preferences.getAppEngineDirectory());
+    dockerFileText.setText(preferences.getDockerDirectory());
+    updateControls();
   }
 
 }

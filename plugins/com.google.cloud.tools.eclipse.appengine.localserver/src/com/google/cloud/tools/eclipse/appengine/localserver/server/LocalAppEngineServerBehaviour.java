@@ -155,6 +155,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
 
     // Create run configuration
     DefaultRunConfiguration devServerRunConfiguration = new DefaultRunConfiguration();
+    devServerRunConfiguration.setAutomaticRestart(false);
     devServerRunConfiguration.setAppYamls(runnables);
     devServerRunConfiguration.setHost(getServer().getHost());
     devServerRunConfiguration.setPort(port);
@@ -189,6 +190,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
 
     // Create run configuration
     DefaultRunConfiguration devServerRunConfiguration = new DefaultRunConfiguration();
+    devServerRunConfiguration.setAutomaticRestart(false);
     devServerRunConfiguration.setAppYamls(runnables);
     devServerRunConfiguration.setHost(getServer().getHost());
     devServerRunConfiguration.setPort(port);

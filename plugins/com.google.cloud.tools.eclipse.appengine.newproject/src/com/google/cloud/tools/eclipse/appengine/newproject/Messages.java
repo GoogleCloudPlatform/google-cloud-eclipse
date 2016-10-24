@@ -21,7 +21,6 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
   private static final String BUNDLE_NAME = "com.google.cloud.tools.eclipse.appengine.newproject.messages"; //$NON-NLS-1$
   public static String AppEngineStandardWizardPage_librariesGroupLabel;
-  public static String AppEngineJavaComponentMissing;
 
   static {
     // initialize resource bundle

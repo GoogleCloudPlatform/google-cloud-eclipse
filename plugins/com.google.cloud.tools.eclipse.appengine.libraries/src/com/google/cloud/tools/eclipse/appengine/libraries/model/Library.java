@@ -14,17 +14,15 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.google.cloud.tools.eclipse.appengine.libraries;
+package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
+import com.google.common.base.Preconditions;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-
-import com.google.common.base.Preconditions;
 
 /**
  * A library that can be added to App Engine projects, e.g. App Engine Endpoints library.

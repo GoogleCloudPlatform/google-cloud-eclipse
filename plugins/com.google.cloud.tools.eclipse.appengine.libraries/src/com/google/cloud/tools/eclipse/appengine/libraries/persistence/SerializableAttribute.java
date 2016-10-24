@@ -14,17 +14,25 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.google.cloud.tools.eclipse.appengine.libraries;
+package com.google.cloud.tools.eclipse.appengine.libraries.persistence;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.jdt.core.ClasspathContainerInitializer;
-import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IClasspathAttribute;
+import org.eclipse.jdt.core.JavaCore;
 
-public class TestAppEngineLibraryContainerInitializer extends ClasspathContainerInitializer {
+/**
+ * Represents a {@link IClasspathAttribute} in such a way that it can be easily transformed into JSON.
+ */
+public class SerializableAttribute {
 
-  @Override
-  public void initialize(IPath containerPath, IJavaProject project) throws CoreException {
+  private String name;
+  private String value;
+
+  public SerializableAttribute(String name, String value) {
+    this.name = name;
+    this.value = value;
   }
 
+  public IClasspathAttribute toClasspathAttribute() {
+    return JavaCore.newClasspathAttribute(name, value);
+  }
 }

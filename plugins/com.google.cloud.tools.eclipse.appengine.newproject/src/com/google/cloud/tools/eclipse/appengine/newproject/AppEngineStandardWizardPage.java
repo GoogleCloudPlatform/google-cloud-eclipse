@@ -45,8 +45,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
-
-import com.google.cloud.tools.eclipse.appengine.libraries.Library;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
 import com.google.cloud.tools.eclipse.ui.util.databinding.BooleanConverter;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;

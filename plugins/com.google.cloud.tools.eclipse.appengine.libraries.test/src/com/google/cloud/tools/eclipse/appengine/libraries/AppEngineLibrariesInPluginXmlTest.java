@@ -24,17 +24,19 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.model.Filter;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFactory;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFactoryException;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
-
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.RegistryFactory;
 import org.junit.Test;
-
-import com.google.cloud.tools.eclipse.appengine.libraries.config.LibraryFactory;
-import com.google.cloud.tools.eclipse.appengine.libraries.config.LibraryFactoryException;
 
 /**
  * This class is intended to test the App Engine libraries set in the plugin.xml to validate that their attributes

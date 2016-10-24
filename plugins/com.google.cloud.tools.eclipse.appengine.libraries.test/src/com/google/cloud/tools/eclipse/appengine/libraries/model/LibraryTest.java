@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package com.google.cloud.tools.eclipse.appengine.libraries;
+
+package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertFalse;
@@ -26,7 +27,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
-
 import org.junit.Test;
 
 public class LibraryTest {
