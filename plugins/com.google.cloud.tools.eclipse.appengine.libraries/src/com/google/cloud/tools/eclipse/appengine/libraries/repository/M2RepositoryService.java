@@ -71,10 +71,10 @@ public class M2RepositoryService implements ILibraryRepositoryService {
     IClasspathAttribute[] libraryFileClasspathAttributes = getClasspathAttributes(libraryFile, artifact);
     return JavaCore.newLibraryEntry(new Path(artifact.getFile().getAbsolutePath()),
                                     getSourceLocation(libraryFile),
-                                    null,
+                                    null /*  sourceAttachmentRootPath */,
                                     getAccessRules(libraryFile.getFilters()),
                                     libraryFileClasspathAttributes,
-                                    true);
+                                    true /* isExported */);
   }
 
   private Artifact resolveArtifact(MavenCoordinates mavenCoordinates) throws LibraryRepositoryServiceException {
@@ -133,13 +133,8 @@ public class M2RepositoryService implements ILibraryRepositoryService {
     IAccessRule[] accessRules = new IAccessRule[filters.size()];
     int idx = 0;
     for (Filter filter : filters) {
-      if (filter.isExclude()) {
-        IAccessRule accessRule = JavaCore.newAccessRule(new Path(filter.getPattern()), IAccessRule.K_NON_ACCESSIBLE);
-        accessRules[idx++] = accessRule;
-      } else {
-        IAccessRule accessRule = JavaCore.newAccessRule(new Path(filter.getPattern()), IAccessRule.K_ACCESSIBLE);
-        accessRules[idx++] = accessRule;
-      }
+      int accessRuleKind = filter.isExclude() ? IAccessRule.K_NON_ACCESSIBLE : IAccessRule.K_ACCESSIBLE;
+      accessRules[idx++] = JavaCore.newAccessRule(new Path(filter.getPattern()), accessRuleKind);
     }
     return accessRules;
   }

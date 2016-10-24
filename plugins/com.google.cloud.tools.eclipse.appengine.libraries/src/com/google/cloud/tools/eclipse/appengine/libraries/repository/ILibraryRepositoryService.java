@@ -26,7 +26,7 @@ import org.eclipse.jdt.core.IClasspathEntry;
 public interface ILibraryRepositoryService {
 
   /**
-   * Creates an classpath entry with the kind {@link IClasspathEntry#CPE_LIBRARY} that refers to the artifact defined
+   * Creates a classpath entry with the kind {@link IClasspathEntry#CPE_LIBRARY} that refers to the artifact defined
    * by the <code>libraryFile</code> parameter.
    *
    * @return a classpath entry with reference to the artifact file resolved by this service and javadoc and source
