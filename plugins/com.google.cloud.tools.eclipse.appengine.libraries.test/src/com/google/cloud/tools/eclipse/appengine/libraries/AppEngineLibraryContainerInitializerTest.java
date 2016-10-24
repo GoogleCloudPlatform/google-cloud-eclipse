@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright 2016 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *******************************************************************************/
+ */
 
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
@@ -76,14 +76,14 @@ public class AppEngineLibraryContainerInitializerTest {
 
   @Before
   public void setUp() throws Exception {
-    when(libraryRepositoryServiceRegistrar.getRepositoryService().getJarLocation(any(MavenCoordinates.class)))
-      .thenAnswer(fakePathFromArtifactId(""));
-    when(libraryRepositoryServiceRegistrar.getRepositoryService().getSourceJarLocation(any(MavenCoordinates.class)))
-      .thenAnswer(fakePathFromArtifactId("-sources"));
+    when(libraryRepositoryServiceRegistrar.getRepositoryService().getLibraryClasspathEntry(any(LibraryFile.class)))
+      .thenAnswer(fakeClasspathEntry());
     setupLibraryFactory();
     setupSerializer();
   }
 
+  // TODO currently AppEngineLibraryContainerInitializer does not depend on ILibraryRepositoryService, but will
+  // after https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/855 is resolved
   /**
    * This test relies on the {@link TestAppEngineLibraryContainerInitializer} defined in the fragment.xml for
    * <code>TEST_CONTAINER_PATH</code>. When the test is launched, the Platform will try to initialize the container
@@ -214,16 +214,15 @@ public class AppEngineLibraryContainerInitializerTest {
     serializer.saveContainer(null, container);
   }
 
-  private Answer<IPath> fakePathFromArtifactId(final String postfix) {
-    return new Answer<IPath>() {
+  private Answer<IClasspathEntry> fakeClasspathEntry() {
+    return new Answer<IClasspathEntry>() {
       @Override
-      public IPath answer(InvocationOnMock invocation) throws Throwable {
-        String postfixToAdd = postfix;
-        if (postfixToAdd ==  null) {
-          postfixToAdd = "";
-        }
-        MavenCoordinates argument = invocation.getArgumentAt(0, MavenCoordinates.class);
-        return new Path("/test/path/" + argument.getArtifactId() + postfixToAdd + "." + argument.getType());
+      public IClasspathEntry answer(InvocationOnMock invocation) throws Throwable {
+        MavenCoordinates mavenCoordinates = invocation.getArgumentAt(0, MavenCoordinates.class);
+        IClasspathEntry classpathEntry = mock(IClasspathEntry.class);
+        when(classpathEntry.getPath()).thenReturn(new Path("/test/path/" + mavenCoordinates.getArtifactId() + "." + mavenCoordinates.getType()));
+        when(classpathEntry.getSourceAttachmentPath()).thenReturn(new Path("/test/path/" + mavenCoordinates.getArtifactId() + "-sources." + mavenCoordinates.getType()));
+        return classpathEntry;
       }
     };
   }

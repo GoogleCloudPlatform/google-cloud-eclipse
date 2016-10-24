@@ -1,11 +1,11 @@
 /*
- * Copyright 2016 Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,9 +17,10 @@
 package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
-import com.google.cloud.tools.eclipse.preferences.PreferenceUtil;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
-
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+import java.util.Properties;
 import org.apache.maven.archetype.catalog.Archetype;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -35,15 +36,10 @@ import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.List;
-import java.util.Properties;
-
 public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOperation {
   IProjectConfigurationManager projectConfigurationManager =
       MavenPlugin.getProjectConfigurationManager();
 
-  private String appEngineProjectId;
   private String packageName;
   private String artifactId;
   private String groupId;
@@ -57,20 +53,23 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
     SubMonitor progress = SubMonitor.convert(monitor);
     monitor.beginTask("Creating Maven AppEngine archetype", 100);
 
-    // The project ID is currently necessary due to tool bugs.
-    String appId = appEngineProjectId;
-    if (appId == null || appId.trim().isEmpty()) {
-      appId = artifactId;
-    }
-    String appengineArtifactVersion = MavenUtils.resolveLatestReleasedArtifactVersion(progress.newChild(20),
-        "com.google.appengine", "appengine-api-1.0-sdk", "jar", AppEngineStandardFacet.DEFAULT_APPENGINE_SDK_VERSION);
-    String gcloudArtifactVersion = MavenUtils.resolveLatestReleasedArtifactVersion(progress.newChild(20),
-        "com.google.appengine", "gcloud-maven-plugin", "maven-plugin", AppEngineStandardFacet.DEFAULT_GCLOUD_PLUGIN_VERSION);
+    String appengineArtifactVersion = MavenUtils.resolveLatestReleasedArtifactVersion(
+        progress.newChild(20), "com.google.appengine", "appengine-api-1.0-sdk", "jar",
+        AppEngineStandardFacet.DEFAULT_APPENGINE_SDK_VERSION);
+    String gcloudArtifactVersion = MavenUtils.resolveLatestReleasedArtifactVersion(
+        progress.newChild(20), "com.google.appengine", "gcloud-maven-plugin", "maven-plugin",
+        AppEngineStandardFacet.DEFAULT_GCLOUD_PLUGIN_VERSION);
 
     Properties properties = new Properties();
     properties.put("appengine-version", appengineArtifactVersion);
     properties.put("gcloud-version", gcloudArtifactVersion);
-    properties.put("application-id", appId);
+    properties.put("useJstl", "true");
+    // The project ID is currently necessary due to tool bugs.
+    properties.put("application-id", artifactId);
+    properties.put("useObjectify", "false");
+    properties.put("useEndpoints1", "false");
+    properties.put("useEndpoints2", "false");
+    properties.put("useAppEngineApi", "false");
 
     ProjectImportConfiguration importConfiguration = new ProjectImportConfiguration();
     String packageName = this.packageName == null || this.packageName.isEmpty() 
@@ -85,7 +84,6 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
           project, true, loopMonitor.newChild(1));
       AppEngineStandardFacet.installAppEngineFacet(facetedProject, true /* installDependentFacets */, loopMonitor.newChild(1));
       AppEngineStandardFacet.installAllAppEngineRuntimes(facetedProject, true /* force */, loopMonitor.newChild(1));
-      PreferenceUtil.setProjectIdPreference(project, appId);
     }
     
     /*
@@ -96,11 +94,6 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
      */
     Job job = new MappingDiscoveryJob(archetypeProjects);
     job.schedule();
-  }
-
-  /** Set the App Engine project identifier; may be {@code null} */
-  void setAppEngineProjectId(String appEngineProjectId) {
-    this.appEngineProjectId = appEngineProjectId;
   }
 
   /** Set the package for any generated code; may be {@code null} */

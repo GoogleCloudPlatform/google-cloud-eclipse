@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import com.google.cloud.tools.appengine.cloudsdk.AppEngineJavaComponentsNotInstalledException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineComponentPage;
 import com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPrompter;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
@@ -28,7 +29,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
-import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.ide.undo.WorkspaceUndoUtil;
@@ -39,24 +39,22 @@ import java.lang.reflect.InvocationTargetException;
 
 public class StandardProjectWizard extends Wizard implements INewWizard {
 
-  private WizardPage page;
+  private AppEngineStandardWizardPage page;
   private AppEngineStandardProjectConfig config = new AppEngineStandardProjectConfig();
-  private boolean hasAppEngineComponent;
 
   public StandardProjectWizard() {
     this.setWindowTitle("New App Engine Standard Project");
-    hasAppEngineComponent = doesAppEngineJavaComponentExist();
-    if (hasAppEngineComponent) {
-      page = new AppEngineStandardWizardPage();
-    } else {
-      page = new AppEngineComponentPage();
-    }
     setNeedsProgressMonitor(true);
   }
 
   @Override
   public void addPages() {
-    this.addPage(page);
+    if (appEngineJavaComponentExists()) {
+      page = new AppEngineStandardWizardPage();
+      this.addPage(page);
+    } else {
+      this.addPage(new AppEngineComponentPage(true /* forNativeProjectWizard */));
+    }
   }
 
   @Override
@@ -74,14 +72,13 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
       config.setCloudSdkLocation(location);
     }
 
-    AppEngineStandardWizardPage createProjectPage = (AppEngineStandardWizardPage) page;
-    config.setPackageName(createProjectPage.getPackageName());
-    config.setProject(createProjectPage.getProjectHandle());
-    if (!createProjectPage.useDefaults()) {
-      config.setEclipseProjectLocationUri(createProjectPage.getLocationURI());
+    config.setPackageName(page.getPackageName());
+    config.setProject(page.getProjectHandle());
+    if (!page.useDefaults()) {
+      config.setEclipseProjectLocationUri(page.getLocationURI());
     }
 
-    config.setAppEngineLibraries(createProjectPage.getSelectedLibraries());
+    config.setAppEngineLibraries(page.getSelectedLibraries());
 
     // todo set up
     final IAdaptable uiInfoAdapter = WorkspaceUndoUtil.getUIInfoAdapter(getShell());
@@ -117,7 +114,7 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
   public void init(IWorkbench workbench, IStructuredSelection selection) {
   }
 
-  private boolean doesAppEngineJavaComponentExist() {
+  private boolean appEngineJavaComponentExists() {
     try {
       new CloudSdk.Builder().build().validateAppEngineJavaComponents();
       return true;

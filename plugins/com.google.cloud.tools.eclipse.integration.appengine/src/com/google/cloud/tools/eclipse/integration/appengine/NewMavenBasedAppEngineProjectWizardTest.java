@@ -1,11 +1,11 @@
 /*
- * Copyright 2016 Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -52,7 +52,7 @@ public class NewMavenBasedAppEngineProjectWizardTest extends AbstractProjectTest
   public void testHelloWorld() throws Exception {
     String[] projectFiles =
         {"src/main/webapp/WEB-INF/appengine-web.xml", "src/main/webapp/WEB-INF/web.xml", "pom.xml"};
-    createAndCheck("appWithPackageProject", null, "com.example.baz", null, "Hello World template",
+    createAndCheck("appWithPackageProject", null, "com.example.baz", "Hello World template",
         projectFiles);
   }
 
@@ -64,27 +64,18 @@ public class NewMavenBasedAppEngineProjectWizardTest extends AbstractProjectTest
 
     String[] projectFiles =
         {"src/main/webapp/WEB-INF/appengine-web.xml", "src/main/webapp/WEB-INF/web.xml", "pom.xml"};
-    createAndCheck("appWithPackageProjectInTemp", location.getAbsolutePath(), "com.example.foo", null,
+    createAndCheck("appWithPackageProjectInTemp", location.getAbsolutePath(), "com.example.foo",
         "Hello World template", projectFiles);
   }
 
   @Test
-  public void testGuestbookExampleNoProjectId() throws Exception {
+  public void testGuestbookExample() throws Exception {
     String[] projectFiles = {"src/main/webapp/guestbook.jsp",
         "src/main/webapp/WEB-INF/appengine-web.xml", "src/main/webapp/WEB-INF/web.xml", "pom.xml"};
-    createAndCheck("guestbookExampleProject", null, "com.example.bar", null, "Guestbook example",
+    createAndCheck("guestbookExampleProject", null, "com.example.bar", "Guestbook example",
         projectFiles);
     // no projectId then archetypes use artifactID
     assertEquals("guestbookExampleProject", getPomProperty(project, "app.id"));
-  }
-
-  @Test
-  public void testGuestbookExampleWithProjectId() throws Exception {
-    String[] projectFiles = {"src/main/webapp/guestbook.jsp",
-        "src/main/webapp/WEB-INF/appengine-web.xml", "src/main/webapp/WEB-INF/web.xml", "pom.xml"};
-    createAndCheck("guestbookExampleProjectWithProjectId", null, "app.engine.test", "my-project-id",
-        "Guestbook example", projectFiles);
-    assertEquals("my-project-id", getPomProperty(project, "app.id"));
   }
 
   private static String getPomProperty(IProject project, String propertyName)
@@ -96,11 +87,12 @@ public class NewMavenBasedAppEngineProjectWizardTest extends AbstractProjectTest
 
   /** Create a project with the given parameters. */
   private void createAndCheck(String artifactId, String location,
-      String packageName, String projectId, String archetypeDescription, String[] projectFiles)
+      String packageName, String archetypeDescription, String[] projectFiles)
       throws CoreException, IOException {
     assertFalse(projectExists(artifactId));
-    project = SwtBotAppEngineActions.createMavenWebAppProject(bot, location, "test", artifactId,
-        packageName, projectId, archetypeDescription);
+    
+    project = SwtBotAppEngineActions.createMavenWebAppProject(bot, location, 
+        "com.google.groupId", artifactId, packageName, archetypeDescription);
     assertTrue(project.exists());
     if (location != null) {
       assertEquals(new File(location).getCanonicalPath(),

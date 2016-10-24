@@ -1,11 +1,11 @@
 /*
- * Copyright 2016 Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,7 +20,6 @@ import com.google.cloud.tools.eclipse.appengine.newproject.JavaPackageValidator;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
-import com.google.cloud.tools.project.ProjectIdValidator;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.CharMatcher;
 
@@ -64,7 +63,6 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
   private Text artifactIdField;
   private Text versionField;
   @VisibleForTesting Text javaPackageField;
-  private Text projectIdField;
 
   private boolean canFlipPage;
 
@@ -182,15 +180,6 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     javaPackagePosition.horizontalSpan = 2;
     javaPackageField.setLayoutData(javaPackagePosition);
     javaPackageField.addModifyListener(pageValidator);
-
-    // App Engine Project ID
-    Label projectIdLabel = new Label(container, SWT.NONE);
-    projectIdLabel.setText(Messages.getString("PROJECT_ID_LABEL")); //$NON-NLS-1$
-    projectIdField = new Text(container, SWT.BORDER);
-    GridData projectIdPosition = new GridData(GridData.FILL_HORIZONTAL);
-    projectIdPosition.horizontalSpan = 2;
-    projectIdField.setLayoutData(projectIdPosition);
-    projectIdField.addModifyListener(pageValidator);
   }
 
   protected void openLocationDialog() {
@@ -248,7 +237,6 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
    */
   private boolean validateGeneratedProjectLocation() {
     String artifactId = getArtifactId();
-    // assert !artifactId.isEmpty()
     IPath path = getLocationPath().append(artifactId);
     if (path.toFile().exists()) {
       String errorMessage = MessageFormat.format(Messages.getString("LOCATION_ALREADY_EXISTS"), path);
@@ -296,11 +284,6 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
       return false;
     }
 
-    String projectId = getAppEngineProjectId();
-    if (!projectId.isEmpty() && !ProjectIdValidator.validate(projectId)) {
-      setErrorMessage(MessageFormat.format(Messages.getString("ILLEGAL_PROJECT_ID"), projectId)); //$NON-NLS-1$
-      return false;
-    }
     return true;
   }
 
@@ -324,11 +307,6 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
    */
   public boolean useDefaults() {
     return useDefaults.getSelection();
-  }
-
-  /** Return the App Engine Project ID (if any) */
-  public String getAppEngineProjectId() {
-    return this.projectIdField.getText();
   }
 
   /** Return the package name for any example code */

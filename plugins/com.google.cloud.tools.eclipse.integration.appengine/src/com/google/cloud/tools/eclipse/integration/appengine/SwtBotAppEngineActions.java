@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -71,8 +71,7 @@ public class SwtBotAppEngineActions {
 
   /** Create a new project with the Maven-based Google App Engine Standard Java Project wizard */
   public static IProject createMavenWebAppProject(SWTWorkbenchBot bot, String location,
-      String groupId, String artifactId, String javaPackage, String projectId,
-      String archetypeDescription) {
+      String groupId, String artifactId, String javaPackage, String archetypeDescription) {
     bot.menu("File").menu("New").menu("Project...").click();
 
     SWTBotShell shell = bot.shell("New Project");
@@ -93,24 +92,20 @@ public class SwtBotAppEngineActions {
     if (javaPackage != null) {
       bot.textWithLabel("Java package:").setText(javaPackage);
     }
-    if (projectId != null) {
-      bot.textWithLabel("App Engine Project ID: (optional)").setText(projectId);
-    }
+
     bot.button("Next >").click();
     // select an archetype; use the default
     if (archetypeDescription != null) {
       bot.list().select(archetypeDescription);
     }
 
-    int mavenCompletionTimeout = 45000/* ms */; // can take a loooong time to fetch archetypes
+    int mavenCompletionTimeout = 60000/* ms */; // can take a loooong time to fetch archetypes
     SwtBotTimeoutManager.setTimeout(mavenCompletionTimeout);
     SwtBotTestingUtilities.clickButtonAndWaitForWindowChange(bot, bot.button("Finish"));
     SwtBotTimeoutManager.resetTimeout();
     SwtBotWorkbenchActions.waitForIdle(bot);
     return waitUntilProjectExists(bot, getWorkspaceRoot().getProject(artifactId));
   }
-
-
 
   /**
    * Spin until the given project actually exists.

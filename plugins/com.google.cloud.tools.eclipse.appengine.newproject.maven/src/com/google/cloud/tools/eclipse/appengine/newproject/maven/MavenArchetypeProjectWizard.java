@@ -1,11 +1,11 @@
 /*
- * Copyright 2016 Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,9 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 
+import com.google.cloud.tools.appengine.cloudsdk.AppEngineJavaComponentsNotInstalledException;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineComponentPage;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 
@@ -42,10 +45,14 @@ public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
 
   @Override
   public void addPages() {
-    page = new MavenAppEngineStandardWizardPage();
-    archetypePage = new MavenAppEngineStandardArchetypeWizardPage();
-    this.addPage(page);
-    this.addPage(archetypePage);
+    if (appEngineJavaComponentExists()) {
+      page = new MavenAppEngineStandardWizardPage();
+      archetypePage = new MavenAppEngineStandardArchetypeWizardPage();
+      this.addPage(page);
+      this.addPage(archetypePage);
+    } else {
+      this.addPage(new AppEngineComponentPage(false /* forNativeProjectWizard */));
+    }
   }
 
   @Override
@@ -56,7 +63,6 @@ public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_MAVEN);
 
     final CreateMavenBasedAppEngineStandardProject operation = new CreateMavenBasedAppEngineStandardProject();
-    operation.setAppEngineProjectId(page.getAppEngineProjectId());
     operation.setPackageName(page.getPackageName());
     operation.setGroupId(page.getGroupId());
     operation.setArtifactId(page.getArtifactId());
@@ -89,4 +95,13 @@ public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
 
   @Override
   public void init(IWorkbench workbench, IStructuredSelection selection) {}
+
+  private boolean appEngineJavaComponentExists() {
+    try {
+      new CloudSdk.Builder().build().validateAppEngineJavaComponents();
+      return true;
+    } catch (AppEngineJavaComponentsNotInstalledException ex) {
+      return false;
+    }
+  }
 }

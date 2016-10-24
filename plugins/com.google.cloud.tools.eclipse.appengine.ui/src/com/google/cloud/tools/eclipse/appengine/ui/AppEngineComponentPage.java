@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.newproject;
+package com.google.cloud.tools.eclipse.appengine.ui;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -24,7 +24,6 @@ import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
-
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 
@@ -33,19 +32,30 @@ import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
  * with instructions on how to install it. This page disables the 'Finish' button.
  */
 public class AppEngineComponentPage extends WizardPage {
+  private boolean forNativeProjectWizard;
 
-  protected AppEngineComponentPage() {
+  public AppEngineComponentPage(boolean forNativeProjectWizard) {
     super("appEngineComponentPage");
     setTitle("App Engine Component is missing");
     setDescription("The Cloud SDK App Engine Java component is not installed"); 
+    this.forNativeProjectWizard = forNativeProjectWizard;
   }
 
   @Override
   public void createControl(Composite parent) {
-    AnalyticsPingManager.getInstance().sendPing(
-        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD,
-        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
-        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE, parent.getShell());
+    if (forNativeProjectWizard) {
+      AnalyticsPingManager.getInstance().sendPing(
+          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD,
+          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
+          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE,
+          parent.getShell());
+    } else {
+      AnalyticsPingManager.getInstance().sendPing(
+          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD,
+          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
+          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_MAVEN,
+          parent.getShell());
+    }
 
     Composite container = new Composite(parent, SWT.NONE);
     GridLayoutFactory.swtDefaults().numColumns(1).applyTo(container);
