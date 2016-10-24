@@ -128,15 +128,6 @@ public class ServerPortExtensionTest {
   }
 
   @Test
-  public void testPortText_limitMinimumPortOnFocusLost() {
-    portExtension.portText.setText("0");
-    assertEquals("0", portExtension.portText.getText());
-
-    portExtension.portText.notifyListeners(SWT.FocusOut, null /* event */);
-    assertEquals("1", portExtension.portText.getText());
-  }
-
-  @Test
   public void testPortText_limitMaximumPortOnFocusLost() {
     portExtension.portText.setText("123456");
     assertEquals("123456", portExtension.portText.getText());

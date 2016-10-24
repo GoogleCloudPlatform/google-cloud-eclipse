@@ -90,7 +90,7 @@ public class ServerPortExtension extends ServerCreationWizardPageExtension {
     public void focusLost(FocusEvent event) {
       try {
         Integer port = Integer.valueOf(portText.getText());
-        port = Math.max(1, Math.min(port, 65535));
+        port = Math.min(port, 65535);
         portText.setText(port.toString());
       } catch (NumberFormatException ex) {
         portText.setText(DEFAULT_SERVICE_PORT.toString());

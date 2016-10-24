@@ -33,7 +33,19 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
     when(server.getHost()).thenReturn("192.168.1.1");
     when(server.getAttribute(eq("appEngineDevServerPort"), anyInt())).thenReturn(8085);
 
-    String url = LocalAppEngineServerLaunchConfigurationDelegate.determinePageLocation(server);
+    String url =
+        LocalAppEngineServerLaunchConfigurationDelegate.determinePageLocation(server, 8085);
     assertEquals("http://192.168.1.1:8085", url);
+  }
+
+  @Test
+  public void testDeterminePageLocation_actualPortMayDifferFromConfigPort() {
+    IServer server = mock(IServer.class);
+    when(server.getHost()).thenReturn("192.168.100.1");
+    when(server.getAttribute(eq("appEngineDevServerPort"), anyInt())).thenReturn(0);
+
+    String url =
+        LocalAppEngineServerLaunchConfigurationDelegate.determinePageLocation(server, 12345);
+    assertEquals("http://192.168.100.1:12345", url);
   }
 }

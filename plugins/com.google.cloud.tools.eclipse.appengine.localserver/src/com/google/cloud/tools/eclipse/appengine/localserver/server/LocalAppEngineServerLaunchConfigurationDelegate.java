@@ -103,27 +103,32 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     console.clearConsole();
     console.activate();
 
-    new ServerLaunchMonitor(configuration, launch, server).engage();
+    int port = server.getAttribute(ServerPortExtension.SERVER_ATTRIBUTE_PORT,
+                                   ServerPortExtension.DEFAULT_SERVICE_PORT);
+    if (port == 0) {
+      port = getFreePort();
+    }
+    new ServerLaunchMonitor(configuration, launch, server, port).engage();
 
     if (ILaunchManager.DEBUG_MODE.equals(mode)) {
-      int debugPort = getDebugPort();
+      int debugPort = getFreePort();
       setupDebugTarget(launch, configuration, debugPort, monitor);
-      serverBehaviour.startDebugDevServer(runnables, console.newMessageStream(), debugPort);
+      serverBehaviour.startDebugDevServer(runnables, console.newMessageStream(), port, debugPort);
     } else {
       // A launch must have at least one debug target or process, or it otherwise becomes a zombie
       LocalAppEngineServerDebugTarget.addTarget(launch, serverBehaviour);
-      serverBehaviour.startDevServer(runnables, console.newMessageStream());
+      serverBehaviour.startDevServer(runnables, console.newMessageStream(), port);
     }
   }
 
   /**
    * Listen for the server to enter STARTED and open a web browser on the server's main page
    */
-  protected void openBrowserPage(final IServer server) {
+  protected void openBrowserPage(final IServer server, int actualPort) {
     if (!shouldOpenStartPage()) {
       return;
     }
-    final String pageLocation = determinePageLocation(server);
+    final String pageLocation = determinePageLocation(server, actualPort);
     if (pageLocation == null) {
       return;
     }
@@ -183,10 +188,10 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     connector.connect(connectionParameters, monitor, launch);
   }
 
-  private int getDebugPort() throws CoreException {
+  private int getFreePort() throws CoreException {
     int port = SocketUtil.findFreePort();
     if (port == -1) {
-      abort("Cannot find free port for remote debugger", null, IStatus.ERROR);
+      abort("Cannot find free port", null, IStatus.ERROR);
     }
     return port;
   }
@@ -200,10 +205,8 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
   }
 
   @VisibleForTesting
-  static String determinePageLocation(IServer server) {
-    Integer port = server.getAttribute(ServerPortExtension.SERVER_ATTRIBUTE_PORT,
-                                       ServerPortExtension.DEFAULT_SERVICE_PORT);
-    return "http://" + server.getHost() + ":" + port;
+  static String determinePageLocation(IServer server, int actualPort) {
+    return "http://" + server.getHost() + ":" + actualPort;
   }
 
 
@@ -221,14 +224,17 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     private ILaunchConfiguration configuration;
     private ILaunch launch;
     private IServer server;
+    private int actualPort;
 
     /**
      * Setup the monitor.
      */
-    ServerLaunchMonitor(ILaunchConfiguration configuration, ILaunch launch, IServer server) {
+    ServerLaunchMonitor(ILaunchConfiguration configuration, ILaunch launch,
+                        IServer server, int actualPort) {
       this.configuration = configuration;
       this.launch = launch;
       this.server = server;
+      this.actualPort = actualPort;
     }
 
     /** Add required listeners */
@@ -248,7 +254,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       Preconditions.checkState(server == event.getServer());
       switch (event.getState()) {
         case IServer.STATE_STARTED:
-          openBrowserPage(server);
+          openBrowserPage(server, actualPort);
           return;
 
         case IServer.STATE_STOPPED:

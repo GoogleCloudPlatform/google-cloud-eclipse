@@ -26,7 +26,6 @@ import com.google.cloud.tools.appengine.cloudsdk.process.ProcessExitListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessStartListener;
 import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
-import com.google.cloud.tools.eclipse.appengine.localserver.ui.ServerPortExtension;
 import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListener;
 import java.io.File;
 import java.util.ArrayList;
@@ -146,8 +145,9 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
    *
    * @param runnables the path to directories that contain configuration files like appengine-web.xml
    * @param console the stream (Eclipse console) to send development server process output to
+   * @param port the app service port
    */
-  void startDevServer(List<File> runnables, MessageConsoleStream console) {
+  void startDevServer(List<File> runnables, MessageConsoleStream console, int port) {
     setServerState(IServer.STATE_STARTING);
 
     // Create dev app server instance
@@ -157,8 +157,6 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
     DefaultRunConfiguration devServerRunConfiguration = new DefaultRunConfiguration();
     devServerRunConfiguration.setAppYamls(runnables);
     devServerRunConfiguration.setHost(getServer().getHost());
-    Integer port = getServer().getAttribute(ServerPortExtension.SERVER_ATTRIBUTE_PORT,
-                                            ServerPortExtension.DEFAULT_SERVICE_PORT);
     devServerRunConfiguration.setPort(port);
 
     // FIXME: workaround bug when running on a Java8 JVM
@@ -179,9 +177,11 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
    *
    * @param runnables the path to directories that contain configuration files like appengine-web.xml
    * @param console the stream (Eclipse console) to send development server process output to
+   * @param port the app service port
    * @param debugPort the port to attach a debugger to if launch is in debug mode
    */
-  void startDebugDevServer(List<File> runnables, MessageConsoleStream console, int debugPort) {
+  void startDebugDevServer(List<File> runnables, MessageConsoleStream console,
+                           int port, int debugPort) {
     setServerState(IServer.STATE_STARTING);
 
     // Create dev app server instance
@@ -191,8 +191,6 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
     DefaultRunConfiguration devServerRunConfiguration = new DefaultRunConfiguration();
     devServerRunConfiguration.setAppYamls(runnables);
     devServerRunConfiguration.setHost(getServer().getHost());
-    Integer port = getServer().getAttribute(ServerPortExtension.SERVER_ATTRIBUTE_PORT,
-                                            ServerPortExtension.DEFAULT_SERVICE_PORT);
     devServerRunConfiguration.setPort(port);
 
     // todo: make this a configurable option, but default to
