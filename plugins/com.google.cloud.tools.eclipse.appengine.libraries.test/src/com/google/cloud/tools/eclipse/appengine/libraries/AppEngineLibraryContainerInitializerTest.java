@@ -32,6 +32,7 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFactoryEx
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
 import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer;
+import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer.ArtifactBaseLocationProvider;
 import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer.LibraryContainerStateLocationProvider;
 import java.io.File;
 import java.io.IOException;
@@ -63,6 +64,7 @@ public class AppEngineLibraryContainerInitializerTest {
   @Mock private LibraryFactory libraryFactory;
   @Mock private IConfigurationElement configurationElement;
   @Mock private LibraryContainerStateLocationProvider containerStateProvider;
+  @Mock private ArtifactBaseLocationProvider artifactBaseLocationProvider;
 
   private LibraryClasspathContainerSerializer serializer;
 
@@ -199,7 +201,8 @@ public class AppEngineLibraryContainerInitializerTest {
   }
 
   private void setupSerializer() throws IOException, CoreException {
-    serializer = new LibraryClasspathContainerSerializer(containerStateProvider);
+    serializer = new LibraryClasspathContainerSerializer(containerStateProvider, artifactBaseLocationProvider);
+    when(artifactBaseLocationProvider.getBaseLocation()).thenReturn(new Path("/test"));
     File stateFile = stateLocationFolder.newFile();
     when(containerStateProvider.getContainerStateFile(any(IJavaProject.class),
                                                       eq(new Path(TEST_LIBRARY_PATH)),
@@ -220,8 +223,14 @@ public class AppEngineLibraryContainerInitializerTest {
       public IClasspathEntry answer(InvocationOnMock invocation) throws Throwable {
         MavenCoordinates mavenCoordinates = invocation.getArgumentAt(0, MavenCoordinates.class);
         IClasspathEntry classpathEntry = mock(IClasspathEntry.class);
-        when(classpathEntry.getPath()).thenReturn(new Path("/test/path/" + mavenCoordinates.getArtifactId() + "." + mavenCoordinates.getType()));
-        when(classpathEntry.getSourceAttachmentPath()).thenReturn(new Path("/test/path/" + mavenCoordinates.getArtifactId() + "-sources." + mavenCoordinates.getType()));
+        when(classpathEntry.getPath()).thenReturn(new Path("/test/path/"
+                                                           + mavenCoordinates.getArtifactId()
+                                                           + "."
+                                                           + mavenCoordinates.getType()));
+        when(classpathEntry.getSourceAttachmentPath()).thenReturn(new Path("/test/path/"
+                                                                           + mavenCoordinates.getArtifactId()
+                                                                           + "-sources."
+                                                                           + mavenCoordinates.getType()));
         return classpathEntry;
       }
     };

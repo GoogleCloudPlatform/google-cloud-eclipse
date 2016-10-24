@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.libraries.persistence;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainer;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 
@@ -29,28 +30,20 @@ public class SerializableLibraryClasspathContainer {
   private String path;
   private SerializableClasspathEntry[] entries;
 
-  public SerializableLibraryClasspathContainer(LibraryClasspathContainer container) {
+  public SerializableLibraryClasspathContainer(LibraryClasspathContainer container, IPath baseDirectory) {
     description = container.getDescription();
     path = container.getPath().toOSString();
     IClasspathEntry[] classpathEntries = container.getClasspathEntries();
     entries = new SerializableClasspathEntry[classpathEntries.length];
     for (int i = 0; i < classpathEntries.length; i++) {
-      IClasspathEntry entry = classpathEntries[i];
-      SerializableClasspathEntry serializableClasspathEntry = new SerializableClasspathEntry();
-      serializableClasspathEntry.setAttributes(entry.getExtraAttributes());
-      serializableClasspathEntry.setAccessRules(entry.getAccessRules());
-      serializableClasspathEntry.setSourcePath(entry.getSourceAttachmentPath());
-      serializableClasspathEntry.setPath(entry.getPath());
-      entries[i] = serializableClasspathEntry;
+      entries[i] = new SerializableClasspathEntry(classpathEntries[i], baseDirectory);
     }
   }
 
-  public LibraryClasspathContainer toLibraryClasspathContainer() {
+  public LibraryClasspathContainer toLibraryClasspathContainer(IPath baseDirectory) {
     IClasspathEntry[] classpathEntries = new IClasspathEntry[entries.length];
     for (int i = 0; i < entries.length; i++) {
-      SerializableClasspathEntry serializableClasspathEntry = entries[i];
-      IClasspathEntry entry = serializableClasspathEntry.toClasspathEntry();
-      classpathEntries[i] = entry;
+      classpathEntries[i] = entries[i].toClasspathEntry(baseDirectory);
     }
     return new LibraryClasspathContainer(new Path(path), description, classpathEntries);
   }

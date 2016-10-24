@@ -33,23 +33,36 @@ public class SerializableClasspathEntry {
   private String path;
   private SerializableAttribute[] attributes;
 
+  public SerializableClasspathEntry(IClasspathEntry entry, IPath baseDirectory) {
+    setAttributes(entry.getExtraAttributes());
+    setAccessRules(entry.getAccessRules());
+    setSourcePath(entry.getSourceAttachmentPath());
+    setPath(entry.getPath(), baseDirectory);
+  }
+
+  private void setPath(IPath path, IPath baseDirectory) {
+    java.nio.file.Path base = baseDirectory.toFile().toPath().toAbsolutePath();
+    java.nio.file.Path child = path.toFile().toPath().toAbsolutePath();
+    if (child.startsWith(base)) {
+      this.path = base.relativize(child).toString();
+    } else {
+      this.path = path.toString();
+    }
+  }
+
   public void setAttributes(IClasspathAttribute[] extraAttributes) {
     attributes = new SerializableAttribute[extraAttributes.length];
     for (int i = 0; i < extraAttributes.length; i++) {
       IClasspathAttribute attribute = extraAttributes[i];
-      attributes[i] = new SerializableAttribute(attribute.getName(), attribute.getValue());
+      attributes[i] = new SerializableAttribute(attribute);
     }
-  }
-
-  public void setPath(IPath path) {
-    this.path = path.toOSString();
   }
 
   public void setAccessRules(IAccessRule[] accessRules) {
     this.accessRules = new SerializableAccessRules[accessRules.length];
     for (int i = 0; i < accessRules.length; i++) {
       IAccessRule rule = accessRules[i];
-      this.accessRules[i] = new SerializableAccessRules(rule.getKind(), rule.getPattern());
+      this.accessRules[i] = new SerializableAccessRules(rule);
     }
   }
 
@@ -57,29 +70,27 @@ public class SerializableClasspathEntry {
     this.sourceAttachmentPath = sourceAttachmentPath.toOSString();
   }
 
-  public IClasspathEntry toClasspathEntry() {
-    return JavaCore.newLibraryEntry(new Path(path),
+  public IClasspathEntry toClasspathEntry(IPath baseDirectory) {
+    return JavaCore.newLibraryEntry(baseDirectory.append(path),
                                     new Path(sourceAttachmentPath),
                                     null,
-                                    getAccessRules(accessRules),
-                                    getAttributes(attributes),
+                                    getAccessRules(),
+                                    getAttributes(),
                                     true);
   }
 
-  private IClasspathAttribute[] getAttributes(SerializableAttribute[] attributes) {
+  private IClasspathAttribute[] getAttributes() {
     IClasspathAttribute[] classpathAttributes = new IClasspathAttribute[attributes.length];
     for (int i = 0; i < attributes.length; i++) {
-      SerializableAttribute serializableAttribute = attributes[i];
-      classpathAttributes[i] = serializableAttribute.toClasspathAttribute();
+      classpathAttributes[i] = attributes[i].toClasspathAttribute();
     }
     return classpathAttributes;
   }
 
-  private IAccessRule[] getAccessRules(SerializableAccessRules[] accessRules) {
+  private IAccessRule[] getAccessRules() {
     IAccessRule[] rules = new IAccessRule[accessRules.length];
     for (int i = 0; i < accessRules.length; i++) {
-      SerializableAccessRules serializableAccessRules = accessRules[i];
-      rules[i] = serializableAccessRules.toAccessRule();
+      rules[i] = accessRules[i].toAccessRule();
     }
     return rules;
   }

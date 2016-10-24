@@ -32,7 +32,9 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.m2e.core.MavenPlugin;
 import org.osgi.framework.FrameworkUtil;
 
 /**
@@ -62,15 +64,22 @@ public class LibraryClasspathContainerSerializer {
     IPath getContainerStateFile(IJavaProject javaProject, IPath containerPath, boolean create) throws CoreException;
   }
 
+  public interface ArtifactBaseLocationProvider {
+    IPath getBaseLocation();
+  }
+
   private LibraryContainerStateLocationProvider stateLocationProvider;
+  private ArtifactBaseLocationProvider artifactBaseLocationProvider;
 
   public LibraryClasspathContainerSerializer() {
-    this(new DefaultStateLocationProvider());
+    this(new DefaultStateLocationProvider(), new M2LocalRepositoryLocationProvider());
   }
 
   @VisibleForTesting
-  public LibraryClasspathContainerSerializer(LibraryContainerStateLocationProvider stateLocationProvider) {
+  public LibraryClasspathContainerSerializer(LibraryContainerStateLocationProvider stateLocationProvider,
+                                             ArtifactBaseLocationProvider artifactBaseLocationProvider) {
     this.stateLocationProvider = stateLocationProvider;
+    this.artifactBaseLocationProvider = artifactBaseLocationProvider;
   }
 
   public void saveContainer(IJavaProject javaProject, LibraryClasspathContainer container) throws IOException,
@@ -82,7 +91,8 @@ public class LibraryClasspathContainerSerializer {
     }
     try (OutputStreamWriter outputStream = new OutputStreamWriter(new FileOutputStream(stateFile), Charsets.UTF_8)) {
       Gson gson = new GsonBuilder().setPrettyPrinting().create();
-      outputStream.write(gson.toJson(new SerializableLibraryClasspathContainer(container)));
+      outputStream.write(gson.toJson(new SerializableLibraryClasspathContainer(container,
+                                                                               artifactBaseLocationProvider.getBaseLocation())));
     }
   }
 
@@ -96,7 +106,7 @@ public class LibraryClasspathContainerSerializer {
       Gson gson = new GsonBuilder().create();
       SerializableLibraryClasspathContainer fromJson =
           gson.fromJson(fileReader, SerializableLibraryClasspathContainer.class);
-      return fromJson.toLibraryClasspathContainer();
+      return fromJson.toLibraryClasspathContainer(artifactBaseLocationProvider.getBaseLocation());
     }
   }
 
@@ -129,6 +139,17 @@ public class LibraryClasspathContainerSerializer {
         containerFile.create(new ByteArrayInputStream(new byte[0]), true, null);
       }
       return containerFile.getLocation();
+    }
+  }
+
+  private static class M2LocalRepositoryLocationProvider implements ArtifactBaseLocationProvider {
+
+    /* (non-Javadoc)
+     * @see com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer.ArtifactBaseLocationProvider#getBaseLocation()
+     */
+    @Override
+    public IPath getBaseLocation() {
+      return new Path(MavenPlugin.getRepositoryRegistry().getLocalRepository().getBasedir().getAbsolutePath());
     }
   }
 }

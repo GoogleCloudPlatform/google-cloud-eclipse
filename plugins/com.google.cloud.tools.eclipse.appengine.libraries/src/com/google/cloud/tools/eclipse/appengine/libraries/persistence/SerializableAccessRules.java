@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.persistence;
 
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.JavaCore;
@@ -29,9 +28,9 @@ public class SerializableAccessRules {
   private AccessRuleKind ruleKind;
   private String pattern;
 
-  public SerializableAccessRules(int kind, IPath pattern) {
-    this.ruleKind = AccessRuleKind.forInt(kind);
-    this.pattern = pattern.toString();
+  public SerializableAccessRules(IAccessRule rule) {
+    ruleKind = AccessRuleKind.forInt(rule.getKind());
+    pattern = rule.getPattern().toString();
   }
 
   public IAccessRule toAccessRule() {

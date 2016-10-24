@@ -23,6 +23,7 @@ import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainer;
+import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer.ArtifactBaseLocationProvider;
 import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer.LibraryContainerStateLocationProvider;
 import com.google.common.base.Charsets;
 import com.google.gson.JsonParser;
@@ -68,7 +69,7 @@ public class LibraryClasspathContainerSerializerTest {
       + "        }"
       + "      ],"
       + "      \"sourceAttachmentPath\": \"/test/path/to/src\","
-      + "      \"path\": \"/test/path/to/jar\","
+      + "      \"path\": \"path/to/jar\","
       + "      \"attributes\": ["
       + "        {"
       + "          \"name\": \"attrName\","
@@ -80,6 +81,7 @@ public class LibraryClasspathContainerSerializerTest {
       + "}";
 
   @Mock private LibraryContainerStateLocationProvider stateLocationProvider;
+  @Mock private ArtifactBaseLocationProvider artifactBaseLocationProvider;
   @Mock private IJavaProject javaProject;
 
   @Rule
@@ -100,6 +102,7 @@ public class LibraryClasspathContainerSerializerTest {
                                                                                   false /* accessible */) },
                                                  true)
     };
+    when(artifactBaseLocationProvider.getBaseLocation()).thenReturn(new Path("/test"));
     container = new LibraryClasspathContainer(new Path(CONTAINER_PATH),
                                               CONTAINER_DESCRIPTION,
                                               classpathEntries);
@@ -110,7 +113,9 @@ public class LibraryClasspathContainerSerializerTest {
     Path stateFilePath = new Path(stateFolder.newFile().getAbsolutePath());
     when(stateLocationProvider.getContainerStateFile(any(IJavaProject.class), any(IPath.class), anyBoolean()))
       .thenReturn(stateFilePath);
-    LibraryClasspathContainerSerializer serializer = new LibraryClasspathContainerSerializer(stateLocationProvider);
+    LibraryClasspathContainerSerializer serializer =
+        new LibraryClasspathContainerSerializer(stateLocationProvider,
+                                                artifactBaseLocationProvider);
     serializer.saveContainer(javaProject, container);
     LibraryClasspathContainer containerFromFile = serializer.loadContainer(javaProject, new Path(CONTAINER_PATH));
     compare(container, containerFromFile);
@@ -124,7 +129,9 @@ public class LibraryClasspathContainerSerializerTest {
     Files.write(stateFilePath.toFile().toPath(),
                 SERIALIZED_CONTAINER.getBytes(Charsets.UTF_8),
                 StandardOpenOption.TRUNCATE_EXISTING);
-    LibraryClasspathContainerSerializer serializer = new LibraryClasspathContainerSerializer(stateLocationProvider);
+    LibraryClasspathContainerSerializer serializer =
+        new LibraryClasspathContainerSerializer(stateLocationProvider,
+                                                artifactBaseLocationProvider);
     LibraryClasspathContainer containerFromFile = serializer.loadContainer(javaProject, new Path(CONTAINER_PATH));
     compare(container, containerFromFile);
   }
@@ -134,7 +141,9 @@ public class LibraryClasspathContainerSerializerTest {
     Path stateFilePath = new Path(stateFolder.newFile().getAbsolutePath());
     when(stateLocationProvider.getContainerStateFile(any(IJavaProject.class), any(IPath.class), anyBoolean()))
       .thenReturn(stateFilePath);
-    LibraryClasspathContainerSerializer serializer = new LibraryClasspathContainerSerializer(stateLocationProvider);
+    LibraryClasspathContainerSerializer serializer =
+        new LibraryClasspathContainerSerializer(stateLocationProvider,
+                                                artifactBaseLocationProvider);
     serializer.saveContainer(javaProject, container);
     // use JsonObject.equals()
     assertEquals(new JsonParser().parse(SERIALIZED_CONTAINER),
@@ -143,13 +152,17 @@ public class LibraryClasspathContainerSerializerTest {
 
   @Test
   public void testSaveContainer_nullStateFileLocationNoError() throws IOException, CoreException {
-    LibraryClasspathContainerSerializer serializer = new LibraryClasspathContainerSerializer(stateLocationProvider);
+    LibraryClasspathContainerSerializer serializer =
+        new LibraryClasspathContainerSerializer(stateLocationProvider,
+                                                artifactBaseLocationProvider);
     serializer.saveContainer(javaProject, container);
   }
 
   @Test
   public void testLoadContainer_nullStateFileLocationNoError() throws IOException, CoreException {
-    LibraryClasspathContainerSerializer serializer = new LibraryClasspathContainerSerializer(stateLocationProvider);
+    LibraryClasspathContainerSerializer serializer =
+        new LibraryClasspathContainerSerializer(stateLocationProvider,
+                                                artifactBaseLocationProvider);
     assertNull(serializer.loadContainer(javaProject, new Path(CONTAINER_PATH)));
   }
 

@@ -27,9 +27,9 @@ public class SerializableAttribute {
   private String name;
   private String value;
 
-  public SerializableAttribute(String name, String value) {
-    this.name = name;
-    this.value = value;
+  public SerializableAttribute(IClasspathAttribute attribute) {
+    name = attribute.getName();
+    value = attribute.getValue();
   }
 
   public IClasspathAttribute toClasspathAttribute() {
