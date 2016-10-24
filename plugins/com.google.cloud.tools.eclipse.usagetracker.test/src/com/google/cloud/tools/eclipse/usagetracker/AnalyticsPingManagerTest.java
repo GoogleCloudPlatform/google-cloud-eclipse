@@ -39,6 +39,7 @@ public class AnalyticsPingManagerTest {
   private static final String METADATA_KEY = "some-custom-key";
   private static final String METADATA_VALUE = "some-custom-value";
 
+  @SuppressWarnings("serial")
   private static final Map<String, String> RANDOM_PARAMETERS = Collections.unmodifiableMap(
       new HashMap<String, String>() {
         {
@@ -57,6 +58,7 @@ public class AnalyticsPingManagerTest {
         }
       });
 
+  @SuppressWarnings("serial")
   private static final Map<String, String> ENCODED_PARAMETERS = Collections.unmodifiableMap(
       new HashMap<String, String>() {
         {

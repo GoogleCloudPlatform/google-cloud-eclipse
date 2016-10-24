@@ -133,5 +133,6 @@ public class M2RepositoryServiceTest {
   }
 
   private static class TestRuntimeException extends RuntimeException {
+    private static final long serialVersionUID = 1L;
   }
 }

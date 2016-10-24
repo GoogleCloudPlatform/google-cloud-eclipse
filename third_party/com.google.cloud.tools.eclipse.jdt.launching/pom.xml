@@ -10,5 +10,4 @@
   </parent>
   <artifactId>com.google.cloud.tools.eclipse.jdt.launching</artifactId>
   <packaging>eclipse-plugin</packaging>
-
 </project>

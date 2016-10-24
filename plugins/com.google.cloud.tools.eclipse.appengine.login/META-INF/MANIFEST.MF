@@ -24,7 +24,7 @@ Bundle-Classpath: lib/com.google.cloud.tools.ide.login-0.0.0-SNAPSHOT.jar,
  lib/google-oauth-client-java6-1.22.0.jar,
  lib/google-oauth-client-jetty-1.22.0.jar,
  .
-Export-Package: com.google.api.client.auth.oauth2;x-friends:="com.google.cloud.tools.eclipse.appengine.deploy",
+Export-Package: com.google.api.client.auth.oauth2;x-friends:="com.google.cloud.tools.eclipse.appengine.deploy,com.google.cloud.tools.eclipse.appengine.deploy.ui",
  com.google.cloud.tools.eclipse.appengine.login,
  com.google.cloud.tools.eclipse.appengine.login.ui,
  com.google.cloud.tools.ide.login

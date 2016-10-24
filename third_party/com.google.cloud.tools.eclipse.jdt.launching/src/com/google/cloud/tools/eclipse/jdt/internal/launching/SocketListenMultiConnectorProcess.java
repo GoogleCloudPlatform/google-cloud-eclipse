@@ -17,7 +17,10 @@ import com.sun.jdi.connect.Connector;
 import com.sun.jdi.connect.IllegalConnectorArgumentsException;
 import com.sun.jdi.connect.ListeningConnector;
 import com.sun.jdi.connect.TransportTimeoutException;
-
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.Map;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -37,18 +40,11 @@ import org.eclipse.jdi.TimeoutException;
 import org.eclipse.jdt.debug.core.JDIDebugModel;
 import org.eclipse.jdt.internal.launching.LaunchingMessages;
 import org.eclipse.jdt.internal.launching.LaunchingPlugin;
-import org.eclipse.jdt.internal.launching.SocketListenConnector;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.osgi.util.NLS;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.Map;
-
 /**
- * Fork of
- * {@link org.eclipse.jdt.internal.launching.SocketListenConnectorProcess}.
+ * Fork of org.eclipse.jdt.internal.launching.SocketListenConnectorProcess.
  * Knows how to handle "connectionLimit" count.
  * 
  * A process that represents a VM listening connector that is waiting for a VM
@@ -58,7 +54,7 @@ import java.util.Map;
  * connections.
  * 
  * @since 3.4
- * @see SocketListenConnector
+ * @see org.eclipse.jdt.internal.launching.SocketListenConnector
  */
 @SuppressWarnings("restriction")
 public class SocketListenMultiConnectorProcess implements IProcess {
@@ -109,17 +105,20 @@ public class SocketListenMultiConnectorProcess implements IProcess {
     }
     
     /**
-     * Starts a job that will accept a VM remotely connecting to the 
-     * given connector.  The #startListening() method must have been
-     * called on the connector with the same arguments before calling
-     * this method.  The 'port' argument in the map should have the same
-     * value as the port specified in this process' constructor.
-     * 
-     * @param connector the connector that will accept incoming connections
-     * @param arguments map of arguments that are used by the connector
-     * @throws CoreException if a problem occurs trying to accept a connection
-     * @see SocketListenConnector
-     */
+	 * Starts a job that will accept a VM remotely connecting to the given
+	 * connector. The #startListening() method must have been called on the
+	 * connector with the same arguments before calling this method. The 'port'
+	 * argument in the map should have the same value as the port specified in
+	 * this process' constructor.
+	 * 
+	 * @param connector
+	 *            the connector that will accept incoming connections
+	 * @param arguments
+	 *            map of arguments that are used by the connector
+	 * @throws CoreException
+	 *             if a problem occurs trying to accept a connection
+	 * @see org.eclipse.jdt.internal.launching.SocketListenConnector
+	 */
 	public void waitForConnection(ListeningConnector connector, Map<String, Connector.Argument> arguments)
 			throws CoreException {
         if (isTerminated()){
