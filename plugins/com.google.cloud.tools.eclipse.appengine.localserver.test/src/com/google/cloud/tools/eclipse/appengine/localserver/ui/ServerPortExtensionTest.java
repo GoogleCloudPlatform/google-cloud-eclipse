@@ -94,48 +94,76 @@ public class ServerPortExtensionTest {
 
   @Test
   public void testPortText_numericCharacters() {
-    portExtension.portText.setText("808");
-    assertEquals("808", portExtension.portText.getText());
+    portExtension.portText.setText("0");
+    assertEquals("0", portExtension.portText.getText());
 
-    portExtension.portText.setText("8108");
-    assertEquals("8108", portExtension.portText.getText());
-  }
+    portExtension.portText.setText("1");
+    assertEquals("1", portExtension.portText.getText());
 
-  @Test
-  public void testPortText_allowArbitrarilyLargeNumbers() {
-    portExtension.portText.setText("80808");
-    assertEquals("80808", portExtension.portText.getText());
+    portExtension.portText.setText("1023");
+    assertEquals("1023", portExtension.portText.getText());
 
-    portExtension.portText.setText("480808");
-    assertEquals("480808", portExtension.portText.getText());
+    portExtension.portText.setText("1024");
+    assertEquals("1024", portExtension.portText.getText());
 
-    portExtension.portText.setText("9480808");
-    assertEquals("9480808", portExtension.portText.getText());
+    portExtension.portText.setText("1025");
+    assertEquals("1025", portExtension.portText.getText());
+
+    portExtension.portText.setText("65534");
+    assertEquals("65534", portExtension.portText.getText());
+
+    portExtension.portText.setText("65535");
+    assertEquals("65535", portExtension.portText.getText());
+
+    portExtension.portText.setText("65536");
+    assertEquals("65536", portExtension.portText.getText());
+
+    portExtension.portText.setText(String.valueOf(Integer.MAX_VALUE));
+    assertEquals(String.valueOf(Integer.MAX_VALUE), portExtension.portText.getText());
   }
 
   @Test
   public void testAttributeSetOnValueChange() {
-    portExtension.portText.setText("12345");
-    assertEquals("12345", portExtension.portText.getText());
-    verify(server).setAttribute("appEngineDevServerPort", 12345);
-
-    portExtension.portText.setText("54321");
-    assertEquals("54321", portExtension.portText.getText());
-    verify(server).setAttribute("appEngineDevServerPort", 54321);
-
     portExtension.portText.setText("0");
-    assertEquals("0", portExtension.portText.getText());
     verify(server).setAttribute("appEngineDevServerPort", 0);
 
-    portExtension.portText.setText("987654321");
-    assertEquals("987654321", portExtension.portText.getText());
-    verify(server).setAttribute("appEngineDevServerPort", 987654321);
+    portExtension.portText.setText("1");
+    verify(server).setAttribute("appEngineDevServerPort", 1);
+
+    portExtension.portText.setText("1023");
+    verify(server).setAttribute("appEngineDevServerPort", 1023);
+
+    portExtension.portText.setText("1024");
+    verify(server).setAttribute("appEngineDevServerPort", 1024);
+
+    portExtension.portText.setText("1025");
+    verify(server).setAttribute("appEngineDevServerPort", 1025);
+
+    portExtension.portText.setText("65534");
+    verify(server).setAttribute("appEngineDevServerPort", 65534);
+
+    portExtension.portText.setText("65535");
+    verify(server).setAttribute("appEngineDevServerPort", 65535);
+
+    portExtension.portText.setText("65536");
+    verify(server).setAttribute("appEngineDevServerPort", 65536);
+
+    portExtension.portText.setText(String.valueOf(Integer.MAX_VALUE));
+    verify(server).setAttribute("appEngineDevServerPort", Integer.MAX_VALUE);
   }
 
   @Test
   public void testAttributeDoesNotChangeOnBlockingNonNumericCharacters() {
     portExtension.portText.setText("12345");
     portExtension.portText.setText("12A345");
+    assertEquals("12345", portExtension.portText.getText());
+    verify(server, times(1)).setAttribute("appEngineDevServerPort", 12345);
+  }
+
+  @Test
+  public void testAttributeDoesNotChangeOnBlockingNegativeNumbers() {
+    portExtension.portText.setText("12345");
+    portExtension.portText.setText("-12345");
     assertEquals("12345", portExtension.portText.getText());
     verify(server, times(1)).setAttribute("appEngineDevServerPort", 12345);
   }
@@ -154,7 +182,13 @@ public class ServerPortExtensionTest {
     portExtension.portText.setText("0");
     assertFalse(portExtension.portDecoration.isVisible());
 
+    portExtension.portText.setText("1023");
+    assertFalse(portExtension.portDecoration.isVisible());
+
     portExtension.portText.setText("1024");
+    assertFalse(portExtension.portDecoration.isVisible());
+
+    portExtension.portText.setText("1025");
     assertFalse(portExtension.portDecoration.isVisible());
 
     portExtension.portText.setText("8080");
@@ -170,6 +204,11 @@ public class ServerPortExtensionTest {
 
     portExtension.portText.setText("65536");
     assertTrue(portExtension.portDecoration.isVisible());
+  }
+
+  @Test
+  public void testFlipErrorDecoration() {
+    portExtension.portText.setVisible(true);
 
     portExtension.portText.setText("65535");
     assertFalse(portExtension.portDecoration.isVisible());
@@ -228,11 +267,9 @@ public class ServerPortExtensionTest {
   }
 
   @Test
-  public void testTriggerPortDecorationOnServerTypeChanges() {
+  public void testErrorDecoration_hideAndShowOnServerTypeChanges() {
     portExtension.portText.setVisible(true);
-
-    portExtension.portText.setText("65536");
-    assertTrue(portExtension.portDecoration.isVisible());
+    portExtension.portText.setText("65536");  // Trigger error decoration first.
 
     portExtension.handlePropertyChanged(newNonAppEngineServerTypeEvent());
     assertFalse(portExtension.portDecoration.isVisible());
