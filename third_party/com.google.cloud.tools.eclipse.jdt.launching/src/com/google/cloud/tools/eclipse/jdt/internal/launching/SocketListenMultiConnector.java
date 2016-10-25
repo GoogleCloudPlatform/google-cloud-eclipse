@@ -13,13 +13,10 @@
 package com.google.cloud.tools.eclipse.jdt.internal.launching;
 
 import com.google.cloud.tools.eclipse.jdi.internal.connect.SocketListeningMultiConnectorImpl;
+
 import com.sun.jdi.connect.Connector;
 import com.sun.jdi.connect.IllegalConnectorArgumentsException;
 import com.sun.jdi.connect.ListeningConnector;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -33,6 +30,11 @@ import org.eclipse.jdt.internal.launching.LaunchingPlugin;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IVMConnector;
 import org.eclipse.osgi.util.NLS;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Fork of org.eclipse.jdt.internal.launching.SocketListenConnector. This

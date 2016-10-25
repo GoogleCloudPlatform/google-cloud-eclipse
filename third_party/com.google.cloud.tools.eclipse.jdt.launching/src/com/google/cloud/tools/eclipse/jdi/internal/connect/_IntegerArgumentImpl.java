@@ -20,7 +20,6 @@ import com.sun.jdi.connect.Connector.IntegerArgument;
  */
 @SuppressWarnings({"restriction","serial"})
 public class _IntegerArgumentImpl implements IntegerArgument {
-
 	private String fLabel;
 	private String fDescription;
 	private int fValue;
