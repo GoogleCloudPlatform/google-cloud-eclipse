@@ -22,8 +22,17 @@ import com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineCon
 import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -52,16 +61,6 @@ import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerListener;
 import org.eclipse.wst.server.core.ServerEvent;
 import org.eclipse.wst.server.core.ServerUtil;
-
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class LocalAppEngineServerLaunchConfigurationDelegate
     extends AbstractJavaLaunchConfigurationDelegate {
@@ -99,7 +98,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
     LocalAppEngineConsole console =
         MessageConsoleUtilities.findOrCreateConsole(configuration.getName(),
-                                            new LocalAppEngineConsole.Factory(serverBehaviour));
+            new LocalAppEngineConsole.Factory(serverBehaviour));
     console.clearConsole();
     console.activate();
 
@@ -108,23 +107,22 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     if (ILaunchManager.DEBUG_MODE.equals(mode)) {
       int debugPort = getDebugPort();
       setupDebugTarget(launch, configuration, debugPort, monitor);
-      serverBehaviour.startDebugDevServer(
-          runnables, console.newMessageStream(), server.getHost(), debugPort);
+      serverBehaviour.startDebugDevServer(runnables, console.newMessageStream(), debugPort);
     } else {
       // A launch must have at least one debug target or process, or it otherwise becomes a zombie
       LocalAppEngineServerDebugTarget.addTarget(launch, serverBehaviour);
-      serverBehaviour.startDevServer(runnables, console.newMessageStream(), server.getHost());
+      serverBehaviour.startDevServer(runnables, console.newMessageStream());
     }
   }
 
   /**
    * Listen for the server to enter STARTED and open a web browser on the server's main page
    */
-  protected void openBrowserPage(final ILaunchConfiguration configuration, final IServer server) {
+  protected void openBrowserPage(final IServer server) {
     if (!shouldOpenStartPage()) {
       return;
     }
-    final String pageLocation = determinePageLocation(server, configuration);
+    final String pageLocation = determinePageLocation(server);
     if (pageLocation == null) {
       return;
     }
@@ -200,9 +198,12 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
         PreferencesInitializer.LAUNCH_BROWSER, true, null);
   }
 
-  private String determinePageLocation(IServer server, ILaunchConfiguration config) {
-    // todo[issue #259]: pull this from the server or launch configuration
-    return "http://" + DEBUGGER_HOST + ":8080";
+  @VisibleForTesting
+  static String determinePageLocation(IServer server) {
+    LocalAppEngineServerBehaviour serverBehaviour = (LocalAppEngineServerBehaviour)
+        server.loadAdapter(LocalAppEngineServerBehaviour.class, null /* monitor */);
+
+    return "http://" + server.getHost() + ":" + serverBehaviour.getPort();
   }
 
 
@@ -247,7 +248,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       Preconditions.checkState(server == event.getServer());
       switch (event.getState()) {
         case IServer.STATE_STARTED:
-          openBrowserPage(configuration, server);
+          openBrowserPage(server);
           return;
 
         case IServer.STATE_STOPPED:
