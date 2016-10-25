@@ -19,17 +19,21 @@ package com.google.cloud.tools.eclipse.appengine.localserver.server;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import org.eclipse.wst.server.core.IServer;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
+@RunWith(MockitoJUnitRunner.class)
 public class LocalAppEngineServerLaunchConfigurationDelegateTest {
+
+  @Mock private IServer server;
 
   @Test
   public void testDeterminePageLocation() {
-    IServer server = mock(IServer.class);
     when(server.getHost()).thenReturn("192.168.1.1");
     when(server.getAttribute(eq("appEngineDevServerPort"), anyInt())).thenReturn(8085);
 
@@ -40,7 +44,6 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
 
   @Test
   public void testDeterminePageLocation_actualPortMayDifferFromConfigPort() {
-    IServer server = mock(IServer.class);
     when(server.getHost()).thenReturn("192.168.100.1");
     when(server.getAttribute(eq("appEngineDevServerPort"), anyInt())).thenReturn(0);
 
