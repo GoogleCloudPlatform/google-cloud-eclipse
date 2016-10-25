@@ -9,7 +9,6 @@ Bundle-ActivationPolicy: lazy
 Fragment-Host: com.google.cloud.tools.eclipse.sdk
 Require-Bundle: org.junit,
  org.eclipse.jface,
- com.google.cloud.tools.eclipse.sdk.ui,
  org.eclipse.equinox.common;bundle-version="3.7.0",
  com.google.cloud.tools.eclipse.util
 Import-Package: org.eclipse.jface.preference,

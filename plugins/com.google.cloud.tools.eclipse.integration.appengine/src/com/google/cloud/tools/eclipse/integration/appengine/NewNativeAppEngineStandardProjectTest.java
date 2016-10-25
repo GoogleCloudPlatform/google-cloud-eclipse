@@ -33,7 +33,6 @@ import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -59,8 +58,8 @@ public class NewNativeAppEngineStandardProjectTest extends AbstractProjectTests 
   }
 
   /** Create a project with the given parameters. */
-  private void createAndCheck(String projectName, String packageName,
-      String[] projectFiles) throws IOException, CoreException {
+  private void createAndCheck(String projectName, String packageName, String[] projectFiles)
+                                                                              throws CoreException {
     assertFalse(projectExists(projectName));
     project = SwtBotAppEngineActions.createNativeWebAppProject(bot, projectName, null,
         packageName);

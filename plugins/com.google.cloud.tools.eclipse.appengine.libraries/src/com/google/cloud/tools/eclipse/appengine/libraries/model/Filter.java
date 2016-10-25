@@ -17,7 +17,6 @@
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
 import com.google.common.base.Preconditions;
-import org.eclipse.jdt.core.IClasspathEntry;
 
 public class Filter {
 
@@ -27,7 +26,7 @@ public class Filter {
   /**
    * @param pattern expected format is the same as JDT's build path inclusion/exclusion filters.
    *
-   * @see IClasspathEntry#getExclusionPatterns()
+   * @see org.eclipse.jdt.core.IClasspathEntry#getExclusionPatterns()
    */
   public static Filter exclusionFilter(String pattern) {
     return new Filter(pattern, true /* exclude */);
@@ -36,7 +35,7 @@ public class Filter {
   /**
    * @param pattern expected format is the same as JDT's build path inclusion/exclusion filters.
    *
-   * @see IClasspathEntry#getInclusionPatterns()
+   * @see org.eclipse.jdt.core.IClasspathEntry#getInclusionPatterns()
    */
   public static Filter inclusionFilter(String pattern) {
     return new Filter(pattern, false /* exclude */);
@@ -50,9 +49,10 @@ public class Filter {
   }
 
   /**
-   * @return a pattern in the format that is the same as JDT's build path inclusion/exclusion filters.
+   * @return a pattern in the format that is the same as JDT's build path inclusion/exclusion
+   *         filters.
    *
-   * @see IClasspathEntry#getInclusionPatterns()
+   * @see org.eclipse.jdt.core.IClasspathEntry#getInclusionPatterns()
    */
   public String getPattern() {
     return pattern;

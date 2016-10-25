@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
+@SuppressWarnings("serial")
 public class LibraryFactoryException extends Exception {
 
   public LibraryFactoryException(String message, Throwable cause) {

@@ -17,7 +17,6 @@ import com.google.cloud.tools.eclipse.jdi.internal.connect.SocketListeningMultiC
 import com.sun.jdi.connect.Connector;
 import com.sun.jdi.connect.IllegalConnectorArgumentsException;
 import com.sun.jdi.connect.ListeningConnector;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -28,7 +27,6 @@ import org.eclipse.jdi.Bootstrap;
 import org.eclipse.jdi.internal.VirtualMachineManagerImpl;
 import org.eclipse.jdt.internal.launching.LaunchingMessages;
 import org.eclipse.jdt.internal.launching.LaunchingPlugin;
-import org.eclipse.jdt.internal.launching.SocketListenConnectorProcess;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IVMConnector;
 import org.eclipse.osgi.util.NLS;
@@ -39,14 +37,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Fork of {@link org.eclipse.jdt.internal.launching.SocketListenConnector}.
- * This connector knows how to interpret the "connectionLimit" parameter.
+ * Fork of org.eclipse.jdt.internal.launching.SocketListenConnector. This
+ * connector knows how to interpret the "connectionLimit" parameter.
  * 
  * A standard socket listening connector. Starts a launch that waits for a VM to
  * connect at a specific port.
  * 
  * @since 3.4
- * @see SocketListenConnectorProcess
+ * @see org.eclipse.jdt.internal.launching.SocketListenConnectorProcess
  */
 @SuppressWarnings("restriction")
 public class SocketListenMultiConnector implements IVMConnector {

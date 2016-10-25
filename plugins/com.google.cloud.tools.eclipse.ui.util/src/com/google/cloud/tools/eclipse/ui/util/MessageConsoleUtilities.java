@@ -84,8 +84,10 @@ public class MessageConsoleUtilities {
     IConsole[] consoles = manager.getConsoles();
     for (IConsole console : consoles) {
       if (name.equals(console.getName())) {
-          return (C) console;
-       }
+        @SuppressWarnings("unchecked")
+        C result = (C) console;
+        return result;
+      }
     }
     // console not found, so create a new one
     C console = factory.createConsole(name);

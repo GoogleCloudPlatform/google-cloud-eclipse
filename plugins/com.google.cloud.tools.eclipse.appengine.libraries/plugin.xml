@@ -3,7 +3,8 @@
 <plugin>
   <extension-point id="com.google.cloud.tools.eclipse.appengine.libraries" name="App Engine Libraries" />
   
-  <extension point="com.google.cloud.tools.eclipse.appengine.libraries">
+  <extension point="com.google.cloud.tools.eclipse.appengine.libraries"
+             id="com.google.cloud.tools.eclipse.appengine.libraries.defaultapis">
     <library 
           id="appengine-api"
           name="App Engine API"

@@ -64,7 +64,11 @@ public class SwtBotAppEngineActions {
     if (javaPackage != null) {
       bot.textWithLabel("Java package:").setText(javaPackage);
     }
+    // can take a loooong time to resolve jars (e.g. servlet-api.jar) from Maven Central
+    int libraryResolutionTimeout = 60000/* ms */;
+    SwtBotTimeoutManager.setTimeout(libraryResolutionTimeout);
     SwtBotTestingUtilities.clickButtonAndWaitForWindowChange(bot, bot.button("Finish"));
+    SwtBotTimeoutManager.resetTimeout();
     SwtBotWorkbenchActions.waitForIdle(bot);
     return waitUntilProjectExists(bot, getWorkspaceRoot().getProject(projectName));
   }

@@ -24,7 +24,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.RegistryFactory;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.jface.preference.IPersistentPreferenceStore;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
@@ -50,7 +49,7 @@ import java.util.logging.Logger;
 /**
  * A host preference page that hosts multiple <em>preference areas</em>. These
  * {@link PreferenceArea} are like embedded preference pages, like more complex JFace
- * {@linkplain FieldEditor}s.
+ * {@link org.eclipse.jface.preference.FieldEditor FieldEditor.
  */
 public class AreaBasedPreferencePage extends PreferencePage
     implements IWorkbenchPreferencePage, IExecutableExtension {

@@ -17,7 +17,6 @@
 package com.google.cloud.tools.eclipse.preferences.areas;
 
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -27,7 +26,8 @@ import org.eclipse.ui.IWorkbench;
 
 /**
  * Abstract base class for preference areas. A preference area is somewhat like a
- * {@link FieldEditor} except that it is expected to be configured from an extension point.
+ * {@link org.eclipse.jface.preference.FieldEditor FieldEditor} except that it is expected to be
+ * configured from an extension point.
  * <p>
  * Preference areas should notify its listeners of changes using property change events.
  */

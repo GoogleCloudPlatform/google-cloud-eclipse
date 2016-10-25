@@ -16,22 +16,21 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy;
 
+import com.google.cloud.tools.appengine.api.deploy.DefaultDeployConfiguration;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineDeployment;
 import java.util.Collections;
-
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
 
-import com.google.cloud.tools.appengine.api.deploy.DefaultDeployConfiguration;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineDeployment;
-import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardProjectStaging;
-
 /**
- * Deploys a staged App Engine project.
- * The project must be staged first (e.g. in case of App Engine Standard project using {@link StandardProjectStaging})
- * This class will take the staged project and deploy it to App Engine using {@link CloudSdk}
+ * Deploys a staged App Engine project. The project must be staged first (e.g. in case of App Engine
+ * Standard project using
+ * {@link com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardProjectStaging
+ * StandardProjectStaging}) This class will take the staged project and deploy it to App Engine
+ * using {@link CloudSdk}.
  *
  */
 public class AppEngineProjectDeployer {

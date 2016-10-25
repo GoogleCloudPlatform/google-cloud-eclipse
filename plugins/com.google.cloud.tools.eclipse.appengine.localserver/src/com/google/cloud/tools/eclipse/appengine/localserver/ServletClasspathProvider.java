@@ -33,14 +33,10 @@ import java.util.logging.Logger;
 import javax.inject.Inject;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.RegistryFactory;
-import org.eclipse.e4.core.contexts.ContextInjectionFactory;
-import org.eclipse.e4.core.contexts.EclipseContextFactory;
-import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jst.server.core.RuntimeClasspathProviderDelegate;
 import org.eclipse.wst.server.core.IRuntime;
-import org.osgi.framework.FrameworkUtil;
 
 /**
  * Supply Java standard classes, specifically servlet-api.jar and jsp-api.jar,
@@ -56,16 +52,16 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
 
   @Inject
   private ILibraryRepositoryService service;
-
-  private IEclipseContext eclipseContextForTesting;
+  @Inject
+  private IExtensionRegistry extensionRegistry;
 
   public ServletClasspathProvider() {
   }
 
   @VisibleForTesting
-  ServletClasspathProvider(Map<String, Library> libraries, IEclipseContext eclipseContextForTesting) {
+  ServletClasspathProvider(Map<String, Library> libraries, ILibraryRepositoryService repositoryService) {
     this.libraries = libraries;
-    this.eclipseContextForTesting = eclipseContextForTesting;
+    service = repositoryService;
   }
 
   @Override
@@ -79,13 +75,8 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
 
   @Override
   public IClasspathEntry[] resolveClasspathContainer(IRuntime runtime) {
-    IEclipseContext context = getEclipseContext();
     try {
-      ContextInjectionFactory.inject(this, context);
-
-      IConfigurationElement[] configurationElements =
-          RegistryFactory.getRegistry().getConfigurationElementsFor("com.google.cloud.tools.eclipse.appengine.libraries");
-      initializeLibraries(configurationElements, new LibraryFactory());
+      initializeLibraries(new LibraryFactory());
 
       // servlet api is assumed to be a single file
       List<LibraryFile> servletApiLibraryFiles = libraries.get("servlet-api").getLibraryFiles();
@@ -102,23 +93,15 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
       return new IClasspathEntry[] { servletApiEntry, jspApiEntry };
     } catch (LibraryRepositoryServiceException e) {
       return null;
-    } finally {
-      context.dispose();
-    }
-  }
-
-  private IEclipseContext getEclipseContext() {
-    if (eclipseContextForTesting == null) {
-      return EclipseContextFactory.getServiceContext(FrameworkUtil.getBundle(getClass()).getBundleContext());
-    } else {
-      return eclipseContextForTesting;
     }
   }
 
   // TODO parse library definition in ILibraryConfigService (or similar) started when the plugin/bundle starts
   // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/856
-  private void initializeLibraries(IConfigurationElement[] configurationElements, LibraryFactory libraryFactory) {
+  private void initializeLibraries(LibraryFactory libraryFactory) {
     if (libraries == null) {
+      IConfigurationElement[] configurationElements =
+          extensionRegistry.getConfigurationElementsFor("com.google.cloud.tools.eclipse.appengine.libraries");
       libraries = new HashMap<>(configurationElements.length);
       for (IConfigurationElement configurationElement : configurationElements) {
         try {

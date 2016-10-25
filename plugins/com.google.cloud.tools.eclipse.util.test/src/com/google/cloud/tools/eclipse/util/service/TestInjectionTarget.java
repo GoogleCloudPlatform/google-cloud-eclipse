@@ -14,16 +14,27 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.libraries.repository;
+package com.google.cloud.tools.eclipse.util.service;
 
-@SuppressWarnings("serial")
-public class LibraryRepositoryServiceException extends Exception {
+import javax.inject.Inject;
+import org.eclipse.core.runtime.IExtensionRegistry;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 
-  public LibraryRepositoryServiceException(String message) {
-    super(message);
+/**
+ * Used to test E4 Dependency Injection in {@link ServiceContextFactoryTest}.
+ */
+public class TestInjectionTarget {
+
+  @Inject
+  private IEclipseContext eclipseContext;
+  @Inject
+  private IExtensionRegistry extensionRegistry;
+
+  public IEclipseContext getEclipseContext() {
+    return eclipseContext;
   }
 
-  public LibraryRepositoryServiceException(String message, Throwable cause) {
-    super(message, cause);
+  public IExtensionRegistry getExtensionRegistry() {
+    return extensionRegistry;
   }
 }

@@ -55,7 +55,9 @@ public class AppEngineLibrariesInPluginXmlTest {
   public void testThereAreExactlyFiveLibraries() {
     IConfigurationElement[] configurationElements =
         RegistryFactory.getRegistry()
-          .getConfigurationElementsFor(AppEngineLibraryContainerInitializer.LIBRARIES_EXTENSION_POINT);
+          .getConfigurationElementsFor("com.google.cloud.tools.eclipse.appengine",
+                                       "libraries",
+                                       "com.google.cloud.tools.eclipse.appengine.libraries.defaultapis");
     assertThat(configurationElements.length, is(5));
   }
 

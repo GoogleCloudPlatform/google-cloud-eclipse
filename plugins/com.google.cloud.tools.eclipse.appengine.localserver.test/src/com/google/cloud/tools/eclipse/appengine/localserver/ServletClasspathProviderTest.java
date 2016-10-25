@@ -33,7 +33,6 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -45,17 +44,15 @@ public class ServletClasspathProviderTest {
 
   private ServletClasspathProvider provider;
   @Mock private ILibraryRepositoryService repositoryService;
-  @Rule public EclipseContextHolder eclipseContextHolder = new EclipseContextHolder();
-  
+
   @Before
   public void setUp() throws LibraryRepositoryServiceException {
-    eclipseContextHolder.set(ILibraryRepositoryService.class, repositoryService);
     Library servletApi = getMockApi("servlet-api");
     Library jspApi = getMockApi("jsp-api");
     HashMap<String, Library> libraries = new HashMap<>();
     libraries.put("servlet-api", servletApi);
     libraries.put("jsp-api", jspApi);
-    provider = new ServletClasspathProvider(libraries, eclipseContextHolder.getContext());
+    provider = new ServletClasspathProvider(libraries, repositoryService);
   }
 
   @Test

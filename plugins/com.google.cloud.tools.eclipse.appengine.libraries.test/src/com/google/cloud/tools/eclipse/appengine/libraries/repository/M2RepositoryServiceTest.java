@@ -133,6 +133,7 @@ public class M2RepositoryServiceTest {
     return new CoreException(StatusUtil.error(this, "Test exception"));
   }
 
+  @SuppressWarnings("serial")
   private static class TestRuntimeException extends RuntimeException {
   }
 }

@@ -138,7 +138,7 @@
             avoid access restriction on class due to restriction on
             required library
           -->
-          <compilerArgument>-warn:+discouraged,forbidden</compilerArgument>
+          <compilerArgument>-warn:+discouraged,+forbidden,-unavoidableGenericProblems,-warningToken</compilerArgument>
         </configuration>
       </plugin>
 

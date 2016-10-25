@@ -16,6 +16,8 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.util.MavenUtils;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Properties;
@@ -33,9 +35,6 @@ import org.eclipse.m2e.core.ui.internal.wizards.MappingDiscoveryJob;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
-
-import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
-import com.google.cloud.tools.eclipse.util.MavenUtils;
 
 public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOperation {
   IProjectConfigurationManager projectConfigurationManager =

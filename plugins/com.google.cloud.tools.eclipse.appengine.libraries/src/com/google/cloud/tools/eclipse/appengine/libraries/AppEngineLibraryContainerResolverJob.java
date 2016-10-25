@@ -57,20 +57,22 @@ public class AppEngineLibraryContainerResolverJob extends Job {
   private static final Logger logger = Logger.getLogger(AppEngineLibraryContainerResolverJob.class.getName());
 
   private Map<String, Library> libraries;
-  private LibraryClasspathContainerSerializer serializer;
 
   @Inject
   private IJavaProject javaProject;
   @Inject
   private ILibraryRepositoryService repositoryService;
+  @Inject
+  private LibraryClasspathContainerSerializer serializer;
 
   public AppEngineLibraryContainerResolverJob() {
-    this(new LibraryClasspathContainerSerializer());
+    super(Messages.AppEngineLibraryContainerResolverJobName);
+    setUser(true);
   }
 
   @VisibleForTesting
   AppEngineLibraryContainerResolverJob(LibraryClasspathContainerSerializer serializer) {
-    super("Initialize libraries");
+    super(Messages.AppEngineLibraryContainerResolverJobName);
     Preconditions.checkNotNull(serializer);
     this.serializer = serializer;
     setUser(true);

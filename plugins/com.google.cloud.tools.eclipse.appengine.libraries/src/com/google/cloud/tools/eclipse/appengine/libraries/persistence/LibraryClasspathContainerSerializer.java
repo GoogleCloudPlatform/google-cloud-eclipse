@@ -33,6 +33,7 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.e4.core.di.annotations.Creatable;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.osgi.framework.FrameworkUtil;
@@ -40,6 +41,7 @@ import org.osgi.framework.FrameworkUtil;
 /**
  * Provides functionality to save and load {@link LibraryClasspathContainer} instances to disk.
  */
+@Creatable
 public class LibraryClasspathContainerSerializer {
 
   private static final Logger logger = Logger.getLogger(LibraryClasspathContainerSerializer.class.getName());

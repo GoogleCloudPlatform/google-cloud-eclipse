@@ -40,7 +40,7 @@
    <extension
          point="org.eclipse.jst.server.core.runtimeClasspathProviders">
       <runtimeClasspathProvider
-            class="com.google.cloud.tools.eclipse.appengine.localserver.ServletClasspathProvider"
+            class="com.google.cloud.tools.eclipse.util.service.ServiceContextFactory:com.google.cloud.tools.eclipse.appengine.localserver.ServletClasspathProvider"
             id="com.google.cloud.tools.eclipse.appengine.standard.runtimeClasspathProvider"
             runtimeTypeIds="com.google.cloud.tools.eclipse.appengine.standard.runtime">
       </runtimeClasspathProvider>

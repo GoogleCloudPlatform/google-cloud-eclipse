@@ -66,6 +66,7 @@ public class AnalyticsPingManager {
   //
   // https://github.com/google/cloud-reporting/blob/master/src/main/java/com/google/cloud/metrics/MetricsUtils.java#L183
   // https://developers.google.com/analytics/devguides/collection/protocol/v1/reference
+  @SuppressWarnings("serial")
   private static final Map<String, String> STANDARD_PARAMETERS = Collections.unmodifiableMap(
       new HashMap<String, String>() {
         {

@@ -16,8 +16,8 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 
-import java.util.Arrays;
-import java.util.Collections;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
+import com.google.common.annotations.VisibleForTesting;
 
 import org.apache.maven.archetype.catalog.Archetype;
 import org.eclipse.jface.dialogs.Dialog;
@@ -31,8 +31,8 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.List;
 
-import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
-import com.google.common.annotations.VisibleForTesting;
+import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * UI to select an archetype in creating a new Maven-based App Engine Standard Java project.
