@@ -50,7 +50,7 @@ import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
  */
 public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
 
-  public static final String SERVER_ATTRIBUTE_PORT = "appEngineDevServerPort";
+  public static final String SERVER_PORT_ATTRIBUTE_NAME = "appEngineDevServerPort";
   public static final int DEFAULT_SERVER_PORT = 8080;
 
   private static final Logger logger =
@@ -147,7 +147,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
   }
 
   private boolean fixActualPort() {
-    actualPort = getServer().getAttribute(SERVER_ATTRIBUTE_PORT, DEFAULT_SERVER_PORT);
+    actualPort = getServer().getAttribute(SERVER_PORT_ATTRIBUTE_NAME, DEFAULT_SERVER_PORT);
     if (actualPort == 0) {
       actualPort = SocketUtil.findFreePort();
     }

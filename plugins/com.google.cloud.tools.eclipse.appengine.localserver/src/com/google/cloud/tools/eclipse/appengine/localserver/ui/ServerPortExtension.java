@@ -95,13 +95,13 @@ public class ServerPortExtension extends ServerCreationWizardPageExtension {
 
   private boolean updatePortAndTriggerDecoration(String newPortString) {
     if (newPortString.isEmpty()) {
-      serverWc.setAttribute(LocalAppEngineServerBehaviour.SERVER_ATTRIBUTE_PORT, 0);
+      serverWc.setAttribute(LocalAppEngineServerBehaviour.SERVER_PORT_ATTRIBUTE_NAME, 0);
       return true;
     }
 
     try {
       int port = Integer.parseInt(newPortString);
-      serverWc.setAttribute(LocalAppEngineServerBehaviour.SERVER_ATTRIBUTE_PORT, port);
+      serverWc.setAttribute(LocalAppEngineServerBehaviour.SERVER_PORT_ATTRIBUTE_NAME, port);
 
       if (port <= 65535) {
         portDecoration.hide();
