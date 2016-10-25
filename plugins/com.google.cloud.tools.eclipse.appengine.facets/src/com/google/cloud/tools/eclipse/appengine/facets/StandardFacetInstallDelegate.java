@@ -17,25 +17,27 @@
 package com.google.cloud.tools.eclipse.appengine.facets;
 
 import com.google.cloud.tools.eclipse.util.templates.appengine.AppEngineTemplateUtility;
-
+import java.io.ByteArrayInputStream;
+import java.util.Collections;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.wst.common.componentcore.ComponentCore;
+import org.eclipse.wst.common.componentcore.resources.IVirtualComponent;
+import org.eclipse.wst.common.componentcore.resources.IVirtualFolder;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 
-import java.io.ByteArrayInputStream;
-import java.util.Collections;
-
 public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate {
+  private final static String DEFAULT_WEB_PATH = "src/main/webapp";
+
+  private final static String WEB_INF = "WEB-INF/";
   private final static String APPENGINE_WEB_XML = "appengine-web.xml";
-  // TODO Change directory for dynamic web module.
-  // Differentiate between project with web facets vs 'true' dynamic web modules?
-  private final static String APPENGINE_WEB_XML_DIR = "src/main/webapp/WEB-INF/";
-  private final static String APPENGINE_WEB_XML_PATH = APPENGINE_WEB_XML_DIR + APPENGINE_WEB_XML;
 
   @Override
   public void execute(IProject project,
@@ -51,31 +53,55 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
    */
   private void createConfigFiles(IProject project, IProgressMonitor monitor)
       throws CoreException {
-    IFile appEngineWebXml = project.getFile(APPENGINE_WEB_XML_PATH);
+    SubMonitor progress = SubMonitor.convert(monitor, 10);
+
+    // The virtual component model is very flexible, but we assume that
+    // the WEB-INF/appengine-web.xml isn't a virtual file remapped elsewhere
+    IFolder webInfDir = getWebInfDirectory(project);
+    IFile appEngineWebXml = webInfDir.getFile(APPENGINE_WEB_XML);
+
     if (appEngineWebXml.exists()) {
       return;
     }
 
-    IFolder configDir = project.getFolder(APPENGINE_WEB_XML_DIR);
-    if (!configDir.exists()) {
-      Path configDirPath = new Path(APPENGINE_WEB_XML_DIR);
-      IContainer current = project;
-      for (int i = 0; i < configDirPath.segmentCount(); i++) {
-        final String segment = configDirPath.segment( i );
-        IFolder folder = current.getFolder(new Path(segment));
+    createFolders(webInfDir, progress.newChild(2));
 
-        if (!folder.exists()) {
-          folder.create( true, true, monitor );
-        }
-        current = folder;
-      }
-      configDir = (IFolder) current;
-    }
-
-    appEngineWebXml.create(new ByteArrayInputStream(new byte[0]), true, monitor);
+    appEngineWebXml.create(new ByteArrayInputStream(new byte[0]), true, progress.newChild(2));
     String configFileLocation = appEngineWebXml.getLocation().toString();
     AppEngineTemplateUtility.createFileContent(
-        configFileLocation, AppEngineTemplateUtility.APPENGINE_WEB_XML_TEMPLATE, Collections.<String, String> emptyMap());
+        configFileLocation, AppEngineTemplateUtility.APPENGINE_WEB_XML_TEMPLATE,
+        Collections.<String, String>emptyMap());
+    progress.worked(6);
+  }
+
+  private IFolder getWebInfDirectory(IProject project) {
+    // Try to obtain the directory as if it was a Dynamic Web Project
+    IVirtualComponent component = ComponentCore.createComponent(project);
+    if (component != null && component.exists()) {
+      IVirtualFolder root = component.getRootFolder();
+      // the root should exist, but the WEB-INF may not yet exist
+      if (root.exists()) {
+        return (IFolder) root.getFolder(WEB_INF).getUnderlyingFolder();
+      }
+    }
+    // Otherwise it's seemingly fair game
+    return project.getFolder(DEFAULT_WEB_PATH).getFolder(WEB_INF);
+
+  }
+
+  private void createFolders(IFolder dir, IProgressMonitor monitor) throws CoreException {
+    IPath path = dir.getProjectRelativePath();
+    IContainer current = dir.getProject();
+    SubMonitor progress = SubMonitor.convert(monitor, path.segmentCount());
+    for (int i = 0; i < path.segmentCount(); i++) {
+      final String segment = path.segment(i);
+      IFolder folder = current.getFolder(new Path(segment));
+      if (!folder.exists()) {
+        folder.create(true, true, null);
+      }
+      current = folder;
+      progress.worked(1);
+    }
   }
 
 }
