@@ -36,6 +36,7 @@ import java.util.logging.Logger;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jdt.launching.SocketUtil;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
@@ -48,6 +49,7 @@ import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
  * Client Library.
  */
 public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
+
   public static final String SERVER_ATTRIBUTE_PORT = "appEngineDevServerPort";
   public static final int DEFAULT_SERVER_PORT = 8080;
 
@@ -58,6 +60,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
   private LocalAppEngineExitListener localAppEngineExitListener;
   private AppEngineDevServer devServer;
   private Process devProcess;
+  private int actualPort = -1;
 
   private DevAppServerOutputListener serverOutputListener;
 
@@ -143,14 +146,30 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
     setModulePublishState(module, state);
   }
 
+  private boolean fixActualPort() {
+    actualPort = getServer().getAttribute(SERVER_ATTRIBUTE_PORT, DEFAULT_SERVER_PORT);
+    if (actualPort == 0) {
+      actualPort = SocketUtil.findFreePort();
+    }
+    return actualPort != -1;
+  }
+
+  int getActualPort() {
+    return actualPort;
+  }
+
   /**
    * Starts the development server.
    *
    * @param runnables the path to directories that contain configuration files like appengine-web.xml
    * @param console the stream (Eclipse console) to send development server process output to
-   * @param port the app service port
    */
-  void startDevServer(List<File> runnables, MessageConsoleStream console, int port) {
+  void startDevServer(List<File> runnables, MessageConsoleStream console) {
+    if (!fixActualPort()) {
+      setServerStatus(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Failed to find a free port"));
+      return;
+    }
+
     setServerState(IServer.STATE_STARTING);
 
     // Create dev app server instance
@@ -161,7 +180,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
     devServerRunConfiguration.setAutomaticRestart(false);
     devServerRunConfiguration.setAppYamls(runnables);
     devServerRunConfiguration.setHost(getServer().getHost());
-    devServerRunConfiguration.setPort(port);
+    devServerRunConfiguration.setPort(actualPort);
 
     // FIXME: workaround bug when running on a Java8 JVM
     // https://github.com/GoogleCloudPlatform/gcloud-eclipse-tools/issues/181
@@ -181,11 +200,14 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
    *
    * @param runnables the path to directories that contain configuration files like appengine-web.xml
    * @param console the stream (Eclipse console) to send development server process output to
-   * @param port the app service port
    * @param debugPort the port to attach a debugger to if launch is in debug mode
    */
-  void startDebugDevServer(List<File> runnables, MessageConsoleStream console,
-                           int port, int debugPort) {
+  void startDebugDevServer(List<File> runnables, MessageConsoleStream console, int debugPort) {
+    if (!fixActualPort()) {
+      setServerStatus(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Failed to find a free port"));
+      return;
+    }
+
     setServerState(IServer.STATE_STARTING);
 
     // Create dev app server instance
@@ -196,7 +218,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
     devServerRunConfiguration.setAutomaticRestart(false);
     devServerRunConfiguration.setAppYamls(runnables);
     devServerRunConfiguration.setHost(getServer().getHost());
-    devServerRunConfiguration.setPort(port);
+    devServerRunConfiguration.setPort(actualPort);
 
     // todo: make this a configurable option, but default to
     // 1 instance to simplify debugging

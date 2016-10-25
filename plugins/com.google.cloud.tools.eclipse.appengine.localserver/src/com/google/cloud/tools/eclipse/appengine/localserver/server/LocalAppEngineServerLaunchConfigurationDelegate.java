@@ -98,36 +98,31 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
     LocalAppEngineConsole console =
         MessageConsoleUtilities.findOrCreateConsole(configuration.getName(),
-                                            new LocalAppEngineConsole.Factory(serverBehaviour));
+            new LocalAppEngineConsole.Factory(serverBehaviour));
     console.clearConsole();
     console.activate();
 
-    int port = server.getAttribute(LocalAppEngineServerBehaviour.SERVER_ATTRIBUTE_PORT,
-                                   LocalAppEngineServerBehaviour.DEFAULT_SERVER_PORT);
-    if (port == 0) {
-      port = getFreePort();
-    }
-    new ServerLaunchMonitor(configuration, launch, server, port).engage();
+    new ServerLaunchMonitor(configuration, launch, server).engage();
 
     if (ILaunchManager.DEBUG_MODE.equals(mode)) {
-      int debugPort = getFreePort();
+      int debugPort = getDebugPort();
       setupDebugTarget(launch, configuration, debugPort, monitor);
-      serverBehaviour.startDebugDevServer(runnables, console.newMessageStream(), port, debugPort);
+      serverBehaviour.startDebugDevServer(runnables, console.newMessageStream(), debugPort);
     } else {
       // A launch must have at least one debug target or process, or it otherwise becomes a zombie
       LocalAppEngineServerDebugTarget.addTarget(launch, serverBehaviour);
-      serverBehaviour.startDevServer(runnables, console.newMessageStream(), port);
+      serverBehaviour.startDevServer(runnables, console.newMessageStream());
     }
   }
 
   /**
    * Listen for the server to enter STARTED and open a web browser on the server's main page
    */
-  protected void openBrowserPage(final IServer server, int actualPort) {
+  protected void openBrowserPage(final IServer server) {
     if (!shouldOpenStartPage()) {
       return;
     }
-    final String pageLocation = determinePageLocation(server, actualPort);
+    final String pageLocation = determinePageLocation(server);
     if (pageLocation == null) {
       return;
     }
@@ -187,10 +182,10 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     connector.connect(connectionParameters, monitor, launch);
   }
 
-  private int getFreePort() throws CoreException {
+  private int getDebugPort() throws CoreException {
     int port = SocketUtil.findFreePort();
     if (port == -1) {
-      abort("Cannot find free port", null, IStatus.ERROR);
+      abort("Cannot find free port for remote debugger", null, IStatus.ERROR);
     }
     return port;
   }
@@ -204,8 +199,11 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
   }
 
   @VisibleForTesting
-  static String determinePageLocation(IServer server, int actualPort) {
-    return "http://" + server.getHost() + ":" + actualPort;
+  static String determinePageLocation(IServer server) {
+    LocalAppEngineServerBehaviour serverBehaviour = (LocalAppEngineServerBehaviour)
+        server.loadAdapter(LocalAppEngineServerBehaviour.class, null /* monitor */);
+
+    return "http://" + server.getHost() + ":" + serverBehaviour.getActualPort();
   }
 
 
@@ -223,17 +221,14 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     private ILaunchConfiguration configuration;
     private ILaunch launch;
     private IServer server;
-    private int actualPort;
 
     /**
      * Setup the monitor.
      */
-    ServerLaunchMonitor(ILaunchConfiguration configuration, ILaunch launch,
-                        IServer server, int actualPort) {
+    ServerLaunchMonitor(ILaunchConfiguration configuration, ILaunch launch, IServer server) {
       this.configuration = configuration;
       this.launch = launch;
       this.server = server;
-      this.actualPort = actualPort;
     }
 
     /** Add required listeners */
@@ -253,7 +248,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       Preconditions.checkState(server == event.getServer());
       switch (event.getState()) {
         case IServer.STATE_STARTED:
-          openBrowserPage(server, actualPort);
+          openBrowserPage(server);
           return;
 
         case IServer.STATE_STOPPED:
