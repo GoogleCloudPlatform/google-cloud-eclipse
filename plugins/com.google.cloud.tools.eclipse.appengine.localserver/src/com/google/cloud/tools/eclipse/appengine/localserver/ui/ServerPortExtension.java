@@ -101,7 +101,9 @@ public class ServerPortExtension extends ServerCreationWizardPageExtension {
 
     try {
       int port = Integer.parseInt(newPortString);
-      serverWc.setAttribute(LocalAppEngineServerBehaviour.SERVER_PORT_ATTRIBUTE_NAME, port);
+      if (port < 0) {
+        return false;
+      }
 
       if (port <= 65535) {
         portDecoration.hide();
@@ -109,6 +111,8 @@ public class ServerPortExtension extends ServerCreationWizardPageExtension {
         portDecoration.show();
         portDecoration.showHoverText(Messages.NEW_SERVER_DIALOG_INVALID_PORT_VALUE);
       }
+
+      serverWc.setAttribute(LocalAppEngineServerBehaviour.SERVER_PORT_ATTRIBUTE_NAME, port);
       return true;
     } catch (NumberFormatException ex) {
       return false;
