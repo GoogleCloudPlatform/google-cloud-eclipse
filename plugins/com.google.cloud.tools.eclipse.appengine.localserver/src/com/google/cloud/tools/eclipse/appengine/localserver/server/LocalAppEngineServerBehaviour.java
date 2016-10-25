@@ -48,6 +48,8 @@ import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
  * Client Library.
  */
 public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
+  public static final String SERVER_ATTRIBUTE_PORT = "appEngineDevServerPort";
+
   private static final Logger logger =
       Logger.getLogger(LocalAppEngineServerBehaviour.class.getName());
 

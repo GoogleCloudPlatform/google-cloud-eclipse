@@ -103,7 +103,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     console.clearConsole();
     console.activate();
 
-    int port = server.getAttribute(ServerPortExtension.SERVER_ATTRIBUTE_PORT,
+    int port = server.getAttribute(LocalAppEngineServerBehaviour.SERVER_ATTRIBUTE_PORT,
                                    ServerPortExtension.DEFAULT_SERVICE_PORT);
     if (port == 0) {
       port = getFreePort();

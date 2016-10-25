@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
 import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
+import com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerBehaviour;
 import com.google.common.annotations.VisibleForTesting;
 import java.beans.PropertyChangeEvent;
 import org.eclipse.jface.fieldassist.ControlDecoration;
@@ -37,7 +38,6 @@ import org.eclipse.wst.server.ui.wizard.ServerCreationWizardPageExtension;
  */
 public class ServerPortExtension extends ServerCreationWizardPageExtension {
 
-  public static final String SERVER_ATTRIBUTE_PORT = "appEngineDevServerPort"; //$NON-NLS-1$
   public static final int DEFAULT_SERVICE_PORT = 8080;
 
   private static final String APP_ENGINE_SERVER_TYPE_ID =
@@ -100,13 +100,13 @@ public class ServerPortExtension extends ServerCreationWizardPageExtension {
   private boolean updatePortAndTriggerDecoration(String newPortString) {
     if (newPortString.isEmpty()) {
       showPortDecoration(informationImage, Messages.NEW_SERVER_DIALOG_EMPTY_PORT_FIELD);
-      serverWc.setAttribute(SERVER_ATTRIBUTE_PORT, 0);
+      serverWc.setAttribute(LocalAppEngineServerBehaviour.SERVER_ATTRIBUTE_PORT, 0);
       return true;
     }
 
     try {
       int port = Integer.parseInt(newPortString);
-      serverWc.setAttribute(SERVER_ATTRIBUTE_PORT, port);
+      serverWc.setAttribute(LocalAppEngineServerBehaviour.SERVER_ATTRIBUTE_PORT, port);
 
       if (port <= 65535) {
         portDecoration.hide();
