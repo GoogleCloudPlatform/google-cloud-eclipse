@@ -37,17 +37,11 @@ public class SerializableClasspathEntry {
     setAttributes(entry.getExtraAttributes());
     setAccessRules(entry.getAccessRules());
     setSourcePath(entry.getSourceAttachmentPath());
-    setPath(entry.getPath(), baseDirectory);
+    setPath(relativizePath(entry.getPath(), baseDirectory));
   }
 
-  private void setPath(IPath path, IPath baseDirectory) {
-    java.nio.file.Path base = baseDirectory.toFile().toPath().toAbsolutePath();
-    java.nio.file.Path child = path.toFile().toPath().toAbsolutePath();
-    if (child.startsWith(base)) {
-      this.path = base.relativize(child).toString();
-    } else {
-      this.path = path.toString();
-    }
+  private void setPath(String path) {
+    this.path = path;
   }
 
   public void setAttributes(IClasspathAttribute[] extraAttributes) {
@@ -71,12 +65,33 @@ public class SerializableClasspathEntry {
   }
 
   public IClasspathEntry toClasspathEntry(IPath baseDirectory) {
-    return JavaCore.newLibraryEntry(baseDirectory.append(path),
+    return JavaCore.newLibraryEntry(makePathAbsolute(path, baseDirectory),
                                     new Path(sourceAttachmentPath),
                                     null,
                                     getAccessRules(),
                                     getAttributes(),
                                     true);
+  }
+
+  // if path is relative, it's appended to baseDirectory, otherwise unchanged
+  private static IPath makePathAbsolute(String path, IPath baseDirectory) {
+    IPath jarPath = new Path(path);
+    if (jarPath.isAbsolute()) {
+      return jarPath;
+    } else {
+      return baseDirectory.append(jarPath);
+    }
+  }
+
+  // converts path to relative if it is under baseDirectory, otherwise uses original
+  private static String relativizePath(IPath path, IPath baseDirectory) {
+    java.nio.file.Path base = baseDirectory.toFile().toPath().toAbsolutePath();
+    java.nio.file.Path child = path.toFile().toPath().toAbsolutePath();
+    if (child.startsWith(base)) {
+      return base.relativize(child).toString();
+    } else {
+      return path.toString();
+    }
   }
 
   private IClasspathAttribute[] getAttributes() {
