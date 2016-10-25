@@ -38,8 +38,6 @@ import org.eclipse.wst.server.ui.wizard.ServerCreationWizardPageExtension;
  */
 public class ServerPortExtension extends ServerCreationWizardPageExtension {
 
-  public static final int DEFAULT_SERVICE_PORT = 8080;
-
   private static final String APP_ENGINE_SERVER_TYPE_ID =
       "com.google.cloud.tools.eclipse.appengine.standard.server"; //$NON-NLS-1$
 
@@ -59,7 +57,7 @@ public class ServerPortExtension extends ServerCreationWizardPageExtension {
 
       portText = new Text(parent, SWT.SINGLE | SWT.BORDER);
       portText.setVisible(false);
-      portText.setText(String.valueOf(DEFAULT_SERVICE_PORT));
+      portText.setText(String.valueOf(LocalAppEngineServerBehaviour.DEFAULT_SERVICE_PORT));
       portText.addVerifyListener(new PortChangeMonitor());
       portText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 

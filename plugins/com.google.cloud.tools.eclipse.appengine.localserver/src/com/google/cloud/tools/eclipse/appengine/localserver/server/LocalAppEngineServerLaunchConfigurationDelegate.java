@@ -19,7 +19,6 @@ package com.google.cloud.tools.eclipse.appengine.localserver.server;
 import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
 import com.google.cloud.tools.eclipse.appengine.localserver.PreferencesInitializer;
 import com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineConsole;
-import com.google.cloud.tools.eclipse.appengine.localserver.ui.ServerPortExtension;
 import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
@@ -104,7 +103,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     console.activate();
 
     int port = server.getAttribute(LocalAppEngineServerBehaviour.SERVER_ATTRIBUTE_PORT,
-                                   ServerPortExtension.DEFAULT_SERVICE_PORT);
+                                   LocalAppEngineServerBehaviour.DEFAULT_SERVICE_PORT);
     if (port == 0) {
       port = getFreePort();
     }
