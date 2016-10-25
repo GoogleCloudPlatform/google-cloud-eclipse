@@ -61,7 +61,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
   private LocalAppEngineExitListener localAppEngineExitListener;
   private AppEngineDevServer devServer;
   private Process devProcess;
-  private int actualPort = -1;
+  private int port = -1;
 
   private DevAppServerOutputListener serverOutputListener;
 
@@ -151,23 +151,23 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
     return new Status(IStatus.ERROR, Activator.PLUGIN_ID, message);
   }
 
-  private int fixActualPort() throws CoreException {
-    actualPort = getServer().getAttribute(SERVER_PORT_ATTRIBUTE_NAME, DEFAULT_SERVER_PORT);
-    if (actualPort < 0 || actualPort > 65535) {
+  private int checkAndSetPort() throws CoreException {
+    port = getServer().getAttribute(SERVER_PORT_ATTRIBUTE_NAME, DEFAULT_SERVER_PORT);
+    if (port < 0 || port > 65535) {
       throw new CoreException(newErrorStatus("Port must be between 0 and 65535."));
     }
 
-    if (actualPort == 0) {
-      actualPort = SocketUtil.findFreePort();
-      if (actualPort == -1) {
+    if (port == 0) {
+      port = SocketUtil.findFreePort();
+      if (port == -1) {
         throw new CoreException(newErrorStatus("Failed to find a free port."));
       }
     }
-    return actualPort;
+    return port;
   }
 
-  public int getActualPort() {
-    return actualPort;
+  public int getPort() {
+    return port;
   }
 
   /**
@@ -177,7 +177,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
    * @param console the stream (Eclipse console) to send development server process output to
    */
   void startDevServer(List<File> runnables, MessageConsoleStream console) throws CoreException {
-    fixActualPort();  // Must be called before setting the STARTING state.
+    checkAndSetPort();  // Must be called before setting the STARTING state.
     setServerState(IServer.STATE_STARTING);
 
     // Create dev app server instance
@@ -188,7 +188,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
     devServerRunConfiguration.setAutomaticRestart(false);
     devServerRunConfiguration.setAppYamls(runnables);
     devServerRunConfiguration.setHost(getServer().getHost());
-    devServerRunConfiguration.setPort(actualPort);
+    devServerRunConfiguration.setPort(port);
 
     // FIXME: workaround bug when running on a Java8 JVM
     // https://github.com/GoogleCloudPlatform/gcloud-eclipse-tools/issues/181
@@ -212,7 +212,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
    */
   void startDebugDevServer(List<File> runnables, MessageConsoleStream console, int debugPort)
       throws CoreException {
-    fixActualPort();  // Must be called before setting the STARTING state.
+    checkAndSetPort();  // Must be called before setting the STARTING state.
     setServerState(IServer.STATE_STARTING);
 
     // Create dev app server instance
@@ -223,7 +223,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
     devServerRunConfiguration.setAutomaticRestart(false);
     devServerRunConfiguration.setAppYamls(runnables);
     devServerRunConfiguration.setHost(getServer().getHost());
-    devServerRunConfiguration.setPort(actualPort);
+    devServerRunConfiguration.setPort(port);
 
     // todo: make this a configurable option, but default to
     // 1 instance to simplify debugging
