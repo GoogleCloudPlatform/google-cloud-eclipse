@@ -177,6 +177,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
    * @param console the stream (Eclipse console) to send development server process output to
    */
   void startDevServer(List<File> runnables, MessageConsoleStream console) throws CoreException {
+    fixActualPort();  // Must be called before setting the STARTING state.
     setServerState(IServer.STATE_STARTING);
 
     // Create dev app server instance
@@ -187,7 +188,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
     devServerRunConfiguration.setAutomaticRestart(false);
     devServerRunConfiguration.setAppYamls(runnables);
     devServerRunConfiguration.setHost(getServer().getHost());
-    devServerRunConfiguration.setPort(fixActualPort());
+    devServerRunConfiguration.setPort(actualPort);
 
     // FIXME: workaround bug when running on a Java8 JVM
     // https://github.com/GoogleCloudPlatform/gcloud-eclipse-tools/issues/181
@@ -211,6 +212,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
    */
   void startDebugDevServer(List<File> runnables, MessageConsoleStream console, int debugPort)
       throws CoreException {
+    fixActualPort();  // Must be called before setting the STARTING state.
     setServerState(IServer.STATE_STARTING);
 
     // Create dev app server instance
@@ -221,7 +223,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
     devServerRunConfiguration.setAutomaticRestart(false);
     devServerRunConfiguration.setAppYamls(runnables);
     devServerRunConfiguration.setHost(getServer().getHost());
-    devServerRunConfiguration.setPort(fixActualPort());
+    devServerRunConfiguration.setPort(actualPort);
 
     // todo: make this a configurable option, but default to
     // 1 instance to simplify debugging
