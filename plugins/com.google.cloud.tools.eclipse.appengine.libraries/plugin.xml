@@ -79,7 +79,7 @@
   <extension
         point="org.eclipse.jdt.core.classpathContainerInitializer">
      <classpathContainerInitializer
-           class="com.google.cloud.tools.eclipse.appengine.libraries.AppEngineLibraryContainerInitializer"
+           class="com.google.cloud.tools.eclipse.util.service.ServiceContextFactory:com.google.cloud.tools.eclipse.appengine.libraries.AppEngineLibraryContainerInitializer"
            id="com.google.cloud.tools.eclipse.appengine.libraries" />
   </extension>
 </plugin>
