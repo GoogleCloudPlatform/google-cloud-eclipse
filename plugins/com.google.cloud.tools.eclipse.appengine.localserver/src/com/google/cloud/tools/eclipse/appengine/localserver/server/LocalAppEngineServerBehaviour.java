@@ -154,7 +154,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
     return actualPort != -1;
   }
 
-  int getActualPort() {
+  public int getActualPort() {
     return actualPort;
   }
 

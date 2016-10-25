@@ -45,9 +45,6 @@ public class ServerPortExtension extends ServerCreationWizardPageExtension {
   @VisibleForTesting Text portText;
   @VisibleForTesting ControlDecoration portDecoration;
 
-  @VisibleForTesting Image informationImage;
-  @VisibleForTesting Image errorImage;
-
   @Override
   public void createControl(UI_POSITION position, Composite parent) {
     // We add controls only to the BOTTOM position.
@@ -62,13 +59,13 @@ public class ServerPortExtension extends ServerCreationWizardPageExtension {
       portText.addVerifyListener(new PortChangeMonitor());
       portText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-      portDecoration = new ControlDecoration(portText, SWT.LEFT | SWT.TOP);
-      portDecoration.hide();
-
       FieldDecorationRegistry registry = FieldDecorationRegistry.getDefault();
-      informationImage =
-          registry.getFieldDecoration(FieldDecorationRegistry.DEC_INFORMATION).getImage();
-      errorImage = registry.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage();
+      Image errorImage = registry.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage();
+
+      portDecoration = new ControlDecoration(portText, SWT.LEFT | SWT.TOP);
+      portDecoration.setDescriptionText(Messages.NEW_SERVER_DIALOG_INVALID_PORT_VALUE);
+      portDecoration.setImage(errorImage);
+      portDecoration.hide();
     }
   }
 
@@ -98,7 +95,6 @@ public class ServerPortExtension extends ServerCreationWizardPageExtension {
 
   private boolean updatePortAndTriggerDecoration(String newPortString) {
     if (newPortString.isEmpty()) {
-      showPortDecoration(informationImage, Messages.NEW_SERVER_DIALOG_EMPTY_PORT_FIELD);
       serverWc.setAttribute(LocalAppEngineServerBehaviour.SERVER_ATTRIBUTE_PORT, 0);
       return true;
     }
@@ -110,18 +106,12 @@ public class ServerPortExtension extends ServerCreationWizardPageExtension {
       if (port <= 65535) {
         portDecoration.hide();
       } else {
-        showPortDecoration(errorImage, Messages.NEW_SERVER_DIALOG_INVALID_PORT_VALUE);
+        portDecoration.show();
+        portDecoration.showHoverText(Messages.NEW_SERVER_DIALOG_INVALID_PORT_VALUE);
       }
       return true;
     } catch (NumberFormatException ex) {
       return false;
     }
-  }
-
-  private void showPortDecoration(Image image, String description) {
-    portDecoration.setImage(image);
-    portDecoration.setDescriptionText(description);
-    portDecoration.show();
-    portDecoration.showHoverText(description);
   }
 }

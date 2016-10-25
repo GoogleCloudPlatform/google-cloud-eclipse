@@ -20,7 +20,6 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
   private static final String BUNDLE_NAME = "com.google.cloud.tools.eclipse.appengine.localserver.messages"; //$NON-NLS-1$
-  public static String NEW_SERVER_DIALOG_EMPTY_PORT_FIELD;
   public static String NEW_SERVER_DIALOG_PORT;
   public static String NEW_SERVER_DIALOG_INVALID_PORT_VALUE;
   static {

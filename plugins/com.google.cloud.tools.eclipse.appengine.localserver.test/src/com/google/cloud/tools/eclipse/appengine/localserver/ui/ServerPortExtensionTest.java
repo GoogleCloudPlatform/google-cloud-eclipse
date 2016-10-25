@@ -170,26 +170,12 @@ public class ServerPortExtensionTest {
 
     portExtension.portText.setText("65536");
     assertTrue(portExtension.portDecoration.isVisible());
-    assertEquals(portExtension.errorImage, portExtension.portDecoration.getImage());
 
     portExtension.portText.setText("65535");
     assertFalse(portExtension.portDecoration.isVisible());
 
     portExtension.portText.setText("98765");
     assertTrue(portExtension.portDecoration.isVisible());
-    assertEquals(portExtension.errorImage, portExtension.portDecoration.getImage());
-
-    portExtension.portText.setText("0");
-    assertFalse(portExtension.portDecoration.isVisible());
-  }
-
-  @Test
-  public void testShowInfoDecorationOnEmtpyField() {
-    portExtension.portText.setVisible(true);
-
-    portExtension.portText.setText("");
-    assertTrue(portExtension.portDecoration.isVisible());
-    assertEquals(portExtension.informationImage, portExtension.portDecoration.getImage());
 
     portExtension.portText.setText("0");
     assertFalse(portExtension.portDecoration.isVisible());
@@ -245,27 +231,14 @@ public class ServerPortExtensionTest {
   public void testTriggerPortDecorationOnServerTypeChanges() {
     portExtension.portText.setVisible(true);
 
-    portExtension.portText.setText("");
-    assertTrue(portExtension.portDecoration.isVisible());
-    assertEquals(portExtension.informationImage, portExtension.portDecoration.getImage());
-
-    portExtension.handlePropertyChanged(newNonAppEngineServerTypeEvent());
-    assertFalse(portExtension.portDecoration.isVisible());
-
-    portExtension.handlePropertyChanged(newAppEngineServerTypeEvent());
-    assertTrue(portExtension.portDecoration.isVisible());
-    assertEquals(portExtension.informationImage, portExtension.portDecoration.getImage());
-
     portExtension.portText.setText("65536");
     assertTrue(portExtension.portDecoration.isVisible());
-    assertEquals(portExtension.errorImage, portExtension.portDecoration.getImage());
 
     portExtension.handlePropertyChanged(newNonAppEngineServerTypeEvent());
     assertFalse(portExtension.portDecoration.isVisible());
 
     portExtension.handlePropertyChanged(newAppEngineServerTypeEvent());
     assertTrue(portExtension.portDecoration.isVisible());
-    assertEquals(portExtension.errorImage, portExtension.portDecoration.getImage());
   }
 
   private static PropertyChangeEvent newAppEngineServerTypeEvent() {
