@@ -17,11 +17,12 @@
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.server.core.IServer;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -31,24 +32,20 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class LocalAppEngineServerLaunchConfigurationDelegateTest {
 
   @Mock private IServer server;
+  @Mock private LocalAppEngineServerBehaviour serverBehavior;
+
+  @Before
+  public void setUp() {
+    when(server.loadAdapter(any(Class.class), any(IProgressMonitor.class)))
+        .thenReturn(serverBehavior);
+  }
 
   @Test
   public void testDeterminePageLocation() {
     when(server.getHost()).thenReturn("192.168.1.1");
-    when(server.getAttribute(eq("appEngineDevServerPort"), anyInt())).thenReturn(8085);
+    when(serverBehavior.getActualPort()).thenReturn(8085);
 
-    String url =
-        LocalAppEngineServerLaunchConfigurationDelegate.determinePageLocation(server, 8085);
+    String url = LocalAppEngineServerLaunchConfigurationDelegate.determinePageLocation(server);
     assertEquals("http://192.168.1.1:8085", url);
-  }
-
-  @Test
-  public void testDeterminePageLocation_actualPortMayDifferFromConfigPort() {
-    when(server.getHost()).thenReturn("192.168.100.1");
-    when(server.getAttribute(eq("appEngineDevServerPort"), anyInt())).thenReturn(0);
-
-    String url =
-        LocalAppEngineServerLaunchConfigurationDelegate.determinePageLocation(server, 12345);
-    assertEquals("http://192.168.100.1:12345", url);
   }
 }

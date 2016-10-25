@@ -50,6 +50,7 @@ public class ServerPortExtension extends ServerCreationWizardPageExtension {
 
   @Override
   public void createControl(UI_POSITION position, Composite parent) {
+    // We add controls only to the BOTTOM position.
     if (position == UI_POSITION.BOTTOM) {
       portLabel = new Label(parent, SWT.NONE);
       portLabel.setVisible(false);
