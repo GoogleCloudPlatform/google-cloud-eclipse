@@ -49,7 +49,7 @@ import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
  */
 public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
   public static final String SERVER_ATTRIBUTE_PORT = "appEngineDevServerPort";
-  public static final int DEFAULT_SERVICE_PORT = 8080;
+  public static final int DEFAULT_SERVER_PORT = 8080;
 
   private static final Logger logger =
       Logger.getLogger(LocalAppEngineServerBehaviour.class.getName());

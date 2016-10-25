@@ -57,7 +57,7 @@ public class ServerPortExtension extends ServerCreationWizardPageExtension {
 
       portText = new Text(parent, SWT.SINGLE | SWT.BORDER);
       portText.setVisible(false);
-      portText.setText(String.valueOf(LocalAppEngineServerBehaviour.DEFAULT_SERVICE_PORT));
+      portText.setText(String.valueOf(LocalAppEngineServerBehaviour.DEFAULT_SERVER_PORT));
       portText.addVerifyListener(new PortChangeMonitor());
       portText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
