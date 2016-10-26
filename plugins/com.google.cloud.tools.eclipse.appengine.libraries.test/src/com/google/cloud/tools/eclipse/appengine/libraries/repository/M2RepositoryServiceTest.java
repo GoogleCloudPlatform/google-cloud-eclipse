@@ -45,6 +45,7 @@ public class M2RepositoryServiceTest {
   private static final String FAKE_PATH = "/fake/path";
 
   @Mock private MavenHelper mavenHelper;
+  @Mock private MavenCoordinatesClasspathAttributesTransformer transformer;
 
   @Test(expected = LibraryRepositoryServiceException.class)
   public void testGetJarLocation_errorInArtifactResolution() throws LibraryRepositoryServiceException, CoreException {
@@ -94,6 +95,7 @@ public class M2RepositoryServiceTest {
   public void testGetJarLocation_customRepositoryURI() throws LibraryRepositoryServiceException, CoreException {
     M2RepositoryService m2RepositoryService = new M2RepositoryService();
     m2RepositoryService.setMavenHelper(mavenHelper);
+    m2RepositoryService.setTransformer(transformer);
     when(mavenHelper.createArtifactRepository("example.com", "http://example.com"))
       .thenReturn(mock(ArtifactRepository.class));
     Artifact artifact = getMockArtifactWithJarPath();

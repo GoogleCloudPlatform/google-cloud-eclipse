@@ -36,4 +36,11 @@ public interface ILibraryRepositoryService {
    */
   IClasspathEntry getLibraryClasspathEntry(LibraryFile libraryFile) throws LibraryRepositoryServiceException;
 
+  /**
+   * Returns a new {@link IClasspathEntry} instance with the kind {@link IClasspathEntry#CPE_LIBRARY} which has the
+   * same properties as the input, except for the path which is resolved afresh.
+   *
+   * @throws LibraryRepositoryServiceException if the artifact resolution fails.
+   */
+  IClasspathEntry rebuildClasspathEntry(IClasspathEntry classpathEntry) throws LibraryRepositoryServiceException;
 }

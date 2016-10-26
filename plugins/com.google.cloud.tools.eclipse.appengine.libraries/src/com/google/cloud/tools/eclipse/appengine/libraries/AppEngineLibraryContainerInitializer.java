@@ -20,6 +20,8 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFactory;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFactoryException;
 import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer;
+import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
+import com.google.cloud.tools.eclipse.appengine.libraries.repository.LibraryRepositoryServiceException;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
@@ -27,12 +29,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.inject.Inject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.RegistryFactory;
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.IClasspathContainer;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.osgi.util.NLS;
@@ -52,10 +56,14 @@ public class AppEngineLibraryContainerInitializer extends ClasspathContainerInit
   private String containerPath = Library.CONTAINER_PATH_PREFIX;
   private Map<String, Library> libraries;
 
-  private final LibraryClasspathContainerSerializer serializer;
+  @Inject
+  private LibraryClasspathContainerSerializer serializer;
+  @Inject
+  private ILibraryRepositoryService repositoryService;
+  @Inject
+  private IExtensionRegistry extensionRegistry;
 
   public AppEngineLibraryContainerInitializer() {
-    serializer = new LibraryClasspathContainerSerializer();
   }
 
   @VisibleForTesting
@@ -63,8 +71,18 @@ public class AppEngineLibraryContainerInitializer extends ClasspathContainerInit
                                        LibraryFactory libraryFactory,
                                        String containerPath,
                                        LibraryClasspathContainerSerializer serializer) {
+    this(configurationElements, libraryFactory, containerPath, serializer, null);
+  }
+
+  @VisibleForTesting
+  AppEngineLibraryContainerInitializer(IConfigurationElement[] configurationElements,
+                                       LibraryFactory libraryFactory,
+                                       String containerPath,
+                                       LibraryClasspathContainerSerializer serializer,
+                                       ILibraryRepositoryService repositoryService) {
     this.containerPath = containerPath;
     this.serializer = serializer;
+    this.repositoryService = repositoryService;
     initializeLibraries(configurationElements, libraryFactory);
   }
 
@@ -73,7 +91,7 @@ public class AppEngineLibraryContainerInitializer extends ClasspathContainerInit
     if (libraries == null) {
       // in tests libraries will be initialized via the test constructor, this would override mocks/stubs.
       IConfigurationElement[] configurationElements =
-          RegistryFactory.getRegistry().getConfigurationElementsFor(LIBRARIES_EXTENSION_POINT);
+          extensionRegistry.getConfigurationElementsFor(LIBRARIES_EXTENSION_POINT);
       initializeLibraries(configurationElements, new LibraryFactory());
     }
     if (containerPath.segmentCount() == 2) {
@@ -85,18 +103,27 @@ public class AppEngineLibraryContainerInitializer extends ClasspathContainerInit
       }
       try {
         LibraryClasspathContainer container = serializer.loadContainer(project, containerPath);
-        // TODO validate libraryFile paths and request resolution via ILibraryRepositoryService if they're invalid
-        // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/855
         if (container != null) {
+          validateJarPaths(container);
           JavaCore.setClasspathContainer(containerPath, new IJavaProject[] {project},
                                          new IClasspathContainer[] {container}, null);
         }
-      } catch (IOException ex) {
+      } catch (IOException | LibraryRepositoryServiceException ex) {
         throw new CoreException(StatusUtil.error(this, Messages.LoadContainerFailed, ex));
       }
     } else {
       throw new CoreException(StatusUtil.error(this, NLS.bind(Messages.ContainerPathNotTwoSegments,
                                                               containerPath.toString())));
+    }
+  }
+
+  private void validateJarPaths(LibraryClasspathContainer container) throws LibraryRepositoryServiceException {
+    IClasspathEntry[] classpathEntries = container.getClasspathEntries();
+    for (int i = 0; i < classpathEntries.length; i++) {
+      IClasspathEntry classpathEntry = classpathEntries[i];
+      if (!classpathEntry.getPath().toFile().exists()) {
+        classpathEntries[i] = repositoryService.rebuildClasspathEntry(classpathEntry);
+      }
     }
   }
 

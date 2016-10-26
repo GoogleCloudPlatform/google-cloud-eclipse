@@ -23,7 +23,6 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates
 import com.google.cloud.tools.eclipse.util.MavenUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
@@ -50,20 +49,8 @@ import org.osgi.service.component.annotations.Component;
 @Component
 public class M2RepositoryService implements ILibraryRepositoryService {
 
-  private static final String CLASSPATH_ATTRIBUTE_REPOSITORY =
-      "com.google.cloud.tools.eclipse.appengine.libraries.repository";
-  private static final String CLASSPATH_ATTRIBUTE_GROUP_ID =
-      "com.google.cloud.tools.eclipse.appengine.libraries.groupid";
-  private static final String CLASSPATH_ATTRIBUTE_ARTIFACT_ID =
-      "com.google.cloud.tools.eclipse.appengine.libraries.artifactId";
-  private static final String CLASSPATH_ATTRIBUTE_TYPE =
-      "com.google.cloud.tools.eclipse.appengine.libraries.type";
-  private static final String CLASSPATH_ATTRIBUTE_VERSION =
-      "com.google.cloud.tools.eclipse.appengine.libraries.version";
-  private static final String CLASSPATH_ATTRIBUTE_CLASSIFIER =
-      "com.google.cloud.tools.eclipse.appengine.libraries.classifier";
-
   private MavenHelper mavenHelper;
+  private MavenCoordinatesClasspathAttributesTransformer transformer;
 
   @Override
   public IClasspathEntry getLibraryClasspathEntry(LibraryFile libraryFile) throws LibraryRepositoryServiceException {
@@ -74,6 +61,18 @@ public class M2RepositoryService implements ILibraryRepositoryService {
                                     null /*  sourceAttachmentRootPath */,
                                     getAccessRules(libraryFile.getFilters()),
                                     libraryFileClasspathAttributes,
+                                    true /* isExported */);
+  }
+
+  @Override
+  public IClasspathEntry rebuildClasspathEntry(IClasspathEntry classpathEntry) throws LibraryRepositoryServiceException {
+    MavenCoordinates mavenCoordinates = transformer.createMavenCoordinates(classpathEntry.getExtraAttributes());
+    Artifact artifact = resolveArtifact(mavenCoordinates);
+    return JavaCore.newLibraryEntry(new Path(artifact.getFile().getAbsolutePath()),
+                                    classpathEntry.getSourceAttachmentPath(),
+                                    null /*  sourceAttachmentRootPath */,
+                                    classpathEntry.getAccessRules(),
+                                    classpathEntry.getExtraAttributes(),
                                     true /* isExported */);
   }
 
@@ -88,11 +87,11 @@ public class M2RepositoryService implements ILibraryRepositoryService {
     }
   }
 
-  private static IClasspathAttribute[] getClasspathAttributes(LibraryFile libraryFile, Artifact artifact)
+  private IClasspathAttribute[] getClasspathAttributes(LibraryFile libraryFile, Artifact artifact)
                                                                               throws LibraryRepositoryServiceException {
     try {
-      List<IClasspathAttribute> attributes = getAttributesForMavenCoordinates(artifact,
-                                                                              libraryFile.getMavenCoordinates());
+      List<IClasspathAttribute> attributes =
+          transformer.createClasspathAttributes(artifact, libraryFile.getMavenCoordinates());
       if (libraryFile.isExport()) {
         attributes.add(UpdateClasspathAttributeUtil.createDependencyAttribute(true /* isWebApp */));
       } else {
@@ -102,21 +101,6 @@ public class M2RepositoryService implements ILibraryRepositoryService {
     } catch (CoreException ex) {
       throw new LibraryRepositoryServiceException("Could not create classpath attributes", ex);
     }
-  }
-
-  private static List<IClasspathAttribute> getAttributesForMavenCoordinates(Artifact artifact,
-                                                                            MavenCoordinates mavenCoordinates) {
-    List<IClasspathAttribute> attributes = Lists.newArrayList(
-        JavaCore.newClasspathAttribute(CLASSPATH_ATTRIBUTE_REPOSITORY, mavenCoordinates.getRepository()),
-        JavaCore.newClasspathAttribute(CLASSPATH_ATTRIBUTE_GROUP_ID, artifact.getGroupId()),
-        JavaCore.newClasspathAttribute(CLASSPATH_ATTRIBUTE_ARTIFACT_ID, artifact.getArtifactId()),
-        JavaCore.newClasspathAttribute(CLASSPATH_ATTRIBUTE_TYPE, artifact.getType()),
-        JavaCore.newClasspathAttribute(CLASSPATH_ATTRIBUTE_VERSION, artifact.getVersion())
-        );
-    if (artifact.getClassifier() != null) {
-      attributes.add(JavaCore.newClasspathAttribute(CLASSPATH_ATTRIBUTE_CLASSIFIER, artifact.getClassifier()));
-    }
-    return attributes;
   }
 
   private IPath getSourceLocation(LibraryFile libraryFile) {
@@ -169,6 +153,7 @@ public class M2RepositoryService implements ILibraryRepositoryService {
   @Activate
   protected void activate() {
     mavenHelper = new M2EclipseMavenHelper();
+    transformer = new MavenCoordinatesClasspathAttributesTransformer();
   }
 
   @VisibleForTesting
@@ -185,6 +170,11 @@ public class M2RepositoryService implements ILibraryRepositoryService {
   @VisibleForTesting
   void setMavenHelper(MavenHelper mavenHelper) {
     this.mavenHelper = mavenHelper;
+  }
+
+  @VisibleForTesting
+  void setTransformer(MavenCoordinatesClasspathAttributesTransformer transformer) {
+    this.transformer = transformer;
   }
 
   private static class M2EclipseMavenHelper implements MavenHelper {
