@@ -364,7 +364,8 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
       if (MavenCoordinatesValidator.validateGroupId(newGroupId.trim())) {
         String newSuggestion = suggestPackageName(newGroupId);
         updatePackageField(newSuggestion);
-        previousSuggestion = newSuggestion;
+      } else if (newGroupId.trim().isEmpty()) {
+        updatePackageField("");
       }
     }
 
@@ -372,6 +373,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
       if (getPackageName().isEmpty() || getPackageName().equals(previousSuggestion)) {
         javaPackageField.setText(newSuggestion);
       }
+      previousSuggestion = newSuggestion;
     }
   }
 
