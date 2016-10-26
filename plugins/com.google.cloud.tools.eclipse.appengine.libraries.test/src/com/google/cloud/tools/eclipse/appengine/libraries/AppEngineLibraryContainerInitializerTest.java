@@ -77,7 +77,7 @@ public class AppEngineLibraryContainerInitializerTest {
 
   @Before
   public void setUp() throws Exception {
-    when(repositoryService.getLibraryClasspathEntry(any(IClasspathEntry.class)))
+    when(repositoryService.rebuildClasspathEntry(any(IClasspathEntry.class)))
       .thenAnswer(fakeClasspathEntry());
     setupLibraryFactory();
     setupSerializer();

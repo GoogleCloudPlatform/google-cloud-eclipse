@@ -42,5 +42,5 @@ public interface ILibraryRepositoryService {
    *
    * @throws LibraryRepositoryServiceException if the artifact resolution fails.
    */
-  IClasspathEntry getLibraryClasspathEntry(IClasspathEntry classpathEntry) throws LibraryRepositoryServiceException;
+  IClasspathEntry rebuildClasspathEntry(IClasspathEntry classpathEntry) throws LibraryRepositoryServiceException;
 }

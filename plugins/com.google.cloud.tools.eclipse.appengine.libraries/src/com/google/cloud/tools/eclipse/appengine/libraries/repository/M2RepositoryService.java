@@ -65,7 +65,7 @@ public class M2RepositoryService implements ILibraryRepositoryService {
   }
 
   @Override
-  public IClasspathEntry getLibraryClasspathEntry(IClasspathEntry classpathEntry) throws LibraryRepositoryServiceException {
+  public IClasspathEntry rebuildClasspathEntry(IClasspathEntry classpathEntry) throws LibraryRepositoryServiceException {
     MavenCoordinates mavenCoordinates = transformer.createMavenCoordinates(classpathEntry.getExtraAttributes());
     Artifact artifact = resolveArtifact(mavenCoordinates);
     return JavaCore.newLibraryEntry(new Path(artifact.getFile().getAbsolutePath()),

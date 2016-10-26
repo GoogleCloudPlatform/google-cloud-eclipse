@@ -122,7 +122,7 @@ public class AppEngineLibraryContainerInitializer extends ClasspathContainerInit
     for (int i = 0; i < classpathEntries.length; i++) {
       IClasspathEntry classpathEntry = classpathEntries[i];
       if (!classpathEntry.getPath().toFile().exists()) {
-        classpathEntries[i] = repositoryService.getLibraryClasspathEntry(classpathEntry);
+        classpathEntries[i] = repositoryService.rebuildClasspathEntry(classpathEntry);
       }
     }
   }
