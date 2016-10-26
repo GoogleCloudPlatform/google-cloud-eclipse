@@ -144,23 +144,40 @@ public class AppEngineLibrariesInPluginXmlTest {
     assertThat(objectifyLibrary.getSiteUri(), is(new URI("https://github.com/objectify/objectify/wiki")));
     assertTrue(objectifyLibrary.isExport());
 
-    assertThat(objectifyLibrary.getLibraryFiles().size(), is(1));
-    LibraryFile libraryFile = objectifyLibrary.getLibraryFiles().get(0);
-    assertThat(libraryFile.getJavadocUri(), is(new URI("http://www.javadoc.io/doc/com.googlecode.objectify/objectify/")));
-    assertNull(libraryFile.getSourceUri());
-    assertTrue("Objectify not exported", libraryFile.isExport());
+    assertThat(objectifyLibrary.getLibraryFiles().size(), is(2));
+    LibraryFile objectifyLibraryFile = objectifyLibrary.getLibraryFiles().get(0);
+    assertThat(objectifyLibraryFile.getJavadocUri(), is(new URI("http://www.javadoc.io/doc/com.googlecode.objectify/objectify/")));
+    assertNull(objectifyLibraryFile.getSourceUri());
+    assertTrue("Objectify not exported", objectifyLibraryFile.isExport());
 
-    assertNotNull(libraryFile.getMavenCoordinates());
-    MavenCoordinates mavenCoordinates = libraryFile.getMavenCoordinates();
-    assertThat(mavenCoordinates.getRepository(), is("central"));
-    assertThat(mavenCoordinates.getGroupId(), is("com.googlecode.objectify"));
-    assertThat(mavenCoordinates.getArtifactId(), is("objectify"));
-    assertThat(mavenCoordinates.getVersion(), is("LATEST"));
-    assertThat(mavenCoordinates.getType(), is("jar"));
-    assertNull(mavenCoordinates.getClassifier());
+    assertNotNull(objectifyLibraryFile.getMavenCoordinates());
+    MavenCoordinates objectifyMavenCoordinates = objectifyLibraryFile.getMavenCoordinates();
+    assertThat(objectifyMavenCoordinates.getRepository(), is("central"));
+    assertThat(objectifyMavenCoordinates.getGroupId(), is("com.googlecode.objectify"));
+    assertThat(objectifyMavenCoordinates.getArtifactId(), is("objectify"));
+    assertThat(objectifyMavenCoordinates.getVersion(), is("5.1.13"));
+    assertThat(objectifyMavenCoordinates.getType(), is("jar"));
+    assertNull(objectifyMavenCoordinates.getClassifier());
 
-    assertNotNull(libraryFile.getFilters());
-    assertTrue(libraryFile.getFilters().isEmpty());
+    assertNotNull(objectifyLibraryFile.getFilters());
+    assertTrue(objectifyLibraryFile.getFilters().isEmpty());
+    
+    LibraryFile guavaLibraryFile = objectifyLibrary.getLibraryFiles().get(1);
+    assertThat(guavaLibraryFile.getJavadocUri(), is(new URI("https://google.github.io/guava/releases/18.0/api/docs/")));
+    assertNull(guavaLibraryFile.getSourceUri());
+    assertTrue("Guava not exported", guavaLibraryFile.isExport());
+
+    assertNotNull(guavaLibraryFile.getMavenCoordinates());
+    MavenCoordinates guavaMavenCoordinates = guavaLibraryFile.getMavenCoordinates();
+    assertThat(guavaMavenCoordinates.getRepository(), is("central"));
+    assertThat(guavaMavenCoordinates.getGroupId(), is("com.google.guava"));
+    assertThat(guavaMavenCoordinates.getArtifactId(), is("guava"));
+    assertThat(guavaMavenCoordinates.getVersion(), is("18.0"));
+    assertThat(guavaMavenCoordinates.getType(), is("jar"));
+    assertNull(guavaMavenCoordinates.getClassifier());
+
+    assertNotNull(guavaLibraryFile.getFilters());
+    assertTrue(guavaLibraryFile.getFilters().isEmpty());
   }
 
   @Test

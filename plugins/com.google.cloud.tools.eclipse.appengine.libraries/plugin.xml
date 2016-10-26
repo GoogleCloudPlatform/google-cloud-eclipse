@@ -43,7 +43,7 @@
         <mavenCoordinates
               artifactId="objectify"
               groupId="com.googlecode.objectify"
-              version="5.1.3" />
+              version="5.1.13" />
       </libraryFile>
       <libraryFile
             javadocUri="https://google.github.io/guava/releases/18.0/api/docs/">
