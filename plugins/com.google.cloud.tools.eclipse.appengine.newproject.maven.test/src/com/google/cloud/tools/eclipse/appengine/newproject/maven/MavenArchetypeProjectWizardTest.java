@@ -20,6 +20,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 
+import org.eclipse.core.databinding.observable.Realm;
+import org.eclipse.jface.databinding.swt.DisplayRealm;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -110,30 +112,36 @@ public class MavenArchetypeProjectWizardTest {
 
   @Test
   public void testAutoPackageNameSetterOnGroupIdChange_whitespaceInGroupId() {
-    wizard.setContainer(mock(IWizardContainer.class));
-    wizard.createPageControls(shell);
-    MavenAppEngineStandardWizardPage page =
-        (MavenAppEngineStandardWizardPage) wizard.getPage("basicNewProjectPage");
+    Realm.runWithDefault(DisplayRealm.getRealm(Display.getDefault()), new Runnable() {
+      @Override
+      public void run() {
+        wizard.setContainer(mock(IWizardContainer.class));
+        wizard.createPageControls(shell);
+        MavenAppEngineStandardWizardPage page =
+            (MavenAppEngineStandardWizardPage) wizard.getPage("basicNewProjectPage");
 
-    page.groupIdField.setText(" ");  // setText() triggers VerifyEvent.
-    assertEquals("", page.javaPackageField.getText());
+        page.groupIdField.setText(" ");  // setText() triggers VerifyEvent.
+        assertEquals("", page.javaPackageField.getText());
 
-    page.groupIdField.setText(" a");
-    assertEquals("a", page.javaPackageField.getText());
+        page.groupIdField.setText(" a");
+        assertEquals("a", page.javaPackageField.getText());
 
-    page.groupIdField.setText(" a ");
-    assertEquals("a", page.javaPackageField.getText());
+        page.groupIdField.setText(" a ");
+        assertEquals("a", page.javaPackageField.getText());
 
-    page.groupIdField.setText(" a b");
-    assertEquals("a", page.javaPackageField.getText());
+        page.groupIdField.setText(" a b");
+        assertEquals("a", page.javaPackageField.getText());
 
-    page.groupIdField.setText(" a ");
-    assertEquals("a", page.javaPackageField.getText());
+        page.groupIdField.setText(" a ");
+        assertEquals("a", page.javaPackageField.getText());
 
-    page.groupIdField.setText(" a");
-    assertEquals("a", page.javaPackageField.getText());
+        page.groupIdField.setText(" a");
+        assertEquals("a", page.javaPackageField.getText());
 
-    page.groupIdField.setText(" ac");
-    assertEquals("ac", page.javaPackageField.getText());
+        page.groupIdField.setText(" ac");
+        assertEquals("ac", page.javaPackageField.getText());
+      }
+    });
+
   }
 }
