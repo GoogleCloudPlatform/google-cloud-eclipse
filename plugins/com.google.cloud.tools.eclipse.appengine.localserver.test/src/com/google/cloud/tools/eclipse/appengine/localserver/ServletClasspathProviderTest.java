@@ -36,14 +36,14 @@ import java.nio.file.Paths;
 @RunWith(MockitoJUnitRunner.class)
 public class ServletClasspathProviderTest {
 
-  private ServletClasspathProvider provider = new ServletClasspathProvider();
+  private ServletClasspathProvider provider;
   @Mock private CloudSdk cloudSdk;
   
   @Before
   public void setUp() {
     when(cloudSdk.getJarPath("servlet-api.jar")).thenReturn(Paths.get("/path/to/servlet-api.jar"));
     when(cloudSdk.getJarPath("jsp-api.jar")).thenReturn(Paths.get("/path/to/jsp-api.jar"));
-    provider.setCloudSdk(cloudSdk);
+	provider = new ServletClasspathProvider(cloudSdk);
   }
 
   @Test

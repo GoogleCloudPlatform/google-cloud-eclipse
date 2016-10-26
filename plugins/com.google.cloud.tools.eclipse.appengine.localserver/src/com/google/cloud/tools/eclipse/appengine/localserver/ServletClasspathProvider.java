@@ -33,8 +33,25 @@ import org.eclipse.wst.server.core.IRuntime;
  * to non-Maven projects.
  */
 public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
-  private CloudSdk cloudSdkForTesting;
+  private final CloudSdk cloudSdk;
 
+  @VisibleForTesting
+  ServletClasspathProvider(CloudSdk sdk) {
+	this.cloudSdk = sdk;
+  }
+  
+  public ServletClasspathProvider() {
+    this(getCloudSdk());
+  }
+  
+  private static CloudSdk getCloudSdk() {
+    try {
+ 	  return new CloudSdk.Builder().build();
+    } catch (AppEngineException ex) {
+      return null;
+    }
+  }
+  
   @Override
   public IClasspathEntry[] resolveClasspathContainer(IProject project, IRuntime runtime) {
     if (project != null && MavenUtils.hasMavenNature(project)) { // Maven handles its own classpath
@@ -46,13 +63,8 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
 
   @Override
   public IClasspathEntry[] resolveClasspathContainer(IRuntime runtime) {
-    CloudSdk cloudSdk = cloudSdkForTesting;
     if (cloudSdk == null) {
-      try {
-        cloudSdk = new CloudSdk.Builder().build();
-      } catch (AppEngineException ex) {
         return new IClasspathEntry[0];
-      }
     }
     java.nio.file.Path servletJar = cloudSdk.getJarPath("servlet-api.jar");
     java.nio.file.Path jspJar = cloudSdk.getJarPath("jsp-api.jar");
@@ -62,10 +74,5 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
     
     IClasspathEntry[] entries = {servletEntry, jspEntry};
     return entries;
-  }
-  
-  @VisibleForTesting
-  public void setCloudSdk(CloudSdk cloudSdk) {
-    this.cloudSdkForTesting = cloudSdk;
   }
 }
