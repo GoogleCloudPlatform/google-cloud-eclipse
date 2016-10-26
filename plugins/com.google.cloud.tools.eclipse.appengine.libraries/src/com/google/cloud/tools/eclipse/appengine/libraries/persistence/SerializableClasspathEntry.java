@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.persistence;
 
+import com.google.cloud.tools.eclipse.util.io.PathUtil;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IAccessRule;
@@ -37,7 +38,7 @@ public class SerializableClasspathEntry {
     setAttributes(entry.getExtraAttributes());
     setAccessRules(entry.getAccessRules());
     setSourcePath(entry.getSourceAttachmentPath());
-    setPath(relativizePath(entry.getPath(), baseDirectory));
+    setPath(PathUtil.relativizePath(entry.getPath(), baseDirectory).toString());
   }
 
   private void setPath(String path) {
@@ -65,33 +66,12 @@ public class SerializableClasspathEntry {
   }
 
   public IClasspathEntry toClasspathEntry(IPath baseDirectory) {
-    return JavaCore.newLibraryEntry(makePathAbsolute(path, baseDirectory),
+    return JavaCore.newLibraryEntry(PathUtil.makePathAbsolute(new Path(path), baseDirectory),
                                     new Path(sourceAttachmentPath),
                                     null,
                                     getAccessRules(),
                                     getAttributes(),
                                     true);
-  }
-
-  // if path is relative, it's appended to baseDirectory, otherwise unchanged
-  private static IPath makePathAbsolute(String path, IPath baseDirectory) {
-    IPath jarPath = new Path(path);
-    if (jarPath.isAbsolute()) {
-      return jarPath;
-    } else {
-      return baseDirectory.append(jarPath);
-    }
-  }
-
-  // converts path to relative if it is under baseDirectory, otherwise uses original
-  private static String relativizePath(IPath path, IPath baseDirectory) {
-    java.nio.file.Path base = baseDirectory.toFile().toPath().toAbsolutePath();
-    java.nio.file.Path child = path.toFile().toPath().toAbsolutePath();
-    if (child.startsWith(base)) {
-      return base.relativize(child).toString();
-    } else {
-      return path.toString();
-    }
   }
 
   private IClasspathAttribute[] getAttributes() {

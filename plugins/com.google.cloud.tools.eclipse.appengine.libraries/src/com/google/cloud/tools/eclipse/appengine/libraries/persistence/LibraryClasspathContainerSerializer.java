@@ -146,7 +146,7 @@ public class LibraryClasspathContainerSerializer {
 
   private static class M2LocalRepositoryLocationProvider implements ArtifactBaseLocationProvider {
 
-    /* (non-Javadoc)
+    /**
      * @see com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer.ArtifactBaseLocationProvider#getBaseLocation()
      */
     @Override

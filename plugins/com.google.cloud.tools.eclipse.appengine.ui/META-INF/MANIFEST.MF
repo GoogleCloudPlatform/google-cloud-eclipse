@@ -7,10 +7,22 @@ Bundle-Vendor: Google Inc.
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: com.google.cloud.tools.eclipse.appengine.ui
-Import-Package: org.eclipse.jface.dialogs,
+Import-Package: com.google.cloud.tools.eclipse.appengine.libraries,
+ com.google.cloud.tools.eclipse.appengine.libraries.model,
+ com.google.cloud.tools.eclipse.ui.util.databinding,
+ com.google.common.base;version="15.0.0",
+ org.eclipse.core.databinding,
+ org.eclipse.core.databinding.beans,
+ org.eclipse.core.databinding.conversion,
+ org.eclipse.core.databinding.observable,
+ org.eclipse.core.databinding.observable.value,
+ org.eclipse.core.databinding.property.value,
+ org.eclipse.jface.databinding.swt,
+ org.eclipse.jface.dialogs,
  org.eclipse.jface.layout,
  org.eclipse.jface.resource,
  org.eclipse.jface.wizard,
+ org.eclipse.osgi.util;version="1.1.0",
  org.eclipse.swt,
  org.eclipse.swt.custom,
  org.eclipse.swt.graphics,
