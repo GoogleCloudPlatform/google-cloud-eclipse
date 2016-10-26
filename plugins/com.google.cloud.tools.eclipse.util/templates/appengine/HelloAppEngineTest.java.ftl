@@ -2,7 +2,6 @@
 
 </#if>import java.io.IOException;
 
-import org.hamcrest.core.Is;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -12,7 +11,7 @@ public class HelloAppEngineTest {
   public void test() throws IOException {
     MockHttpServletResponse response = new MockHttpServletResponse();
     new HelloAppEngine().doGet(null, response);
-    Assert.assertThat(response.getContentType(), Is.is("text/plain"));
-    Assert.assertThat(response.getWriterContent().toString(), Is.is("Hello App Engine!\n"));
+    Assert.assertEquals("text/plain", response.getContentType());
+    Assert.assertEquals("Hello App Engine!\r\n", response.getWriterContent().toString());
   }
 }
