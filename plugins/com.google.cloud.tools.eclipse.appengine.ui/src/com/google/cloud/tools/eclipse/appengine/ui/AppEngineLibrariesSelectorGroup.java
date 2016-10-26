@@ -93,7 +93,10 @@ public class AppEngineLibrariesSelectorGroup {
     Library endpoints = new Library("appengine-endpoints");
     endpoints.setName("App Engine Endpoints");
     endpoints.setLibraryDependencies(Collections.singletonList("appengine-api"));
-    return Arrays.asList(appEngine, endpoints);
+    Library objectify = new Library("objectify");
+    objectify.setName("Objectify");
+    objectify.setLibraryDependencies(Collections.singletonList("appengine-api"));
+    return Arrays.asList(appEngine, endpoints, objectify);
   }
 
   private static String getLibraryName(Library library) {
