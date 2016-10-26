@@ -157,14 +157,13 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
   private void setupDebugTarget(ILaunch launch, ILaunchConfiguration configuration, int port,
       IProgressMonitor monitor) throws CoreException {
-    // Attempt to retrieve our socketListenerMultipleConnector first: our fragment versions are
-    // setup to ensure that it will not be installed on 4.7 (Oxygen) or beyond
-    IVMConnector connector = JavaRuntime.getVMConnector(
-        "com.google.cloud.tools.eclipse.jdt.launching.socketListenerMultipleConnector");
-    if (connector == null) {
-      // The 4.7 listen connector supports a connectionLimit
-      connector = JavaRuntime
-          .getVMConnector(IJavaLaunchConfigurationConstants.ID_SOCKET_LISTEN_VM_CONNECTOR);
+    // The 4.7 listen connector supports a connectionLimit
+    IVMConnector connector =
+        JavaRuntime.getVMConnector(IJavaLaunchConfigurationConstants.ID_SOCKET_LISTEN_VM_CONNECTOR);
+    if (connector == null || !connector.getArgumentOrder().contains("connectionLimit")) {
+      // Attempt to retrieve our socketListenerMultipleConnector
+      connector = JavaRuntime.getVMConnector(
+          "com.google.cloud.tools.eclipse.jdt.launching.socketListenerMultipleConnector");
     }
     if (connector == null) {
       abort("Cannot find Socket Listening connector", null, 0);

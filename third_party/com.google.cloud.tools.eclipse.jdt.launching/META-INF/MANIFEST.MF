@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %fragmentName
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.jdt.launching;singleton:=true
 Bundle-Version: 0.1.0.qualifier
-Fragment-Host: org.eclipse.jdt.launching;bundle-version="[3.7,3.8.200]"
+Fragment-Host: org.eclipse.jdt.launching;bundle-version="3.7"
 Bundle-Vendor: %fragmentProvider
 Bundle-Localization: fragment
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
