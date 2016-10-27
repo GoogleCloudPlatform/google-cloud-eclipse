@@ -40,6 +40,8 @@ public class UserChoseTest {
   @Test
   public void testInitiallyFalse() {
 	Assert.assertFalse(instance.userChosePackageName());
+	instance.keyPressed(event);
+	Assert.assertFalse(instance.userChosePackageName());
   }
   
   @Test
