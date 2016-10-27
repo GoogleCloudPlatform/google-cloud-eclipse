@@ -41,6 +41,7 @@ import org.eclipse.jdt.launching.SocketUtil;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
+import org.eclipse.wst.server.core.internal.IModulePublishHelper;
 import org.eclipse.wst.server.core.model.IModuleResource;
 import org.eclipse.wst.server.core.model.IModuleResourceDelta;
 import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
@@ -49,7 +50,8 @@ import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
  * A {@link ServerBehaviourDelegate} for App Engine Server executed via the Java App Management
  * Client Library.
  */
-public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
+public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
+  implements IModulePublishHelper {
 
   public static final String SERVER_PORT_ATTRIBUTE_NAME = "appEngineDevServerPort";
   public static final int DEFAULT_SERVER_PORT = 8080;
@@ -311,5 +313,13 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
         setServerState(IServer.STATE_STOPPED);
       }
     }
+  }
+
+  @Override
+  public IPath getPublishDirectory(IModule[] module) {
+    if (module == null || module.length != 1) {
+      return null;
+    }
+    return getModuleDeployDirectory(module[0]);
   }
 }
