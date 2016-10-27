@@ -56,20 +56,15 @@ public class StandardFacetsInstallationTests {
   }
 
   @After
-  public void tearDown() {
+  public void tearDown() throws CoreException {
     if (project != null) {
-      try {
-        project.delete(true, null);
-      } catch (CoreException ex) {
-        ex.printStackTrace();
-      }
-      assertFalse("project should have been deleted", project.exists());
+      project.delete(true, null);
     }
   }
 
   @Test
   public void testStandardFacetInstallationOnGwtWar() throws IOException, CoreException {
-    project = importProject("projects/gwt-project.zip");
+    project = importProject("projects/test-dynamic-web-project.zip");
     IFacetedProject facetedProject = new FacetedProjectHelper().getFacetedProject(project);
     // verify that the appengine-web.xml is installed in the dynamic web root folder
     AppEngineStandardFacet.installAppEngineFacet(facetedProject, true, null);
@@ -108,8 +103,8 @@ public class StandardFacetsInstallationTests {
     IProjectDescription descriptor =
         root.getWorkspace().loadProjectDescription(projectFileLocation);
     IProject project = root.getProject(descriptor.getName());
-    project.create(descriptor, progress.newChild(5));
-    project.open(progress.newChild(5));
+    project.create(descriptor, progress.newChild(5)); // adds the project to the workspace
+    project.open(progress.newChild(5)); // opens the project
     return project;
   }
 }
