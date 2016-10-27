@@ -367,7 +367,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
         String suggestion = suggestPackageName(newGroupId);
         javaPackageField.setText(suggestion);
       } else if (newGroupId.trim().isEmpty()) {
-    	javaPackageField.setText("");
+        javaPackageField.setText("");
       }
     }
 

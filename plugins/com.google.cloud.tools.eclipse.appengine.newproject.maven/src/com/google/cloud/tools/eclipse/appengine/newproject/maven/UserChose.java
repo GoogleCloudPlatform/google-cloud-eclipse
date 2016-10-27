@@ -38,7 +38,8 @@ class UserChose implements KeyListener {
     if (event.character == '\t' || event.character == '\r' || event.character == '\n') {
 	  return;
     }
-    if (event.keyCode == SWT.ESC || event.keyCode == SWT.ARROW_UP 
+    if (event.keyCode == SWT.ESC || event.keyCode == SWT.END || event.keyCode == SWT.HOME
+        || event.keyCode == SWT.ARROW_UP 
         || event.keyCode == SWT.ARROW_DOWN || event.keyCode == SWT.ARROW_LEFT 
         || event.keyCode == SWT.ARROW_RIGHT) {
       return;

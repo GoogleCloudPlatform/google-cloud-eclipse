@@ -81,7 +81,17 @@ public class UserChoseTest {
   
   @Test
   public void testEscape() {
-	testNonModifyingKeyCode(SWT.ESC);
+    testNonModifyingKeyCode(SWT.ESC);
+  }
+  
+  @Test
+  public void testHome() {
+    testNonModifyingKeyCode(SWT.HOME);
+  }
+  
+  @Test
+  public void testEnd() {
+    testNonModifyingKeyCode(SWT.END);
   }
   
   private void testNonModifyingCharacter(char c) {
