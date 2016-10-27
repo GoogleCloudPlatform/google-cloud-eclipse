@@ -157,7 +157,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     groupIdField = new Text(mavenCoordinatesGroup, SWT.BORDER);
     GridDataFactory.defaultsFor(groupIdField).align(SWT.FILL, SWT.CENTER).applyTo(groupIdField);
     groupIdField.addModifyListener(pageValidator);
-    groupIdField.addVerifyListener(new AutoPackageNameSetterOnGroupIdChange());
+    groupIdField.addModifyListener(new AutoPackageNameSetterOnGroupIdChange());
 
     Label artifactIdLabel = new Label(mavenCoordinatesGroup, SWT.NONE);
     artifactIdLabel.setText(Messages.getString("ARTIFACT_ID")); //$NON-NLS-1$
@@ -364,21 +364,17 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
    * 1) {@link #javaPackageField} is empty; or
    * 2) the field matches previous auto-fill before ID modification.
    */
-  private final class AutoPackageNameSetterOnGroupIdChange implements VerifyListener {
+  private final class AutoPackageNameSetterOnGroupIdChange implements ModifyListener {
 
     @Override
-    public void verifyText(VerifyEvent event) {
-      String groupId = groupIdField.getText();
-      // Below explains how to get text after modification:
-      // http://stackoverflow.com/questions/32872249/get-text-of-swt-text-component-before-modification
-      String newGroupId =
-          groupId.substring(0, event.start) + event.text + groupId.substring(event.end);
-
+    public void modifyText(ModifyEvent event) {
       // getGroupId() trims whitespace, so we do the same to sync with the dialog validation error.
-      if (MavenCoordinatesValidator.validateGroupId(newGroupId.trim())) {
-        String newSuggestion = suggestPackageName(newGroupId);
+      String groupId = groupIdField.getText().trim();
+
+      if (MavenCoordinatesValidator.validateGroupId(groupId)) {
+        String newSuggestion = suggestPackageName(groupId);
         updatePackageField(newSuggestion);
-      } else if (newGroupId.isEmpty()) {
+      } else if (groupId.isEmpty()) {
         updatePackageField("");
       }
     }
