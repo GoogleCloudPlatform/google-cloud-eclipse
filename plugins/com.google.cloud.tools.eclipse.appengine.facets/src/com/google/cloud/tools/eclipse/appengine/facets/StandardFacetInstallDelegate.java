@@ -16,17 +16,15 @@
 
 package com.google.cloud.tools.eclipse.appengine.facets;
 
+import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 import com.google.cloud.tools.eclipse.util.templates.appengine.AppEngineTemplateUtility;
 import java.io.ByteArrayInputStream;
 import java.util.Collections;
-import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.wst.common.componentcore.ComponentCore;
 import org.eclipse.wst.common.componentcore.resources.IVirtualComponent;
@@ -64,7 +62,7 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
       return;
     }
 
-    createFolders(webInfDir, progress.newChild(2));
+    ResourceUtils.createFolders(webInfDir, progress.newChild(2));
 
     appEngineWebXml.create(new ByteArrayInputStream(new byte[0]), true, progress.newChild(2));
     String configFileLocation = appEngineWebXml.getLocation().toString();
@@ -88,19 +86,4 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
     return project.getFolder(DEFAULT_WEB_PATH).getFolder(WEB_INF);
 
   }
-
-  private void createFolders(IFolder dir, IProgressMonitor monitor) throws CoreException {
-    IPath path = dir.getProjectRelativePath();
-    IContainer current = dir.getProject();
-    SubMonitor progress = SubMonitor.convert(monitor, path.segmentCount());
-    for (String segment : path.segments()) {
-      IFolder folder = current.getFolder(new Path(segment));
-      if (!folder.exists()) {
-        folder.create(true, true, null);
-      }
-      current = folder;
-      progress.worked(1);
-    }
-  }
-
 }
