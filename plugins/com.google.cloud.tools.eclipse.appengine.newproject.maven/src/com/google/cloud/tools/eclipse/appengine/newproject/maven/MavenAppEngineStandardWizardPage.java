@@ -348,13 +348,10 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
   }
 
   /**
-   * Auto-fills {@link #javaPackageField} as Group ID when
-   * 1) {@link #javaPackageField} is empty; or
-   * 2) the field matches previous auto-fill before ID modification.
+   * Auto-fills {@link #javaPackageField} as Group ID if the user has not explicitly
+   * chosen a package name.
    */
   private final class AutoPackageNameSetterOnGroupIdChange implements VerifyListener {
-
-    private String previousSuggestion = "";
 
     @Override
     public void verifyText(VerifyEvent event) {
@@ -369,18 +366,17 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
 
       // getGroupId() trims whitespace, so we do the same to sync with the dialog validation error.
       if (MavenCoordinatesValidator.validateGroupId(newGroupId.trim())) {
-        String newSuggestion = suggestPackageName(newGroupId);
-        updatePackageField(newSuggestion);
+        String suggestion = suggestPackageName(newGroupId);
+        updatePackageField(suggestion);
       } else if (newGroupId.trim().isEmpty()) {
         updatePackageField("");
       }
     }
 
-    private void updatePackageField(String newSuggestion) {
-      if (getPackageName().isEmpty() || getPackageName().equals(previousSuggestion)) {
-        javaPackageField.setText(newSuggestion);
+    private void updatePackageField(String suggestion) {
+      if (!userChosePackageName) {
+        javaPackageField.setText(suggestion);
       }
-      previousSuggestion = newSuggestion;
     }
   }
 
