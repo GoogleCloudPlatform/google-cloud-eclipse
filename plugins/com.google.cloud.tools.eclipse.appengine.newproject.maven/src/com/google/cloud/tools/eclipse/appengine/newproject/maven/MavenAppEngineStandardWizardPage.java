@@ -378,6 +378,8 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
       if (MavenCoordinatesValidator.validateGroupId(newGroupId.trim())) {
         String newSuggestion = suggestPackageName(newGroupId);
         updatePackageField(newSuggestion);
+      } else if (newGroupId.isEmpty()) {
+        updatePackageField("");
       }
     }
   }
