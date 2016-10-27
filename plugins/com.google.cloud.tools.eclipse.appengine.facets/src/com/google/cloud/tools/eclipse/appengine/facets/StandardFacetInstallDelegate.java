@@ -93,8 +93,7 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
     IPath path = dir.getProjectRelativePath();
     IContainer current = dir.getProject();
     SubMonitor progress = SubMonitor.convert(monitor, path.segmentCount());
-    for (int i = 0; i < path.segmentCount(); i++) {
-      final String segment = path.segment(i);
+    for (String segment : path.segments()) {
       IFolder folder = current.getFolder(new Path(segment));
       if (!folder.exists()) {
         folder.create(true, true, null);
