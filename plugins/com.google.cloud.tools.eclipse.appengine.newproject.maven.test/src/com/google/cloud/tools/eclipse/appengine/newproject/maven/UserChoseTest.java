@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Widget;
@@ -42,8 +43,47 @@ public class UserChoseTest {
   }
   
   @Test
-  public void testTabKey() {
-	event.character = '\t';
+  public void testTab() {
+	testNonModifyingCharacter('\t');
+  } 
+  
+  @Test
+  public void testCarriageReturn() {
+	testNonModifyingCharacter('\r');
+  }
+  
+  @Test
+  public void testLinefeed() {
+	testNonModifyingCharacter('\n');
+  }
+
+  @Test
+  public void testDownArrowKey() {
+    testNonModifyingKeyCode(SWT.ARROW_DOWN);
+  }
+  
+  @Test
+  public void testUpArrowKey() {
+    testNonModifyingKeyCode(SWT.ARROW_UP);
+  }
+  
+  @Test
+  public void testLeftArrowKey() {
+	testNonModifyingKeyCode(SWT.ARROW_LEFT);
+  }
+  
+  @Test
+  public void testRightArrowKey() {
+	testNonModifyingKeyCode(SWT.ARROW_RIGHT);
+  }
+  
+  @Test
+  public void testEscape() {
+	testNonModifyingKeyCode(SWT.ESC);
+  }
+  
+  private void testNonModifyingCharacter(char c) {
+	event.character = c;
 	instance.keyReleased(event);
 	Assert.assertFalse(instance.userChosePackageName());
 	
@@ -51,9 +91,23 @@ public class UserChoseTest {
 	instance.keyReleased(event);
 	Assert.assertTrue(instance.userChosePackageName());
 	
-	event.character = '\t';
+	event.character = c;
 	instance.keyReleased(event);
 	Assert.assertTrue(instance.userChosePackageName());
-  }  
+  }
+  
+  private void testNonModifyingKeyCode(int code) {
+	event.keyCode = code;
+	instance.keyReleased(event);
+	Assert.assertFalse(instance.userChosePackageName());
+	
+	event.keyCode = SWT.BS;
+	instance.keyReleased(event);
+	Assert.assertTrue(instance.userChosePackageName());
+	
+	event.keyCode = code;
+	instance.keyReleased(event);
+	Assert.assertTrue(instance.userChosePackageName());
+  }
   
 }
