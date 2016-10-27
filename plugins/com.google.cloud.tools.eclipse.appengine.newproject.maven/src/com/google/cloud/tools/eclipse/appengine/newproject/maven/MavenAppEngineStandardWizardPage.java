@@ -34,8 +34,6 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -71,7 +69,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
   private AppEngineLibrariesSelectorGroup appEngineLibrariesSelectorGroup;
 
   private boolean canFlipPage;
-  private boolean userChosePackageName = false;
+  private UserChose userChosePackageName = new UserChose();
 
   public MavenAppEngineStandardWizardPage() {
     super("basicNewProjectPage"); //$NON-NLS-1$
@@ -186,7 +184,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     GridData javaPackagePosition = new GridData(GridData.FILL_HORIZONTAL);
     javaPackagePosition.horizontalSpan = 2;
     javaPackageField.setLayoutData(javaPackagePosition);
-    javaPackageField.addKeyListener(new UserChose());
+    javaPackageField.addKeyListener(userChosePackageName);
     javaPackageField.addModifyListener(pageValidator);
   }
 
@@ -355,7 +353,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
 
     @Override
     public void verifyText(VerifyEvent event) {
-      if (userChosePackageName) {
+      if (userChosePackageName.userChosePackageName()) {
         return;
       }
       String groupId = groupIdField.getText();
@@ -367,17 +365,12 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
       // getGroupId() trims whitespace, so we do the same to sync with the dialog validation error.
       if (MavenCoordinatesValidator.validateGroupId(newGroupId.trim())) {
         String suggestion = suggestPackageName(newGroupId);
-        updatePackageField(suggestion);
+        javaPackageField.setText(suggestion);
       } else if (newGroupId.trim().isEmpty()) {
-        updatePackageField("");
+    	javaPackageField.setText("");
       }
     }
 
-    private void updatePackageField(String suggestion) {
-      if (!userChosePackageName) {
-        javaPackageField.setText(suggestion);
-      }
-    }
   }
 
   /**
@@ -398,29 +391,5 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     // 3) Replace consecutive dots with a single dot.
     return CharMatcher.is('.').trimFrom(groupId)
         .replaceAll("[^\\w.]", "").replaceAll("\\.+",  "."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-  }
-  
-  private class UserChose implements KeyListener {
-
-    @Override
-    public void keyPressed(KeyEvent event) {
-    }
-
-	@Override
-	public void keyReleased(KeyEvent event) {
-	  // filter out navigation keys
-	  if (event.character == '\t' || event.character == '\r' || event.character == '\n') {
-		  return;
-	  }
-	  if (event.keyCode == SWT.ARROW_UP || event.keyCode == SWT.ARROW_DOWN
-	      || event.keyCode == SWT.ARROW_LEFT || event.keyCode == SWT.ARROW_RIGHT) {
-        return;
-	  }
-	  if (event.keyCode == SWT.ESC) {
-	    return;
-	  }
-	  
-	  userChosePackageName = true;
-	}
   }
 }
