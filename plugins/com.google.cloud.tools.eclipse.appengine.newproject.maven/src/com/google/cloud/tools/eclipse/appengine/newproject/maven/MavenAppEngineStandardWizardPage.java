@@ -70,6 +70,8 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
 
   private boolean shouldUpdatePackageName = true;
 
+  private boolean javaPackageProgrammaticUpdate = false;
+
   public MavenAppEngineStandardWizardPage() {
     super("basicNewProjectPage"); //$NON-NLS-1$
     setTitle(Messages.getString("WIZARD_TITLE")); //$NON-NLS-1$
@@ -189,7 +191,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
       @Override
       public void verifyText(VerifyEvent event) {
         // check if set programmatically
-        if (event.keyCode == SWT.NONE) {
+        if (javaPackageProgrammaticUpdate) {
           return;
         }
         String current = ((Text) event.widget).getText();
@@ -382,7 +384,9 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
 
   private void updatePackageField(String newSuggestion) {
     if (shouldUpdatePackageName) {
+      javaPackageProgrammaticUpdate = true;
       javaPackageField.setText(newSuggestion);
+      javaPackageProgrammaticUpdate = false;
     }
   }
 
