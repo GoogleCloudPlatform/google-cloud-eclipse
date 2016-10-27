@@ -17,7 +17,9 @@
 package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import org.eclipse.core.databinding.observable.Realm;
@@ -142,6 +144,37 @@ public class MavenArchetypeProjectWizardTest {
         assertEquals("ac", page.javaPackageField.getText());
       }
     });
-
   }
+
+  @Test
+  public void testAutoPackageNameSetterOnGroupIdChange_disbledOnUserChange() {
+    Realm.runWithDefault(DisplayRealm.getRealm(Display.getDefault()), new Runnable() {
+      @Override
+      public void run() {
+        wizard.setContainer(mock(IWizardContainer.class));
+        wizard.createPageControls(shell);
+        MavenAppEngineStandardWizardPage page =
+            (MavenAppEngineStandardWizardPage) wizard.getPage("basicNewProjectPage");
+        assertTrue(page.autoGeneratePackageName);
+
+        page.groupIdField.setText("abc");
+        assertEquals("abc", page.javaPackageField.getText());
+        assertTrue(page.autoGeneratePackageName);
+
+        page.javaPackageField.setText("def");
+        assertFalse(page.autoGeneratePackageName);
+
+        // javaPackageField should no longer auto-gen
+        page.groupIdField.setText("xyz");
+        assertEquals("def", page.javaPackageField.getText());
+
+        // we shouldn't auto-gen even if the user clears the contents
+        page.javaPackageField.setText("");
+        assertFalse(page.autoGeneratePackageName);
+        page.groupIdField.setText("abc");
+        assertEquals("", page.javaPackageField.getText());
+      }
+    });
+  }
+
 }

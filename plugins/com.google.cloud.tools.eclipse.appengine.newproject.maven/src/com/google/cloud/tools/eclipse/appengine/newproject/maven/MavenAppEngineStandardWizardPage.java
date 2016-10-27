@@ -68,8 +68,11 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
 
   private boolean canFlipPage;
 
-  private boolean shouldUpdatePackageName = true;
+  /** True if we should auto-generate the javaPackageField from the provided groupId */
+  @VisibleForTesting
+  boolean autoGeneratePackageName = true;
 
+  /** True if we're programmatically setting javaPackageField with an auto-generated value */
   private boolean javaPackageProgrammaticUpdate = false;
 
   public MavenAppEngineStandardWizardPage() {
@@ -190,14 +193,10 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
 
       @Override
       public void verifyText(VerifyEvent event) {
-        // check if set programmatically
-        if (javaPackageProgrammaticUpdate) {
-          return;
+        // if the user ever changes the package name field, then we never auto-generate again
+        if (!javaPackageProgrammaticUpdate) {
+          autoGeneratePackageName = false;
         }
-        String current = ((Text) event.widget).getText();
-        String newText =
-            current.substring(0, event.start) + event.text + current.substring(event.end);
-        shouldUpdatePackageName = newText.isEmpty();
       }
     });
   }
@@ -381,7 +380,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
   }
 
   private void updatePackageField(String newSuggestion) {
-    if (shouldUpdatePackageName) {
+    if (autoGeneratePackageName) {
       javaPackageProgrammaticUpdate = true;
       javaPackageField.setText(newSuggestion);
       javaPackageProgrammaticUpdate = false;
