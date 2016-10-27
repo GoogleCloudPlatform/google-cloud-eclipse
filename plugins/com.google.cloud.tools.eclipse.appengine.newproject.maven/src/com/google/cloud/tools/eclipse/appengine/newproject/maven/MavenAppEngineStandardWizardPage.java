@@ -34,6 +34,8 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -69,6 +71,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
   private AppEngineLibrariesSelectorGroup appEngineLibrariesSelectorGroup;
 
   private boolean canFlipPage;
+  private boolean userChosePackageName = false;
 
   public MavenAppEngineStandardWizardPage() {
     super("basicNewProjectPage"); //$NON-NLS-1$
@@ -183,6 +186,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     GridData javaPackagePosition = new GridData(GridData.FILL_HORIZONTAL);
     javaPackagePosition.horizontalSpan = 2;
     javaPackageField.setLayoutData(javaPackagePosition);
+    javaPackageField.addKeyListener(new UserChose());
     javaPackageField.addModifyListener(pageValidator);
   }
 
@@ -354,6 +358,9 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
 
     @Override
     public void verifyText(VerifyEvent event) {
+      if (userChosePackageName) {
+        return;
+      }
       String groupId = groupIdField.getText();
       // Below explains how to get text after modification:
       // http://stackoverflow.com/questions/32872249/get-text-of-swt-text-component-before-modification
@@ -395,5 +402,21 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     // 3) Replace consecutive dots with a single dot.
     return CharMatcher.is('.').trimFrom(groupId)
         .replaceAll("[^\\w.]", "").replaceAll("\\.+",  "."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+  }
+  
+  private class UserChose implements KeyListener {
+
+    @Override
+    public void keyPressed(KeyEvent event) {
+    }
+
+	@Override
+	public void keyReleased(KeyEvent event) {
+	  // filter out navigation keys
+	  if (event.character == '\t' || event.character == '\r' || event.character == '\n') {
+		  return;
+	  }
+	  userChosePackageName = true;
+	}
   }
 }
