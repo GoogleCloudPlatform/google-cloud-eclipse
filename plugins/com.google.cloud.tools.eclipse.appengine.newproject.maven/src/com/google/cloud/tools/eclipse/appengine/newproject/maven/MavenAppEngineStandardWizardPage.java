@@ -359,9 +359,8 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
   }
 
   /**
-   * Auto-fills {@link #javaPackageField} as Group ID when
-   * 1) {@link #javaPackageField} is empty; or
-   * 2) the field matches previous auto-fill before ID modification.
+   * Auto-fills {@link #javaPackageField} from the Group ID if the user has not explicitly chosen a
+   * package name.
    */
   private final class AutoPackageNameSetterOnGroupIdChange implements ModifyListener {
 
