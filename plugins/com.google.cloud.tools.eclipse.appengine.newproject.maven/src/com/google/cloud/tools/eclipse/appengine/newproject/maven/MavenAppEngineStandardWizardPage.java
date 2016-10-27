@@ -69,6 +69,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
   private AppEngineLibrariesSelectorGroup appEngineLibrariesSelectorGroup;
 
   private boolean canFlipPage;
+  private UserChose userChosePackageName = new UserChose();
 
   public MavenAppEngineStandardWizardPage() {
     super("basicNewProjectPage"); //$NON-NLS-1$
@@ -183,6 +184,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     GridData javaPackagePosition = new GridData(GridData.FILL_HORIZONTAL);
     javaPackagePosition.horizontalSpan = 2;
     javaPackageField.setLayoutData(javaPackagePosition);
+    javaPackageField.addKeyListener(userChosePackageName);
     javaPackageField.addModifyListener(pageValidator);
   }
 
@@ -344,16 +346,16 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
   }
 
   /**
-   * Auto-fills {@link #javaPackageField} as Group ID when
-   * 1) {@link #javaPackageField} is empty; or
-   * 2) the field matches previous auto-fill before ID modification.
+   * Auto-fills {@link #javaPackageField} as Group ID if the user has not explicitly
+   * chosen a package name.
    */
   private final class AutoPackageNameSetterOnGroupIdChange implements VerifyListener {
 
-    private String previousSuggestion = "";
-
     @Override
     public void verifyText(VerifyEvent event) {
+      if (userChosePackageName.userChosePackageName()) {
+        return;
+      }
       String groupId = groupIdField.getText();
       // Below explains how to get text after modification:
       // http://stackoverflow.com/questions/32872249/get-text-of-swt-text-component-before-modification
@@ -362,17 +364,13 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
 
       // getGroupId() trims whitespace, so we do the same to sync with the dialog validation error.
       if (MavenCoordinatesValidator.validateGroupId(newGroupId.trim())) {
-        String newSuggestion = suggestPackageName(newGroupId);
-        updatePackageField(newSuggestion);
-        previousSuggestion = newSuggestion;
+        String suggestion = suggestPackageName(newGroupId);
+        javaPackageField.setText(suggestion);
+      } else if (newGroupId.trim().isEmpty()) {
+        javaPackageField.setText("");
       }
     }
 
-    private void updatePackageField(String newSuggestion) {
-      if (getPackageName().isEmpty() || getPackageName().equals(previousSuggestion)) {
-        javaPackageField.setText(newSuggestion);
-      }
-    }
   }
 
   /**
