@@ -24,7 +24,8 @@ import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.CharMatcher;
-
+import java.text.MessageFormat;
+import java.util.List;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
@@ -48,9 +49,6 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import java.text.MessageFormat;
-import java.util.List;
-
 /**
  * UI to collect all information necessary to create a new Maven-based App Engine Standard Java
  * project.
@@ -69,6 +67,8 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
   private AppEngineLibrariesSelectorGroup appEngineLibrariesSelectorGroup;
 
   private boolean canFlipPage;
+
+  private boolean shouldUpdatePackageName = true;
 
   public MavenAppEngineStandardWizardPage() {
     super("basicNewProjectPage"); //$NON-NLS-1$
@@ -184,6 +184,20 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     javaPackagePosition.horizontalSpan = 2;
     javaPackageField.setLayoutData(javaPackagePosition);
     javaPackageField.addModifyListener(pageValidator);
+    javaPackageField.addVerifyListener(new VerifyListener() {
+
+      @Override
+      public void verifyText(VerifyEvent event) {
+        // check if set programmatically
+        if (event.keyCode == SWT.NONE) {
+          return;
+        }
+        String current = ((Text) event.widget).getText();
+        String newText =
+            current.substring(0, event.start) + event.text + current.substring(event.end);
+        shouldUpdatePackageName = newText.isEmpty();
+      }
+    });
   }
 
   protected void openLocationDialog() {
@@ -350,8 +364,6 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
    */
   private final class AutoPackageNameSetterOnGroupIdChange implements VerifyListener {
 
-    private String previousSuggestion = "";
-
     @Override
     public void verifyText(VerifyEvent event) {
       String groupId = groupIdField.getText();
@@ -364,14 +376,13 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
       if (MavenCoordinatesValidator.validateGroupId(newGroupId.trim())) {
         String newSuggestion = suggestPackageName(newGroupId);
         updatePackageField(newSuggestion);
-        previousSuggestion = newSuggestion;
       }
     }
+  }
 
-    private void updatePackageField(String newSuggestion) {
-      if (getPackageName().isEmpty() || getPackageName().equals(previousSuggestion)) {
-        javaPackageField.setText(newSuggestion);
-      }
+  private void updatePackageField(String newSuggestion) {
+    if (shouldUpdatePackageName) {
+      javaPackageField.setText(newSuggestion);
     }
   }
 
