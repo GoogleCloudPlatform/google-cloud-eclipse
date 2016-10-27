@@ -44,10 +44,11 @@ public class ResourceUtils {
     for (String segment : path.segments()) {
       IFolder child = current.getFolder(new Path(segment));
       if (!child.exists()) {
-        child.create(true, true, null);
+        child.create(true, true, progress.newChild(1));
+      } else {
+        progress.worked(1);
       }
       current = child;
-      progress.worked(1);
     }
   }
 
