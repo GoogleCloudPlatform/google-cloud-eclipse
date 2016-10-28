@@ -142,6 +142,9 @@ public class AppEngineLibrariesSelectorGroup {
     return libraryButtons;
   }
 
+  /**
+   * Utility interface to return a value;
+   */
   private static interface Getter<T> {
     T get();
   }
@@ -153,12 +156,18 @@ public class AppEngineLibrariesSelectorGroup {
       this.libraryButton = libraryButton;
     }
 
+    /**
+     * Returns true if the checkbox associated with this instance was explicitly clicked by the user.
+     */
     @Override
     public Boolean get() {
       return libraryButton.getData(BUTTON_MANUAL_SELECTION_KEY) != null;
     }
   }
 
+  /**
+   * Tracks if the checkbox has been explicitly clicked by the user.
+   */
   private static final class ManualSelectionTracker implements SelectionListener {
     @Override
     public void widgetSelected(SelectionEvent e) {
@@ -171,44 +180,64 @@ public class AppEngineLibrariesSelectorGroup {
     }
 
     private void setManualSelection(SelectionEvent e) {
-      Button button = (Button)e.getSource();
-      button.setData(BUTTON_MANUAL_SELECTION_KEY, button.getSelection() ? new Object() : null);
+      Button source = (Button)e.getSource();
+      if (e.getSource() instanceof Button && (source.getStyle() & SWT.CHECK) != 0) {
+        Button button = source;
+        button.setData(BUTTON_MANUAL_SELECTION_KEY, button.getSelection() ? new Object() : null);
+      }
     }
   }
 
+  /**
+   * Returns a computed value based on whether the associated library is in a list or not. 
+   */
   private static final class DependentLibrarySelected extends ComputedValue {
-    private String id;
-    private IObservableList selectedLibraries;
+    private String libraryId;
+    private IObservableList libraries;
     private Getter<Boolean> condition;
     private boolean selectedResult;
 
-    private DependentLibrarySelected(IObservableList selectedLibraries,
+    /**
+     * @param libraries the list of libraries to search
+     * @param libraryId the id of the library to be searched for
+     * @param foundResult return value if the library is found
+     */
+    private DependentLibrarySelected(IObservableList libraries,
                                      String libraryId,
-                                     final boolean selectedResult) {
-      this(selectedLibraries, libraryId, selectedResult, new Getter<Boolean>(){
+                                     final boolean foundResult) {
+      this(libraries, libraryId, foundResult, new Getter<Boolean>(){
         @Override
         public Boolean get() {
-          return !selectedResult;
+          return !foundResult;
         }});
     }
 
-    private DependentLibrarySelected(IObservableList selectedLibraries, String libraryId,
-                                     boolean selectedResult,
+    /**
+     * @param libraries the list of libraries to search
+     * @param libraryId the id of the library to be searched for
+     * @param foundResult return value if the library is selected
+     * @param condition if the library is not found in the list, return the result of <code>condition.get()</code>
+     */
+    private DependentLibrarySelected(IObservableList libraries,
+                                     String libraryId,
+                                     boolean foundResult,
                                      Getter<Boolean> condition) {
+      Preconditions.checkNotNull(libraries);
+      Preconditions.checkNotNull(libraryId);
       Preconditions.checkNotNull(condition);
-      this.selectedResult = selectedResult;
-      this.selectedLibraries = selectedLibraries;
-      id = libraryId;
+      this.selectedResult = foundResult;
+      this.libraries = libraries;
+      this.libraryId = libraryId;
       this.condition = condition;
     }
 
     @Override
     protected Object calculate() {
-      for (int i = 0; i < selectedLibraries.size(); i++) {
-        Object object = selectedLibraries.get(i);
+      for (int i = 0; i < libraries.size(); i++) {
+        Object object = libraries.get(i);
         Library library = (Library) object;
         for (String depId : library.getLibraryDependencies()) {
-          if (id.equals(depId)) {
+          if (libraryId.equals(depId)) {
             return selectedResult;
           }
         }
@@ -217,6 +246,10 @@ public class AppEngineLibrariesSelectorGroup {
     }
   }
 
+  /**
+   * Returns null always, can be used in databinding if the actual value is not important, i.e. converters and/or
+   * validators are used to implement the desired behavior.
+   */
   private static final class NullComputedValue extends ComputedValue {
     @Override
     protected Object calculate() {
@@ -224,28 +257,33 @@ public class AppEngineLibrariesSelectorGroup {
     }
   }
 
+  /**
+   * Adds/removes the library to the list of <code>libraries</code> depending upon the boolean value received for
+   * conversion. If the value is <code>true</code> it will add, otherwise it will remove the library from the list.
+   */
   private static final class HandleLibrarySelectionConverter extends Converter {
 
     private Library library;
-    private List<Library> selectedLibraries;
+    private List<Library> libraries;
 
-    public HandleLibrarySelectionConverter(List<Library> selectedLibraries, Library library) {
+    public HandleLibrarySelectionConverter(List<Library> libraries, Library library) {
       super(Boolean.class, List.class);
-      Preconditions.checkNotNull(selectedLibraries, "selector is null");
+      Preconditions.checkNotNull(libraries, "selector is null");
       Preconditions.checkNotNull(library, "library is null");
-      this.selectedLibraries = selectedLibraries;
+      this.libraries = libraries;
       this.library = library;
     }
 
     @Override
     public Object convert(Object fromObject) {
+      Preconditions.checkArgument(fromObject instanceof Boolean);
       Boolean selected = (Boolean) fromObject;
       if (selected) {
-        selectedLibraries.add(library);
+        libraries.add(library);
       } else {
-        selectedLibraries.remove(library);
+        libraries.remove(library);
       }
-      return null;
+      return libraries;
     }
 
   }
