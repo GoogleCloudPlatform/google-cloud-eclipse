@@ -126,13 +126,16 @@ public class AppEngineLibrariesSelectorGroup {
                              new DependentLibrarySelected(getDisplayRealm(),
                                                           selectedLibraries,
                                                           library.getId(),
-                                                          true,
+                                                          true /* resultIfFound */,
                                                           new ButtonManuallySelected(libraryButton)),
                              new UpdateValueStrategy(UpdateValueStrategy.POLICY_NEVER),
                              new UpdateValueStrategy());
     // library checkbox enablement model -> UI
     bindingContext.bindValue(libraryButtonEnablement,
-                             new DependentLibrarySelected(getDisplayRealm(), selectedLibraries, library.getId(), false),
+                             new DependentLibrarySelected(getDisplayRealm(),
+                                                          selectedLibraries,
+                                                          library.getId(),
+                                                          false /* resultIfFound */),
                              new UpdateValueStrategy(UpdateValueStrategy.POLICY_NEVER),
                              new UpdateValueStrategy());
   }
@@ -180,18 +183,18 @@ public class AppEngineLibrariesSelectorGroup {
    */
   private static final class ManualSelectionTracker implements SelectionListener {
     @Override
-    public void widgetSelected(SelectionEvent e) {
-      setManualSelection(e);
+    public void widgetSelected(SelectionEvent event) {
+      setManualSelection(event);
     }
 
     @Override
-    public void widgetDefaultSelected(SelectionEvent e) {
-      setManualSelection(e);
+    public void widgetDefaultSelected(SelectionEvent event) {
+      setManualSelection(event);
     }
 
-    private void setManualSelection(SelectionEvent e) {
-      Button source = (Button)e.getSource();
-      if (e.getSource() instanceof Button && (source.getStyle() & SWT.CHECK) != 0) {
+    private void setManualSelection(SelectionEvent event) {
+      Button source = (Button) event.getSource();
+      if (event.getSource() instanceof Button && (source.getStyle() & SWT.CHECK) != 0) {
         Button button = source;
         button.setData(BUTTON_MANUAL_SELECTION_KEY, button.getSelection() ? new Object() : null);
       }
@@ -210,44 +213,45 @@ public class AppEngineLibrariesSelectorGroup {
     /**
      * @param libraries the list of libraries to search
      * @param libraryId the id of the library to be searched for
-     * @param foundResult return value if the library is found
+     * @param resultIfFound value returned by {@link #calculate()} if the library is found
      */
     private DependentLibrarySelected(Realm realm,
                                      IObservableList libraries,
                                      String libraryId,
-                                     final boolean foundResult) {
-      this(realm, libraries, libraryId, foundResult, new Getter<Boolean>(){
+                                     final boolean resultIfFound) {
+      this(realm, libraries, libraryId, resultIfFound, new Getter<Boolean>() {
         @Override
         public Boolean get() {
-          return !foundResult;
+          return !resultIfFound;
         }});
     }
 
     /**
      * @param libraries the list of libraries to search
      * @param libraryId the id of the library to be searched for
-     * @param foundResult return value if the library is selected
-     * @param condition if the library is not found in the list, return the result of <code>condition.get()</code>
+     * @param resultIfFound value returned by {@link #calculate()} if the library is found
+     * @param resultIfNotFound if the library is not found in the list, return the result of <code>condition.get()</code>
      */
     private DependentLibrarySelected(Realm realm,
                                      IObservableList libraries,
                                      String libraryId,
-                                     boolean foundResult,
-                                     Getter<Boolean> condition) {
+                                     boolean resultIfFound,
+                                     Getter<Boolean> resultIfNotFound) {
       super(realm);
       Preconditions.checkNotNull(libraries);
       Preconditions.checkNotNull(libraryId);
-      Preconditions.checkNotNull(condition);
-      this.selectedResult = foundResult;
+      Preconditions.checkNotNull(resultIfNotFound);
+      this.selectedResult = resultIfFound;
       this.libraries = libraries;
       this.libraryId = libraryId;
-      this.condition = condition;
+      this.condition = resultIfNotFound;
     }
 
     @Override
     protected Object calculate() {
-      for (int i = 0; i < libraries.size(); i++) {
-        Object object = libraries.get(i);
+//      for (int i = 0; i < libraries.size(); i++) {
+//        Object object = libraries.get(i);
+      for (Object object : libraries) {
         Library library = (Library) object;
         for (String depId : library.getLibraryDependencies()) {
           if (libraryId.equals(depId)) {
