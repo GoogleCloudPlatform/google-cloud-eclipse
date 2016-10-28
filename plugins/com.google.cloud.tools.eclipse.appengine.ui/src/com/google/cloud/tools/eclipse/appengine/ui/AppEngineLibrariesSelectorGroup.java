@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-
 package com.google.cloud.tools.eclipse.appengine.ui;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
-import com.google.cloud.tools.eclipse.ui.util.databinding.BooleanConverter;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.util.ArrayList;
@@ -29,17 +26,17 @@ import java.util.LinkedList;
 import java.util.List;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateValueStrategy;
-import org.eclipse.core.databinding.beans.PojoProperties;
-import org.eclipse.core.databinding.observable.Realm;
+import org.eclipse.core.databinding.conversion.Converter;
+import org.eclipse.core.databinding.observable.list.IObservableList;
+import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.core.databinding.observable.value.ComputedValue;
-import org.eclipse.core.databinding.observable.value.IObservableValue;
-import org.eclipse.core.databinding.observable.value.WritableValue;
-import org.eclipse.jface.databinding.swt.DisplayRealm;
 import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
@@ -48,10 +45,10 @@ public class AppEngineLibrariesSelectorGroup {
   private Composite parentContainer;
   private List<Button> libraryButtons = new LinkedList<>();
   private DataBindingContext bindingContext;
+  private IObservableList selectedLibraries = new WritableList();
 
   public AppEngineLibrariesSelectorGroup(Composite parentContainer) {
     Preconditions.checkNotNull(parentContainer, "parentContainer is null");
-
     this.parentContainer = parentContainer;
     createContents();
   }
@@ -77,9 +74,27 @@ public class AppEngineLibrariesSelectorGroup {
       libraryButton.setText(getLibraryName(library));
       libraryButton.setData(library);
       libraryButtons.add(libraryButton);
+
+      libraryButton.addSelectionListener(new SelectionListener() {
+
+        @Override
+        public void widgetSelected(SelectionEvent e) {
+          setManualSelection(e);
+        }
+
+        @Override
+        public void widgetDefaultSelected(SelectionEvent e) {
+          setManualSelection(e);
+        }
+
+        private void setManualSelection(SelectionEvent e) {
+          Button button = (Button)e.getSource();
+          button.setData("manualSelection", button.getSelection() ? new Object() : null);
+        }
+      });
     }
 
-    addDatabindingForDependencies();
+    addDatabinding();
 
     GridLayoutFactory.fillDefaults().applyTo(apiGroup);
   }
@@ -106,49 +121,35 @@ public class AppEngineLibrariesSelectorGroup {
     }
   }
 
-  private void addDatabindingForDependencies() {
+  private void addDatabinding() {
     bindingContext = new DataBindingContext();
     for (Button libraryButton : libraryButtons) {
-      Library library = (Library) libraryButton.getData();
-      if (!library.getLibraryDependencies().isEmpty()) {
-        addDatabindingForDependencies(libraryButton);
-      }
+      addDatabindingForButton(libraryButton);
     }
   }
 
-  private void addDatabindingForDependencies(Button libraryButton) {
-    Library library = (Library) libraryButton.getData();
-    for (String libraryId : library.getLibraryDependencies()) {
-      Button dependencyButton = getButtonForLibraryId(libraryId);
-      if (dependencyButton != null) {
-        ISWTObservableValue libraryButtonSelection = WidgetProperties.selection().observe(libraryButton);
-        IObservableValue dependencyButtonSelection =
-            PojoProperties.value(Button.class, "selection").observe(getDisplayRealm(), dependencyButton);
-        IObservableValue dependencyButtonEnablement =
-            PojoProperties.value(Button.class, "enabled").observe(getDisplayRealm(), dependencyButton);
+  private void addDatabindingForButton(final Button libraryButton) {
+    final Library library = (Library) libraryButton.getData();
+    ISWTObservableValue libraryButtonSelection = WidgetProperties.selection().observe(libraryButton);
+    ISWTObservableValue libraryButtonEnablement = WidgetProperties.enabled().observe(libraryButton);
 
-        WritableValue intermediate = new WritableValue(false, Boolean.class);
-        bindingContext.bindValue(libraryButtonSelection, intermediate);
-        bindingContext.bindValue(dependencyButtonSelection, intermediate);
-        bindingContext.bindValue(dependencyButtonEnablement, intermediate,
-                                 new UpdateValueStrategy().setConverter(BooleanConverter.negate()),
-                                 new UpdateValueStrategy().setConverter(BooleanConverter.negate()));
-      }
-    }
-  }
-
-  private Button getButtonForLibraryId(String libraryId) {
-    for (Button button : libraryButtons) {
-      Library library = (Library) button.getData();
-      if (library.getId().equals(libraryId)) {
-        return button;
-      }
-    }
-    return null;
-  }
-
-  private Realm getDisplayRealm() {
-    return DisplayRealm.getRealm(parentContainer.getDisplay());
+    bindingContext.bindValue(libraryButtonSelection, new NullComputedValue(),
+        new UpdateValueStrategy().setConverter(new HandleLibrarySelectionConverter(library)),
+        new UpdateValueStrategy(UpdateValueStrategy.POLICY_NEVER));
+    bindingContext.bindValue(libraryButtonSelection, 
+                             new DependentLibrarySelected(selectedLibraries, 
+                                                          library.getId(),
+                                                          true,
+                                                          new Getter<Boolean>() {
+                                                            @Override
+                                                            public Boolean get() {
+                                                              return libraryButton.getData("manualSelection") != null;
+                                                            }}),
+        new UpdateValueStrategy(UpdateValueStrategy.POLICY_NEVER),
+        new UpdateValueStrategy());
+    bindingContext.bindValue(libraryButtonEnablement, new DependentLibrarySelected(selectedLibraries, library.getId(), false),
+        new UpdateValueStrategy(UpdateValueStrategy.POLICY_NEVER),
+        new UpdateValueStrategy());
   }
 
   public void dispose() {
@@ -157,8 +158,78 @@ public class AppEngineLibrariesSelectorGroup {
     }
   }
 
+  private static interface Getter<T> {
+    T get();
+  }
+  
+  private static class DependentLibrarySelected extends ComputedValue {
+    private String id;
+    private IObservableList selectedLibraries;
+    private Getter<Boolean> condition;
+    private boolean selectedResult;
+
+    private DependentLibrarySelected(IObservableList selectedLibraries, String libraryId, final boolean selectedResult) {
+      this(selectedLibraries, libraryId, selectedResult, new Getter<Boolean>(){
+        @Override
+        public Boolean get() {
+          return !selectedResult;
+        }});
+    }
+    
+    private DependentLibrarySelected(IObservableList selectedLibraries, String libraryId, boolean selectedResult, Getter<Boolean> condition) {
+      Preconditions.checkNotNull(condition);
+      this.selectedResult = selectedResult;
+      this.selectedLibraries = selectedLibraries;
+      id = libraryId;
+      this.condition = condition;
+    }
+
+    @Override
+    protected Object calculate() {
+      for (int i = 0; i < selectedLibraries.size(); i++) {
+        Object object = selectedLibraries.get(i);
+        Library library = (Library) object;
+        for (String depId : library.getLibraryDependencies()) {
+          if (id.equals(depId)) {
+            return selectedResult;
+          }
+        }
+      }
+      return condition.get();
+    }
+  }
+
+  private static class NullComputedValue extends ComputedValue {
+    @Override
+    protected Object calculate() {
+      return null;
+    }
+  }
+
+  private class HandleLibrarySelectionConverter extends Converter {
+
+    private Library library;
+
+    public HandleLibrarySelectionConverter(Library library) {
+      super(Boolean.class, List.class);
+      this.library = library;
+    }
+
   @VisibleForTesting
   List<Button> getLibraryButtons() {
     return libraryButtons;
+  }
+
+    @Override
+    public Object convert(Object fromObject) {
+      Boolean selected = (Boolean) fromObject;
+      if (selected) {
+        selectedLibraries.add(library);
+      } else {
+        selectedLibraries.remove(library);
+      }
+      return null;
+    }
+
   }
 }
