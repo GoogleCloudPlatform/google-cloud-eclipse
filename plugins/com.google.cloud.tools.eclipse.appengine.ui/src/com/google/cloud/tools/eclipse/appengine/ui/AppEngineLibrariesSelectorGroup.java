@@ -230,7 +230,8 @@ public class AppEngineLibrariesSelectorGroup {
      * @param libraries the list of libraries to search
      * @param libraryId the id of the library to be searched for
      * @param resultIfFound value returned by {@link #calculate()} if the library is found
-     * @param resultIfNotFound if the library is not found in the list, return the result of <code>condition.get()</code>
+     * @param resultIfNotFound if the library is not found in the list, return the result of
+     * <code>resultIfNotFound.get()</code>
      */
     private DependentLibrarySelected(Realm realm,
                                      IObservableList libraries,
@@ -249,9 +250,8 @@ public class AppEngineLibrariesSelectorGroup {
 
     @Override
     protected Object calculate() {
-//      for (int i = 0; i < libraries.size(); i++) {
-//        Object object = libraries.get(i);
-      for (Object object : libraries) {
+      for (int i = 0; i < libraries.size(); i++) {
+        Object object = libraries.get(i);
         Library library = (Library) object;
         for (String depId : library.getLibraryDependencies()) {
           if (libraryId.equals(depId)) {
