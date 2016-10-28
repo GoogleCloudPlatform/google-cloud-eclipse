@@ -139,8 +139,12 @@ public class AppEngineLibrariesSelectorGroup {
                                                           library.getId(),
                                                           true /* resultIfFound */) {
                                                             @Override
-                                                            protected boolean resultIfNotFound() {
-                                                              return libraryButton.getData(BUTTON_MANUAL_SELECTION_KEY) != null;
+                                                            protected Object calculate() {
+                                                              if (libraryButton.getData(BUTTON_MANUAL_SELECTION_KEY) != null) {
+                                                                return true;
+                                                              } else {
+                                                                return super.calculate();
+                                                              }
                                                             }
                                                           },
                              new UpdateValueStrategy(UpdateValueStrategy.POLICY_NEVER),
@@ -222,14 +226,6 @@ public class AppEngineLibrariesSelectorGroup {
           }
         }
       }
-      return resultIfNotFound();
-    }
-
-    /**
-     * Subclasses can override this method if the default implementation of returning <code>!resultIfFound</code> is not
-     * sufficient.
-     */
-    protected boolean resultIfNotFound() {
       return !resultIfFound;
     }
   }
