@@ -28,9 +28,11 @@ import java.util.List;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateValueStrategy;
 import org.eclipse.core.databinding.conversion.Converter;
+import org.eclipse.core.databinding.observable.Realm;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.core.databinding.observable.value.ComputedValue;
+import org.eclipse.jface.databinding.swt.DisplayRealm;
 import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -45,14 +47,17 @@ import org.eclipse.swt.widgets.Group;
 public class AppEngineLibrariesSelectorGroup {
 
   private static final String BUTTON_MANUAL_SELECTION_KEY = "manualSelection";
+
   private Composite parentContainer;
-  private List<Button> libraryButtons = new LinkedList<>();
+  private final List<Button> libraryButtons;
   private DataBindingContext bindingContext;
-  private IObservableList selectedLibraries = new WritableList();
+  private final IObservableList selectedLibraries;
 
   public AppEngineLibrariesSelectorGroup(Composite parentContainer) {
     Preconditions.checkNotNull(parentContainer, "parentContainer is null");
     this.parentContainer = parentContainer;
+    selectedLibraries = new WritableList(getDisplayRealm());
+    libraryButtons = new LinkedList<>();
     createContents();
   }
 
@@ -100,7 +105,7 @@ public class AppEngineLibrariesSelectorGroup {
   }
 
   private void addDatabinding() {
-    bindingContext = new DataBindingContext();
+    bindingContext = new DataBindingContext(getDisplayRealm());
     for (Button libraryButton : libraryButtons) {
       addDatabindingForButton(libraryButton);
     }
@@ -112,13 +117,14 @@ public class AppEngineLibrariesSelectorGroup {
     ISWTObservableValue libraryButtonEnablement = WidgetProperties.enabled().observe(libraryButton);
     // library selection UI -> model
     bindingContext.bindValue(libraryButtonSelection,
-                             new NullComputedValue(),
+                             new NullComputedValue(getDisplayRealm()),
                              new UpdateValueStrategy().setConverter(new HandleLibrarySelectionConverter(selectedLibraries,
                                                                                                         library)),
                              new UpdateValueStrategy(UpdateValueStrategy.POLICY_NEVER));
     // library selection model -> UI
     bindingContext.bindValue(libraryButtonSelection, 
-                             new DependentLibrarySelected(selectedLibraries, 
+                             new DependentLibrarySelected(getDisplayRealm(),
+                                                          selectedLibraries,
                                                           library.getId(),
                                                           true,
                                                           new ButtonManuallySelected(libraryButton)),
@@ -126,7 +132,7 @@ public class AppEngineLibrariesSelectorGroup {
                              new UpdateValueStrategy());
     // library checkbox enablement model -> UI
     bindingContext.bindValue(libraryButtonEnablement,
-                             new DependentLibrarySelected(selectedLibraries, library.getId(), false),
+                             new DependentLibrarySelected(getDisplayRealm(), selectedLibraries, library.getId(), false),
                              new UpdateValueStrategy(UpdateValueStrategy.POLICY_NEVER),
                              new UpdateValueStrategy());
   }
@@ -135,6 +141,10 @@ public class AppEngineLibrariesSelectorGroup {
     if (bindingContext != null) {
       bindingContext.dispose();
     }
+  }
+
+  private Realm getDisplayRealm() {
+    return DisplayRealm.getRealm(parentContainer.getDisplay());
   }
 
   @VisibleForTesting
@@ -202,10 +212,11 @@ public class AppEngineLibrariesSelectorGroup {
      * @param libraryId the id of the library to be searched for
      * @param foundResult return value if the library is found
      */
-    private DependentLibrarySelected(IObservableList libraries,
+    private DependentLibrarySelected(Realm realm,
+                                     IObservableList libraries,
                                      String libraryId,
                                      final boolean foundResult) {
-      this(libraries, libraryId, foundResult, new Getter<Boolean>(){
+      this(realm, libraries, libraryId, foundResult, new Getter<Boolean>(){
         @Override
         public Boolean get() {
           return !foundResult;
@@ -218,10 +229,12 @@ public class AppEngineLibrariesSelectorGroup {
      * @param foundResult return value if the library is selected
      * @param condition if the library is not found in the list, return the result of <code>condition.get()</code>
      */
-    private DependentLibrarySelected(IObservableList libraries,
+    private DependentLibrarySelected(Realm realm,
+                                     IObservableList libraries,
                                      String libraryId,
                                      boolean foundResult,
                                      Getter<Boolean> condition) {
+      super(realm);
       Preconditions.checkNotNull(libraries);
       Preconditions.checkNotNull(libraryId);
       Preconditions.checkNotNull(condition);
@@ -251,6 +264,11 @@ public class AppEngineLibrariesSelectorGroup {
    * validators are used to implement the desired behavior.
    */
   private static final class NullComputedValue extends ComputedValue {
+
+    public NullComputedValue(Realm realm) {
+      super(realm);
+    }
+
     @Override
     protected Object calculate() {
       return null;
