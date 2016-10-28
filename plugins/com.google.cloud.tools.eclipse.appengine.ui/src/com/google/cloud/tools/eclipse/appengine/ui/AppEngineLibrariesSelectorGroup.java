@@ -19,8 +19,10 @@ package com.google.cloud.tools.eclipse.appengine.ui;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.ui.util.databinding.BooleanConverter;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -29,12 +31,12 @@ import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateValueStrategy;
 import org.eclipse.core.databinding.beans.PojoProperties;
 import org.eclipse.core.databinding.observable.Realm;
+import org.eclipse.core.databinding.observable.value.ComputedValue;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.WritableValue;
 import org.eclipse.jface.databinding.swt.DisplayRealm;
 import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
-import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
@@ -43,16 +45,13 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 
 public class AppEngineLibrariesSelectorGroup {
-  private DialogPage parentDialog;
   private Composite parentContainer;
   private List<Button> libraryButtons = new LinkedList<>();
   private DataBindingContext bindingContext;
 
-  public AppEngineLibrariesSelectorGroup(DialogPage parentDialog, Composite parentContainer) {
-    Preconditions.checkNotNull(parentDialog, "parentDialog is null");
+  public AppEngineLibrariesSelectorGroup(Composite parentContainer) {
     Preconditions.checkNotNull(parentContainer, "parentContainer is null");
 
-    this.parentDialog = parentDialog;
     this.parentContainer = parentContainer;
     createContents();
   }
@@ -149,7 +148,7 @@ public class AppEngineLibrariesSelectorGroup {
   }
 
   private Realm getDisplayRealm() {
-    return DisplayRealm.getRealm(parentDialog.getControl().getDisplay()); 
+    return DisplayRealm.getRealm(parentContainer.getDisplay());
   }
 
   public void dispose() {
@@ -158,4 +157,8 @@ public class AppEngineLibrariesSelectorGroup {
     }
   }
 
+  @VisibleForTesting
+  List<Button> getLibraryButtons() {
+    return libraryButtons;
+  }
 }
