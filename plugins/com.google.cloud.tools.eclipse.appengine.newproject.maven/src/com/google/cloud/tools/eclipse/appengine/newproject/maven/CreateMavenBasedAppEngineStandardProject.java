@@ -69,13 +69,13 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
     properties.put("useJstl", "true");
     // The project ID is currently necessary due to tool bugs.
     properties.put("application-id", artifactId);
-    properties.put("useObjectify", "false");
+    properties.put("useObjectify", Boolean.toString(appEngineLibraryIds.contains("objectify")));
     properties.put("useEndpoints1", Boolean.toString(appEngineLibraryIds.contains("appengine-endpoints")));
     properties.put("useEndpoints2", "false");
     properties.put("useAppEngineApi", Boolean.toString(appEngineLibraryIds.contains("appengine-api")));
 
     ProjectImportConfiguration importConfiguration = new ProjectImportConfiguration();
-    String packageName = this.packageName == null || this.packageName.isEmpty() 
+    String packageName = this.packageName == null || this.packageName.isEmpty()
         ? groupId : this.packageName;
     List<IProject> archetypeProjects = projectConfigurationManager.createArchetypeProjects(location,
         archetype, groupId, artifactId, version, packageName, properties,
@@ -88,10 +88,10 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
       AppEngineStandardFacet.installAppEngineFacet(facetedProject, true /* installDependentFacets */, loopMonitor.newChild(1));
       AppEngineStandardFacet.installAllAppEngineRuntimes(facetedProject, true /* force */, loopMonitor.newChild(1));
     }
-    
+
     /*
      * invoke the Maven lifecycle mapping discovery job
-     * 
+     *
      * todo: is this step necessary? we know the archetype contents and we handle the
      * lifecycle-mappings and rules
      */
@@ -121,14 +121,14 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
   void setLocation(IPath location) {
     this.location = location;
   }
-  
+
   /**
    * Set the version of the project to be created.
    */
   void setVersion(String version) {
     this.version = version;
   }
-  
+
   void setArchetype(Archetype archetype) {
     this.archetype = archetype;
   }
