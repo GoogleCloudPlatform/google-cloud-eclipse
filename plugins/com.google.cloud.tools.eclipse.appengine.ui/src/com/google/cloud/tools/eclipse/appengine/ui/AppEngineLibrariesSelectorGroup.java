@@ -250,8 +250,7 @@ public class AppEngineLibrariesSelectorGroup {
 
     @Override
     protected Object calculate() {
-      for (int i = 0; i < libraries.size(); i++) {
-        Object object = libraries.get(i);
+      for (Object object : libraries) {
         Library library = (Library) object;
         for (String depId : library.getLibraryDependencies()) {
           if (libraryId.equals(depId)) {
