@@ -44,6 +44,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 
+// TODO https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/911
 public class AppEngineLibrariesSelectorGroup {
 
   private static final String BUTTON_MANUAL_SELECTION_KEY = "manualSelection";
@@ -78,7 +79,7 @@ public class AppEngineLibrariesSelectorGroup {
       libraryButton.addSelectionListener(new ManualSelectionTracker());
       libraryButtons.add(libraryButton);
     }
-    addDatabinding();
+    setupDatabinding();
     GridLayoutFactory.fillDefaults().applyTo(apiGroup);
   }
 
@@ -104,14 +105,25 @@ public class AppEngineLibrariesSelectorGroup {
     }
   }
 
-  private void addDatabinding() {
+  private void setupDatabinding() {
     bindingContext = new DataBindingContext(getDisplayRealm());
     for (Button libraryButton : libraryButtons) {
-      addDatabindingForButton(libraryButton);
+      setupDatabindingForButton(libraryButton);
     }
   }
 
-  private void addDatabindingForButton(final Button libraryButton) {
+  /**
+   * We have three bindings for each library:
+   * <ol><li>A one-way binding of the checkbox selection state to add or remove the corresponding library from our
+   * selected-libraries list.</li>
+   * <li>The opposite of the first, a one-way binding to set the checkbox selection state when the corresponding
+   * library has been selected or if it is a dependency of another selected library.</li>
+   * <li>A one-way binding to set the checkbox enablement when the corresponding library is a dependency of a selected
+   * library.</li>
+   * </ol>
+   * @param libraryButton to which the databinding will be configured.
+   */
+  private void setupDatabindingForButton(final Button libraryButton) {
     final Library library = (Library) libraryButton.getData();
     ISWTObservableValue libraryButtonSelection = WidgetProperties.selection().observe(libraryButton);
     ISWTObservableValue libraryButtonEnablement = WidgetProperties.enabled().observe(libraryButton);
@@ -121,19 +133,21 @@ public class AppEngineLibrariesSelectorGroup {
                              new UpdateValueStrategy().setConverter(new HandleLibrarySelectionConverter(selectedLibraries,
                                                                                                         library)),
                              new UpdateValueStrategy(UpdateValueStrategy.POLICY_NEVER));
-    // library selection model -> UI
+    // UI <- library selection model
     bindingContext.bindValue(libraryButtonSelection, 
                              new DependentLibrarySelected(getDisplayRealm(),
-                                                          selectedLibraries,
                                                           library.getId(),
-                                                          true /* resultIfFound */,
-                                                          new ButtonManuallySelected(libraryButton)),
+                                                          true /* resultIfFound */) {
+                                                            @Override
+                                                            protected boolean resultIfNotFound() {
+                                                              return libraryButton.getData(BUTTON_MANUAL_SELECTION_KEY) != null;
+                                                            }
+                                                          },
                              new UpdateValueStrategy(UpdateValueStrategy.POLICY_NEVER),
                              new UpdateValueStrategy());
-    // library checkbox enablement model -> UI
+    // UI enablement <- library is a dependency
     bindingContext.bindValue(libraryButtonEnablement,
                              new DependentLibrarySelected(getDisplayRealm(),
-                                                          selectedLibraries,
                                                           library.getId(),
                                                           false /* resultIfFound */),
                              new UpdateValueStrategy(UpdateValueStrategy.POLICY_NEVER),
@@ -153,29 +167,6 @@ public class AppEngineLibrariesSelectorGroup {
   @VisibleForTesting
   List<Button> getLibraryButtons() {
     return libraryButtons;
-  }
-
-  /**
-   * Utility interface to return a value;
-   */
-  private static interface Getter<T> {
-    T get();
-  }
-
-  private static final class ButtonManuallySelected implements Getter<Boolean> {
-    private final Button libraryButton;
-
-    private ButtonManuallySelected(Button libraryButton) {
-      this.libraryButton = libraryButton;
-    }
-
-    /**
-     * Returns true if the checkbox associated with this instance was explicitly clicked by the user.
-     */
-    @Override
-    public Boolean get() {
-      return libraryButton.getData(BUTTON_MANUAL_SELECTION_KEY) != null;
-    }
   }
 
   /**
@@ -204,61 +195,42 @@ public class AppEngineLibrariesSelectorGroup {
   /**
    * Returns a computed value based on whether the associated library is in a list or not. 
    */
-  private static final class DependentLibrarySelected extends ComputedValue {
+  private class DependentLibrarySelected extends ComputedValue {
     private String libraryId;
-    private IObservableList libraries;
-    private Getter<Boolean> condition;
-    private boolean selectedResult;
+    private boolean resultIfFound;
 
     /**
-     * @param libraries the list of libraries to search
      * @param libraryId the id of the library to be searched for
      * @param resultIfFound value returned by {@link #calculate()} if the library is found
      */
     private DependentLibrarySelected(Realm realm,
-                                     IObservableList libraries,
                                      String libraryId,
                                      final boolean resultIfFound) {
-      this(realm, libraries, libraryId, resultIfFound, new Getter<Boolean>() {
-        @Override
-        public Boolean get() {
-          return !resultIfFound;
-        }});
-    }
-
-    /**
-     * @param libraries the list of libraries to search
-     * @param libraryId the id of the library to be searched for
-     * @param resultIfFound value returned by {@link #calculate()} if the library is found
-     * @param resultIfNotFound if the library is not found in the list, return the result of
-     * <code>resultIfNotFound.get()</code>
-     */
-    private DependentLibrarySelected(Realm realm,
-                                     IObservableList libraries,
-                                     String libraryId,
-                                     boolean resultIfFound,
-                                     Getter<Boolean> resultIfNotFound) {
       super(realm);
-      Preconditions.checkNotNull(libraries);
       Preconditions.checkNotNull(libraryId);
-      Preconditions.checkNotNull(resultIfNotFound);
-      this.selectedResult = resultIfFound;
-      this.libraries = libraries;
+      this.resultIfFound = resultIfFound;
       this.libraryId = libraryId;
-      this.condition = resultIfNotFound;
     }
 
     @Override
     protected Object calculate() {
-      for (Object object : libraries) {
+      for (Object object : selectedLibraries) {
         Library library = (Library) object;
         for (String depId : library.getLibraryDependencies()) {
           if (libraryId.equals(depId)) {
-            return selectedResult;
+            return resultIfFound;
           }
         }
       }
-      return condition.get();
+      return resultIfNotFound();
+    }
+
+    /**
+     * Subclasses can override this method if the default implementation of returning <code>!resultIfFound</code> is not
+     * sufficient.
+     */
+    protected boolean resultIfNotFound() {
+      return !resultIfFound;
     }
   }
 
