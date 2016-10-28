@@ -56,9 +56,9 @@ public class XmlTest {
   @Test
   public void testLimitedVisibility() {
     NodeList pages = doc.getElementsByTagName("page");
-    Assert.assertEquals(2, pages.getLength());
+    Assert.assertEquals(1, pages.getLength());
     NodeList enabledWhen = doc.getElementsByTagName("enabledWhen");
-    Assert.assertEquals(3, enabledWhen.getLength());
+    Assert.assertEquals(2, enabledWhen.getLength());
     NodeList tests = doc.getElementsByTagName("test");
     Assert.assertEquals(4, tests.getLength());
     NodeList adapts = doc.getElementsByTagName("adapt");
