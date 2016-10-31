@@ -145,7 +145,11 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
       @Override
       public IStatus validate(Object value /* email */) {
         if (requireValues && Strings.isNullOrEmpty((String) value)) {
-          return ValidationStatus.error(Messages.getString("error.account.missing"));
+          if (accountSelector.isSignedIn()) {
+            return ValidationStatus.error(Messages.getString("error.account.missing.signedin"));
+          } else {
+            return ValidationStatus.error(Messages.getString("error.account.missing.signedout"));
+          }
         }
         return ValidationStatus.ok();
       }

@@ -100,6 +100,10 @@ public class AccountSelector extends Composite {
     return index;
   }
 
+  public boolean isSignedIn() {
+    return loginService.hasAccounts();
+  }
+
   @VisibleForTesting
   class LogInOnSelect extends SelectionAdapter {
     @Override
