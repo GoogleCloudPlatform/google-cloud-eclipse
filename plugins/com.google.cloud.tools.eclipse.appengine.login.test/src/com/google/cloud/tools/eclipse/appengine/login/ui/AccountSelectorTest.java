@@ -265,6 +265,20 @@ public class AccountSelectorTest {
     assertEquals("<select this to login>", selector.combo.getItem(2));
   }
 
+  @Test
+  public void testIsSignedIn_notSignedIn() {
+    when(loginService.hasAccounts()).thenReturn(false);
+    AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
+    assertFalse(selector.isSignedIn());
+  }
+
+  @Test
+  public void testIsSignedIn_signedIn() {
+    when(loginService.hasAccounts()).thenReturn(true);
+    AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
+    assertTrue(selector.isSignedIn());
+  }
+
   private void simulateSelect(AccountSelector selector, int index) {
     selector.combo.select(index);
     selector.combo.notifyListeners(SWT.Selection, mock(Event.class));
