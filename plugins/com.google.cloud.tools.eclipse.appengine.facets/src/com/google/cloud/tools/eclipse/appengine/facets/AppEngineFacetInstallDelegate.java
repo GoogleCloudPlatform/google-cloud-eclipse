@@ -16,15 +16,15 @@
 
 package com.google.cloud.tools.eclipse.appengine.facets;
 
+import com.google.cloud.tools.appengine.api.AppEngineException;
+import com.google.cloud.tools.appengine.cloudsdk.AppEngineJavaComponentsNotInstalledException;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.common.project.facet.core.IDelegate;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
-
-import com.google.cloud.tools.appengine.cloudsdk.AppEngineJavaComponentsNotInstalledException;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 
 public abstract class AppEngineFacetInstallDelegate implements IDelegate   {
   @Override
@@ -36,13 +36,17 @@ public abstract class AppEngineFacetInstallDelegate implements IDelegate   {
   }
 
   private void validateAppEngineJavaComponents() throws CoreException {
-    CloudSdk cloudSdk = new CloudSdk.Builder().build();
     try {
+      CloudSdk cloudSdk = new CloudSdk.Builder().build();
       cloudSdk.validateAppEngineJavaComponents();
     } catch (AppEngineJavaComponentsNotInstalledException ex) {
-      // to properly display error in message box
-      throw new CoreException(StatusUtil.error(getClass(),
-          Messages.getString("appengine.java.component.missing"), ex));
+      // todo properly display error in message box
+      throw new CoreException(
+          StatusUtil.error(getClass(), Messages.getString("appengine.java.component.missing"), ex));
+    } catch (AppEngineException ex) {
+      // todo properly display error in message box
+      throw new CoreException(
+          StatusUtil.error(getClass(), Messages.getString("cloud.sdk.missing"), ex));
     }
   }
 }

@@ -16,12 +16,14 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 
-import com.google.cloud.tools.appengine.cloudsdk.AppEngineJavaComponentsNotInstalledException;
+import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineComponentPage;
+import com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPrompter;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
-
+import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -32,11 +34,10 @@ import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.statushandlers.StatusManager;
 
-import java.lang.reflect.InvocationTargetException;
-
 public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
   private MavenAppEngineStandardWizardPage page;
   private MavenAppEngineStandardArchetypeWizardPage archetypePage;
+  private File cloudSdkLocation;
 
   public MavenArchetypeProjectWizard() {
     setWindowTitle(Messages.getString("WIZARD_TITLE")); //$NON-NLS-1$
@@ -61,6 +62,13 @@ public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_COMPLETE,
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_MAVEN);
+
+    if (cloudSdkLocation == null) {
+      cloudSdkLocation = CloudSdkPrompter.getCloudSdkLocation(getShell());
+      if (cloudSdkLocation == null) {
+        return false;
+      }
+    }
 
     final CreateMavenBasedAppEngineStandardProject operation = new CreateMavenBasedAppEngineStandardProject();
     operation.setPackageName(page.getPackageName());
@@ -95,13 +103,18 @@ public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
   }
 
   @Override
-  public void init(IWorkbench workbench, IStructuredSelection selection) {}
+  public void init(IWorkbench workbench, IStructuredSelection selection) {
+    if (cloudSdkLocation == null) {
+      cloudSdkLocation = CloudSdkPrompter.getCloudSdkLocation(getShell());
+      // if the user doesn't provide the Cloud SDK then we'll error in performFinish() too
+    }
+  }
 
   private boolean appEngineJavaComponentExists() {
     try {
       new CloudSdk.Builder().build().validateAppEngineJavaComponents();
       return true;
-    } catch (AppEngineJavaComponentsNotInstalledException ex) {
+    } catch (AppEngineException ex) {
       return false;
     }
   }

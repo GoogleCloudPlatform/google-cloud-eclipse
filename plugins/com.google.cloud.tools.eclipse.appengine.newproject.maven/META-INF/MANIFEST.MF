@@ -24,6 +24,7 @@ Bundle-ActivationPolicy: lazy
 Import-Package: com.google.cloud.tools.eclipse.appengine.facets,
  com.google.cloud.tools.eclipse.appengine.libraries.model,
  com.google.cloud.tools.eclipse.appengine.ui,
+ com.google.cloud.tools.eclipse.sdk.ui.preferences,
  com.google.cloud.tools.eclipse.usagetracker,
  com.google.cloud.tools.eclipse.util,
  org.apache.maven.archetype.catalog;provider=m2e,
