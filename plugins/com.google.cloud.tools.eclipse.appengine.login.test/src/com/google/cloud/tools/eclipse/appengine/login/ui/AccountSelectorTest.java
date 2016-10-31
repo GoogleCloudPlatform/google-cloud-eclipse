@@ -274,7 +274,7 @@ public class AccountSelectorTest {
 
   @Test
   public void testIsSignedIn_signedIn() {
-    when(loginService.hasAccounts()).thenReturn(true);
+    when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1)));
     AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
     assertTrue(selector.isSignedIn());
   }

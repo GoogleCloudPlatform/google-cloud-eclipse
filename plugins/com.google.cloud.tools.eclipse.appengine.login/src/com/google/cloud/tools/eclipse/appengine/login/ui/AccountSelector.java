@@ -101,7 +101,8 @@ public class AccountSelector extends Composite {
   }
 
   public boolean isSignedIn() {
-    return loginService.hasAccounts();
+    // <Add a new account...> is always in the combo
+    return combo.getItemCount() > 1;
   }
 
   @VisibleForTesting

@@ -51,6 +51,9 @@ public class StandardDeployPreferencesPanelTest {
 
   @Before
   public void setUp() throws Exception {
+    // TODO: use ShellTestResource (see AccountPanelTest) after fixing
+    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/771.
+    // (Remove shell.dispose() in tearDown() too.)
     shell = new Shell(Display.getDefault());
     parent = new Composite(shell, SWT.NONE);
     when(project.getName()).thenReturn("testProject");
@@ -58,9 +61,6 @@ public class StandardDeployPreferencesPanelTest {
 
   @After
   public void tearDown() {
-    if (parent != null) {
-      parent.dispose();
-    }
     if (shell != null) {
       shell.dispose();
     }
