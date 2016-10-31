@@ -16,8 +16,10 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.repository;
 
-
+import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.beans.HasPropertyWithValue.hasProperty;
+import static org.hamcrest.collection.IsArrayContaining.hasItemInArray;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
@@ -29,11 +31,13 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.M2RepositoryService.MavenHelper;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import java.io.File;
+import java.net.URI;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.core.IClasspathAttribute;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -47,8 +51,10 @@ public class M2RepositoryServiceTest {
   @Mock private MavenHelper mavenHelper;
   @Mock private MavenCoordinatesClasspathAttributesTransformer transformer;
 
+  private M2RepositoryService m2RepositoryService;
+  
   @Test(expected = LibraryRepositoryServiceException.class)
-  public void testGetJarLocation_errorInArtifactResolution() throws LibraryRepositoryServiceException, CoreException {
+  public void getLibraryClasspathEntry_errorInArtifactResolution() throws Exception {
     M2RepositoryService m2RepositoryService = new M2RepositoryService();
     m2RepositoryService.setMavenHelper(mavenHelper);
     when(mavenHelper.resolveArtifact(any(IProgressMonitor.class), any(MavenCoordinates.class),
@@ -60,7 +66,7 @@ public class M2RepositoryServiceTest {
   }
 
   @Test(expected = LibraryRepositoryServiceException.class)
-  public void testGetJarLocation_invalidRepositoryId() throws LibraryRepositoryServiceException {
+  public void getLibraryClasspathEntry_invalidRepositoryId() throws LibraryRepositoryServiceException {
     M2RepositoryService m2RepositoryService = new M2RepositoryService();
     m2RepositoryService.setMavenHelper(mavenHelper);
 
@@ -70,7 +76,7 @@ public class M2RepositoryServiceTest {
   }
 
   @Test(expected = LibraryRepositoryServiceException.class)
-  public void testGetJarLocation_invalidRepositoryURI() throws LibraryRepositoryServiceException {
+  public void getLibraryClasspathEntry_invalidRepositoryURI() throws LibraryRepositoryServiceException {
     M2RepositoryService m2RepositoryService = new M2RepositoryService();
     m2RepositoryService.setMavenHelper(mavenHelper);
 
@@ -80,8 +86,7 @@ public class M2RepositoryServiceTest {
   }
 
   @Test(expected = LibraryRepositoryServiceException.class)
-  public void testGetJarLocation_customRepositoryCreationError() throws LibraryRepositoryServiceException,
-                                                                        CoreException {
+  public void getLibraryClasspathEntry_customRepositoryCreationError() throws Exception {
     M2RepositoryService m2RepositoryService = new M2RepositoryService();
     m2RepositoryService.setMavenHelper(mavenHelper);
     when(mavenHelper.createArtifactRepository("example.com", "http://example.com")).thenThrow(testCoreException());
@@ -92,7 +97,7 @@ public class M2RepositoryServiceTest {
   }
 
   @Test
-  public void testGetJarLocation_customRepositoryURI() throws LibraryRepositoryServiceException, CoreException {
+  public void getLibraryClasspathEntry_customRepositoryURI() throws Exception {
     M2RepositoryService m2RepositoryService = new M2RepositoryService();
     m2RepositoryService.setMavenHelper(mavenHelper);
     m2RepositoryService.setTransformer(transformer);
@@ -107,6 +112,26 @@ public class M2RepositoryServiceTest {
     IPath jarLocation = m2RepositoryService.getLibraryClasspathEntry(new LibraryFile(mavenCoordinates)).getPath();
 
     assertThat(jarLocation.toOSString(), is(FAKE_PATH));
+  }
+
+  @Test
+  public void getLibraryClasspathEntry_withJavadoc() throws Exception {
+    M2RepositoryService m2RepositoryService = new M2RepositoryService();
+    m2RepositoryService.setMavenHelper(mavenHelper);
+    m2RepositoryService.setTransformer(transformer);
+    Artifact artifact = getMockArtifactWithJarPath();
+    when(mavenHelper.resolveArtifact(any(IProgressMonitor.class),
+                                     any(MavenCoordinates.class),
+                                     anyListOf(ArtifactRepository.class))).thenReturn(artifact);
+    MavenCoordinates mavenCoordinates = new MavenCoordinates("groupId", "artifactId");
+    LibraryFile libraryFile = new LibraryFile(mavenCoordinates);
+    libraryFile.setJavadocUri(new URI("http://example.com/javadoc"));
+    IClasspathAttribute[] attributes = m2RepositoryService.getLibraryClasspathEntry(libraryFile).getExtraAttributes();
+
+    assertThat(attributes, hasItemInArray(allOf(hasProperty("name",
+                                                            is(IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME)),
+                                                hasProperty("value",
+                                                            is("http://example.com/javadoc")))));
   }
 
   @Test(expected = IllegalStateException.class)

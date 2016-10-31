@@ -23,6 +23,7 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates
 import com.google.cloud.tools.eclipse.util.MavenUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
@@ -97,8 +98,12 @@ public class M2RepositoryService implements ILibraryRepositoryService {
       } else {
         attributes.add(UpdateClasspathAttributeUtil.createNonDependencyAttribute());
       }
+      if (libraryFile.getJavadocUri() != null) {
+        attributes.add(JavaCore.newClasspathAttribute(IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME,
+                                                      libraryFile.getJavadocUri().toURL().toString()));
+      }
       return attributes.toArray(new IClasspathAttribute[0]);
-    } catch (CoreException ex) {
+    } catch (CoreException | MalformedURLException ex) {
       throw new LibraryRepositoryServiceException("Could not create classpath attributes", ex);
     }
   }
