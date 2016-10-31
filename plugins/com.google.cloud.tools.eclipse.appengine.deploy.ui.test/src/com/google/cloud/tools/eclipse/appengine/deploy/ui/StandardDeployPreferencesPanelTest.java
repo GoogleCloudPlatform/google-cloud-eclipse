@@ -21,8 +21,12 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
+import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.appengine.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.appengine.login.ui.AccountSelectorObservableValue;
+import com.google.cloud.tools.ide.login.Account;
+import java.util.Arrays;
+import java.util.HashSet;
 import org.eclipse.core.databinding.ValidationStatusProvider;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IStatus;
@@ -42,12 +46,11 @@ public class StandardDeployPreferencesPanelTest {
 
   private Composite parent;
   private Shell shell;
-  @Mock
-  private IProject project;
-  @Mock
-  private IGoogleLoginService loginService;
-  @Mock
-  private Runnable layoutChangedHandler;
+  @Mock private IProject project;
+  @Mock private IGoogleLoginService loginService;
+  @Mock private Runnable layoutChangedHandler;
+  @Mock private Account account;
+  @Mock private Credential credential;
 
   @Before
   public void setUp() throws Exception {
@@ -57,6 +60,8 @@ public class StandardDeployPreferencesPanelTest {
     shell = new Shell(Display.getDefault());
     parent = new Composite(shell, SWT.NONE);
     when(project.getName()).thenReturn("testProject");
+    when(account.getEmail()).thenReturn("some-email-1@example.com");
+    when(account.getOAuth2Credential()).thenReturn(credential);
   }
 
   @After
@@ -74,7 +79,7 @@ public class StandardDeployPreferencesPanelTest {
 
   @Test
   public void testValidationMessageWhenSignedIn() {
-    when(loginService.hasAccounts()).thenReturn(true);
+    when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account)));
     StandardDeployPreferencesPanel deployPanel = new StandardDeployPreferencesPanel(parent, project, loginService, layoutChangedHandler, true);
     assertThat(getAccountSelectorValidationStatus(deployPanel), is("Select an account."));
   }
