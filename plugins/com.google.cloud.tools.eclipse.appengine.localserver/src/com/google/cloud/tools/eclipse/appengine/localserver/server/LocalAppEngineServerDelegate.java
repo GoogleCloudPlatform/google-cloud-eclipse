@@ -18,7 +18,6 @@ package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -32,6 +31,7 @@ import org.eclipse.wst.server.core.model.ServerDelegate;
 
 @SuppressWarnings("restriction") // For FacetUtil
 public class LocalAppEngineServerDelegate extends ServerDelegate {
+  private static final IModule[] EMPTY_MODULES = new IModule[0];
   private static final String SERVLET_MODULE_FACET = "jst.web";
   private static final String ATTR_APP_ENGINE_SERVER_MODULES = "app-engine-server-modules-list";
 
@@ -72,13 +72,18 @@ public class LocalAppEngineServerDelegate extends ServerDelegate {
   }
 
   /**
-   * If the module is a web module returns the utility modules contained within its
-   * WAR, otherwise returns an empty list.
+   * If the module is a web module returns the utility modules contained within its WAR, otherwise
+   * returns an empty list.
+   * 
+   * @param module the module path traversed to this point
    */
   @Override
   public IModule[] getChildModules(IModule[] module) {
-    if ((module != null) && (module.length > 0) && (module[0] != null) && (module[0].getModuleType() != null)) {
-      IModule thisModule = module[0];
+    if (module == null || module.length == 0) {
+      return EMPTY_MODULES;
+    }
+    IModule thisModule = module[module.length - 1];
+    if (thisModule != null && thisModule.getModuleType() != null) {
       IModuleType moduleType = thisModule.getModuleType();
       if (moduleType != null && SERVLET_MODULE_FACET.equals(moduleType.getId())) { //$NON-NLS-1$
         IWebModule webModule = (IWebModule) thisModule.loadAdapter(IWebModule.class, null);
@@ -88,7 +93,7 @@ public class LocalAppEngineServerDelegate extends ServerDelegate {
         }
       }
     }
-    return new IModule[0];
+    return EMPTY_MODULES;
   }
 
   @Override
