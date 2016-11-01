@@ -53,7 +53,10 @@ public class BrowserSupportBasedHyperlink implements IHyperlink {
       IWorkbenchBrowserSupport browserSupport = PlatformUI.getWorkbench().getBrowserSupport();
       int style = IWorkbenchBrowserSupport.LOCATION_BAR | IWorkbenchBrowserSupport.NAVIGATION_BAR
           | IWorkbenchBrowserSupport.STATUS;
-      browserSupport.createBrowser(style, null, null, null).openURL(new URL(url));
+      String browserId = null;
+      String title = null;
+      String tooltip = null;
+      browserSupport.createBrowser(style, browserId, title, tooltip).openURL(new URL(url));
 
     } catch (PartInitException partInitException) {
       logger.log(Level.SEVERE, "Cannot open hyperlink using browser support, will try SWT's Program.launch(String)",
