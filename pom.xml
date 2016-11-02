@@ -41,6 +41,7 @@
     <module>plugins/com.google.cloud.tools.eclipse.sdk.ui</module>
     <module>plugins/com.google.cloud.tools.eclipse.sdk.ui.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.test.dependencies</module>
+    <module>plugins/com.google.cloud.tools.eclipse.test.util</module>
     <module>plugins/com.google.cloud.tools.eclipse.usagetracker</module>
     <module>plugins/com.google.cloud.tools.eclipse.usagetracker.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.ui.util</module>
