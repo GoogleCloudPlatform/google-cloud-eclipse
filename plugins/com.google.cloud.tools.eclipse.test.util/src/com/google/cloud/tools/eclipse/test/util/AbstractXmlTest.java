@@ -14,27 +14,23 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.login.ui;
+package com.google.cloud.tools.eclipse.test.util;
 
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
-import org.junit.rules.ExternalResource;
+import org.junit.Before;
+import org.junit.Rule;
+import org.w3c.dom.Document;
 
-public class ShellTestResource extends ExternalResource {
+public class AbstractXmlTest {
 
-  private Shell shell;
+  @Rule public PluginXmlDocument pluginXmlDocument = new PluginXmlDocument();
+  private Document doc;
 
-  public Shell getShell() {
-    return shell;
+  @Before
+  public void setUp() {
+    doc = pluginXmlDocument.get();
   }
 
-  @Override
-  protected void before() {
-    shell = new Shell(Display.getDefault());
-  }
-
-  @Override
-  protected void after() {
-    shell.dispose();
+  protected Document getDoc() {
+    return doc;
   }
 }

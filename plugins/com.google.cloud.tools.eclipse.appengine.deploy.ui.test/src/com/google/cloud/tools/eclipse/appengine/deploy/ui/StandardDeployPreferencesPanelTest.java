@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.appengine.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.appengine.login.ui.AccountSelectorObservableValue;
+import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import com.google.cloud.tools.ide.login.Account;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -32,10 +33,9 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -51,24 +51,15 @@ public class StandardDeployPreferencesPanelTest {
   @Mock private Runnable layoutChangedHandler;
   @Mock private Account account;
   @Mock private Credential credential;
+  @Rule public ShellTestResource shellTestResource = new ShellTestResource();
 
   @Before
   public void setUp() throws Exception {
-    // TODO: use ShellTestResource (see AccountPanelTest) after fixing
-    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/771.
-    // (Remove shell.dispose() in tearDown() too.)
-    shell = new Shell(Display.getDefault());
+    shell = shellTestResource.getShell();
     parent = new Composite(shell, SWT.NONE);
     when(project.getName()).thenReturn("testProject");
     when(account.getEmail()).thenReturn("some-email-1@example.com");
     when(account.getOAuth2Credential()).thenReturn(credential);
-  }
-
-  @After
-  public void tearDown() {
-    if (shell != null) {
-      shell.dispose();
-    }
   }
 
   @Test

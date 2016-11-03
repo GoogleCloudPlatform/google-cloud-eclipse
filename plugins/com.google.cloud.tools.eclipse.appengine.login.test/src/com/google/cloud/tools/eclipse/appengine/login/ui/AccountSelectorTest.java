@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.appengine.login.IGoogleLoginService;
+import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import com.google.cloud.tools.ide.login.Account;
 
 import org.eclipse.swt.SWT;

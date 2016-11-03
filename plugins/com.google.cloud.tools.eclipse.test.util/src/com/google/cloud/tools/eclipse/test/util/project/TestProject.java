@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.localserver.server;
+package com.google.cloud.tools.eclipse.test.util.project;
 
 import static org.junit.Assert.fail;
 
@@ -51,8 +51,9 @@ public final class TestProject extends ExternalResource {
     return this;
   }
 
-  public TestProject(List<IProjectFacetVersion> projectFacetVersions) {
+  public TestProject withFacetVersions(List<IProjectFacetVersion> projectFacetVersions) {
     this.projectFacetVersions.addAll(projectFacetVersions);
+    return this;
   }
 
   @Override

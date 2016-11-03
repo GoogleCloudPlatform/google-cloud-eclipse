@@ -22,6 +22,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
+import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import org.eclipse.core.databinding.observable.Realm;
 import org.eclipse.jface.databinding.swt.DisplayRealm;
 import org.eclipse.jface.wizard.IWizardContainer;
@@ -30,28 +31,21 @@ import org.eclipse.swt.widgets.Shell;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 public class MavenArchetypeProjectWizardTest {
 
   private MavenArchetypeProjectWizard wizard;
   private Shell shell;
+  @Rule public ShellTestResource shellTestResource = new ShellTestResource();
 
   @Before
   public void setUp() {
-    // TODO(chanseok): use ShellTestResource (see AccountPanelTest) after fixing
-    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/771.
-    // (Remove shell.dispose() in tearDown() too.)
-    assertNotNull(Display.getDefault());
-    shell = new Shell(Display.getDefault());
+    shell = shellTestResource.getShell();
 
     wizard = new MavenArchetypeProjectWizard();
     wizard.addPages();
-  }
-
-  @After
-  public void tearDown() {
-    shell.dispose();
   }
 
   @Test

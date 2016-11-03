@@ -35,6 +35,7 @@ import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryCla
 import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer.ArtifactBaseLocationProvider;
 import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer.LibraryContainerStateLocationProvider;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
+import com.google.cloud.tools.eclipse.test.util.project.TestProject;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;

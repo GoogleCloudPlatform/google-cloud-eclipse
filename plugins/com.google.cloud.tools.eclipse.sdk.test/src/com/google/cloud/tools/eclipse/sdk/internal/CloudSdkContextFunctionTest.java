@@ -21,7 +21,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-
+import com.google.cloud.tools.eclipse.test.util.reflection.ReflectionUtil;
 import org.eclipse.e4.core.contexts.EclipseContextFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.junit.After;
