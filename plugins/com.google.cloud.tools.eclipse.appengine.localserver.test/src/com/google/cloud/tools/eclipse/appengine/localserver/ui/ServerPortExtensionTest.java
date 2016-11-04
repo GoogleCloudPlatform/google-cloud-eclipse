@@ -41,7 +41,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class ServerPortExtensionTest {
 
-  @Rule ShellTestResource shellTestResource = new ShellTestResource();
+  @Rule public ShellTestResource shellTestResource = new ShellTestResource();
 
   private Shell shell;
   private ServerPortExtension portExtension;

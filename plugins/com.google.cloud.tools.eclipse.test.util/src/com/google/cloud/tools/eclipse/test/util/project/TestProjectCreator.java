@@ -36,22 +36,18 @@ import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.common.project.facet.core.internal.FacetedProjectNature;
 import org.junit.rules.ExternalResource;
 
-/**
- * TODO Duplicate of com.google.cloud.tools.eclipse.appengine.libraries.TestProject with additional option to
- * add facets to the project. https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/771
- */
-public final class TestProject extends ExternalResource {
+public final class TestProjectCreator extends ExternalResource {
 
   private IJavaProject javaProject;
   private String containerPath;
   private List<IProjectFacetVersion> projectFacetVersions = new ArrayList<>();
 
-  public TestProject withClasspathContainerPath(String containerPath) {
+  public TestProjectCreator withClasspathContainerPath(String containerPath) {
     this.containerPath = containerPath;
     return this;
   }
 
-  public TestProject withFacetVersions(List<IProjectFacetVersion> projectFacetVersions) {
+  public TestProjectCreator withFacetVersions(List<IProjectFacetVersion> projectFacetVersions) {
     this.projectFacetVersions.addAll(projectFacetVersions);
     return this;
   }

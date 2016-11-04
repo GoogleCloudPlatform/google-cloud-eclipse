@@ -16,16 +16,12 @@
 
 package com.google.cloud.tools.eclipse.test.util;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertNotNull;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.List;
+import java.io.InputStream;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import javax.xml.parsers.DocumentBuilder;
@@ -33,15 +29,15 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.junit.rules.ExternalResource;
 import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 /**
  * Test utility class to obtain a {@link Document} representing the host bundle's plugin.xml.
  * <p>
  * Assumptions:
  * <ul>
- *  <li>instances are created only in test fragments bundles that are hosted by the corresponding production</li>
- *  <li>host and test bundles are located under the same parent directory</li>
- *  <li>test bundle's name (Bundle-SymbolicName) is the host bundle's name postfixed with <code>.test</code>
+ *  <li>instances are created only in test fragment bundles that are hosted by the corresponding production</li>
+ *  <li>the tests execute with the working directory in a bundle or fragment directory</li>
  * </ul>
  */
 public class PluginXmlDocument extends ExternalResource {
@@ -49,19 +45,32 @@ public class PluginXmlDocument extends ExternalResource {
   private Document doc;
 
   @Override
-  protected void before() throws Throwable {
-    String hostBundleName = getHostBundleName();
-    String pluginXmlLocation = "../" + hostBundleName + "/plugin.xml";
+  protected void before() throws ParserConfigurationException, SAXException, IOException {
     DocumentBuilder builder = createDocumentBuilder();
+    InputStream pluginXml = getPluginXml();
+    assertNotNull(pluginXml);
     // test fails if malformed
-    doc = builder.parse(new File(pluginXmlLocation));
+    doc = builder.parse(pluginXml);
   }
-  
+
+  /**
+   * Subclasses should override this method in case the plugin.xml is not at the location of
+   * <code>&lt;work_dir&gt;/../&lt;host_bundle_name&gt;/plugin.xml</code>
+   */
+  protected InputStream getPluginXml() throws IOException {
+    String pluginXmlLocation = "../" + getHostBundleName() + "/plugin.xml";
+    return new FileInputStream(pluginXmlLocation);
+  }
+
+  /**
+   * Returns the Document representing the plugin.xml. The file is parsed only once when {@link #before()} is executed
+   * by JUnit.
+   */
   public Document get() {
     return doc;
   }
 
-  private DocumentBuilder createDocumentBuilder() throws ParserConfigurationException {
+  private static DocumentBuilder createDocumentBuilder() throws ParserConfigurationException {
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     factory.setNamespaceAware(true);
     DocumentBuilder builder = factory.newDocumentBuilder();
@@ -72,10 +81,6 @@ public class PluginXmlDocument extends ExternalResource {
     String manifestPath = "META-INF/MANIFEST.MF";
     Manifest manifest = new Manifest(new FileInputStream(manifestPath));
     Attributes attr = manifest.getMainAttributes();
-    String testBundleName = attr.getValue("Bundle-SymbolicName");
-    List<String> bundleNameComponents = Splitter.on('.').splitToList(testBundleName);
-    int size = bundleNameComponents.size();
-    assertThat(bundleNameComponents.get(size - 1), is("test"));
-    return Joiner.on('.').join(bundleNameComponents.subList(0, size - 1));
+    return attr.getValue("Fragment-Host");
   }
 }

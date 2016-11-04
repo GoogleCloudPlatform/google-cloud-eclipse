@@ -20,7 +20,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.w3c.dom.Document;
 
-public class AbstractXmlTest {
+public abstract class AbstractPluginXmlTest {
 
   @Rule public PluginXmlDocument pluginXmlDocument = new PluginXmlDocument();
   private Document doc;

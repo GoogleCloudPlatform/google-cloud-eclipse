@@ -35,7 +35,7 @@ import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryCla
 import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer.ArtifactBaseLocationProvider;
 import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer.LibraryContainerStateLocationProvider;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
-import com.google.cloud.tools.eclipse.test.util.project.TestProject;
+import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
@@ -72,7 +72,7 @@ public class AppEngineLibraryContainerInitializerTest {
   private LibraryClasspathContainerSerializer serializer;
 
   @Rule
-  public TestProject testProject = new TestProject().withClasspathContainerPath(TEST_LIBRARY_PATH);
+  public TestProjectCreator testProject = new TestProjectCreator().withClasspathContainerPath(TEST_LIBRARY_PATH);
   @Rule
   public TemporaryFolder stateLocationFolder = new TemporaryFolder();
 
