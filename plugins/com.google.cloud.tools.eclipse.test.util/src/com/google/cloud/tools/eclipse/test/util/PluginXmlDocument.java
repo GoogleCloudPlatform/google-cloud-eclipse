@@ -19,7 +19,6 @@ package com.google.cloud.tools.eclipse.test.util;
 import static org.junit.Assert.assertNotNull;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.jar.Attributes;
@@ -47,18 +46,21 @@ public class PluginXmlDocument extends ExternalResource {
   @Override
   protected void before() throws ParserConfigurationException, SAXException, IOException {
     DocumentBuilder builder = createDocumentBuilder();
-    InputStream pluginXml = getPluginXml();
-    assertNotNull(pluginXml);
-    // test fails if malformed
-    doc = builder.parse(pluginXml);
+    try (InputStream pluginXml = getPluginXml()) {
+      assertNotNull(pluginXml);
+      // test fails if malformed
+      doc = builder.parse(pluginXml);
+    }
   }
 
   /**
-   * Subclasses should override this method in case the plugin.xml is not at the location of
+   * Subclasses should override this method if the plugin.xml is not at the location of
    * <code>&lt;work_dir&gt;/../&lt;host_bundle_name&gt;/plugin.xml</code>
    */
   protected InputStream getPluginXml() throws IOException {
-    String pluginXmlLocation = "../" + getHostBundleName() + "/plugin.xml";
+    String hostBundleName = getHostBundleName();
+    assertNotNull(hostBundleName);
+    String pluginXmlLocation = "../" + hostBundleName + "/plugin.xml";
     return new FileInputStream(pluginXmlLocation);
   }
 
@@ -77,7 +79,15 @@ public class PluginXmlDocument extends ExternalResource {
     return builder;
   }
 
-  private String getHostBundleName() throws IOException, FileNotFoundException {
+  /**
+   * Returns the host bundle name defined in the manifest of the test fragment bundle.
+   * <p>
+   * The working directory is assumed to be the root of the fragment bundle (i.e. <code>META-INF/MANIFEST.MF</code>
+   * is a valid path to the manifest file of the fragment.
+   * @return the value of <code>Fragment-Host</code> attribute or <code>null</code> if the attribute is not present
+   * @throws IOException if the manifest file is not found or an error occurs while reading it
+   */
+  private String getHostBundleName() throws IOException {
     String manifestPath = "META-INF/MANIFEST.MF";
     Manifest manifest = new Manifest(new FileInputStream(manifestPath));
     Attributes attr = manifest.getMainAttributes();
