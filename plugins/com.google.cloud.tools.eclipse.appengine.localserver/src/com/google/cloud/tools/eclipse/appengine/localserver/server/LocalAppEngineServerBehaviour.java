@@ -118,16 +118,6 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     return super.getResources(module);
   }
 
-  @Override
-  public IStatus canStop() {
-    int serverState = getServer().getServerState();
-    if ((serverState != IServer.STATE_STOPPING) && (serverState != IServer.STATE_STOPPED)) {
-      return Status.OK_STATUS;
-    } else {
-      return newErrorStatus("Stop in progress");
-    }
-  }
-
   /**
    * Returns runtime base directory. Uses temp directory.
    */
