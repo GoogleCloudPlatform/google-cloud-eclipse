@@ -22,14 +22,14 @@ import static org.junit.Assert.assertThat;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
-import com.google.cloud.tools.eclipse.test.util.AbstractPluginXmlTest;
+import com.google.cloud.tools.eclipse.test.util.BasePluginXmlTest;
 import org.junit.Assert;
 import org.junit.Test;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public class XmlTest extends AbstractPluginXmlTest {
+public class PluginXmlTest extends BasePluginXmlTest {
 
   @Test
   public void testLimitedVisibility() {
