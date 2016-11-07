@@ -143,7 +143,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     GridDataFactory.swtDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false)
         .applyTo(locationField);
     locationField.setText(workspaceLocationProvider.get().toOSString());
-    locationField.setData("" /* initially empty for manually entered location */);
+    locationField.setData("" /* initially empty for manually entered location */); //$NON-NLS-1$
     locationField.addModifyListener(pageValidator);
     locationField.setEnabled(false);
 
@@ -296,7 +296,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     String artifactId = getArtifactId();
     IPath path = getLocationPath().append(artifactId);
     if (path.toFile().exists()) {
-      String errorMessage = MessageFormat.format(Messages.getString("LOCATION_ALREADY_EXISTS"), path);
+      String errorMessage = MessageFormat.format(Messages.getString("LOCATION_ALREADY_EXISTS"), path); //$NON-NLS-1$
       setErrorMessage(errorMessage);
       return false;
     }
@@ -401,7 +401,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
         String newSuggestion = suggestPackageName(groupId);
         updatePackageField(newSuggestion);
       } else if (groupId.isEmpty()) {
-        updatePackageField("");
+        updatePackageField(""); //$NON-NLS-1$
       }
     }
   }
