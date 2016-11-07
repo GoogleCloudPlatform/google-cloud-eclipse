@@ -27,17 +27,22 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+// Flex facet temporarily disabled
 @RunWith(MockitoJUnitRunner.class)
 public class AppEngineFlexFacetTest {
   @Mock private IFacetedProject facetedProject;
 
   @Test
+  public void testFlexFacetDoesNotExists() {
+    Assert.assertFalse(
+        ProjectFacetsManager.isProjectFacetDefined("com.google.cloud.tools.eclipse.appengine.facets.flex"));
+  }
+
   public void testFlexFacetExists() {
     Assert.assertTrue(
         ProjectFacetsManager.isProjectFacetDefined("com.google.cloud.tools.eclipse.appengine.facets.flex"));
   }
 
-  @Test
   public void testHasAppEngineFacet_withFacet() {
     IProjectFacet projectFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexFacet.ID);
     when(facetedProject.hasProjectFacet(projectFacet)).thenReturn(true);
@@ -45,7 +50,6 @@ public class AppEngineFlexFacetTest {
     Assert.assertTrue(AppEngineFlexFacet.hasAppEngineFacet(facetedProject));
   }
 
-  @Test
   public void testHasAppEngineFacet_withoutFacet() {
     IProjectFacet projectFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexFacet.ID);
     when(facetedProject.hasProjectFacet(projectFacet)).thenReturn(false);
@@ -53,7 +57,6 @@ public class AppEngineFlexFacetTest {
     Assert.assertFalse(AppEngineFlexFacet.hasAppEngineFacet(facetedProject));
   }
 
-  @Test
   public void testFacetLabel() {
     IProjectFacet projectFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexFacet.ID);
 
