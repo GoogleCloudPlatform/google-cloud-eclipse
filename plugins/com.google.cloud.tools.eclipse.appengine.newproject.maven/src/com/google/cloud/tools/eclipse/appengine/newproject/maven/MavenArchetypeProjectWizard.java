@@ -95,7 +95,7 @@ public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
     } catch (InterruptedException ex) {
       status = Status.CANCEL_STATUS;
     } catch (InvocationTargetException ex) {
-      status = StandardProjectWizard.setErrorStatus(ex);
+      status = StandardProjectWizard.setErrorStatus(this, ex.getCause());
     }
 
     return status.isOK();
