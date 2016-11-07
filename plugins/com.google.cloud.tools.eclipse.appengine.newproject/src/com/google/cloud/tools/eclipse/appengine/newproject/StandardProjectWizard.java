@@ -22,6 +22,7 @@ import com.google.cloud.tools.eclipse.appengine.ui.AppEngineComponentPage;
 import com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPrompter;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.runtime.IAdaptable;
@@ -96,14 +97,12 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
     return status.isOK();
   }
 
-  // visible for testing
-  static IStatus setErrorStatus(Throwable ex) {
-    int errorCode = 1;
+  public static IStatus setErrorStatus(Throwable ex) {
     String message = "Failed to create project";
     if (ex.getMessage() != null && !ex.getMessage().isEmpty()) {
       message += ": " + ex.getMessage();
     }
-    IStatus status = new Status(Status.ERROR, "todo plugin ID", errorCode, message, ex);
+    IStatus status = StatusUtil.error(StandardProjectWizard.class, message, ex);
     StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.LOG);
     return status;
   }

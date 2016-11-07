@@ -52,7 +52,7 @@ import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.osgi.framework.FrameworkUtil;
 
 /**
-* Utility to make a new Eclipse project with the App Engine Standard facets in the workspace.  
+* Utility to make a new Eclipse project with the App Engine Standard facets in the workspace.
 */
 class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
 
@@ -76,14 +76,14 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
     String name = newProject.getName();
     final IProjectDescription description = workspace.newProjectDescription(name);
     description.setLocationURI(location);
-    
+
     CreateProjectOperation operation = new CreateProjectOperation(
         description, "Creating new App Engine Project");
     try {
       operation.execute(monitor, uiInfoAdapter);
       CodeTemplates.materialize(newProject, config, monitor);
     } catch (ExecutionException ex) {
-      throw new InvocationTargetException(ex, ex.getMessage());
+      throw new InvocationTargetException(ex);
     }
 
     IFacetedProject facetedProject = ProjectFacetsManager.create(
@@ -91,7 +91,7 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
     AppEngineStandardFacet.installAppEngineFacet(
         facetedProject, true /* installDependentFacets */, monitor);
     AppEngineStandardFacet.installAllAppEngineRuntimes(facetedProject, true /* force */, monitor);
-    
+
     addAppEngineLibrariesToBuildPath(newProject, config.getAppEngineLibraries(), monitor);
 
     addJunit4ToClasspath(monitor, newProject);
@@ -126,7 +126,7 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
       subMonitor.worked(1);
     }
     javaProject.setRawClasspath(newRawClasspath, monitor);
-    
+
     runContainerResolverJob(javaProject);
   }
 
