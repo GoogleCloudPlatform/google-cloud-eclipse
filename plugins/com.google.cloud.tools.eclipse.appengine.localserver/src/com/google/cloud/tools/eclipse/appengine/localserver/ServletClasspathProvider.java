@@ -73,6 +73,10 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
     }
   }
 
+  // TODO this method is called e.g. when the user clicks through the project to drill down into the libraries attached
+  // to the project and resolves the servlet and jsp jars each time. So we must ensure that if the supported versions
+  // change in the future, resolved versions of these jars remain the same for a project as long as it is associated
+  // the same runtime https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/953
   @Override
   public IClasspathEntry[] resolveClasspathContainer(IRuntime runtime) {
     try {

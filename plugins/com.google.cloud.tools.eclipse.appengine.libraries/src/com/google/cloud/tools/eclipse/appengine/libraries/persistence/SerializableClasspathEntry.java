@@ -45,7 +45,8 @@ public class SerializableClasspathEntry {
   }
 
   /**
-   * Relativizes the source attachment path wrt. the base directories used to store source and binary artifacts.
+   * Relativizes the source attachment path with respect to the base directories used to store source and binary
+   * artifacts.
    * <p>
    * Tries to make the source attachment path relative to <code>sourceBaseDirectory</code>. If the source attachment
    * path is not relative to the sourceBaseDirectory, it will try to make it relative to <code>baseDirectory</code>.
@@ -115,8 +116,12 @@ public class SerializableClasspathEntry {
         case BINARY_REPO_RELATIVE_PREFIX:
           return PathUtil.makePathAbsolute(path.removeFirstSegments(1), baseDirectory);
         default:
-          // Illegal path prefix
-          return null;
+          // Unknown prefix, use path only if valid
+          if (path.toFile().exists()) {
+            return path;
+          } else {
+            return null;
+          }
       }
     }
     return path;

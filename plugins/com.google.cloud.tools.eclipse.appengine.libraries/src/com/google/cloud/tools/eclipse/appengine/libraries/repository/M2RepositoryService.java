@@ -67,7 +67,7 @@ public class M2RepositoryService implements ILibraryRepositoryService {
     MavenCoordinates mavenCoordinates = libraryFile.getMavenCoordinates();
     Artifact artifact = resolveArtifact(mavenCoordinates);
     IClasspathAttribute[] libraryFileClasspathAttributes = getClasspathAttributes(libraryFile, artifact);
-    URL sourceUrl = getSourceUrlFromUri(libraryFile);
+    URL sourceUrl = getSourceUrlFromUri(libraryFile.getSourceUri());
     return JavaCore.newLibraryEntry(new Path(artifact.getFile().getAbsolutePath()),
                                     getSourceLocation(mavenCoordinates, sourceUrl),
                                     null /*  sourceAttachmentRootPath */,
@@ -76,9 +76,8 @@ public class M2RepositoryService implements ILibraryRepositoryService {
                                     true /* isExported */);
   }
 
-  protected URL getSourceUrlFromUri(LibraryFile libraryFile) {
+  protected URL getSourceUrlFromUri(URI sourceUri) {
     try {
-      URI sourceUri = libraryFile.getSourceUri();
       if (sourceUri == null) {
         return null;
       } else {
@@ -94,12 +93,26 @@ public class M2RepositoryService implements ILibraryRepositoryService {
   public IClasspathEntry rebuildClasspathEntry(IClasspathEntry classpathEntry) throws LibraryRepositoryServiceException {
     MavenCoordinates mavenCoordinates = transformer.createMavenCoordinates(classpathEntry.getExtraAttributes());
     Artifact artifact = resolveArtifact(mavenCoordinates);
+    URL sourceUrl = getSourceUrlFromAttribute(classpathEntry.getExtraAttributes());
     return JavaCore.newLibraryEntry(new Path(artifact.getFile().getAbsolutePath()),
-                                    classpathEntry.getSourceAttachmentPath(),
+                                    getSourceLocation(mavenCoordinates, sourceUrl),
                                     null /*  sourceAttachmentRootPath */,
                                     classpathEntry.getAccessRules(),
                                     classpathEntry.getExtraAttributes(),
                                     true /* isExported */);
+  }
+
+  private URL getSourceUrlFromAttribute(IClasspathAttribute[] extraAttributes) {
+    try {
+      for (IClasspathAttribute iClasspathAttribute : extraAttributes) {
+        if (CLASSPATH_ATTRIBUTE_SOURCE_URL.equals(iClasspathAttribute.getName())) {
+          return new URL(iClasspathAttribute.getValue());
+        }
+      }
+    } catch (MalformedURLException e) {
+      // should not cause error in the resolution process, we'll disregard it
+    }
+    return null;
   }
 
   private Artifact resolveArtifact(MavenCoordinates mavenCoordinates) throws LibraryRepositoryServiceException {
