@@ -28,7 +28,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.IWizardContainer;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotCheckBox;
 import org.junit.Before;
 import org.junit.Rule;
@@ -54,9 +53,7 @@ public class MavenAppEngineStandardWizardPageTest {
     IWizard wizard = mock(IWizard.class);
     when(wizard.getContainer()).thenReturn(mock(IWizardContainer.class));
     page.setWizard(wizard);
-
-    Shell shell = shellTestResource.getShell();
-    page.createControl(shell);
+    page.createControl(shellTestResource.getShell());
   }
 
   @Test
@@ -72,8 +69,7 @@ public class MavenAppEngineStandardWizardPageTest {
 
   @Test
   public void testLocationValues_uncheckUseDefaults() {
-    SWTBotCheckBox checkBox = new SWTBotCheckBox(page.useDefaults);
-    checkBox.click();
+    new SWTBotCheckBox(page.useDefaults).click();
 
     assertFalse(page.useDefaults());
     assertFalse(page.useDefaults.getSelection());
