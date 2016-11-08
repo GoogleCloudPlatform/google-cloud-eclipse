@@ -387,7 +387,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
 
   @Override
   public IPath getPublishDirectory(IModule[] module) {
-    if (module == null || module.length != 1) {
+    if (module == null || module.length == 0) {
       return null;
     }
     return getModuleDeployDirectory(module[0]);
