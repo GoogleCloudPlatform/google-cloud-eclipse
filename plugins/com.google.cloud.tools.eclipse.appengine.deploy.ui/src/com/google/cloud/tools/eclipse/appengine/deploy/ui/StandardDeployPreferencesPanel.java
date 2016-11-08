@@ -120,7 +120,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
     Dialog.applyDialogFont(this);
 
-    GridLayoutFactory.fillDefaults().spacing(0, 0).generateLayout(this);
+    GridLayoutFactory.fillDefaults().generateLayout(this);
 
     loadPreferences(project);
 
