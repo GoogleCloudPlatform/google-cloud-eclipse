@@ -75,31 +75,21 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
   /** True if we're programmatically setting javaPackageField with an auto-generated value */
   private boolean javaPackageProgrammaticUpdate = false;
 
-  private WorkspaceLocationProvider workspaceLocationProvider;
-
-  @VisibleForTesting
-  static interface WorkspaceLocationProvider {
-    IPath get();
-  }
+  private final IPath workspaceLocation;
 
   public MavenAppEngineStandardWizardPage() {
-    this(new WorkspaceLocationProvider() {
-      @Override
-      public IPath get() {
-        return ResourcesPlugin.getWorkspace().getRoot().getLocation();
-      }
-    });
+    this(ResourcesPlugin.getWorkspace().getRoot().getLocation());
   }
 
   @VisibleForTesting
-  MavenAppEngineStandardWizardPage(WorkspaceLocationProvider workspaceLocationProvider) {
+  public MavenAppEngineStandardWizardPage(IPath workspaceLocation) {
     super("basicNewProjectPage"); //$NON-NLS-1$
     setTitle(Messages.getString("WIZARD_TITLE")); //$NON-NLS-1$
     setDescription(Messages.getString("WIZARD_DESCRIPTION")); //$NON-NLS-1$
     setImageDescriptor(AppEngineImages.googleCloudPlatform(32));
 
     canFlipPage = false;
-    this.workspaceLocationProvider = workspaceLocationProvider;
+    this.workspaceLocation = workspaceLocation;
   }
 
   @Override
@@ -142,7 +132,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     locationField = new Text(locationGroup, SWT.BORDER);
     GridDataFactory.swtDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false)
         .applyTo(locationField);
-    locationField.setText(workspaceLocationProvider.get().toOSString());
+    locationField.setText(workspaceLocation.toOSString());
     locationField.setData("" /* initially empty for manually entered location */); //$NON-NLS-1$
     locationField.addModifyListener(pageValidator);
     locationField.setEnabled(false);
@@ -161,7 +151,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
       public void widgetSelected(SelectionEvent event) {
         if (useDefaults.getSelection()) {
           locationField.setData(locationField.getText());  // Save to restore it later.
-          locationField.setText(workspaceLocationProvider.get().toOSString());
+          locationField.setText(workspaceLocation.toOSString());
         } else {
           String previousValue = (String) locationField.getData();
           locationField.setText(previousValue);
@@ -374,7 +364,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
   /** Return the location where the project should be generated into */
   public IPath getLocationPath() {
     if (useDefaults()) {
-      return workspaceLocationProvider.get();
+      return workspaceLocation;
     }
     return new Path(locationField.getText());
   }

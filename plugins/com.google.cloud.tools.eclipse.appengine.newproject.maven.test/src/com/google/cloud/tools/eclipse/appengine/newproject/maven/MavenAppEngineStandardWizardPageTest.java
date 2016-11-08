@@ -22,9 +22,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.google.cloud.tools.eclipse.appengine.newproject.maven.MavenAppEngineStandardWizardPage.WorkspaceLocationProvider;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.IWizardContainer;
@@ -41,12 +39,7 @@ public class MavenAppEngineStandardWizardPageTest {
   @Rule public ShellTestResource shellTestResource = new ShellTestResource();
 
   private MavenAppEngineStandardWizardPage page =
-      new MavenAppEngineStandardWizardPage(new WorkspaceLocationProvider() {
-        @Override
-        public IPath get() {
-          return new Path("/default/workspace/location");
-        }
-      });
+      new MavenAppEngineStandardWizardPage(new Path("/default/workspace/location"));
 
   @Before
   public void setUp() {
