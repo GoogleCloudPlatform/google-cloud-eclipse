@@ -140,7 +140,7 @@ public class AppEngineLibrariesSelectorGroup {
                                                           true /* resultIfFound */) {
                                                             @Override
                                                             protected Object calculate() {
-                                                              // super.calculate() needs to be called always to ensure
+                                                              // must call super.calculate to ensure
                                                               // databinding will call this method when
                                                               // selectedLibraries changes
                                                               return (boolean) super.calculate()
