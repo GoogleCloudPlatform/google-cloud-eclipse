@@ -38,6 +38,7 @@ Export-Package: com.google.cloud.tools.eclipse.appengine.localserver.server
 Import-Package: com.google.cloud.tools.eclipse.appengine.facets,
  com.google.cloud.tools.eclipse.appengine.libraries.model,
  com.google.cloud.tools.eclipse.appengine.libraries.repository,
+ com.google.cloud.tools.eclipse.jst.server.core,
  com.google.cloud.tools.eclipse.preferences,
  com.google.cloud.tools.eclipse.preferences.areas,
  com.google.cloud.tools.eclipse.sdk.ui,

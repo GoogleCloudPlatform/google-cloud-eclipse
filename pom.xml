@@ -52,6 +52,7 @@
     <module>plugins/com.google.cloud.tools.eclipse.swtbot</module>
 
     <module>third_party/com.google.cloud.tools.eclipse.jdt.launching</module>
+    <module>third_party/com.google.cloud.tools.eclipse.jst.server.core</module>
   </modules>
 
   <properties>
