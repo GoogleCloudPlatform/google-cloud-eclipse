@@ -34,7 +34,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -233,10 +232,6 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     devServerRunConfiguration.setPort(serverPort);
     devServerRunConfiguration.setAdminPort(adminPort);
 
-    // FIXME: workaround bug when running on a Java8 JVM
-    // https://github.com/GoogleCloudPlatform/gcloud-eclipse-tools/issues/181
-    devServerRunConfiguration.setJvmFlags(Arrays.asList("-Dappengine.user.timezone=UTC")); //$NON-NLS-1$
-
     // Run server
     try {
       devServer.run(devServerRunConfiguration);
@@ -274,9 +269,6 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     devServerRunConfiguration.setMaxModuleInstances(1);
 
     List<String> jvmFlags = new ArrayList<String>();
-    // FIXME: workaround bug when running on a Java8 JVM
-    // https://github.com/GoogleCloudPlatform/gcloud-eclipse-tools/issues/181
-    jvmFlags.add("-Dappengine.user.timezone=UTC"); //$NON-NLS-1$
 
     if (debugPort <= 0 || debugPort > 65535) {
       throw new IllegalArgumentException("Debug port is set to " + debugPort //$NON-NLS-1$
