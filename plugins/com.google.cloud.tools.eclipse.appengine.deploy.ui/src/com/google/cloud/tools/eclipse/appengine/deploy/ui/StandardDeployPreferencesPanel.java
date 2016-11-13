@@ -26,11 +26,9 @@ import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectIdInputValidato
 import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectVersionValidator;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.ErrorHandler;
-import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.QueryParameterProvider;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import java.util.Collections;
-import java.util.Map;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
@@ -69,7 +67,6 @@ import org.osgi.service.prefs.BackingStoreException;
 public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
   private static final String APPENGINE_VERSIONS_URL = "https://console.cloud.google.com/appengine/versions";
-  private static final String URI_PARAM_PROJECT = "project";
 
   private static final int INDENT_CHECKBOX_ENABLED_WIDGET = 10;
 
@@ -308,18 +305,16 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     autoPromoteButton = new Button(promoteComposite, SWT.CHECK);
     autoPromoteButton.setText(Messages.getString("auto.promote"));
 
-    Link manualPromoteLink = new Link(promoteComposite, SWT.NONE);
+    final Link manualPromoteLink = new Link(promoteComposite, SWT.NONE);
     GridData layoutData = GridDataFactory.swtDefaults().create();
     layoutData.horizontalIndent = INDENT_CHECKBOX_ENABLED_WIDGET;
     manualPromoteLink.setLayoutData(layoutData);
     manualPromoteLink.setText(Messages.getString("deploy.manual.link", APPENGINE_VERSIONS_URL));
     manualPromoteLink.setFont(promoteComposite.getFont());
-    manualPromoteLink.addSelectionListener(new OpenUriSelectionListener(new QueryParameterProvider() {
-      @Override
-      public Map<String, String> getParameters() {
-        return Collections.singletonMap(URI_PARAM_PROJECT, projectId.getText().trim());
-      }
-    }, new ErrorHandler() {
+    manualPromoteLink.addSelectionListener(
+        new OpenUriSelectionListener(
+            new ProjectIdQueryParameterProvider(projectId), 
+            new ErrorHandler() {
       @Override
       public void handle(Exception ex) {
         MessageDialog.openError(getShell(), Messages.getString("cannot.open.browser"), ex.getLocalizedMessage());
