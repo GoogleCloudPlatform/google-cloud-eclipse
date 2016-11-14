@@ -43,6 +43,7 @@ public class ProjectIdQueryParameterProviderTest {
   public void testNotEmpty() {
     Mockito.when(projectId.getText()).thenReturn("myId");
     Assert.assertEquals(1, instance.getParameters().size());
+    Assert.assertEquals("myId", instance.getParameters().get("project"));
   }
 
 }
