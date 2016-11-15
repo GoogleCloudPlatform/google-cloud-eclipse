@@ -378,10 +378,9 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
    * Validates a checkbox and text field as follows:
    * <ol>
    * <li>if the checkbox is unselected -> valid
-   * <li>if the checkbox is selected -> the result is determined by the provided <code>validator</code> used
-   * on the value of the text field
+   * <li>if the checkbox is selected -> the result is determined by the provided
+   * <code>validator</code> used on the value of the text field
    * </ol>
-   *
    */
   private static class OverrideValidator extends FixedMultiValidator {
 
@@ -390,11 +389,14 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     private IValidator validator;
 
     /**
-     * @param selection must be an observable for a checkbox, i.e. a {@link Button} with {@link SWT#CHECK} style
+     * @param selection must be an observable for a checkbox, i.e. a {@link Button} with
+     *        {@link SWT#CHECK} style
      * @param text must be an observable for a {@link Text}
-     * @param validator must be a validator for String values, will be applied to <code>text.getValue()</code>
+     * @param validator must be a validator for String values, will be applied to
+     *        <code>text.getValue()</code>
      */
-    public OverrideValidator(ISWTObservableValue selection, ISWTObservableValue text, IValidator validator) {
+    public OverrideValidator(ISWTObservableValue selection, ISWTObservableValue text,
+        IValidator validator) {
       Preconditions.checkArgument(text.getWidget() instanceof Text,
                                   "text is an observable for {0}, should be for {1}",
                                   text.getWidget().getClass().getName(),
