@@ -94,14 +94,16 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
             convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING))
         .generateLayout(container);
 
-    TitleAreaDialogSupport.create(this, content.getDataBindingContext()).setValidationMessageProvider(new ValidationMessageProvider() {
-      @Override
-      public int getMessageType(ValidationStatusProvider statusProvider) {
-        int type = super.getMessageType(statusProvider);
-        setValid(type != IMessageProvider.ERROR);
-        return type;
-      }
-    });
+    TitleAreaDialogSupport.create(this, 
+        content.getDataBindingContext()).setValidationMessageProvider(
+    	    new ValidationMessageProvider() {
+		      @Override
+		      public int getMessageType(ValidationStatusProvider statusProvider) {
+		        int type = super.getMessageType(statusProvider);
+		        setValid(type != IMessageProvider.ERROR);
+		        return type;
+		      }
+		    });
     return dialogArea;
   }
 
