@@ -66,7 +66,8 @@ import org.osgi.service.prefs.BackingStoreException;
 
 public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
-  private static final String APPENGINE_VERSIONS_URL = "https://console.cloud.google.com/appengine/versions";
+  private static final String APPENGINE_VERSIONS_URL =
+      "https://console.cloud.google.com/appengine/versions";
 
   private static final int INDENT_CHECKBOX_ENABLED_WIDGET = 10;
 
@@ -173,12 +174,13 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     IObservableValue projectIdModel = PojoProperties.value("projectId").observe(model);
 
     context.bindValue(projectIdField, projectIdModel,
-                      new UpdateValueStrategy().setAfterGetValidator(new ProjectIdInputValidator(requireValues)),
-                      new UpdateValueStrategy().setAfterGetValidator(new ProjectIdInputValidator(requireValues)));
+        new UpdateValueStrategy().setAfterGetValidator(new ProjectIdInputValidator(requireValues)),
+        new UpdateValueStrategy().setAfterGetValidator(new ProjectIdInputValidator(requireValues)));
   }
 
   private void setupProjectVersionDataBinding(DataBindingContext context) {
-    ISWTObservableValue overrideButton = WidgetProperties.selection().observe(overrideDefaultVersionButton);
+    ISWTObservableValue overrideButton =
+        WidgetProperties.selection().observe(overrideDefaultVersionButton);
     ISWTObservableValue versionField = WidgetProperties.text(SWT.Modify).observe(version);
     ISWTObservableValue versionLabelEnablement = WidgetProperties.enabled().observe(versionLabel);
     ISWTObservableValue versionFieldEnablement = WidgetProperties.enabled().observe(version);
@@ -203,11 +205,13 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
   private void setupAutoPromoteDataBinding(DataBindingContext context) {
     ISWTObservableValue promoteButton = WidgetProperties.selection().observe(autoPromoteButton);
-    ISWTObservableValue stopPreviousVersion = WidgetProperties.selection().observe(stopPreviousVersionButton);
-    ISWTObservableValue stopPreviousVersionEnablement = WidgetProperties.enabled().observe(stopPreviousVersionButton);
+    ISWTObservableValue stopPreviousVersion =
+        WidgetProperties.selection().observe(stopPreviousVersionButton);
+    ISWTObservableValue stopPreviousVersionEnablement =
+        WidgetProperties.enabled().observe(stopPreviousVersionButton);
 
-    // use an intermediary value to control the enabled state of stopPreviousVersionButton based on the promote
-    // checkbox's state
+    // use an intermediary value to control the enabled state of stopPreviousVersionButton
+    // based on the promote checkbox's state
     WritableValue enablement = new WritableValue();
     context.bindValue(promoteButton, enablement);
     context.bindValue(stopPreviousVersionEnablement, enablement);
@@ -220,19 +224,21 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   }
 
   private void setupBucketDataBinding(DataBindingContext context) {
-    ISWTObservableValue overrideButton = WidgetProperties.selection().observe(overrideDefaultBucketButton);
+    ISWTObservableValue overrideButton =
+        WidgetProperties.selection().observe(overrideDefaultBucketButton);
     ISWTObservableValue bucketField = WidgetProperties.text(SWT.Modify).observe(bucket);
     ISWTObservableValue bucketLabelEnablement = WidgetProperties.enabled().observe(bucketLabel);
     ISWTObservableValue bucketFieldEnablement = WidgetProperties.enabled().observe(bucket);
 
-    // use an intermediary value to control the enabled state of the label and the field based on the override
-    // checkbox's state
+    // use an intermediary value to control the enabled state of the label and the field 
+    // based on the override checkbox's state
     WritableValue enablement = new WritableValue();
     context.bindValue(overrideButton, enablement);
     context.bindValue(bucketLabelEnablement, enablement);
     context.bindValue(bucketFieldEnablement, enablement);
 
-    IObservableValue overrideModelObservable = PojoProperties.value("overrideDefaultBucket").observe(model);
+    IObservableValue overrideModelObservable =
+        PojoProperties.value("overrideDefaultBucket").observe(model);
     IObservableValue bucketModelObservable = PojoProperties.value("bucket").observe(model);
 
     context.bindValue(enablement, overrideModelObservable);
@@ -381,7 +387,6 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
    * <li>if the checkbox is selected -> the result is determined by the provided <code>validator</code> used
    * on the value of the text field
    * </ol>
-   *
    */
   private static class OverrideValidator extends FixedMultiValidator {
 
@@ -390,11 +395,14 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     private IValidator validator;
 
     /**
-     * @param selection must be an observable for a checkbox, i.e. a {@link Button} with {@link SWT#CHECK} style
+     * @param selection must be an observable for a checkbox, i.e. a {@link Button} with
+     *        {@link SWT#CHECK} style
      * @param text must be an observable for a {@link Text}
-     * @param validator must be a validator for String values, will be applied to <code>text.getValue()</code>
+     * @param validator must be a validator for String values, will be applied to
+     *        <code>text.getValue()</code>
      */
-    public OverrideValidator(ISWTObservableValue selection, ISWTObservableValue text, IValidator validator) {
+    public OverrideValidator(ISWTObservableValue selection, ISWTObservableValue text,
+        IValidator validator) {
       Preconditions.checkArgument(text.getWidget() instanceof Text,
                                   "text is an observable for {0}, should be for {1}",
                                   text.getWidget().getClass().getName(),

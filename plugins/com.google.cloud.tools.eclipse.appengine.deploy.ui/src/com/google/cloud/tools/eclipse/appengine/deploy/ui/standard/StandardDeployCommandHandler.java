@@ -164,8 +164,8 @@ public class StandardDeployCommandHandler extends AbstractHandler {
     return config;
   }
 
-  private DefaultDeployConfiguration getDeployConfiguration(IProject project,
-                                                            ExecutionEvent event) throws ExecutionException {
+  private DefaultDeployConfiguration getDeployConfiguration(IProject project, ExecutionEvent event)
+      throws ExecutionException {
     StandardDeployPreferences deployPreferences = new StandardDeployPreferences(project);
     if (deployPreferences.getProjectId() == null || deployPreferences.getProjectId().isEmpty()) {
       throw new ExecutionException(Messages.getString("error.projectId.missing"));
@@ -185,7 +185,8 @@ public class StandardDeployCommandHandler extends AbstractHandler {
   }
 
   private IPath getTempDir() {
-    return Platform.getStateLocation(Platform.getBundle("com.google.cloud.tools.eclipse.appengine.deploy"))
+    return Platform
+        .getStateLocation(Platform.getBundle("com.google.cloud.tools.eclipse.appengine.deploy"))
         .append("tmp");
   }
 }
