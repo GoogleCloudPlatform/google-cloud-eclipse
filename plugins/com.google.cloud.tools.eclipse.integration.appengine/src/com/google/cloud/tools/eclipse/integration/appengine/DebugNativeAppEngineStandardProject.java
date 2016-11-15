@@ -54,7 +54,7 @@ import java.nio.charset.StandardCharsets;
 public class DebugNativeAppEngineStandardProject extends AbstractProjectTests {
   /**
    * Launch a native application in debug mode and verify that (1) it started, (2) it can be
-   * terminated and removed from the launch list, and (3) the process is actually terminated
+   * terminated and removed from the launch list, and (3) the process is actually terminated.
    */
   @Test
   public void testDebugLaunch() throws Exception {
