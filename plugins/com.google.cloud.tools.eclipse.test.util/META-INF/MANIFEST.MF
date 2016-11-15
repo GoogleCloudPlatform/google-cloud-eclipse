@@ -11,10 +11,12 @@ Require-Bundle: org.junit;bundle-version="4.12.0"
 Import-Package: com.google.common.base;version="17.0.0",
  org.eclipse.core.resources,
  org.eclipse.core.runtime;version="3.5.0",
+ org.eclipse.core.runtime.jobs,
  org.eclipse.jdt.core,
  org.eclipse.swt.widgets,
  org.eclipse.wst.common.project.facet.core,
  org.eclipse.wst.common.project.facet.core.internal,
+ org.eclipse.wst.common.project.facet.core.util.internal,
  org.mockito;provider=google;version="1.10.19",
  org.osgi.framework;version="1.8.0"
 Export-Package: com.google.cloud.tools.eclipse.test.util,
