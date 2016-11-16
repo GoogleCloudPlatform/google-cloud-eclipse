@@ -19,7 +19,6 @@ FILES=$KOKORO_GFILE_DIR/plugins/*.jar
 for f in $FILES
 do
   echo "Processing $f file..."
-  # signed=$(echo $f | sed 's/\/\(.*\)\/\(.*\)\.jar/\/\1\/signed\/\2.jar/g')
   filename=$(echo $f | sed 's/\/\(.*\)\/\(.*\)\.jar/\2.jar/g')
   echo "Signing $filename"
   if /escalated_sign/escalated_sign.py -j /escalated_sign_jobs -t signjar \
@@ -35,7 +34,6 @@ FEATURES=$KOKORO_GFILE_DIR/features/*.jar
 for f in $FEATURES
 do
   echo "Processing $f file..."
-  # signed=$(echo $f | sed 's/\/\(.*\)\/\(.*\)\.jar/\/\1\/signed\/\2.jar/g')
   filename=$(echo $f | sed 's/\/\(.*\)\/\(.*\)\.jar/\2.jar/g')
   echo "Signing $filename"
   /escalated_sign/escalated_sign.py -j /escalated_sign_jobs -t signjar \
