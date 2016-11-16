@@ -9,10 +9,6 @@ echo ${KOKORO_GFILE_DIR}
 cd $KOKORO_GFILE_DIR
 mkdir -p signed && chmod 777 signed
 mkdir -p signed/plugins && chmod 777 signed/plugins
-
-/escalated_sign/escalated_sign.py -j /escalated_sign_jobs -t signjar \
- $KOKORO_GFILE_DIR/artifacts.jar \
- $KOKORO_GFILE_DIR/signed/artifacts.jar
  
 FILES=$KOKORO_GFILE_DIR/plugins/*.jar
 for f in $FILES
