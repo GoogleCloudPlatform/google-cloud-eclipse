@@ -16,11 +16,12 @@ do
   echo "Processing $f file..."
   # signed=$(echo $f | sed 's/\/\(.*\)\/\(.*\)\.jar/\/\1\/signed\/\2.jar/g')
   filename=$(echo $f | sed 's/\/\(.*\)\/\(.*\)\.jar/\2.jar/g')
-  if [[ ${filename} != *"hamcrest"* ]];then
-    echo "Signing $filename"
-    /escalated_sign/escalated_sign.py -j /escalated_sign_jobs -t signjar \
+  echo "Signing $filename"
+  if /escalated_sign/escalated_sign.py -j /escalated_sign_jobs -t signjar \
     $KOKORO_GFILE_DIR/plugins/$filename \
     $KOKORO_GFILE_DIR/signed/plugins/$filename
-    echo "Signed $filename"
+  then echo "Signed $filename"
+  else 
+    cp $KOKORO_GFILE_DIR/plugins/$filename $KOKORO_GFILE_DIR/signed/plugins/$filename
   fi
 done
