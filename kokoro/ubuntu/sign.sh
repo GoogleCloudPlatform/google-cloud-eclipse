@@ -8,18 +8,20 @@ set -x
 echo ${KOKORO_GFILE_DIR}
 cd $KOKORO_GFILE_DIR
 mkdir -p signed && chmod 777 signed
+mkdir -p signed/plugins && chmod 777 signed/plugins
+
 /escalated_sign/escalated_sign.py -j /escalated_sign_jobs -t signjar \
  $KOKORO_GFILE_DIR/artifacts.jar \
  $KOKORO_GFILE_DIR/signed/artifacts.jar
-/escalated_sign/escalated_sign.py -j /escalated_sign_jobs -t signjar \
- $KOKORO_GFILE_DIR/content.jar \
- $KOKORO_GFILE_DIR/signed/content.jar
  
 FILES=$KOKORO_GFILE_DIR/plugins/*.jar
 for f in $FILES
 do
   echo "Processing $f file..."
-  signed=$(echo $f | sed 's/\/\(.*\)\/\(.*\)\.jar/\/\1\/signed\/\2.jar/g')
-  echo "Signing to $signed"
-  /escalated_sign/escalated_sign.py -j /escalated_sign_jobs -t signjar $f $signed
+  # signed=$(echo $f | sed 's/\/\(.*\)\/\(.*\)\.jar/\/\1\/signed\/\2.jar/g')
+  filename=$(echo $f | sed 's/\/\(.*\)\/\(.*\)\.jar/\2.jar/g')
+  echo "Signing $filename"
+  /escalated_sign/escalated_sign.py -j /escalated_sign_jobs -t signjar \
+    $KOKORO_GFILE_DIR/plugins/$filename \
+    $KOKORO_GFILE_DIR/signed/plugins/$filename
 done
