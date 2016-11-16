@@ -9,6 +9,11 @@ echo ${KOKORO_GFILE_DIR}
 cd $KOKORO_GFILE_DIR
 mkdir -p signed && chmod 777 signed
 mkdir -p signed/plugins && chmod 777 signed/plugins
+mkdir -p signed/features && chmod 777 signed/features
+ 
+cp $KOKORO_GFILE_DIR/artifacts.jar $KOKORO_GFILE_DIR/signed/artifacts.jar
+cp $KOKORO_GFILE_DIR/content.jar $KOKORO_GFILE_DIR/signed/content.jar
+cp $KOKORO_GFILE_DIR/category.xml $KOKORO_GFILE_DIR/signed/category.xml
  
 FILES=$KOKORO_GFILE_DIR/plugins/*.jar
 for f in $FILES
