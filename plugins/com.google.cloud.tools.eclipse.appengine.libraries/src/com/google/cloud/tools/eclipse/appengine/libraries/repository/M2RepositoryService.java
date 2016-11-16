@@ -76,7 +76,7 @@ public class M2RepositoryService implements ILibraryRepositoryService {
                                     true /* isExported */);
   }
 
-  protected URL getSourceUrlFromUri(URI sourceUri) {
+  private URL getSourceUrlFromUri(URI sourceUri) {
     try {
       if (sourceUri == null) {
         return null;
@@ -148,7 +148,7 @@ public class M2RepositoryService implements ILibraryRepositoryService {
     }
   }
 
-  protected void addUriAttribute(List<IClasspathAttribute> attributes, String attributeName, URI uri) {
+  private void addUriAttribute(List<IClasspathAttribute> attributes, String attributeName, URI uri) {
     try {
       attributes.add(JavaCore.newClasspathAttribute(attributeName, uri.toURL().toString()));
     } catch (MalformedURLException | IllegalArgumentException ex) {

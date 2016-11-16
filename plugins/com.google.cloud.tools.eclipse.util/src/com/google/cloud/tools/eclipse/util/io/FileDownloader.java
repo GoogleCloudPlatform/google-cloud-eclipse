@@ -32,6 +32,8 @@ import org.eclipse.core.runtime.Path;
  * Utility class to download files from {@link URL}s.
  */
 public class FileDownloader {
+  private static final int DEFAULT_CONNECT_TIMEOUT_MS = 3000;
+  private static final int DEFAULT_READ_TIMEOUT_MS = 3000;
   private IPath downloadFolderPath;
 
   /**
@@ -65,6 +67,8 @@ public class FileDownloader {
 
     File downloadedFile = downloadFolderPath.append(new Path(url.getPath()).lastSegment()).toFile();
     URLConnection connection = url.openConnection();
+    connection.setConnectTimeout(DEFAULT_CONNECT_TIMEOUT_MS);
+    connection.setReadTimeout(DEFAULT_READ_TIMEOUT_MS);
     connection.setRequestProperty(HttpHeaders.USER_AGENT, "google-cloud-eclipse");
     try (InputStream inputStream = connection.getInputStream();
          FileOutputStream outputStream = new FileOutputStream(downloadedFile)) {

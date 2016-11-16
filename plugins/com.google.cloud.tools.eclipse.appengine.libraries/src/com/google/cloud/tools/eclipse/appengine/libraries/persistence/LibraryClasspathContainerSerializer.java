@@ -47,8 +47,6 @@ import org.osgi.framework.FrameworkUtil;
 @Creatable
 public class LibraryClasspathContainerSerializer {
 
-  private static final String APPENGINE_LIBRARIES_BUNDLE_NAME = "com.google.cloud.tools.eclipse.appengine.libraries";
-
   private static final Logger logger = Logger.getLogger(LibraryClasspathContainerSerializer.class.getName());
 
   /**
@@ -167,8 +165,9 @@ public class LibraryClasspathContainerSerializer {
     }
   }
 
-  @VisibleForTesting
-  static class LibrariesBundleStateLocationProvider implements ArtifactBaseLocationProvider {
+  private static class LibrariesBundleStateLocationProvider implements ArtifactBaseLocationProvider {
+
+    private static final String APPENGINE_LIBRARIES_BUNDLE_NAME = "com.google.cloud.tools.eclipse.appengine.libraries";
 
     /**
      * @see com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer.ArtifactBaseLocationProvider#getBaseLocation()

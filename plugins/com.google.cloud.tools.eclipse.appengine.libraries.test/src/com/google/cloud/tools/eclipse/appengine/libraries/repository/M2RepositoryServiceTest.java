@@ -57,7 +57,7 @@ public class M2RepositoryServiceTest {
   private M2RepositoryService m2RepositoryService;
   
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     m2RepositoryService = new M2RepositoryService();
     m2RepositoryService.setMavenHelper(mavenHelper);
     m2RepositoryService.setTransformer(transformer);

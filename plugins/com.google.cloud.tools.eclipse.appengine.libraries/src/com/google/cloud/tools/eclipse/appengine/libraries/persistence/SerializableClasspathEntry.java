@@ -107,7 +107,7 @@ public class SerializableClasspathEntry {
                                     true);
   }
 
-  protected IPath restoreSourcePath(IPath baseDirectory, IPath sourceBaseDirectory) {
+  private IPath restoreSourcePath(IPath baseDirectory, IPath sourceBaseDirectory) {
     Path path = new Path(sourceAttachmentPath);
     if (path.segmentCount() > 0) {
       switch (path.segment(0)) {
