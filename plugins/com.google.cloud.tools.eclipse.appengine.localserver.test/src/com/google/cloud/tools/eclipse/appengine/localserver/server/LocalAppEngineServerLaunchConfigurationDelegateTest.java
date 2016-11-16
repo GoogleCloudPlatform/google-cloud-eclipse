@@ -43,7 +43,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
   @Test
   public void testDeterminePageLocation() {
     when(server.getHost()).thenReturn("192.168.1.1");
-    when(serverBehavior.getPort()).thenReturn(8085);
+    when(serverBehavior.getServerPort()).thenReturn(8085);
 
     String url = LocalAppEngineServerLaunchConfigurationDelegate.determinePageLocation(server);
     assertEquals("http://192.168.1.1:8085", url);

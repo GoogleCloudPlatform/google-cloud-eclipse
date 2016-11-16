@@ -24,6 +24,8 @@ public class Messages extends NLS {
   public static String GAE_STANDARD_FACET_MISSING;
   public static String NEW_SERVER_DIALOG_PORT;
   public static String NEW_SERVER_DIALOG_INVALID_PORT_VALUE;
+  public static String PORT_IN_USE;
+  public static String PORT_OUT_OF_RANGE;
   static {
     // initialize resource bundle
     NLS.initializeMessages(BUNDLE_NAME, Messages.class);

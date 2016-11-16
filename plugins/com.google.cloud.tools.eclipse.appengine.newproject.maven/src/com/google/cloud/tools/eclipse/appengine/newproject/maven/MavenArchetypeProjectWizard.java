@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 
 import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.eclipse.appengine.newproject.StandardProjectWizard;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineComponentPage;
 import com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPrompter;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
@@ -32,7 +33,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.statushandlers.StatusManager;
 
 public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
   private MavenAppEngineStandardWizardPage page;
@@ -95,8 +95,7 @@ public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
     } catch (InterruptedException ex) {
       status = Status.CANCEL_STATUS;
     } catch (InvocationTargetException ex) {
-      status = new Status(Status.ERROR, getClass().getName(), 0, ex.getMessage(), ex.getCause());
-      StatusManager.getManager().handle(status, StatusManager.LOG | StatusManager.SHOW);
+      status = StandardProjectWizard.setErrorStatus(this, ex.getCause());
     }
 
     return status.isOK();

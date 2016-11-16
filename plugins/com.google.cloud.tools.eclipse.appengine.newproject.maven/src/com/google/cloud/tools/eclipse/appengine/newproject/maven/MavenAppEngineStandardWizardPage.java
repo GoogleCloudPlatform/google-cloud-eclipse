@@ -57,8 +57,8 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
 
   private String defaultVersion = "0.1.0-SNAPSHOT"; //$NON-NLS-1$
 
-  private Button useDefaults;
-  private Text locationField;
+  @VisibleForTesting Button useDefaults;
+  @VisibleForTesting Text locationField;
   private Button locationBrowseButton;
   @VisibleForTesting Text groupIdField;
   private Text artifactIdField;
@@ -75,13 +75,21 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
   /** True if we're programmatically setting javaPackageField with an auto-generated value */
   private boolean javaPackageProgrammaticUpdate = false;
 
+  private final IPath workspaceLocation;
+
   public MavenAppEngineStandardWizardPage() {
+    this(ResourcesPlugin.getWorkspace().getRoot().getLocation());
+  }
+
+  @VisibleForTesting
+  public MavenAppEngineStandardWizardPage(IPath workspaceLocation) {
     super("basicNewProjectPage"); //$NON-NLS-1$
     setTitle(Messages.getString("WIZARD_TITLE")); //$NON-NLS-1$
     setDescription(Messages.getString("WIZARD_DESCRIPTION")); //$NON-NLS-1$
     setImageDescriptor(AppEngineImages.googleCloudPlatform(32));
 
     canFlipPage = false;
+    this.workspaceLocation = workspaceLocation;
   }
 
   @Override
@@ -124,6 +132,8 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     locationField = new Text(locationGroup, SWT.BORDER);
     GridDataFactory.swtDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false)
         .applyTo(locationField);
+    locationField.setText(workspaceLocation.toOSString());
+    locationField.setData("" /* initially empty for manually entered location */); //$NON-NLS-1$
     locationField.addModifyListener(pageValidator);
     locationField.setEnabled(false);
 
@@ -139,6 +149,14 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     useDefaults.addSelectionListener(new SelectionAdapter() {
       @Override
       public void widgetSelected(SelectionEvent event) {
+        if (useDefaults.getSelection()) {
+          locationField.setData(locationField.getText());  // Save to restore it later.
+          locationField.setText(workspaceLocation.toOSString());
+        } else {
+          String previousValue = (String) locationField.getData();
+          locationField.setText(previousValue);
+        }
+
         locationField.setEnabled(!useDefaults.getSelection());
         locationBrowseButton.setEnabled(!useDefaults.getSelection());
         checkFlipToNext();
@@ -154,7 +172,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     mavenCoordinatesGroup.setText(Messages.getString("MAVEN_PROJECT_COORDINATES")); //$NON-NLS-1$
     GridDataFactory.defaultsFor(mavenCoordinatesGroup).span(2, 1).applyTo(mavenCoordinatesGroup);
     GridLayoutFactory.swtDefaults().numColumns(2).applyTo(mavenCoordinatesGroup);
-    
+
     Label groupIdLabel = new Label(mavenCoordinatesGroup, SWT.NONE);
     groupIdLabel.setText(Messages.getString("GROUP_ID")); //$NON-NLS-1$
     groupIdField = new Text(mavenCoordinatesGroup, SWT.BORDER);
@@ -268,8 +286,8 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     String artifactId = getArtifactId();
     IPath path = getLocationPath().append(artifactId);
     if (path.toFile().exists()) {
-      String errorMessage = MessageFormat.format(Messages.getString("LOCATION_ALREADY_EXISTS"), path);
-      setErrorMessage(errorMessage); //$NON-NLS-1$
+      String errorMessage = MessageFormat.format(Messages.getString("LOCATION_ALREADY_EXISTS"), path); //$NON-NLS-1$
+      setErrorMessage(errorMessage);
       return false;
     }
     return true;
@@ -346,7 +364,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
   /** Return the location where the project should be generated into */
   public IPath getLocationPath() {
     if (useDefaults()) {
-      return ResourcesPlugin.getWorkspace().getRoot().getLocation();
+      return workspaceLocation;
     }
     return new Path(locationField.getText());
   }
@@ -373,7 +391,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
         String newSuggestion = suggestPackageName(groupId);
         updatePackageField(newSuggestion);
       } else if (groupId.isEmpty()) {
-        updatePackageField("");
+        updatePackageField(""); //$NON-NLS-1$
       }
     }
   }

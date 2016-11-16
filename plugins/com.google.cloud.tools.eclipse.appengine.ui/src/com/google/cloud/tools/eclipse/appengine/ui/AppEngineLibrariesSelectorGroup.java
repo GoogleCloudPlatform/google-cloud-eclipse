@@ -134,17 +134,17 @@ public class AppEngineLibrariesSelectorGroup {
                                                                                                         library)),
                              new UpdateValueStrategy(UpdateValueStrategy.POLICY_NEVER));
     // UI <- library selection model
-    bindingContext.bindValue(libraryButtonSelection, 
+    bindingContext.bindValue(libraryButtonSelection,
                              new DependentLibrarySelected(getDisplayRealm(),
                                                           library.getId(),
                                                           true /* resultIfFound */) {
                                                             @Override
                                                             protected Object calculate() {
-                                                              if (libraryButton.getData(BUTTON_MANUAL_SELECTION_KEY) != null) {
-                                                                return true;
-                                                              } else {
-                                                                return super.calculate();
-                                                              }
+                                                              // must call super.calculate to ensure
+                                                              // databinding will call this method when
+                                                              // selectedLibraries changes
+                                                              return (boolean) super.calculate()
+                                                                  || libraryButton.getData(BUTTON_MANUAL_SELECTION_KEY) != null;
                                                             }
                                                           },
                              new UpdateValueStrategy(UpdateValueStrategy.POLICY_NEVER),
@@ -188,16 +188,17 @@ public class AppEngineLibrariesSelectorGroup {
     }
 
     private void setManualSelection(SelectionEvent event) {
-      Button source = (Button) event.getSource();
-      if (event.getSource() instanceof Button && (source.getStyle() & SWT.CHECK) != 0) {
-        Button button = source;
+      Preconditions.checkArgument(event.getSource() instanceof Button);
+
+      Button button = (Button) event.getSource();
+      if ((button.getStyle() & SWT.CHECK) != 0) {
         button.setData(BUTTON_MANUAL_SELECTION_KEY, button.getSelection() ? new Object() : null);
       }
     }
   }
 
   /**
-   * Returns a computed value based on whether the associated library is in a list or not. 
+   * Returns a computed value based on whether the associated library is in a list or not.
    */
   private class DependentLibrarySelected extends ComputedValue {
     private String libraryId;

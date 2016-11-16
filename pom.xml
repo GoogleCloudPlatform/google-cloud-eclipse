@@ -88,13 +88,13 @@
       <!-- bundle: com.google.gson -->
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
-      <version>2.6.2</version>
+      <version>2.7</version>
     </dependency>
     <dependency>
       <!-- bundle: com.google.cloud.tools.app.lib -->
       <groupId>com.google.cloud.tools</groupId>
       <artifactId>appengine-plugins-core</artifactId>
-      <version>0.1.13</version>
+      <version>0.2.0</version>
     </dependency>
     <dependency>
       <!-- bundle: com.google.guava -->

@@ -218,6 +218,24 @@ public class AppEngineLibrariesSelectorGroupTest {
       }});
   }
 
+  // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/954
+  @Test
+  public void testSelectAndUnselectAppengineApiThenSelectEndpointsShouldKeepAppEngineSelected() {
+    syncExec(new Runnable() {
+
+      @Override
+      public void run() {
+        appengineButton.click();
+        appengineButton.click();
+        endpointsButton.click();
+        List<Library> selectedLibraries = getSelectedLibrariesSorted();
+        assertNotNull(selectedLibraries);
+        assertThat(selectedLibraries.size(), is(2));
+        assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
+        assertThat(selectedLibraries.get(1).getId(), is("appengine-endpoints"));
+      }});
+  }
+
   private SWTBotCheckBox getButton(String libraryId) {
     for (Button button : librariesSelector.getLibraryButtons()) {
       if (libraryId.equals(((Library) button.getData()).getId())) {
