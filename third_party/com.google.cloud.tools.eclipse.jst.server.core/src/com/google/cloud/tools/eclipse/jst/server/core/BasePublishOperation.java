@@ -15,6 +15,7 @@ package com.google.cloud.tools.eclipse.jst.server.core;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -35,7 +36,8 @@ import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
 import org.eclipse.wst.server.core.util.PublishHelper;
 
 /**
- * Publish operation suitable for standard web app servers.
+ * Publish operation suitable for standard web app servers. Originally pulled from the Tomcat WTP
+ * server adapter's <tt>org.eclipse.jst.server.tomcat.core.internal.PublishOperation2</tt>.
  */
 public abstract class BasePublishOperation extends PublishOperation {
   private static final String PLUGIN_ID = "com.google.cloud.tools.eclipse.jst.server.core";
@@ -124,10 +126,10 @@ public abstract class BasePublishOperation extends PublishOperation {
   public void execute(IProgressMonitor monitor, IAdaptable info) throws CoreException {
     initialize();
 
-    List<IStatus> status = new ArrayList<IStatus>();
+    List<IStatus> statuses = new ArrayList<IStatus>();
     // If parent web module
     if (module.length == 1) {
-      publishDir(module[0], status, monitor);
+      publishDir(module[0], statuses, monitor);
     } else {
       // Else a child module
       Properties p = loadModulePublishLocations();
@@ -146,38 +148,39 @@ public abstract class BasePublishOperation extends PublishOperation {
       }
 
       if (isBinary) {
-        publishArchiveModule(childURI, p, status, monitor);
+        publishArchiveModule(childURI, p, statuses, monitor);
       } else {
-        publishJar(childURI, p, status, monitor);
+        publishJar(childURI, p, statuses, monitor);
       }
       saveModulePublishLocations(p);
     }
-    throwException(status);
+    throwExceptionOnError(statuses);
     setModulePublishState(module, IServer.PUBLISH_STATE_NONE);
   }
 
-  private void publishDir(IModule module2, List<IStatus> status, IProgressMonitor monitor)
+  private void publishDir(IModule module2, List<IStatus> statuses, IProgressMonitor monitor)
       throws CoreException {
     IPath path = getModuleDeployDirectory(module2);
 
     // Remove if requested or if previously published and are now serving without publishing
     if (kind == IServer.PUBLISH_CLEAN || deltaKind == ServerBehaviourDelegate.REMOVED
         || isServeModulesWithoutPublish()) {
-      File f = path.toFile();
-      if (f.exists()) {
-        IStatus[] stat = PublishHelper.deleteDirectory(f, monitor);
-        addArrayToList(status, stat);
+      File moduleDeployLocation = path.toFile();
+      if (moduleDeployLocation.exists()) {
+        IStatus[] status = PublishHelper.deleteDirectory(moduleDeployLocation, monitor);
+        addArrayToList(statuses, status);
       }
 
       if (deltaKind == ServerBehaviourDelegate.REMOVED
-          || isServeModulesWithoutPublish())
+          || isServeModulesWithoutPublish()) {
         return;
+      }
     }
 
     if (kind == IServer.PUBLISH_CLEAN || kind == IServer.PUBLISH_FULL) {
       IModuleResource[] mr = getResources(module);
-      IStatus[] stat = helper.publishFull(mr, path, monitor);
-      addArrayToList(status, stat);
+      IStatus[] status = helper.publishFull(mr, path, monitor);
+      addArrayToList(statuses, status);
       return;
     }
 
@@ -185,12 +188,12 @@ public abstract class BasePublishOperation extends PublishOperation {
 
     int size = delta.length;
     for (int i = 0; i < size; i++) {
-      IStatus[] stat = helper.publishDelta(delta[i], path, monitor);
-      addArrayToList(status, stat);
+      IStatus[] status = helper.publishDelta(delta[i], path, monitor);
+      addArrayToList(statuses, status);
     }
   }
 
-  protected void publishJar(String jarURI, Properties p, List<IStatus> status,
+  protected void publishJar(String jarURI, Properties p, List<IStatus> statuses,
       IProgressMonitor monitor) throws CoreException {
     IPath path = getModuleDeployDirectory(module[0]);
     boolean moving = false;
@@ -235,16 +238,17 @@ public abstract class BasePublishOperation extends PublishOperation {
     }
 
     // make directory if it doesn't exist
-    if (!path.toFile().exists())
+    if (!path.toFile().exists()) {
       path.toFile().mkdirs();
+    }
 
     IModuleResource[] mr = getResources(module);
-    IStatus[] stat = helper.publishZip(mr, jarPath, monitor);
-    addArrayToList(status, stat);
+    IStatus[] status = helper.publishZip(mr, jarPath, monitor);
+    addArrayToList(statuses, status);
     p.put(module[1].getId(), jarURI);
   }
 
-  private void publishArchiveModule(String jarURI, Properties p, List<IStatus> status,
+  private void publishArchiveModule(String jarURI, Properties p, List<IStatus> statuses,
       IProgressMonitor monitor) {
     IPath path = getModuleDeployDirectory(module[0]);
     boolean moving = false;
@@ -279,35 +283,38 @@ public abstract class BasePublishOperation extends PublishOperation {
       p.remove(module[1].getId());
 
       if (deltaKind == ServerBehaviourDelegate.REMOVED
-          || isServeModulesWithoutPublish())
+          || isServeModulesWithoutPublish()) {
         return;
+      }
     }
     if (!moving && kind != IServer.PUBLISH_CLEAN && kind != IServer.PUBLISH_FULL) {
       // avoid changes if no changes to module since last publish
       IModuleResourceDelta[] delta = getPublishedResourceDelta(module);
-      if (delta == null || delta.length == 0)
+      if (delta == null || delta.length == 0) {
         return;
+      }
     }
 
     // make directory if it doesn't exist
-    if (!path.toFile().exists())
+    if (!path.toFile().exists()) {
       path.toFile().mkdirs();
+    }
 
     IModuleResource[] mr = getResources(module);
-    IStatus[] stat = helper.publishToPath(mr, jarPath, monitor);
-    addArrayToList(status, stat);
+    IStatus[] status = helper.publishToPath(mr, jarPath, monitor);
+    addArrayToList(statuses, status);
     p.put(module[1].getId(), jarURI);
   }
 
   /**
    * Save the locations of the configured modules.
    */
-  protected void saveModulePublishLocations(Properties p) {
+  protected void saveModulePublishLocations(Properties properties) {
     IPath path = getRuntimeBaseDirectory().append("publish.txt");
     try (FileOutputStream fout = new FileOutputStream(path.toFile())) {
-      p.store(fout, "Module publish data");
-    } catch (Exception e) {
-      // ignore
+      properties.store(fout, "Module publish data");
+    } catch (IOException ex) {
+      // ignore: this is a helper file
     }
   }
 
@@ -319,8 +326,9 @@ public abstract class BasePublishOperation extends PublishOperation {
     IPath path = getRuntimeBaseDirectory().append("publish.txt");
     try (FileInputStream fin = new FileInputStream(path.toFile())) {
       p.load(fin);
-    } catch (Exception e) {
-      // ignore
+    } catch (IOException e) {
+      // ignore: if not found, then we haven't published previously,
+      // and so previous module locations doesn't matter
     }
     return p;
   }
@@ -330,30 +338,33 @@ public abstract class BasePublishOperation extends PublishOperation {
    * Utility method to throw a CoreException based on the contents of a list of error and warning
    * status.
    * 
-   * @param status a List containing error and warning IStatus
-   * @throws CoreException
+   * @param statuses a list of error and warning IStatus
+   * @throws CoreException reporting these error and warning statuses
    */
-  protected static void throwException(List<IStatus> status) throws CoreException {
-    if (status == null || status.size() == 0)
+  protected static void throwExceptionOnError(List<IStatus> statuses) throws CoreException {
+    if (statuses == null || statuses.size() == 0) {
       return;
+    }
 
-    if (status.size() == 1) {
-      IStatus status2 = status.get(0);
+    if (statuses.size() == 1) {
+      IStatus status2 = statuses.get(0);
       throw new CoreException(status2);
     }
-    IStatus[] children = new IStatus[status.size()];
-    status.toArray(children);
+    IStatus[] children = new IStatus[statuses.size()];
+    statuses.toArray(children);
     String message = "Publishing failed with multiple errors"; // Messages.errorPublish;
     MultiStatus status2 = new MultiStatus(PLUGIN_ID, 0, children, message, null);
     throw new CoreException(status2);
   }
 
   protected static void addArrayToList(List<IStatus> list, IStatus[] a) {
-    if (list == null || a == null || a.length == 0)
+    if (list == null || a == null || a.length == 0) {
       return;
+    }
 
     int size = a.length;
-    for (int i = 0; i < size; i++)
+    for (int i = 0; i < size; i++) {
       list.add(a[i]);
+    }
   }
 }
