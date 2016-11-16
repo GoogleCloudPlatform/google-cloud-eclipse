@@ -17,10 +17,10 @@ do
   # signed=$(echo $f | sed 's/\/\(.*\)\/\(.*\)\.jar/\/\1\/signed\/\2.jar/g')
   filename=$(echo $f | sed 's/\/\(.*\)\/\(.*\)\.jar/\2.jar/g')
   echo "Signing $filename"
-  if /escalated_sign/escalated_sign.py -j /escalated_sign_jobs -t signjar \
+  if [[ ${filename} != *"hamcrest"* ]];
+    /escalated_sign/escalated_sign.py -j /escalated_sign_jobs -t signjar \
     $KOKORO_GFILE_DIR/plugins/$filename \
     $KOKORO_GFILE_DIR/signed/plugins/$filename
   then echo "Signed $filename"
-  # else cp the already signed jar
   fi
 done
