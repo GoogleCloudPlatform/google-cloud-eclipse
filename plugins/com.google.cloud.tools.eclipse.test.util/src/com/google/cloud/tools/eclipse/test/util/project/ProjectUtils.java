@@ -117,12 +117,11 @@ public class ProjectUtils {
         while (display.readAndDispatch()) {
           /* spin */
         }
-      } else {
-        try {
-          Thread.sleep(50);
-        } catch (InterruptedException ex) {
-          throw new RuntimeException(ex);
-        }
+      }
+      try {
+        Thread.sleep(10);
+      } catch (InterruptedException ex) {
+        throw new RuntimeException(ex);
       }
     }
   }
