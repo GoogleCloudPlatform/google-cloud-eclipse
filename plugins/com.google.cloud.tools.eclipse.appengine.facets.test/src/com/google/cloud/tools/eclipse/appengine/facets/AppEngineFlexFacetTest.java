@@ -27,7 +27,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-// Flex facet temporarily disabled
 @RunWith(MockitoJUnitRunner.class)
 public class AppEngineFlexFacetTest {
   @Mock private IFacetedProject facetedProject;
@@ -38,26 +37,39 @@ public class AppEngineFlexFacetTest {
         ProjectFacetsManager.isProjectFacetDefined("com.google.cloud.tools.eclipse.appengine.facets.flex"));
   }
 
-  public void testFlexFacetExists() {
-    Assert.assertTrue(
-        ProjectFacetsManager.isProjectFacetDefined("com.google.cloud.tools.eclipse.appengine.facets.flex"));
-  }
-
+  @Test
   public void testHasAppEngineFacet_withFacet() {
+    if (!ProjectFacetsManager.isProjectFacetDefined(
+        "com.google.cloud.tools.eclipse.appengine.facets.flex")) {
+      return;
+    }
+
     IProjectFacet projectFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexFacet.ID);
     when(facetedProject.hasProjectFacet(projectFacet)).thenReturn(true);
 
     Assert.assertTrue(AppEngineFlexFacet.hasAppEngineFacet(facetedProject));
   }
 
+  @Test
   public void testHasAppEngineFacet_withoutFacet() {
+    if (!ProjectFacetsManager.isProjectFacetDefined(
+        "com.google.cloud.tools.eclipse.appengine.facets.flex")) {
+      return;
+    }
+
     IProjectFacet projectFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexFacet.ID);
     when(facetedProject.hasProjectFacet(projectFacet)).thenReturn(false);
 
     Assert.assertFalse(AppEngineFlexFacet.hasAppEngineFacet(facetedProject));
   }
 
+  @Test
   public void testFacetLabel() {
+    if (!ProjectFacetsManager.isProjectFacetDefined(
+        "com.google.cloud.tools.eclipse.appengine.facets.flex")) {
+      return;
+    }
+
     IProjectFacet projectFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexFacet.ID);
 
     Assert.assertEquals("App Engine Java Flexible Environment", projectFacet.getLabel());
