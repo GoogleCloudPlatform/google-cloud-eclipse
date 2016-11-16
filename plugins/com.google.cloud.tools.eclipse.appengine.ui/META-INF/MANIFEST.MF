@@ -29,5 +29,4 @@ Import-Package: com.google.cloud.tools.eclipse.appengine.libraries.model,
  org.eclipse.swt.layout,
  org.eclipse.swt.widgets,
  org.eclipse.ui.plugin
-Require-Bundle: com.google.cloud.tools.eclipse.usagetracker,
- org.eclipse.osgi
+Require-Bundle: com.google.cloud.tools.eclipse.usagetracker
