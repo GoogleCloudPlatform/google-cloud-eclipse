@@ -158,7 +158,7 @@ public abstract class BasePublishOperation extends PublishOperation {
     setModulePublishState(module, IServer.PUBLISH_STATE_NONE);
   }
 
-  private void publishDir(IModule module2, List<IStatus> statuses, IProgressMonitor monitor)
+  protected void publishDir(IModule module2, List<IStatus> statuses, IProgressMonitor monitor)
       throws CoreException {
     IPath path = getModuleDeployDirectory(module2);
 
@@ -248,7 +248,7 @@ public abstract class BasePublishOperation extends PublishOperation {
     p.put(module[1].getId(), jarURI);
   }
 
-  private void publishArchiveModule(String jarURI, Properties p, List<IStatus> statuses,
+  protected void publishArchiveModule(String jarURI, Properties p, List<IStatus> statuses,
       IProgressMonitor monitor) {
     IPath path = getModuleDeployDirectory(module[0]);
     boolean moving = false;
