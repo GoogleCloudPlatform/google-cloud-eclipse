@@ -109,7 +109,8 @@ public class ProjectUtils {
     return projects;
   }
 
-  private static void waitUntilIdle() {
+  /** Wait for any spawned jobs to complete (e.g., validation jobs). */
+  public static void waitUntilIdle() {
     while (!Job.getJobManager().isIdle()) {
       Display display = Display.getCurrent();
       if (display != null) {

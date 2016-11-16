@@ -132,7 +132,7 @@ public abstract class BasePublishOperation extends PublishOperation {
       publishDir(module[0], statuses, monitor);
     } else {
       // Else a child module
-      Properties p = loadModulePublishLocations();
+      Properties properties = loadModulePublishLocations();
 
       // Try to determine the URI for the child module
       IWebModule webModule = (IWebModule) module[0].loadAdapter(IWebModule.class, monitor);
@@ -148,11 +148,11 @@ public abstract class BasePublishOperation extends PublishOperation {
       }
 
       if (isBinary) {
-        publishArchiveModule(childURI, p, statuses, monitor);
+        publishArchiveModule(childURI, properties, statuses, monitor);
       } else {
-        publishJar(childURI, p, statuses, monitor);
+        publishJar(childURI, properties, statuses, monitor);
       }
-      saveModulePublishLocations(p);
+      saveModulePublishLocations(properties);
     }
     throwExceptionOnError(statuses);
     setModulePublishState(module, IServer.PUBLISH_STATE_NONE);
@@ -193,12 +193,12 @@ public abstract class BasePublishOperation extends PublishOperation {
     }
   }
 
-  protected void publishJar(String jarURI, Properties p, List<IStatus> statuses,
+  protected void publishJar(String jarURI, Properties properties, List<IStatus> statuses,
       IProgressMonitor monitor) throws CoreException {
     IPath path = getModuleDeployDirectory(module[0]);
     boolean moving = false;
     // Get URI used for previous publish, if known
-    String oldURI = (String) p.get(module[1].getId());
+    String oldURI = (String) properties.get(module[1].getId());
     if (oldURI != null) {
       // If old URI found, detect if jar is moving or changing its name
       if (jarURI != null) {
@@ -224,7 +224,7 @@ public abstract class BasePublishOperation extends PublishOperation {
       File file = oldJarPath.toFile();
       if (file.exists())
         file.delete();
-      p.remove(module[1].getId());
+      properties.remove(module[1].getId());
 
       if (deltaKind == ServerBehaviourDelegate.REMOVED
           || isServeModulesWithoutPublish())
@@ -245,7 +245,7 @@ public abstract class BasePublishOperation extends PublishOperation {
     IModuleResource[] mr = getResources(module);
     IStatus[] status = helper.publishZip(mr, jarPath, monitor);
     addArrayToList(statuses, status);
-    p.put(module[1].getId(), jarURI);
+    properties.put(module[1].getId(), jarURI);
   }
 
   protected void publishArchiveModule(String jarURI, Properties p, List<IStatus> statuses,
@@ -322,15 +322,15 @@ public abstract class BasePublishOperation extends PublishOperation {
    * Obtain the locations of the configured modules.
    */
   protected Properties loadModulePublishLocations() {
-    Properties p = new Properties();
+    Properties properties = new Properties();
     IPath path = getRuntimeBaseDirectory().append("publish.txt");
     try (FileInputStream fin = new FileInputStream(path.toFile())) {
-      p.load(fin);
+      properties.load(fin);
     } catch (IOException e) {
       // ignore: if not found, then we haven't published previously,
       // and so previous module locations doesn't matter
     }
-    return p;
+    return properties;
   }
 
 
@@ -347,24 +347,24 @@ public abstract class BasePublishOperation extends PublishOperation {
     }
 
     if (statuses.size() == 1) {
-      IStatus status2 = statuses.get(0);
-      throw new CoreException(status2);
+      IStatus substatus = statuses.get(0);
+      throw new CoreException(substatus);
     }
     IStatus[] children = new IStatus[statuses.size()];
     statuses.toArray(children);
     String message = "Publishing failed with multiple errors"; // Messages.errorPublish;
-    MultiStatus status2 = new MultiStatus(PLUGIN_ID, 0, children, message, null);
-    throw new CoreException(status2);
+    MultiStatus multistatus = new MultiStatus(PLUGIN_ID, 0, children, message, null);
+    throw new CoreException(multistatus);
   }
 
-  protected static void addArrayToList(List<IStatus> list, IStatus[] a) {
-    if (list == null || a == null || a.length == 0) {
+  protected static void addArrayToList(List<IStatus> list, IStatus[] array) {
+    if (list == null || array == null || array.length == 0) {
       return;
     }
 
-    int size = a.length;
+    int size = array.length;
     for (int i = 0; i < size; i++) {
-      list.add(a[i]);
+      list.add(array[i]);
     }
   }
 }
