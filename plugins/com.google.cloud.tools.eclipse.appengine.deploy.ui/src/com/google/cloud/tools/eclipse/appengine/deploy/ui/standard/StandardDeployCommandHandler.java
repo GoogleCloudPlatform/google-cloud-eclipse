@@ -39,7 +39,9 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsoleConstants;
+import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.IConsoleView;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.ui.handlers.HandlerUtil;
@@ -148,19 +150,8 @@ public class StandardDeployCommandHandler extends AbstractHandler {
     });
     deploy.schedule();
     
-    // https://wiki.eclipse.org/FAQ_How_do_I_find_the_active_workbench_page%3F
-    IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindow(event);
-    if (window != null) {
-      IWorkbenchPage page = window.getActivePage();
-      if (page != null) {
-        try {
-          IConsoleView view = (IConsoleView) page.showView(IConsoleConstants.ID_CONSOLE_VIEW);
-          view.display(messageConsole);
-        } catch (PartInitException ex) {
-          // ignore; user has to show console manually
-        }
-      }
-    }
+    IConsoleManager consoleManager = ConsolePlugin.getDefault().getConsoleManager();
+    consoleManager.showConsoleView(messageConsole);
   }
 
   private String getConsoleName(String project) {
