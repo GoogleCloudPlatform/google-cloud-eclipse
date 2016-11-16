@@ -150,7 +150,7 @@ public class StandardDeployCommandHandler extends AbstractHandler {
     deploy.schedule();
     
     // https://wiki.eclipse.org/FAQ_How_do_I_find_the_active_workbench_page%3F
-    IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+    IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindow(event);
     if (window != null) {
       IWorkbenchPage page = window.getActivePage();
       if (page != null) {
