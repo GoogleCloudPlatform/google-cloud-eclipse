@@ -15,7 +15,7 @@ mkdir -p signed && chmod 777 signed
  $KOKORO_GFILE_DIR/content.jar \
  $KOKORO_GFILE_DIR/signed/content.jar
  
-FILES=$KOKORO_GFILE_DIR/plugins
+FILES=$KOKORO_GFILE_DIR/plugins/*
 for f in $FILES
 do
   echo "Processing $f file..."
