@@ -233,7 +233,7 @@ public class M2RepositoryService implements ILibraryRepositoryService {
       Artifact artifact = resolveArtifact(sourceMavenCoordinates);
       return new Path(artifact.getFile().getAbsolutePath());
     } catch (LibraryRepositoryServiceException exception) {
-      // source file is failed to download, this is not an error
+      // source file failed to download, this is not an error
       return null;
     }
   }
