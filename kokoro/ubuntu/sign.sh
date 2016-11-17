@@ -14,7 +14,9 @@ mkdir -p signed/features && chmod 777 signed/features
 cp $KOKORO_GFILE_DIR/artifacts.jar $KOKORO_GFILE_DIR/signed/artifacts.jar
 cp $KOKORO_GFILE_DIR/content.jar $KOKORO_GFILE_DIR/signed/content.jar
 cp $KOKORO_GFILE_DIR/category.xml $KOKORO_GFILE_DIR/signed/category.xml
- 
+
+cat $KOKORO_GFILE_DIR/category.xml 
+
 FILES=$KOKORO_GFILE_DIR/plugins/*.jar
 for f in $FILES
 do
