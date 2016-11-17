@@ -22,6 +22,7 @@ import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IProjectFacet;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -39,10 +40,8 @@ public class AppEngineFlexFacetTest {
 
   @Test
   public void testHasAppEngineFacet_withFacet() {
-    if (!ProjectFacetsManager.isProjectFacetDefined(
-        "com.google.cloud.tools.eclipse.appengine.facets.flex")) {
-      return;
-    }
+    Assume.assumeTrue(ProjectFacetsManager.isProjectFacetDefined(
+        "com.google.cloud.tools.eclipse.appengine.facets.flex"));
 
     IProjectFacet projectFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexFacet.ID);
     when(facetedProject.hasProjectFacet(projectFacet)).thenReturn(true);
@@ -52,10 +51,8 @@ public class AppEngineFlexFacetTest {
 
   @Test
   public void testHasAppEngineFacet_withoutFacet() {
-    if (!ProjectFacetsManager.isProjectFacetDefined(
-        "com.google.cloud.tools.eclipse.appengine.facets.flex")) {
-      return;
-    }
+    Assume.assumeTrue(ProjectFacetsManager.isProjectFacetDefined(
+        "com.google.cloud.tools.eclipse.appengine.facets.flex"));
 
     IProjectFacet projectFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexFacet.ID);
     when(facetedProject.hasProjectFacet(projectFacet)).thenReturn(false);
@@ -65,10 +62,8 @@ public class AppEngineFlexFacetTest {
 
   @Test
   public void testFacetLabel() {
-    if (!ProjectFacetsManager.isProjectFacetDefined(
-        "com.google.cloud.tools.eclipse.appengine.facets.flex")) {
-      return;
-    }
+    Assume.assumeTrue(ProjectFacetsManager.isProjectFacetDefined(
+        "com.google.cloud.tools.eclipse.appengine.facets.flex"));
 
     IProjectFacet projectFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexFacet.ID);
 
