@@ -23,8 +23,8 @@ do
   filename=$(basename "$f")
   echo "Signing $filename"
   if /escalated_sign/escalated_sign.py -j /escalated_sign_jobs -t signjar \
-    "plugins/$filename" \
-    "signed/plugins/$filename"
+    plugins/"$filename" \
+    signed/plugins/"$filename"
   then echo "Signed $filename"
   else 
     cp "plugins/$filename" "signed/plugins/$filename"
@@ -38,7 +38,7 @@ do
   filename=$(basename "$f")
   echo "Signing $filename"
   /escalated_sign/escalated_sign.py -j /escalated_sign_jobs -t signjar \
-    "features/$filename" \
-    "signed/features/$filename"
+    features/"$filename" \
+    signed/features/"$filename"
   echo "Signed $filename"
 done
