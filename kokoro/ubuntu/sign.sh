@@ -12,9 +12,7 @@ mkdir -p signed && chmod 777 signed
 mkdir -p signed/plugins && chmod 777 signed/plugins
 mkdir -p signed/features && chmod 777 signed/features
  
-cp artifacts.jar signed/artifacts.jar
 cp content.jar signed/content.jar
-cp category.xml signed/category.xml
 
 FILES=plugins/*.jar
 for f in $FILES
