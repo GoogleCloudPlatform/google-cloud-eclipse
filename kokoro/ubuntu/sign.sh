@@ -20,7 +20,7 @@ FILES=plugins/*.jar
 for f in $FILES
 do
   echo "Processing $f file..."
-  filename=$(basename "$f" .jar)
+  filename=$(basename "$f")
   echo "Signing $filename"
   if /escalated_sign/escalated_sign.py -j /escalated_sign_jobs -t signjar \
     plugins/$filename \
