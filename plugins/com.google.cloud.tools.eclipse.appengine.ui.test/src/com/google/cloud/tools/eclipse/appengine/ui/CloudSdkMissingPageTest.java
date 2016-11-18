@@ -31,12 +31,12 @@ public class CloudSdkMissingPageTest {
   
   @Test
   public void testTitle() {
-    Assert.assertEquals("Cloud SDK Missing", page.getTitle());
+    Assert.assertEquals("Cloud SDK missing", page.getTitle());
   }
   
   @Test
   public void testDescription() {
-    Assert.assertEquals("Cloud SDK Missing", page.getDescription());
+    Assert.assertEquals("Could not find the Google Cloud SDK", page.getDescription());
   }
 
 }
