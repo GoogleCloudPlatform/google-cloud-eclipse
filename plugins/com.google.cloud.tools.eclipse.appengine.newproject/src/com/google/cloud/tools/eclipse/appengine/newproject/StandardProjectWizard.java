@@ -18,7 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-import com.google.cloud.tools.eclipse.appengine.ui.AppEngineComponentPage;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineJavaComponentMissingPage;
 import com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPrompter;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
@@ -52,7 +52,7 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
       page = new AppEngineStandardWizardPage();
       this.addPage(page);
     } else {
-      this.addPage(new AppEngineComponentPage(true /* forNativeProjectWizard */));
+      this.addPage(new AppEngineJavaComponentMissingPage(true /* forNativeProjectWizard */));
     }
   }
 

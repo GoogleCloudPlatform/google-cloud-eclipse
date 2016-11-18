@@ -28,16 +28,16 @@ import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 
 /**
- * AppEngineComponentPage is a page that displays a message that Gcloud App Engine Java component is missing
- * with instructions on how to install it. This page disables the 'Finish' button.
+ * Wizard page that displays a message that Gcloud App Engine Java component is
+ * missing with instructions on how to install it. This page disables the 'Finish' button.
  */
-public class AppEngineComponentPage extends WizardPage {
+public class AppEngineJavaComponentMissingPage extends WizardPage {
   private boolean forNativeProjectWizard;
 
-  public AppEngineComponentPage(boolean forNativeProjectWizard) {
-    super("appEngineComponentPage");
-    setTitle("App Engine Component is missing");
-    setDescription("The Cloud SDK App Engine Java component is not installed"); 
+  public AppEngineJavaComponentMissingPage(boolean forNativeProjectWizard) {
+    super("appEngineComponentPage"); //$NON-NLS-1$
+    setTitle(Messages.getString("appengine.java.component.missing"));
+    setDescription(Messages.getString("appengine.java.component.not.installed")); 
     this.forNativeProjectWizard = forNativeProjectWizard;
   }
 
@@ -63,15 +63,15 @@ public class AppEngineComponentPage extends WizardPage {
     GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
     gridData.widthHint = parent.getSize().x;
 
-    String message = Messages.AppEngineJavaComponentMissing;
+    String message = Messages.getString("fix.appengine.java.component");
     StyledText styledText = new StyledText(container, SWT.MULTI | SWT.READ_ONLY | SWT.WRAP);
     styledText.setLayoutData(gridData);
     styledText.setText(message);
     styledText.setBackground(container.getBackground());
     styledText.setCaret(null /* hide caret */);
 
-    int startIndex = message.indexOf("\'");
-    int endIndex = message.indexOf("\'", startIndex + 1);
+    int startIndex = message.indexOf("\'"); //$NON-NLS-1$
+    int endIndex = message.indexOf("\'", startIndex + 1); //$NON-NLS-1$
     if ((-1 < startIndex) && (startIndex < endIndex)) {
       StyleRange styleRange = new StyleRange();
       styleRange.start = startIndex + 1;

@@ -19,7 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.eclipse.appengine.newproject.StandardProjectWizard;
-import com.google.cloud.tools.eclipse.appengine.ui.AppEngineComponentPage;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineJavaComponentMissingPage;
 import com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPrompter;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
@@ -52,7 +52,7 @@ public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
       this.addPage(page);
       this.addPage(archetypePage);
     } else {
-      this.addPage(new AppEngineComponentPage(false /* forNativeProjectWizard */));
+      this.addPage(new AppEngineJavaComponentMissingPage(false /* forNativeProjectWizard */));
     }
   }
 
