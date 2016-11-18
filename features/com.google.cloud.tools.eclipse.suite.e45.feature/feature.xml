@@ -18,6 +18,16 @@
       %license.text
    </license>
 
+   <requires>
+      <import feature="org.eclipse.jdt" version="3.11.2.v20160212-1500" match="greaterOrEqual"/>
+      <import feature="org.eclipse.m2e.wtp.feature" version="1.2.1.20150819-2220" match="greaterOrEqual"/>
+      <import feature="org.eclipse.m2e.feature" version="1.6.2.20150902-0002" match="greaterOrEqual"/>
+      <import feature="org.eclipse.jst.common.fproj.enablement.jdt" version="3.6.3.v201501141810" match="greaterOrEqual"/>
+      <import feature="org.eclipse.wst.common.fproj" version="3.7.0.v201505072140" match="greaterOrEqual"/>
+      <import feature="org.eclipse.jst.web_ui.feature" version="3.7.1.v201512021921" match="greaterOrEqual"/>
+      <import feature="org.eclipse.wst.web_ui.feature" version="3.7.1.v201602111638" match="greaterOrEqual"/>
+   </requires>
+
    <plugin
          id="com.google.cloud.tools.appengine"
          download-size="0"

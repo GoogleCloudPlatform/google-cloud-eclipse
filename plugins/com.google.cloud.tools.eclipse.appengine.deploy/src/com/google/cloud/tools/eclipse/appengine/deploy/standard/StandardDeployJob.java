@@ -139,7 +139,6 @@ public class StandardDeployJob extends WorkspaceJob {
     }
   }
 
-
   @Override
   protected void canceling() {
     cloudSdkProcessStatus = Status.CANCEL_STATUS;

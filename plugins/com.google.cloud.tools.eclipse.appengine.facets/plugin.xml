@@ -47,6 +47,8 @@
     </listener>
   </extension>
 
+  <!-- Temporarily disable flex facet -->
+  <!--
   <extension
         point="org.eclipse.wst.common.project.facet.core.facets">
      <project-facet
@@ -62,6 +64,7 @@
         </constraint>
      </project-facet-version>
   </extension>
+  -->
 
   <extension point="org.eclipse.wst.common.project.facet.core.facets">
     <action

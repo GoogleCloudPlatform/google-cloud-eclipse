@@ -140,11 +140,11 @@ public class AppEngineLibrariesSelectorGroup {
                                                           true /* resultIfFound */) {
                                                             @Override
                                                             protected Object calculate() {
-                                                              if (libraryButton.getData(BUTTON_MANUAL_SELECTION_KEY) != null) {
-                                                                return true;
-                                                              } else {
-                                                                return super.calculate();
-                                                              }
+                                                              // must call super.calculate to ensure
+                                                              // databinding will call this method when
+                                                              // selectedLibraries changes
+                                                              return (boolean) super.calculate()
+                                                                  || libraryButton.getData(BUTTON_MANUAL_SELECTION_KEY) != null;
                                                             }
                                                           },
                              new UpdateValueStrategy(UpdateValueStrategy.POLICY_NEVER),

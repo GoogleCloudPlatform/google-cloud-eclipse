@@ -16,6 +16,8 @@
 
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
+import com.google.cloud.tools.appengine.api.AppEngineException;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
 import com.google.cloud.tools.eclipse.appengine.localserver.PreferencesInitializer;
 import com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineConsole;
@@ -68,13 +70,27 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
   private final static Logger logger =
       Logger.getLogger(LocalAppEngineServerLaunchConfigurationDelegate.class.getName());
 
-  private static final String DEBUGGER_HOST = "localhost";
+  private static final String DEBUGGER_HOST = "localhost"; //$NON-NLS-1$
 
+  private static void validateCloudSdk() throws CoreException  {
+    try {
+      CloudSdk cloudSdk = new CloudSdk.Builder().build();
+      cloudSdk.validateCloudSdk();
+    } catch (AppEngineException ex) {
+      String detailMessage = Messages.getString("cloudsdk.not.configured"); //$NON-NLS-1$
+      Status status = new Status(IStatus.ERROR,
+          "com.google.cloud.tools.eclipse.appengine.localserver", detailMessage, ex); //$NON-NLS-1$
+      throw new CoreException(status);
+    }
+  }
+  
   @Override
   public void launch(ILaunchConfiguration configuration, String mode, final ILaunch launch,
       IProgressMonitor monitor) throws CoreException {
     AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.APP_ENGINE_LOCAL_SERVER,
         AnalyticsEvents.APP_ENGINE_LOCAL_SERVER_MODE, mode);
+    
+    validateCloudSdk();
 
     IServer server = ServerUtil.getServer(configuration);
     if (server == null) {
@@ -87,8 +103,8 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       return;
     }
 
-    LocalAppEngineServerBehaviour serverBehaviour =
-        (LocalAppEngineServerBehaviour) server.loadAdapter(LocalAppEngineServerBehaviour.class, null);
+    LocalAppEngineServerBehaviour serverBehaviour = (LocalAppEngineServerBehaviour) server
+        .loadAdapter(LocalAppEngineServerBehaviour.class, null);
 
     List<File> runnables = new ArrayList<File>();
     for (IModule module : modules) {
@@ -102,7 +118,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     console.clearConsole();
     console.activate();
 
-    new ServerLaunchMonitor(configuration, launch, server).engage();
+    new ServerLaunchMonitor(launch, server).engage();
 
     if (ILaunchManager.DEBUG_MODE.equals(mode)) {
       int debugPort = getDebugPort();
@@ -128,7 +144,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     }
     final IWorkbench workbench = PlatformUI.getWorkbench();
 
-    Job openJob = new UIJob(workbench.getDisplay(), "Launching start page") {
+    Job openJob = new UIJob(workbench.getDisplay(), "Launching start page") { //$NON-NLS-1$
 
       @Override
       public IStatus runInUIThread(IProgressMonitor monitor) {
@@ -144,10 +160,10 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
               .openURL(url);
         } catch (PartInitException ex) {
           // Unable to use the normal browser support, so punt to the OS
-          logger.log(Level.WARNING, "Cannot launch a browser", ex);
+          logger.log(Level.WARNING, "Cannot launch a browser", ex); //$NON-NLS-1$
           Program.launch(pageLocation);
         } catch (MalformedURLException ex) {
-          logger.log(Level.SEVERE, "Invalid dev_appserver URL", ex);
+          logger.log(Level.SEVERE, "Invalid dev_appserver URL", ex); //$NON-NLS-1$
         }
         return Status.OK_STATUS;
       }
@@ -160,13 +176,13 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     // The 4.7 listen connector supports a connectionLimit
     IVMConnector connector =
         JavaRuntime.getVMConnector(IJavaLaunchConfigurationConstants.ID_SOCKET_LISTEN_VM_CONNECTOR);
-    if (connector == null || !connector.getArgumentOrder().contains("connectionLimit")) {
+    if (connector == null || !connector.getArgumentOrder().contains("connectionLimit")) { //$NON-NLS-1$
       // Attempt to retrieve our socketListenerMultipleConnector
       connector = JavaRuntime.getVMConnector(
-          "com.google.cloud.tools.eclipse.jdt.launching.socketListenerMultipleConnector");
+          "com.google.cloud.tools.eclipse.jdt.launching.socketListenerMultipleConnector"); //$NON-NLS-1$
     }
     if (connector == null) {
-      abort("Cannot find Socket Listening connector", null, 0);
+      abort("Cannot find Socket Listening connector", null, 0); //$NON-NLS-1$
       return; // keep JDT null analysis happy
     }
 
@@ -174,17 +190,17 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     @SuppressWarnings("deprecation")
     int timeout = JavaRuntime.getPreferences().getInt(JavaRuntime.PREF_CONNECT_TIMEOUT);
     Map<String, String> connectionParameters = new HashMap<>();
-    connectionParameters.put("hostname", DEBUGGER_HOST);
-    connectionParameters.put("port", Integer.toString(port));
-    connectionParameters.put("timeout", Integer.toString(timeout));
-    connectionParameters.put("connectionLimit", "0");
+    connectionParameters.put("hostname", DEBUGGER_HOST); //$NON-NLS-1$
+    connectionParameters.put("port", Integer.toString(port)); //$NON-NLS-1$
+    connectionParameters.put("timeout", Integer.toString(timeout)); //$NON-NLS-1$
+    connectionParameters.put("connectionLimit", "0"); //$NON-NLS-1$ //$NON-NLS-2$
     connector.connect(connectionParameters, monitor, launch);
   }
 
   private int getDebugPort() throws CoreException {
     int port = SocketUtil.findFreePort();
     if (port == -1) {
-      abort("Cannot find free port for remote debugger", null, IStatus.ERROR);
+      abort("Cannot find free port for remote debugger", null, IStatus.ERROR); //$NON-NLS-1$
     }
     return port;
   }
@@ -202,13 +218,12 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     LocalAppEngineServerBehaviour serverBehaviour = (LocalAppEngineServerBehaviour)
         server.loadAdapter(LocalAppEngineServerBehaviour.class, null /* monitor */);
 
-    return "http://" + server.getHost() + ":" + serverBehaviour.getServerPort();
+    return "http://" + server.getHost() + ":" + serverBehaviour.getServerPort(); //$NON-NLS-1$ //$NON-NLS-2$
   }
 
-
   /**
-   * Monitors the server and launch state. Ensures listeners are properly removed on server stop and
-   * launch termination. It is necessary in part as there may be several launches per
+   * Monitors the server and launch state. Ensures listeners are properly removed on server stop
+   * and launch termination. It is necessary in part as there may be several launches per
    * LaunchConfigurationDelegate.
    * <ul>
    * <li>On server start, open a browser page</li>
@@ -217,15 +232,13 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
    * </ul>
    */
   private class ServerLaunchMonitor implements ILaunchesListener2, IServerListener {
-    private ILaunchConfiguration configuration;
     private ILaunch launch;
     private IServer server;
 
     /**
      * Setup the monitor.
      */
-    ServerLaunchMonitor(ILaunchConfiguration configuration, ILaunch launch, IServer server) {
-      this.configuration = configuration;
+    ServerLaunchMonitor(ILaunch launch, IServer server) {
       this.launch = launch;
       this.server = server;
     }
@@ -256,7 +269,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
             logger.fine("Server stopped; terminating launch");//$NON-NLS-1$
             launch.terminate();
           } catch (DebugException ex) {
-            logger.log(Level.WARNING, "Unable to terminate launch", ex);
+            logger.log(Level.WARNING, "Unable to terminate launch", ex); //$NON-NLS-1$
           }
       }
     }

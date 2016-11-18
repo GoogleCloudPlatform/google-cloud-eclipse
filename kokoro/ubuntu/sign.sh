@@ -7,10 +7,38 @@ set -x
 
 echo ${KOKORO_GFILE_DIR}
 cd $KOKORO_GFILE_DIR
+
 mkdir -p signed && chmod 777 signed
-/escalated_sign/escalated_sign.py -j /escalated_sign_jobs -t signjar \
- $KOKORO_GFILE_DIR/artifacts.jar \
- $KOKORO_GFILE_DIR/signed/artifacts.jar
-/escalated_sign/escalated_sign.py -j /escalated_sign_jobs -t signjar \
- $KOKORO_GFILE_DIR/content.jar \
- $KOKORO_GFILE_DIR/signed/content.jar
+mkdir -p signed/plugins && chmod 777 signed/plugins
+mkdir -p signed/features && chmod 777 signed/features
+ 
+cp artifacts.jar signed/artifacts.jar
+cp content.jar signed/content.jar
+cp category.xml signed/category.xml
+
+FILES=plugins/*.jar
+for f in $FILES
+do
+  echo "Processing $f file..."
+  filename=$(basename "$f")
+  echo "Signing $filename"
+  if /escalated_sign/escalated_sign.py -j /escalated_sign_jobs -t signjar \
+    "$KOKORO_GFILE_DIR/plugins/$filename" \
+    "$KOKORO_GFILE_DIR/signed/plugins/$filename"
+  then echo "Signed $filename"
+  else 
+    cp "$KOKORO_GFILE_DIR/plugins/$filename" "$KOKORO_GFILE_DIR/signed/plugins/$filename"
+  fi
+done
+
+FEATURES=features/*.jar
+for f in $FEATURES
+do
+  echo "Processing $f file..."
+  filename=$(basename "$f")
+  echo "Signing $filename"
+  /escalated_sign/escalated_sign.py -j /escalated_sign_jobs -t signjar \
+    "$KOKORO_GFILE_DIR/features/$filename" \
+    "$KOKORO_GFILE_DIR/signed/features/$filename"
+  echo "Signed $filename"
+done
