@@ -26,7 +26,7 @@ public class CloudSdkMissingPageTest {
   
   @Before
   public void setUp() {
-    page = new CloudSdkMissingPage();
+    page = new CloudSdkMissingPage("");
   }
   
   @Test

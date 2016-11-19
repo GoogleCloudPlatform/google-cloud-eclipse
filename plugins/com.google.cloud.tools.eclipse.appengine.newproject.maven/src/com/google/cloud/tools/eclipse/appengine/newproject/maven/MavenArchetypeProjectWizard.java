@@ -16,10 +16,9 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 
-import com.google.cloud.tools.appengine.api.AppEngineException;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.eclipse.appengine.newproject.StandardProjectWizard;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineJavaComponentMissingPage;
+import com.google.cloud.tools.eclipse.appengine.ui.CloudSdkMissingPage;
 import com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPrompter;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
@@ -46,13 +45,16 @@ public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
 
   @Override
   public void addPages() {
-    if (appEngineJavaComponentExists()) {
+    if (!StandardProjectWizard.cloudSdkExists()) {
+      this.addPage(
+          new CloudSdkMissingPage(AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_MAVEN));
+    } else if (!StandardProjectWizard.appEngineJavaComponentExists()) {
+      this.addPage(new AppEngineJavaComponentMissingPage(false /* forNativeProjectWizard */));
+    } else { // all is good
       page = new MavenAppEngineStandardWizardPage();
       archetypePage = new MavenAppEngineStandardArchetypeWizardPage();
       this.addPage(page);
       this.addPage(archetypePage);
-    } else {
-      this.addPage(new AppEngineJavaComponentMissingPage(false /* forNativeProjectWizard */));
     }
   }
 
@@ -109,12 +111,4 @@ public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
     }
   }
 
-  private boolean appEngineJavaComponentExists() {
-    try {
-      new CloudSdk.Builder().build().validateAppEngineJavaComponents();
-      return true;
-    } catch (AppEngineException ex) {
-      return false;
-    }
-  }
 }

@@ -50,12 +50,12 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
   @Override
   public void addPages() {
     if (!cloudSdkExists()) {
-      this.addPage(new CloudSdkMissingPage());
+      addPage(new CloudSdkMissingPage(AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE));
     } else if (!appEngineJavaComponentExists()) {
-      this.addPage(new AppEngineJavaComponentMissingPage(true /* forNativeProjectWizard */));
+      addPage(new AppEngineJavaComponentMissingPage(true /* forNativeProjectWizard */));
     } else { // all is good
       page = new AppEngineStandardWizardPage();
-      this.addPage(page);
+      addPage(page);
     }
   }
 
@@ -120,7 +120,7 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
   /**
    * Verify that the Cloud SDK is where we can find it.
    */
-  private static boolean cloudSdkExists() {
+  public static boolean cloudSdkExists() {
     try {
       CloudSdk sdk = new CloudSdk.Builder().build();
       sdk.validateCloudSdk();
@@ -133,7 +133,7 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
   /**
    * Verify that we're set up for App Engine Java development.
    */
-  private static boolean appEngineJavaComponentExists() {
+  public static boolean appEngineJavaComponentExists() {
     try {
       CloudSdk sdk = new CloudSdk.Builder().build();
       sdk.validateAppEngineJavaComponents();

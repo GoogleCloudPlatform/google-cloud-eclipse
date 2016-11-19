@@ -31,12 +31,17 @@ import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
  * Wizard page that displays a message that cloud SDK is
  * missing with instructions on how to install it. This page disables the 'Finish' button.
  */
+// todo combine this with AppEngineJavaComponentMissingPage by injecting the
+// various messages. Otherwise they're the same.
 public class CloudSdkMissingPage extends WizardPage {
 
-  public CloudSdkMissingPage() {
+  private String wizardType;
+
+  public CloudSdkMissingPage(String wizardType) {
     super("cloudSdkMissingComponentPage"); //$NON-NLS-1$
     setTitle(Messages.getString("cloud.sdk.missing"));
     setDescription(Messages.getString("cloud.sdk.not.installed")); 
+    this.wizardType = wizardType;
   }
 
   @Override
@@ -44,7 +49,7 @@ public class CloudSdkMissingPage extends WizardPage {
     AnalyticsPingManager.getInstance().sendPing(
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD,
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
-        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE,
+        wizardType,
         parent.getShell());
 
     Composite container = new Composite(parent, SWT.NONE);
