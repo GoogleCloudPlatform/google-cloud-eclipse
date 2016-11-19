@@ -52,7 +52,8 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
     if (!cloudSdkExists()) {
       addPage(new CloudSdkMissingPage(AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE));
     } else if (!appEngineJavaComponentExists()) {
-      addPage(new AppEngineJavaComponentMissingPage(true /* forNativeProjectWizard */));
+      addPage(new AppEngineJavaComponentMissingPage(
+          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE));
     } else { // all is good
       page = new AppEngineStandardWizardPage();
       addPage(page);

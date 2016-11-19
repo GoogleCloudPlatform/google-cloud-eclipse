@@ -16,18 +16,28 @@
 
 package com.google.cloud.tools.eclipse.appengine.ui;
 
-/**
- * Wizard page that displays a message that gcloud App Engine Java component is
- * missing with instructions on how to install it. This page disables the 'Finish' button.
- */
-public class AppEngineJavaComponentMissingPage extends MissingComponentPage {
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
-  public AppEngineJavaComponentMissingPage(String wizardType) {
-      super("appEngineJavaComponentMissingPage",  //$NON-NLS-1$
-          wizardType, 
-          Messages.getString("appengine.java.component.missing"), 
-          Messages.getString("appengine.java.component.not.installed"),
-          Messages.getString("fix.appengine.java.component"));
+public class AppEngineJavaComponentMissingPageTest {
+
+  private AppEngineJavaComponentMissingPage page;
+  
+  @Before
+  public void setUp() {
+    page = new AppEngineJavaComponentMissingPage("");
   }
   
+  @Test
+  public void testTitle() {
+    Assert.assertEquals("App Engine Java Component is missing", page.getTitle());
+  }
+  
+  @Test
+  public void testDescription() {
+    Assert.assertEquals("The Cloud SDK App Engine Java component is not installed",
+        page.getDescription());
+  }
+
 }
