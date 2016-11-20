@@ -53,7 +53,12 @@ public class XmlTest {
   public void testFacetsDefined() throws Exception {
     Document doc = builder.parse(
         new File("../com.google.cloud.tools.eclipse.appengine.facets/plugin.xml"));
-    NodeList conflicts = doc.getElementsByTagName("conflicts");
+    checkFacetDefined(doc, "conflicts");
+    checkFacetDefined(doc, "requires");
+  }
+
+  private static void checkFacetDefined(Document doc, String element) {
+    NodeList conflicts = doc.getElementsByTagName(element);
     for (int i = 0; i < conflicts.getLength(); i++) {
       Element conflict = (Element) conflicts.item(i);
       String facet = conflict.getAttribute("facet");
