@@ -12,7 +12,6 @@
           <and>
             <requires facet="jst.web" version="2.5"/>
             <requires facet="java" version="1.7"/>
-            <conflicts facet="com.google.cloud.tools.eclipse.appengine.facets.flex"/>
           </and>
         </constraint>
     </project-facet-version>
