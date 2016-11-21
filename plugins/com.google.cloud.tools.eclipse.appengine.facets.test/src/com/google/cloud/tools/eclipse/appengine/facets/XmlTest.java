@@ -57,11 +57,11 @@ public class XmlTest {
     checkFacetDefined(doc, "requires");
   }
 
-  private static void checkFacetDefined(Document doc, String element) {
-    NodeList conflicts = doc.getElementsByTagName(element);
-    for (int i = 0; i < conflicts.getLength(); i++) {
-      Element conflict = (Element) conflicts.item(i);
-      String facet = conflict.getAttribute("facet");
+  private static void checkFacetDefined(Document doc, String elementName) {
+    NodeList elements = doc.getElementsByTagName(elementName);
+    for (int i = 0; i < elements.getLength(); i++) {
+      Element element = (Element) elements.item(i);
+      String facet = element.getAttribute("facet");
       Assert.assertTrue(ProjectFacetsManager.isProjectFacetDefined(facet));
     }
   }
