@@ -37,7 +37,7 @@ public class AppEngineJavaComponentMissingPageTest {
   @Test
   public void testDescription() {
     Assert.assertEquals("The Cloud SDK App Engine Java component is not installed",
-        page.getDescription());
+        page.getErrorMessage());
   }
 
 }

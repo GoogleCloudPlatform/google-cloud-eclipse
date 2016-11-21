@@ -40,14 +40,14 @@ public class MissingComponentPage extends WizardPage {
    * @param pageName internal identifier
    * @param wizardType should be constant from AnalyticsEvents
    * @param title dialog title
-   * @param description short error message
+   * @param errorMessage short error message
    * @param message detailed message and instructions. Text between single quotes is made bold.
    */
-  public MissingComponentPage(String pageName, String wizardType, String title, String description,
-      String message) {
+  public MissingComponentPage(String pageName, String wizardType, String title,
+      String errorMessage, String message) {
     super(pageName);
     setTitle(title);
-    setErrorMessage(description);
+    setErrorMessage(errorMessage);
     this.wizardType = wizardType;
     this.message = message;
   }
