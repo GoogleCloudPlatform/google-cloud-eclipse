@@ -11,15 +11,12 @@ cd $KOKORO_GFILE_DIR
 mkdir -p signed && chmod 777 signed
 mkdir -p signed/plugins && chmod 777 signed/plugins
 mkdir -p signed/features && chmod 777 signed/features
- 
-cp content.jar signed/content.jar
 
 FILES=plugins/*.jar
 for f in $FILES
 do
   echo "Processing $f file..."
   filename=$(basename "$f")
-  echo "Signing $filename"
   if /escalated_sign/escalated_sign.py -j /escalated_sign_jobs -t signjar \
     "$KOKORO_GFILE_DIR/plugins/$filename" \
     "$KOKORO_GFILE_DIR/signed/plugins/$filename"
@@ -34,7 +31,6 @@ for f in $FEATURES
 do
   echo "Processing $f file..."
   filename=$(basename "$f")
-  echo "Signing $filename"
   /escalated_sign/escalated_sign.py -j /escalated_sign_jobs -t signjar \
     "$KOKORO_GFILE_DIR/features/$filename" \
     "$KOKORO_GFILE_DIR/signed/features/$filename"
