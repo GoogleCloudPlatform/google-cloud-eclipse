@@ -16,12 +16,12 @@
 
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.common.base.Function;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Status;
@@ -108,8 +108,8 @@ public class LocalAppEngineServerDelegateTest {
     Function<IModule, String> alwaysDefault = new Function<IModule, String>() {
       @Override
       public String apply(IModule module) {
-        assertNotNull(module);
-        return module != null ? module.getName() : null;
+        Preconditions.checkNotNull(module);
+        return module.getName();
       }
     };
     when(module1.getName()).thenReturn("module1");

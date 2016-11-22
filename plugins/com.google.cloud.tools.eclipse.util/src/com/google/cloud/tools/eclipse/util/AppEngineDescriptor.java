@@ -17,8 +17,6 @@
 package com.google.cloud.tools.eclipse.util;
 
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -41,23 +39,16 @@ public class AppEngineDescriptor {
   private static final String WEB_XML_NS_URI = "http://appengine.google.com/ns/1.0";
   private Document document;
 
-  public void parse(File appEngineXml) throws CoreException {
-    try (InputStream contents = new FileInputStream(appEngineXml)) {
-      parse(contents);
-    } catch (IOException exception) {
-      throw new CoreException(StatusUtil.error(getClass(),
-          "Cannot parse appengine-web.xml", exception));
-    }
-  }
-
-  public void parse(InputStream appEngineXmlContents) throws CoreException {
+  public static AppEngineDescriptor parse(InputStream appEngineXmlContents) throws CoreException {
     try {
+      AppEngineDescriptor instance = new AppEngineDescriptor();
       DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
       documentBuilderFactory.setNamespaceAware(true);
-      document = documentBuilderFactory.newDocumentBuilder().parse(appEngineXmlContents);
+      instance.document = documentBuilderFactory.newDocumentBuilder().parse(appEngineXmlContents);
+      return instance;
     } catch (IOException | SAXException | ParserConfigurationException exception) {
       throw new CoreException(
-          StatusUtil.error(getClass(), "Cannot parse appengine-web.xml", exception));
+          StatusUtil.error(AppEngineDescriptor.class, "Cannot parse appengine-web.xml", exception));
     }
   }
 

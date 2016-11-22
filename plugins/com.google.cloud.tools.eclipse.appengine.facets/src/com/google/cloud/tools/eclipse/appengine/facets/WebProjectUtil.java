@@ -35,10 +35,10 @@ public class WebProjectUtil {
   private final static String WEB_INF = "WEB-INF/";
 
   /**
-   * Return the project's <tt>WEB-INF</tt> directory. There is no guarantee that the contents are
-   * actually published.
+   * Return the project's <code>WEB-INF</code> directory. There is no guarantee that the contents
+   * are actually published.
    * 
-   * @return the <tt>IFolder</tt> or null if not present
+   * @return the <code>IFolder</code> or null if not present
    */
   public static IFolder getWebInfDirectory(IProject project) {
     // Try to obtain the directory as if it was a Dynamic Web Project
@@ -59,7 +59,7 @@ public class WebProjectUtil {
   }
 
   /**
-   * Attempt to resolve the given file within the project's <tt>WEB-INF</tt>.
+   * Attempt to resolve the given file within the project's <code>WEB-INF</code>.
    * 
    * @return the file location or {@code null} if not found
    */
