@@ -19,8 +19,13 @@ package com.google.cloud.tools.eclipse.appengine.localserver.server;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Function;
+import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -63,8 +68,26 @@ public class LocalAppEngineServerDelegate extends ServerDelegate {
    */
   @Override
   public IStatus canModifyModules(IModule[] add, IModule[] remove) {
-    if (add != null) {
-      for (IModule module : add) {
+    IStatus result = checkProjectFacets(add);
+    if (!result.isOK()) {
+      return result;
+    }
+    return checkConflictingServiceIds(getServer().getModules(), add, remove,
+        new Function<IModule, String>() {
+          @Override
+          public String apply(IModule module) {
+            return ModuleUtils.getServiceId(module);
+          }
+        });
+  }
+
+  /**
+   * Check that the associated projects support the App Engine runtime.
+   */
+  @VisibleForTesting
+  IStatus checkProjectFacets(IModule[] toBeAdded) {
+    if (toBeAdded != null) {
+      for (IModule module : toBeAdded) {
         if (module.getProject() != null) {
           IStatus supportedFacets = FacetUtil.verifyFacets(module.getProject(), getServer());
           if (supportedFacets != null && !supportedFacets.isOK()) {
@@ -75,6 +98,50 @@ public class LocalAppEngineServerDelegate extends ServerDelegate {
             return appEngineStandardFacetPresent;
           }
         }
+      }
+    }
+    return Status.OK_STATUS;
+  }
+
+  /**
+   * Check that the associated projects have unique App Engine Service IDs.
+   */
+  @VisibleForTesting
+  IStatus checkConflictingServiceIds(IModule[] current, IModule[] toBeAdded,
+      IModule[] toBeRemoved, Function<IModule, String> serviceIdFunction) {
+
+    // verify that we do not have conflicting modules by service id
+    Map<String, IModule> currentServiceIds = new HashMap<>();
+    for (IModule module : current) {
+      String moduleServiceId = serviceIdFunction.apply(module);
+      if (currentServiceIds.containsKey(moduleServiceId)) {
+        // uh oh, we have a conflict within the already-defined modules
+        return StatusUtil.error(LocalAppEngineServerDebugTarget.class,
+            MessageFormat.format(
+                "\"{0}\" and \"{1}\" have same App Engine Service ID: {2}",
+                currentServiceIds.get(moduleServiceId).getName(), module.getName(),
+                moduleServiceId));
+      }
+      currentServiceIds.put(moduleServiceId, module);
+    }
+    if (toBeRemoved != null) {
+      for (IModule module : toBeRemoved) {
+        String moduleServiceId = serviceIdFunction.apply(module);
+        // could verify that: serviceIds.containsKey(moduleServiceId)
+        currentServiceIds.remove(moduleServiceId);
+      }
+    }
+    if (toBeAdded != null) {
+      for (IModule module : toBeAdded) {
+        String moduleServiceId = serviceIdFunction.apply(module);
+        if (currentServiceIds.containsKey(moduleServiceId)) {
+          return StatusUtil.error(LocalAppEngineServerDebugTarget.class,
+              MessageFormat.format(
+                  "\"{0}\" and \"{1}\" have same App Engine Service ID: {2}",
+                  currentServiceIds.get(moduleServiceId).getName(), module.getName(),
+                  moduleServiceId));
+        }
+        currentServiceIds.put(moduleServiceId, module);
       }
     }
     return Status.OK_STATUS;
