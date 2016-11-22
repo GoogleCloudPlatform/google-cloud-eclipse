@@ -86,7 +86,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     super("basicNewProjectPage"); //$NON-NLS-1$
     setTitle(Messages.getString("WIZARD_TITLE")); //$NON-NLS-1$
     setDescription(Messages.getString("WIZARD_DESCRIPTION")); //$NON-NLS-1$
-    setImageDescriptor(AppEngineImages.googleCloudPlatform(32));
+    setImageDescriptor(AppEngineImages.appEngine(64));
 
     canFlipPage = false;
     this.workspaceLocation = workspaceLocation;
