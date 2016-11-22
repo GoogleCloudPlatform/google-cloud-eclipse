@@ -6,7 +6,7 @@
             id="com.google.cloud.tools.eclipse.appengine.newproject.MavenAppEngineStandard"
             name="%mavenwizard.name"
             class="com.google.cloud.tools.eclipse.appengine.newproject.maven.MavenArchetypeProjectWizard"
-            icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gcp-16x16.png"
+            icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gae-16x16.png"
             project="true"
             category="com.google.cloud.tools.eclipse.appengine.wizards">
          <description>%mavenwizard.description</description>

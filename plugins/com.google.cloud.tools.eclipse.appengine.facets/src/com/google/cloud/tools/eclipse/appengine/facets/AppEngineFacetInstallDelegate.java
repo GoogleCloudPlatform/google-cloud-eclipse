@@ -35,6 +35,7 @@ public abstract class AppEngineFacetInstallDelegate implements IDelegate   {
     validateAppEngineJavaComponents();
   }
 
+  // todo move to shared code
   private void validateAppEngineJavaComponents() throws CoreException {
     try {
       CloudSdk cloudSdk = new CloudSdk.Builder().build();

@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.libraries.persistence;
 import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainer;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
+import com.google.common.base.Preconditions;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.io.ByteArrayInputStream;
@@ -33,9 +34,11 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.e4.core.di.annotations.Creatable;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.m2e.core.MavenPlugin;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 
 /**
@@ -71,17 +74,22 @@ public class LibraryClasspathContainerSerializer {
   }
 
   private LibraryContainerStateLocationProvider stateLocationProvider;
-  private ArtifactBaseLocationProvider artifactBaseLocationProvider;
+  private ArtifactBaseLocationProvider binaryArtifactBaseLocationProvider;
+  private ArtifactBaseLocationProvider sourceBaseLocationProvider;
 
   public LibraryClasspathContainerSerializer() {
-    this(new DefaultStateLocationProvider(), new M2LocalRepositoryLocationProvider());
+    this(new DefaultStateLocationProvider(),
+         new M2LocalRepositoryLocationProvider(),
+         new LibrariesBundleStateLocationProvider());
   }
 
   @VisibleForTesting
   public LibraryClasspathContainerSerializer(LibraryContainerStateLocationProvider stateLocationProvider,
-                                             ArtifactBaseLocationProvider artifactBaseLocationProvider) {
+                                             ArtifactBaseLocationProvider binaryBaseLocationProvider,
+                                             ArtifactBaseLocationProvider sourceBaseLocationProvider) {
     this.stateLocationProvider = stateLocationProvider;
-    this.artifactBaseLocationProvider = artifactBaseLocationProvider;
+    this.binaryArtifactBaseLocationProvider = binaryBaseLocationProvider;
+    this.sourceBaseLocationProvider = sourceBaseLocationProvider;
   }
 
   public void saveContainer(IJavaProject javaProject, LibraryClasspathContainer container) throws IOException,
@@ -94,7 +102,8 @@ public class LibraryClasspathContainerSerializer {
     try (OutputStreamWriter outputStream = new OutputStreamWriter(new FileOutputStream(stateFile), Charsets.UTF_8)) {
       Gson gson = new GsonBuilder().setPrettyPrinting().create();
       outputStream.write(gson.toJson(new SerializableLibraryClasspathContainer(container,
-                                                                               artifactBaseLocationProvider.getBaseLocation())));
+                                                                               binaryArtifactBaseLocationProvider.getBaseLocation(),
+                                                                               sourceBaseLocationProvider.getBaseLocation())));
     }
   }
 
@@ -108,7 +117,8 @@ public class LibraryClasspathContainerSerializer {
       Gson gson = new GsonBuilder().create();
       SerializableLibraryClasspathContainer fromJson =
           gson.fromJson(fileReader, SerializableLibraryClasspathContainer.class);
-      return fromJson.toLibraryClasspathContainer(artifactBaseLocationProvider.getBaseLocation());
+      return fromJson.toLibraryClasspathContainer(binaryArtifactBaseLocationProvider.getBaseLocation(),
+                                                  sourceBaseLocationProvider.getBaseLocation());
     }
   }
 
@@ -152,6 +162,22 @@ public class LibraryClasspathContainerSerializer {
     @Override
     public IPath getBaseLocation() {
       return new Path(MavenPlugin.getRepositoryRegistry().getLocalRepository().getBasedir().getAbsolutePath());
+    }
+  }
+
+  private static class LibrariesBundleStateLocationProvider implements ArtifactBaseLocationProvider {
+
+    private static final String APPENGINE_LIBRARIES_BUNDLE_NAME = "com.google.cloud.tools.eclipse.appengine.libraries";
+
+    /**
+     * @see com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer.ArtifactBaseLocationProvider#getBaseLocation()
+     */
+    @Override
+    public IPath getBaseLocation() {
+      Bundle librariesBundle = Platform.getBundle(APPENGINE_LIBRARIES_BUNDLE_NAME);
+      Preconditions.checkState(librariesBundle != null,
+                               "Bundle Cloud Tools For Eclipse App Engine Libraries Management not found");
+      return Platform.getStateLocation(librariesBundle);
     }
   }
 }

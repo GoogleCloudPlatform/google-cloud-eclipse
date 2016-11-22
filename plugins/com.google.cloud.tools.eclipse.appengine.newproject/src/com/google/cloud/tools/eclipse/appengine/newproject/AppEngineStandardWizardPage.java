@@ -50,7 +50,7 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
     this.setTitle("App Engine Standard Project");
     this.setDescription("Create a new App Engine Standard Project in the workspace.");
 
-    this.setImageDescriptor(AppEngineImages.googleCloudPlatform(32));
+    this.setImageDescriptor(AppEngineImages.appEngine(64));
   }
 
   // todo is there a way to call this for a test?

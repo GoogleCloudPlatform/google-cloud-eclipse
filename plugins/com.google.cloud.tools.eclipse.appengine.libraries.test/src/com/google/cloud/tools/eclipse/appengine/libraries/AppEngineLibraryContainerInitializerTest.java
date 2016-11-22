@@ -66,7 +66,8 @@ public class AppEngineLibraryContainerInitializerTest {
   @Mock private LibraryFactory libraryFactory;
   @Mock private IConfigurationElement configurationElement;
   @Mock private LibraryContainerStateLocationProvider containerStateProvider;
-  @Mock private ArtifactBaseLocationProvider artifactBaseLocationProvider;
+  @Mock private ArtifactBaseLocationProvider binaryBaseLocationProvider;
+  @Mock private ArtifactBaseLocationProvider sourceBaseLocationProvider;
   @Mock private ILibraryRepositoryService repositoryService;
 
   private LibraryClasspathContainerSerializer serializer;
@@ -202,8 +203,11 @@ public class AppEngineLibraryContainerInitializerTest {
   }
 
   private void setupSerializer() throws IOException, CoreException {
-    serializer = new LibraryClasspathContainerSerializer(containerStateProvider, artifactBaseLocationProvider);
-    when(artifactBaseLocationProvider.getBaseLocation()).thenReturn(new Path("/test"));
+    serializer = new LibraryClasspathContainerSerializer(containerStateProvider,
+                                                         binaryBaseLocationProvider,
+                                                         sourceBaseLocationProvider);
+    when(binaryBaseLocationProvider.getBaseLocation()).thenReturn(new Path("/test"));
+    when(sourceBaseLocationProvider.getBaseLocation()).thenReturn(new Path("/test"));
     File stateFile = stateLocationFolder.newFile();
     when(containerStateProvider.getContainerStateFile(any(IJavaProject.class),
                                                       eq(new Path(TEST_LIBRARY_PATH)),

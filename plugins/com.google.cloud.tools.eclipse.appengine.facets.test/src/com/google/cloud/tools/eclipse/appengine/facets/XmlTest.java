@@ -22,10 +22,13 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 public class XmlTest {
     
@@ -37,12 +40,29 @@ public class XmlTest {
     factory.setNamespaceAware(true);
     builder = factory.newDocumentBuilder();
   }
-    
+
   @Test
   public void testPluginXml() throws Exception {
     // test fails if malformed
     Document doc = builder.parse(
         new File("../com.google.cloud.tools.eclipse.appengine.facets/plugin.xml"));
     Assert.assertEquals("plugin", doc.getDocumentElement().getNodeName());
+  }
+  
+  @Test
+  public void testFacetsDefined() throws Exception {
+    Document doc = builder.parse(
+        new File("../com.google.cloud.tools.eclipse.appengine.facets/plugin.xml"));
+    checkFacetDefined(doc, "conflicts");
+    checkFacetDefined(doc, "requires");
+  }
+
+  private static void checkFacetDefined(Document doc, String elementName) {
+    NodeList elements = doc.getElementsByTagName(elementName);
+    for (int i = 0; i < elements.getLength(); i++) {
+      Element element = (Element) elements.item(i);
+      String facet = element.getAttribute("facet");
+      Assert.assertTrue(ProjectFacetsManager.isProjectFacetDefined(facet));
+    }
   }
 }

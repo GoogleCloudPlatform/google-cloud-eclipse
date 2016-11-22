@@ -68,7 +68,7 @@ public class AppEngineLibrariesSelectorGroup {
 
   private void createContents() {
     Group apiGroup = new Group(parentContainer, SWT.NONE);
-    apiGroup.setText(Messages.AppEngineLibrariesSelectorGroupLabel);
+    apiGroup.setText(Messages.getString("appengine.libraries.group"));
     GridDataFactory.fillDefaults().span(2, 1).applyTo(apiGroup);
 
     List<Library> libraries = getLibraries();
@@ -140,11 +140,11 @@ public class AppEngineLibrariesSelectorGroup {
                                                           true /* resultIfFound */) {
                                                             @Override
                                                             protected Object calculate() {
-                                                              if (libraryButton.getData(BUTTON_MANUAL_SELECTION_KEY) != null) {
-                                                                return true;
-                                                              } else {
-                                                                return super.calculate();
-                                                              }
+                                                              // must call super.calculate to ensure
+                                                              // databinding will call this method when
+                                                              // selectedLibraries changes
+                                                              return (boolean) super.calculate()
+                                                                  || libraryButton.getData(BUTTON_MANUAL_SELECTION_KEY) != null;
                                                             }
                                                           },
                              new UpdateValueStrategy(UpdateValueStrategy.POLICY_NEVER),

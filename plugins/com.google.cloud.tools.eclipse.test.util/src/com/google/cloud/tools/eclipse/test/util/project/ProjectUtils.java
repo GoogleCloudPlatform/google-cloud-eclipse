@@ -1,0 +1,134 @@
+/*
+ * Copyright 2016 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.google.cloud.tools.eclipse.test.util.project;
+
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.wst.common.project.facet.core.util.internal.ZipUtil;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
+
+/**
+ * A set of utility methods for dealing with projects.
+ */
+public class ProjectUtils {
+
+  /**
+   * Import the Eclipse projects found within the bundle containing {@code clazz} at the
+   * {@code relativeLocation}. Return the list of projects imported.
+   * 
+   * @throws IOException if the zip cannot be accessed
+   * @throws CoreException if a project cannot be imported
+   */
+  public static List<IProject> importProjects(Class<?> clazz, String relativeLocation,
+      IProgressMonitor monitor)
+      throws IOException, CoreException {
+    SubMonitor progress = SubMonitor.convert(monitor, 100);
+
+    // Resolve the zip from within this bundle
+    Bundle bundle = FrameworkUtil.getBundle(clazz);
+    URL bundleLocation = bundle.getResource(relativeLocation);
+    assertNotNull(bundleLocation);
+    URL zipLocation = FileLocator.toFileURL(bundleLocation);
+    if (!zipLocation.getProtocol().equals("file")) {
+      throw new IOException("could not resolve location to a file");
+    }
+    File zippedFile = new File(zipLocation.getPath());
+    assertTrue(zippedFile.exists());
+    progress.worked(5);
+
+    IWorkspaceRoot root = getWorkspace().getRoot();
+    // extract projects into our workspace using WTP internal utility class
+    // assumes projects are contained in subdirectories within the zip
+    ZipUtil.unzip(zippedFile, root.getLocation().toFile(), progress.newChild(10));
+
+    List<IPath> projectFiles = new ArrayList<>();
+    try (ZipFile zip = new ZipFile(zippedFile)) {
+      for (Enumeration<? extends ZipEntry> it = zip.entries(); it.hasMoreElements();) {
+        ZipEntry entry = it.nextElement();
+        if (entry.getName().endsWith("/.project")) {
+          IPath projectFileLocation = root.getLocation().append(new Path(entry.getName()));
+          projectFiles.add(projectFileLocation);
+        }
+      }
+      progress.worked(5);
+    }
+
+    // import the projects
+    progress.setWorkRemaining(10 * projectFiles.size() + 10);
+    List<IProject> projects = new ArrayList<>(projectFiles.size());
+    for (IPath projectFile : projectFiles) {
+      IProjectDescription descriptor =
+          root.getWorkspace().loadProjectDescription(projectFile);
+      IProject project = root.getProject(descriptor.getName());
+      // bring in the project to the workspace
+      project.create(descriptor, progress.newChild(2));
+      project.open(progress.newChild(8));
+      projects.add(project);
+    }
+
+    // wait for any post-import operations too
+    waitUntilIdle();
+
+    return projects;
+  }
+
+  /** Wait for any spawned jobs to complete (e.g., validation jobs). */
+  public static void waitUntilIdle() {
+    while (!Job.getJobManager().isIdle()) {
+      Display display = Display.getCurrent();
+      if (display != null) {
+        while (display.readAndDispatch()) {
+          /* spin */
+        }
+      }
+      try {
+        Thread.sleep(10);
+      } catch (InterruptedException ex) {
+        throw new RuntimeException(ex);
+      }
+    }
+  }
+
+  private static IWorkspace getWorkspace() {
+    return ResourcesPlugin.getWorkspace();
+  }
+
+  private ProjectUtils() {}
+}

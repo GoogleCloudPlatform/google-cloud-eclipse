@@ -210,4 +210,12 @@
                class="com.google.cloud.tools.eclipse.appengine.localserver.ui.LaunchBehaviorsArea"
                preferences="instance://com.google.cloud.tools.eclipse.appengine.localserver"/>
    </extension>
+   <extension
+         point="org.eclipse.wst.server.ui.wizardFragments">
+      <fragment
+            class="com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineServerWizardFragment"
+            id="com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineServerWizardFragment"
+            typeIds="com.google.cloud.tools.eclipse.appengine.standard.runtime">
+      </fragment>
+   </extension>
 </plugin>
