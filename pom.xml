@@ -9,6 +9,26 @@
   <version>0.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
+
+  <name>Google Cloud Platform plugin for Eclipse</name>
+  <description>
+    An Eclipse plugin for building, debugging, and deploying Google
+    Cloud Platform applications.
+  </description>
+  <url>https://github.com/GoogleCloudPlatform/google-cloud-eclipse</url>
+
+  <organization>
+    <name>Google Inc.</name>
+    <url>http://www.google.com</url>
+  </organization>
+
+  <licenses>
+    <license>
+      <name>The Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
+
   <modules>
     <module>gcp-repo</module>
     <module>features/com.google.cloud.tools.eclipse.suite.e45.feature</module>
@@ -186,6 +206,35 @@
       </plugin>
 
       <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-packaging-plugin</artifactId>
+        <dependencies>
+          <dependency>
+            <groupId>org.eclipse.tycho.extras</groupId>
+            <artifactId>tycho-buildtimestamp-jgit</artifactId>
+            <version>${tycho-extras.version}</version>
+          </dependency>
+        </dependencies>
+        <configuration>
+          <timestampProvider>jgit</timestampProvider>
+          <jgit.ignore>
+            pom.xml
+          </jgit.ignore>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-p2-plugin</artifactId>
+        <configuration>
+          <baselineRepositories>
+            <repository>
+              <url>${project.url}</url>
+            </repository>
+          </baselineRepositories>
+        </configuration>
+      </plugin>
+
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
         <executions>
@@ -227,6 +276,18 @@
         <plugin>
           <groupId>org.eclipse.tycho</groupId>
           <artifactId>target-platform-configuration</artifactId>
+          <version>${tycho.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.eclipse.tycho</groupId>
+          <artifactId>tycho-packaging-plugin</artifactId>
+          <version>${tycho.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.eclipse.tycho</groupId>
+          <artifactId>tycho-p2-plugin</artifactId>
           <version>${tycho.version}</version>
         </plugin>
 
