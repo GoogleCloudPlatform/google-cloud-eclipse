@@ -106,6 +106,8 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     LocalAppEngineServerBehaviour serverBehaviour = (LocalAppEngineServerBehaviour) server
         .loadAdapter(LocalAppEngineServerBehaviour.class, null);
 
+    setDefaultSourceLocator(launch, configuration);
+
     List<File> runnables = new ArrayList<File>();
     for (IModule module : modules) {
       IPath deployPath = serverBehaviour.getModuleDeployDirectory(module);

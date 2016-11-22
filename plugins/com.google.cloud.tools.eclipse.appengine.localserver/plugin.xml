@@ -117,13 +117,17 @@
             typeIds="com.google.cloud.tools.eclipse.appengine.standard.server">
       </publishTask>
    </extension>
+   
+   
    <extension
          point="org.eclipse.debug.core.launchConfigurationTypes">
       <launchConfigurationType
-            delegate="com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerLaunchConfigurationDelegate"
             id="com.google.cloud.tools.eclipse.appengine.AppToolsLaunchConfigurationType"
+            name="%apptoolsServerTypeName"
+            delegate="com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerLaunchConfigurationDelegate"
             modes="run, debug"
-            name="%apptoolsServerTypeName">
+            sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
+            sourcePathComputerId="org.eclipse.jst.server.generic.core.sourcePathComputer">
       </launchConfigurationType>
    </extension>
    <extension
