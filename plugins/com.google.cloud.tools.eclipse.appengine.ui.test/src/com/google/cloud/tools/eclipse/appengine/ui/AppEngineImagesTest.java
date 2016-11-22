@@ -30,6 +30,11 @@ public class AppEngineImagesTest {
   public void testLoadAppEngine64() {
     Assert.assertNotNull(AppEngineImages.appEngine(64));
   }
+  
+  @Test
+  public void testLoadAppEngine16() {
+    Assert.assertNotNull(AppEngineImages.appEngine(16));
+  }
 
   @Test
   public void testLoadNonExistentGCPSize() {
