@@ -19,7 +19,6 @@ for f in $FILES
 do
   echo "Processing $f file..."
   filename=$(basename "$f")
-  echo "Signing $filename"
   if /escalated_sign/escalated_sign.py -j /escalated_sign_jobs -t signjar \
     "$KOKORO_GFILE_DIR/plugins/$filename" \
     "$KOKORO_GFILE_DIR/signed/plugins/$filename"
@@ -34,7 +33,6 @@ for f in $FEATURES
 do
   echo "Processing $f file..."
   filename=$(basename "$f")
-  echo "Signing $filename"
   /escalated_sign/escalated_sign.py -j /escalated_sign_jobs -t signjar \
     "$KOKORO_GFILE_DIR/features/$filename" \
     "$KOKORO_GFILE_DIR/signed/features/$filename"

@@ -59,6 +59,8 @@ public final class TestProjectCreator extends ExternalResource {
 
   @Override
   protected void after() {
+    // Wait for any jobs to complete as WTP validation runs without the workspace protection lock
+    ProjectUtils.waitUntilIdle();
     try {
       javaProject.getProject().delete(true, null);
     } catch (CoreException e) {

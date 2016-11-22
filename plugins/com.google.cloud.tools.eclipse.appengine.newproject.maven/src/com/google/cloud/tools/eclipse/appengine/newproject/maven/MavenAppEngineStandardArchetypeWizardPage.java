@@ -60,7 +60,7 @@ public class MavenAppEngineStandardArchetypeWizardPage extends WizardPage {
     super("newProjectArchetypePage"); //$NON-NLS-1$
     setTitle(Messages.getString("WIZARD_TITLE")); //$NON-NLS-1$
     setDescription(Messages.getString("SELECT_AN_ARCHETYPE")); //$NON-NLS-1$
-    setImageDescriptor(AppEngineImages.googleCloudPlatform(32));
+    setImageDescriptor(AppEngineImages.appEngine(64));
   }
 
   @Override

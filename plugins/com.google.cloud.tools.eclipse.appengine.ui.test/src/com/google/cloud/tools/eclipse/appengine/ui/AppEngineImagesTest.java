@@ -27,8 +27,13 @@ public class AppEngineImagesTest {
   }
   
   @Test
-  public void testLoadGCP32() {
-    Assert.assertNotNull(AppEngineImages.googleCloudPlatform(32));
+  public void testLoadAppEngine64() {
+    Assert.assertNotNull(AppEngineImages.appEngine(64));
+  }
+  
+  @Test
+  public void testLoadAppEngine16() {
+    Assert.assertNotNull(AppEngineImages.appEngine(16));
   }
 
   @Test
