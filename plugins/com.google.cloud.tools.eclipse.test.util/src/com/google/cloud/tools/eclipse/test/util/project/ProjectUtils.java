@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.test.util.project;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -114,15 +115,15 @@ public class ProjectUtils {
     for (IProject project : projects) {
       project.build(IncrementalProjectBuilder.FULL_BUILD, progress.newChild(3));
     }
-    assertTrue("imported projects have errors", projectsHaveNoErrors(projects));
+    assertFalse("imported projects have errors", projectsHaveErrors(projects));
 
     return projects;
   }
 
   /**
-   * Verify projects have no errors; lists any found to <code>System.err</code>.
+   * Return true if projects have errors; lists any found to <code>System.err</code>.
    */
-  private static boolean projectsHaveNoErrors(Collection<IProject> projects) {
+  public static boolean projectsHaveErrors(Collection<IProject> projects) {
     List<String> foundProblems = new ArrayList<>();
     for (IProject project : projects) {
       try {
@@ -140,10 +141,13 @@ public class ProjectUtils {
       }
     }
     if (foundProblems.isEmpty()) {
-      return true;
+      return false;
     }
-    System.err.println(foundProblems);
-    return false;
+    System.err.println("Project errors:");
+    for (String problem : foundProblems) {
+      System.err.println(" " + problem);
+    }
+    return true;
   }
 
   private static String formatProblem(IMarker problem) {
