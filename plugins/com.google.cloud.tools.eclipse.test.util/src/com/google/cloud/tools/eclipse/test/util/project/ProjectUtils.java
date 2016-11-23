@@ -23,12 +23,17 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -99,14 +104,52 @@ public class ProjectUtils {
       IProject project = root.getProject(descriptor.getName());
       // bring in the project to the workspace
       project.create(descriptor, progress.newChild(2));
-      project.open(progress.newChild(8));
+      project.open(progress.newChild(5));
       projects.add(project);
     }
 
     // wait for any post-import operations too
     waitUntilIdle();
+    assertTrue(projectsHaveNoErrors(projects));
 
     return projects;
+  }
+
+  /**
+   * Verify projects have no errors; lists any found to <code>System.err</code>.
+   */
+  private static boolean projectsHaveNoErrors(Collection<IProject> projects) {
+    List<String> foundProblems = new ArrayList<>();
+    for (IProject project : projects) {
+      try {
+        IMarker[] problems = project.findMarkers(IMarker.PROBLEM, true /* includeSubtypes */,
+            IResource.DEPTH_INFINITE);
+        for (IMarker problem : problems) {
+          int severity = problem.getAttribute(IMarker.SEVERITY, IMarker.SEVERITY_INFO);
+          if (severity >= IMarker.SEVERITY_ERROR) {
+            foundProblems.add(formatProblem(problem));
+          }
+        }
+      } catch (CoreException ex) {
+        // re-throw as we shouldn't have problems in tests
+        throw new RuntimeException(ex);
+      }
+    }
+    if (foundProblems.isEmpty()) {
+      return true;
+    }
+    System.err.println(foundProblems);
+    return false;
+  }
+
+  private static String formatProblem(IMarker problem) {
+    StringBuilder sb = new StringBuilder();
+    sb.append(problem.getResource().getFullPath());
+    sb.append(':');
+    sb.append(problem.getAttribute(IMarker.LINE_NUMBER, -1));
+    sb.append(": ");
+    sb.append(problem.getAttribute(IMarker.MESSAGE, ""));
+    return sb.toString();
   }
 
   /** Wait for any spawned jobs to complete (e.g., validation jobs). */
@@ -125,6 +168,29 @@ public class ProjectUtils {
       }
     }
   }
+
+  /**
+   * List the file contents of the given project to <code>System.out</code>. Useful for diagnostics.
+   * 
+   * @param prefix put at the beginning of each line
+   * @param project the project to list
+   */
+  public static void listFiles(final String prefix, IProject project) {
+    try {
+      project.accept(new IResourceVisitor() {
+        @Override
+        public boolean visit(IResource resource) throws CoreException {
+          if (resource instanceof IFile) {
+            System.out.println(prefix + ": " + resource.getProjectRelativePath());
+          }
+          return true;
+        }
+      });
+    } catch (CoreException ex) {
+      System.err.println("Exception during traversal: " + ex);
+    }
+  }
+
 
   private static IWorkspace getWorkspace() {
     return ResourcesPlugin.getWorkspace();

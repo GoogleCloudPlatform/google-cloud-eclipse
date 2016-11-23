@@ -34,7 +34,6 @@ import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.core.ServerCore;
 import org.eclipse.wst.server.core.ServerUtil;
 import org.junit.After;
-import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -56,12 +55,16 @@ public class LocalAppEnginePublishOperationTest {
     assertTrue("sox-shared".equals(projects.get(1).getName())
         || "sox-shared".equals(projects.get(0).getName()));
     serverProject = projects.get("sox-server".equals(projects.get(0).getName()) ? 0 : 1);
-    assertNotNull(serverProject);
+    assertNotNull("sox-server", serverProject);
     sharedProject = projects.get("sox-shared".equals(projects.get(0).getName()) ? 0 : 1);
-    assertNotNull(sharedProject);
+    assertNotNull("sox-shared", sharedProject);
 
-    assertTrue(serverProject.getFile("bin/sox/server/GreetingServiceImpl.class").exists());
-    assertTrue(sharedProject.getFile("bin/sox/shared/GreetingService.class").exists());
+    ProjectUtils.listFiles("sox-server", serverProject);
+    ProjectUtils.listFiles("sox-shared", serverProject);
+    assertTrue("sox-server GreetingServiceImpl.class",
+        serverProject.getFile("bin/sox/server/GreetingServiceImpl.class").exists());
+    assertTrue("sox-shared GreetingService.class",
+        sharedProject.getFile("bin/sox/shared/GreetingService.class").exists());
 
     serverModule = ServerUtil.getModule(serverProject);
     assertNotNull(serverModule);
