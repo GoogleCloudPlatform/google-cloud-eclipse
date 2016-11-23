@@ -37,7 +37,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
@@ -112,9 +111,6 @@ public class ProjectUtils {
 
     // wait for any post-import operations too
     waitUntilIdle();
-    for (IProject project : projects) {
-      project.build(IncrementalProjectBuilder.FULL_BUILD, progress.newChild(3));
-    }
     assertFalse("imported projects have errors", projectsHaveErrors(projects));
 
     return projects;
@@ -160,20 +156,23 @@ public class ProjectUtils {
     return sb.toString();
   }
 
-  /** Wait for any spawned jobs to complete (e.g., validation jobs). */
+  /** Wait for any spawned jobs and builds to complete (e.g., validation jobs). */
   public static void waitUntilIdle() {
-    while (!Job.getJobManager().isIdle()) {
-      Display display = Display.getCurrent();
-      if (display != null) {
-        while (display.readAndDispatch()) {
-          /* spin */
+    try {
+      Job.getJobManager().join(ResourcesPlugin.FAMILY_MANUAL_BUILD, null);
+      Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
+
+      while (!Job.getJobManager().isIdle()) {
+        Display display = Display.getCurrent();
+        if (display != null) {
+          while (display.readAndDispatch()) {
+            /* spin */
+          }
         }
-      }
-      try {
         Thread.sleep(10);
-      } catch (InterruptedException ex) {
-        throw new RuntimeException(ex);
       }
+    } catch (InterruptedException ex) {
+      throw new RuntimeException(ex);
     }
   }
 
