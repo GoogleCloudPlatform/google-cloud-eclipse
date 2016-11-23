@@ -19,8 +19,6 @@ package com.google.cloud.tools.eclipse.appengine.login.ui;
 import org.eclipse.core.databinding.observable.Diffs;
 import org.eclipse.core.databinding.observable.value.AbstractObservableValue;
 import org.eclipse.jface.databinding.swt.DisplayRealm;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 
 /**
  * An object that represents and binds to the email value of an {@link AccountSelector}, whose
@@ -36,9 +34,9 @@ public class AccountSelectorObservableValue extends AbstractObservableValue {
     super(DisplayRealm.getRealm(accountSelector.getDisplay()));
     this.accountSelector = accountSelector;
 
-    accountSelector.addSelectionListener(new SelectionAdapter() {
+    accountSelector.addSelectionListener(new Runnable() {
       @Override
-      public void widgetSelected(SelectionEvent event) {
+      public void run() {
         String newValue = accountSelector.getSelectedEmail();
         fireValueChange(Diffs.createValueDiff(oldValue, newValue));
         oldValue = newValue;
