@@ -30,7 +30,7 @@
           <dependency-resolution>
             <extraRequirements>
               <requirement>
-                <!-- needed for WTP runtime definitions -->
+                <!-- needed for our server runtime definitions -->
                 <type>eclipse-plugin</type>
                 <id>com.google.cloud.tools.eclipse.appengine.localserver</id>
                 <versionRange>0.0.0</versionRange>

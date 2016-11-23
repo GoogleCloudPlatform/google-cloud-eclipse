@@ -59,13 +59,6 @@ public class LocalAppEnginePublishOperationTest {
     sharedProject = projects.get("sox-shared".equals(projects.get(0).getName()) ? 0 : 1);
     assertNotNull("sox-shared", sharedProject);
 
-    ProjectUtils.listFiles("sox-server", serverProject);
-    ProjectUtils.listFiles("sox-shared", serverProject);
-    assertTrue("sox-server GreetingServiceImpl.class",
-        serverProject.getFile("bin/sox/server/GreetingServiceImpl.class").exists());
-    assertTrue("sox-shared GreetingService.class",
-        sharedProject.getFile("bin/sox/shared/GreetingService.class").exists());
-
     serverModule = ServerUtil.getModule(serverProject);
     assertNotNull(serverModule);
     sharedModule = ServerUtil.getModule(sharedProject);
