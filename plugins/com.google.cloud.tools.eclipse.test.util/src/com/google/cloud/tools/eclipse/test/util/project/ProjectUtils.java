@@ -36,6 +36,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
@@ -110,7 +111,10 @@ public class ProjectUtils {
 
     // wait for any post-import operations too
     waitUntilIdle();
-    assertTrue(projectsHaveNoErrors(projects));
+    for (IProject project : projects) {
+      project.build(IncrementalProjectBuilder.FULL_BUILD, progress.newChild(3));
+    }
+    assertTrue("imported projects have errors", projectsHaveNoErrors(projects));
 
     return projects;
   }
