@@ -95,7 +95,7 @@
      <os-jvm-flags/>
      <org.eclipse.swtbot.search.timeout>10000</org.eclipse.swtbot.search.timeout>
 
-     <jgit.dirtyWorkingTree>warning</dirtyWorkingTree>
+     <jgit.dirtyWorkingTree>warning</jgit.dirtyWorkingTree>
   </properties>
 
   <!--
