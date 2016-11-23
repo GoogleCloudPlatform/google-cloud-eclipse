@@ -214,7 +214,7 @@ public class AccountSelectorTest {
         new AccountSelector(shell, loginService, "<select this to login>", true);
 
     selector.selectAccount("some-email-2@example.com");
-    assertNotEquals(-1, selector.combo.getSelectionIndex());
+    assertEquals(1, selector.combo.getSelectionIndex());
     assertEquals("some-email-2@example.com", selector.getSelectedEmail());
     assertEquals(credential2, selector.getSelectedCredential());
   }
@@ -268,13 +268,13 @@ public class AccountSelectorTest {
 
     selector.selectAccount("some-email-1@example.com");
 
-    assertNotEquals(-1, selector.combo.getSelectionIndex());
+    assertEquals(0, selector.combo.getSelectionIndex());
     assertEquals(credential1, selector.getSelectedCredential());
     assertEquals("some-email-1@example.com", selector.getSelectedEmail());
 
     selector.selectAccount(null);
 
-    assertNotEquals(-1, selector.combo.getSelectionIndex());
+    assertEquals(0, selector.combo.getSelectionIndex());
     assertEquals(credential1, selector.getSelectedCredential());
     assertEquals("some-email-1@example.com", selector.getSelectedEmail());
   }

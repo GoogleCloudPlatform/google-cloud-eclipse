@@ -146,8 +146,14 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     UpdateValueStrategy modelToTarget =
         new UpdateValueStrategy().setConverter(new Converter(String.class, String.class) {
           @Override
-          public Object convert(Object fromObject /* email */) {
-            return accountSelector.isEmailAvailable((String) fromObject) ? fromObject : null;
+          public Object convert(Object expectedEmail) {
+            // Expected to be an email address, but must check is a current account
+            if (expectedEmail instanceof String
+                && accountSelector.isEmailAvailable((String) expectedEmail)) {
+              return expectedEmail;
+            } else {
+              return null;
+            }
           }
         });
 

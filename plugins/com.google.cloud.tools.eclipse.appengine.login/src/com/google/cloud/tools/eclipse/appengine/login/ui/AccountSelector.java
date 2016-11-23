@@ -21,6 +21,10 @@ import com.google.api.client.util.Strings;
 import com.google.cloud.tools.eclipse.appengine.login.IGoogleLoginService;
 import com.google.cloud.tools.ide.login.Account;
 import com.google.common.annotations.VisibleForTesting;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
@@ -60,7 +64,14 @@ public class AccountSelector extends Composite {
     combo = new Combo(this, SWT.READ_ONLY);
     GridDataFactory.fillDefaults().grab(true, false).applyTo(combo);
 
-    for (Account account : loginService.getAccounts()) {
+    List<Account> sortedAccounts = new ArrayList<>(loginService.getAccounts());
+    Collections.sort(sortedAccounts, new Comparator<Account>() {
+      @Override
+      public int compare(Account o1, Account o2) {
+        return o1.getEmail().compareTo(o2.getEmail());
+      }
+    });
+    for (Account account : sortedAccounts) {
       combo.add(account.getEmail());
       combo.setData(account.getEmail(), account.getOAuth2Credential());
     }
