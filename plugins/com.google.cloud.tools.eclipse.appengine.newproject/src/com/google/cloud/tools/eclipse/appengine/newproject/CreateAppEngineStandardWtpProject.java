@@ -76,25 +76,25 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
     String name = newProject.getName();
     final IProjectDescription description = workspace.newProjectDescription(name);
     description.setLocationURI(location);
-
+    SubMonitor subMonitor = SubMonitor.convert(monitor, "Creating App Engine standard project", 100);
     CreateProjectOperation operation = new CreateProjectOperation(
         description, "Creating new App Engine Project");
     try {
-      operation.execute(monitor, uiInfoAdapter);
-      CodeTemplates.materialize(newProject, config, monitor);
+      operation.execute(subMonitor.newChild(10), uiInfoAdapter);
+      CodeTemplates.materialize(newProject, config, subMonitor.newChild(80));
     } catch (ExecutionException ex) {
       throw new InvocationTargetException(ex);
     }
 
     IFacetedProject facetedProject = ProjectFacetsManager.create(
-        newProject, true, monitor);
+        newProject, true, subMonitor.newChild(2));
     AppEngineStandardFacet.installAppEngineFacet(
-        facetedProject, true /* installDependentFacets */, monitor);
-    AppEngineStandardFacet.installAllAppEngineRuntimes(facetedProject, true /* force */, monitor);
+        facetedProject, true /* installDependentFacets */, subMonitor.newChild(2));
+    AppEngineStandardFacet.installAllAppEngineRuntimes(facetedProject, true /* force */, subMonitor.newChild(2));
 
-    addAppEngineLibrariesToBuildPath(newProject, config.getAppEngineLibraries(), monitor);
+    addAppEngineLibrariesToBuildPath(newProject, config.getAppEngineLibraries(), subMonitor.newChild(2));
 
-    addJunit4ToClasspath(monitor, newProject);
+    addJunit4ToClasspath(subMonitor.newChild(2), newProject);
   }
 
   private void addAppEngineLibrariesToBuildPath(IProject newProject,
