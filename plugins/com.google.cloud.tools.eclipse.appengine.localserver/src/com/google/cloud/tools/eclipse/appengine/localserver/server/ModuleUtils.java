@@ -47,10 +47,10 @@ public class ModuleUtils {
     if (!(descriptorFile instanceof IFile)) {
       return null;
     }
-    AppEngineDescriptor descriptor = new AppEngineDescriptor();
+    
     String serviceId = null;
     try (InputStream contents = ((IFile) descriptorFile).getContents()) {
-      descriptor.parse(contents);
+      AppEngineDescriptor descriptor = AppEngineDescriptor.parse(contents);
       serviceId = descriptor.getServiceId();
     } catch (CoreException | IOException ex) {
       logger.log(Level.WARNING, "Unable to read " + descriptorFile.getFullPath(), ex);

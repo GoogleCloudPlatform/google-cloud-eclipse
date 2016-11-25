@@ -26,7 +26,6 @@ import org.eclipse.wst.server.core.model.IModuleResourceDelta;
  * Handles the publishing operations for the App Engine development server.
  */
 public class LocalAppEnginePublishOperation extends BasePublishOperation {
-  private static final String PLUGIN_ID = LocalAppEnginePublishOperation.class.getName();
 
   private LocalAppEngineServerBehaviour server;
 
@@ -34,8 +33,8 @@ public class LocalAppEnginePublishOperation extends BasePublishOperation {
    * Construct the operation object to publish the specified module(s) to the
    * specified server.
    */
-  public LocalAppEnginePublishOperation(LocalAppEngineServerBehaviour server, int kind, IModule[] modules,
-      int deltaKind) {
+  public LocalAppEnginePublishOperation(LocalAppEngineServerBehaviour server, int kind,
+      IModule[] modules, int deltaKind) {
     super("Publish to server", "Publish module to App Engine Development Server", kind, modules,
         deltaKind);
     this.server = server;
