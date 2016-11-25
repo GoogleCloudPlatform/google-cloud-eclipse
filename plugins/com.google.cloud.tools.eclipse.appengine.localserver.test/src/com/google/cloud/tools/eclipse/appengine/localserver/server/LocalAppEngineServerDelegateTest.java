@@ -55,10 +55,10 @@ public class LocalAppEngineServerDelegateTest {
   @Rule public TestProjectCreator dynamicWebProject =
       new TestProjectCreator().withFacetVersions(Lists.newArrayList(JavaFacet.VERSION_1_7,
                                                                     WebFacetUtils.WEB_25));
-  @Rule public TestProjectCreator appEngineStandardProject =
+  @Rule
+  public TestProjectCreator appEngineStandardProject =
       new TestProjectCreator().withFacetVersions(Lists.newArrayList(JavaFacet.VERSION_1_7,
-                                                                    WebFacetUtils.WEB_25,
-                                                                    AppEngineStandardFacet.APPENGINE_STANDARD_VERSION));
+          WebFacetUtils.WEB_25, AppEngineStandardFacet.APPENGINE_STANDARD_VERSION));
 
   @Test
   public void testCanModifyModules() throws CoreException {

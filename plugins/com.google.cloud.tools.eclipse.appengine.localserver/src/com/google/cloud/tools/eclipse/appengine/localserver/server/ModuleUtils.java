@@ -23,7 +23,6 @@ import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.wst.server.core.IModule;
@@ -35,20 +34,20 @@ public class ModuleUtils {
   private static final Logger logger = Logger.getLogger(ModuleUtils.class.getName());
 
   /**
-   * Retrieve the &lt;service&gt; or &lt;module&gt; identifier from the <tt>appengine-web.xml</tt>.
-   * If an identifier is not found, or <tt>appengine-web.xml</tt> is not found, then returns
-   * "default".
+   * Retrieve the &lt;service&gt; or &lt;module&gt; identifier from <tt>appengine-web.xml</tt>.
+   * If an identifier is not found, then returns "default".
    * 
    * @return the identifier, defaulting to "default" if not found
    */
   public static String getServiceId(IModule module) {
-    IResource descriptorFile =
+    IFile descriptorFile =
         WebProjectUtil.findInWebInf(module.getProject(), new Path("appengine-web.xml"));
-    if (!(descriptorFile instanceof IFile)) {
-      return null;
+    if (descriptorFile == null) {
+      return "default";
     }
+    
     String serviceId = null;
-    try (InputStream contents = ((IFile) descriptorFile).getContents()) {
+    try (InputStream contents = descriptorFile.getContents()) {
       AppEngineDescriptor descriptor = AppEngineDescriptor.parse(contents);
       serviceId = descriptor.getServiceId();
     } catch (CoreException | IOException ex) {

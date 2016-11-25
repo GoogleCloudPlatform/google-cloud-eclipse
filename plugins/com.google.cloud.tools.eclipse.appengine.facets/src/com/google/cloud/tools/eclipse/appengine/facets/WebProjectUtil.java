@@ -63,7 +63,7 @@ public class WebProjectUtil {
    * 
    * @return the file location or {@code null} if not found
    */
-  public static IResource findInWebInf(IProject project, IPath filePath) {
+  public static IFile findInWebInf(IProject project, IPath filePath) {
     IFolder webInfFolder = getWebInfDirectory(project);
     if (webInfFolder == null) {
       return null;
