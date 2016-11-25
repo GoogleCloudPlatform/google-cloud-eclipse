@@ -32,12 +32,17 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
- * Utilities to obtain information from appengine-web.xml
+ * Utilities to obtain information from appengine-web.xml.
  */
+// TODO this class belongs in appengine-plugins-core
 public class AppEngineDescriptor {
 
   private static final String WEB_XML_NS_URI = "http://appengine.google.com/ns/1.0";
   private Document document;
+  
+  private AppEngineDescriptor() {
+    // force use of parse method
+  }
 
   public static AppEngineDescriptor parse(InputStream appEngineXmlContents) throws CoreException {
     try {
