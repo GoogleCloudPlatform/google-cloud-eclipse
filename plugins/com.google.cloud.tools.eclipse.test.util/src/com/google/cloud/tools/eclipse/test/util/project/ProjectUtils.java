@@ -16,10 +16,10 @@
 
 package com.google.cloud.tools.eclipse.test.util.project;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import com.google.common.base.Joiner;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -109,39 +109,42 @@ public class ProjectUtils {
 
     // wait for any post-import operations too
     waitUntilIdle();
-    assertFalse("imported projects have errors", projectsHaveErrors(projects));
+    failIfBuildErrors("Imported projects have errors", projects);
 
     return projects;
   }
 
-  /**
-   * Return true if projects have errors; lists any found to <code>System.err</code>.
-   */
-  public static boolean projectsHaveErrors(Collection<IProject> projects) {
-    List<String> foundProblems = new ArrayList<>();
+  /** Fail if there are any build errors on any project in the workspace. */
+  public static void failIfBuildErrors() throws CoreException {
+    failIfBuildErrors("Projects have build errors", getWorkspace().getRoot().getProjects());
+  }
+
+  /** Fail if there are any build errors on the specified projects. */
+  public static void failIfBuildErrors(String message, Collection<IProject> projects)
+      throws CoreException {
+    failIfBuildErrors(message, projects.toArray(new IProject[projects.size()]));
+  }
+
+  /** Fail if there are any build errors on the specified projects. */
+  public static void failIfBuildErrors(String message, IProject... projects) throws CoreException {
+    List<String> errors = getAllBuildErrors(projects);
+    assertTrue(message + "\n" + Joiner.on("\n").join(errors), errors.isEmpty());
+  }
+
+  /** Return a list of all build errors on the specified projects. */
+  public static List<String> getAllBuildErrors(IProject... projects) throws CoreException {
+    List<String> errors = new ArrayList<>();
     for (IProject project : projects) {
-      try {
-        IMarker[] problems = project.findMarkers(IMarker.PROBLEM, true /* includeSubtypes */,
-            IResource.DEPTH_INFINITE);
-        for (IMarker problem : problems) {
-          int severity = problem.getAttribute(IMarker.SEVERITY, IMarker.SEVERITY_INFO);
-          if (severity >= IMarker.SEVERITY_ERROR) {
-            foundProblems.add(formatProblem(problem));
-          }
+      IMarker[] problems = project.findMarkers(IMarker.PROBLEM, true /* includeSubtypes */,
+          IResource.DEPTH_INFINITE);
+      for (IMarker problem : problems) {
+        int severity = problem.getAttribute(IMarker.SEVERITY, IMarker.SEVERITY_INFO);
+        if (severity >= IMarker.SEVERITY_ERROR) {
+          errors.add(formatProblem(problem));
         }
-      } catch (CoreException ex) {
-        // re-throw as we shouldn't have problems in tests
-        throw new RuntimeException(ex);
       }
     }
-    if (foundProblems.isEmpty()) {
-      return false;
-    }
-    System.err.println("Project errors:");
-    for (String problem : foundProblems) {
-      System.err.println(" " + problem);
-    }
-    return true;
+    return errors;
   }
 
   private static String formatProblem(IMarker problem) {
@@ -157,18 +160,18 @@ public class ProjectUtils {
   /** Wait for any spawned jobs and builds to complete (e.g., validation jobs). */
   public static void waitUntilIdle() {
     try {
-      Job.getJobManager().join(ResourcesPlugin.FAMILY_MANUAL_BUILD, null);
-      Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
+      do {
+        Job.getJobManager().join(ResourcesPlugin.FAMILY_MANUAL_BUILD, null);
+        Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
 
-      while (!Job.getJobManager().isIdle()) {
         Display display = Display.getCurrent();
         if (display != null) {
           while (display.readAndDispatch()) {
             /* spin */
           }
         }
-        Thread.sleep(10);
-      }
+        Thread.yield();
+      } while (!Job.getJobManager().isIdle());
     } catch (InterruptedException ex) {
       throw new RuntimeException(ex);
     }
