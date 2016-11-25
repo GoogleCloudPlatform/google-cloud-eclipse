@@ -36,7 +36,6 @@ public class ModuleUtils {
   /**
    * Retrieve the &lt;service&gt; or &lt;module&gt; identifier from <tt>appengine-web.xml</tt>.
    * If an identifier is not found, then returns "default".
-   * If <tt>appengine-web.xml</tt> is not found, then returns null.
    * 
    * @return the identifier, defaulting to "default" if not found
    */
@@ -44,7 +43,7 @@ public class ModuleUtils {
     IFile descriptorFile =
         WebProjectUtil.findInWebInf(module.getProject(), new Path("appengine-web.xml"));
     if (descriptorFile == null) {
-      return null;
+      return "default";
     }
     
     String serviceId = null;

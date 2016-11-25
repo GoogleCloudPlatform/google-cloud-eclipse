@@ -34,12 +34,29 @@ import org.mockito.Mockito;
 
 public class ModuleUtilsTest {
 
+  private IModule module = Mockito.mock(IModule.class);
+  private IFile descriptorFile = Mockito.mock(IFile.class);
+  private IFolder webinf = Mockito.mock(IFolder.class);
+
   @Before
   public void turnOffLogging() {
     Logger logger = Logger.getLogger(ModuleUtils.class.getName());
     logger.setLevel(Level.OFF);
   }
   
+  @Before
+  public void setUpMocks() {
+    IProject project = Mockito.mock(IProject.class);
+    Mockito.when(module.getProject()).thenReturn(project);
+    IFolder webapp = Mockito.mock(IFolder.class);
+    Mockito.when(project.getFolder("src/main/webapp")).thenReturn(webapp);
+    Mockito.when(webapp.getFolder("WEB-INF/")).thenReturn(webinf);
+    Mockito.when(webinf.exists()).thenReturn(true);
+    IPath ipath = Mockito.any();
+    Mockito.when(webinf.getFile(ipath)).thenReturn(descriptorFile);
+    Mockito.when(descriptorFile.exists()).thenReturn(true);
+  }
+
   @Test
   public void testGetServiceId_null() {
     try {
@@ -51,68 +68,37 @@ public class ModuleUtilsTest {
   
   @Test
   public void testGetServiceId_noWebInf() {
-    IModule module = Mockito.mock(IModule.class);
-    IProject project = Mockito.mock(IProject.class);
-    Mockito.when(module.getProject()).thenReturn(project);
-    IFolder webapp = Mockito.mock(IFolder.class);
-    Mockito.when(project.getFolder("src/main/webapp")).thenReturn(webapp);
-    IFolder webinf = Mockito.mock(IFolder.class);
-    Mockito.when(webapp.getFolder("WEB-INF/")).thenReturn(webinf);
-    Assert.assertNull(ModuleUtils.getServiceId(module));
+    Mockito.when(webinf.exists()).thenReturn(false);
+    Assert.assertEquals("default", ModuleUtils.getServiceId(module));
   }
   
   @Test
   public void testGetServiceId_default() throws CoreException {
-    IModule module = Mockito.mock(IModule.class);
-    IProject project = Mockito.mock(IProject.class);
-    Mockito.when(module.getProject()).thenReturn(project);
-    IFolder webapp = Mockito.mock(IFolder.class);
-    Mockito.when(project.getFolder("src/main/webapp")).thenReturn(webapp);
-    IFolder webinf = Mockito.mock(IFolder.class);
-    Mockito.when(webapp.getFolder("WEB-INF/")).thenReturn(webinf);
-    IFile descriptorFile = Mockito.mock(IFile.class);
-    Mockito.when(webinf.exists()).thenReturn(true);
-    IPath ipath = Mockito.any();
-    Mockito.when(webinf.getFile(ipath)).thenReturn(descriptorFile);
-    Mockito.when(descriptorFile.exists()).thenReturn(true);
     Mockito.when(descriptorFile.getContents()).thenThrow(new CoreException(Status.CANCEL_STATUS));
     Assert.assertEquals("default", ModuleUtils.getServiceId(module));
   }
   
   @Test
   public void testGetServiceId() throws CoreException {
-    IModule module = mockAppEngineWebXml("appengine-web.xml");
+    mockAppEngineWebXml("appengine-web.xml");
     Assert.assertEquals("myServiceId", ModuleUtils.getServiceId(module));
   }
  
   @Test
   public void testGetServiceId_module() throws CoreException {
-    IModule module = mockAppEngineWebXml("appengine-web_module.xml");
+    mockAppEngineWebXml("appengine-web_module.xml");
     Assert.assertEquals("myServiceId", ModuleUtils.getServiceId(module));
   }
   
   @Test
   public void testGetServiceId_notPresent() throws CoreException {
-    IModule module = mockAppEngineWebXml("appengine-web_noservice.xml");
+    mockAppEngineWebXml("appengine-web_noservice.xml");
     Assert.assertEquals("default", ModuleUtils.getServiceId(module));
   }
 
-  private IModule mockAppEngineWebXml(String testfile) throws CoreException {
-    IModule module = Mockito.mock(IModule.class);
-    IProject project = Mockito.mock(IProject.class);
-    Mockito.when(module.getProject()).thenReturn(project);
-    IFolder webapp = Mockito.mock(IFolder.class);
-    Mockito.when(project.getFolder("src/main/webapp")).thenReturn(webapp);
-    IFolder webinf = Mockito.mock(IFolder.class);
-    Mockito.when(webapp.getFolder("WEB-INF/")).thenReturn(webinf);
-    IFile descriptorFile = Mockito.mock(IFile.class);
-    Mockito.when(webinf.exists()).thenReturn(true);
-    IPath ipath = Mockito.any();
-    Mockito.when(webinf.getFile(ipath)).thenReturn(descriptorFile);
-    Mockito.when(descriptorFile.exists()).thenReturn(true);
+  private void mockAppEngineWebXml(String testfile) throws CoreException {
     InputStream in = this.getClass().getResourceAsStream(testfile);
     Mockito.when(descriptorFile.getContents()).thenReturn(in);
-    return module;
   }
 
 }
