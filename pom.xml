@@ -94,6 +94,8 @@
      <!-- OS-specific JVM flags, empty for the default case but redefined below -->
      <os-jvm-flags/>
      <org.eclipse.swtbot.search.timeout>10000</org.eclipse.swtbot.search.timeout>
+
+     <jgit.dirtyWorkingTree>warning</jgit.dirtyWorkingTree>
   </properties>
 
   <!--
@@ -217,6 +219,7 @@
         </dependencies>
         <configuration>
           <timestampProvider>jgit</timestampProvider>
+          <jgit.dirtyWorkingTree>${jgit.dirtyWorkingTree}</jgit.dirtyWorkingTree>
           <jgit.ignore>
             pom.xml
           </jgit.ignore>
@@ -443,6 +446,7 @@
         <tycho.toolchains>SYSTEM</tycho.toolchains>
         <!-- Ensure we don't resolve previous versions of our artifacts -->
         <tycho.localArtifacts>ignore</tycho.localArtifacts>
+        <jgit.dirtyWorkingTree>error</jgit.dirtyWorkingTree>
       </properties>
       <modules>
         <module>eclipse/ide-target-platform</module>

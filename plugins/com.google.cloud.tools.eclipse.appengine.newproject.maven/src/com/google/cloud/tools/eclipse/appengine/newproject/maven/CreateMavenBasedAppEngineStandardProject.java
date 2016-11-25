@@ -53,8 +53,7 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
   @Override
   protected void execute(IProgressMonitor monitor)
       throws CoreException, InvocationTargetException, InterruptedException {
-    SubMonitor progress = SubMonitor.convert(monitor);
-    monitor.beginTask("Creating Maven AppEngine archetype", 100);
+    SubMonitor progress = SubMonitor.convert(monitor, "Creating Maven AppEngine archetype", 110);
 
     String appengineArtifactVersion = MavenUtils.resolveLatestReleasedArtifactVersion(
         progress.newChild(20), "com.google.appengine", "appengine-api-1.0-sdk", "jar",
