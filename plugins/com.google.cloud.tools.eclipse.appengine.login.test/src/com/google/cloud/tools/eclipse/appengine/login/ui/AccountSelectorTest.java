@@ -32,6 +32,7 @@ import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import com.google.cloud.tools.ide.login.Account;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Shell;
@@ -331,7 +332,7 @@ public class AccountSelectorTest {
   }
 
   @Test
-  public void testFailedLogin_deselectLoginLinkItem() {
+  public void testFailedLogin_reselectLoginLinkItem() {
     when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1, account2)));
     when(loginService.logIn(anyString())).thenReturn(null);
     AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
@@ -346,10 +347,10 @@ public class AccountSelectorTest {
     simulateSelect(selector, 2);
 
     assertEquals(3, selector.combo.getItemCount());
-    assertEquals(-1, selector.combo.getSelectionIndex());
-    assertNull(selector.getSelectedCredential());
-    assertTrue(selector.getSelectedEmail().isEmpty());
-    assertEquals("<select this to login>", selector.combo.getItem(2));
+    assertEquals(1, selector.combo.getSelectionIndex());
+    assertEquals(credential2, selector.getSelectedCredential());
+    assertEquals("some-email-2@example.com", selector.getSelectedEmail());
+    assertEquals("some-email-2@example.com", selector.combo.getText());
   }
 
   @Test
@@ -384,6 +385,17 @@ public class AccountSelectorTest {
         new HashSet<>(Arrays.asList(account1, account2, account3)));
     AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
     assertEquals(3, selector.getAccountCount());
+  }
+
+  @Test
+  public void testInitialItemOrder() {
+    when(loginService.getAccounts())
+        .thenReturn(new LinkedHashSet<>(Arrays.asList(account3, account2, account1)));
+    AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
+    assertEquals(4, selector.combo.getItemCount());
+    assertEquals(account1.getEmail(), selector.combo.getItem(0));
+    assertEquals(account2.getEmail(), selector.combo.getItem(1));
+    assertEquals(account3.getEmail(), selector.combo.getItem(2));
   }
 
   private void simulateSelect(AccountSelector selector, int index) {

@@ -38,7 +38,7 @@ public class AccountSelector extends Composite {
 
   private IGoogleLoginService loginService;
   private String loginMessage;
-  private Credential selectedCredential;
+  private Account selectedAccount;
   private ListenerList selectionListeners = new ListenerList();
 
   /**
@@ -74,7 +74,7 @@ public class AccountSelector extends Composite {
     });
     for (Account account : sortedAccounts) {
       combo.add(account.getEmail());
-      combo.setData(account.getEmail(), account.getOAuth2Credential());
+      combo.setData(account.getEmail(), account);
     }
     combo.add(loginMessage);
     combo.addSelectionListener(logInOnSelect);
@@ -97,7 +97,7 @@ public class AccountSelector extends Composite {
    * (By its contract, {@link Account} never carries a {@code null} {@link Credential}.)
    */
   public Credential getSelectedCredential() {
-    return selectedCredential;
+    return selectedAccount != null ? selectedAccount.getOAuth2Credential() : null;
   }
 
   /**
@@ -126,7 +126,7 @@ public class AccountSelector extends Composite {
     }
     if (index != -1) {
       combo.select(index);
-      selectedCredential = (Credential) combo.getData(email);
+      selectedAccount = (Account) combo.getData(email);
       fireSelectionListeners();
     }
     return index;
@@ -161,14 +161,20 @@ public class AccountSelector extends Composite {
       if (combo.getText().equals(loginMessage)) {
         Account account = loginService.logIn(null /* no custom dialog message */);
         if (account != null) {
+          // account is selected and saved
           addAndSelectAccount(account);
-          // account is selected and selectedCredential saved
-          return;
+        } else {
+          // login failed, so restore to previous combo state
+          int index = selectedAccount != null ? combo.indexOf(selectedAccount.getEmail()) : -1;
+          if (index != -1) {
+            combo.select(index);
+          } else {
+            combo.deselectAll();
+          }
         }
-        // XXX: shouldn't this re-select the previous account?
-        combo.deselectAll();
+        return;
       }
-      selectedCredential = (Credential) combo.getData(getSelectedEmail());
+      selectedAccount = (Account) combo.getData(getSelectedEmail());
       fireSelectionListeners();
     }
 
@@ -177,7 +183,7 @@ public class AccountSelector extends Composite {
       int index = combo.indexOf(account.getEmail());
       if (index < 0) {
         combo.add(account.getEmail(), 0 /* place at top */);
-        combo.setData(account.getEmail(), account.getOAuth2Credential());
+        combo.setData(account.getEmail(), account);
       }
       selectAccount(account.getEmail());
     }
