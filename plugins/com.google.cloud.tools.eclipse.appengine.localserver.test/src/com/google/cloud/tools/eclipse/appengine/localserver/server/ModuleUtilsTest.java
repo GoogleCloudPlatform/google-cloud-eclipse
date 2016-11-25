@@ -81,6 +81,23 @@ public class ModuleUtilsTest {
   
   @Test
   public void testGetServiceId() throws CoreException {
+    IModule module = mockAppEngineWebXml("appengine-web.xml");
+    Assert.assertEquals("myServiceId", ModuleUtils.getServiceId(module));
+  }
+ 
+  @Test
+  public void testGetServiceId_module() throws CoreException {
+    IModule module = mockAppEngineWebXml("appengine-web_module.xml");
+    Assert.assertEquals("myServiceId", ModuleUtils.getServiceId(module));
+  }
+  
+  @Test
+  public void testGetServiceId_notPresent() throws CoreException {
+    IModule module = mockAppEngineWebXml("appengine-web_noservice.xml");
+    Assert.assertEquals("default", ModuleUtils.getServiceId(module));
+  }
+
+  private IModule mockAppEngineWebXml(String testfile) throws CoreException {
     IModule module = Mockito.mock(IModule.class);
     IProject project = Mockito.mock(IProject.class);
     Mockito.when(module.getProject()).thenReturn(project);
@@ -93,9 +110,9 @@ public class ModuleUtilsTest {
     IPath ipath = Mockito.any();
     Mockito.when(webinf.getFile(ipath)).thenReturn(descriptorFile);
     Mockito.when(descriptorFile.exists()).thenReturn(true);
-    InputStream in = this.getClass().getResourceAsStream("appengine-web.xml");
+    InputStream in = this.getClass().getResourceAsStream(testfile);
     Mockito.when(descriptorFile.getContents()).thenReturn(in);
-    Assert.assertEquals("myServiceId", ModuleUtils.getServiceId(module));
+    return module;
   }
 
 }
