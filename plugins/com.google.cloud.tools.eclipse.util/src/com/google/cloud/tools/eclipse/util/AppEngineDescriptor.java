@@ -76,7 +76,7 @@ public class AppEngineDescriptor {
   }
 
   /**
-   * @return service ID parsed from the &lt;application&gt; element of the appengine-web.xml, or
+   * @return service ID parsed from the &lt;service&gt; element of the appengine-web.xml, or
    *         null if it is missing. Will also look at module ID.
    * @throws CoreException if parsing the value fails
    */
