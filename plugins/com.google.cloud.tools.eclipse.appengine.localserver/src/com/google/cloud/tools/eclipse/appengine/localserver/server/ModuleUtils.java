@@ -35,21 +35,21 @@ public class ModuleUtils {
   private static final Logger logger = Logger.getLogger(ModuleUtils.class.getName());
 
   /**
-   * Retrieve the &lt;service&gt; or &lt;module&gt; identifier from the <tt>appengine-web.xml</tt>.
-   * If an identifier is not found, or <tt>appengine-web.xml</tt> is not found, then returns
-   * "default".
+   * Retrieve the &lt;service&gt; or &lt;module&gt; identifier from <tt>appengine-web.xml</tt>.
+   * If an identifier is not found, then returns "default".
+   * If <tt>appengine-web.xml</tt> is not found, then returns null.
    * 
    * @return the identifier, defaulting to "default" if not found
    */
   public static String getServiceId(IModule module) {
-    IResource descriptorFile =
+    IFile descriptorFile =
         WebProjectUtil.findInWebInf(module.getProject(), new Path("appengine-web.xml"));
-    if (!(descriptorFile instanceof IFile)) {
+    if (descriptorFile == null) {
       return null;
     }
     
     String serviceId = null;
-    try (InputStream contents = ((IFile) descriptorFile).getContents()) {
+    try (InputStream contents = descriptorFile.getContents()) {
       AppEngineDescriptor descriptor = AppEngineDescriptor.parse(contents);
       serviceId = descriptor.getServiceId();
     } catch (CoreException | IOException ex) {
