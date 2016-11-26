@@ -19,7 +19,8 @@ package com.google.cloud.tools.eclipse.appengine.localserver;
 import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
-  private static final String BUNDLE_NAME = "com.google.cloud.tools.eclipse.appengine.localserver.messages"; //$NON-NLS-1$
+  private static final String BUNDLE_NAME =
+      "com.google.cloud.tools.eclipse.appengine.localserver.messages"; //$NON-NLS-1$
 
   public static String NOT_FACETED_PROJECT;
   public static String GAE_STANDARD_FACET_MISSING;
@@ -31,6 +32,7 @@ public class Messages extends NLS {
   public static String CREATE_APP_ENGINE_RUNTIME_WIZARD_DESCRIPTION;
   public static String CREATE_APP_ENGINE_RUNTIME_WIZARD_TITLE;
   public static String OPEN_CLOUD_SDK_PREFERENCE_BUTTON;
+  public static String RUNTIME_WIZARD_CLOUD_SDK_FOUND;
   public static String RUNTIME_WIZARD_CLOUD_SDK_NOT_FOUND;
 
   static {

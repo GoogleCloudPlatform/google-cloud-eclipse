@@ -55,9 +55,11 @@ public class LocalAppEngineServerDelegate extends ServerDelegate {
    *         {@code server}
    */
   public static LocalAppEngineServerDelegate getAppEngineServer(IServer server) {
-    LocalAppEngineServerDelegate serverDelegate = server.getAdapter(LocalAppEngineServerDelegate.class);
+    LocalAppEngineServerDelegate serverDelegate =
+        server.getAdapter(LocalAppEngineServerDelegate.class);
     if (serverDelegate == null) {
-      serverDelegate = (LocalAppEngineServerDelegate) server.loadAdapter(LocalAppEngineServerDelegate.class, null);
+      serverDelegate = (LocalAppEngineServerDelegate) server
+          .loadAdapter(LocalAppEngineServerDelegate.class, null);
     }
     return serverDelegate;
   }
@@ -152,9 +154,9 @@ public class LocalAppEngineServerDelegate extends ServerDelegate {
       if (AppEngineStandardFacet.hasAppEngineFacet(ProjectFacetsManager.create(module.getProject()))) {
         return Status.OK_STATUS;
       } else {
-        return StatusUtil.error(LocalAppEngineServerDelegate.class, NLS.bind(Messages.GAE_STANDARD_FACET_MISSING,
-                                                                             module.getName(),
-                                                                             module.getProject().getName()));
+        String errorMessage = NLS.bind(Messages.GAE_STANDARD_FACET_MISSING, module.getName(),
+            module.getProject().getName());
+        return StatusUtil.error(LocalAppEngineServerDelegate.class, errorMessage);
       }
     } catch (CoreException ex) {
       return StatusUtil.error(LocalAppEngineServerDelegate.class,
