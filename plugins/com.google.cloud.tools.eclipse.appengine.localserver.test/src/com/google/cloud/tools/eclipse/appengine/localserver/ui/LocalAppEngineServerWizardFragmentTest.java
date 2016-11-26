@@ -16,8 +16,13 @@
 
 package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.wst.server.ui.wizard.IWizardHandle;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 public class LocalAppEngineServerWizardFragmentTest {
   private LocalAppEngineServerWizardFragment wizardFragment;
@@ -47,5 +52,21 @@ public class LocalAppEngineServerWizardFragmentTest {
 
     wizardFragment.enter();
     Assert.assertTrue(wizardFragment.isComplete());
+  }
+  
+  @Test
+  public void testCreateComposite() {
+    LocalAppEngineServerWizardFragment wizardFragment = new LocalAppEngineServerWizardFragment();
+    IWizardHandle wizard = Mockito.mock(IWizardHandle.class);
+    Composite parent = new Shell();
+    Composite composite = wizardFragment.createComposite(parent, wizard);
+    
+    Mockito.verify(wizard).setTitle("App Engine Standard Runtime");
+    Mockito.verify(wizard)
+        .setDescription("The App Engine Standard runtime requires the Google Cloud SDK");
+    
+    Assert.assertEquals(1, composite.getChildren().length);
+    Label label = (Label) composite.getChildren()[0];
+    Assert.assertTrue(label.getText().startsWith("Using the Google Cloud SDK installed in "));
   }
 }
