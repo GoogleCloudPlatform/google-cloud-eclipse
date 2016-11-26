@@ -147,7 +147,8 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
         new UpdateValueStrategy().setConverter(new Converter(String.class, String.class) {
           @Override
           public Object convert(Object expectedEmail) {
-            // Expected to be an email address, but must check is a current account
+            // Expected to be an email address, but must also ensure is a currently logged-in
+            // account
             if (expectedEmail instanceof String
                 && accountSelector.isEmailAvailable((String) expectedEmail)) {
               return expectedEmail;

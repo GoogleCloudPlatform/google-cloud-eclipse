@@ -287,7 +287,7 @@ public class AccountSelectorTest {
 
     AccountSelector selector =
         new AccountSelector(shell, loginService, "<select this to login>", true);
-    // should not select any element if more than 1 accounts
+    // should not select any element if more than one account
     assertEquals(-1, selector.combo.getSelectionIndex());
     assertNull(selector.getSelectedCredential());
     assertTrue(selector.getSelectedEmail().isEmpty());
