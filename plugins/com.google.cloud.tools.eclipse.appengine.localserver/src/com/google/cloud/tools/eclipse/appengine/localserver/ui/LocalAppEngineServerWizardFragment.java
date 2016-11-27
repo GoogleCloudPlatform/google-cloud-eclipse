@@ -128,6 +128,7 @@ public class LocalAppEngineServerWizardFragment extends WizardFragment {
             CloudSdkPreferenceArea.PAGE_ID, null, null);
         Shell shell = dialog.getShell();
         if (shell == null || shell.isDisposed()) {
+          dialog.setBlockOnOpen(false); // so as not to interrupt wizard's disposal
           dialog.open();
         }
       }
