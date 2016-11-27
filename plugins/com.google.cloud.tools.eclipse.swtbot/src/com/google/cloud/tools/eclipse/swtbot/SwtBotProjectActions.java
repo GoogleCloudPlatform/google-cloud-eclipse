@@ -18,12 +18,9 @@ package com.google.cloud.tools.eclipse.swtbot;
 
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
 
-import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.Widget;
@@ -35,9 +32,6 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * SWTBot utility methods that perform general workbench actions.
@@ -198,38 +192,6 @@ public final class SwtBotProjectActions {
     SWTBotView explorer = getExplorer(bot);
     Tree tree = bot.widget(widgetOfType(Tree.class), explorer.getWidget());
     return new SWTBotTree(tree);
-  }
-
-  /** Return the list of all problems in the workspace. */
-  public static List<String> getAllBuildErrors(SWTWorkbenchBot bot) {
-    IWorkspaceRoot root = getWorkspaceRoot();
-    List<String> foundProblems = new ArrayList<>();
-    for (IProject project : root.getProjects()) {
-      try {
-        IMarker[] problems = project.findMarkers(IMarker.PROBLEM, true /* includeSubtypes */,
-            IResource.DEPTH_INFINITE);
-        for (IMarker problem : problems) {
-          int severity = problem.getAttribute(IMarker.SEVERITY, IMarker.SEVERITY_INFO);
-          if (severity >= IMarker.SEVERITY_ERROR) {
-            foundProblems.add(formatProblem(problem));
-          }
-        }
-      } catch (CoreException ex) {
-        // re-throw as we shouldn't have problems in tests
-        throw new RuntimeException(ex);
-      }
-    }
-    return foundProblems;
-  }
-
-  private static String formatProblem(IMarker problem) {
-    StringBuilder sb = new StringBuilder();
-    sb.append(problem.getResource().getFullPath());
-    sb.append(':');
-    sb.append(problem.getAttribute(IMarker.LINE_NUMBER, -1));
-    sb.append(": ");
-    sb.append(problem.getAttribute(IMarker.MESSAGE, ""));
-    return sb.toString();
   }
 
   /**

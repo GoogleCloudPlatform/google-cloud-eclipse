@@ -20,13 +20,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
-import com.google.cloud.tools.eclipse.swtbot.SwtBotProjectActions;
+import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
-import com.google.common.base.Joiner;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -39,7 +37,6 @@ import org.junit.runner.RunWith;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 
 /**
  * Test creation of a new project with the "Maven-Based Google App Engine Standard Java Project"
@@ -108,10 +105,6 @@ public class NewMavenBasedAppEngineProjectWizardTest extends AbstractProjectTest
       Path projectFilePath = new Path(projectFile);
       assertTrue(project.exists(projectFilePath));
     }
-    List<String> buildErrors = SwtBotProjectActions.getAllBuildErrors(bot);
-    if (!buildErrors.isEmpty()) {
-      String errorsString = Joiner.on("\n").join(buildErrors);
-      fail(errorsString);
-    }
+    ProjectUtils.failIfBuildErrors("New Maven project has errors", project);
   }
 }
