@@ -63,7 +63,7 @@ public class LocalAppEngineServerWizardFragment extends WizardFragment {
 
   @Override
   public void enter() {
-    // TODO why do we check here and in the constructor?
+    // TODO why do we check here AND in the constructor?
     cloudSdkPath = getCloudSdkLocation();
     dialogFinished = false;
     enableFinishButton = true;
