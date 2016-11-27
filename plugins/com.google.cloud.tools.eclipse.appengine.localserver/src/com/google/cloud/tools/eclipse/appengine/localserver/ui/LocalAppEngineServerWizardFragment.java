@@ -32,6 +32,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.wst.server.ui.wizard.IWizardHandle;
 import org.eclipse.wst.server.ui.wizard.WizardFragment;
@@ -83,7 +84,7 @@ public class LocalAppEngineServerWizardFragment extends WizardFragment {
     GridLayout layout = new GridLayout();
     layout.numColumns = 1;
     cloudSdkComposite.setLayout(layout);
-
+    
     Label label = new Label(cloudSdkComposite, SWT.NONE);
     
     if (cloudSdkPath != null) {
@@ -125,7 +126,10 @@ public class LocalAppEngineServerWizardFragment extends WizardFragment {
       if (dialogFinished && cloudSdkButton.getSelection()) {
         PreferenceDialog dialog = PreferencesUtil.createPreferenceDialogOn(null,
             CloudSdkPreferenceArea.PAGE_ID, null, null);
-        dialog.open();
+        Shell shell = dialog.getShell();
+        if (shell == null || shell.isDisposed()) {
+          dialog.open();
+        }
       }
     }
   }
