@@ -42,6 +42,7 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
 
   private Text javaPackageField;
   private AppEngineLibrariesSelectorGroup appEngineLibrariesSelectorGroup;
+  private Text serviceNameField;
 
   public AppEngineStandardWizardPage() {
     super("basicNewProjectPage"); //$NON-NLS-1$
@@ -75,6 +76,16 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
     javaPackageField.setLayoutData(javaPackagePosition);
     javaPackageField.addModifyListener(pageValidator);
 
+    // App Engine service; a.k.a. module
+    Label serviceNameLabel = new Label(container, SWT.NONE);
+    serviceNameLabel.setText("App Engine service:");
+    serviceNameField = new Text(container, SWT.BORDER);
+    serviceNameField.setMessage("default");
+    GridData serviceNamePosition = new GridData(GridData.FILL_HORIZONTAL);
+    serviceNamePosition.horizontalSpan = 2;
+    serviceNameField.setLayoutData(serviceNamePosition);
+    serviceNameField.addModifyListener(pageValidator);
+    
     // Manage APIs
     appEngineLibrariesSelectorGroup = new AppEngineLibrariesSelectorGroup(container);
 
@@ -127,5 +138,9 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
   public void dispose() {
     appEngineLibrariesSelectorGroup.dispose();
     super.dispose();
+  }
+
+  public String getServiceName() {
+    return serviceNameField.getText();
   }
 }

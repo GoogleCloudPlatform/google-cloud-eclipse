@@ -33,6 +33,7 @@ class AppEngineStandardProjectConfig {
   private String packageName = "";
   private IProject project;
   private List<Library> appEngineLibraries = Collections.emptyList();
+  private String serviceName;
 
 
   public File getCloudSdkLocation() {
@@ -76,6 +77,17 @@ class AppEngineStandardProjectConfig {
 
   public void setAppEngineLibraries(List<Library> libraries) {
     this.appEngineLibraries = new LinkedList<>(libraries);
+  }
+
+  String getServiceName() {
+    if (serviceName == null) {
+      return project.getName();
+    }
+    return serviceName;
+  }
+  
+  void setServiceName(String serviceName) {
+    this.serviceName = serviceName;
   }
 
 }

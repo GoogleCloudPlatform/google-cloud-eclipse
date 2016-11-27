@@ -71,6 +71,7 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
       return true;
     }
     
+    config.setServiceName(page.getServiceName());
     config.setPackageName(page.getPackageName());
     config.setProject(page.getProjectHandle());
     if (!page.useDefaults()) {
@@ -80,7 +81,7 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
     config.setAppEngineLibraries(page.getSelectedLibraries());
 
     // todo set up
-    final IAdaptable uiInfoAdapter = WorkspaceUndoUtil.getUIInfoAdapter(getShell());
+    IAdaptable uiInfoAdapter = WorkspaceUndoUtil.getUIInfoAdapter(getShell());
     IRunnableWithProgress runnable = new CreateAppEngineStandardWtpProject(config, uiInfoAdapter);
 
     IStatus status = Status.OK_STATUS;
