@@ -124,13 +124,8 @@ public class LocalAppEngineServerWizardFragment extends WizardFragment {
     @Override
     public void widgetDisposed(DisposeEvent event) {
       if (dialogFinished && cloudSdkButton.getSelection()) {
-        PreferenceDialog dialog = PreferencesUtil.createPreferenceDialogOn(null,
-            CloudSdkPreferenceArea.PAGE_ID, null, null);
-        Shell shell = dialog.getShell();
-        if (shell == null || shell.isDisposed()) {
-          dialog.setBlockOnOpen(false); // so as not to interrupt wizard's disposal
-          dialog.open();
-        }
+        // switch to Cloud SDK preferences panel
+        PreferencesUtil.createPreferenceDialogOn(null, CloudSdkPreferenceArea.PAGE_ID, null, null);
       }
     }
   }
