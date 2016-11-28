@@ -133,6 +133,10 @@ public class LocalAppEngineServerDelegate extends ServerDelegate {
     }
     if (toBeAdded != null) {
       for (IModule module : toBeAdded) {
+        if (currentServiceIds.containsValue(module)) {
+          // skip modules that are already present
+          continue;
+        }
         String moduleServiceId = serviceIdFunction.apply(module);
         if (currentServiceIds.containsKey(moduleServiceId)) {
           return StatusUtil.error(LocalAppEngineServerDebugTarget.class,

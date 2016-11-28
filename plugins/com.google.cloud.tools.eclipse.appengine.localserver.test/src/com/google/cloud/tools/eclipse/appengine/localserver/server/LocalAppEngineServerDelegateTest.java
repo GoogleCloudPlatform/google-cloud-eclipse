@@ -105,7 +105,7 @@ public class LocalAppEngineServerDelegateTest {
   @Test
   public void testCheckConflictingId_differentServiceIds() throws CoreException {
     delegate = getDelegateWithServer();
-    Function<IModule, String> alwaysDefault = new Function<IModule, String>() {
+    Function<IModule, String> moduleName = new Function<IModule, String>() {
       @Override
       public String apply(IModule module) {
         Preconditions.checkNotNull(module);
@@ -115,7 +115,23 @@ public class LocalAppEngineServerDelegateTest {
     when(module1.getName()).thenReturn("module1");
     when(module2.getName()).thenReturn("module2");
     Assert.assertEquals(Status.OK, delegate.checkConflictingServiceIds(
-        new IModule[] {module1}, new IModule[] {module2}, null, alwaysDefault).getSeverity());
+        new IModule[] {module1}, new IModule[] {module2}, null, moduleName).getSeverity());
+  }
+
+  /** https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1029 */
+  @Test
+  public void testCheckConflictingId_addExitingModule() throws CoreException {
+    delegate = getDelegateWithServer();
+    Function<IModule, String> moduleName = new Function<IModule, String>() {
+      @Override
+      public String apply(IModule module) {
+        Preconditions.checkNotNull(module);
+        return module.getName();
+      }
+    };
+    when(module1.getName()).thenReturn("module1");
+    Assert.assertEquals(Status.OK, delegate.checkConflictingServiceIds(new IModule[] {module1},
+        new IModule[] {module1}, null, moduleName).getSeverity());
   }
 
   @Test
