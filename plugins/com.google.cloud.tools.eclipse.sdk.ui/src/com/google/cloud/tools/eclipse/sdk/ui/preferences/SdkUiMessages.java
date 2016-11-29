@@ -28,6 +28,7 @@ public class SdkUiMessages extends NLS {
   public static String CloudSdkPreferencePage_5;
   public static String CloudSdkNotFound;
   public static String NoSuchDirectory;
+  public static String FileNotDirectory;
   public static String AppEngineJavaComponentsNotInstalled;
   public static String CloudSdkPrompter_0;
   public static String CloudSdkPrompter_1;

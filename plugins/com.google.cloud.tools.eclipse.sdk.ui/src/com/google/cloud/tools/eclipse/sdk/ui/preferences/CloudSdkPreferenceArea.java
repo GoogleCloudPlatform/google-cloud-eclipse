@@ -196,14 +196,23 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
 
     @Override
     protected boolean doCheckState() {
-      String directory = getStringValue();
-      if (!super.doCheckState()) {
+      String directory = getStringValue().trim();
+      if (directory.isEmpty()) {
+        return true;
+      }
+      
+      File file = new File(directory);
+      if (!file.exists()) {
         String message = MessageFormat.format(SdkUiMessages.NoSuchDirectory, directory);
+        status = new Status(IStatus.ERROR, getClass().getName(), message);
+        return false;
+      } else if (!file.isDirectory()) {
+        String message = MessageFormat.format(SdkUiMessages.FileNotDirectory, directory);
         status = new Status(IStatus.ERROR, getClass().getName(), message);
         return false;
       }
       status = Status.OK_STATUS;
-      return directory.isEmpty() || validateSdk(Paths.get(directory));
+      return validateSdk(Paths.get(directory));
     }
   }
 }
