@@ -21,13 +21,16 @@ import com.google.api.client.util.Strings;
 import com.google.cloud.tools.eclipse.appengine.login.IGoogleLoginService;
 import com.google.cloud.tools.ide.login.Account;
 import com.google.common.annotations.VisibleForTesting;
-
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 
@@ -35,27 +38,47 @@ public class AccountSelector extends Composite {
 
   private IGoogleLoginService loginService;
   private String loginMessage;
-  private Credential selectedCredential;
+  private Account selectedAccount;
+  private ListenerList selectionListeners = new ListenerList();
+
+  /**
+   * If true and if there is no selected account and there is exactly one logged-in account, then
+   * select that account.
+   */
+  private boolean selectDefaultSingleAccount = true;
 
   @VisibleForTesting Combo combo;
   @VisibleForTesting LogInOnSelect logInOnSelect = new LogInOnSelect();
 
+  public AccountSelector(Composite parent, IGoogleLoginService loginService, String loginMessage) {
+    this(parent, loginService, loginMessage, false);
+  }
+
   public AccountSelector(Composite parent, IGoogleLoginService loginService,
-                         String loginMessage) {
+      String loginMessage, boolean selectDefaultSingleAccount) {
     super(parent, SWT.NONE);
     this.loginService = loginService;
     this.loginMessage = loginMessage;
+    this.selectDefaultSingleAccount = selectDefaultSingleAccount;
     GridLayoutFactory.fillDefaults().generateLayout(this);
 
     combo = new Combo(this, SWT.READ_ONLY);
     GridDataFactory.fillDefaults().grab(true, false).applyTo(combo);
 
-    for (Account account : loginService.getAccounts()) {
+    List<Account> sortedAccounts = new ArrayList<>(loginService.getAccounts());
+    Collections.sort(sortedAccounts, new Comparator<Account>() {
+      @Override
+      public int compare(Account o1, Account o2) {
+        return o1.getEmail().compareTo(o2.getEmail());
+      }
+    });
+    for (Account account : sortedAccounts) {
       combo.add(account.getEmail());
-      combo.setData(account.getEmail(), account.getOAuth2Credential());
+      combo.setData(account.getEmail(), account);
     }
     combo.add(loginMessage);
     combo.addSelectionListener(logInOnSelect);
+    selectAccount(null);
   }
 
   /**
@@ -74,35 +97,61 @@ public class AccountSelector extends Composite {
    * (By its contract, {@link Account} never carries a {@code null} {@link Credential}.)
    */
   public Credential getSelectedCredential() {
-    return selectedCredential;
+    return selectedAccount != null ? selectedAccount.getOAuth2Credential() : null;
   }
 
+  /**
+   * Returns the currently selected email, or empty string if none; never {@code null}.
+   */
   public String getSelectedEmail() {
     return combo.getText();
   }
 
   /**
-   * Selects an account corresponding to the given {@code email} and returns its index of the
-   * combo item. If there is no account corresponding to the {@code email}, returns -1 while
-   * retaining current selection (if any).
+   * Selects an account corresponding to the given {@code email} and returns its index of the combo
+   * item. If there is no account corresponding to the {@code email}, <b>and</b> there is exactly 1
+   * known account and {@link #selectDefaultSingleAccount} is true, then we automatically select
+   * that single account; otherwise this method does returns -1 while retaining current selection
+   * (if any).
    *
-   * @param email email address to use to select an account. If {@code null} or the empty string,
-   *     or if there is no matching account, this method does nothing
-   * @return index of the newly selected combo item; -1 if {@code email} is {@code null} or
-   *     the empty string, or if there is no matching account
+   * @param email email address to use to select an account
+   * @return index of the newly selected combo item; -1 if {@code email} is {@code null} or the
+   *         empty string, or if there is no matching account
    */
   public int selectAccount(String email) {
     int index = Strings.isNullOrEmpty(email) ? -1 : combo.indexOf(email);
+    if (index < 0 && selectDefaultSingleAccount && getAccountCount() == 1) {
+      index = 0;
+      email = combo.getItem(0);
+    }
     if (index != -1) {
       combo.select(index);
-      selectedCredential = (Credential) combo.getData(email);
+      selectedAccount = (Account) combo.getData(email);
+      fireSelectionListeners();
     }
     return index;
   }
 
   public boolean isSignedIn() {
-    // <Add a new account...> is always in the combo
-    return combo.getItemCount() > 1;
+    return getAccountCount() > 0;
+  }
+
+  public int getAccountCount() {
+    return combo.getItemCount() - 1;  // <Add a new account...> is always in the combo
+  }
+
+  private void fireSelectionListeners() {
+    for (Object o : selectionListeners.getListeners()) {
+      ((Runnable) o).run();
+    }
+  }
+
+  public void addSelectionListener(Runnable listener) {
+    selectionListeners.add(listener);
+  }
+
+  public void removeSelectionListener(Runnable listener) {
+    selectionListeners.remove(listener);
   }
 
   @VisibleForTesting
@@ -112,31 +161,31 @@ public class AccountSelector extends Composite {
       if (combo.getText().equals(loginMessage)) {
         Account account = loginService.logIn(null /* no custom dialog message */);
         if (account != null) {
+          // account is selected and saved
           addAndSelectAccount(account);
         } else {
-          combo.deselectAll();
+          // login failed, so restore to previous combo state
+          int index = selectedAccount != null ? combo.indexOf(selectedAccount.getEmail()) : -1;
+          if (index != -1) {
+            combo.select(index);
+          } else {
+            combo.deselectAll();
+          }
         }
+        return;
       }
-
-      selectedCredential = (Credential) combo.getData(getSelectedEmail());
+      selectedAccount = (Account) combo.getData(getSelectedEmail());
+      fireSelectionListeners();
     }
 
     private void addAndSelectAccount(Account account) {
       // If the combo already has the email, just select it.
-      if (selectAccount(account.getEmail()) != -1) {
-        return;
+      int index = combo.indexOf(account.getEmail());
+      if (index < 0) {
+        combo.add(account.getEmail(), 0 /* place at top */);
+        combo.setData(account.getEmail(), account);
       }
-      combo.add(account.getEmail(), 0 /* place at top */);
-      combo.setData(account.getEmail(), account.getOAuth2Credential());
-      combo.select(0);
+      selectAccount(account.getEmail());
     }
-  }
-
-  public void addSelectionListener(SelectionListener listener) {
-    combo.addSelectionListener(listener);
-  }
-
-  public void removeSelectionListener(SelectionListener listener) {
-    combo.removeSelectionListener(listener);
   }
 }

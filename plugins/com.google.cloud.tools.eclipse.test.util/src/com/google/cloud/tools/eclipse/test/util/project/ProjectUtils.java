@@ -19,16 +19,20 @@ package com.google.cloud.tools.eclipse.test.util.project;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import com.google.common.base.Joiner;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -105,24 +109,71 @@ public class ProjectUtils {
 
     // wait for any post-import operations too
     waitUntilIdle();
+    failIfBuildErrors("Imported projects have errors", projects);
 
     return projects;
   }
 
-  /** Wait for any spawned jobs to complete (e.g., validation jobs). */
-  public static void waitUntilIdle() {
-    while (!Job.getJobManager().isIdle()) {
-      Display display = Display.getCurrent();
-      if (display != null) {
-        while (display.readAndDispatch()) {
-          /* spin */
+  /** Fail if there are any build errors on any project in the workspace. */
+  public static void failIfBuildErrors() throws CoreException {
+    failIfBuildErrors("Projects have build errors", getWorkspace().getRoot().getProjects());
+  }
+
+  /** Fail if there are any build errors on the specified projects. */
+  public static void failIfBuildErrors(String message, Collection<IProject> projects)
+      throws CoreException {
+    failIfBuildErrors(message, projects.toArray(new IProject[projects.size()]));
+  }
+
+  /** Fail if there are any build errors on the specified projects. */
+  public static void failIfBuildErrors(String message, IProject... projects) throws CoreException {
+    List<String> errors = getAllBuildErrors(projects);
+    assertTrue(message + "\n" + Joiner.on("\n").join(errors), errors.isEmpty());
+  }
+
+  /** Return a list of all build errors on the specified projects. */
+  public static List<String> getAllBuildErrors(IProject... projects) throws CoreException {
+    List<String> errors = new ArrayList<>();
+    for (IProject project : projects) {
+      IMarker[] problems = project.findMarkers(IMarker.PROBLEM, true /* includeSubtypes */,
+          IResource.DEPTH_INFINITE);
+      for (IMarker problem : problems) {
+        int severity = problem.getAttribute(IMarker.SEVERITY, IMarker.SEVERITY_INFO);
+        if (severity >= IMarker.SEVERITY_ERROR) {
+          errors.add(formatProblem(problem));
         }
       }
-      try {
-        Thread.sleep(10);
-      } catch (InterruptedException ex) {
-        throw new RuntimeException(ex);
-      }
+    }
+    return errors;
+  }
+
+  private static String formatProblem(IMarker problem) {
+    StringBuilder sb = new StringBuilder();
+    sb.append(problem.getResource().getFullPath());
+    sb.append(':');
+    sb.append(problem.getAttribute(IMarker.LINE_NUMBER, -1));
+    sb.append(": ");
+    sb.append(problem.getAttribute(IMarker.MESSAGE, ""));
+    return sb.toString();
+  }
+
+  /** Wait for any spawned jobs and builds to complete (e.g., validation jobs). */
+  public static void waitUntilIdle() {
+    try {
+      do {
+        Job.getJobManager().join(ResourcesPlugin.FAMILY_MANUAL_BUILD, null);
+        Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
+
+        Display display = Display.getCurrent();
+        if (display != null) {
+          while (display.readAndDispatch()) {
+            /* spin */
+          }
+        }
+        Thread.yield();
+      } while (!Job.getJobManager().isIdle());
+    } catch (InterruptedException ex) {
+      throw new RuntimeException(ex);
     }
   }
 

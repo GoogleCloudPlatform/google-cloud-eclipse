@@ -34,7 +34,6 @@ import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.core.ServerCore;
 import org.eclipse.wst.server.core.ServerUtil;
 import org.junit.After;
-import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -49,9 +48,6 @@ public class LocalAppEnginePublishOperationTest {
 
   @Before
   public void setUp() throws IOException, CoreException {
-    Assume.assumeFalse("This test is flakey on travis and needs to be de-flaked",
-        Boolean.parseBoolean(System.getenv("TRAVIS")));
-
     projects = ProjectUtils.importProjects(getClass(), "projects/test-submodules.zip", null);
     assertEquals(2, projects.size());
     assertTrue("sox-server".equals(projects.get(0).getName())
@@ -59,12 +55,9 @@ public class LocalAppEnginePublishOperationTest {
     assertTrue("sox-shared".equals(projects.get(1).getName())
         || "sox-shared".equals(projects.get(0).getName()));
     serverProject = projects.get("sox-server".equals(projects.get(0).getName()) ? 0 : 1);
-    assertNotNull(serverProject);
+    assertNotNull("sox-server", serverProject);
     sharedProject = projects.get("sox-shared".equals(projects.get(0).getName()) ? 0 : 1);
-    assertNotNull(sharedProject);
-
-    assertTrue(serverProject.getFile("bin/sox/server/GreetingServiceImpl.class").exists());
-    assertTrue(sharedProject.getFile("bin/sox/shared/GreetingService.class").exists());
+    assertNotNull("sox-shared", sharedProject);
 
     serverModule = ServerUtil.getModule(serverProject);
     assertNotNull(serverModule);
