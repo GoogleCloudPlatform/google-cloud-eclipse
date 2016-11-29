@@ -43,6 +43,7 @@ import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
@@ -201,18 +202,18 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
         return true;
       }
       
-      File file = new File(directory);
-      if (!file.exists()) {
-        String message = MessageFormat.format(SdkUiMessages.NoSuchDirectory, directory);
+      Path location = Paths.get(directory);
+      if (!Files.exists(location)) {
+        String message = MessageFormat.format(SdkUiMessages.NoSuchDirectory, location);
         status = new Status(IStatus.ERROR, getClass().getName(), message);
         return false;
-      } else if (!file.isDirectory()) {
-        String message = MessageFormat.format(SdkUiMessages.FileNotDirectory, directory);
+      } else if (!Files.isDirectory(location)) {
+        String message = MessageFormat.format(SdkUiMessages.FileNotDirectory, location);
         status = new Status(IStatus.ERROR, getClass().getName(), message);
         return false;
       }
       status = Status.OK_STATUS;
-      return validateSdk(Paths.get(directory));
+      return validateSdk(location);
     }
   }
 }
