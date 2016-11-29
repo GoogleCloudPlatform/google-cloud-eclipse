@@ -150,8 +150,8 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
   }
 
   private boolean validateSdk(Path location) {
+    CloudSdk sdk = new CloudSdk.Builder().sdkPath(location).build();
     try {
-      CloudSdk sdk = new CloudSdk.Builder().sdkPath(location).build();
       sdk.validateCloudSdk();
       sdk.validateAppEngineJavaComponents(); 
     } catch (AppEngineJavaComponentsNotInstalledException ex) {
@@ -160,8 +160,11 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     } catch (AppEngineException ex) {
       // accept a seemingly invalid location in case the SDK organization
       // has changed and the CloudSdk#validate() code is out of date
+      // todo: does this really make sense? In that case, wouldn't all the
+      // other functionality of the Cloud SDK -- deploy, run, etc. --
+      // also be broken?
       status = new Status(IStatus.WARNING, getClass().getName(),
-          MessageFormat.format(SdkUiMessages.CloudSdkPreferencePage_6, ex.getMessage()));
+          MessageFormat.format(SdkUiMessages.CloudSdkNotFound, sdk.getSdkPath()));
     }
     return true;
   }

@@ -61,7 +61,7 @@ public class CloudSdkPreferenceAreaTest {
     when(preferences.getString(anyString())).thenReturn(null);
 
     show();
-    area.setStringValue("/non-existant");
+    area.setStringValue("/non-existent");
     assertFalse(area.getStatus().isOK());
     assertEquals(IStatus.ERROR, area.getStatus().getSeverity());
   }
