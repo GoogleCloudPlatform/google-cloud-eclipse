@@ -203,7 +203,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
         return false;
       }
       status = Status.OK_STATUS;
-      return getStringValue().isEmpty() || validateSdk(Paths.get(getStringValue()));
+      return directory.isEmpty() || validateSdk(Paths.get(directory));
     }
   }
 }
