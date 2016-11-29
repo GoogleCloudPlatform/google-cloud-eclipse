@@ -23,7 +23,6 @@ import com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPreferenceArea;
 import com.google.common.annotations.VisibleForTesting;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
@@ -32,7 +31,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.wst.server.ui.wizard.IWizardHandle;
 import org.eclipse.wst.server.ui.wizard.WizardFragment;
@@ -44,7 +42,6 @@ public class LocalAppEngineServerWizardFragment extends WizardFragment {
   private boolean enableFinishButton;
 
   public LocalAppEngineServerWizardFragment() {
-    cloudSdkPath = getCloudSdkLocation();
   }
 
   @VisibleForTesting
@@ -64,7 +61,6 @@ public class LocalAppEngineServerWizardFragment extends WizardFragment {
 
   @Override
   public void enter() {
-    // TODO why do we check here AND in the constructor?
     cloudSdkPath = getCloudSdkLocation();
     dialogFinished = false;
     enableFinishButton = true;
