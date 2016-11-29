@@ -141,7 +141,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     }
   }
 
-  private Path getDefaultSdkLocation() {
+  private static Path getDefaultSdkLocation() {
     try {
       return new CloudSdk.Builder().build().getSdkPath();
     } catch (AppEngineException ex) {
@@ -170,12 +170,12 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
   }
 
   /**
-   * A wrapper around DirectoryFieldEditor for performing validation checks that the location holds
-   * a SDK. Uses {@code VALIDATE_ON_KEY_STROKE} to perform check on per keystroke to avoid wiping
+   * A wrapper around DirectoryFieldEditor for validating that the location holds
+   * a SDK. Uses {@code VALIDATE_ON_KEY_STROKE} to perform check per keystroke to avoid wiping
    * out the validation messages.
    */
   class CloudSdkDirectoryFieldEditor extends DirectoryFieldEditor {
-    public CloudSdkDirectoryFieldEditor(String name, String labelText, Composite parent) {
+    CloudSdkDirectoryFieldEditor(String name, String labelText, Composite parent) {
       // unfortunately cannot use super(name,labelText,parent) as must specify the
       // validateStrategy before the createControl()
       init(name, labelText);
