@@ -20,7 +20,6 @@ import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPreferenceArea;
-import com.google.common.annotations.VisibleForTesting;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.osgi.util.NLS;
@@ -44,11 +43,6 @@ public class LocalAppEngineServerWizardFragment extends WizardFragment {
   public LocalAppEngineServerWizardFragment() {
   }
 
-  @VisibleForTesting
-  LocalAppEngineServerWizardFragment(String cloudSdkPath) {
-    this.cloudSdkPath = cloudSdkPath;
-  }
-
   @Override
   public boolean hasComposite() {
     return true;
@@ -56,12 +50,11 @@ public class LocalAppEngineServerWizardFragment extends WizardFragment {
 
   @Override
   public boolean isComplete() {
-    return enableFinishButton || cloudSdkPath != null;
+    return enableFinishButton;
   }
 
   @Override
   public void enter() {
-    cloudSdkPath = getCloudSdkLocation();
     dialogFinished = false;
     enableFinishButton = true;
   }
@@ -73,6 +66,8 @@ public class LocalAppEngineServerWizardFragment extends WizardFragment {
 
   @Override
   public Composite createComposite(Composite parent, IWizardHandle wizard) {
+    cloudSdkPath = getCloudSdkLocation();
+
     wizard.setTitle(Messages.CREATE_APP_ENGINE_RUNTIME_WIZARD_TITLE);
     wizard.setDescription(Messages.CREATE_APP_ENGINE_RUNTIME_WIZARD_DESCRIPTION);
 
