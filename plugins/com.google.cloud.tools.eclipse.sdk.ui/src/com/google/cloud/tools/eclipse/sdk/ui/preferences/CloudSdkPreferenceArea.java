@@ -196,8 +196,10 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
 
     @Override
     protected boolean doCheckState() {
+      String directory = getStringValue();
       if (!super.doCheckState()) {
-        status = new Status(IStatus.ERROR, getClass().getName(), "Invalid directory");
+        String message = MessageFormat.format(SdkUiMessages.NoSuchDirectory, directory);
+        status = new Status(IStatus.ERROR, getClass().getName(), message);
         return false;
       }
       status = Status.OK_STATUS;
