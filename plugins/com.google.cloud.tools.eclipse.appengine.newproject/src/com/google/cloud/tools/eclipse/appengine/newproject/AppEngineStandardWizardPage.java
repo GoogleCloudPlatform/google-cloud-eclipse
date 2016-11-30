@@ -16,9 +16,13 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineLibrariesSelectorGroup;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import java.io.File;
-import java.util.List;
-
+import java.util.Collection;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
@@ -29,11 +33,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
-import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
-import com.google.cloud.tools.eclipse.appengine.ui.AppEngineLibrariesSelectorGroup;
-import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
-import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
-import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 
 /**
  * UI to collect all information necessary to create a new App Engine Standard Java Eclipse project.
@@ -119,7 +118,7 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
     return this.javaPackageField.getText();
   }
 
-  public List<Library> getSelectedLibraries() {
+  public Collection<Library> getSelectedLibraries() {
     return appEngineLibrariesSelectorGroup.getSelectedLibraries();
   }
 

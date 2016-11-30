@@ -20,6 +20,7 @@ import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
@@ -132,10 +133,10 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
     this.archetype = archetype;
   }
 
-  void setAppEngineLibraryIds(List<Library> libraries) {
+  void setAppEngineLibraryIds(Collection<Library> libraries) {
     appEngineLibraryIds = new HashSet<String>();
-    for (int i = 0; i < libraries.size(); i++) {
-      appEngineLibraryIds.add(libraries.get(i).getId());
+    for (Library library : libraries) {
+      appEngineLibraryIds.add(library.getId());
     }
   }
 

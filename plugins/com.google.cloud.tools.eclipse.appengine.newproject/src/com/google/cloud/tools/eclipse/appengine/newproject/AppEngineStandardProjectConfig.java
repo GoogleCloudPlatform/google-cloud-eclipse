@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.newproject;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import java.io.File;
 import java.net.URI;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -74,7 +75,7 @@ class AppEngineStandardProjectConfig {
     return appEngineLibraries;
   }
 
-  public void setAppEngineLibraries(List<Library> libraries) {
+  public void setAppEngineLibraries(Collection<Library> libraries) {
     this.appEngineLibraries = new LinkedList<>(libraries);
   }
 
