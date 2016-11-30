@@ -161,9 +161,6 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     } catch (AppEngineException ex) {
       // accept a seemingly invalid location in case the SDK organization
       // has changed and the CloudSdk#validate() code is out of date
-      // todo: does this really make sense? In that case, wouldn't all the
-      // other functionality of the Cloud SDK -- deploy, run, etc. --
-      // also be broken?
       status = new Status(IStatus.WARNING, getClass().getName(),
           MessageFormat.format(SdkUiMessages.CloudSdkNotFound, sdk.getSdkPath()));
     }
