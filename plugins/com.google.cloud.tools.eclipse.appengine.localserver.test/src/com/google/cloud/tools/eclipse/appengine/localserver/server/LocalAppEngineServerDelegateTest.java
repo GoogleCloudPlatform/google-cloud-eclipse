@@ -28,6 +28,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.jst.server.core.IWebModule;
+import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
+import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IRuntime;
 import org.eclipse.wst.server.core.IRuntimeWorkingCopy;
@@ -47,6 +49,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class LocalAppEngineServerDelegateTest {
 
   private LocalAppEngineServerDelegate delegate = new LocalAppEngineServerDelegate();
+  private static final IProjectFacetVersion APPENGINE_STANDARD_FACET_VERSION_1 =
+      ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID).getVersion("1");
+
   @Mock private IModule module1;
   @Mock private IWebModule webModule1;
   @Mock private IModule module2;
@@ -58,7 +63,7 @@ public class LocalAppEngineServerDelegateTest {
   @Rule
   public TestProjectCreator appEngineStandardProject =
       new TestProjectCreator().withFacetVersions(Lists.newArrayList(JavaFacet.VERSION_1_7,
-          WebFacetUtils.WEB_25, AppEngineStandardFacet.APPENGINE_STANDARD_VERSION));
+          WebFacetUtils.WEB_25, APPENGINE_STANDARD_FACET_VERSION_1));
 
   @Test
   public void testCanModifyModules() throws CoreException {

@@ -170,7 +170,7 @@ public class LocalAppEngineServerDelegate extends ServerDelegate {
   /**
    * If the module is a web module returns the utility modules contained within its WAR, otherwise
    * returns an empty list.
-   * 
+   *
    * @param module the module path traversed to this point
    */
   @Override
@@ -181,7 +181,7 @@ public class LocalAppEngineServerDelegate extends ServerDelegate {
     IModule thisModule = module[module.length - 1];
     if (thisModule != null && thisModule.getModuleType() != null) {
       IModuleType moduleType = thisModule.getModuleType();
-      if (moduleType != null && SERVLET_MODULE_FACET.equals(moduleType.getId())) { //$NON-NLS-1$
+      if (moduleType != null && SERVLET_MODULE_FACET.equals(moduleType.getId())) {
         IWebModule webModule = (IWebModule) thisModule.loadAdapter(IWebModule.class, null);
         if (webModule != null) {
           IModule[] modules = webModule.getModules();
