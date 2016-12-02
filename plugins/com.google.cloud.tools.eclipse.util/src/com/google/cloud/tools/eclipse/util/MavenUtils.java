@@ -63,7 +63,8 @@ public class MavenUtils {
         return true;
       }
     } catch (CoreException coreException) {
-      logger.log(Level.SEVERE, "Unable to examine natures on project " + project.getName(), coreException);
+      logger.log(Level.SEVERE, "Unable to examine natures on project " + project.getName(),
+          coreException);
     }
     return false;
   }
@@ -86,11 +87,12 @@ public class MavenUtils {
   }
 
   /**
-   * Returns true if a dependency with the same group ID and artifact ID as <code>targetDependency</code>
-   * exists in <code>dependencies</code>. Returns false otherwise.
+   * Returns true if a dependency with the same group ID and artifact ID as
+   * <code>targetDependency</code> exists in <code>dependencies</code>. Returns false otherwise.
    */
-  public static boolean doesListContainDependency(List<Dependency> dependencies, Dependency targetDependency) {
-    if((dependencies == null) || (targetDependency == null)) {
+  public static boolean doesListContainDependency(List<Dependency> dependencies,
+      Dependency targetDependency) {
+    if (dependencies == null || targetDependency == null) {
       return false;
     }
 
@@ -108,28 +110,28 @@ public class MavenUtils {
    * <code>artifactId</code> or the <code>defaultVersion</code> if an error occurs while fetching
    * the latest version.
    */
-  public static String resolveLatestReleasedArtifactVersion(IProgressMonitor monitor, String groupId,
-                                                            String artifactId, String type, String defaultVersion) {
+  public static String resolveLatestReleasedArtifactVersion(IProgressMonitor monitor,
+      String groupId, String artifactId, String type, String defaultVersion) {
     try {
       Artifact artifact = resolveArtifact(monitor, groupId, artifactId, type, "LATEST");
       return artifact.getVersion();
     } catch (CoreException ex) {
       logger.log(Level.WARNING,
-                 MessageFormat.format("Unable to resolve artifact {0}:{1}", groupId, artifactId), ex);
+          MessageFormat.format("Unable to resolve artifact {0}:{1}", groupId, artifactId), ex);
       return defaultVersion;
     }
   }
 
-  public static Artifact resolveArtifact(IProgressMonitor monitor, String groupId, String artifactId,
-                                         String type, String version) throws CoreException {
+  public static Artifact resolveArtifact(IProgressMonitor monitor, String groupId,
+      String artifactId, String type, String version) throws CoreException {
     return resolveArtifact(monitor, groupId, artifactId, type, version, null, null);
   }
 
-  public static Artifact resolveArtifact(IProgressMonitor monitor, String groupId, String artifactId,
-                                         String type, String version, String classifier,
-                                         List<ArtifactRepository> repositories) throws CoreException {
+  public static Artifact resolveArtifact(IProgressMonitor monitor, String groupId,
+      String artifactId, String type, String version, String classifier,
+      List<ArtifactRepository> repositories) throws CoreException {
     Artifact artifact = MavenPlugin.getMaven().resolve(groupId, artifactId, version, type,
-                                                       classifier, repositories, monitor);
+        classifier, repositories, monitor);
     return artifact;
   }
 
