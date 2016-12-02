@@ -2,8 +2,10 @@
 <introContent>
    <extensionContent path="overview/@">
       <group style-id="content-group">
-         <link label="Google Cloud Tools for Eclipse" url="http://www.eclipse-tips.com" style-id="content-link">
-            <text>Learn more about Google Cloud Tools for Eclipse</text>
+         <link label="Google Cloud Tools for Eclipse"
+               style-id="content-link"
+               url="https://github.com/GoogleCloudPlatform/google-cloud-eclipse/wiki/Google-Cloud-Tools-for-Eclipse">
+            <text>Learn more about Google Cloud Tools for Eclipse.</text>
          </link>
       </group>
    </extensionContent>
