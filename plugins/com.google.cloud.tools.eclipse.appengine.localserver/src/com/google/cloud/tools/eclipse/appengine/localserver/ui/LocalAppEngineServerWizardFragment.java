@@ -20,16 +20,17 @@ import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPreferenceArea;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.wst.server.ui.wizard.IWizardHandle;
@@ -38,10 +39,8 @@ import org.eclipse.wst.server.ui.wizard.WizardFragment;
 public class LocalAppEngineServerWizardFragment extends WizardFragment {
 
   private String cloudSdkPath = null;
-  private boolean dialogFinished = false;
-
-  public LocalAppEngineServerWizardFragment() {
-  }
+  private boolean openPreferenceDialog = false;
+  private Button cloudSdkButton = null;
 
   @Override
   public boolean hasComposite() {
@@ -51,11 +50,6 @@ public class LocalAppEngineServerWizardFragment extends WizardFragment {
   @Override
   public boolean isComplete() {
     return true;
-  }
-
-  @Override
-  public void enter() {
-    dialogFinished = false;
   }
 
   @Override
@@ -77,17 +71,13 @@ public class LocalAppEngineServerWizardFragment extends WizardFragment {
       label.setText(cloudSdkFound);
     } else {
       label.setText(Messages.RUNTIME_WIZARD_CLOUD_SDK_NOT_FOUND);
-      Button cloudSdkButton = new Button(cloudSdkComposite, SWT.CHECK);
+      cloudSdkButton = new Button(cloudSdkComposite, SWT.CHECK);
       cloudSdkButton.setText(Messages.OPEN_CLOUD_SDK_PREFERENCE_BUTTON);
-      parent.addDisposeListener(new OpenPreferencePage(cloudSdkButton));
+      cloudSdkButton.addSelectionListener(new CloudSdkButtonListener());
+      parent.addDisposeListener(new OpenPreferencePage());
     }
     
     return cloudSdkComposite;
-  }
-
-  @Override
-  public void performFinish(IProgressMonitor monitor) throws CoreException {
-    dialogFinished = true;
   }
 
   private String getCloudSdkLocation() {
@@ -98,21 +88,37 @@ public class LocalAppEngineServerWizardFragment extends WizardFragment {
       return null;
     }
   }
+  
+  private final class CloudSdkButtonListener implements SelectionListener {
 
-  private final class OpenPreferencePage implements DisposeListener {
-    private final Button cloudSdkButton;
-
-    private OpenPreferencePage(Button cloudSdkButton) {
-      this.cloudSdkButton = cloudSdkButton;
+    @Override
+    public void widgetSelected(SelectionEvent event) {
+      if (cloudSdkButton != null) {
+        openPreferenceDialog = cloudSdkButton.getSelection();
+      }
     }
 
     @Override
+    public void widgetDefaultSelected(SelectionEvent event) {
+      widgetSelected(event);
+    }
+
+  }
+  
+  private final class OpenPreferencePage implements DisposeListener {
+
+    @Override
     public void widgetDisposed(DisposeEvent event) {
-      if (dialogFinished && cloudSdkButton.getSelection()) {
+      if (openPreferenceDialog) {
         // switch to Cloud SDK preferences panel
-        PreferenceDialog dialog = PreferencesUtil.createPreferenceDialogOn(
-            null, CloudSdkPreferenceArea.PAGE_ID, null, null);
-        dialog.open();
+        Display.getDefault().asyncExec(new Runnable() {
+          @Override
+          public void run() {
+            PreferenceDialog dialog = PreferencesUtil.createPreferenceDialogOn(
+                null, CloudSdkPreferenceArea.PAGE_ID, null, null);
+            dialog.open();
+          }
+       });   
       }
     }
   }
