@@ -21,7 +21,6 @@ import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPreferenceArea;
 import org.eclipse.jface.preference.PreferenceDialog;
-import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -38,13 +37,12 @@ import org.eclipse.wst.server.ui.wizard.WizardFragment;
 
 public class LocalAppEngineServerWizardFragment extends WizardFragment {
 
-  private String cloudSdkPath = null;
   private boolean openPreferenceDialog = false;
   private Button cloudSdkButton = null;
 
   @Override
   public boolean hasComposite() {
-    return true;
+    return getCloudSdkLocation() == null;
   }
 
   @Override
@@ -54,8 +52,6 @@ public class LocalAppEngineServerWizardFragment extends WizardFragment {
 
   @Override
   public Composite createComposite(Composite parent, IWizardHandle wizard) {
-    cloudSdkPath = getCloudSdkLocation();
-
     wizard.setTitle(Messages.CREATE_APP_ENGINE_RUNTIME_WIZARD_TITLE);
     wizard.setDescription(Messages.CREATE_APP_ENGINE_RUNTIME_WIZARD_DESCRIPTION);
 
@@ -65,17 +61,11 @@ public class LocalAppEngineServerWizardFragment extends WizardFragment {
     cloudSdkComposite.setLayout(layout);
     
     Label label = new Label(cloudSdkComposite, SWT.NONE);
-    
-    if (cloudSdkPath != null) {
-      String cloudSdkFound = NLS.bind(Messages.RUNTIME_WIZARD_CLOUD_SDK_FOUND, cloudSdkPath);
-      label.setText(cloudSdkFound);
-    } else {
-      label.setText(Messages.RUNTIME_WIZARD_CLOUD_SDK_NOT_FOUND);
-      cloudSdkButton = new Button(cloudSdkComposite, SWT.CHECK);
-      cloudSdkButton.setText(Messages.OPEN_CLOUD_SDK_PREFERENCE_BUTTON);
-      cloudSdkButton.addSelectionListener(new CloudSdkButtonListener());
-      parent.addDisposeListener(new OpenPreferencePage());
-    }
+    label.setText(Messages.RUNTIME_WIZARD_CLOUD_SDK_NOT_FOUND);
+    cloudSdkButton = new Button(cloudSdkComposite, SWT.CHECK);
+    cloudSdkButton.setText(Messages.OPEN_CLOUD_SDK_PREFERENCE_BUTTON);
+    cloudSdkButton.addSelectionListener(new CloudSdkButtonListener());
+    parent.addDisposeListener(new OpenPreferencePage());
     
     return cloudSdkComposite;
   }
