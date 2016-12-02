@@ -20,7 +20,6 @@ import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.cloudsdk.AppEngineJavaComponentsNotInstalledException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkOutOfDateException;
-import com.google.cloud.tools.eclipse.appengine.localserver.server.Messages;
 import com.google.cloud.tools.eclipse.preferences.areas.PreferenceArea;
 import com.google.cloud.tools.eclipse.sdk.internal.PreferenceConstants;
 
@@ -162,9 +161,8 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
       status = new Status(IStatus.WARNING, getClass().getName(),
           MessageFormat.format(SdkUiMessages.AppEngineJavaComponentsNotInstalled, ex.getMessage()));
     } catch (CloudSdkOutOfDateException ex) {
-        Status status = new Status(IStatus.ERROR,
+        status = new Status(IStatus.ERROR,
             "com.google.cloud.tools.eclipse.appengine.deploy.ui", SdkUiMessages.CloudSdkOutOfDate);
-        throw new CoreException(status);
     } catch (AppEngineException ex) {
       // accept a seemingly invalid location in case the SDK organization
       // has changed and the CloudSdk#validate() code is out of date
