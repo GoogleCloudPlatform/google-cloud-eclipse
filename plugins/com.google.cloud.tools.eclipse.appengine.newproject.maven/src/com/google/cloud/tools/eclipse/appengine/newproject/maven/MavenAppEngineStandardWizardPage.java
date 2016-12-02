@@ -22,10 +22,13 @@ import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineLibrariesSelectorGroup;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
+import com.google.cloud.tools.io.FilePermissions;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.CharMatcher;
 import java.text.MessageFormat;
 import java.util.List;
+import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
@@ -279,29 +282,18 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     } else {
       try {
         java.nio.file.Path path = Paths.get(location);
-        do {
-          if (Files.exists(path)) {
-            if (!Files.isDirectory(path)) {
-              String message = MessageFormat.format(Messages.getString("FILE_LOCATION"), path.toString()); //$NON-NLS-1$
-              page.setMessage(message, WARNING);
-              return false;              
-            } else if (!Files.isWritable(path)) {
-              String message = MessageFormat.format(Messages.getString("NONWRITABLE"), location); //$NON-NLS-1$
-              page.setMessage(message, WARNING);
-              return false;
-            } else { // writable directory
-              return true;
-            }
-          }
-          path = path.getParent();
-        } while (path != null);
-      } catch (InvalidPathException ex) {
+        FilePermissions.verifyDirectoryCreatable(path);
+        return true;
+      } catch (FileAlreadyExistsException ex) {
+          String message = MessageFormat.format(Messages.getString("FILE_LOCATION"), location); //$NON-NLS-1$
+          page.setMessage(message, ERROR);
+          return false;  
+      } catch (IOException ex) {
         String message = MessageFormat.format(Messages.getString("INVALID_PATH"), location); //$NON-NLS-1$
         page.setMessage(message, ERROR);
         return false;  
       }
     }
-    return true;
   }
 
   public List<Library> getSelectedLibraries() {
