@@ -33,11 +33,11 @@ public class StandardProjectWizardTest {
     } catch (NullPointerException ex) {
       wizard = new StandardProjectWizard();
     }
-    wizard.addPages();
   }
 
   @Test
   public void testCanFinish() {
+    wizard.addPages();
     Assert.assertFalse(wizard.canFinish());
   }
 
@@ -48,14 +48,17 @@ public class StandardProjectWizardTest {
 
   @Test
   public void testOnePage() {
+    wizard.addPages();
     Assert.assertEquals(1, wizard.getPageCount());
   }
 
   @Test
   public void testGetPageByName() {
+    wizard.addPages();
     Assert.assertNotNull(wizard.getPage("basicNewProjectPage"));
   }
 
+  // todo these can move to a different class with less setup
   @Test
   public void testErrorMessage_Exception() {
     RuntimeException ex = new RuntimeException("testing");
