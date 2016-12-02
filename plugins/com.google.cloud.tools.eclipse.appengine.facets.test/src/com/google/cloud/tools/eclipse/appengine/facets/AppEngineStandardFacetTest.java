@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.facets;
 
 import static org.mockito.Mockito.when;
 
+import org.eclipse.wst.common.project.facet.core.IProjectFacet;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.server.core.IRuntimeType;
 import org.junit.Assert;
@@ -51,5 +52,12 @@ public class AppEngineStandardFacetTest {
     when(serverRuntime.getRuntimeType()).thenReturn(runtimeType);
 
     Assert.assertFalse(AppEngineStandardFacet.isAppEngineStandardRuntime(serverRuntime));
+  }
+
+  @Test
+  public void testFacetLabel() {
+    IProjectFacet projectFacet = ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID);
+
+    Assert.assertEquals("App Engine Java Standard Environment", projectFacet.getLabel());
   }
 }

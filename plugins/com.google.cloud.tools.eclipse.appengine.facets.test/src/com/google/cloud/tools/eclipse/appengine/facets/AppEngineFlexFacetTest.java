@@ -22,6 +22,7 @@ import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IProjectFacet;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -32,13 +33,16 @@ public class AppEngineFlexFacetTest {
   @Mock private IFacetedProject facetedProject;
 
   @Test
-  public void testFlexFacetExists() {
-    Assert.assertTrue(
+  public void testFlexFacetDoesNotExists() {
+    Assert.assertFalse(
         ProjectFacetsManager.isProjectFacetDefined("com.google.cloud.tools.eclipse.appengine.facets.flex"));
   }
 
   @Test
   public void testHasAppEngineFacet_withFacet() {
+    Assume.assumeTrue(ProjectFacetsManager.isProjectFacetDefined(
+        "com.google.cloud.tools.eclipse.appengine.facets.flex"));
+
     IProjectFacet projectFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexFacet.ID);
     when(facetedProject.hasProjectFacet(projectFacet)).thenReturn(true);
 
@@ -47,9 +51,22 @@ public class AppEngineFlexFacetTest {
 
   @Test
   public void testHasAppEngineFacet_withoutFacet() {
+    Assume.assumeTrue(ProjectFacetsManager.isProjectFacetDefined(
+        "com.google.cloud.tools.eclipse.appengine.facets.flex"));
+
     IProjectFacet projectFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexFacet.ID);
     when(facetedProject.hasProjectFacet(projectFacet)).thenReturn(false);
 
     Assert.assertFalse(AppEngineFlexFacet.hasAppEngineFacet(facetedProject));
+  }
+
+  @Test
+  public void testFacetLabel() {
+    Assume.assumeTrue(ProjectFacetsManager.isProjectFacetDefined(
+        "com.google.cloud.tools.eclipse.appengine.facets.flex"));
+
+    IProjectFacet projectFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexFacet.ID);
+
+    Assert.assertEquals("App Engine Java Flexible Environment", projectFacet.getLabel());
   }
 }

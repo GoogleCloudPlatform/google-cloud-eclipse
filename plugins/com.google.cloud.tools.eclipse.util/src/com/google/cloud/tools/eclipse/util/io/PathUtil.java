@@ -52,6 +52,19 @@ public class PathUtil {
    * <code>basePath</code> is returned. If <code>basePath</code> is <code>null</code>, <code>path</code> is returned.
    */
   public static IPath relativizePath(IPath path, IPath basePath) {
+    return relativizePath(path, basePath, false);
+  }
+
+  /**
+   * Returns the relative path of the original <code>path</code> with respect to the <code>basePath</code> if they share
+   * the same prefix path, otherwise <code>null</code>. If <code>path</code> is <code>null</code>,
+   * <code>basePath</code> is returned. If <code>basePath</code> is <code>null</code>, <code>path</code> is returned.
+   */
+  public static IPath relativizePathStrict(IPath path, IPath basePath) {
+    return relativizePath(path, basePath, true);
+  }
+  
+  private static IPath relativizePath(IPath path, IPath basePath, boolean strict) {
     if (path ==  null) {
       return basePath;
     }
@@ -62,6 +75,8 @@ public class PathUtil {
     java.nio.file.Path child = path.toFile().toPath().toAbsolutePath();
     if (child.startsWith(base)) {
       return new Path(base.relativize(child).toString());
+    } else if (strict) {
+      return null;
     } else {
       return path;
     }

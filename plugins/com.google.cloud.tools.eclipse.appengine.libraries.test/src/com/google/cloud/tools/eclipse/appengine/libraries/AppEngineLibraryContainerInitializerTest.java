@@ -35,6 +35,7 @@ import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryCla
 import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer.ArtifactBaseLocationProvider;
 import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer.LibraryContainerStateLocationProvider;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
+import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
@@ -65,13 +66,14 @@ public class AppEngineLibraryContainerInitializerTest {
   @Mock private LibraryFactory libraryFactory;
   @Mock private IConfigurationElement configurationElement;
   @Mock private LibraryContainerStateLocationProvider containerStateProvider;
-  @Mock private ArtifactBaseLocationProvider artifactBaseLocationProvider;
+  @Mock private ArtifactBaseLocationProvider binaryBaseLocationProvider;
+  @Mock private ArtifactBaseLocationProvider sourceBaseLocationProvider;
   @Mock private ILibraryRepositoryService repositoryService;
 
   private LibraryClasspathContainerSerializer serializer;
 
   @Rule
-  public TestProject testProject = new TestProject().withClasspathContainerPath(TEST_LIBRARY_PATH);
+  public TestProjectCreator testProject = new TestProjectCreator().withClasspathContainerPath(TEST_LIBRARY_PATH);
   @Rule
   public TemporaryFolder stateLocationFolder = new TemporaryFolder();
 
@@ -201,8 +203,11 @@ public class AppEngineLibraryContainerInitializerTest {
   }
 
   private void setupSerializer() throws IOException, CoreException {
-    serializer = new LibraryClasspathContainerSerializer(containerStateProvider, artifactBaseLocationProvider);
-    when(artifactBaseLocationProvider.getBaseLocation()).thenReturn(new Path("/test"));
+    serializer = new LibraryClasspathContainerSerializer(containerStateProvider,
+                                                         binaryBaseLocationProvider,
+                                                         sourceBaseLocationProvider);
+    when(binaryBaseLocationProvider.getBaseLocation()).thenReturn(new Path("/test"));
+    when(sourceBaseLocationProvider.getBaseLocation()).thenReturn(new Path("/test"));
     File stateFile = stateLocationFolder.newFile();
     when(containerStateProvider.getContainerStateFile(any(IJavaProject.class),
                                                       eq(new Path(TEST_LIBRARY_PATH)),

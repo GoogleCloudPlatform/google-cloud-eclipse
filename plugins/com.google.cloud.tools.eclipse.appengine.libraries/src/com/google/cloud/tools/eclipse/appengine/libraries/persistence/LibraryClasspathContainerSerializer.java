@@ -18,24 +18,29 @@ package com.google.cloud.tools.eclipse.appengine.libraries.persistence;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainer;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Charsets;
+import com.google.common.base.Preconditions;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.logging.Logger;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.e4.core.di.annotations.Creatable;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.m2e.core.MavenPlugin;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 
 /**
@@ -44,7 +49,8 @@ import org.osgi.framework.FrameworkUtil;
 @Creatable
 public class LibraryClasspathContainerSerializer {
 
-  private static final Logger logger = Logger.getLogger(LibraryClasspathContainerSerializer.class.getName());
+  private static final Logger logger =
+      Logger.getLogger(LibraryClasspathContainerSerializer.class.getName());
 
   /**
    * Implementers of this interface provide a location of a file that can be used to save and load
@@ -53,17 +59,19 @@ public class LibraryClasspathContainerSerializer {
   public interface LibraryContainerStateLocationProvider {
 
     /**
-     * Based on the parameters <code>javaProject</code> and <code>containerPath</code> will return an {@link IPath}
-     * to a file that can be used to save and load {@link LibraryClasspathContainer} instances.
+     * Based on the parameters <code>javaProject</code> and <code>containerPath</code> will return
+     * an {@link IPath} to a file that can be used to save and load
+     * {@link LibraryClasspathContainer} instances.
      *
      * @param javaProject the project the {@link LibraryClasspathContainer} belongs to
      * @param containerPath the container path of the {@link LibraryClasspathContainer}
-     * @param create if true the file and parent folders will be created if needed, if false the location returned may
-     * not refer to an existing file.
+     * @param create if true the file and parent folders will be created if needed, if false the
+     *        location returned may not refer to an existing file.
      *
      * @throws CoreException if an error happens while creating the necessary folders or file
      */
-    IPath getContainerStateFile(IJavaProject javaProject, IPath containerPath, boolean create) throws CoreException;
+    IPath getContainerStateFile(IJavaProject javaProject, IPath containerPath, boolean create)
+        throws CoreException;
   }
 
   public interface ArtifactBaseLocationProvider {
@@ -71,50 +79,61 @@ public class LibraryClasspathContainerSerializer {
   }
 
   private LibraryContainerStateLocationProvider stateLocationProvider;
-  private ArtifactBaseLocationProvider artifactBaseLocationProvider;
+  private ArtifactBaseLocationProvider binaryArtifactBaseLocationProvider;
+  private ArtifactBaseLocationProvider sourceBaseLocationProvider;
 
   public LibraryClasspathContainerSerializer() {
-    this(new DefaultStateLocationProvider(), new M2LocalRepositoryLocationProvider());
+    this(new DefaultStateLocationProvider(),
+         new M2LocalRepositoryLocationProvider(),
+         new LibrariesBundleStateLocationProvider());
   }
 
   @VisibleForTesting
-  public LibraryClasspathContainerSerializer(LibraryContainerStateLocationProvider stateLocationProvider,
-                                             ArtifactBaseLocationProvider artifactBaseLocationProvider) {
+  public LibraryClasspathContainerSerializer(
+      LibraryContainerStateLocationProvider stateLocationProvider,
+      ArtifactBaseLocationProvider binaryBaseLocationProvider,
+      ArtifactBaseLocationProvider sourceBaseLocationProvider) {
     this.stateLocationProvider = stateLocationProvider;
-    this.artifactBaseLocationProvider = artifactBaseLocationProvider;
+    this.binaryArtifactBaseLocationProvider = binaryBaseLocationProvider;
+    this.sourceBaseLocationProvider = sourceBaseLocationProvider;
   }
 
-  public void saveContainer(IJavaProject javaProject, LibraryClasspathContainer container) throws IOException,
-                                                                                                  CoreException {
+  public void saveContainer(IJavaProject javaProject, LibraryClasspathContainer container)
+      throws IOException, CoreException {
     File stateFile = getContainerStateFile(javaProject, container.getPath(), true);
     if (stateFile == null) {
       logger.warning("Container state file cannot be created, save failed");
       return;
     }
-    try (OutputStreamWriter outputStream = new OutputStreamWriter(new FileOutputStream(stateFile), Charsets.UTF_8)) {
+    try (OutputStreamWriter out =
+        new OutputStreamWriter(new FileOutputStream(stateFile), StandardCharsets.UTF_8)) {
       Gson gson = new GsonBuilder().setPrettyPrinting().create();
-      outputStream.write(gson.toJson(new SerializableLibraryClasspathContainer(container,
-                                                                               artifactBaseLocationProvider.getBaseLocation())));
+      out.write(gson.toJson(new SerializableLibraryClasspathContainer(container,
+          binaryArtifactBaseLocationProvider.getBaseLocation(),
+          sourceBaseLocationProvider.getBaseLocation())));
     }
   }
 
-  public LibraryClasspathContainer loadContainer(IJavaProject javaProject, IPath containerPath) throws IOException,
-                                                                                                       CoreException {
+  public LibraryClasspathContainer loadContainer(IJavaProject javaProject, IPath containerPath)
+      throws IOException, CoreException {
     File stateFile = getContainerStateFile(javaProject, containerPath, false);
     if (stateFile == null) {
       return null;
     }
-    try (FileReader fileReader = new FileReader(stateFile)) {
+    try (Reader reader = new InputStreamReader(new FileInputStream(stateFile), StandardCharsets.UTF_8)) {
       Gson gson = new GsonBuilder().create();
       SerializableLibraryClasspathContainer fromJson =
-          gson.fromJson(fileReader, SerializableLibraryClasspathContainer.class);
-      return fromJson.toLibraryClasspathContainer(artifactBaseLocationProvider.getBaseLocation());
+          gson.fromJson(reader, SerializableLibraryClasspathContainer.class);
+      return fromJson.toLibraryClasspathContainer(
+          binaryArtifactBaseLocationProvider.getBaseLocation(),
+          sourceBaseLocationProvider.getBaseLocation());
     }
   }
 
-  private File getContainerStateFile(IJavaProject javaProject, IPath containerPath, boolean create) 
-                                                                                                  throws CoreException {
-    IPath containerStateFile = stateLocationProvider.getContainerStateFile(javaProject, containerPath, create);
+  private File getContainerStateFile(IJavaProject javaProject, IPath containerPath, boolean create)
+      throws CoreException {
+    IPath containerStateFile =
+        stateLocationProvider.getContainerStateFile(javaProject, containerPath, create);
     if (containerStateFile != null && containerStateFile.toFile().exists()) {
       return containerStateFile.toFile();
     } else {
@@ -122,17 +141,19 @@ public class LibraryClasspathContainerSerializer {
     }
   }
 
-  private static class DefaultStateLocationProvider implements LibraryContainerStateLocationProvider {
+  private static class DefaultStateLocationProvider
+      implements LibraryContainerStateLocationProvider {
 
     /*
-     * The IFile and IFolder methods do not validate whether the underlying resources exist, therefore if
-     * <code>create</code> is false, they will not fail or throw and error.
+     * The IFile and IFolder methods do not validate whether the underlying resources exist.
+     * Therefore if <code>create</code> is false, they will not fail or throw and error.
      */
     @Override
-    public IPath getContainerStateFile(IJavaProject javaProject, IPath containerPath, boolean create) 
-                                                                                                  throws CoreException {
+    public IPath getContainerStateFile(IJavaProject javaProject, IPath containerPath,
+        boolean create) throws CoreException {
       IFolder settingsFolder = javaProject.getProject().getFolder(".settings");
-      IFolder folder = settingsFolder.getFolder(FrameworkUtil.getBundle(getClass()).getSymbolicName());
+      IFolder folder =
+          settingsFolder.getFolder(FrameworkUtil.getBundle(getClass()).getSymbolicName());
       if (!folder.exists() && create) {
         folder.create(true, true, null);
       }
@@ -151,7 +172,26 @@ public class LibraryClasspathContainerSerializer {
      */
     @Override
     public IPath getBaseLocation() {
-      return new Path(MavenPlugin.getRepositoryRegistry().getLocalRepository().getBasedir().getAbsolutePath());
+      return new Path(
+          MavenPlugin.getRepositoryRegistry().getLocalRepository().getBasedir().getAbsolutePath());
+    }
+  }
+
+  private static class LibrariesBundleStateLocationProvider
+      implements ArtifactBaseLocationProvider {
+
+    private static final String APPENGINE_LIBRARIES_BUNDLE_NAME =
+        "com.google.cloud.tools.eclipse.appengine.libraries";
+
+    /**
+     * @see com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer.ArtifactBaseLocationProvider#getBaseLocation()
+     */
+    @Override
+    public IPath getBaseLocation() {
+      Bundle librariesBundle = Platform.getBundle(APPENGINE_LIBRARIES_BUNDLE_NAME);
+      Preconditions.checkState(librariesBundle != null,
+          "Bundle Cloud Tools For Eclipse App Engine Libraries Management not found");
+      return Platform.getStateLocation(librariesBundle);
     }
   }
 }

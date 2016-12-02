@@ -33,11 +33,11 @@ public class StandardProjectWizardTest {
     } catch (NullPointerException ex) {
       wizard = new StandardProjectWizard();
     }
-    wizard.addPages();
   }
-  
+
   @Test
   public void testCanFinish() {
+    wizard.addPages();
     Assert.assertFalse(wizard.canFinish());
   }
 
@@ -45,29 +45,32 @@ public class StandardProjectWizardTest {
   public void testTitleSet() {
     Assert.assertEquals("New App Engine Standard Project", wizard.getWindowTitle());
   }
-  
+
   @Test
   public void testOnePage() {
+    wizard.addPages();
     Assert.assertEquals(1, wizard.getPageCount());
   }
-  
+
   @Test
   public void testGetPageByName() {
+    wizard.addPages();
     Assert.assertNotNull(wizard.getPage("basicNewProjectPage"));
   }
-  
+
+  // todo these can move to a different class with less setup
   @Test
   public void testErrorMessage_Exception() {
     RuntimeException ex = new RuntimeException("testing");
-    IStatus status = StandardProjectWizard.setErrorStatus(ex);
+    IStatus status = StandardProjectWizard.setErrorStatus(this, ex);
     Assert.assertEquals("Failed to create project: testing", status.getMessage());
   }
-    
+
   @Test
   public void testErrorMessage_ExceptionWithoutMessage() {
     RuntimeException ex = new RuntimeException();
-    IStatus status = StandardProjectWizard.setErrorStatus(ex);
+    IStatus status = StandardProjectWizard.setErrorStatus(this, ex);
     Assert.assertEquals("Failed to create project", status.getMessage());
   }
-  
+
 }

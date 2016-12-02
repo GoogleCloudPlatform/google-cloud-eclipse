@@ -14,24 +14,29 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.libraries;
+package com.google.cloud.tools.eclipse.test.util.service;
 
 import static org.mockito.Mockito.mock;
 
-import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import java.util.Hashtable;
 import org.junit.rules.ExternalResource;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
 
-public class TestLibraryRepositoryServiceRegistrar extends ExternalResource {
+public class TestServiceRegistrar<S> extends ExternalResource {
 
-  private ServiceRegistration<ILibraryRepositoryService> serviceRegistration;
-  private ILibraryRepositoryService repositoryService = mock(ILibraryRepositoryService.class);
+  private ServiceRegistration<S> serviceRegistration;
+  private Class<S> serviceClass;
+  private S service;
+
+  public TestServiceRegistrar(Class<S> serviceClass) {
+    this.serviceClass = serviceClass;
+  }
 
   @Override
   protected void before() throws Throwable {
+    service = mock(serviceClass);
     registerMockService();
   }
 
@@ -46,10 +51,10 @@ public class TestLibraryRepositoryServiceRegistrar extends ExternalResource {
     Hashtable<String, Object> properties = new Hashtable<>();
     properties.put(Constants.SERVICE_RANKING, Integer.MAX_VALUE);
     serviceRegistration = FrameworkUtil.getBundle(getClass()).getBundleContext()
-        .registerService(ILibraryRepositoryService.class, getRepositoryService(), properties);
+        .registerService(serviceClass, service, properties);
   }
 
-  public ILibraryRepositoryService getRepositoryService() {
-    return repositoryService;
+  public S getRepositoryService() {
+    return service;
   }
 }

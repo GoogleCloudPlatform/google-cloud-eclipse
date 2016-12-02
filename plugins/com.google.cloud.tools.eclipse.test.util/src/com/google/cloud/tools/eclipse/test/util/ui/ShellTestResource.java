@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.login.ui;
+package com.google.cloud.tools.eclipse.test.util.ui;
+
+import static org.junit.Assert.assertNotNull;
 
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -22,7 +24,12 @@ import org.junit.rules.ExternalResource;
 
 public class ShellTestResource extends ExternalResource {
 
+  private Display display;
   private Shell shell;
+
+  public Display getDisplay() {
+    return display;
+  }
 
   public Shell getShell() {
     return shell;
@@ -30,7 +37,9 @@ public class ShellTestResource extends ExternalResource {
 
   @Override
   protected void before() {
-    shell = new Shell(Display.getDefault());
+    display = Display.getDefault();
+    assertNotNull(display);
+    shell = new Shell(display);
   }
 
   @Override

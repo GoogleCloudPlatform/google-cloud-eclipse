@@ -43,7 +43,7 @@ public class AppEngineStandardRuntimeChangeListener implements IFacetedProjectLi
     if (event.getType() != IFacetedProjectEvent.Type.PRIMARY_RUNTIME_CHANGED) {
       return;
     }
-    
+
     IPrimaryRuntimeChangedEvent runtimeChangeEvent = (IPrimaryRuntimeChangedEvent)event;
     final IRuntime newRuntime = runtimeChangeEvent.getNewPrimaryRuntime();
     if (newRuntime == null) {

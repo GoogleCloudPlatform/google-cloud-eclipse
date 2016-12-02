@@ -35,11 +35,12 @@ import org.eclipse.wst.server.core.util.PublishHelper;
 public class ExplodedWarPublisher {
 
   /**
-   * It does a smart export, i.e. considers the resources to be copied and
-   * if the destination directory already contains resources those will be deleted if they are not part of the
-   * exploded WAR.
+   * It does a smart export, i.e. considers the resources to be copied and if the destination
+   * directory already contains resources those will be deleted if they are not part of the exploded
+   * WAR.
    */
-  public void publish(IProject project, IPath destination, IProgressMonitor monitor) throws CoreException {
+  public void publish(IProject project, IPath destination, IProgressMonitor monitor)
+      throws CoreException {
     if (monitor.isCanceled()) {
       throw new OperationCanceledException();
     }
@@ -51,7 +52,8 @@ public class ExplodedWarPublisher {
     progress.setTaskName(Messages.getString("task.name.publish.war"));
 
     PublishHelper publishHelper = new PublishHelper(null);
-    J2EEFlexProjDeployable deployable = new J2EEFlexProjDeployable(project, ComponentCore.createComponent(project));
+    J2EEFlexProjDeployable deployable =
+        new J2EEFlexProjDeployable(project, ComponentCore.createComponent(project));
     publishHelper.publishSmart(deployable.members(), destination, progress.newChild(100));
   }
 }

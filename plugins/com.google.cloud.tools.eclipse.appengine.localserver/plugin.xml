@@ -104,7 +104,7 @@
    <extension
          point="org.eclipse.wst.server.ui.serverImages">
       <image
-            icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gcp-16x16.png"
+            icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gae-16x16.png"
             id="com.google.cloud.tools.eclipse.appengine.standard.serverImage"
             typeIds="com.google.cloud.tools.eclipse.appengine.standard.runtime, com.google.cloud.tools.eclipse.appengine.standard.server">
       </image>
@@ -117,20 +117,24 @@
             typeIds="com.google.cloud.tools.eclipse.appengine.standard.server">
       </publishTask>
    </extension>
+   
+   
    <extension
          point="org.eclipse.debug.core.launchConfigurationTypes">
       <launchConfigurationType
-            delegate="com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerLaunchConfigurationDelegate"
             id="com.google.cloud.tools.eclipse.appengine.AppToolsLaunchConfigurationType"
+            name="%apptoolsServerTypeName"
+            delegate="com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerLaunchConfigurationDelegate"
             modes="run, debug"
-            name="%apptoolsServerTypeName">
+            sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
+            sourcePathComputerId="org.eclipse.jst.server.generic.core.sourcePathComputer">
       </launchConfigurationType>
    </extension>
    <extension
          point="org.eclipse.debug.ui.launchConfigurationTypeImages">
       <launchConfigurationTypeImage
             configTypeID="com.google.cloud.tools.eclipse.appengine.AppToolsLaunchConfigurationType"
-            icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gcp-16x16.png"
+            icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gae-16x16.png"
             id="com.google.cloud.tools.eclipse.appengine.launchConfigurationTypeImages">
       </launchConfigurationTypeImage>
    </extension>
@@ -209,5 +213,13 @@
                title="App Engine"
                class="com.google.cloud.tools.eclipse.appengine.localserver.ui.LaunchBehaviorsArea"
                preferences="instance://com.google.cloud.tools.eclipse.appengine.localserver"/>
+   </extension>
+   <extension
+         point="org.eclipse.wst.server.ui.wizardFragments">
+      <fragment
+            class="com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineServerWizardFragment"
+            id="com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineServerWizardFragment"
+            typeIds="com.google.cloud.tools.eclipse.appengine.standard.runtime">
+      </fragment>
    </extension>
 </plugin>

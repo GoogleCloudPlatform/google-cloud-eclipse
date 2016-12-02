@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PropertyPage;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
+import org.eclipse.wst.common.project.facet.core.IProjectFacet;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexFacet;
@@ -46,20 +47,29 @@ import com.google.cloud.tools.eclipse.util.AdapterUtil;
 public class DeployPropertyPage extends PropertyPage {
 
   private DeployPreferencesPanel content;
+  private boolean canSetMessage;
+  private boolean isStandardPanel;
+  private IFacetedProject facetedProject = null;
+  private String invalidFacetConfigErrorMessage = "";
   private static final Logger logger = Logger.getLogger(DeployPropertyPage.class.getName());
 
   @Override
   protected Control createContents(Composite parent) {
     Composite container = new Composite(parent, SWT.NONE);
+    IProject project = AdapterUtil.adapt(getElement(), IProject.class);
+
     try {
-      content = getPreferencesPanel(container);
-      if (content == null) {
-        return container;
-      }
+      facetedProject = ProjectFacetsManager.create(project);
     } catch (CoreException ex) {
       logger.log(Level.WARNING, ex.getMessage());
       return container;
     }
+
+    content = getPreferencesPanel(project, facetedProject, container);
+    if (content == null) {
+      return container;
+    }
+    isStandardPanel = content instanceof StandardDeployPreferencesPanel;
 
     GridDataFactory.fillDefaults().grab(true, false).applyTo(content);
     GridDataFactory.fillDefaults().grab(true, true).applyTo(container);
@@ -91,8 +101,13 @@ public class DeployPropertyPage extends PropertyPage {
 
   @Override
   public boolean performOk() {
+    // Content can be null if Properties Page is opened and App Engine facets are uninstalled
     if (isValid()) {
-      return content.savePreferences();
+      if (content == null) {
+        return true;
+      } else {
+        return content.savePreferences();
+      }
     }
     return false;
   }
@@ -105,13 +120,30 @@ public class DeployPropertyPage extends PropertyPage {
 
   @Override
   public void dispose() {
-    content.dispose();
+    if (content != null) {
+      // Content can be null if Properties Page is opened and App Engine facets are uninstalled
+      content.dispose();
+    }
     super.dispose();
   }
 
-  private DeployPreferencesPanel getPreferencesPanel(Composite container) throws CoreException {
-    IProject project = AdapterUtil.adapt(getElement(), IProject.class);
-    IFacetedProject facetedProject = ProjectFacetsManager.create(project);
+  @Override
+  public void setErrorMessage(String newMessage) {
+    if (!canSetMessage) {
+      return;
+    }
+    super.setErrorMessage(newMessage);
+  }
+
+  @Override
+  public void setMessage(String newMessage, int newType) {
+    if (!canSetMessage) {
+      return;
+    }
+    super.setMessage(newMessage, newType);
+  }
+
+  private DeployPreferencesPanel getPreferencesPanel(IProject project, IFacetedProject facetedProject, Composite container) {
     IGoogleLoginService loginService =
         PlatformUI.getWorkbench().getService(IGoogleLoginService.class);
 
@@ -127,4 +159,43 @@ public class DeployPropertyPage extends PropertyPage {
       return null;
     }
   }
+
+  @Override
+  public void setVisible(boolean visible) {
+    super.setVisible(visible);
+    evaluateFacetConfiguration();
+  }
+
+  /**
+   * Checks to see if the project associated with this Property dialog still has a valid
+   * App Engine facet. If it does, allow messages to be displayed. If it doesn't display
+   * appropriate error message and prevent other messages from being displayed.
+   */
+  private void evaluateFacetConfiguration() {
+    if (isStandardPanel && !AppEngineStandardFacet.hasAppEngineFacet(facetedProject)) {
+      IProjectFacet projectFacet = ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID);
+      invalidFacetConfigErrorMessage = Messages.getString("invalid.deploy.page.state", projectFacet.getLabel());
+      updatePageBasedOnFacetConfig(false);
+    } else if (!isStandardPanel && !AppEngineFlexFacet.hasAppEngineFacet(facetedProject)) {
+      IProjectFacet projectFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexFacet.ID);
+      invalidFacetConfigErrorMessage = Messages.getString("invalid.deploy.page.state", projectFacet.getLabel());
+      updatePageBasedOnFacetConfig(false);
+    } else {
+      invalidFacetConfigErrorMessage = "";
+      updatePageBasedOnFacetConfig(true);
+    }
+
+  }
+
+  private void updatePageBasedOnFacetConfig(boolean hasCorrectFacetConfiguration) {
+    if (hasCorrectFacetConfiguration) {
+      canSetMessage = true;
+      setErrorMessage(null);
+    } else {
+      setErrorMessage(invalidFacetConfigErrorMessage);
+      canSetMessage = false;
+    }
+    
+  }
+ 
 }

@@ -25,14 +25,14 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import java.beans.PropertyChangeEvent;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.wst.server.core.IServerType;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.ui.wizard.ServerCreationWizardPageExtension.UI_POSITION;
-import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -41,6 +41,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class ServerPortExtensionTest {
 
+  @Rule public ShellTestResource shellTestResource = new ShellTestResource();
+
   private Shell shell;
   private ServerPortExtension portExtension;
 
@@ -48,19 +50,11 @@ public class ServerPortExtensionTest {
 
   @Before
   public void setUp() {
-    // TODO(chanseok): use ShellTestResource (see AccountPanelTest) after fixing
-    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/771.
-    // (Remove shell.dispose() in tearDown() too.)
-    shell = new Shell(Display.getDefault());
+    shell = shellTestResource.getShell();
     shell.setVisible(true);
     portExtension = new ServerPortExtension();
     portExtension.createControl(UI_POSITION.BOTTOM, shell);
     portExtension.setServerWorkingCopy(server);
-  }
-
-  @After
-  public void tearDown() {
-    shell.dispose();
   }
 
   @Test

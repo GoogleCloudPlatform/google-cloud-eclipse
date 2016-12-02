@@ -28,7 +28,6 @@ import com.google.common.base.Preconditions;
  * Wraps certain {@link org.eclipse.wst.common.project.facet.core.ProjectFacetsManager} static methods to allow 
  * unit testing of classes that use those methods. 
  */
-// TODO this class could probably have a better bundle to live in
 public class FacetedProjectHelper {
 
   /**

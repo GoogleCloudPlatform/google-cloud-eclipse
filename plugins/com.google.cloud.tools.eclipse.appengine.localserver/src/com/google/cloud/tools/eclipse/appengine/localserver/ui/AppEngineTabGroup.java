@@ -20,6 +20,7 @@ import org.eclipse.debug.ui.AbstractLaunchConfigurationTabGroup;
 import org.eclipse.debug.ui.EnvironmentTab;
 import org.eclipse.debug.ui.ILaunchConfigurationDialog;
 import org.eclipse.debug.ui.ILaunchConfigurationTab;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.wst.server.ui.ServerLaunchConfigurationTab;
 
 public class AppEngineTabGroup extends AbstractLaunchConfigurationTabGroup {
@@ -31,7 +32,7 @@ public class AppEngineTabGroup extends AbstractLaunchConfigurationTabGroup {
   @Override
   public void createTabs(ILaunchConfigurationDialog dialog, String mode) {
     ILaunchConfigurationTab[] tabs = new ILaunchConfigurationTab[2];
-    tabs[0] = new ServerLaunchConfigurationTab(SERVER_TYPE_IDS);
+    tabs[0] = new AppEngineServerLaunchConfigurationTab(SERVER_TYPE_IDS);
     tabs[0].setLaunchConfigurationDialog(dialog);
     tabs[1] = new EnvironmentTab();
     tabs[1].setLaunchConfigurationDialog(dialog);
@@ -43,4 +44,20 @@ public class AppEngineTabGroup extends AbstractLaunchConfigurationTabGroup {
     setTabs(tabs);
   }
 
+  /**
+   * To call {@code AbstractLaunchConfigurationTab#scheduleUpdateJob()} as a workaround for
+   * https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/481
+   */
+  private static class AppEngineServerLaunchConfigurationTab extends ServerLaunchConfigurationTab {
+
+    private AppEngineServerLaunchConfigurationTab(String[] serverTypeIds) {
+      super(serverTypeIds);
+    }
+
+    @Override
+    public void createControl(Composite parent) {
+      super.createControl(parent);
+      scheduleUpdateJob();
+    }
+  }
 }

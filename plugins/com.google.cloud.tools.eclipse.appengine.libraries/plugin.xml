@@ -39,7 +39,7 @@
           siteUri="https://github.com/objectify/objectify/wiki" >
       <libraryDependency id="appengine-api" />
       <libraryFile
-            javadocUri="http://www.javadoc.io/doc/com.googlecode.objectify/objectify/">
+            javadocUri="http://static.javadoc.io/com.googlecode.objectify/objectify/5.1.13/">
         <mavenCoordinates
               artifactId="objectify"
               groupId="com.googlecode.objectify"

@@ -146,7 +146,7 @@ public class AppEngineLibrariesInPluginXmlTest {
 
     assertThat(objectifyLibrary.getLibraryFiles().size(), is(2));
     LibraryFile objectifyLibraryFile = objectifyLibrary.getLibraryFiles().get(0);
-    assertThat(objectifyLibraryFile.getJavadocUri(), is(new URI("http://www.javadoc.io/doc/com.googlecode.objectify/objectify/")));
+    assertThat(objectifyLibraryFile.getJavadocUri(), is(new URI("http://static.javadoc.io/com.googlecode.objectify/objectify/5.1.13/")));
     assertNull(objectifyLibraryFile.getSourceUri());
     assertTrue("Objectify not exported", objectifyLibraryFile.isExport());
 

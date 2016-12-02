@@ -23,7 +23,6 @@ import com.google.common.base.Strings;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateValueStrategy;
@@ -58,7 +57,7 @@ public class AppEngineLibrariesSelectorGroup {
     Preconditions.checkNotNull(parentContainer, "parentContainer is null");
     this.parentContainer = parentContainer;
     selectedLibraries = new WritableList(getDisplayRealm());
-    libraryButtons = new LinkedList<>();
+    libraryButtons = new ArrayList<>();
     createContents();
   }
 
@@ -68,7 +67,7 @@ public class AppEngineLibrariesSelectorGroup {
 
   private void createContents() {
     Group apiGroup = new Group(parentContainer, SWT.NONE);
-    apiGroup.setText(Messages.AppEngineLibrariesSelectorGroupLabel);
+    apiGroup.setText(Messages.getString("appengine.libraries.group"));
     GridDataFactory.fillDefaults().span(2, 1).applyTo(apiGroup);
 
     List<Library> libraries = getLibraries();
@@ -114,48 +113,38 @@ public class AppEngineLibrariesSelectorGroup {
 
   /**
    * We have three bindings for each library:
-   * <ol><li>A one-way binding of the checkbox selection state to add or remove the corresponding library from our
-   * selected-libraries list.</li>
-   * <li>The opposite of the first, a one-way binding to set the checkbox selection state when the corresponding
-   * library has been selected or if it is a dependency of another selected library.</li>
-   * <li>A one-way binding to set the checkbox enablement when the corresponding library is a dependency of a selected
-   * library.</li>
+   * <ol>
+   * <li>A one-way binding of the checkbox selection state to add or remove the corresponding
+   * library from our selected-libraries list.</li>
+   * <li>The opposite of the first, a one-way binding to set the checkbox selection state when the
+   * corresponding library has been selected or if it is a dependency of another selected library.
+   * </li>
+   * <li>A one-way binding to set the checkbox enablement when the corresponding library is a
+   * dependency of a selected library.</li>
    * </ol>
+   * 
    * @param libraryButton to which the databinding will be configured.
    */
-  private void setupDatabindingForButton(final Button libraryButton) {
-    final Library library = (Library) libraryButton.getData();
-    ISWTObservableValue libraryButtonSelection = WidgetProperties.selection().observe(libraryButton);
-    ISWTObservableValue libraryButtonEnablement = WidgetProperties.enabled().observe(libraryButton);
+  private void setupDatabindingForButton(Button libraryButton) {
+    Library library = (Library) libraryButton.getData();
+    ISWTObservableValue libraryButtonSelection =
+        WidgetProperties.selection().observe(libraryButton);
+    ISWTObservableValue libraryButtonEnablement = 
+        WidgetProperties.enabled().observe(libraryButton);
     // library selection UI -> model
-    bindingContext.bindValue(libraryButtonSelection,
-                             new NullComputedValue(getDisplayRealm()),
-                             new UpdateValueStrategy().setConverter(new HandleLibrarySelectionConverter(selectedLibraries,
-                                                                                                        library)),
-                             new UpdateValueStrategy(UpdateValueStrategy.POLICY_NEVER));
+    bindingContext.bindValue(libraryButtonSelection, new NullComputedValue(getDisplayRealm()),
+        new UpdateValueStrategy()
+            .setConverter(new HandleLibrarySelectionConverter(selectedLibraries, library)),
+        new UpdateValueStrategy(UpdateValueStrategy.POLICY_NEVER));
     // UI <- library selection model
-    bindingContext.bindValue(libraryButtonSelection, 
-                             new DependentLibrarySelected(getDisplayRealm(),
-                                                          library.getId(),
-                                                          true /* resultIfFound */) {
-                                                            @Override
-                                                            protected Object calculate() {
-                                                              if (libraryButton.getData(BUTTON_MANUAL_SELECTION_KEY) != null) {
-                                                                return true;
-                                                              } else {
-                                                                return super.calculate();
-                                                              }
-                                                            }
-                                                          },
-                             new UpdateValueStrategy(UpdateValueStrategy.POLICY_NEVER),
-                             new UpdateValueStrategy());
+    boolean resultIfFound = true;
+    bindingContext.bindValue(libraryButtonSelection,
+        new LibrarySelected(getDisplayRealm(), library.getId(), resultIfFound, libraryButton), 
+        new UpdateValueStrategy(UpdateValueStrategy.POLICY_NEVER), new UpdateValueStrategy());
     // UI enablement <- library is a dependency
     bindingContext.bindValue(libraryButtonEnablement,
-                             new DependentLibrarySelected(getDisplayRealm(),
-                                                          library.getId(),
-                                                          false /* resultIfFound */),
-                             new UpdateValueStrategy(UpdateValueStrategy.POLICY_NEVER),
-                             new UpdateValueStrategy());
+        new DependentLibrarySelected(getDisplayRealm(), library.getId(), false /* resultIfFound*/),
+        new UpdateValueStrategy(UpdateValueStrategy.POLICY_NEVER), new UpdateValueStrategy());
   }
 
   public void dispose() {
@@ -173,6 +162,25 @@ public class AppEngineLibrariesSelectorGroup {
     return libraryButtons;
   }
 
+  private final class LibrarySelected extends DependentLibrarySelected {
+    private final Button libraryButton;
+
+    private LibrarySelected(Realm realm, String libraryId, boolean resultIfFound,
+        Button libraryButton) {
+      super(realm, libraryId, resultIfFound);
+      this.libraryButton = libraryButton;
+    }
+
+    @Override
+    protected Object calculate() {
+      // must call super.calculate to ensure
+      // databinding will call this method when
+      // selectedLibraries changes
+      return (boolean) super.calculate()
+          || libraryButton.getData(BUTTON_MANUAL_SELECTION_KEY) != null;
+    }
+  }
+
   /**
    * Tracks if the checkbox has been explicitly clicked by the user.
    */
@@ -188,16 +196,17 @@ public class AppEngineLibrariesSelectorGroup {
     }
 
     private void setManualSelection(SelectionEvent event) {
-      Button source = (Button) event.getSource();
-      if (event.getSource() instanceof Button && (source.getStyle() & SWT.CHECK) != 0) {
-        Button button = source;
+      Preconditions.checkArgument(event.getSource() instanceof Button);
+
+      Button button = (Button) event.getSource();
+      if ((button.getStyle() & SWT.CHECK) != 0) {
         button.setData(BUTTON_MANUAL_SELECTION_KEY, button.getSelection() ? new Object() : null);
       }
     }
   }
 
   /**
-   * Returns a computed value based on whether the associated library is in a list or not. 
+   * Returns a computed value based on whether the associated library is in a list or not.
    */
   private class DependentLibrarySelected extends ComputedValue {
     private String libraryId;
@@ -231,8 +240,8 @@ public class AppEngineLibrariesSelectorGroup {
   }
 
   /**
-   * Returns null always, can be used in databinding if the actual value is not important, i.e. converters and/or
-   * validators are used to implement the desired behavior.
+   * Always returns null. Can be used in databinding if the actual value is not important;
+   * i.e. converters and/or validators are used to implement the desired behavior.
    */
   private static final class NullComputedValue extends ComputedValue {
 
@@ -247,15 +256,16 @@ public class AppEngineLibrariesSelectorGroup {
   }
 
   /**
-   * Adds/removes the library to the list of <code>libraries</code> depending upon the boolean value received for
-   * conversion. If the value is <code>true</code> it will add, otherwise it will remove the library from the list.
+   * Adds/removes the library to the list of <code>libraries</code> depending upon the boolean 
+   * received for conversion. If the value is <code>true</code> it will add, otherwise it will
+   * remove the library from the list.
    */
   private static final class HandleLibrarySelectionConverter extends Converter {
 
     private Library library;
     private List<Library> libraries;
 
-    public HandleLibrarySelectionConverter(List<Library> libraries, Library library) {
+    HandleLibrarySelectionConverter(List<Library> libraries, Library library) {
       super(Boolean.class, List.class);
       Preconditions.checkNotNull(libraries, "selector is null");
       Preconditions.checkNotNull(library, "library is null");

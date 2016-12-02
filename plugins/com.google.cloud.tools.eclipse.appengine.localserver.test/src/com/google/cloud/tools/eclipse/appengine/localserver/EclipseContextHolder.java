@@ -22,14 +22,16 @@ import org.junit.Rule;
 import org.junit.rules.ExternalResource;
 
 /**
- * Helper class to be used with {@link Rule} to make tests easier that depend on {@link IEclipseContext}. It provides
- * an empty context that can be filled with object needed for the test using the {@link #set(Class, Object)} method.
+ * Helper class to be used with {@link Rule} to make tests easier that depend on
+ * {@link IEclipseContext}. It provides an empty context that can be filled with object needed for
+ * the test using the {@link #set(Class, Object)} method.
  * <p>
- * Creates a new context instance for each test runs and takes care of the disposal of the context object after
- * the test has been executed.
+ * Creates a new context instance for each test runs and takes care of the disposal of the context
+ * object after the test has been executed.
  * <p>
- * Mocking the {@link IEclipseContext} objects can be complicated hence this class. mock(IEclipseContext.class) causes
- * ClassCastException, mock(EclipseContext.class) throws an error during service lookup.
+ * Mocking the {@link IEclipseContext} objects can be complicated hence this class.
+ * mock(IEclipseContext.class) causes ClassCastException, 
+ * mock(EclipseContext.class) throws an error during service lookup.
  */
 public class EclipseContextHolder extends ExternalResource {
 

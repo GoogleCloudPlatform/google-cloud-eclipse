@@ -18,12 +18,27 @@ package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
 import static org.mockito.Mockito.when;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
+import com.google.common.base.Function;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jst.common.project.facet.core.JavaFacet;
+import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.jst.server.core.IWebModule;
+import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
+import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.server.core.IModule;
+import org.eclipse.wst.server.core.IRuntime;
+import org.eclipse.wst.server.core.IRuntimeWorkingCopy;
+import org.eclipse.wst.server.core.IServer;
+import org.eclipse.wst.server.core.IServerWorkingCopy;
+import org.eclipse.wst.server.core.ServerCore;
 import org.eclipse.wst.server.core.internal.ModuleType;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -34,15 +49,94 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class LocalAppEngineServerDelegateTest {
 
   private LocalAppEngineServerDelegate delegate = new LocalAppEngineServerDelegate();
-  private @Mock IModule module1;
-  private @Mock IModule module2;
-  private @Mock IWebModule webModule;
+  private static final IProjectFacetVersion APPENGINE_STANDARD_FACET_VERSION_1 =
+      ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID).getVersion("1");
+
+  @Mock private IModule module1;
+  @Mock private IWebModule webModule1;
+  @Mock private IModule module2;
+  @Mock private IWebModule webModule2;
+  @Mock private IModule module3;
+  @Rule public TestProjectCreator dynamicWebProject =
+      new TestProjectCreator().withFacetVersions(Lists.newArrayList(JavaFacet.VERSION_1_7,
+                                                                    WebFacetUtils.WEB_25));
+  @Rule
+  public TestProjectCreator appEngineStandardProject =
+      new TestProjectCreator().withFacetVersions(Lists.newArrayList(JavaFacet.VERSION_1_7,
+          WebFacetUtils.WEB_25, APPENGINE_STANDARD_FACET_VERSION_1));
 
   @Test
-  public void testCanModifyModules() {
+  public void testCanModifyModules() throws CoreException {
+    delegate = getDelegateWithServer();
     IModule[] remove = new IModule[0];
     IModule[] add = new IModule[0];
     Assert.assertEquals(Status.OK_STATUS, delegate.canModifyModules(add, remove));
+  }
+
+  @Test
+  public void testCheckProjectFacets_NoAppEngineStandardFacet() throws CoreException {
+    delegate = getDelegateWithServer();
+    IModule[] add = new IModule[]{ module1 };
+    when(module1.getProject()).thenReturn(dynamicWebProject.getProject());
+    Assert.assertEquals(Status.ERROR, delegate.checkProjectFacets(add).getSeverity());
+  }
+
+  @Test
+  public void testCheckProjectFacets_appEngineStandardFacet() throws CoreException {
+    delegate = getDelegateWithServer();
+    IModule[] add = new IModule[]{ module1 };
+    when(module1.getProject()).thenReturn(appEngineStandardProject.getProject());
+    Assert.assertEquals(Status.OK_STATUS, delegate.checkProjectFacets(add));
+  }
+
+  @Test
+  public void testCheckConflictingId_defaultServiceIds() throws CoreException {
+    delegate = getDelegateWithServer();
+    Function<IModule, String> alwaysDefault = new Function<IModule, String>() {
+      @Override
+      public String apply(IModule module) {
+        return "default";
+      }
+    };
+
+    Assert.assertEquals(Status.ERROR, delegate.checkConflictingServiceIds(new IModule[] {module1},
+        new IModule[] {module2}, null, alwaysDefault).getSeverity());
+
+    // should be ok if we remove module1 and add module2
+    Assert.assertEquals(Status.OK, delegate.checkConflictingServiceIds(new IModule[] {module1},
+        new IModule[] {module2}, new IModule[] {module1}, alwaysDefault).getSeverity());
+  }
+
+  @Test
+  public void testCheckConflictingId_differentServiceIds() throws CoreException {
+    delegate = getDelegateWithServer();
+    Function<IModule, String> moduleName = new Function<IModule, String>() {
+      @Override
+      public String apply(IModule module) {
+        Preconditions.checkNotNull(module);
+        return module.getName();
+      }
+    };
+    when(module1.getName()).thenReturn("module1");
+    when(module2.getName()).thenReturn("module2");
+    Assert.assertEquals(Status.OK, delegate.checkConflictingServiceIds(
+        new IModule[] {module1}, new IModule[] {module2}, null, moduleName).getSeverity());
+  }
+
+  /** https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1029 */
+  @Test
+  public void testCheckConflictingId_addExitingModule() throws CoreException {
+    delegate = getDelegateWithServer();
+    Function<IModule, String> moduleName = new Function<IModule, String>() {
+      @Override
+      public String apply(IModule module) {
+        Preconditions.checkNotNull(module);
+        return module.getName();
+      }
+    };
+    when(module1.getName()).thenReturn("module1");
+    Assert.assertEquals(Status.OK, delegate.checkConflictingServiceIds(new IModule[] {module1},
+        new IModule[] {module1}, null, moduleName).getSeverity());
   }
 
   @Test
@@ -68,17 +162,27 @@ public class LocalAppEngineServerDelegateTest {
   }
 
   @Test
-  public void testGetChildModules_webModuleType(){
+  public void testGetChildModules_webModuleType() {
     ModuleType webModuleType = new ModuleType("jst.web", "1.0");
     when(module1.getModuleType()).thenReturn(webModuleType);
     when(module1.getId()).thenReturn("module1");
+    when(module1.loadAdapter(IWebModule.class, null)).thenReturn(webModule1);
+    when(webModule1.getModules()).thenReturn(new IModule[] {module2});
+    when(module2.getModuleType()).thenReturn(webModuleType);
     when(module2.getId()).thenReturn("module2");
-    when(webModule.getModules()).thenReturn(new IModule[]{module2});
-    when(module1.loadAdapter(IWebModule.class, null)).thenReturn(webModule);
+    when(module2.loadAdapter(IWebModule.class, null)).thenReturn(webModule2);
+    when(webModule2.getModules()).thenReturn(new IModule[] {module3});
+    when(module3.getModuleType()).thenReturn(webModuleType);
+    when(module3.getId()).thenReturn("module3");
 
-    IModule[] childModules = delegate.getChildModules(new IModule[]{module1});
+    IModule[] childModules;
+    childModules = delegate.getChildModules(new IModule[] {module1});
     Assert.assertEquals(1, childModules.length);
     Assert.assertEquals("module2", childModules[0].getId());
+
+    childModules = delegate.getChildModules(new IModule[] {module1, module2});
+    Assert.assertEquals(1, childModules.length);
+    Assert.assertEquals("module3", childModules[0].getId());
   }
 
   @Test
@@ -90,4 +194,16 @@ public class LocalAppEngineServerDelegateTest {
     Assert.assertEquals("module1", rootModules[0].getId());
   }
 
+  private LocalAppEngineServerDelegate getDelegateWithServer() throws CoreException {
+    IServerWorkingCopy serverWorkingCopy =
+        ServerCore.findServerType("com.google.cloud.tools.eclipse.appengine.standard.server")
+          .createServer("testServer", null, null);
+    IRuntimeWorkingCopy runtimeWorkingCopy =
+        ServerCore.findRuntimeType("com.google.cloud.tools.eclipse.appengine.standard.runtime")
+          .createRuntime("testRuntime", null);
+    IRuntime runtime = runtimeWorkingCopy.save(true, null);
+    serverWorkingCopy.setRuntime(runtime);
+    IServer original = serverWorkingCopy.save(true, null);
+    return LocalAppEngineServerDelegate.getAppEngineServer(original);
+  }
 }

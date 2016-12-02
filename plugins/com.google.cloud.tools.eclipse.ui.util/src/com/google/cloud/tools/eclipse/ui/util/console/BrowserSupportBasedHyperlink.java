@@ -20,7 +20,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.eclipse.swt.program.Program;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
@@ -52,7 +51,13 @@ public class BrowserSupportBasedHyperlink implements IHyperlink {
   public void linkActivated() {
     try {
       IWorkbenchBrowserSupport browserSupport = PlatformUI.getWorkbench().getBrowserSupport();
-      browserSupport.createBrowser(null).openURL(new URL(url));
+      int style = IWorkbenchBrowserSupport.LOCATION_BAR | IWorkbenchBrowserSupport.NAVIGATION_BAR
+          | IWorkbenchBrowserSupport.STATUS;
+      String browserId = null;
+      String title = null;
+      String tooltip = null;
+      browserSupport.createBrowser(style, browserId, title, tooltip).openURL(new URL(url));
+
     } catch (PartInitException partInitException) {
       logger.log(Level.SEVERE, "Cannot open hyperlink using browser support, will try SWT's Program.launch(String)",
                  partInitException);

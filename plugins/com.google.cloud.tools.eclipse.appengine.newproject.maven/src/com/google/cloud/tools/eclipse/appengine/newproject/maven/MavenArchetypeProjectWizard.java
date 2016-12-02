@@ -16,12 +16,15 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 
-import com.google.cloud.tools.appengine.cloudsdk.AppEngineJavaComponentsNotInstalledException;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-import com.google.cloud.tools.eclipse.appengine.ui.AppEngineComponentPage;
+import com.google.cloud.tools.eclipse.appengine.newproject.StandardProjectWizard;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineJavaComponentMissingPage;
+import com.google.cloud.tools.eclipse.appengine.ui.CloudSdkMissingPage;
+import com.google.cloud.tools.eclipse.appengine.ui.Messages;
+import com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPrompter;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
-
+import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -30,13 +33,11 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.statushandlers.StatusManager;
-
-import java.lang.reflect.InvocationTargetException;
 
 public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
   private MavenAppEngineStandardWizardPage page;
   private MavenAppEngineStandardArchetypeWizardPage archetypePage;
+  private File cloudSdkLocation;
 
   public MavenArchetypeProjectWizard() {
     setWindowTitle(Messages.getString("WIZARD_TITLE")); //$NON-NLS-1$
@@ -45,13 +46,18 @@ public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
 
   @Override
   public void addPages() {
-    if (appEngineJavaComponentExists()) {
+    if (!StandardProjectWizard.cloudSdkExists()) {
+      addPage(
+          new CloudSdkMissingPage(
+          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_MAVEN));
+    } else if (!StandardProjectWizard.appEngineJavaComponentExists()) {
+      addPage(new AppEngineJavaComponentMissingPage(
+          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE));
+    } else { // all is good
       page = new MavenAppEngineStandardWizardPage();
       archetypePage = new MavenAppEngineStandardArchetypeWizardPage();
-      this.addPage(page);
-      this.addPage(archetypePage);
-    } else {
-      this.addPage(new AppEngineComponentPage(false /* forNativeProjectWizard */));
+      addPage(page);
+      addPage(archetypePage);
     }
   }
 
@@ -61,6 +67,13 @@ public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_COMPLETE,
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_MAVEN);
+
+    if (cloudSdkLocation == null) {
+      cloudSdkLocation = CloudSdkPrompter.getCloudSdkLocation(getShell());
+      if (cloudSdkLocation == null) {
+        return false;
+      }
+    }
 
     final CreateMavenBasedAppEngineStandardProject operation = new CreateMavenBasedAppEngineStandardProject();
     operation.setPackageName(page.getPackageName());
@@ -87,22 +100,18 @@ public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
     } catch (InterruptedException ex) {
       status = Status.CANCEL_STATUS;
     } catch (InvocationTargetException ex) {
-      status = new Status(Status.ERROR, getClass().getName(), 0, ex.getMessage(), ex.getCause());
-      StatusManager.getManager().handle(status, StatusManager.LOG | StatusManager.SHOW);
+      status = StandardProjectWizard.setErrorStatus(this, ex.getCause());
     }
 
     return status.isOK();
   }
 
   @Override
-  public void init(IWorkbench workbench, IStructuredSelection selection) {}
-
-  private boolean appEngineJavaComponentExists() {
-    try {
-      new CloudSdk.Builder().build().validateAppEngineJavaComponents();
-      return true;
-    } catch (AppEngineJavaComponentsNotInstalledException ex) {
-      return false;
+  public void init(IWorkbench workbench, IStructuredSelection selection) {
+    if (cloudSdkLocation == null) {
+      cloudSdkLocation = CloudSdkPrompter.getCloudSdkLocation(getShell());
+      // if the user doesn't provide the Cloud SDK then we'll error in performFinish() too
     }
   }
+
 }

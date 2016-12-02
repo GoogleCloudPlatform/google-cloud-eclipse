@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.libraries;
+package com.google.cloud.tools.eclipse.test.util.project;
 
 import static org.junit.Assert.fail;
 
 import com.google.common.base.Strings;
+import java.util.ArrayList;
+import java.util.List;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -28,15 +30,25 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.wst.common.project.facet.core.IFacetedProject;
+import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
+import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
+import org.eclipse.wst.common.project.facet.core.internal.FacetedProjectNature;
 import org.junit.rules.ExternalResource;
 
-public final class TestProject extends ExternalResource {
+public final class TestProjectCreator extends ExternalResource {
 
   private IJavaProject javaProject;
   private String containerPath;
+  private List<IProjectFacetVersion> projectFacetVersions = new ArrayList<>();
 
-  public TestProject withClasspathContainerPath(String containerPath) {
+  public TestProjectCreator withClasspathContainerPath(String containerPath) {
     this.containerPath = containerPath;
+    return this;
+  }
+
+  public TestProjectCreator withFacetVersions(List<IProjectFacetVersion> projectFacetVersions) {
+    this.projectFacetVersions.addAll(projectFacetVersions);
     return this;
   }
 
@@ -47,6 +59,8 @@ public final class TestProject extends ExternalResource {
 
   @Override
   protected void after() {
+    // Wait for any jobs to complete as WTP validation runs without the workspace protection lock
+    ProjectUtils.waitUntilIdle();
     try {
       javaProject.getProject().delete(true, null);
     } catch (CoreException e) {
@@ -58,23 +72,38 @@ public final class TestProject extends ExternalResource {
     return javaProject;
   }
 
+  public IProject getProject() {
+    return javaProject.getProject();
+  }
+
   private void createJavaProject(String projectName) throws CoreException, JavaModelException {
     IProjectDescription newProjectDescription = ResourcesPlugin.getWorkspace().newProjectDescription(projectName);
-    newProjectDescription.setNatureIds(new String[]{JavaCore.NATURE_ID});
+    newProjectDescription.setNatureIds(new String[]{JavaCore.NATURE_ID, FacetedProjectNature.NATURE_ID});
     IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
     project.create(newProjectDescription, null);
     project.open(null);
     javaProject = JavaCore.create(project);
-    if (!Strings.isNullOrEmpty(containerPath)) {
-      addContainerPathToRawClasspath();
-    }
+
+    addContainerPathToRawClasspath();
+    addFacets();
   }
 
   private void addContainerPathToRawClasspath() throws JavaModelException {
-    IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
-    IClasspathEntry[] newRawClasspath = new IClasspathEntry[rawClasspath.length + 1];
-    System.arraycopy(rawClasspath, 0, newRawClasspath, 0, rawClasspath.length);
-    newRawClasspath[newRawClasspath.length - 1] = JavaCore.newContainerEntry(new Path(containerPath));
-    javaProject.setRawClasspath(newRawClasspath, null);
+    if (!Strings.isNullOrEmpty(containerPath)) {
+      IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
+      IClasspathEntry[] newRawClasspath = new IClasspathEntry[rawClasspath.length + 1];
+      System.arraycopy(rawClasspath, 0, newRawClasspath, 0, rawClasspath.length);
+      newRawClasspath[newRawClasspath.length - 1] = JavaCore.newContainerEntry(new Path(containerPath));
+      javaProject.setRawClasspath(newRawClasspath, null);
+    }
+  }
+
+  private void addFacets() throws CoreException {
+    if (!projectFacetVersions.isEmpty()) {
+      IFacetedProject facetedProject = ProjectFacetsManager.create(getProject());
+      for (IProjectFacetVersion projectFacetVersion : projectFacetVersions) {
+        facetedProject.installProjectFacet(projectFacetVersion, null, null);
+      }
+    }
   }
 }

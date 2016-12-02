@@ -23,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
+import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -31,11 +32,13 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotCheckBox;
-import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 public class AppEngineLibrariesSelectorGroupTest {
+
+  @Rule public ShellTestResource shellTestResource = new ShellTestResource();
 
   private Shell shell;
   private AppEngineLibrariesSelectorGroup librariesSelector;
@@ -49,29 +52,13 @@ public class AppEngineLibrariesSelectorGroupTest {
 
       @Override
       public void run() {
-        // TODO use ShellTestResource (see AccountPanelTest) after fixing
-        // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/771.
-        // (Remove shell.dispose() in tearDown() too.)
-        shell = new Shell(Display.getDefault());
+        shell = shellTestResource.getShell();
         shell.setLayout(new FillLayout());
         librariesSelector = new AppEngineLibrariesSelectorGroup(shell);
         shell.open();
         appengineButton = getButton("appengine-api");
         endpointsButton = getButton("appengine-endpoints");
         objectifyButton = getButton("objectify");
-      }
-    });
-  }
-
-  @After
-  public void tearDown() {
-    Display.getDefault().syncExec(new Runnable() {
-
-      @Override
-      public void run() {
-        if (shell != null) {
-          shell.dispose();
-        }
       }
     });
   }
@@ -228,6 +215,24 @@ public class AppEngineLibrariesSelectorGroupTest {
         assertNotNull(selectedLibraries);
         assertThat(selectedLibraries.size(), is(1));
         assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
+      }});
+  }
+
+  // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/954
+  @Test
+  public void testSelectAndUnselectAppengineApiThenSelectEndpointsShouldKeepAppEngineSelected() {
+    syncExec(new Runnable() {
+
+      @Override
+      public void run() {
+        appengineButton.click();
+        appengineButton.click();
+        endpointsButton.click();
+        List<Library> selectedLibraries = getSelectedLibrariesSorted();
+        assertNotNull(selectedLibraries);
+        assertThat(selectedLibraries.size(), is(2));
+        assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
+        assertThat(selectedLibraries.get(1).getId(), is("appengine-endpoints"));
       }});
   }
 

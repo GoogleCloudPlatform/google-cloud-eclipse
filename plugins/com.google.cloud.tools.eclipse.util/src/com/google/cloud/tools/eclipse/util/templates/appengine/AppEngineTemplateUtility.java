@@ -17,8 +17,9 @@
 package com.google.cloud.tools.eclipse.util.templates.appengine;
 
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -43,22 +44,23 @@ public class AppEngineTemplateUtility {
 
   private static Configuration configuration;
 
-  public static void createFileContent(String outputFileLocation, String templateName, Map<String, String> dataMap)
+  public static void createFileContent(
+      String outputFileLocation, String templateName, Map<String, String> dataMap)
       throws CoreException {
     Preconditions.checkNotNull(outputFileLocation, "output file is null");
     Preconditions.checkNotNull(templateName, "template name is null");
     Preconditions.checkNotNull(dataMap, "data map is null");
 
-    try {
-      if (configuration == null) {
-        configuration = createConfiguration();
-      }
-      File outputFile = new File(outputFileLocation);
-      Writer fileWriter = new FileWriter(outputFile);
+    if (configuration == null) {
+      configuration = createConfiguration();
+    }
+    File outputFile = new File(outputFileLocation);
+    try (Writer writer =
+        new OutputStreamWriter(new FileOutputStream(outputFile), StandardCharsets.UTF_8)) {
       Template template = configuration.getTemplate(templateName);
-      template.process(dataMap, fileWriter);
-    } catch (IOException | TemplateException e) {
-      throw new CoreException(StatusUtil.error(AppEngineTemplateUtility.class, e.getMessage()));
+      template.process(dataMap, writer);
+    } catch (IOException | TemplateException ex) {
+      throw new CoreException(StatusUtil.error(AppEngineTemplateUtility.class, ex.getMessage()));
     }
   }
 
@@ -66,12 +68,13 @@ public class AppEngineTemplateUtility {
   }
 
   private static Configuration createConfiguration() {
-    Configuration cfg = new Configuration(Configuration.VERSION_2_3_25);
-    cfg.setClassForTemplateLoading(AppEngineTemplateUtility.class, "/templates/appengine");
-    cfg.setDefaultEncoding(StandardCharsets.UTF_8.name());
-    cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
-    cfg.setLogTemplateExceptions(false);
-    return cfg;
+    Configuration configuration = new Configuration(Configuration.VERSION_2_3_25);
+    configuration.setClassForTemplateLoading(
+        AppEngineTemplateUtility.class, "/templates/appengine");
+    configuration.setDefaultEncoding(StandardCharsets.UTF_8.name());
+    configuration.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+    configuration.setLogTemplateExceptions(false);
+    return configuration;
   }
 
 }

@@ -30,7 +30,7 @@ import java.nio.file.Path;
  */
 public class MockSdkGenerator {
   /**
-   * Create a mock Google Cloud SDK installation. It is the callers responsibility to remove this
+   * Create a mock Google Cloud SDK installation. It is the caller's responsibility to remove this
    * directory with {@link #deleteMockSdk(Path)}.
    */
   public static Path createMockSdk() throws Exception {

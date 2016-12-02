@@ -10,6 +10,9 @@ Fragment-Host: com.google.cloud.tools.eclipse.appengine.deploy.ui
 Require-Bundle: org.hamcrest;bundle-version="1.1.0",
  org.junit;bundle-version="4.12.0"
 Import-Package: com.google.cloud.tools.eclipse.appengine.facets,
+ com.google.cloud.tools.eclipse.test.util,
+ com.google.cloud.tools.eclipse.test.util.ui,
+ com.google.common.base;version="17.0.0",
  org.eclipse.core.expressions,
  org.eclipse.jface.viewers,
  org.eclipse.wst.common.project.facet.core,
