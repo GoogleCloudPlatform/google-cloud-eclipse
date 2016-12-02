@@ -22,6 +22,7 @@ import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPreferenceArea;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
@@ -38,7 +39,6 @@ public class LocalAppEngineServerWizardFragment extends WizardFragment {
 
   private String cloudSdkPath = null;
   private boolean dialogFinished = false;
-  private boolean enableFinishButton;
 
   public LocalAppEngineServerWizardFragment() {
   }
@@ -56,12 +56,6 @@ public class LocalAppEngineServerWizardFragment extends WizardFragment {
   @Override
   public void enter() {
     dialogFinished = false;
-    enableFinishButton = true;
-  }
-
-  @Override
-  public void exit() {
-    enableFinishButton = false;
   }
 
   @Override
@@ -116,7 +110,9 @@ public class LocalAppEngineServerWizardFragment extends WizardFragment {
     public void widgetDisposed(DisposeEvent event) {
       if (dialogFinished && cloudSdkButton.getSelection()) {
         // switch to Cloud SDK preferences panel
-        PreferencesUtil.createPreferenceDialogOn(null, CloudSdkPreferenceArea.PAGE_ID, null, null);
+        PreferenceDialog dialog = PreferencesUtil.createPreferenceDialogOn(
+            null, CloudSdkPreferenceArea.PAGE_ID, null, null);
+        dialog.open();
       }
     }
   }
