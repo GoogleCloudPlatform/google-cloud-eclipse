@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
@@ -30,7 +31,7 @@ public class LocalAppEngineServerWizardFragmentTest {
 
   @Test
   public void testHasComposite() {
-    Assert.assertTrue(fragment.hasComposite());
+    Assert.assertFalse(fragment.hasComposite());
   }
 
   @Test
@@ -49,8 +50,12 @@ public class LocalAppEngineServerWizardFragmentTest {
         .setDescription("The App Engine Standard runtime requires the Google Cloud SDK");
     
     Control[] children = composite.getChildren();
-    Assert.assertEquals(1, children.length);
+    Assert.assertEquals(2, children.length);
     Label label = (Label) children[0];
-    Assert.assertTrue(label.getText().startsWith("Using the Google Cloud SDK installed in "));
+    Assert.assertTrue(label.getText().startsWith("Cannot find the Google Cloud SDK"));
+    Button button = (Button) children[1];
+    Assert.assertEquals(
+        "Open the Cloud SDK Location preference page when the wizard closes",
+        button.getText());
   }
 }
