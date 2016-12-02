@@ -19,9 +19,9 @@ package com.google.cloud.tools.eclipse.appengine.newproject;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import java.io.File;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import org.eclipse.core.resources.IProject;
 
@@ -34,7 +34,6 @@ class AppEngineStandardProjectConfig {
   private String packageName = "";
   private IProject project;
   private List<Library> appEngineLibraries = Collections.emptyList();
-
 
   public File getCloudSdkLocation() {
     return cloudSdkLocation;
@@ -76,7 +75,7 @@ class AppEngineStandardProjectConfig {
   }
 
   public void setAppEngineLibraries(Collection<Library> libraries) {
-    this.appEngineLibraries = new LinkedList<>(libraries);
+    this.appEngineLibraries = new ArrayList<>(libraries);
   }
 
 }

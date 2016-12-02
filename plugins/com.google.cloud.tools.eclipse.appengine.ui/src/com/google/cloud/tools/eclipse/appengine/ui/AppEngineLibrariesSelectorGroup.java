@@ -21,8 +21,10 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -35,6 +37,7 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
@@ -47,37 +50,42 @@ import org.eclipse.swt.widgets.Group;
 public class AppEngineLibrariesSelectorGroup implements ISelectionProvider {
   // TODO obtain libraries from extension registry
   // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/819
-  private static Map<String, Library> getAvailableLibraries() {
-    Map<String, Library> libraries = new LinkedHashMap<>();
+  private static Collection<Library> getAvailableLibraries() {
     Library appEngine = new Library("appengine-api");
     appEngine.setName("App Engine API");
-    libraries.put(appEngine.getId(), appEngine);
     Library endpoints = new Library("appengine-endpoints");
     endpoints.setName("App Engine Endpoints");
     endpoints.setLibraryDependencies(Collections.singletonList("appengine-api"));
-    libraries.put(endpoints.getId(), endpoints);
     Library objectify = new Library("objectify");
     objectify.setName("Objectify");
     objectify.setLibraryDependencies(Collections.singletonList("appengine-api"));
-    libraries.put(objectify.getId(), objectify);
-    return libraries;
+    return Arrays.asList(appEngine, endpoints, objectify);
   }
 
   private Composite parentContainer;
 
   /** The libraries that can be selected. */
   private final Map<String, Library> availableLibraries;
+
   /** The user's explicitly selected libraries. */
-  private final Collection<Library> explicitLibraries = new HashSet<>();
+  private final Collection<Library> explicitSelectedLibraries = new HashSet<>();
 
   private final Map<Library, Button> libraryButtons = new LinkedHashMap<>();
   private final ListenerList/* <ISelectedChangeListener> */ listeners = new ListenerList/* <> */();
 
-
   public AppEngineLibrariesSelectorGroup(Composite parentContainer) {
+    this(parentContainer, getAvailableLibraries());
+  }
+
+  public AppEngineLibrariesSelectorGroup(Composite parentContainer,
+      Collection<Library> availableLibraries) {
     Preconditions.checkNotNull(parentContainer, "parentContainer is null");
+    Preconditions.checkNotNull(availableLibraries, "availableLibraries is null");
     this.parentContainer = parentContainer;
-    this.availableLibraries = getAvailableLibraries();
+    this.availableLibraries = new HashMap<>();
+    for (Library library : availableLibraries) {
+      this.availableLibraries.put(library.getId(), library);
+    }
     createContents();
   }
 
@@ -97,11 +105,11 @@ public class AppEngineLibrariesSelectorGroup implements ISelectionProvider {
   }
 
   /**
-   * Returns a computed value based on whether the associated library is in a list or not.
+   * Returns the selected libraries and required dependencies.
    */
   public Collection<Library> getSelectedLibraries() {
-    Collection<Library> libraries = new HashSet<>(explicitLibraries);
-    for (Library library : explicitLibraries) {
+    Collection<Library> libraries = new HashSet<>(explicitSelectedLibraries);
+    for (Library library : explicitSelectedLibraries) {
       for (String depId : library.getLibraryDependencies()) {
         libraries.add(availableLibraries.get(depId));
       }
@@ -112,10 +120,11 @@ public class AppEngineLibrariesSelectorGroup implements ISelectionProvider {
   private void updateButtons() {
     Set<Library> included = new HashSet<>(getSelectedLibraries());
     for (Entry<Library, Button> entry : libraryButtons.entrySet()) {
-      Library dep = entry.getKey();
+      Library dependency = entry.getKey();
       Button button = entry.getValue();
-      button.setSelection(included.contains(dep));
-      button.setEnabled(!included.contains(dep) || explicitLibraries.contains(dep));
+      button.setSelection(included.contains(dependency));
+      button.setEnabled(
+          !included.contains(dependency) || explicitSelectedLibraries.contains(dependency));
     }
   }
 
@@ -143,12 +152,30 @@ public class AppEngineLibrariesSelectorGroup implements ISelectionProvider {
     listeners.remove(listener);
   }
 
+  /**
+   * Return the list of selected libraries and their required libraries.
+   */
   public ISelection getSelection() {
     return new StructuredSelection(getSelectedLibraries());
   }
 
+  /**
+   * Set selection by providing a collection of {@linkplain Library} objects or
+   * {@link Library#getId() library IDs}. All libraries are marked as being explicitly selected.
+   * Must be called from the SWT thread.
+   */
   public void setSelection(ISelection selection) {
-    throw new UnsupportedOperationException();
+    explicitSelectedLibraries.clear();
+    if (selection instanceof IStructuredSelection) {
+      for (Object object : ((IStructuredSelection) selection).toArray()) {
+        if (object instanceof String && availableLibraries.containsKey(object)) {
+          explicitSelectedLibraries.add(availableLibraries.get(object));
+        } else if (object instanceof Library && availableLibraries.containsValue(object)) {
+          explicitSelectedLibraries.add((Library) object);
+        }
+      }
+    }
+    updateButtons();
   }
 
   private void fireSelectionListeners() {
@@ -179,13 +206,12 @@ public class AppEngineLibrariesSelectorGroup implements ISelectionProvider {
       Button button = (Button) event.getSource();
       Library clicked = (Library) button.getData();
       if (button.getSelection()) {
-        explicitLibraries.add(clicked);
+        explicitSelectedLibraries.add(clicked);
       } else {
-        explicitLibraries.remove(clicked);
+        explicitSelectedLibraries.remove(clicked);
       }
       updateButtons();
       fireSelectionListeners();
     }
   }
-
 }
