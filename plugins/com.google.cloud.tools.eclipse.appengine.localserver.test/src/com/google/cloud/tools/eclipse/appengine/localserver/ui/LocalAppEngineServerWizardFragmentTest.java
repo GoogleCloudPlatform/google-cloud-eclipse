@@ -35,11 +35,7 @@ public class LocalAppEngineServerWizardFragmentTest {
 
   @Test
   public void testIsComplete() {
-    Assert.assertFalse(fragment.isComplete());
-    fragment.enter();
     Assert.assertTrue(fragment.isComplete());
-    fragment.exit();
-    Assert.assertFalse(fragment.isComplete());
   }
   
   @Test

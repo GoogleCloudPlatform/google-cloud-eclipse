@@ -50,7 +50,7 @@ public class LocalAppEngineServerWizardFragment extends WizardFragment {
 
   @Override
   public boolean isComplete() {
-    return enableFinishButton;
+    return true;
   }
 
   @Override
