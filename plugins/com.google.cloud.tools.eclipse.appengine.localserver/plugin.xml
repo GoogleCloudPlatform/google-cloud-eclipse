@@ -219,7 +219,7 @@
       <fragment
             class="com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineServerWizardFragment"
             id="com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineServerWizardFragment"
-            typeIds="com.google.cloud.tools.eclipse.appengine.standard.runtime">
+            typeIds="com.google.cloud.tools.eclipse.appengine.standard.server">
       </fragment>
    </extension>
 </plugin>
