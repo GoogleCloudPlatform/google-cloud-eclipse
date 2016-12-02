@@ -54,8 +54,7 @@ public class LocalAppEngineServerWizardFragmentTest {
     Label label = (Label) children[0];
     Assert.assertTrue(label.getText().startsWith("Cannot find the Google Cloud SDK"));
     Button button = (Button) children[1];
-    Assert.assertEquals(
-        "Open the Cloud SDK Location preference page when the wizard closes",
+    Assert.assertEquals("Open the Cloud SDK Location preference page when the wizard closes",
         button.getText());
   }
 }
