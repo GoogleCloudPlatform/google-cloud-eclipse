@@ -77,9 +77,9 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
     final IProjectDescription description = workspace.newProjectDescription(name);
     description.setLocationURI(location);
     SubMonitor subMonitor =
-        SubMonitor.convert(monitor, Messages.getString("creating.appengine.standard.project"), 100);
+        SubMonitor.convert(monitor, Messages.getString("creating.app.engine.standard.project"), 100);
     CreateProjectOperation operation = new CreateProjectOperation(
-        description, Messages.getString("creating.new.appengine.standard.project"));
+        description, Messages.getString("creating.new.app.engine.standard.project"));
     try {
       operation.execute(subMonitor.newChild(10), uiInfoAdapter);
       CodeTemplates.materialize(newProject, config, subMonitor.newChild(80));

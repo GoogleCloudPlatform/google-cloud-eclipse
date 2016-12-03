@@ -45,8 +45,8 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
 
   public AppEngineStandardWizardPage() {
     super("basicNewProjectPage"); //$NON-NLS-1$
-    this.setTitle(Messages.getString("appengine.standard.project"));
-    this.setDescription(Messages.getString("create.appengine.standard.project"));
+    this.setTitle(Messages.getString("app.engine.standard.project"));
+    this.setDescription(Messages.getString("create.app.engine.standard.project"));
 
     this.setImageDescriptor(AppEngineImages.appEngine(64));
   }
