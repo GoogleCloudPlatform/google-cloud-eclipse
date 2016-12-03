@@ -26,7 +26,7 @@ import org.eclipse.jdt.core.JavaCore;
 public class JavaPackageValidator {
 
   private static final String PLUGIN_ID = 
-      "com.google.cloud.tools.eclipse.appengine.newproject.AppEngineStandard";
+      "com.google.cloud.tools.eclipse.appengine.newproject.AppEngineStandard"; //$NON-NLS-1$
   
   /**
    * Check if a string is a legal Java package name.
@@ -39,7 +39,7 @@ public class JavaPackageValidator {
     } else if (packageName.endsWith(".")) {
       // todo or allow this and strip the period
       return new Status(IStatus.ERROR, PLUGIN_ID, 46, 
-          MessageFormat.format("{0} ends with a period.", packageName), null);
+          Messages.getString("package.ends.with.period", packageName), null);
     } else if (containsWhitespace(packageName)) {
       // very weird condition because validatePackageName allows internal white space
       return new Status(IStatus.ERROR, PLUGIN_ID, 46, 
