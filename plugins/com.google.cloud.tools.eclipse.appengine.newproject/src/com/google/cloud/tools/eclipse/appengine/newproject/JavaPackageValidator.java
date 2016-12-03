@@ -16,8 +16,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
-import java.text.MessageFormat;
-
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.JavaConventions;
@@ -43,7 +41,7 @@ public class JavaPackageValidator {
     } else if (containsWhitespace(packageName)) {
       // very weird condition because validatePackageName allows internal white space
       return new Status(IStatus.ERROR, PLUGIN_ID, 46, 
-          MessageFormat.format("{0} contains whitespace.", packageName), null);
+          Messages.getString("package.contains.whitespace", packageName), null);
     } else {
       return JavaConventions.validatePackageName(
           packageName, JavaCore.VERSION_1_4, JavaCore.VERSION_1_4);
