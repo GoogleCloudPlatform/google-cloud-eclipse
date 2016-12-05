@@ -181,8 +181,8 @@ public class AppEngineLibrariesSelectorGroup implements ISelectionProvider {
   private void fireSelectionListeners() {
     SelectionChangedEvent event =
         new SelectionChangedEvent(this, getSelection());
-    for (Object l : listeners.getListeners()) {
-      ((ISelectionChangedListener) l).selectionChanged(event);
+    for (Object listener : listeners.getListeners()) {
+      ((ISelectionChangedListener) listener).selectionChanged(event);
     }
   }
 
