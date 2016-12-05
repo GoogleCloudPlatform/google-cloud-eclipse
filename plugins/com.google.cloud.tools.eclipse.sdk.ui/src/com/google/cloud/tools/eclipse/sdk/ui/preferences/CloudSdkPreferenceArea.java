@@ -19,9 +19,11 @@ package com.google.cloud.tools.eclipse.sdk.ui.preferences;
 import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.cloudsdk.AppEngineJavaComponentsNotInstalledException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkOutOfDateException;
 import com.google.cloud.tools.eclipse.preferences.areas.PreferenceArea;
 import com.google.cloud.tools.eclipse.sdk.internal.PreferenceConstants;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.Dialog;
@@ -43,6 +45,7 @@ import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
@@ -141,7 +144,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     }
   }
 
-  private Path getDefaultSdkLocation() {
+  private static Path getDefaultSdkLocation() {
     try {
       return new CloudSdk.Builder().build().getSdkPath();
     } catch (AppEngineException ex) {
@@ -150,29 +153,32 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
   }
 
   private boolean validateSdk(Path location) {
+    CloudSdk sdk = new CloudSdk.Builder().sdkPath(location).build();
     try {
-      CloudSdk sdk = new CloudSdk.Builder().sdkPath(location).build();
       sdk.validateCloudSdk();
       sdk.validateAppEngineJavaComponents(); 
     } catch (AppEngineJavaComponentsNotInstalledException ex) {
       status = new Status(IStatus.WARNING, getClass().getName(),
           MessageFormat.format(SdkUiMessages.AppEngineJavaComponentsNotInstalled, ex.getMessage()));
+    } catch (CloudSdkOutOfDateException ex) {
+        status = new Status(IStatus.ERROR,
+            "com.google.cloud.tools.eclipse.appengine.deploy.ui", SdkUiMessages.CloudSdkOutOfDate);
     } catch (AppEngineException ex) {
       // accept a seemingly invalid location in case the SDK organization
       // has changed and the CloudSdk#validate() code is out of date
       status = new Status(IStatus.WARNING, getClass().getName(),
-          MessageFormat.format(SdkUiMessages.CloudSdkPreferencePage_6, ex.getMessage()));
+          MessageFormat.format(SdkUiMessages.CloudSdkNotFound, sdk.getSdkPath()));
     }
     return true;
   }
 
   /**
-   * A wrapper around DirectoryFieldEditor for performing validation checks that the location holds
-   * a SDK. Uses {@code VALIDATE_ON_KEY_STROKE} to perform check on per keystroke to avoid wiping
+   * A wrapper around DirectoryFieldEditor for validating that the location holds
+   * a SDK. Uses {@code VALIDATE_ON_KEY_STROKE} to perform check per keystroke to avoid wiping
    * out the validation messages.
    */
   class CloudSdkDirectoryFieldEditor extends DirectoryFieldEditor {
-    public CloudSdkDirectoryFieldEditor(String name, String labelText, Composite parent) {
+    CloudSdkDirectoryFieldEditor(String name, String labelText, Composite parent) {
       // unfortunately cannot use super(name,labelText,parent) as must specify the
       // validateStrategy before the createControl()
       init(name, labelText);
@@ -193,12 +199,23 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
 
     @Override
     protected boolean doCheckState() {
-      if (!super.doCheckState()) {
-        status = new Status(IStatus.ERROR, getClass().getName(), "Invalid directory");
+      String directory = getStringValue().trim();
+      if (directory.isEmpty()) {
+        return true;
+      }
+      
+      Path location = Paths.get(directory);
+      if (!Files.exists(location)) {
+        String message = MessageFormat.format(SdkUiMessages.NoSuchDirectory, location);
+        status = new Status(IStatus.ERROR, getClass().getName(), message);
+        return false;
+      } else if (!Files.isDirectory(location)) {
+        String message = MessageFormat.format(SdkUiMessages.FileNotDirectory, location);
+        status = new Status(IStatus.ERROR, getClass().getName(), message);
         return false;
       }
       status = Status.OK_STATUS;
-      return getStringValue().isEmpty() || validateSdk(Paths.get(getStringValue()));
+      return validateSdk(location);
     }
   }
 }

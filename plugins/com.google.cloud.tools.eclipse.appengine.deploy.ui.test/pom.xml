@@ -20,13 +20,7 @@
         <configuration>
           <useUIHarness>true</useUIHarness>
           <useUIThread>true</useUIThread>
-          <product>org.eclipse.sdk.ide</product>
-          <dependencies>
-            <dependency>
-              <type>p2-installable-unit</type>
-              <artifactId>org.eclipse.sdk.feature.group</artifactId>
-            </dependency>
-          </dependencies>
+          <product>org.eclipse.platform.ide</product>
         </configuration>
       </plugin>
       <plugin>
@@ -35,11 +29,6 @@
         <configuration>
           <dependency-resolution>
             <extraRequirements>
-              <requirement>
-                <type>eclipse-feature</type>
-                <id>com.google.cloud.tools.eclipse.suite.e45.feature</id>
-                <versionRange>0.0.0</versionRange>
-              </requirement>
               <requirement>
                 <type>eclipse-feature</type>
                 <id>org.eclipse.m2e.feature</id>

@@ -24,7 +24,12 @@ import org.junit.rules.ExternalResource;
 
 public class ShellTestResource extends ExternalResource {
 
+  private Display display;
   private Shell shell;
+
+  public Display getDisplay() {
+    return display;
+  }
 
   public Shell getShell() {
     return shell;
@@ -32,8 +37,9 @@ public class ShellTestResource extends ExternalResource {
 
   @Override
   protected void before() {
-    assertNotNull(Display.getDefault());
-    shell = new Shell(Display.getDefault());
+    display = Display.getDefault();
+    assertNotNull(display);
+    shell = new Shell(display);
   }
 
   @Override

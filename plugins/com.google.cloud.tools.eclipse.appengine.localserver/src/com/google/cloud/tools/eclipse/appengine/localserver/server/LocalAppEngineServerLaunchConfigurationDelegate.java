@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
 import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkOutOfDateException;
 import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
 import com.google.cloud.tools.eclipse.appengine.localserver.PreferencesInitializer;
 import com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineConsole;
@@ -76,6 +77,11 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     try {
       CloudSdk cloudSdk = new CloudSdk.Builder().build();
       cloudSdk.validateCloudSdk();
+    } catch (CloudSdkOutOfDateException ex) {
+        String detailMessage = Messages.getString("cloudsdk.out.of.date");
+        Status status = new Status(IStatus.ERROR,
+            "com.google.cloud.tools.eclipse.appengine.deploy.ui", detailMessage);
+        throw new CoreException(status);
     } catch (AppEngineException ex) {
       String detailMessage = Messages.getString("cloudsdk.not.configured"); //$NON-NLS-1$
       Status status = new Status(IStatus.ERROR,

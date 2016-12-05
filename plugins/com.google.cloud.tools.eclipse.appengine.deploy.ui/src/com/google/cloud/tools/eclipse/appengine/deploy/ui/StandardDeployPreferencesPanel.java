@@ -26,11 +26,12 @@ import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectIdInputValidato
 import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectVersionValidator;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.ErrorHandler;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.ObservablesManager;
 import org.eclipse.core.databinding.UpdateValueStrategy;
@@ -92,7 +93,8 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
   private ExpandableComposite expandableComposite;
 
-  private DeployPreferencesModel model;
+  @VisibleForTesting
+  DeployPreferencesModel model;
   private ObservablesManager observables;
   private DataBindingContext bindingContext;
 
@@ -139,33 +141,36 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   }
 
   private void setupAccountEmailDataBinding(DataBindingContext context) {
-    IValidator accountSelectedChecker = new IValidator() {
-      @Override
-      public IStatus validate(Object value /* email */) {
-        if (requireValues && Strings.isNullOrEmpty((String) value)) {
-          if (accountSelector.isSignedIn()) {
-            return ValidationStatus.error(Messages.getString("error.account.missing.signedin"));
-          } else {
-            return ValidationStatus.error(Messages.getString("error.account.missing.signedout"));
+    AccountSelectorObservableValue accountSelectorObservableValue =
+        new AccountSelectorObservableValue(accountSelector);
+    UpdateValueStrategy modelToTarget =
+        new UpdateValueStrategy().setConverter(new Converter(String.class, String.class) {
+          @Override
+          public Object convert(Object expectedEmail) {
+            // Expected to be an email address, but must also ensure is a currently logged-in
+            // account
+            if (expectedEmail instanceof String
+                && accountSelector.isEmailAvailable((String) expectedEmail)) {
+              return expectedEmail;
+            } else {
+              return null;
+            }
           }
-        }
-        return ValidationStatus.ok();
-      }
-    };
-    UpdateValueStrategy targetToModel = new UpdateValueStrategy()
-        .setBeforeSetValidator(accountSelectedChecker);
-    UpdateValueStrategy modelToTarget = new UpdateValueStrategy()
-        .setBeforeSetValidator(accountSelectedChecker)
-        .setConverter(new Converter(String.class, String.class) {
-      @Override
-      public Object convert(Object fromObject /* email */) {
-        return accountSelector.isEmailAvailable((String) fromObject) ? fromObject : null;
-      }
-    });
+        });
 
     final IObservableValue accountEmailModel = PojoProperties.value("accountEmail").observe(model);
-    context.bindValue(new AccountSelectorObservableValue(accountSelector), accountEmailModel,
-        targetToModel, modelToTarget);
+
+    Binding binding = context.bindValue(accountSelectorObservableValue, accountEmailModel,
+        new UpdateValueStrategy(), modelToTarget);
+    /*
+     * Trigger an explicit target -> model update for the auto-select-single-account case. When the
+     * model has a null account but there is exactly 1 login account, then the AccountSelector
+     * automatically selects that account. That change means the AccountSelector is at odds with the
+     * model.
+     */
+    binding.updateTargetToModel();
+    context.addValidationStatusProvider(new AccountSelectorValidator(requireValues, accountSelector,
+        accountSelectorObservableValue));
   }
 
   private void setupProjectIdDataBinding(DataBindingContext context) {
@@ -278,8 +283,9 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     new Label(accountComposite, SWT.LEFT).setText(
         Messages.getString("deploy.preferences.dialog.label.selectAccount"));
 
+    // If we don't require values, then don't auto-select accounts
     accountSelector = new AccountSelector(accountComposite, loginService,
-        Messages.getString("deploy.preferences.dialog.accountSelector.login"));
+        Messages.getString("deploy.preferences.dialog.accountSelector.login"), requireValues);
     GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(accountComposite);
   }
 
@@ -424,6 +430,40 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
         return ValidationStatus.ok();
       }
       return validator.validate(textObservable.getValue());
+    }
+  }
+
+  /**
+   * Validates the {@link AccountSelector account selector} state against the panel settings.
+   * Reports an error if the panel requires all values to be set, but the account selector does not
+   * have a valid account.
+   */
+  private static class AccountSelectorValidator extends FixedMultiValidator {
+    final private boolean requireValues;
+    final private AccountSelectorObservableValue accountSelectorObservableValue;
+    final private AccountSelector accountSelector;
+
+    private AccountSelectorValidator(boolean requireValues, AccountSelector accountSelector,
+        AccountSelectorObservableValue accountSelectorObservableValue) {
+      this.requireValues = requireValues;
+      this.accountSelector = accountSelector;
+      this.accountSelectorObservableValue = accountSelectorObservableValue;
+      // trigger the validator, as defaults to OK otherwise
+      getValidationStatus();
+    }
+
+    @Override
+    protected IStatus validate() {
+      // access accountSelectorObservableValue so MultiValidator records the access
+      String selectedEmail = (String) accountSelectorObservableValue.getValue();
+      if (requireValues && Strings.isNullOrEmpty(selectedEmail)) {
+        if (accountSelector.isSignedIn()) {
+          return ValidationStatus.error(Messages.getString("error.account.missing.signedin"));
+        } else {
+          return ValidationStatus.error(Messages.getString("error.account.missing.signedout"));
+        }
+      }
+      return ValidationStatus.ok();
     }
   }
 

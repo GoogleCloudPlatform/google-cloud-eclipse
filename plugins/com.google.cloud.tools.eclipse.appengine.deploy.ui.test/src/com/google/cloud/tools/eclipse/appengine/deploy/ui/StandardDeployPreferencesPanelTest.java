@@ -18,7 +18,9 @@ package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.api.client.auth.oauth2.Credential;
@@ -33,7 +35,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Shell;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -45,48 +46,75 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class StandardDeployPreferencesPanelTest {
 
   private Composite parent;
-  private Shell shell;
   @Mock private IProject project;
   @Mock private IGoogleLoginService loginService;
   @Mock private Runnable layoutChangedHandler;
-  @Mock private Account account;
+  @Mock private Account account1;
+  @Mock private Account account2;
   @Mock private Credential credential;
   @Rule public ShellTestResource shellTestResource = new ShellTestResource();
 
   @Before
   public void setUp() throws Exception {
-    shell = shellTestResource.getShell();
-    parent = new Composite(shell, SWT.NONE);
+    parent = new Composite(shellTestResource.getShell(), SWT.NONE);
     when(project.getName()).thenReturn("testProject");
-    when(account.getEmail()).thenReturn("some-email-1@example.com");
-    when(account.getOAuth2Credential()).thenReturn(credential);
+    when(account1.getEmail()).thenReturn("some-email-1@example.com");
+    when(account2.getEmail()).thenReturn("some-email-2@example.com");
+    when(account1.getOAuth2Credential()).thenReturn(credential);
+    when(account2.getOAuth2Credential()).thenReturn(mock(Credential.class));
+  }
+
+  @Test
+  public void testSelectSingleAccount() {
+    when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1)));
+    StandardDeployPreferencesPanel deployPanel = new StandardDeployPreferencesPanel(
+        parent, project, loginService, layoutChangedHandler, true);
+    assertThat(deployPanel.getSelectedCredential(), is(credential));
+
+    // todo? assertTrue(deployPanel.getAccountSelector().isAutoSelectAccountIfNone()
+
+    // verify not in error
+    IStatus status = getAccountSelectorValidationStatus(deployPanel);
+    assertTrue("account selector is in error: " + status.getMessage(), status.isOK());
+
+    assertThat("auto-selected value should be propagated back to model",
+        deployPanel.model.getAccountEmail(), is(account1.getEmail()));
   }
 
   @Test
   public void testValidationMessageWhenNotSignedIn() {
     StandardDeployPreferencesPanel deployPanel = new StandardDeployPreferencesPanel(parent, project, loginService, layoutChangedHandler, true);
-    assertThat(getAccountSelectorValidationStatus(deployPanel), is("Sign in to Google."));
+    IStatus status = getAccountSelectorValidationStatus(deployPanel);
+    assertThat(status.getMessage(), is("Sign in to Google."));
   }
 
   @Test
   public void testValidationMessageWhenSignedIn() {
-    when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account)));
+    // Return two accounts because the account selector will auto-select if there exists only one.
+    when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1, account2)));
+
     StandardDeployPreferencesPanel deployPanel = new StandardDeployPreferencesPanel(parent, project, loginService, layoutChangedHandler, true);
-    assertThat(getAccountSelectorValidationStatus(deployPanel), is("Select an account."));
+    IStatus status = getAccountSelectorValidationStatus(deployPanel);
+    assertThat(status.getMessage(), is("Select an account."));
   }
 
-  private String getAccountSelectorValidationStatus(StandardDeployPreferencesPanel deployPanel) {
+  private IStatus getAccountSelectorValidationStatus(StandardDeployPreferencesPanel deployPanel) {
+    IStatus status = null;
     for (Object object : deployPanel.getDataBindingContext().getValidationStatusProviders()) {
       ValidationStatusProvider statusProvider = (ValidationStatusProvider) object;
       if (!statusProvider.getTargets().isEmpty()) {
         if (statusProvider.getTargets().get(0) instanceof AccountSelectorObservableValue) {
-          IStatus status = (IStatus) statusProvider.getValidationStatus().getValue();
-          return status.getMessage();
+          status = (IStatus) statusProvider.getValidationStatus().getValue();
+          if (!status.isOK()) {
+            return status;
+          }
         }
       }
     }
-    fail("Could not find AccountSelector databinding to verify validation");
-    return null;
+    if (status == null) {
+      fail("Could not find AccountSelector databinding to verify validation");
+    }
+    return status;
   }
 
 }

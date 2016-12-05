@@ -22,8 +22,12 @@ import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineLibrariesSelectorGroup;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
+import com.google.cloud.tools.io.FilePermissions;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.CharMatcher;
+import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.Collection;
 import org.eclipse.aether.repository.RepositoryPolicy;
@@ -229,7 +233,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     });
   }
 
-  protected void openLocationDialog() {
+  private void openLocationDialog() {
     DirectoryDialog dialog = new DirectoryDialog(getShell());
     dialog.setText(Messages.getString("GENERATED_PROJECT_LOCATION")); //$NON-NLS-1$
     String location = dialog.open();
@@ -244,7 +248,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     return canFlipPage;
   }
 
-  protected void checkFlipToNext() {
+  private void checkFlipToNext() {
     canFlipPage = validatePage();
     getContainer().updateButtons();
   }
@@ -254,16 +258,15 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
    *
    * @return true if valid, false if there is a problem
    */
-  public boolean validatePage() {
+  private boolean validatePage() {
     setMessage(null);
     setErrorMessage(null);
 
     // order here should match order of the UI fields
-
-    String location = locationField.getText().trim();
-    if (!useDefaults() && location.isEmpty()) {
-      setMessage(Messages.getString("PROVIDE_LOCATION"), INFORMATION); //$NON-NLS-1$
-      return false;
+    if (!useDefaults()) {
+      if (!validateLocation(locationField.getText().trim(), this)) {
+        return false;
+      }
     }
 
     if (!validateMavenSettings()) {
@@ -285,6 +288,28 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     if (!appEngineLibrariesSelectorGroup.getSelectedLibraries().isEmpty()
         && RepositoryPolicy.UPDATE_POLICY_NEVER.equals(globalUpdatePolicy)) {
       setMessage(Messages.getString("M2E_GLOBAL_UPDATES_PREVENT_CHECKS"), WARNING);
+    }
+  }
+
+  @VisibleForTesting
+  static boolean validateLocation(String location, WizardPage page) {
+    if (location.isEmpty()) {
+      page.setMessage(Messages.getString("PROVIDE_LOCATION"), INFORMATION); //$NON-NLS-1$
+      return false;
+    } else {
+      try {
+        java.nio.file.Path path = Paths.get(location);
+        FilePermissions.verifyDirectoryCreatable(path);
+        return true;
+      } catch (FileAlreadyExistsException ex) {
+          String message = MessageFormat.format(Messages.getString("FILE_LOCATION"), location); //$NON-NLS-1$
+          page.setMessage(message, ERROR);
+          return false;  
+      } catch (IOException ex) {
+        String message = MessageFormat.format(Messages.getString("INVALID_PATH"), location); //$NON-NLS-1$
+        page.setMessage(message, ERROR);
+        return false;  
+      }
     }
   }
 

@@ -28,6 +28,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.jst.server.core.IWebModule;
+import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
+import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IRuntime;
 import org.eclipse.wst.server.core.IRuntimeWorkingCopy;
@@ -47,6 +49,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class LocalAppEngineServerDelegateTest {
 
   private LocalAppEngineServerDelegate delegate = new LocalAppEngineServerDelegate();
+  private static final IProjectFacetVersion APPENGINE_STANDARD_FACET_VERSION_1 =
+      ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID).getVersion("1");
+
   @Mock private IModule module1;
   @Mock private IWebModule webModule1;
   @Mock private IModule module2;
@@ -58,7 +63,7 @@ public class LocalAppEngineServerDelegateTest {
   @Rule
   public TestProjectCreator appEngineStandardProject =
       new TestProjectCreator().withFacetVersions(Lists.newArrayList(JavaFacet.VERSION_1_7,
-          WebFacetUtils.WEB_25, AppEngineStandardFacet.APPENGINE_STANDARD_VERSION));
+          WebFacetUtils.WEB_25, APPENGINE_STANDARD_FACET_VERSION_1));
 
   @Test
   public void testCanModifyModules() throws CoreException {
@@ -105,7 +110,7 @@ public class LocalAppEngineServerDelegateTest {
   @Test
   public void testCheckConflictingId_differentServiceIds() throws CoreException {
     delegate = getDelegateWithServer();
-    Function<IModule, String> alwaysDefault = new Function<IModule, String>() {
+    Function<IModule, String> moduleName = new Function<IModule, String>() {
       @Override
       public String apply(IModule module) {
         Preconditions.checkNotNull(module);
@@ -115,7 +120,23 @@ public class LocalAppEngineServerDelegateTest {
     when(module1.getName()).thenReturn("module1");
     when(module2.getName()).thenReturn("module2");
     Assert.assertEquals(Status.OK, delegate.checkConflictingServiceIds(
-        new IModule[] {module1}, new IModule[] {module2}, null, alwaysDefault).getSeverity());
+        new IModule[] {module1}, new IModule[] {module2}, null, moduleName).getSeverity());
+  }
+
+  /** https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1029 */
+  @Test
+  public void testCheckConflictingId_addExitingModule() throws CoreException {
+    delegate = getDelegateWithServer();
+    Function<IModule, String> moduleName = new Function<IModule, String>() {
+      @Override
+      public String apply(IModule module) {
+        Preconditions.checkNotNull(module);
+        return module.getName();
+      }
+    };
+    when(module1.getName()).thenReturn("module1");
+    Assert.assertEquals(Status.OK, delegate.checkConflictingServiceIds(new IModule[] {module1},
+        new IModule[] {module1}, null, moduleName).getSeverity());
   }
 
   @Test

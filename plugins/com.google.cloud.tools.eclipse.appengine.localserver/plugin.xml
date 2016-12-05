@@ -104,7 +104,7 @@
    <extension
          point="org.eclipse.wst.server.ui.serverImages">
       <image
-            icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gcp-16x16.png"
+            icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gae-16x16.png"
             id="com.google.cloud.tools.eclipse.appengine.standard.serverImage"
             typeIds="com.google.cloud.tools.eclipse.appengine.standard.runtime, com.google.cloud.tools.eclipse.appengine.standard.server">
       </image>
@@ -134,7 +134,7 @@
          point="org.eclipse.debug.ui.launchConfigurationTypeImages">
       <launchConfigurationTypeImage
             configTypeID="com.google.cloud.tools.eclipse.appengine.AppToolsLaunchConfigurationType"
-            icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gcp-16x16.png"
+            icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gae-16x16.png"
             id="com.google.cloud.tools.eclipse.appengine.launchConfigurationTypeImages">
       </launchConfigurationTypeImage>
    </extension>
@@ -219,7 +219,7 @@
       <fragment
             class="com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineServerWizardFragment"
             id="com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineServerWizardFragment"
-            typeIds="com.google.cloud.tools.eclipse.appengine.standard.runtime">
+            typeIds="com.google.cloud.tools.eclipse.appengine.standard.server">
       </fragment>
    </extension>
 </plugin>
