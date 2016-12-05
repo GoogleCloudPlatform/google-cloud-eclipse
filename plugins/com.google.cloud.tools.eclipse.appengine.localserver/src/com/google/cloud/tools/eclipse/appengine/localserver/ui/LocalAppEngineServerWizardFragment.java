@@ -101,7 +101,7 @@ public class LocalAppEngineServerWizardFragment extends WizardFragment {
     public void widgetDisposed(DisposeEvent event) {
       if (openPreferenceDialog) {
         // switch to Cloud SDK preferences panel
-        Display.getDefault().asyncExec(new Runnable() {
+        event.display.asyncExec(new Runnable() {
           @Override
           public void run() {
             PreferenceDialog dialog = PreferencesUtil.createPreferenceDialogOn(
