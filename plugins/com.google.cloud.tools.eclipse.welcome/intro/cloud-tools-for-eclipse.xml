@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <introContent>
-   <extensionContent path="overview/@">
+   <extensionContent path="overview/@" style="css/intro.css">
       <group style-id="content-group">
-         <link label="Google Cloud Tools for Eclipse"
+         <link id="cloud-tools-for-eclipse-link"
+               label="Google Cloud Tools for Eclipse"
                style-id="content-link"
                url="https://github.com/GoogleCloudPlatform/google-cloud-eclipse/wiki/Google-Cloud-Tools-for-Eclipse">
             <text>Learn more about Google Cloud Tools for Eclipse.</text>
