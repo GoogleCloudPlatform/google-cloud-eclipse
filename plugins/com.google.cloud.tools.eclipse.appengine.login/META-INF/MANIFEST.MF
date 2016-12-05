@@ -9,7 +9,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Service-Component: OSGI-INF/login.xml
 Require-Bundle: com.google.gson,
- com.google.guava;bundle-version="17.0.0",
+ com.google.guava;bundle-version="20.0.0",
  jackson-core-asl,
  org.eclipse.core.runtime,
  org.eclipse.ui,
