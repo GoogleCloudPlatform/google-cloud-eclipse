@@ -42,7 +42,6 @@ import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.jst.j2ee.classpathdep.UpdateClasspathAttributeUtil;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
@@ -108,7 +107,7 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
       return;
     }
     SubMonitor subMonitor = SubMonitor.convert(monitor,
-        Messages.getString("adding.appengine.libraries"), libraries.size()); //$NON-NLS-1$
+        Messages.getString("adding.app.engine.libraries"), libraries.size()); //$NON-NLS-1$
     IJavaProject javaProject = JavaCore.create(newProject);
     IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
     IClasspathEntry[] newRawClasspath =
@@ -154,7 +153,7 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
   }
 
   private static void addJunit4ToClasspath(IProgressMonitor monitor, final IProject newProject)
-      throws CoreException, JavaModelException {
+      throws CoreException {
     IJavaProject javaProject = JavaCore.create(newProject);
     IClasspathAttribute nonDependencyAttribute =
         UpdateClasspathAttributeUtil.createNonDependencyAttribute();
