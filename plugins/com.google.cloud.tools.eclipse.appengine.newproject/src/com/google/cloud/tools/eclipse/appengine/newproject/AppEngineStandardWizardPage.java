@@ -45,8 +45,8 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
 
   public AppEngineStandardWizardPage() {
     super("basicNewProjectPage"); //$NON-NLS-1$
-    this.setTitle(Messages.getString("app.engine.standard.project"));
-    this.setDescription(Messages.getString("create.app.engine.standard.project"));
+    this.setTitle(Messages.getString("app.engine.standard.project")); //$NON-NLS-1$
+    this.setDescription(Messages.getString("create.app.engine.standard.project")); //$NON-NLS-1$
 
     this.setImageDescriptor(AppEngineImages.appEngine(64));
   }
@@ -66,7 +66,7 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
 
     // Java package name
     Label packageNameLabel = new Label(container, SWT.NONE);
-    packageNameLabel.setText(Messages.getString("java.package"));
+    packageNameLabel.setText(Messages.getString("java.package")); //$NON-NLS-1$
     javaPackageField = new Text(container, SWT.BORDER);
     GridData javaPackagePosition = new GridData(GridData.FILL_HORIZONTAL);
     javaPackagePosition.horizontalSpan = 2;
@@ -92,14 +92,16 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
     String packageName = javaPackageField.getText();
     IStatus packageStatus = JavaPackageValidator.validate(packageName);
     if (!packageStatus.isOK()) {
-      setErrorMessage(Messages.getString("illegal.package.name", packageStatus.getMessage()));
+      String message = Messages.getString("illegal.package.name",  //$NON-NLS-1$
+          packageStatus.getMessage());
+      setErrorMessage(message); 
       return false;
     }
 
     File parent = getLocationPath().toFile();
     File projectDirectory = new File(parent, getProjectName());
     if (projectDirectory.exists()) {
-      setErrorMessage(Messages.getString("project.location.exists", projectDirectory));
+      setErrorMessage(Messages.getString("project.location.exists", projectDirectory)); //$NON-NLS-1$
       return false;
     }
 

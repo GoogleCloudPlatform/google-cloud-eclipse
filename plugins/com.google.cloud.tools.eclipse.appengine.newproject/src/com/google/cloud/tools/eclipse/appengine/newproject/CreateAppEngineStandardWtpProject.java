@@ -59,9 +59,10 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
   private final AppEngineStandardProjectConfig config;
   private final IAdaptable uiInfoAdapter;
 
-  CreateAppEngineStandardWtpProject(AppEngineStandardProjectConfig config, IAdaptable uiInfoAdapter) {
+  CreateAppEngineStandardWtpProject(AppEngineStandardProjectConfig config,
+      IAdaptable uiInfoAdapter) {
     if (config == null) {
-      throw new NullPointerException("Null App Engine configuration");
+      throw new NullPointerException("Null App Engine configuration"); //$NON-NLS-1$
     }
     this.config = config;
     this.uiInfoAdapter = uiInfoAdapter;
@@ -76,10 +77,10 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
     String name = newProject.getName();
     final IProjectDescription description = workspace.newProjectDescription(name);
     description.setLocationURI(location);
-    SubMonitor subMonitor =
-        SubMonitor.convert(monitor, Messages.getString("creating.app.engine.standard.project"), 100);
+    SubMonitor subMonitor = SubMonitor.convert(monitor,
+        Messages.getString("creating.app.engine.standard.project"), 100); //$NON-NLS-1$
     CreateProjectOperation operation = new CreateProjectOperation(
-        description, Messages.getString("creating.new.app.engine.standard.project"));
+        description, Messages.getString("creating.new.app.engine.standard.project")); //$NON-NLS-1$
     try {
       operation.execute(subMonitor.newChild(10), uiInfoAdapter);
       CodeTemplates.materialize(newProject, config, subMonitor.newChild(80));
@@ -91,9 +92,11 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
         newProject, true, subMonitor.newChild(2));
     AppEngineStandardFacet.installAppEngineFacet(
         facetedProject, true /* installDependentFacets */, subMonitor.newChild(2));
-    AppEngineStandardFacet.installAllAppEngineRuntimes(facetedProject, true /* force */, subMonitor.newChild(2));
+    AppEngineStandardFacet.installAllAppEngineRuntimes(facetedProject, true /* force */,
+        subMonitor.newChild(2));
 
-    addAppEngineLibrariesToBuildPath(newProject, config.getAppEngineLibraries(), subMonitor.newChild(2));
+    addAppEngineLibrariesToBuildPath(newProject, config.getAppEngineLibraries(),
+        subMonitor.newChild(2));
 
     addJunit4ToClasspath(subMonitor.newChild(2), newProject);
   }
@@ -105,7 +108,7 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
       return;
     }
     SubMonitor subMonitor = SubMonitor.convert(monitor,
-        Messages.getString("adding.appengine.libraries"), libraries.size());
+        Messages.getString("adding.appengine.libraries"), libraries.size()); //$NON-NLS-1$
     IJavaProject javaProject = JavaCore.create(newProject);
     IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
     IClasspathEntry[] newRawClasspath =
@@ -150,7 +153,7 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
     job.schedule();
   }
 
-  private void addJunit4ToClasspath(IProgressMonitor monitor, final IProject newProject)
+  private static void addJunit4ToClasspath(IProgressMonitor monitor, final IProject newProject)
       throws CoreException, JavaModelException {
     IJavaProject javaProject = JavaCore.create(newProject);
     IClasspathAttribute nonDependencyAttribute =

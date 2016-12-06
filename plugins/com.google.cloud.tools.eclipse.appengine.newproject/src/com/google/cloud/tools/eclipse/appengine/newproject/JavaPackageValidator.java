@@ -34,14 +34,14 @@ public class JavaPackageValidator {
       return new Status(IStatus.ERROR, PLUGIN_ID, 45, "null package name", null);
     } else if (packageName.isEmpty()) { // default package is allowed
       return Status.OK_STATUS;
-    } else if (packageName.endsWith(".")) {
+    } else if (packageName.endsWith(".")) { //$NON-NLS-1$
       // todo or allow this and strip the period
       return new Status(IStatus.ERROR, PLUGIN_ID, 46, 
-          Messages.getString("package.ends.with.period", packageName), null);
+          Messages.getString("package.ends.with.period", packageName), null); //$NON-NLS-1$
     } else if (containsWhitespace(packageName)) {
       // very weird condition because validatePackageName allows internal white space
       return new Status(IStatus.ERROR, PLUGIN_ID, 46, 
-          Messages.getString("package.contains.whitespace", packageName), null);
+          Messages.getString("package.contains.whitespace", packageName), null); //$NON-NLS-1$
     } else {
       return JavaConventions.validatePackageName(
           packageName, JavaCore.VERSION_1_4, JavaCore.VERSION_1_4);
