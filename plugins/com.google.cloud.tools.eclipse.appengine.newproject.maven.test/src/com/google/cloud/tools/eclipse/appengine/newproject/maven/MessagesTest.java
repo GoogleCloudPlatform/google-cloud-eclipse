@@ -16,23 +16,15 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
+import org.junit.Assert;
+import org.junit.Test;
 
-public class Messages {
-  private static final String BUNDLE_NAME =
-      "com.google.cloud.tools.eclipse.appengine.newproject.maven.messages"; //$NON-NLS-1$
+public class MessagesTest {
 
-  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME);
-
-  private Messages() {
+  @Test
+  public void testWizardTitle() {
+    Assert.assertEquals(
+        "Maven-based App Engine Standard Project", Messages.getString("WIZARD_TITLE"));
   }
 
-  public static String getString(String key) {
-    try {
-      return RESOURCE_BUNDLE.getString(key);
-    } catch (MissingResourceException ex) {
-      return '!' + key + '!';
-    }
-  }
 }

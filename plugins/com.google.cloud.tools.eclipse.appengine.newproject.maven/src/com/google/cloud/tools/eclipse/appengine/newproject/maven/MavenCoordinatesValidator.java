@@ -56,7 +56,7 @@ public class MavenCoordinatesValidator {
       return false;
     }
     // verify matches pattern
-    return id.matches("[A-Za-z0-9_\\-.]+");
+    return id.matches("[A-Za-z0-9_\\-.]+"); //$NON-NLS-1$
   }
 
   private static IWorkspace getWorkspace() {
