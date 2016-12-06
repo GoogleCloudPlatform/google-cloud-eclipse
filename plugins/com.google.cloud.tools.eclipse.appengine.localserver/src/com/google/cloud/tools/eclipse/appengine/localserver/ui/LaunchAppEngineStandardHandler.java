@@ -3,6 +3,7 @@ package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
 import com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerDelegate;
 import com.google.cloud.tools.eclipse.util.AdapterUtil;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import java.util.ArrayList;
@@ -11,7 +12,6 @@ import java.util.Set;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.commands.IHandler;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -29,7 +29,9 @@ import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.core.ServerCore;
 import org.eclipse.wst.server.core.ServerUtil;
 
-public class LaunchAppEngineStandardHandler extends AbstractHandler implements IHandler {
+public class LaunchAppEngineStandardHandler extends AbstractHandler {
+  @VisibleForTesting
+  boolean mockLaunch = false;
 
   @Override
   public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -44,7 +46,7 @@ public class LaunchAppEngineStandardHandler extends AbstractHandler implements I
       if (server == null) {
         server = createServer(modules, progress.newChild(3));
       }
-      if (server.getServerState() != IServer.STATE_STARTED
+      if (!mockLaunch && server.getServerState() != IServer.STATE_STARTED
           && server.getServerState() != IServer.STATE_STARTING) {
         server.start(launchMode, progress.newChild(4));
       }
