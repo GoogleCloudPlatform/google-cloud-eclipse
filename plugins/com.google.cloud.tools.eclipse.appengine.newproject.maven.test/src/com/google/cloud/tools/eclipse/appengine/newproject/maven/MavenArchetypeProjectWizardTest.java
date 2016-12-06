@@ -28,7 +28,6 @@ import org.eclipse.jface.databinding.swt.DisplayRealm;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;

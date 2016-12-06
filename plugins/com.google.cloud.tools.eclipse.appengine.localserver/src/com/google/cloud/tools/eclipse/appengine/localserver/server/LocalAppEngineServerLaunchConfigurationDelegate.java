@@ -130,7 +130,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
     if (ILaunchManager.DEBUG_MODE.equals(mode)) {
       int debugPort = getDebugPort();
-      setupDebugTarget(launch, configuration, debugPort, monitor);
+      setupDebugTarget(launch, debugPort, monitor);
       serverBehaviour.startDebugDevServer(runnables, console.newMessageStream(), debugPort);
     } else {
       // A launch must have at least one debug target or process, or it otherwise becomes a zombie
@@ -179,7 +179,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     openJob.schedule();
   }
 
-  private void setupDebugTarget(ILaunch launch, ILaunchConfiguration configuration, int port,
+  private void setupDebugTarget(ILaunch launch, int port,
       IProgressMonitor monitor) throws CoreException {
     // The 4.7 listen connector supports a connectionLimit
     IVMConnector connector =

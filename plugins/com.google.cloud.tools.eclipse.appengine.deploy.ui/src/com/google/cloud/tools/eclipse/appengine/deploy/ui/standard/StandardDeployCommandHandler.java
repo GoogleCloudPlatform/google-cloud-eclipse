@@ -36,13 +36,8 @@ import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.console.ConsolePlugin;
-import org.eclipse.ui.console.IConsoleConstants;
 import org.eclipse.ui.console.IConsoleManager;
-import org.eclipse.ui.console.IConsoleView;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.ui.handlers.HandlerUtil;
 
@@ -103,7 +98,7 @@ public class StandardDeployCommandHandler extends AbstractHandler {
         DeployPreferencesDialog dialog =
             new DeployPreferencesDialog(HandlerUtil.getActiveShell(event), project, loginService);
         if (dialog.open() == Window.OK) {
-          launchDeployJob(project, dialog.getCredential(), event);
+          launchDeployJob(project, dialog.getCredential());
         }
       }
       // return value must be null, reserved for future use
@@ -119,7 +114,7 @@ public class StandardDeployCommandHandler extends AbstractHandler {
     return severity != IMarker.SEVERITY_ERROR;
   }
 
-  private void launchDeployJob(IProject project, Credential credential, ExecutionEvent event)
+  private void launchDeployJob(IProject project, Credential credential)
       throws IOException, ExecutionException {
 
     AnalyticsPingManager.getInstance().sendPing(
@@ -127,13 +122,13 @@ public class StandardDeployCommandHandler extends AbstractHandler {
 
     IPath workDirectory = createWorkDirectory();
 
-    DefaultDeployConfiguration deployConfiguration = getDeployConfiguration(project, event);
+    DefaultDeployConfiguration deployConfiguration = getDeployConfiguration(project);
     DeployConsole messageConsole =
         MessageConsoleUtilities.createConsole(getConsoleName(deployConfiguration.getProject()),
                                               new DeployConsole.Factory());
 
     MessageConsoleStream outputStream = messageConsole.newMessageStream();
-    StandardDeployJobConfig config = getDeployJobConfig(project, credential, event,
+    StandardDeployJobConfig config = getDeployJobConfig(project, credential,
         workDirectory, outputStream, deployConfiguration);
 
     StandardDeployJob deploy = new StandardDeployJob.Builder().config(config).build();
@@ -162,7 +157,7 @@ public class StandardDeployCommandHandler extends AbstractHandler {
   }
 
   private StandardDeployJobConfig getDeployJobConfig(IProject project, Credential credential,
-      ExecutionEvent event, IPath workDirectory, MessageConsoleStream outputStream,
+      IPath workDirectory, MessageConsoleStream outputStream,
       DefaultDeployConfiguration deployConfiguration) {
     StandardDeployJobConfig config = new StandardDeployJobConfig();
     config.setProject(project)
@@ -174,7 +169,7 @@ public class StandardDeployCommandHandler extends AbstractHandler {
     return config;
   }
 
-  private DefaultDeployConfiguration getDeployConfiguration(IProject project, ExecutionEvent event)
+  private DefaultDeployConfiguration getDeployConfiguration(IProject project)
       throws ExecutionException {
     StandardDeployPreferences deployPreferences = new StandardDeployPreferences(project);
     if (deployPreferences.getProjectId() == null || deployPreferences.getProjectId().isEmpty()) {

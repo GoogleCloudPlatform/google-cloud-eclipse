@@ -112,7 +112,7 @@ public class AccountsPanel extends PopupDialog {
       close();
       loginService.logIn(null /* no custom dialog title */);
     }
-  };
+  }
 
   private class LogOutOnClick extends SelectionAdapter {
     @Override

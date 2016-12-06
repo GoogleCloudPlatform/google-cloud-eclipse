@@ -27,7 +27,6 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
-import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 

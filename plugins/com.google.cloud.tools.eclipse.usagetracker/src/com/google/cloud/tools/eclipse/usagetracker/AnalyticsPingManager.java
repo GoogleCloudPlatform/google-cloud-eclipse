@@ -343,5 +343,5 @@ public class AnalyticsPingManager {
       this.metadataValue = metadataValue;
       this.shell = shell;
     }
-  };
+  }
 }

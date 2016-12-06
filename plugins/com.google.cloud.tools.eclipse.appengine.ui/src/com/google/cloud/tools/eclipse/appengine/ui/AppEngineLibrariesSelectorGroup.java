@@ -144,10 +144,12 @@ public class AppEngineLibrariesSelectorGroup implements ISelectionProvider {
     return new ArrayList<>(libraryButtons.values());
   }
 
+  @Override
   public void addSelectionChangedListener(ISelectionChangedListener listener) {
     listeners.add(listener);
   }
 
+  @Override
   public void removeSelectionChangedListener(ISelectionChangedListener listener) {
     listeners.remove(listener);
   }
@@ -155,6 +157,7 @@ public class AppEngineLibrariesSelectorGroup implements ISelectionProvider {
   /**
    * Return the list of selected libraries and their required libraries.
    */
+  @Override
   public ISelection getSelection() {
     return new StructuredSelection(getSelectedLibraries());
   }
@@ -164,6 +167,7 @@ public class AppEngineLibrariesSelectorGroup implements ISelectionProvider {
    * {@link Library#getId() library IDs}. All libraries are marked as being explicitly selected.
    * Must be called from the SWT thread.
    */
+  @Override
   public void setSelection(ISelection selection) {
     explicitSelectedLibraries.clear();
     if (selection instanceof IStructuredSelection) {
