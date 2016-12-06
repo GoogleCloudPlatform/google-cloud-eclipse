@@ -148,7 +148,7 @@ described below.
      previous steps to mark it as compatible with the `JavaSE-1.7` execution
      environment.
 
-  1. Click `Apply`.
+  1. Click `OK`.
 
 2. Set up the Target Platform: you will need to repeat this process whenever
    items are changed in the target platform, such as a new release of the
