@@ -17,7 +17,7 @@
             label="Google Cloud Tools for Eclipse Tutorial"
             style-id="content-link"
             url="https://github.com/GoogleCloudPlatform/google-cloud-eclipse/wiki/Cloud-Tools-for-Eclipse-Tutorial">
-        <text>Click to see the tutorial about using Google Cloud Tools for Eclipse.</text>
+        <text>Read the Google Cloud Tools for Eclipse tutorial about using Google Cloud Tools for Eclipse.</text>
       </link>
     </group>
   </extensionContent>
