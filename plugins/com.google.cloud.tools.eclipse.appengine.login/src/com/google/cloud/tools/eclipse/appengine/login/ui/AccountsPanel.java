@@ -131,5 +131,5 @@ public class AccountsPanel extends PopupDialog {
         loginService.logOutAll();
       }
     }
-  };
+  }
 }
