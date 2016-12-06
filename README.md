@@ -174,10 +174,11 @@ described below.
   
   7. Click `Finish` to complete the new target platform definition.
   
-  8. Your new target platform should be selected in the `Target Platform` preferences.
-     Click `OK` to load this new target platform.
+  8. Select your new target platform (instead of Running Platform) in the `Target Platform` preferences.
+  
+  9. Click `OK` to load this new target platform.
       
-  7. Eclipse will load the target.
+  10. Eclipse will load the target.
 
 3. Import the projects
 
