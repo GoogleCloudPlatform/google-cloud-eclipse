@@ -23,5 +23,11 @@
         id="com.google.cloud.tools.eclipse.appengine.wizards" 
         name="%gcp.category" />
   </extension>
+  <extension
+        point="org.eclipse.help.contexts">
+     <contexts
+           file="help-contexts/contexts.xml">
+     </contexts>
+  </extension>
 
 </plugin>

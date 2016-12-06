@@ -32,6 +32,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 
 /**
@@ -44,10 +45,10 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
 
   public AppEngineStandardWizardPage() {
     super("basicNewProjectPage"); //$NON-NLS-1$
-    this.setTitle(Messages.getString("app.engine.standard.project")); //$NON-NLS-1$
-    this.setDescription(Messages.getString("create.app.engine.standard.project")); //$NON-NLS-1$
+    setTitle(Messages.getString("app.engine.standard.project")); //$NON-NLS-1$
+    setDescription(Messages.getString("create.app.engine.standard.project")); //$NON-NLS-1$
 
-    this.setImageDescriptor(AppEngineImages.appEngine(64));
+    setImageDescriptor(AppEngineImages.appEngine(64));
   }
 
   // todo is there a way to call this for a test?
@@ -60,12 +61,15 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE, parent.getShell());
 
     Composite container = (Composite) getControl();
+    PlatformUI.getWorkbench().getHelpSystem().setHelp(container,
+        "com.google.cloud.tools.eclipse.appengine.newproject.NewProjectContext"); //$NON-NLS-1$
 
     ModifyListener pageValidator = new PageValidator();
 
     // Java package name
     Label packageNameLabel = new Label(container, SWT.NONE);
     packageNameLabel.setText(Messages.getString("java.package")); //$NON-NLS-1$
+
     javaPackageField = new Text(container, SWT.BORDER);
     GridData javaPackagePosition = new GridData(GridData.FILL_HORIZONTAL);
     javaPackagePosition.horizontalSpan = 2;
@@ -93,7 +97,7 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
     if (!packageStatus.isOK()) {
       String message = Messages.getString("illegal.package.name",  //$NON-NLS-1$
           packageStatus.getMessage());
-      setErrorMessage(message); 
+      setErrorMessage(message);
       return false;
     }
 
@@ -115,7 +119,7 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
   }
 
   public String getPackageName() {
-    return this.javaPackageField.getText();
+    return javaPackageField.getText();
   }
 
   public Collection<Library> getSelectedLibraries() {

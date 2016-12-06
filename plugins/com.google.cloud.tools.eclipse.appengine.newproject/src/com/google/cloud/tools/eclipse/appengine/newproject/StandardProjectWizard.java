@@ -43,7 +43,7 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
   private AppEngineStandardProjectConfig config = new AppEngineStandardProjectConfig();
 
   public StandardProjectWizard() {
-    this.setWindowTitle(Messages.getString("new.app.engine.standard.project"));
+    setWindowTitle(Messages.getString("new.app.engine.standard.project"));
     setNeedsProgressMonitor(true);
   }
 
@@ -70,7 +70,7 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
     if (page == null) {
       return true;
     }
-    
+
     config.setPackageName(page.getPackageName());
     config.setProject(page.getProjectHandle());
     if (!page.useDefaults()) {
