@@ -71,6 +71,9 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
   private final static Logger logger =
       Logger.getLogger(LocalAppEngineServerLaunchConfigurationDelegate.class.getName());
 
+  public static final String[] SUPPORTED_LAUNCH_MODES =
+      {ILaunchManager.RUN_MODE, ILaunchManager.DEBUG_MODE};
+
   private static final String DEBUGGER_HOST = "localhost"; //$NON-NLS-1$
 
   private static void validateCloudSdk() throws CoreException  {

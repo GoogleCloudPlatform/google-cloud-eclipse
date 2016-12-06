@@ -41,6 +41,11 @@ import org.eclipse.wst.server.core.model.ServerDelegate;
 
 @SuppressWarnings("restriction") // For FacetUtil
 public class LocalAppEngineServerDelegate extends ServerDelegate {
+  public static final String RUNTIME_TYPE_ID =
+      "com.google.cloud.tools.eclipse.appengine.standard.runtime";
+  public static final String SERVER_TYPE_ID =
+      "com.google.cloud.tools.eclipse.appengine.standard.server";
+
   private static final IModule[] EMPTY_MODULES = new IModule[0];
   private static final String SERVLET_MODULE_FACET = "jst.web"; //$NON-NLS-1$
   private static final String ATTR_APP_ENGINE_SERVER_MODULES = "app-engine-server-modules-list"; //$NON-NLS-1$

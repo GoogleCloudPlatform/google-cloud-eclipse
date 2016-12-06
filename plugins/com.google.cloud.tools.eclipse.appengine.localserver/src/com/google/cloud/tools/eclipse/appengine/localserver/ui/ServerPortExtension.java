@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
 import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerBehaviour;
+import com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerDelegate;
 import com.google.common.annotations.VisibleForTesting;
 import java.beans.PropertyChangeEvent;
 import org.eclipse.jface.fieldassist.ControlDecoration;
@@ -37,9 +38,6 @@ import org.eclipse.wst.server.ui.wizard.ServerCreationWizardPageExtension;
  * An extension that adds a server port field to the WTP server creation wizard page.
  */
 public class ServerPortExtension extends ServerCreationWizardPageExtension {
-
-  private static final String APP_ENGINE_SERVER_TYPE_ID =
-      "com.google.cloud.tools.eclipse.appengine.standard.server"; //$NON-NLS-1$
 
   @VisibleForTesting Label portLabel;
   @VisibleForTesting Text portText;
@@ -73,7 +71,7 @@ public class ServerPortExtension extends ServerCreationWizardPageExtension {
   public void handlePropertyChanged(PropertyChangeEvent event) {
     if (event != null && event.getNewValue() instanceof IServerType) {
       IServerType serverType = (IServerType) event.getNewValue();
-      boolean showPort = APP_ENGINE_SERVER_TYPE_ID.equals(serverType.getId());
+      boolean showPort = LocalAppEngineServerDelegate.SERVER_TYPE_ID.equals(serverType.getId());
       portLabel.setVisible(showPort);
       portText.setVisible(showPort);
       if (showPort) {
