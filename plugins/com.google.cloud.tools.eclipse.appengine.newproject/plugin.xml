@@ -26,7 +26,7 @@
   <extension
         point="org.eclipse.help.contexts">
      <contexts
-           file="help-contexts/contexts.xml">
+           file="helpContexts.xml">
      </contexts>
   </extension>
 
