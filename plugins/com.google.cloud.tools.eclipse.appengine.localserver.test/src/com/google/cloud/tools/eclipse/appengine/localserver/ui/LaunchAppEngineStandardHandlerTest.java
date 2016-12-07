@@ -93,8 +93,9 @@ public class LaunchAppEngineStandardHandlerTest {
     handler.execute(event);
     assertEquals("no new server should be created", 1, tracker.getServers().size());
 
-    event = new ExecutionEventBuilder().withCurrentSelection(module2, module1).build();
-    handler.execute(event);
+    ExecutionEvent swappedEvent =
+        new ExecutionEventBuilder().withCurrentSelection(module2, module1).build();
+    handler.execute(swappedEvent);
     assertEquals("no new server should be created", 1, tracker.getServers().size());
   }
 
