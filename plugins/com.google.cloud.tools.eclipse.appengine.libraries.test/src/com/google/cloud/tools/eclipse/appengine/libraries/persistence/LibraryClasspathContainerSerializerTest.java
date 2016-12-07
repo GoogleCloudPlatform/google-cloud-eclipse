@@ -25,9 +25,9 @@ import static org.mockito.Mockito.when;
 import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainer;
 import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer.ArtifactBaseLocationProvider;
 import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer.LibraryContainerStateLocationProvider;
-import com.google.common.base.Charsets;
 import com.google.gson.JsonParser;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import org.eclipse.core.runtime.CoreException;
@@ -121,7 +121,8 @@ public class LibraryClasspathContainerSerializerTest {
     Path stateFilePath = new Path(stateFolder.newFile().getAbsolutePath());
     when(stateLocationProvider.getContainerStateFile(any(IJavaProject.class), any(IPath.class),
         anyBoolean())).thenReturn(stateFilePath);
-    Files.write(stateFilePath.toFile().toPath(), SERIALIZED_CONTAINER.getBytes(Charsets.UTF_8),
+    Files.write(stateFilePath.toFile().toPath(),
+        SERIALIZED_CONTAINER.getBytes(StandardCharsets.UTF_8),
         StandardOpenOption.TRUNCATE_EXISTING);
     LibraryClasspathContainerSerializer serializer = new LibraryClasspathContainerSerializer(
         stateLocationProvider, binaryBaseLocationProvider, sourceBaseLocationProvider);
@@ -139,7 +140,7 @@ public class LibraryClasspathContainerSerializerTest {
         stateLocationProvider, binaryBaseLocationProvider, sourceBaseLocationProvider);
     serializer.saveContainer(javaProject, container);
     byte[] data = Files.readAllBytes(stateFilePath.toFile().toPath());
-    String actual = new String(data, Charsets.UTF_8);
+    String actual = new String(data, StandardCharsets.UTF_8);
     // use JsonObject.equals()
     assertEquals(new JsonParser().parse(SERIALIZED_CONTAINER), new JsonParser().parse(actual));
   }
