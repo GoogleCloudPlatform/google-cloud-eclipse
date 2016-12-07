@@ -76,12 +76,9 @@ public class LaunchAppEngineStandardHandlerTest {
   public void setUp() throws CoreException {
     handler = new LaunchAppEngineStandardHandler();
     handler.mockLaunch = true;
-
-    // Must provide a real project as validators fail.
-    module1 = mockAppEngineStandardModule("default", appEngineStandardProject1.getProject());
-    module2 = mockAppEngineStandardModule("other", appEngineStandardProject2.getProject());
   }
 
+  /** Must provide a real project as validators fail. */
   private static IModule mockAppEngineStandardModule(String serviceId, IProject project)
       throws CoreException {
     ModuleType webModuleType = new ModuleType("jst.web", "2.5");
@@ -109,7 +106,9 @@ public class LaunchAppEngineStandardHandlerTest {
   }
 
   @Test
-  public void testWithOneModule() throws ExecutionException {
+  public void testWithOneModule() throws ExecutionException, CoreException {
+    module1 = mockAppEngineStandardModule("default", appEngineStandardProject1.getProject());
+
     ExecutionEvent event = new ExecutionEventBuilder().withCurrentSelection(module1).build();
     handler.execute(event);
     assertEquals("new server should have been created", 1, tracker.getServers().size());
@@ -119,7 +118,10 @@ public class LaunchAppEngineStandardHandlerTest {
   }
 
   @Test
-  public void testWithTwoModules() throws ExecutionException {
+  public void testWithTwoModules() throws ExecutionException, CoreException {
+    module1 = mockAppEngineStandardModule("default", appEngineStandardProject1.getProject());
+    module2 = mockAppEngineStandardModule("other", appEngineStandardProject2.getProject());
+
     ExecutionEvent event =
         new ExecutionEventBuilder().withCurrentSelection(module1, module2).build();
     handler.execute(event);
@@ -131,5 +133,15 @@ public class LaunchAppEngineStandardHandlerTest {
     event = new ExecutionEventBuilder().withCurrentSelection(module2, module1).build();
     handler.execute(event);
     assertEquals("no new server should be created", 1, tracker.getServers().size());
+  }
+
+  @Test(expected = ExecutionException.class)
+  public void failsWithClashingServiceIds() throws ExecutionException, CoreException {
+    module1 = mockAppEngineStandardModule("other", appEngineStandardProject1.getProject());
+    module2 = mockAppEngineStandardModule("other", appEngineStandardProject2.getProject());
+
+    ExecutionEvent event =
+        new ExecutionEventBuilder().withCurrentSelection(module1, module2).build();
+    handler.execute(event);
   }
 }
