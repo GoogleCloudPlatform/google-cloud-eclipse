@@ -31,6 +31,7 @@ import org.eclipse.jst.server.core.IWebModule;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.server.core.IModule;
+import org.eclipse.wst.server.core.IModuleType;
 import org.eclipse.wst.server.core.IRuntime;
 import org.eclipse.wst.server.core.IRuntimeWorkingCopy;
 import org.eclipse.wst.server.core.IServer;
@@ -154,7 +155,7 @@ public class LocalAppEngineServerDelegateTest {
 
   @Test
   public void testGetChildModules_nonWebModuleType(){
-    ModuleType nonWebModuleType = new ModuleType("non-web", "1.0");
+    IModuleType nonWebModuleType = ModuleType.getModuleType("non-web", "1.0");
     when(module1.getModuleType()).thenReturn(nonWebModuleType);
 
     IModule[] childModules = delegate.getChildModules(new IModule[]{module1});
@@ -163,7 +164,7 @@ public class LocalAppEngineServerDelegateTest {
 
   @Test
   public void testGetChildModules_webModuleType() {
-    ModuleType webModuleType = new ModuleType("jst.web", "1.0");
+    IModuleType webModuleType = ModuleType.getModuleType("jst.web", "1.0");
     when(module1.getModuleType()).thenReturn(webModuleType);
     when(module1.getId()).thenReturn("module1");
     when(module1.loadAdapter(IWebModule.class, null)).thenReturn(webModule1);
