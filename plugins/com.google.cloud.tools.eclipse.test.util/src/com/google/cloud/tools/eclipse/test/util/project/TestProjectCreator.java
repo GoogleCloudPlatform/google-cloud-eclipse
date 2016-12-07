@@ -105,7 +105,7 @@ public final class TestProjectCreator extends ExternalResource {
 
     addContainerPathToRawClasspath();
     addFacets();
-    if (appEngineServiceId == null) {
+    if (appEngineServiceId != null) {
       setAppEngineServiceId(appEngineServiceId);
     }
   }
@@ -132,7 +132,7 @@ public final class TestProjectCreator extends ExternalResource {
   public void setAppEngineServiceId(String serviceId) throws CoreException {
     IFolder webinf = WebProjectUtil.getWebInfDirectory(getProject());
     IFile descriptorFile = webinf.getFile("appengine-web.xml");
-    assertTrue(descriptorFile.exists());
+    assertTrue("Project should have AppEngine Standard facet", descriptorFile.exists());
     StringBuilder newAppEngineWebDescriptor = new StringBuilder();
     newAppEngineWebDescriptor
         .append("<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>\n");
