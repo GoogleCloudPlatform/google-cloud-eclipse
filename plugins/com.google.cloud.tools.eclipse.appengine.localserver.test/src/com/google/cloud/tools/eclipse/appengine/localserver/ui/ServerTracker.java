@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.wst.server.core.IServer;
@@ -26,7 +27,7 @@ import org.junit.rules.ExternalResource;
 
 /** Track creation of WTP {@link IServer} instances and ensure they are deleted. */
 public class ServerTracker extends ExternalResource {
-  private List<IServer> servers = new ArrayList<>();
+  private List<IServer> servers = Collections.synchronizedList(new ArrayList<IServer>());
 
   private IServerLifecycleListener lifecycleListener = new IServerLifecycleListener() {
     @Override

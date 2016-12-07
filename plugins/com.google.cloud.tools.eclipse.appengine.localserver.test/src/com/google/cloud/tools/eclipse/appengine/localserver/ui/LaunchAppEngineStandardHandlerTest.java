@@ -17,30 +17,19 @@
 package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
-import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.test.util.ui.ExecutionEventBuilder;
 import com.google.common.collect.Lists;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.server.core.IModule;
-import org.eclipse.wst.server.core.internal.ModuleType;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -69,45 +58,17 @@ public class LaunchAppEngineStandardHandlerTest {
       new TestProjectCreator().withFacetVersions(Lists.newArrayList(JavaFacet.VERSION_1_7,
           WebFacetUtils.WEB_25, APPENGINE_STANDARD_FACET_VERSION_1));
 
-  private IModule module1;
-  private IModule module2;
-
   @Before
   public void setUp() throws CoreException {
     handler = new LaunchAppEngineStandardHandler();
     handler.mockLaunch = true;
   }
 
-  /** Must provide a real project as validators fail. */
-  private static IModule mockAppEngineStandardModule(String serviceId, IProject project)
-      throws CoreException {
-    ModuleType webModuleType = new ModuleType("jst.web", "2.5");
-    IModule module = mock(IModule.class);
-
-    when(module.getName()).thenReturn(serviceId);
-    when(module.getModuleType()).thenReturn(webModuleType);
-    when(module.getProject()).thenReturn(project);
-
-    IFolder webinf = WebProjectUtil.getWebInfDirectory(project);
-    IFile descriptorFile = webinf.getFile("appengine-web.xml");
-    assertTrue(descriptorFile.exists());
-    descriptorFile.setContents(appEngineForService(serviceId), IFile.FORCE, null);
-
-    return module;
-  }
-
-  private static InputStream appEngineForService(String serviceId) {
-    StringBuilder contents = new StringBuilder();
-    contents.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
-    contents.append("<appengine-web-app xmlns=\"http://appengine.google.com/ns/1.0\">\n");
-    contents.append("<service>").append(serviceId).append("</service>\n");
-    contents.append("</appengine-web-app>\n");
-    return new ByteArrayInputStream(contents.toString().getBytes(StandardCharsets.UTF_8));
-  }
 
   @Test
   public void testWithOneModule() throws ExecutionException, CoreException {
-    module1 = mockAppEngineStandardModule("default", appEngineStandardProject1.getProject());
+    appEngineStandardProject1.setAppEngineServiceId("default");
+    IModule module1 = appEngineStandardProject1.getModule();
 
     ExecutionEvent event = new ExecutionEventBuilder().withCurrentSelection(module1).build();
     handler.execute(event);
@@ -119,8 +80,10 @@ public class LaunchAppEngineStandardHandlerTest {
 
   @Test
   public void testWithTwoModules() throws ExecutionException, CoreException {
-    module1 = mockAppEngineStandardModule("default", appEngineStandardProject1.getProject());
-    module2 = mockAppEngineStandardModule("other", appEngineStandardProject2.getProject());
+    appEngineStandardProject1.setAppEngineServiceId("default");
+    IModule module1 = appEngineStandardProject1.getModule();
+    appEngineStandardProject2.setAppEngineServiceId("other");
+    IModule module2 = appEngineStandardProject2.getModule();
 
     ExecutionEvent event =
         new ExecutionEventBuilder().withCurrentSelection(module1, module2).build();
@@ -137,8 +100,10 @@ public class LaunchAppEngineStandardHandlerTest {
 
   @Test(expected = ExecutionException.class)
   public void failsWithClashingServiceIds() throws ExecutionException, CoreException {
-    module1 = mockAppEngineStandardModule("other", appEngineStandardProject1.getProject());
-    module2 = mockAppEngineStandardModule("other", appEngineStandardProject2.getProject());
+    appEngineStandardProject1.setAppEngineServiceId("other");
+    IModule module1 = appEngineStandardProject1.getModule();
+    appEngineStandardProject2.setAppEngineServiceId("other");
+    IModule module2 = appEngineStandardProject2.getModule();
 
     ExecutionEvent event =
         new ExecutionEventBuilder().withCurrentSelection(module1, module2).build();
