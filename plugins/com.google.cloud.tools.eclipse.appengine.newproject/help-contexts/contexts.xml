@@ -5,7 +5,6 @@
 
 &lt;b&gt;Project name:&lt;/b&gt; Specify an Eclipse project name.
 
-&lt;b&gt;Add Libraries to build path:&lt;/b&gt; You can add some popular libraries on the App Engine Standard environment to your build path.
-Add libraries.</description>
+&lt;b&gt;Add Libraries to build path:&lt;/b&gt; You can add some popular libraries on the App Engine Standard environment to your build path.</description>
   </context>
 </contexts>
