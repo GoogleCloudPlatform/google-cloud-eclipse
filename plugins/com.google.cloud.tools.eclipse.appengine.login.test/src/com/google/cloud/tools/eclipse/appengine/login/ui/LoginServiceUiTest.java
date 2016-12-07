@@ -27,7 +27,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Semaphore;
 import org.junit.Assert;
@@ -96,11 +95,12 @@ public class LoginServiceUiTest {
     return new Thread(new Runnable() {
       @Override
       public void run() {
-        Charset utf8 = StandardCharsets.UTF_8;
         try (
           Socket socket = serverSocket.accept();
-          InputStreamReader reader = new InputStreamReader(socket.getInputStream(), utf8);
-          OutputStreamWriter writer = new OutputStreamWriter(socket.getOutputStream(), utf8);
+          InputStreamReader reader = new InputStreamReader(
+              socket.getInputStream(), StandardCharsets.UTF_8);
+          OutputStreamWriter writer = new OutputStreamWriter(
+              socket.getOutputStream(), StandardCharsets.UTF_8);
         ) {
           StringBuilder input = new StringBuilder();
           for (int ch = reader.read(); ch != -1; ch = reader.read()) {

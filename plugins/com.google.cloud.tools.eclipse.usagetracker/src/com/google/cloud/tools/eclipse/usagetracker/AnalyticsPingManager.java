@@ -272,9 +272,9 @@ public class AnalyticsPingManager {
       resultBuilder.append(entry.getKey());
       resultBuilder.append('=');
       try {
-        resultBuilder.append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8.name()));
+        resultBuilder.append(URLEncoder.encode(entry.getValue(), "UTF-8"));
       } catch (UnsupportedEncodingException uee) {
-        throw new RuntimeException("UTF-8 not supported");
+        // JVM implementations not supporting UTF-8 are not expected.
       }
     }
     return resultBuilder.toString();
