@@ -63,7 +63,7 @@ public final class TestProjectCreator extends ExternalResource {
   }
 
   public TestProjectCreator withAppEngineServiceId(String serviceId) {
-    this.appEngineServiceId = serviceId;
+    appEngineServiceId = serviceId;
     return this;
   }
 

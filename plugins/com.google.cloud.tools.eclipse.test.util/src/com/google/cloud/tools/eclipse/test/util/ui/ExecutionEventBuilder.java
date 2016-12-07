@@ -48,10 +48,6 @@ public class ExecutionEventBuilder {
     return this;
   }
 
-  public ExecutionEventBuilder withCurrentSelection(Object object) {
-    return withCurrentSelection(new StructuredSelection(object));
-  }
-
   public ExecutionEventBuilder withCurrentSelection(Object... objects) {
     return withCurrentSelection(new StructuredSelection(objects));
   }
