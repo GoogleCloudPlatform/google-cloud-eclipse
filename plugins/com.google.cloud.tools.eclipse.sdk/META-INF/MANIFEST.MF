@@ -6,7 +6,7 @@ Bundle-Version: 0.1.0.qualifier
 Bundle-Vendor: Google Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
-Require-Bundle: com.google.cloud.tools.appengine;bundle-version="0.2.3",
+Require-Bundle: com.google.cloud.tools.appengine;bundle-version="0.2.4",
  org.eclipse.equinox.preferences;bundle-version="3.5.300",
  org.eclipse.e4.core.contexts;bundle-version="1.4.0",
  org.eclipse.e4.core.di;bundle-version="1.5.0"
