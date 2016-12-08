@@ -43,6 +43,15 @@
          </exclude>
       </validator>
    </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="*">
+         <newWizardShortcut
+               id="com.google.cloud.tools.eclipse.appengine.newproject.MavenAppEngineStandard">
+         </newWizardShortcut>
+      </perspectiveExtension>
+   </extension>
    
   <extension
         point="org.eclipse.help.contexts">
