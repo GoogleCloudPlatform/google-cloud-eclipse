@@ -272,6 +272,18 @@ The process is:
 
 Both the `.tpd` and `.target` files should be committed.
 
+### Updating Dependencies
+
+The IDE Target Platform needs to be rebuilt at the command line 
+and reimported into Eclipse when dependency versions are changed:
+
+1. `mvn -Pide-target-platform package`
+2. Preferences > Plug-in Development > Target Platforms
+3. Select your target ("GCP IDE Target Platform") and click Edit
+4. Select the location and click Reload to cause any cached info to be discarded.
+5. Click Edit and then select Uncategorized.
+6. Finish / OK until done.
+
 ### Updating the Eclipse IDE Target Platforms
 
 The IDE Target Platform, defined in `eclipse/ide-target-platform`,
