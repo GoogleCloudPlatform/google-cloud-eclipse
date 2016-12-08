@@ -28,7 +28,6 @@ import com.google.common.base.CharMatcher;
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Paths;
-import java.text.MessageFormat;
 import java.util.Collection;
 import org.eclipse.aether.repository.RepositoryPolicy;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -334,7 +333,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     String artifactId = getArtifactId();
     IPath path = getLocationPath().append(artifactId);
     if (path.toFile().exists()) {
-      String errorMessage = MessageFormat.format(Messages.getString("LOCATION_ALREADY_EXISTS"), path); //$NON-NLS-1$
+      String errorMessage = Messages.getString("LOCATION_ALREADY_EXISTS", path); //$NON-NLS-1$
       setErrorMessage(errorMessage);
       return false;
     }
@@ -347,7 +346,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
       setMessage(Messages.getString("PROVIDE_GROUP_ID"), INFORMATION); //$NON-NLS-1$
       return false;
     } else if (!MavenCoordinatesValidator.validateGroupId(groupId)) {
-      setErrorMessage(MessageFormat.format(Messages.getString("ILLEGAL_GROUP_ID"), groupId)); //$NON-NLS-1$
+      setErrorMessage(Messages.getString("ILLEGAL_GROUP_ID", groupId)); //$NON-NLS-1$
       return false;
     }
     String artifactId = getArtifactId();
@@ -355,7 +354,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
       setMessage(Messages.getString("PROVIDE_ARTIFACT_ID"), INFORMATION); //$NON-NLS-1$
       return false;
     } else if (!MavenCoordinatesValidator.validateArtifactId(artifactId)) {
-      setErrorMessage(Messages.getString("ILLEGAL_ARTIFACT_ID") + artifactId); //$NON-NLS-1$
+      setErrorMessage(Messages.getString("ILLEGAL_ARTIFACT_ID", artifactId)); //$NON-NLS-1$
       return false;
     }
     String version = getVersion();
@@ -374,7 +373,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     IStatus status = JavaPackageValidator.validate(packageName);
     if (!status.isOK()) {
       String details = status.getMessage() == null ? packageName : status.getMessage();
-      String message = MessageFormat.format(Messages.getString("ILLEGAL_PACKAGE_NAME"), details); //$NON-NLS-1$
+      String message = Messages.getString("ILLEGAL_PACKAGE_NAME", details); //$NON-NLS-1$
       setErrorMessage(message);
       return false;
     }
