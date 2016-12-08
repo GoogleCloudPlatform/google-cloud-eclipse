@@ -5,6 +5,6 @@
 
 &lt;b&gt;Project name:&lt;/b&gt; An Eclipse project name.
 
-&lt;b&gt;Libraries to add to build path:&lt;/b&gt; Add useful libraries for the App Engine standard environment for your project build path.</description>
+&lt;b&gt;Libraries to add to build path:&lt;/b&gt; Adds useful libraries for the App Engine standard environment for your project build path.</description>
   </context>
 </contexts>
