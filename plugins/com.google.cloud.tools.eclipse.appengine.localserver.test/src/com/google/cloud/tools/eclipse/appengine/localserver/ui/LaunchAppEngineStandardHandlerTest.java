@@ -82,7 +82,6 @@ public class LaunchAppEngineStandardHandlerTest {
         }
         return super.findExistingServer(modules, progress);
       }
-
     };
   }
 
