@@ -67,7 +67,7 @@ public class LaunchAppEngineStandardHandlerTest {
 
 
   @Before
-  public void setUp() throws CoreException {
+  public void setUp() {
     handler = new LaunchAppEngineStandardHandler() {
       @Override
       protected void launch(IServer server, String launchMode, SubMonitor progress)

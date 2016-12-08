@@ -80,7 +80,7 @@ public class LaunchAppEngineStandardHandler extends AbstractHandler {
     return null;
   }
 
-  private boolean isRunning(IServer server) {
+  private static boolean isRunning(IServer server) {
     return server.getServerState() == IServer.STATE_STARTED
         || server.getServerState() == IServer.STATE_STARTING;
   }
