@@ -28,7 +28,6 @@ import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.junit.Test;
 
 public class DeployPropertyPageTest extends AbstractProjectTests {
-  // TODO: add tests for flex project when Create New Flex project wizard is available
   @Test
   public void testPropertyPageTitle_standardProject() throws CoreException {
     String projectName = "foo";

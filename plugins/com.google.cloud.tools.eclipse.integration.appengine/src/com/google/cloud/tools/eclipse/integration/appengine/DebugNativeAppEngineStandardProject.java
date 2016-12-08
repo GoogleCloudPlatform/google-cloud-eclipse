@@ -74,8 +74,8 @@ public class DebugNativeAppEngineStandardProject extends AbstractProjectTests {
         "app.engine.test");
     assertTrue(project.exists());
 
-    SWTBotTreeItem project = SwtBotProjectActions.selectProject(bot, "testapp");
-    assertNotNull(project);
+    SWTBotTreeItem testappProject = SwtBotProjectActions.selectProject(bot, "testapp");
+    assertNotNull(testappProject);
     SwtBotTestingUtilities.performAndWaitForWindowChange(bot, new Runnable() {
       @Override
       public void run() {
