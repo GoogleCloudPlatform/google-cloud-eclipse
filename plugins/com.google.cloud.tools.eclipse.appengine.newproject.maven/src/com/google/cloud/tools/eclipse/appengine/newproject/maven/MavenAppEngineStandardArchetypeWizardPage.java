@@ -18,7 +18,8 @@ package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
 import com.google.common.annotations.VisibleForTesting;
-
+import java.util.Arrays;
+import java.util.Collections;
 import org.apache.maven.archetype.catalog.Archetype;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -30,15 +31,13 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.List;
-
-import java.util.Arrays;
-import java.util.Collections;
+import org.eclipse.ui.PlatformUI;
 
 /**
  * UI to select an archetype in creating a new Maven-based App Engine Standard Java project.
  */
 public class MavenAppEngineStandardArchetypeWizardPage extends WizardPage {
-  
+
   @VisibleForTesting
   static final java.util.List<ArchetypeTuple> PRESET_ARCHETYPES =
       Collections.unmodifiableList(Arrays.asList(
@@ -67,6 +66,9 @@ public class MavenAppEngineStandardArchetypeWizardPage extends WizardPage {
   public void createControl(Composite parent) {
     Composite container = new Composite(parent, SWT.NONE);
     GridLayoutFactory.swtDefaults().numColumns(2).applyTo(container);
+
+    PlatformUI.getWorkbench().getHelpSystem().setHelp(container,
+        "com.google.cloud.tools.eclipse.appengine.newproject.maven.ArchetypeSelectionContext"); //$NON-NLS-1$
 
     // List of (selectable) archetypes on the left
     archetypeList = new List(container, SWT.SINGLE | SWT.BORDER);
@@ -109,7 +111,7 @@ public class MavenAppEngineStandardArchetypeWizardPage extends WizardPage {
     Archetype archetype;
     String displayName;
     String description;
-    
+
     ArchetypeTuple(String groupId, String artifactId, String displayName, String description) {
       archetype = new Archetype();
       archetype.setGroupId(groupId);
