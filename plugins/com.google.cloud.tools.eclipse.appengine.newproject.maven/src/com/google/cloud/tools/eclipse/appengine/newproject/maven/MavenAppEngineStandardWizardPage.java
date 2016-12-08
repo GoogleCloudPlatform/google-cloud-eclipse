@@ -190,6 +190,9 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     Label groupIdLabel = new Label(mavenCoordinatesGroup, SWT.NONE);
     groupIdLabel.setText(Messages.getString("GROUP_ID")); //$NON-NLS-1$
     groupIdField = new Text(mavenCoordinatesGroup, SWT.BORDER);
+    groupIdField.setToolTipText(
+        "The Maven Group ID. Should be an alphanumeric path separated by periods.");
+
     GridDataFactory.defaultsFor(groupIdField).align(SWT.FILL, SWT.CENTER).applyTo(groupIdField);
     groupIdField.addModifyListener(pageValidator);
     groupIdField.addModifyListener(new AutoPackageNameSetterOnGroupIdChange());
@@ -197,6 +200,9 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     Label artifactIdLabel = new Label(mavenCoordinatesGroup, SWT.NONE);
     artifactIdLabel.setText(Messages.getString("ARTIFACT_ID")); //$NON-NLS-1$
     artifactIdField = new Text(mavenCoordinatesGroup, SWT.BORDER);
+    artifactIdField.setToolTipText(
+        "The Maven Artifact ID. Should be an alphanumeric name separated by dashes.");
+    
     GridDataFactory.defaultsFor(artifactIdField).align(SWT.FILL, SWT.CENTER)
         .applyTo(artifactIdField);
     artifactIdField.addModifyListener(pageValidator);
