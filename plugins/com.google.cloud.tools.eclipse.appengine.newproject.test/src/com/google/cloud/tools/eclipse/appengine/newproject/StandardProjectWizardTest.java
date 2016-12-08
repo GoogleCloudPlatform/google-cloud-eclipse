@@ -38,7 +38,7 @@ public class StandardProjectWizardTest {
   public void testTitleSet() {
     Assert.assertEquals("New App Engine Standard Project", wizard.getWindowTitle());
   }
-  
+
   @Test
   public void testAddPages() {
     wizard.addPages();
@@ -46,5 +46,5 @@ public class StandardProjectWizardTest {
     Assert.assertEquals(1, wizard.getPageCount());
     Assert.assertNotNull(wizard.getPage("basicNewProjectPage"));
   }
-  
+
 }
