@@ -24,12 +24,6 @@
         name="%gcp.category" />
   </extension>
   <extension
-<<<<<<< Updated upstream
-        point="org.eclipse.help.contexts">
-     <contexts
-           file="helpContexts.xml">
-     </contexts>
-=======
         point="org.eclipse.ui.perspectiveExtensions">
      <perspectiveExtension
            targetID="*">
@@ -37,7 +31,12 @@
               id="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineStandard">
         </newWizardShortcut>
      </perspectiveExtension>
->>>>>>> Stashed changes
+  </extension>
+  <extension
+        point="org.eclipse.help.contexts">
+     <contexts
+           file="helpContexts.xml">
+     </contexts>
   </extension>
 
 </plugin>
