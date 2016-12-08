@@ -17,6 +17,8 @@
 package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
@@ -25,11 +27,15 @@ import com.google.common.collect.Lists;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.server.core.IModule;
+import org.eclipse.wst.server.core.IServer;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -48,6 +54,7 @@ public class LaunchAppEngineStandardHandlerTest {
   public ServerTracker tracker = new ServerTracker();
 
   private LaunchAppEngineStandardHandler handler;
+  private IServer serverToReturn = null;
 
   @Rule
   public TestProjectCreator appEngineStandardProject1 =
@@ -58,24 +65,35 @@ public class LaunchAppEngineStandardHandlerTest {
       new TestProjectCreator().withFacetVersions(Lists.newArrayList(JavaFacet.VERSION_1_7,
           WebFacetUtils.WEB_25, APPENGINE_STANDARD_FACET_VERSION_1));
 
+
   @Before
   public void setUp() throws CoreException {
-    handler = new LaunchAppEngineStandardHandler();
-    handler.mockLaunch = true;
+    handler = new LaunchAppEngineStandardHandler() {
+      @Override
+      protected void launch(IServer server, String launchMode, SubMonitor progress)
+          throws CoreException {
+        // do nothing
+      }
+
+      @Override
+      protected IServer findExistingServer(IModule[] modules, SubMonitor progress) {
+        if (serverToReturn != null) {
+          return serverToReturn;
+        }
+        return super.findExistingServer(modules, progress);
+      }
+
+    };
   }
 
 
   @Test
-  public void testWithOneModule() throws ExecutionException, CoreException {
-    appEngineStandardProject1.setAppEngineServiceId("default");
+  public void testWithDefaultModule() throws ExecutionException, CoreException {
     IModule module1 = appEngineStandardProject1.getModule();
 
     ExecutionEvent event = new ExecutionEventBuilder().withCurrentSelection(module1).build();
     handler.execute(event);
     assertEquals("new server should have been created", 1, tracker.getServers().size());
-
-    handler.execute(event);
-    assertEquals("no new server should be created", 1, tracker.getServers().size());
   }
 
   @Test
@@ -89,14 +107,37 @@ public class LaunchAppEngineStandardHandlerTest {
         new ExecutionEventBuilder().withCurrentSelection(module1, module2).build();
     handler.execute(event);
     assertEquals("new server should have been created", 1, tracker.getServers().size());
+  }
 
+  @Test(expected = ExecutionException.class)
+  public void failsIfAlreadyLaunched() throws ExecutionException, CoreException {
+    IModule module1 = appEngineStandardProject1.getModule();
+
+    ExecutionEvent event = new ExecutionEventBuilder().withCurrentSelection(module1).build();
+    serverToReturn = mock(IServer.class);
+    ILaunch launch = mock(ILaunch.class);
+    when(serverToReturn.getServerState()).thenReturn(IServer.STATE_STARTED);
+    when(serverToReturn.getLaunch()).thenReturn(launch);
+    when(launch.getLaunchMode()).thenReturn(ILaunchManager.DEBUG_MODE);
     handler.execute(event);
-    assertEquals("no new server should be created", 1, tracker.getServers().size());
+  }
 
+  public void testInvariantToModuleOrder() throws ExecutionException, CoreException {
+    appEngineStandardProject1.setAppEngineServiceId("default");
+    IModule module1 = appEngineStandardProject1.getModule();
+    appEngineStandardProject2.setAppEngineServiceId("other");
+    IModule module2 = appEngineStandardProject2.getModule();
+
+    ExecutionEvent event =
+        new ExecutionEventBuilder().withCurrentSelection(module1, module2).build();
+    handler.execute(event);
+    assertEquals("new server should have been created", 1, tracker.getServers().size());
+
+    // because we don't actually launch the servers, we won't get an ExecutionException
     ExecutionEvent swappedEvent =
         new ExecutionEventBuilder().withCurrentSelection(module2, module1).build();
     handler.execute(swappedEvent);
-    assertEquals("no new server should be created", 1, tracker.getServers().size());
+    assertEquals("no new servers should be created", 1, tracker.getServers().size());
   }
 
   @Test(expected = ExecutionException.class)
@@ -110,4 +151,5 @@ public class LaunchAppEngineStandardHandlerTest {
         new ExecutionEventBuilder().withCurrentSelection(module1, module2).build();
     handler.execute(event);
   }
+
 }
