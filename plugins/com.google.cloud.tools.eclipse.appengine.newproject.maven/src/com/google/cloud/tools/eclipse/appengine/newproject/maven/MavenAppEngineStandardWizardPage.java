@@ -190,8 +190,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     Label groupIdLabel = new Label(mavenCoordinatesGroup, SWT.NONE);
     groupIdLabel.setText(Messages.getString("GROUP_ID")); //$NON-NLS-1$
     groupIdField = new Text(mavenCoordinatesGroup, SWT.BORDER);
-    groupIdField.setToolTipText(
-        "The Maven Group ID. Should be an alphanumeric path separated by periods.");
+    groupIdField.setToolTipText(Messages.getString("GROUP_ID_TOOLTIP")); //$NON-NLS-1$
 
     GridDataFactory.defaultsFor(groupIdField).align(SWT.FILL, SWT.CENTER).applyTo(groupIdField);
     groupIdField.addModifyListener(pageValidator);
@@ -200,8 +199,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     Label artifactIdLabel = new Label(mavenCoordinatesGroup, SWT.NONE);
     artifactIdLabel.setText(Messages.getString("ARTIFACT_ID")); //$NON-NLS-1$
     artifactIdField = new Text(mavenCoordinatesGroup, SWT.BORDER);
-    artifactIdField.setToolTipText(
-        "The Maven Artifact ID. Should be an alphanumeric name separated by dashes.");
+    artifactIdField.setToolTipText(Messages.getString("ARTIFACT_ID_TOOLTIP")); //$NON-NLS-1$
     
     GridDataFactory.defaultsFor(artifactIdField).align(SWT.FILL, SWT.CENTER)
         .applyTo(artifactIdField);
@@ -293,7 +291,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     String globalUpdatePolicy = MavenPlugin.getMavenConfiguration().getGlobalUpdatePolicy();
     if (!appEngineLibrariesSelectorGroup.getSelectedLibraries().isEmpty()
         && RepositoryPolicy.UPDATE_POLICY_NEVER.equals(globalUpdatePolicy)) {
-      setMessage(Messages.getString("M2E_GLOBAL_UPDATES_PREVENT_CHECKS"), WARNING);
+      setMessage(Messages.getString("M2E_GLOBAL_UPDATES_PREVENT_CHECKS"), WARNING); //$NON-NLS-1$
     }
   }
 
@@ -308,11 +306,11 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
         FilePermissions.verifyDirectoryCreatable(path);
         return true;
       } catch (FileAlreadyExistsException ex) {
-          String message = MessageFormat.format(Messages.getString("FILE_LOCATION"), location); //$NON-NLS-1$
+          String message = Messages.getString("FILE_LOCATION", location); //$NON-NLS-1$
           page.setMessage(message, ERROR);
           return false;  
       } catch (IOException ex) {
-        String message = MessageFormat.format(Messages.getString("INVALID_PATH"), location); //$NON-NLS-1$
+        String message = Messages.getString("INVALID_PATH", location); //$NON-NLS-1$
         page.setMessage(message, ERROR);
         return false;  
       }
