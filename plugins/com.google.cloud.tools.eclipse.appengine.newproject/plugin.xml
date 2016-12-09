@@ -26,7 +26,19 @@
   <extension
         point="org.eclipse.ui.perspectiveExtensions">
      <perspectiveExtension
-           targetID="*">
+           targetID="org.eclipse.jdt.ui.JavaPerspective">
+        <newWizardShortcut
+              id="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineStandard">
+        </newWizardShortcut>
+     </perspectiveExtension>
+     <perspectiveExtension
+           targetID="org.eclipse.jst.j2ee.J2EEPerspective">
+        <newWizardShortcut
+              id="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineStandard">
+        </newWizardShortcut>
+     </perspectiveExtension>
+     <perspectiveExtension
+           targetID="org.eclipse.wst.web.ui.webDevPerspective">
         <newWizardShortcut
               id="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineStandard">
         </newWizardShortcut>
