@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -77,7 +78,7 @@ public class CreateAppEngineStandardWtpProjectTest {
   // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1086
   // (Don't forget to remove Guava from MANIFEST.MF.)
   private void logForSetPrimaryRuntimeError() {
-    assertTrue(project == config.getProject());
+    assertSame(project, config.getProject());
 
     // Log targeted runtimes that have been added to the project.
     try {
