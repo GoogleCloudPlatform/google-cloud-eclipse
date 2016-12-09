@@ -309,7 +309,8 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
           page.setMessage(message, ERROR);
           return false;  
       } catch (IOException ex) {
-        String message = Messages.getString("INVALID_PATH", location, ex.getMessage()); //$NON-NLS-1$
+        String message = Messages.getString(
+            "INVALID_PATH", location, ex.getLocalizedMessage()); //$NON-NLS-1$
         page.setMessage(message, ERROR);
         return false;  
       }
