@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<contexts>
+  <context id="NewProjectContext" title="Create App Engine Standard Project">
+     <description>Create a new Eclipse project that can be deployed to the App Engine standard environment.
+
+&lt;b&gt;Project name:&lt;/b&gt; An Eclipse project name.
+
+&lt;b&gt;Libraries to add to build path:&lt;/b&gt; Adds useful libraries for the App Engine standard environment for your project build path.</description>
+  </context>
+</contexts>

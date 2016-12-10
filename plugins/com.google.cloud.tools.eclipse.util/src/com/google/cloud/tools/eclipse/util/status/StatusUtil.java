@@ -29,44 +29,44 @@ public class StatusUtil {
 
   private StatusUtil() {}
 
-  public static IStatus error(Class<?> origin, String message) {
-    return error(origin, message, null);
-  }
-
-  public static IStatus error(Class<?> origin, String message, Throwable error) {
-    String bundleOrClassname = null;
-    
-    Bundle bundle = FrameworkUtil.getBundle(origin);
-    if (bundle == null) {
-      bundleOrClassname = origin.getName();
-    } else {
-      bundleOrClassname = bundle.getSymbolicName();
-    }
-    return error(bundleOrClassname, message, error);
-  }
-
   public static IStatus error(Object origin, String message) {
-    if (origin instanceof Class) {
-      return error((Class<?>) origin, message);
-    } else {
-      return error(origin.getClass(), message);
-    }
+    return new Status(IStatus.ERROR, getBundleId(origin), message);
   }
 
   public static IStatus error(Object origin, String message, Throwable error) {
-    if (origin instanceof Class) {
-      return error((Class<?>) origin, message, error);
-    } else {
-      return error(origin.getClass(), message, error);
-    }
+    return new Status(IStatus.ERROR, getBundleId(origin), message, error);
   }
 
-  private static IStatus error(String bundleOrClassname, String message, Throwable error) {
-    if (error == null) {
-      return new Status(IStatus.ERROR, bundleOrClassname, message);
-    } else {
-      return new Status(IStatus.ERROR, bundleOrClassname, message, error);
-    }
+  public static IStatus warn(Object origin, String message) {
+    return new Status(IStatus.WARNING, getBundleId(origin), message);
   }
 
+  public static IStatus warn(Object origin, String message, Throwable error) {
+    return new Status(IStatus.WARNING, getBundleId(origin), message, error);
+  }
+
+  public static IStatus info(Object origin, String message) {
+    return new Status(IStatus.INFO, getBundleId(origin), message);
+  }
+
+  public static IStatus info(Object origin, String message, Throwable error) {
+    return new Status(IStatus.INFO, getBundleId(origin), message, error);
+  }
+
+  private static String getBundleId(Object origin) {
+    Class<?> clazz = null;
+    if (origin == null) {
+      clazz = StatusUtil.class;
+    } else if (origin instanceof Class<?>) {
+      clazz = (Class<?>) origin;
+    } else {
+      clazz = origin.getClass();
+    }
+
+    Bundle bundle = FrameworkUtil.getBundle(clazz);
+    if (bundle == null) {
+      return clazz.getName(); // what else can we do?
+    }
+    return bundle.getSymbolicName();
+  }
 }

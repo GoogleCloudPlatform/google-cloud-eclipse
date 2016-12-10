@@ -23,7 +23,6 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -61,7 +60,7 @@ public class AppEngineStandardProjectConfigTest {
 
   @Test
   public void testAppEngineLibraries() {
-    config.setAppEngineLibraries(Collections.singletonList(new Library("app-engine-library")));
+    config.setAppEngineLibraries(Collections.singleton(new Library("app-engine-library")));
     assertThat(config.getAppEngineLibraries().size(), is(1));
     assertThat(config.getAppEngineLibraries().iterator().next().getId(), is("app-engine-library"));
   }

@@ -40,6 +40,7 @@ import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.cloudsdk.AppEngineJavaComponentsNotInstalledException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkOutOfDateException;
 import com.google.cloud.tools.eclipse.appengine.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
 import com.google.common.base.Preconditions;
@@ -151,6 +152,11 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
       Status status = new Status(IStatus.ERROR,
           "com.google.cloud.tools.eclipse.appengine.deploy.ui", detailMessage);
       return status;
+    } catch (CloudSdkOutOfDateException ex) {
+        String detailMessage = Messages.getString("cloudsdk.out.of.date");
+        Status status = new Status(IStatus.ERROR,
+            "com.google.cloud.tools.eclipse.appengine.deploy.ui", detailMessage);
+        return status;
     } catch (AppEngineException ex) {
       String detailMessage = Messages.getString("cloudsdk.not.configured.detail");
       Status status = new Status(IStatus.ERROR,

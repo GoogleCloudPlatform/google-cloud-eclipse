@@ -24,6 +24,7 @@ import static org.junit.Assert.fail;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -251,7 +252,7 @@ public class AppEngineLibrariesSelectorGroupTest {
   }
 
   private List<Library> getSelectedLibrariesSorted() {
-    List<Library> selectedLibraries = librariesSelector.getSelectedLibraries();
+    List<Library> selectedLibraries = new ArrayList<>(librariesSelector.getSelectedLibraries());
     Collections.sort(selectedLibraries, new Comparator<Library>() {
 
       @Override

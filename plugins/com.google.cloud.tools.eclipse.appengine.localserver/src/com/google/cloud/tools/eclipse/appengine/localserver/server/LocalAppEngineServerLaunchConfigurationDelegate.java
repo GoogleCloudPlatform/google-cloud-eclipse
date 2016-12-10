@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
 import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkOutOfDateException;
 import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
 import com.google.cloud.tools.eclipse.appengine.localserver.PreferencesInitializer;
 import com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineConsole;
@@ -70,12 +71,20 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
   private final static Logger logger =
       Logger.getLogger(LocalAppEngineServerLaunchConfigurationDelegate.class.getName());
 
+  public static final String[] SUPPORTED_LAUNCH_MODES =
+      {ILaunchManager.RUN_MODE, ILaunchManager.DEBUG_MODE};
+
   private static final String DEBUGGER_HOST = "localhost"; //$NON-NLS-1$
 
   private static void validateCloudSdk() throws CoreException  {
     try {
       CloudSdk cloudSdk = new CloudSdk.Builder().build();
       cloudSdk.validateCloudSdk();
+    } catch (CloudSdkOutOfDateException ex) {
+        String detailMessage = Messages.getString("cloudsdk.out.of.date");
+        Status status = new Status(IStatus.ERROR,
+            "com.google.cloud.tools.eclipse.appengine.deploy.ui", detailMessage);
+        throw new CoreException(status);
     } catch (AppEngineException ex) {
       String detailMessage = Messages.getString("cloudsdk.not.configured"); //$NON-NLS-1$
       Status status = new Status(IStatus.ERROR,
@@ -124,7 +133,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
     if (ILaunchManager.DEBUG_MODE.equals(mode)) {
       int debugPort = getDebugPort();
-      setupDebugTarget(launch, configuration, debugPort, monitor);
+      setupDebugTarget(launch, debugPort, monitor);
       serverBehaviour.startDebugDevServer(runnables, console.newMessageStream(), debugPort);
     } else {
       // A launch must have at least one debug target or process, or it otherwise becomes a zombie
@@ -173,7 +182,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     openJob.schedule();
   }
 
-  private void setupDebugTarget(ILaunch launch, ILaunchConfiguration configuration, int port,
+  private void setupDebugTarget(ILaunch launch, int port,
       IProgressMonitor monitor) throws CoreException {
     // The 4.7 listen connector supports a connectionLimit
     IVMConnector connector =

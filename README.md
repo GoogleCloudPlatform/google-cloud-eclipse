@@ -3,6 +3,8 @@
 
 This project provides an Eclipse plugin for building, debugging, and deploying Google Cloud Platform applications.
 
+[End user documentation and installation instructions can be found in the Github Wiki.](https://github.com/GoogleCloudPlatform/google-cloud-eclipse/wiki/Google-Cloud-Tools-for-Eclipse)
+
 _TL;DR_: `mvn -Dtycho.toolchains=SYSTEM package` should
 generate a p2-accessible repository in `gcp-repo/target/repository`.
 
@@ -146,7 +148,7 @@ described below.
      previous steps to mark it as compatible with the `JavaSE-1.7` execution
      environment.
 
-  1. Click `Apply`.
+  1. Click `OK`.
 
 2. Set up the Target Platform: you will need to repeat this process whenever
    items are changed in the target platform, such as a new release of the
@@ -172,10 +174,11 @@ described below.
   
   7. Click `Finish` to complete the new target platform definition.
   
-  8. Your new target platform should be selected in the `Target Platform` preferences.
-     Click `OK` to load this new target platform.
+  8. Select your new target platform (instead of Running Platform) in the `Target Platform` preferences.
+  
+  9. Click `OK` to load this new target platform.
       
-  7. Eclipse will load the target.
+  10. Eclipse will load the target.
 
 3. Import the projects
 
@@ -268,6 +271,18 @@ The process is:
      to update the corresponding .target file.
 
 Both the `.tpd` and `.target` files should be committed.
+
+### Updating Dependencies
+
+The IDE Target Platform needs to be rebuilt at the command line 
+and reimported into Eclipse when dependency versions are changed:
+
+1. `mvn -Pide-target-platform package`
+2. Preferences > Plug-in Development > Target Platforms
+3. Select your target ("GCP IDE Target Platform") and click Edit
+4. Select the location and click Reload to cause any cached info to be discarded.
+5. Click Edit and then select Uncategorized.
+6. Finish / OK until done.
 
 ### Updating the Eclipse IDE Target Platforms
 

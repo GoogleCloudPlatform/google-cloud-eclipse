@@ -16,11 +16,18 @@
 
 package com.google.cloud.tools.eclipse.test.util.project;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import com.google.common.base.Strings;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -34,12 +41,15 @@ import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.common.project.facet.core.internal.FacetedProjectNature;
+import org.eclipse.wst.server.core.IModule;
+import org.eclipse.wst.server.core.ServerUtil;
 import org.junit.rules.ExternalResource;
 
 public final class TestProjectCreator extends ExternalResource {
 
   private IJavaProject javaProject;
   private String containerPath;
+  private String appEngineServiceId;
   private List<IProjectFacetVersion> projectFacetVersions = new ArrayList<>();
 
   public TestProjectCreator withClasspathContainerPath(String containerPath) {
@@ -49,6 +59,11 @@ public final class TestProjectCreator extends ExternalResource {
 
   public TestProjectCreator withFacetVersions(List<IProjectFacetVersion> projectFacetVersions) {
     this.projectFacetVersions.addAll(projectFacetVersions);
+    return this;
+  }
+
+  public TestProjectCreator withAppEngineServiceId(String serviceId) {
+    appEngineServiceId = serviceId;
     return this;
   }
 
@@ -76,6 +91,10 @@ public final class TestProjectCreator extends ExternalResource {
     return javaProject.getProject();
   }
 
+  public IModule getModule() {
+    return ServerUtil.getModule(javaProject.getProject());
+  }
+
   private void createJavaProject(String projectName) throws CoreException, JavaModelException {
     IProjectDescription newProjectDescription = ResourcesPlugin.getWorkspace().newProjectDescription(projectName);
     newProjectDescription.setNatureIds(new String[]{JavaCore.NATURE_ID, FacetedProjectNature.NATURE_ID});
@@ -86,6 +105,9 @@ public final class TestProjectCreator extends ExternalResource {
 
     addContainerPathToRawClasspath();
     addFacets();
+    if (appEngineServiceId != null) {
+      setAppEngineServiceId(appEngineServiceId);
+    }
   }
 
   private void addContainerPathToRawClasspath() throws JavaModelException {
@@ -106,4 +128,19 @@ public final class TestProjectCreator extends ExternalResource {
       }
     }
   }
+
+  public void setAppEngineServiceId(String serviceId) throws CoreException {
+    IFolder webinf = WebProjectUtil.getWebInfDirectory(getProject());
+    IFile descriptorFile = webinf.getFile("appengine-web.xml");
+    assertTrue("Project should have AppEngine Standard facet", descriptorFile.exists());
+    StringBuilder newAppEngineWebDescriptor = new StringBuilder();
+    newAppEngineWebDescriptor
+        .append("<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>\n");
+    newAppEngineWebDescriptor.append("<service>").append(serviceId).append("</service>\n");
+    newAppEngineWebDescriptor.append("</appengine-web-app>\n");
+    InputStream contents = new ByteArrayInputStream(
+        newAppEngineWebDescriptor.toString().getBytes(StandardCharsets.UTF_8));
+    descriptorFile.setContents(contents, IFile.FORCE, null);
+  }
+
 }

@@ -18,11 +18,10 @@ package com.google.cloud.tools.eclipse.appengine.localserver;
 
 import org.eclipse.e4.core.contexts.EclipseContextFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.junit.Rule;
 import org.junit.rules.ExternalResource;
 
 /**
- * Helper class to be used with {@link Rule} to make tests easier that depend on
+ * Helper class to be used with {@link org.junit.Rule} to make tests easier that depend on
  * {@link IEclipseContext}. It provides an empty context that can be filled with object needed for
  * the test using the {@link #set(Class, Object)} method.
  * <p>

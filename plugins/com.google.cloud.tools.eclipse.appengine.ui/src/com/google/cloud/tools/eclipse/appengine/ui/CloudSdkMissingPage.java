@@ -24,10 +24,10 @@ public class CloudSdkMissingPage extends MissingComponentPage {
 
   public CloudSdkMissingPage(String wizardType) {
     super("cloudSdkMissingComponentPage",  //$NON-NLS-1$
-        wizardType, 
-        Messages.getString("cloud.sdk.missing"), 
+        wizardType,
+        Messages.getString("cloud.sdk.missing"),
         Messages.getString("cloud.sdk.not.installed"),
         Messages.getString("fix.cloud.sdk.location"));
   }
-  
+
 }

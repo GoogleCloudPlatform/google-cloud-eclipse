@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
+import com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerDelegate;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTabGroup;
 import org.eclipse.debug.ui.EnvironmentTab;
 import org.eclipse.debug.ui.ILaunchConfigurationDialog;
@@ -25,9 +26,7 @@ import org.eclipse.wst.server.ui.ServerLaunchConfigurationTab;
 
 public class AppEngineTabGroup extends AbstractLaunchConfigurationTabGroup {
 
-  private static final String[] SERVER_TYPE_IDS = new String[]{
-      "com.google.cloud.tools.eclipse.appengine.standard.server"
-  };
+  private static final String[] SERVER_TYPE_IDS = {LocalAppEngineServerDelegate.SERVER_TYPE_ID};
 
   @Override
   public void createTabs(ILaunchConfigurationDialog dialog, String mode) {

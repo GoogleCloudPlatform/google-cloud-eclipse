@@ -23,5 +23,32 @@
         id="com.google.cloud.tools.eclipse.appengine.wizards" 
         name="%gcp.category" />
   </extension>
+  <extension
+        point="org.eclipse.ui.perspectiveExtensions">
+     <perspectiveExtension
+           targetID="org.eclipse.jdt.ui.JavaPerspective">
+        <newWizardShortcut
+              id="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineStandard">
+        </newWizardShortcut>
+     </perspectiveExtension>
+     <perspectiveExtension
+           targetID="org.eclipse.jst.j2ee.J2EEPerspective">
+        <newWizardShortcut
+              id="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineStandard">
+        </newWizardShortcut>
+     </perspectiveExtension>
+     <perspectiveExtension
+           targetID="org.eclipse.wst.web.ui.webDevPerspective">
+        <newWizardShortcut
+              id="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineStandard">
+        </newWizardShortcut>
+     </perspectiveExtension>
+  </extension>
+  <extension
+        point="org.eclipse.help.contexts">
+     <contexts
+           file="helpContexts.xml">
+     </contexts>
+  </extension>
 
 </plugin>

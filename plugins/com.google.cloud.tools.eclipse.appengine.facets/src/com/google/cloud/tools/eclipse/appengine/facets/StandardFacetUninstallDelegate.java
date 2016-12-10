@@ -35,14 +35,14 @@ public class StandardFacetUninstallDelegate implements IDelegate {
   @Override
   public void execute(IProject project, IProjectFacetVersion version, Object config,
       IProgressMonitor monitor) throws CoreException {
-    uninstallAppEngineRuntime(project, monitor);
+    uninstallAppEngineRuntime(project);
   }
 
   /**
    * Removes all the App Engine server runtimes from the list of targeted runtimes for
    * <code>project</code>.
    */
-  private void uninstallAppEngineRuntime(final IProject project, IProgressMonitor monitor) {
+  private void uninstallAppEngineRuntime(final IProject project) {
     Job uninstallJob = new Job("Uninstall App Engine runtimes in " + project.getName()) {
 
       @Override

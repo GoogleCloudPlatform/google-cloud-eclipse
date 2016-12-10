@@ -71,7 +71,7 @@ public class CodeTemplates {
     IFolder packageFolder = createFoldersForPackage(java, packageName, subMonitor);
     createChildFile("HelloAppEngine.java", AppEngineTemplateUtility.HELLO_APPENGINE_TEMPLATE,
         packageFolder, subMonitor, templateValues);
-    
+
     // now set up the test directory
     IFolder testPackageFolder = createFoldersForPackage(testJava, packageName, subMonitor);
     createChildFile("HelloAppEngineTest.java",
@@ -80,12 +80,13 @@ public class CodeTemplates {
     createChildFile("MockHttpServletResponse.java",
         AppEngineTemplateUtility.MOCK_HTTPSERVLETRESPONSE_TEMPLATE, testPackageFolder, subMonitor,
         templateValues);
-    
+
     IFolder webapp = createChildFolder("webapp", main, subMonitor);
     IFolder webinf = createChildFolder("WEB-INF", webapp, subMonitor);
-    
+
     Map<String, String> properties = new HashMap<>();
     properties.put("service", config.getServiceName());
+
     createChildFile("appengine-web.xml", AppEngineTemplateUtility.APPENGINE_WEB_XML_TEMPLATE,
         webinf, subMonitor, properties);
 

@@ -16,20 +16,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.standard;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.eclipse.core.resources.WorkspaceJob;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubMonitor;
-
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessExitListener;
@@ -39,8 +25,20 @@ import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
 import com.google.cloud.tools.eclipse.appengine.login.CredentialHelper;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
-import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.eclipse.core.resources.WorkspaceJob;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 
 /**
  * Executes a job that deploys a project to App Engine Standard.
@@ -65,7 +63,7 @@ public class StandardDeployJob extends WorkspaceJob {
   private final ExplodedWarPublisher exporter;
   private final StandardProjectStaging staging;
   private AppEngineProjectDeployer deployer;
-  
+
   //temporary way of error handling, after #439 is fixed, it'll be cleaner
   private IStatus cloudSdkProcessStatus = Status.OK_STATUS;
   private Process process;
@@ -150,7 +148,7 @@ public class StandardDeployJob extends WorkspaceJob {
 
   private void saveCredential(Path destination, Credential credential) throws IOException {
     String jsonCredential = new CredentialHelper().toJson(credential);
-    Files.write(destination, jsonCredential.getBytes(Charsets.UTF_8));
+    Files.write(destination, jsonCredential.getBytes(StandardCharsets.UTF_8));
   }
 
   private CloudSdk getCloudSdk(Path credentialFile) {

@@ -70,6 +70,8 @@
     <module>plugins/com.google.cloud.tools.eclipse.util.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.integration.appengine</module>
     <module>plugins/com.google.cloud.tools.eclipse.swtbot</module>
+    <module>plugins/com.google.cloud.tools.eclipse.welcome</module>
+    <module>plugins/com.google.cloud.tools.eclipse.welcome.test</module>
 
     <module>third_party/com.google.cloud.tools.eclipse.jdt.launching</module>
     <module>third_party/com.google.cloud.tools.eclipse.jst.server.core</module>
@@ -114,16 +116,16 @@
       <version>2.7</version>
     </dependency>
     <dependency>
-      <!-- bundle: com.google.cloud.tools.app.lib -->
+      <!-- bundle: com.google.cloud.tools.appengine -->
       <groupId>com.google.cloud.tools</groupId>
       <artifactId>appengine-plugins-core</artifactId>
-      <version>0.2.0</version>
+      <version>0.2.4</version>
     </dependency>
     <dependency>
       <!-- bundle: com.google.guava -->
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>17.0</version>
+      <version>20.0</version>
     </dependency>
     <dependency>
       <!-- bundle: jackson-core-asl -->

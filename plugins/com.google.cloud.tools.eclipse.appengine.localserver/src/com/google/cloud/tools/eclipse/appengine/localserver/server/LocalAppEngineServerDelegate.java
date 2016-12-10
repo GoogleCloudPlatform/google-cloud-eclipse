@@ -41,6 +41,11 @@ import org.eclipse.wst.server.core.model.ServerDelegate;
 
 @SuppressWarnings("restriction") // For FacetUtil
 public class LocalAppEngineServerDelegate extends ServerDelegate {
+  public static final String RUNTIME_TYPE_ID =
+      "com.google.cloud.tools.eclipse.appengine.standard.runtime";
+  public static final String SERVER_TYPE_ID =
+      "com.google.cloud.tools.eclipse.appengine.standard.server";
+
   private static final IModule[] EMPTY_MODULES = new IModule[0];
   private static final String SERVLET_MODULE_FACET = "jst.web"; //$NON-NLS-1$
   private static final String ATTR_APP_ENGINE_SERVER_MODULES = "app-engine-server-modules-list"; //$NON-NLS-1$
@@ -55,9 +60,11 @@ public class LocalAppEngineServerDelegate extends ServerDelegate {
    *         {@code server}
    */
   public static LocalAppEngineServerDelegate getAppEngineServer(IServer server) {
-    LocalAppEngineServerDelegate serverDelegate = server.getAdapter(LocalAppEngineServerDelegate.class);
+    LocalAppEngineServerDelegate serverDelegate =
+        server.getAdapter(LocalAppEngineServerDelegate.class);
     if (serverDelegate == null) {
-      serverDelegate = (LocalAppEngineServerDelegate) server.loadAdapter(LocalAppEngineServerDelegate.class, null);
+      serverDelegate = (LocalAppEngineServerDelegate) server
+          .loadAdapter(LocalAppEngineServerDelegate.class, null);
     }
     return serverDelegate;
   }
@@ -133,6 +140,10 @@ public class LocalAppEngineServerDelegate extends ServerDelegate {
     }
     if (toBeAdded != null) {
       for (IModule module : toBeAdded) {
+        if (currentServiceIds.containsValue(module)) {
+          // skip modules that are already present
+          continue;
+        }
         String moduleServiceId = serviceIdFunction.apply(module);
         if (currentServiceIds.containsKey(moduleServiceId)) {
           return StatusUtil.error(LocalAppEngineServerDebugTarget.class,
@@ -152,9 +163,9 @@ public class LocalAppEngineServerDelegate extends ServerDelegate {
       if (AppEngineStandardFacet.hasAppEngineFacet(ProjectFacetsManager.create(module.getProject()))) {
         return Status.OK_STATUS;
       } else {
-        return StatusUtil.error(LocalAppEngineServerDelegate.class, NLS.bind(Messages.GAE_STANDARD_FACET_MISSING,
-                                                                             module.getName(),
-                                                                             module.getProject().getName()));
+        String errorMessage = NLS.bind(Messages.GAE_STANDARD_FACET_MISSING, module.getName(),
+            module.getProject().getName());
+        return StatusUtil.error(LocalAppEngineServerDelegate.class, errorMessage);
       }
     } catch (CoreException ex) {
       return StatusUtil.error(LocalAppEngineServerDelegate.class,
@@ -166,7 +177,7 @@ public class LocalAppEngineServerDelegate extends ServerDelegate {
   /**
    * If the module is a web module returns the utility modules contained within its WAR, otherwise
    * returns an empty list.
-   * 
+   *
    * @param module the module path traversed to this point
    */
   @Override
@@ -177,7 +188,7 @@ public class LocalAppEngineServerDelegate extends ServerDelegate {
     IModule thisModule = module[module.length - 1];
     if (thisModule != null && thisModule.getModuleType() != null) {
       IModuleType moduleType = thisModule.getModuleType();
-      if (moduleType != null && SERVLET_MODULE_FACET.equals(moduleType.getId())) { //$NON-NLS-1$
+      if (moduleType != null && SERVLET_MODULE_FACET.equals(moduleType.getId())) {
         IWebModule webModule = (IWebModule) thisModule.loadAdapter(IWebModule.class, null);
         if (webModule != null) {
           IModule[] modules = webModule.getModules();

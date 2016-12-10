@@ -16,36 +16,45 @@
 
 package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.wst.server.ui.wizard.IWizardHandle;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 public class LocalAppEngineServerWizardFragmentTest {
-  private LocalAppEngineServerWizardFragment wizardFragment;
+  private LocalAppEngineServerWizardFragment fragment = new LocalAppEngineServerWizardFragment();
 
   @Test
-  public void testHasComposite_cloudSdkExists() {
-    wizardFragment = new LocalAppEngineServerWizardFragment(true);
-    Assert.assertFalse(wizardFragment.hasComposite());
+  public void testHasComposite() {
+    Assert.assertFalse(fragment.hasComposite());
   }
 
   @Test
-  public void testHasComposite_cloudSdkDoesNotExists() {
-    wizardFragment = new LocalAppEngineServerWizardFragment(false);
-    Assert.assertTrue(wizardFragment.hasComposite());
+  public void testIsComplete() {
+    Assert.assertTrue(fragment.isComplete());
   }
-
+  
   @Test
-  public void testIsComplete_cloudSdkExists() {
-    wizardFragment = new LocalAppEngineServerWizardFragment(true);
-    Assert.assertTrue(wizardFragment.isComplete());
-  }
-
-  @Test
-  public void testIsComplete_cloudSdkDoesNotExists() {
-    wizardFragment = new LocalAppEngineServerWizardFragment(false);
-    Assert.assertFalse(wizardFragment.isComplete());
-
-    wizardFragment.enter();
-    Assert.assertTrue(wizardFragment.isComplete());
+  public void testCreateComposite() {
+    IWizardHandle wizard = Mockito.mock(IWizardHandle.class);
+    Composite parent = new Shell();
+    Composite composite = fragment.createComposite(parent, wizard);
+    
+    Mockito.verify(wizard).setTitle("App Engine Standard Runtime");
+    Mockito.verify(wizard)
+        .setDescription("The App Engine Standard runtime requires the Google Cloud SDK");
+    
+    Control[] children = composite.getChildren();
+    Assert.assertEquals(2, children.length);
+    Label label = (Label) children[0];
+    Assert.assertTrue(label.getText().startsWith("Cannot find the Google Cloud SDK"));
+    Button button = (Button) children[1];
+    Assert.assertEquals("Open the Cloud SDK Location preference page when the wizard closes",
+        button.getText());
   }
 }

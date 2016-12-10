@@ -22,10 +22,14 @@ import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineLibrariesSelectorGroup;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
+import com.google.cloud.tools.io.FilePermissions;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.CharMatcher;
-import java.text.MessageFormat;
-import java.util.List;
+import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Paths;
+import java.util.Collection;
+import org.eclipse.aether.repository.RepositoryPolicy;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
@@ -33,7 +37,10 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -48,6 +55,7 @@ import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 
 /**
  * UI to collect all information necessary to create a new Maven-based App Engine Standard Java
@@ -103,10 +111,19 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     GridLayoutFactory.swtDefaults().numColumns(2).applyTo(container);
     setControl(container);
 
+    PlatformUI.getWorkbench().getHelpSystem().setHelp(container,
+        "com.google.cloud.tools.eclipse.appengine.newproject.maven.NewMavenProjectContext"); //$NON-NLS-1$
+
     createLocationArea(container);
     createMavenCoordinatesArea(container);
     createAppEngineProjectDetailsArea(container);
     appEngineLibrariesSelectorGroup = new AppEngineLibrariesSelectorGroup(container);
+    appEngineLibrariesSelectorGroup.addSelectionChangedListener(new ISelectionChangedListener() {
+      @Override
+      public void selectionChanged(SelectionChangedEvent event) {
+        validatePage();
+      }
+    });
 
     Dialog.applyDialogFont(container);
   }
@@ -176,6 +193,8 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     Label groupIdLabel = new Label(mavenCoordinatesGroup, SWT.NONE);
     groupIdLabel.setText(Messages.getString("GROUP_ID")); //$NON-NLS-1$
     groupIdField = new Text(mavenCoordinatesGroup, SWT.BORDER);
+    groupIdField.setToolTipText(Messages.getString("GROUP_ID_TOOLTIP")); //$NON-NLS-1$
+
     GridDataFactory.defaultsFor(groupIdField).align(SWT.FILL, SWT.CENTER).applyTo(groupIdField);
     groupIdField.addModifyListener(pageValidator);
     groupIdField.addModifyListener(new AutoPackageNameSetterOnGroupIdChange());
@@ -183,6 +202,8 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     Label artifactIdLabel = new Label(mavenCoordinatesGroup, SWT.NONE);
     artifactIdLabel.setText(Messages.getString("ARTIFACT_ID")); //$NON-NLS-1$
     artifactIdField = new Text(mavenCoordinatesGroup, SWT.BORDER);
+    artifactIdField.setToolTipText(Messages.getString("ARTIFACT_ID_TOOLTIP")); //$NON-NLS-1$
+    
     GridDataFactory.defaultsFor(artifactIdField).align(SWT.FILL, SWT.CENTER)
         .applyTo(artifactIdField);
     artifactIdField.addModifyListener(pageValidator);
@@ -219,7 +240,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     });
   }
 
-  protected void openLocationDialog() {
+  private void openLocationDialog() {
     DirectoryDialog dialog = new DirectoryDialog(getShell());
     dialog.setText(Messages.getString("GENERATED_PROJECT_LOCATION")); //$NON-NLS-1$
     String location = dialog.open();
@@ -234,7 +255,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     return canFlipPage;
   }
 
-  protected void checkFlipToNext() {
+  private void checkFlipToNext() {
     canFlipPage = validatePage();
     getContainer().updateButtons();
   }
@@ -244,16 +265,15 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
    *
    * @return true if valid, false if there is a problem
    */
-  public boolean validatePage() {
+  private boolean validatePage() {
     setMessage(null);
     setErrorMessage(null);
 
     // order here should match order of the UI fields
-
-    String location = locationField.getText().trim();
-    if (!useDefaults() && location.isEmpty()) {
-      setMessage(Messages.getString("PROVIDE_LOCATION"), INFORMATION); //$NON-NLS-1$
-      return false;
+    if (!useDefaults()) {
+      if (!validateLocation(locationField.getText().trim(), this)) {
+        return false;
+      }
     }
 
     if (!validateMavenSettings()) {
@@ -265,11 +285,42 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     if (!validateAppEngineProjectDetails()) {
       return false;
     }
+    checkMavenUpdateSettings();
 
     return true;
   }
 
-  public List<Library> getSelectedLibraries() {
+  private void checkMavenUpdateSettings() {
+    String globalUpdatePolicy = MavenPlugin.getMavenConfiguration().getGlobalUpdatePolicy();
+    if (!appEngineLibrariesSelectorGroup.getSelectedLibraries().isEmpty()
+        && RepositoryPolicy.UPDATE_POLICY_NEVER.equals(globalUpdatePolicy)) {
+      setMessage(Messages.getString("M2E_GLOBAL_UPDATES_PREVENT_CHECKS"), WARNING); //$NON-NLS-1$
+    }
+  }
+
+  @VisibleForTesting
+  static boolean validateLocation(String location, WizardPage page) {
+    if (location.isEmpty()) {
+      page.setMessage(Messages.getString("PROVIDE_LOCATION"), INFORMATION); //$NON-NLS-1$
+      return false;
+    } else {
+      try {
+        java.nio.file.Path path = Paths.get(location);
+        FilePermissions.verifyDirectoryCreatable(path);
+        return true;
+      } catch (FileAlreadyExistsException ex) {
+          String message = Messages.getString("FILE_LOCATION", location); //$NON-NLS-1$
+          page.setMessage(message, ERROR);
+          return false;
+      } catch (IOException ex) {
+        String message = Messages.getString("INVALID_PATH", location); //$NON-NLS-1$
+        page.setMessage(message, ERROR);
+        return false;
+      }
+    }
+  }
+
+  public Collection<Library> getSelectedLibraries() {
     return appEngineLibrariesSelectorGroup.getSelectedLibraries();
   }
 
@@ -286,7 +337,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     String artifactId = getArtifactId();
     IPath path = getLocationPath().append(artifactId);
     if (path.toFile().exists()) {
-      String errorMessage = MessageFormat.format(Messages.getString("LOCATION_ALREADY_EXISTS"), path); //$NON-NLS-1$
+      String errorMessage = Messages.getString("LOCATION_ALREADY_EXISTS", path); //$NON-NLS-1$
       setErrorMessage(errorMessage);
       return false;
     }
@@ -299,7 +350,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
       setMessage(Messages.getString("PROVIDE_GROUP_ID"), INFORMATION); //$NON-NLS-1$
       return false;
     } else if (!MavenCoordinatesValidator.validateGroupId(groupId)) {
-      setErrorMessage(MessageFormat.format(Messages.getString("ILLEGAL_GROUP_ID"), groupId)); //$NON-NLS-1$
+      setErrorMessage(Messages.getString("ILLEGAL_GROUP_ID", groupId)); //$NON-NLS-1$
       return false;
     }
     String artifactId = getArtifactId();
@@ -307,7 +358,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
       setMessage(Messages.getString("PROVIDE_ARTIFACT_ID"), INFORMATION); //$NON-NLS-1$
       return false;
     } else if (!MavenCoordinatesValidator.validateArtifactId(artifactId)) {
-      setErrorMessage(Messages.getString("ILLEGAL_ARTIFACT_ID") + artifactId); //$NON-NLS-1$
+      setErrorMessage(Messages.getString("ILLEGAL_ARTIFACT_ID", artifactId)); //$NON-NLS-1$
       return false;
     }
     String version = getVersion();
@@ -326,7 +377,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     IStatus status = JavaPackageValidator.validate(packageName);
     if (!status.isOK()) {
       String details = status.getMessage() == null ? packageName : status.getMessage();
-      String message = MessageFormat.format(Messages.getString("ILLEGAL_PACKAGE_NAME"), details); //$NON-NLS-1$
+      String message = Messages.getString("ILLEGAL_PACKAGE_NAME", details); //$NON-NLS-1$
       setErrorMessage(message);
       return false;
     }

@@ -22,16 +22,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.appengine.login.ui.LoginServiceUi.LocalServerReceiverWrapper;
-
-import org.junit.Assert;
-import org.junit.Test;
-
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Semaphore;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class LoginServiceUiTest {
 
@@ -98,8 +97,10 @@ public class LoginServiceUiTest {
       public void run() {
         try (
           Socket socket = serverSocket.accept();
-          InputStreamReader reader = new InputStreamReader(socket.getInputStream(), "UTF-8");
-          OutputStreamWriter writer = new OutputStreamWriter(socket.getOutputStream(), "UTF-8");
+          InputStreamReader reader = new InputStreamReader(
+              socket.getInputStream(), StandardCharsets.UTF_8);
+          OutputStreamWriter writer = new OutputStreamWriter(
+              socket.getOutputStream(), StandardCharsets.UTF_8);
         ) {
           StringBuilder input = new StringBuilder();
           for (int ch = reader.read(); ch != -1; ch = reader.read()) {

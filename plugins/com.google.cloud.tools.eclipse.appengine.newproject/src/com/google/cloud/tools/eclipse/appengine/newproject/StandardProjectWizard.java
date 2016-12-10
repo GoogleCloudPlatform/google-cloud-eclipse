@@ -43,7 +43,7 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
   private AppEngineStandardProjectConfig config = new AppEngineStandardProjectConfig();
 
   public StandardProjectWizard() {
-    this.setWindowTitle("New App Engine Standard Project");
+    setWindowTitle(Messages.getString("new.app.engine.standard.project"));
     setNeedsProgressMonitor(true);
   }
 
@@ -70,7 +70,7 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
     if (page == null) {
       return true;
     }
-    
+
     config.setServiceName(page.getServiceName());
     config.setPackageName(page.getPackageName());
     config.setProject(page.getProjectHandle());
@@ -99,7 +99,7 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
   }
 
   public static IStatus setErrorStatus(Object origin, Throwable ex) {
-    String message = "Failed to create project";
+    String message = Messages.getString("project.creation.failed");
     if (ex.getMessage() != null && !ex.getMessage().isEmpty()) {
       message += ": " + ex.getMessage();
     }
