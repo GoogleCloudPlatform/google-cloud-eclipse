@@ -72,7 +72,7 @@ public class StandardFacetsInstallationTests {
     assertTrue(correctAppEngineWebXml.exists());
     assertFalse(wrongAppEngineWebXml.exists());
 
-    ProjectUtils.waitUntilIdle();  // App Engine runtime is added as a Job, so wait.
+    ProjectUtils.waitUntilIdle();  // App Engine runtime is added via a Job, so wait.
     IRuntime primaryRuntime = facetedProject.getPrimaryRuntime();
     assertTrue(AppEngineStandardFacet.isAppEngineStandardRuntime(primaryRuntime));
   }
