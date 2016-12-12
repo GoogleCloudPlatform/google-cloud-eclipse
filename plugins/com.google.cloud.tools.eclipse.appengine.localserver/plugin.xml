@@ -223,6 +223,37 @@
       </fragment>
    </extension>
    <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:org.eclipse.ui.popup.any?after=additions">
+         <command
+               commandId="com.google.cloud.tools.eclipse.appengine.localserver.launch"
+               disabledIcon="platform:/plugin/org.eclipse.debug.ui/icons/full/dtool16/run_exc.png"
+               icon="platform:/plugin/org.eclipse.debug.ui/icons/full/etool16/run_exc.png"
+               label="Run in App Engine"
+               mnemonic="R"
+               style="push">
+            <parameter
+                  name="launchMode"
+                  value="run">
+            </parameter>
+         </command>
+         <command
+               commandId="com.google.cloud.tools.eclipse.appengine.localserver.launch"
+               disabledIcon="platform:/plugin/org.eclipse.debug.ui/icons/full/dtool16/debug_exc.png"
+               icon="platform:/plugin/org.eclipse.debug.ui/icons/full/etool16/debug_exc.png"
+               label="Debug in App Engine"
+               mnemonic="D"
+               style="push">
+            <parameter
+                  name="launchMode"
+                  value="debug">
+            </parameter>
+         </command>
+      </menuContribution>
+   </extension>
+   <extension
          point="org.eclipse.ui.commands">
       <command
             description="Launch on App Engine development server"
@@ -242,25 +273,22 @@
             class="com.google.cloud.tools.eclipse.appengine.localserver.ui.LaunchAppEngineStandardHandler"
             commandId="com.google.cloud.tools.eclipse.appengine.localserver.launch">
          <enabledWhen>
-            <or>
-               <iterate
-                     ifEmpty="false">
-                  <or>
-                     <adapt
-                           type="org.eclipse.wst.server.core.IModule">
-                     </adapt>
-                     <test
-                           property="org.eclipse.wst.server.ui.isRunnable">
-                     </test>
-                  </or>
-               </iterate>
-               <with
-                     variable="activeEditor">
+           <or>
+           	  <iterate>
+		        <test
+        		    property="org.eclipse.wst.common.project.facet.core.projectFacet"
+            		value="com.google.cloud.tools.eclipse.appengine.facets.standard" />
+              </iterate>
+              <with
+                     variable="activeEditorInput">
                   <adapt
-                        type="org.eclipse.ui.IEditorPart">
+                        type="org.eclipse.core.resources.IFile">
+			        <test
+            			property="org.eclipse.wst.common.project.facet.core.projectFacet"
+            			value="com.google.cloud.tools.eclipse.appengine.facets.standard" />
                   </adapt>
                </with>
-            </or>
+           </or>
          </enabledWhen>
       </handler>
    </extension>
