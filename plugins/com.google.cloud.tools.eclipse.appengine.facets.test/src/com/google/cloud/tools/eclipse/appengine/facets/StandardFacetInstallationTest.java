@@ -38,7 +38,7 @@ import org.junit.Test;
 /**
  * Tests some cases of installing the App Engine Standard facet on existing projects.
  */
-public class StandardFacetsInstallationTests {
+public class StandardFacetInstallationTest {
   private IWorkspaceRoot root;
   private List<IProject> projects;
 
