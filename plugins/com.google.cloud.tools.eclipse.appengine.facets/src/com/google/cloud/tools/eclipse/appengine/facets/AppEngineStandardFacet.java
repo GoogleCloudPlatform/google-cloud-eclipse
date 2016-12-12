@@ -156,8 +156,8 @@ public class AppEngineStandardFacet {
     org.eclipse.wst.server.core.IRuntime[] appEngineRuntimes = getAppEngineRuntimes();
     if (appEngineRuntimes.length > 0) {
       IRuntime appEngineFacetRuntime = null;
-      for(int index = 0; index < appEngineRuntimes.length; index++) {
-        appEngineFacetRuntime = FacetUtil.getRuntime(appEngineRuntimes[index]);
+      for (org.eclipse.wst.server.core.IRuntime appEngineRuntime : appEngineRuntimes) {
+        appEngineFacetRuntime = FacetUtil.getRuntime(appEngineRuntime);
         project.addTargetedRuntime(appEngineFacetRuntime, monitor);
       }
       project.setPrimaryRuntime(appEngineFacetRuntime, monitor);

@@ -91,8 +91,6 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
         newProject, true, subMonitor.newChild(2));
     AppEngineStandardFacet.installAppEngineFacet(
         facetedProject, true /* installDependentFacets */, subMonitor.newChild(2));
-    AppEngineStandardFacet.installAllAppEngineRuntimes(facetedProject, true /* force */,
-        subMonitor.newChild(2));
 
     addAppEngineLibrariesToBuildPath(newProject, config.getAppEngineLibraries(),
         subMonitor.newChild(2));
