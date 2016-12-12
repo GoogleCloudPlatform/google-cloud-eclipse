@@ -52,8 +52,7 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
       protected IStatus run(IProgressMonitor monitor) {
         try {
           IFacetedProject facetedProject = ProjectFacetsManager.create(project);
-          AppEngineStandardFacet.installAllAppEngineRuntimes(
-              facetedProject, false /* force */, monitor);
+          AppEngineStandardFacet.installAllAppEngineRuntimes(facetedProject, monitor);
           return Status.OK_STATUS;
         } catch (CoreException ex) {
           return ex.getStatus();
