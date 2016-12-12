@@ -31,6 +31,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
+import org.eclipse.wst.common.project.facet.core.runtime.IRuntime;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -57,7 +58,7 @@ public class StandardFacetsInstallationTests {
   }
 
   @Test
-  public void testStandardFacetInstallationOnGwtWar() throws IOException, CoreException {
+  public void testStandardFacetInstallation() throws IOException, CoreException {
     projects =
         ProjectUtils.importProjects(getClass(), "projects/test-dynamic-web-project.zip", null);
     assertEquals(1, projects.size());
@@ -70,5 +71,9 @@ public class StandardFacetsInstallationTests {
         project.getFile(new Path("src/main/webapp/WEB-INF/appengine-web.xml"));
     assertTrue(correctAppEngineWebXml.exists());
     assertFalse(wrongAppEngineWebXml.exists());
+
+    ProjectUtils.waitUntilIdle();  // App Engine runtime is added as a Job, so wait.
+    IRuntime primaryRuntime = facetedProject.getPrimaryRuntime();
+    assertTrue(AppEngineStandardFacet.isAppEngineStandardRuntime(primaryRuntime));
   }
 }
