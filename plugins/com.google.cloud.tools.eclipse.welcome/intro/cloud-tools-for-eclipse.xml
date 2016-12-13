@@ -22,6 +22,17 @@
     </group>
   </extensionContent>
 
+  <extensionContent path="whatsnew/@" style="css/intro.css">
+    <group style-id="content-group">
+      <link id="cloud-tools-for-eclipse-whatsnew-link"
+            label="Google Cloud Tools for Eclipse Release Notes"
+            style-id="content-link"
+            url="https://cloud.google.com/eclipse/docs/release-notes">
+        <text>Announcements about new or updated features, bug fixes, known issues, and deprecated functionality.</text>
+      </link>
+    </group>
+  </extensionContent>
+
   <extensionContent path="migrate/@" style="css/intro.css">
     <group style-id="content-group">
       <link id="cloud-tools-for-eclipse-migration-link"
