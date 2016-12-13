@@ -23,10 +23,10 @@ public class SdkUiMessages extends NLS {
   private static final String BUNDLE_NAME =
       "com.google.cloud.tools.eclipse.sdk.ui.preferences.messages"; //$NON-NLS-1$
   
-  public static String CloudSdkPreferencePage_2;
+  public static String CloudSdkRequired;
   public static String CloudSdkPreferencePage_3;
   public static String CloudSdkPreferencePage_4;
-  public static String CloudSdkPreferencePage_5;
+  public static String SdkLocation;
   public static String CloudSdkNotFound;
   public static String CloudSdkOutOfDate;
   public static String NoSuchDirectory;
