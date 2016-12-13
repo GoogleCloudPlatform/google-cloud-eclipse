@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.test.util;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.RegistryFactory;
+import org.eclipse.ui.internal.registry.KeywordRegistry;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -27,9 +28,11 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+@SuppressWarnings("restriction")
 public class BasePluginXmlTest {
 
   @Rule public final PluginXmlDocument pluginXmlDocument = new PluginXmlDocument();
+  
   private Document doc;
 
   @Before
@@ -54,12 +57,28 @@ public class BasePluginXmlTest {
     
     // todo should we test that the file has at least one extension point?
     
+    IExtensionRegistry registry = RegistryFactory.getRegistry();
     for (int i = 0; i < extensions.getLength(); i++) {
       Element extension = (Element) extensions.item(i);
       String point = extension.getAttribute("point");
-      IExtensionRegistry registry = RegistryFactory.getRegistry();
       IExtensionPoint extensionPoint = registry.getExtensionPoint(point);
       Assert.assertNotNull(extensionPoint);
+    }
+  }
+  
+  @Test
+  public void testKeywordsDefined() {
+    NodeList references = getDocument().getElementsByTagName("keywordReference");
+        
+    if (references.getLength() > 0) { // not all files reference keywords
+      KeywordRegistry registry = KeywordRegistry.getInstance();
+      for (int i = 0; i < references.getLength(); i++) {
+        Element reference = (Element) references.item(i);
+        String id = reference.getAttribute("id");
+        String keyword = registry.getKeywordLabel(id);
+        Assert.assertNotNull(id, keyword);
+        Assert.assertFalse(id, keyword.isEmpty());
+      }
     }
   }
 
