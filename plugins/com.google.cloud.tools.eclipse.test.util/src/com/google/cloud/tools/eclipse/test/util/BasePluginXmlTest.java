@@ -49,7 +49,7 @@ public class BasePluginXmlTest {
   }
    
   @Test
-  public void testLoadExtensionPoints() {
+  public void testValidExtensionPoints() {
     NodeList extensions = getDocument().getDocumentElement().getElementsByTagName("extension");
     
     // todo should we test that the file has at least one extension point?
@@ -62,5 +62,5 @@ public class BasePluginXmlTest {
       Assert.assertNotNull(extensionPoint);
     }
   }
-  
+
 }
