@@ -47,6 +47,8 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
   }
 
   private void installAppEngineRuntimes(final IProject project) {
+    // Modifying targeted runtimes while installing/uninstalling facets is not allowed,
+    // so schedule a job as a workaround.
     Job installJob = new Job("Install App Engine runtimes in " + project.getName()) {
       @Override
       protected IStatus run(IProgressMonitor monitor) {

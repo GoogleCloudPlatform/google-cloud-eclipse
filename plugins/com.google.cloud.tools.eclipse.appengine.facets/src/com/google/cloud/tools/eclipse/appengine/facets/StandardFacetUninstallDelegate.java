@@ -42,6 +42,8 @@ public class StandardFacetUninstallDelegate implements IDelegate {
    * <code>project</code>.
    */
   private void uninstallAppEngineRuntimes(final IProject project) {
+    // Modifying targeted runtimes while installing/uninstalling facets is not allowed,
+    // so schedule a job as a workaround.
     Job uninstallJob = new Job("Uninstall App Engine runtimes in " + project.getName()) {
 
       @Override
