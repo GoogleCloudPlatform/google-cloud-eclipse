@@ -58,8 +58,8 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 
 /**
- * UI to collect all information necessary to create a new Maven-based App Engine Standard Java
- * project.
+ * UI to collect all information necessary to create a new Maven-based App Engine Standard 
+ * environment Java project.
  */
 public class MavenAppEngineStandardWizardPage extends WizardPage {
 
@@ -313,7 +313,8 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
           page.setMessage(message, ERROR);
           return false;
       } catch (IOException ex) {
-        String message = Messages.getString("INVALID_PATH", location); //$NON-NLS-1$
+        String message = Messages.getString(
+            "INVALID_PATH", location, ex.getLocalizedMessage()); //$NON-NLS-1$
         page.setMessage(message, ERROR);
         return false;
       }

@@ -16,45 +16,21 @@
 
 package com.google.cloud.tools.eclipse.appengine.facets;
 
-import java.io.File;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-public class XmlTest {
-    
-  private DocumentBuilder builder;
-  
-  @Before
-  public void setUp() throws ParserConfigurationException {
-    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-    factory.setNamespaceAware(true);
-    builder = factory.newDocumentBuilder();
-  }
+import com.google.cloud.tools.eclipse.test.util.BasePluginXmlTest;
 
-  @Test
-  public void testPluginXml() throws Exception {
-    // test fails if malformed
-    Document doc = builder.parse(
-        new File("../com.google.cloud.tools.eclipse.appengine.facets/plugin.xml"));
-    Assert.assertEquals("plugin", doc.getDocumentElement().getNodeName());
-  }
+public class XmlTest extends BasePluginXmlTest {
   
   @Test
-  public void testFacetsDefined() throws Exception {
-    Document doc = builder.parse(
-        new File("../com.google.cloud.tools.eclipse.appengine.facets/plugin.xml"));
-    checkFacetDefined(doc, "conflicts");
-    checkFacetDefined(doc, "requires");
+  public void testFacetsDefined() {
+    checkFacetDefined(getDocument(), "conflicts");
+    checkFacetDefined(getDocument(), "requires");
   }
 
   private static void checkFacetDefined(Document doc, String elementName) {

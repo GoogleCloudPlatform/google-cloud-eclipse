@@ -9,3 +9,4 @@ Bundle-Version: 0.1.0.qualifier
 Fragment-Host: com.google.cloud.tools.eclipse.appengine.whitelist
 Require-Bundle: org.junit,
  org.eclipse.equinox.registry
+Import-Package: com.google.cloud.tools.eclipse.test.util
