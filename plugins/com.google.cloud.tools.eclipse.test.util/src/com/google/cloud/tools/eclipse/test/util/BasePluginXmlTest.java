@@ -76,8 +76,8 @@ public class BasePluginXmlTest {
         Element reference = (Element) references.item(i);
         String id = reference.getAttribute("id");
         String keyword = registry.getKeywordLabel(id);
-        Assert.assertNotNull(id, keyword);
-        Assert.assertFalse(id, keyword.isEmpty());
+        Assert.assertNotNull("Null keyword " + id, keyword);
+        Assert.assertFalse("Empty keyword " + id, keyword.isEmpty());
       }
     }
   }
