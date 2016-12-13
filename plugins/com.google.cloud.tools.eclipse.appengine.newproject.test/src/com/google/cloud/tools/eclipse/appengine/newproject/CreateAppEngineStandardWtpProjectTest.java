@@ -20,7 +20,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
+import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.common.io.ByteStreams;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -137,6 +139,21 @@ public class CreateAppEngineStandardWtpProjectTest {
     IType hamcrest = javaProject.findType("org.hamcrest.CoreMatchers");
     assertNotNull("Did not find hamcrest", hamcrest);
     assertTrue(hamcrest.exists());
+  }
+
+  @Test
+  public void testAppEngineRuntimeAdded() throws InvocationTargetException, CoreException {
+    try {
+      new CreateAppEngineStandardWtpProject(config, adaptable).execute(null /* monitor */);
+
+      ProjectUtils.waitUntilIdle();  // App Engine runtime is added via a Job, so wait.
+      IFacetedProject facetedProject = ProjectFacetsManager.create(project);
+      IRuntime primaryRuntime = facetedProject.getPrimaryRuntime();
+      assertTrue(AppEngineStandardFacet.isAppEngineStandardRuntime(primaryRuntime));
+    } catch (CoreException ex) {
+      logForSetPrimaryRuntimeError();
+      throw ex;
+    }
   }
 
   @Test
