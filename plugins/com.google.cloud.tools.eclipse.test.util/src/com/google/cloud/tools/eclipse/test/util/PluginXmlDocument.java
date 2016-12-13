@@ -35,8 +35,9 @@ import org.xml.sax.SAXException;
  * <p>
  * Assumptions:
  * <ul>
- *  <li>instances are created only in test fragment bundles that are hosted by the corresponding production</li>
- *  <li>the tests execute with the working directory in a bundle or fragment directory</li>
+ * <li>instances are created only in test fragment bundles that are hosted by the corresponding
+ * production</li>
+ * <li>the tests execute with the working directory in a bundle or fragment directory</li>
  * </ul>
  */
 public class PluginXmlDocument extends ExternalResource {
@@ -65,8 +66,8 @@ public class PluginXmlDocument extends ExternalResource {
   }
 
   /**
-   * Returns the Document representing the plugin.xml. The file is parsed only once when {@link #before()} is executed
-   * by JUnit.
+   * Returns the Document representing the plugin.xml. The file is parsed only once when
+   * {@link #before()} is executed by JUnit.
    */
   public Document get() {
     return doc;
@@ -82,15 +83,17 @@ public class PluginXmlDocument extends ExternalResource {
   /**
    * Returns the host bundle name defined in the manifest of the test fragment bundle.
    * <p>
-   * The working directory is assumed to be the root of the fragment bundle (i.e. <code>META-INF/MANIFEST.MF</code>
-   * is a valid path to the manifest file of the fragment.
-   * @return the value of <code>Fragment-Host</code> attribute or <code>null</code> if the attribute is not present
+   * The working directory is assumed to be the root of the fragment bundle (i.e.
+   * <code>META-INF/MANIFEST.MF</code> is a valid path to the manifest file of the fragment.
+   * 
+   * @return the value of <code>Fragment-Host</code> attribute or <code>null</code> if the attribute
+   *         is not present
    * @throws IOException if the manifest file is not found or an error occurs while reading it
    */
   private String getHostBundleName() throws IOException {
     String manifestPath = "META-INF/MANIFEST.MF";
     Manifest manifest = new Manifest(new FileInputStream(manifestPath));
-    Attributes attr = manifest.getMainAttributes();
-    return attr.getValue("Fragment-Host");
+    Attributes attributes = manifest.getMainAttributes();
+    return attributes.getValue("Fragment-Host");
   }
 }

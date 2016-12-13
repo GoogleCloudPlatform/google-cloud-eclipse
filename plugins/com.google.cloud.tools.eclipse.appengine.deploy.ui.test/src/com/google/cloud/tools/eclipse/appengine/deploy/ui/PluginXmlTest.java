@@ -32,13 +32,13 @@ public class PluginXmlTest extends BasePluginXmlTest {
 
   @Test
   public void testLimitedVisibility() {
-    NodeList pages = getDoc().getElementsByTagName("page");
+    NodeList pages = getDocument().getElementsByTagName("page");
     Assert.assertEquals(2, pages.getLength());
-    NodeList enabledWhen = getDoc().getElementsByTagName("enabledWhen");
+    NodeList enabledWhen = getDocument().getElementsByTagName("enabledWhen");
     Assert.assertEquals(3, enabledWhen.getLength());
-    NodeList tests = getDoc().getElementsByTagName("test");
+    NodeList tests = getDocument().getElementsByTagName("test");
     Assert.assertEquals(3, tests.getLength());
-    NodeList adapts = getDoc().getElementsByTagName("adapt");
+    NodeList adapts = getDocument().getElementsByTagName("adapt");
     Assert.assertEquals(1, adapts.getLength());
 
     for (int i = 0; i < enabledWhen.getLength(); i++) {
