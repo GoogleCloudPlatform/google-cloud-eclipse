@@ -75,7 +75,6 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
     GridData javaPackagePosition = GridDataFactory.swtDefaults().create();
     javaPackageField.setLayoutData(javaPackagePosition);
     javaPackageField.addModifyListener(pageValidator);
-    GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(container);
 
     // Manage APIs
     appEngineLibrariesSelectorGroup = new AppEngineLibrariesSelectorGroup(container);
