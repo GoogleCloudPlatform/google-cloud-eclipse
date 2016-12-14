@@ -24,8 +24,6 @@ import com.google.cloud.tools.eclipse.ui.util.FontUtil;
 import com.google.cloud.tools.eclipse.ui.util.databinding.BucketNameValidator;
 import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectIdInputValidator;
 import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectVersionValidator;
-import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener;
-import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.ErrorHandler;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -58,7 +56,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
@@ -70,9 +67,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   private static final String APPENGINE_VERSIONS_URL =
       "https://console.cloud.google.com/appengine/versions";
 
-  private static final int INDENT_CHECKBOX_ENABLED_WIDGET = 10;
-
-  private static Logger logger = Logger.getLogger(DeployPropertyPage.class.getName());
+  private static final Logger logger = Logger.getLogger(DeployPropertyPage.class.getName());
 
   private AccountSelector accountSelector;
 

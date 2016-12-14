@@ -25,7 +25,6 @@ import java.io.File;
 import java.util.Collection;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -70,8 +69,9 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
     // Java package name
     Label packageNameLabel = new Label(container, SWT.NONE);
     packageNameLabel.setText(Messages.getString("java.package")); //$NON-NLS-1$
-    javaPackageField = new Text(container, SWT.BORDER); 
+    javaPackageField = new Text(container, SWT.BORDER);
     GridData javaPackagePosition = new GridData(GridData.FILL_HORIZONTAL);
+    javaPackagePosition.horizontalSpan = 2;
     javaPackageField.setLayoutData(javaPackagePosition);
     javaPackageField.addModifyListener(pageValidator);
 
