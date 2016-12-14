@@ -25,16 +25,15 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.wst.common.componentcore.ComponentCore;
-import org.eclipse.wst.common.componentcore.resources.IVirtualComponent;
-import org.eclipse.wst.common.componentcore.resources.IVirtualFolder;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
+import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
 public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate {
-  private final static String DEFAULT_WEB_PATH = "src/main/webapp";
-
-  private final static String WEB_INF = "WEB-INF/";
   private final static String APPENGINE_WEB_XML = "appengine-web.xml";
 
   @Override
@@ -44,6 +43,25 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
                       IProgressMonitor monitor) throws CoreException {
     super.execute(project, version, config, monitor);
     createConfigFiles(project, monitor);
+    installAppEngineRuntimes(project);
+  }
+
+  private void installAppEngineRuntimes(final IProject project) {
+    // Modifying targeted runtimes while installing/uninstalling facets is not allowed,
+    // so schedule a job as a workaround.
+    Job installJob = new Job("Install App Engine runtimes in " + project.getName()) {
+      @Override
+      protected IStatus run(IProgressMonitor monitor) {
+        try {
+          IFacetedProject facetedProject = ProjectFacetsManager.create(project);
+          AppEngineStandardFacet.installAllAppEngineRuntimes(facetedProject, monitor);
+          return Status.OK_STATUS;
+        } catch (CoreException ex) {
+          return ex.getStatus();
+        }
+      }
+    };
+    installJob.schedule();
   }
 
   /**
@@ -55,7 +73,7 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
 
     // The virtual component model is very flexible, but we assume that
     // the WEB-INF/appengine-web.xml isn't a virtual file remapped elsewhere
-    IFolder webInfDir = getWebInfDirectory(project);
+    IFolder webInfDir = WebProjectUtil.getWebInfDirectory(project);
     IFile appEngineWebXml = webInfDir.getFile(APPENGINE_WEB_XML);
 
     if (appEngineWebXml.exists()) {
@@ -70,20 +88,5 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
         configFileLocation, AppEngineTemplateUtility.APPENGINE_WEB_XML_TEMPLATE,
         Collections.<String, String>emptyMap());
     progress.worked(6);
-  }
-
-  private IFolder getWebInfDirectory(IProject project) {
-    // Try to obtain the directory as if it was a Dynamic Web Project
-    IVirtualComponent component = ComponentCore.createComponent(project);
-    if (component != null && component.exists()) {
-      IVirtualFolder root = component.getRootFolder();
-      // the root should exist, but the WEB-INF may not yet exist
-      if (root.exists()) {
-        return (IFolder) root.getFolder(WEB_INF).getUnderlyingFolder();
-      }
-    }
-    // Otherwise it's seemingly fair game
-    return project.getFolder(DEFAULT_WEB_PATH).getFolder(WEB_INF);
-
   }
 }

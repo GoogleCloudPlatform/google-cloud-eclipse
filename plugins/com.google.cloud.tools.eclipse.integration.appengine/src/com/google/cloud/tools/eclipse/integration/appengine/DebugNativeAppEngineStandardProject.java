@@ -53,8 +53,12 @@ import java.nio.charset.StandardCharsets;
 @RunWith(SWTBotJunit4ClassRunner.class)
 public class DebugNativeAppEngineStandardProject extends AbstractProjectTests {
   /**
-   * Launch a native application in debug mode and verify that (1) it started, (2) it can be
-   * terminated and removed from the launch list, and (3) the process is actually terminated
+   * Launch a native application in debug mode and verify that:
+   * <ol>
+   * <li>it started,</li>
+   * <li>it can be terminated and removed from the launch list, and</li>
+   * <li>the process is actually terminated.</li>
+   * </ol>
    */
   @Test
   public void testDebugLaunch() throws Exception {
@@ -70,8 +74,8 @@ public class DebugNativeAppEngineStandardProject extends AbstractProjectTests {
         "app.engine.test");
     assertTrue(project.exists());
 
-    SWTBotTreeItem project = SwtBotProjectActions.selectProject(bot, "testapp");
-    assertNotNull(project);
+    SWTBotTreeItem testappProject = SwtBotProjectActions.selectProject(bot, "testapp");
+    assertNotNull(testappProject);
     SwtBotTestingUtilities.performAndWaitForWindowChange(bot, new Runnable() {
       @Override
       public void run() {

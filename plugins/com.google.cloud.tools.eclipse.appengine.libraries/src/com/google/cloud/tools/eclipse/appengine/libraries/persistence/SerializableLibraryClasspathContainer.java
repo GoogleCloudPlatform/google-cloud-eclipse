@@ -30,20 +30,20 @@ public class SerializableLibraryClasspathContainer {
   private String path;
   private SerializableClasspathEntry[] entries;
 
-  public SerializableLibraryClasspathContainer(LibraryClasspathContainer container, IPath baseDirectory) {
+  public SerializableLibraryClasspathContainer(LibraryClasspathContainer container, IPath baseDirectory, IPath sourceBaseDirectory) {
     description = container.getDescription();
     path = container.getPath().toOSString();
     IClasspathEntry[] classpathEntries = container.getClasspathEntries();
     entries = new SerializableClasspathEntry[classpathEntries.length];
     for (int i = 0; i < classpathEntries.length; i++) {
-      entries[i] = new SerializableClasspathEntry(classpathEntries[i], baseDirectory);
+      entries[i] = new SerializableClasspathEntry(classpathEntries[i], baseDirectory, sourceBaseDirectory);
     }
   }
 
-  public LibraryClasspathContainer toLibraryClasspathContainer(IPath baseDirectory) {
+  public LibraryClasspathContainer toLibraryClasspathContainer(IPath baseDirectory, IPath sourceBaseDirectory) {
     IClasspathEntry[] classpathEntries = new IClasspathEntry[entries.length];
     for (int i = 0; i < entries.length; i++) {
-      classpathEntries[i] = entries[i].toClasspathEntry(baseDirectory);
+      classpathEntries[i] = entries[i].toClasspathEntry(baseDirectory, sourceBaseDirectory);
     }
     return new LibraryClasspathContainer(new Path(path), description, classpathEntries);
   }

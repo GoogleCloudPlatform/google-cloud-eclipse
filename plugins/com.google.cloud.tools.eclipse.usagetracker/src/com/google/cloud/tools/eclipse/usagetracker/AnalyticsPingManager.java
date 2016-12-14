@@ -20,7 +20,21 @@ import com.google.cloud.tools.eclipse.preferences.Activator;
 import com.google.cloud.tools.eclipse.preferences.AnalyticsPreferences;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.common.annotations.VisibleForTesting;
-
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
@@ -33,21 +47,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.osgi.service.prefs.BackingStoreException;
-
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Provides methods that report plugin-specific events to Analytics.
@@ -217,7 +216,7 @@ public class AnalyticsPingManager {
       // This prevent Analytics from identifying our pings as spam.
       connection.setRequestProperty("User-Agent", CloudToolsInfo.USER_AGENT);
       connection.setReadTimeout(3000);  // milliseconds
-      byte[] bytesToWrite = parametersString.getBytes("UTF-8");
+      byte[] bytesToWrite = parametersString.getBytes(StandardCharsets.UTF_8);
       connection.setFixedLengthStreamingMode(bytesToWrite.length);
 
       try (OutputStream out = connection.getOutputStream()) {
@@ -343,5 +342,5 @@ public class AnalyticsPingManager {
       this.metadataValue = metadataValue;
       this.shell = shell;
     }
-  };
+  }
 }

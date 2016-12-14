@@ -24,6 +24,7 @@ import static org.junit.Assert.fail;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -218,6 +219,24 @@ public class AppEngineLibrariesSelectorGroupTest {
       }});
   }
 
+  // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/954
+  @Test
+  public void testSelectAndUnselectAppengineApiThenSelectEndpointsShouldKeepAppEngineSelected() {
+    syncExec(new Runnable() {
+
+      @Override
+      public void run() {
+        appengineButton.click();
+        appengineButton.click();
+        endpointsButton.click();
+        List<Library> selectedLibraries = getSelectedLibrariesSorted();
+        assertNotNull(selectedLibraries);
+        assertThat(selectedLibraries.size(), is(2));
+        assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
+        assertThat(selectedLibraries.get(1).getId(), is("appengine-endpoints"));
+      }});
+  }
+
   private SWTBotCheckBox getButton(String libraryId) {
     for (Button button : librariesSelector.getLibraryButtons()) {
       if (libraryId.equals(((Library) button.getData()).getId())) {
@@ -233,7 +252,7 @@ public class AppEngineLibrariesSelectorGroupTest {
   }
 
   private List<Library> getSelectedLibrariesSorted() {
-    List<Library> selectedLibraries = librariesSelector.getSelectedLibraries();
+    List<Library> selectedLibraries = new ArrayList<>(librariesSelector.getSelectedLibraries());
     Collections.sort(selectedLibraries, new Comparator<Library>() {
 
       @Override

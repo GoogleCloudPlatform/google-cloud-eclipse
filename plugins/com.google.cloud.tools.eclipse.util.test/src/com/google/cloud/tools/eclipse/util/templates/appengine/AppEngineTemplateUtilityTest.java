@@ -66,11 +66,11 @@ public class AppEngineTemplateUtilityTest {
   }
 
   @Test
-  public void testCreateFileContent_appengineWebXml()
-      throws CoreException, IOException {
-    String fileLocation = testFile.getLocation().toString();  
-    AppEngineTemplateUtility.createFileContent(
-        fileLocation, AppEngineTemplateUtility.APPENGINE_WEB_XML_TEMPLATE, Collections.<String, String> emptyMap());
+  public void testCreateFileContent_appengineWebXml() throws CoreException, IOException {
+    String fileLocation = testFile.getLocation().toString();
+    AppEngineTemplateUtility.createFileContent(fileLocation,
+        AppEngineTemplateUtility.APPENGINE_WEB_XML_TEMPLATE,
+        Collections.<String, String>emptyMap());
 
     InputStream testFileStream = testFile.getContents(true);
     InputStream expectedFileStream = getDataFile("appengineWebXml.txt");
@@ -78,13 +78,12 @@ public class AppEngineTemplateUtilityTest {
   }
 
   @Test
-  public void testCreateFileContent_helloAppEngineWithPackage()
-      throws CoreException, IOException {
+  public void testCreateFileContent_helloAppEngineWithPackage() throws CoreException, IOException {
     String fileLocation = testFile.getLocation().toString();
     Map<String, String> dataMap = new HashMap<String, String>();
     dataMap.put("package", "com.example");
-    AppEngineTemplateUtility.createFileContent(
-        fileLocation, AppEngineTemplateUtility.HELLO_APPENGINE_TEMPLATE, dataMap);
+    AppEngineTemplateUtility.createFileContent(fileLocation,
+        AppEngineTemplateUtility.HELLO_APPENGINE_TEMPLATE, dataMap);
 
     InputStream testFileStream = testFile.getContents(true);
     InputStream expectedFileStream = getDataFile("helloAppEngineWithPackage.txt");
@@ -97,8 +96,8 @@ public class AppEngineTemplateUtilityTest {
     String fileLocation = testFile.getLocation().toString();
     Map<String, String> dataMap = new HashMap<String, String>();
     dataMap.put("package", "");
-    AppEngineTemplateUtility.createFileContent(
-        fileLocation, AppEngineTemplateUtility.HELLO_APPENGINE_TEMPLATE, dataMap);
+    AppEngineTemplateUtility.createFileContent(fileLocation,
+        AppEngineTemplateUtility.HELLO_APPENGINE_TEMPLATE, dataMap);
 
     InputStream testFileStream = testFile.getContents(true);
     InputStream expectedFileStream = getDataFile("helloAppEngineWithoutPackage.txt");
@@ -106,11 +105,10 @@ public class AppEngineTemplateUtilityTest {
   }
 
   @Test
-  public void testCreateFileContent_index()
-      throws CoreException, IOException {
-    String fileLocation = testFile.getLocation().toString();  
-    AppEngineTemplateUtility.createFileContent(
-        fileLocation, AppEngineTemplateUtility.INDEX_HTML_TEMPLATE, Collections.<String, String> emptyMap());
+  public void testCreateFileContent_index() throws CoreException, IOException {
+    String fileLocation = testFile.getLocation().toString();
+    AppEngineTemplateUtility.createFileContent(fileLocation,
+        AppEngineTemplateUtility.INDEX_HTML_TEMPLATE, Collections.<String, String>emptyMap());
 
     InputStream testFileStream = testFile.getContents(true);
     InputStream expectedFileStream = getDataFile("index.txt");
@@ -122,8 +120,8 @@ public class AppEngineTemplateUtilityTest {
     String fileLocation = testFile.getLocation().toString();
     Map<String, String> dataMap = new HashMap<String, String>();
     dataMap.put("package", "com.example.");
-    AppEngineTemplateUtility.createFileContent(
-        fileLocation, AppEngineTemplateUtility.WEB_XML_TEMPLATE, dataMap);
+    AppEngineTemplateUtility.createFileContent(fileLocation,
+        AppEngineTemplateUtility.WEB_XML_TEMPLATE, dataMap);
 
     InputStream testFileStream = testFile.getContents(true);
     InputStream expectedFileStream = getDataFile("web.txt");
@@ -132,7 +130,7 @@ public class AppEngineTemplateUtilityTest {
 
   private InputStream getDataFile(String fileName) throws IOException {
     Bundle bundle = FrameworkUtil.getBundle(AppEngineTemplateUtilityTest.class);
-    URL expectedFileUrl = bundle.getResource("/testData/templates/appengine/" + fileName);  
+    URL expectedFileUrl = bundle.getResource("/testData/templates/appengine/" + fileName);
     return expectedFileUrl.openStream();
   }
 

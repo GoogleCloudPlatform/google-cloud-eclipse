@@ -6,7 +6,7 @@
             id="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineStandard"
             name="%wizard.name"
             class="com.google.cloud.tools.eclipse.appengine.newproject.StandardProjectWizard"
-            icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gcp-16x16.png"
+            icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gae-16x16.png"
             project="true"
             category="com.google.cloud.tools.eclipse.appengine.wizards">
          <description>%wizard.description</description>
@@ -22,6 +22,33 @@
     <category 
         id="com.google.cloud.tools.eclipse.appengine.wizards" 
         name="%gcp.category" />
+  </extension>
+  <extension
+        point="org.eclipse.ui.perspectiveExtensions">
+     <perspectiveExtension
+           targetID="org.eclipse.jdt.ui.JavaPerspective">
+        <newWizardShortcut
+              id="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineStandard">
+        </newWizardShortcut>
+     </perspectiveExtension>
+     <perspectiveExtension
+           targetID="org.eclipse.jst.j2ee.J2EEPerspective">
+        <newWizardShortcut
+              id="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineStandard">
+        </newWizardShortcut>
+     </perspectiveExtension>
+     <perspectiveExtension
+           targetID="org.eclipse.wst.web.ui.webDevPerspective">
+        <newWizardShortcut
+              id="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineStandard">
+        </newWizardShortcut>
+     </perspectiveExtension>
+  </extension>
+  <extension
+        point="org.eclipse.help.contexts">
+     <contexts
+           file="helpContexts.xml">
+     </contexts>
   </extension>
 
 </plugin>

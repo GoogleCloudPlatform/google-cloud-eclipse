@@ -17,7 +17,6 @@
 package com.google.cloud.tools.eclipse.appengine.facets;
 
 import java.util.Set;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -35,14 +34,16 @@ public class StandardFacetUninstallDelegate implements IDelegate {
   @Override
   public void execute(IProject project, IProjectFacetVersion version, Object config,
       IProgressMonitor monitor) throws CoreException {
-    uninstallAppEngineRuntime(project, monitor);
+    uninstallAppEngineRuntimes(project);
   }
 
   /**
    * Removes all the App Engine server runtimes from the list of targeted runtimes for
    * <code>project</code>.
    */
-  private void uninstallAppEngineRuntime(final IProject project, IProgressMonitor monitor) {
+  private void uninstallAppEngineRuntimes(final IProject project) {
+    // Modifying targeted runtimes while installing/uninstalling facets is not allowed,
+    // so schedule a job as a workaround.
     Job uninstallJob = new Job("Uninstall App Engine runtimes in " + project.getName()) {
 
       @Override
@@ -63,7 +64,6 @@ public class StandardFacetUninstallDelegate implements IDelegate {
       }
     };
     uninstallJob.schedule();
-
   }
 
 }

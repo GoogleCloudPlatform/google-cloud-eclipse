@@ -8,7 +8,7 @@ Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Activator: com.google.cloud.tools.eclipse.appengine.localserver.Activator
 Bundle-ActivationPolicy: lazy
-Require-Bundle: com.google.cloud.tools.appengine;bundle-version="0.1.13",
+Require-Bundle: com.google.cloud.tools.appengine;bundle-version="0.2.4",
  com.google.cloud.tools.eclipse.appengine.ui;bundle-version="0.1.0",
  org.eclipse.wst.server.core;bundle-version="1.7.0",
  org.eclipse.wst.server.ui;bundle-version="1.5.201",
@@ -24,7 +24,7 @@ Require-Bundle: com.google.cloud.tools.appengine;bundle-version="0.1.13",
  javax.servlet.jsp;bundle-version="2.1.0",
  org.eclipse.core.resources;bundle-version="3.10.1",
  org.eclipse.debug.core;bundle-version="3.10.0",
- com.google.guava;bundle-version="15.0.0",
+ com.google.guava;bundle-version="20.0.0",
  org.eclipse.debug.ui;bundle-version="3.11.101",
  org.eclipse.core.expressions;bundle-version="3.5.0",
  org.eclipse.m2e.core;bundle-version="1.6.2",
@@ -33,14 +33,17 @@ Require-Bundle: com.google.cloud.tools.appengine;bundle-version="0.1.13",
  org.eclipse.m2e.jdt;bundle-version="1.6.2",
  org.eclipse.ui.console;bundle-version="3.6.100",
  org.eclipse.ui.ide;bundle-version="3.11.0",
- org.eclipse.jdt.core
+ org.eclipse.jdt.core,
+ org.eclipse.swt
 Export-Package: com.google.cloud.tools.eclipse.appengine.localserver.server
 Import-Package: com.google.cloud.tools.eclipse.appengine.facets,
  com.google.cloud.tools.eclipse.appengine.libraries.model,
  com.google.cloud.tools.eclipse.appengine.libraries.repository,
+ com.google.cloud.tools.eclipse.jst.server.core,
  com.google.cloud.tools.eclipse.preferences,
  com.google.cloud.tools.eclipse.preferences.areas,
  com.google.cloud.tools.eclipse.sdk.ui,
+ com.google.cloud.tools.eclipse.sdk.ui.preferences,
  com.google.cloud.tools.eclipse.ui.util,
  com.google.cloud.tools.eclipse.ui.util.console,
  com.google.cloud.tools.eclipse.usagetracker,

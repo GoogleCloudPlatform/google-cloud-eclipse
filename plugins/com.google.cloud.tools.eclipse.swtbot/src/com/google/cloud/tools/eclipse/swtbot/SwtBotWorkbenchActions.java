@@ -16,6 +16,8 @@
 
 package com.google.cloud.tools.eclipse.swtbot;
 
+import java.util.List;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
@@ -28,8 +30,6 @@ import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.waits.ICondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
 import org.hamcrest.Matcher;
-
-import java.util.List;
 
 /**
  * SWTBot utility methods that perform general workbench actions.
@@ -67,6 +67,14 @@ public final class SwtBotWorkbenchActions {
    */
   public static void waitForIdle(SWTBot bot) {
     while (!Job.getJobManager().isIdle()) {
+      try {
+        Job.getJobManager().join(ResourcesPlugin.FAMILY_MANUAL_BUILD, null);
+        Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
+      } catch (InterruptedException ex) {
+        // interruption likely happened for a reason
+        return;
+      }
+
       bot.sleep(300);
     }
   }

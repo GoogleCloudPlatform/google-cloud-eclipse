@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
 import com.google.common.base.Preconditions;
+import java.text.MessageFormat;
 
 /**
  * Describes a Maven artifact.
@@ -48,6 +49,18 @@ public class MavenCoordinates {
 
     this.groupId = groupId;
     this.artifactId = artifactId;
+  }
+
+  /**
+   * Copy constructor
+   */
+  public MavenCoordinates(MavenCoordinates mavenCoordinates) {
+    repository = mavenCoordinates.repository;
+    groupId = mavenCoordinates.groupId;
+    artifactId = mavenCoordinates.artifactId;
+    version = mavenCoordinates.version;
+    type = mavenCoordinates.type;
+    classifier = mavenCoordinates.classifier;
   }
 
   /**
@@ -128,5 +141,11 @@ public class MavenCoordinates {
    */
   public String getArtifactId() {
     return artifactId;
+  }
+
+  @Override
+  public String toString() {
+    return MessageFormat.format("MavenCoordinates [repository={0}, {1}:{2}:{3}:{4}:{5}]",
+                                repository, groupId, artifactId, type, classifier, version);
   }
 }

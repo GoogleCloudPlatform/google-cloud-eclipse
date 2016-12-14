@@ -23,6 +23,7 @@ import com.google.cloud.tools.eclipse.swtbot.SwtBotWorkbenchActions;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
+import org.eclipse.swtbot.swt.finder.widgets.TimeoutException;
 import org.junit.After;
 import org.junit.BeforeClass;
 
@@ -48,7 +49,11 @@ public class AbstractProjectTests {
     if (project != null) {
       // ensure there are no jobs
       SwtBotWorkbenchActions.waitForIdle(bot);
-      SwtBotProjectActions.deleteProject(bot, project.getName());
+      try {
+        SwtBotProjectActions.deleteProject(bot, project.getName());
+      } catch (TimeoutException ex) {
+        // If this fails it shouldn't fail the test, which has already run
+      }
       project = null;
     }
     bot.resetWorkbench();

@@ -19,12 +19,10 @@ package com.google.cloud.tools.eclipse.integration.appengine;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
-import com.google.cloud.tools.eclipse.swtbot.SwtBotProjectActions;
+import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
-import com.google.common.base.Joiner;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
@@ -32,8 +30,6 @@ import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.util.List;
 
 /**
  * Test creation of a new standard App Engine project.
@@ -74,10 +70,6 @@ public class NewNativeAppEngineStandardProjectTest extends AbstractProjectTests 
       Path projectFilePath = new Path(projectFile);
       assertTrue(project.exists(projectFilePath));
     }
-    List<String> buildErrors = SwtBotProjectActions.getAllBuildErrors(bot);
-    if (!buildErrors.isEmpty()) {
-      String errorsString = Joiner.on("\n").join(buildErrors);
-      fail(errorsString);
-    }
+    ProjectUtils.failIfBuildErrors("New native project has errors", project);
   }
 }

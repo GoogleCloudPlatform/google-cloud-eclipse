@@ -28,34 +28,37 @@ import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 
 /**
- * AppEngineComponentPage is a page that displays a message that Gcloud App Engine Java component is missing
- * with instructions on how to install it. This page disables the 'Finish' button.
+ * Wizard page that displays a message that something needed in the environment is
+ * missing with instructions on how to install it. This page disables the 'Finish' button.
  */
-public class AppEngineComponentPage extends WizardPage {
-  private boolean forNativeProjectWizard;
+public class MissingComponentPage extends WizardPage {
 
-  public AppEngineComponentPage(boolean forNativeProjectWizard) {
-    super("appEngineComponentPage");
-    setTitle("App Engine Component is missing");
-    setDescription("The Cloud SDK App Engine Java component is not installed"); 
-    this.forNativeProjectWizard = forNativeProjectWizard;
+  private String wizardType;
+  private String message;
+
+  /**
+   * @param pageName internal identifier
+   * @param wizardType should be constant from AnalyticsEvents
+   * @param title dialog title
+   * @param errorMessage short error message
+   * @param message detailed message and instructions. Text between single quotes is made bold.
+   */
+  public MissingComponentPage(String pageName, String wizardType, String title,
+      String errorMessage, String message) {
+    super(pageName);
+    setTitle(title);
+    setErrorMessage(errorMessage);
+    this.wizardType = wizardType;
+    this.message = message;
   }
 
   @Override
   public void createControl(Composite parent) {
-    if (forNativeProjectWizard) {
-      AnalyticsPingManager.getInstance().sendPing(
-          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD,
-          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
-          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE,
-          parent.getShell());
-    } else {
-      AnalyticsPingManager.getInstance().sendPing(
-          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD,
-          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
-          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_MAVEN,
-          parent.getShell());
-    }
+    AnalyticsPingManager.getInstance().sendPing(
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD,
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
+        wizardType,
+        parent.getShell());
 
     Composite container = new Composite(parent, SWT.NONE);
     GridLayoutFactory.swtDefaults().numColumns(1).applyTo(container);
@@ -63,15 +66,14 @@ public class AppEngineComponentPage extends WizardPage {
     GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
     gridData.widthHint = parent.getSize().x;
 
-    String message = Messages.AppEngineJavaComponentMissing;
     StyledText styledText = new StyledText(container, SWT.MULTI | SWT.READ_ONLY | SWT.WRAP);
     styledText.setLayoutData(gridData);
     styledText.setText(message);
     styledText.setBackground(container.getBackground());
     styledText.setCaret(null /* hide caret */);
 
-    int startIndex = message.indexOf("\'");
-    int endIndex = message.indexOf("\'", startIndex + 1);
+    int startIndex = message.indexOf("\'"); //$NON-NLS-1$
+    int endIndex = message.indexOf("\'", startIndex + 1); //$NON-NLS-1$
     if ((-1 < startIndex) && (startIndex < endIndex)) {
       StyleRange styleRange = new StyleRange();
       styleRange.start = startIndex + 1;

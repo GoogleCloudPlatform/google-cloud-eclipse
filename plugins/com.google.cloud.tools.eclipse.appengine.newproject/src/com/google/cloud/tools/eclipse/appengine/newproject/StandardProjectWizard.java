@@ -18,7 +18,8 @@ package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-import com.google.cloud.tools.eclipse.appengine.ui.AppEngineComponentPage;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineJavaComponentMissingPage;
+import com.google.cloud.tools.eclipse.appengine.ui.CloudSdkMissingPage;
 import com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPrompter;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
@@ -38,21 +39,24 @@ import org.eclipse.ui.statushandlers.StatusManager;
 
 public class StandardProjectWizard extends Wizard implements INewWizard {
 
-  private AppEngineStandardWizardPage page;
+  private AppEngineStandardWizardPage page = null;
   private AppEngineStandardProjectConfig config = new AppEngineStandardProjectConfig();
 
   public StandardProjectWizard() {
-    this.setWindowTitle("New App Engine Standard Project");
+    setWindowTitle(Messages.getString("new.app.engine.standard.project"));
     setNeedsProgressMonitor(true);
   }
 
   @Override
   public void addPages() {
-    if (appEngineJavaComponentExists()) {
+    if (!cloudSdkExists()) {
+      addPage(new CloudSdkMissingPage(AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE));
+    } else if (!appEngineJavaComponentExists()) {
+      addPage(new AppEngineJavaComponentMissingPage(
+          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE));
+    } else { // all is good
       page = new AppEngineStandardWizardPage();
-      this.addPage(page);
-    } else {
-      this.addPage(new AppEngineComponentPage(true /* forNativeProjectWizard */));
+      addPage(page);
     }
   }
 
@@ -63,12 +67,8 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE);
 
-    if (config.getCloudSdkLocation() == null) {
-      File location = CloudSdkPrompter.getCloudSdkLocation(getShell());
-      if (location == null) {
-        return false;
-      }
-      config.setCloudSdkLocation(location);
+    if (page == null) {
+      return true;
     }
 
     config.setPackageName(page.getPackageName());
@@ -80,7 +80,7 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
     config.setAppEngineLibraries(page.getSelectedLibraries());
 
     // todo set up
-    final IAdaptable uiInfoAdapter = WorkspaceUndoUtil.getUIInfoAdapter(getShell());
+    IAdaptable uiInfoAdapter = WorkspaceUndoUtil.getUIInfoAdapter(getShell());
     IRunnableWithProgress runnable = new CreateAppEngineStandardWtpProject(config, uiInfoAdapter);
 
     IStatus status = Status.OK_STATUS;
@@ -98,7 +98,7 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
   }
 
   public static IStatus setErrorStatus(Object origin, Throwable ex) {
-    String message = "Failed to create project";
+    String message = Messages.getString("project.creation.failed");
     if (ex.getMessage() != null && !ex.getMessage().isEmpty()) {
       message += ": " + ex.getMessage();
     }
@@ -119,11 +119,25 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
   }
 
   /**
-   * Verify that we're set up for App Engine Java development. This may cause a dialog to popup.
+   * Verify that the Cloud SDK is where we can find it.
    */
-  private boolean appEngineJavaComponentExists() {
+  public static boolean cloudSdkExists() {
     try {
-      new CloudSdk.Builder().build().validateAppEngineJavaComponents();
+      CloudSdk sdk = new CloudSdk.Builder().build();
+      sdk.validateCloudSdk();
+      return true;
+    } catch (AppEngineException ex) {
+      return false;
+    }
+  }
+
+  /**
+   * Verify that we're set up for App Engine Java development.
+   */
+  public static boolean appEngineJavaComponentExists() {
+    try {
+      CloudSdk sdk = new CloudSdk.Builder().build();
+      sdk.validateAppEngineJavaComponents();
       return true;
     } catch (AppEngineException ex) {
       return false;

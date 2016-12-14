@@ -121,7 +121,9 @@ public class AppEngineLibraryContainerInitializer extends ClasspathContainerInit
     IClasspathEntry[] classpathEntries = container.getClasspathEntries();
     for (int i = 0; i < classpathEntries.length; i++) {
       IClasspathEntry classpathEntry = classpathEntries[i];
-      if (!classpathEntry.getPath().toFile().exists()) {
+      if (!classpathEntry.getPath().toFile().exists()
+          || (classpathEntry.getSourceAttachmentPath() != null
+              && !classpathEntry.getSourceAttachmentPath().toFile().exists())) {
         classpathEntries[i] = repositoryService.rebuildClasspathEntry(classpathEntry);
       }
     }

@@ -42,7 +42,6 @@ import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.jst.j2ee.classpathdep.UpdateClasspathAttributeUtil;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
@@ -59,9 +58,10 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
   private final AppEngineStandardProjectConfig config;
   private final IAdaptable uiInfoAdapter;
 
-  CreateAppEngineStandardWtpProject(AppEngineStandardProjectConfig config, IAdaptable uiInfoAdapter) {
+  CreateAppEngineStandardWtpProject(AppEngineStandardProjectConfig config,
+      IAdaptable uiInfoAdapter) {
     if (config == null) {
-      throw new NullPointerException("Null App Engine configuration");
+      throw new NullPointerException("Null App Engine configuration"); //$NON-NLS-1$
     }
     this.config = config;
     this.uiInfoAdapter = uiInfoAdapter;
@@ -70,31 +70,32 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
   @Override
   public void execute(IProgressMonitor monitor) throws InvocationTargetException, CoreException {
     IWorkspace workspace = ResourcesPlugin.getWorkspace();
-    final IProject newProject = config.getProject();
+    IProject newProject = config.getProject();
     URI location = config.getEclipseProjectLocationUri();
 
     String name = newProject.getName();
-    final IProjectDescription description = workspace.newProjectDescription(name);
+    IProjectDescription description = workspace.newProjectDescription(name);
     description.setLocationURI(location);
-
+    SubMonitor subMonitor = SubMonitor.convert(monitor,
+        Messages.getString("creating.app.engine.standard.project"), 100); //$NON-NLS-1$
     CreateProjectOperation operation = new CreateProjectOperation(
-        description, "Creating new App Engine Project");
+        description, Messages.getString("creating.new.app.engine.standard.project")); //$NON-NLS-1$
     try {
-      operation.execute(monitor, uiInfoAdapter);
-      CodeTemplates.materialize(newProject, config, monitor);
+      operation.execute(subMonitor.newChild(10), uiInfoAdapter);
+      CodeTemplates.materialize(newProject, config, subMonitor.newChild(80));
     } catch (ExecutionException ex) {
       throw new InvocationTargetException(ex);
     }
 
     IFacetedProject facetedProject = ProjectFacetsManager.create(
-        newProject, true, monitor);
+        newProject, true, subMonitor.newChild(2));
     AppEngineStandardFacet.installAppEngineFacet(
-        facetedProject, true /* installDependentFacets */, monitor);
-    AppEngineStandardFacet.installAllAppEngineRuntimes(facetedProject, true /* force */, monitor);
+        facetedProject, true /* installDependentFacets */, subMonitor.newChild(2));
 
-    addAppEngineLibrariesToBuildPath(newProject, config.getAppEngineLibraries(), monitor);
+    addAppEngineLibrariesToBuildPath(newProject, config.getAppEngineLibraries(),
+        subMonitor.newChild(2));
 
-    addJunit4ToClasspath(monitor, newProject);
+    addJunit4ToClasspath(subMonitor.newChild(2), newProject);
   }
 
   private void addAppEngineLibrariesToBuildPath(IProject newProject,
@@ -103,19 +104,21 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
     if (libraries.isEmpty()) {
       return;
     }
-    SubMonitor subMonitor = SubMonitor.convert(monitor, "Adding App Engine libraries", libraries.size());
+    SubMonitor subMonitor = SubMonitor.convert(monitor,
+        Messages.getString("adding.app.engine.libraries"), libraries.size()); //$NON-NLS-1$
     IJavaProject javaProject = JavaCore.create(newProject);
     IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
-    IClasspathEntry[] newRawClasspath = Arrays.copyOf(rawClasspath, rawClasspath.length + libraries.size());
+    IClasspathEntry[] newRawClasspath =
+        Arrays.copyOf(rawClasspath, rawClasspath.length + libraries.size());
     for (int i = 0; i < libraries.size(); i++) {
       Library library = libraries.get(i);
       IClasspathAttribute[] classpathAttributes;
       if (library.isExport()) {
-        classpathAttributes =
-            new IClasspathAttribute[] { UpdateClasspathAttributeUtil.createDependencyAttribute(true /* isWebApp */) };
+        classpathAttributes = new IClasspathAttribute[] {
+            UpdateClasspathAttributeUtil.createDependencyAttribute(true /* isWebApp */)};
       } else {
         classpathAttributes =
-            new IClasspathAttribute[] { UpdateClasspathAttributeUtil.createNonDependencyAttribute() };
+            new IClasspathAttribute[] {UpdateClasspathAttributeUtil.createNonDependencyAttribute()};
       }
 
       IClasspathEntry libraryContainer = JavaCore.newContainerEntry(library.getContainerPath(),
@@ -131,9 +134,10 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
   }
 
   private void runContainerResolverJob(IJavaProject javaProject) {
-    IEclipseContext context =
-        EclipseContextFactory.getServiceContext(FrameworkUtil.getBundle(getClass()).getBundleContext());
-    final IEclipseContext childContext = context.createChild(AppEngineLibraryContainerResolverJob.class.getName());
+    IEclipseContext context = EclipseContextFactory
+        .getServiceContext(FrameworkUtil.getBundle(getClass()).getBundleContext());
+    final IEclipseContext childContext =
+        context.createChild(AppEngineLibraryContainerResolverJob.class.getName());
     childContext.set(IJavaProject.class, javaProject);
     AppEngineLibraryContainerResolverJob job =
         ContextInjectionFactory.make(AppEngineLibraryContainerResolverJob.class, childContext);
@@ -146,14 +150,16 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
     job.schedule();
   }
 
-  private void addJunit4ToClasspath(IProgressMonitor monitor, final IProject newProject) throws CoreException,
-                                                                                         JavaModelException {
+  private static void addJunit4ToClasspath(IProgressMonitor monitor, final IProject newProject)
+      throws CoreException {
     IJavaProject javaProject = JavaCore.create(newProject);
-    IClasspathAttribute nonDependencyAttribute = UpdateClasspathAttributeUtil.createNonDependencyAttribute();
-    IClasspathEntry junit4Container = JavaCore.newContainerEntry(JUnitCore.JUNIT4_CONTAINER_PATH,
-                                                                 new IAccessRule[0],
-                                                                 new IClasspathAttribute[]{ nonDependencyAttribute },
-                                                                 false);
+    IClasspathAttribute nonDependencyAttribute =
+        UpdateClasspathAttributeUtil.createNonDependencyAttribute();
+    IClasspathEntry junit4Container = JavaCore.newContainerEntry(
+        JUnitCore.JUNIT4_CONTAINER_PATH,
+        new IAccessRule[0],
+        new IClasspathAttribute[] {nonDependencyAttribute},
+        false);
     IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
     IClasspathEntry[] newRawClasspath = Arrays.copyOf(rawClasspath, rawClasspath.length + 1);
     newRawClasspath[newRawClasspath.length - 1] = junit4Container;

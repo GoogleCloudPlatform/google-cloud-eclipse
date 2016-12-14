@@ -69,25 +69,33 @@ public class CodeTemplates {
     }
     
     IFolder packageFolder = createFoldersForPackage(java, packageName, subMonitor);
-    createChildFile("HelloAppEngine.java", AppEngineTemplateUtility.HELLO_APPENGINE_TEMPLATE, packageFolder, subMonitor, templateValues);
-    
+    createChildFile("HelloAppEngine.java", AppEngineTemplateUtility.HELLO_APPENGINE_TEMPLATE,
+        packageFolder, subMonitor, templateValues);
+
     // now set up the test directory
     IFolder testPackageFolder = createFoldersForPackage(testJava, packageName, subMonitor);
-    createChildFile("HelloAppEngineTest.java", AppEngineTemplateUtility.HELLO_APPENGINE_TEST_TEMPLATE, testPackageFolder, subMonitor, templateValues);
-    createChildFile("MockHttpServletResponse.java", AppEngineTemplateUtility.MOCK_HTTPSERVLETRESPONSE_TEMPLATE, testPackageFolder, subMonitor, templateValues);
-    
+    createChildFile("HelloAppEngineTest.java",
+        AppEngineTemplateUtility.HELLO_APPENGINE_TEST_TEMPLATE, testPackageFolder, subMonitor,
+        templateValues);
+    createChildFile("MockHttpServletResponse.java",
+        AppEngineTemplateUtility.MOCK_HTTPSERVLETRESPONSE_TEMPLATE, testPackageFolder, subMonitor,
+        templateValues);
+
     IFolder webapp = createChildFolder("webapp", main, subMonitor);
     IFolder webinf = createChildFolder("WEB-INF", webapp, subMonitor);
-    
+
     Map<String, String> properties = new HashMap<>();
-    createChildFile("appengine-web.xml", AppEngineTemplateUtility.APPENGINE_WEB_XML_TEMPLATE, webinf, subMonitor, properties);
-    
+    createChildFile("appengine-web.xml", AppEngineTemplateUtility.APPENGINE_WEB_XML_TEMPLATE,
+        webinf, subMonitor, properties);
+
     Map<String, String> packageMap = new HashMap<>();
     String packageValue = config.getPackageName().isEmpty() ? "" : config.getPackageName() + ".";
     packageMap.put("package", packageValue);
-    createChildFile("web.xml", AppEngineTemplateUtility.WEB_XML_TEMPLATE, webinf, subMonitor, packageMap);
-    
-    createChildFile("index.html", AppEngineTemplateUtility.INDEX_HTML_TEMPLATE, webapp, subMonitor, Collections.<String, String> emptyMap());
+    createChildFile("web.xml", AppEngineTemplateUtility.WEB_XML_TEMPLATE, webinf, subMonitor,
+        packageMap);
+
+    createChildFile("index.html", AppEngineTemplateUtility.INDEX_HTML_TEMPLATE, webapp, subMonitor,
+        Collections.<String, String>emptyMap());
   }
 
   private static IFolder createFoldersForPackage(IFolder parentFolder,

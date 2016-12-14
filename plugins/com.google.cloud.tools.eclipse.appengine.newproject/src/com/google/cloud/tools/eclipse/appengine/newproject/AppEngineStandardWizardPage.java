@@ -16,9 +16,13 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineLibrariesSelectorGroup;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import java.io.File;
-import java.util.List;
-
+import java.util.Collection;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
@@ -28,12 +32,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
-import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
-import com.google.cloud.tools.eclipse.appengine.ui.AppEngineLibrariesSelectorGroup;
-import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
-import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
-import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 
 /**
  * UI to collect all information necessary to create a new App Engine Standard Java Eclipse project.
@@ -45,12 +45,10 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
 
   public AppEngineStandardWizardPage() {
     super("basicNewProjectPage"); //$NON-NLS-1$
-    // todo instead of hard coding strings, read the wizard.name and wizard.description properties
-    // from plugins/com.google.cloud.tools.eclipse.appengine.newproject/plugin.properties
-    this.setTitle("App Engine Standard Project");
-    this.setDescription("Create a new App Engine Standard Project in the workspace.");
+    setTitle(Messages.getString("app.engine.standard.project")); //$NON-NLS-1$
+    setDescription(Messages.getString("create.app.engine.standard.project")); //$NON-NLS-1$
 
-    this.setImageDescriptor(AppEngineImages.googleCloudPlatform(32));
+    setImageDescriptor(AppEngineImages.appEngine(64));
   }
 
   // todo is there a way to call this for a test?
@@ -63,12 +61,14 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE, parent.getShell());
 
     Composite container = (Composite) getControl();
+    PlatformUI.getWorkbench().getHelpSystem().setHelp(container,
+        "com.google.cloud.tools.eclipse.appengine.newproject.NewProjectContext"); //$NON-NLS-1$
 
     ModifyListener pageValidator = new PageValidator();
 
     // Java package name
     Label packageNameLabel = new Label(container, SWT.NONE);
-    packageNameLabel.setText("Java package:");
+    packageNameLabel.setText(Messages.getString("java.package")); //$NON-NLS-1$
     javaPackageField = new Text(container, SWT.BORDER);
     GridData javaPackagePosition = new GridData(GridData.FILL_HORIZONTAL);
     javaPackagePosition.horizontalSpan = 2;
@@ -94,14 +94,16 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
     String packageName = javaPackageField.getText();
     IStatus packageStatus = JavaPackageValidator.validate(packageName);
     if (!packageStatus.isOK()) {
-      setErrorMessage("Illegal package name: " + packageStatus.getMessage());
+      String message = Messages.getString("illegal.package.name",  //$NON-NLS-1$
+          packageStatus.getMessage());
+      setErrorMessage(message);
       return false;
     }
 
     File parent = getLocationPath().toFile();
     File projectDirectory = new File(parent, getProjectName());
     if (projectDirectory.exists()) {
-      setErrorMessage("Project location already exists: " + projectDirectory);
+      setErrorMessage(Messages.getString("project.location.exists", projectDirectory)); //$NON-NLS-1$
       return false;
     }
 
@@ -116,10 +118,10 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
   }
 
   public String getPackageName() {
-    return this.javaPackageField.getText();
+    return javaPackageField.getText();
   }
 
-  public List<Library> getSelectedLibraries() {
+  public Collection<Library> getSelectedLibraries() {
     return appEngineLibrariesSelectorGroup.getSelectedLibraries();
   }
 

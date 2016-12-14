@@ -19,24 +19,31 @@
    </license>
 
    <plugin
-         id="org.hamcrest"
+         id="com.google.cloud.tools.appengine"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="org.hamcrest.core"
+         id="com.google.guava"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="20.0.0"
          unpack="false"/>
 
    <plugin
-         id="org.hamcrest.library"
+         id="com.google.gson"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="2.7"
+         unpack="false"/>
+
+   <plugin
+         id="jackson-core-asl"
+         download-size="0"
+         install-size="0"
+         version="1.9.13"
          unpack="false"/>
 
    <plugin
@@ -51,34 +58,6 @@
          download-size="0"
          install-size="0"
          version="6.1.26"
-         unpack="false"/>
-
-   <plugin
-         id="com.google.guava"
-         download-size="0"
-         install-size="0"
-         version="17.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="com.google.gson"
-         download-size="0"
-         install-size="0"
-         version="2.6.2"
-         unpack="false"/>
-
-   <plugin
-         id="com.google.cloud.tools.appengine"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="jackson-core-asl"
-         download-size="0"
-         install-size="0"
-         version="1.9.13"
          unpack="false"/>
 
 </feature>

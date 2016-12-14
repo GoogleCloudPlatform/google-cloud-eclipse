@@ -24,15 +24,12 @@ import com.google.cloud.tools.eclipse.ui.util.FontUtil;
 import com.google.cloud.tools.eclipse.ui.util.databinding.BucketNameValidator;
 import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectIdInputValidator;
 import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectVersionValidator;
-import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener;
-import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.ErrorHandler;
-import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.QueryParameterProvider;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import java.util.Collections;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.eclipse.core.databinding.Binding;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.ObservablesManager;
 import org.eclipse.core.databinding.UpdateValueStrategy;
@@ -59,7 +56,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
@@ -68,12 +64,11 @@ import org.osgi.service.prefs.BackingStoreException;
 
 public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
-  private static final String APPENGINE_VERSIONS_URL = "https://console.cloud.google.com/appengine/versions";
-  private static final String URI_PARAM_PROJECT = "project";
+  private static final String APPENGINE_VERSIONS_URL =
+      "https://console.cloud.google.com/appengine/versions";
 
-  private static final int INDENT_CHECKBOX_ENABLED_WIDGET = 10;
-
-  private static Logger logger = Logger.getLogger(DeployPropertyPage.class.getName());
+  private static final Logger logger = Logger.getLogger(
+      StandardDeployPreferencesPanel.class.getName());
 
   private AccountSelector accountSelector;
 
@@ -81,7 +76,6 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   private Text projectId;
 
   private Button overrideDefaultVersionButton;
-  private Label versionLabel;
   private Text version;
 
   private Button autoPromoteButton;
@@ -89,12 +83,12 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   private Button stopPreviousVersionButton;
 
   private Button overrideDefaultBucketButton;
-  private Label bucketLabel;
   private Text bucket;
 
   private ExpandableComposite expandableComposite;
 
-  private DeployPreferencesModel model;
+  @VisibleForTesting
+  DeployPreferencesModel model;
   private ObservablesManager observables;
   private DataBindingContext bindingContext;
 
@@ -141,33 +135,36 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   }
 
   private void setupAccountEmailDataBinding(DataBindingContext context) {
-    IValidator accountSelectedChecker = new IValidator() {
-      @Override
-      public IStatus validate(Object value /* email */) {
-        if (requireValues && Strings.isNullOrEmpty((String) value)) {
-          if (accountSelector.isSignedIn()) {
-            return ValidationStatus.error(Messages.getString("error.account.missing.signedin"));
-          } else {
-            return ValidationStatus.error(Messages.getString("error.account.missing.signedout"));
+    AccountSelectorObservableValue accountSelectorObservableValue =
+        new AccountSelectorObservableValue(accountSelector);
+    UpdateValueStrategy modelToTarget =
+        new UpdateValueStrategy().setConverter(new Converter(String.class, String.class) {
+          @Override
+          public Object convert(Object expectedEmail) {
+            // Expected to be an email address, but must also ensure is a currently logged-in
+            // account
+            if (expectedEmail instanceof String
+                && accountSelector.isEmailAvailable((String) expectedEmail)) {
+              return expectedEmail;
+            } else {
+              return null;
+            }
           }
-        }
-        return ValidationStatus.ok();
-      }
-    };
-    UpdateValueStrategy targetToModel = new UpdateValueStrategy()
-        .setBeforeSetValidator(accountSelectedChecker);
-    UpdateValueStrategy modelToTarget = new UpdateValueStrategy()
-        .setBeforeSetValidator(accountSelectedChecker)
-        .setConverter(new Converter(String.class, String.class) {
-      @Override
-      public Object convert(Object fromObject /* email */) {
-        return accountSelector.isEmailAvailable((String) fromObject) ? fromObject : null;
-      }
-    });
+        });
 
     final IObservableValue accountEmailModel = PojoProperties.value("accountEmail").observe(model);
-    context.bindValue(new AccountSelectorObservableValue(accountSelector), accountEmailModel,
-        targetToModel, modelToTarget);
+
+    Binding binding = context.bindValue(accountSelectorObservableValue, accountEmailModel,
+        new UpdateValueStrategy(), modelToTarget);
+    /*
+     * Trigger an explicit target -> model update for the auto-select-single-account case. When the
+     * model has a null account but there is exactly 1 login account, then the AccountSelector
+     * automatically selects that account. That change means the AccountSelector is at odds with the
+     * model.
+     */
+    binding.updateTargetToModel();
+    context.addValidationStatusProvider(new AccountSelectorValidator(requireValues, accountSelector,
+        accountSelectorObservableValue));
   }
 
   private void setupProjectIdDataBinding(DataBindingContext context) {
@@ -176,21 +173,20 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     IObservableValue projectIdModel = PojoProperties.value("projectId").observe(model);
 
     context.bindValue(projectIdField, projectIdModel,
-                      new UpdateValueStrategy().setAfterGetValidator(new ProjectIdInputValidator(requireValues)),
-                      new UpdateValueStrategy().setAfterGetValidator(new ProjectIdInputValidator(requireValues)));
+        new UpdateValueStrategy().setAfterGetValidator(new ProjectIdInputValidator(requireValues)),
+        new UpdateValueStrategy().setAfterGetValidator(new ProjectIdInputValidator(requireValues)));
   }
 
   private void setupProjectVersionDataBinding(DataBindingContext context) {
-    ISWTObservableValue overrideButton = WidgetProperties.selection().observe(overrideDefaultVersionButton);
+    ISWTObservableValue overrideButton =
+        WidgetProperties.selection().observe(overrideDefaultVersionButton);
     ISWTObservableValue versionField = WidgetProperties.text(SWT.Modify).observe(version);
-    ISWTObservableValue versionLabelEnablement = WidgetProperties.enabled().observe(versionLabel);
     ISWTObservableValue versionFieldEnablement = WidgetProperties.enabled().observe(version);
 
-    // use an intermediary value to control the enabled state of the label and the field based on the override
+    // use an intermediary value to control the enabled state of the the field based on the override
     // checkbox's state
     WritableValue enablement = new WritableValue();
     context.bindValue(overrideButton, enablement);
-    context.bindValue(versionLabelEnablement, enablement);
     context.bindValue(versionFieldEnablement, enablement);
 
     IObservableValue overrideModel = PojoProperties.value("overrideDefaultVersioning").observe(model);
@@ -206,11 +202,13 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
   private void setupAutoPromoteDataBinding(DataBindingContext context) {
     ISWTObservableValue promoteButton = WidgetProperties.selection().observe(autoPromoteButton);
-    ISWTObservableValue stopPreviousVersion = WidgetProperties.selection().observe(stopPreviousVersionButton);
-    ISWTObservableValue stopPreviousVersionEnablement = WidgetProperties.enabled().observe(stopPreviousVersionButton);
+    ISWTObservableValue stopPreviousVersion =
+        WidgetProperties.selection().observe(stopPreviousVersionButton);
+    ISWTObservableValue stopPreviousVersionEnablement =
+        WidgetProperties.enabled().observe(stopPreviousVersionButton);
 
-    // use an intermediary value to control the enabled state of stopPreviousVersionButton based on the promote
-    // checkbox's state
+    // use an intermediary value to control the enabled state of stopPreviousVersionButton
+    // based on the promote checkbox's state
     WritableValue enablement = new WritableValue();
     context.bindValue(promoteButton, enablement);
     context.bindValue(stopPreviousVersionEnablement, enablement);
@@ -223,19 +221,19 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   }
 
   private void setupBucketDataBinding(DataBindingContext context) {
-    ISWTObservableValue overrideButton = WidgetProperties.selection().observe(overrideDefaultBucketButton);
+    ISWTObservableValue overrideButton =
+        WidgetProperties.selection().observe(overrideDefaultBucketButton);
     ISWTObservableValue bucketField = WidgetProperties.text(SWT.Modify).observe(bucket);
-    ISWTObservableValue bucketLabelEnablement = WidgetProperties.enabled().observe(bucketLabel);
     ISWTObservableValue bucketFieldEnablement = WidgetProperties.enabled().observe(bucket);
 
-    // use an intermediary value to control the enabled state of the label and the field based on the override
-    // checkbox's state
+    // use an intermediary value to control the enabled state of the label and the field 
+    // based on the override checkbox's state
     WritableValue enablement = new WritableValue();
     context.bindValue(overrideButton, enablement);
-    context.bindValue(bucketLabelEnablement, enablement);
     context.bindValue(bucketFieldEnablement, enablement);
 
-    IObservableValue overrideModelObservable = PojoProperties.value("overrideDefaultBucket").observe(model);
+    IObservableValue overrideModelObservable =
+        PojoProperties.value("overrideDefaultBucket").observe(model);
     IObservableValue bucketModelObservable = PojoProperties.value("bucket").observe(model);
 
     context.bindValue(enablement, overrideModelObservable);
@@ -275,8 +273,9 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     new Label(accountComposite, SWT.LEFT).setText(
         Messages.getString("deploy.preferences.dialog.label.selectAccount"));
 
+    // If we don't require values, then don't auto-select accounts
     accountSelector = new AccountSelector(accountComposite, loginService,
-        Messages.getString("deploy.preferences.dialog.accountSelector.login"));
+        Messages.getString("deploy.preferences.dialog.accountSelector.login"), requireValues);
     GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(accountComposite);
   }
 
@@ -285,7 +284,9 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
     projectIdLabel = new Label(projectIdComposite, SWT.LEFT);
     projectIdLabel.setText(Messages.getString("project.id"));
-
+    GridData layoutData = GridDataFactory.swtDefaults().create();
+    projectIdLabel.setLayoutData(layoutData);
+    
     projectId = new Text(projectIdComposite, SWT.LEFT | SWT.SINGLE | SWT.BORDER);
     GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(projectIdComposite);
   }
@@ -295,15 +296,10 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
     overrideDefaultVersionButton = new Button(versionComposite, SWT.CHECK);
     overrideDefaultVersionButton.setText(Messages.getString("use.custom.versioning"));
-    overrideDefaultVersionButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1));
-
-    versionLabel = new Label(versionComposite, SWT.NONE);
-    versionLabel.setText(Messages.getString("project.version"));
     GridData layoutData = GridDataFactory.swtDefaults().create();
-    layoutData.horizontalIndent = INDENT_CHECKBOX_ENABLED_WIDGET;
-    versionLabel.setLayoutData(layoutData);
+    overrideDefaultVersionButton.setLayoutData(layoutData);
 
-    version = new Text(versionComposite, SWT.LEFT | SWT.SINGLE | SWT.BORDER);
+    version = new Text(versionComposite, SWT.LEAD | SWT.SINGLE | SWT.BORDER);
     GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(versionComposite);
   }
 
@@ -311,28 +307,11 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     Composite promoteComposite = new Composite(this, SWT.NONE);
     autoPromoteButton = new Button(promoteComposite, SWT.CHECK);
     autoPromoteButton.setText(Messages.getString("auto.promote"));
-
-    Link manualPromoteLink = new Link(promoteComposite, SWT.NONE);
-    GridData layoutData = GridDataFactory.swtDefaults().create();
-    layoutData.horizontalIndent = INDENT_CHECKBOX_ENABLED_WIDGET;
-    manualPromoteLink.setLayoutData(layoutData);
-    manualPromoteLink.setText(Messages.getString("deploy.manual.link", APPENGINE_VERSIONS_URL));
-    manualPromoteLink.setFont(promoteComposite.getFont());
-    manualPromoteLink.addSelectionListener(new OpenUriSelectionListener(new QueryParameterProvider() {
-      @Override
-      public Map<String, String> getParameters() {
-        return Collections.singletonMap(URI_PARAM_PROJECT, projectId.getText().trim());
-      }
-    }, new ErrorHandler() {
-      @Override
-      public void handle(Exception ex) {
-        MessageDialog.openError(getShell(), Messages.getString("cannot.open.browser"), ex.getLocalizedMessage());
-      }
-    }));
+    String manualPromoteMessage = Messages.getString("deploy.manual.link", APPENGINE_VERSIONS_URL);
+    autoPromoteButton.setToolTipText(manualPromoteMessage);
 
     stopPreviousVersionButton = new Button(promoteComposite, SWT.CHECK);
     stopPreviousVersionButton.setText(Messages.getString("stop.previous.version"));
-    GridDataFactory.swtDefaults().indent(INDENT_CHECKBOX_ENABLED_WIDGET, 0).applyTo(stopPreviousVersionButton);
 
     GridLayoutFactory.fillDefaults().generateLayout(promoteComposite);
   }
@@ -351,7 +330,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   }
 
   private void createExpandableComposite() {
-    expandableComposite = new ExpandableComposite(this, SWT.NONE, ExpandableComposite.TWISTIE | ExpandableComposite.CLIENT_INDENT);
+    expandableComposite = new ExpandableComposite(this, SWT.NONE, ExpandableComposite.TWISTIE);
     FontUtil.convertFontToBold(expandableComposite);
     expandableComposite.setText(Messages.getString("settings.advanced"));
     expandableComposite.setExpanded(false);
@@ -364,10 +343,8 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
     overrideDefaultBucketButton = new Button(bucketComposite, SWT.CHECK);
     overrideDefaultBucketButton.setText(Messages.getString("use.custom.bucket"));
-    overrideDefaultBucketButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1));
-
-    bucketLabel = new Label(bucketComposite, SWT.RADIO);
-    bucketLabel.setText(Messages.getString("bucket.name"));
+    GridData layoutData = GridDataFactory.swtDefaults().create();
+    overrideDefaultBucketButton.setLayoutData(layoutData);
 
     bucket = new Text(bucketComposite, SWT.LEFT | SWT.SINGLE | SWT.BORDER);
 
@@ -379,10 +356,9 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
    * Validates a checkbox and text field as follows:
    * <ol>
    * <li>if the checkbox is unselected -> valid
-   * <li>if the checkbox is selected -> the result is determined by the provided <code>validator</code> used
-   * on the value of the text field
+   * <li>if the checkbox is selected -> the result is determined by the provided
+   * <code>validator</code> used on the value of the text field
    * </ol>
-   *
    */
   private static class OverrideValidator extends FixedMultiValidator {
 
@@ -391,11 +367,14 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     private IValidator validator;
 
     /**
-     * @param selection must be an observable for a checkbox, i.e. a {@link Button} with {@link SWT#CHECK} style
+     * @param selection must be an observable for a checkbox, i.e. a {@link Button} with
+     *        {@link SWT#CHECK} style
      * @param text must be an observable for a {@link Text}
-     * @param validator must be a validator for String values, will be applied to <code>text.getValue()</code>
+     * @param validator must be a validator for String values, will be applied to
+     *        <code>text.getValue()</code>
      */
-    public OverrideValidator(ISWTObservableValue selection, ISWTObservableValue text, IValidator validator) {
+    public OverrideValidator(ISWTObservableValue selection, ISWTObservableValue text,
+        IValidator validator) {
       Preconditions.checkArgument(text.getWidget() instanceof Text,
                                   "text is an observable for {0}, should be for {1}",
                                   text.getWidget().getClass().getName(),
@@ -417,6 +396,40 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
         return ValidationStatus.ok();
       }
       return validator.validate(textObservable.getValue());
+    }
+  }
+
+  /**
+   * Validates the {@link AccountSelector account selector} state against the panel settings.
+   * Reports an error if the panel requires all values to be set, but the account selector does not
+   * have a valid account.
+   */
+  private static class AccountSelectorValidator extends FixedMultiValidator {
+    final private boolean requireValues;
+    final private AccountSelectorObservableValue accountSelectorObservableValue;
+    final private AccountSelector accountSelector;
+
+    private AccountSelectorValidator(boolean requireValues, AccountSelector accountSelector,
+        AccountSelectorObservableValue accountSelectorObservableValue) {
+      this.requireValues = requireValues;
+      this.accountSelector = accountSelector;
+      this.accountSelectorObservableValue = accountSelectorObservableValue;
+      // trigger the validator, as defaults to OK otherwise
+      getValidationStatus();
+    }
+
+    @Override
+    protected IStatus validate() {
+      // access accountSelectorObservableValue so MultiValidator records the access
+      String selectedEmail = (String) accountSelectorObservableValue.getValue();
+      if (requireValues && Strings.isNullOrEmpty(selectedEmail)) {
+        if (accountSelector.isSignedIn()) {
+          return ValidationStatus.error(Messages.getString("error.account.missing.signedin"));
+        } else {
+          return ValidationStatus.error(Messages.getString("error.account.missing.signedout"));
+        }
+      }
+      return ValidationStatus.ok();
     }
   }
 

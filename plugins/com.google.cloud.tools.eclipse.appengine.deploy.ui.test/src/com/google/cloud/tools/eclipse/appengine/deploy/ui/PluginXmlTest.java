@@ -20,7 +20,6 @@ import static org.hamcrest.CoreMatchers.either;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.BasePluginXmlTest;
 import org.junit.Assert;
@@ -33,13 +32,13 @@ public class PluginXmlTest extends BasePluginXmlTest {
 
   @Test
   public void testLimitedVisibility() {
-    NodeList pages = getDoc().getElementsByTagName("page");
+    NodeList pages = getDocument().getElementsByTagName("page");
     Assert.assertEquals(2, pages.getLength());
-    NodeList enabledWhen = getDoc().getElementsByTagName("enabledWhen");
+    NodeList enabledWhen = getDocument().getElementsByTagName("enabledWhen");
     Assert.assertEquals(3, enabledWhen.getLength());
-    NodeList tests = getDoc().getElementsByTagName("test");
-    Assert.assertEquals(4, tests.getLength());
-    NodeList adapts = getDoc().getElementsByTagName("adapt");
+    NodeList tests = getDocument().getElementsByTagName("test");
+    Assert.assertEquals(3, tests.getLength());
+    NodeList adapts = getDocument().getElementsByTagName("adapt");
     Assert.assertEquals(1, adapts.getLength());
 
     for (int i = 0; i < enabledWhen.getLength(); i++) {
@@ -52,13 +51,10 @@ public class PluginXmlTest extends BasePluginXmlTest {
     Assert.assertEquals("org.eclipse.core.resources.IProject", adapt.getAttribute("type"));
 
     NodeList adaptTestNodes = adapt.getElementsByTagName("test");
-    Assert.assertEquals(2, adaptTestNodes.getLength());
+    Assert.assertEquals(1, adaptTestNodes.getLength());
     Element adaptTestEntry1 = (Element) adaptTestNodes.item(0);
     String adaptTestProperty = "org.eclipse.wst.common.project.facet.core.projectFacet";
     Assert.assertEquals(adaptTestProperty, adaptTestEntry1.getAttribute("property"));
     Assert.assertEquals(AppEngineStandardFacet.ID, adaptTestEntry1.getAttribute("value"));
-    Element adaptTestEntry2 = (Element) adaptTestNodes.item(1);
-    Assert.assertEquals(adaptTestProperty, adaptTestEntry2.getAttribute("property"));
-    Assert.assertEquals(AppEngineFlexFacet.ID, adaptTestEntry2.getAttribute("value"));
   }
 }

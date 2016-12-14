@@ -20,13 +20,7 @@
         <configuration>
           <useUIHarness>true</useUIHarness>
           <useUIThread>true</useUIThread>
-          <product>org.eclipse.sdk.ide</product>
-          <dependencies>
-            <dependency>
-              <type>p2-installable-unit</type>
-              <artifactId>org.eclipse.sdk.feature.group</artifactId>
-            </dependency>
-          </dependencies>
+          <product>org.eclipse.platform.ide</product>
         </configuration>
       </plugin>
       <plugin>
@@ -37,32 +31,27 @@
             <extraRequirements>
               <requirement>
                 <type>eclipse-feature</type>
-                <id>com.google.cloud.tools.eclipse.suite.e45.feature</id>
-                <versionRange>0.0.0</versionRange>
-              </requirement>
-              <requirement>
-                <type>eclipse-feature</type>
                 <id>org.eclipse.m2e.feature</id>
                 <versionRange>0.0.0</versionRange>
               </requirement>
               <requirement>
                 <type>eclipse-feature</type>
-                <id>org.eclipse.jst.web_sdk.feature</id>
+                <id>org.eclipse.jst.web_ui.feature</id>
                 <versionRange>0.0.0</versionRange>
               </requirement>
               <requirement>
                 <type>eclipse-feature</type>
-                <id>org.eclipse.jst.common.fproj.enablement.jdt.sdk</id>
+                <id>org.eclipse.jst.common.fproj.enablement.jdt</id>
                 <versionRange>0.0.0</versionRange>
               </requirement>
               <requirement>
                 <type>eclipse-feature</type>
-                <id>org.eclipse.wst.common.fproj.sdk</id>
+                <id>org.eclipse.wst.common.fproj</id>
                 <versionRange>0.0.0</versionRange>
               </requirement>
               <requirement>
                 <type>eclipse-feature</type>
-                <id>org.eclipse.wst.server_adapters.sdk.feature</id>
+                <id>org.eclipse.wst.server_adapters.feature</id>
                 <versionRange>0.0.0</versionRange>
               </requirement>
               <requirement>
