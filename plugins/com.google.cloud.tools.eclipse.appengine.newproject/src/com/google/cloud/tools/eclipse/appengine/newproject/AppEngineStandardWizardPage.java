@@ -25,6 +25,7 @@ import java.io.File;
 import java.util.Collection;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -67,13 +68,16 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
     ModifyListener pageValidator = new PageValidator();
 
     // Java package name
-    Label packageNameLabel = new Label(container, SWT.NONE);
+    Composite packageComposite = new Composite(container, SWT.NONE);
+
+    Label packageNameLabel = new Label(packageComposite, SWT.NONE);
     packageNameLabel.setText(Messages.getString("java.package")); //$NON-NLS-1$
-    javaPackageField = new Text(container, SWT.BORDER);
+    javaPackageField = new Text(packageComposite, SWT.BORDER);
     GridData javaPackagePosition = new GridData(GridData.FILL_HORIZONTAL);
     javaPackagePosition.horizontalSpan = 2;
     javaPackageField.setLayoutData(javaPackagePosition);
     javaPackageField.addModifyListener(pageValidator);
+    GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(packageComposite);
 
     // Manage APIs
     appEngineLibrariesSelectorGroup = new AppEngineLibrariesSelectorGroup(container);
