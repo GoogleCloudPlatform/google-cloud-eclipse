@@ -73,6 +73,7 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
     packageNameLabel.setText(Messages.getString("java.package")); //$NON-NLS-1$
     javaPackageField = new Text(container, SWT.LEAD | SWT.SINGLE | SWT.BORDER);
     GridData javaPackagePosition = GridDataFactory.swtDefaults().create();
+    javaPackagePosition.horizontalSpan = 2;
     javaPackageField.setLayoutData(javaPackagePosition);
     javaPackageField.addModifyListener(pageValidator);
 
