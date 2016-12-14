@@ -303,7 +303,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     GridData layoutData = GridDataFactory.swtDefaults().create();
     overrideDefaultVersionButton.setLayoutData(layoutData);
 
-    version = new Text(versionComposite, SWT.LEFT | SWT.SINGLE | SWT.BORDER);
+    version = new Text(versionComposite, SWT.LEAD | SWT.SINGLE | SWT.BORDER);
     GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(versionComposite);
   }
 
