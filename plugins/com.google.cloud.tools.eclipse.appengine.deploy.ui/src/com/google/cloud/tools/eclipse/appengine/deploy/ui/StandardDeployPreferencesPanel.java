@@ -289,7 +289,6 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     projectIdLabel = new Label(projectIdComposite, SWT.LEFT);
     projectIdLabel.setText(Messages.getString("project.id"));
     GridData layoutData = GridDataFactory.swtDefaults().create();
-    layoutData.horizontalAlignment = GridData.BEGINNING;
     projectIdLabel.setLayoutData(layoutData);
     
     projectId = new Text(projectIdComposite, SWT.LEFT | SWT.SINGLE | SWT.BORDER);
@@ -302,7 +301,6 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     overrideDefaultVersionButton = new Button(versionComposite, SWT.CHECK);
     overrideDefaultVersionButton.setText(Messages.getString("use.custom.versioning"));
     GridData layoutData = GridDataFactory.swtDefaults().create();
-    layoutData.horizontalAlignment = GridData.BEGINNING;
     overrideDefaultVersionButton.setLayoutData(layoutData);
 
     version = new Text(versionComposite, SWT.LEFT | SWT.SINGLE | SWT.BORDER);
