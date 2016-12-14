@@ -302,7 +302,6 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     overrideDefaultVersionButton = new Button(versionComposite, SWT.CHECK);
     overrideDefaultVersionButton.setText(Messages.getString("use.custom.versioning"));
     GridData layoutData = GridDataFactory.swtDefaults().create();
-    layoutData.horizontalIndent = INDENT_CHECKBOX_ENABLED_WIDGET;
     overrideDefaultVersionButton.setLayoutData(layoutData);
 
     version = new Text(versionComposite, SWT.LEFT | SWT.SINGLE | SWT.BORDER);
