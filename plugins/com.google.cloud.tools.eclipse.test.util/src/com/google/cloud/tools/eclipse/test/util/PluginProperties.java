@@ -24,9 +24,7 @@ import java.io.InputStream;
 import java.util.Properties;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
-import javax.xml.parsers.ParserConfigurationException;
 import org.junit.rules.ExternalResource;
-import org.xml.sax.SAXException;
 
 /**
  * Test utility class to obtain a Properties representing the host bundle's plugin.properties.
@@ -43,12 +41,12 @@ public class PluginProperties extends ExternalResource {
   private final Properties pluginProperties = new Properties();
 
   @Override
-  protected void before() throws ParserConfigurationException, SAXException, IOException {
+  protected void before()  {
     try (InputStream in = readPluginProperties()) {
-      if (in != null) {
         // test fails if malformed
         pluginProperties.load(in);
-      }
+    } catch (IOException ex) {
+      // no plugin properties file. This is OK if no properties are referenced.
     }
   }
 
@@ -81,7 +79,7 @@ public class PluginProperties extends ExternalResource {
    *         is not present
    * @throws IOException if the manifest file is not found or an error occurs while reading it
    */
-  private String getHostBundleName() throws IOException {
+  private static String getHostBundleName() throws IOException {
     String manifestPath = "META-INF/MANIFEST.MF";
     Manifest manifest = new Manifest(new FileInputStream(manifestPath));
     Attributes attributes = manifest.getMainAttributes();
