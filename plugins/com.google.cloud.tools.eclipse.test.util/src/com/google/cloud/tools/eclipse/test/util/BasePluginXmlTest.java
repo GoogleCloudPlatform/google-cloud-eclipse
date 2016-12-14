@@ -26,12 +26,15 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 @SuppressWarnings("restriction")
 public class BasePluginXmlTest {
 
   @Rule public final PluginXmlDocument pluginXmlDocument = new PluginXmlDocument();
+  @Rule public final PluginProperties pluginProperties = new PluginProperties();
   
   private Document doc;
 
@@ -78,6 +81,30 @@ public class BasePluginXmlTest {
         String keyword = registry.getKeywordLabel(id);
         Assert.assertNotNull("Null keyword " + id, keyword);
         Assert.assertFalse("Empty keyword " + id, keyword.isEmpty());
+      }
+    }
+  }
+  
+  @Test
+  public void testPropertiesDefined() {
+    assertPropertiesDefined(getDocument().getDocumentElement());
+  }
+  
+  private void assertPropertiesDefined(Element element) {
+    NamedNodeMap attributes = element.getAttributes();
+    for (int i = 0; i < attributes.getLength(); i++) {
+      String name = attributes.item(i).getNodeValue();
+      if (name.startsWith("%")) {
+        String value = pluginProperties.get().getProperty(name.substring(1));
+        Assert.assertNotNull(name + " is not defined");
+        Assert.assertFalse(name + " is not defined", value.isEmpty());
+      }
+    }
+    
+    NodeList children = element.getChildNodes();
+    for (int i = 0; i < children.getLength(); i++) {
+      if (children.item(i).getNodeType() == Node.ELEMENT_NODE) {
+        assertPropertiesDefined((Element) children.item(i));
       }
     }
   }
