@@ -87,7 +87,6 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   private Button stopPreviousVersionButton;
 
   private Button overrideDefaultBucketButton;
-  private Label bucketLabel;
   private Text bucket;
 
   private ExpandableComposite expandableComposite;
@@ -229,14 +228,12 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     ISWTObservableValue overrideButton =
         WidgetProperties.selection().observe(overrideDefaultBucketButton);
     ISWTObservableValue bucketField = WidgetProperties.text(SWT.Modify).observe(bucket);
-    ISWTObservableValue bucketLabelEnablement = WidgetProperties.enabled().observe(bucketLabel);
     ISWTObservableValue bucketFieldEnablement = WidgetProperties.enabled().observe(bucket);
 
     // use an intermediary value to control the enabled state of the label and the field 
     // based on the override checkbox's state
     WritableValue enablement = new WritableValue();
     context.bindValue(overrideButton, enablement);
-    context.bindValue(bucketLabelEnablement, enablement);
     context.bindValue(bucketFieldEnablement, enablement);
 
     IObservableValue overrideModelObservable =
@@ -364,10 +361,10 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
     overrideDefaultBucketButton = new Button(bucketComposite, SWT.CHECK);
     overrideDefaultBucketButton.setText(Messages.getString("use.custom.bucket"));
-    overrideDefaultBucketButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1));
-
-    bucketLabel = new Label(bucketComposite, SWT.RADIO);
-    bucketLabel.setText(Messages.getString("bucket.name"));
+    GridData layoutData = GridDataFactory.swtDefaults().create();
+    overrideDefaultBucketButton.setLayoutData(layoutData);
+    
+    // overrideDefaultBucketButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1));
 
     bucket = new Text(bucketComposite, SWT.LEFT | SWT.SINGLE | SWT.BORDER);
 
