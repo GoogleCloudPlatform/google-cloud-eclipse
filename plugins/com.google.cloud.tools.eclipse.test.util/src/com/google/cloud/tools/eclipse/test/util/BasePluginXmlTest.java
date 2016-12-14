@@ -94,18 +94,24 @@ public class BasePluginXmlTest {
     NamedNodeMap attributes = element.getAttributes();
     for (int i = 0; i < attributes.getLength(); i++) {
       String name = attributes.item(i).getNodeValue();
-      if (name.startsWith("%")) {
-        String value = pluginProperties.get().getProperty(name.substring(1));
-        Assert.assertNotNull(name + " is not defined");
-        Assert.assertFalse(name + " is not defined", value.isEmpty());
-      }
+      assertPropertyDefined(name);
     }
+    
+    assertPropertyDefined(element.getTextContent());
     
     NodeList children = element.getChildNodes();
     for (int i = 0; i < children.getLength(); i++) {
       if (children.item(i).getNodeType() == Node.ELEMENT_NODE) {
         assertPropertiesDefined((Element) children.item(i));
       }
+    }
+  }
+
+  private void assertPropertyDefined(String name) {
+    if (name.startsWith("%")) {
+      String value = pluginProperties.get().getProperty(name.substring(1));
+      Assert.assertNotNull(name + " is not defined");
+      Assert.assertFalse(name + " is not defined", value.isEmpty());
     }
   }
 
