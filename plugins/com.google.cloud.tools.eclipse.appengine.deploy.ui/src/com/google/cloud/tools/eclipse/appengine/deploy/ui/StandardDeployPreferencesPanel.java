@@ -351,7 +351,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
   private void createExpandableComposite() {
     expandableComposite = new ExpandableComposite(this, 
-        SWT.NONE, ExpandableComposite.TWISTIE | ExpandableComposite.CLIENT_INDENT);
+        SWT.NONE, ExpandableComposite.TWISTIE);
     FontUtil.convertFontToBold(expandableComposite);
     expandableComposite.setText(Messages.getString("settings.advanced"));
     expandableComposite.setExpanded(false);
