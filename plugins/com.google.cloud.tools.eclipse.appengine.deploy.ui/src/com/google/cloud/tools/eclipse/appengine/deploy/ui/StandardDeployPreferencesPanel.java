@@ -187,7 +187,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     ISWTObservableValue versionField = WidgetProperties.text(SWT.Modify).observe(version);
     ISWTObservableValue versionFieldEnablement = WidgetProperties.enabled().observe(version);
 
-    // use an intermediary value to control the enabled state of the label and the field based on the override
+    // use an intermediary value to control the enabled state of the the field based on the override
     // checkbox's state
     WritableValue enablement = new WritableValue();
     context.bindValue(overrideButton, enablement);
@@ -280,7 +280,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     // If we don't require values, then don't auto-select accounts
     accountSelector = new AccountSelector(accountComposite, loginService,
         Messages.getString("deploy.preferences.dialog.accountSelector.login"), requireValues);
-    GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(accountComposite);
+   GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(accountComposite);
   }
 
   private void createProjectIdSection() {
@@ -288,7 +288,10 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
     projectIdLabel = new Label(projectIdComposite, SWT.LEFT);
     projectIdLabel.setText(Messages.getString("project.id"));
-
+    GridData layoutData = GridDataFactory.swtDefaults().create();
+    layoutData.horizontalAlignment = GridData.BEGINNING;
+    projectIdLabel.setLayoutData(layoutData);
+    
     projectId = new Text(projectIdComposite, SWT.LEFT | SWT.SINGLE | SWT.BORDER);
     GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(projectIdComposite);
   }
@@ -299,6 +302,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     overrideDefaultVersionButton = new Button(versionComposite, SWT.CHECK);
     overrideDefaultVersionButton.setText(Messages.getString("use.custom.versioning"));
     GridData layoutData = GridDataFactory.swtDefaults().create();
+    layoutData.horizontalAlignment = GridData.BEGINNING;
     overrideDefaultVersionButton.setLayoutData(layoutData);
 
     version = new Text(versionComposite, SWT.LEFT | SWT.SINGLE | SWT.BORDER);
@@ -347,8 +351,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   }
 
   private void createExpandableComposite() {
-    expandableComposite = new ExpandableComposite(this, 
-        SWT.NONE, ExpandableComposite.TWISTIE);
+    expandableComposite = new ExpandableComposite(this, SWT.NONE, ExpandableComposite.TWISTIE);
     FontUtil.convertFontToBold(expandableComposite);
     expandableComposite.setText(Messages.getString("settings.advanced"));
     expandableComposite.setExpanded(false);
@@ -363,8 +366,6 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     overrideDefaultBucketButton.setText(Messages.getString("use.custom.bucket"));
     GridData layoutData = GridDataFactory.swtDefaults().create();
     overrideDefaultBucketButton.setLayoutData(layoutData);
-    
-    // overrideDefaultBucketButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1));
 
     bucket = new Text(bucketComposite, SWT.LEFT | SWT.SINGLE | SWT.BORDER);
 
