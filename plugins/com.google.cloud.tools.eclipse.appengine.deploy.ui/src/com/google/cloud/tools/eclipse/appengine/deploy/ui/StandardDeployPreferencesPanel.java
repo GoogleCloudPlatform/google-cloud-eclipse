@@ -311,23 +311,8 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     Composite promoteComposite = new Composite(this, SWT.NONE);
     autoPromoteButton = new Button(promoteComposite, SWT.CHECK);
     autoPromoteButton.setText(Messages.getString("auto.promote"));
-
-    final Link manualPromoteLink = new Link(promoteComposite, SWT.NONE);
-    GridData layoutData = GridDataFactory.swtDefaults().create();
-    layoutData.horizontalIndent = INDENT_CHECKBOX_ENABLED_WIDGET;
-    manualPromoteLink.setLayoutData(layoutData);
-    manualPromoteLink.setText(Messages.getString("deploy.manual.link", APPENGINE_VERSIONS_URL));
-    manualPromoteLink.setFont(promoteComposite.getFont());
-    manualPromoteLink.addSelectionListener(
-        new OpenUriSelectionListener(
-            new ProjectIdQueryParameterProvider(projectId), 
-            new ErrorHandler() {
-      @Override
-      public void handle(Exception ex) {
-        MessageDialog.openError(getShell(), 
-            Messages.getString("cannot.open.browser"), ex.getLocalizedMessage());
-      }
-    }));
+    String manualPromoteMessage = Messages.getString("deploy.manual.link", APPENGINE_VERSIONS_URL);
+    autoPromoteButton.setToolTipText(manualPromoteMessage);
 
     stopPreviousVersionButton = new Button(promoteComposite, SWT.CHECK);
     stopPreviousVersionButton.setText(Messages.getString("stop.previous.version"));
