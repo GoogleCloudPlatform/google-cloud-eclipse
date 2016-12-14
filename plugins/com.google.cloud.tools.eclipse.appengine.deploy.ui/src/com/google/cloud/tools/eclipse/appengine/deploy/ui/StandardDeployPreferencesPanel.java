@@ -80,7 +80,6 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   private Text projectId;
 
   private Button overrideDefaultVersionButton;
-  private Label versionLabel;
   private Text version;
 
   private Button autoPromoteButton;
@@ -187,14 +186,12 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     ISWTObservableValue overrideButton =
         WidgetProperties.selection().observe(overrideDefaultVersionButton);
     ISWTObservableValue versionField = WidgetProperties.text(SWT.Modify).observe(version);
-    ISWTObservableValue versionLabelEnablement = WidgetProperties.enabled().observe(versionLabel);
     ISWTObservableValue versionFieldEnablement = WidgetProperties.enabled().observe(version);
 
     // use an intermediary value to control the enabled state of the label and the field based on the override
     // checkbox's state
     WritableValue enablement = new WritableValue();
     context.bindValue(overrideButton, enablement);
-    context.bindValue(versionLabelEnablement, enablement);
     context.bindValue(versionFieldEnablement, enablement);
 
     IObservableValue overrideModel = PojoProperties.value("overrideDefaultVersioning").observe(model);
@@ -304,13 +301,9 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
     overrideDefaultVersionButton = new Button(versionComposite, SWT.CHECK);
     overrideDefaultVersionButton.setText(Messages.getString("use.custom.versioning"));
-    overrideDefaultVersionButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1));
-
-    versionLabel = new Label(versionComposite, SWT.NONE);
-    versionLabel.setText(Messages.getString("project.version"));
     GridData layoutData = GridDataFactory.swtDefaults().create();
     layoutData.horizontalIndent = INDENT_CHECKBOX_ENABLED_WIDGET;
-    versionLabel.setLayoutData(layoutData);
+    overrideDefaultVersionButton.setLayoutData(layoutData);
 
     version = new Text(versionComposite, SWT.LEFT | SWT.SINGLE | SWT.BORDER);
     GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(versionComposite);
