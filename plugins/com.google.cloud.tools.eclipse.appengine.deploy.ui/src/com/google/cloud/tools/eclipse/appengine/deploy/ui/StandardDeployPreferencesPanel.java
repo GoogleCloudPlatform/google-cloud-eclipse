@@ -332,9 +332,6 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
     stopPreviousVersionButton = new Button(promoteComposite, SWT.CHECK);
     stopPreviousVersionButton.setText(Messages.getString("stop.previous.version"));
-    GridDataFactory.swtDefaults()
-        .indent(INDENT_CHECKBOX_ENABLED_WIDGET, 0)
-        .applyTo(stopPreviousVersionButton);
 
     GridLayoutFactory.fillDefaults().generateLayout(promoteComposite);
   }
