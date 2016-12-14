@@ -67,7 +67,8 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   private static final String APPENGINE_VERSIONS_URL =
       "https://console.cloud.google.com/appengine/versions";
 
-  private static final Logger logger = Logger.getLogger(DeployPropertyPage.class.getName());
+  private static final Logger logger = Logger.getLogger(
+      StandardDeployPreferencesPanel.class.getName());
 
   private AccountSelector accountSelector;
 
