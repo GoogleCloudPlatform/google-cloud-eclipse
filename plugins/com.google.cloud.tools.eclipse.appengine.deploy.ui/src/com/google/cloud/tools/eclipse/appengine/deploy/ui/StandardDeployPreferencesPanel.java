@@ -80,7 +80,6 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   private Text projectId;
 
   private Button overrideDefaultVersionButton;
-  private Label versionLabel;
   private Text version;
 
   private Button autoPromoteButton;
@@ -88,7 +87,6 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   private Button stopPreviousVersionButton;
 
   private Button overrideDefaultBucketButton;
-  private Label bucketLabel;
   private Text bucket;
 
   private ExpandableComposite expandableComposite;
@@ -187,14 +185,12 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     ISWTObservableValue overrideButton =
         WidgetProperties.selection().observe(overrideDefaultVersionButton);
     ISWTObservableValue versionField = WidgetProperties.text(SWT.Modify).observe(version);
-    ISWTObservableValue versionLabelEnablement = WidgetProperties.enabled().observe(versionLabel);
     ISWTObservableValue versionFieldEnablement = WidgetProperties.enabled().observe(version);
 
-    // use an intermediary value to control the enabled state of the label and the field based on the override
+    // use an intermediary value to control the enabled state of the the field based on the override
     // checkbox's state
     WritableValue enablement = new WritableValue();
     context.bindValue(overrideButton, enablement);
-    context.bindValue(versionLabelEnablement, enablement);
     context.bindValue(versionFieldEnablement, enablement);
 
     IObservableValue overrideModel = PojoProperties.value("overrideDefaultVersioning").observe(model);
@@ -232,14 +228,12 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     ISWTObservableValue overrideButton =
         WidgetProperties.selection().observe(overrideDefaultBucketButton);
     ISWTObservableValue bucketField = WidgetProperties.text(SWT.Modify).observe(bucket);
-    ISWTObservableValue bucketLabelEnablement = WidgetProperties.enabled().observe(bucketLabel);
     ISWTObservableValue bucketFieldEnablement = WidgetProperties.enabled().observe(bucket);
 
     // use an intermediary value to control the enabled state of the label and the field 
     // based on the override checkbox's state
     WritableValue enablement = new WritableValue();
     context.bindValue(overrideButton, enablement);
-    context.bindValue(bucketLabelEnablement, enablement);
     context.bindValue(bucketFieldEnablement, enablement);
 
     IObservableValue overrideModelObservable =
@@ -294,7 +288,9 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
     projectIdLabel = new Label(projectIdComposite, SWT.LEFT);
     projectIdLabel.setText(Messages.getString("project.id"));
-
+    GridData layoutData = GridDataFactory.swtDefaults().create();
+    projectIdLabel.setLayoutData(layoutData);
+    
     projectId = new Text(projectIdComposite, SWT.LEFT | SWT.SINGLE | SWT.BORDER);
     GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(projectIdComposite);
   }
@@ -304,13 +300,8 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
     overrideDefaultVersionButton = new Button(versionComposite, SWT.CHECK);
     overrideDefaultVersionButton.setText(Messages.getString("use.custom.versioning"));
-    overrideDefaultVersionButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1));
-
-    versionLabel = new Label(versionComposite, SWT.NONE);
-    versionLabel.setText(Messages.getString("project.version"));
     GridData layoutData = GridDataFactory.swtDefaults().create();
-    layoutData.horizontalIndent = INDENT_CHECKBOX_ENABLED_WIDGET;
-    versionLabel.setLayoutData(layoutData);
+    overrideDefaultVersionButton.setLayoutData(layoutData);
 
     version = new Text(versionComposite, SWT.LEFT | SWT.SINGLE | SWT.BORDER);
     GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(versionComposite);
@@ -340,9 +331,6 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
     stopPreviousVersionButton = new Button(promoteComposite, SWT.CHECK);
     stopPreviousVersionButton.setText(Messages.getString("stop.previous.version"));
-    GridDataFactory.swtDefaults()
-        .indent(INDENT_CHECKBOX_ENABLED_WIDGET, 0)
-        .applyTo(stopPreviousVersionButton);
 
     GridLayoutFactory.fillDefaults().generateLayout(promoteComposite);
   }
@@ -361,8 +349,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   }
 
   private void createExpandableComposite() {
-    expandableComposite = new ExpandableComposite(this, 
-        SWT.NONE, ExpandableComposite.TWISTIE | ExpandableComposite.CLIENT_INDENT);
+    expandableComposite = new ExpandableComposite(this, SWT.NONE, ExpandableComposite.TWISTIE);
     FontUtil.convertFontToBold(expandableComposite);
     expandableComposite.setText(Messages.getString("settings.advanced"));
     expandableComposite.setExpanded(false);
@@ -375,10 +362,8 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
     overrideDefaultBucketButton = new Button(bucketComposite, SWT.CHECK);
     overrideDefaultBucketButton.setText(Messages.getString("use.custom.bucket"));
-    overrideDefaultBucketButton.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1));
-
-    bucketLabel = new Label(bucketComposite, SWT.RADIO);
-    bucketLabel.setText(Messages.getString("bucket.name"));
+    GridData layoutData = GridDataFactory.swtDefaults().create();
+    overrideDefaultBucketButton.setLayoutData(layoutData);
 
     bucket = new Text(bucketComposite, SWT.LEFT | SWT.SINGLE | SWT.BORDER);
 
