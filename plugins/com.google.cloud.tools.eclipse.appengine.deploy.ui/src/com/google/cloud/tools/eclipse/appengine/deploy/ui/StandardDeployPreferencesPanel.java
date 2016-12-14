@@ -280,7 +280,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     // If we don't require values, then don't auto-select accounts
     accountSelector = new AccountSelector(accountComposite, loginService,
         Messages.getString("deploy.preferences.dialog.accountSelector.login"), requireValues);
-   GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(accountComposite);
+    GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(accountComposite);
   }
 
   private void createProjectIdSection() {
