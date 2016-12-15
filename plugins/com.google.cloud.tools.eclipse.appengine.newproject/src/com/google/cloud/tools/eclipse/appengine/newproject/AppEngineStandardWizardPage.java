@@ -50,7 +50,6 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
     setImageDescriptor(AppEngineImages.appEngine(64));
   }
 
-  // todo is there a way to call this for a test?
   @Override
   public void createControl(Composite parent) {
     super.createControl(parent);
