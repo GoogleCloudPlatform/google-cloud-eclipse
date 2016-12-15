@@ -18,15 +18,18 @@ package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+
+import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 
 public class AppEngineStandardWizardPageTest {
 
   private AppEngineStandardWizardPage page = new AppEngineStandardWizardPage();
-  
+  @Rule public ShellTestResource shellTestResource = new ShellTestResource();
+
   @Test
   public void testPageInitiallyIncomplete() {
     Assert.assertFalse(page.isPageComplete());
@@ -62,7 +65,7 @@ public class AppEngineStandardWizardPageTest {
   
   @Test
   public void testCreateControl() {
-    Shell shell = new Shell(Display.getCurrent());
+    Shell shell = shellTestResource.getShell();
     Composite parent = new Composite(shell, SWT.NONE);
     page.createControl(parent);
     Assert.assertNull(page.getErrorMessage());
