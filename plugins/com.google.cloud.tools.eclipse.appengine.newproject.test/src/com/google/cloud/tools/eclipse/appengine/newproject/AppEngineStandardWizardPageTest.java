@@ -16,13 +16,16 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class AppEngineStandardWizardPageTest {
 
-  private AppEngineStandardWizardPage page =
-      new AppEngineStandardWizardPage();
+  private AppEngineStandardWizardPage page = new AppEngineStandardWizardPage();
   
   @Test
   public void testPageInitiallyIncomplete() {
@@ -46,7 +49,23 @@ public class AppEngineStandardWizardPageTest {
   
   @Test
   public void testDescription() {
-    Assert.assertEquals("Create a new App Engine Standard environment project in the workspace.", 
+    Assert.assertEquals("Create a new App Engine Standard environment project in the workspace.",
         page.getDescription());
+  }
+  
+  @Test
+  public void testValidatePage() {
+    Assert.assertFalse(page.validatePage());
+    Assert.assertNull(page.getErrorMessage());
+    Assert.assertEquals("Project name must be specified", page.getMessage());
+  }
+  
+  @Test
+  public void testCreateControl() {
+    Shell shell = new Shell(Display.getCurrent());
+    Composite parent = new Composite(shell, SWT.NONE);
+    page.createControl(parent);
+    Assert.assertNull(page.getErrorMessage());
+    Assert.assertEquals("Enter a project name.", page.getMessage());
   }
 }

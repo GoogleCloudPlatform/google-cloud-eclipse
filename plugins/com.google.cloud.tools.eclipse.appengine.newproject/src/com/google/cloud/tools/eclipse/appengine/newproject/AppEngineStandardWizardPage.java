@@ -47,7 +47,6 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
     super("basicNewProjectPage"); //$NON-NLS-1$
     setTitle(Messages.getString("app.engine.standard.project")); //$NON-NLS-1$
     setDescription(Messages.getString("create.app.engine.standard.project")); //$NON-NLS-1$
-
     setImageDescriptor(AppEngineImages.appEngine(64));
   }
 
@@ -78,11 +77,19 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
     // Manage APIs
     appEngineLibrariesSelectorGroup = new AppEngineLibrariesSelectorGroup(container);
 
+    setPageComplete(validatePage());
+    // Show enter project name on opening
+    setErrorMessage(null);
+    setMessage(Messages.getString("enter.project.name"));
+    
     Dialog.applyDialogFont(container);
   }
 
   @Override
   public boolean validatePage() {
+    setErrorMessage(null);
+    setMessage(null);
+    
     if (!super.validatePage()) {
       return false;
     }
