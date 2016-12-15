@@ -19,7 +19,7 @@
         <artifactId>tycho-surefire-plugin</artifactId>
         <configuration>
           <useUIHarness>true</useUIHarness>
-          <useUIThread>false</useUIThread>
+          <useUIThread>true</useUIThread>
           <product>org.eclipse.platform.ide</product>
         </configuration>
       </plugin>
