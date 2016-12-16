@@ -223,65 +223,6 @@
       </fragment>
    </extension>
    <extension
-         point="org.eclipse.ui.menus">
-      <menuContribution
-            allPopups="false"
-            locationURI="popup:org.eclipse.ui.popup.any?after=additions">
-         <command
-               commandId="com.google.cloud.tools.eclipse.appengine.localserver.launch"
-               disabledIcon="platform:/plugin/org.eclipse.debug.ui/icons/full/dtool16/run_exc.png"
-               icon="platform:/plugin/org.eclipse.debug.ui/icons/full/etool16/run_exc.png"
-               label="Run in App Engine"
-               mnemonic="R"
-               style="push">
-            <parameter
-                  name="launchMode"
-                  value="run">
-            </parameter>
-         </command>
-         <command
-               commandId="com.google.cloud.tools.eclipse.appengine.localserver.launch"
-               disabledIcon="platform:/plugin/org.eclipse.debug.ui/icons/full/dtool16/debug_exc.png"
-               icon="platform:/plugin/org.eclipse.debug.ui/icons/full/etool16/debug_exc.png"
-               label="Debug in App Engine"
-               mnemonic="D"
-               style="push">
-            <parameter
-                  name="launchMode"
-                  value="debug">
-            </parameter>
-         </command>
-      </menuContribution>
-      <menuContribution
-            allPopups="false"
-            locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
-         <command
-               commandId="com.google.cloud.tools.eclipse.appengine.localserver.launch"
-               disabledIcon="platform:/plugin/org.eclipse.debug.ui/icons/full/dtool16/run_exc.png"
-               icon="platform:/plugin/org.eclipse.debug.ui/icons/full/etool16/run_exc.png"
-               label="Run in App Engine"
-               mnemonic="R"
-               style="push">
-            <parameter
-                  name="launchMode"
-                  value="run">
-            </parameter>
-         </command>
-         <command
-               commandId="com.google.cloud.tools.eclipse.appengine.localserver.launch"
-               disabledIcon="platform:/plugin/org.eclipse.debug.ui/icons/full/dtool16/debug_exc.png"
-               icon="platform:/plugin/org.eclipse.debug.ui/icons/full/etool16/debug_exc.png"
-               label="Debug in App Engine"
-               mnemonic="D"
-               style="push">
-            <parameter
-                  name="launchMode"
-                  value="debug">
-            </parameter>
-         </command>
-      </menuContribution>
-   </extension>
-   <extension
          point="org.eclipse.ui.commands">
       <command
             description="Launch on App Engine development server"
