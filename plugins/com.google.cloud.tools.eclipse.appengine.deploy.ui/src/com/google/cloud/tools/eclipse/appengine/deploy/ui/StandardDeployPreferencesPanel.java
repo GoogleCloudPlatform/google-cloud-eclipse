@@ -270,7 +270,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   private void createCredentialSection(IGoogleLoginService loginService) {
     Composite accountComposite = new Composite(this, SWT.NONE);
 
-    Label accountLabel = new Label(accountComposite, SWT.LEFT);
+    Label accountLabel = new Label(accountComposite, SWT.LEAD);
     accountLabel.setText(Messages.getString("deploy.preferences.dialog.label.selectAccount"));
     accountLabel.setToolTipText(Messages.getString("tooltip.account"));
 
@@ -284,13 +284,13 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   private void createProjectIdSection() {
     Composite projectIdComposite = new Composite(this, SWT.NONE);
 
-    projectIdLabel = new Label(projectIdComposite, SWT.LEFT);
+    projectIdLabel = new Label(projectIdComposite, SWT.LEAD);
     projectIdLabel.setText(Messages.getString("project.id"));
     projectIdLabel.setToolTipText(Messages.getString("tooltip.project.id"));
     GridData layoutData = GridDataFactory.swtDefaults().create();
     projectIdLabel.setLayoutData(layoutData);
 
-    projectId = new Text(projectIdComposite, SWT.LEFT | SWT.SINGLE | SWT.BORDER);
+    projectId = new Text(projectIdComposite, SWT.LEAD | SWT.SINGLE | SWT.BORDER);
     projectId.setToolTipText(Messages.getString("tooltip.project.id"));
     GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(projectIdComposite);
   }
@@ -355,7 +355,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     overrideDefaultBucketButton.setLayoutData(layoutData);
     overrideDefaultBucketButton.setToolTipText(Messages.getString("tooltip.staging.bucket"));
 
-    bucket = new Text(bucketComposite, SWT.LEFT | SWT.SINGLE | SWT.BORDER);
+    bucket = new Text(bucketComposite, SWT.LEAD | SWT.SINGLE | SWT.BORDER);
     bucket.setToolTipText(Messages.getString("tooltip.staging.bucket"));
 
     GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(bucketComposite);
