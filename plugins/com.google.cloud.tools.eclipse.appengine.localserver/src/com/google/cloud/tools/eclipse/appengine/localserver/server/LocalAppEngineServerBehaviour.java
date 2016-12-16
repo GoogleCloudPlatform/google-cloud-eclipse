@@ -34,13 +34,18 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
@@ -150,6 +155,23 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
 
   private static IStatus newErrorStatus(String message) {
     return new Status(IStatus.ERROR, Activator.PLUGIN_ID, message);
+  }
+
+
+  @Override
+  public void setupLaunchConfiguration(ILaunchConfigurationWorkingCopy workingCopy,
+      IProgressMonitor monitor) throws CoreException {
+    super.setupLaunchConfiguration(workingCopy, monitor);
+
+    // it seems surprising that the Server class doesn't already do this
+    Collection<IProject> projects = new ArrayList<>();
+    for (IModule module : getServer().getModules()) {
+      IProject project = module.getProject();
+      if (project != null) {
+        projects.add(project);
+      }
+    }
+    workingCopy.setMappedResources(projects.toArray(new IResource[projects.size()]));
   }
 
   private void checkAndSetPorts() throws CoreException {
