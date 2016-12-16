@@ -226,7 +226,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     ISWTObservableValue bucketField = WidgetProperties.text(SWT.Modify).observe(bucket);
     ISWTObservableValue bucketFieldEnablement = WidgetProperties.enabled().observe(bucket);
 
-    // use an intermediary value to control the enabled state of the label and the field 
+    // use an intermediary value to control the enabled state of the label and the field
     // based on the override checkbox's state
     WritableValue enablement = new WritableValue();
     context.bindValue(overrideButton, enablement);
@@ -270,12 +270,14 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   private void createCredentialSection(IGoogleLoginService loginService) {
     Composite accountComposite = new Composite(this, SWT.NONE);
 
-    new Label(accountComposite, SWT.LEFT).setText(
-        Messages.getString("deploy.preferences.dialog.label.selectAccount"));
+    Label accountLabel = new Label(accountComposite, SWT.LEFT);
+    accountLabel.setText(Messages.getString("deploy.preferences.dialog.label.selectAccount"));
+    accountLabel.setToolTipText(Messages.getString("tooltip.account"));
 
     // If we don't require values, then don't auto-select accounts
     accountSelector = new AccountSelector(accountComposite, loginService,
         Messages.getString("deploy.preferences.dialog.accountSelector.login"), requireValues);
+    accountSelector.setToolTipText(Messages.getString("tooltip.account"));
     GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(accountComposite);
   }
 
@@ -284,10 +286,12 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
     projectIdLabel = new Label(projectIdComposite, SWT.LEFT);
     projectIdLabel.setText(Messages.getString("project.id"));
+    projectIdLabel.setToolTipText(Messages.getString("tooltip.project.id"));
     GridData layoutData = GridDataFactory.swtDefaults().create();
     projectIdLabel.setLayoutData(layoutData);
-    
+
     projectId = new Text(projectIdComposite, SWT.LEFT | SWT.SINGLE | SWT.BORDER);
+    projectId.setToolTipText(Messages.getString("tooltip.project.id"));
     GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(projectIdComposite);
   }
 
@@ -296,10 +300,12 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
     overrideDefaultVersionButton = new Button(versionComposite, SWT.CHECK);
     overrideDefaultVersionButton.setText(Messages.getString("use.custom.versioning"));
+    overrideDefaultVersionButton.setToolTipText(Messages.getString("tooltip.version"));
     GridData layoutData = GridDataFactory.swtDefaults().create();
     overrideDefaultVersionButton.setLayoutData(layoutData);
 
     version = new Text(versionComposite, SWT.LEAD | SWT.SINGLE | SWT.BORDER);
+    version.setToolTipText(Messages.getString("tooltip.version"));
     GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(versionComposite);
   }
 
@@ -307,11 +313,13 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     Composite promoteComposite = new Composite(this, SWT.NONE);
     autoPromoteButton = new Button(promoteComposite, SWT.CHECK);
     autoPromoteButton.setText(Messages.getString("auto.promote"));
-    String manualPromoteMessage = Messages.getString("deploy.manual.link", APPENGINE_VERSIONS_URL);
+    String manualPromoteMessage = Messages.getString(
+        "tooltip.manual.promote.link", APPENGINE_VERSIONS_URL);
     autoPromoteButton.setToolTipText(manualPromoteMessage);
 
     stopPreviousVersionButton = new Button(promoteComposite, SWT.CHECK);
     stopPreviousVersionButton.setText(Messages.getString("stop.previous.version"));
+    stopPreviousVersionButton.setToolTipText(Messages.getString("tooltip.stop.previous.version"));
 
     GridLayoutFactory.fillDefaults().generateLayout(promoteComposite);
   }
@@ -345,8 +353,10 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     overrideDefaultBucketButton.setText(Messages.getString("use.custom.bucket"));
     GridData layoutData = GridDataFactory.swtDefaults().create();
     overrideDefaultBucketButton.setLayoutData(layoutData);
+    overrideDefaultBucketButton.setToolTipText(Messages.getString("tooltip.staging.bucket"));
 
     bucket = new Text(bucketComposite, SWT.LEFT | SWT.SINGLE | SWT.BORDER);
+    bucket.setToolTipText(Messages.getString("tooltip.staging.bucket"));
 
     GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(bucketComposite);
     return bucketComposite;

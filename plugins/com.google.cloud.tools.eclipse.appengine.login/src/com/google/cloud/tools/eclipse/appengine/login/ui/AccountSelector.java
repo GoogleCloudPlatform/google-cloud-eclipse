@@ -188,4 +188,9 @@ public class AccountSelector extends Composite {
       selectAccount(account.getEmail());
     }
   }
+
+  @Override
+  public void setToolTipText(String string) {
+    combo.setToolTipText(string);
+  }
 }
