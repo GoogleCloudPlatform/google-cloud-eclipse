@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.localserver.ui;
+package com.google.cloud.tools.eclipse.appengine.localserver.launching;
 
 import com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerDelegate;
 import com.google.cloud.tools.eclipse.util.AdapterUtil;
@@ -23,24 +23,21 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import com.google.common.collect.Sets.SetView;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.debug.core.ILaunch;
-import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerType;
@@ -48,36 +45,32 @@ import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.core.ServerCore;
 import org.eclipse.wst.server.core.ServerUtil;
 
-/** Find or create a server with the selected projects and launch it. */
-public class LaunchAppEngineStandardHandler extends AbstractHandler {
-  @Override
-  public Object execute(ExecutionEvent event) throws ExecutionException {
-    String launchMode = event.getParameter("launchMode");
-    if (launchMode == null) {
-      launchMode = ILaunchManager.DEBUG_MODE;
-    }
-    IModule[] modules = asModules(event);
-    SubMonitor progress = SubMonitor.convert(null, 10);
-    try {
-      IServer server = findExistingServer(modules, progress.newChild(3));
-      if (server != null && isRunning(server)) {
-        ILaunch launch = server.getLaunch();
-        Preconditions.checkNotNull(launch, "Running server should have a launch");
-        String detail = launchMode.equals(launch.getLaunchMode())
-            ? "Server is already running"
-            : MessageFormat.format("Server is already running in \"{0}\" mode",
-                launch.getLaunchMode());
-        IStatus status = StatusUtil.info(this,
-            MessageFormat.format("\"{0}\" already running", server.getName()));
-        throw new ExecutionException(detail, new CoreException(status));
-      } else if (server == null) {
-        server = createServer(modules, progress.newChild(3));
+/**
+ * A helper class for launching modules on a server
+ */
+public class LaunchHelper {
+  public void launch(IModule[] modules, String launchMode) throws CoreException {
+    SubMonitor progress = SubMonitor.convert(null);
+    Collection<IServer> servers =
+        findExistingServers(modules, /* exact */ true, progress.newChild(3));
+    IServer server = null;
+    if (!servers.isEmpty()) {
+      for (IServer existing : servers) {
+        if (isRunning(existing)) {
+          ILaunch launch = existing.getLaunch();
+          Preconditions.checkNotNull(launch, "Running server should have a launch");
+          String detail = launchMode.equals(launch.getLaunchMode()) ? "Server is already running"
+              : MessageFormat.format("Server is already running in \"{0}\" mode",
+                  launch.getLaunchMode());
+          throw new CoreException(StatusUtil.info(this, detail));
+        }
+        server = existing;
       }
-      launch(server, launchMode, progress.newChild(4));
-    } catch (CoreException ex) {
-      throw new ExecutionException("Unable to configure server", ex);
     }
-    return null;
+    if (server == null) {
+      server = createServer(modules, progress.newChild(3));
+    }
+    launch(server, launchMode, progress.newChild(4));
   }
 
   private static boolean isRunning(IServer server) {
@@ -85,16 +78,25 @@ public class LaunchAppEngineStandardHandler extends AbstractHandler {
         || server.getServerState() == IServer.STATE_STARTING;
   }
 
+  /**
+   * Look for servers that may match.
+   * 
+   * @param modules the web modules to search for
+   * @param narrow if true, look for exact module match
+   * @return an existing server
+   */
   @VisibleForTesting
-  protected IServer findExistingServer(IModule[] modules, SubMonitor progress) {
+  public Collection<IServer> findExistingServers(IModule[] modules, boolean exact,
+      SubMonitor progress) {
     if (modules.length == 1) {
       IServer defaultServer = ServerCore.getDefaultServer(modules[0]);
       if (defaultServer != null && LocalAppEngineServerDelegate.SERVER_TYPE_ID
           .equals(defaultServer.getServerType().getId())) {
-        return defaultServer;
+        return Collections.singletonList(defaultServer);
       }
     }
     Set<IModule> myModules = ImmutableSet.copyOf(modules);
+    List<IServer> matches = new ArrayList<>();
     // Look for servers that contain these modules
     // Could prioritize servers that have *exactly* these modules,
     // or that have the smallest overlap
@@ -103,11 +105,13 @@ public class LaunchAppEngineStandardHandler extends AbstractHandler {
         continue;
       }
       Set<IModule> serverModules = ImmutableSet.copyOf(server.getModules());
-      if (Sets.intersection(myModules, serverModules).size() == myModules.size()) {
-        return server;
+      SetView<IModule> overlap = Sets.intersection(myModules, serverModules);
+      if (overlap.size() == myModules.size()
+          && (!exact || overlap.size() == serverModules.size())) {
+        matches.add(server);
       }
     }
-    return null;
+    return matches;
   }
 
   private IServer createServer(IModule[] modules, SubMonitor progress) throws CoreException {
@@ -124,10 +128,8 @@ public class LaunchAppEngineStandardHandler extends AbstractHandler {
     server.start(launchMode, progress);
   }
 
-  /** Identify the relevant modules from the execution context. */
-  private static IModule[] asModules(ExecutionEvent event) throws ExecutionException {
-    // First check the current selected objects
-    ISelection selection = HandlerUtil.getCurrentSelection(event);
+  /** Identify the relevant modules from the selection. */
+  public IModule[] asModules(ISelection selection) throws CoreException {
     if (selection instanceof IStructuredSelection && !selection.isEmpty()) {
       Object[] selectedObjects = ((IStructuredSelection) selection).toArray();
       List<IModule> modules = new ArrayList<>(selectedObjects.length);
@@ -136,8 +138,11 @@ public class LaunchAppEngineStandardHandler extends AbstractHandler {
       }
       return modules.toArray(new IModule[modules.size()]);
     }
-    // Check the project of the active editor.
-    IEditorPart editor = HandlerUtil.getActiveEditor(event);
+    throw new CoreException(StatusUtil.error(this, "Cannot determine server execution context"));
+  }
+
+  /** Check the project of the active editor. */
+  public IModule[] asModules(IEditorPart editor) throws CoreException {
     if (editor != null && editor.getEditorInput() instanceof IFileEditorInput) {
       IFileEditorInput input = (IFileEditorInput) editor.getEditorInput();
       IProject project = input.getFile().getProject();
@@ -145,10 +150,10 @@ public class LaunchAppEngineStandardHandler extends AbstractHandler {
         return new IModule[] {asModule(project)};
       }
     }
-    throw new ExecutionException("Cannot determine server execution context");
+    throw new CoreException(StatusUtil.error(this, "Cannot determine server execution context"));
   }
 
-  private static IModule asModule(Object object) throws ExecutionException {
+  private IModule asModule(Object object) throws CoreException {
     IModule module = AdapterUtil.adapt(object, IModule.class);
     if (module != null) {
       return module;
@@ -160,7 +165,7 @@ public class LaunchAppEngineStandardHandler extends AbstractHandler {
         return module;
       }
     }
-    throw new ExecutionException("no module found for " + object);
+    throw new CoreException(StatusUtil.error(this, "no module found for " + object));
   }
 
 }

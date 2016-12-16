@@ -252,6 +252,34 @@
             </parameter>
          </command>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
+         <command
+               commandId="com.google.cloud.tools.eclipse.appengine.localserver.launch"
+               disabledIcon="platform:/plugin/org.eclipse.debug.ui/icons/full/dtool16/run_exc.png"
+               icon="platform:/plugin/org.eclipse.debug.ui/icons/full/etool16/run_exc.png"
+               label="Run in App Engine"
+               mnemonic="R"
+               style="push">
+            <parameter
+                  name="launchMode"
+                  value="run">
+            </parameter>
+         </command>
+         <command
+               commandId="com.google.cloud.tools.eclipse.appengine.localserver.launch"
+               disabledIcon="platform:/plugin/org.eclipse.debug.ui/icons/full/dtool16/debug_exc.png"
+               icon="platform:/plugin/org.eclipse.debug.ui/icons/full/etool16/debug_exc.png"
+               label="Debug in App Engine"
+               mnemonic="D"
+               style="push">
+            <parameter
+                  name="launchMode"
+                  value="debug">
+            </parameter>
+         </command>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -270,7 +298,7 @@
    <extension
          point="org.eclipse.ui.handlers">
       <handler
-            class="com.google.cloud.tools.eclipse.appengine.localserver.ui.LaunchAppEngineStandardHandler"
+            class="com.google.cloud.tools.eclipse.appengine.localserver.launching.LaunchAppEngineStandardHandler"
             commandId="com.google.cloud.tools.eclipse.appengine.localserver.launch">
          <enabledWhen>
            <or>
@@ -291,5 +319,48 @@
            </or>
          </enabledWhen>
       </handler>
+   </extension>
+   <extension
+         point="org.eclipse.debug.ui.launchShortcuts">
+        <shortcut
+            id="com.google.cloud.tools.eclipse.appengine.localserver.launch.appengine.standard"
+            label="App Engine"
+            description="Launch in the local App Engine development environment"
+            path="com.google.cloud.tools.eclipse/appEngineStandard"
+            class="com.google.cloud.tools.eclipse.appengine.localserver.launching.LocalAppEngineStandardLaunchShortcut"
+            icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gae-16x16.png"
+            modes="run,debug">
+         <contextualLaunch>
+            <enablement>
+	           <or>
+    	           <with variable="selection">
+        		   	  <iterate>
+        		   	    <adapt type="org.eclipse.core.resources.IProject">
+		        			<test
+        		    			property="org.eclipse.wst.common.project.facet.core.projectFacet"
+            					value="com.google.cloud.tools.eclipse.appengine.facets.standard" />
+    					</adapt>
+              		  </iterate>
+              		</with>
+              		<with variable="activeEditorInput">
+                  		<adapt type="org.eclipse.core.resources.IFile">
+			        		<test
+            					property="org.eclipse.wst.common.project.facet.core.projectFacet"
+            					value="com.google.cloud.tools.eclipse.appengine.facets.standard" />
+                  		</adapt>
+               		</with>
+           		</or>
+            </enablement>
+         </contextualLaunch>
+         <description
+               description="Run on the local App Engine development server"
+               mode="run" />
+         <description
+               description="Debug on the local App Engine development server"
+               mode="debug" />
+         <configurationType
+               id="com.google.cloud.tools.eclipse.appengine.AppToolsLaunchConfigurationType"/>
+      </shortcut>
+      
    </extension>
 </plugin>
