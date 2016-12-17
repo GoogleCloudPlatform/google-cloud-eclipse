@@ -203,7 +203,7 @@
             category="com.google.cloud.tools.eclipse.preferences.main"
             class="com.google.cloud.tools.eclipse.preferences.areas.AreaBasedPreferencePage"
             id="com.google.cloud.tools.eclipse.preferences.appengine.localserver"
-            name="Launching">
+            name="%launch.prefpage.name">
       </page>
    </extension>
    <extension
@@ -225,12 +225,12 @@
    <extension
          point="org.eclipse.ui.commands">
       <command
-            description="Launch on App Engine development server"
+            description="%launch.command.description"
             id="com.google.cloud.tools.eclipse.appengine.localserver.launch"
-            name="Launch on App Engine">
+            name="%launch.command.name">
          <commandParameter
                id="launchMode"
-               name="Launch mode"
+               name="%launch.command.mode.name"
                optional="true"
                values="com.google.cloud.tools.eclipse.appengine.localserver.ui.LaunchModes">
          </commandParameter>
@@ -265,8 +265,8 @@
          point="org.eclipse.debug.ui.launchShortcuts">
         <shortcut
             id="com.google.cloud.tools.eclipse.appengine.localserver.launch.appengine.standard"
-            label="App Engine"
-            description="Launch in the local App Engine development environment"
+            label="%launch.shortcut.label"
+            description="%launch.shortcut.description"
             path="com.google.cloud.tools.eclipse/appEngineStandard"
             class="com.google.cloud.tools.eclipse.appengine.localserver.launching.LocalAppEngineStandardLaunchShortcut"
             icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gae-16x16.png"
@@ -294,10 +294,10 @@
             </enablement>
          </contextualLaunch>
          <description
-               description="Run on the local App Engine development server"
+               description="%launch.shortcut.run.description"
                mode="run" />
          <description
-               description="Debug on the local App Engine development server"
+               description="%launch.shortcut.debug.description"
                mode="debug" />
          <configurationType
                id="com.google.cloud.tools.eclipse.appengine.AppToolsLaunchConfigurationType"/>

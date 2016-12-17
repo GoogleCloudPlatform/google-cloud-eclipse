@@ -1,3 +1,18 @@
+/*
+ * Copyright 2016 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.google.cloud.tools.eclipse.appengine.localserver.launching;
 
@@ -27,7 +42,7 @@ public class LocalAppEngineStandardLaunchShortcut implements ILaunchShortcut2 {
       IModule[] modules = launcher.asModules(selection);
       launcher.launch(modules, launchMode);
     } catch (CoreException ex) {
-      ErrorDialog.openError(null, "Unable to launch App Engine server", ex.getLocalizedMessage(),
+      ErrorDialog.openError(null, Messages.getString("UnableToLaunch"), ex.getLocalizedMessage(), //$NON-NLS-1$
           ex.getStatus());
     }
   }
@@ -38,33 +53,31 @@ public class LocalAppEngineStandardLaunchShortcut implements ILaunchShortcut2 {
       IModule[] modules = launcher.asModules(editor);
       launcher.launch(modules, launchMode);
     } catch (CoreException ex) {
-      ErrorDialog.openError(null, "Unable to launch App Engine server", ex.getLocalizedMessage(),
+      ErrorDialog.openError(null, Messages.getString("UnableToLaunch"), ex.getLocalizedMessage(), //$NON-NLS-1$
           ex.getStatus());
     }
   }
 
   @Override
   public ILaunchConfiguration[] getLaunchConfigurations(ISelection selection) {
-    IModule[] modules = null;
     try {
-      modules = launcher.asModules(selection);
+      IModule[] modules = launcher.asModules(selection);
+      return getLaunchConfigurations(modules);
     } catch (CoreException ex) {
       // return null as we do not support these types of objects
       return null;
     }
-    return getLaunchConfigurations(modules);
   }
 
   @Override
   public ILaunchConfiguration[] getLaunchConfigurations(IEditorPart editor) {
-    IModule[] modules = null;
     try {
-      modules = launcher.asModules(editor);
+      IModule[] modules = launcher.asModules(editor);
+      return getLaunchConfigurations(modules);
     } catch (CoreException ex) {
       // return null as we do not support this type of project container
       return null;
     }
-    return getLaunchConfigurations(modules);
   }
 
   /**
