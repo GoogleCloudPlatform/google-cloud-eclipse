@@ -31,6 +31,8 @@ location "http://download.eclipse.org/releases/neon" {
 	org.eclipse.jetty.servlet
 	org.eclipse.jetty.server
 	org.eclipse.jetty.util
+	
+	ch.qos.logback.slf4j
 }
 
 // /webtools/repository/neon currently has some issues

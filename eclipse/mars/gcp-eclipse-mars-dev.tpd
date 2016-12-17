@@ -1,0 +1,10 @@
+/**
+ * Additional developer dependencies required for development
+ * within Eclipse.  Required as we pull in some OSGi bundles
+ * from Maven Central that can't be pulled in directly via p2. 
+ */
+include "gcp-eclipse-mars.tpd"
+
+location "https://dl.google.com/eclipse/plugin/DEV" {
+	com.google.cloud.tools.eclipse.3rdparty.feature.feature.group
+}
