@@ -88,7 +88,6 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
 
     GridDataFactory.fillDefaults().grab(true, false).applyTo(javaPackageField);
     GridLayoutFactory.swtDefaults().numColumns(2).applyTo(composite);
-
   }
 
   @Override
