@@ -63,7 +63,7 @@ public class LocalAppEngineConsole extends MessageConsole {
       computedName =
           MessageFormat.format(Messages.getString("SERVER_STOPPED_TEMPLATE"), unprefixedName);
     } else {
-      return;
+      computedName = unprefixedName;
     }
     UIJob nameUpdateJob = new UIJob("Update server name") {
       @Override
