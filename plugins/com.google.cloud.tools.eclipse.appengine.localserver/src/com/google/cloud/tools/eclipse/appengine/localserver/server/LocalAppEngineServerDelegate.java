@@ -163,13 +163,14 @@ public class LocalAppEngineServerDelegate extends ServerDelegate {
       if (AppEngineStandardFacet.hasAppEngineFacet(ProjectFacetsManager.create(module.getProject()))) {
         return Status.OK_STATUS;
       } else {
-        String errorMessage = NLS.bind(Messages.GAE_STANDARD_FACET_MISSING, module.getName(),
+        String errorMessage =
+            NLS.bind(Messages.getString("GAE_STANDARD_FACET_MISSING"), module.getName(),
             module.getProject().getName());
         return StatusUtil.error(LocalAppEngineServerDelegate.class, errorMessage);
       }
     } catch (CoreException ex) {
       return StatusUtil.error(LocalAppEngineServerDelegate.class,
-                              NLS.bind(Messages.NOT_FACETED_PROJECT, module.getProject().getName()),
+          NLS.bind(Messages.getString("NOT_FACETED_PROJECT"), module.getProject().getName()),
                               ex);
     }
   }
