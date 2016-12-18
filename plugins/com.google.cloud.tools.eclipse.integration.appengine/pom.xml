@@ -35,6 +35,11 @@
                 <id>com.google.cloud.tools.eclipse.suite.e45.feature</id>
                 <versionRange>0.0.0</versionRange>
               </requirement>
+              <requirement>
+                <type>eclipse-plugin</type>
+                <id>ch.qos.logback.slf4j</id>
+                <versionRange>0.0.0</versionRange>
+              </requirement>
             </extraRequirements>
           </dependency-resolution>
         </configuration>
@@ -42,4 +47,3 @@
     </plugins>
   </build>
 </project>
-
