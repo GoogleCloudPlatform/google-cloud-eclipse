@@ -81,7 +81,7 @@ class AppEngineStandardProjectConfig {
 
   String getServiceName() {
     if (serviceName == null) {
-      return project.getName();
+      return "default"; // NON-NLS-1
     }
     return serviceName;
   }

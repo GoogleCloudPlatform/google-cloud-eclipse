@@ -64,17 +64,9 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
     PlatformUI.getWorkbench().getHelpSystem().setHelp(container,
         "com.google.cloud.tools.eclipse.appengine.newproject.NewProjectContext"); //$NON-NLS-1$
 
-    createPackageField(container);
-
-    // App Engine service; a.k.a. module
-    Label serviceNameLabel = new Label(container, SWT.NONE);
-    serviceNameLabel.setText("App Engine service:");
-    serviceNameField = new Text(container, SWT.BORDER);
-    serviceNameField.setMessage("default");
-    GridData serviceNamePosition = new GridData(GridData.FILL_HORIZONTAL);
-    serviceNamePosition.horizontalSpan = 2;
-    serviceNameField.setLayoutData(serviceNamePosition);
-    serviceNameField.addModifyListener(pageValidator);
+    ModifyListener pageValidator = new PageValidator();
+    createPackageField(container, pageValidator);
+    createServiceField(container, pageValidator);
     
     // Manage APIs
     appEngineLibrariesSelectorGroup = new AppEngineLibrariesSelectorGroup(container);
@@ -88,8 +80,8 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
   }
 
   // Java package name
-  private void createPackageField(Composite container) {
-    
+  // todo should we turn Label + TextField into a widget of its own? 
+  private void createPackageField(Composite container, ModifyListener pageValidator) {
     Composite composite = new Composite(container, SWT.NONE);
     // assumed that container has a single-column GridLayout
     GridDataFactory.fillDefaults().applyTo(composite);
@@ -98,13 +90,28 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
     packageNameLabel.setText(Messages.getString("java.package")); //$NON-NLS-1$
     javaPackageField = new Text(composite, SWT.BORDER);
     
-    ModifyListener pageValidator = new PageValidator();
     javaPackageField.addModifyListener(pageValidator);
 
     GridDataFactory.fillDefaults().grab(true, false).applyTo(javaPackageField);
     GridLayoutFactory.swtDefaults().numColumns(2).applyTo(composite);
   }
 
+  // App Engine service name
+  private void createServiceField(Composite container, ModifyListener pageValidator) {
+    Composite composite = new Composite(container, SWT.NONE);
+    // assumed that container has a single-column GridLayout
+    GridDataFactory.fillDefaults().applyTo(composite);
+
+    Label serviceNameLabel = new Label(composite, SWT.LEAD);
+    serviceNameLabel.setText("App Engine service:");
+    serviceNameField = new Text(composite, SWT.BORDER);
+    serviceNameField.setMessage("default");
+    serviceNameField.addModifyListener(pageValidator);
+
+    GridDataFactory.fillDefaults().grab(true, false).applyTo(serviceNameField);
+    GridLayoutFactory.swtDefaults().numColumns(2).applyTo(composite);
+  }  
+  
   @Override
   public boolean validatePage() {
     setErrorMessage(null);
