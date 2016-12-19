@@ -54,7 +54,7 @@ public class AppEngineStandardProjectConfigTest {
   
   @Test
   public void testServiceName() {
-    Assert.assertEquals("default", config.getServiceName());
+    Assert.assertNull(config.getServiceName());
     config.setServiceName("foobar");
     Assert.assertEquals("foobar", config.getServiceName());
   }

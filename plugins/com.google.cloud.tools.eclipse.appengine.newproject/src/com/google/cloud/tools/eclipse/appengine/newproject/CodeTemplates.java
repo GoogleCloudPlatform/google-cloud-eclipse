@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.SubMonitor;
 
 import com.google.cloud.tools.eclipse.util.templates.appengine.AppEngineTemplateUtility;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
 
 public class CodeTemplates {
 
@@ -85,7 +86,10 @@ public class CodeTemplates {
     IFolder webinf = createChildFolder("WEB-INF", webapp, subMonitor);
 
     Map<String, String> properties = new HashMap<>();
-    properties.put("service", config.getServiceName());
+    String service = config.getServiceName();
+    if (!Strings.isNullOrEmpty(service)) {
+      properties.put("service", service);  // $NON-NLS-1
+    }
 
     createChildFile("appengine-web.xml", AppEngineTemplateUtility.APPENGINE_WEB_XML_TEMPLATE,
         webinf, subMonitor, properties);

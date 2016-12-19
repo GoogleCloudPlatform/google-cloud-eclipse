@@ -36,53 +36,50 @@ class AppEngineStandardProjectConfig {
   private List<Library> appEngineLibraries = Collections.emptyList();
   private String serviceName;
 
-  public File getCloudSdkLocation() {
+  File getCloudSdkLocation() {
     return cloudSdkLocation;
   }
 
-  public void setCloudSdkLocation(File cloudSdkLocation) {
+  void setCloudSdkLocation(File cloudSdkLocation) {
     this.cloudSdkLocation = cloudSdkLocation;
   }
   
-  public void setPackageName(String name) {
+  void setPackageName(String name) {
     this.packageName = name;
   }
 
-  public String getPackageName() {
+  String getPackageName() {
     return this.packageName;
   }
 
   /**
    * Null project location URI means the default location.
    */
-  public void setProject(IProject project) {
+  void setProject(IProject project) {
     this.project = project;
   }
 
-  public IProject getProject() {
+  IProject getProject() {
     return this.project;
   }
 
-  public URI getEclipseProjectLocationUri() {
+  URI getEclipseProjectLocationUri() {
     return this.eclipseProjectLocationUri;
   }
 
-  public void setEclipseProjectLocationUri(URI uri) {
+  void setEclipseProjectLocationUri(URI uri) {
     this.eclipseProjectLocationUri = uri;
   }
 
-  public List<Library> getAppEngineLibraries() {
+  List<Library> getAppEngineLibraries() {
     return appEngineLibraries;
   }
 
-  public void setAppEngineLibraries(Collection<Library> libraries) {
+  void setAppEngineLibraries(Collection<Library> libraries) {
     this.appEngineLibraries = new ArrayList<>(libraries);
   }
 
   String getServiceName() {
-    if (serviceName == null) {
-      return "default"; // NON-NLS-1
-    }
     return serviceName;
   }
   
