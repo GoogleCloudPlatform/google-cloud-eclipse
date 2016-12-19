@@ -95,25 +95,29 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
       boolean fork = true;
       boolean cancelable = true;
       getContainer().run(fork, cancelable, runnable);
+      
+      // open most important file created by wizard in editor
+      IFile file = runnable.getMostImportant();
+      openInEditor(file);
     } catch (InterruptedException ex) {
       status = Status.CANCEL_STATUS;
     } catch (InvocationTargetException ex) {
       status = setErrorStatus(this, ex.getCause());
     }
-    
-    // open most important file created by wizard in editor
-    IFile file = runnable.getMostImportant();
+
+    return status.isOK();
+  }
+
+  private void openInEditor(IFile file) {
     IWorkbenchWindow window = workbench.getActiveWorkbenchWindow();
     if (window != null && file != null) {
       IWorkbenchPage page = window.getActivePage();
       try {
         IDE.openEditor(page, file, true);
       } catch (PartInitException ex) {
-        // ignore;
+        // ignore; we don't have to open the file
       }
     }
-
-    return status.isOK();
   }
 
   public static IStatus setErrorStatus(Object origin, Throwable ex) {

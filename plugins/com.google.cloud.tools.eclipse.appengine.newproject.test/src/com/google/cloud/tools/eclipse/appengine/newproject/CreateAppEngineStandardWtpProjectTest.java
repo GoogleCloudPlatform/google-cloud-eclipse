@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -139,6 +140,13 @@ public class CreateAppEngineStandardWtpProjectTest {
     IType hamcrest = javaProject.findType("org.hamcrest.CoreMatchers");
     assertNotNull("Did not find hamcrest", hamcrest);
     assertTrue(hamcrest.exists());
+  }
+  
+  @Test
+  public void testMostImportantFile() throws InvocationTargetException, CoreException {
+    CreateAppEngineStandardWtpProject creator = new CreateAppEngineStandardWtpProject(config, adaptable);
+    creator.execute(new NullProgressMonitor());
+    assertEquals("HelloAppEngine.java", creator.getMostImportant().getName());
   }
 
   @Test
