@@ -66,7 +66,7 @@ public class LocalAppEngineConsolePageParticipant implements IConsolePagePartici
 
   @Override
   public void dispose() {
-    LocalAppEngineServerBehaviour serverBehaviour = this.console.getServerBehaviourDelegate();
+    LocalAppEngineServerBehaviour serverBehaviour = console.getServerBehaviourDelegate();
     if (serverBehaviour != null) {
       serverBehaviour.getServer().removeServerListener(serverStateListener);
     }
@@ -109,6 +109,7 @@ public class LocalAppEngineConsolePageParticipant implements IConsolePagePartici
     if (terminateAction != null) {
       LocalAppEngineServerBehaviour serverBehaviour = console.getServerBehaviourDelegate();
       if (serverBehaviour != null) {
+        // it's ok for us to call #canStop() since it's our implementation
         IStatus status = serverBehaviour.canStop();
         terminateAction.setEnabled(status.isOK());
       }

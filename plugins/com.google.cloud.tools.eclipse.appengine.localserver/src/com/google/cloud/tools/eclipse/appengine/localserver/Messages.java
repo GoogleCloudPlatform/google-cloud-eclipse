@@ -16,11 +16,11 @@
 
 package com.google.cloud.tools.eclipse.appengine.localserver;
 
+import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
-import org.eclipse.osgi.util.NLS;
 
-public class Messages extends NLS {
+public class Messages {
   private static final String BUNDLE_NAME =
       "com.google.cloud.tools.eclipse.appengine.localserver.messages"; //$NON-NLS-1$
 
@@ -34,6 +34,13 @@ public class Messages extends NLS {
     }
   }
 
-  private Messages() {
+  public static String getString(String key, Object... params) {
+    try {
+      return MessageFormat.format(RESOURCE_BUNDLE.getString(key), params);
+    } catch (MissingResourceException ex) {
+      return '!' + key + '!';
+    }
   }
+
+  private Messages() {}
 }

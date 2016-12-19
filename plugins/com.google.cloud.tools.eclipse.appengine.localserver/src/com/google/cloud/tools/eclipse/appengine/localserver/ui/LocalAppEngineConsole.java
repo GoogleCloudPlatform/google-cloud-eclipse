@@ -19,7 +19,6 @@ package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerBehaviour;
 import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities.ConsoleFactory;
-import java.text.MessageFormat;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -55,13 +54,13 @@ public class LocalAppEngineConsole extends MessageConsole {
     final String computedName;
     if (state == IServer.STATE_STARTING) {
       computedName =
-          MessageFormat.format(Messages.getString("SERVER_STARTING_TEMPLATE"), unprefixedName);
+          Messages.getString("SERVER_STARTING_TEMPLATE", unprefixedName);
     } else if (state == IServer.STATE_STOPPING) {
       computedName =
-          MessageFormat.format(Messages.getString("SERVER_STOPPING_TEMPLATE"), unprefixedName);
+          Messages.getString("SERVER_STOPPING_TEMPLATE", unprefixedName);
     } else if (state == IServer.STATE_STOPPED) {
       computedName =
-          MessageFormat.format(Messages.getString("SERVER_STOPPED_TEMPLATE"), unprefixedName);
+          Messages.getString("SERVER_STOPPED_TEMPLATE", unprefixedName);
     } else {
       computedName = unprefixedName;
     }

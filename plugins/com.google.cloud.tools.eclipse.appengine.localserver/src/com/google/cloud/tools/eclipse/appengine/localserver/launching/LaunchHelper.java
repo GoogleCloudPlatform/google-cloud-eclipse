@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.localserver.launching;
 
+import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerDelegate;
 import com.google.cloud.tools.eclipse.util.AdapterUtil;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
@@ -58,9 +59,9 @@ public class LaunchHelper {
       for (IServer existing : servers) {
         if (isRunning(existing)) {
           ILaunch launch = existing.getLaunch();
-          Preconditions.checkNotNull(launch, "Running server should have a launch");
-          String detail = launchMode.equals(launch.getLaunchMode()) ? "Server is already running"
-              : MessageFormat.format("Server is already running in \"{0}\" mode",
+          Preconditions.checkNotNull(launch, Messages.getString("RUNNING_SERVER_SHOULD_HAVE_A_LAUNCH")); //$NON-NLS-1$
+          String detail = launchMode.equals(launch.getLaunchMode()) ? Messages.getString("SERVER_ALREADY_RUNNING") //$NON-NLS-1$
+              : MessageFormat.format(Messages.getString("SERVER_ALREADY_RUNNING_IN_MODE"), //$NON-NLS-1$
                   launch.getLaunchMode());
           throw new CoreException(StatusUtil.info(this, detail));
         }
@@ -138,7 +139,7 @@ public class LaunchHelper {
       }
       return modules.toArray(new IModule[modules.size()]);
     }
-    throw new CoreException(StatusUtil.error(this, "Cannot determine server execution context"));
+    throw new CoreException(StatusUtil.error(this, Messages.getString("CANNOT_DETERMINE_EXECUTION_CONTEXT"))); //$NON-NLS-1$
   }
 
   /** Check the project of the active editor. */
@@ -150,7 +151,7 @@ public class LaunchHelper {
         return new IModule[] {asModule(project)};
       }
     }
-    throw new CoreException(StatusUtil.error(this, "Cannot determine server execution context"));
+    throw new CoreException(StatusUtil.error(this, Messages.getString("CANNOT_DETERMINE_EXECUTION_CONTEXT"))); //$NON-NLS-1$
   }
 
   private IModule asModule(Object object) throws CoreException {
@@ -165,7 +166,8 @@ public class LaunchHelper {
         return module;
       }
     }
-    throw new CoreException(StatusUtil.error(this, "no module found for " + object));
+    throw new CoreException(
+        StatusUtil.error(this, Messages.getString("NO_MODULE_FOUND_FOR", object))); //$NON-NLS-1$
   }
 
 }
