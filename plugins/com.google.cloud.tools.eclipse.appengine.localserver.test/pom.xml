@@ -30,6 +30,11 @@
           <dependency-resolution>
             <extraRequirements>
               <requirement>
+                <type>eclipse-plugin</type>
+                <id>ch.qos.logback.slf4j</id>
+                <versionRange>0.0.0</versionRange>
+              </requirement>
+              <requirement>
                 <type>eclipse-feature</type>
                 <id>org.eclipse.m2e.feature</id>
                 <versionRange>0.0.0</versionRange>

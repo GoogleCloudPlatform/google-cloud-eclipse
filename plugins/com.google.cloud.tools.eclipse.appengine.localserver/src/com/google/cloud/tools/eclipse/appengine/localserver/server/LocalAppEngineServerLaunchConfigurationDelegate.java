@@ -106,6 +106,10 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       String message = "There is no App Engine development server available";
       Status status = new Status(IStatus.ERROR, Activator.PLUGIN_ID, message);
       throw new CoreException(status);
+    } else if (server.getServerState() != IServer.STATE_STOPPED) {
+      String message = "Server is already in operation";
+      Status status = new Status(IStatus.ERROR, Activator.PLUGIN_ID, message);
+      throw new CoreException(status);
     }
     IModule[] modules = server.getModules();
     if (modules == null || modules.length == 0) {

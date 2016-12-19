@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.localserver.ui;
+package com.google.cloud.tools.eclipse.appengine.localserver.launching;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.appengine.localserver.ui.ServerTracker;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
-import com.google.cloud.tools.eclipse.test.util.ui.ExecutionEventBuilder;
 import com.google.common.collect.Lists;
-import org.eclipse.core.commands.ExecutionEvent;
+import java.util.Collection;
+import java.util.Collections;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.SubMonitor;
@@ -46,14 +47,14 @@ import org.mockito.runners.MockitoJUnitRunner;
  * Tests for the {@link LaunchAppEngineStandardHandler}.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class LaunchAppEngineStandardHandlerTest {
+public class LaunchHelperTest {
   private static final IProjectFacetVersion APPENGINE_STANDARD_FACET_VERSION_1 =
       ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID).getVersion("1");
 
   @Rule
   public ServerTracker tracker = new ServerTracker();
 
-  private LaunchAppEngineStandardHandler handler;
+  private LaunchHelper handler;
   private IServer serverToReturn = null;
 
   @Rule
@@ -68,87 +69,79 @@ public class LaunchAppEngineStandardHandlerTest {
 
   @Before
   public void setUp() {
-    handler = new LaunchAppEngineStandardHandler() {
+    handler = new LaunchHelper() {
       @Override
       protected void launch(IServer server, String launchMode, SubMonitor progress)
           throws CoreException {
         // do nothing
       }
 
+
       @Override
-      protected IServer findExistingServer(IModule[] modules, SubMonitor progress) {
+      public Collection<IServer> findExistingServers(IModule[] modules, boolean exact,
+          SubMonitor progress) {
         if (serverToReturn != null) {
-          return serverToReturn;
+          return Collections.singleton(serverToReturn);
         }
-        return super.findExistingServer(modules, progress);
+        return super.findExistingServers(modules, exact, progress);
       }
     };
   }
 
 
   @Test
-  public void testWithDefaultModule() throws ExecutionException, CoreException {
+  public void testWithDefaultModule() throws CoreException {
     IModule module1 = appEngineStandardProject1.getModule();
 
-    ExecutionEvent event = new ExecutionEventBuilder().withCurrentSelection(module1).build();
-    handler.execute(event);
+    handler.launch(new IModule[] {module1}, ILaunchManager.DEBUG_MODE);
     assertEquals("new server should have been created", 1, tracker.getServers().size());
   }
 
   @Test
-  public void testWithTwoModules() throws ExecutionException, CoreException {
+  public void testWithTwoModules() throws CoreException {
     appEngineStandardProject1.setAppEngineServiceId("default");
     IModule module1 = appEngineStandardProject1.getModule();
     appEngineStandardProject2.setAppEngineServiceId("other");
     IModule module2 = appEngineStandardProject2.getModule();
 
-    ExecutionEvent event =
-        new ExecutionEventBuilder().withCurrentSelection(module1, module2).build();
-    handler.execute(event);
+    handler.launch(new IModule[] {module1, module2}, ILaunchManager.DEBUG_MODE);
     assertEquals("new server should have been created", 1, tracker.getServers().size());
   }
 
-  @Test(expected = ExecutionException.class)
-  public void failsIfAlreadyLaunched() throws ExecutionException, CoreException {
+  @Test(expected = CoreException.class)
+  public void failsIfAlreadyLaunched() throws CoreException {
     IModule module1 = appEngineStandardProject1.getModule();
 
-    ExecutionEvent event = new ExecutionEventBuilder().withCurrentSelection(module1).build();
     serverToReturn = mock(IServer.class);
     ILaunch launch = mock(ILaunch.class);
     when(serverToReturn.getServerState()).thenReturn(IServer.STATE_STARTED);
     when(serverToReturn.getLaunch()).thenReturn(launch);
     when(launch.getLaunchMode()).thenReturn(ILaunchManager.DEBUG_MODE);
-    handler.execute(event);
+    handler.launch(new IModule[] {module1}, ILaunchManager.DEBUG_MODE);
   }
 
-  public void testInvariantToModuleOrder() throws ExecutionException, CoreException {
+  public void testInvariantToModuleOrder() throws CoreException {
     appEngineStandardProject1.setAppEngineServiceId("default");
     IModule module1 = appEngineStandardProject1.getModule();
     appEngineStandardProject2.setAppEngineServiceId("other");
     IModule module2 = appEngineStandardProject2.getModule();
 
-    ExecutionEvent event =
-        new ExecutionEventBuilder().withCurrentSelection(module1, module2).build();
-    handler.execute(event);
+    handler.launch(new IModule[] {module1, module2}, ILaunchManager.DEBUG_MODE);
     assertEquals("new server should have been created", 1, tracker.getServers().size());
 
     // because we don't actually launch the servers, we won't get an ExecutionException
-    ExecutionEvent swappedEvent =
-        new ExecutionEventBuilder().withCurrentSelection(module2, module1).build();
-    handler.execute(swappedEvent);
+    handler.launch(new IModule[] {module2, module1}, ILaunchManager.DEBUG_MODE);
     assertEquals("no new servers should be created", 1, tracker.getServers().size());
   }
 
-  @Test(expected = ExecutionException.class)
+  @Test(expected = CoreException.class)
   public void failsWithClashingServiceIds() throws ExecutionException, CoreException {
     appEngineStandardProject1.setAppEngineServiceId("other");
     IModule module1 = appEngineStandardProject1.getModule();
     appEngineStandardProject2.setAppEngineServiceId("other");
     IModule module2 = appEngineStandardProject2.getModule();
 
-    ExecutionEvent event =
-        new ExecutionEventBuilder().withCurrentSelection(module1, module2).build();
-    handler.execute(event);
+    handler.launch(new IModule[] {module1, module2}, ILaunchManager.DEBUG_MODE);
   }
 
 }
