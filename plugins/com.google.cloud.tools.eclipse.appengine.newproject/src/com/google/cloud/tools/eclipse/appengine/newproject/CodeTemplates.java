@@ -51,22 +51,22 @@ public class CodeTemplates {
     subMonitor.setTaskName("Generating code");
     boolean force = true;
     boolean local = true;
-    IFolder src = project.getFolder("src");
+    IFolder src = project.getFolder("src");  // $NON-NLS-1$
     if (!src.exists()) {
       src.create(force, local, subMonitor);
     }
-    IFolder main = createChildFolder("main", src, subMonitor);
-    IFolder java = createChildFolder("java", main, subMonitor);
-    IFolder test = createChildFolder("test", src, subMonitor);
-    IFolder testJava = createChildFolder("java", test, subMonitor);
+    IFolder main = createChildFolder("main", src, subMonitor);  // $NON-NLS-1$
+    IFolder java = createChildFolder("java", main, subMonitor);  // $NON-NLS-1$
+    IFolder test = createChildFolder("test", src, subMonitor);  // $NON-NLS-1$
+    IFolder testJava = createChildFolder("java", test, subMonitor);  // $NON-NLS-1$
 
     String packageName = config.getPackageName();
 
     Map<String, String> templateValues = new HashMap<>();
     if (packageName != null && !packageName.isEmpty()) {
-      templateValues.put("package", packageName);
+      templateValues.put("package", packageName);  // $NON-NLS-1$
     } else {
-      templateValues.put("package", "");
+      templateValues.put("package", ""); 
     }
     
     IFolder packageFolder = createFoldersForPackage(java, packageName, subMonitor);
@@ -75,20 +75,20 @@ public class CodeTemplates {
 
     // now set up the test directory
     IFolder testPackageFolder = createFoldersForPackage(testJava, packageName, subMonitor);
-    createChildFile("HelloAppEngineTest.java",
+    createChildFile("HelloAppEngineTest.java",  // $NON-NLS-1$
         AppEngineTemplateUtility.HELLO_APPENGINE_TEST_TEMPLATE, testPackageFolder, subMonitor,
         templateValues);
-    createChildFile("MockHttpServletResponse.java",
+    createChildFile("MockHttpServletResponse.java",  // $NON-NLS-1$
         AppEngineTemplateUtility.MOCK_HTTPSERVLETRESPONSE_TEMPLATE, testPackageFolder, subMonitor,
         templateValues);
 
-    IFolder webapp = createChildFolder("webapp", main, subMonitor);
-    IFolder webinf = createChildFolder("WEB-INF", webapp, subMonitor);
+    IFolder webapp = createChildFolder("webapp", main, subMonitor);  // $NON-NLS-1$
+    IFolder webinf = createChildFolder("WEB-INF", webapp, subMonitor);  // $NON-NLS-1$
 
     Map<String, String> properties = new HashMap<>();
     String service = config.getServiceName();
     if (!Strings.isNullOrEmpty(service)) {
-      properties.put("service", service);  // $NON-NLS-1
+      properties.put("service", service);  // $NON-NLS-1$
     }
 
     createChildFile("appengine-web.xml", AppEngineTemplateUtility.APPENGINE_WEB_XML_TEMPLATE,
@@ -109,7 +109,7 @@ public class CodeTemplates {
                                                  SubMonitor subMonitor) throws CoreException {
     IFolder folder = parentFolder;
     if (packageName != null && !packageName.isEmpty()) {
-      String[] packages = packageName.split("\\.");
+      String[] packages = packageName.split("\\.");  // $NON-NLS-1$
       for (int i = 0; i < packages.length; i++) {
         folder = createChildFolder(packages[i], folder, subMonitor);
       }
