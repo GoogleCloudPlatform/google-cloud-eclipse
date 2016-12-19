@@ -16,16 +16,14 @@
 
 package com.google.cloud.tools.eclipse.ui.util.databinding;
 
+import com.google.cloud.tools.eclipse.ui.util.Messages;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
-
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-
-import com.google.cloud.tools.eclipse.ui.util.Messages;
 
 /**
  * Validate a project version.
@@ -36,7 +34,7 @@ public class ProjectVersionValidator implements IValidator {
 
   private static final String RESERVED_PREFIX = "ah-";
   private static final List<String> RESERVED_VALUES = Arrays.asList("default", "latest");
-  
+
   /**
    * @param value the prospective version string
    * @return OK status if valid, or an ERROR status with a description why invalid
@@ -48,18 +46,18 @@ public class ProjectVersionValidator implements IValidator {
     // It cannot begin with the prefix ah- and the names default and latest are
     // reserved and cannot be used."
     if (!(input instanceof String)) {
-      return ValidationStatus.error(Messages.getString("project.version.invalid")); //$NON-NLS-1$
+      return ValidationStatus.error(Messages.getString("version.invalid")); //$NON-NLS-1$
     }
     String value = (String) input;
     if (value.isEmpty()) {
-      return ValidationStatus.error(Messages.getString("project.version.invalid")); //$NON-NLS-1$
+      return ValidationStatus.error(Messages.getString("version.invalid")); //$NON-NLS-1$
     } else if (APPENGINE_PROJECT_VERSION_PATTERN.matcher(value).matches()) {
       if (value.startsWith(RESERVED_PREFIX) || RESERVED_VALUES.contains(value)) {
-        return ValidationStatus.error(Messages.getString("project.version.reserved")); //$NON-NLS-1$
+        return ValidationStatus.error(Messages.getString("version.reserved")); //$NON-NLS-1$
       }
       return Status.OK_STATUS;
     } else {
-      return ValidationStatus.error(Messages.getString("project.version.invalid")); //$NON-NLS-1$
+      return ValidationStatus.error(Messages.getString("version.invalid")); //$NON-NLS-1$
     }
   }
 }

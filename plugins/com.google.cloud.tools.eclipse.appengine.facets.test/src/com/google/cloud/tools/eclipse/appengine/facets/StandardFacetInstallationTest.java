@@ -26,26 +26,18 @@ import java.io.IOException;
 import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
+import org.eclipse.wst.common.project.facet.core.runtime.IRuntime;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 /**
  * Tests some cases of installing the App Engine Standard facet on existing projects.
  */
-public class StandardFacetsInstallationTests {
-  private IWorkspaceRoot root;
+public class StandardFacetInstallationTest {
   private List<IProject> projects;
-
-  @Before
-  public void setUp() {
-    root = ResourcesPlugin.getWorkspace().getRoot();
-  }
 
   @After
   public void tearDown() throws CoreException {
@@ -57,7 +49,7 @@ public class StandardFacetsInstallationTests {
   }
 
   @Test
-  public void testStandardFacetInstallationOnGwtWar() throws IOException, CoreException {
+  public void testStandardFacetInstallation() throws IOException, CoreException {
     projects =
         ProjectUtils.importProjects(getClass(), "projects/test-dynamic-web-project.zip", null);
     assertEquals(1, projects.size());
@@ -70,5 +62,9 @@ public class StandardFacetsInstallationTests {
         project.getFile(new Path("src/main/webapp/WEB-INF/appengine-web.xml"));
     assertTrue(correctAppEngineWebXml.exists());
     assertFalse(wrongAppEngineWebXml.exists());
+
+    ProjectUtils.waitUntilIdle();  // App Engine runtime is added via a Job, so wait.
+    IRuntime primaryRuntime = facetedProject.getPrimaryRuntime();
+    assertTrue(AppEngineStandardFacet.isAppEngineStandardRuntime(primaryRuntime));
   }
 }

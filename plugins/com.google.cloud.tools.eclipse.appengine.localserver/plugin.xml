@@ -203,7 +203,7 @@
             category="com.google.cloud.tools.eclipse.preferences.main"
             class="com.google.cloud.tools.eclipse.preferences.areas.AreaBasedPreferencePage"
             id="com.google.cloud.tools.eclipse.preferences.appengine.localserver"
-            name="Launching">
+            name="%launch.prefpage.name">
       </page>
    </extension>
    <extension
@@ -225,12 +225,12 @@
    <extension
          point="org.eclipse.ui.commands">
       <command
-            description="Launch on App Engine development server"
+            description="%launch.command.description"
             id="com.google.cloud.tools.eclipse.appengine.localserver.launch"
-            name="Launch on App Engine">
+            name="%launch.command.name">
          <commandParameter
                id="launchMode"
-               name="Launch mode"
+               name="%launch.command.mode.name"
                optional="true"
                values="com.google.cloud.tools.eclipse.appengine.localserver.ui.LaunchModes">
          </commandParameter>
@@ -239,29 +239,69 @@
    <extension
          point="org.eclipse.ui.handlers">
       <handler
-            class="com.google.cloud.tools.eclipse.appengine.localserver.ui.LaunchAppEngineStandardHandler"
+            class="com.google.cloud.tools.eclipse.appengine.localserver.launching.LaunchAppEngineStandardHandler"
             commandId="com.google.cloud.tools.eclipse.appengine.localserver.launch">
          <enabledWhen>
-            <or>
-               <iterate
-                     ifEmpty="false">
-                  <or>
-                     <adapt
-                           type="org.eclipse.wst.server.core.IModule">
-                     </adapt>
-                     <test
-                           property="org.eclipse.wst.server.ui.isRunnable">
-                     </test>
-                  </or>
-               </iterate>
-               <with
-                     variable="activeEditor">
+           <or>
+           	  <iterate>
+		        <test
+        		    property="org.eclipse.wst.common.project.facet.core.projectFacet"
+            		value="com.google.cloud.tools.eclipse.appengine.facets.standard" />
+              </iterate>
+              <with
+                     variable="activeEditorInput">
                   <adapt
-                        type="org.eclipse.ui.IEditorPart">
+                        type="org.eclipse.core.resources.IFile">
+			        <test
+            			property="org.eclipse.wst.common.project.facet.core.projectFacet"
+            			value="com.google.cloud.tools.eclipse.appengine.facets.standard" />
                   </adapt>
                </with>
-            </or>
+           </or>
          </enabledWhen>
       </handler>
+   </extension>
+   <extension
+         point="org.eclipse.debug.ui.launchShortcuts">
+        <shortcut
+            id="com.google.cloud.tools.eclipse.appengine.localserver.launch.appengine.standard"
+            label="%launch.shortcut.label"
+            description="%launch.shortcut.description"
+            path="com.google.cloud.tools.eclipse/appEngineStandard"
+            class="com.google.cloud.tools.eclipse.appengine.localserver.launching.LocalAppEngineStandardLaunchShortcut"
+            icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gae-16x16.png"
+            modes="run,debug">
+         <contextualLaunch>
+            <enablement>
+	           <or>
+    	           <with variable="selection">
+        		   	  <iterate>
+        		   	    <adapt type="org.eclipse.core.resources.IProject">
+		        			<test
+        		    			property="org.eclipse.wst.common.project.facet.core.projectFacet"
+            					value="com.google.cloud.tools.eclipse.appengine.facets.standard" />
+    					</adapt>
+              		  </iterate>
+              		</with>
+              		<with variable="activeEditorInput">
+                  		<adapt type="org.eclipse.core.resources.IFile">
+			        		<test
+            					property="org.eclipse.wst.common.project.facet.core.projectFacet"
+            					value="com.google.cloud.tools.eclipse.appengine.facets.standard" />
+                  		</adapt>
+               		</with>
+           		</or>
+            </enablement>
+         </contextualLaunch>
+         <description
+               description="%launch.shortcut.run.description"
+               mode="run" />
+         <description
+               description="%launch.shortcut.debug.description"
+               mode="debug" />
+         <configurationType
+               id="com.google.cloud.tools.eclipse.appengine.AppToolsLaunchConfigurationType"/>
+      </shortcut>
+      
    </extension>
 </plugin>

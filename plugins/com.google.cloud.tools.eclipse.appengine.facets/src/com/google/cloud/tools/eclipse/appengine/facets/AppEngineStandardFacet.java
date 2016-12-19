@@ -21,7 +21,6 @@ import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -134,30 +133,25 @@ public class AppEngineStandardFacet {
    * of targeted runtimes.
    *
    * @param project the faceted project receiving the App Engine runtime(s)
-   * @param force true if all runtime instances should be added to the <code>project</code> even if targeted list of
-   *  <code>project</code> already includes App Engine runtime instances and false otherwise
    * @param monitor the progress monitor
-   * @throws CoreException if the project contains one or more facets that are not supported by this runtime; if
-   *   failed for any other reason
+   * @throws CoreException if the project contains one or more facets that are not supported by
+   *     this runtime; if failed for any other reason
    */
-  public static void installAllAppEngineRuntimes(IFacetedProject project, boolean force, IProgressMonitor monitor)
+  public static void installAllAppEngineRuntimes(IFacetedProject project, IProgressMonitor monitor)
       throws CoreException {
-    // If the project already has an App Engine runtime instance and force is false
+    // If the project already has an App Engine runtime instance
     // do not add any other App Engine runtime instances to the list of targeted runtimes
-    Set<IRuntime> existingTargetedRuntimes = project.getTargetedRuntimes();
-    if (!existingTargetedRuntimes.isEmpty()) {
-      for (IRuntime existingTargetedRuntime : existingTargetedRuntimes) {
-        if (AppEngineStandardFacet.isAppEngineStandardRuntime(existingTargetedRuntime) && !force) {
-          return;
-        }
+    for (IRuntime existingTargetedRuntime : project.getTargetedRuntimes()) {
+      if (AppEngineStandardFacet.isAppEngineStandardRuntime(existingTargetedRuntime)) {
+        return;
       }
     }
 
     org.eclipse.wst.server.core.IRuntime[] appEngineRuntimes = getAppEngineRuntimes();
     if (appEngineRuntimes.length > 0) {
       IRuntime appEngineFacetRuntime = null;
-      for(int index = 0; index < appEngineRuntimes.length; index++) {
-        appEngineFacetRuntime = FacetUtil.getRuntime(appEngineRuntimes[index]);
+      for (org.eclipse.wst.server.core.IRuntime appEngineRuntime : appEngineRuntimes) {
+        appEngineFacetRuntime = FacetUtil.getRuntime(appEngineRuntime);
         project.addTargetedRuntime(appEngineFacetRuntime, monitor);
       }
       project.setPrimaryRuntime(appEngineFacetRuntime, monitor);

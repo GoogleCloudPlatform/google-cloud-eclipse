@@ -56,7 +56,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
   public static final String PAGE_ID = "com.google.cloud.tools.eclipse.preferences.main";
   private static final Logger logger = Logger.getLogger(CloudSdkPreferenceArea.class.getName());
 
-  private DirectoryFieldEditor sdkLocation;
+  private CloudSdkDirectoryFieldEditor sdkLocation;
   private IStatus status = Status.OK_STATUS;
   private IPropertyChangeListener wrappedPropertyChangeListener = new IPropertyChangeListener() {
 
@@ -74,7 +74,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
   public Control createContents(Composite parent) {
     Composite contents = new Composite(parent, SWT.NONE);
     Link instructions = new Link(contents, SWT.WRAP);
-    instructions.setText(SdkUiMessages.CloudSdkPreferencePage_2);
+    instructions.setText(SdkUiMessages.CloudSdkRequired);
     instructions.setFont(contents.getFont());
     instructions.addSelectionListener(new SelectionAdapter() {
       @Override
@@ -85,7 +85,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
 
     Composite fieldContents = new Composite(parent, SWT.NONE);
     sdkLocation = new CloudSdkDirectoryFieldEditor(PreferenceConstants.CLOUDSDK_PATH,
-        SdkUiMessages.CloudSdkPreferencePage_5, fieldContents);
+        SdkUiMessages.SdkLocation, fieldContents);
     Path defaultLocation = getDefaultSdkLocation();
     if (defaultLocation != null) {
       sdkLocation.setFilterPath(defaultLocation.toFile());
@@ -96,6 +96,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
         .generateLayout(fieldContents);
 
     GridLayoutFactory.fillDefaults().generateLayout(contents);
+    
     Dialog.applyDialogFont(contents);
     return contents;
   }
@@ -103,6 +104,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
   @Override
   public void load() {
     sdkLocation.load();
+    fireValueChanged(VALUE, "", "");
   }
 
   @Override
@@ -155,20 +157,24 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     CloudSdk sdk = new CloudSdk.Builder().sdkPath(location).build();
     try {
       sdk.validateCloudSdk();
-      sdk.validateAppEngineJavaComponents(); 
+      sdk.validateAppEngineJavaComponents();
+      status = Status.OK_STATUS;
+      return true;
     } catch (AppEngineJavaComponentsNotInstalledException ex) {
       status = new Status(IStatus.WARNING, getClass().getName(),
           MessageFormat.format(SdkUiMessages.AppEngineJavaComponentsNotInstalled, ex.getMessage()));
+      return false;
     } catch (CloudSdkOutOfDateException ex) {
         status = new Status(IStatus.ERROR,
             "com.google.cloud.tools.eclipse.appengine.deploy.ui", SdkUiMessages.CloudSdkOutOfDate);
+        return false;
     } catch (AppEngineException ex) {
       // accept a seemingly invalid location in case the SDK organization
       // has changed and the CloudSdk#validate() code is out of date
       status = new Status(IStatus.WARNING, getClass().getName(),
           MessageFormat.format(SdkUiMessages.CloudSdkNotFound, sdk.getSdkPath()));
+      return false;
     }
-    return true;
   }
 
   /**
@@ -213,7 +219,6 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
         status = new Status(IStatus.ERROR, getClass().getName(), message);
         return false;
       }
-      status = Status.OK_STATUS;
       return validateSdk(location);
     }
   }

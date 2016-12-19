@@ -21,17 +21,13 @@ import static org.junit.Assert.assertNotNull;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Properties;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import org.junit.rules.ExternalResource;
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
 
 /**
- * Test utility class to obtain a {@link Document} representing the host bundle's plugin.xml.
+ * Test utility class to obtain a Properties representing the host bundle's plugin.properties.
  * <p>
  * Assumptions:
  * <ul>
@@ -40,44 +36,37 @@ import org.xml.sax.SAXException;
  * <li>the tests execute with the working directory in a bundle or fragment directory</li>
  * </ul>
  */
-public class PluginXmlDocument extends ExternalResource {
+public class PluginProperties extends ExternalResource {
 
-  private Document doc;
+  private final Properties pluginProperties = new Properties();
 
   @Override
-  protected void before() throws ParserConfigurationException, SAXException, IOException {
-    DocumentBuilder builder = createDocumentBuilder();
-    try (InputStream pluginXml = getPluginXml()) {
-      assertNotNull(pluginXml);
-      // test fails if malformed
-      doc = builder.parse(pluginXml);
+  protected void before()  {
+    try (InputStream in = readPluginProperties()) {
+        // test fails if malformed
+        pluginProperties.load(in);
+    } catch (IOException ex) {
+      // no plugin properties file. This is OK if no properties are referenced.
     }
   }
 
   /**
-   * Subclasses should override this method if the plugin.xml is not at the location of
-   * <code>&lt;work_dir&gt;/../&lt;host_bundle_name&gt;/plugin.xml</code>
+   * Subclasses should override this method if plugin.properties is not at the location of
+   * <code>&lt;work_dir&gt;/../&lt;host_bundle_name&gt;/plugin.properties</code>
    */
-  protected InputStream getPluginXml() throws IOException {
+  protected InputStream readPluginProperties() throws IOException {
     String hostBundleName = getHostBundleName();
     assertNotNull(hostBundleName);
-    String pluginXmlLocation = "../" + hostBundleName + "/plugin.xml";
-    return new FileInputStream(pluginXmlLocation);
+    String pluginPropertiesLocation = "../" + hostBundleName + "/plugin.properties";
+    return new FileInputStream(pluginPropertiesLocation);
   }
 
   /**
-   * Returns the Document representing the plugin.xml. The file is parsed only once when
+   * Returns properties read from plugin.properties. The file is parsed only once when
    * {@link #before()} is executed by JUnit.
    */
-  public Document get() {
-    return doc;
-  }
-
-  private static DocumentBuilder createDocumentBuilder() throws ParserConfigurationException {
-    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-    factory.setNamespaceAware(true);
-    DocumentBuilder builder = factory.newDocumentBuilder();
-    return builder;
+  public Properties get() {
+    return pluginProperties;
   }
 
   /**
@@ -90,7 +79,7 @@ public class PluginXmlDocument extends ExternalResource {
    *         is not present
    * @throws IOException if the manifest file is not found or an error occurs while reading it
    */
-  private String getHostBundleName() throws IOException {
+  private static String getHostBundleName() throws IOException {
     String manifestPath = "META-INF/MANIFEST.MF";
     Manifest manifest = new Manifest(new FileInputStream(manifestPath));
     Attributes attributes = manifest.getMainAttributes();

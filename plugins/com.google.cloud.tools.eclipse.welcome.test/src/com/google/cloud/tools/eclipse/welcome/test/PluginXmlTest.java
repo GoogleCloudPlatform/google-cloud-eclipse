@@ -27,7 +27,7 @@ public class PluginXmlTest extends BasePluginXmlTest {
 
   @Test
   public void testExtensionPoint() {
-    NodeList extensions = getDoc().getElementsByTagName("extension");
+    NodeList extensions = getDocument().getElementsByTagName("extension");
     assertEquals(1, extensions.getLength());
     Element extension = (Element) extensions.item(0);
     assertEquals("org.eclipse.ui.intro.configExtension", extension.getAttribute("point"));

@@ -57,32 +57,32 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
     SubMonitor progress = SubMonitor.convert(monitor, "Creating Maven AppEngine archetype", 110);
 
     String appengineArtifactVersion = MavenUtils.resolveLatestReleasedArtifactVersion(
-        progress.newChild(20), 
-        "com.google.appengine", //$NON-NLS-1$ 
-        "appengine-api-1.0-sdk", //$NON-NLS-1$ 
-        "jar", //$NON-NLS-1$ 
+        progress.newChild(20),
+        "com.google.appengine", //$NON-NLS-1$
+        "appengine-api-1.0-sdk", //$NON-NLS-1$
+        "jar", //$NON-NLS-1$
         AppEngineStandardFacet.DEFAULT_APPENGINE_SDK_VERSION);
     String gcloudArtifactVersion = MavenUtils.resolveLatestReleasedArtifactVersion(
-        progress.newChild(20), 
-        "com.google.appengine", //$NON-NLS-1$ 
-        "gcloud-maven-plugin", //$NON-NLS-1$ 
-        "maven-plugin", //$NON-NLS-1$ 
+        progress.newChild(20),
+        "com.google.appengine", //$NON-NLS-1$
+        "gcloud-maven-plugin", //$NON-NLS-1$
+        "maven-plugin", //$NON-NLS-1$
         AppEngineStandardFacet.DEFAULT_GCLOUD_PLUGIN_VERSION);
 
     Properties properties = new Properties();
-    properties.put("appengine-version", appengineArtifactVersion); //$NON-NLS-1$ 
-    properties.put("gcloud-version", gcloudArtifactVersion); //$NON-NLS-1$ 
-    properties.put("useJstl", "true"); //$NON-NLS-1$ //$NON-NLS-2$ 
+    properties.put("appengine-version", appengineArtifactVersion); //$NON-NLS-1$
+    properties.put("gcloud-version", gcloudArtifactVersion); //$NON-NLS-1$
+    properties.put("useJstl", "true"); //$NON-NLS-1$ //$NON-NLS-2$
     // The project ID is currently necessary due to tool bugs.
-    properties.put("application-id", artifactId); //$NON-NLS-1$ 
-    properties.put("useObjectify", //$NON-NLS-1$ 
-        Boolean.toString(appEngineLibraryIds.contains("objectify"))); //$NON-NLS-1$ 
-    properties.put("useEndpoints1", //$NON-NLS-1$ 
-        Boolean.toString(appEngineLibraryIds.contains("appengine-endpoints"))); //$NON-NLS-1$ 
-    properties.put("useEndpoints2", //$NON-NLS-1$ 
-        "false"); //$NON-NLS-1$ 
-    properties.put("useAppEngineApi", //$NON-NLS-1$ 
-        Boolean.toString(appEngineLibraryIds.contains("appengine-api"))); //$NON-NLS-1$ 
+    properties.put("application-id", artifactId); //$NON-NLS-1$
+    properties.put("useObjectify", //$NON-NLS-1$
+        Boolean.toString(appEngineLibraryIds.contains("objectify"))); //$NON-NLS-1$
+    properties.put("useEndpoints1", //$NON-NLS-1$
+        Boolean.toString(appEngineLibraryIds.contains("appengine-endpoints"))); //$NON-NLS-1$
+    properties.put("useEndpoints2", //$NON-NLS-1$
+        "false"); //$NON-NLS-1$
+    properties.put("useAppEngineApi", //$NON-NLS-1$
+        Boolean.toString(appEngineLibraryIds.contains("appengine-api"))); //$NON-NLS-1$
 
     ProjectImportConfiguration importConfiguration = new ProjectImportConfiguration();
     String packageName = this.packageName == null || this.packageName.isEmpty()
@@ -97,8 +97,6 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
           project, true, loopMonitor.newChild(1));
       AppEngineStandardFacet.installAppEngineFacet(facetedProject,
           true /* installDependentFacets */, loopMonitor.newChild(1));
-      AppEngineStandardFacet.installAllAppEngineRuntimes(facetedProject, true /* force */,
-          loopMonitor.newChild(1));
     }
 
     /*

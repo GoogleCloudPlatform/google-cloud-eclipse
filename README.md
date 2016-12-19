@@ -203,6 +203,13 @@ described below.
   1. There should be no errors in the `Markers` or `Problems` views in Eclipse.
     However you may see several low-priority warnings.
 
+      1. You may see Maven-related errors like _"plugin execution not
+         covered by lifecycle configuration"_. 
+         If so, right-click on the problem and select
+         _Quick Fix_ > _Discover new m2e connectors_
+	 and follow the process to install the recommended plugin
+	 connectors.
+
   1. Right-click the `gcloud-eclipse-tools.launch` file under the `trunk` module in the
   `Package Explorer`.
 

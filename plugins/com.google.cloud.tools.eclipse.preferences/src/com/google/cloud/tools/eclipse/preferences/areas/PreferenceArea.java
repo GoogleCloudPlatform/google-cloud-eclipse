@@ -167,5 +167,4 @@ public abstract class PreferenceArea {
     this.rank = rank;
   }
 
-
 }

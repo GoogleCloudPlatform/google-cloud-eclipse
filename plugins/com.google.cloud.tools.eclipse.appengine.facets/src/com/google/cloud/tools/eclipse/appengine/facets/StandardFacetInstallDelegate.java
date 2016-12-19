@@ -25,8 +25,13 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
+import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
 public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate {
   private final static String APPENGINE_WEB_XML = "appengine-web.xml";
@@ -38,6 +43,25 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
                       IProgressMonitor monitor) throws CoreException {
     super.execute(project, version, config, monitor);
     createConfigFiles(project, monitor);
+    installAppEngineRuntimes(project);
+  }
+
+  private void installAppEngineRuntimes(final IProject project) {
+    // Modifying targeted runtimes while installing/uninstalling facets is not allowed,
+    // so schedule a job as a workaround.
+    Job installJob = new Job("Install App Engine runtimes in " + project.getName()) {
+      @Override
+      protected IStatus run(IProgressMonitor monitor) {
+        try {
+          IFacetedProject facetedProject = ProjectFacetsManager.create(project);
+          AppEngineStandardFacet.installAllAppEngineRuntimes(facetedProject, monitor);
+          return Status.OK_STATUS;
+        } catch (CoreException ex) {
+          return ex.getStatus();
+        }
+      }
+    };
+    installJob.schedule();
   }
 
   /**

@@ -56,7 +56,7 @@ public class AreaBasedPreferencePage extends PreferencePage
   /**
    * Responsible for ordering preference areas by their rank.
    */
-  public static class AreaOrdering implements Comparator<PreferenceArea> {
+  private static class AreaOrdering implements Comparator<PreferenceArea> {
     @Override
     public int compare(PreferenceArea o1, PreferenceArea o2) {
       return o1.getRank() - o2.getRank();
@@ -208,6 +208,7 @@ public class AreaBasedPreferencePage extends PreferencePage
     // apply extra space around areas
     GridLayoutFactory.swtDefaults().spacing(5, 10).generateLayout(container);
     parent.layout(true, true);
+    
     return container;
   }
 
@@ -289,7 +290,7 @@ public class AreaBasedPreferencePage extends PreferencePage
     return RegistryFactory.getRegistry();
   }
 
-  protected void update() {
+  private void update() {
     IStatus severest = Status.OK_STATUS;
     for (PreferenceArea area : areas) {
       IStatus status = area.getStatus();
