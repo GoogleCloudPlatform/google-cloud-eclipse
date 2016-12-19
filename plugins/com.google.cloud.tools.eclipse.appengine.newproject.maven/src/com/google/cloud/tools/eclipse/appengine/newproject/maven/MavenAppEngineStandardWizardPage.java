@@ -217,6 +217,8 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
   private void createAppEngineProjectDetailsArea(Composite container,
       ModifyListener pageValidator) {
     Composite composite = new Composite(container, SWT.NONE);
+    // assumed that container has a two-column GridLayout
+    GridDataFactory.fillDefaults().span(2, 1).grab(true,  false).applyTo(composite);
 
     // Java package name
     Label packageNameLabel = new Label(composite, SWT.LEAD);
