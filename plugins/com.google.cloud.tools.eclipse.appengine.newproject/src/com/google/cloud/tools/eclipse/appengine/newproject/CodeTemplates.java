@@ -43,8 +43,9 @@ public class CodeTemplates {
    * @param config replacement values
    * @param monitor progress monitor
    * @param name directory from which to load template
+   * @return the most important file created that should be opened in an editor
    */
-  public static void materialize(IProject project, AppEngineStandardProjectConfig config,
+  public static IFile materialize(IProject project, AppEngineStandardProjectConfig config,
       IProgressMonitor monitor) throws CoreException {
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
     subMonitor.setTaskName("Generating code");
@@ -69,7 +70,8 @@ public class CodeTemplates {
     }
     
     IFolder packageFolder = createFoldersForPackage(java, packageName, subMonitor);
-    createChildFile("HelloAppEngine.java", AppEngineTemplateUtility.HELLO_APPENGINE_TEMPLATE,
+    IFile hello = createChildFile("HelloAppEngine.java", 
+        AppEngineTemplateUtility.HELLO_APPENGINE_TEMPLATE,
         packageFolder, subMonitor, templateValues);
 
     // now set up the test directory
@@ -96,6 +98,8 @@ public class CodeTemplates {
 
     createChildFile("index.html", AppEngineTemplateUtility.INDEX_HTML_TEMPLATE, webapp, subMonitor,
         Collections.<String, String>emptyMap());
+    
+    return hello;
   }
 
   private static IFolder createFoldersForPackage(IFolder parentFolder,
