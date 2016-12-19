@@ -37,5 +37,6 @@ Export-Package: com.google.cloud.tools.eclipse.test.util,
  com.google.cloud.tools.eclipse.test.util.http,
  com.google.cloud.tools.eclipse.test.util.project,
  com.google.cloud.tools.eclipse.test.util.reflection,
+ com.google.cloud.tools.eclipse.test.util.service,
  com.google.cloud.tools.eclipse.test.util.ui
 
