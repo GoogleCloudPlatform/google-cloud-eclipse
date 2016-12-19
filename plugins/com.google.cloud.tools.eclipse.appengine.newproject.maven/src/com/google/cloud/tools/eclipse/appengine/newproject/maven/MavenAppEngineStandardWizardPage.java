@@ -221,7 +221,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     // Java package name
     Label packageNameLabel = new Label(composite, SWT.LEAD);
     packageNameLabel.setText(Messages.getString("JAVA_PACKAGE_LABEL")); //$NON-NLS-1$
-    javaPackageField = new Text(container, SWT.BORDER);
+    javaPackageField = new Text(composite, SWT.BORDER);
     javaPackageField.addModifyListener(pageValidator);
     javaPackageField.addVerifyListener(new VerifyListener() {
 
