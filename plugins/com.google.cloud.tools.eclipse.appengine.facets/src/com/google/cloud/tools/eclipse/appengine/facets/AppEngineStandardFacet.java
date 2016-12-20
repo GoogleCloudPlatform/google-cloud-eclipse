@@ -126,11 +126,12 @@ public class AppEngineStandardFacet {
     }
 
     IProjectFacet appEngineFacet = ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID);
-    IProjectFacetVersion appEngineFacetVersion = appEngineFacet.getVersion(AppEngineStandardFacet.VERSION);
+    IProjectFacetVersion appEngineFacetVersion =
+        appEngineFacet.getVersion(AppEngineStandardFacet.VERSION);
 
     if (!facetedProject.hasProjectFacet(appEngineFacet)) {
       Object config = null;
-      facetedProject.installProjectFacet(appEngineFacetVersion, config , subMonitor.newChild(50));
+      facetedProject.installProjectFacet(appEngineFacetVersion, config, subMonitor.newChild(50));
     }
   }
 
