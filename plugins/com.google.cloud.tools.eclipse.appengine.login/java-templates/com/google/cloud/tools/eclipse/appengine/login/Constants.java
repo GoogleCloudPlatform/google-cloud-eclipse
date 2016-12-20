@@ -28,7 +28,7 @@ public class Constants {
 
   public static String getOAuthClientId() {
     if (Platform.inDevelopmentMode()) {
-      return System.getProperty("oauth.client.id", "(unset:oauth.client.id)");
+      return System.getProperty("oauth.client.id", OAUTH_CLIENT_ID);
     } else {
       return OAUTH_CLIENT_ID;
     }
@@ -36,7 +36,7 @@ public class Constants {
 
   public static String getOAuthClientSecret() {
     if (Platform.inDevelopmentMode()) {
-      return System.getProperty("oauth.client.secret", "(unset:oauth.client.secret)");
+      return System.getProperty("oauth.client.secret", OAUTH_CLIENT_SECRET);
     } else {
       return OAUTH_CLIENT_SECRET;
     }
