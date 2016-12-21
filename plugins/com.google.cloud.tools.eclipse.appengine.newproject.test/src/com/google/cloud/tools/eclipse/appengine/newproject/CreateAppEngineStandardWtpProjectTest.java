@@ -24,15 +24,9 @@ import static org.junit.Assert.fail;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
-import com.google.common.io.ByteStreams;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
-import java.util.Set;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -76,38 +70,6 @@ public class CreateAppEngineStandardWtpProjectTest {
     project.delete(true, monitor);
   }
 
-  // TODO(chanseok): Debugging code. Remove after the issue is resolved:
-  // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1086
-  // (Don't forget to remove Guava from MANIFEST.MF.)
-  private void logForSetPrimaryRuntimeError() {
-    System.out.println("project: " + project.getName());
-    System.out.println("config.getProject(): " + config.getProject());
-
-    // Log targeted runtimes that have been added to the project.
-    try {
-      IFacetedProject facetedProject = ProjectFacetsManager.create(project);
-      Set<IRuntime> targetedRuntimes = facetedProject.getTargetedRuntimes();
-      System.out.println("No. targeted runtimes: " + targetedRuntimes.size());
-      for (IRuntime targetedRuntime : targetedRuntimes) {
-        System.out.println("  Runtime: " + targetedRuntime.toString());
-      }
-      System.out.println("Primary runtime: " + facetedProject.getPrimaryRuntime().toString());
-    } catch (CoreException ex) {
-      ex.printStackTrace(System.out);
-    }
-
-    // Log contents of the facet settings file.
-    IFile settingsFile = project.getFile(".settings/org.eclipse.wst.common.project.facet.core.xml");
-    System.out.println("File in sync? " + settingsFile.isSynchronized(IResource.DEPTH_INFINITE));
-    try {
-      ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-      ByteStreams.copy(settingsFile.getContents(), outputStream);
-      System.out.println(outputStream.toString());
-    } catch (CoreException | IOException ex) {
-      ex.printStackTrace(System.out);
-    }
-  }
-
   @Test
   public void testConstructor() {
     new CreateAppEngineStandardWtpProject(config, adaptable);
@@ -115,15 +77,10 @@ public class CreateAppEngineStandardWtpProjectTest {
 
   @Test
   public void testUnitTestCreated() throws InvocationTargetException, CoreException {
-    try {
-      CreateAppEngineStandardWtpProject creator = new CreateAppEngineStandardWtpProject(config, adaptable);
-      creator.execute(new NullProgressMonitor());
+    CreateAppEngineStandardWtpProject creator = new CreateAppEngineStandardWtpProject(config, adaptable);
+    creator.execute(new NullProgressMonitor());
 
-      assertJunitAndHamcrestAreOnClasspath();
-    } catch (CoreException ex) {
-      logForSetPrimaryRuntimeError();
-      throw ex;
-    }
+    assertJunitAndHamcrestAreOnClasspath();
   }
 
   private void assertJunitAndHamcrestAreOnClasspath() throws CoreException {
@@ -141,7 +98,7 @@ public class CreateAppEngineStandardWtpProjectTest {
     assertNotNull("Did not find hamcrest", hamcrest);
     assertTrue(hamcrest.exists());
   }
-  
+
   @Test
   public void testMostImportantFile() throws InvocationTargetException, CoreException {
     CreateAppEngineStandardWtpProject creator = new CreateAppEngineStandardWtpProject(config, adaptable);
@@ -151,31 +108,21 @@ public class CreateAppEngineStandardWtpProjectTest {
 
   @Test
   public void testAppEngineRuntimeAdded() throws InvocationTargetException, CoreException {
-    try {
-      new CreateAppEngineStandardWtpProject(config, adaptable).execute(null /* monitor */);
+    new CreateAppEngineStandardWtpProject(config, adaptable).execute(null /* monitor */);
 
-      ProjectUtils.waitUntilIdle();  // App Engine runtime is added via a Job, so wait.
-      IFacetedProject facetedProject = ProjectFacetsManager.create(project);
-      IRuntime primaryRuntime = facetedProject.getPrimaryRuntime();
-      assertTrue(AppEngineStandardFacet.isAppEngineStandardRuntime(primaryRuntime));
-    } catch (CoreException ex) {
-      logForSetPrimaryRuntimeError();
-      throw ex;
-    }
+    ProjectUtils.waitUntilIdle();  // App Engine runtime is added via a Job, so wait.
+    IFacetedProject facetedProject = ProjectFacetsManager.create(project);
+    IRuntime primaryRuntime = facetedProject.getPrimaryRuntime();
+    assertTrue(AppEngineStandardFacet.isAppEngineStandardRuntime(primaryRuntime));
   }
 
   @Test
   public void testAppEngineLibrariesAdded() throws InvocationTargetException, CoreException {
-    try {
-      Library library = new Library(APP_ENGINE_API);
-      config.setAppEngineLibraries(Collections.singletonList(library));
-      CreateAppEngineStandardWtpProject creator = new CreateAppEngineStandardWtpProject(config, adaptable);
-      creator.execute(new NullProgressMonitor());
-      assertAppEngineContainerOnClasspath(library);
-    } catch (CoreException ex) {
-      logForSetPrimaryRuntimeError();
-      throw ex;
-    }
+    Library library = new Library(APP_ENGINE_API);
+    config.setAppEngineLibraries(Collections.singletonList(library));
+    CreateAppEngineStandardWtpProject creator = new CreateAppEngineStandardWtpProject(config, adaptable);
+    creator.execute(new NullProgressMonitor());
+    assertAppEngineContainerOnClasspath(library);
   }
 
   private void assertAppEngineContainerOnClasspath(Library library) throws CoreException {
