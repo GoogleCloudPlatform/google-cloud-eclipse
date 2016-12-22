@@ -26,14 +26,19 @@ import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.ide.undo.WorkspaceUndoUtil;
 import org.eclipse.ui.statushandlers.StatusManager;
 
@@ -41,6 +46,7 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
 
   private AppEngineStandardWizardPage page = null;
   private AppEngineStandardProjectConfig config = new AppEngineStandardProjectConfig();
+  private IWorkbench workbench;
 
   public StandardProjectWizard() {
     setWindowTitle(Messages.getString("new.app.engine.standard.project"));
@@ -71,6 +77,7 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
       return true;
     }
 
+    config.setServiceName(page.getServiceName());
     config.setPackageName(page.getPackageName());
     config.setProject(page.getProjectHandle());
     if (!page.useDefaults()) {
@@ -81,13 +88,18 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
 
     // todo set up
     IAdaptable uiInfoAdapter = WorkspaceUndoUtil.getUIInfoAdapter(getShell());
-    IRunnableWithProgress runnable = new CreateAppEngineStandardWtpProject(config, uiInfoAdapter);
+    CreateAppEngineStandardWtpProject runnable =
+        new CreateAppEngineStandardWtpProject(config, uiInfoAdapter);
 
     IStatus status = Status.OK_STATUS;
     try {
       boolean fork = true;
       boolean cancelable = true;
       getContainer().run(fork, cancelable, runnable);
+      
+      // open most important file created by wizard in editor
+      IFile file = runnable.getMostImportant();
+      openInEditor(file);
     } catch (InterruptedException ex) {
       status = Status.CANCEL_STATUS;
     } catch (InvocationTargetException ex) {
@@ -95,6 +107,18 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
     }
 
     return status.isOK();
+  }
+
+  private void openInEditor(IFile file) {
+    IWorkbenchWindow window = workbench.getActiveWorkbenchWindow();
+    if (window != null && file != null) {
+      IWorkbenchPage page = window.getActivePage();
+      try {
+        IDE.openEditor(page, file, true);
+      } catch (PartInitException ex) {
+        // ignore; we don't have to open the file
+      }
+    }
   }
 
   public static IStatus setErrorStatus(Object origin, Throwable ex) {
@@ -109,6 +133,7 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
 
   @Override
   public void init(IWorkbench workbench, IStructuredSelection selection) {
+    this.workbench = workbench;
     if (config.getCloudSdkLocation() == null) {
       File location = CloudSdkPrompter.getCloudSdkLocation(getShell());
       // if the user doesn't provide the Cloud SDK then we'll error in performFinish() too

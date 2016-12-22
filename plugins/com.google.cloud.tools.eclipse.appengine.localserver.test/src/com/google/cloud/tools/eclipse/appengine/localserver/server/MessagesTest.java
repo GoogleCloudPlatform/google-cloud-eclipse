@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
+import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import org.junit.Assert;
 import org.junit.Test;
 

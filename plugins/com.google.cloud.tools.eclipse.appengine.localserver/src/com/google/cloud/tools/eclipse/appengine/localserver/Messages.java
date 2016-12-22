@@ -16,29 +16,31 @@
 
 package com.google.cloud.tools.eclipse.appengine.localserver;
 
-import org.eclipse.osgi.util.NLS;
+import java.text.MessageFormat;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
 
-public class Messages extends NLS {
+public class Messages {
   private static final String BUNDLE_NAME =
       "com.google.cloud.tools.eclipse.appengine.localserver.messages"; //$NON-NLS-1$
 
-  public static String NOT_FACETED_PROJECT;
-  public static String GAE_STANDARD_FACET_MISSING;
-  public static String NEW_SERVER_DIALOG_PORT;
-  public static String NEW_SERVER_DIALOG_INVALID_PORT_VALUE;
-  public static String PORT_IN_USE;
-  public static String PORT_OUT_OF_RANGE;
+  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME);
 
-  public static String CREATE_APP_ENGINE_RUNTIME_WIZARD_DESCRIPTION;
-  public static String CREATE_APP_ENGINE_RUNTIME_WIZARD_TITLE;
-  public static String OPEN_CLOUD_SDK_PREFERENCE_BUTTON;
-  public static String RUNTIME_WIZARD_CLOUD_SDK_NOT_FOUND;
-
-  static {
-    // initialize resource bundle
-    NLS.initializeMessages(BUNDLE_NAME, Messages.class);
+  public static String getString(String key) {
+    try {
+      return RESOURCE_BUNDLE.getString(key);
+    } catch (MissingResourceException e) {
+      return '!' + key + '!';
+    }
   }
 
-  private Messages() {
+  public static String getString(String key, Object... params) {
+    try {
+      return MessageFormat.format(RESOURCE_BUNDLE.getString(key), params);
+    } catch (MissingResourceException ex) {
+      return '!' + key + '!';
+    }
   }
+
+  private Messages() {}
 }

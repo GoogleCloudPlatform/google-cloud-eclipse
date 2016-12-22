@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.common.project.facet.core.JavaFacetInstallConfig;
 import org.eclipse.jst.j2ee.project.facet.IJ2EEFacetInstallDataModelProperties;
@@ -66,7 +67,7 @@ public class AppEngineStandardFacet {
   }
 
   /**
-   * Returns true if <code>facetRuntime</code> is an App Engine Standard runtime and false otherwise
+   * Returns true if {@code facetRuntime} is an App Engine Standard runtime and false otherwise.
    *
    * @param facetRuntime the facet runtime; runtime should not be null
    * @return true if <code>facetRuntime</code> is an App Engine Standard runtime and false otherwise
@@ -87,12 +88,14 @@ public class AppEngineStandardFacet {
   }
 
   /**
-   * Returns true if <code>serverRuntime</code> is an App Engine Standard runtime and false otherwise
+   * Returns true if {@code serverRuntime} is an App Engine Standard runtime and false otherwise.
    *
    * @param serverRuntime the server runtime, runtime should not be null
-   * @return true if <code>serverRuntime</code> is an App Engine Standard runtime and false otherwise
+   * @return true if <code>serverRuntime</code> is an App Engine Standard runtime and false
+   *         otherwise
    */
-  public static boolean isAppEngineStandardRuntime(org.eclipse.wst.server.core.IRuntime serverRuntime) {
+  public static boolean isAppEngineStandardRuntime(
+      org.eclipse.wst.server.core.IRuntime serverRuntime) {
     Preconditions.checkNotNull(serverRuntime, "runtime is null");
     IRuntimeType runtimeType = serverRuntime.getRuntimeType();
     if (runtimeType == null) {
@@ -102,28 +105,33 @@ public class AppEngineStandardFacet {
   }
 
   /**
-   * Checks to see if <code>facetedProject</code> has the App Engine facet installed. If not, it installs
-   * the App Engine facet.
+   * Checks to see if <code>facetedProject</code> has the App Engine standard facet. 
+   * If not, it installs the App Engine standard facet.
    *
    * @param facetedProject the faceted project receiving the App Engine facet
-   * @param installDependentFacets true if the facets required by the App Engine facet should be installed,
-   *   false otherwise
+   * @param installDependentFacets true if the facets required by the App Engine facet should be
+   *        installed, false otherwise
    * @param monitor the progress monitor
    * @throws CoreException if anything goes wrong during install
    */
-  public static void installAppEngineFacet(IFacetedProject facetedProject, boolean installDependentFacets, IProgressMonitor monitor)
-      throws CoreException {
+  public static void installAppEngineFacet(IFacetedProject facetedProject,
+      boolean installDependentFacets, IProgressMonitor monitor) throws CoreException {
+    
+    SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
+    
     // Install required App Engine facets i.e. Java 1.7 and Dynamic Web Module 2.5
     if (installDependentFacets) {
-      installJavaFacet(facetedProject, monitor);
-      installWebFacet(facetedProject, monitor);
+      installJavaFacet(facetedProject, subMonitor.newChild(20));
+      installWebFacet(facetedProject, subMonitor.newChild(30));
     }
 
     IProjectFacet appEngineFacet = ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID);
-    IProjectFacetVersion appEngineFacetVersion = appEngineFacet.getVersion(AppEngineStandardFacet.VERSION);
+    IProjectFacetVersion appEngineFacetVersion =
+        appEngineFacet.getVersion(AppEngineStandardFacet.VERSION);
 
     if (!facetedProject.hasProjectFacet(appEngineFacet)) {
-      facetedProject.installProjectFacet(appEngineFacetVersion, null /* config */, monitor);
+      Object config = null;
+      facetedProject.installProjectFacet(appEngineFacetVersion, config, subMonitor.newChild(50));
     }
   }
 

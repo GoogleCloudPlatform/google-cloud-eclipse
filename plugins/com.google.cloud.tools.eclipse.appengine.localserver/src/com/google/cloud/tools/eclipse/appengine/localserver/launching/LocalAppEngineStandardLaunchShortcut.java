@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.localserver.launching;
 
+import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.eclipse.core.resources.IResource;
@@ -42,7 +43,7 @@ public class LocalAppEngineStandardLaunchShortcut implements ILaunchShortcut2 {
       IModule[] modules = launcher.asModules(selection);
       launcher.launch(modules, launchMode);
     } catch (CoreException ex) {
-      ErrorDialog.openError(null, Messages.getString("UnableToLaunch"), ex.getLocalizedMessage(), //$NON-NLS-1$
+      ErrorDialog.openError(null, Messages.getString("UNABLE_TO_LAUNCH"), ex.getLocalizedMessage(), //$NON-NLS-1$
           ex.getStatus());
     }
   }
@@ -53,7 +54,7 @@ public class LocalAppEngineStandardLaunchShortcut implements ILaunchShortcut2 {
       IModule[] modules = launcher.asModules(editor);
       launcher.launch(modules, launchMode);
     } catch (CoreException ex) {
-      ErrorDialog.openError(null, Messages.getString("UnableToLaunch"), ex.getLocalizedMessage(), //$NON-NLS-1$
+      ErrorDialog.openError(null, Messages.getString("UNABLE_TO_LAUNCH"), ex.getLocalizedMessage(), //$NON-NLS-1$
           ex.getStatus());
     }
   }

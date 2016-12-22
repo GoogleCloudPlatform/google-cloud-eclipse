@@ -78,13 +78,14 @@ public class CodeTemplatesTest {
       throws CoreException, ParserConfigurationException, SAXException, IOException {
     AppEngineStandardProjectConfig config = new AppEngineStandardProjectConfig();
     
-    CodeTemplates.materialize(project, config, monitor);
+    IFile mostImportant = CodeTemplates.materialize(project, config, monitor);
     
     IFolder src = project.getFolder("src");
     IFolder main = src.getFolder("main");
     IFolder java = main.getFolder("java");
     IFile servlet = java.getFile("HelloAppEngine.java");
     Assert.assertTrue(servlet.exists());
+    Assert.assertEquals(servlet, mostImportant);
     
     IFolder webapp = main.getFolder("webapp");
     IFolder webinf = webapp.getFolder("WEB-INF");
