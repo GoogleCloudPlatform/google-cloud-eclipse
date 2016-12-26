@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
-import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.cloudsdk.AppEngineJavaComponentsNotInstalledException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
@@ -66,7 +65,7 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
       page = new AppEngineStandardWizardPage();
       addPage(page);      
 	} catch (CloudSdkNotFoundException ex) {
-	  addPage(new CloudSdkMissingPage(AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE));
+      addPage(new CloudSdkMissingPage(AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE));
 	} catch (CloudSdkOutOfDateException ex) {
       addPage(new CloudSdkOutOfDatePage(
           AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE));
@@ -152,33 +151,4 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
       }
     }
   }
-
-  /**
-   * Verify that the Cloud SDK is where we can find it.
-   */
-  public static boolean cloudSdkExists() {
-    try {
-      CloudSdk sdk = new CloudSdk.Builder().build();
-      sdk.validateCloudSdk();
-      return true;
-    } catch (CloudSdkNotFoundException ex) {
-      return false;
-    } catch (CloudSdkOutOfDateException ex) {
-        return true;
-    }
-  }
-
-  /**
-   * Verify that we're set up for App Engine Java development.
-   */
-  public static boolean appEngineJavaComponentExists() {
-    try {
-      CloudSdk sdk = new CloudSdk.Builder().build();
-      sdk.validateAppEngineJavaComponents();
-      return true;
-    } catch (AppEngineException ex) {
-      return false;
-    }
-  }
-
 }
