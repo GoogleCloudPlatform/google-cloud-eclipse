@@ -18,8 +18,11 @@ package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkOutOfDateException;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineJavaComponentMissingPage;
 import com.google.cloud.tools.eclipse.appengine.ui.CloudSdkMissingPage;
+import com.google.cloud.tools.eclipse.appengine.ui.CloudSdkOutOfDatePage;
 import com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPrompter;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
@@ -57,6 +60,9 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
   public void addPages() {
     if (!cloudSdkExists()) {
       addPage(new CloudSdkMissingPage(AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE));
+    } else if (cloudSdkTooOld()) {
+        addPage(new CloudSdkOutOfDatePage(
+                AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE));
     } else if (!appEngineJavaComponentExists()) {
       addPage(new AppEngineJavaComponentMissingPage(
           AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE));
@@ -66,7 +72,19 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
     }
   }
 
-  @Override
+  private boolean cloudSdkTooOld() {
+	try {
+      CloudSdk sdk = new CloudSdk.Builder().build();
+      sdk.validateCloudSdk();
+      return false;
+    } catch (CloudSdkNotFoundException ex) {
+	  return false;
+    } catch (CloudSdkOutOfDateException ex) {
+      return true;
+	}
+  }
+
+@Override
   public boolean performFinish() {
     AnalyticsPingManager.getInstance().sendPing(
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_COMPLETE,
@@ -151,8 +169,10 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
       CloudSdk sdk = new CloudSdk.Builder().build();
       sdk.validateCloudSdk();
       return true;
-    } catch (AppEngineException ex) {
+    } catch (CloudSdkNotFoundException ex) {
       return false;
+    } catch (CloudSdkOutOfDateException ex) {
+        return true;
     }
   }
 
