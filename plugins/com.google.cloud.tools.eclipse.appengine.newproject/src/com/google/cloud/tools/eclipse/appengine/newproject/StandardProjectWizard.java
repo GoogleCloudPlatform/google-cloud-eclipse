@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import com.google.cloud.tools.appengine.api.AppEngineException;
+import com.google.cloud.tools.appengine.cloudsdk.AppEngineJavaComponentsNotInstalledException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkOutOfDateException;
@@ -58,33 +59,24 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
 
   @Override
   public void addPages() {
-    if (!cloudSdkExists()) {
-      addPage(new CloudSdkMissingPage(AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE));
-    } else if (cloudSdkTooOld()) {
-        addPage(new CloudSdkOutOfDatePage(
-                AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE));
-    } else if (!appEngineJavaComponentExists()) {
-      addPage(new AppEngineJavaComponentMissingPage(
-          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE));
-    } else { // all is good
-      page = new AppEngineStandardWizardPage();
-      addPage(page);
-    }
-  }
-
-  private boolean cloudSdkTooOld() {
 	try {
       CloudSdk sdk = new CloudSdk.Builder().build();
       sdk.validateCloudSdk();
-      return false;
-    } catch (CloudSdkNotFoundException ex) {
-	  return false;
-    } catch (CloudSdkOutOfDateException ex) {
-      return true;
-	}
+      sdk.validateAppEngineJavaComponents();
+      page = new AppEngineStandardWizardPage();
+      addPage(page);      
+	} catch (CloudSdkNotFoundException ex) {
+	  addPage(new CloudSdkMissingPage(AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE));
+	} catch (CloudSdkOutOfDateException ex) {
+      addPage(new CloudSdkOutOfDatePage(
+          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE));
+    } catch (AppEngineJavaComponentsNotInstalledException ex) {
+      addPage(new AppEngineJavaComponentMissingPage(
+          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE));    	
+    }
   }
 
-@Override
+  @Override
   public boolean performFinish() {
     AnalyticsPingManager.getInstance().sendPing(
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_COMPLETE,
