@@ -50,7 +50,7 @@ public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
   
   @Override
   public void addPages() {
-	try {
+    try {
       CloudSdk sdk = new CloudSdk.Builder().build();
       sdk.validateCloudSdk();
       sdk.validateAppEngineJavaComponents();
@@ -58,14 +58,14 @@ public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
       archetypePage = new MavenAppEngineStandardArchetypeWizardPage();
       addPage(page);
       addPage(archetypePage);
-	} catch (CloudSdkNotFoundException ex) {
+    } catch (CloudSdkNotFoundException ex) {
       addPage(new CloudSdkMissingPage(AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_MAVEN));
-	} catch (CloudSdkOutOfDateException ex) {
+    } catch (CloudSdkOutOfDateException ex) {
       addPage(new CloudSdkOutOfDatePage(
           AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_MAVEN));
     } catch (AppEngineJavaComponentsNotInstalledException ex) {
       addPage(new AppEngineJavaComponentMissingPage(
-          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_MAVEN));    	
+          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_MAVEN));
     }
   }
   

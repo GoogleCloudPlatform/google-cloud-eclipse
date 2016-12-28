@@ -17,8 +17,8 @@
 package com.google.cloud.tools.eclipse.appengine.ui;
 
 /**
- * Wizard page that displays a message that cloud SDK is
- * missing with instructions on how to install it. This page disables the 'Finish' button.
+ * Wizard page that displays a message that the Cloud SDK is
+ * out of date with instructions on how to update it. This page disables the 'Finish' button.
  */
 public class CloudSdkOutOfDatePage extends MissingComponentPage {
 

@@ -58,20 +58,19 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
 
   @Override
   public void addPages() {
-	try {
+    try {
       CloudSdk sdk = new CloudSdk.Builder().build();
       sdk.validateCloudSdk();
       sdk.validateAppEngineJavaComponents();
       page = new AppEngineStandardWizardPage();
-      addPage(page);      
-	} catch (CloudSdkNotFoundException ex) {
+      addPage(page);
+    } catch (CloudSdkNotFoundException ex) {
       addPage(new CloudSdkMissingPage(AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE));
-	} catch (CloudSdkOutOfDateException ex) {
-      addPage(new CloudSdkOutOfDatePage(
-          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE));
+    } catch (CloudSdkOutOfDateException ex) {
+      addPage(new CloudSdkOutOfDatePage(AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE));
     } catch (AppEngineJavaComponentsNotInstalledException ex) {
       addPage(new AppEngineJavaComponentMissingPage(
-          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE));    	
+          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE));
     }
   }
 
