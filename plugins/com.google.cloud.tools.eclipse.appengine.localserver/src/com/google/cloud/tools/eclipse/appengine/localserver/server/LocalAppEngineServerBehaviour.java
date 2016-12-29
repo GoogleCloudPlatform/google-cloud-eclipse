@@ -392,8 +392,10 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
       } else if (line.equals("Traceback (most recent call last):")) { //$NON-NLS-1$
         // An error occurred
         setServerState(IServer.STATE_STOPPED);
-
-      } else if (line.contains("Starting module") && line.contains("running at: http://")) { //$NON-NLS-1$ //$NON-NLS-2$
+      } else if (line.contains("Error: A fatal exception has occurred. Program will exit")) { //$NON-NLS-1$
+        setServerState(IServer.STATE_STOPPED);      
+      } else if (line.contains("Starting module")  //$NON-NLS-1$
+          && line.contains("running at: http://")) { //$NON-NLS-1$
         if (serverPortCandidate == 0 || line.contains("Starting module \"default\"")) { //$NON-NLS-1$
           serverPortCandidate = extractPortFromServerUrlOutput(line);
         }
