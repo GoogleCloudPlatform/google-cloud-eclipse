@@ -29,12 +29,15 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.wst.common.componentcore.ComponentCore;
+import org.eclipse.wst.common.componentcore.resources.IVirtualComponent;
+import org.eclipse.wst.common.componentcore.resources.IVirtualFolder;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
 public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate {
-  private final static String APPENGINE_WEB_XML = "appengine-web.xml";
+  private static final String APPENGINE_WEB_XML = "appengine-web.xml";
 
   @Override
   public void execute(IProject project,
@@ -42,8 +45,38 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
                       Object config,
                       IProgressMonitor monitor) throws CoreException {
     super.execute(project, version, config, monitor);
+
+    fixWebContentRootIfNecessary(project, monitor);
     createConfigFiles(project, monitor);
     installAppEngineRuntimes(project);
+  }
+
+  /**
+   * Deletes the incorrect "/WebContent" (attributed to the fault of the Dynamic Web Module facet)
+   * and fixes the default webapp setting accordingly.
+   *
+   * If the Dynamic Web Module facet was installed together, it will have created the "/WebContent"
+   * folder with the default webapp structure (if the user did not change the default folder name
+   * when selecting the Web facet to install). This method detects if the project already had
+   * another genuine webapp directory, and if so, fixes the default webapp project setting
+   * to point to the existing webapp.
+   */
+  private void fixWebContentRootIfNecessary(IProject project, IProgressMonitor monitor)
+      throws CoreException {
+    if (WebProjectUtil.hasBogusWebRootFolder(project)) {
+      IVirtualComponent component = ComponentCore.createComponent(project);
+      if (component != null && component.exists()) {
+        IVirtualFolder rootFolder = component.getRootFolder();
+        // This removes the following entry in ".settings/org.eclipse.wst.common.component":
+        // <wb-resource deploy-path="/" source-path="/WebContent" tag="defaultRootSource"/>
+        rootFolder.removeLink(WebProjectUtil.DEFAULT_DYNAMIC_WEB_FACET_WEB_CONTENT_PATH,
+                              IVirtualFolder.FORCE, monitor);
+      }
+
+      // Delete "/WebContent" physically.
+      project.getFolder(WebProjectUtil.DEFAULT_DYNAMIC_WEB_FACET_WEB_CONTENT_PATH)
+        .delete(true /* force */, monitor);
+    }
   }
 
   private void installAppEngineRuntimes(final IProject project) {
