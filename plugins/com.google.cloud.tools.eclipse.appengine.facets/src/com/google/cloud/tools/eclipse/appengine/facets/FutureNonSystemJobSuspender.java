@@ -19,7 +19,6 @@ package com.google.cloud.tools.eclipse.appengine.facets;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
@@ -36,6 +35,7 @@ import org.eclipse.core.runtime.jobs.Job;
  * Not recommended to use for other situations, although the workings of the class are general.
  */
 public class FutureNonSystemJobSuspender {
+  private static final Object suspendResumeLock = new Object();
   private static boolean suspended;
 
   private static class SuspendedJob {
@@ -48,25 +48,29 @@ public class FutureNonSystemJobSuspender {
     }
   }
 
-  private static List<SuspendedJob> suspendedJobs =
-      Collections.synchronizedList(new ArrayList<SuspendedJob>());
+  private static final List<SuspendedJob> suspendedJobs = new ArrayList<SuspendedJob>();
 
-  private static JobScheduleListener jobScheduleListener = new JobScheduleListener();
+  private static final JobScheduleListener jobScheduleListener = new JobScheduleListener();
 
   /** Once called, it is imperative to call {@link resume()} later. */
-  public static synchronized void suspendFutureJobs() {
-    Preconditions.checkState(!suspended, "Already suspended.");
-    suspended = true;
-    Job.getJobManager().addJobChangeListener(jobScheduleListener);
+  public static void suspendFutureJobs() {
+    synchronized (suspendResumeLock) {
+      Preconditions.checkState(!suspended, "Already suspended.");
+      suspended = true;
+      Job.getJobManager().addJobChangeListener(jobScheduleListener);
+    }
   }
 
-  public static synchronized void resume() {
-    Preconditions.checkState(suspended, "Not suspended.");
-    resumeInternal();
+  public static void resume() {
+    synchronized (suspendResumeLock) {
+      Preconditions.checkState(suspended, "Not suspended.");
+      resumeInternal();
+    }
   }
 
+  // Called only from resume(), so assumes holding the lock.
   @VisibleForTesting
-  static synchronized void resumeInternal() {
+  static void resumeInternal() {
     suspended = false;
     Job.getJobManager().removeJobChangeListener(jobScheduleListener);
 
@@ -82,10 +86,14 @@ public class FutureNonSystemJobSuspender {
   private static class JobScheduleListener implements IJobChangeListener {
     @Override
     public void scheduled(IJobChangeEvent event) {
-      Job job = event.getJob();
-      if (!job.isSystem()) {
-        job.cancel();  // This will always succeed since the job is not running yet.
-        suspendedJobs.add(new SuspendedJob(job, event.getDelay()));
+      synchronized (suspendResumeLock) {
+        if (suspended) {
+          Job job = event.getJob();
+          if (!job.isSystem()) {
+            job.cancel();  // This will always succeed since the job is not running yet.
+            suspendedJobs.add(new SuspendedJob(job, event.getDelay()));
+          }
+        }
       }
     }
 
