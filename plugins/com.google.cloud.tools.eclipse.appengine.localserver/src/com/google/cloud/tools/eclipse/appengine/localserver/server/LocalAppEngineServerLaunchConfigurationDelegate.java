@@ -137,9 +137,8 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
     new ServerLaunchMonitor(launch, server).engage();
 
-    String programArguments = getProgramArguments(configuration);
     String vmArgumentString = getVMArguments(configuration);
-    // these strings are exactly as supplied by the user in the dialog box
+    // This string is exactly as supplied by the user in the dialog box
     
     List<String> vmArguments = Arrays.asList(vmArgumentString.split("\\s+"));
     if (ILaunchManager.DEBUG_MODE.equals(mode)) {
