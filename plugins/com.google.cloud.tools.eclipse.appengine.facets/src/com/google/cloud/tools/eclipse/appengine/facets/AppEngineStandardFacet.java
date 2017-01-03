@@ -218,8 +218,7 @@ public class AppEngineStandardFacet {
    * Installs Java 1.7 facet if it doesn't already exist in <code>factedProject</code>
    */
   private static void addJavaFacetToBatch(IFacetedProject facetedProject,
-      Set<IFacetedProject.Action> batchSet)
-      throws CoreException {
+      Set<IFacetedProject.Action> batchSet) {
     if (facetedProject.hasProjectFacet(JavaFacet.VERSION_1_7)) {
       return;
     }
@@ -238,8 +237,7 @@ public class AppEngineStandardFacet {
    * Installs Dynamic Web Module 2.5 facet if it doesn't already exits in <code>factedProject</code>
    */
   private static void addWebFacetToBatch(IFacetedProject facetedProject,
-      Set<IFacetedProject.Action> batchSet)
-      throws CoreException {
+      Set<IFacetedProject.Action> batchSet) {
     if (facetedProject.hasProjectFacet(WebFacetUtils.WEB_25)) {
       return;
     }
