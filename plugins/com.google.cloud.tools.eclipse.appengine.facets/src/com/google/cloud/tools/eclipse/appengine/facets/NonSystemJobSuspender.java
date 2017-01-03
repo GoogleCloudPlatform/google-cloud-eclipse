@@ -45,7 +45,7 @@ class NonSystemJobSuspender {
     }
   }
 
-  private static final List<SuspendedJob> suspendedJobs = new ArrayList<SuspendedJob>();
+  private static final List<SuspendedJob> suspendedJobs = new ArrayList<>();
 
   private static final NonSystemJobScheduleListener jobScheduleListener =
       new NonSystemJobScheduleListener();
