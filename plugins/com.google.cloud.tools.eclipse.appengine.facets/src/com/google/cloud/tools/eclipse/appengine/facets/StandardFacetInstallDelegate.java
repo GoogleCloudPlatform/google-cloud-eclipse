@@ -63,7 +63,7 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
     // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1155
     // The first ConvertJob has already been scheduled (which installs JSDT facet), and
     // this is to suspend the second ConvertJob temporarily.
-    FutureNonSystemJobSuspender.suspendFutureJobs();
+    NonSystemJobSuspender.suspendFutureJobs();
   }
 
   private static class AppEngineRuntimeInstallJob extends Job {
@@ -106,7 +106,7 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
       }
       finally {
         // Now resume all the suspended jobs (including the second ConvertJob).
-        FutureNonSystemJobSuspender.resume();
+        NonSystemJobSuspender.resume();
       }
     }
   };

@@ -33,25 +33,25 @@ public class FutureNonSystemJobSuspenderTest {
 
   @After
   public void tearDown() {
-    FutureNonSystemJobSuspender.resumeInternal();
+    NonSystemJobSuspender.resumeInternal();
     job1.cancel();
     job2.cancel();
   }
 
   @Test(expected = IllegalStateException.class)
   public void testCannotSuspendConcurrently() {
-    FutureNonSystemJobSuspender.suspendFutureJobs();
-    FutureNonSystemJobSuspender.suspendFutureJobs();
+    NonSystemJobSuspender.suspendFutureJobs();
+    NonSystemJobSuspender.suspendFutureJobs();
   }
 
   @Test(expected = IllegalStateException.class)
   public void testCannotResumeIfNotSuspended() {
-    FutureNonSystemJobSuspender.resume();
+    NonSystemJobSuspender.resume();
   }
 
   @Test
   public void testSuspendFutureJobs() {
-    FutureNonSystemJobSuspender.suspendFutureJobs();
+    NonSystemJobSuspender.suspendFutureJobs();
     job1.schedule();
     job2.schedule(10000 /* ms */);
     assertEquals(Job.NONE, job1.getState());
@@ -62,14 +62,14 @@ public class FutureNonSystemJobSuspenderTest {
   public void testScheduledJobsAreNotSuspended() {
     job1.schedule();
     job2.schedule(10000 /* ms */);
-    FutureNonSystemJobSuspender.suspendFutureJobs();
+    NonSystemJobSuspender.suspendFutureJobs();
     assertTrue(Job.WAITING == job1.getState() || Job.RUNNING == job1.getState());
     assertEquals(Job.SLEEPING, job2.getState());
   }
 
   @Test
   public void testSystemJobsAreNotSuspended() {
-    FutureNonSystemJobSuspender.suspendFutureJobs();
+    NonSystemJobSuspender.suspendFutureJobs();
     job1.setSystem(true);
     job2.setSystem(true);
     job1.schedule();
@@ -80,13 +80,13 @@ public class FutureNonSystemJobSuspenderTest {
 
   @Test
   public void testResume() {
-    FutureNonSystemJobSuspender.suspendFutureJobs();
+    NonSystemJobSuspender.suspendFutureJobs();
     job1.schedule();
     job2.schedule(10000 /* ms */);
     assertEquals(Job.NONE, job1.getState());
     assertEquals(Job.NONE, job2.getState());
 
-    FutureNonSystemJobSuspender.resume();
+    NonSystemJobSuspender.resume();
     assertTrue(Job.WAITING == job1.getState() || Job.RUNNING == job1.getState());
     assertEquals(Job.SLEEPING, job2.getState());
   }

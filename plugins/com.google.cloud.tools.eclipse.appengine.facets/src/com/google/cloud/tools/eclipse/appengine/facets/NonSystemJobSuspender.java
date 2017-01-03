@@ -20,8 +20,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.List;
-import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
 
 /**
@@ -34,7 +32,7 @@ import org.eclipse.core.runtime.jobs.Job;
  *
  * Not recommended to use for other situations, although the workings of the class are general.
  */
-public class FutureNonSystemJobSuspender {
+public class NonSystemJobSuspender {
   private static boolean suspended;
 
   private static class SuspendedJob {
@@ -49,7 +47,8 @@ public class FutureNonSystemJobSuspender {
 
   private static final List<SuspendedJob> suspendedJobs = new ArrayList<SuspendedJob>();
 
-  private static final JobScheduleListener jobScheduleListener = new JobScheduleListener();
+  private static final NonSystemJobScheduleListener jobScheduleListener =
+      new NonSystemJobScheduleListener();
 
   /** Once called, it is imperative to call {@link resume()} later. */
   public static synchronized void suspendFutureJobs() {
@@ -74,7 +73,7 @@ public class FutureNonSystemJobSuspender {
     suspendedJobs.clear();
   }
 
-  private static synchronized void suspendJob(Job job, long scheduleDelay) {
+  static synchronized void suspendJob(Job job, long scheduleDelay) {
     if (suspended) {
       if (!job.isSystem()) {
         job.cancel();  // This will always succeed since the job is not running yet.
@@ -83,28 +82,5 @@ public class FutureNonSystemJobSuspender {
     }
   }
 
-  private FutureNonSystemJobSuspender() {}
-
-  /** Listens for every job being scheduled and cancels it. */
-  private static class JobScheduleListener implements IJobChangeListener {
-    @Override
-    public void scheduled(IJobChangeEvent event) {
-      suspendJob(event.getJob(), event.getDelay());
-    }
-
-    @Override
-    public void aboutToRun(IJobChangeEvent event) {}
-
-    @Override
-    public void awake(IJobChangeEvent event) {}
-
-    @Override
-    public void done(IJobChangeEvent event) {}
-
-    @Override
-    public void running(IJobChangeEvent event) {}
-
-    @Override
-    public void sleeping(IJobChangeEvent event) {}
-  }
-};
+  private NonSystemJobSuspender() {}
+}
