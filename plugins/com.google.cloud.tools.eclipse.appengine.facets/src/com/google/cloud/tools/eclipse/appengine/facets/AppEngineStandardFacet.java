@@ -127,11 +127,11 @@ public class AppEngineStandardFacet {
     // all the facets. This ensures that the first ConvertJob starts installing the JSDT facet only
     // after the batch is complete, which in turn prevents the first ConvertJob from scheduling
     // the second ConvertJob (triggered by installing the JSDT facet.)
-    Set<IFacetedProject.Action> facetInstallBatchQueue = new HashSet<>();
+    Set<IFacetedProject.Action> facetInstallBatchSet = new HashSet<>();
     // Install required App Engine facets i.e. Java 1.7 and Dynamic Web Module 2.5
     if (installDependentFacets) {
-      addJavaFacetToBatchQueue(facetedProject, facetInstallBatchQueue);
-      addWebFacetToBatchQueue(facetedProject, facetInstallBatchQueue);
+      addJavaFacetToBatch(facetedProject, facetInstallBatchSet);
+      addWebFacetToBatch(facetedProject, facetInstallBatchSet);
     }
 
     IProjectFacet appEngineFacet = ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID);
@@ -140,9 +140,9 @@ public class AppEngineStandardFacet {
 
     if (!facetedProject.hasProjectFacet(appEngineFacet)) {
       Object config = null;
-      facetInstallBatchQueue.add(new IFacetedProject.Action(
+      facetInstallBatchSet.add(new IFacetedProject.Action(
           IFacetedProject.Action.Type.INSTALL, appEngineFacetVersion, config));
-      facetedProject.modify(facetInstallBatchQueue, subMonitor.newChild(100));
+      facetedProject.modify(facetInstallBatchSet, subMonitor.newChild(100));
     }
   }
 
@@ -217,8 +217,8 @@ public class AppEngineStandardFacet {
   /**
    * Installs Java 1.7 facet if it doesn't already exist in <code>factedProject</code>
    */
-  private static void addJavaFacetToBatchQueue(IFacetedProject facetedProject,
-      Set<IFacetedProject.Action> batchQueue)
+  private static void addJavaFacetToBatch(IFacetedProject facetedProject,
+      Set<IFacetedProject.Action> batchSet)
       throws CoreException {
     if (facetedProject.hasProjectFacet(JavaFacet.VERSION_1_7)) {
       return;
@@ -230,15 +230,15 @@ public class AppEngineStandardFacet {
     sourcePaths.add(new Path("src/main/java"));
     sourcePaths.add(new Path("src/test/java"));
     javaConfig.setSourceFolders(sourcePaths);
-    batchQueue.add(new IFacetedProject.Action(
+    batchSet.add(new IFacetedProject.Action(
         IFacetedProject.Action.Type.INSTALL, JavaFacet.VERSION_1_7, javaConfig));
   }
 
   /**
    * Installs Dynamic Web Module 2.5 facet if it doesn't already exits in <code>factedProject</code>
    */
-  private static void addWebFacetToBatchQueue(IFacetedProject facetedProject,
-      Set<IFacetedProject.Action> batchQueue)
+  private static void addWebFacetToBatch(IFacetedProject facetedProject,
+      Set<IFacetedProject.Action> batchSet)
       throws CoreException {
     if (facetedProject.hasProjectFacet(WebFacetUtils.WEB_25)) {
       return;
@@ -249,7 +249,7 @@ public class AppEngineStandardFacet {
     webModel.setBooleanProperty(IJ2EEFacetInstallDataModelProperties.GENERATE_DD, false);
     webModel.setBooleanProperty(IWebFacetInstallDataModelProperties.INSTALL_WEB_LIBRARY, false);
     webModel.setStringProperty(IWebFacetInstallDataModelProperties.CONFIG_FOLDER, "src/main/webapp");
-    batchQueue.add(new IFacetedProject.Action(
+    batchSet.add(new IFacetedProject.Action(
         IFacetedProject.Action.Type.INSTALL, WebFacetUtils.WEB_25, webModel));
   }
 
