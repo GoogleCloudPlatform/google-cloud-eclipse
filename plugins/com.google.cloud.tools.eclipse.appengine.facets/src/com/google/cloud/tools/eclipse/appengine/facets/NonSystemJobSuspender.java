@@ -32,7 +32,7 @@ import org.eclipse.core.runtime.jobs.Job;
  *
  * Not recommended to use for other situations, although the workings of the class are general.
  */
-public class NonSystemJobSuspender {
+class NonSystemJobSuspender {
   private static boolean suspended;
 
   private static class SuspendedJob {
