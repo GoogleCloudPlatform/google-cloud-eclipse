@@ -85,7 +85,7 @@ public class StandardDeployCommandHandler extends AbstractHandler {
   @Override
   public Object execute(ExecutionEvent event) throws ExecutionException {
     try {
-      IProject project = helper.getProject(event);
+      IProject project = helper.getAppEngineStandardProject(event);
       if (project != null) {
         if (!checkProjectErrors(project)) {
           MessageDialog.openInformation(HandlerUtil.getActiveShell(event),

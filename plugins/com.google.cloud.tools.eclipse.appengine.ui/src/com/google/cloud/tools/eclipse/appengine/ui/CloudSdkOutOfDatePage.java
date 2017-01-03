@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.localserver.server;
+package com.google.cloud.tools.eclipse.appengine.ui;
 
-import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
-import org.junit.Assert;
-import org.junit.Test;
+/**
+ * Wizard page that displays a message that the Cloud SDK is
+ * out of date with instructions on how to update it. This page disables the 'Finish' button.
+ */
+public class CloudSdkOutOfDatePage extends MissingComponentPage {
 
-public class MessagesTest {
-
-  @Test
-  public void testCloudSdkNotConfigured() {
-    Assert.assertEquals(
-        "Could not run project because the Cloud SDK was not found. "
-        + "Check Preferences > Google Cloud Tools > SDK location and try again.", 
-        Messages.getString("cloudsdk.not.configured"));
+  public CloudSdkOutOfDatePage(String wizardType) {
+    super("cloudSdkOutOfDatePage", //$NON-NLS-1$
+        wizardType,
+        Messages.getString("cloud.sdk.out.of.date"),
+        Messages.getString("cloud.sdk.out.of.date"),
+        Messages.getString("fix.cloud.sdk.version"));
   }
 
 }

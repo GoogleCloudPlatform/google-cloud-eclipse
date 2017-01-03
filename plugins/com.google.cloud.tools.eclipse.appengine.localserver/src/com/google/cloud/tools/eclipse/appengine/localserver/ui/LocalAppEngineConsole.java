@@ -16,25 +16,82 @@
 
 package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
-import org.eclipse.ui.console.MessageConsole;
-
+import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerBehaviour;
 import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities.ConsoleFactory;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.ui.console.MessageConsole;
+import org.eclipse.ui.progress.UIJob;
+import org.eclipse.wst.server.core.IServer;
+import org.eclipse.wst.server.core.IServerListener;
+import org.eclipse.wst.server.core.ServerEvent;
 
 /**
  * A console that displays information for a run/debug session of the App Engine runtime
  */
 public class LocalAppEngineConsole extends MessageConsole {
   private LocalAppEngineServerBehaviour serverBehaviour;
+  private String unprefixedName;
+  private IServerListener serverStateListener = new IServerListener() {
+    @Override
+    public void serverChanged(ServerEvent event) {
+      updateName(event.getState());
+    }
+  };
 
   public LocalAppEngineConsole(String name, LocalAppEngineServerBehaviour serverBehaviour) {
     super(name, null);
+    this.unprefixedName = name;
     this.serverBehaviour = serverBehaviour;
+  }
+
+  /**
+   * Update the shown name with the server stop/stopping state.
+   */
+  protected void updateName(int state) {
+    final String computedName;
+    if (state == IServer.STATE_STARTING) {
+      computedName =
+          Messages.getString("SERVER_STARTING_TEMPLATE", unprefixedName);
+    } else if (state == IServer.STATE_STOPPING) {
+      computedName =
+          Messages.getString("SERVER_STOPPING_TEMPLATE", unprefixedName);
+    } else if (state == IServer.STATE_STOPPED) {
+      computedName =
+          Messages.getString("SERVER_STOPPED_TEMPLATE", unprefixedName);
+    } else {
+      computedName = unprefixedName;
+    }
+    UIJob nameUpdateJob = new UIJob("Update server name") {
+      @Override
+      public IStatus runInUIThread(IProgressMonitor monitor) {
+        LocalAppEngineConsole.this.setName(computedName);
+        return Status.OK_STATUS;
+      }
+    };
+    nameUpdateJob.setSystem(true);
+    nameUpdateJob.schedule();
   }
 
   public LocalAppEngineServerBehaviour getServerBehaviourDelegate() {
     return serverBehaviour;
   }
+
+  @Override
+  protected void init() {
+    super.init();
+    serverBehaviour.getServer().addServerListener(serverStateListener);
+  }
+
+  @Override
+  protected void dispose() {
+    serverBehaviour.getServer().removeServerListener(serverStateListener);
+    super.dispose();
+  }
+
+
 
   public static class Factory implements ConsoleFactory<LocalAppEngineConsole> {
 

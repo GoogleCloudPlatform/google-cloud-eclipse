@@ -53,6 +53,13 @@ public class AppEngineStandardProjectConfigTest {
   }
   
   @Test
+  public void testServiceName() {
+    Assert.assertNull(config.getServiceName());
+    config.setServiceName("foobar");
+    Assert.assertEquals("foobar", config.getServiceName());
+  }
+  
+  @Test
   public void testEclipseProjectLocationUri() throws URISyntaxException {   
     config.setEclipseProjectLocationUri(new URI("file://foo/bar"));   
     Assert.assertEquals(new URI("file://foo/bar"), config.getEclipseProjectLocationUri());    

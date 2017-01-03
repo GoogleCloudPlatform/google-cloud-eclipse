@@ -24,6 +24,7 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IWorkspace;
@@ -57,6 +58,15 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
 
   private final AppEngineStandardProjectConfig config;
   private final IAdaptable uiInfoAdapter;
+  private IFile mostImportant = null;
+
+  /**
+   * @return the file in the project that should be opened in an editor when the wizard finishes;
+   *     may be null
+   */
+  IFile getMostImportant() {
+    return mostImportant;
+  }
 
   CreateAppEngineStandardWtpProject(AppEngineStandardProjectConfig config,
       IAdaptable uiInfoAdapter) {
@@ -82,7 +92,7 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
         description, Messages.getString("creating.new.app.engine.standard.project")); //$NON-NLS-1$
     try {
       operation.execute(subMonitor.newChild(10), uiInfoAdapter);
-      CodeTemplates.materialize(newProject, config, subMonitor.newChild(80));
+      mostImportant = CodeTemplates.materialize(newProject, config, subMonitor.newChild(80));
     } catch (ExecutionException ex) {
       throw new InvocationTargetException(ex);
     }

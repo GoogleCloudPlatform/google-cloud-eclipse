@@ -49,7 +49,7 @@ public class ServerPortExtension extends ServerCreationWizardPageExtension {
     if (position == UI_POSITION.BOTTOM) {
       portLabel = new Label(parent, SWT.NONE);
       portLabel.setVisible(false);
-      portLabel.setText(Messages.NEW_SERVER_DIALOG_PORT);
+      portLabel.setText(Messages.getString("NEW_SERVER_DIALOG_PORT"));
 
       portText = new Text(parent, SWT.SINGLE | SWT.BORDER);
       portText.setVisible(false);
@@ -61,7 +61,7 @@ public class ServerPortExtension extends ServerCreationWizardPageExtension {
       Image errorImage = registry.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage();
 
       portDecoration = new ControlDecoration(portText, SWT.LEFT | SWT.TOP);
-      portDecoration.setDescriptionText(Messages.NEW_SERVER_DIALOG_INVALID_PORT_VALUE);
+      portDecoration.setDescriptionText(Messages.getString("NEW_SERVER_DIALOG_INVALID_PORT_VALUE"));
       portDecoration.setImage(errorImage);
       portDecoration.hide();
     }
@@ -107,7 +107,7 @@ public class ServerPortExtension extends ServerCreationWizardPageExtension {
         portDecoration.hide();
       } else {
         portDecoration.show();
-        portDecoration.showHoverText(Messages.NEW_SERVER_DIALOG_INVALID_PORT_VALUE);
+        portDecoration.showHoverText(Messages.getString("NEW_SERVER_DIALOG_INVALID_PORT_VALUE"));
       }
 
       serverWc.setAttribute(LocalAppEngineServerBehaviour.SERVER_PORT_ATTRIBUTE_NAME, port);

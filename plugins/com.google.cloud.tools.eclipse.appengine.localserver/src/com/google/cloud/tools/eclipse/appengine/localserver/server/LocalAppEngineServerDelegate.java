@@ -21,7 +21,6 @@ import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +30,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jst.server.core.IWebModule;
-import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IModuleType;
@@ -42,9 +40,9 @@ import org.eclipse.wst.server.core.model.ServerDelegate;
 @SuppressWarnings("restriction") // For FacetUtil
 public class LocalAppEngineServerDelegate extends ServerDelegate {
   public static final String RUNTIME_TYPE_ID =
-      "com.google.cloud.tools.eclipse.appengine.standard.runtime";
+      "com.google.cloud.tools.eclipse.appengine.standard.runtime"; //$NON-NLS-1$
   public static final String SERVER_TYPE_ID =
-      "com.google.cloud.tools.eclipse.appengine.standard.server";
+      "com.google.cloud.tools.eclipse.appengine.standard.server"; //$NON-NLS-1$
 
   private static final IModule[] EMPTY_MODULES = new IModule[0];
   private static final String SERVLET_MODULE_FACET = "jst.web"; //$NON-NLS-1$
@@ -124,8 +122,7 @@ public class LocalAppEngineServerDelegate extends ServerDelegate {
       if (currentServiceIds.containsKey(moduleServiceId)) {
         // uh oh, we have a conflict within the already-defined modules
         return StatusUtil.error(LocalAppEngineServerDebugTarget.class,
-            MessageFormat.format(
-                "\"{0}\" and \"{1}\" have same App Engine Service ID: {2}",
+            Messages.getString("SERVICES_HAVE_SAME_ID", //$NON-NLS-1$
                 currentServiceIds.get(moduleServiceId).getName(), module.getName(),
                 moduleServiceId));
       }
@@ -147,8 +144,7 @@ public class LocalAppEngineServerDelegate extends ServerDelegate {
         String moduleServiceId = serviceIdFunction.apply(module);
         if (currentServiceIds.containsKey(moduleServiceId)) {
           return StatusUtil.error(LocalAppEngineServerDebugTarget.class,
-              MessageFormat.format(
-                  "\"{0}\" and \"{1}\" have same App Engine Service ID: {2}",
+              Messages.getString("SERVICES_HAVE_SAME_ID", //$NON-NLS-1$
                   currentServiceIds.get(moduleServiceId).getName(), module.getName(),
                   moduleServiceId));
         }
@@ -163,14 +159,13 @@ public class LocalAppEngineServerDelegate extends ServerDelegate {
       if (AppEngineStandardFacet.hasAppEngineFacet(ProjectFacetsManager.create(module.getProject()))) {
         return Status.OK_STATUS;
       } else {
-        String errorMessage = NLS.bind(Messages.GAE_STANDARD_FACET_MISSING, module.getName(),
+        String errorMessage = Messages.getString("GAE_STANDARD_FACET_MISSING", module.getName(), //$NON-NLS-1$
             module.getProject().getName());
         return StatusUtil.error(LocalAppEngineServerDelegate.class, errorMessage);
       }
     } catch (CoreException ex) {
       return StatusUtil.error(LocalAppEngineServerDelegate.class,
-                              NLS.bind(Messages.NOT_FACETED_PROJECT, module.getProject().getName()),
-                              ex);
+          Messages.getString("NOT_FACETED_PROJECT", module.getProject().getName()), ex); //$NON-NLS-1$
     }
   }
 

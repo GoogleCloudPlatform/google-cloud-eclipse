@@ -17,7 +17,6 @@
 package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
 import com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerBehaviour;
-
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IToolBarManager;
@@ -27,6 +26,8 @@ import org.eclipse.ui.console.IConsoleConstants;
 import org.eclipse.ui.console.IConsolePageParticipant;
 import org.eclipse.ui.part.IPageBookViewPage;
 import org.eclipse.wst.server.core.IServer;
+import org.eclipse.wst.server.core.IServerListener;
+import org.eclipse.wst.server.core.ServerEvent;
 import org.eclipse.wst.server.ui.internal.ImageResource;
 import org.eclipse.wst.server.ui.internal.Messages;
 
@@ -37,6 +38,12 @@ import org.eclipse.wst.server.ui.internal.Messages;
 public class LocalAppEngineConsolePageParticipant implements IConsolePageParticipant {
   private LocalAppEngineConsole console;
   private Action terminateAction;
+  private IServerListener serverStateListener = new IServerListener() {
+    @Override
+    public void serverChanged(ServerEvent event) {
+      update();
+    }
+  };
   
   @Override
   public <T> T getAdapter(Class<T> required) {
@@ -50,10 +57,19 @@ public class LocalAppEngineConsolePageParticipant implements IConsolePagePartici
     // contribute to toolbar
     IActionBars actionBars = page.getSite().getActionBars();
     configureToolBar(actionBars.getToolBarManager());
+
+    LocalAppEngineServerBehaviour serverBehaviour = this.console.getServerBehaviourDelegate();
+    if (serverBehaviour != null) {
+      serverBehaviour.getServer().addServerListener(serverStateListener);
+    }
   }
 
   @Override
   public void dispose() {
+    LocalAppEngineServerBehaviour serverBehaviour = console.getServerBehaviourDelegate();
+    if (serverBehaviour != null) {
+      serverBehaviour.getServer().removeServerListener(serverStateListener);
+    }
     terminateAction = null;
   }
 
@@ -93,6 +109,7 @@ public class LocalAppEngineConsolePageParticipant implements IConsolePagePartici
     if (terminateAction != null) {
       LocalAppEngineServerBehaviour serverBehaviour = console.getServerBehaviourDelegate();
       if (serverBehaviour != null) {
+        // it's ok for us to call #canStop() since it's our implementation
         IStatus status = serverBehaviour.canStop();
         terminateAction.setEnabled(status.isOK());
       }

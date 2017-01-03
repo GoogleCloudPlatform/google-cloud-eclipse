@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.integration.appengine;
 
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -109,13 +110,19 @@ public class DebugNativeAppEngineStandardProject extends AbstractProjectTests {
     assertEquals("Hello App Engine!",
         getUrlContents(new URL("http://localhost:8080/hello"), (int) SWTBotPreferences.TIMEOUT));
 
+    SWTBotToolbarButton stopServerButton = null;
     for (SWTBotToolbarButton button : consoleView.getToolbarButtons()) {
       if ("Stop the server".equals(button.getToolTipText())) {
+        stopServerButton = button;
         button.click();
       }
     }
+    assertNotNull(stopServerButton);
     SwtBotTreeUtilities.waitUntilTreeContainsText(bot, allItems[0], "<terminated>");
     assertNoService(new URL("http://localhost:8080/hello"));
+    assertTrue("App Engine console should mark as stopped",
+        consoleView.getViewReference().getContentDescription().startsWith("<stopped>"));
+    assertFalse("Stop Server button should be disabled", stopServerButton.isEnabled());
   }
 
   /**

@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.localserver.server;
+package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
-import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class MessagesTest {
 
   @Test
-  public void testCloudSdkNotConfigured() {
+  public void testSpecifyVersionTooltip() {
     Assert.assertEquals(
-        "Could not run project because the Cloud SDK was not found. "
-        + "Check Preferences > Google Cloud Tools > SDK location and try again.", 
-        Messages.getString("cloudsdk.not.configured"));
+        "If checked, stops the previously running version when "
+        + "deploying a new version that receives all traffic.", 
+        Messages.getString("tooltip.stop.previous.version"));
   }
 
 }

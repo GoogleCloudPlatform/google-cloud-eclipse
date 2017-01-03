@@ -28,11 +28,11 @@ import com.google.cloud.tools.appengine.cloudsdk.process.ProcessStartListener;
 import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
 import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListener;
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -114,6 +114,16 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
       devServer = null;
       setServerState(IServer.STATE_STOPPED);
     }
+  }
+
+
+  @Override
+  public IStatus canStop() {
+    int serverState = getServer().getServerState();
+    if (serverState == IServer.STATE_STARTED) {
+      return Status.OK_STATUS;
+    }
+    return StatusUtil.error(this, "Not started");
   }
 
   /**
@@ -200,7 +210,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
       String attribute, int defaultPort) throws CoreException {
     int port = server.getAttribute(attribute, defaultPort);
     if (port < 0 || port > 65535) {
-      throw new CoreException(newErrorStatus(Messages.PORT_OUT_OF_RANGE));
+      throw new CoreException(newErrorStatus(Messages.getString("PORT_OUT_OF_RANGE")));
     }
 
     if (port != 0 && portProber.isPortInUse(port)) {
@@ -209,8 +219,8 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
         logger.log(Level.INFO, attribute + ": port " + port + " in use. Picking an unused port.");
         port = 0;
       } else {
-        throw new CoreException(newErrorStatus(
-            MessageFormat.format(Messages.PORT_IN_USE, String.valueOf(port))));
+        throw new CoreException(
+            newErrorStatus(Messages.getString("PORT_IN_USE", String.valueOf(port))));
       }
     }
     return port;

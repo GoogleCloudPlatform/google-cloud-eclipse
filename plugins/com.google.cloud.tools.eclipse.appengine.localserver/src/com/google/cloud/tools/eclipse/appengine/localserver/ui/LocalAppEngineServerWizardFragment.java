@@ -51,8 +51,8 @@ public class LocalAppEngineServerWizardFragment extends WizardFragment {
 
   @Override
   public Composite createComposite(Composite parent, IWizardHandle wizard) {
-    wizard.setTitle(Messages.CREATE_APP_ENGINE_RUNTIME_WIZARD_TITLE);
-    wizard.setDescription(Messages.CREATE_APP_ENGINE_RUNTIME_WIZARD_DESCRIPTION);
+    wizard.setTitle(Messages.getString("CREATE_APP_ENGINE_RUNTIME_WIZARD_TITLE"));
+    wizard.setDescription(Messages.getString("CREATE_APP_ENGINE_RUNTIME_WIZARD_DESCRIPTION"));
 
     Composite cloudSdkComposite = new Composite(parent, SWT.NONE);
     GridLayout layout = new GridLayout();
@@ -60,9 +60,9 @@ public class LocalAppEngineServerWizardFragment extends WizardFragment {
     cloudSdkComposite.setLayout(layout);
     
     Label label = new Label(cloudSdkComposite, SWT.NONE);
-    label.setText(Messages.RUNTIME_WIZARD_CLOUD_SDK_NOT_FOUND);
+    label.setText(Messages.getString("RUNTIME_WIZARD_CLOUD_SDK_NOT_FOUND"));
     cloudSdkButton = new Button(cloudSdkComposite, SWT.CHECK);
-    cloudSdkButton.setText(Messages.OPEN_CLOUD_SDK_PREFERENCE_BUTTON);
+    cloudSdkButton.setText(Messages.getString("OPEN_CLOUD_SDK_PREFERENCE_BUTTON"));
     cloudSdkButton.addSelectionListener(new CloudSdkButtonListener());
     parent.addDisposeListener(new OpenPreferencePage());
     
