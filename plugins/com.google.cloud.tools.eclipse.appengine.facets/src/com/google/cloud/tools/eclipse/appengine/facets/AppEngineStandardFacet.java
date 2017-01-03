@@ -122,16 +122,16 @@ public class AppEngineStandardFacet {
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
 
     // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1155
-    // Instead of using "IFacetedProject.installProjectFacet()", we install facets in a batch
-    // using "IFacetedProject.modify()" so that we hold the lock until we finish installing
-    // all the facets. This ensures that the first ConvertJob starts installing the JSDT facet only
-    // after the batch is complete, which in turn prevents the first ConvertJob from scheduling
-    // the second ConvertJob (triggered by installing the JSDT facet.)
-    Set<IFacetedProject.Action> facetInstallBatchSet = new HashSet<>();
+    // Instead of calling "IFacetedProject.installProjectFacet()" multiple times, we install facets
+    // in a batch using "IFacetedProject.modify()" so that we hold the lock until we finish
+    // installing all the facets. This ensures that the first ConvertJob starts installing the JSDT
+    // facet only after the batch is complete, which in turn prevents the first ConvertJob from
+    // scheduling the second ConvertJob (triggered by installing the JSDT facet.)
+    Set<IFacetedProject.Action> facetInstallSet = new HashSet<>();
     // Install required App Engine facets i.e. Java 1.7 and Dynamic Web Module 2.5
     if (installDependentFacets) {
-      addJavaFacetToBatch(facetedProject, facetInstallBatchSet);
-      addWebFacetToBatch(facetedProject, facetInstallBatchSet);
+      addJavaFacetToBatch(facetedProject, facetInstallSet);
+      addWebFacetToBatch(facetedProject, facetInstallSet);
     }
 
     IProjectFacet appEngineFacet = ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID);
@@ -140,9 +140,9 @@ public class AppEngineStandardFacet {
 
     if (!facetedProject.hasProjectFacet(appEngineFacet)) {
       Object config = null;
-      facetInstallBatchSet.add(new IFacetedProject.Action(
+      facetInstallSet.add(new IFacetedProject.Action(
           IFacetedProject.Action.Type.INSTALL, appEngineFacetVersion, config));
-      facetedProject.modify(facetInstallBatchSet, subMonitor.newChild(100));
+      facetedProject.modify(facetInstallSet, subMonitor.newChild(100));
     }
   }
 
@@ -215,10 +215,10 @@ public class AppEngineStandardFacet {
   }
 
   /**
-   * Installs Java 1.7 facet if it doesn't already exist in <code>factedProject</code>
+   * Installs Java 1.7 facet if it doesn't already exist in {@code factedProject}.
    */
   private static void addJavaFacetToBatch(IFacetedProject facetedProject,
-      Set<IFacetedProject.Action> batchSet) {
+      Set<IFacetedProject.Action> facetInstallSet) {
     if (facetedProject.hasProjectFacet(JavaFacet.VERSION_1_7)) {
       return;
     }
@@ -229,15 +229,15 @@ public class AppEngineStandardFacet {
     sourcePaths.add(new Path("src/main/java"));
     sourcePaths.add(new Path("src/test/java"));
     javaConfig.setSourceFolders(sourcePaths);
-    batchSet.add(new IFacetedProject.Action(
+    facetInstallSet.add(new IFacetedProject.Action(
         IFacetedProject.Action.Type.INSTALL, JavaFacet.VERSION_1_7, javaConfig));
   }
 
   /**
-   * Installs Dynamic Web Module 2.5 facet if it doesn't already exits in <code>factedProject</code>
+   * Installs Dynamic Web Module 2.5 facet if it doesn't already exist in {@code factedProject}.
    */
   private static void addWebFacetToBatch(IFacetedProject facetedProject,
-      Set<IFacetedProject.Action> batchSet) {
+      Set<IFacetedProject.Action> facetInstallSet) {
     if (facetedProject.hasProjectFacet(WebFacetUtils.WEB_25)) {
       return;
     }
@@ -247,7 +247,7 @@ public class AppEngineStandardFacet {
     webModel.setBooleanProperty(IJ2EEFacetInstallDataModelProperties.GENERATE_DD, false);
     webModel.setBooleanProperty(IWebFacetInstallDataModelProperties.INSTALL_WEB_LIBRARY, false);
     webModel.setStringProperty(IWebFacetInstallDataModelProperties.CONFIG_FOLDER, "src/main/webapp");
-    batchSet.add(new IFacetedProject.Action(
+    facetInstallSet.add(new IFacetedProject.Action(
         IFacetedProject.Action.Type.INSTALL, WebFacetUtils.WEB_25, webModel));
   }
 
