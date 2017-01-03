@@ -26,7 +26,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.junit.After;
 import org.junit.Test;
 
-public class FutureNonSystemJobSuspenderTest {
+public class NonSystemJobSuspenderTest {
 
   private Job job1 = new NoOpSpinJob("Test job 1");
   private Job job2 = new NoOpSpinJob("Test job 2");
