@@ -215,7 +215,7 @@ public class AppEngineStandardFacet {
   }
 
   /**
-   * Installs Java 1.7 facet if it doesn't already exist in {@code factedProject}.
+   * Installs Java 1.7 facet if it doesn't already exist in {@code facetedProject}.
    */
   private static void addJavaFacetToBatch(IFacetedProject facetedProject,
       Set<IFacetedProject.Action> facetInstallSet) {
@@ -234,7 +234,7 @@ public class AppEngineStandardFacet {
   }
 
   /**
-   * Installs Dynamic Web Module 2.5 facet if it doesn't already exist in {@code factedProject}.
+   * Installs Dynamic Web Module 2.5 facet if it doesn't already exist in {@code facetedProject}.
    */
   private static void addWebFacetToBatch(IFacetedProject facetedProject,
       Set<IFacetedProject.Action> facetInstallSet) {
