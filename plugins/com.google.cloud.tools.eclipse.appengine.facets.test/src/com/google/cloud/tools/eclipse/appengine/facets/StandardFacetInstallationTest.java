@@ -21,7 +21,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
-import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
 import java.io.IOException;
 import java.util.List;
 import org.eclipse.core.resources.IFile;
@@ -29,6 +28,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
+import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.common.project.facet.core.runtime.IRuntime;
 import org.junit.After;
 import org.junit.Test;
@@ -54,7 +54,7 @@ public class StandardFacetInstallationTest {
         ProjectUtils.importProjects(getClass(), "projects/test-dynamic-web-project.zip", null);
     assertEquals(1, projects.size());
     IProject project = projects.get(0);
-    IFacetedProject facetedProject = new FacetedProjectHelper().getFacetedProject(project);
+    IFacetedProject facetedProject = ProjectFacetsManager.create(project);
     // verify that the appengine-web.xml is installed in the dynamic web root folder
     AppEngineStandardFacet.installAppEngineFacet(facetedProject, true, null);
     IFile correctAppEngineWebXml = project.getFile(new Path("war/WEB-INF/appengine-web.xml"));

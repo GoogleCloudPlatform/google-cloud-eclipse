@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
+import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -61,7 +62,7 @@ public class NewNativeAppEngineStandardProjectTest extends AbstractProjectTests 
         packageName);
     assertTrue(project.exists());
 
-    IFacetedProject facetedProject = new FacetedProjectHelper().getFacetedProject(project);
+    IFacetedProject facetedProject = ProjectFacetsManager.create(project);
     assertNotNull("Native App Engine projects should be faceted", facetedProject);
     assertTrue("Project does not have standard facet",
         new FacetedProjectHelper().projectHasFacet(facetedProject, AppEngineStandardFacet.ID));

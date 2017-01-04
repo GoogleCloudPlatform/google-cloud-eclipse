@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
+import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -96,7 +97,7 @@ public class NewMavenBasedAppEngineProjectWizardTest extends AbstractProjectTest
           project.getLocation().toFile().getParentFile().getCanonicalPath());
     }
 
-    IFacetedProject facetedProject = new FacetedProjectHelper().getFacetedProject(project);
+    IFacetedProject facetedProject = ProjectFacetsManager.create(project);
     assertNotNull("m2e-wtp should create a faceted project", facetedProject);
     assertTrue("Project does not have standard facet",
         new FacetedProjectHelper().projectHasFacet(facetedProject, AppEngineStandardFacet.ID));
