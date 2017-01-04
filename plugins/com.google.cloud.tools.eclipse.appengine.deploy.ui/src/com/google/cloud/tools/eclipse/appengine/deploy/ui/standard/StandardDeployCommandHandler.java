@@ -128,7 +128,6 @@ public class StandardDeployCommandHandler extends AbstractHandler {
 
       @Override
       public void done(IJobChangeEvent event) {
-        super.done(event);
         AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.APP_ENGINE_DEPLOY_SUCCESS,
             AnalyticsEvents.APP_ENGINE_DEPLOY_STANDARD, null);
         launchCleanupJob();
