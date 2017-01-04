@@ -73,7 +73,7 @@ public class StandardDeployCommandHandler extends AbstractHandler {
   @Override
   public Object execute(ExecutionEvent event) throws ExecutionException {
     try {
-      IProject project = new ProjectFromSelectionHelper().getProject(event);
+      IProject project = ProjectFromSelectionHelper.getProject(event);
       Preconditions.checkState(project != null, "Command enablement wrongly configured.");
       IFacetedProject facetedProject = ProjectFacetsManager.create(project);
       Preconditions.checkState(facetedProject != null, "Command enablement wrongly configured.");

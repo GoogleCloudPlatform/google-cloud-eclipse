@@ -26,7 +26,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 
 public class ProjectFromSelectionHelper {
 
-  public IProject getProject(ExecutionEvent event) throws ExecutionException {
+  public static IProject getProject(ExecutionEvent event) throws ExecutionException {
     ISelection selection = HandlerUtil.getCurrentSelectionChecked(event);
     if (selection instanceof IStructuredSelection) {
       IStructuredSelection structuredSelection = (IStructuredSelection) selection;
