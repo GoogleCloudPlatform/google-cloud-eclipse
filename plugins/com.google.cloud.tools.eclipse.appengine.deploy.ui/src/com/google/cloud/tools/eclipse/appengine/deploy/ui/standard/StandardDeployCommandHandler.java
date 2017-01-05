@@ -33,7 +33,6 @@ import com.google.cloud.tools.eclipse.ui.util.ProjectFromSelectionHelper;
 import com.google.cloud.tools.eclipse.ui.util.ServiceUtils;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
-import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.text.DateFormat;
@@ -74,9 +73,13 @@ public class StandardDeployCommandHandler extends AbstractHandler {
   public Object execute(ExecutionEvent event) throws ExecutionException {
     try {
       IProject project = ProjectFromSelectionHelper.getProject(event);
-      Preconditions.checkState(project != null, "Command enablement wrongly configured.");
+      if (project == null) {
+        throw new AssertionError("Deploy menu enabled for non-project resources.");
+      }
       IFacetedProject facetedProject = ProjectFacetsManager.create(project);
-      Preconditions.checkState(facetedProject != null, "Command enablement wrongly configured.");
+      if (facetedProject == null) {
+        throw new AssertionError("Deploy menu enabled for non-faceted projects.");
+      }
 
       if (!checkProjectErrors(project)) {
         MessageDialog.openInformation(HandlerUtil.getActiveShell(event),
