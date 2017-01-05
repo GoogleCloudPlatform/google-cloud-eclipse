@@ -74,11 +74,11 @@ public class StandardDeployCommandHandler extends AbstractHandler {
     try {
       IProject project = ProjectFromSelectionHelper.getProject(event);
       if (project == null) {
-        throw new AssertionError("Deploy menu enabled for non-project resources.");
+        throw new NullPointerException("Deploy menu enabled for non-project resources");
       }
       IFacetedProject facetedProject = ProjectFacetsManager.create(project);
       if (facetedProject == null) {
-        throw new AssertionError("Deploy menu enabled for non-faceted projects.");
+        throw new NullPointerException("Deploy menu enabled for non-faceted projects");
       }
 
       if (!checkProjectErrors(project)) {
