@@ -64,8 +64,7 @@ public class AppEngineStandardFacet {
    * @return true if project has the App Engine Standard facet and false otherwise
    */
   public static boolean hasAppEngineFacet(IFacetedProject project) {
-    FacetedProjectHelper facetedProjectHelper = new FacetedProjectHelper();
-    return facetedProjectHelper.projectHasFacet(project, ID);
+    return FacetedProjectHelper.projectHasFacet(project, ID);
   }
 
   /**
