@@ -56,6 +56,10 @@ public class DeployPropertyPage extends PropertyPage {
   @Override
   protected Control createContents(Composite parent) {
     Composite container = new Composite(parent, SWT.NONE);
+    
+    PlatformUI.getWorkbench().getHelpSystem().setHelp(parent,
+        "com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployAppEngineStandardProjectContext"); //$NON-NLS-1$
+    
     IProject project = AdapterUtil.adapt(getElement(), IProject.class);
 
     try {
