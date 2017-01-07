@@ -100,7 +100,7 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
     List<IProject> archetypeProjects = projectConfigurationManager.createArchetypeProjects(location,
         archetype, groupId, artifactId, version, packageName, properties,
         importConfiguration, progress.newChild(40));
-
+    
     SubMonitor loopMonitor = progress.newChild(30).setWorkRemaining(3 * archetypeProjects.size());
     for (IProject project : archetypeProjects) {
       IFile pom = project.getFile("pom.xml");
