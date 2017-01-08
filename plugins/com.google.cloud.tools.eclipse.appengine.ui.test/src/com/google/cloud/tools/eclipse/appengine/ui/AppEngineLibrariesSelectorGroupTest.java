@@ -65,7 +65,7 @@ public class AppEngineLibrariesSelectorGroupTest {
   }
   
   @Test
-  public void testTooltips() {
+  public void testToolTips() {
     assertTrue(appengineButton.getToolTipText().length() > 0);
     assertTrue(endpointsButton.getToolTipText().length() > 0);
     assertTrue(objectifyButton.getToolTipText().length() > 0);
