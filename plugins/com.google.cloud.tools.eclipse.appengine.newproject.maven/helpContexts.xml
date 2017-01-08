@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <contexts>
   <context id="NewMavenProjectContext" title="Create Maven-based App Engine Standard Project">
-     <description>Create a new Maven-based Eclipse project that can be deployed to the App Engine standard environment.
+    <description>Create a new Maven-based Eclipse project that can be deployed to the App Engine standard environment.
 
 &lt;b&gt;Group ID:&lt;/b&gt; The Maven Group ID. Should be an alphanumeric path separated by periods.
 Typically the same as the Java package name.
@@ -12,6 +12,6 @@ Typically the same as the Java package name.
 to your project build path.</description>
   </context>
   <context id="ArchetypeSelectionContext" title="Select Maven Archetype">
-     <description>Choose one of the Maven archetypes pre-configured for the App Engine standard environment.</description>
+    <description>Choose one of the Maven archetypes pre-configured for the App Engine standard environment.</description>
   </context>
 </contexts>
