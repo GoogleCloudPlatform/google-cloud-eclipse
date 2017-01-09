@@ -61,7 +61,9 @@ public class M2SourceAttachmentDownloaderJobTest {
   @Mock
   private MavenHelper mavenHelper;
   @Mock
-  private Artifact artifact;
+  private Artifact sourceArtifact;
+  @Mock
+  private Artifact binaryArtifact;
   @Mock
   private LibraryClasspathContainerSerializer serializer;
   private IClasspathEntry library;
@@ -75,14 +77,15 @@ public class M2SourceAttachmentDownloaderJobTest {
   
   @Test
   public void testRun_attachesSourceArtifact() throws InterruptedException, CoreException, IOException {
-    File sourceArtifact = temporaryFolder.newFile("testSourceArtifact");
-    when(artifact.getFile()).thenReturn(sourceArtifact);
+    File sourceArtifactFile = temporaryFolder.newFile("testSourceArtifact");
+    when(sourceArtifact.getFile()).thenReturn(sourceArtifactFile);
     when(mavenHelper.getMavenSourceJarLocation(any(Artifact.class), any(IProgressMonitor.class)))
-      .thenReturn(new Path(sourceArtifact.getAbsolutePath()));
-    MavenCoordinates mavenCoordinates = new MavenCoordinates("groupId", "artifactId");
+      .thenReturn(new Path(sourceArtifactFile.getAbsolutePath()));
+    when(binaryArtifact.getGroupId()).thenReturn("groupId");
+    when(binaryArtifact.getArtifactId()).thenReturn("artifactId");
     IJavaProject javaProject = testProjectCreator.getJavaProject();
     JavaCore.setClasspathContainer(new Path(CONTAINER_PATH), new IJavaProject[]{ javaProject }, new IClasspathContainer[]{ container }, null);
-    M2SourceAttachmentDownloaderJob job = createJob(mavenCoordinates, javaProject);
+    M2SourceAttachmentDownloaderJob job = createJob(binaryArtifact, javaProject);
     job.schedule();
     job.join();
     assertThat(job.getResult(), is(Status.OK_STATUS));
@@ -90,22 +93,22 @@ public class M2SourceAttachmentDownloaderJobTest {
     for (IClasspathEntry iClasspathEntry : javaProject.getResolvedClasspath(false)) {
       if (iClasspathEntry.getPath().equals(new Path(LIBRARY_PATH))) {
         libraryFound = true;
-        assertThat(iClasspathEntry.getSourceAttachmentPath().toFile().getAbsolutePath(), is(sourceArtifact.getAbsolutePath()));
+        assertThat(iClasspathEntry.getSourceAttachmentPath().toFile().getAbsolutePath(), is(sourceArtifactFile.getAbsolutePath()));
       }
     }
     assertTrue(libraryFound);
   }
 
-  private M2SourceAttachmentDownloaderJob createJob(final MavenCoordinates mavenCoordinates,
+  private M2SourceAttachmentDownloaderJob createJob(final Artifact artifact,
       final IJavaProject javaProject) {
     return JobUtil.createJob(M2SourceAttachmentDownloaderJob.class, new ContextParameterSupplier() {
       @Override
       public void setParameters(IEclipseContext context) {
         context.set(IJavaProject.class, javaProject);
-        context.set(MavenCoordinates.class, mavenCoordinates);
+        context.set(Artifact.class, sourceArtifact);
         context.set(MavenHelper.class, mavenHelper);
         context.set(LibraryClasspathContainerSerializer.class, serializer);
-        context.set("classpathEntryPath", new Path(LIBRARY_PATH));
+        context.set(M2SourceAttachmentDownloaderJob.PARAM_CLASSPATHENTRY_PATH, new Path(LIBRARY_PATH));
       }
     });
   }
