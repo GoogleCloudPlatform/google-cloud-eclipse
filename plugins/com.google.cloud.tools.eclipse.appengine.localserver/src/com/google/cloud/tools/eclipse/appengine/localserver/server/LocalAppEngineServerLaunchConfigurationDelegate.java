@@ -28,6 +28,7 @@ import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -46,6 +47,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.DebugException;
+import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
@@ -137,10 +139,14 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
     new ServerLaunchMonitor(launch, server).engage();
 
+    // todo: programArguments is currently ignored
+    if (!Strings.isNullOrEmpty(getProgramArguments(configuration))) {
+      logger.warning("App Engine Local Server currently ignores program arguments");
+    }
+    // vmArguments is exactly as supplied by the user in the dialog box
     String vmArgumentString = getVMArguments(configuration);
-    // This string is exactly as supplied by the user in the dialog box
+    List<String> vmArguments = Arrays.asList(DebugPlugin.parseArguments(vmArgumentString));
     
-    List<String> vmArguments = Arrays.asList(vmArgumentString.split("\\s+"));
     if (ILaunchManager.DEBUG_MODE.equals(mode)) {
       int debugPort = getDebugPort();
       setupDebugTarget(launch, debugPort, monitor);
