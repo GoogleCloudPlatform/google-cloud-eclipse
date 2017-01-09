@@ -32,6 +32,7 @@ import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import java.io.File;
 import java.net.URI;
+import java.net.URL;
 import org.apache.maven.artifact.Artifact;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -67,10 +68,11 @@ public class M2RepositoryServiceTest {
   public void setUp() {
     mavenCoordinates = new MavenCoordinates("groupId", "artifactId");
     testJob = new TestJob();
-    when(sourceDownloaderJobFactory.createM2SourceDownloaderJob(any(IJavaProject.class), 
-                                                                any(MavenCoordinates.class),
-                                                                any(IPath.class),
-                                                                any(MavenHelper.class))).thenReturn(testJob);
+    when(sourceDownloaderJobFactory.createSourceDownloaderJob(any(IJavaProject.class), 
+                                                              any(MavenCoordinates.class),
+                                                              any(IPath.class),
+                                                              any(URL.class))).thenReturn(testJob);
+    
     m2RepositoryService = new M2RepositoryService();
     m2RepositoryService.setMavenHelper(mavenHelper);
     m2RepositoryService.setTransformer(transformer);
