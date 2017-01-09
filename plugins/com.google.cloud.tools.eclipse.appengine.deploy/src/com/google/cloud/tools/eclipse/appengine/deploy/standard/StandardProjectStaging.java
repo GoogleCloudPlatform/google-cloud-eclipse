@@ -27,7 +27,7 @@ import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineStandardStagin
 import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
 
 /**
- * Calls the staging operation on an App Engine Standard project using the {@link CloudSdk}
+ * Calls the staging operation on an App Engine Standard project using the {@link CloudSdk}.
  */
 public class StandardProjectStaging {
 
@@ -36,7 +36,8 @@ public class StandardProjectStaging {
    * @param stagingDirectory where the result of the staging operation will be written
    * @param cloudSdk executes the staging operation
    */
-  public void stage(IPath explodedWarDirectory, IPath stagingDirectory, CloudSdk cloudSdk, IProgressMonitor monitor) {
+  public void stage(IPath explodedWarDirectory, IPath stagingDirectory, CloudSdk cloudSdk,
+      IProgressMonitor monitor) {
     if (monitor.isCanceled()) {
       throw new OperationCanceledException();
     }
@@ -48,6 +49,7 @@ public class StandardProjectStaging {
     stagingConfig.setSourceDirectory(explodedWarDirectory.toFile());
     stagingConfig.setStagingDirectory(stagingDirectory.toFile());
     stagingConfig.setEnableJarSplitting(true);
+    stagingConfig.setDisableUpdateCheck(true);
 
     CloudSdkAppEngineStandardStaging staging = new CloudSdkAppEngineStandardStaging(cloudSdk);
     staging.stageStandard(stagingConfig);
