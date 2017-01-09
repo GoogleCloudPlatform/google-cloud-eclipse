@@ -24,7 +24,6 @@ import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryCla
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.LibraryRepositoryServiceException;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.io.IOException;
@@ -33,7 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -65,21 +63,12 @@ public class AppEngineLibraryContainerResolverJob extends Job {
   @Inject
   private LibraryClasspathContainerSerializer serializer;
 
-  public AppEngineLibraryContainerResolverJob() {
+  @Inject
+  public AppEngineLibraryContainerResolverJob(IJavaProject javaProject) {
     super(Messages.AppEngineLibraryContainerResolverJobName);
+    Preconditions.checkNotNull(javaProject, "javaProject is null");
+    this.javaProject = javaProject;
     setUser(true);
-  }
-
-  @VisibleForTesting
-  AppEngineLibraryContainerResolverJob(LibraryClasspathContainerSerializer serializer) {
-    super(Messages.AppEngineLibraryContainerResolverJobName);
-    Preconditions.checkNotNull(serializer);
-    this.serializer = serializer;
-    setUser(true);
-  }
-
-  @PostConstruct
-  public void init() {
     setRule(javaProject.getSchedulingRule());
   }
 
@@ -127,7 +116,7 @@ public class AppEngineLibraryContainerResolverJob extends Job {
     IClasspathEntry[] entries = new IClasspathEntry[libraryFiles.size()];
     int idx = 0;
     for (LibraryFile libraryFile : libraryFiles) {
-      entries[idx++] = repositoryService.getLibraryClasspathEntry(javaProject, libraryFile);
+      entries[idx++] = repositoryService.getLibraryClasspathEntry(javaProject, libraryFile, monitor);
       child.worked(1);
     }
     monitor.done();

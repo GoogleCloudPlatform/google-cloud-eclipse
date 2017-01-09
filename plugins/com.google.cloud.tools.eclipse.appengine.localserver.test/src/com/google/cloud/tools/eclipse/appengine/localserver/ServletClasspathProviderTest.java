@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -66,7 +67,8 @@ public class ServletClasspathProviderTest {
 
   @Test
   public void testResolveClasspathContainerThrowsError() throws LibraryRepositoryServiceException {
-    when(repositoryService.getLibraryClasspathEntry(any(IJavaProject.class), any(LibraryFile.class)))
+    when(repositoryService.getLibraryClasspathEntry(any(IJavaProject.class), any(LibraryFile.class),
+                                                    any (IProgressMonitor.class)))
       .thenThrow(new LibraryRepositoryServiceException("test exception"));
     assertNull(provider.resolveClasspathContainer(null, null));
   }
@@ -85,7 +87,8 @@ public class ServletClasspathProviderTest {
     servletApi.setLibraryFiles(Collections.singletonList(libraryFile));
     IClasspathEntry classpathEntry = mock(IClasspathEntry.class);
     when(classpathEntry.getPath()).thenReturn(new Path("/path/to/" + libraryId + ".jar"));
-    when(repositoryService.getLibraryClasspathEntry(any(IJavaProject.class), eq(libraryFile))).thenReturn(classpathEntry);
+    when(repositoryService.getLibraryClasspathEntry(any(IJavaProject.class), eq(libraryFile),
+                                                    any(IProgressMonitor.class))).thenReturn(classpathEntry);
     return servletApi;
   }
 }

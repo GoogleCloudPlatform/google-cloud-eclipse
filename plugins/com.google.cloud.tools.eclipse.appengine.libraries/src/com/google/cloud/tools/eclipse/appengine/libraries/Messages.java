@@ -30,6 +30,7 @@ public class Messages extends NLS {
   public static String RepositoryUriInvalid;
   public static String RepositoryUriNotAbsolute;
   public static String ResolveArtifactError;
+  public static String SetSourceAttachmentFailed;
   public static String TaskResolveArtifacts;
   public static String TaskResolveLibraries;
   public static String TaskResolveLibrariesError;

@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 
 /**
@@ -61,7 +62,7 @@ public class FileDownloader {
    * @throws IOException if the URL cannot be opened, the output file cannot be written or the transfer of the remote
    * file fails
    */
-  public IPath download(URL url) throws IOException {
+  public IPath download(URL url, IProgressMonitor monitor) throws IOException {
     Preconditions.checkNotNull(url, "url is null");
     String lastSegment = new Path(url.getPath()).lastSegment();
     Preconditions.checkNotNull(lastSegment, "last segment is null");

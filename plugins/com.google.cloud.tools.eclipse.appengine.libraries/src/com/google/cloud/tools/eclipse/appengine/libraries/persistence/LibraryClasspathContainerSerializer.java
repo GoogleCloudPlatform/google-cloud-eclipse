@@ -108,7 +108,6 @@ public class LibraryClasspathContainerSerializer {
       logger.warning("Container state file cannot be created, save failed");
       return;
     } else {
-      truncateFile(stateFile);
       try (OutputStreamWriter out =
           new OutputStreamWriter(new FileOutputStream(stateFile), StandardCharsets.UTF_8)) {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -116,13 +115,6 @@ public class LibraryClasspathContainerSerializer {
             binaryArtifactBaseLocationProvider.getBaseLocation(),
             sourceBaseLocationProvider.getBaseLocation())));
       }
-    }
-  }
-
-  private void truncateFile(File stateFile) throws IOException, FileNotFoundException {
-    try (FileOutputStream fileOutputStream = new FileOutputStream(stateFile);
-         FileChannel channel = fileOutputStream.getChannel()) {
-      channel.truncate(0);
     }
   }
 

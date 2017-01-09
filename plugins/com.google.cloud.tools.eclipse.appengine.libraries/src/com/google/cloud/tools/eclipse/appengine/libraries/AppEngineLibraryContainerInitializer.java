@@ -34,6 +34,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -124,7 +125,7 @@ public class AppEngineLibraryContainerInitializer extends ClasspathContainerInit
       if (!classpathEntry.getPath().toFile().exists()
           || (classpathEntry.getSourceAttachmentPath() != null
               && !classpathEntry.getSourceAttachmentPath().toFile().exists())) {
-        classpathEntries[i] = repositoryService.rebuildClasspathEntry(javaProject, classpathEntry);
+        classpathEntries[i] = repositoryService.rebuildClasspathEntry(javaProject, classpathEntry, new NullProgressMonitor());
       }
     }
   }

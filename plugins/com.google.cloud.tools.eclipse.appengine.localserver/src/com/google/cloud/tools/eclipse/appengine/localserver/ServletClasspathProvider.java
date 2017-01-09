@@ -32,12 +32,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Inject;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionRegistry;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jst.server.core.RuntimeClasspathProviderDelegate;
 import org.eclipse.wst.server.core.IRuntime;
 
@@ -96,13 +94,13 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
       List<LibraryFile> servletApiLibraryFiles = libraries.get("servlet-api").getLibraryFiles();
       Preconditions.checkState(servletApiLibraryFiles.size() == 1);
       LibraryFile servletApi = servletApiLibraryFiles.get(0);
-      IClasspathEntry servletApiEntry = service.getLibraryClasspathEntry(null, servletApi);
+      IClasspathEntry servletApiEntry = service.getLibraryClasspathEntry(null, servletApi, new NullProgressMonitor());
 
       // jsp api is assumed to be a single file
       List<LibraryFile> jspApiLibraryFiles = libraries.get("jsp-api").getLibraryFiles();
       Preconditions.checkState(jspApiLibraryFiles.size() == 1);
       LibraryFile jspApi = jspApiLibraryFiles.get(0);
-      IClasspathEntry jspApiEntry = service.getLibraryClasspathEntry(null, jspApi);
+      IClasspathEntry jspApiEntry = service.getLibraryClasspathEntry(null, jspApi, new NullProgressMonitor());
 
       return new IClasspathEntry[] { servletApiEntry, jspApiEntry };
     } catch (LibraryRepositoryServiceException ex) {
@@ -127,12 +125,4 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
       }
     }
   }
-
-  private static class NonJavaProjectException extends Exception {
-
-    public NonJavaProjectException(IProject project) {
-      super("Not a java project: " + project.getName());
-    }
-  }
-
 }

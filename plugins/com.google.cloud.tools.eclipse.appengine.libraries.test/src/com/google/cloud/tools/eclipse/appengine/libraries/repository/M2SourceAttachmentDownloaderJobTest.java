@@ -10,6 +10,8 @@ import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContai
 import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
 import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
+import com.google.cloud.tools.eclipse.util.jobs.JobUtil;
+import com.google.cloud.tools.eclipse.util.jobs.JobUtil.ContextParameterSupplier;
 import java.io.File;
 import java.io.IOException;
 import org.apache.maven.artifact.Artifact;
@@ -17,6 +19,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -33,7 +36,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class M2SourceAttachmentDownloaderJobTest {
 
   private static final String CONTAINER_PATH = "/containerPath";
-  private static final String LIBRARY_PATH = "/libraryPath";
+  private static final String LIBRARY_PATH = "/libraryPath/library.jar";
 
   @Rule
   public TestProjectCreator testProjectCreator = new TestProjectCreator().withClasspathContainerPath(CONTAINER_PATH);
@@ -58,15 +61,12 @@ public class M2SourceAttachmentDownloaderJobTest {
   public void test() throws InterruptedException, CoreException, IOException {
     File sourceArtifact = temporaryFolder.newFile("testSourceArtifact");
     when(artifact.getFile()).thenReturn(sourceArtifact);
-    when(mavenHelper.getMavenSourceJarLocation(any(MavenCoordinates.class))).thenReturn(new Path(sourceArtifact.getAbsolutePath()));
+    when(mavenHelper.getMavenSourceJarLocation(any(MavenCoordinates.class), any(IProgressMonitor.class)))
+      .thenReturn(new Path(sourceArtifact.getAbsolutePath()));
     MavenCoordinates mavenCoordinates = new MavenCoordinates("groupId", "artifactId");
     IJavaProject javaProject = testProjectCreator.getJavaProject();
     JavaCore.setClasspathContainer(new Path(CONTAINER_PATH), new IJavaProject[]{ javaProject }, new IClasspathContainer[]{ container }, null);
-    M2SourceAttachmentDownloaderJob job = new M2SourceAttachmentDownloaderJob(javaProject,
-                                                                              new Path(LIBRARY_PATH),
-                                                                              mavenCoordinates,
-                                                                              mavenHelper,
-                                                                              serializer);
+    M2SourceAttachmentDownloaderJob job = createJob(mavenCoordinates, javaProject);
     job.schedule();
     job.join();
     assertThat(job.getResult(), is(Status.OK_STATUS));
@@ -80,4 +80,17 @@ public class M2SourceAttachmentDownloaderJobTest {
     assertTrue(libraryFound);
   }
 
+  private M2SourceAttachmentDownloaderJob createJob(final MavenCoordinates mavenCoordinates,
+      final IJavaProject javaProject) {
+    return JobUtil.createJob(M2SourceAttachmentDownloaderJob.class, new ContextParameterSupplier() {
+      @Override
+      public void setParameters(IEclipseContext context) {
+        context.set(IJavaProject.class, javaProject);
+        context.set(MavenCoordinates.class, mavenCoordinates);
+        context.set(MavenHelper.class, mavenHelper);
+        context.set(LibraryClasspathContainerSerializer.class, serializer);
+        context.set("classpathEntryPath", new Path(LIBRARY_PATH));
+      }
+    });
+  }
 }

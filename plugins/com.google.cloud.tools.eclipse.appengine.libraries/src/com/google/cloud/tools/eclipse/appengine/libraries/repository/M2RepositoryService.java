@@ -20,12 +20,10 @@ import com.google.cloud.tools.eclipse.appengine.libraries.Messages;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Filter;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
-import com.google.cloud.tools.eclipse.appengine.libraries.repository.impl.DefaultSourceDownloaderJobFactory;
-import com.google.cloud.tools.eclipse.appengine.libraries.repository.impl.M2EclipseMavenHelper;
+import com.google.cloud.tools.eclipse.appengine.libraries.util.PathUtil;
 import com.google.cloud.tools.eclipse.util.io.FileDownloader;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -34,8 +32,8 @@ import java.util.List;
 import org.apache.maven.artifact.Artifact;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -43,13 +41,12 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jst.j2ee.classpathdep.UpdateClasspathAttributeUtil;
 import org.eclipse.osgi.util.NLS;
-import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 
 /**
- * Implementation of {@link ILibraryRepositoryService} that relies on M2Eclipse to download the artifacts and store
- * them in the local Maven repository pointed to by M2Eclipse's M2_REPO variable.
+ * Implementation of {@link ILibraryRepositoryService} that relies on M2Eclipse to download the
+ * artifacts and store them in the local Maven repository pointed to by M2Eclipse's M2_REPO variable.
  */
 @Component
 public class M2RepositoryService implements ILibraryRepositoryService {
@@ -62,43 +59,54 @@ public class M2RepositoryService implements ILibraryRepositoryService {
   private SourceDownloaderJobFactory sourceDownloaderJobFactory;
 
   @Override
-  public IClasspathEntry getLibraryClasspathEntry(IJavaProject javaProject, LibraryFile libraryFile) 
-                                                                            throws LibraryRepositoryServiceException {
+  public IClasspathEntry getLibraryClasspathEntry(IJavaProject javaProject, LibraryFile libraryFile,
+                                                  IProgressMonitor monitor) 
+                                                          throws LibraryRepositoryServiceException {
     verifyDependencies();
     MavenCoordinates mavenCoordinates = libraryFile.getMavenCoordinates();
     try {
-      Artifact artifact = mavenHelper.resolveArtifact(null, mavenCoordinates);
-      IClasspathAttribute[] libraryFileClasspathAttributes = getClasspathAttributes(libraryFile, artifact);
+      Artifact artifact = mavenHelper.resolveArtifact(mavenCoordinates, null);
+      IClasspathAttribute[] libraryFileClasspathAttributes =
+          getClasspathAttributes(libraryFile, artifact);
       URL sourceUrl = getSourceUrlFromUri(libraryFile.getSourceUri());
       Path classpathEntryPath = new Path(artifact.getFile().getAbsolutePath());
       return JavaCore.newLibraryEntry(classpathEntryPath,
-                                      getSourceLocation(mavenCoordinates, sourceUrl, javaProject, classpathEntryPath),
+                                      getSourceLocation(mavenCoordinates, sourceUrl, javaProject,
+                                                        classpathEntryPath, monitor),
                                       null /*  sourceAttachmentRootPath */,
                                       getAccessRules(libraryFile.getFilters()),
                                       libraryFileClasspathAttributes,
                                       true /* isExported */);
     } catch (CoreException ex) {
-      throw new LibraryRepositoryServiceException(NLS.bind(Messages.ResolveArtifactError, mavenCoordinates), ex);
+      throw new LibraryRepositoryServiceException(NLS.bind(Messages.ResolveArtifactError,
+                                                           mavenCoordinates),
+                                                  ex);
     }
   }
 
   @Override
-  public IClasspathEntry rebuildClasspathEntry(IJavaProject javaProject, IClasspathEntry classpathEntry) 
-                                                                            throws LibraryRepositoryServiceException {
+  public IClasspathEntry rebuildClasspathEntry(IJavaProject javaProject,
+                                               IClasspathEntry classpathEntry,
+                                               IProgressMonitor monitor) 
+                                                          throws LibraryRepositoryServiceException {
     verifyDependencies();
-    MavenCoordinates mavenCoordinates = transformer.createMavenCoordinates(classpathEntry.getExtraAttributes());
+    MavenCoordinates mavenCoordinates =
+        transformer.createMavenCoordinates(classpathEntry.getExtraAttributes());
     try {
-      Artifact artifact = mavenHelper.resolveArtifact(null, mavenCoordinates);
+      Artifact artifact = mavenHelper.resolveArtifact(mavenCoordinates, null);
       URL sourceUrl = getSourceUrlFromAttribute(classpathEntry.getExtraAttributes());
       Path classpathEntryPath = new Path(artifact.getFile().getAbsolutePath());
       return JavaCore.newLibraryEntry(classpathEntryPath,
-                                      getSourceLocation(mavenCoordinates, sourceUrl, javaProject, classpathEntryPath),
+                                      getSourceLocation(mavenCoordinates, sourceUrl, javaProject,
+                                                        classpathEntryPath, monitor),
                                       null /*  sourceAttachmentRootPath */,
                                       classpathEntry.getAccessRules(),
                                       classpathEntry.getExtraAttributes(),
                                       true /* isExported */);
     } catch (CoreException ex) {
-      throw new LibraryRepositoryServiceException(NLS.bind(Messages.ResolveArtifactError, mavenCoordinates), ex);
+      throw new LibraryRepositoryServiceException(NLS.bind(Messages.ResolveArtifactError,
+                                                           mavenCoordinates),
+                                                  ex);
     }
   }
 
@@ -129,7 +137,7 @@ public class M2RepositoryService implements ILibraryRepositoryService {
   }
 
   private IClasspathAttribute[] getClasspathAttributes(LibraryFile libraryFile, Artifact artifact)
-                                                                              throws LibraryRepositoryServiceException {
+                                                          throws LibraryRepositoryServiceException {
     try {
       List<IClasspathAttribute> attributes =
           transformer.createClasspathAttributes(artifact, libraryFile.getMavenCoordinates());
@@ -142,7 +150,8 @@ public class M2RepositoryService implements ILibraryRepositoryService {
         addUriAttribute(attributes, CLASSPATH_ATTRIBUTE_SOURCE_URL, libraryFile.getSourceUri());
       }
       if (libraryFile.getJavadocUri() != null) {
-        addUriAttribute(attributes, IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME, libraryFile.getJavadocUri());
+        addUriAttribute(attributes, IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME,
+                        libraryFile.getJavadocUri());
       }
       return attributes.toArray(new IClasspathAttribute[0]);
     } catch (CoreException ex) {
@@ -159,13 +168,16 @@ public class M2RepositoryService implements ILibraryRepositoryService {
   }
 
   /**
-   * Determines the source artifact's path by delegating to either M2Eclipse or a {@link FileDownloader}.
+   * Determines the source artifact's path by delegating to either M2Eclipse or a
+   * {@link FileDownloader}.
    * <p>
-   * If <code>javaProject</code> is null, the source artifact path resolution is synchronous and the path is returned,
-   * otherwise a background job is created that will do the resolution and <code>null</code> is returned.
+   * If <code>javaProject</code> is null, the source artifact path resolution is synchronous and the
+   * path is returned, otherwise a background job is created that will do the resolution and 
+   * <code>null</code> is returned.
    * @param mavenCoordinates determines the artifact whose sources need to be resolved
-   * @param sourceUrl optional URL pointing to a remote location hosting the source artifact, if <code>null</code> then
-   * the <code>mavenCoordinates</code> will be used with classifier <code>source</code> to obtain the sources
+   * @param sourceUrl optional URL pointing to a remote location hosting the source artifact, if
+   * <code>null</code> then the <code>mavenCoordinates</code> will be used with classifier
+   * <code>source</code> to obtain the sources
    * @param javaProject the project that owns the classpath entry that needs to be updated
    * @param classpathEntryPath the path of the classpath entry that needs to be updated
    * @return
@@ -173,58 +185,35 @@ public class M2RepositoryService implements ILibraryRepositoryService {
   private IPath getSourceLocation(final MavenCoordinates mavenCoordinates,
                                   final URL sourceUrl,
                                   final IJavaProject javaProject,
-                                  final IPath classpathEntryPath) {
-    if (sourceUrl == null) {
-      if (javaProject != null) {
-        sourceDownloaderJobFactory.createM2SourceDownloaderJob(javaProject,
-                                                               mavenCoordinates,
-                                                               classpathEntryPath,
-                                                               mavenHelper).schedule();
-        return null;
-      } else {
-        // without project the async job wouldn't know where to add the downloaded jar, let's resolve it synchronized
-        return mavenHelper.getMavenSourceJarLocation(mavenCoordinates);
-      }
+                                  final IPath classpathEntryPath,
+                                  IProgressMonitor monitor) {
+    if (javaProject != null) {
+      sourceDownloaderJobFactory.createSourceDownloaderJob(javaProject,
+                                                           mavenCoordinates,
+                                                           classpathEntryPath,
+                                                           sourceUrl).schedule();
+      return null;
     } else {
-      if (javaProject != null) {
-        sourceDownloaderJobFactory.createRemoteFileSourceDownloaderJob(javaProject,
-                                                                       classpathEntryPath,
-                                                                       mavenCoordinates,
-                                                                       sourceUrl).schedule();
-        return null;
+      // without project the asynchronous job wouldn't know where to add the downloaded jar, let's
+      // resolve it synchronized
+      if (sourceUrl == null) {
+        return mavenHelper.getMavenSourceJarLocation(mavenCoordinates, monitor);
       } else {
-        // without project the async job wouldn't know where to add the downloaded jar, let's resolve it synchronized
-        return getDownloadedSourceLocation(mavenCoordinates, sourceUrl);
+        return getDownloadedSourceLocation(mavenCoordinates, sourceUrl, monitor);
       }
     }
   }
 
-  private IPath getDownloadedSourceLocation(MavenCoordinates mavenCoordinates, URL sourceUrl) {
+  private IPath getDownloadedSourceLocation(MavenCoordinates mavenCoordinates, URL sourceUrl,
+                                            IProgressMonitor monitor) {
     try {
-      IPath downloadFolder = getDownloadedFilesFolder(mavenCoordinates);
-      IPath path = new FileDownloader(downloadFolder).download(sourceUrl);
+      IPath downloadFolder = PathUtil.bundleStateBasedMavenFolder(mavenCoordinates);
+      IPath path = new FileDownloader(downloadFolder).download(sourceUrl, monitor);
       return path;
     } catch (IOException e) {
       // source file is failed to download, this is not an error
       return null;
     }
-  }
-
-  /**
-   * Returns the folder to which the a file corresponding to <code>mavenCoordinates</code> should be downloaded.
-   * <p>
-   * The folder is created as follows:
-   * <code>&lt;bundle_state_location&gt;/downloads/&lt;groupId&gt;/&lt;artifactId&gt;/&lt;version&gt;</code>
-   * @return the location of the download folder, may not exist
-   */
-  private IPath getDownloadedFilesFolder(MavenCoordinates mavenCoordinates) {
-    File downloadedSources =
-        Platform.getStateLocation(FrameworkUtil.getBundle(getClass()))
-        .append("downloads")
-        .append(mavenCoordinates.getGroupId())
-        .append(mavenCoordinates.getArtifactId())
-        .append(mavenCoordinates.getVersion()).toFile();
-    return new Path(downloadedSources.getAbsolutePath());
   }
 
   private static IAccessRule[] getAccessRules(List<Filter> filters) {
@@ -239,9 +228,9 @@ public class M2RepositoryService implements ILibraryRepositoryService {
 
   @Activate
   protected void activate() {
-    mavenHelper = new M2EclipseMavenHelper();
+    mavenHelper = new MavenHelper();
     transformer = new MavenCoordinatesClasspathAttributesTransformer();
-    sourceDownloaderJobFactory = new DefaultSourceDownloaderJobFactory();
+    sourceDownloaderJobFactory = new SourceDownloaderJobFactory();
   }
 
   private void verifyDependencies() {

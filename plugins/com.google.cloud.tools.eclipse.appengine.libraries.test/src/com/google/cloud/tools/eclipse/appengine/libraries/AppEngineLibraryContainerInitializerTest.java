@@ -42,6 +42,7 @@ import java.util.Collections;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -79,8 +80,8 @@ public class AppEngineLibraryContainerInitializerTest {
 
   @Before
   public void setUp() throws Exception {
-    when(repositoryService.rebuildClasspathEntry(any(IJavaProject.class), any(IClasspathEntry.class)))
-      .thenAnswer(fakeClasspathEntry());
+    when(repositoryService.rebuildClasspathEntry(any(IJavaProject.class), any(IClasspathEntry.class),
+                                                 any(IProgressMonitor.class))).thenAnswer(fakeClasspathEntry());
     setupLibraryFactory();
     setupSerializer();
   }

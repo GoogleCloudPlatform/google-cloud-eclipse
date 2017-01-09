@@ -1,11 +1,11 @@
 package com.google.cloud.tools.eclipse.appengine.libraries.repository;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainer;
+import com.google.cloud.tools.eclipse.appengine.libraries.Messages;
 import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
-import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import java.io.IOException;
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.core.runtime.CoreException;
@@ -19,51 +19,33 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.osgi.util.NLS;
 
 public abstract class AbstractSourceAttachmentDownloaderJob extends Job {
 
-  private long retryDelayFactor = 3000L;
-  private int retryAttempts = 10;
-
-  @Inject
-  private IJavaProject javaProject;
   @Inject
   @Named("classpathEntryPath")
   private IPath classpathEntryPath;
   @Inject
   private LibraryClasspathContainerSerializer serializer;
+  @Inject
+  private IJavaProject javaProject;
 
-  public AbstractSourceAttachmentDownloaderJob(String name) {
+  @Inject
+  public AbstractSourceAttachmentDownloaderJob(@Named("jobName") String name,
+                                               IJavaProject javaProject) {
     super(name);
-  }
-
-  @VisibleForTesting
-  AbstractSourceAttachmentDownloaderJob(IJavaProject javaProject, IPath classpathEntryPath,
-                                        LibraryClasspathContainerSerializer serializer) {
-    super("TestSourceAttachmentDownloaderJob");
+    Preconditions.checkNotNull(javaProject, "javaProject is null");
     this.javaProject = javaProject;
-    this.classpathEntryPath = classpathEntryPath;
-    this.serializer = serializer;
-  }
-
-  @VisibleForTesting
-  AbstractSourceAttachmentDownloaderJob(IJavaProject javaProject, IPath classpathEntryPath,
-                                        LibraryClasspathContainerSerializer serializer, int retryAttempts,
-                                        long retryDelayFactor) {
-    super("TestSourceAttachmentDownloaderJob");
-    this.javaProject = javaProject;
-    this.classpathEntryPath = classpathEntryPath;
-    this.serializer = serializer;
-    this.retryAttempts = retryAttempts;
-    this.retryDelayFactor = retryDelayFactor;
+    setRule(javaProject.getSchedulingRule());
   }
 
   @Override
   protected IStatus run(IProgressMonitor monitor) {
     try {
-      IPath sourcePath = getSourcePath();
+      IPath sourcePath = getSourcePath(monitor);
       if (sourcePath != null) {
-        setSourceAttachmentPath(getJavaProject(), sourcePath, monitor);
+        setSourceAttachmentPath(sourcePath, monitor);
       }
       return Status.OK_STATUS;
     } catch (IOException | CoreException ex) {
@@ -71,40 +53,80 @@ public abstract class AbstractSourceAttachmentDownloaderJob extends Job {
     }
   }
 
-  protected abstract IPath getSourcePath();
+  /**
+   * Subclasses must implement this method to return an {@link IPath} that points to the
+   * <code>jar</code> file containing the sources for the library corresponding to
+   * {@link #classpathEntryPath}.
+   */
+  protected abstract IPath getSourcePath(IProgressMonitor monitor);
 
   /**
-   * Finds the library entry with path matching {@link #classpathEntryPath} and sets the source attachment path to
-   * <code>sourcePath</code>
+   * Finds the library entry in the project's classpath with path matching 
+   * {@link #classpathEntryPath} and sets the source attachment path to <code>sourcePath</code>
    */
-  private void setSourceAttachmentPath(IJavaProject javaProject, IPath sourcePath, IProgressMonitor monitor) throws IOException, CoreException {
+  private void setSourceAttachmentPath(IPath sourcePath,
+                                       IProgressMonitor monitor) throws IOException, CoreException {
     IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
     for (int i = 0; i < rawClasspath.length; i++) {
-      // this method can return null for uninitialized LibraryClasspathContainer instances, in that case
-      // this jobs gets rescheduled to let JDT initialize the container in the meantime
       LibraryClasspathContainer libraryContainer = getLibraryClasspathContainer(rawClasspath[i]);
       if (libraryContainer != null) {
         IClasspathEntry[] classpathEntries = libraryContainer.getClasspathEntries();
         for (int j = 0; j < classpathEntries.length; j++) {
           if (classpathEntries[j].getPath().equals(classpathEntryPath)) {
-            setSourceAttachmentPathForEntry(javaProject, sourcePath, monitor, libraryContainer, classpathEntries, j);
+            updateClasspathEntrySourcePath(classpathEntries, j, sourcePath);
+            LibraryClasspathContainer newLibraryContainer =
+                copyContainerWithNewEntries(libraryContainer, classpathEntries);
+            JavaCore.setClasspathContainer(libraryContainer.getPath(),
+                                           new IJavaProject[]{ javaProject },
+                                           new IClasspathContainer[]{ newLibraryContainer },
+                                           monitor);
+            serializer.saveContainer(javaProject, newLibraryContainer);
             return;
           }
         }
       }
     }
-    if (retryAttempts-- > 0) {
-      schedule((long) (Math.random() * retryDelayFactor));
-    } else {
-      new CoreException(StatusUtil.error(this, "Could not set source attachment path"));
-    }
+    throw new CoreException(StatusUtil.error(this, NLS.bind(Messages.SetSourceAttachmentFailed,
+                                                            classpathEntryPath.toOSString(),
+                                                            javaProject.getProject().getName())));
   }
 
   /**
-   * Returns the {@link LibraryClasspathContainer} corresponding to the {@link IClasspathEntry} if one exists, otherwise
-   * <code>null</code>
+   * Creates a new {@link LibraryClasspathContainer} with the same path and description as
+   * <code>libraryContainer</code>'s but with the <code>classpathEntries</code>.
+   * @param libraryContainer the original container whose path and description are copied to the
+   * result
+   * @param classpathEntries the classpath entries of the new container
    */
-  private LibraryClasspathContainer getLibraryClasspathContainer(IClasspathEntry entry) throws JavaModelException {
+  private LibraryClasspathContainer copyContainerWithNewEntries(
+      LibraryClasspathContainer libraryContainer, IClasspathEntry[] classpathEntries) {
+    LibraryClasspathContainer newLibraryContainer =
+        new LibraryClasspathContainer(libraryContainer.getPath(),
+                                      libraryContainer.getDescription(),
+                                      classpathEntries);
+    return newLibraryContainer;
+  }
+
+  /**
+   * Updates a classpath entry by adding <code>sourcePath</code> as source attachment path.
+   * @param entryIndex the index of the element in the array that will be updated
+   */
+  private void updateClasspathEntrySourcePath(IClasspathEntry[] entries, int entryIndex,
+      IPath sourcePath) {
+    entries[entryIndex] = JavaCore.newLibraryEntry(entries[entryIndex].getPath(),
+                                                   sourcePath,
+                                                   null,
+                                                   entries[entryIndex].getAccessRules(),
+                                                   entries[entryIndex].getExtraAttributes(),
+                                                   entries[entryIndex].isExported());
+  }
+
+  /**
+   * Returns the {@link LibraryClasspathContainer} corresponding to the {@link IClasspathEntry} if
+   * one exists, otherwise <code>null</code>.
+   */
+  private LibraryClasspathContainer getLibraryClasspathContainer(IClasspathEntry entry)
+                                                                        throws JavaModelException {
     if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
       IClasspathContainer container = JavaCore.getClasspathContainer(entry.getPath(), javaProject);
       if (container instanceof LibraryClasspathContainer) {
@@ -114,29 +136,7 @@ public abstract class AbstractSourceAttachmentDownloaderJob extends Job {
     return null;
   }
 
-  private void setSourceAttachmentPathForEntry(IJavaProject javaProject, IPath sourcePath, IProgressMonitor monitor,
-      LibraryClasspathContainer libraryContainer, IClasspathEntry[] classpathEntries, int j)
-      throws JavaModelException, IOException, CoreException {
-    classpathEntries[j] = JavaCore.newLibraryEntry(classpathEntries[j].getPath(),
-                                                   sourcePath,
-                                                   null,
-                                                   classpathEntries[j].getAccessRules(),
-                                                   classpathEntries[j].getExtraAttributes(),
-                                                   classpathEntries[j].isExported());
-    LibraryClasspathContainer newLibraryContainer = new LibraryClasspathContainer(libraryContainer.getPath(),
-                                                                                  libraryContainer.getDescription(),
-                                                                                  classpathEntries);
-    JavaCore.setClasspathContainer(libraryContainer.getPath(), new IJavaProject[]{ javaProject },
-                                   new IClasspathContainer[]{ newLibraryContainer }, monitor);
-    serializer.saveContainer(javaProject, newLibraryContainer);
-  }
-
   protected IJavaProject getJavaProject() {
     return javaProject;
-  }
-
-  @PostConstruct
-  public void init() {
-    setRule(javaProject.getSchedulingRule());
   }
 }

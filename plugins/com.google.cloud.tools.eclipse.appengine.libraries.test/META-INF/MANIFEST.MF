@@ -10,6 +10,7 @@ Fragment-Host: com.google.cloud.tools.eclipse.appengine.libraries
 Require-Bundle: org.hamcrest;bundle-version="1.1.0",
  org.junit;bundle-version="4.12.0"
 Import-Package: com.google.cloud.tools.eclipse.test.util.project,
+ com.google.cloud.tools.eclipse.util.jobs,
  org.eclipse.core.resources,
  org.eclipse.core.runtime.spi;version="3.4.0",
  org.mockito;provider=google;version="1.10.19",

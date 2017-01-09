@@ -7,6 +7,8 @@ import java.net.URL;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.core.IJavaProject;
 
 public class RemoteFileSourceAttachmentDownloaderJob extends AbstractSourceAttachmentDownloaderJob {
 
@@ -16,14 +18,15 @@ public class RemoteFileSourceAttachmentDownloaderJob extends AbstractSourceAttac
   @Inject
   private URL sourceUrl;
   
-  public RemoteFileSourceAttachmentDownloaderJob() {
-    super(Messages.RemoteFileSourceAttachmentDownloaderJobName);
+  @Inject
+  public RemoteFileSourceAttachmentDownloaderJob(IJavaProject javaProject) {
+    super(Messages.RemoteFileSourceAttachmentDownloaderJobName, javaProject);
   }
 
   @Override
-  protected IPath getSourcePath() {
+  protected IPath getSourcePath(IProgressMonitor monitor) {
     try {
-      IPath path = new FileDownloader(downloadFolder).download(sourceUrl);
+      IPath path = new FileDownloader(downloadFolder).download(sourceUrl, monitor);
       return path;
     } catch (IOException e) {
       // source file is failed to download, this is not an error
