@@ -26,7 +26,7 @@ import com.google.cloud.tools.io.FilePermissions;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.CharMatcher;
 import java.io.IOException;
-import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.NotDirectoryException;
 import java.nio.file.Paths;
 import java.util.Collection;
 import org.eclipse.aether.repository.RepositoryPolicy;
@@ -308,7 +308,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
         java.nio.file.Path path = Paths.get(location);
         FilePermissions.verifyDirectoryCreatable(path);
         return true;
-      } catch (FileAlreadyExistsException ex) {
+      } catch (NotDirectoryException ex) {
           String message = Messages.getString("FILE_LOCATION", location); //$NON-NLS-1$
           page.setMessage(message, ERROR);
           return false;

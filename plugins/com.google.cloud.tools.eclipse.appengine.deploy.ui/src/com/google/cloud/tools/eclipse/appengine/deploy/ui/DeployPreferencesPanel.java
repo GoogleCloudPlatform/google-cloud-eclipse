@@ -30,11 +30,11 @@ abstract class DeployPreferencesPanel extends Composite {
     initializeFormToolkit();
   }
 
-  public abstract DataBindingContext getDataBindingContext();
+  abstract DataBindingContext getDataBindingContext();
 
-  public abstract void resetToDefaults();
+  abstract void resetToDefaults();
 
-  public abstract boolean savePreferences();
+  abstract boolean savePreferences();
 
   @Override
   public void dispose() {

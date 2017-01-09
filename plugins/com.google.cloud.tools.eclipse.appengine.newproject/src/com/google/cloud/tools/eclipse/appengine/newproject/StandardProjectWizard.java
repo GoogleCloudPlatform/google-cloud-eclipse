@@ -16,11 +16,15 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
-import com.google.cloud.tools.appengine.api.AppEngineException;
+import com.google.cloud.tools.appengine.cloudsdk.AppEngineJavaComponentsNotInstalledException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkOutOfDateException;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineJavaComponentMissingPage;
 import com.google.cloud.tools.eclipse.appengine.ui.CloudSdkMissingPage;
+import com.google.cloud.tools.eclipse.appengine.ui.CloudSdkOutOfDatePage;
 import com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPrompter;
+import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
@@ -35,10 +39,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.ide.undo.WorkspaceUndoUtil;
 import org.eclipse.ui.statushandlers.StatusManager;
 
@@ -55,14 +55,19 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
 
   @Override
   public void addPages() {
-    if (!cloudSdkExists()) {
-      addPage(new CloudSdkMissingPage(AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE));
-    } else if (!appEngineJavaComponentExists()) {
-      addPage(new AppEngineJavaComponentMissingPage(
-          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE));
-    } else { // all is good
+    try {
+      CloudSdk sdk = new CloudSdk.Builder().build();
+      sdk.validateCloudSdk();
+      sdk.validateAppEngineJavaComponents();
       page = new AppEngineStandardWizardPage();
       addPage(page);
+    } catch (CloudSdkNotFoundException ex) {
+      addPage(new CloudSdkMissingPage(AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE));
+    } catch (CloudSdkOutOfDateException ex) {
+      addPage(new CloudSdkOutOfDatePage(AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE));
+    } catch (AppEngineJavaComponentsNotInstalledException ex) {
+      addPage(new AppEngineJavaComponentMissingPage(
+          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE));
     }
   }
 
@@ -99,7 +104,7 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
       
       // open most important file created by wizard in editor
       IFile file = runnable.getMostImportant();
-      openInEditor(file);
+      WorkbenchUtil.openInEditor(workbench, file);
     } catch (InterruptedException ex) {
       status = Status.CANCEL_STATUS;
     } catch (InvocationTargetException ex) {
@@ -107,18 +112,6 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
     }
 
     return status.isOK();
-  }
-
-  private void openInEditor(IFile file) {
-    IWorkbenchWindow window = workbench.getActiveWorkbenchWindow();
-    if (window != null && file != null) {
-      IWorkbenchPage page = window.getActivePage();
-      try {
-        IDE.openEditor(page, file, true);
-      } catch (PartInitException ex) {
-        // ignore; we don't have to open the file
-      }
-    }
   }
 
   public static IStatus setErrorStatus(Object origin, Throwable ex) {
@@ -142,31 +135,4 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
       }
     }
   }
-
-  /**
-   * Verify that the Cloud SDK is where we can find it.
-   */
-  public static boolean cloudSdkExists() {
-    try {
-      CloudSdk sdk = new CloudSdk.Builder().build();
-      sdk.validateCloudSdk();
-      return true;
-    } catch (AppEngineException ex) {
-      return false;
-    }
-  }
-
-  /**
-   * Verify that we're set up for App Engine Java development.
-   */
-  public static boolean appEngineJavaComponentExists() {
-    try {
-      CloudSdk sdk = new CloudSdk.Builder().build();
-      sdk.validateAppEngineJavaComponents();
-      return true;
-    } catch (AppEngineException ex) {
-      return false;
-    }
-  }
-
 }

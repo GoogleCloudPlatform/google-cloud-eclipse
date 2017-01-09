@@ -60,24 +60,27 @@ public class LibraryFactory {
         Library library = new Library(configurationElement.getAttribute(ATTRIBUTE_NAME_ID));
         library.setName(configurationElement.getAttribute(ATTRIBUTE_NAME_NAME));
         library.setSiteUri(new URI(configurationElement.getAttribute(ATTRIBUTE_NAME_SITE_URI)));
-        library.setLibraryFiles(getLibraryFiles(configurationElement.getChildren(ELEMENT_NAME_LIBRARY_FILE)));
+        library.setLibraryFiles(
+            getLibraryFiles(configurationElement.getChildren(ELEMENT_NAME_LIBRARY_FILE)));
         String exportString = configurationElement.getAttribute(ATTRIBUTE_NAME_EXPORT);
         if (exportString != null) {
           library.setExport(Boolean.parseBoolean(exportString));
         }
-        String recommendationString = configurationElement.getAttribute(ATTRIBUTE_NAME_RECOMMENDATION);
+        String recommendationString =
+            configurationElement.getAttribute(ATTRIBUTE_NAME_RECOMMENDATION);
         if (recommendationString != null) {
-          library.setRecommendation(LibraryRecommendation.valueOf(recommendationString.toUpperCase(Locale.US)));
+          library.setRecommendation(
+              LibraryRecommendation.valueOf(recommendationString.toUpperCase(Locale.US)));
         }
-        library.setLibraryDependencies(getLibraryDependencies(configurationElement.getChildren(ELEMENT_NAME_LIBRARY_DEPENDENCY)));
+        library.setLibraryDependencies(getLibraryDependencies(
+            configurationElement.getChildren(ELEMENT_NAME_LIBRARY_DEPENDENCY)));
         return library;
       } else {
         throw new LibraryFactoryException(NLS.bind(Messages.UnexpectedConfigurationElement,
-                                                   configurationElement.getName(),
-                                                   ELEMENT_NAME_LIBRARY));
+            configurationElement.getName(), ELEMENT_NAME_LIBRARY));
       }
-    } catch (InvalidRegistryObjectException | URISyntaxException | IllegalArgumentException exception) {
-      throw new LibraryFactoryException(Messages.CreateLibraryError, exception);
+    } catch (InvalidRegistryObjectException | URISyntaxException | IllegalArgumentException ex) {
+      throw new LibraryFactoryException(Messages.CreateLibraryError, ex);
     }
   }
 
@@ -86,7 +89,8 @@ public class LibraryFactory {
     List<LibraryFile> libraryFiles = new ArrayList<>();
     for (IConfigurationElement libraryFileElement : children) {
       if (ELEMENT_NAME_LIBRARY_FILE.equals(libraryFileElement.getName())) {
-        MavenCoordinates mavenCoordinates = getMavenCoordinates(libraryFileElement.getChildren(ELEMENT_NAME_MAVEN_COORDINATES));
+        MavenCoordinates mavenCoordinates = getMavenCoordinates(
+            libraryFileElement.getChildren(ELEMENT_NAME_MAVEN_COORDINATES));
         LibraryFile libraryFile = new LibraryFile(mavenCoordinates);
         libraryFile.setFilters(getFilters(libraryFileElement.getChildren()));
         libraryFile.setSourceUri(getUri(libraryFileElement.getAttribute(ATTRIBUTE_NAME_SOURCE_URI)));
@@ -111,7 +115,8 @@ public class LibraryFactory {
 
   private MavenCoordinates getMavenCoordinates(IConfigurationElement[] children) {
     if (children.length != 1) {
-      logger.warning("Single configuration element for MavenCoordinates was expected, found: " + children.length); //$NON-NLS-1$
+      logger.warning("Single configuration element for MavenCoordinates was expected, found: " //$NON-NLS-1$
+          + children.length);
     }
     IConfigurationElement mavenCoordinatesElement = children[0];
     String groupId = mavenCoordinatesElement.getAttribute(ATTRIBUTE_NAME_GROUP_ID);

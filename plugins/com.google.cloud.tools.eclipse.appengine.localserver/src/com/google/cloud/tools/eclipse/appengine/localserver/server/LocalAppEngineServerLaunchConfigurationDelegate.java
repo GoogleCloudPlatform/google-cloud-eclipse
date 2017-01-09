@@ -28,10 +28,12 @@ import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +47,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.DebugException;
+import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
@@ -82,10 +85,10 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       CloudSdk cloudSdk = new CloudSdk.Builder().build();
       cloudSdk.validateCloudSdk();
     } catch (CloudSdkOutOfDateException ex) {
-        String detailMessage = Messages.getString("cloudsdk.out.of.date");
-        Status status = new Status(IStatus.ERROR,
-            "com.google.cloud.tools.eclipse.appengine.deploy.ui", detailMessage);
-        throw new CoreException(status);
+      String detailMessage = Messages.getString("cloudsdk.out.of.date");
+      Status status = new Status(IStatus.ERROR,
+          "com.google.cloud.tools.eclipse.appengine.deploy.ui", detailMessage);
+      throw new CoreException(status);
     } catch (AppEngineException ex) {
       String detailMessage = Messages.getString("cloudsdk.not.configured"); //$NON-NLS-1$
       Status status = new Status(IStatus.ERROR,
@@ -101,7 +104,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
         AnalyticsEvents.APP_ENGINE_LOCAL_SERVER_MODE, mode);
     
     validateCloudSdk();
-
+    
     IServer server = ServerUtil.getServer(configuration);
     if (server == null) {
       String message = "There is no App Engine development server available";
@@ -136,14 +139,22 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
     new ServerLaunchMonitor(launch, server).engage();
 
+    // todo: programArguments is currently ignored
+    if (!Strings.isNullOrEmpty(getProgramArguments(configuration))) {
+      logger.warning("App Engine Local Server currently ignores program arguments");
+    }
+    // vmArguments is exactly as supplied by the user in the dialog box
+    String vmArgumentString = getVMArguments(configuration);
+    List<String> vmArguments = Arrays.asList(DebugPlugin.parseArguments(vmArgumentString));
+    
     if (ILaunchManager.DEBUG_MODE.equals(mode)) {
       int debugPort = getDebugPort();
       setupDebugTarget(launch, debugPort, monitor);
-      serverBehaviour.startDebugDevServer(runnables, console.newMessageStream(), debugPort);
+      serverBehaviour.startDebugDevServer(runnables, console.newMessageStream(), debugPort, vmArguments);
     } else {
       // A launch must have at least one debug target or process, or it otherwise becomes a zombie
       LocalAppEngineServerDebugTarget.addTarget(launch, serverBehaviour);
-      serverBehaviour.startDevServer(runnables, console.newMessageStream());
+      serverBehaviour.startDevServer(runnables, console.newMessageStream(), vmArguments);
     }
   }
 

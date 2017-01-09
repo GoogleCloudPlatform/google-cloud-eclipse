@@ -67,6 +67,13 @@ public class LibraryTest {
     library.setName("b");
     assertThat(library.getName(), is("b"));
   }
+  
+  @Test
+  public void testSetToolTip() {
+    Library library = new Library("a");
+    library.setToolTip("some help");
+    assertThat(library.getToolTip(), is("some help"));
+  }
 
   @Test
   public void testSetNullSiteUri() {

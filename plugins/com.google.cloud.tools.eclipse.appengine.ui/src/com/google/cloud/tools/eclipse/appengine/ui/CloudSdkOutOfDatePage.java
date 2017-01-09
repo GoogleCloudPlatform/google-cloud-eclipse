@@ -14,23 +14,20 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.localserver.ui;
+package com.google.cloud.tools.eclipse.appengine.ui;
 
-import org.eclipse.debug.ui.ILaunchConfigurationTab;
-import org.junit.Assert;
-import org.junit.Test;
+/**
+ * Wizard page that displays a message that the Cloud SDK is
+ * out of date with instructions on how to update it. This page disables the 'Finish' button.
+ */
+public class CloudSdkOutOfDatePage extends MissingComponentPage {
 
-public class AppEngineTabGroupTest {
-  
-  @Test
-  public void testCreateTabs() {
-    AppEngineTabGroup group = new AppEngineTabGroup();
-    group.createTabs(null, "");
-    for (ILaunchConfigurationTab tab : group.getTabs()) {
-      Assert.assertNotNull(tab);
-    }
-    Assert.assertEquals("Server", group.getTabs()[0].getName());
-    Assert.assertEquals("Arguments", group.getTabs()[1].getName());
+  public CloudSdkOutOfDatePage(String wizardType) {
+    super("cloudSdkOutOfDatePage", //$NON-NLS-1$
+        wizardType,
+        Messages.getString("cloud.sdk.out.of.date"),
+        Messages.getString("cloud.sdk.out.of.date"),
+        Messages.getString("fix.cloud.sdk.version"));
   }
 
 }

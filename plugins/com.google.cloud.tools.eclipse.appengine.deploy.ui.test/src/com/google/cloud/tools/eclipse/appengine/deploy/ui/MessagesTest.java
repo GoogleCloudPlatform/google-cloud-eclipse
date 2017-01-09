@@ -14,23 +14,19 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.localserver.ui;
+package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
-import org.eclipse.debug.ui.ILaunchConfigurationTab;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class AppEngineTabGroupTest {
-  
+public class MessagesTest {
+
   @Test
-  public void testCreateTabs() {
-    AppEngineTabGroup group = new AppEngineTabGroup();
-    group.createTabs(null, "");
-    for (ILaunchConfigurationTab tab : group.getTabs()) {
-      Assert.assertNotNull(tab);
-    }
-    Assert.assertEquals("Server", group.getTabs()[0].getName());
-    Assert.assertEquals("Arguments", group.getTabs()[1].getName());
+  public void testSpecifyVersionTooltip() {
+    Assert.assertEquals(
+        "If checked, stops the previously running version when "
+        + "deploying a new version that receives all traffic.", 
+        Messages.getString("tooltip.stop.previous.version"));
   }
 
 }

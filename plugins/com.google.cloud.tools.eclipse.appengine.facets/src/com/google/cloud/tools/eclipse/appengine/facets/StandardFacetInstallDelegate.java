@@ -30,11 +30,15 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
+import org.eclipse.wst.common.project.facet.core.IProjectFacet;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
 public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate {
-  private final static String APPENGINE_WEB_XML = "appengine-web.xml";
+  private static final String APPENGINE_WEB_XML = "appengine-web.xml";
+
+  private static final String JSDT_FACET_ID = "wst.jsdt.web";
+  private static final int MAX_JSDT_CHECK_RETRIES = 100;
 
   @Override
   public void execute(IProject project,
@@ -46,23 +50,66 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
     installAppEngineRuntimes(project);
   }
 
-  private void installAppEngineRuntimes(final IProject project) {
+  private void installAppEngineRuntimes(IProject project) throws CoreException {
+    IFacetedProject facetedProject = ProjectFacetsManager.create(project);
+
     // Modifying targeted runtimes while installing/uninstalling facets is not allowed,
     // so schedule a job as a workaround.
-    Job installJob = new Job("Install App Engine runtimes in " + project.getName()) {
-      @Override
-      protected IStatus run(IProgressMonitor monitor) {
-        try {
-          IFacetedProject facetedProject = ProjectFacetsManager.create(project);
-          AppEngineStandardFacet.installAllAppEngineRuntimes(facetedProject, monitor);
-          return Status.OK_STATUS;
-        } catch (CoreException ex) {
-          return ex.getStatus();
-        }
-      }
-    };
+    Job installJob = new AppEngineRuntimeInstallJob(
+        "Install App Engine runtimes in " + project.getName(), facetedProject);
+    // Schedule immediately so that it doesn't go into the SLEEPING state. Ensuring the job is
+    // active is necessary for unit testing.
     installJob.schedule();
+    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1155
+    // The first ConvertJob has already been scheduled (which installs JSDT facet), and
+    // this is to suspend the second ConvertJob temporarily.
+    NonSystemJobSuspender.suspendFutureJobs();
   }
+
+  private static class AppEngineRuntimeInstallJob extends Job {
+
+    private IFacetedProject facetedProject;
+
+    private AppEngineRuntimeInstallJob(String name, IFacetedProject facetedProject) {
+      super(name);
+      this.facetedProject = facetedProject;
+    }
+
+    private void waitUntilJsdtIsFixedFacet() {
+      try {
+        IProjectFacet jsdtFacet = ProjectFacetsManager.getProjectFacet(JSDT_FACET_ID);
+        for (int times = 0;
+            times < MAX_JSDT_CHECK_RETRIES && !facetedProject.isFixedProjectFacet(jsdtFacet);
+            times++) {
+          try {
+            // To prevent going into the SLEEPING state, don't use "Job.schedule(100)".
+            Thread.sleep(100 /* ms */);
+          } catch (InterruptedException ex) {
+            // Keep waiting.
+          }
+        }
+      } catch (IllegalArgumentException ex) {
+        // JSDT facet itself doesn't exist. (Should not really happen.) Ignore and fall through.
+      }
+    }
+
+    @Override
+    protected IStatus run(IProgressMonitor monitor) {
+      try {
+        // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1155
+        // Wait until the first ConvertJob installs the JSDT facet.
+        waitUntilJsdtIsFixedFacet();
+        AppEngineStandardFacet.installAllAppEngineRuntimes(facetedProject, monitor);
+        return Status.OK_STATUS;
+      } catch (CoreException ex) {
+        return ex.getStatus();
+      }
+      finally {
+        // Now resume all the suspended jobs (including the second ConvertJob).
+        NonSystemJobSuspender.resume();
+      }
+    }
+  };
 
   /**
    * Creates an appengine-web.xml file in the WEB-INF folder if it doesn't exist

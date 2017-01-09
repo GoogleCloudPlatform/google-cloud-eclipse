@@ -96,8 +96,10 @@ public final class TestProjectCreator extends ExternalResource {
   }
 
   private void createJavaProject(String projectName) throws CoreException, JavaModelException {
-    IProjectDescription newProjectDescription = ResourcesPlugin.getWorkspace().newProjectDescription(projectName);
-    newProjectDescription.setNatureIds(new String[]{JavaCore.NATURE_ID, FacetedProjectNature.NATURE_ID});
+    IProjectDescription newProjectDescription =
+        ResourcesPlugin.getWorkspace().newProjectDescription(projectName);
+    newProjectDescription.setNatureIds(
+        new String[]{JavaCore.NATURE_ID, FacetedProjectNature.NATURE_ID});
     IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
     project.create(newProjectDescription, null);
     project.open(null);
@@ -115,7 +117,8 @@ public final class TestProjectCreator extends ExternalResource {
       IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
       IClasspathEntry[] newRawClasspath = new IClasspathEntry[rawClasspath.length + 1];
       System.arraycopy(rawClasspath, 0, newRawClasspath, 0, rawClasspath.length);
-      newRawClasspath[newRawClasspath.length - 1] = JavaCore.newContainerEntry(new Path(containerPath));
+      newRawClasspath[newRawClasspath.length - 1] =
+          JavaCore.newContainerEntry(new Path(containerPath));
       javaProject.setRawClasspath(newRawClasspath, null);
     }
   }
@@ -125,6 +128,7 @@ public final class TestProjectCreator extends ExternalResource {
       IFacetedProject facetedProject = ProjectFacetsManager.create(getProject());
       for (IProjectFacetVersion projectFacetVersion : projectFacetVersions) {
         facetedProject.installProjectFacet(projectFacetVersion, null, null);
+        ProjectUtils.waitUntilIdle();  // App Engine runtime is added via a Job, so wait.
       }
     }
   }

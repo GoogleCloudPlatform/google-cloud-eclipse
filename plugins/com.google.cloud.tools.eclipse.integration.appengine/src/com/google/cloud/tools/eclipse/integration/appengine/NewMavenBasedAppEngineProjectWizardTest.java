@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
+import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -87,8 +88,8 @@ public class NewMavenBasedAppEngineProjectWizardTest extends AbstractProjectTest
       String packageName, String archetypeDescription, String[] projectFiles)
       throws CoreException, IOException {
     assertFalse(projectExists(artifactId));
-    
-    project = SwtBotAppEngineActions.createMavenWebAppProject(bot, location, 
+
+    project = SwtBotAppEngineActions.createMavenWebAppProject(bot, location,
         "com.google.groupId", artifactId, packageName, archetypeDescription);
     assertTrue(project.exists());
     if (location != null) {
@@ -96,15 +97,16 @@ public class NewMavenBasedAppEngineProjectWizardTest extends AbstractProjectTest
           project.getLocation().toFile().getParentFile().getCanonicalPath());
     }
 
-    IFacetedProject facetedProject = new FacetedProjectHelper().getFacetedProject(project);
+    IFacetedProject facetedProject = ProjectFacetsManager.create(project);
     assertNotNull("m2e-wtp should create a faceted project", facetedProject);
     assertTrue("Project does not have standard facet",
-        new FacetedProjectHelper().projectHasFacet(facetedProject, AppEngineStandardFacet.ID));
+        FacetedProjectHelper.projectHasFacet(facetedProject, AppEngineStandardFacet.ID));
 
     for (String projectFile : projectFiles) {
       Path projectFilePath = new Path(projectFile);
       assertTrue(project.exists(projectFilePath));
     }
+    ProjectUtils.waitUntilIdle();  // App Engine runtime is added via a Job, so wait.
     ProjectUtils.failIfBuildErrors("New Maven project has errors", project);
   }
 }

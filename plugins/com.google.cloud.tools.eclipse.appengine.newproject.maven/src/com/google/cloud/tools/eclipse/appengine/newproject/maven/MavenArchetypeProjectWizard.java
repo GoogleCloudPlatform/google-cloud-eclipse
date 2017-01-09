@@ -16,14 +16,22 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 
+import com.google.cloud.tools.appengine.cloudsdk.AppEngineJavaComponentsNotInstalledException;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkOutOfDateException;
 import com.google.cloud.tools.eclipse.appengine.newproject.StandardProjectWizard;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineJavaComponentMissingPage;
 import com.google.cloud.tools.eclipse.appengine.ui.CloudSdkMissingPage;
+import com.google.cloud.tools.eclipse.appengine.ui.CloudSdkOutOfDatePage;
 import com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPrompter;
+import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -37,28 +45,34 @@ public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
   private MavenAppEngineStandardWizardPage page;
   private MavenAppEngineStandardArchetypeWizardPage archetypePage;
   private File cloudSdkLocation;
+  private IWorkbench workbench;
 
   public MavenArchetypeProjectWizard() {
     setWindowTitle(Messages.getString("WIZARD_TITLE")); //$NON-NLS-1$
     setNeedsProgressMonitor(true);
   }
-
+  
   @Override
   public void addPages() {
-    if (!StandardProjectWizard.cloudSdkExists()) {
-      addPage(
-          new CloudSdkMissingPage(
-          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_MAVEN));
-    } else if (!StandardProjectWizard.appEngineJavaComponentExists()) {
-      addPage(new AppEngineJavaComponentMissingPage(
-          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE));
-    } else { // all is good
+    try {
+      CloudSdk sdk = new CloudSdk.Builder().build();
+      sdk.validateCloudSdk();
+      sdk.validateAppEngineJavaComponents();
       page = new MavenAppEngineStandardWizardPage();
       archetypePage = new MavenAppEngineStandardArchetypeWizardPage();
       addPage(page);
       addPage(archetypePage);
+    } catch (CloudSdkNotFoundException ex) {
+      addPage(new CloudSdkMissingPage(AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_MAVEN));
+    } catch (CloudSdkOutOfDateException ex) {
+      addPage(new CloudSdkOutOfDatePage(
+          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_MAVEN));
+    } catch (AppEngineJavaComponentsNotInstalledException ex) {
+      addPage(new AppEngineJavaComponentMissingPage(
+          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_MAVEN));
     }
   }
+  
 
   @Override
   public boolean performFinish() {
@@ -74,7 +88,8 @@ public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
       }
     }
 
-    final CreateMavenBasedAppEngineStandardProject operation = new CreateMavenBasedAppEngineStandardProject();
+    final CreateMavenBasedAppEngineStandardProject operation
+        = new CreateMavenBasedAppEngineStandardProject();
     operation.setPackageName(page.getPackageName());
     operation.setGroupId(page.getGroupId());
     operation.setArtifactId(page.getArtifactId());
@@ -96,6 +111,11 @@ public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
       boolean fork = true;
       boolean cancelable = true;
       getContainer().run(fork, cancelable, runnable);
+      
+      // open most important file created by wizard in editor
+      IFile file = operation.getMostImportant();
+      WorkbenchUtil.openInEditor(workbench, file);
+      
     } catch (InterruptedException ex) {
       status = Status.CANCEL_STATUS;
     } catch (InvocationTargetException ex) {
@@ -107,6 +127,7 @@ public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
 
   @Override
   public void init(IWorkbench workbench, IStructuredSelection selection) {
+    this.workbench = workbench;
     if (cloudSdkLocation == null) {
       cloudSdkLocation = CloudSdkPrompter.getCloudSdkLocation(getShell());
       // if the user doesn't provide the Cloud SDK then we'll error in performFinish() too
