@@ -1,3 +1,19 @@
+/*
+ * Copyright 2016 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.google.cloud.tools.eclipse.appengine.libraries.repository;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainer;
@@ -23,8 +39,10 @@ import org.eclipse.osgi.util.NLS;
 
 public abstract class AbstractSourceAttachmentDownloaderJob extends Job {
 
+  static final String PARAM_CLASSPATHENTRY_PATH = "classpathEntryPath";
+  
   @Inject
-  @Named("classpathEntryPath")
+  @Named(PARAM_CLASSPATHENTRY_PATH)
   private IPath classpathEntryPath;
   @Inject
   private LibraryClasspathContainerSerializer serializer;
@@ -32,9 +50,8 @@ public abstract class AbstractSourceAttachmentDownloaderJob extends Job {
   private IJavaProject javaProject;
 
   @Inject
-  public AbstractSourceAttachmentDownloaderJob(@Named("jobName") String name,
-                                               IJavaProject javaProject) {
-    super(name);
+  public AbstractSourceAttachmentDownloaderJob(IJavaProject javaProject) {
+    super(NLS.bind(Messages.SourceAttachmentDownloaderJobName, javaProject));
     Preconditions.checkNotNull(javaProject, "javaProject is null");
     this.javaProject = javaProject;
     setRule(javaProject.getSchedulingRule());
@@ -49,14 +66,13 @@ public abstract class AbstractSourceAttachmentDownloaderJob extends Job {
       }
       return Status.OK_STATUS;
     } catch (IOException | CoreException ex) {
-      return StatusUtil.error(this, "Could not attach source path", ex);
+      return StatusUtil.error(this, Messages.SourceAttachmentFailed, ex);
     }
   }
 
   /**
-   * Subclasses must implement this method to return an {@link IPath} that points to the
-   * <code>jar</code> file containing the sources for the library corresponding to
-   * {@link #classpathEntryPath}.
+   * @return an {@link IPath} that points to the <code>jar</code> file containing the sources for
+   * the library corresponding to {@link #classpathEntryPath}.
    */
   protected abstract IPath getSourcePath(IProgressMonitor monitor);
 
@@ -76,7 +92,7 @@ public abstract class AbstractSourceAttachmentDownloaderJob extends Job {
             updateClasspathEntrySourcePath(classpathEntries, j, sourcePath);
             LibraryClasspathContainer newLibraryContainer =
                 copyContainerWithNewEntries(libraryContainer, classpathEntries);
-            JavaCore.setClasspathContainer(libraryContainer.getPath(),
+            JavaCore.setClasspathContainer(newLibraryContainer.getPath(),
                                            new IJavaProject[]{ javaProject },
                                            new IClasspathContainer[]{ newLibraryContainer },
                                            monitor);
@@ -86,7 +102,7 @@ public abstract class AbstractSourceAttachmentDownloaderJob extends Job {
         }
       }
     }
-    throw new CoreException(StatusUtil.error(this, NLS.bind(Messages.SetSourceAttachmentFailed,
+    throw new CoreException(StatusUtil.error(this, NLS.bind(Messages.SourceAttachmentForProjectFailed,
                                                             classpathEntryPath.toOSString(),
                                                             javaProject.getProject().getName())));
   }
@@ -111,8 +127,9 @@ public abstract class AbstractSourceAttachmentDownloaderJob extends Job {
    * Updates a classpath entry by adding <code>sourcePath</code> as source attachment path.
    * @param entryIndex the index of the element in the array that will be updated
    */
-  private void updateClasspathEntrySourcePath(IClasspathEntry[] entries, int entryIndex,
-      IPath sourcePath) {
+  private void updateClasspathEntrySourcePath(IClasspathEntry[] entries,
+                                              int entryIndex,
+                                              IPath sourcePath) {
     entries[entryIndex] = JavaCore.newLibraryEntry(entries[entryIndex].getPath(),
                                                    sourcePath,
                                                    null,
@@ -134,9 +151,5 @@ public abstract class AbstractSourceAttachmentDownloaderJob extends Job {
       }
     }
     return null;
-  }
-
-  protected IJavaProject getJavaProject() {
-    return javaProject;
   }
 }

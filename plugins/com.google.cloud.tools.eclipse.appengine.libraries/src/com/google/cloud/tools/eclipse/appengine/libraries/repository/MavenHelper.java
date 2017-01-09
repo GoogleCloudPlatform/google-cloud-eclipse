@@ -1,3 +1,19 @@
+/*
+ * Copyright 2016 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.google.cloud.tools.eclipse.appengine.libraries.repository;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.Messages;
@@ -17,27 +33,34 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.osgi.util.NLS;
 
 public class MavenHelper {
+
   public Artifact resolveArtifact(MavenCoordinates mavenCoordinates,
                                   IProgressMonitor monitor) throws CoreException {
     List<ArtifactRepository> repository = getRepository(mavenCoordinates);
-    return MavenUtils.resolveArtifact(null, mavenCoordinates.getGroupId(), mavenCoordinates.getArtifactId(),
-                                      mavenCoordinates.getType(), mavenCoordinates.getVersion(),
-                                      mavenCoordinates.getClassifier(), repository);
+    return MavenUtils.resolveArtifact(null,
+                                      mavenCoordinates.getGroupId(),
+                                      mavenCoordinates.getArtifactId(),
+                                      mavenCoordinates.getType(),
+                                      mavenCoordinates.getVersion(),
+                                      mavenCoordinates.getClassifier(),
+                                      repository);
   }
 
-  public IPath getMavenSourceJarLocation(MavenCoordinates mavenCoordinates, IProgressMonitor monitor) {
+  public IPath getMavenSourceJarLocation(Artifact artifact,
+                                         IProgressMonitor monitor) {
     try {
-      MavenCoordinates sourceMavenCoordinates = new MavenCoordinates(mavenCoordinates);
+      MavenCoordinates sourceMavenCoordinates = new MavenCoordinates(artifact);
       sourceMavenCoordinates.setClassifier("sources");
-      Artifact artifact = resolveArtifact(sourceMavenCoordinates, null);
-      return new Path(artifact.getFile().getAbsolutePath());
+      Artifact sourceArtifact = resolveArtifact(sourceMavenCoordinates, null);
+      return new Path(sourceArtifact.getFile().getAbsolutePath());
     } catch (CoreException exception) {
       // source file failed to download, this is not an error
       return null;
     }
   }
   
-  public List<ArtifactRepository> getRepository(MavenCoordinates mavenCoordinates) throws CoreException {
+  private List<ArtifactRepository> getRepository(MavenCoordinates mavenCoordinates)
+                                                                              throws CoreException {
     if (MavenCoordinates.MAVEN_CENTRAL_REPO.equals(mavenCoordinates.getRepository())) {
       // M2Eclipse will use the Maven Central repo in case null is used
       return null;
@@ -46,15 +69,19 @@ public class MavenHelper {
     }
   }
 
-  public ArtifactRepository getCustomRepository(String repository) throws CoreException {
+  private ArtifactRepository getCustomRepository(String repository) throws CoreException {
     try {
       URI repoUri = new URI(repository);
       if (!repoUri.isAbsolute()) {
-        throw new CoreException(StatusUtil.error(this, NLS.bind(Messages.RepositoryUriNotAbsolute, repository)));
+        throw new CoreException(StatusUtil.error(this, NLS.bind(Messages.RepositoryUriNotAbsolute,
+                                                                repository)));
       }
       return MavenUtils.createRepository(repoUri.getHost(), repoUri.toString());
     } catch (URISyntaxException exception) {
-      throw new CoreException(StatusUtil.error(this, NLS.bind(Messages.RepositoryUriInvalid, repository), exception));
+      throw new CoreException(StatusUtil.error(this,
+                                               NLS.bind(Messages.RepositoryUriInvalid,
+                                                        repository),
+                                               exception));
     }
   }
 }

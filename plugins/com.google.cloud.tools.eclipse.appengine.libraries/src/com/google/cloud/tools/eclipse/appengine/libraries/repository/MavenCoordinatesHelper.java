@@ -29,7 +29,7 @@ import org.eclipse.jdt.core.JavaCore;
 /**
  * Provides methods to convert a {@link MavenCoordinates} object to a {@link IClasspathAttribute} and vice versa.
  */
-public class MavenCoordinatesClasspathAttributesTransformer {
+public class MavenCoordinatesHelper {
 
   private static final String CLASSPATH_ATTRIBUTE_REPOSITORY =
       "com.google.cloud.tools.eclipse.appengine.libraries.repository";
@@ -45,7 +45,7 @@ public class MavenCoordinatesClasspathAttributesTransformer {
       "com.google.cloud.tools.eclipse.appengine.libraries.classifier";
 
   public List<IClasspathAttribute> createClasspathAttributes(Artifact artifact,
-                                                                            MavenCoordinates mavenCoordinates) {
+                                                             MavenCoordinates mavenCoordinates) {
     List<IClasspathAttribute> attributes = Lists.newArrayList(
         JavaCore.newClasspathAttribute(CLASSPATH_ATTRIBUTE_REPOSITORY, mavenCoordinates.getRepository()),
         JavaCore.newClasspathAttribute(CLASSPATH_ATTRIBUTE_GROUP_ID, artifact.getGroupId()),

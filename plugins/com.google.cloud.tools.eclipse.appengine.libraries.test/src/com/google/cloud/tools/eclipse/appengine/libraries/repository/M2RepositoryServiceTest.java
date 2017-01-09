@@ -58,7 +58,7 @@ public class M2RepositoryServiceTest {
   private TestJob testJob;
   private M2RepositoryService m2RepositoryService;
   @Mock private MavenHelper mavenHelper;
-  @Mock private MavenCoordinatesClasspathAttributesTransformer transformer;
+  @Mock private MavenCoordinatesHelper transformer;
   @Mock private SourceDownloaderJobFactory sourceDownloaderJobFactory;
   @Rule public TestProjectCreator testProjectCreator = new TestProjectCreator();
 
@@ -69,7 +69,7 @@ public class M2RepositoryServiceTest {
     mavenCoordinates = new MavenCoordinates("groupId", "artifactId");
     testJob = new TestJob();
     when(sourceDownloaderJobFactory.createSourceDownloaderJob(any(IJavaProject.class), 
-                                                              any(MavenCoordinates.class),
+                                                              any(Artifact.class),
                                                               any(IPath.class),
                                                               any(URL.class))).thenReturn(testJob);
     
