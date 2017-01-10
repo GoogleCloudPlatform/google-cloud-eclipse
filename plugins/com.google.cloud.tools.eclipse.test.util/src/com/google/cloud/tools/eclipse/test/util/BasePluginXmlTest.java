@@ -43,23 +43,23 @@ public class BasePluginXmlTest {
     doc = pluginXmlDocument.get();
   }
 
-  protected Document getDocument() {
+  protected final Document getDocument() {
     return doc;
   }
   
   // Generic tests that should be true of all plugin.xml files
   
   @Test
-  public void testRootElementIsPlugin() {
+  public final void testRootElementIsPlugin() {
     Assert.assertEquals("plugin", getDocument().getDocumentElement().getNodeName());
   }
    
   @Test
-  public void testValidExtensionPoints() {
+  public final void testValidExtensionPoints() {
     NodeList extensions = getDocument().getElementsByTagName("extension");
-    
-    // todo should we test that the file has at least one extension point?
-    
+    Assert.assertTrue(
+        "plugin.xml must contain at least one extension point", extensions.getLength() > 0);
+        
     IExtensionRegistry registry = RegistryFactory.getRegistry();
     for (int i = 0; i < extensions.getLength(); i++) {
       Element extension = (Element) extensions.item(i);
@@ -70,7 +70,7 @@ public class BasePluginXmlTest {
   }
   
   @Test
-  public void testKeywordsDefined() {
+  public final void testKeywordsDefined() {
     NodeList references = getDocument().getElementsByTagName("keywordReference");
         
     if (references.getLength() > 0) { // not all files reference keywords
@@ -86,7 +86,7 @@ public class BasePluginXmlTest {
   }
   
   @Test
-  public void testPropertiesDefined() {
+  public final void testPropertiesDefined() {
     assertPropertiesDefined(getDocument().getDocumentElement());
   }
   
