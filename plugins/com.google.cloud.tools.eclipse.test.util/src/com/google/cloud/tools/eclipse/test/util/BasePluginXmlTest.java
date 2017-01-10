@@ -30,6 +30,9 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+/**
+ * Generic tests that should be true of all plugins.
+ */
 @SuppressWarnings("restriction")
 public class BasePluginXmlTest {
 
@@ -45,9 +48,7 @@ public class BasePluginXmlTest {
 
   protected final Document getDocument() {
     return doc;
-  }
-  
-  // Generic tests that should be true of all plugin.xml files
+  } 
   
   @Test
   public final void testRootElementIsPlugin() {
