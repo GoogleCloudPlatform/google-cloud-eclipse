@@ -15,5 +15,87 @@
     <keyword label="%appEngineNameWithSpace" 
              id="com.google.cloud.tools.eclipse.appengine.ui.AppSpaceEngineKeyword"/>
   </extension>
+  <extension
+        point="org.eclipse.ui.menus">
+     <menuContribution
+           allPopups="false"
+           locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
+        <toolbar
+              id="com.google.cloud.tools.eclipse.appengine.toolbar">
+           <command
+                 commandId="com.google.cloud.tools.eclipse.appengine.ui.showPopup"
+                 icon="icons/gae-16x16.png"
+                 id="com.google.cloud.tools.eclipse.appengine.actions"
+                 label="App Engine"
+                 style="pulldown"
+                 tooltip="App Engine">
+           </command>
+        </toolbar>
+     </menuContribution>
+       
+     <menuContribution
+           allPopups="false"
+           locationURI="menu:com.google.cloud.tools.eclipse.appengine.actions">
+        <menu
+              id="com.google.cloud.tools.eclipse.appengine.actions.new"
+              label="New...">
+           <command
+                 commandId="org.eclipse.ui.newWizard"
+                 label="Native App Engine Standard Project"
+                 style="push">
+              <parameter
+                    name="newWizardId"
+                    value="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineStandard">
+              </parameter>
+           </command>
+           <command
+                 commandId="org.eclipse.ui.newWizard"
+                 label="Maven App Engine Standard Project"
+                 style="push">
+              <parameter
+                    name="newWizardId"
+                    value="com.google.cloud.tools.eclipse.appengine.newproject.MavenAppEngineStandard">
+              </parameter>
+           </command>
+        </menu>
+        <separator
+              name="launch"
+              visible="true">
+        </separator>
+        <command
+              commandId="com.google.cloud.tools.eclipse.appengine.localserver.launch"
+              icon="platform:/plugin/org.eclipse.debug.ui/icons/full/etool16/debug_exc.png"
+              label="Debug on App Engine"
+              style="push">
+           <parameter
+                 name="launchMode"
+                 value="debug">
+           </parameter>
+        </command>
+        <command
+              commandId="com.google.cloud.tools.eclipse.appengine.localserver.launch"
+              icon="platform:/plugin/org.eclipse.debug.ui/icons/full/etool16/run_exc.png"
+              label="Run on App Engine"
+              style="push">
+           <parameter
+                 name="launchMode"
+                 value="run">
+           </parameter>
+        </command>
+        <separator
+              name="deploy"
+              visible="true">
+        </separator>
+        <command
+              commandId="com.google.cloud.tools.eclipse.appengine.deploy"
+              label="Deploy to App Engine"
+              style="push">
+        </command>
+        <separator
+              name="additions"
+              visible="true">
+        </separator>
+     </menuContribution>       
+  </extension>
 
 </plugin>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            defaultHandler="com.google.cloud.tools.eclipse.ui.util.OpenDropDownMenuHandler"
+            id="com.google.cloud.tools.eclipse.appengine.ui.showPopup"
+            name="Show popup menu">
+      </command>
+   </extension>
+
+</plugin>

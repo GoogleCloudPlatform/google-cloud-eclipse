@@ -243,20 +243,34 @@
             commandId="com.google.cloud.tools.eclipse.appengine.localserver.launch">
          <enabledWhen>
            <or>
-           	  <iterate>
-		        <test
-        		    property="org.eclipse.wst.common.project.facet.core.projectFacet"
-            		value="com.google.cloud.tools.eclipse.appengine.facets.standard" />
+           	  <iterate
+                    ifEmpty="false">
+                 <adapt
+                       type="org.eclipse.core.resources.IResource">
+                    <test
+                          property="org.eclipse.wst.common.project.facet.core.projectFacet"
+                          value="com.google.cloud.tools.eclipse.appengine.facets.standard">
+                    </test>
+                 </adapt>
               </iterate>
-              <with
-                     variable="activeEditorInput">
-                  <adapt
-                        type="org.eclipse.core.resources.IFile">
-			        <test
-            			property="org.eclipse.wst.common.project.facet.core.projectFacet"
-            			value="com.google.cloud.tools.eclipse.appengine.facets.standard" />
-                  </adapt>
-               </with>
+               <and>
+                  <with
+                        variable="activePart">
+                     <instanceof
+                           value="org.eclipse.ui.IEditorPart">
+                     </instanceof>
+                  </with>
+                  <with
+                        variable="activeEditorInput">
+                     <adapt
+                           type="org.eclipse.core.resources.IFile">
+                        <test
+                              property="org.eclipse.wst.common.project.facet.core.projectFacet"
+                              value="com.google.cloud.tools.eclipse.appengine.facets.standard">
+                        </test>
+                     </adapt>
+                  </with>
+               </and>
            </or>
          </enabledWhen>
       </handler>
