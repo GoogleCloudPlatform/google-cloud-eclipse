@@ -20,6 +20,7 @@ import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.beans.HasPropertyWithValue.hasProperty;
 import static org.hamcrest.collection.IsArrayContaining.hasItemInArray;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
@@ -33,16 +34,21 @@ import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import java.io.File;
 import java.net.URI;
 import java.net.URL;
+import java.util.List;
 import org.apache.maven.artifact.Artifact;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathAttribute;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -54,6 +60,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class M2RepositoryServiceTest {
 
   private static final String FAKE_PATH = "/fake/path";
+  private static final String FAKE_SOURCE_PATH = "/fake/source/path";
 
   private TestJob testJob;
   private M2RepositoryService m2RepositoryService;
@@ -123,7 +130,7 @@ public class M2RepositoryServiceTest {
   }
 
   @Test
-  public void getLibraryClasspathEntry_withInvalidSourceUriMavenSourceResolutionHappens()
+  public void getLibraryClasspathEntry_withInvalidSourceUriSourceResolutionStillHappens()
                                                                                   throws Exception {
     Artifact artifact = getMockArtifactWithJarPath();
     when(mavenHelper.resolveArtifact(any(MavenCoordinates.class),
@@ -135,6 +142,49 @@ public class M2RepositoryServiceTest {
                                                  new NullProgressMonitor());
     testJob.join();
     assertTrue(testJob.executed);
+  }
+
+  @Test
+  public void getLibraryClasspathEntry_withoutJavaProjectNoBackgroundJobIsExecuted() throws Exception {
+    Artifact artifact = getMockArtifactWithJarPath();
+    when(mavenHelper.resolveArtifact(any(MavenCoordinates.class),
+                                     any(IProgressMonitor.class))).thenReturn(artifact);
+    when(mavenHelper.getMavenSourceJarLocation(any(Artifact.class),
+                                               any(IProgressMonitor.class)))
+                    .thenReturn(new Path(FAKE_SOURCE_PATH));
+    LibraryFile libraryFile = new LibraryFile(mavenCoordinates);
+    IClasspathEntry classpathEntry =
+        m2RepositoryService.getLibraryClasspathEntry(null /* javaProject */,
+                                                     libraryFile,
+                                                     new NullProgressMonitor());
+    testJob.join();
+    assertFalse(testJob.executed);
+    assertThat(classpathEntry.getSourceAttachmentPath().toFile().getAbsolutePath(),
+               is(FAKE_SOURCE_PATH));
+  }
+
+  @Test
+  public void rebuildClasspathEntry() throws Exception {
+    Artifact artifact = getMockArtifactWithJarPath();
+    when(mavenHelper.resolveArtifact(any(MavenCoordinates.class),
+                                     any(IProgressMonitor.class))).thenReturn(artifact);
+    IClasspathEntry classpathEntry = getClasspathEntry("groupId", "artifactId");
+    m2RepositoryService.rebuildClasspathEntry(testProjectCreator.getJavaProject(),
+                                              classpathEntry,
+                                              new NullProgressMonitor());
+    testJob.join();
+    assertTrue(testJob.executed);
+  }
+
+  @Test(expected = LibraryRepositoryServiceException.class)
+  public void rebuildClasspathEntry_errorInArtifactResolution() throws Exception {
+    when(mavenHelper.resolveArtifact(any(MavenCoordinates.class), any(IProgressMonitor.class)))
+      .thenThrow(testCoreException());
+
+    IClasspathEntry classpathEntry = getClasspathEntry("groupId", "artifactId");
+    m2RepositoryService.rebuildClasspathEntry(testProjectCreator.getJavaProject(),
+                                              classpathEntry,
+                                              new NullProgressMonitor());
   }
 
   @Test(expected = IllegalStateException.class)
@@ -180,6 +230,15 @@ public class M2RepositoryServiceTest {
     File file = new File(FAKE_PATH);
     when(artifact.getFile()).thenReturn(file );
     return artifact;
+  }
+
+  private IClasspathEntry getClasspathEntry(String groupId, String artifactId) {
+    List<IClasspathAttribute> attributes =
+        new MavenCoordinatesHelper().createClasspathAttributes(new MavenCoordinates(groupId,
+                                                                                    artifactId),
+                                                               "1.0.0");
+    return JavaCore.newLibraryEntry(new Path(FAKE_PATH), null, null, new IAccessRule[0],
+                                    attributes.toArray(new IClasspathAttribute[0]), true);
   }
 
   private CoreException testCoreException() {
