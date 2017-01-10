@@ -23,7 +23,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainer;
-import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
 import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.util.jobs.JobUtil;
@@ -33,6 +32,7 @@ import java.io.IOException;
 import org.apache.maven.artifact.Artifact;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.e4.core.contexts.IEclipseContext;
@@ -55,7 +55,8 @@ public class M2SourceAttachmentDownloaderJobTest {
   private static final String LIBRARY_PATH = "/libraryPath/library.jar";
 
   @Rule
-  public TestProjectCreator testProjectCreator = new TestProjectCreator().withClasspathContainerPath(CONTAINER_PATH);
+  public TestProjectCreator testProjectCreator =
+    new TestProjectCreator().withClasspathContainerPath(CONTAINER_PATH);
   @Rule
   public TemporaryFolder temporaryFolder = new TemporaryFolder();
   @Mock
@@ -72,11 +73,13 @@ public class M2SourceAttachmentDownloaderJobTest {
   @Before
   public void setUp() {
     library = JavaCore.newLibraryEntry(new Path(LIBRARY_PATH), null, null);
-    container = new LibraryClasspathContainer(new Path(CONTAINER_PATH), "Test Container", new IClasspathEntry[]{ library });
+    container = new LibraryClasspathContainer(new Path(CONTAINER_PATH),
+                                              "Test Container",
+                                              new IClasspathEntry[]{ library });
   }
   
   @Test
-  public void testRun_attachesSourceArtifact() throws InterruptedException, CoreException, IOException {
+  public void testRun_attachesSources() throws InterruptedException, CoreException, IOException {
     File sourceArtifactFile = temporaryFolder.newFile("testSourceArtifact");
     when(sourceArtifact.getFile()).thenReturn(sourceArtifactFile);
     when(mavenHelper.getMavenSourceJarLocation(any(Artifact.class), any(IProgressMonitor.class)))
@@ -84,7 +87,10 @@ public class M2SourceAttachmentDownloaderJobTest {
     when(binaryArtifact.getGroupId()).thenReturn("groupId");
     when(binaryArtifact.getArtifactId()).thenReturn("artifactId");
     IJavaProject javaProject = testProjectCreator.getJavaProject();
-    JavaCore.setClasspathContainer(new Path(CONTAINER_PATH), new IJavaProject[]{ javaProject }, new IClasspathContainer[]{ container }, null);
+    JavaCore.setClasspathContainer(new Path(CONTAINER_PATH),
+                                   new IJavaProject[]{ javaProject },
+                                   new IClasspathContainer[]{ container },
+                                   new NullProgressMonitor());
     M2SourceAttachmentDownloaderJob job = createJob(binaryArtifact, javaProject);
     job.schedule();
     job.join();
@@ -93,7 +99,8 @@ public class M2SourceAttachmentDownloaderJobTest {
     for (IClasspathEntry iClasspathEntry : javaProject.getResolvedClasspath(false)) {
       if (iClasspathEntry.getPath().equals(new Path(LIBRARY_PATH))) {
         libraryFound = true;
-        assertThat(iClasspathEntry.getSourceAttachmentPath().toFile().getAbsolutePath(), is(sourceArtifactFile.getAbsolutePath()));
+        assertThat(iClasspathEntry.getSourceAttachmentPath().toFile().getAbsolutePath(),
+                   is(sourceArtifactFile.getAbsolutePath()));
       }
     }
     assertTrue(libraryFound);
@@ -108,7 +115,8 @@ public class M2SourceAttachmentDownloaderJobTest {
         context.set(Artifact.class, sourceArtifact);
         context.set(MavenHelper.class, mavenHelper);
         context.set(LibraryClasspathContainerSerializer.class, serializer);
-        context.set(M2SourceAttachmentDownloaderJob.PARAM_CLASSPATHENTRY_PATH, new Path(LIBRARY_PATH));
+        context.set(M2SourceAttachmentDownloaderJob.PARAM_CLASSPATHENTRY_PATH,
+                    new Path(LIBRARY_PATH));
       }
     });
   }

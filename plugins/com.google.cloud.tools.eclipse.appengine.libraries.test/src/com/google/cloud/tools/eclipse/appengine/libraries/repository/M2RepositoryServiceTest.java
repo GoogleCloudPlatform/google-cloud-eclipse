@@ -84,7 +84,8 @@ public class M2RepositoryServiceTest {
     when(mavenHelper.resolveArtifact(any(MavenCoordinates.class), any(IProgressMonitor.class)))
       .thenThrow(testCoreException());
 
-    m2RepositoryService.getLibraryClasspathEntry(testProjectCreator.getJavaProject(), new LibraryFile(mavenCoordinates),
+    m2RepositoryService.getLibraryClasspathEntry(testProjectCreator.getJavaProject(),
+                                                 new LibraryFile(mavenCoordinates),
                                                  new NullProgressMonitor());
   }
 
@@ -97,7 +98,8 @@ public class M2RepositoryServiceTest {
     IPath jarLocation =
         m2RepositoryService.getLibraryClasspathEntry(testProjectCreator.getJavaProject(),
                                                      new LibraryFile(mavenCoordinates),
-                                                     new NullProgressMonitor()).getPath();
+                                                     new NullProgressMonitor())
+                           .getPath();
 
     assertThat(jarLocation.toOSString(), is(FAKE_PATH));
   }
@@ -121,7 +123,8 @@ public class M2RepositoryServiceTest {
   }
 
   @Test
-  public void getLibraryClasspathEntry_withInvalidSourceUriMavenSourceResolutionHappens() throws Exception {
+  public void getLibraryClasspathEntry_withInvalidSourceUriMavenSourceResolutionHappens()
+                                                                                  throws Exception {
     Artifact artifact = getMockArtifactWithJarPath();
     when(mavenHelper.resolveArtifact(any(MavenCoordinates.class),
                                      any(IProgressMonitor.class))).thenReturn(artifact);
