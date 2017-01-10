@@ -142,7 +142,8 @@ public class M2RepositoryService implements ILibraryRepositoryService {
                                                           throws LibraryRepositoryServiceException {
     try {
       List<IClasspathAttribute> attributes =
-          mavenCoordinatesHelper.createClasspathAttributes(artifact, libraryFile.getMavenCoordinates());
+          mavenCoordinatesHelper.createClasspathAttributes(libraryFile.getMavenCoordinates(),
+                                                           artifact.getVersion());
       if (libraryFile.isExport()) {
         attributes.add(UpdateClasspathAttributeUtil.createDependencyAttribute(true /* isWebApp */));
       } else {
