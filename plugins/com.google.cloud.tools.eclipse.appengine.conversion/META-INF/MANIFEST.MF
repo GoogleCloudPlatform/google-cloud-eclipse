@@ -4,6 +4,5 @@ Bundle-Name: Cloud Tools for Eclipse App Engine Project Conversion Support
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.appengine.conversion;singleton:=true
 Bundle-Version: 0.1.0.qualifier
 Bundle-Vendor: Google Inc.
-Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
