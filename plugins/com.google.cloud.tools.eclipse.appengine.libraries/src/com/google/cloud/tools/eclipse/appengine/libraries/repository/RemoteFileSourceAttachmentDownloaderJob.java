@@ -29,9 +29,12 @@ public class RemoteFileSourceAttachmentDownloaderJob extends AbstractSourceAttac
   private IPath downloadFolder;
   private URL sourceUrl;
   
-  public RemoteFileSourceAttachmentDownloaderJob(IJavaProject javaProject, IPath classpathEntryPath, LibraryClasspathContainerSerializer serializer, IPath downloadFolder, URL sourceUrl) {
+  public RemoteFileSourceAttachmentDownloaderJob(IJavaProject javaProject, IPath classpathEntryPath,
+                                                 LibraryClasspathContainerSerializer serializer,
+                                                 IPath downloadFolder, URL sourceUrl) {
     super(javaProject, classpathEntryPath, serializer);
     this.downloadFolder = downloadFolder;
+    this.sourceUrl = sourceUrl;
   }
 
   @Override

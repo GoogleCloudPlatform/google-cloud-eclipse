@@ -16,49 +16,46 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.repository;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.when;
-
 import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer;
-import java.io.File;
-import org.apache.maven.artifact.Artifact;
-import org.eclipse.core.runtime.IProgressMonitor;
+import com.google.cloud.tools.eclipse.test.util.http.TestHttpServer;
+import java.net.URL;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaProject;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class M2SourceAttachmentDownloaderJobTest extends AbstractSourceAttachmentDownloaderJobTest {
+public class RemoteFileSourceAttachmentDownloaderJobTest extends AbstractSourceAttachmentDownloaderJobTest {
 
-  @Mock
-  private MavenHelper mavenHelper;
-  @Mock
-  private Artifact binaryArtifact;
-  private File sourceArtifactFile;
+  private static final String SOURCE_ARTIFACT_NAME = "sourceArtifact.zip";
 
+  @Rule
+  public TestHttpServer fileServer = new TestHttpServer(temporaryFolder, SOURCE_ARTIFACT_NAME,
+                                                        "Source artifact contents");
+
+  private URL sourceUrl;
+  private Path downloadFolder; 
+  
   @Before
+  @Override
   public void setUp() throws Exception {
     super.setUp();
-    sourceArtifactFile = temporaryFolder.newFile("testSourceArtifact");
-    when(mavenHelper.getMavenSourceJarLocation(any(Artifact.class), any(IProgressMonitor.class)))
-      .thenReturn(new Path(sourceArtifactFile.getAbsolutePath()));
-    when(binaryArtifact.getGroupId()).thenReturn("groupId");
-    when(binaryArtifact.getArtifactId()).thenReturn("artifactId");
+    sourceUrl = new URL(fileServer.getAddress() + "/" + SOURCE_ARTIFACT_NAME);
+    downloadFolder = new Path(temporaryFolder.newFolder().getAbsolutePath());
   }
-
+  
   @Override
   protected String getSourceArtifactFilePath() {
-    return sourceArtifactFile.getAbsolutePath();
+    return downloadFolder.append(SOURCE_ARTIFACT_NAME).toFile().getAbsolutePath();
   }
 
   @Override
-  protected Job createJob(IJavaProject javaProject,
+  protected Job createJob(IJavaProject javaProject, 
                           LibraryClasspathContainerSerializer serializer) {
-    return new M2SourceAttachmentDownloaderJob(javaProject, new Path(LIBRARY_PATH), serializer,
-                                               binaryArtifact, mavenHelper);
+    return new RemoteFileSourceAttachmentDownloaderJob(javaProject, new Path(LIBRARY_PATH),
+                                                       serializer, downloadFolder, sourceUrl);
   }
 }
