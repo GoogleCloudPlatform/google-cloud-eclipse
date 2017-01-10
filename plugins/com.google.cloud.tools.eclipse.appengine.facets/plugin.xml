@@ -67,7 +67,7 @@
 
   <extension point="org.eclipse.ui.handlers">
     <handler
-      class="com.google.cloud.tools.eclipse.appengine.facets.ui.AppEngineStandardProjectConverter"
+      class="com.google.cloud.tools.eclipse.appengine.facets.ui.AppEngineStandardProjectConvertCommandHandler"
       commandId="com.google.cloud.tools.eclipse.appengine.facets.convertToStandard">
       <enabledWhen>
         <and>

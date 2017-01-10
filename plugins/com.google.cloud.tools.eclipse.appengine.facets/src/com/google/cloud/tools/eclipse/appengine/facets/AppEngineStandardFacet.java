@@ -246,7 +246,8 @@ public class AppEngineStandardFacet {
     webModel.setBooleanProperty(IJ2EEModuleFacetInstallDataModelProperties.ADD_TO_EAR, false);
     webModel.setBooleanProperty(IJ2EEFacetInstallDataModelProperties.GENERATE_DD, false);
     webModel.setBooleanProperty(IWebFacetInstallDataModelProperties.INSTALL_WEB_LIBRARY, false);
-    webModel.setStringProperty(IWebFacetInstallDataModelProperties.CONFIG_FOLDER, "src/main/webapp");
+    webModel.setStringProperty(IWebFacetInstallDataModelProperties.CONFIG_FOLDER,
+        WebProjectUtil.getWebAppDirectory(facetedProject.getProject()).toString());
     facetInstallSet.add(new IFacetedProject.Action(
         IFacetedProject.Action.Type.INSTALL, WebFacetUtils.WEB_25, webModel));
   }
