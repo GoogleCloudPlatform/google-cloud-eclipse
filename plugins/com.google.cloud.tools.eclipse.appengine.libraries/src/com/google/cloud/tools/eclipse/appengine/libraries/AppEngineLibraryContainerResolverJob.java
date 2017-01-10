@@ -57,11 +57,10 @@ public class AppEngineLibraryContainerResolverJob extends Job {
   private Map<String, Library> libraries;
 
   @Inject
-  private IJavaProject javaProject;
-  @Inject
   private ILibraryRepositoryService repositoryService;
   @Inject
   private LibraryClasspathContainerSerializer serializer;
+  private IJavaProject javaProject;
 
   @Inject
   public AppEngineLibraryContainerResolverJob(IJavaProject javaProject) {

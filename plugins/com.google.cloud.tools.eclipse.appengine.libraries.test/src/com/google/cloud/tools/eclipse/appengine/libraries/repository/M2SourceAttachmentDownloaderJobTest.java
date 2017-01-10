@@ -25,8 +25,6 @@ import static org.mockito.Mockito.when;
 import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainer;
 import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
-import com.google.cloud.tools.eclipse.util.jobs.JobUtil;
-import com.google.cloud.tools.eclipse.util.jobs.JobUtil.ContextParameterSupplier;
 import java.io.File;
 import java.io.IOException;
 import org.apache.maven.artifact.Artifact;
@@ -35,7 +33,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -91,7 +88,9 @@ public class M2SourceAttachmentDownloaderJobTest {
                                    new IJavaProject[]{ javaProject },
                                    new IClasspathContainer[]{ container },
                                    new NullProgressMonitor());
-    M2SourceAttachmentDownloaderJob job = createJob(binaryArtifact, javaProject);
+    M2SourceAttachmentDownloaderJob job =
+        new M2SourceAttachmentDownloaderJob(javaProject, new Path(LIBRARY_PATH), serializer,
+                                            sourceArtifact, mavenHelper);
     job.schedule();
     job.join();
     assertThat(job.getResult(), is(Status.OK_STATUS));
@@ -104,20 +103,5 @@ public class M2SourceAttachmentDownloaderJobTest {
       }
     }
     assertTrue(libraryFound);
-  }
-
-  private M2SourceAttachmentDownloaderJob createJob(final Artifact artifact,
-      final IJavaProject javaProject) {
-    return JobUtil.createJob(M2SourceAttachmentDownloaderJob.class, new ContextParameterSupplier() {
-      @Override
-      public void setParameters(IEclipseContext context) {
-        context.set(IJavaProject.class, javaProject);
-        context.set(Artifact.class, sourceArtifact);
-        context.set(MavenHelper.class, mavenHelper);
-        context.set(LibraryClasspathContainerSerializer.class, serializer);
-        context.set(M2SourceAttachmentDownloaderJob.PARAM_CLASSPATHENTRY_PATH,
-                    new Path(LIBRARY_PATH));
-      }
-    });
   }
 }

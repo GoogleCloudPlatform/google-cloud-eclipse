@@ -16,7 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.repository;
 
-import javax.inject.Inject;
+import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer;
 import org.apache.maven.artifact.Artifact;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -24,14 +24,15 @@ import org.eclipse.jdt.core.IJavaProject;
 
 public class M2SourceAttachmentDownloaderJob extends AbstractSourceAttachmentDownloaderJob {
 
-  @Inject
   protected Artifact artifact;
-  @Inject
   private MavenHelper mavenHelper;
 
-  @Inject
-  public M2SourceAttachmentDownloaderJob(IJavaProject javaProject) {
-    super(javaProject);
+  public M2SourceAttachmentDownloaderJob(IJavaProject javaProject, IPath classpathEntryPath,
+                                         LibraryClasspathContainerSerializer serializer,
+                                         Artifact artifact, MavenHelper mavenHelper) {
+    super(javaProject, classpathEntryPath, serializer);
+    this.artifact = artifact;
+    this.mavenHelper = mavenHelper;
   }
   
   @Override

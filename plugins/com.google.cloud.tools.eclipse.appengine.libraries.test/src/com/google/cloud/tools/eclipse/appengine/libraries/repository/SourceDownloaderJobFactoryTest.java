@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer;
 import java.net.MalformedURLException;
 import java.net.URL;
 import org.apache.maven.artifact.Artifact;
@@ -37,6 +38,7 @@ public class SourceDownloaderJobFactoryTest {
   private static final String REMOTE_URL = "http://example.org/foo.zip";
 
   @Mock private MavenHelper mavenHelper;
+  @Mock private LibraryClasspathContainerSerializer serializer;
   @Mock private IJavaProject javaProject;
   @Mock private Artifact artifact;
   @Mock private IPath classpathEntryPath;
@@ -44,10 +46,11 @@ public class SourceDownloaderJobFactoryTest {
   @Test
   public void testCreateM2BasedJobWithoutSourceUrl() {
     Job job =
-        new SourceDownloaderJobFactory(mavenHelper).createSourceDownloaderJob(javaProject,
-                                                                              artifact,
-                                                                              classpathEntryPath,
-                                                                              null /* sourceURL */);
+        new SourceDownloaderJobFactory(mavenHelper,
+                                       serializer).createSourceDownloaderJob(javaProject,
+                                                                             artifact,
+                                                                             classpathEntryPath,
+                                                                             null /* sourceURL */);
     assertThat(job, instanceOf(M2SourceAttachmentDownloaderJob.class));
   }
 
@@ -58,10 +61,11 @@ public class SourceDownloaderJobFactoryTest {
     when(artifact.getVersion()).thenReturn("1.0.0");
 
     Job job =
-        new SourceDownloaderJobFactory(mavenHelper).createSourceDownloaderJob(javaProject,
-                                                                              artifact,
-                                                                              classpathEntryPath,
-                                                                              new URL(REMOTE_URL));
+        new SourceDownloaderJobFactory(mavenHelper,
+                                       serializer).createSourceDownloaderJob(javaProject,
+                                                                             artifact,
+                                                                             classpathEntryPath,
+                                                                             new URL(REMOTE_URL));
     assertThat(job, instanceOf(RemoteFileSourceAttachmentDownloaderJob.class));
   }
 

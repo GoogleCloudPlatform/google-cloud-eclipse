@@ -16,28 +16,22 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.repository;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer;
 import com.google.cloud.tools.eclipse.util.io.FileDownloader;
 import java.io.IOException;
 import java.net.URL;
-import javax.inject.Inject;
-import javax.inject.Named;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 
 public class RemoteFileSourceAttachmentDownloaderJob extends AbstractSourceAttachmentDownloaderJob {
 
-  static final String PARAM_DOWNLOAD_FOLDER = "downloadFolder";
-
-  @Inject
-  @Named(PARAM_DOWNLOAD_FOLDER)
   private IPath downloadFolder;
-  @Inject
   private URL sourceUrl;
   
-  @Inject
-  public RemoteFileSourceAttachmentDownloaderJob(IJavaProject javaProject) {
-    super(javaProject);
+  public RemoteFileSourceAttachmentDownloaderJob(IJavaProject javaProject, IPath classpathEntryPath, LibraryClasspathContainerSerializer serializer, IPath downloadFolder, URL sourceUrl) {
+    super(javaProject, classpathEntryPath, serializer);
+    this.downloadFolder = downloadFolder;
   }
 
   @Override

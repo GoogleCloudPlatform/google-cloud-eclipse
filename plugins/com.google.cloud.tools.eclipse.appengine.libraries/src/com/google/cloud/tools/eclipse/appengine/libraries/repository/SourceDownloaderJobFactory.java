@@ -16,64 +16,39 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.repository;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer;
 import com.google.cloud.tools.eclipse.appengine.libraries.util.PathUtil;
-import com.google.cloud.tools.eclipse.util.jobs.JobUtil;
 import java.net.URL;
 import org.apache.maven.artifact.Artifact;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jdt.core.IJavaProject;
 
 public class SourceDownloaderJobFactory {
 
-  private MavenHelper mavenHelper;
+  private final MavenHelper mavenHelper;
+  private final LibraryClasspathContainerSerializer serializer;
   
-  public SourceDownloaderJobFactory(MavenHelper mavenHelper) {
+  public SourceDownloaderJobFactory(MavenHelper mavenHelper,
+                                    LibraryClasspathContainerSerializer serializer) {
     this.mavenHelper = mavenHelper;
+    this.serializer = serializer;
   }
 
   public Job createSourceDownloaderJob(IJavaProject javaProject, Artifact artifact,
                                        IPath classpathEntryPath, URL sourceUrl) {
     if (sourceUrl == null) {
-      return createM2SourceDownloaderJob(javaProject, artifact, classpathEntryPath);
+      return new M2SourceAttachmentDownloaderJob(javaProject,
+                                                 classpathEntryPath,
+                                                 serializer,
+                                                 artifact,
+                                                 mavenHelper);
     } else {
-      return createRemoteFileSourceDownloaderJob(javaProject, classpathEntryPath, 
-                                                 artifact, sourceUrl);
+      return new RemoteFileSourceAttachmentDownloaderJob(javaProject,
+                                                         classpathEntryPath,
+                                                         serializer,
+                                                         PathUtil.bundleStateBasedMavenFolder(artifact),
+                                                         sourceUrl);
     }
-  }
-  
-  private Job createM2SourceDownloaderJob(final IJavaProject javaProject,
-                                          final Artifact artifact,
-                                          final IPath classpathEntryPath) {
-    return JobUtil.createJob(M2SourceAttachmentDownloaderJob.class, 
-                             new JobUtil.ContextParameterSupplier() {
-                               @Override
-                               public void setParameters(IEclipseContext context) {
-                                 context.set(IJavaProject.class, javaProject);
-                                 context.set(Artifact.class, artifact);
-                                 context.set(M2SourceAttachmentDownloaderJob.PARAM_CLASSPATHENTRY_PATH,
-                                             classpathEntryPath);
-                                 context.set(MavenHelper.class, mavenHelper);
-                               }
-                             });
-  }
-
-  private Job createRemoteFileSourceDownloaderJob(final IJavaProject javaProject,
-                                                  final IPath classpathEntryPath,
-                                                  final Artifact artifact,
-                                                  final URL sourceUrl) {
-    return JobUtil.createJob(RemoteFileSourceAttachmentDownloaderJob.class,
-                             new JobUtil.ContextParameterSupplier() {
-                               @Override
-                               public void setParameters(IEclipseContext context) {
-                                 context.set(IJavaProject.class, javaProject);
-                                 context.set(RemoteFileSourceAttachmentDownloaderJob.PARAM_CLASSPATHENTRY_PATH,
-                                             classpathEntryPath);
-                                 context.set(RemoteFileSourceAttachmentDownloaderJob.PARAM_DOWNLOAD_FOLDER, 
-                                     PathUtil.bundleStateBasedMavenFolder(artifact));
-                                 context.set(URL.class, sourceUrl);
-                               }
-                             });
   }
 }

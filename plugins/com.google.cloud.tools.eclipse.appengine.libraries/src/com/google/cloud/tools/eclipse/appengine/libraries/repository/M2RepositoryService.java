@@ -20,6 +20,7 @@ import com.google.cloud.tools.eclipse.appengine.libraries.Messages;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Filter;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
+import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer;
 import com.google.cloud.tools.eclipse.appengine.libraries.util.PathUtil;
 import com.google.cloud.tools.eclipse.util.io.FileDownloader;
 import com.google.common.annotations.VisibleForTesting;
@@ -231,7 +232,8 @@ public class M2RepositoryService implements ILibraryRepositoryService {
   protected void activate() {
     mavenHelper = new MavenHelper();
     mavenCoordinatesHelper = new MavenCoordinatesHelper();
-    sourceDownloaderJobFactory = new SourceDownloaderJobFactory(mavenHelper);
+    sourceDownloaderJobFactory =
+        new SourceDownloaderJobFactory(mavenHelper, new LibraryClasspathContainerSerializer());
   }
 
   private void verifyDependencies() {

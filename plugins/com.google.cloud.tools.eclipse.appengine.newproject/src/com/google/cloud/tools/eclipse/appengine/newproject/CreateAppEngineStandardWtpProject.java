@@ -19,7 +19,6 @@ package com.google.cloud.tools.eclipse.appengine.newproject;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.libraries.AppEngineLibraryContainerResolverJob;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
-import com.google.cloud.tools.eclipse.util.jobs.JobUtil;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.Arrays;
@@ -34,6 +33,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.EclipseContextFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathAttribute;
@@ -46,6 +50,7 @@ import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.ide.undo.CreateProjectOperation;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
+import org.osgi.framework.FrameworkUtil;
 
 /**
 * Utility to make a new Eclipse project with the App Engine Standard facets in the workspace.
@@ -140,12 +145,18 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
   }
 
   private void runContainerResolverJob(final IJavaProject javaProject) {
-    JobUtil.createJob(AppEngineLibraryContainerResolverJob.class, new JobUtil.ContextParameterSupplier() {
+    IEclipseContext context =
+        EclipseContextFactory.getServiceContext(FrameworkUtil.getBundle(getClass()).getBundleContext());
+    final IEclipseContext childContext = context.createChild(AppEngineLibraryContainerResolverJob.class.getName());
+    childContext.set(IJavaProject.class, javaProject);
+    Job job = ContextInjectionFactory.make(AppEngineLibraryContainerResolverJob.class, childContext);
+    job.addJobChangeListener(new JobChangeAdapter() {
       @Override
-      public void setParameters(IEclipseContext context) {
-        context.set(IJavaProject.class, javaProject);
+      public void done(IJobChangeEvent event) {
+        childContext.dispose();
       }
-    }).schedule();
+    });
+    job.schedule();
   }
 
   private static void addJunit4ToClasspath(IProgressMonitor monitor, final IProject newProject)

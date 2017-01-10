@@ -22,8 +22,6 @@ import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryCla
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Preconditions;
 import java.io.IOException;
-import javax.inject.Inject;
-import javax.inject.Named;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -39,21 +37,16 @@ import org.eclipse.osgi.util.NLS;
 
 public abstract class AbstractSourceAttachmentDownloaderJob extends Job {
 
-  static final String PARAM_CLASSPATHENTRY_PATH = "classpathEntryPath";
-  
-  @Inject
-  @Named(PARAM_CLASSPATHENTRY_PATH)
   private IPath classpathEntryPath;
-  @Inject
   private LibraryClasspathContainerSerializer serializer;
-  @Inject
   private IJavaProject javaProject;
 
-  @Inject
-  public AbstractSourceAttachmentDownloaderJob(IJavaProject javaProject) {
+  public AbstractSourceAttachmentDownloaderJob(IJavaProject javaProject, IPath classpathEntryPath, LibraryClasspathContainerSerializer serializer) {
     super(NLS.bind(Messages.SourceAttachmentDownloaderJobName, javaProject));
     Preconditions.checkNotNull(javaProject, "javaProject is null");
     this.javaProject = javaProject;
+    this.classpathEntryPath = classpathEntryPath;
+    this.serializer = serializer;
     setRule(javaProject.getSchedulingRule());
   }
 
