@@ -144,10 +144,11 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
     runContainerResolverJob(javaProject);
   }
 
-  private void runContainerResolverJob(final IJavaProject javaProject) {
-    IEclipseContext context =
-        EclipseContextFactory.getServiceContext(FrameworkUtil.getBundle(getClass()).getBundleContext());
-    final IEclipseContext childContext = context.createChild(AppEngineLibraryContainerResolverJob.class.getName());
+  private void runContainerResolverJob(IJavaProject javaProject) {
+    IEclipseContext context = EclipseContextFactory
+        .getServiceContext(FrameworkUtil.getBundle(getClass()).getBundleContext());
+    final IEclipseContext childContext =
+        context.createChild(AppEngineLibraryContainerResolverJob.class.getName());
     childContext.set(IJavaProject.class, javaProject);
     Job job = ContextInjectionFactory.make(AppEngineLibraryContainerResolverJob.class, childContext);
     job.addJobChangeListener(new JobChangeAdapter() {

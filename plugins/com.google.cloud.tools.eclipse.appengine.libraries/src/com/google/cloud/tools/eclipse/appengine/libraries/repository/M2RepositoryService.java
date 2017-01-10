@@ -56,7 +56,6 @@ public class M2RepositoryService implements ILibraryRepositoryService {
       "com.google.cloud.tools.eclipse.appengine.libraries.sourceUrl";
 
   private MavenHelper mavenHelper;
-  private MavenCoordinatesHelper mavenCoordinatesHelper;
   private SourceDownloaderJobFactory sourceDownloaderJobFactory;
 
   @Override
@@ -93,7 +92,7 @@ public class M2RepositoryService implements ILibraryRepositoryService {
                                                           throws LibraryRepositoryServiceException {
     verifyDependencies();
     MavenCoordinates mavenCoordinates =
-        mavenCoordinatesHelper.createMavenCoordinates(classpathEntry.getExtraAttributes());
+        MavenCoordinatesHelper.createMavenCoordinates(classpathEntry.getExtraAttributes());
     try {
       Artifact artifact = mavenHelper.resolveArtifact(mavenCoordinates, monitor);
       URL sourceUrl = getSourceUrlFromAttribute(classpathEntry.getExtraAttributes());
@@ -142,7 +141,7 @@ public class M2RepositoryService implements ILibraryRepositoryService {
                                                           throws LibraryRepositoryServiceException {
     try {
       List<IClasspathAttribute> attributes =
-          mavenCoordinatesHelper.createClasspathAttributes(libraryFile.getMavenCoordinates(),
+          MavenCoordinatesHelper.createClasspathAttributes(libraryFile.getMavenCoordinates(),
                                                            artifact.getVersion());
       if (libraryFile.isExport()) {
         attributes.add(UpdateClasspathAttributeUtil.createDependencyAttribute(true /* isWebApp */));
@@ -183,7 +182,6 @@ public class M2RepositoryService implements ILibraryRepositoryService {
    * <code>source</code> to obtain the sources
    * @param javaProject the project that owns the classpath entry that needs to be updated
    * @param classpathEntryPath the path of the classpath entry that needs to be updated
-   * @return
    */
   private IPath getSourceLocation(final Artifact artifact,
                                   final URL sourceUrl,
@@ -231,14 +229,12 @@ public class M2RepositoryService implements ILibraryRepositoryService {
   @Activate
   protected void activate() {
     mavenHelper = new MavenHelper();
-    mavenCoordinatesHelper = new MavenCoordinatesHelper();
     sourceDownloaderJobFactory =
         new SourceDownloaderJobFactory(mavenHelper, new LibraryClasspathContainerSerializer());
   }
 
   private void verifyDependencies() {
     Preconditions.checkState(mavenHelper != null, "mavenHelper is null");
-    Preconditions.checkState(mavenCoordinatesHelper != null, "transformer is null");
     Preconditions.checkState(sourceDownloaderJobFactory != null, "sourceDownloaderJobFactory is null");
   }
   /*
@@ -247,11 +243,6 @@ public class M2RepositoryService implements ILibraryRepositoryService {
   @VisibleForTesting
   void setMavenHelper(MavenHelper mavenHelper) {
     this.mavenHelper = mavenHelper;
-  }
-
-  @VisibleForTesting
-  void setTransformer(MavenCoordinatesHelper transformer) {
-    this.mavenCoordinatesHelper = transformer;
   }
 
   @VisibleForTesting

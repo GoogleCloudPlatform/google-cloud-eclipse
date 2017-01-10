@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Google Inc.
+ * Copyright 2017 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,8 @@ import org.eclipse.jdt.core.IJavaProject;
 
 public class RemoteFileSourceAttachmentDownloaderJob extends AbstractSourceAttachmentDownloaderJob {
 
-  private IPath downloadFolder;
-  private URL sourceUrl;
+  final private IPath downloadFolder;
+  final private URL sourceUrl;
   
   public RemoteFileSourceAttachmentDownloaderJob(IJavaProject javaProject, IPath classpathEntryPath,
                                                  LibraryClasspathContainerSerializer serializer,

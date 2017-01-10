@@ -65,7 +65,6 @@ public class M2RepositoryServiceTest {
   private TestJob testJob;
   private M2RepositoryService m2RepositoryService;
   @Mock private MavenHelper mavenHelper;
-  @Mock private MavenCoordinatesHelper transformer;
   @Mock private SourceDownloaderJobFactory sourceDownloaderJobFactory;
   @Rule public TestProjectCreator testProjectCreator = new TestProjectCreator();
 
@@ -82,7 +81,6 @@ public class M2RepositoryServiceTest {
     
     m2RepositoryService = new M2RepositoryService();
     m2RepositoryService.setMavenHelper(mavenHelper);
-    m2RepositoryService.setTransformer(transformer);
     m2RepositoryService.setSourceDownloaderJobFactory(sourceDownloaderJobFactory);
   }
   
@@ -207,7 +205,6 @@ public class M2RepositoryServiceTest {
   public void testSourceDownloadJobFactoryMustBeSet() throws LibraryRepositoryServiceException {
     M2RepositoryService service = new M2RepositoryService();
     service.setMavenHelper(mavenHelper);
-    service.setTransformer(transformer);
     service.getLibraryClasspathEntry(testProjectCreator.getJavaProject(),
                                      new LibraryFile(mavenCoordinates),
                                      new NullProgressMonitor());
@@ -234,7 +231,7 @@ public class M2RepositoryServiceTest {
 
   private IClasspathEntry getClasspathEntry(String groupId, String artifactId) {
     List<IClasspathAttribute> attributes =
-        new MavenCoordinatesHelper().createClasspathAttributes(new MavenCoordinates(groupId,
+        MavenCoordinatesHelper.createClasspathAttributes(new MavenCoordinates(groupId,
                                                                                     artifactId),
                                                                "1.0.0");
     return JavaCore.newLibraryEntry(new Path(FAKE_PATH), null, null, new IAccessRule[0],
@@ -250,8 +247,8 @@ public class M2RepositoryServiceTest {
   }
 
   private static class TestJob extends Job {
-    public boolean executed = false;
-    public TestJob() {
+    private boolean executed = false;
+    private TestJob() {
       super("testJob");
     }
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Google Inc.
+ * Copyright 2017 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ public class PathUtil {
   }
   
   /**
-   * Returns the folder to which the a file corresponding to <code>mavenCoordinates</code> should be
+   * Returns the folder to which the file described by <code>artifact</code> should be
    * downloaded.
    * <p>
    * The folder is created as follows:

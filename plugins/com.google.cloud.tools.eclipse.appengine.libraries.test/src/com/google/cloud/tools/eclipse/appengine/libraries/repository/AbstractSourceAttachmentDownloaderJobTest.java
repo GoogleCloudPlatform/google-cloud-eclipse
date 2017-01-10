@@ -39,7 +39,7 @@ import org.mockito.Mock;
 
 public abstract class AbstractSourceAttachmentDownloaderJobTest {
 
-  protected static final String CONTAINER_PATH = "/containerPath";
+  private static final String CONTAINER_PATH = "/containerPath";
   protected static final String LIBRARY_PATH = "/libraryPath/library.jar";
 
   @Rule

@@ -45,7 +45,7 @@ public class MavenCoordinatesHelperTest {
     mavenCoordinates.setClassifier("classifier");
 
     List<IClasspathAttribute> classpathAttributes =
-        new MavenCoordinatesHelper().createClasspathAttributes(mavenCoordinates, "1.0.0");
+        MavenCoordinatesHelper.createClasspathAttributes(mavenCoordinates, "1.0.0");
     assertAttribute(classpathAttributes,
                     "com.google.cloud.tools.eclipse.appengine.libraries.repository", "testRepo");
     assertAttribute(classpathAttributes,
@@ -63,7 +63,7 @@ public class MavenCoordinatesHelperTest {
   @Test
   public void testCreateClasspathAttributesWithoutClassifier() {
     List<IClasspathAttribute> classpathAttributes =
-        new MavenCoordinatesHelper().createClasspathAttributes(mavenCoordinates, "1.0.0");
+        MavenCoordinatesHelper.createClasspathAttributes(mavenCoordinates, "1.0.0");
     for (IClasspathAttribute iClasspathAttribute : classpathAttributes) {
       assertThat(iClasspathAttribute.getName(),
                  not("com.google.cloud.tools.eclipse.appengine.libraries.classifier"));
@@ -72,12 +72,12 @@ public class MavenCoordinatesHelperTest {
 
   @Test(expected = NullPointerException.class)
   public void testCreateMavenCoordinates_nullArray() {
-    new MavenCoordinatesHelper().createMavenCoordinates(null);
+    MavenCoordinatesHelper.createMavenCoordinates(null);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testCreateMavenCoordinates_emptyArray() {
-    new MavenCoordinatesHelper().createMavenCoordinates(new IClasspathAttribute[0]);
+    MavenCoordinatesHelper.createMavenCoordinates(new IClasspathAttribute[0]);
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -86,7 +86,7 @@ public class MavenCoordinatesHelperTest {
         new IClasspathAttribute[] { 
             createAttribute("com.google.cloud.tools.eclipse.appengine.libraries.groupid", "groupId")
     };
-    new MavenCoordinatesHelper().createMavenCoordinates(attributes);
+    MavenCoordinatesHelper.createMavenCoordinates(attributes);
   }
 
   @Test
@@ -96,7 +96,7 @@ public class MavenCoordinatesHelperTest {
           createAttribute("com.google.cloud.tools.eclipse.appengine.libraries.groupid", "groupId"),
           createAttribute("com.google.cloud.tools.eclipse.appengine.libraries.artifactId", "artifactId")
     };
-    MavenCoordinates mavenCoordinates = new MavenCoordinatesHelper().createMavenCoordinates(attributes);
+    MavenCoordinates mavenCoordinates = MavenCoordinatesHelper.createMavenCoordinates(attributes);
     assertThat(mavenCoordinates.getGroupId(), is("groupId"));
     assertThat(mavenCoordinates.getArtifactId(), is("artifactId"));
   }
@@ -105,7 +105,7 @@ public class MavenCoordinatesHelperTest {
   public void testCreateMavenCoordinates_withRepository() {
     IClasspathAttribute[] attributes =
         addToDefaultAttributes("com.google.cloud.tools.eclipse.appengine.libraries.repository", "repo");
-    MavenCoordinates mavenCoordinates = new MavenCoordinatesHelper().createMavenCoordinates(attributes);
+    MavenCoordinates mavenCoordinates = MavenCoordinatesHelper.createMavenCoordinates(attributes);
     assertThat(mavenCoordinates.getRepository(), is("repo"));
   }
 
@@ -113,7 +113,7 @@ public class MavenCoordinatesHelperTest {
   public void testCreateMavenCoordinates_withType() {
     IClasspathAttribute[] attributes =
         addToDefaultAttributes("com.google.cloud.tools.eclipse.appengine.libraries.type", "war");
-    MavenCoordinates mavenCoordinates = new MavenCoordinatesHelper().createMavenCoordinates(attributes);
+    MavenCoordinates mavenCoordinates = MavenCoordinatesHelper.createMavenCoordinates(attributes);
     assertThat(mavenCoordinates.getType(), is("war"));
   }
 
@@ -121,7 +121,7 @@ public class MavenCoordinatesHelperTest {
   public void testCreateMavenCoordinates_withVersion() {
     IClasspathAttribute[] attributes =
         addToDefaultAttributes("com.google.cloud.tools.eclipse.appengine.libraries.version", "1.0.0");
-    MavenCoordinates mavenCoordinates = new MavenCoordinatesHelper().createMavenCoordinates(attributes);
+    MavenCoordinates mavenCoordinates = MavenCoordinatesHelper.createMavenCoordinates(attributes);
     assertThat(mavenCoordinates.getVersion(), is("1.0.0"));
   }
 
@@ -129,7 +129,7 @@ public class MavenCoordinatesHelperTest {
   public void testCreateMavenCoordinates_withClassifier() {
     IClasspathAttribute[] attributes =
         addToDefaultAttributes("com.google.cloud.tools.eclipse.appengine.libraries.classifier", "sources");
-    MavenCoordinates mavenCoordinates = new MavenCoordinatesHelper().createMavenCoordinates(attributes);
+    MavenCoordinates mavenCoordinates = MavenCoordinatesHelper.createMavenCoordinates(attributes);
     assertThat(mavenCoordinates.getClassifier(), is("sources"));
   }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Google Inc.
+ * Copyright 2017 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,9 +37,9 @@ import org.eclipse.osgi.util.NLS;
 
 public abstract class AbstractSourceAttachmentDownloaderJob extends Job {
 
-  private IPath classpathEntryPath;
-  private LibraryClasspathContainerSerializer serializer;
-  private IJavaProject javaProject;
+  private final IPath classpathEntryPath;
+  private final LibraryClasspathContainerSerializer serializer;
+  private final IJavaProject javaProject;
 
   public AbstractSourceAttachmentDownloaderJob(IJavaProject javaProject, IPath classpathEntryPath, LibraryClasspathContainerSerializer serializer) {
     super(NLS.bind(Messages.SourceAttachmentDownloaderJobName, javaProject));
@@ -76,8 +76,8 @@ public abstract class AbstractSourceAttachmentDownloaderJob extends Job {
   private void setSourceAttachmentPath(IPath sourcePath,
                                        IProgressMonitor monitor) throws IOException, CoreException {
     IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
-    for (int i = 0; i < rawClasspath.length; i++) {
-      LibraryClasspathContainer libraryContainer = getLibraryClasspathContainer(rawClasspath[i]);
+    for (IClasspathEntry classpathEntry : rawClasspath) {
+      LibraryClasspathContainer libraryContainer = getLibraryClasspathContainer(classpathEntry);
       if (libraryContainer != null) {
         IClasspathEntry[] classpathEntries = libraryContainer.getClasspathEntries();
         for (int j = 0; j < classpathEntries.length; j++) {

@@ -104,14 +104,15 @@ public class LibraryClasspathContainerSerializer {
     if (stateFile == null) {
       logger.warning("Container state file cannot be created, save failed");
       return;
-    } else {
-      try (OutputStreamWriter out =
-          new OutputStreamWriter(new FileOutputStream(stateFile), StandardCharsets.UTF_8)) {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        out.write(gson.toJson(new SerializableLibraryClasspathContainer(container,
-            binaryArtifactBaseLocationProvider.getBaseLocation(),
-            sourceBaseLocationProvider.getBaseLocation())));
-      }
+    }
+    try (OutputStreamWriter out =
+        new OutputStreamWriter(new FileOutputStream(stateFile), StandardCharsets.UTF_8)) {
+      Gson gson = new GsonBuilder().setPrettyPrinting().create();
+      SerializableLibraryClasspathContainer serializableContainer =
+          new SerializableLibraryClasspathContainer(container,
+                                                    binaryArtifactBaseLocationProvider.getBaseLocation(),
+                                                    sourceBaseLocationProvider.getBaseLocation());
+      out.write(gson.toJson(serializableContainer));
     }
   }
 

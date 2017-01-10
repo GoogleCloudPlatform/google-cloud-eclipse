@@ -68,7 +68,7 @@ public class ServletClasspathProviderTest {
   @Test
   public void testResolveClasspathContainerThrowsError() throws LibraryRepositoryServiceException {
     when(repositoryService.getLibraryClasspathEntry(any(IJavaProject.class), any(LibraryFile.class),
-                                                    any (IProgressMonitor.class)))
+                                                    any(IProgressMonitor.class)))
       .thenThrow(new LibraryRepositoryServiceException("test exception"));
     assertNull(provider.resolveClasspathContainer(null, null));
   }

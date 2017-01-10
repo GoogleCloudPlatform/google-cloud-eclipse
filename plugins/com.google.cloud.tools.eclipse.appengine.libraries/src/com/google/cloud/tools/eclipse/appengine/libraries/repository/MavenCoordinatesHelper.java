@@ -44,7 +44,9 @@ public class MavenCoordinatesHelper {
   private static final String CLASSPATH_ATTRIBUTE_CLASSIFIER =
       "com.google.cloud.tools.eclipse.appengine.libraries.classifier";
 
-  public List<IClasspathAttribute> createClasspathAttributes(MavenCoordinates mavenCoordinates,
+  private MavenCoordinatesHelper() { }
+
+  public static List<IClasspathAttribute> createClasspathAttributes(MavenCoordinates mavenCoordinates,
                                                              String actualVersion) {
     List<IClasspathAttribute> attributes = Lists.newArrayList(
         JavaCore.newClasspathAttribute(CLASSPATH_ATTRIBUTE_REPOSITORY,
@@ -65,7 +67,7 @@ public class MavenCoordinatesHelper {
     return attributes;
   }
 
-  public MavenCoordinates createMavenCoordinates(IClasspathAttribute[] attributes) {
+  public static MavenCoordinates createMavenCoordinates(IClasspathAttribute[] attributes) {
     Preconditions.checkNotNull(attributes, "attributes is null");
     Map<String, String> attributeMap = new HashMap<>(attributes.length);
     for (IClasspathAttribute attribute : attributes) {

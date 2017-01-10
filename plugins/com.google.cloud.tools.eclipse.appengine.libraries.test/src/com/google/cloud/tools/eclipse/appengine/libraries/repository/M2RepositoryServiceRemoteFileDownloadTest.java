@@ -66,7 +66,6 @@ public class M2RepositoryServiceRemoteFileDownloadTest {
   public void setUp() throws Exception {
     m2RepositoryService = new M2RepositoryService();
     m2RepositoryService.setMavenHelper(mavenHelper);
-    m2RepositoryService.setTransformer(transformer);
     m2RepositoryService.setSourceDownloaderJobFactory(sourceDownloaderJobFactory);
   }
 
