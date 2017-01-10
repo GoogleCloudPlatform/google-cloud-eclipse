@@ -40,7 +40,7 @@
            locationURI="menu:com.google.cloud.tools.eclipse.appengine.actions">
         <menu
               id="com.google.cloud.tools.eclipse.appengine.actions.new"
-              label="%menu.new">
+              label="%createNewProject">
            <command
                  commandId="org.eclipse.ui.newWizard"
                  style="push">
