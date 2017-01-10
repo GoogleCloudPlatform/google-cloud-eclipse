@@ -42,7 +42,7 @@ public abstract class AbstractSourceAttachmentDownloaderJob extends Job {
   private final IJavaProject javaProject;
 
   public AbstractSourceAttachmentDownloaderJob(IJavaProject javaProject, IPath classpathEntryPath, LibraryClasspathContainerSerializer serializer) {
-    super(NLS.bind(Messages.SourceAttachmentDownloaderJobName, javaProject));
+    super(NLS.bind(Messages.SourceAttachmentDownloaderJobName, javaProject.getProject().getName()));
     Preconditions.checkNotNull(javaProject, "javaProject is null");
     this.javaProject = javaProject;
     this.classpathEntryPath = classpathEntryPath;
