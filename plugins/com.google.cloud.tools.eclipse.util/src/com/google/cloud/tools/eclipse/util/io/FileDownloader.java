@@ -17,7 +17,6 @@
 package com.google.cloud.tools.eclipse.util.io;
 
 import com.google.common.base.Preconditions;
-import com.google.common.io.ByteStreams;
 import com.google.common.net.HttpHeaders;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -25,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.file.Files;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
@@ -33,6 +33,9 @@ import org.eclipse.core.runtime.Path;
  * Utility class to download files from {@link URL}s.
  */
 public class FileDownloader {
+
+  private static final String USER_AGENT = "google-cloud-eclipse";
+
   private static final int DEFAULT_CONNECT_TIMEOUT_MS = 3000;
   private static final int DEFAULT_READ_TIMEOUT_MS = 3000;
   private IPath downloadFolderPath;
@@ -73,11 +76,23 @@ public class FileDownloader {
     URLConnection connection = url.openConnection();
     connection.setConnectTimeout(DEFAULT_CONNECT_TIMEOUT_MS);
     connection.setReadTimeout(DEFAULT_READ_TIMEOUT_MS);
-    connection.setRequestProperty(HttpHeaders.USER_AGENT, "google-cloud-eclipse");
+    connection.setRequestProperty(HttpHeaders.USER_AGENT, USER_AGENT);
     try (InputStream inputStream = connection.getInputStream();
          FileOutputStream outputStream = new FileOutputStream(downloadedFile)) {
-      ByteStreams.copy(inputStream, outputStream);
+      byte[] buffer = new byte[4096];
+      int read = 0;
+      while ((read = inputStream.read(buffer)) != -1) {
+        if (monitor.isCanceled()) {
+          return null;
+        } else {
+          outputStream.write(buffer, 0, read);
+        }
+      }
       return new Path(downloadedFile.getAbsolutePath());
+    } finally {
+      if (monitor.isCanceled()) {
+        Files.delete(downloadedFile.toPath());
+      }
     }
   }
 

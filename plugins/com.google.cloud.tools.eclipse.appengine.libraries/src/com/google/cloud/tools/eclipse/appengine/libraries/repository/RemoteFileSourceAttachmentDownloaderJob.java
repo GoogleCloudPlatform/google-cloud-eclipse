@@ -37,8 +37,7 @@ public class RemoteFileSourceAttachmentDownloaderJob extends AbstractSourceAttac
   @Override
   protected IPath getSourcePath(IProgressMonitor monitor) {
     try {
-      IPath path = new FileDownloader(downloadFolder).download(sourceUrl, monitor);
-      return path;
+      return new FileDownloader(downloadFolder).download(sourceUrl, monitor);
     } catch (IOException e) {
       // source file is failed to download, this is not an error
       return null;

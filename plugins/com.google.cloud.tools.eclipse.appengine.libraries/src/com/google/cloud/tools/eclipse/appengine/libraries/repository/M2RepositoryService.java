@@ -67,7 +67,7 @@ public class M2RepositoryService implements ILibraryRepositoryService {
     verifyDependencies();
     MavenCoordinates mavenCoordinates = libraryFile.getMavenCoordinates();
     try {
-      Artifact artifact = mavenHelper.resolveArtifact(mavenCoordinates, null);
+      Artifact artifact = mavenHelper.resolveArtifact(mavenCoordinates, monitor);
       IClasspathAttribute[] libraryFileClasspathAttributes =
           getClasspathAttributes(libraryFile, artifact);
       URL sourceUrl = getSourceUrlFromUri(libraryFile.getSourceUri());
@@ -95,7 +95,7 @@ public class M2RepositoryService implements ILibraryRepositoryService {
     MavenCoordinates mavenCoordinates =
         mavenCoordinatesHelper.createMavenCoordinates(classpathEntry.getExtraAttributes());
     try {
-      Artifact artifact = mavenHelper.resolveArtifact(mavenCoordinates, null);
+      Artifact artifact = mavenHelper.resolveArtifact(mavenCoordinates, monitor);
       URL sourceUrl = getSourceUrlFromAttribute(classpathEntry.getExtraAttributes());
       Path classpathEntryPath = new Path(artifact.getFile().getAbsolutePath());
       return JavaCore.newLibraryEntry(classpathEntryPath,
@@ -210,8 +210,7 @@ public class M2RepositoryService implements ILibraryRepositoryService {
                                             IProgressMonitor monitor) {
     try {
       IPath downloadFolder = PathUtil.bundleStateBasedMavenFolder(artifact);
-      IPath path = new FileDownloader(downloadFolder).download(sourceUrl, monitor);
-      return path;
+      return new FileDownloader(downloadFolder).download(sourceUrl, monitor);
     } catch (IOException e) {
       // source file is failed to download, this is not an error
       return null;

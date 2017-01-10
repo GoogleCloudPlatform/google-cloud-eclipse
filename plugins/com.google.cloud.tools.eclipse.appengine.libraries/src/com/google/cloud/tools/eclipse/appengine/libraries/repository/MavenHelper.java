@@ -37,7 +37,7 @@ public class MavenHelper {
   public Artifact resolveArtifact(MavenCoordinates mavenCoordinates,
                                   IProgressMonitor monitor) throws CoreException {
     List<ArtifactRepository> repository = getRepository(mavenCoordinates);
-    return MavenUtils.resolveArtifact(null,
+    return MavenUtils.resolveArtifact(monitor,
                                       mavenCoordinates.getGroupId(),
                                       mavenCoordinates.getArtifactId(),
                                       mavenCoordinates.getType(),
@@ -51,7 +51,7 @@ public class MavenHelper {
     try {
       MavenCoordinates sourceMavenCoordinates = new MavenCoordinates(artifact);
       sourceMavenCoordinates.setClassifier("sources");
-      Artifact sourceArtifact = resolveArtifact(sourceMavenCoordinates, null);
+      Artifact sourceArtifact = resolveArtifact(sourceMavenCoordinates, monitor);
       return new Path(sourceArtifact.getFile().getAbsolutePath());
     } catch (CoreException exception) {
       // source file failed to download, this is not an error
