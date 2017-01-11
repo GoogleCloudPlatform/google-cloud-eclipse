@@ -18,11 +18,16 @@ package com.google.cloud.tools.eclipse.appengine.facets;
 
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -242,12 +247,16 @@ public class AppEngineStandardFacet {
       return;
     }
 
+    String webAppDirectory = findMainWebAppDirectory(facetedProject.getProject()).toOSString();
+    if (webAppDirectory == null) {
+      webAppDirectory = "src/main/webapp";
+    }
+
     IDataModel webModel = DataModelFactory.createDataModel(new WebFacetInstallDataModelProvider());
     webModel.setBooleanProperty(IJ2EEModuleFacetInstallDataModelProperties.ADD_TO_EAR, false);
     webModel.setBooleanProperty(IJ2EEFacetInstallDataModelProperties.GENERATE_DD, false);
     webModel.setBooleanProperty(IWebFacetInstallDataModelProperties.INSTALL_WEB_LIBRARY, false);
-    webModel.setStringProperty(IWebFacetInstallDataModelProperties.CONFIG_FOLDER,
-        WebProjectUtil.getWebAppDirectory(facetedProject.getProject()).toString());
+    webModel.setStringProperty(IWebFacetInstallDataModelProperties.CONFIG_FOLDER, webAppDirectory);
     facetInstallSet.add(new IFacetedProject.Action(
         IFacetedProject.Action.Type.INSTALL, WebFacetUtils.WEB_25, webModel));
   }
@@ -267,4 +276,45 @@ public class AppEngineStandardFacet {
     return appEngineRuntimes.toArray(appEngineRuntimesArray);
   }
 
+  /**
+   * Attempts to find a main web application directory, by the following logic:
+   *
+   * 1. If there is no {@code WEB-INF} folder in the {@code project}, returns {@code null}.
+   * 2. Otherwise, if there is at least one {@code WEB-INF} folder that contains {@code WEB-INF},
+   *     returns the parent directory of one of such {@code WEB-INF}.
+   * 3. Otherwise, returns the parent directory of an arbitrary {@code WEB-INF}.
+   */
+  @VisibleForTesting
+  static IPath findMainWebAppDirectory(IProject project) {
+    List<IFolder> webInfFolders = findAllWebInfFolders(project);
+    if (webInfFolders.isEmpty()) {
+      return null;
+    }
+
+    for (IFolder webInf : webInfFolders) {
+      if (webInf.getFile("web.xml").exists()) {
+        return webInf.getParent().getProjectRelativePath();
+      }
+    }
+    return webInfFolders.get(0).getParent().getProjectRelativePath();
+  }
+
+  @VisibleForTesting
+  static List<IFolder> findAllWebInfFolders(IContainer container) {
+    List<IFolder> webInfFolders = new ArrayList<>();
+    try {
+      for (IResource resource : container.members()) {
+        if (resource.exists() && resource.getType() == IResource.FOLDER) {
+          if ("WEB-INF".equals(resource.getName())) {
+            webInfFolders.add((IFolder) resource);
+            } else {
+            webInfFolders.addAll(findAllWebInfFolders((IFolder) resource));
+          }
+        }
+      }
+    } catch (CoreException ex) {
+      // IContainer.members() failed, and we return what we've found so far.
+    }
+    return webInfFolders;
+  }
 }

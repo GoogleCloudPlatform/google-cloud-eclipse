@@ -20,7 +20,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.wst.common.componentcore.ComponentCore;
 import org.eclipse.wst.common.componentcore.resources.IVirtualComponent;
 import org.eclipse.wst.common.componentcore.resources.IVirtualFolder;
@@ -71,17 +70,4 @@ public class WebProjectUtil {
     return file.exists() ? file : null;
   }
 
-  /**
-   * Return the parent directory of the project's {@code WEB-INF} directory, if found. If not
-   * found,
-   *
-   * @return directory relative to {@code project}, if found; otherwise, {@code src/main/webapp}
-   */
-  public static IPath getWebAppDirectory(IProject project) {
-    IFolder webInfDirectory = WebProjectUtil.getWebInfDirectory(project);
-    if (webInfDirectory != null) {
-      return webInfDirectory.getParent().getProjectRelativePath();
-    }
-    return new Path(DEFAULT_WEB_PATH);
-  }
 }
