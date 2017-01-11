@@ -238,9 +238,10 @@ public class AppEngineStandardFacet {
       return;
     }
 
-    String webAppDirectory = findMainWebAppDirectory(facetedProject.getProject()).toOSString();
-    if (webAppDirectory == null) {
-      webAppDirectory = "src/main/webapp";
+    String webAppDirectory = "src/main/webapp";
+    IPath webAppDirectoryFound = findMainWebAppDirectory(facetedProject.getProject());
+    if (webAppDirectoryFound != null) {
+      webAppDirectory = webAppDirectoryFound.toOSString();
     }
 
     IDataModel webModel = DataModelFactory.createDataModel(new WebFacetInstallDataModelProvider());
