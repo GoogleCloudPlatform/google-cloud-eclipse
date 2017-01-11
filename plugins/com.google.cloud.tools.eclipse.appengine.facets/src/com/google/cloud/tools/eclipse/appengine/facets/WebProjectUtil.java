@@ -35,7 +35,7 @@ public class WebProjectUtil {
   /**
    * Return the project's <code>WEB-INF</code> directory. There is no guarantee that the contents
    * are actually published.
-   *
+   * 
    * @return the <code>IFolder</code> or null if not present
    */
   public static IFolder getWebInfDirectory(IProject project) {
@@ -58,7 +58,7 @@ public class WebProjectUtil {
 
   /**
    * Attempt to resolve the given file within the project's <code>WEB-INF</code>.
-   *
+   * 
    * @return the file location or {@code null} if not found
    */
   public static IFile findInWebInf(IProject project, IPath filePath) {
