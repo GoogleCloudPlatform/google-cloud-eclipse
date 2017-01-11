@@ -44,7 +44,7 @@ import java.io.InputStream;
  * wizard.
  */
 @RunWith(SWTBotJunit4ClassRunner.class)
-public class NewMavenBasedAppEngineProjectWizardTest extends AbstractProjectTests {
+public class NewMavenBasedAppEngineProjectWizardTest extends AbstractProjectTest {
 
   @Test
   public void testHelloWorld() throws Exception {

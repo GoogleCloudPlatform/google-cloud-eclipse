@@ -28,7 +28,7 @@ import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.junit.Test;
 
-public class DeployPropertyPageTest extends AbstractProjectTests {
+public class DeployPropertyPageTest extends AbstractProjectTest {
   @Test
   public void testPropertyPageTitle_standardProject() throws CoreException {
     String projectName = "foo";
