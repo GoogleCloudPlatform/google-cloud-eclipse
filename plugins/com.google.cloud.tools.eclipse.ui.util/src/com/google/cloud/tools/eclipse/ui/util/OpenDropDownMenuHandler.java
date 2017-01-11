@@ -72,7 +72,7 @@ public final class OpenDropDownMenuHandler extends AbstractHandler {
   /**
    * Ensure we're being executed as a command tool item with style {@code DROP_DOWN}.
    * 
-   * @return the {@link ToolItem} or
+   * @return the {@link ToolItem}
    */
   private static ToolItem findToolItem(ExecutionEvent event) throws ExecutionException {
     if (event.getTrigger() instanceof Event) {

@@ -23,9 +23,6 @@ import org.junit.Test;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-/**
- *
- */
 public class PluginXmlTest extends BasePluginXmlTest {
   @Test
   public void testExtensionPoint() {
