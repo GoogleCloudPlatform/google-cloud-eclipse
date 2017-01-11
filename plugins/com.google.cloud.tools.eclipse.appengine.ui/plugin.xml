@@ -6,8 +6,6 @@
   <extension point="org.eclipse.ui.keywords">
     <keyword label="%googleCloudPlatformAcronym" 
              id="com.google.cloud.tools.eclipse.appengine.ui.GCPKeyword"/>
-    <keyword label="%googleCloudPlatformWithSpace" 
-             id="com.google.cloud.tools.eclipse.appengine.ui.GCPSpaceKeyword"/>
     <keyword label="%appEngineAcronym" 
              id="com.google.cloud.tools.eclipse.appengine.ui.GAEKeyword"/>
     <keyword label="%googleName" 
@@ -29,8 +27,8 @@
                  icon="icons/gcp-16x16.png"
                  id="com.google.cloud.tools.eclipse.appengine.actions"
                  style="pulldown"
-                 label="%googleCloudPlatformWithSpace"
-                 tooltip="%googleCloudPlatformWithSpace">
+                 label="%googleCloudPlatformName"
+                 tooltip="%googleCloudPlatformName">
            </command>
         </toolbar>
      </menuContribution>
