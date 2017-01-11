@@ -19,6 +19,9 @@ package com.google.cloud.tools.eclipse.appengine.facets;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
@@ -73,38 +76,65 @@ public class AppEngineStandardFacetTest {
   }
 
   @Test
-  public void findAllWebInfFolders_noWebInfFolders() {
+  public void testFindAllWebInfFolders_noWebInfFolders() {
     List<IFolder> webInfFolders =
         AppEngineStandardFacet.findAllWebInfFolders(projectCreator.getProject());
     Assert.assertTrue(webInfFolders.isEmpty());
   }
 
   @Test
-  public void findAllWebInfFolders() throws CoreException {
+  public void testFindAllWebInfFolders() throws CoreException {
     IProject project = projectCreator.getProject();
-    createPath(project, new Path("my-webapp/WEB-INF"));
+    createPath(project, new Path("src/my-webapp/WEB-INF"));
 
     List<IFolder> webInfFolders =
         AppEngineStandardFacet.findAllWebInfFolders(project);
     Assert.assertEquals(1, webInfFolders.size());
-    Assert.assertEquals(project.getFolder("my-webapp/WEB-INF"), webInfFolders.get(0));
+    Assert.assertEquals(project.getFolder("src/my-webapp/WEB-INF"), webInfFolders.get(0));
   }
 
   @Test
-  public void findAllWebInfFolders_multipleFolders() throws CoreException {
+  public void testFindAllWebInfFolders_multipleFolders() throws CoreException {
     IProject project = projectCreator.getProject();
     createPath(project, new Path("webapps/first-webapp/WEB-INF"));
     createPath(project, new Path("webapps/second-webapp/WEB-INF"));
     createPath(project, new Path("third-webapp/WEB-INF"));
+    createPath(project, new Path("WEB-INF"));
 
     List<IFolder> webInfFolders = AppEngineStandardFacet.findAllWebInfFolders(project);
-    Assert.assertEquals(3, webInfFolders.size());
+    Assert.assertEquals(4, webInfFolders.size());
     Assert.assertTrue(webInfFolders.contains(project.getFolder("webapps/first-webapp/WEB-INF")));
     Assert.assertTrue(webInfFolders.contains(project.getFolder("webapps/second-webapp/WEB-INF")));
     Assert.assertTrue(webInfFolders.contains(project.getFolder("third-webapp/WEB-INF")));
+    Assert.assertTrue(webInfFolders.contains(project.getFolder("WEB-INF")));
   }
 
-  private void createPath(IContainer parent, IPath relativePath) throws CoreException {
+  @Test
+  public void testFindMainWebAppDirectory_noWebInfFolders() {
+    IPath mainWebApp = AppEngineStandardFacet.findMainWebAppDirectory(projectCreator.getProject());
+    Assert.assertNull(mainWebApp);
+  }
+
+  @Test
+  public void testFindMainWebAppDirectory() throws CoreException {
+    createPath(projectCreator.getProject(), new Path("webapps/first-webapp/WEB-INF"));
+    IPath mainWebApp = AppEngineStandardFacet.findMainWebAppDirectory(projectCreator.getProject());
+    Assert.assertEquals(new Path("webapps/first-webapp"), mainWebApp);
+  }
+
+  @Test
+  public void testFindMainWebAppDirectory_returnsFolderWithWebXml() throws CoreException {
+    IProject project = projectCreator.getProject();
+    createPath(project, new Path("webapps/first-webapp/WEB-INF"));
+    createEmptyFile(project, new Path("webapps/second-webapp/WEB-INF/web.xml"));
+    createPath(project, new Path("third-webapp/WEB-INF"));
+    createPath(project, new Path("WEB-INF"));
+
+    IPath mainWebApp = AppEngineStandardFacet.findMainWebAppDirectory(project);
+    Assert.assertEquals(new Path("webapps/second-webapp"), mainWebApp);
+  }
+
+  private static void createPath(IContainer parent, IPath relativePath) throws CoreException {
     if (!relativePath.isEmpty()) {
       String firstSegment = relativePath.segment(0);
       IFolder child = parent.getFolder(new Path(firstSegment));
@@ -115,5 +145,13 @@ public class AppEngineStandardFacetTest {
 
       createPath(child, relativePath.removeFirstSegments(1));
     }
+  }
+
+  private static void createEmptyFile(IProject project, IPath relativePath) throws CoreException {
+    createPath(project, relativePath.removeLastSegments(1));
+
+    InputStream emptyStream = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
+    project.getFile(relativePath).create(emptyStream, false /* force */, null /* monitor */);
+    Assert.assertTrue(project.getFile(relativePath).exists());
   }
 }
