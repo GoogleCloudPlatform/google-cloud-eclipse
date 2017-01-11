@@ -26,8 +26,8 @@ import org.eclipse.jdt.core.IJavaProject;
 
 public class RemoteFileSourceAttachmentDownloaderJob extends AbstractSourceAttachmentDownloaderJob {
 
-  final private IPath downloadFolder;
-  final private URL sourceUrl;
+  private final IPath downloadFolder;
+  private final URL sourceUrl;
   
   public RemoteFileSourceAttachmentDownloaderJob(IJavaProject javaProject, IPath classpathEntryPath,
                                                  LibraryClasspathContainerSerializer serializer,

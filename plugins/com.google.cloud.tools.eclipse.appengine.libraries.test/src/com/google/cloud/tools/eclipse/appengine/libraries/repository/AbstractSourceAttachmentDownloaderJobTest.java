@@ -44,7 +44,7 @@ public abstract class AbstractSourceAttachmentDownloaderJobTest {
 
   @Rule
   public TestProjectCreator testProjectCreator =
-    new TestProjectCreator().withClasspathContainerPath(CONTAINER_PATH);
+      new TestProjectCreator().withClasspathContainerPath(CONTAINER_PATH);
   @Rule
   public TemporaryFolder temporaryFolder = new TemporaryFolder();
   @Mock

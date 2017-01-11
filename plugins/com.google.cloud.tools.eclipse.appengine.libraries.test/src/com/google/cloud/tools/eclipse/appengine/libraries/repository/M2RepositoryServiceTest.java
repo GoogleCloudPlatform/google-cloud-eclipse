@@ -231,9 +231,8 @@ public class M2RepositoryServiceTest {
 
   private IClasspathEntry getClasspathEntry(String groupId, String artifactId) {
     List<IClasspathAttribute> attributes =
-        MavenCoordinatesHelper.createClasspathAttributes(new MavenCoordinates(groupId,
-                                                                                    artifactId),
-                                                               "1.0.0");
+        MavenCoordinatesHelper.createClasspathAttributes(new MavenCoordinates(groupId, artifactId),
+                                                         "1.0.0");
     return JavaCore.newLibraryEntry(new Path(FAKE_PATH), null, null, new IAccessRule[0],
                                     attributes.toArray(new IClasspathAttribute[0]), true);
   }

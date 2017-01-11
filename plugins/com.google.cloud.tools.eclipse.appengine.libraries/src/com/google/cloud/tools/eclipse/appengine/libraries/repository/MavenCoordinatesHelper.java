@@ -47,7 +47,7 @@ public class MavenCoordinatesHelper {
   private MavenCoordinatesHelper() { }
 
   public static List<IClasspathAttribute> createClasspathAttributes(MavenCoordinates mavenCoordinates,
-                                                             String actualVersion) {
+                                                                    String actualVersion) {
     List<IClasspathAttribute> attributes = Lists.newArrayList(
         JavaCore.newClasspathAttribute(CLASSPATH_ATTRIBUTE_REPOSITORY,
                                        mavenCoordinates.getRepository()),

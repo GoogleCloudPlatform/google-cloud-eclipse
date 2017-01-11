@@ -84,7 +84,7 @@ public abstract class AbstractSourceAttachmentDownloaderJob extends Job {
           if (classpathEntries[j].getPath().equals(classpathEntryPath)) {
             updateClasspathEntrySourcePath(classpathEntries, j, sourcePath);
             LibraryClasspathContainer newLibraryContainer =
-                copyContainerWithNewEntries(libraryContainer, classpathEntries);
+                libraryContainer.copyWithNewEntries(classpathEntries);
             JavaCore.setClasspathContainer(newLibraryContainer.getPath(),
                                            new IJavaProject[]{ javaProject },
                                            new IClasspathContainer[]{ newLibraryContainer },
@@ -101,28 +101,12 @@ public abstract class AbstractSourceAttachmentDownloaderJob extends Job {
   }
 
   /**
-   * Creates a new {@link LibraryClasspathContainer} with the same path and description as
-   * <code>libraryContainer</code>'s but with the <code>classpathEntries</code>.
-   * @param libraryContainer the original container whose path and description are copied to the
-   * result
-   * @param classpathEntries the classpath entries of the new container
-   */
-  private LibraryClasspathContainer copyContainerWithNewEntries(
-      LibraryClasspathContainer libraryContainer, IClasspathEntry[] classpathEntries) {
-    LibraryClasspathContainer newLibraryContainer =
-        new LibraryClasspathContainer(libraryContainer.getPath(),
-                                      libraryContainer.getDescription(),
-                                      classpathEntries);
-    return newLibraryContainer;
-  }
-
-  /**
    * Updates a classpath entry by adding <code>sourcePath</code> as source attachment path.
    * @param entryIndex the index of the element in the array that will be updated
    */
-  private void updateClasspathEntrySourcePath(IClasspathEntry[] entries,
-                                              int entryIndex,
-                                              IPath sourcePath) {
+  private static void updateClasspathEntrySourcePath(IClasspathEntry[] entries,
+                                                     int entryIndex,
+                                                     IPath sourcePath) {
     entries[entryIndex] = JavaCore.newLibraryEntry(entries[entryIndex].getPath(),
                                                    sourcePath,
                                                    null,
