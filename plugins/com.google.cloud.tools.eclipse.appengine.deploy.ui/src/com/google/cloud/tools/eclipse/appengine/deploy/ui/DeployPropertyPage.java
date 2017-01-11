@@ -147,7 +147,8 @@ public class DeployPropertyPage extends PropertyPage {
     super.setMessage(newMessage, newType);
   }
 
-  private DeployPreferencesPanel getPreferencesPanel(IProject project, IFacetedProject facetedProject, Composite container) {
+  private DeployPreferencesPanel getPreferencesPanel(IProject project,
+      IFacetedProject facetedProject, Composite container) {
     IGoogleLoginService loginService =
         PlatformUI.getWorkbench().getService(IGoogleLoginService.class);
 
@@ -159,7 +160,8 @@ public class DeployPropertyPage extends PropertyPage {
       setTitle(Messages.getString("flex.page.title"));
       return new FlexDeployPreferencesPanel(container, project);
     } else {
-      logger.log(Level.WARNING, "App Engine Deployment property page is only visible if project contains an App Engine facet");
+      logger.log(Level.WARNING,
+          "App Engine Deployment property page is only visible if project contains an App Engine facet");
       return null;
     }
   }
@@ -178,11 +180,13 @@ public class DeployPropertyPage extends PropertyPage {
   private void evaluateFacetConfiguration() {
     if (isStandardPanel && !AppEngineStandardFacet.hasAppEngineFacet(facetedProject)) {
       IProjectFacet projectFacet = ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID);
-      invalidFacetConfigErrorMessage = Messages.getString("invalid.deploy.page.state", projectFacet.getLabel());
+      invalidFacetConfigErrorMessage =
+          Messages.getString("invalid.deploy.page.state", projectFacet.getLabel());
       updatePageBasedOnFacetConfig(false);
     } else if (!isStandardPanel && !AppEngineFlexFacet.hasAppEngineFacet(facetedProject)) {
       IProjectFacet projectFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexFacet.ID);
-      invalidFacetConfigErrorMessage = Messages.getString("invalid.deploy.page.state", projectFacet.getLabel());
+      invalidFacetConfigErrorMessage =
+          Messages.getString("invalid.deploy.page.state", projectFacet.getLabel());
       updatePageBasedOnFacetConfig(false);
     } else {
       invalidFacetConfigErrorMessage = "";

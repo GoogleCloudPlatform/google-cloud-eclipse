@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.facets;
 
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
@@ -52,7 +51,8 @@ public class AppEngineStandardFacet {
   public static final String ID = "com.google.cloud.tools.eclipse.appengine.facets.standard";
 
   static final String VERSION = "1";
-  static final String DEFAULT_RUNTIME_ID = "com.google.cloud.tools.eclipse.appengine.standard.runtime";
+  static final String DEFAULT_RUNTIME_ID =
+      "com.google.cloud.tools.eclipse.appengine.standard.runtime";
   static final String DEFAULT_RUNTIME_NAME = "App Engine Standard";
   public static final String DEFAULT_APPENGINE_SDK_VERSION = "1.9.46";
   public static final String DEFAULT_GCLOUD_PLUGIN_VERSION = "2.0.9.133.v201611104";
@@ -184,32 +184,24 @@ public class AppEngineStandardFacet {
     }
   }
 
-  public static org.eclipse.wst.server.core.IRuntime createAppEngineServerRuntime(IProgressMonitor monitor)
-      throws CoreException {
+  public static org.eclipse.wst.server.core.IRuntime createAppEngineServerRuntime(
+      IProgressMonitor monitor) throws CoreException {
     IRuntimeType appEngineRuntimeType =
         ServerCore.findRuntimeType(AppEngineStandardFacet.DEFAULT_RUNTIME_ID);
     if (appEngineRuntimeType == null) {
-      throw new NullPointerException("Could not find " + AppEngineStandardFacet.DEFAULT_RUNTIME_NAME + " runtime type");
+      throw new NullPointerException(
+          "Could not find " + AppEngineStandardFacet.DEFAULT_RUNTIME_NAME + " runtime type");
     }
 
     IRuntimeWorkingCopy appEngineRuntimeWorkingCopy
         = appEngineRuntimeType.createRuntime(null /* id */, monitor);
-
-    CloudSdk cloudSdk = new CloudSdk.Builder().build();
-    if (cloudSdk != null) {
-      java.nio.file.Path sdkLocation = cloudSdk.getJavaAppEngineSdkPath();
-      if (sdkLocation != null) {
-        IPath sdkPath = Path.fromOSString(sdkLocation.toAbsolutePath().toString());
-        appEngineRuntimeWorkingCopy.setLocation(sdkPath);
-      }
-    }
-
     return appEngineRuntimeWorkingCopy.save(true, monitor);
   }
 
   public static IRuntime createAppEngineFacetRuntime(IProgressMonitor monitor)
       throws CoreException {
-    org.eclipse.wst.server.core.IRuntime appEngineServerRuntime = createAppEngineServerRuntime(monitor);
+    org.eclipse.wst.server.core.IRuntime appEngineServerRuntime =
+        createAppEngineServerRuntime(monitor);
     return FacetUtil.getRuntime(appEngineServerRuntime);
   }
 
