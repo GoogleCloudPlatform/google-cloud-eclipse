@@ -85,7 +85,9 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
   public IClasspathEntry[] resolveClasspathContainer(IRuntime runtime) {
     return doResolveClasspathContainer(null, runtime);
   }
-  
+
+  // TODO project is unused, source resolution will always happen in sync
+  // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1218
   private IClasspathEntry[] doResolveClasspathContainer(IProject project, IRuntime runtime) {
     try {
       initializeLibraries(new LibraryFactory());
@@ -94,13 +96,15 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
       List<LibraryFile> servletApiLibraryFiles = libraries.get("servlet-api").getLibraryFiles();
       Preconditions.checkState(servletApiLibraryFiles.size() == 1);
       LibraryFile servletApi = servletApiLibraryFiles.get(0);
-      IClasspathEntry servletApiEntry = service.getLibraryClasspathEntry(null, servletApi, new NullProgressMonitor());
+      IClasspathEntry servletApiEntry = service.getLibraryClasspathEntry(null, servletApi,
+                                                                         new NullProgressMonitor());
 
       // jsp api is assumed to be a single file
       List<LibraryFile> jspApiLibraryFiles = libraries.get("jsp-api").getLibraryFiles();
       Preconditions.checkState(jspApiLibraryFiles.size() == 1);
       LibraryFile jspApi = jspApiLibraryFiles.get(0);
-      IClasspathEntry jspApiEntry = service.getLibraryClasspathEntry(null, jspApi, new NullProgressMonitor());
+      IClasspathEntry jspApiEntry = service.getLibraryClasspathEntry(null, jspApi,
+                                                                     new NullProgressMonitor());
 
       return new IClasspathEntry[] { servletApiEntry, jspApiEntry };
     } catch (LibraryRepositoryServiceException ex) {
