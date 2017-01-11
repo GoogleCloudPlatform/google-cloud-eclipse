@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.sdk;
 
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
+import com.google.common.base.Strings;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,7 +47,7 @@ public class OutputCollectorOutputLineListener implements ProcessOutputLineListe
   @Override
   public void onOutputLine(String line) {
     wrappedListener.onOutputLine(line);
-    if (line.startsWith(prefix)) {
+    if (!Strings.isNullOrEmpty(prefix) && line.startsWith(prefix)) {
       collectedMessages.add(line);
     }
   }

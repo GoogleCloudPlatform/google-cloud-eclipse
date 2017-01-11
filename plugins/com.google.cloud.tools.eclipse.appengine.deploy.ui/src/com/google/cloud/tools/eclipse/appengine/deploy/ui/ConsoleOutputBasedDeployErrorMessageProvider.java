@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 import com.google.cloud.tools.eclipse.appengine.deploy.DeployErrorMessageProvider;
 import com.google.cloud.tools.eclipse.sdk.OutputCollectorOutputLineListener;
 import com.google.common.base.Joiner;
+import com.google.common.base.Preconditions;
 import java.util.List;
 
 public class ConsoleOutputBasedDeployErrorMessageProvider implements DeployErrorMessageProvider {
@@ -26,6 +27,7 @@ public class ConsoleOutputBasedDeployErrorMessageProvider implements DeployError
   private OutputCollectorOutputLineListener outputLineListener;
 
   public ConsoleOutputBasedDeployErrorMessageProvider(OutputCollectorOutputLineListener outputLineListener) {
+    Preconditions.checkNotNull(outputLineListener, "outputLineListener is null");
     this.outputLineListener = outputLineListener;
   }
 
