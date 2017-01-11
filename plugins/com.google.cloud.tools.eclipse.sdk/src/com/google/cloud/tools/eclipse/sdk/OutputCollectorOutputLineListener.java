@@ -34,7 +34,6 @@ public class OutputCollectorOutputLineListener implements ProcessOutputLineListe
   private final ProcessOutputLineListener wrappedListener;
 
   /**
-   * 
    * @param prefix collects all lines starting with this prefix. If <code>prefix</code> is
    * <code>null</code> or empty string, it will not collect any lines
    */
