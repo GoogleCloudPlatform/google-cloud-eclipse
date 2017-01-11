@@ -26,6 +26,7 @@ import com.google.cloud.tools.eclipse.appengine.login.CredentialHelper;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -112,12 +113,16 @@ public class StandardDeployJob extends WorkspaceJob {
           return cloudSdkProcessStatus;
         }
         // temporary way of error handling, after #439 is fixed, it'll be cleaner
-        return StatusUtil.error(getClass(), "Staging failed, check the error message in the Console View");
+        String errorMessage =
+            getErrorMessageOrDefault(Messages.getString("deploy.job.staging.failed"));
+        return StatusUtil.error(getClass(), errorMessage);
       }
       deployer.deploy(stagingDirectory, cloudSdk, config.getDeployConfiguration(), progress.newChild(70));
       if (!cloudSdkProcessStatus.isOK() && cloudSdkProcessStatus != Status.CANCEL_STATUS) {
         // temporary way of error handling, after #439 is fixed, it'll be cleaner
-        return StatusUtil.error(getClass(), "Deploy failed, check the error message in the Console View");
+        String errorMessage =
+            getErrorMessageOrDefault(Messages.getString("deploy.job.deploy.failed"));
+        return StatusUtil.error(getClass(), errorMessage);
       }
 
       return cloudSdkProcessStatus;
@@ -144,6 +149,19 @@ public class StandardDeployJob extends WorkspaceJob {
       process.destroy();
     }
     super.canceling();
+  }
+
+  /**
+   * @return the error message obtained from <code>config.getErrorMessageProvider()</code> or
+   * <code>defaultMessage</code>
+   */
+  private String getErrorMessageOrDefault(String defaultMessage) {
+    String errorMessage = config.getErrorMessageProvider().getErrorMessage();
+    if (!Strings.isNullOrEmpty(errorMessage)) {
+      return errorMessage;
+    } else {
+      return defaultMessage;
+    }
   }
 
   private void saveCredential(Path destination, Credential credential) throws IOException {
