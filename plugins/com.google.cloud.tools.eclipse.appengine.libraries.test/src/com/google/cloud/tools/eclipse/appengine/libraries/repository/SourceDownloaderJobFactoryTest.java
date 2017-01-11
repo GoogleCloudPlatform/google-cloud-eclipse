@@ -18,15 +18,18 @@ package com.google.cloud.tools.eclipse.appengine.libraries.repository;
 
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer;
 import java.net.MalformedURLException;
 import java.net.URL;
 import org.apache.maven.artifact.Artifact;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaProject;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -42,6 +45,13 @@ public class SourceDownloaderJobFactoryTest {
   @Mock private IJavaProject javaProject;
   @Mock private Artifact artifact;
   @Mock private IPath classpathEntryPath;
+
+  @Before
+  public void setUp() throws Exception {
+    IProject project = mock(IProject.class);
+    when(project.getName()).thenReturn("testProject");
+    when(javaProject.getProject()).thenReturn(project);
+  }
 
   @Test
   public void testCreateM2BasedJobWithoutSourceUrl() {
