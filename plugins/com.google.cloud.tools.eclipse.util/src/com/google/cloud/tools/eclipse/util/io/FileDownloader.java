@@ -18,10 +18,13 @@ package com.google.cloud.tools.eclipse.util.io;
 
 import com.google.common.base.Preconditions;
 import com.google.common.net.HttpHeaders;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
@@ -77,16 +80,16 @@ public class FileDownloader {
     connection.setConnectTimeout(DEFAULT_CONNECT_TIMEOUT_MS);
     connection.setReadTimeout(DEFAULT_READ_TIMEOUT_MS);
     connection.setRequestProperty(HttpHeaders.USER_AGENT, USER_AGENT);
-    try (InputStream inputStream = connection.getInputStream();
-         FileOutputStream outputStream = new FileOutputStream(downloadedFile)) {
+    try (InputStream inputStream = new BufferedInputStream(connection.getInputStream());
+         OutputStream outputStream =
+             new BufferedOutputStream(new FileOutputStream(downloadedFile))) {
       byte[] buffer = new byte[4096];
       int read = 0;
       while ((read = inputStream.read(buffer)) != -1) {
         if (monitor.isCanceled()) {
           return null;
-        } else {
-          outputStream.write(buffer, 0, read);
         }
+        outputStream.write(buffer, 0, read);
       }
       return new Path(downloadedFile.getAbsolutePath());
     } finally {
