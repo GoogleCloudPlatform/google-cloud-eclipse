@@ -21,17 +21,9 @@ import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IProjectFacet;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
-/**
- * Wraps certain {@link ProjectFacetsManager} static methods to allow unit testing of classes that
- * use those methods.
- */
 public class FacetedProjectHelper {
 
-  /**
-   * Wraps {@link ProjectFacetsManager#getProjectFacet()} and
-   * {@link org.eclipse.wst.common.project.facet.core.IFacetedProjectBase#hasProjectFacet()}.
-   */
-  public boolean projectHasFacet(IFacetedProject facetedProject, String facetId) {
+  public static boolean projectHasFacet(IFacetedProject facetedProject, String facetId) {
     Preconditions.checkNotNull(facetedProject, "facetedProject is null");
     Preconditions.checkNotNull(facetId, "facetId is null");
     Preconditions.checkArgument(!facetId.isEmpty(), "facetId is empty string");

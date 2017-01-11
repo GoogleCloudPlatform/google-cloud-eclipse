@@ -246,10 +246,14 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
   /**
    * Starts the development server.
    *
-   * @param runnables the path to directories that contain configuration files like appengine-web.xml
+   * @param runnables the path to directories that contain configuration files such as
+   *        appengine-web.xml
    * @param console the stream (Eclipse console) to send development server process output to
+   * @param arguments JVM arguments to pass to the dev server
    */
-  void startDevServer(List<File> runnables, MessageConsoleStream console) throws CoreException {
+  void startDevServer(List<File> runnables, MessageConsoleStream console, List<String> vmArguments)
+      throws CoreException {
+    
     checkAndSetPorts();  // Must be called before setting the STARTING state.
     setServerState(IServer.STATE_STARTING);
 
@@ -263,6 +267,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     devServerRunConfiguration.setHost(getServer().getHost());
     devServerRunConfiguration.setPort(serverPort);
     devServerRunConfiguration.setAdminPort(adminPort);
+    devServerRunConfiguration.setJvmFlags(vmArguments);
 
     // Run server
     try {
@@ -276,18 +281,21 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
   /**
    * Starts the development server in debug mode.
    *
-   * @param runnables the path to directories that contain configuration files like appengine-web.xml
+   * @param runnables the path to directories that contain configuration files like
+   *        appengine-web.xml
    * @param console the stream (Eclipse console) to send development server process output to
    * @param debugPort the port to attach a debugger to if launch is in debug mode
+   * @param arguments JVM arguments to pass to the dev server
    */
-  void startDebugDevServer(List<File> runnables, MessageConsoleStream console, int debugPort)
+  void startDebugDevServer(List<File> runnables, MessageConsoleStream console, int debugPort, 
+      List<String> vmArguments)
       throws CoreException {
     checkAndSetPorts();  // Must be called before setting the STARTING state.
     setServerState(IServer.STATE_STARTING);
 
     // Create dev app server instance
     initializeDevServer(console);
-
+    
     // Create run configuration
     DefaultRunConfiguration devServerRunConfiguration = new DefaultRunConfiguration();
     devServerRunConfiguration.setAutomaticRestart(false);
@@ -302,12 +310,15 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
 
     List<String> jvmFlags = new ArrayList<String>();
 
+    // todo only real difference between this method and startDevServer are these two extra 
+    // JVM flags. Just set them and call startDevServer
     if (debugPort <= 0 || debugPort > 65535) {
       throw new IllegalArgumentException("Debug port is set to " + debugPort //$NON-NLS-1$
                                       + ", should be between 1-65535"); //$NON-NLS-1$
     }
     jvmFlags.add("-Xdebug"); //$NON-NLS-1$
     jvmFlags.add("-Xrunjdwp:transport=dt_socket,server=n,suspend=y,quiet=y,address=" + debugPort); //$NON-NLS-1$
+    jvmFlags.addAll(vmArguments);
     devServerRunConfiguration.setJvmFlags(jvmFlags);
 
     // Run server

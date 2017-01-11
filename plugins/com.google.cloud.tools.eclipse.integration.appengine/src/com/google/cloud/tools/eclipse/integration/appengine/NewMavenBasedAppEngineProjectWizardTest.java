@@ -100,7 +100,7 @@ public class NewMavenBasedAppEngineProjectWizardTest extends AbstractProjectTest
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);
     assertNotNull("m2e-wtp should create a faceted project", facetedProject);
     assertTrue("Project does not have standard facet",
-        new FacetedProjectHelper().projectHasFacet(facetedProject, AppEngineStandardFacet.ID));
+        FacetedProjectHelper.projectHasFacet(facetedProject, AppEngineStandardFacet.ID));
 
     for (String projectFile : projectFiles) {
       Path projectFilePath = new Path(projectFile);

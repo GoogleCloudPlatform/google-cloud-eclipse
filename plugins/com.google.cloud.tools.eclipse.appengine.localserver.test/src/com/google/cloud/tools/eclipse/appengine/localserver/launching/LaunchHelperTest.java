@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.localserver.launching;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -27,6 +28,7 @@ import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.Collections;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.debug.core.ILaunch;
@@ -144,4 +146,22 @@ public class LaunchHelperTest {
     handler.launch(new IModule[] {module1, module2}, ILaunchManager.DEBUG_MODE);
   }
 
+  @Test
+  public void testToProjectWithProject() {
+    assertEquals(appEngineStandardProject1.getProject(),
+        LaunchHelper.toProject(appEngineStandardProject1.getProject()));
+  }
+
+  @Test
+  public void testToProjectWithJavaProject() {
+    assertEquals(appEngineStandardProject1.getProject(),
+        LaunchHelper.toProject(appEngineStandardProject1.getJavaProject()));
+  }
+
+  @Test
+  public void testToProjectWithFile() {
+    IFile file = appEngineStandardProject1.getProject().getFile("WebContent/META-INF/MANIFEST.MF");
+    assertTrue("MANIFEST.MF not found", file.exists());
+    assertEquals(appEngineStandardProject1.getProject(), LaunchHelper.toProject(file));
+  }
 }

@@ -65,7 +65,7 @@ public class NewNativeAppEngineStandardProjectTest extends AbstractProjectTests 
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);
     assertNotNull("Native App Engine projects should be faceted", facetedProject);
     assertTrue("Project does not have standard facet",
-        new FacetedProjectHelper().projectHasFacet(facetedProject, AppEngineStandardFacet.ID));
+        FacetedProjectHelper.projectHasFacet(facetedProject, AppEngineStandardFacet.ID));
 
     for (String projectFile : projectFiles) {
       Path projectFilePath = new Path(projectFile);

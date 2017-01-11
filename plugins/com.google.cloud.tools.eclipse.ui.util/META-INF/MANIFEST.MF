@@ -32,6 +32,7 @@ Import-Package: com.google.cloud.tools.eclipse.ui.util,
  org.eclipse.ui.browser;ui.workbench=split,
  org.eclipse.ui.console,
  org.eclipse.ui.handlers,
+ org.eclipse.ui.ide,
  org.eclipse.wst.common.project.facet.core
 Export-Package: com.google.cloud.tools.eclipse.ui.util,
  com.google.cloud.tools.eclipse.ui.util.console,

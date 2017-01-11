@@ -30,6 +30,7 @@ import org.eclipse.debug.core.ILaunchMode;
  */
 public class LaunchModes implements IParameterValues {
   @Override
+  @SuppressWarnings("rawtypes")
   public Map getParameterValues() {
     ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
     Map<String, String> modes = new HashMap<>();

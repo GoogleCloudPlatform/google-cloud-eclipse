@@ -26,16 +26,16 @@ public class FacetedProjectHelperTest {
 
   @Test(expected = NullPointerException.class)
   public void testProjectHasFacet_projectNull() {
-    new FacetedProjectHelper().projectHasFacet(null, null);
+    FacetedProjectHelper.projectHasFacet(null, null);
   }
 
   @Test(expected = NullPointerException.class)
   public void testProjectHasFacet_facetIdNull() {
-    new FacetedProjectHelper().projectHasFacet(mock(IFacetedProject.class), null);
+    FacetedProjectHelper.projectHasFacet(mock(IFacetedProject.class), null);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testProjectHasFacet_facetIdEmpty() {
-    new FacetedProjectHelper().projectHasFacet(mock(IFacetedProject.class), "");
+    FacetedProjectHelper.projectHasFacet(mock(IFacetedProject.class), "");
   }
 }
