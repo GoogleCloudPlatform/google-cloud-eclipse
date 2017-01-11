@@ -272,8 +272,11 @@ public class AppEngineStandardFacet {
    *
    * 1. If there is no {@code WEB-INF} folder in the {@code project}, returns {@code null}.
    * 2. Otherwise, if there is at least one {@code WEB-INF} folder that contains {@code WEB-INF},
-   *     returns the parent directory of one of such {@code WEB-INF}.
+   *     returns the parent directory of one of such {@code WEB-INF} folders.
    * 3. Otherwise, returns the parent directory of an arbitrary {@code WEB-INF}.
+   *
+   * @return path of the main web application directory, relative to {@code project}, if found;
+   *     otherwise, {@code null}
    */
   @VisibleForTesting
   static IPath findMainWebAppDirectory(IProject project) {
