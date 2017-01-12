@@ -47,7 +47,7 @@ public class NatureUtils {
       List<String> natures = new ArrayList<>(Arrays.asList(description.getNatureIds()));
       natures.remove(natureId);
       description.setNatureIds(natures.toArray(new String[0]));
-      project.setDescription(description, null);
+      project.setDescription(description, null /* monitor */);
     }
   }
 }

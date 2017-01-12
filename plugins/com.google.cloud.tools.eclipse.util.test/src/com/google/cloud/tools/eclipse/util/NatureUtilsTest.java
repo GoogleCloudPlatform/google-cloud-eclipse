@@ -19,26 +19,33 @@ package com.google.cloud.tools.eclipse.util;
 import static org.junit.Assert.assertEquals;
 
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
-import java.util.ArrayList;
-import java.util.Arrays;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.JavaCore;
 import org.junit.Rule;
 import org.junit.Test;
 
 public class NatureUtilsTest {
 
-  @Rule public TestProjectCreator projectCreator = new TestProjectCreator()
-      .withNatures(new ArrayList<>(Arrays.asList("natureId1", "natureId2")));
-  //@Rule public TestProjectCreator projectCreatorWithGpeNature = new TestProjectCreator()
-  //    .withNatures(Arrays.asList("natureId1", "com.google.appengine.eclipse.core.gaeNature"));
+  @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
 
   @Test
   public void testRemoveNature() throws CoreException {
     IProject project = projectCreator.getProject();
-    assertEquals(2, project.getDescription().getNatureIds());
+    // By default, project has Java nature and faceted project nature.
+    assertEquals(2, project.getDescription().getNatureIds().length);
 
-    NatureUtils.removeNature(projectCreator.getProject(), "non-existing-nature");
-    assertEquals(2, project.getDescription().getNatureIds());
+    NatureUtils.removeNature(projectCreator.getProject(), JavaCore.NATURE_ID);
+    assertEquals(1, project.getDescription().getNatureIds().length);
+  }
+
+  @Test
+  public void testRemoveNature_nonExistingNature() throws CoreException {
+    IProject project = projectCreator.getProject();
+    NatureUtils.removeNature(projectCreator.getProject(), JavaCore.NATURE_ID);
+    assertEquals(1, project.getDescription().getNatureIds().length);
+
+    NatureUtils.removeNature(projectCreator.getProject(), JavaCore.NATURE_ID);
+    assertEquals(1, project.getDescription().getNatureIds().length);
   }
 }
