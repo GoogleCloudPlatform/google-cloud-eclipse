@@ -17,8 +17,8 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.sdk.OutputCollectorOutputLineListener;
@@ -45,7 +45,7 @@ public class ConsoleOutputBasedDeployErrorMessageProviderTest {
     when(listener.getCollectedMessages()).thenReturn(Collections.<String>emptyList());
     ConsoleOutputBasedDeployErrorMessageProvider messageProvider =
         new ConsoleOutputBasedDeployErrorMessageProvider(listener);
-    assertNull(messageProvider.getErrorMessage());
+    assertTrue(messageProvider.getErrorMessage().isEmpty());
   }
 
   @Test

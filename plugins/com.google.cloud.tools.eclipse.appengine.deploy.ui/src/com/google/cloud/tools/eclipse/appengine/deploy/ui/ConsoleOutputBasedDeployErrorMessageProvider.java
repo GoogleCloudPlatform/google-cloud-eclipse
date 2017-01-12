@@ -37,7 +37,7 @@ public class ConsoleOutputBasedDeployErrorMessageProvider implements DeployError
     if (!messages.isEmpty()) {
       return Joiner.on('\n').join(messages);
     } else {
-      return null;
+      return "";
     }
   }
 }

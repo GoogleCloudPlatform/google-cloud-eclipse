@@ -21,5 +21,8 @@ package com.google.cloud.tools.eclipse.appengine.deploy;
  */
 public interface DeployErrorMessageProvider {
 
+  /**
+   * @return the error message or an empty string if there is no error message
+   */
   String getErrorMessage();
 }
