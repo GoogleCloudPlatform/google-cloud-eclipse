@@ -89,12 +89,12 @@ echo "#     $LOCAL_REPO/plugins/*"
 echo "#"
 ask_proceed
 
+echo "The following steps require running an Eclipse binary."
 while true; do
-    echo "The following steps require running an Eclipse binary."
     echo -n "Enter the Eclipse home path: "
     read ECLIPSE_HOME
     if [ -x "$ECLIPSE_HOME/eclipse" ]; then break; fi
-    echo "'$ECLIPSE_HOME/eclipse' not executable. Try again."
+    echo "'$ECLIPSE_HOME/eclipse' is not an executable. Try again."
 done
 
 set -x
@@ -159,13 +159,19 @@ echo "#"
 echo "# into 'gs://cloud-tools-for-eclipse/<VERSION>/'."
 echo "#"
 ask_proceed
+
 while true; do
     echo -n "Enter version: "
     read VERSION
     echo -n "Verify version: "
     read VERSION_AGAIN
-    if [ "$VERSION" == "$VERSION_AGAIN" ]; then break; fi
-    echo "Versions don't match. Please try again."
+    if [ -z "$VERSION" ]; then
+      echo "Empty string. Please try again."
+    elif [ "$VERSION" != "$VERSION_AGAIN" ]; then
+      echo "Versions don't match. Please try again."
+    else
+      break
+    fi
 done
 
 set -x
