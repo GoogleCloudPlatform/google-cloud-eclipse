@@ -27,6 +27,7 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -296,19 +297,22 @@ public class AppEngineStandardFacet {
 
   @VisibleForTesting
   static List<IFolder> findAllWebInfFolders(IContainer container) {
-    List<IFolder> webInfFolders = new ArrayList<>();
+    final List<IFolder> webInfFolders = new ArrayList<>();
+
     try {
-      for (IResource resource : container.members()) {
-        if (resource.exists() && resource.getType() == IResource.FOLDER) {
-          if ("WEB-INF".equals(resource.getName())) {
+      IResourceVisitor webInfCollector = new IResourceVisitor() {
+        @Override
+        public boolean visit(IResource resource) throws CoreException {
+          if (resource.getType() == IResource.FOLDER && "WEB-INF".equals(resource.getName())) {
             webInfFolders.add((IFolder) resource);
-            } else {
-            webInfFolders.addAll(findAllWebInfFolders((IFolder) resource));
+            return false;  // No need to visit sub-directories.
           }
+          return true;
         }
-      }
+      };
+      container.accept(webInfCollector);
     } catch (CoreException ex) {
-      // IContainer.members() failed, and we return what we've found so far.
+      // Our attempt to find folders failed, but don't error out.
     }
     return webInfFolders;
   }
