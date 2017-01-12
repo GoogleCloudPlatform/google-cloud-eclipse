@@ -60,31 +60,15 @@ public class StandardDeployJob extends WorkspaceJob {
 
   private static final Logger logger = Logger.getLogger(StandardDeployJob.class.getName());
 
-  private final ExplodedWarPublisher exporter;
-  private final StandardProjectStaging staging;
-  private AppEngineProjectDeployer deployer;
-
   //temporary way of error handling, after #439 is fixed, it'll be cleaner
   private IStatus cloudSdkProcessStatus = Status.OK_STATUS;
   private Process process;
 
-  private StandardDeployJobConfig config;
+  private final StandardDeployJobConfig config;
 
-  StandardDeployJob(ExplodedWarPublisher exporter,
-                           StandardProjectStaging staging,
-                           AppEngineProjectDeployer deployer,
-                           StandardDeployJobConfig config) {
+  public StandardDeployJob(StandardDeployJobConfig config) {
     super(Messages.getString("deploy.standard.runnable.name")); //$NON-NLS-1$
-
-    Preconditions.checkNotNull(deployer, "deployer is null");
-    Preconditions.checkNotNull(exporter, "exporter is null");
-    Preconditions.checkNotNull(staging, "staging is null");
-    Preconditions.checkNotNull(config, "config is null");
-
-    this.exporter = exporter;
-    this.staging = staging;
-    this.deployer = deployer;
-    this.config = config;
+    this.config = Preconditions.checkNotNull(config, "config is null");
   }
 
   @Override
@@ -101,8 +85,10 @@ public class StandardDeployJob extends WorkspaceJob {
 
       try {
         getJobManager().beginRule(config.getProject(), progress);
-        exporter.publish(config.getProject(), explodedWarDirectory, progress.newChild(10));
-        staging.stage(explodedWarDirectory, stagingDirectory, cloudSdk, progress.newChild(20));
+        new ExplodedWarPublisher().publish(
+            config.getProject(), explodedWarDirectory, progress.newChild(10));
+        new StandardProjectStaging().stage(
+            explodedWarDirectory, stagingDirectory, cloudSdk, progress.newChild(20));
       } finally {
         getJobManager().endRule(config.getProject());
       }
@@ -114,7 +100,8 @@ public class StandardDeployJob extends WorkspaceJob {
         // temporary way of error handling, after #439 is fixed, it'll be cleaner
         return StatusUtil.error(getClass(), "Staging failed, check the error message in the Console View");
       }
-      deployer.deploy(stagingDirectory, cloudSdk, config.getDeployConfiguration(), progress.newChild(70));
+      new AppEngineProjectDeployer().deploy(
+          stagingDirectory, cloudSdk, config.getDeployConfiguration(), progress.newChild(70));
       if (!cloudSdkProcessStatus.isOK() && cloudSdkProcessStatus != Status.CANCEL_STATUS) {
         // temporary way of error handling, after #439 is fixed, it'll be cleaner
         return StatusUtil.error(getClass(), "Deploy failed, check the error message in the Console View");
@@ -181,51 +168,5 @@ public class StandardDeployJob extends WorkspaceJob {
         cloudSdkProcessStatus = StatusUtil.error(this, Messages.getString("cloudsdk.process.failed", exitCode));
       }
     }
-  }
-
-  public static class Builder {
-    private ExplodedWarPublisher exporter;
-    private StandardProjectStaging staging;
-    private AppEngineProjectDeployer deployer;
-    private StandardDeployJobConfig config;
-
-    public Builder exporter(ExplodedWarPublisher exporter) {
-      this.exporter = exporter;
-      return this;
-    }
-
-    public Builder staging(StandardProjectStaging staging) {
-      this.staging = staging;
-      return this;
-    }
-
-    public Builder deployer(AppEngineProjectDeployer deployer) {
-      this.deployer = deployer;
-      return this;
-    }
-
-    public Builder config(StandardDeployJobConfig config) {
-      this.config = config;
-      return this;
-    }
-
-    public StandardDeployJob build() {
-      Preconditions.checkNotNull(config, "config is null");
-
-      if (exporter == null) {
-        exporter = new ExplodedWarPublisher();
-      }
-
-      if (staging == null) {
-        staging = new StandardProjectStaging();
-      }
-
-      if (deployer == null) {
-        deployer = new AppEngineProjectDeployer();
-      }
-
-      return new StandardDeployJob(exporter, staging, deployer, config);
-    }
-
   }
 }

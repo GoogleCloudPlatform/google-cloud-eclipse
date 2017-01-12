@@ -26,7 +26,9 @@ import javax.xml.validation.SchemaFactory;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-public class PluginXmlValidationTest {
+import com.google.cloud.tools.eclipse.test.util.BasePluginXmlTest;
+
+public class PluginXmlValidationTest extends BasePluginXmlTest {
 
   @Test
   public void validatePluginXml() throws SAXException, IOException {

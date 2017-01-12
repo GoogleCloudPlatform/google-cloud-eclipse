@@ -19,10 +19,19 @@ package com.google.cloud.tools.eclipse.sdk.ui.preferences;
 import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.cloudsdk.AppEngineJavaComponentsNotInstalledException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkOutOfDateException;
 import com.google.cloud.tools.eclipse.preferences.areas.PreferenceArea;
 import com.google.cloud.tools.eclipse.sdk.internal.PreferenceConstants;
-
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.MessageFormat;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.Dialog;
@@ -40,16 +49,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
-
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.text.MessageFormat;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class CloudSdkPreferenceArea extends PreferenceArea {
   /** Preference Page ID that hosts this area. */
@@ -96,7 +95,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
         .generateLayout(fieldContents);
 
     GridLayoutFactory.fillDefaults().generateLayout(contents);
-    
+
     Dialog.applyDialogFont(contents);
     return contents;
   }
@@ -160,20 +159,19 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
       sdk.validateAppEngineJavaComponents();
       status = Status.OK_STATUS;
       return true;
-    } catch (AppEngineJavaComponentsNotInstalledException ex) {
-      status = new Status(IStatus.WARNING, getClass().getName(),
-          MessageFormat.format(SdkUiMessages.AppEngineJavaComponentsNotInstalled, ex.getMessage()));
-      return false;
-    } catch (CloudSdkOutOfDateException ex) {
-        status = new Status(IStatus.ERROR,
-            "com.google.cloud.tools.eclipse.appengine.deploy.ui", SdkUiMessages.CloudSdkOutOfDate);
-        return false;
-    } catch (AppEngineException ex) {
+    } catch (CloudSdkNotFoundException ex) {
       // accept a seemingly invalid location in case the SDK organization
       // has changed and the CloudSdk#validate() code is out of date
       status = new Status(IStatus.WARNING, getClass().getName(),
           MessageFormat.format(SdkUiMessages.CloudSdkNotFound, sdk.getSdkPath()));
       return false;
+    } catch (AppEngineJavaComponentsNotInstalledException ex) {
+      status = new Status(IStatus.WARNING, getClass().getName(),
+          MessageFormat.format(SdkUiMessages.AppEngineJavaComponentsNotInstalled, ex.getMessage()));
+      return false;
+    } catch (CloudSdkOutOfDateException ex) {
+        status = new Status(IStatus.ERROR, getClass().getName(), SdkUiMessages.CloudSdkOutOfDate);
+        return false;
     }
   }
 
@@ -184,11 +182,11 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
    */
   class CloudSdkDirectoryFieldEditor extends DirectoryFieldEditor {
     CloudSdkDirectoryFieldEditor(String name, String labelText, Composite parent) {
-      // unfortunately cannot use super(name,labelText,parent) as must specify the
+      // unfortunately cannot use super(name, labelText, parent) as must specify the
       // validateStrategy before the createControl()
       init(name, labelText);
-      setErrorMessage(JFaceResources.getString("DirectoryFieldEditor.errorMessage"));//$NON-NLS-1$
-      setChangeButtonText(JFaceResources.getString("openBrowse"));//$NON-NLS-1$
+      setErrorMessage(JFaceResources.getString("DirectoryFieldEditor.errorMessage")); //$NON-NLS-1$
+      setChangeButtonText(JFaceResources.getString("openBrowse")); //$NON-NLS-1$
       setEmptyStringAllowed(true);
       setValidateStrategy(VALIDATE_ON_KEY_STROKE);
       createControl(parent);
@@ -206,9 +204,10 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     protected boolean doCheckState() {
       String directory = getStringValue().trim();
       if (directory.isEmpty()) {
+        status = Status.OK_STATUS;
         return true;
       }
-      
+
       Path location = Paths.get(directory);
       if (!Files.exists(location)) {
         String message = MessageFormat.format(SdkUiMessages.NoSuchDirectory, location);

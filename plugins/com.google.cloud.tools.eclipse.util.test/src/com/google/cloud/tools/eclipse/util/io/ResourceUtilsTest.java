@@ -31,7 +31,7 @@ import org.junit.Test;
 /**
  * Tests for the utility methods on {@link ResourceUtils}.
  */
-public class ResourceUtilsTests {
+public class ResourceUtilsTest {
   private IProject project;
 
   @After
