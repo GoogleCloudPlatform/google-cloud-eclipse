@@ -103,14 +103,14 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
 
     TitleAreaDialogSupport.create(this,
         content.getDataBindingContext()).setValidationMessageProvider(
-    	    new ValidationMessageProvider() {
-		      @Override
-		      public int getMessageType(ValidationStatusProvider statusProvider) {
-		        int type = super.getMessageType(statusProvider);
-		        setValid(type != IMessageProvider.ERROR);
-		        return type;
-		      }
-		    });
+            new ValidationMessageProvider() {
+              @Override
+              public int getMessageType(ValidationStatusProvider statusProvider) {
+                int type = super.getMessageType(statusProvider);
+                setValid(type != IMessageProvider.ERROR);
+                return type;
+              }
+            });
     return dialogArea;
   }
 
