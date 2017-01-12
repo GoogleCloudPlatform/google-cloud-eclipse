@@ -242,28 +242,42 @@
             class="com.google.cloud.tools.eclipse.appengine.localserver.launching.LaunchAppEngineStandardHandler"
             commandId="com.google.cloud.tools.eclipse.appengine.localserver.launch">
          <enabledWhen>
-           <or>
-           	  <iterate>
-		        <test
-        		    property="org.eclipse.wst.common.project.facet.core.projectFacet"
-            		value="com.google.cloud.tools.eclipse.appengine.facets.standard" />
-              </iterate>
-              <with
-                     variable="activeEditorInput">
+            <or>
+               <iterate
+                     ifEmpty="false">
                   <adapt
-                        type="org.eclipse.core.resources.IFile">
-			        <test
-            			property="org.eclipse.wst.common.project.facet.core.projectFacet"
-            			value="com.google.cloud.tools.eclipse.appengine.facets.standard" />
+                        type="org.eclipse.core.resources.IResource">
+                     <test
+                           property="org.eclipse.wst.common.project.facet.core.projectFacet"
+                           value="com.google.cloud.tools.eclipse.appengine.facets.standard">
+                     </test>
                   </adapt>
-               </with>
+              </iterate>
+              <and>
+                 <with
+                       variable="activePart">
+                    <instanceof
+                          value="org.eclipse.ui.IEditorPart">
+                    </instanceof>
+                  </with>
+                  <with
+                        variable="activeEditorInput">
+                     <adapt
+                           type="org.eclipse.core.resources.IFile">
+                        <test
+                              property="org.eclipse.wst.common.project.facet.core.projectFacet"
+                              value="com.google.cloud.tools.eclipse.appengine.facets.standard">
+                        </test>
+                     </adapt>
+                  </with>
+               </and>
            </or>
          </enabledWhen>
       </handler>
    </extension>
    <extension
          point="org.eclipse.debug.ui.launchShortcuts">
-        <shortcut
+      <shortcut
             id="com.google.cloud.tools.eclipse.appengine.localserver.launch.appengine.standard"
             label="%launch.shortcut.label"
             description="%launch.shortcut.description"
@@ -273,24 +287,24 @@
             modes="run,debug">
          <contextualLaunch>
             <enablement>
-	           <or>
-    	           <with variable="selection">
-        		   	  <iterate>
-        		   	    <adapt type="org.eclipse.core.resources.IProject">
-		        			<test
-        		    			property="org.eclipse.wst.common.project.facet.core.projectFacet"
-            					value="com.google.cloud.tools.eclipse.appengine.facets.standard" />
-    					</adapt>
-              		  </iterate>
-              		</with>
-              		<with variable="activeEditorInput">
-                  		<adapt type="org.eclipse.core.resources.IFile">
-			        		<test
-            					property="org.eclipse.wst.common.project.facet.core.projectFacet"
-            					value="com.google.cloud.tools.eclipse.appengine.facets.standard" />
-                  		</adapt>
-               		</with>
-           		</or>
+              <or>
+                  <with variable="selection">
+                     <iterate>
+                        <adapt type="org.eclipse.core.resources.IProject">
+                           <test
+                                 property="org.eclipse.wst.common.project.facet.core.projectFacet"
+                                 value="com.google.cloud.tools.eclipse.appengine.facets.standard" />
+                           </adapt>
+                     </iterate>
+                  </with>
+                  <with variable="activeEditorInput">
+                     <adapt type="org.eclipse.core.resources.IFile">
+                        <test
+                              property="org.eclipse.wst.common.project.facet.core.projectFacet"
+                              value="com.google.cloud.tools.eclipse.appengine.facets.standard" />
+                     </adapt>
+                  </with>
+               </or>
             </enablement>
          </contextualLaunch>
          <description
