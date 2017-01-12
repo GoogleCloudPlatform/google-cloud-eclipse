@@ -20,12 +20,12 @@ import com.google.cloud.tools.eclipse.preferences.Activator;
 import com.google.cloud.tools.eclipse.preferences.AnalyticsPreferences;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.net.UrlEscapers;
+
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
@@ -271,11 +271,7 @@ public class AnalyticsPingManager {
       }
       resultBuilder.append(entry.getKey());
       resultBuilder.append('=');
-      try {
-        resultBuilder.append(URLEncoder.encode(entry.getValue(), "UTF-8"));
-      } catch (UnsupportedEncodingException uee) {
-        throw new RuntimeException("UTF-8 not supported");
-      }
+      resultBuilder.append(UrlEscapers.urlFormParameterEscaper().escape(entry.getValue()));
     }
     return resultBuilder.toString();
   }
