@@ -25,7 +25,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -52,7 +51,6 @@ public final class TestProjectCreator extends ExternalResource {
   private String containerPath;
   private String appEngineServiceId;
   private List<IProjectFacetVersion> projectFacetVersions = new ArrayList<>();
-  private List<String> natureIds = new ArrayList<>();
 
   public TestProjectCreator withClasspathContainerPath(String containerPath) {
     this.containerPath = containerPath;
@@ -61,11 +59,6 @@ public final class TestProjectCreator extends ExternalResource {
 
   public TestProjectCreator withFacetVersions(List<IProjectFacetVersion> projectFacetVersions) {
     this.projectFacetVersions.addAll(projectFacetVersions);
-    return this;
-  }
-
-  public TestProjectCreator withNatures(List<String> natureIds) {
-    this.natureIds.addAll(natureIds);
     return this;
   }
 
@@ -114,7 +107,6 @@ public final class TestProjectCreator extends ExternalResource {
 
     addContainerPathToRawClasspath();
     addFacets();
-    addNatures();
     if (appEngineServiceId != null) {
       setAppEngineServiceId(appEngineServiceId);
     }
@@ -138,15 +130,6 @@ public final class TestProjectCreator extends ExternalResource {
         facetedProject.installProjectFacet(projectFacetVersion, null, null);
         ProjectUtils.waitUntilIdle();  // App Engine runtime is added via a Job, so wait.
       }
-    }
-  }
-
-  private void addNatures() throws CoreException {
-    if (!natureIds .isEmpty()) {
-      IProjectDescription description = getProject().getDescription();
-      natureIds.addAll(Arrays.asList(description.getNatureIds()));
-      description.setNatureIds(natureIds.toArray(new String[0]));
-      getProject().setDescription(description, null /* monitor */);
     }
   }
 
