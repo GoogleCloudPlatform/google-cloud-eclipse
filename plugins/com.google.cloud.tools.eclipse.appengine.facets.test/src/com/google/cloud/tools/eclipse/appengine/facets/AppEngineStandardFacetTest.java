@@ -21,7 +21,6 @@ import static org.mockito.Mockito.when;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
@@ -150,7 +149,7 @@ public class AppEngineStandardFacetTest {
   private static void createEmptyFile(IProject project, IPath relativePath) throws CoreException {
     createPath(project, relativePath.removeLastSegments(1));
 
-    InputStream emptyStream = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
+    InputStream emptyStream = new ByteArrayInputStream(new byte[0]);
     project.getFile(relativePath).create(emptyStream, false /* force */, null /* monitor */);
     Assert.assertTrue(project.getFile(relativePath).exists());
   }
