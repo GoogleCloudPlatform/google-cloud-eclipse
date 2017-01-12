@@ -43,11 +43,12 @@ import java.io.File;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class CloudSdkPreferenceAreaTest {
+  
   @Mock
-  IPreferenceStore preferences;
+  private IPreferenceStore preferences;
 
-  CloudSdkPreferenceArea area;
-  Shell shell;
+  private CloudSdkPreferenceArea area;
+  private Shell shell;
 
   @After
   public void tearDown() {
@@ -77,6 +78,9 @@ public class CloudSdkPreferenceAreaTest {
     show();
     area.setStringValue(roots[0].getAbsolutePath());
     assertEquals(IStatus.WARNING, area.getStatus().getSeverity());
+    
+    area.setStringValue("");
+    assertEquals(IStatus.OK, area.getStatus().getSeverity());    
   }
 
   private void show() {

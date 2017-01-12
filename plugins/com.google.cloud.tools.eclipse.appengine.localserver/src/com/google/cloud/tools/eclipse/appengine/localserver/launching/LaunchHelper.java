@@ -31,7 +31,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.debug.core.ILaunch;
@@ -50,6 +52,8 @@ import org.eclipse.wst.server.core.ServerUtil;
  * A helper class for launching modules on a server
  */
 public class LaunchHelper {
+  private static final Logger logger = Logger.getLogger(LaunchHelper.class.getName());
+
   public void launch(IModule[] modules, String launchMode) throws CoreException {
     SubMonitor progress = SubMonitor.convert(null);
     Collection<IServer> servers =
@@ -139,7 +143,8 @@ public class LaunchHelper {
       }
       return modules.toArray(new IModule[modules.size()]);
     }
-    throw new CoreException(StatusUtil.error(this, Messages.getString("CANNOT_DETERMINE_EXECUTION_CONTEXT"))); //$NON-NLS-1$
+    throw new CoreException(
+        StatusUtil.error(this, Messages.getString("CANNOT_DETERMINE_EXECUTION_CONTEXT"))); //$NON-NLS-1$
   }
 
   /** Check the project of the active editor. */
@@ -151,7 +156,8 @@ public class LaunchHelper {
         return new IModule[] {asModule(project)};
       }
     }
-    throw new CoreException(StatusUtil.error(this, Messages.getString("CANNOT_DETERMINE_EXECUTION_CONTEXT"))); //$NON-NLS-1$
+    throw new CoreException(
+        StatusUtil.error(this, Messages.getString("CANNOT_DETERMINE_EXECUTION_CONTEXT"))); //$NON-NLS-1$
   }
 
   private IModule asModule(Object object) throws CoreException {
@@ -159,15 +165,29 @@ public class LaunchHelper {
     if (module != null) {
       return module;
     }
-    IProject project = AdapterUtil.adapt(object, IProject.class);
+    IProject project = toProject(object);
     if (project != null) {
       module = ServerUtil.getModule(project);
       if (module != null) {
         return module;
       }
     }
+    logger.warning("Unable to map to a module: " + object);
     throw new CoreException(
-        StatusUtil.error(this, Messages.getString("NO_MODULE_FOUND_FOR", object))); //$NON-NLS-1$
+        StatusUtil.error(this, Messages.getString("CANNOT_DETERMINE_EXECUTION_CONTEXT"))); //$NON-NLS-1$
+  }
+
+  @VisibleForTesting
+  static IProject toProject(Object object) {
+    IProject project = AdapterUtil.adapt(object, IProject.class);
+    if (project != null) {
+      return project;
+    }
+    IResource resource = AdapterUtil.adapt(object, IResource.class);
+    if (resource != null) {
+      return resource.getProject();
+    }
+    return null;
   }
 
 }
