@@ -5,7 +5,7 @@
       <link id="cloud-tools-for-eclipse-link"
             label="Google Cloud Tools for Eclipse"
             style-id="content-link"
-            url="https://github.com/GoogleCloudPlatform/google-cloud-eclipse/wiki/Google-Cloud-Tools-for-Eclipse">
+            url="https://cloud.google.com/eclipse/docs/">
         <text>Learn more about Google Cloud Tools for Eclipse.</text>
       </link>
     </group>
@@ -16,7 +16,7 @@
       <link id="cloud-tools-for-eclipse-tutorial-link"
             label="Google Cloud Tools for Eclipse Tutorial"
             style-id="content-link"
-            url="https://github.com/GoogleCloudPlatform/google-cloud-eclipse/wiki/Cloud-Tools-for-Eclipse-Tutorial">
+            url="https://cloud.google.com/eclipse/docs/quickstart">
         <text>Read the Google Cloud Tools for Eclipse tutorial about using Google Cloud Tools for Eclipse.</text>
       </link>
     </group>
