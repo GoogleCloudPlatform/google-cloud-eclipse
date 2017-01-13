@@ -98,9 +98,9 @@ public class AppEngineLibraryContainerInitializer extends ClasspathContainerInit
     }
     if (containerPath.segmentCount() == 2) {
       if (!containerPath.segment(0).equals(this.containerPath)) {
-        throw new CoreException(StatusUtil.error(this,
+        throw new CoreException(StatusUtil.error(this, 
             Messages.getString("ContainerPathInvalidFirstSegment", this.containerPath,
-            containerPath.segment(0))));
+                containerPath.segment(0))));
       }
       try {
         LibraryClasspathContainer container = serializer.loadContainer(project, containerPath);
