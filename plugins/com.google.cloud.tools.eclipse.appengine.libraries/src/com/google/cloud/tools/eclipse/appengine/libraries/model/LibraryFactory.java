@@ -26,7 +26,6 @@ import java.util.Locale;
 import java.util.logging.Logger;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.InvalidRegistryObjectException;
-import org.eclipse.osgi.util.NLS;
 
 public class LibraryFactory {
 
@@ -76,11 +75,12 @@ public class LibraryFactory {
             configurationElement.getChildren(ELEMENT_NAME_LIBRARY_DEPENDENCY)));
         return library;
       } else {
-        throw new LibraryFactoryException(NLS.bind(Messages.UnexpectedConfigurationElement,
+        throw new LibraryFactoryException(
+            Messages.getString("UnexpectedConfigurationElement",
             configurationElement.getName(), ELEMENT_NAME_LIBRARY));
       }
     } catch (InvalidRegistryObjectException | URISyntaxException | IllegalArgumentException ex) {
-      throw new LibraryFactoryException(Messages.CreateLibraryError, ex);
+      throw new LibraryFactoryException(Messages.getString("CreateLibraryError"), ex);
     }
   }
 

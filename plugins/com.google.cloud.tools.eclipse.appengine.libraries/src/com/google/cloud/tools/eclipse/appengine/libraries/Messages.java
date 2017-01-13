@@ -16,29 +16,23 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
-import org.eclipse.osgi.util.NLS;
+import java.text.MessageFormat;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
 
-public class Messages extends NLS {
-  private static final String BUNDLE_NAME = "com.google.cloud.tools.eclipse.appengine.libraries.messages"; //$NON-NLS-1$
-  public static String AppEngineLibraryContainerResolverJobName;
-  public static String ContainerPathInvalidFirstSegment;
-  public static String ContainerPathNotTwoSegments;
-  public static String CreateLibraryError;
-  public static String LoadContainerFailed;
-  public static String RepositoryCannotBeLocated;
-  public static String RepositoryUriInvalid;
-  public static String RepositoryUriNotAbsolute;
-  public static String ResolveArtifactError;
-  public static String TaskResolveArtifacts;
-  public static String TaskResolveLibraries;
-  public static String TaskResolveLibrariesError;
-  public static String UnexpectedConfigurationElement;
+public class Messages {
 
-  static {
-    // initialize resource bundle
-    NLS.initializeMessages(BUNDLE_NAME, Messages.class);
-  }
+  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle(
+      "com.google.cloud.tools.eclipse.appengine.libraries.messages"); //$NON-NLS-1$
 
   private Messages() {
+  }
+
+  public static String getString(String key, Object... params) {
+    try {
+      return MessageFormat.format(RESOURCE_BUNDLE.getString(key), params);
+    } catch (MissingResourceException ex) {
+      return '!' + key + '!';
+    }
   }
 }
