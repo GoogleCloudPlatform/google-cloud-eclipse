@@ -158,7 +158,8 @@ public class LoginServiceUi implements UiFacade {
           AnalyticsPingManager.getInstance().sendPing(
               AnalyticsEvents.LOGIN_START, null, null, dialog.getShell());
 
-          monitor.beginTask(message != null ? message : Messages.getString("LOGIN_PROGRESS_DIALOG_MESSAGE"),
+          monitor.beginTask(
+              message != null ? message : Messages.getString("LOGIN_PROGRESS_DIALOG_MESSAGE"),
               IProgressMonitor.UNKNOWN);
           // Fork another sub-job to circumvent the limitation of LocalServerReceiver.
           // (See the comments of scheduleCodeWaitingJob().)
