@@ -182,3 +182,14 @@ ask_proceed
 set -x
 gsutil -m acl ch -r -u AllUsers:R gs://cloud-tools-for-eclipse/$VERSION
 set +x
+
+###############################################################################
+echo
+echo "#"
+echo "# Done! Verify that you can install the plugin into Eclipse"
+echo "# from the public link:"
+echo "#"
+echo "# https://storage.googleapis.com/cloud-tools-for-eclipse/$VERSION/"
+echo "#"
+echo "# If everything is OK, update Lorry."
+echo "#"
