@@ -11,6 +11,15 @@
 # confirmation) for temporary work directory, which can be inspected later
 # and/or deleted safely anytime.
 
+if [ -z "$ECLIPSE_HOME" ]; then
+    echo 'The release steps require running an Eclipse binary.'
+    echo 'Set $ECLIPSE_HOME before running this script.'
+    exit 1
+elif [ ! -x "$ECLIPSE_HOME/eclipse" ]; then
+    echo "'$ECLIPSE_HOME/eclipse' is not an executable. Halting."
+    exit 1
+fi
+
 WORK_DIR=$HOME/CT4E_release_work
 SIGNED_DIR=$WORK_DIR/signed
 LOCAL_REPO=$WORK_DIR/repository
@@ -89,14 +98,6 @@ echo "#     $LOCAL_REPO/plugins/*"
 echo "#"
 ask_proceed
 
-echo "The following steps require running an Eclipse binary."
-while true; do
-    echo -n "Enter the Eclipse home path: "
-    read ECLIPSE_HOME
-    if [ -x "$ECLIPSE_HOME/eclipse" ]; then break; fi
-    echo "'$ECLIPSE_HOME/eclipse' is not an executable. Try again."
-done
-
 set -x
 $ECLIPSE_HOME/eclipse -nosplash -consolelog \
     -application org.eclipse.equinox.p2.publisher.FeaturesAndBundlesPublisher \
@@ -158,21 +159,9 @@ echo "#     $LOCAL_REPO/plugins/*"
 echo "#"
 echo "# into 'gs://cloud-tools-for-eclipse/<VERSION>/'."
 echo "#"
+echo -n "Enter version: "
+read VERSION
 ask_proceed
-
-while true; do
-    echo -n "Enter version: "
-    read VERSION
-    echo -n "Verify version: "
-    read VERSION_AGAIN
-    if [ -z "$VERSION" ]; then
-      echo "Empty string. Please try again."
-    elif [ "$VERSION" != "$VERSION_AGAIN" ]; then
-      echo "Versions don't match. Please try again."
-    else
-      break
-    fi
-done
 
 set -x
 gsutil cp $LOCAL_REPO/artifacts.xml $LOCAL_REPO/content.xml \
