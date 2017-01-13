@@ -436,7 +436,7 @@
               </formats>
               <check />
             </configuration>
-      </plugin>
+          </plugin>
         </plugins>
       </build>
     </profile>
