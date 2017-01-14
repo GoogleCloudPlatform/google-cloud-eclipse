@@ -48,7 +48,6 @@ import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
@@ -340,6 +339,11 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   private void createAdvancedSection() {
     createExpandableComposite();
     final Composite bucketComposite = createBucketSection(expandableComposite);
+    
+    GridData bucketCompositeData = new GridData(SWT.BEGINNING, SWT.CENTER, true, false);
+    bucketCompositeData.horizontalSpan = 3;
+    bucketComposite.setLayoutData(bucketCompositeData);
+    
     expandableComposite.setClient(bucketComposite);
     expandableComposite.addExpansionListener(new ExpansionAdapter() {
       @Override
@@ -347,9 +351,6 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
         handleExpansionStateChanged();
       }
     });
-    GridData gridData = new GridData(SWT.BEGINNING, SWT.CENTER, true, false);
-    gridData.horizontalSpan = 3;
-    expandableComposite.setLayoutData(gridData);
   }
 
   private void createExpandableComposite() {
@@ -357,6 +358,9 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     FontUtil.convertFontToBold(expandableComposite);
     expandableComposite.setText(Messages.getString("settings.advanced"));
     expandableComposite.setExpanded(false);
+    GridData gridData = new GridData(SWT.BEGINNING, SWT.CENTER, true, false);
+    gridData.horizontalSpan = 3;
+    expandableComposite.setLayoutData(gridData);
 
     getFormToolkit().adapt(expandableComposite, true, true);
   }
@@ -373,6 +377,8 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     bucket = new Text(bucketComposite, SWT.LEAD | SWT.SINGLE | SWT.BORDER);
     GridData bucketData = new GridData(SWT.BEGINNING, SWT.CENTER, true, false);
     bucketData.horizontalSpan = 2;
+    // force to same size as other text fields
+    bucketData.widthHint = 500;
     bucket.setLayoutData(bucketData);
     
     bucket.setToolTipText(Messages.getString("tooltip.staging.bucket"));
