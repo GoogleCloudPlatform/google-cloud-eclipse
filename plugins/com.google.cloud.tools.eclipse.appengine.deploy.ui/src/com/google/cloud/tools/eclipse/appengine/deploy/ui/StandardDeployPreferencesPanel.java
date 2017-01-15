@@ -103,7 +103,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     this.requireValues = requireValues;
 
     GridLayout gridLayout = new GridLayout();
-    gridLayout.numColumns = 3;
+    gridLayout.numColumns = 2;
     
     createCredentialSection(loginService);
 
@@ -276,16 +276,11 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     accountLabel.setText(Messages.getString("deploy.preferences.dialog.label.selectAccount"));
     accountLabel.setToolTipText(Messages.getString("tooltip.account"));
 
-    GridData accountLabelGridData = new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
-    accountLabelGridData.horizontalSpan = 1;
-    accountLabel.setLayoutData(accountLabelGridData);
-    
     // If we don't require values, then don't auto-select accounts
     accountSelector = new AccountSelector(this, loginService,
         Messages.getString("deploy.preferences.dialog.accountSelector.login"), requireValues);
     accountSelector.setToolTipText(Messages.getString("tooltip.account"));
     GridData accountSelectorGridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
-    accountSelectorGridData.horizontalSpan = 2;
     accountSelector.setLayoutData(accountSelectorGridData);
   }
 
@@ -294,13 +289,9 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     projectIdLabel.setText(Messages.getString("project.id"));
     projectIdLabel.setToolTipText(Messages.getString("tooltip.project.id"));
     
-    GridData projectIdLabelGridData = new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
-    projectIdLabel.setLayoutData(projectIdLabelGridData);
-
     projectId = new Text(this, SWT.LEAD | SWT.SINGLE | SWT.BORDER);
     projectId.setToolTipText(Messages.getString("tooltip.project.id"));
     GridData projectIdTextGridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
-    projectIdTextGridData.horizontalSpan = 2;
     projectId.setLayoutData(projectIdTextGridData);
   }
 
@@ -314,7 +305,6 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     version = new Text(this, SWT.LEAD | SWT.SINGLE | SWT.BORDER);
     version.setToolTipText(Messages.getString("tooltip.version"));
     GridData versionGridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
-    versionGridData.horizontalSpan = 2;
     version.setLayoutData(versionGridData);
   }
 
@@ -325,24 +315,20 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
         "tooltip.manual.promote.link", APPENGINE_VERSIONS_URL);
     autoPromoteButton.setToolTipText(manualPromoteMessage);
     GridData autoPromoteButtonGridData = new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
-    autoPromoteButtonGridData.horizontalSpan = 3;
+    autoPromoteButtonGridData.horizontalSpan = 2;
     autoPromoteButton.setLayoutData(autoPromoteButtonGridData);
 
     stopPreviousVersionButton = new Button(this, SWT.CHECK);
     stopPreviousVersionButton.setText(Messages.getString("stop.previous.version"));
     stopPreviousVersionButton.setToolTipText(Messages.getString("tooltip.stop.previous.version"));
     GridData stopPreviousVersionButtonGridData = new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
-    stopPreviousVersionButtonGridData.horizontalSpan = 3;
+    stopPreviousVersionButtonGridData.horizontalSpan = 2;
     stopPreviousVersionButton.setLayoutData(stopPreviousVersionButtonGridData);
   }
 
   private void createAdvancedSection() {
     createExpandableComposite();
     final Composite bucketComposite = createBucketSection(expandableComposite);
-    
-    GridData bucketCompositeData = new GridData(SWT.BEGINNING, SWT.CENTER, true, false);
-    bucketCompositeData.horizontalSpan = 3;
-    bucketComposite.setLayoutData(bucketCompositeData);
     
     expandableComposite.setClient(bucketComposite);
     expandableComposite.addExpansionListener(new ExpansionAdapter() {
@@ -358,8 +344,8 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     FontUtil.convertFontToBold(expandableComposite);
     expandableComposite.setText(Messages.getString("settings.advanced"));
     expandableComposite.setExpanded(false);
-    GridData gridData = new GridData(SWT.BEGINNING, SWT.CENTER, true, false);
-    gridData.horizontalSpan = 3;
+    GridData gridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
+    gridData.horizontalSpan = 2;
     expandableComposite.setLayoutData(gridData);
 
     getFormToolkit().adapt(expandableComposite, true, true);
@@ -375,15 +361,12 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     overrideDefaultBucketButton.setToolTipText(Messages.getString("tooltip.staging.bucket"));
 
     bucket = new Text(bucketComposite, SWT.LEAD | SWT.SINGLE | SWT.BORDER);
-    GridData bucketData = new GridData(SWT.BEGINNING, SWT.CENTER, true, false);
-    bucketData.horizontalSpan = 2;
-    // force to same size as other text fields
-    bucketData.widthHint = 500;
+    GridData bucketData = new GridData(SWT.FILL, SWT.CENTER, true, false);
     bucket.setLayoutData(bucketData);
     
     bucket.setToolTipText(Messages.getString("tooltip.staging.bucket"));
 
-    GridLayoutFactory.fillDefaults().numColumns(3).generateLayout(bucketComposite);
+    GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(bucketComposite);
     return bucketComposite;
   }
 
