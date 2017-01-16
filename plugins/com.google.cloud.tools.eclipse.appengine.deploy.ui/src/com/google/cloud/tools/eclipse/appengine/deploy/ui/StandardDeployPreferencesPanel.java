@@ -117,7 +117,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
     Dialog.applyDialogFont(this);
 
-    this.setLayout(gridLayout);
+    setLayout(gridLayout);
     
     loadPreferences(project);
 
