@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
+import com.google.cloud.tools.eclipse.util.templates.appengine.AppEngineTemplateUtility;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,11 +24,9 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -44,8 +43,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
-import com.google.cloud.tools.eclipse.util.templates.appengine.AppEngineTemplateUtility;
 
 public class CodeTemplatesTest {
 
@@ -162,4 +159,9 @@ public class CodeTemplatesTest {
     }
   }
 
+  @Test
+  public void testCopyChildFile() throws CoreException {
+    CodeTemplates.copyChildFile("favicon.ico", parent, monitor);
+    Assert.assertTrue(parent.getFile("favicon.ico").exists());
+  }
 }
