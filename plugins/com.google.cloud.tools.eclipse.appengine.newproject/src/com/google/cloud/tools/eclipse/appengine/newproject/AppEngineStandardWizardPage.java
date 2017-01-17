@@ -80,20 +80,17 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
 
   private void createCustomFields(Composite container, ModifyListener pageValidator) {
     Composite composite = new Composite(container, SWT.NONE);
-    // assumed that container has a single-column GridLayout
-    GridDataFactory.fillDefaults().applyTo(composite);
     
     GridLayout layout = new GridLayout();
     layout.numColumns = 2;
     composite.setLayout(layout);
     
-    createPackageField(composite, layout, pageValidator);
-    createServiceField(composite, layout, pageValidator);
+    createPackageField(composite, pageValidator);
+    createServiceField(composite, pageValidator);
   }
 
   // Java package name
-  private void createPackageField(
-      Composite parent, GridLayout layout, ModifyListener pageValidator) {
+  private void createPackageField(Composite parent, ModifyListener pageValidator) {
     Label packageNameLabel = new Label(parent, SWT.LEAD);
     packageNameLabel.setText(Messages.getString("java.package")); //$NON-NLS-1$
     javaPackageField = new Text(parent, SWT.BORDER);
@@ -104,8 +101,7 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
   }
 
   // App Engine service name
-  private void createServiceField(
-      Composite parent, GridLayout layout, ModifyListener pageValidator) {
+  private void createServiceField(Composite parent, ModifyListener pageValidator) {
 
     Label serviceNameLabel = new Label(parent, SWT.LEAD);
     serviceNameLabel.setText(Messages.getString("app.engine.service"));
@@ -141,7 +137,8 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
     File parent = getLocationPath().toFile();
     File projectDirectory = new File(parent, getProjectName());
     if (projectDirectory.exists()) {
-      setErrorMessage(Messages.getString("project.location.exists", projectDirectory)); //$NON-NLS-1$
+      setErrorMessage(
+          Messages.getString("project.location.exists", projectDirectory)); //$NON-NLS-1$
       return false;
     }
 
