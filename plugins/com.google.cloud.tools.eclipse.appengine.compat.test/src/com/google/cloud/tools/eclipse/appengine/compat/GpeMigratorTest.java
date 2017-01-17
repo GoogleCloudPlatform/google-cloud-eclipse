@@ -1,0 +1,63 @@
+/*
+ * Copyright 2017 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.google.cloud.tools.eclipse.appengine.compat;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.wst.common.project.facet.core.IFacetedProject;
+import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
+import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+
+public class GpeMigratorTest {
+
+  @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
+
+  private IFacetedProject facetedProject;
+
+  @Before
+  public void setUp() throws CoreException {
+    facetedProject = ProjectFacetsManager.create(projectCreator.getProject());
+  }
+
+  @Test
+  public void testRemoveObsoleteGpeFixture_removeGpeGaeFacet() throws CoreException {
+    IProjectFacetVersion gpeGaeFacet =
+        ProjectFacetsManager.getProjectFacet("com.google.appengine.facet").getVersion("1");
+    facetedProject.installProjectFacet(gpeGaeFacet, null, null);
+    assertTrue(facetedProject.hasProjectFacet(gpeGaeFacet));
+
+    GpeMigrator.removeObsoleteGpeFixtures(facetedProject, null /* monitor */);
+    assertFalse(facetedProject.hasProjectFacet(gpeGaeFacet));
+  }
+
+  @Test
+  public void testRemoveObsoleteGpeFixture_removeGpeGaeEarFacet() throws CoreException {
+    IProjectFacetVersion gpeGaeEarFacet =
+        ProjectFacetsManager.getProjectFacet("com.google.appengine.facet.ear").getVersion("1");
+    facetedProject.installProjectFacet(gpeGaeEarFacet, null, null);
+    assertTrue(facetedProject.hasProjectFacet(gpeGaeEarFacet));
+
+    GpeMigrator.removeObsoleteGpeFixtures(facetedProject, null /* monitor */);
+    assertFalse(facetedProject.hasProjectFacet(gpeGaeEarFacet));
+  }
+}

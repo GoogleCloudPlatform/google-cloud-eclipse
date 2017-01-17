@@ -55,16 +55,16 @@ public class GpeMigrator {
     }
     subMonitor.worked(10);
 
-    IProjectFacet gpeFacet = ProjectFacetsManager.getProjectFacet(GPE_WTP_GAE_FACET_ID);
-    IProjectFacetVersion gpeFacetVersion = gpeFacet.getVersion(GPE_WTP_GAE_FACET_VERSION);
-    facetedProject.uninstallProjectFacet(gpeFacetVersion, null /* config */, null /* monitor */);
+    IProjectFacet gpeGaeFacet = ProjectFacetsManager.getProjectFacet(GPE_WTP_GAE_FACET_ID);
+    IProjectFacetVersion gpeGaeFacetVersion = gpeGaeFacet.getVersion(GPE_WTP_GAE_FACET_VERSION);
+    facetedProject.uninstallProjectFacet(gpeGaeFacetVersion, null /* config */, null /* monitor */);
     subMonitor.worked(10);
 
-    IProjectFacet gpeEarFacet = ProjectFacetsManager.getProjectFacet(GPE_WTP_GAE_EAR_FACET_ID);
-    IProjectFacetVersion gpeEarFacetVersion =
-        gpeEarFacet.getVersion(GPE_WTP_GAE_EAR_FACET_VERSION);
+    IProjectFacet gpeGaeEarFacet = ProjectFacetsManager.getProjectFacet(GPE_WTP_GAE_EAR_FACET_ID);
+    IProjectFacetVersion gpeGaeEarFacetVersion =
+        gpeGaeEarFacet.getVersion(GPE_WTP_GAE_EAR_FACET_VERSION);
     facetedProject.uninstallProjectFacet(
-        gpeEarFacetVersion, null /* config */, null /* monitor */);
+        gpeGaeEarFacetVersion, null /* config */, null /* monitor */);
     subMonitor.worked(10);
   }
 }
