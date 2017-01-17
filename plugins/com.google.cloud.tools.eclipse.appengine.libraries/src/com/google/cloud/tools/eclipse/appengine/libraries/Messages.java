@@ -30,9 +30,7 @@ public class Messages extends NLS {
   public static String SourceAttachmentDownloaderJobName;
   public static String RepositoryUriInvalid;
   public static String RepositoryUriNotAbsolute;
-  public static String ResolveArtifactError;
   public static String SourceAttachmentFailed;
-  public static String SourceAttachmentForProjectFailed;
   public static String TaskResolveArtifacts;
   public static String TaskResolveLibraries;
   public static String TaskResolveLibrariesError;
