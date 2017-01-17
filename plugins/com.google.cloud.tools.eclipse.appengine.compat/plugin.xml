@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+   <!-- Dummy GPE WTP facet definition to enable removing it in CT4E -->
    <extension point="org.eclipse.wst.common.project.facet.core.facets">        
-    <project-facet id="com.google.appengine.facet">
-       <!--label>%standardFacetName</label>
-       <description>%standardFacetDescription</description-->
-    </project-facet>
-    <project-facet-version facet="com.google.appengine.facet" version="1"/>
+    <project-facet id="com.google.appengine.facet" />
+    <project-facet-version facet="com.google.appengine.facet" version="1" />
+  </extension>
+
+   <!-- Dummy GPE WTP facet definition to enable removing it in CT4E -->
+   <extension point="org.eclipse.wst.common.project.facet.core.facets">
+    <project-facet id="com.google.appengine.facet.ear" />
+    <project-facet-version facet="com.google.appengine.facet.ear" version="1" />
   </extension>
 </plugin>

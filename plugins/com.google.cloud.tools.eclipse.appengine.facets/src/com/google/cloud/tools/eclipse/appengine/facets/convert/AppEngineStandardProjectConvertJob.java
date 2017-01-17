@@ -1,11 +1,25 @@
+/*
+ * Copyright 2017 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.google.cloud.tools.eclipse.appengine.facets.convert;
 
+import com.google.cloud.tools.eclipse.appengine.compat.GpeMigrator;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.Messages;
-import com.google.cloud.tools.eclipse.util.NatureUtils;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
-import com.google.common.annotations.VisibleForTesting;
-import java.util.Set;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -13,16 +27,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
-import org.eclipse.wst.common.project.facet.core.IProjectFacet;
-import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
-import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
-import org.eclipse.wst.common.project.facet.core.runtime.IRuntime;
 
 public class AppEngineStandardProjectConvertJob extends Job {
-
-  private static final String GPE_GAE_NATURE_ID = "com.google.appengine.eclipse.core.gaeNature";
-  private static final String GPE_WTP_SERVER_RUNTIME = "com.google.appengine.runtime.id1";
-  private static final String GPE_WTP_SERVER_RUNTIME_COMPONENT = "com.google.appengine.runtime.id";
 
   private final IFacetedProject facetedProject;
 
@@ -35,42 +41,23 @@ public class AppEngineStandardProjectConvertJob extends Job {
   protected IStatus run(IProgressMonitor monitor) {
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
 
+    // Updating project before installing App Engine facet to avoid
+    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1155.
+    try {
+      GpeMigrator.removeObsoleteGpeFixtures(facetedProject, subMonitor.newChild(20));
+    } catch (CoreException ex) {
+      // Failed to remove GPE fixtures; live with it.
+      subMonitor.worked(20);
+    }
+
     try {
       AppEngineStandardFacet.installAppEngineFacet(facetedProject,
           true /* install Java and Web facets too (safe even if already installed) */,
           subMonitor.newChild(80));
+      return Status.OK_STATUS;
     } catch (CoreException ex) {
       String project = facetedProject.getProject().getName();
       return StatusUtil.error(this, Messages.getString("project.conversion.error", project), ex);
-    }
-
-    removeObsoleteFixtures(facetedProject);
-    monitor.worked(20);
-    return Status.OK_STATUS;
-  }
-
-  @VisibleForTesting
-  void removeObsoleteFixtures(IFacetedProject facetedProject) {
-    try {
-      NatureUtils.removeNature(facetedProject.getProject(), GPE_GAE_NATURE_ID);
-
-      IProjectFacet gpeWtpGaeFacet = ProjectFacetsManager.getProjectFacet("com.google.appengine.facet");
-      IProjectFacetVersion gpeWtpGaeFacetVersion = gpeWtpGaeFacet.getVersion("1");
-
-      IProjectFacet gpeWtpGaeEarFacet = ProjectFacetsManager.getProjectFacet("com.google.appengine.facet.ear");
-
-      facetedProject.uninstallProjectFacet(
-          gpeWtpGaeFacetVersion, null /* config */, null /* monitor */);
-
-      Set<IRuntime> runtimes = facetedProject.getTargetedRuntimes();
-      for (IRuntime runtime : runtimes) {
-        if (GPE_WTP_SERVER_RUNTIME.equals(runtime.getProperty("id"))
-            || GPE_WTP_SERVER_RUNTIME_COMPONENT.equals(runtime.getProperty("id"))) {
-          facetedProject.removeTargetedRuntime(runtime, null /* monitor */);
-        }
-      }
-    } catch (CoreException ex) {
-      // Failed to remove obsolete natures and facets. Live with it.
     }
   }
 }

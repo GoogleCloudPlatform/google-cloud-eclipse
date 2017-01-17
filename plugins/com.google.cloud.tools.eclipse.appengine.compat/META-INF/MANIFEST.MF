@@ -6,3 +6,10 @@ Bundle-Version: 0.1.0.qualifier
 Bundle-Vendor: Google Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
+Export-Package: com.google.cloud.tools.eclipse.appengine.compat
+Import-Package: com.google.cloud.tools.eclipse.util,
+ com.google.common.annotations,
+ org.eclipse.core.resources,
+ org.eclipse.core.runtime;version="3.5.0",
+ org.eclipse.wst.common.project.facet.core,
+ org.eclipse.wst.common.project.facet.core.runtime
