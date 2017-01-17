@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Google Inc.
+ * Copyright 2017 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.newproject;
+package com.google.cloud.tools.eclipse.appengine.deploy;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -22,17 +22,9 @@ import org.junit.Test;
 public class MessagesTest {
 
   @Test
-  public void testNewAppEngineStandardProject() {
-    Assert.assertEquals(
-        "New App Engine Standard Project", 
-        Messages.getString("new.app.engine.standard.project"));
-  }
-  
-  @Test
-  public void testPackageEndsWithPeriod() {
-    Assert.assertEquals(
-        "com.google. ends with a period.", 
-        Messages.getString("package.ends.with.period", "com.google."));
+  public void testCloudSdkNotConfigured() {
+    Assert.assertEquals("Deploy failed.", 
+        Messages.getString("deploy.failed.error.message"));
   }
 
 }

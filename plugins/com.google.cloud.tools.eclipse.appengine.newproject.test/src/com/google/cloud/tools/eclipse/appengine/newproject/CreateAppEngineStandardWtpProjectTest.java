@@ -122,6 +122,13 @@ public class CreateAppEngineStandardWtpProjectTest {
   }
 
   @Test
+  public void testFaviconAdded() throws InvocationTargetException, CoreException {
+    new CreateAppEngineStandardWtpProject(config, adaptable).execute(null /* monitor */);
+    ProjectUtils.waitUntilIdle();
+    assertTrue("favicon.ico not found", project.getFile("src/main/webapp/favicon.ico").exists());
+  }
+
+  @Test
   public void testAppEngineLibrariesAdded() throws InvocationTargetException, CoreException {
     Library library = new Library(APP_ENGINE_API);
     config.setAppEngineLibraries(Collections.singletonList(library));

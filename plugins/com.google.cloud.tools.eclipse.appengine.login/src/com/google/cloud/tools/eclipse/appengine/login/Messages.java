@@ -16,27 +16,23 @@
 
 package com.google.cloud.tools.eclipse.appengine.login;
 
-import org.eclipse.osgi.util.NLS;
+import java.text.MessageFormat;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
 
-public class Messages extends NLS {
-  private static final String BUNDLE_NAME = "com.google.cloud.tools.eclipse.appengine.login.messages"; //$NON-NLS-1$
-  public static String BUTTON_ACCOUNTS_PANEL_ADD_ACCOUNT;
-  public static String BUTTON_ACCOUNTS_PANEL_LOGOUT;
-  public static String LOGIN_ERROR_CANNOT_OPEN_BROWSER;
-  public static String LOGIN_ERROR_DIALOG_MESSAGE;
-  public static String LOGIN_ERROR_DIALOG_TITLE;
-  public static String LOGIN_ERROR_LOCAL_SERVER_RUN;
-  public static String LOGIN_MENU_LOGGED_IN;
-  public static String LOGIN_MENU_LOGGED_OUT;
-  public static String LOGIN_PROGRESS_DIALOG_MESSAGE;
-  public static String LOGIN_PROGRESS_DIALOG_TITLE;
-  public static String LOGOUT_CONFIRM_DIALOG_MESSAGE;
-  public static String LOGOUT_CONFIRM_DIALOG_TITLE;
-  static {
-    // initialize resource bundle
-    NLS.initializeMessages(BUNDLE_NAME, Messages.class);
-  }
+public class Messages {
+  private static final String BUNDLE_NAME =
+      "com.google.cloud.tools.eclipse.appengine.login.messages"; //$NON-NLS-1$
+  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME);
 
   private Messages() {
+  }
+  
+  public static String getString(String key, Object... params) {
+    try {
+      return MessageFormat.format(RESOURCE_BUNDLE.getString(key), params);
+    } catch (MissingResourceException ex) {
+      return '!' + key + '!';
+    }
   }
 }

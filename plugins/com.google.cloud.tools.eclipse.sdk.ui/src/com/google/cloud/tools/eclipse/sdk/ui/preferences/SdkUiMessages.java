@@ -16,30 +16,23 @@
 
 package com.google.cloud.tools.eclipse.sdk.ui.preferences;
 
-import org.eclipse.osgi.util.NLS;
+import java.text.MessageFormat;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
 
-public class SdkUiMessages extends NLS {
+public class SdkUiMessages {
   
   private static final String BUNDLE_NAME =
       "com.google.cloud.tools.eclipse.sdk.ui.preferences.messages"; //$NON-NLS-1$
-  
-  public static String CloudSdkRequired;
-  public static String CloudSdkPreferencePage_3;
-  public static String CloudSdkPreferencePage_4;
-  public static String SdkLocation;
-  public static String CloudSdkNotFound;
-  public static String CloudSdkOutOfDate;
-  public static String NoSuchDirectory;
-  public static String FileNotDirectory;
-  public static String AppEngineJavaComponentsNotInstalled;
-  public static String CloudSdkPrompter_0;
-  public static String CloudSdkPrompter_1;
-  public static String openBrowse;
-
-  static {
-    // initialize resource bundle
-    NLS.initializeMessages(BUNDLE_NAME, SdkUiMessages.class);
-  }
+  private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME);
 
   private SdkUiMessages() {}
+  
+  public static String getString(String key, Object... params) {
+    try {
+      return MessageFormat.format(RESOURCE_BUNDLE.getString(key), params);
+    } catch (MissingResourceException ex) {
+      return '!' + key + '!';
+    }
+  }
 }

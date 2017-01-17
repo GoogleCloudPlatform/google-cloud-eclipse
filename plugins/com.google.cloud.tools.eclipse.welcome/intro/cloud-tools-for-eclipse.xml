@@ -5,7 +5,7 @@
       <link id="cloud-tools-for-eclipse-link"
             label="Google Cloud Tools for Eclipse"
             style-id="content-link"
-            url="https://github.com/GoogleCloudPlatform/google-cloud-eclipse/wiki/Google-Cloud-Tools-for-Eclipse">
+            url="https://cloud.google.com/eclipse/docs/">
         <text>Learn more about Google Cloud Tools for Eclipse.</text>
       </link>
     </group>
@@ -16,8 +16,8 @@
       <link id="cloud-tools-for-eclipse-tutorial-link"
             label="Google Cloud Tools for Eclipse Tutorial"
             style-id="content-link"
-            url="https://github.com/GoogleCloudPlatform/google-cloud-eclipse/wiki/Cloud-Tools-for-Eclipse-Tutorial">
-        <text>Read the Google Cloud Tools for Eclipse tutorial about using Google Cloud Tools for Eclipse.</text>
+            url="https://cloud.google.com/eclipse/docs/quickstart">
+        <text>Read the Google Cloud Tools for Eclipse tutorial to learn how to build App Engine applications with Eclipse.</text>
       </link>
     </group>
   </extensionContent>
@@ -28,7 +28,7 @@
             label="Google Cloud Tools for Eclipse Release Notes"
             style-id="content-link"
             url="https://cloud.google.com/eclipse/docs/release-notes">
-        <text>Announcements about new or updated features, bug fixes, known issues, and deprecated functionality.</text>
+        <text>Announcements about new and updated features, bug fixes, known issues, and deprecated functionality.</text>
       </link>
     </group>
   </extensionContent>
@@ -39,7 +39,7 @@
             label="Migration from the Google Plugin for Eclipse (GPE)"
             style-id="content-link"
             url="https://github.com/GoogleCloudPlatform/google-cloud-eclipse/wiki/Migration-from-the-Google-Plugin-for-Eclipse-(GPE)">
-        <text>Learn how to migrate to Google Cloud Tools for Eclipse from Google Plugin for Eclipse.</text>
+        <text>Learn how to migrate to Google Cloud Tools for Eclipse from the Google Plugin for Eclipse.</text>
       </link>
     </group>
   </extensionContent>

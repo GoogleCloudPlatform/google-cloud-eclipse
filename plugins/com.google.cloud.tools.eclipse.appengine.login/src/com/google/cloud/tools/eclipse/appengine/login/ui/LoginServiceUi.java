@@ -77,7 +77,8 @@ public class LoginServiceUi implements UiFacade {
   @Override
   public void showErrorDialog(String title, String message) {
     // Ignore "title" and "message", as they are non-localized hard-coded strings in the library.
-    showErrorDialogHelper(Messages.LOGIN_ERROR_DIALOG_TITLE, Messages.LOGIN_ERROR_DIALOG_MESSAGE);
+    showErrorDialogHelper(Messages.getString("LOGIN_ERROR_DIALOG_TITLE"),
+        Messages.getString("LOGIN_ERROR_DIALOG_MESSAGE"));
   }
 
   @Override
@@ -101,7 +102,8 @@ public class LoginServiceUi implements UiFacade {
       String redirectUrl = codeReceiver.getRedirectUri();
       if (!Program.launch(GoogleLoginService.getGoogleLoginUrl(redirectUrl))) {
         showErrorDialogHelper(
-            Messages.LOGIN_ERROR_DIALOG_TITLE, Messages.LOGIN_ERROR_CANNOT_OPEN_BROWSER);
+            Messages.getString("LOGIN_ERROR_DIALOG_TITLE"),
+            Messages.getString("LOGIN_ERROR_CANNOT_OPEN_BROWSER"));
         return null;
       }
 
@@ -118,8 +120,8 @@ public class LoginServiceUi implements UiFacade {
     } catch (IOException ioe) {
       // Don't show an error dialog if a user pressed the cancel button.
       if (!ioe.getMessage().contains(ERROR_MARKER_USER_CANCELED_LOGIN)) {
-        showErrorDialogHelper(Messages.LOGIN_ERROR_DIALOG_TITLE,
-            Messages.LOGIN_ERROR_LOCAL_SERVER_RUN + ioe.getLocalizedMessage());
+        showErrorDialogHelper(Messages.getString("LOGIN_ERROR_DIALOG_TITLE"),
+            Messages.getString("LOGIN_ERROR_LOCAL_SERVER_RUN") + ioe.getLocalizedMessage());
       }
       return null;
     }
@@ -134,7 +136,7 @@ public class LoginServiceUi implements UiFacade {
         @Override
         protected void configureShell(Shell shell) {
           super.configureShell(shell);
-          shell.setText(Messages.LOGIN_PROGRESS_DIALOG_TITLE);
+          shell.setText(Messages.getString("LOGIN_PROGRESS_DIALOG_TITLE"));
         }
         @Override
         protected void cancelPressed() {
@@ -156,7 +158,8 @@ public class LoginServiceUi implements UiFacade {
           AnalyticsPingManager.getInstance().sendPing(
               AnalyticsEvents.LOGIN_START, null, null, dialog.getShell());
 
-          monitor.beginTask(message != null ? message : Messages.LOGIN_PROGRESS_DIALOG_MESSAGE,
+          monitor.beginTask(
+              message != null ? message : Messages.getString("LOGIN_PROGRESS_DIALOG_MESSAGE"),
               IProgressMonitor.UNKNOWN);
           // Fork another sub-job to circumvent the limitation of LocalServerReceiver.
           // (See the comments of scheduleCodeWaitingJob().)

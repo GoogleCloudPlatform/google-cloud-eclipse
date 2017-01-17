@@ -4,6 +4,7 @@
       label="Google Cloud Platform for Eclipse 4.5 and later"
       version="0.1.0.qualifier"
       provider-name="Google, Inc."
+      plugin="com.google.cloud.tools.eclipse.appengine.ui"
       license-feature="com.google.licenses.apache_v2">
 
    <description>
