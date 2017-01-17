@@ -31,7 +31,7 @@ public class LibraryClasspathContainerResolverJob extends Job {
 
   @Inject
   public LibraryClasspathContainerResolverJob(IJavaProject javaProject) {
-    super(Messages.AppEngineLibraryContainerResolverJobName);
+    super(Messages.getString("AppEngineLibraryContainerResolverJobName"));
     Preconditions.checkNotNull(javaProject, "javaProject is null");
     this.javaProject = javaProject;
     setUser(true);

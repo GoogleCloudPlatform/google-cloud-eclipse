@@ -28,7 +28,6 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.osgi.util.NLS;
 
 /**
  * Wrapper class around {@link MavenUtils} to enable mocking in unit tests.
@@ -61,14 +60,14 @@ public class MavenHelper {
     try {
       URI repoUri = new URI(repository);
       if (!repoUri.isAbsolute()) {
-        throw new CoreException(StatusUtil.error(this, NLS.bind(Messages.RepositoryUriNotAbsolute,
-                                                                repository)));
+        throw new CoreException(StatusUtil.error(this, Messages.getString("RepositoryUriNotAbsolute",
+                                                                          repository)));
       }
       return MavenUtils.createRepository(repoUri.getHost(), repoUri.toString());
     } catch (URISyntaxException exception) {
       throw new CoreException(StatusUtil.error(this,
-                                               NLS.bind(Messages.RepositoryUriInvalid,
-                                                        repository),
+                                               Messages.getString("RepositoryUriInvalid",
+                                                                  repository),
                                                exception));
     }
   }

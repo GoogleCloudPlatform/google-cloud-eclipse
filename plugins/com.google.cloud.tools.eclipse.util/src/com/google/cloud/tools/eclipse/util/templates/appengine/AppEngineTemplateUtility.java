@@ -16,23 +16,22 @@
 
 package com.google.cloud.tools.eclipse.util.templates.appengine;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
-
-import org.eclipse.core.runtime.CoreException;
-
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Preconditions;
-
+import com.google.common.io.ByteStreams;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import org.eclipse.core.runtime.CoreException;
 
 public class AppEngineTemplateUtility {
   public static final String APPENGINE_WEB_XML_TEMPLATE = "appengine-web.xml.ftl";
@@ -60,6 +59,21 @@ public class AppEngineTemplateUtility {
       Template template = configuration.getTemplate(templateName);
       template.process(dataMap, writer);
     } catch (IOException | TemplateException ex) {
+      throw new CoreException(StatusUtil.error(AppEngineTemplateUtility.class, ex.getMessage()));
+    }
+  }
+
+  public static void copyFileContent(String outputFileLocation, String sourceName)
+      throws CoreException {
+    Preconditions.checkNotNull(outputFileLocation, "output file is null");
+    Preconditions.checkNotNull(sourceName, "source file name is null");
+
+    try (
+        InputStream inputStream = AppEngineTemplateUtility.class
+            .getResourceAsStream("/templates/appengine/" + sourceName);
+        FileOutputStream outputStream = new FileOutputStream(new File(outputFileLocation))) {
+      ByteStreams.copy(inputStream, outputStream);
+    } catch (IOException ex) {
       throw new CoreException(StatusUtil.error(AppEngineTemplateUtility.class, ex.getMessage()));
     }
   }

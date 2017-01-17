@@ -54,7 +54,6 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jst.j2ee.classpathdep.UpdateClasspathAttributeUtil;
-import org.eclipse.osgi.util.NLS;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -81,7 +80,7 @@ public class LibraryClasspathContainerResolverService
     try {
       IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
       SubMonitor subMonitor = SubMonitor.convert(monitor,
-                                                 Messages.TaskResolveLibraries,
+                                                 Messages.getString("TaskResolveLibraries"),
                                                  getTotalwork(rawClasspath));
       for (IClasspathEntry classpathEntry : rawClasspath) {
         status = StatusUtil.merge(status, resolveContainer(javaProject,
@@ -89,7 +88,7 @@ public class LibraryClasspathContainerResolverService
                                                            subMonitor.newChild(1)));
       }
     } catch (CoreException ex) {
-      return StatusUtil.error(this, Messages.TaskResolveLibrariesError, ex);
+      return StatusUtil.error(this, Messages.getString("TaskResolveLibrariesError"), ex);
     }
     return status == null ? Status.OK_STATUS : status;
   }
@@ -105,8 +104,8 @@ public class LibraryClasspathContainerResolverService
       }
       return resolvedEntries;
     } else {
-      throw new CoreException(StatusUtil.error(this, NLS.bind(Messages.InvalidLibraryId,
-                                                              libraryId)));
+      throw new CoreException(StatusUtil.error(this, Messages.getString("InvalidLibraryId",
+                                                                        libraryId)));
     }
   }
 
@@ -126,7 +125,7 @@ public class LibraryClasspathContainerResolverService
       }
       return Status.OK_STATUS;
     } catch (CoreException | IOException ex) {
-      return StatusUtil.error(this, NLS.bind(Messages.TaskResolveContainerError, continerPath), ex);
+      return StatusUtil.error(this, Messages.getString("TaskResolveContainerError", continerPath), ex);
     }
   }
   
@@ -137,7 +136,7 @@ public class LibraryClasspathContainerResolverService
                                                             throws CoreException {
     List<LibraryFile> libraryFiles = library.getLibraryFiles();
     SubMonitor subMonitor = SubMonitor.convert(monitor, libraryFiles.size());
-    subMonitor.subTask(NLS.bind(Messages.TaskResolveArtifacts, getLibraryDescription(library)));
+    subMonitor.subTask(Messages.getString("TaskResolveArtifacts", getLibraryDescription(library)));
     SubMonitor child = subMonitor.newChild(libraryFiles.size());
 
     IClasspathEntry[] entries = new IClasspathEntry[libraryFiles.size()];

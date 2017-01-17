@@ -12,7 +12,6 @@ import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.osgi.util.NLS;
 
 /**
  * Job to fill in the source attachment path attribute of an {@link IClasspathEntry}.
@@ -38,7 +37,8 @@ class SourceAttacherJob extends Job {
 
   SourceAttacherJob(IJavaProject javaProject, IPath containerPath, IPath libraryPath,
                     Callable<IPath> sourceArtifactPathProvider) {
-    super(NLS.bind(Messages.SourceAttachmentDownloaderJobName, javaProject.getProject().getName()));
+    super(Messages.getString("SourceAttachmentDownloaderJobName",
+                             javaProject.getProject().getName()));
     this.javaProject = javaProject;
     this.containerPath = containerPath;
     this.libraryPath = libraryPath;
@@ -72,13 +72,13 @@ class SourceAttacherJob extends Job {
         JavaCore.setClasspathContainer(containerPath, new IJavaProject[]{ javaProject },
                                        new IClasspathContainer[]{ newContainer }, monitor);
       } else {
-        logger.log(Level.FINE, NLS.bind(Messages.ContainerClassUnexpected,
-                                        container.getClass().getName(),
-                                        LibraryClasspathContainer.class.getName()));
+        logger.log(Level.FINE, Messages.getString("ContainerClassUnexpected",
+                                                  container.getClass().getName(),
+                                                  LibraryClasspathContainer.class.getName()));
       }
     } catch (Exception ex) {
       // it's not needed to be logged normally
-      logger.log(Level.FINE, Messages.SourceAttachmentFailed, ex);
+      logger.log(Level.FINE, Messages.getString("SourceAttachmentFailed"), ex);
     }
     // even if it fails, we should not display an error to the user
     return Status.OK_STATUS;

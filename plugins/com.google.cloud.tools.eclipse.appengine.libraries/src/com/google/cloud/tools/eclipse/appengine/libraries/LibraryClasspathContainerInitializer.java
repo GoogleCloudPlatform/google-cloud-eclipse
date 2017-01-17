@@ -30,7 +30,6 @@ import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.osgi.util.NLS;
 
 /**
  * {@link ClasspathContainerInitializer} implementation that resolves containers for App Engine
@@ -59,14 +58,14 @@ public class LibraryClasspathContainerInitializer extends ClasspathContainerInit
   @Override
   public void initialize(IPath containerPath, IJavaProject project) throws CoreException {
     if (containerPath.segmentCount() != 2) {
-      throw new CoreException(StatusUtil.error(this, NLS.bind(Messages.ContainerPathNotTwoSegments,
-                                                              containerPath.toString())));
+      throw new CoreException(StatusUtil.error(this, Messages.getString("ContainerPathNotTwoSegments",
+                                                                        containerPath.toString())));
     }
     if (!containerPath.segment(0).equals(Library.CONTAINER_PATH_PREFIX)) {
       throw new CoreException(StatusUtil.error(this,
-                                               NLS.bind(Messages.ContainerPathInvalidFirstSegment,
-                                                        Library.CONTAINER_PATH_PREFIX,
-                                                        containerPath.segment(0))));
+                                               Messages.getString("ContainerPathInvalidFirstSegment",
+                                                                  Library.CONTAINER_PATH_PREFIX,
+                                                                  containerPath.segment(0))));
     }
     try {
       LibraryClasspathContainer container = serializer.loadContainer(project, containerPath);
@@ -79,7 +78,7 @@ public class LibraryClasspathContainerInitializer extends ClasspathContainerInit
         resolverService.resolveContainer(project, containerPath, new NullProgressMonitor());
       }
     } catch (IOException ex) {
-      throw new CoreException(StatusUtil.error(this, Messages.LoadContainerFailed, ex));
+      throw new CoreException(StatusUtil.error(this, Messages.getString("LoadContainerFailed"), ex));
     }
   }
 

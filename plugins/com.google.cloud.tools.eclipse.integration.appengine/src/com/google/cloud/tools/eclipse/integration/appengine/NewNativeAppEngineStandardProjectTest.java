@@ -36,7 +36,7 @@ import org.junit.runner.RunWith;
  * Test creation of a new standard App Engine project.
  */
 @RunWith(SWTBotJunit4ClassRunner.class)
-public class NewNativeAppEngineStandardProjectTest extends AbstractProjectTests {
+public class NewNativeAppEngineStandardProjectTest extends BaseProjectTest {
 
   @Test
   public void testWithDefaults() throws Exception {

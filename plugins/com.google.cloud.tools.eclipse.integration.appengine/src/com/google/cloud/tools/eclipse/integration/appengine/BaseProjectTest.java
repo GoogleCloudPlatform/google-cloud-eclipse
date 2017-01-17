@@ -30,7 +30,7 @@ import org.junit.BeforeClass;
 /**
  * Common infrastructure for workbench-based tests that create a single project.
  */
-public class AbstractProjectTests {
+public class BaseProjectTest {
 
   protected static SWTWorkbenchBot bot;
   protected IProject project;

@@ -52,7 +52,7 @@ public class AnalyticsOptInArea extends PreferenceArea {
   public Control createContents(Composite container) {
     // Opt-in checkbox with a label
     optInStatusEditor = new Button(container, SWT.CHECK);
-    optInStatusEditor.setText(Messages.ANALYTICS_OPT_IN_TEXT);
+    optInStatusEditor.setText(Messages.getString("ANALYTICS_OPT_IN_TEXT"));
     optInStatusEditor.addSelectionListener(new SelectionListener() {
       @Override
       public void widgetSelected(SelectionEvent event) {
@@ -69,14 +69,14 @@ public class AnalyticsOptInArea extends PreferenceArea {
 
     // The privacy policy disclaimer with a clickable link
     Link privacyPolicyDisclaimer = new Link(container, SWT.NONE);
-    privacyPolicyDisclaimer.setText(Messages.ANALYTICS_DISCLAIMER);
+    privacyPolicyDisclaimer.setText(Messages.getString("ANALYTICS_DISCLAIMER"));
     privacyPolicyDisclaimer.setFont(optInStatusEditor.getFont());
     privacyPolicyDisclaimer.addSelectionListener(new SelectionAdapter() {
       @Override
       public void widgetSelected(SelectionEvent event) {
         // Open a privacy policy web page when the link is clicked.
         try {
-          URL url = new URL(Messages.GOOGLE_PRIVACY_POLICY_URL);
+          URL url = new URL(Messages.getString("GOOGLE_PRIVACY_POLICY_URL"));
           IWorkbenchBrowserSupport browserSupport = PlatformUI.getWorkbench().getBrowserSupport();
           browserSupport.createBrowser(null).openURL(url);
         } catch (MalformedURLException mue) {

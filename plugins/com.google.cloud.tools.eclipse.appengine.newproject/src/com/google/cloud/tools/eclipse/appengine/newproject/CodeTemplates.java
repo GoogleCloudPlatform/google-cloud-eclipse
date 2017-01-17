@@ -16,11 +16,13 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
+import com.google.cloud.tools.eclipse.util.templates.appengine.AppEngineTemplateUtility;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
 import java.io.ByteArrayInputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -30,10 +32,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
-
-import com.google.cloud.tools.eclipse.util.templates.appengine.AppEngineTemplateUtility;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Strings;
 
 public class CodeTemplates {
 
@@ -54,12 +52,12 @@ public class CodeTemplates {
     boolean local = true;
     IFolder src = project.getFolder("src");  //$NON-NLS-1$
     if (!src.exists()) {
-      src.create(force, local, subMonitor);
+      src.create(force, local, subMonitor.newChild(5));
     }
-    IFolder main = createChildFolder("main", src, subMonitor);  //$NON-NLS-1$
-    IFolder java = createChildFolder("java", main, subMonitor);  //$NON-NLS-1$
-    IFolder test = createChildFolder("test", src, subMonitor);  //$NON-NLS-1$
-    IFolder testJava = createChildFolder("java", test, subMonitor);  //$NON-NLS-1$
+    IFolder main = createChildFolder("main", src, subMonitor.newChild(5)); //$NON-NLS-1$
+    IFolder java = createChildFolder("java", main, subMonitor.newChild(5)); //$NON-NLS-1$
+    IFolder test = createChildFolder("test", src, subMonitor.newChild(5)); //$NON-NLS-1$
+    IFolder testJava = createChildFolder("java", test, subMonitor.newChild(5)); //$NON-NLS-1$
 
     String packageName = config.getPackageName();
 
@@ -70,22 +68,23 @@ public class CodeTemplates {
       templateValues.put("package", ""); 
     }
     
-    IFolder packageFolder = createFoldersForPackage(java, packageName, subMonitor);
+    IFolder packageFolder = createFoldersForPackage(java, packageName, subMonitor.newChild(5));
     IFile hello = createChildFile("HelloAppEngine.java", 
         AppEngineTemplateUtility.HELLO_APPENGINE_TEMPLATE,
-        packageFolder, subMonitor, templateValues);
+        packageFolder, subMonitor.newChild(5), templateValues);
 
     // now set up the test directory
-    IFolder testPackageFolder = createFoldersForPackage(testJava, packageName, subMonitor);
-    createChildFile("HelloAppEngineTest.java",  //$NON-NLS-1$
-        AppEngineTemplateUtility.HELLO_APPENGINE_TEST_TEMPLATE, testPackageFolder, subMonitor,
-        templateValues);
-    createChildFile("MockHttpServletResponse.java",  //$NON-NLS-1$
-        AppEngineTemplateUtility.MOCK_HTTPSERVLETRESPONSE_TEMPLATE, testPackageFolder, subMonitor,
-        templateValues);
+    IFolder testPackageFolder =
+        createFoldersForPackage(testJava, packageName, subMonitor.newChild(5));
+    createChildFile("HelloAppEngineTest.java", //$NON-NLS-1$
+        AppEngineTemplateUtility.HELLO_APPENGINE_TEST_TEMPLATE, testPackageFolder,
+        subMonitor.newChild(5), templateValues);
+    createChildFile("MockHttpServletResponse.java", //$NON-NLS-1$
+        AppEngineTemplateUtility.MOCK_HTTPSERVLETRESPONSE_TEMPLATE, testPackageFolder,
+        subMonitor.newChild(5), templateValues);
 
-    IFolder webapp = createChildFolder("webapp", main, subMonitor);  //$NON-NLS-1$
-    IFolder webinf = createChildFolder("WEB-INF", webapp, subMonitor);  //$NON-NLS-1$
+    IFolder webapp = createChildFolder("webapp", main, subMonitor.newChild(5)); //$NON-NLS-1$
+    IFolder webinf = createChildFolder("WEB-INF", webapp, subMonitor.newChild(5)); //$NON-NLS-1$
 
     Map<String, String> properties = new HashMap<>();
     String service = config.getServiceName();
@@ -94,17 +93,19 @@ public class CodeTemplates {
     }
 
     createChildFile("appengine-web.xml", AppEngineTemplateUtility.APPENGINE_WEB_XML_TEMPLATE,
-        webinf, subMonitor, properties);
+        webinf, subMonitor.newChild(5), properties);
 
     Map<String, String> packageMap = new HashMap<>();
     String packageValue = config.getPackageName().isEmpty() ? "" : config.getPackageName() + ".";
     packageMap.put("package", packageValue);
-    createChildFile("web.xml", AppEngineTemplateUtility.WEB_XML_TEMPLATE, webinf, subMonitor,
-        packageMap);
+    createChildFile("web.xml", AppEngineTemplateUtility.WEB_XML_TEMPLATE, webinf,
+        subMonitor.newChild(5), packageMap);
 
-    createChildFile("index.html", AppEngineTemplateUtility.INDEX_HTML_TEMPLATE, webapp, subMonitor,
-        Collections.<String, String>emptyMap());
-    
+    createChildFile("index.html", AppEngineTemplateUtility.INDEX_HTML_TEMPLATE, webapp,
+        subMonitor.newChild(5), Collections.<String, String>emptyMap());
+
+    copyChildFile("favicon.ico", webapp, subMonitor.newChild(5));
+
     return hello;
   }
 
@@ -114,8 +115,9 @@ public class CodeTemplates {
     IFolder folder = parentFolder;
     if (packageName != null && !packageName.isEmpty()) {
       String[] packages = packageName.split("\\.");  //$NON-NLS-1$
+      subMonitor.setWorkRemaining(packages.length);
       for (int i = 0; i < packages.length; i++) {
-        folder = createChildFolder(packages[i], folder, subMonitor);
+        folder = createChildFolder(packages[i], folder, subMonitor.newChild(1));
       }
     }
     return folder;
@@ -125,7 +127,6 @@ public class CodeTemplates {
   static IFolder createChildFolder(String name, IFolder parent, SubMonitor monitor) 
       throws CoreException {
     monitor.subTask("Creating folder " + name);
-    monitor.newChild(10);
 
     boolean force = true;
     boolean local = true;
@@ -141,7 +142,6 @@ public class CodeTemplates {
       Map<String, String> values) throws CoreException {
 
     monitor.subTask("Creating file " + name);
-    monitor.newChild(20);
 
     IFile child = parent.getFile(new Path(name));
     if (!child.exists()) {
@@ -152,5 +152,18 @@ public class CodeTemplates {
     }
     return child;
   }
+
+  @VisibleForTesting
+  static void copyChildFile(String name, IContainer parent, SubMonitor monitor)
+      throws CoreException {
+    monitor.subTask("Copying file " + name);
+
+    IFile child = parent.getFile(new Path(name));
+    if (!child.exists()) {
+      AppEngineTemplateUtility.copyFileContent(child.getLocation().toString(), name);
+      child.refreshLocal(IResource.DEPTH_ZERO, monitor);
+    }
+  }
+
 
 }

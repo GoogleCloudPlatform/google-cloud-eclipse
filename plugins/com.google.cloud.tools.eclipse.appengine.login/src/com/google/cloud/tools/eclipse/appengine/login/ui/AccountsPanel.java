@@ -94,13 +94,13 @@ public class AccountsPanel extends PopupDialog {
     GridLayoutFactory.fillDefaults().numColumns(2).applyTo(buttonArea);
 
     Button addAccountButton = new Button(buttonArea, SWT.FLAT);
-    addAccountButton.setText(Messages.BUTTON_ACCOUNTS_PANEL_ADD_ACCOUNT);
+    addAccountButton.setText(Messages.getString("BUTTON_ACCOUNTS_PANEL_ADD_ACCOUNT"));
     addAccountButton.addSelectionListener(new LogInOnClick());
     GridDataFactory.defaultsFor(addAccountButton).applyTo(addAccountButton);
 
     if (loginService.hasAccounts()) {
       logOutButton = new Button(buttonArea, SWT.FLAT);
-      logOutButton.setText(Messages.BUTTON_ACCOUNTS_PANEL_LOGOUT);
+      logOutButton.setText(Messages.getString("BUTTON_ACCOUNTS_PANEL_LOGOUT"));
       logOutButton.addSelectionListener(new LogOutOnClick());
       GridDataFactory.defaultsFor(logOutButton).applyTo(logOutButton);
     }
@@ -117,12 +117,13 @@ public class AccountsPanel extends PopupDialog {
   private class LogOutOnClick extends SelectionAdapter {
     @Override
     public void widgetSelected(SelectionEvent event) {
+      // todo localize
       String[] dialogButtonLabels = {"Sign Out", "Don't Sign Out"};
       MessageDialog logoutDialog = new MessageDialog(
           getShell(),
-          Messages.LOGOUT_CONFIRM_DIALOG_TITLE,
+          Messages.getString("LOGOUT_CONFIRM_DIALOG_TITLE"),
           null /* dialogTitleImage */,
-          Messages.LOGOUT_CONFIRM_DIALOG_MESSAGE,
+          Messages.getString("LOGOUT_CONFIRM_DIALOG_MESSAGE"),
           MessageDialog.QUESTION,
           dialogButtonLabels, 0);
       boolean shouldLogout = logoutDialog.open() == 0;

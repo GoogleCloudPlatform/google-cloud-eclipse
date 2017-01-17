@@ -52,7 +52,7 @@ import java.nio.charset.StandardCharsets;
  * terminate.
  */
 @RunWith(SWTBotJunit4ClassRunner.class)
-public class DebugNativeAppEngineStandardProject extends AbstractProjectTests {
+public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
   /**
    * Launch a native application in debug mode and verify that:
    * <ol>

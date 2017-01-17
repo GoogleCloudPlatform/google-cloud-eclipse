@@ -16,9 +16,10 @@
 
 package com.google.cloud.tools.eclipse.appengine.facets;
 
-import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.cloudsdk.AppEngineJavaComponentsNotInstalledException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkOutOfDateException;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -39,15 +40,20 @@ public abstract class AppEngineFacetInstallDelegate implements IDelegate   {
   private void validateAppEngineJavaComponents() throws CoreException {
     try {
       CloudSdk cloudSdk = new CloudSdk.Builder().build();
+      cloudSdk.validateCloudSdk();
       cloudSdk.validateAppEngineJavaComponents();
+    } catch (CloudSdkNotFoundException ex) {
+      // todo properly display error in message box
+      throw new CoreException(
+          StatusUtil.error(getClass(), Messages.getString("cloud.sdk.missing"), ex));
     } catch (AppEngineJavaComponentsNotInstalledException ex) {
       // todo properly display error in message box
       throw new CoreException(
           StatusUtil.error(getClass(), Messages.getString("appengine.java.component.missing"), ex));
-    } catch (AppEngineException ex) {
+    } catch (CloudSdkOutOfDateException ex) {
       // todo properly display error in message box
       throw new CoreException(
-          StatusUtil.error(getClass(), Messages.getString("cloud.sdk.missing"), ex));
+          StatusUtil.error(getClass(), Messages.getString("cloud.sdk.out.of.date"), ex));
     }
   }
 }
