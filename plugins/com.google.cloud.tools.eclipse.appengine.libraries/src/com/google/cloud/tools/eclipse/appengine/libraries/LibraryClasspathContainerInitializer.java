@@ -44,13 +44,16 @@ public class LibraryClasspathContainerInitializer extends ClasspathContainerInit
   private LibraryClasspathContainerSerializer serializer;
   @Inject
   private ILibraryClasspathContainerResolverService resolverService;
+  private String containerPathPrefix = Library.CONTAINER_PATH_PREFIX;
 
   public LibraryClasspathContainerInitializer() {
   }
 
   @VisibleForTesting
-  LibraryClasspathContainerInitializer(LibraryClasspathContainerSerializer serializer,
+  LibraryClasspathContainerInitializer(String containerPathPrefix,
+                                       LibraryClasspathContainerSerializer serializer,
                                        ILibraryClasspathContainerResolverService resolverService) {
+    this.containerPathPrefix = containerPathPrefix;
     this.serializer = serializer;
     this.resolverService = resolverService;
   }
@@ -61,10 +64,10 @@ public class LibraryClasspathContainerInitializer extends ClasspathContainerInit
       throw new CoreException(StatusUtil.error(this, Messages.getString("ContainerPathNotTwoSegments",
                                                                         containerPath.toString())));
     }
-    if (!containerPath.segment(0).equals(Library.CONTAINER_PATH_PREFIX)) {
+    if (!containerPath.segment(0).equals(containerPathPrefix)) {
       throw new CoreException(StatusUtil.error(this,
                                                Messages.getString("ContainerPathInvalidFirstSegment",
-                                                                  Library.CONTAINER_PATH_PREFIX,
+                                                                  containerPathPrefix,
                                                                   containerPath.segment(0))));
     }
     try {
