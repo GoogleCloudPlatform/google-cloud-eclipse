@@ -1,5 +1,6 @@
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -34,6 +35,7 @@ class SourceAttacherJob extends Job {
   private final IPath containerPath;
   private final IPath libraryPath;
   private final Callable<IPath> sourceArtifactPathProvider;
+  private final LibraryClasspathContainerSerializer serializer;
 
   SourceAttacherJob(IJavaProject javaProject, IPath containerPath, IPath libraryPath,
                     Callable<IPath> sourceArtifactPathProvider) {
@@ -43,6 +45,7 @@ class SourceAttacherJob extends Job {
     this.containerPath = containerPath;
     this.libraryPath = libraryPath;
     this.sourceArtifactPathProvider = sourceArtifactPathProvider;
+    serializer = new LibraryClasspathContainerSerializer();
     setRule(javaProject.getSchedulingRule());
   }
 
@@ -71,6 +74,7 @@ class SourceAttacherJob extends Job {
             libraryClasspathContainer.copyWithNewEntries(newClasspathEntries);
         JavaCore.setClasspathContainer(containerPath, new IJavaProject[]{ javaProject },
                                        new IClasspathContainer[]{ newContainer }, monitor);
+        serializer.saveContainer(javaProject, newContainer);
       } else {
         logger.log(Level.FINE, Messages.getString("ContainerClassUnexpected",
                                                   container.getClass().getName(),

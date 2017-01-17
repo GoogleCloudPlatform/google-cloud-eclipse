@@ -137,15 +137,16 @@ public class LibraryClasspathContainerSerializer {
 
   private File getContainerStateFile(IJavaProject javaProject, IPath containerPath, boolean create)
       throws CoreException {
-    IPath containerStateFile = stateLocationProvider.getContainerStateFile(javaProject, containerPath, create);
+    IPath containerStateFile = stateLocationProvider.getContainerStateFile(javaProject,
+                                                                           containerPath,
+                                                                           create);
     if (containerStateFile != null && containerStateFile.toFile().exists()) {
       return containerStateFile.toFile();
     }
     return null;
   }
 
-  private static class DefaultStateLocationProvider
-      implements LibraryContainerStateLocationProvider {
+  private static class DefaultStateLocationProvider implements LibraryContainerStateLocationProvider {
 
     /*
      * The IFile and IFolder methods do not validate whether the underlying resources exist.

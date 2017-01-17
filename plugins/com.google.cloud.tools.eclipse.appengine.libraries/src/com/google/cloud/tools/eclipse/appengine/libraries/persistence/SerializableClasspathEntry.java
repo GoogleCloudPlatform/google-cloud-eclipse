@@ -56,16 +56,15 @@ public class SerializableClasspathEntry {
    * <code>baseDirectory</code>, it will be prefixed with {@value #SOURCE_REPO_RELATIVE_PREFIX} or
    * {@value #BINARY_REPO_RELATIVE_PREFIX} respectively to inform the deserialization process.
    */
-  private IPath relativizeSourcePath(IPath sourceAttachmentPath, IPath baseDirectory, IPath sourceBaseDirectory) {
+  private static IPath relativizeSourcePath(IPath sourceAttachmentPath, IPath baseDirectory, IPath sourceBaseDirectory) {
     if (sourceAttachmentPath == null) {
       return null;
+    }
+    IPath pathRelativeToSourceBase = PathUtil.relativizePathStrict(sourceAttachmentPath, sourceBaseDirectory);
+    if (pathRelativeToSourceBase != null) {
+      return new Path(SOURCE_REPO_RELATIVE_PREFIX).append(pathRelativeToSourceBase);
     } else {
-      IPath pathRelativeToSourceBase = PathUtil.relativizePathStrict(sourceAttachmentPath, sourceBaseDirectory);
-      if (pathRelativeToSourceBase != null) {
-        return new Path(SOURCE_REPO_RELATIVE_PREFIX).append(pathRelativeToSourceBase);
-      } else {
-        return new Path(BINARY_REPO_RELATIVE_PREFIX).append(PathUtil.relativizePath(sourceAttachmentPath, baseDirectory));
-      }
+      return new Path(BINARY_REPO_RELATIVE_PREFIX).append(PathUtil.relativizePath(sourceAttachmentPath, baseDirectory));
     }
   }
 
