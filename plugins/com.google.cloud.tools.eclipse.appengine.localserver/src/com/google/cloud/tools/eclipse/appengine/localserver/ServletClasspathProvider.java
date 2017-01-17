@@ -18,7 +18,6 @@ package com.google.cloud.tools.eclipse.appengine.localserver;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.ILibraryClasspathContainerResolverService;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
-import com.google.cloud.tools.eclipse.appengine.libraries.repository.LibraryRepositoryServiceException;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -82,7 +81,7 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
                          allEntries, servletApiEntries.length,
                          jspApiEntries.length);
         return allEntries;
-    } catch (LibraryRepositoryServiceException | CoreException ex) {
+    } catch (CoreException ex) {
       logger.log(Level.WARNING, "Failed to initialize libraries", ex);
     }
     return null;

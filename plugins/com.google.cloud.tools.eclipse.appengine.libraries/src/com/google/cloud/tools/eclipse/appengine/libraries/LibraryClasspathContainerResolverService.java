@@ -23,7 +23,6 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFactoryEx
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
-import com.google.cloud.tools.eclipse.appengine.libraries.repository.LibraryRepositoryServiceException;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.MavenCoordinatesHelper;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Strings;
@@ -85,9 +84,9 @@ public class LibraryClasspathContainerResolverService
                                                  Messages.TaskResolveLibraries,
                                                  getTotalwork(rawClasspath));
       for (IClasspathEntry classpathEntry : rawClasspath) {
-        StatusUtil.merge(status, resolveContainer(javaProject,
-                                                  classpathEntry.getPath(),
-                                                  subMonitor.newChild(1)));
+        status = StatusUtil.merge(status, resolveContainer(javaProject,
+                                                           classpathEntry.getPath(),
+                                                           subMonitor.newChild(1)));
       }
     } catch (CoreException ex) {
       return StatusUtil.error(this, Messages.TaskResolveLibrariesError, ex);
@@ -96,8 +95,7 @@ public class LibraryClasspathContainerResolverService
   }
 
   public IClasspathEntry[] resolveLibraryAttachSourcesSync(String libraryId)
-                                                               throws CoreException,
-                                                                      LibraryRepositoryServiceException {
+                                                               throws CoreException {
     Library library = libraries.get(libraryId);
     if (library != null) {
       IClasspathEntry[] resolvedEntries = new IClasspathEntry[library.getLibraryFiles().size()];
@@ -107,7 +105,8 @@ public class LibraryClasspathContainerResolverService
       }
       return resolvedEntries;
     } else {
-      throw new LibraryRepositoryServiceException(NLS.bind(Messages.InvalidLibraryId, libraryId));
+      throw new CoreException(StatusUtil.error(this, NLS.bind(Messages.InvalidLibraryId,
+                                                              libraryId)));
     }
   }
 
@@ -126,8 +125,8 @@ public class LibraryClasspathContainerResolverService
         serializer.saveContainer(javaProject, container);
       }
       return Status.OK_STATUS;
-    } catch (LibraryRepositoryServiceException | CoreException | IOException ex) {
-      return StatusUtil.error(this, "Could not resolve container path: " + continerPath, ex);
+    } catch (CoreException | IOException ex) {
+      return StatusUtil.error(this, NLS.bind(Messages.TaskResolveContainerError, continerPath), ex);
     }
   }
   
@@ -135,8 +134,7 @@ public class LibraryClasspathContainerResolverService
                                                         IPath containerPath,
                                                         Library library,
                                                         IProgressMonitor monitor)
-                                                            throws LibraryRepositoryServiceException,
-                                                                   CoreException {
+                                                            throws CoreException {
     List<LibraryFile> libraryFiles = library.getLibraryFiles();
     SubMonitor subMonitor = SubMonitor.convert(monitor, libraryFiles.size());
     subMonitor.subTask(NLS.bind(Messages.TaskResolveArtifacts, getLibraryDescription(library)));
@@ -159,32 +157,41 @@ public class LibraryClasspathContainerResolverService
     return container;
   }
 
-  private IClasspathEntry resolveLibraryFileAttachSourceAsync(IJavaProject javaProject, IPath containerPath, LibraryFile libraryFile,
-      IProgressMonitor monitor) throws CoreException, LibraryRepositoryServiceException {
+  private IClasspathEntry resolveLibraryFileAttachSourceAsync(IJavaProject javaProject,
+                                                              IPath containerPath,
+                                                              LibraryFile libraryFile,
+                                                              IProgressMonitor monitor)
+                                                                  throws CoreException {
     return resolveLibraryFile(javaProject, containerPath, libraryFile, true, monitor);
   }
 
-  private IClasspathEntry resolveLibraryFileAttachSourceSync(final LibraryFile libraryFile) throws CoreException, LibraryRepositoryServiceException {
+  private IClasspathEntry resolveLibraryFileAttachSourceSync(final LibraryFile libraryFile)
+                                                                              throws CoreException {
     return resolveLibraryFile(null, null, libraryFile, false, null);
   }
 
   private IClasspathEntry resolveLibraryFile(IJavaProject javaProject, final IPath containerPath,
-      final LibraryFile libraryFile, boolean sourceAsync, final IProgressMonitor monitor)
-      throws CoreException, LibraryRepositoryServiceException {
+                                             final LibraryFile libraryFile, boolean sourceAsync,
+                                             final IProgressMonitor monitor)
+                                                 throws CoreException {
     final Artifact artifact = repositoryService.resolveArtifact(libraryFile, monitor);
     IPath libraryPath = new Path(artifact.getFile().getAbsolutePath());
     IPath sourceAttachmentPath = null;
     if (sourceAsync) {
-      Job job = new SourceAttacherJob(javaProject, containerPath, libraryPath, new Callable<IPath>() {
-  
+      Job job = new SourceAttacherJob(javaProject, containerPath,
+                                      libraryPath, new Callable<IPath>() {
         @Override
         public IPath call() throws Exception {
-          return repositoryService.resolveSourceArtifact(libraryFile, artifact.getVersion(), monitor);
+          return repositoryService.resolveSourceArtifact(libraryFile,
+                                                         artifact.getVersion(),
+                                                         monitor);
         }
       });
       job.schedule();
     } else {
-      sourceAttachmentPath = repositoryService.resolveSourceArtifact(libraryFile, artifact.getVersion(), monitor);
+      sourceAttachmentPath = repositoryService.resolveSourceArtifact(libraryFile,
+                                                                     artifact.getVersion(),
+                                                                     monitor);
     }
     final IClasspathEntry newLibraryEntry = JavaCore.newLibraryEntry(libraryPath,
         sourceAttachmentPath,
@@ -206,7 +213,9 @@ public class LibraryClasspathContainerResolverService
   }
 
   private static boolean isLibraryClasspathEntry(IPath path) {
-    return path != null && path.segmentCount() == 2 && Library.CONTAINER_PATH_PREFIX.equals(path.segment(0));
+    return path != null
+        && path.segmentCount() == 2
+        && Library.CONTAINER_PATH_PREFIX.equals(path.segment(0));
   }
 
   private static String getLibraryDescription(Library library) {
@@ -238,37 +247,37 @@ public class LibraryClasspathContainerResolverService
     IAccessRule[] accessRules = new IAccessRule[filters.size()];
     int idx = 0;
     for (Filter filter : filters) {
-      int accessRuleKind = filter.isExclude() ? IAccessRule.K_NON_ACCESSIBLE : IAccessRule.K_ACCESSIBLE;
+      int accessRuleKind =
+          filter.isExclude() ? IAccessRule.K_NON_ACCESSIBLE : IAccessRule.K_ACCESSIBLE;
       accessRules[idx++] = JavaCore.newAccessRule(new Path(filter.getPattern()), accessRuleKind);
     }
     return accessRules;
   }
 
-  private static IClasspathAttribute[] getClasspathAttributes(LibraryFile libraryFile, Artifact artifact)
-      throws LibraryRepositoryServiceException {
-    try {
-      List<IClasspathAttribute> attributes =
-          MavenCoordinatesHelper.createClasspathAttributes(libraryFile.getMavenCoordinates(),
-              artifact.getVersion());
-      if (libraryFile.isExport()) {
-        attributes.add(UpdateClasspathAttributeUtil.createDependencyAttribute(true /* isWebApp */));
-      } else {
-        attributes.add(UpdateClasspathAttributeUtil.createNonDependencyAttribute());
-      }
-      if (libraryFile.getSourceUri() != null) {
-        addUriAttribute(attributes, CLASSPATH_ATTRIBUTE_SOURCE_URL, libraryFile.getSourceUri());
-      }
-      if (libraryFile.getJavadocUri() != null) {
-        addUriAttribute(attributes, IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME,
-            libraryFile.getJavadocUri());
-      }
-      return attributes.toArray(new IClasspathAttribute[0]);
-    } catch (CoreException ex) {
-      throw new LibraryRepositoryServiceException("Could not create classpath attributes", ex);
+  private static IClasspathAttribute[] getClasspathAttributes(LibraryFile libraryFile,
+                                                              Artifact artifact)
+                                                                  throws CoreException {
+    List<IClasspathAttribute> attributes =
+        MavenCoordinatesHelper.createClasspathAttributes(libraryFile.getMavenCoordinates(),
+                                                         artifact.getVersion());
+    if (libraryFile.isExport()) {
+      attributes.add(UpdateClasspathAttributeUtil.createDependencyAttribute(true /* isWebApp */));
+    } else {
+      attributes.add(UpdateClasspathAttributeUtil.createNonDependencyAttribute());
     }
+    if (libraryFile.getSourceUri() != null) {
+      addUriAttribute(attributes, CLASSPATH_ATTRIBUTE_SOURCE_URL, libraryFile.getSourceUri());
+    }
+    if (libraryFile.getJavadocUri() != null) {
+      addUriAttribute(attributes, IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME,
+                      libraryFile.getJavadocUri());
+    }
+    return attributes.toArray(new IClasspathAttribute[0]);
   }
 
-  private static void addUriAttribute(List<IClasspathAttribute> attributes, String attributeName, URI uri) {
+  private static void addUriAttribute(List<IClasspathAttribute> attributes,
+                                      String attributeName,
+                                      URI uri) {
     try {
       attributes.add(JavaCore.newClasspathAttribute(attributeName, uri.toURL().toString()));
     } catch (MalformedURLException | IllegalArgumentException ex) {

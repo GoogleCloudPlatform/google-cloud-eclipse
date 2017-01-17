@@ -30,6 +30,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.osgi.util.NLS;
 
+/**
+ * Wrapper class around {@link MavenUtils} to enable mocking in unit tests.
+ */
 public class MavenHelper {
 
   public Artifact resolveArtifact(MavenCoordinates mavenCoordinates,

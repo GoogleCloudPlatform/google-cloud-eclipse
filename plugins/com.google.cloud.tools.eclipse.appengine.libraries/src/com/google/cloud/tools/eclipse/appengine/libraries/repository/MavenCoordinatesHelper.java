@@ -27,7 +27,8 @@ import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.JavaCore;
 
 /**
- * Provides methods to convert a {@link MavenCoordinates} object to a {@link IClasspathAttribute} and vice versa.
+ * Provides methods to convert a {@link MavenCoordinates} object to a {@link IClasspathAttribute}
+ * and vice versa.
  */
 public class MavenCoordinatesHelper {
 

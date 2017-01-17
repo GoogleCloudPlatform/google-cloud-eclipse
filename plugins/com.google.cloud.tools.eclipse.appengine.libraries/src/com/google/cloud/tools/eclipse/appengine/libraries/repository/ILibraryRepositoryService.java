@@ -28,7 +28,22 @@ import org.eclipse.core.runtime.IProgressMonitor;
  */
 public interface ILibraryRepositoryService {
 
+  /**
+   * @return an <code>artifact</code> that is described by <code>libraryFile</code>
+   */
   Artifact resolveArtifact(LibraryFile libraryFile, IProgressMonitor monitor) throws CoreException;
 
+  /**
+   * Resolves a source artifact for the binary artifact described by a {@link LibraryFile}.
+   * <p>
+   * If <code>libraryFile.getSourceUri()</code> is not null, the source will be downloaded from that
+   * URI, otherwise resolving a suitable source artifact is up to the implementation (e.g. using
+   * Maven/M2E)
+   *
+   * @param libraryFile describing the artifact whose source artifact needs to be resolved
+   * @param versionHint the actual version to be resolved in case <code>libraryFile</code>'s version
+   * is set to latest,  
+   * @return a path of the resolved source artifact
+   */
   IPath resolveSourceArtifact(LibraryFile libraryFile, String versionHint, IProgressMonitor monitor) throws CoreException;
 }

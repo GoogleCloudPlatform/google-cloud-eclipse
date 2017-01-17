@@ -32,6 +32,7 @@ public class Messages extends NLS {
   public static String RepositoryUriNotAbsolute;
   public static String SourceAttachmentFailed;
   public static String TaskResolveArtifacts;
+  public static String TaskResolveContainerError;
   public static String TaskResolveLibraries;
   public static String TaskResolveLibrariesError;
   public static String UnexpectedConfigurationElement;

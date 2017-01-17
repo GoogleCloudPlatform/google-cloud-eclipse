@@ -16,7 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
-import com.google.cloud.tools.eclipse.appengine.libraries.repository.LibraryRepositoryServiceException;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -24,17 +24,32 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 
+/**
+ * Service interface to resolve {@link LibraryClasspathContainer}s.
+ */
 public interface ILibraryClasspathContainerResolverService {
 
   public static final String LIBRARIES_EXTENSION_POINT =
       "com.google.cloud.tools.eclipse.appengine.libraries"; //$NON-NLS-1$
 
+  /**
+   * Resolves all {@link LibraryClasspathContainer}s found on the classpath of
+   * <code>javaProject</code>. Source attachment for the resolved libraries will happen
+   * asynchronously.
+   */
   public IStatus resolveAll(IJavaProject javaProject, IProgressMonitor monitor);
 
-  public IClasspathEntry[] resolveLibraryAttachSourcesSync(String libraryId)
-                                                               throws CoreException,
-                                                                      LibraryRepositoryServiceException;
+  /**
+   * Resolves the binary and source artifacts corresponding to the {@link Library} identified by
+   * <code>libraryId</code> synchronously and creates the {@link IClasspathEntry}s referring them.
+   */
+  public IClasspathEntry[] resolveLibraryAttachSourcesSync(String libraryId) throws CoreException;
 
+  /**
+   * Resolves a single {@link LibraryClasspathContainer} corresponding to <code>containerPath</code>
+   * in <code>javaProject</code>. Sources for the resolved binary artifacts are resolved
+   * asynchronously.
+   */
   public IStatus resolveContainer(IJavaProject javaProject,
                                   IPath continerPath,
                                   IProgressMonitor monitor);

@@ -22,6 +22,7 @@ import com.google.cloud.tools.eclipse.appengine.libraries.util.PathUtil;
 import com.google.cloud.tools.eclipse.util.io.FileDownloader;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -36,7 +37,11 @@ import org.osgi.service.component.annotations.Component;
 
 /**
  * Implementation of {@link ILibraryRepositoryService} that relies on M2Eclipse to download the
- * artifacts and store them in the local Maven repository pointed to by M2Eclipse's M2_REPO variable.
+ * artifacts and store them in the local Maven repository pointed to by M2Eclipse's M2_REPO
+ * variable.
+ * <p>
+ * In case <code>libraryfile.getSourceUri()</code> is null, M2Eclipse is used to resolve the source
+ * artifact by using the "sources" classifier with the binary artifact's {@link MavenCoordinates}.;
  */
 @Component
 public class M2RepositoryService implements ILibraryRepositoryService {
@@ -44,13 +49,16 @@ public class M2RepositoryService implements ILibraryRepositoryService {
   private MavenHelper mavenHelper;
 
   @Override
-  public Artifact resolveArtifact(LibraryFile libraryFile, IProgressMonitor monitor) throws CoreException {
+  public Artifact resolveArtifact(LibraryFile libraryFile, IProgressMonitor monitor)
+                                                                              throws CoreException {
     MavenCoordinates mavenCoordinates = libraryFile.getMavenCoordinates();
     return mavenHelper.resolveArtifact(mavenCoordinates, monitor);
   }
 
   @Override
-  public IPath resolveSourceArtifact(LibraryFile libraryFile, String versionHint, IProgressMonitor monitor) throws CoreException {
+  public IPath resolveSourceArtifact(LibraryFile libraryFile,
+                                     String versionHint,
+                                     IProgressMonitor monitor) throws CoreException {
     MavenCoordinates mavenCoordinates = libraryFile.getMavenCoordinates();
     MavenCoordinates sourceCoordinates = new MavenCoordinates(mavenCoordinates);
     if (!Strings.isNullOrEmpty(versionHint)) {
@@ -58,13 +66,15 @@ public class M2RepositoryService implements ILibraryRepositoryService {
     }
     sourceCoordinates.setClassifier("sources");
     if (libraryFile.getSourceUri() == null) {
-      return new Path(mavenHelper.resolveArtifact(sourceCoordinates, monitor).getFile().getAbsolutePath());
+      File artifactFile = mavenHelper.resolveArtifact(sourceCoordinates, monitor).getFile();
+      return new Path(artifactFile.getAbsolutePath());
     } else {
-      return getDownloadedSourceLocation(sourceCoordinates, getSourceUrlFromUri(libraryFile.getSourceUri()), monitor);
+      return getDownloadedSourceLocation(sourceCoordinates,
+                                         getSourceUrlFromUri(libraryFile.getSourceUri()), monitor);
     }
   }
 
-  private URL getSourceUrlFromUri(URI sourceUri) {
+  private static URL getSourceUrlFromUri(URI sourceUri) {
     try {
       if (sourceUri == null) {
         return null;
@@ -77,8 +87,8 @@ public class M2RepositoryService implements ILibraryRepositoryService {
     }
   }
 
-  private IPath getDownloadedSourceLocation(MavenCoordinates mavenCoordinates, URL sourceUrl,
-                                            IProgressMonitor monitor) {
+  private static IPath getDownloadedSourceLocation(MavenCoordinates mavenCoordinates, URL sourceUrl,
+                                                   IProgressMonitor monitor) {
     try {
       IPath downloadFolder = PathUtil.bundleStateBasedMavenFolder(mavenCoordinates);
       return new FileDownloader(downloadFolder).download(sourceUrl, monitor);

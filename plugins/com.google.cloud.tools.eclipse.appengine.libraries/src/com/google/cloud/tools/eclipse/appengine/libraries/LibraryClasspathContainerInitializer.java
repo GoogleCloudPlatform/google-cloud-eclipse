@@ -41,8 +41,6 @@ import org.eclipse.osgi.util.NLS;
  */
 public class LibraryClasspathContainerInitializer extends ClasspathContainerInitializer {
 
-  private String containerPathPrefix = Library.CONTAINER_PATH_PREFIX;
-
   @Inject
   private LibraryClasspathContainerSerializer serializer;
   @Inject
@@ -52,43 +50,40 @@ public class LibraryClasspathContainerInitializer extends ClasspathContainerInit
   }
 
   @VisibleForTesting
-  LibraryClasspathContainerInitializer(String containerPathPrefix,
-                                       LibraryClasspathContainerSerializer serializer,
+  LibraryClasspathContainerInitializer(LibraryClasspathContainerSerializer serializer,
                                        ILibraryClasspathContainerResolverService resolverService) {
-    this.containerPathPrefix = containerPathPrefix;
     this.serializer = serializer;
     this.resolverService = resolverService;
   }
 
   @Override
   public void initialize(IPath containerPath, IJavaProject project) throws CoreException {
-    if (containerPath.segmentCount() == 2) {
-      if (!containerPath.segment(0).equals(containerPathPrefix)) {
-        throw new CoreException(StatusUtil.error(this,
-                                                 NLS.bind(Messages.ContainerPathInvalidFirstSegment,
-                                                          containerPathPrefix,
-                                                          containerPath.segment(0))));
-      }
-      try {
-        LibraryClasspathContainer container = serializer.loadContainer(project, containerPath);
-        if (container != null && jarPathsAreValid(container)) {
-          JavaCore.setClasspathContainer(containerPath,
-                                         new IJavaProject[] {project},
-                                         new IClasspathContainer[] {container},
-                                         new NullProgressMonitor());
-        } else {
-          resolverService.resolveContainer(project, containerPath, new NullProgressMonitor());
-        }
-      } catch (IOException ex) {
-        throw new CoreException(StatusUtil.error(this, Messages.LoadContainerFailed, ex));
-      }
-    } else {
+    if (containerPath.segmentCount() != 2) {
       throw new CoreException(StatusUtil.error(this, NLS.bind(Messages.ContainerPathNotTwoSegments,
                                                               containerPath.toString())));
     }
+    if (!containerPath.segment(0).equals(Library.CONTAINER_PATH_PREFIX)) {
+      throw new CoreException(StatusUtil.error(this,
+                                               NLS.bind(Messages.ContainerPathInvalidFirstSegment,
+                                                        Library.CONTAINER_PATH_PREFIX,
+                                                        containerPath.segment(0))));
+    }
+    try {
+      LibraryClasspathContainer container = serializer.loadContainer(project, containerPath);
+      if (container != null && jarPathsAreValid(container)) {
+        JavaCore.setClasspathContainer(containerPath,
+                                       new IJavaProject[] {project},
+                                       new IClasspathContainer[] {container},
+                                       new NullProgressMonitor());
+      } else {
+        resolverService.resolveContainer(project, containerPath, new NullProgressMonitor());
+      }
+    } catch (IOException ex) {
+      throw new CoreException(StatusUtil.error(this, Messages.LoadContainerFailed, ex));
+    }
   }
 
-  private boolean jarPathsAreValid(LibraryClasspathContainer container) {
+  private static boolean jarPathsAreValid(LibraryClasspathContainer container) {
     IClasspathEntry[] classpathEntries = container.getClasspathEntries();
     for (int i = 0; i < classpathEntries.length; i++) {
       IClasspathEntry classpathEntry = classpathEntries[i];

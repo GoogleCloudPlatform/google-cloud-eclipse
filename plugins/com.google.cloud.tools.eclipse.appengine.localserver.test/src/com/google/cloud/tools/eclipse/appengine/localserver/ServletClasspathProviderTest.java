@@ -17,23 +17,18 @@
 package com.google.cloud.tools.eclipse.appengine.localserver;
 
 import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
-import com.google.cloud.tools.eclipse.appengine.libraries.repository.LibraryRepositoryServiceException;
 import java.util.Collections;
 import java.util.HashMap;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaProject;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -51,7 +46,7 @@ public class ServletClasspathProviderTest {
   @Mock private ILibraryRepositoryService repositoryService;
 
   @Before
-  public void setUp() throws LibraryRepositoryServiceException {
+  public void setUp() {
     Library servletApi = getMockApi("servlet-api");
     Library jspApi = getMockApi("jsp-api");
     HashMap<String, Library> libraries = new HashMap<>();
@@ -68,7 +63,7 @@ public class ServletClasspathProviderTest {
   }
 
   @Test
-  public void testResolveClasspathContainerThrowsError() throws LibraryRepositoryServiceException {
+  public void testResolveClasspathContainerThrowsError() {
 //    when(repositoryService.getLibraryClasspathEntry(any(IJavaProject.class), any(LibraryFile.class),
 //                                                    any(IProgressMonitor.class)))
 //      .thenThrow(new LibraryRepositoryServiceException("test exception"));
@@ -83,7 +78,7 @@ public class ServletClasspathProviderTest {
     Assert.assertNull(provider.resolveClasspathContainer(project, null));
   }
 
-  private Library getMockApi(String libraryId) throws LibraryRepositoryServiceException {
+  private Library getMockApi(String libraryId) {
     Library servletApi = new Library(libraryId);
     LibraryFile libraryFile = mock(LibraryFile.class);
     servletApi.setLibraryFiles(Collections.singletonList(libraryFile));

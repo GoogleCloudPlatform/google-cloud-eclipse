@@ -14,6 +14,19 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.osgi.util.NLS;
 
+/**
+ * Job to fill in the source attachment path attribute of an {@link IClasspathEntry}.
+ * <p>
+ * The {@link IPath} referencing the source artifact is provided by a {@link Callable} object. The
+ * job will create a new {@link IClasspathEntry} by copying the original and adding the source
+ * attachment path. The {@link LibraryClasspathContainer} associated with the container path will
+ * also be replaced with a copy that is identical to the original except for the updated
+ * {@link IClasspathEntry}s.
+ * <p>
+ * If the source resolution or setting the source attachment attribute fails, the job will still
+ * return {@link Status#OK_STATUS} as this is not considered an error that the user should be
+ * notified of.
+ */
 class SourceAttacherJob extends Job {
   
   private static final Logger logger = Logger.getLogger(SourceAttacherJob.class.getName());
@@ -21,7 +34,7 @@ class SourceAttacherJob extends Job {
   private final IJavaProject javaProject;
   private final IPath containerPath;
   private final IPath libraryPath;
-  private Callable<IPath> sourceArtifactPathProvider;
+  private final Callable<IPath> sourceArtifactPathProvider;
 
   SourceAttacherJob(IJavaProject javaProject, IPath containerPath, IPath libraryPath,
                     Callable<IPath> sourceArtifactPathProvider) {
