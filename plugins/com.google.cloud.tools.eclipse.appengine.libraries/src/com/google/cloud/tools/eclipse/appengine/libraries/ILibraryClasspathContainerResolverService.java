@@ -31,8 +31,7 @@ public interface ILibraryClasspathContainerResolverService {
 
   public IStatus resolveAll(IJavaProject javaProject, IProgressMonitor monitor);
 
-  public IClasspathEntry[] resolveLibraryAttachSourcesSync(IJavaProject javaProject,
-                                                           String libraryId)
+  public IClasspathEntry[] resolveLibraryAttachSourcesSync(String libraryId)
                                                                throws CoreException,
                                                                       LibraryRepositoryServiceException;
 

@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.osgi.util.NLS;
 
 class SourceAttacherJob extends Job {
   
@@ -20,15 +21,15 @@ class SourceAttacherJob extends Job {
   private final IJavaProject javaProject;
   private final IPath containerPath;
   private final IPath libraryPath;
-  private Callable<IPath> sourceArtifactPathFuture;
+  private Callable<IPath> sourceArtifactPathProvider;
 
   SourceAttacherJob(IJavaProject javaProject, IPath containerPath, IPath libraryPath,
-                    Callable<IPath> callable) {
-    super("Attaching source");
+                    Callable<IPath> sourceArtifactPathProvider) {
+    super(NLS.bind(Messages.SourceAttachmentDownloaderJobName, javaProject.getProject().getName()));
     this.javaProject = javaProject;
     this.containerPath = containerPath;
     this.libraryPath = libraryPath;
-    this.sourceArtifactPathFuture = callable;
+    this.sourceArtifactPathProvider = sourceArtifactPathProvider;
     setRule(javaProject.getSchedulingRule());
   }
 
@@ -36,21 +37,35 @@ class SourceAttacherJob extends Job {
   protected IStatus run(IProgressMonitor monitor) {
     try {
       IClasspathContainer container = JavaCore.getClasspathContainer(containerPath, javaProject);
-      LibraryClasspathContainer libraryClasspathContainer = (LibraryClasspathContainer) container;
-      IClasspathEntry[] classpathEntries = libraryClasspathContainer.getClasspathEntries();
-      IClasspathEntry[] newClasspathEntries = new IClasspathEntry[classpathEntries.length];
-      System.arraycopy(classpathEntries, 0, newClasspathEntries, 0, classpathEntries.length);
-      for (int i = 0; i < newClasspathEntries.length; i++) {
-        if (newClasspathEntries[i].getPath().equals(libraryPath)) {
-          IPath sourceArtifactPath = sourceArtifactPathFuture.call();
-          newClasspathEntries[i] = JavaCore.newLibraryEntry(newClasspathEntries[i].getPath(), sourceArtifactPath, null, newClasspathEntries[i].getAccessRules(), newClasspathEntries[i].getExtraAttributes(), newClasspathEntries[i].isExported());
+      if (container instanceof LibraryClasspathContainer) {
+        LibraryClasspathContainer libraryClasspathContainer = (LibraryClasspathContainer) container;
+        IClasspathEntry[] classpathEntries = libraryClasspathContainer.getClasspathEntries();
+        IClasspathEntry[] newClasspathEntries = new IClasspathEntry[classpathEntries.length];
+        System.arraycopy(classpathEntries, 0, newClasspathEntries, 0, classpathEntries.length);
+        for (int i = 0; i < newClasspathEntries.length; i++) {
+          IClasspathEntry entry = newClasspathEntries[i];
+          if (entry.getPath().equals(libraryPath)) {
+            IPath sourceArtifactPath = sourceArtifactPathProvider.call();
+            newClasspathEntries[i] = JavaCore.newLibraryEntry(entry.getPath(),
+                                                              sourceArtifactPath,
+                                                              null /* sourceAttachmentRootPath */,
+                                                              entry.getAccessRules(),
+                                                              entry.getExtraAttributes(),
+                                                              entry.isExported());
+          }
         }
+        LibraryClasspathContainer newContainer =
+            libraryClasspathContainer.copyWithNewEntries(newClasspathEntries);
+        JavaCore.setClasspathContainer(containerPath, new IJavaProject[]{ javaProject },
+                                       new IClasspathContainer[]{ newContainer }, monitor);
+      } else {
+        logger.log(Level.FINE, NLS.bind(Messages.ContainerClassUnexpected,
+                                        container.getClass().getName(),
+                                        LibraryClasspathContainer.class.getName()));
       }
-      LibraryClasspathContainer newContainer = libraryClasspathContainer.copyWithNewEntries(newClasspathEntries);
-      JavaCore.setClasspathContainer(containerPath, new IJavaProject[]{ javaProject }, new IClasspathContainer[]{ newContainer }, monitor);
     } catch (Exception ex) {
       // it's not needed to be logged normally
-      logger.log(Level.FINE, "Could not attach source", ex);
+      logger.log(Level.FINE, Messages.SourceAttachmentFailed, ex);
     }
     // even if it fails, we should not display an error to the user
     return Status.OK_STATUS;

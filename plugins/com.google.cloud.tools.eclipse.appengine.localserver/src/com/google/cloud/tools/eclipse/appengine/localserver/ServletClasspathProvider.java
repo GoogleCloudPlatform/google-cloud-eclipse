@@ -26,8 +26,6 @@ import javax.inject.Inject;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jst.server.core.RuntimeClasspathProviderDelegate;
 import org.eclipse.wst.server.core.IRuntime;
 
@@ -52,7 +50,7 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
     if (project != null && MavenUtils.hasMavenNature(project)) { // Maven handles its own classpath
       return null;
     } else {
-      return doResolveClasspathContainer(project, runtime);
+      return doResolveClasspathContainer(runtime);
     }
   }
 
@@ -67,17 +65,15 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
   // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/953
   @Override
   public IClasspathEntry[] resolveClasspathContainer(IRuntime runtime) {
-    return doResolveClasspathContainer(null, runtime);
+    return doResolveClasspathContainer(runtime);
   }
 
-  private IClasspathEntry[] doResolveClasspathContainer(IProject project, IRuntime runtime) {
+  private IClasspathEntry[] doResolveClasspathContainer(IRuntime runtime) {
     try {
-      if (project.hasNature(JavaCore.NATURE_ID)) {
-        IJavaProject javaProject = JavaCore.create(project);
         IClasspathEntry[] servletApiEntries =
-            resolverService.resolveLibraryAttachSourcesSync(javaProject, "servlet-api");
+            resolverService.resolveLibraryAttachSourcesSync("servlet-api");
         IClasspathEntry[] jspApiEntries =
-            resolverService.resolveLibraryAttachSourcesSync(javaProject, "jsp-api");
+            resolverService.resolveLibraryAttachSourcesSync("jsp-api");
         
         IClasspathEntry[] allEntries =
             new IClasspathEntry[servletApiEntries.length + jspApiEntries.length];
@@ -86,7 +82,6 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
                          allEntries, servletApiEntries.length,
                          jspApiEntries.length);
         return allEntries;
-      }
     } catch (LibraryRepositoryServiceException | CoreException ex) {
       logger.log(Level.WARNING, "Failed to initialize libraries", ex);
     }

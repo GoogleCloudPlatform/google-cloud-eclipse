@@ -17,15 +17,12 @@
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
-import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFactory;
 import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer;
-import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
 import javax.inject.Inject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
@@ -55,20 +52,12 @@ public class LibraryClasspathContainerInitializer extends ClasspathContainerInit
   }
 
   @VisibleForTesting
-  LibraryClasspathContainerInitializer(IConfigurationElement[] configurationElements,
-                                       LibraryFactory libraryFactory,
-                                       String containerPath,
-                                       LibraryClasspathContainerSerializer serializer) {
-    this(configurationElements, libraryFactory, containerPath, serializer, null);
-  }
-
-  @VisibleForTesting
-  LibraryClasspathContainerInitializer(IConfigurationElement[] configurationElements,
-                                       LibraryFactory libraryFactory,
-                                       String containerPath,
+  LibraryClasspathContainerInitializer(String containerPathPrefix,
                                        LibraryClasspathContainerSerializer serializer,
-                                       ILibraryRepositoryService repositoryService) {
-    this.containerPathPrefix = containerPath;
+                                       ILibraryClasspathContainerResolverService resolverService) {
+    this.containerPathPrefix = containerPathPrefix;
+    this.serializer = serializer;
+    this.resolverService = resolverService;
   }
 
   @Override

@@ -21,9 +21,11 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
   private static final String BUNDLE_NAME = "com.google.cloud.tools.eclipse.appengine.libraries.messages"; //$NON-NLS-1$
   public static String AppEngineLibraryContainerResolverJobName;
+  public static String ContainerClassUnexpected;
   public static String ContainerPathInvalidFirstSegment;
   public static String ContainerPathNotTwoSegments;
   public static String CreateLibraryError;
+  public static String InvalidLibraryId;
   public static String LoadContainerFailed;
   public static String SourceAttachmentDownloaderJobName;
   public static String RepositoryUriInvalid;

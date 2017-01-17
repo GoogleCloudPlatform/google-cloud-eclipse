@@ -95,8 +95,7 @@ public class LibraryClasspathContainerResolverService
     return status == null ? Status.OK_STATUS : status;
   }
 
-  public IClasspathEntry[] resolveLibraryAttachSourcesSync(IJavaProject javaProject,
-                                                           String libraryId)
+  public IClasspathEntry[] resolveLibraryAttachSourcesSync(String libraryId)
                                                                throws CoreException,
                                                                       LibraryRepositoryServiceException {
     Library library = libraries.get(libraryId);
@@ -104,11 +103,11 @@ public class LibraryClasspathContainerResolverService
       IClasspathEntry[] resolvedEntries = new IClasspathEntry[library.getLibraryFiles().size()];
       int idx = 0;
       for (LibraryFile libraryFile : library.getLibraryFiles()) {
-        resolvedEntries[idx++] = resolveLibraryFileAttachSourceSync(javaProject, libraryFile);
+        resolvedEntries[idx++] = resolveLibraryFileAttachSourceSync(libraryFile);
       }
       return resolvedEntries;
     } else {
-      throw new LibraryRepositoryServiceException("Invalid libraryId");
+      throw new LibraryRepositoryServiceException(NLS.bind(Messages.InvalidLibraryId, libraryId));
     }
   }
 
@@ -165,8 +164,8 @@ public class LibraryClasspathContainerResolverService
     return resolveLibraryFile(javaProject, containerPath, libraryFile, true, monitor);
   }
 
-  private IClasspathEntry resolveLibraryFileAttachSourceSync(IJavaProject javaProject, final LibraryFile libraryFile) throws CoreException, LibraryRepositoryServiceException {
-    return resolveLibraryFile(javaProject, null, libraryFile, false, null);
+  private IClasspathEntry resolveLibraryFileAttachSourceSync(final LibraryFile libraryFile) throws CoreException, LibraryRepositoryServiceException {
+    return resolveLibraryFile(null, null, libraryFile, false, null);
   }
 
   private IClasspathEntry resolveLibraryFile(IJavaProject javaProject, final IPath containerPath,

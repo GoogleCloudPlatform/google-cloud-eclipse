@@ -139,8 +139,7 @@ public class LibraryClasspathContainerSerializer {
       throws CoreException {
     IPath containerStateFile = stateLocationProvider.getContainerStateFile(javaProject, containerPath, create);
     if (containerStateFile != null && containerStateFile.toFile().exists()) {
-      File file = containerStateFile.toFile();
-      return file;
+      return containerStateFile.toFile();
     }
     return null;
   }
