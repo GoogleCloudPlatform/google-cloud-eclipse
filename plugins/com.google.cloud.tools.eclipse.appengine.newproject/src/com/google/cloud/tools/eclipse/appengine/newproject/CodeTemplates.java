@@ -99,12 +99,10 @@ public class CodeTemplates {
     String packageValue = config.getPackageName().isEmpty() ? "" : config.getPackageName() + ".";
     packageMap.put("package", packageValue);
     createChildFile("web.xml", AppEngineTemplateUtility.WEB_XML_TEMPLATE, webinf,
-        subMonitor.newChild(5),
-        packageMap);
+        subMonitor.newChild(5), packageMap);
 
     createChildFile("index.html", AppEngineTemplateUtility.INDEX_HTML_TEMPLATE, webapp,
-        subMonitor.newChild(5),
-        Collections.<String, String>emptyMap());
+        subMonitor.newChild(5), Collections.<String, String>emptyMap());
 
     copyChildFile("favicon.ico", webapp, subMonitor.newChild(5));
 

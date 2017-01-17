@@ -68,12 +68,11 @@ public class AppEngineTemplateUtility {
     Preconditions.checkNotNull(outputFileLocation, "output file is null");
     Preconditions.checkNotNull(sourceName, "source file name is null");
 
-    try (InputStream inputStream =
-        AppEngineTemplateUtility.class.getResourceAsStream("/templates/appengine/" + sourceName)) {
-      File outputFile = new File(outputFileLocation);
-      FileOutputStream outputStream = new FileOutputStream(outputFile);
+    try (
+        InputStream inputStream = AppEngineTemplateUtility.class
+            .getResourceAsStream("/templates/appengine/" + sourceName);
+        FileOutputStream outputStream = new FileOutputStream(new File(outputFileLocation))) {
       ByteStreams.copy(inputStream, outputStream);
-      outputStream.close();
     } catch (IOException ex) {
       throw new CoreException(StatusUtil.error(AppEngineTemplateUtility.class, ex.getMessage()));
     }
