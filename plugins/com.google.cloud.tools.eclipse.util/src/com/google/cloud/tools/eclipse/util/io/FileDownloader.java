@@ -73,9 +73,13 @@ public class FileDownloader {
     String lastSegment = new Path(url.getPath()).lastSegment();
     Preconditions.checkNotNull(lastSegment, "last segment is null");
     Preconditions.checkArgument(!lastSegment.isEmpty(), "last segment is empty string");
-    ensureDownloadFolderExists();
 
     File downloadedFile = downloadFolderPath.append(lastSegment).toFile();
+    if (downloadedFile.exists()) {
+      return new Path(downloadedFile.getAbsolutePath());
+    }
+
+    ensureDownloadFolderExists();
     URLConnection connection = url.openConnection();
     connection.setConnectTimeout(DEFAULT_CONNECT_TIMEOUT_MS);
     connection.setReadTimeout(DEFAULT_READ_TIMEOUT_MS);

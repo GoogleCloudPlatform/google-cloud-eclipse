@@ -18,33 +18,17 @@ package com.google.cloud.tools.eclipse.appengine.libraries.repository;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
+import org.apache.maven.artifact.Artifact;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaProject;
 
 /**
  * Service interface for obtaining local paths for artifacts described by {@link MavenCoordinates}
  */
 public interface ILibraryRepositoryService {
 
-  /**
-   * Creates a classpath entry with the kind {@link IClasspathEntry#CPE_LIBRARY} that refers to the artifact defined
-   * by the <code>libraryFile</code> parameter.
-   *
-   * @return a classpath entry with reference to the artifact file resolved by this service and javadoc and source
-   * attachment information if available
-   * @throws LibraryRepositoryServiceException if the classpath entry cannot be created, e.g. cannot be resolved based
-   * on the Maven coordinates or because of a network problem
-   */
-  IClasspathEntry getLibraryClasspathEntry(IJavaProject javaProject, LibraryFile libraryFile,
-                                           IProgressMonitor monitor) throws LibraryRepositoryServiceException;
+  Artifact resolveArtifact(LibraryFile libraryFile, IProgressMonitor monitor) throws CoreException;
 
-  /**
-   * Returns a new {@link IClasspathEntry} instance with the kind {@link IClasspathEntry#CPE_LIBRARY} which has the
-   * same properties as the input, except for the path which is resolved afresh.
-   *
-   * @throws LibraryRepositoryServiceException if the artifact resolution fails.
-   */
-  IClasspathEntry rebuildClasspathEntry(IJavaProject javaProject, IClasspathEntry classpathEntry,
-                                        IProgressMonitor monitor) throws LibraryRepositoryServiceException;
+  IPath resolveSourceArtifact(LibraryFile libraryFile, String versionHint, IProgressMonitor monitor) throws CoreException;
 }

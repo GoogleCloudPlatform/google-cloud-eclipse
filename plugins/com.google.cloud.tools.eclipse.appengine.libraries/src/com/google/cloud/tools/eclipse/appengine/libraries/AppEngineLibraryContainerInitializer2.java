@@ -22,16 +22,12 @@ import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryCla
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
-import java.io.IOException;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
-import org.eclipse.jdt.core.IClasspathContainer;
-import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.osgi.util.NLS;
 
 /**
@@ -40,16 +36,15 @@ import org.eclipse.osgi.util.NLS;
  * The container path is expected to be in the form of
  * &lt;value of {@link Library#CONTAINER_PATH_PREFIX}&gt;/&lt;library ID&gt;
  */
-public class AppEngineLibraryContainerInitializer extends ClasspathContainerInitializer {
+public class AppEngineLibraryContainerInitializer2 extends ClasspathContainerInitializer {
 
   private String containerPath = Library.CONTAINER_PATH_PREFIX;
-  private LibraryClasspathContainerSerializer serializer = new LibraryClasspathContainerSerializer();
 
-  public AppEngineLibraryContainerInitializer() {
+  public AppEngineLibraryContainerInitializer2() {
   }
 
   @VisibleForTesting
-  AppEngineLibraryContainerInitializer(IConfigurationElement[] configurationElements,
+  AppEngineLibraryContainerInitializer2(IConfigurationElement[] configurationElements,
                                        LibraryFactory libraryFactory,
                                        String containerPath,
                                        LibraryClasspathContainerSerializer serializer) {
@@ -57,7 +52,7 @@ public class AppEngineLibraryContainerInitializer extends ClasspathContainerInit
   }
 
   @VisibleForTesting
-  AppEngineLibraryContainerInitializer(IConfigurationElement[] configurationElements,
+  AppEngineLibraryContainerInitializer2(IConfigurationElement[] configurationElements,
                                        LibraryFactory libraryFactory,
                                        String containerPath,
                                        LibraryClasspathContainerSerializer serializer,
@@ -70,37 +65,14 @@ public class AppEngineLibraryContainerInitializer extends ClasspathContainerInit
     if (containerPath.segmentCount() == 2) {
       if (!containerPath.segment(0).equals(this.containerPath)) {
         throw new CoreException(StatusUtil.error(this,
-            NLS.bind(Messages.ContainerPathInvalidFirstSegment,
-                this.containerPath,
-                containerPath.segment(0))));
+                                                 NLS.bind(Messages.ContainerPathInvalidFirstSegment,
+                                                          this.containerPath,
+                                                          containerPath.segment(0))));
       }
-      try {
-        LibraryClasspathContainer container = serializer.loadContainer(project, containerPath);
-        if (container != null && jarPathsAreValid(container)) {
-          JavaCore.setClasspathContainer(containerPath, new IJavaProject[] {project},
-              new IClasspathContainer[] {container}, null);
-        } else {
-          new AppEngineLibraryContainerResolver(project).resolveContainer(containerPath, new NullProgressMonitor());
-        }
-      } catch (IOException ex) {
-        throw new CoreException(StatusUtil.error(this, Messages.LoadContainerFailed, ex));
-      }
+      new AppEngineLibraryContainerResolver(project).resolveContainer(containerPath, new NullProgressMonitor());
     } else {
       throw new CoreException(StatusUtil.error(this, NLS.bind(Messages.ContainerPathNotTwoSegments,
-          containerPath.toString())));
+                                                              containerPath.toString())));
     }
-  }
-
-  private boolean jarPathsAreValid(LibraryClasspathContainer container) {
-    IClasspathEntry[] classpathEntries = container.getClasspathEntries();
-    for (int i = 0; i < classpathEntries.length; i++) {
-      IClasspathEntry classpathEntry = classpathEntries[i];
-      if (!classpathEntry.getPath().toFile().exists()
-          || (classpathEntry.getSourceAttachmentPath() != null
-          && !classpathEntry.getSourceAttachmentPath().toFile().exists())) {
-        return false;
-      }
-    }
-    return true;
   }
 }

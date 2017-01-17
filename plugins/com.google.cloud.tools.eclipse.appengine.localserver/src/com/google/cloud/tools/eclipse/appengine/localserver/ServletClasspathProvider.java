@@ -16,26 +16,14 @@
 
 package com.google.cloud.tools.eclipse.appengine.localserver;
 
-import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
-import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFactory;
-import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFactoryException;
-import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
+import com.google.cloud.tools.eclipse.appengine.libraries.AppEngineLibraryContainerResolver;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.LibraryRepositoryServiceException;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.inject.Inject;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IExtensionRegistry;
-import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jst.server.core.RuntimeClasspathProviderDelegate;
 import org.eclipse.wst.server.core.IRuntime;
 
@@ -47,22 +35,7 @@ import org.eclipse.wst.server.core.IRuntime;
  */
 public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
 
-  private static final Logger logger = Logger.getLogger(ServletClasspathProvider.class.getName());
-
-  private Map<String, Library> libraries;
-
-  @Inject
-  private ILibraryRepositoryService service;
-  @Inject
-  private IExtensionRegistry extensionRegistry;
-
   public ServletClasspathProvider() {
-  }
-
-  @VisibleForTesting
-  ServletClasspathProvider(Map<String, Library> libraries, ILibraryRepositoryService repositoryService) {
-    this.libraries = libraries;
-    service = repositoryService;
   }
 
   @Override
@@ -90,43 +63,15 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
   // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1218
   private IClasspathEntry[] doResolveClasspathContainer(IProject project, IRuntime runtime) {
     try {
-      initializeLibraries(new LibraryFactory());
-
-      // servlet api is assumed to be a single file
-      List<LibraryFile> servletApiLibraryFiles = libraries.get("servlet-api").getLibraryFiles();
-      Preconditions.checkState(servletApiLibraryFiles.size() == 1);
-      LibraryFile servletApi = servletApiLibraryFiles.get(0);
-      IClasspathEntry servletApiEntry = service.getLibraryClasspathEntry(null, servletApi,
-                                                                         new NullProgressMonitor());
-
-      // jsp api is assumed to be a single file
-      List<LibraryFile> jspApiLibraryFiles = libraries.get("jsp-api").getLibraryFiles();
-      Preconditions.checkState(jspApiLibraryFiles.size() == 1);
-      LibraryFile jspApi = jspApiLibraryFiles.get(0);
-      IClasspathEntry jspApiEntry = service.getLibraryClasspathEntry(null, jspApi,
-                                                                     new NullProgressMonitor());
-
-      return new IClasspathEntry[] { servletApiEntry, jspApiEntry };
-    } catch (LibraryRepositoryServiceException ex) {
+      IClasspathEntry[] servletApiEntries = new AppEngineLibraryContainerResolver(JavaCore.create(project)).resolveLibraryAttachSourcesSync("servlet-api");
+      
+      IClasspathEntry[] jspApiEntries = new AppEngineLibraryContainerResolver(JavaCore.create(project)).resolveLibraryAttachSourcesSync("jsp-api");
+      IClasspathEntry[] allEntries = new IClasspathEntry[servletApiEntries.length + jspApiEntries.length];
+      System.arraycopy(servletApiEntries, 0, allEntries, 0, servletApiEntries.length);
+      System.arraycopy(jspApiEntries, 0, allEntries, servletApiEntries.length, jspApiEntries.length);
+      return allEntries;
+    } catch (LibraryRepositoryServiceException | CoreException ex) {
       return null;
-    }
-  }
-
-  // TODO parse library definition in ILibraryConfigService (or similar) started when the plugin/bundle starts
-  // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/856
-  private void initializeLibraries(LibraryFactory libraryFactory) {
-    if (libraries == null) {
-      IConfigurationElement[] configurationElements =
-          extensionRegistry.getConfigurationElementsFor("com.google.cloud.tools.eclipse.appengine.libraries");
-      libraries = new HashMap<>(configurationElements.length);
-      for (IConfigurationElement configurationElement : configurationElements) {
-        try {
-          Library library = libraryFactory.create(configurationElement);
-          libraries.put(library.getId(), library);
-        } catch (LibraryFactoryException exception) {
-          logger.log(Level.SEVERE, "Failed to initialize libraries", exception); //$NON-NLS-1$
-        }
-      }
     }
   }
 }

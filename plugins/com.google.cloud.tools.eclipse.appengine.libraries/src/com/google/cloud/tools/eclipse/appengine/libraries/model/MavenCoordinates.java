@@ -62,6 +62,15 @@ public class MavenCoordinates {
     classifier = artifact.getClassifier();
   }
 
+  public MavenCoordinates(MavenCoordinates mavenCoordinates) {
+    repository = mavenCoordinates.repository;
+    groupId = mavenCoordinates.groupId;
+    artifactId = mavenCoordinates.artifactId;
+    version = mavenCoordinates.version;
+    type = mavenCoordinates.type;
+    classifier = mavenCoordinates.classifier;
+  }
+
   /**
    * @return the Maven version of the artifact, defaults to special value {@link MavenCoordinates#LATEST_VERSION}, never
    * <code>null</code>

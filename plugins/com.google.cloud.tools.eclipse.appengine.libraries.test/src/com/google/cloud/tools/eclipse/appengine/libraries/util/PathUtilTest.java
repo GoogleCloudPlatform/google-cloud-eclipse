@@ -19,7 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.libraries.util;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
-import org.apache.maven.artifact.Artifact;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
 import org.eclipse.core.runtime.IPath;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,14 +32,20 @@ public class PathUtilTest {
   private static final String EXPECTED_DOWNLOAD_FOLDER =
       ".metadata/.plugins/com.google.cloud.tools.eclipse.appengine.libraries/downloads/groupId/artifactId/1.0.0";
 
-  @Mock private Artifact artifact;
+  @Mock private MavenCoordinates artifact;
 
   @Test
-  public void test() {
+  public void testBundleStateBasedMavenFolder_withSpecificVersion() {
     when(artifact.getGroupId()).thenReturn("groupId");
     when(artifact.getArtifactId()).thenReturn("artifactId");
     when(artifact.getVersion()).thenReturn("1.0.0");
     IPath folder = PathUtil.bundleStateBasedMavenFolder(artifact);
     assertTrue(folder.toString().endsWith(EXPECTED_DOWNLOAD_FOLDER));
+  }
+  
+  @Test(expected = IllegalArgumentException.class)
+  public void testBundleStateBasedMavenFolder_withLatestVersion() {
+    when(artifact.getVersion()).thenReturn("LATEST");
+    PathUtil.bundleStateBasedMavenFolder(artifact);
   }
 }

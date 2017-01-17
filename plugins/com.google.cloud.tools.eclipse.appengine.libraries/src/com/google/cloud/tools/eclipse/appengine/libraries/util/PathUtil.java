@@ -16,9 +16,10 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.util;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
+import com.google.common.base.Preconditions;
 import java.io.File;
-import org.apache.maven.artifact.Artifact;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
@@ -41,13 +42,14 @@ public class PathUtil {
    * 
    * @return the location of the download folder, may not exist
    */
-  public static IPath bundleStateBasedMavenFolder(Artifact artifact) {
+  public static IPath bundleStateBasedMavenFolder(MavenCoordinates mavenCoordinates) {
+    Preconditions.checkArgument(!mavenCoordinates.getVersion().equals(MavenCoordinates.LATEST_VERSION));
     File downloadedSources =
         Platform.getStateLocation(FrameworkUtil.getBundle(ILibraryRepositoryService.class))
         .append("downloads")
-        .append(artifact.getGroupId())
-        .append(artifact.getArtifactId())
-        .append(artifact.getVersion())
+        .append(mavenCoordinates.getGroupId())
+        .append(mavenCoordinates.getArtifactId())
+        .append(mavenCoordinates.getVersion())
         .toFile();
     return new Path(downloadedSources.getAbsolutePath());
   }
