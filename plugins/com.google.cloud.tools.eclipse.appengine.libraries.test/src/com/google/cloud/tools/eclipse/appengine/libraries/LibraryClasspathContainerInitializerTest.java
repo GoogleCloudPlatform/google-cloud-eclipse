@@ -25,7 +25,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.io.File;
@@ -42,10 +41,24 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
 
+/**
+ * This test relies on the {@link TestAppEngineLibraryContainerInitializer} defined in the
+ * fragment.xml for <code>TEST_CONTAINER_PATH</code>. When the test is launched, the Platform will
+ * try to initialize the container defined for the test project (field <code>testProject</code>),
+ * but due to the empty implementation of
+ * {@link TestAppEngineLibraryContainerInitializer#initialize(org.eclipse.core.runtime.IPath, org.eclipse.jdt.core.IJavaProject)}
+ * the container will remain unresolved.
+ * Then the {@link LibraryClasspathContainerInitializer} instance created in the test methods will
+ * initialize the container and then it will be verified.
+ * <p>
+ * This approach is required by the fact that the production
+ * {@link LibraryClasspathContainerInitializer} is defined in the host project's plugin.xml and it
+ * is not possible to remove/override it. Thus if we used the same container path prefix as in
+ * production, the initializer defined in the plugin.xml would be called on the test containers
+ * interfering with the test code.
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class LibraryClasspathContainerInitializerTest {
 
@@ -188,14 +201,5 @@ public class LibraryClasspathContainerInitializerTest {
     assertThat(resolvedClasspath[1].getPath().toString(), is(artifactFile.getAbsolutePath()));
     assertThat(resolvedClasspath[1].getSourceAttachmentPath().toString(),
                is(sourceArtifactFile.getAbsolutePath()));
-  }
-
-  private Answer<IClasspathEntry> fakeClasspathEntry() {
-    return new Answer<IClasspathEntry>() {
-      @Override
-      public IClasspathEntry answer(InvocationOnMock invocation) throws Throwable {
-        return invocation.getArgumentAt(1, IClasspathEntry.class);
-      }
-    };
   }
 }
