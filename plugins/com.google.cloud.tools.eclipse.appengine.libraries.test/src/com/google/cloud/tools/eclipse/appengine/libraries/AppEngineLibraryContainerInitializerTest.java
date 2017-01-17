@@ -71,7 +71,7 @@ public class AppEngineLibraryContainerInitializerTest {
   @Mock private LibraryContainerStateLocationProvider containerStateProvider;
   @Mock private ArtifactBaseLocationProvider binaryBaseLocationProvider;
   @Mock private ArtifactBaseLocationProvider sourceBaseLocationProvider;
-  @Mock private ILibraryRepositoryService repositoryService;
+  @Mock private ILibraryClasspathContainerResolverService resolverService;
 
   private LibraryClasspathContainerSerializer serializer;
 
@@ -102,11 +102,7 @@ public class AppEngineLibraryContainerInitializerTest {
   @Test
   public void testInitialize_resolvesContainerToJar() throws CoreException {
     LibraryClasspathContainerInitializer containerInitializer =
-        new LibraryClasspathContainerInitializer(new IConfigurationElement[]{ configurationElement },
-                                                 libraryFactory,
-                                                 TEST_CONTAINER_PATH,
-                                                 serializer,
-                                                 repositoryService);
+        new LibraryClasspathContainerInitializer(serializer, resolverService);
     containerInitializer.initialize(new Path(TEST_LIBRARY_PATH), testProject.getJavaProject());
 
     IClasspathEntry[] resolvedClasspath = testProject.getJavaProject().getResolvedClasspath(false);
@@ -119,20 +115,14 @@ public class AppEngineLibraryContainerInitializerTest {
   @Test(expected = CoreException.class)
   public void testInitialize_containerPathConsistsOfOneSegment() throws Exception {
     LibraryClasspathContainerInitializer containerInitializer =
-        new LibraryClasspathContainerInitializer(new IConfigurationElement[]{ configurationElement },
-                                                 libraryFactory,
-                                                 TEST_CONTAINER_PATH,
-                                                 serializer);
+        new LibraryClasspathContainerInitializer(serializer, resolverService);
     containerInitializer.initialize(new Path("single.segment.id"), testProject.getJavaProject());
   }
 
   @Test(expected = CoreException.class)
   public void testInitialize_containerPathConsistsOfThreeSegments() throws Exception {
     LibraryClasspathContainerInitializer containerInitializer =
-        new LibraryClasspathContainerInitializer(new IConfigurationElement[]{ configurationElement },
-                                                 libraryFactory,
-                                                 TEST_CONTAINER_PATH,
-                                                 serializer);
+        new LibraryClasspathContainerInitializer(serializer, resolverService);
     containerInitializer.initialize(new Path("first.segment/second.segment/third.segment"),
                                     testProject.getJavaProject());
   }
@@ -140,21 +130,14 @@ public class AppEngineLibraryContainerInitializerTest {
   @Test(expected = CoreException.class)
   public void testInitialize_containerPathHasWrongFirstSegment() throws Exception {
     LibraryClasspathContainerInitializer containerInitializer =
-        new LibraryClasspathContainerInitializer(new IConfigurationElement[]{ configurationElement },
-                                                 libraryFactory,
-                                                 TEST_CONTAINER_PATH,
-                                                 serializer);
+        new LibraryClasspathContainerInitializer(serializer, resolverService);
     containerInitializer.initialize(new Path("first.segment/second.segment"), testProject.getJavaProject());
   }
 
   @Test
   public void testInitialize_containerPathHasWrongLibraryId() throws Exception {
     LibraryClasspathContainerInitializer containerInitializer =
-        new LibraryClasspathContainerInitializer(new IConfigurationElement[]{ configurationElement },
-                                                 libraryFactory,
-                                                 TEST_CONTAINER_PATH,
-                                                 serializer,
-                                                 repositoryService);
+        new LibraryClasspathContainerInitializer(serializer, resolverService);
     containerInitializer.initialize(new Path(TEST_CONTAINER_PATH + "/second.segment"), testProject.getJavaProject());
     IClasspathEntry[] resolvedClasspath = testProject.getJavaProject().getResolvedClasspath(false);
     assertThat(resolvedClasspath.length, is(1));
@@ -171,12 +154,7 @@ public class AppEngineLibraryContainerInitializerTest {
       .when(libraryFactory).create(any(IConfigurationElement.class));
 
     LibraryClasspathContainerInitializer containerInitializer =
-        new LibraryClasspathContainerInitializer(new IConfigurationElement[]{ configurationElement,
-                                                                              configurationElement },
-                                                 libraryFactory,
-                                                 TEST_CONTAINER_PATH,
-                                                 serializer,
-                                                 repositoryService);
+        new LibraryClasspathContainerInitializer(serializer, resolverService);
     containerInitializer.initialize(new Path(TEST_LIBRARY_PATH), testProject.getJavaProject());
 
     IClasspathEntry[] resolvedClasspath = testProject.getJavaProject().getResolvedClasspath(false);
@@ -192,10 +170,7 @@ public class AppEngineLibraryContainerInitializerTest {
     doThrow(new IOException("test exception"))
       .when(mockSerializer).loadContainer(any(IJavaProject.class), any(IPath.class));
     LibraryClasspathContainerInitializer containerInitializer =
-        new LibraryClasspathContainerInitializer(new IConfigurationElement[]{ configurationElement },
-                                                 libraryFactory,
-                                                 TEST_CONTAINER_PATH,
-                                                 mockSerializer);
+        new LibraryClasspathContainerInitializer(mockSerializer, resolverService);
     containerInitializer.initialize(new Path(TEST_LIBRARY_PATH), testProject.getJavaProject());
   }
 
