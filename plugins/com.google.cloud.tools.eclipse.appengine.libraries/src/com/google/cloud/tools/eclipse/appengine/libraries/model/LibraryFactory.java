@@ -26,8 +26,10 @@ import java.util.Locale;
 import java.util.logging.Logger;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.InvalidRegistryObjectException;
+import org.eclipse.e4.core.di.annotations.Creatable;
 import org.eclipse.osgi.util.NLS;
 
+@Creatable
 public class LibraryFactory {
 
   private static final Logger logger = Logger.getLogger(LibraryFactory.class.getName());

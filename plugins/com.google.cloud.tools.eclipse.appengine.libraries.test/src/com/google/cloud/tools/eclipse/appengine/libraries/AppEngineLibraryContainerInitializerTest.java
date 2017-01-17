@@ -94,15 +94,15 @@ public class AppEngineLibraryContainerInitializerTest {
    * defined for the test project (field <code>testProject</code>), but due to the empty implementation of
    * {@link TestAppEngineLibraryContainerInitializer#initialize(org.eclipse.core.runtime.IPath, org.eclipse.jdt.core.IJavaProject)}
    * the container will remain unresolved.
-   * Then the {@link AppEngineLibraryContainerInitializer} instance created in this method will initialize the container
+   * Then the {@link LibraryClasspathContainerInitializer} instance created in this method will initialize the container
    * and the test will verify it.
-   * This approach is required by the fact that the production {@link AppEngineLibraryContainerInitializer} is defined
+   * This approach is required by the fact that the production {@link LibraryClasspathContainerInitializer} is defined
    * in the host project's plugin.xml and it is not possible to remove/override it.
    */
   @Test
   public void testInitialize_resolvesContainerToJar() throws CoreException {
-    AppEngineLibraryContainerInitializer containerInitializer =
-        new AppEngineLibraryContainerInitializer(new IConfigurationElement[]{ configurationElement },
+    LibraryClasspathContainerInitializer containerInitializer =
+        new LibraryClasspathContainerInitializer(new IConfigurationElement[]{ configurationElement },
                                                  libraryFactory,
                                                  TEST_CONTAINER_PATH,
                                                  serializer,
@@ -118,8 +118,8 @@ public class AppEngineLibraryContainerInitializerTest {
 
   @Test(expected = CoreException.class)
   public void testInitialize_containerPathConsistsOfOneSegment() throws Exception {
-    AppEngineLibraryContainerInitializer containerInitializer =
-        new AppEngineLibraryContainerInitializer(new IConfigurationElement[]{ configurationElement },
+    LibraryClasspathContainerInitializer containerInitializer =
+        new LibraryClasspathContainerInitializer(new IConfigurationElement[]{ configurationElement },
                                                  libraryFactory,
                                                  TEST_CONTAINER_PATH,
                                                  serializer);
@@ -128,8 +128,8 @@ public class AppEngineLibraryContainerInitializerTest {
 
   @Test(expected = CoreException.class)
   public void testInitialize_containerPathConsistsOfThreeSegments() throws Exception {
-    AppEngineLibraryContainerInitializer containerInitializer =
-        new AppEngineLibraryContainerInitializer(new IConfigurationElement[]{ configurationElement },
+    LibraryClasspathContainerInitializer containerInitializer =
+        new LibraryClasspathContainerInitializer(new IConfigurationElement[]{ configurationElement },
                                                  libraryFactory,
                                                  TEST_CONTAINER_PATH,
                                                  serializer);
@@ -139,8 +139,8 @@ public class AppEngineLibraryContainerInitializerTest {
 
   @Test(expected = CoreException.class)
   public void testInitialize_containerPathHasWrongFirstSegment() throws Exception {
-    AppEngineLibraryContainerInitializer containerInitializer =
-        new AppEngineLibraryContainerInitializer(new IConfigurationElement[]{ configurationElement },
+    LibraryClasspathContainerInitializer containerInitializer =
+        new LibraryClasspathContainerInitializer(new IConfigurationElement[]{ configurationElement },
                                                  libraryFactory,
                                                  TEST_CONTAINER_PATH,
                                                  serializer);
@@ -149,8 +149,8 @@ public class AppEngineLibraryContainerInitializerTest {
 
   @Test
   public void testInitialize_containerPathHasWrongLibraryId() throws Exception {
-    AppEngineLibraryContainerInitializer containerInitializer =
-        new AppEngineLibraryContainerInitializer(new IConfigurationElement[]{ configurationElement },
+    LibraryClasspathContainerInitializer containerInitializer =
+        new LibraryClasspathContainerInitializer(new IConfigurationElement[]{ configurationElement },
                                                  libraryFactory,
                                                  TEST_CONTAINER_PATH,
                                                  serializer,
@@ -170,8 +170,8 @@ public class AppEngineLibraryContainerInitializerTest {
       .doReturn(library)
       .when(libraryFactory).create(any(IConfigurationElement.class));
 
-    AppEngineLibraryContainerInitializer containerInitializer =
-        new AppEngineLibraryContainerInitializer(new IConfigurationElement[]{ configurationElement,
+    LibraryClasspathContainerInitializer containerInitializer =
+        new LibraryClasspathContainerInitializer(new IConfigurationElement[]{ configurationElement,
                                                                               configurationElement },
                                                  libraryFactory,
                                                  TEST_CONTAINER_PATH,
@@ -191,8 +191,8 @@ public class AppEngineLibraryContainerInitializerTest {
     LibraryClasspathContainerSerializer mockSerializer = mock(LibraryClasspathContainerSerializer.class);
     doThrow(new IOException("test exception"))
       .when(mockSerializer).loadContainer(any(IJavaProject.class), any(IPath.class));
-    AppEngineLibraryContainerInitializer containerInitializer =
-        new AppEngineLibraryContainerInitializer(new IConfigurationElement[]{ configurationElement },
+    LibraryClasspathContainerInitializer containerInitializer =
+        new LibraryClasspathContainerInitializer(new IConfigurationElement[]{ configurationElement },
                                                  libraryFactory,
                                                  TEST_CONTAINER_PATH,
                                                  mockSerializer);

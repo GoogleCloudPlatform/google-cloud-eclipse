@@ -27,9 +27,7 @@ import java.util.List;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.osgi.util.NLS;
 
 public class MavenHelper {
@@ -46,19 +44,6 @@ public class MavenHelper {
                                       repository);
   }
 
-  public IPath getMavenSourceJarLocation(Artifact artifact,
-                                         IProgressMonitor monitor) {
-    try {
-      MavenCoordinates sourceMavenCoordinates = new MavenCoordinates(artifact);
-      sourceMavenCoordinates.setClassifier("sources");
-      Artifact sourceArtifact = resolveArtifact(sourceMavenCoordinates, monitor);
-      return new Path(sourceArtifact.getFile().getAbsolutePath());
-    } catch (CoreException exception) {
-      // source file failed to download, this is not an error
-      return null;
-    }
-  }
-  
   private List<ArtifactRepository> getRepository(MavenCoordinates mavenCoordinates)
                                                                               throws CoreException {
     if (MavenCoordinates.MAVEN_CENTRAL_REPO.equals(mavenCoordinates.getRepository())) {

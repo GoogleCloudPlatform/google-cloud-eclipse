@@ -20,8 +20,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.DefaultArtifact;
 import org.junit.Test;
 
 public class MavenCoordinatesTest {
@@ -59,19 +57,6 @@ public class MavenCoordinatesTest {
     assertThat(mavenCoordinates.getRepository(), is(MavenCoordinates.MAVEN_CENTRAL_REPO));
   }
 
-  @Test
-  public void testConstructorFromArtifact() {
-    Artifact artifact = new DefaultArtifact("groupId", "artifactId", "1.0.0", "compile",
-                                            "jar", "sources", null);
-    MavenCoordinates mavenCoordinates = new MavenCoordinates(artifact);
-    assertThat(mavenCoordinates.getGroupId(), is("groupId"));
-    assertThat(mavenCoordinates.getArtifactId(), is("artifactId"));
-    assertThat(mavenCoordinates.getType(), is(MavenCoordinates.JAR_TYPE));
-    assertThat(mavenCoordinates.getVersion(), is("1.0.0"));
-    assertThat(mavenCoordinates.getRepository(), is(MavenCoordinates.MAVEN_CENTRAL_REPO));
-    assertThat(mavenCoordinates.getClassifier(), is("sources"));
-  }
-  
   @Test(expected = NullPointerException.class)
   public void testSetRepositoryNull() {
     new MavenCoordinates("a", "b").setRepository(null);

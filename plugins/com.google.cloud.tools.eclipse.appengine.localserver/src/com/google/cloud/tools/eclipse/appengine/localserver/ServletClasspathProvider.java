@@ -16,13 +16,17 @@
 
 package com.google.cloud.tools.eclipse.appengine.localserver;
 
-import com.google.cloud.tools.eclipse.appengine.libraries.AppEngineLibraryContainerResolver;
+import com.google.cloud.tools.eclipse.appengine.libraries.ILibraryClasspathContainerResolverService;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.LibraryRepositoryServiceException;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.inject.Inject;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jst.server.core.RuntimeClasspathProviderDelegate;
 import org.eclipse.wst.server.core.IRuntime;
@@ -34,6 +38,11 @@ import org.eclipse.wst.server.core.IRuntime;
  * The jars are resolved using {@link ILibraryRepositoryService}.
  */
 public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
+
+  private static final Logger logger = Logger.getLogger(ServletClasspathProvider.class.getName());
+  
+  @Inject
+  private ILibraryClasspathContainerResolverService resolverService;
 
   public ServletClasspathProvider() {
   }
@@ -47,31 +56,40 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
     }
   }
 
-  // TODO this method is called often as the result of user initiated UI actions, e.g. when the user clicks through
-  // the project in the Project Explorer view to drill down into the libraries attached to the project. This method
-  // resolves the servlet and jsp jars each time (instead of persisting the resolved version the first time and use that
-  // later). So we must ensure that if the supported versions change in the future (e.g. a new GAE runtime starts
-  // supporting Servlet API 3.1), then resolved versions of these jars remain the same for a project as long as it is
-  // associated with the originally selected runtime (i.e. the one that supports Servlet 2.5)
+  // TODO this method is called often as the result of user initiated UI actions, e.g. when the user
+  // clicks through the project in the Project Explorer view to drill down into the libraries
+  // attached to the project. This method resolves the servlet and jsp jars each time (instead of
+  // persisting the resolved version the first time and use that later). So we must ensure that if
+  // the supported versions change in the future (e.g. a new GAE runtime starts
+  // supporting Servlet API 3.1), then resolved versions of these jars remain the same for a project
+  // as long as it is associated with the originally selected runtime (i.e. the one that supports
+  // Servlet 2.5)
   // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/953
   @Override
   public IClasspathEntry[] resolveClasspathContainer(IRuntime runtime) {
     return doResolveClasspathContainer(null, runtime);
   }
 
-  // TODO project is unused, source resolution will always happen in sync
-  // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1218
   private IClasspathEntry[] doResolveClasspathContainer(IProject project, IRuntime runtime) {
     try {
-      IClasspathEntry[] servletApiEntries = new AppEngineLibraryContainerResolver(JavaCore.create(project)).resolveLibraryAttachSourcesSync("servlet-api");
-      
-      IClasspathEntry[] jspApiEntries = new AppEngineLibraryContainerResolver(JavaCore.create(project)).resolveLibraryAttachSourcesSync("jsp-api");
-      IClasspathEntry[] allEntries = new IClasspathEntry[servletApiEntries.length + jspApiEntries.length];
-      System.arraycopy(servletApiEntries, 0, allEntries, 0, servletApiEntries.length);
-      System.arraycopy(jspApiEntries, 0, allEntries, servletApiEntries.length, jspApiEntries.length);
-      return allEntries;
+      if (project.hasNature(JavaCore.NATURE_ID)) {
+        IJavaProject javaProject = JavaCore.create(project);
+        IClasspathEntry[] servletApiEntries =
+            resolverService.resolveLibraryAttachSourcesSync(javaProject, "servlet-api");
+        IClasspathEntry[] jspApiEntries =
+            resolverService.resolveLibraryAttachSourcesSync(javaProject, "jsp-api");
+        
+        IClasspathEntry[] allEntries =
+            new IClasspathEntry[servletApiEntries.length + jspApiEntries.length];
+        System.arraycopy(servletApiEntries, 0, allEntries, 0, servletApiEntries.length);
+        System.arraycopy(jspApiEntries, 0, 
+                         allEntries, servletApiEntries.length,
+                         jspApiEntries.length);
+        return allEntries;
+      }
     } catch (LibraryRepositoryServiceException | CoreException ex) {
-      return null;
+      logger.log(Level.WARNING, "Failed to initialize libraries", ex);
     }
+    return null;
   }
 }

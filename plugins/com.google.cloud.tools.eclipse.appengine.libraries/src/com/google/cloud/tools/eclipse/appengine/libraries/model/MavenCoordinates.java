@@ -52,16 +52,6 @@ public class MavenCoordinates {
     this.artifactId = artifactId;
   }
 
-  public MavenCoordinates(Artifact artifact) {
-    repository =
-        artifact.getRepository() == null ? MAVEN_CENTRAL_REPO : artifact.getRepository().getUrl();
-    groupId = artifact.getGroupId();
-    artifactId = artifact.getArtifactId();
-    version = artifact.getVersion();
-    type = artifact.getType();
-    classifier = artifact.getClassifier();
-  }
-
   public MavenCoordinates(MavenCoordinates mavenCoordinates) {
     repository = mavenCoordinates.repository;
     groupId = mavenCoordinates.groupId;

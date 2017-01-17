@@ -17,7 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
-import com.google.cloud.tools.eclipse.appengine.libraries.AppEngineLibraryContainerResolverJob;
+import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainerResolverJob;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
@@ -148,9 +148,9 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
     IEclipseContext context = EclipseContextFactory
         .getServiceContext(FrameworkUtil.getBundle(getClass()).getBundleContext());
     final IEclipseContext childContext =
-        context.createChild(AppEngineLibraryContainerResolverJob.class.getName());
+        context.createChild(LibraryClasspathContainerResolverJob.class.getName());
     childContext.set(IJavaProject.class, javaProject);
-    Job job = ContextInjectionFactory.make(AppEngineLibraryContainerResolverJob.class, childContext);
+    Job job = ContextInjectionFactory.make(LibraryClasspathContainerResolverJob.class, childContext);
     job.addJobChangeListener(new JobChangeAdapter() {
       @Override
       public void done(IJobChangeEvent event) {

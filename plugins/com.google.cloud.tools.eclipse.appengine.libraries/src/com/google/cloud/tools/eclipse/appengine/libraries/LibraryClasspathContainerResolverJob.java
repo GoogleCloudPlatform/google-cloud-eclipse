@@ -23,12 +23,14 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaProject;
 
-public class AppEngineLibraryContainerResolverJob extends Job {
+public class LibraryClasspathContainerResolverJob extends Job {
 
+  @Inject
+  private ILibraryClasspathContainerResolverService resolverService;
   private IJavaProject javaProject;
 
   @Inject
-  public AppEngineLibraryContainerResolverJob(IJavaProject javaProject) {
+  public LibraryClasspathContainerResolverJob(IJavaProject javaProject) {
     super(Messages.AppEngineLibraryContainerResolverJobName);
     Preconditions.checkNotNull(javaProject, "javaProject is null");
     this.javaProject = javaProject;
@@ -38,6 +40,6 @@ public class AppEngineLibraryContainerResolverJob extends Job {
 
   @Override
   protected IStatus run(IProgressMonitor monitor) {
-    return new AppEngineLibraryContainerResolver(javaProject).resolveAll(monitor);
+    return resolverService.resolveAll(javaProject, monitor);
   }
 }
