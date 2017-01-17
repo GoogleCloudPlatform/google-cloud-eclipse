@@ -31,7 +31,7 @@ public class MessagesTest {
   @Test
   public void testPackageEndsWithPeriod() {
     Assert.assertEquals(
-        "com.google. ends with a period", 
+        "com.google. ends with a period.", 
         Messages.getString("package.ends.with.period", "com.google."));
   }
 
