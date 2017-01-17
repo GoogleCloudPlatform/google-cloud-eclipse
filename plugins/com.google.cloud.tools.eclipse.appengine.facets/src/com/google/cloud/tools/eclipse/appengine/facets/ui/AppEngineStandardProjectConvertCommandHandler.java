@@ -20,15 +20,16 @@ import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.Messages;
 import com.google.cloud.tools.eclipse.appengine.facets.convert.AppEngineStandardProjectConvertJob;
 import com.google.cloud.tools.eclipse.ui.util.ProjectFromSelectionHelper;
+import com.google.common.annotations.VisibleForTesting;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
@@ -49,9 +50,9 @@ public class AppEngineStandardProjectConvertCommandHandler extends AbstractHandl
         throw new IllegalStateException("Convert menu enabled for App Engine projects");
       }
 
-      if (checkFacetCompatibilty(facetedProject, event)) {
-        Job convertJob = new AppEngineStandardProjectConvertJob(facetedProject);
-        convertJob.schedule();
+      Shell shell = HandlerUtil.getActiveShell(event);
+      if (checkFacetCompatibilty(facetedProject, new MessageDialogWrapper(shell))) {
+        new AppEngineStandardProjectConvertJob(facetedProject).schedule();
       }
       return null;  // Must return null per method Javadoc.
     } catch (CoreException ex) {
@@ -59,13 +60,15 @@ public class AppEngineStandardProjectConvertCommandHandler extends AbstractHandl
     }
   }
 
-  private boolean checkFacetCompatibilty(IFacetedProject facetedProject, ExecutionEvent event) {
+  @VisibleForTesting
+  boolean checkFacetCompatibilty(IFacetedProject facetedProject,
+      MessageDialogWrapper dialogWrapper) {
     if (facetedProject.hasProjectFacet(JavaFacet.FACET)) {
       if (!facetedProject.hasProjectFacet(JavaFacet.VERSION_1_7)) {
         String required = JavaFacet.VERSION_1_7.getVersionString();
         String installed = facetedProject.getInstalledVersion(JavaFacet.FACET).getVersionString();
 
-        MessageDialog.openInformation(HandlerUtil.getActiveShell(event),
+        dialogWrapper.openInformation(
             Messages.getString("java.facet.incompatible.title"),
             Messages.getString("java.facet.incompatible.message",
                                facetedProject.getProject().getName(), required, installed));
@@ -79,7 +82,7 @@ public class AppEngineStandardProjectConvertCommandHandler extends AbstractHandl
         String installed =
             facetedProject.getInstalledVersion(WebFacetUtils.WEB_FACET).getVersionString();
 
-        MessageDialog.openInformation(HandlerUtil.getActiveShell(event),
+        dialogWrapper.openInformation(
             Messages.getString("web.facet.incompatible.title"),
             Messages.getString("web.facet.incompatible.message",
                                facetedProject.getProject().getName(), required, installed));
@@ -88,5 +91,22 @@ public class AppEngineStandardProjectConvertCommandHandler extends AbstractHandl
     }
 
     return true;
+  }
+
+  /**
+   * Wraps the static method {@link MessageDialog#openInformation} for unit testing.
+   */
+  @VisibleForTesting
+  public static class MessageDialogWrapper {
+
+    private Shell shell;
+
+    public MessageDialogWrapper(Shell shell) {
+      this.shell = shell;
+    }
+
+    public void openInformation(String title, String message) {
+      MessageDialog.openInformation(shell, title, message);
+    }
   }
 }
