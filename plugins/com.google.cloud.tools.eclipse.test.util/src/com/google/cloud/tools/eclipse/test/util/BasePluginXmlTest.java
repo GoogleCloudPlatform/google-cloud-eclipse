@@ -98,23 +98,30 @@ public abstract class BasePluginXmlTest {
   }
   
   @Test
-  public final void testBuildProperties() {
+  public final void testBuildProperties() throws IOException {
     Properties properties = buildProperties.get();
     String[] binIncludes = ((String) properties.get("bin.includes")).split(",\\s*");
     List<String> binList = Arrays.asList(binIncludes);
+    
     Assert.assertTrue(binList.contains("plugin.xml"));
     Assert.assertTrue(binList.contains("plugin.properties"));
+    Assert.assertTrue(binList.contains("."));
+    Assert.assertTrue(binList.contains("META-INF/"));
     
-    testOptionalInclude(binList, "helpContexts.xml");
+    testIncludedIfPresent(binList, "helpContexts.xml");
+    testIncludedIfPresent(binList, "icons/");
+    testIncludedIfPresent(binList, "lib/");
+    testIncludedIfPresent(binList, "README.md/");
+    testIncludedIfPresent(binList, "epl-v10.html/");
+    testIncludedIfPresent(binList, "OSGI-INF/");
+    testIncludedIfPresent(binList, "fragment.xml");
   }
 
-  private void testOptionalInclude(List<String> binList, String name) {
-    try {
-      String path = EclipseProperties.getHostBundlePath() + "/" + name;
-      if (Files.exists(Paths.get(path))) {
-        Assert.assertTrue(binList.contains(name));
-      }
-    } catch (IOException ex) {
+  private void testIncludedIfPresent(List<String> binList, String name) 
+      throws IOException {
+    String path = EclipseProperties.getHostBundlePath() + "/" + name;
+    if (Files.exists(Paths.get(path))) {
+      Assert.assertTrue(binList.contains(name));
     }
   }
   
