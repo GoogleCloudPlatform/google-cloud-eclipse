@@ -273,7 +273,7 @@ public class AppEngineStandardFacet {
    * Attempts to find a main web application directory, by the following logic:
    *
    * 1. If there is no {@code WEB-INF} folder in the {@code project}, returns {@code null}.
-   * 2. Otherwise, if there is at least one {@code WEB-INF} folder that contains {@code WEB-INF},
+   * 2. Otherwise, if there is at least one {@code WEB-INF} folder that contains {@code web.xml},
    *     returns the parent directory of one of such {@code WEB-INF} folders.
    * 3. Otherwise, returns the parent directory of an arbitrary {@code WEB-INF}.
    *

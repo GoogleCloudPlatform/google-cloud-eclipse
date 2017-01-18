@@ -42,7 +42,7 @@ public class NatureUtils {
    */
   public static void removeNature(IProject project, String natureId) throws CoreException {
     if (project.hasNature(natureId)) {
-      // Remove the Nature ID from the natures in the project description
+      // Remove the nature ID from the natures in the project description
       IProjectDescription description = project.getDescription();
       List<String> natures = new ArrayList<>(Arrays.asList(description.getNatureIds()));
       natures.remove(natureId);

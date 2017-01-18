@@ -22,7 +22,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.common.project.facet.core.IDelegate;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 
-/** A dummy delegate required for defining facet install/uinstall actions in {@code plugin.xml}. */
+/** A dummy delegate required for defining facet install/uninstall actions in {@code plugin.xml}. */
 public class DummyDelegate implements IDelegate {
 
   @Override
