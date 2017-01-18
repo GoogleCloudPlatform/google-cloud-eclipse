@@ -80,7 +80,8 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
 
   private void createCustomFields(Composite container, ModifyListener pageValidator) {
     Composite composite = new Composite(container, SWT.NONE);
-    
+    GridDataFactory.fillDefaults().applyTo(composite);
+
     GridLayout layout = new GridLayout();
     layout.numColumns = 2;
     composite.setLayout(layout);
