@@ -37,7 +37,7 @@ public class NatureUtilsTest {
     assertArrayEquals(new String[]{JavaCore.NATURE_ID, FacetedProjectNature.NATURE_ID},
         project.getDescription().getNatureIds());
 
-    NatureUtils.removeNature(projectCreator.getProject(), JavaCore.NATURE_ID);
+    NatureUtils.removeNature(project, JavaCore.NATURE_ID);
     assertArrayEquals(new String[]{FacetedProjectNature.NATURE_ID},
         project.getDescription().getNatureIds());
   }
@@ -45,9 +45,9 @@ public class NatureUtilsTest {
   @Test
   public void testRemoveNature_nonExistingNature() throws CoreException {
     IProject project = projectCreator.getProject();
-    NatureUtils.removeNature(projectCreator.getProject(), JavaCore.NATURE_ID);
+    NatureUtils.removeNature(project, JavaCore.NATURE_ID);
 
-    NatureUtils.removeNature(projectCreator.getProject(), JavaCore.NATURE_ID);
+    NatureUtils.removeNature(project, JavaCore.NATURE_ID);
     assertArrayEquals(new String[]{FacetedProjectNature.NATURE_ID},
         project.getDescription().getNatureIds());
   }
