@@ -16,13 +16,11 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.standard;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.IPath;
-
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.appengine.api.deploy.DefaultDeployConfiguration;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
-import com.google.cloud.tools.eclipse.appengine.deploy.DeployErrorMessageProvider;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IPath;
 
 public class StandardDeployJobConfig {
 
@@ -32,7 +30,6 @@ public class StandardDeployJobConfig {
   private ProcessOutputLineListener stdoutLineListener;
   private ProcessOutputLineListener stderrLineListener;
   private DefaultDeployConfiguration deployConfiguration;
-  private DeployErrorMessageProvider errorMessageProvider;
 
   public IPath getWorkDirectory() {
     return workDirectory;
@@ -85,15 +82,6 @@ public class StandardDeployJobConfig {
 
   public StandardDeployJobConfig setDeployConfiguration(DefaultDeployConfiguration deployConfiguration) {
     this.deployConfiguration = deployConfiguration;
-    return this;
-  }
-
-  public DeployErrorMessageProvider getErrorMessageProvider() {
-    return errorMessageProvider;
-  }
-
-  public StandardDeployJobConfig setErrorMessageProvider(DeployErrorMessageProvider errorMessageProvider) {
-    this.errorMessageProvider = errorMessageProvider;
     return this;
   }
 }

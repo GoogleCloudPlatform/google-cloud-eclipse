@@ -23,14 +23,16 @@ import com.google.cloud.tools.appengine.cloudsdk.process.ProcessStartListener;
 import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineProjectDeployer;
 import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
 import com.google.cloud.tools.eclipse.appengine.login.CredentialHelper;
+import com.google.cloud.tools.eclipse.sdk.OutputCollectorOutputLineListener;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
+import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.resources.WorkspaceJob;
@@ -58,6 +60,7 @@ public class StandardDeployJob extends WorkspaceJob {
   private static final String STAGING_DIRECTORY_NAME = "staging";
   private static final String EXPLODED_WAR_DIRECTORY_NAME = "exploded-war";
   private static final String CREDENTIAL_FILENAME = "gcloud-credentials.json";
+  private static final String ERROR_MESSAGE_PREFIX = "ERROR:";
 
   private static final Logger logger = Logger.getLogger(StandardDeployJob.class.getName());
 
@@ -66,10 +69,14 @@ public class StandardDeployJob extends WorkspaceJob {
   private Process process;
 
   private final StandardDeployJobConfig config;
+  private OutputCollectorOutputLineListener errorCollectingLineListener;
 
   public StandardDeployJob(StandardDeployJobConfig config) {
     super(Messages.getString("deploy.standard.runnable.name")); //$NON-NLS-1$
     this.config = Preconditions.checkNotNull(config, "config is null");
+    errorCollectingLineListener =
+        new OutputCollectorOutputLineListener(config.getStderrLineListener(),
+                                              ERROR_MESSAGE_PREFIX);
   }
 
   @Override
@@ -143,15 +150,15 @@ public class StandardDeployJob extends WorkspaceJob {
    * <code>defaultMessage</code>
    */
   private String getErrorMessageOrDefault(String defaultMessage) {
-    String errorMessage = config.getErrorMessageProvider().getErrorMessage();
-    if (!Strings.isNullOrEmpty(errorMessage)) {
-      return errorMessage;
+    List<String> messages = errorCollectingLineListener.getCollectedMessages();
+    if (!messages.isEmpty()) {
+      return Joiner.on('\n').join(messages);
     } else {
       return defaultMessage;
     }
   }
 
-  private void saveCredential(Path destination, Credential credential) throws IOException {
+  private static void saveCredential(Path destination, Credential credential) throws IOException {
     String jsonCredential = new CredentialHelper().toJson(credential);
     Files.write(destination, jsonCredential.getBytes(StandardCharsets.UTF_8));
   }
@@ -159,7 +166,7 @@ public class StandardDeployJob extends WorkspaceJob {
   private CloudSdk getCloudSdk(Path credentialFile) {
     CloudSdk cloudSdk = new CloudSdk.Builder()
                           .addStdOutLineListener(config.getStdoutLineListener())
-                          .addStdErrLineListener(config.getStderrLineListener())
+                          .addStdErrLineListener(errorCollectingLineListener)
                           .appCommandCredentialFile(credentialFile.toFile())
                           .startListener(new StoreProcessObjectListener())
                           .exitListener(new RecordProcessError())

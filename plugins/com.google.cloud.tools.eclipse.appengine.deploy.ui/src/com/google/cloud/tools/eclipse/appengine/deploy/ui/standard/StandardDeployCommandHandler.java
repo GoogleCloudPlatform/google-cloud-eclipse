@@ -24,11 +24,9 @@ import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployJo
 import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployPreferences;
 import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployPreferencesConverter;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployConsole;
-import com.google.cloud.tools.eclipse.appengine.deploy.ui.ConsoleOutputBasedDeployErrorMessageProvider;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPreferencesDialog;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
 import com.google.cloud.tools.eclipse.appengine.login.IGoogleLoginService;
-import com.google.cloud.tools.eclipse.sdk.OutputCollectorOutputLineListener;
 import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListener;
 import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities;
 import com.google.cloud.tools.eclipse.ui.util.ProjectFromSelectionHelper;
@@ -68,8 +66,6 @@ import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
  * the staging and deploy operations provided by the App Engine Plugins Core Library.
  */
 public class StandardDeployCommandHandler extends AbstractHandler {
-
-  private static final String DEPLOY_ERROR_MESSAGE_PREFIX = "ERROR:";
 
   @Override
   public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -124,7 +120,7 @@ public class StandardDeployCommandHandler extends AbstractHandler {
                                               new DeployConsole.Factory());
 
     MessageConsoleStream outputStream = messageConsole.newMessageStream();
-    StandardDeployJobConfig config = getDeployJobConfig(project, credential,
+    StandardDeployJobConfig config = createDeployJobConfig(project, credential,
         workDirectory, outputStream, deployConfiguration);
 
     StandardDeployJob deploy = new StandardDeployJob(config);
@@ -156,20 +152,18 @@ public class StandardDeployCommandHandler extends AbstractHandler {
                                 nowString);
   }
 
-  private static StandardDeployJobConfig getDeployJobConfig(IProject project, Credential credential,
-      IPath workDirectory, MessageConsoleStream outputStream,
-      DefaultDeployConfiguration deployConfiguration) {
+  private static StandardDeployJobConfig createDeployJobConfig(IProject project,
+                                                               Credential credential,
+                                                               IPath workDirectory,
+                                                               MessageConsoleStream outputStream,
+                                                               DefaultDeployConfiguration deployConfiguration) {
     StandardDeployJobConfig config = new StandardDeployJobConfig();
-    OutputCollectorOutputLineListener stderrLineListener =
-        new OutputCollectorOutputLineListener(new MessageConsoleWriterOutputLineListener(outputStream),
-                                              DEPLOY_ERROR_MESSAGE_PREFIX);
     config.setProject(project)
         .setCredential(credential)
         .setWorkDirectory(workDirectory)
         .setStdoutLineListener(new MessageConsoleWriterOutputLineListener(outputStream))
-        .setStderrLineListener(stderrLineListener)
-        .setDeployConfiguration(deployConfiguration)
-        .setErrorMessageProvider(new ConsoleOutputBasedDeployErrorMessageProvider(stderrLineListener));
+        .setStderrLineListener(new MessageConsoleWriterOutputLineListener(outputStream))
+        .setDeployConfiguration(deployConfiguration);
     return config;
   }
 
