@@ -20,6 +20,8 @@ import com.google.cloud.tools.eclipse.appengine.compat.GpeMigrator;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.Messages;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -29,6 +31,9 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 
 public class AppEngineStandardProjectConvertJob extends Job {
+
+  private static final Logger logger =
+      Logger.getLogger(AppEngineStandardProjectConvertJob.class.getName());
 
   private final IFacetedProject facetedProject;
 
@@ -48,6 +53,7 @@ public class AppEngineStandardProjectConvertJob extends Job {
     } catch (CoreException ex) {
       // Failed to remove GPE fixtures; live with it.
       subMonitor.worked(20);
+      logger.log(Level.WARNING, "Error while removing GPE fixtures", ex);
     }
 
     try {
