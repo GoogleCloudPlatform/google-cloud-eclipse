@@ -110,10 +110,11 @@ public abstract class BasePluginXmlTest {
     testIncludedIfPresent(includes, "helpContexts.xml");
     testIncludedIfPresent(includes, "icons/");
     testIncludedIfPresent(includes, "lib/");
-    testIncludedIfPresent(includes, "README.md/");
-    testIncludedIfPresent(includes, "epl-v10.html/");
+    testIncludedIfPresent(includes, "README.md");
+    testIncludedIfPresent(includes, "epl-v10.html");
     testIncludedIfPresent(includes, "OSGI-INF/");
     testIncludedIfPresent(includes, "fragment.xml");
+    testIncludedIfPresent(includes, "fragment.properties");
   }
 
   private static void testIncludedIfPresent(Set<String> includes, String name) 
