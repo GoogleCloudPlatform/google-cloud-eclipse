@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.preferences.areas;
+package com.google.cloud.tools.eclipse.preferences;
 
 import com.google.cloud.tools.eclipse.test.util.BasePluginXmlTest;
 
