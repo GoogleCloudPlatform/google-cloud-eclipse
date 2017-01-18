@@ -62,6 +62,7 @@
     <module>plugins/com.google.cloud.tools.eclipse.sdk.ui.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.test.dependencies</module>
     <module>plugins/com.google.cloud.tools.eclipse.test.util</module>
+    <module>plugins/com.google.cloud.tools.eclipse.test.logback</module>
     <module>plugins/com.google.cloud.tools.eclipse.usagetracker</module>
     <module>plugins/com.google.cloud.tools.eclipse.usagetracker.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.ui.util</module>
@@ -424,6 +425,18 @@
               </artifact>
             </target>
            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>cobertura-maven-plugin</artifactId>
+            <version>2.7</version>
+            <configuration>
+              <formats>
+                <format>html</format>
+                <format>xml</format>
+              </formats>
+              <check />
+            </configuration>
           </plugin>
         </plugins>
       </build>

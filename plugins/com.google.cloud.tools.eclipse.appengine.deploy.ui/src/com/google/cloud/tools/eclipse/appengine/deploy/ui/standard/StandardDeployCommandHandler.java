@@ -127,7 +127,7 @@ public class StandardDeployCommandHandler extends AbstractHandler {
     StandardDeployJobConfig config = getDeployJobConfig(project, credential,
         workDirectory, outputStream, deployConfiguration);
 
-    StandardDeployJob deploy = new StandardDeployJob.Builder().config(config).build();
+    StandardDeployJob deploy = new StandardDeployJob(config);
     messageConsole.setJob(deploy);
     deploy.addJobChangeListener(new JobChangeAdapter() {
 

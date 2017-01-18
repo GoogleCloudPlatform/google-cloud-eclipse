@@ -26,7 +26,6 @@ import java.util.Locale;
 import java.util.logging.Logger;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.InvalidRegistryObjectException;
-import org.eclipse.osgi.util.NLS;
 
 public class LibraryFactory {
 
@@ -76,11 +75,12 @@ public class LibraryFactory {
             configurationElement.getChildren(ELEMENT_NAME_LIBRARY_DEPENDENCY)));
         return library;
       } else {
-        throw new LibraryFactoryException(NLS.bind(Messages.UnexpectedConfigurationElement,
-            configurationElement.getName(), ELEMENT_NAME_LIBRARY));
+        throw new LibraryFactoryException(
+            Messages.getString("UnexpectedConfigurationElement",
+                configurationElement.getName(), ELEMENT_NAME_LIBRARY));
       }
     } catch (InvalidRegistryObjectException | URISyntaxException | IllegalArgumentException ex) {
-      throw new LibraryFactoryException(Messages.CreateLibraryError, ex);
+      throw new LibraryFactoryException(Messages.getString("CreateLibraryError"), ex);
     }
   }
 
@@ -93,8 +93,10 @@ public class LibraryFactory {
             libraryFileElement.getChildren(ELEMENT_NAME_MAVEN_COORDINATES));
         LibraryFile libraryFile = new LibraryFile(mavenCoordinates);
         libraryFile.setFilters(getFilters(libraryFileElement.getChildren()));
-        libraryFile.setSourceUri(getUri(libraryFileElement.getAttribute(ATTRIBUTE_NAME_SOURCE_URI)));
-        libraryFile.setJavadocUri(getUri(libraryFileElement.getAttribute(ATTRIBUTE_NAME_JAVADOC_URI)));
+        libraryFile.setSourceUri(
+            getUri(libraryFileElement.getAttribute(ATTRIBUTE_NAME_SOURCE_URI)));
+        libraryFile.setJavadocUri(
+            getUri(libraryFileElement.getAttribute(ATTRIBUTE_NAME_JAVADOC_URI)));
         String exportString = libraryFileElement.getAttribute(ATTRIBUTE_NAME_EXPORT);
         if (exportString != null) {
           libraryFile.setExport(Boolean.parseBoolean(exportString));
@@ -115,7 +117,8 @@ public class LibraryFactory {
 
   private MavenCoordinates getMavenCoordinates(IConfigurationElement[] children) {
     if (children.length != 1) {
-      logger.warning("Single configuration element for MavenCoordinates was expected, found: " //$NON-NLS-1$
+      logger.warning(
+          "Single configuration element for MavenCoordinates was expected, found: " //$NON-NLS-1$
           + children.length);
     }
     IConfigurationElement mavenCoordinatesElement = children[0];

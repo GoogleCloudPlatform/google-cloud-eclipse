@@ -126,8 +126,8 @@ public class CloudSdkPrompter {
    * @return true if the user appears to have configured the SDK, or false if the SDK is unavailable
    */
   static boolean promptForSdk(IShellProvider shellProvider) {
-    if (!MessageDialog.openQuestion(null, SdkUiMessages.CloudSdkPrompter_0,
-        SdkUiMessages.CloudSdkPrompter_1)) {
+    if (!MessageDialog.openQuestion(null, SdkUiMessages.getString("CloudSdkPrompter_0"),
+        SdkUiMessages.getString("CloudSdkPrompter_1"))) {
       return false;
     }
     Shell shell = shellProvider == null ? null : shellProvider.getShell();

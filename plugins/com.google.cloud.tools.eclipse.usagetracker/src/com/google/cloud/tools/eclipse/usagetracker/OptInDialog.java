@@ -79,7 +79,7 @@ public class OptInDialog extends Dialog {
   @Override
   protected void configureShell(Shell shell) {
     super.configureShell(shell);
-    shell.setText(Messages.OPT_IN_DIALOG_TITLE);
+    shell.setText(Messages.getString("OPT_IN_DIALOG_TITLE"));
   }
 
   /**
@@ -87,8 +87,8 @@ public class OptInDialog extends Dialog {
    */
   @Override
   protected void createButtonsForButtonBar(Composite parent) {
-    createButton(parent, IDialogConstants.OK_ID, Messages.OPT_IN_BUTTON, false);
-    createButton(parent, IDialogConstants.CANCEL_ID, Messages.OPT_OUT_BUTTON, true);
+    createButton(parent, IDialogConstants.OK_ID, Messages.getString("OPT_IN_BUTTON"), false);
+    createButton(parent, IDialogConstants.CANCEL_ID, Messages.getString("OPT_OUT_BUTTON"), true);
   }
 
   @Override
@@ -96,7 +96,7 @@ public class OptInDialog extends Dialog {
     Composite container = (Composite) super.createDialogArea(parent);
 
     Label label = new Label(container, SWT.WRAP);
-    label.setText(Messages.OPT_IN_DIALOG_TEXT);
+    label.setText(Messages.getString("OPT_IN_DIALOG_TEXT"));
 
     return container;
   }
