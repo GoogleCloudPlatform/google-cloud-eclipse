@@ -27,7 +27,7 @@ import java.util.jar.Manifest;
 import org.junit.rules.ExternalResource;
 
 /**
- * Test utility class to obtain a Properties representing the host bundle's plugin.properties.
+ * Test utility class to obtain a Properties representing a properties file in the host bundle.
  * <p>
  * Assumptions:
  * <ul>
@@ -36,37 +36,44 @@ import org.junit.rules.ExternalResource;
  * <li>the tests execute with the working directory in a bundle or fragment directory</li>
  * </ul>
  */
-public class PluginProperties extends ExternalResource {
+public class EclipseProperties extends ExternalResource {
 
-  private final Properties pluginProperties = new Properties();
+  private final Properties properties = new Properties();
+  private final String filename;
+
+  public EclipseProperties(String filename) {
+    this.filename = filename;
+  }
 
   @Override
   protected void before()  {
-    try (InputStream in = readPluginProperties()) {
+    try (InputStream in = readProperties()) {
         // test fails if malformed
-        pluginProperties.load(in);
+        properties.load(in);
     } catch (IOException ex) {
       // no plugin properties file. This is OK if no properties are referenced.
     }
   }
 
-  /**
-   * Subclasses should override this method if plugin.properties is not at the location of
-   * <code>&lt;work_dir&gt;/../&lt;host_bundle_name&gt;/plugin.properties</code>
-   */
-  protected InputStream readPluginProperties() throws IOException {
+  private InputStream readProperties() throws IOException {
+    String bundlePath = getHostBundlePath();
+    String propertiesLocation = bundlePath + "/" + filename;
+    return new FileInputStream(propertiesLocation);
+  }
+
+  static String getHostBundlePath() throws IOException {
     String hostBundleName = getHostBundleName();
     assertNotNull(hostBundleName);
-    String pluginPropertiesLocation = "../" + hostBundleName + "/plugin.properties";
-    return new FileInputStream(pluginPropertiesLocation);
+    String bundlePath = "../" + hostBundleName;
+    return bundlePath;
   }
 
   /**
-   * Returns properties read from plugin.properties. The file is parsed only once when
+   * Returns properties read from a properties file. The file is parsed only once when
    * {@link #before()} is executed by JUnit.
    */
   public Properties get() {
-    return pluginProperties;
+    return properties;
   }
 
   /**

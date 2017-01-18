@@ -16,6 +16,13 @@
 
 package com.google.cloud.tools.eclipse.test.util;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
+
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.RegistryFactory;
@@ -34,10 +41,14 @@ import org.w3c.dom.NodeList;
  * Generic tests that should be true of all plugins.
  */
 @SuppressWarnings("restriction")
-public class BasePluginXmlTest {
+public abstract class BasePluginXmlTest {
 
-  @Rule public final PluginXmlDocument pluginXmlDocument = new PluginXmlDocument();
-  @Rule public final PluginProperties pluginProperties = new PluginProperties();
+  @Rule
+  public final PluginXmlDocument pluginXmlDocument = new PluginXmlDocument();
+  @Rule
+  public final EclipseProperties pluginProperties = new EclipseProperties("plugin.properties");
+  @Rule
+  public final EclipseProperties buildProperties = new EclipseProperties("build.properties");
   
   private Document doc;
 
@@ -83,6 +94,27 @@ public class BasePluginXmlTest {
         Assert.assertNotNull("Null keyword " + id, keyword);
         Assert.assertFalse("Empty keyword " + id, keyword.isEmpty());
       }
+    }
+  }
+  
+  @Test
+  public final void testBuildProperties() {
+    Properties properties = buildProperties.get();
+    String[] binIncludes = ((String) properties.get("bin.includes")).split(",\\s*");
+    List<String> binList = Arrays.asList(binIncludes);
+    Assert.assertTrue(binList.contains("plugin.xml"));
+    Assert.assertTrue(binList.contains("plugin.properties"));
+    
+    testOptionalInclude(binList, "helpContexts.xml");
+  }
+
+  private void testOptionalInclude(List<String> binList, String name) {
+    try {
+      String path = EclipseProperties.getHostBundlePath() + "/" + name;
+      if (Files.exists(Paths.get(path))) {
+        Assert.assertTrue(binList.contains(name));
+      }
+    } catch (IOException ex) {
     }
   }
   
