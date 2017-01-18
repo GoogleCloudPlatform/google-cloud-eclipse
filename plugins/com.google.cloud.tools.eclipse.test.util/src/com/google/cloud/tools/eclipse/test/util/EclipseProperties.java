@@ -69,11 +69,11 @@ public class EclipseProperties extends ExternalResource {
   }
 
   /**
-   * Returns properties read from a properties file. The file is parsed only once when
+   * Returns property read from a properties file. The file is parsed only once when
    * {@link #before()} is executed by JUnit.
    */
-  public Properties get() {
-    return properties;
+  public String get(String name) {
+    return properties.getProperty(name);
   }
 
   /**
