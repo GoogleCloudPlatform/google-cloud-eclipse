@@ -40,7 +40,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class AppEngineStandardProjectConvertCommandHandlerTest {
 
-  @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
+  @Rule public final TestProjectCreator projectCreator = new TestProjectCreator();
 
   @Mock private MessageDialogWrapper mockDialogWrapper;
 

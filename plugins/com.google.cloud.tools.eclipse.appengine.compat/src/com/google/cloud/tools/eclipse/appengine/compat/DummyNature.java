@@ -1,5 +1,4 @@
-/*
- * Copyright 2017 Google Inc.
+/* Copyright 2017 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +13,27 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.compat;
+ package com.google.cloud.tools.eclipse.appengine.compat;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.wst.common.project.facet.core.IDelegate;
-import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 
-/** A dummy delegate required for defining facet install/uinstall actions in {@code plugin.xml}. */
-public class DummyDelegate implements IDelegate {
+/** A dummy nature runtime class only to enable defining a dummy nature for testing. */
+public class DummyNature implements IProjectNature {
 
   @Override
-  public void execute(IProject project, IProjectFacetVersion facetVersion,
-      Object config, IProgressMonitor monitor) throws CoreException {
+  public void configure() throws CoreException {}
+
+  @Override
+  public void deconfigure() throws CoreException {}
+
+  @Override
+  public IProject getProject() {
+    return null;
   }
+
+  @Override
+  public void setProject(IProject project) {}
 
 }

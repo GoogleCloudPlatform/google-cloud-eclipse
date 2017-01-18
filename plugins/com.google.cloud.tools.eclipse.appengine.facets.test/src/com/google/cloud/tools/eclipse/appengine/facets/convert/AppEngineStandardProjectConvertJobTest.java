@@ -16,6 +16,8 @@
 
 package com.google.cloud.tools.eclipse.appengine.facets.convert;
 
+import static org.junit.Assert.assertTrue;
+
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import org.eclipse.core.runtime.CoreException;
@@ -27,7 +29,7 @@ import org.junit.Test;
 
 public class AppEngineStandardProjectConvertJobTest {
 
-  @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
+  @Rule public final TestProjectCreator projectCreator = new TestProjectCreator();
 
   @Test
   public void testAppEngineFacetAdded() throws CoreException, InterruptedException {
@@ -35,6 +37,6 @@ public class AppEngineStandardProjectConvertJobTest {
     Job convertJob = new AppEngineStandardProjectConvertJob(facetedProject);
     convertJob.schedule();
     convertJob.join();
-    AppEngineStandardFacet.hasAppEngineFacet(facetedProject);
+    assertTrue(AppEngineStandardFacet.hasAppEngineFacet(facetedProject));
   }
 }

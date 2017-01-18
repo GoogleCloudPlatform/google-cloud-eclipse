@@ -28,7 +28,7 @@ import org.junit.Test;
 
 public class NatureUtilsTest {
 
-  @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
+  @Rule public final TestProjectCreator projectCreator = new TestProjectCreator();
 
   @Test
   public void testRemoveNature() throws CoreException {

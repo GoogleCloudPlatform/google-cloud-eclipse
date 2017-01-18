@@ -36,8 +36,7 @@ public class GpeMigrator {
   private static final String GPE_WTP_GAE_EAR_FACET_ID = "com.google.appengine.facet.ear";
   private static final String GPE_WTP_GAE_EAR_FACET_VERSION = "1";
 
-  private static final String GPE_WTP_SERVER_RUNTIME = "com.google.appengine.runtime.id1";
-  private static final String GPE_WTP_SERVER_RUNTIME_COMPONENT = "com.google.appengine.runtime.id";
+  private static final String GPE_WTP_GAE_RUNTIME = "com.google.appengine.runtime.id";
 
   public static void removeObsoleteGpeFixtures(
       IFacetedProject facetedProject, IProgressMonitor monitor) throws CoreException {
@@ -48,8 +47,7 @@ public class GpeMigrator {
 
     Set<IRuntime> runtimes = facetedProject.getTargetedRuntimes();
     for (IRuntime runtime : runtimes) {
-      if (GPE_WTP_SERVER_RUNTIME.equals(runtime.getProperty("id"))
-          || GPE_WTP_SERVER_RUNTIME_COMPONENT.equals(runtime.getProperty("id"))) {
+      if (GPE_WTP_GAE_RUNTIME.equals(runtime.getProperty("id"))) {
         facetedProject.removeTargetedRuntime(runtime, null /* monitor */);
       }
     }
