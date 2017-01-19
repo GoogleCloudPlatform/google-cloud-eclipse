@@ -16,12 +16,14 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexFacet;
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.appengine.login.IGoogleLoginService;
+import com.google.cloud.tools.eclipse.util.AdapterUtil;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jface.databinding.preference.PreferencePageSupport;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
@@ -33,11 +35,6 @@ import org.eclipse.ui.dialogs.PropertyPage;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IProjectFacet;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
-
-import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexFacet;
-import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
-import com.google.cloud.tools.eclipse.appengine.login.IGoogleLoginService;
-import com.google.cloud.tools.eclipse.util.AdapterUtil;
 
 /**
  * Displays the App Engine deployment page for the selected project in the property page dialog.
@@ -56,10 +53,10 @@ public class DeployPropertyPage extends PropertyPage {
   @Override
   protected Control createContents(Composite parent) {
     Composite container = new Composite(parent, SWT.NONE);
-    
+
     PlatformUI.getWorkbench().getHelpSystem().setHelp(parent,
         "com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployAppEngineStandardProjectContext"); //$NON-NLS-1$
-    
+
     IProject project = AdapterUtil.adapt(getElement(), IProject.class);
 
     try {
@@ -79,7 +76,7 @@ public class DeployPropertyPage extends PropertyPage {
     GridDataFactory.fillDefaults().grab(true, true).applyTo(container);
     GridLayoutFactory.fillDefaults().generateLayout(container);
 
-    PreferencePageSupport.create(this, content.getDataBindingContext());
+    new CustomPreferencePageSupport(this, content.getDataBindingContext());
     return content;
   }
 
@@ -203,7 +200,7 @@ public class DeployPropertyPage extends PropertyPage {
       setErrorMessage(invalidFacetConfigErrorMessage);
       canSetMessage = false;
     }
-    
+
   }
- 
+
 }
