@@ -17,7 +17,7 @@
 package com.google.cloud.tools.eclipse.ui.util.databinding;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 import org.eclipse.core.runtime.IStatus;
 import org.junit.Test;
@@ -39,12 +39,14 @@ public class BucketNameValidatorTest {
 
   @Test
   public void testValidation_emptyString() {
-    assertThat(new BucketNameValidator().validate("").getSeverity(), is(IStatus.ERROR));
+    assertThat(new BucketNameValidator().validate("").getSeverity(), is(IStatus.INFO));
+    assertThat(new BucketNameValidator().validate("").getCode(), is(IStatus.ERROR));
   }
 
   @Test
   public void testValidation_upperCaseLetter() {
-    assertThat(new BucketNameValidator().validate("THISWOULDBEVALIDIFLOWERCASE").getSeverity(), is(IStatus.ERROR));
+    assertThat(new BucketNameValidator().validate("THISWOULDBEVALIDIFLOWERCASE").getSeverity(),
+        is(IStatus.ERROR));
   }
 
   @Test
@@ -86,12 +88,12 @@ public class BucketNameValidatorTest {
   public void testValidation_tooLongNameWithoutDot() {
     assertThat(new BucketNameValidator().validate(LENGTH_63 + "4").getSeverity(), is(IStatus.ERROR));
   }
-  
+
   @Test
   public void testValidation_validNameWithDot() {
     assertThat(new BucketNameValidator().validate(LENGTH_64_WITH_DOT).getSeverity(), is(IStatus.OK));
   }
-  
+
   @Test
   public void testValidation_tooLongNameWithDot() {
     assertThat(new BucketNameValidator().validate(LENGTH_222 + "9").getSeverity(), is(IStatus.ERROR));
@@ -101,7 +103,7 @@ public class BucketNameValidatorTest {
   public void testValidation_maxLengthWithDot() {
     assertThat(new BucketNameValidator().validate(LENGTH_222).getSeverity(), is(IStatus.OK));
   }
-  
+
   @Test
   public void testValidation_emptyComponent() {
     assertThat(new BucketNameValidator().validate("foo..bar").getSeverity(), is(IStatus.ERROR));
