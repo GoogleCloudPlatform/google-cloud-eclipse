@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import org.apache.maven.archetype.catalog.Archetype;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -50,6 +51,15 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
   private IPath location;
   private Archetype archetype;
   private HashSet<String> appEngineLibraryIds = new HashSet<String>();
+  private IFile mostImportant;
+  
+  /**
+   * @return the file in the project that should be opened in an editor when the wizard finishes;
+   *     may be null
+   */
+  IFile getMostImportant() {
+    return mostImportant;
+  }
 
   @Override
   protected void execute(IProgressMonitor monitor)
@@ -90,9 +100,13 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
     List<IProject> archetypeProjects = projectConfigurationManager.createArchetypeProjects(location,
         archetype, groupId, artifactId, version, packageName, properties,
         importConfiguration, progress.newChild(40));
-
+    
     SubMonitor loopMonitor = progress.newChild(30).setWorkRemaining(3 * archetypeProjects.size());
     for (IProject project : archetypeProjects) {
+      IFile pom = project.getFile("pom.xml");
+      if (pom.exists()) {
+        this.mostImportant = pom;
+      }
       IFacetedProject facetedProject = ProjectFacetsManager.create(
           project, true, loopMonitor.newChild(1));
       AppEngineStandardFacet.installAppEngineFacet(facetedProject,

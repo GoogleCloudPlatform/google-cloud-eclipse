@@ -44,14 +44,14 @@ import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jst.j2ee.classpathdep.UpdateClasspathAttributeUtil;
-import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 
 /**
- * Implementation of {@link ILibraryRepositoryService} that relies on M2Eclipse to download the artifacts and store
- * them in the local Maven repository pointed to by M2Eclipse's M2_REPO variable.
+ * Implementation of {@link ILibraryRepositoryService} that relies on M2Eclipse to download the
+ * artifacts and store them in the local Maven repository pointed to by M2Eclipse's M2_REPO
+ * variable.
  */
 @Component
 public class M2RepositoryService implements ILibraryRepositoryService {
@@ -63,10 +63,12 @@ public class M2RepositoryService implements ILibraryRepositoryService {
   private MavenCoordinatesClasspathAttributesTransformer transformer;
 
   @Override
-  public IClasspathEntry getLibraryClasspathEntry(LibraryFile libraryFile) throws LibraryRepositoryServiceException {
+  public IClasspathEntry getLibraryClasspathEntry(LibraryFile libraryFile)
+      throws LibraryRepositoryServiceException {
     MavenCoordinates mavenCoordinates = libraryFile.getMavenCoordinates();
     Artifact artifact = resolveArtifact(mavenCoordinates);
-    IClasspathAttribute[] libraryFileClasspathAttributes = getClasspathAttributes(libraryFile, artifact);
+    IClasspathAttribute[] libraryFileClasspathAttributes =
+        getClasspathAttributes(libraryFile, artifact);
     URL sourceUrl = getSourceUrlFromUri(libraryFile.getSourceUri());
     return JavaCore.newLibraryEntry(new Path(artifact.getFile().getAbsolutePath()),
                                     getSourceLocation(mavenCoordinates, sourceUrl),
@@ -90,8 +92,10 @@ public class M2RepositoryService implements ILibraryRepositoryService {
   }
 
   @Override
-  public IClasspathEntry rebuildClasspathEntry(IClasspathEntry classpathEntry) throws LibraryRepositoryServiceException {
-    MavenCoordinates mavenCoordinates = transformer.createMavenCoordinates(classpathEntry.getExtraAttributes());
+  public IClasspathEntry rebuildClasspathEntry(IClasspathEntry classpathEntry)
+      throws LibraryRepositoryServiceException {
+    MavenCoordinates mavenCoordinates =
+        transformer.createMavenCoordinates(classpathEntry.getExtraAttributes());
     Artifact artifact = resolveArtifact(mavenCoordinates);
     URL sourceUrl = getSourceUrlFromAttribute(classpathEntry.getExtraAttributes());
     return JavaCore.newLibraryEntry(new Path(artifact.getFile().getAbsolutePath()),
@@ -115,19 +119,21 @@ public class M2RepositoryService implements ILibraryRepositoryService {
     return null;
   }
 
-  private Artifact resolveArtifact(MavenCoordinates mavenCoordinates) throws LibraryRepositoryServiceException {
+  private Artifact resolveArtifact(MavenCoordinates mavenCoordinates)
+      throws LibraryRepositoryServiceException {
     Preconditions.checkState(mavenHelper != null, "mavenHelper is null"); //$NON-NLS-1$
     try {
       List<ArtifactRepository> repository = getRepository(mavenCoordinates);
 
       return mavenHelper.resolveArtifact(null, mavenCoordinates, repository);
     } catch (CoreException ex) {
-      throw new LibraryRepositoryServiceException(NLS.bind(Messages.ResolveArtifactError, mavenCoordinates), ex);
+      throw new LibraryRepositoryServiceException(
+          Messages.getString("ResolveArtifactError", mavenCoordinates), ex);
     }
   }
 
   private IClasspathAttribute[] getClasspathAttributes(LibraryFile libraryFile, Artifact artifact)
-                                                                              throws LibraryRepositoryServiceException {
+      throws LibraryRepositoryServiceException {
     try {
       List<IClasspathAttribute> attributes =
           transformer.createClasspathAttributes(artifact, libraryFile.getMavenCoordinates());
@@ -140,7 +146,8 @@ public class M2RepositoryService implements ILibraryRepositoryService {
         addUriAttribute(attributes, CLASSPATH_ATTRIBUTE_SOURCE_URL, libraryFile.getSourceUri());
       }
       if (libraryFile.getJavadocUri() != null) {
-        addUriAttribute(attributes, IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME, libraryFile.getJavadocUri());
+        addUriAttribute(attributes, IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME,
+            libraryFile.getJavadocUri());
       }
       return attributes.toArray(new IClasspathAttribute[0]);
     } catch (CoreException ex) {
@@ -177,10 +184,12 @@ public class M2RepositoryService implements ILibraryRepositoryService {
   }
 
   /**
-   * Returns the folder to which the a file corresponding to <code>mavenCoordinates</code> should be downloaded.
+   * Returns the folder to which the a file corresponding to <code>mavenCoordinates</code> should be
+   * downloaded.
    * <p>
    * The folder is created as follows:
    * <code>&lt;bundle_state_location&gt;/downloads/&lt;groupId&gt;/&lt;artifactId&gt;/&lt;version&gt;</code>
+   * 
    * @return the location of the download folder, may not exist
    */
   private IPath getDownloadedFilesFolder(MavenCoordinates mavenCoordinates) {
@@ -203,21 +212,26 @@ public class M2RepositoryService implements ILibraryRepositoryService {
     return accessRules;
   }
 
-  private ArtifactRepository getCustomRepository(String repository) throws LibraryRepositoryServiceException {
+  private ArtifactRepository getCustomRepository(String repository)
+      throws LibraryRepositoryServiceException {
     try {
       URI repoUri = new URI(repository);
       if (!repoUri.isAbsolute()) {
-        throw new LibraryRepositoryServiceException(NLS.bind(Messages.RepositoryUriNotAbsolute, repository));
+        throw new LibraryRepositoryServiceException(
+            Messages.getString("RepositoryUriNotAbsolute", repository));
       }
       return mavenHelper.createArtifactRepository(repoUri.getHost(), repoUri.toString());
     } catch (URISyntaxException exception) {
-      throw new LibraryRepositoryServiceException(NLS.bind(Messages.RepositoryUriInvalid, repository), exception);
+      throw new LibraryRepositoryServiceException(
+          Messages.getString("RepositoryUriInvalid", repository), exception);
     } catch (CoreException exception) {
-      throw new LibraryRepositoryServiceException(NLS.bind(Messages.RepositoryCannotBeLocated, repository), exception);
+      throw new LibraryRepositoryServiceException(
+          Messages.getString("RepositoryCannotBeLocated", repository), exception);
     }
   }
 
-  private List<ArtifactRepository> getRepository(MavenCoordinates mavenCoordinates) throws LibraryRepositoryServiceException {
+  private List<ArtifactRepository> getRepository(MavenCoordinates mavenCoordinates)
+      throws LibraryRepositoryServiceException {
     if (MavenCoordinates.MAVEN_CENTRAL_REPO.equals(mavenCoordinates.getRepository())) {
       // M2Eclipse will use the Maven Central repo in case null is used
       return null;

@@ -49,6 +49,7 @@ public class GoogleLoginCommandHandler extends AbstractHandler implements IEleme
         element.getServiceLocator().getService(IGoogleLoginService.class);
     boolean loggedIn = loginService.hasAccounts();
 
-    element.setText(loggedIn ? Messages.LOGIN_MENU_LOGGED_IN : Messages.LOGIN_MENU_LOGGED_OUT);
+    element.setText(loggedIn ? Messages.getString("LOGIN_MENU_LOGGED_IN")
+        : Messages.getString("LOGIN_MENU_LOGGED_OUT"));
   }
 }

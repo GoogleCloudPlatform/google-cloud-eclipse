@@ -101,4 +101,8 @@
       </enablement>    
     </consolePageParticipant>
   </extension>
+  
+  <extension point="org.eclipse.help.contexts">
+    <contexts file="helpContexts.xml" />
+  </extension>
 </plugin>

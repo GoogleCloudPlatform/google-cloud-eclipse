@@ -53,11 +53,14 @@ public class AppEngineLibrariesSelectorGroup implements ISelectionProvider {
   private static Collection<Library> getAvailableLibraries() {
     Library appEngine = new Library("appengine-api");
     appEngine.setName("App Engine API");
+    appEngine.setToolTip(Messages.getString("appengine.api.tooltip"));
     Library endpoints = new Library("appengine-endpoints");
-    endpoints.setName("App Engine Endpoints");
+    endpoints.setName("Google Cloud Endpoints");
+    endpoints.setToolTip(Messages.getString("endpoints.tooltip"));
     endpoints.setLibraryDependencies(Collections.singletonList("appengine-api"));
     Library objectify = new Library("objectify");
     objectify.setName("Objectify");
+    objectify.setToolTip(Messages.getString("objectify.tooltip"));
     objectify.setLibraryDependencies(Collections.singletonList("appengine-api"));
     return Arrays.asList(appEngine, endpoints, objectify);
   }
@@ -97,6 +100,9 @@ public class AppEngineLibrariesSelectorGroup implements ISelectionProvider {
     for (Library library : availableLibraries.values()) {
       Button libraryButton = new Button(apiGroup, SWT.CHECK);
       libraryButton.setText(getLibraryName(library));
+      if (library.getToolTip() != null) {
+        libraryButton.setToolTipText(library.getToolTip());
+      }
       libraryButton.setData(library);
       libraryButton.addSelectionListener(new ManualSelectionTracker());
       libraryButtons.put(library, libraryButton);

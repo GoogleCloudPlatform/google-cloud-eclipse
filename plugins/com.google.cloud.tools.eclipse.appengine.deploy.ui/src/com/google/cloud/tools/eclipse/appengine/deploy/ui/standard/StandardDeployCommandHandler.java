@@ -16,31 +16,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.ui.standard;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.text.DateFormat;
-import java.text.MessageFormat;
-import java.util.Date;
-import java.util.Locale;
-
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.JobChangeAdapter;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.window.Window;
-import org.eclipse.ui.console.ConsolePlugin;
-import org.eclipse.ui.console.IConsoleManager;
-import org.eclipse.ui.console.MessageConsoleStream;
-import org.eclipse.ui.handlers.HandlerUtil;
-
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.appengine.api.deploy.DefaultDeployConfiguration;
 import com.google.cloud.tools.eclipse.appengine.deploy.CleanupOldDeploysJob;
@@ -58,8 +33,31 @@ import com.google.cloud.tools.eclipse.ui.util.ProjectFromSelectionHelper;
 import com.google.cloud.tools.eclipse.ui.util.ServiceUtils;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
-import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
-import com.google.common.annotations.VisibleForTesting;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.text.DateFormat;
+import java.text.MessageFormat;
+import java.util.Date;
+import java.util.Locale;
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.window.Window;
+import org.eclipse.ui.console.ConsolePlugin;
+import org.eclipse.ui.console.IConsoleManager;
+import org.eclipse.ui.console.MessageConsoleStream;
+import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.wst.common.project.facet.core.IFacetedProject;
+import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
 /**
  * Command handler to deploy a web application project to App Engine Standard.
@@ -71,40 +69,36 @@ public class StandardDeployCommandHandler extends AbstractHandler {
 
   private static final String CONSOLE_NAME = "App Engine Deploy";
 
-  private ProjectFromSelectionHelper helper;
-
-  public StandardDeployCommandHandler() {
-    this(new FacetedProjectHelper());
-  }
-
-  @VisibleForTesting
-  StandardDeployCommandHandler(FacetedProjectHelper facetedProjectHelper) {
-    this.helper = new ProjectFromSelectionHelper(facetedProjectHelper);
-  }
-
   @Override
   public Object execute(ExecutionEvent event) throws ExecutionException {
     try {
-      IProject project = helper.getAppEngineStandardProject(event);
-      if (project != null) {
-        if (!checkProjectErrors(project)) {
-          MessageDialog.openInformation(HandlerUtil.getActiveShell(event),
-                                        Messages.getString("build.error.dialog.title"),
-                                        Messages.getString("build.error.dialog.message"));
-          return null;
-        }
+      IProject project = ProjectFromSelectionHelper.getProject(event);
+      if (project == null) {
+        throw new NullPointerException("Deploy menu enabled for non-project resources");
+      }
+      IFacetedProject facetedProject = ProjectFacetsManager.create(project);
+      if (facetedProject == null) {
+        throw new NullPointerException("Deploy menu enabled for non-faceted projects");
+      }
 
-        IGoogleLoginService loginService = ServiceUtils.getService(event, IGoogleLoginService.class);
-        DeployPreferencesDialog dialog =
-            new DeployPreferencesDialog(HandlerUtil.getActiveShell(event), project, loginService);
-        if (dialog.open() == Window.OK) {
-          launchDeployJob(project, dialog.getCredential());
-        }
+      if (!checkProjectErrors(project)) {
+        MessageDialog.openInformation(HandlerUtil.getActiveShell(event),
+                                      Messages.getString("build.error.dialog.title"),
+                                      Messages.getString("build.error.dialog.message"));
+        return null;
+      }
+
+      IGoogleLoginService loginService = ServiceUtils.getService(event, IGoogleLoginService.class);
+      DeployPreferencesDialog dialog =
+          new DeployPreferencesDialog(HandlerUtil.getActiveShell(event), project, loginService);
+      if (dialog.open() == Window.OK) {
+        launchDeployJob(project, dialog.getCredential());
       }
       // return value must be null, reserved for future use
       return null;
     } catch (CoreException | IOException exception) {
-      throw new ExecutionException(Messages.getString("deploy.failed.error.message"), exception); //$NON-NLS-1$
+      throw new ExecutionException(
+          Messages.getString("deploy.failed.error.message"), exception); //$NON-NLS-1$
     }
   }
 
@@ -131,20 +125,19 @@ public class StandardDeployCommandHandler extends AbstractHandler {
     StandardDeployJobConfig config = getDeployJobConfig(project, credential,
         workDirectory, outputStream, deployConfiguration);
 
-    StandardDeployJob deploy = new StandardDeployJob.Builder().config(config).build();
+    StandardDeployJob deploy = new StandardDeployJob(config);
     messageConsole.setJob(deploy);
     deploy.addJobChangeListener(new JobChangeAdapter() {
 
       @Override
       public void done(IJobChangeEvent event) {
-        super.done(event);
         AnalyticsPingManager.getInstance().sendPing(AnalyticsEvents.APP_ENGINE_DEPLOY_SUCCESS,
             AnalyticsEvents.APP_ENGINE_DEPLOY_STANDARD, null);
         launchCleanupJob();
       }
     });
     deploy.schedule();
-    
+
     IConsoleManager consoleManager = ConsolePlugin.getDefault().getConsoleManager();
     consoleManager.showConsoleView(messageConsole);
   }

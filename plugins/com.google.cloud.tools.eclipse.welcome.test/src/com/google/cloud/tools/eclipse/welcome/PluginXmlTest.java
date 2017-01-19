@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.welcome.test;
+package com.google.cloud.tools.eclipse.welcome;
 
 import static org.junit.Assert.assertEquals;
 

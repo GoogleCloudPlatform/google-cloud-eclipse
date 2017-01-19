@@ -39,19 +39,21 @@ import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.osgi.util.NLS;
 
 /**
- * {@link ClasspathContainerInitializer} implementation that resolves containers for App Engine libraries.
+ * {@link ClasspathContainerInitializer} implementation that resolves containers
+ * for App Engine libraries.
  * <p>
  * The container path is expected to be in the form of
  * &lt;value of {@link Library#CONTAINER_PATH_PREFIX}&gt;/&lt;library ID&gt;
  */
 public class AppEngineLibraryContainerInitializer extends ClasspathContainerInitializer {
 
-  public static final String LIBRARIES_EXTENSION_POINT = "com.google.cloud.tools.eclipse.appengine.libraries"; //$NON-NLS-1$
+  public static final String LIBRARIES_EXTENSION_POINT =
+      "com.google.cloud.tools.eclipse.appengine.libraries"; //$NON-NLS-1$
 
-  private static final Logger logger = Logger.getLogger(AppEngineLibraryContainerInitializer.class.getName());
+  private static final Logger logger = Logger.getLogger(
+      AppEngineLibraryContainerInitializer.class.getName());
 
   private String containerPath = Library.CONTAINER_PATH_PREFIX;
   private Map<String, Library> libraries;
@@ -96,10 +98,9 @@ public class AppEngineLibraryContainerInitializer extends ClasspathContainerInit
     }
     if (containerPath.segmentCount() == 2) {
       if (!containerPath.segment(0).equals(this.containerPath)) {
-        throw new CoreException(StatusUtil.error(this,
-                                                 NLS.bind(Messages.ContainerPathInvalidFirstSegment,
-                                                          this.containerPath,
-                                                          containerPath.segment(0))));
+        throw new CoreException(StatusUtil.error(this, 
+            Messages.getString("ContainerPathInvalidFirstSegment", this.containerPath,
+                containerPath.segment(0))));
       }
       try {
         LibraryClasspathContainer container = serializer.loadContainer(project, containerPath);
@@ -109,15 +110,16 @@ public class AppEngineLibraryContainerInitializer extends ClasspathContainerInit
                                          new IClasspathContainer[] {container}, null);
         }
       } catch (IOException | LibraryRepositoryServiceException ex) {
-        throw new CoreException(StatusUtil.error(this, Messages.LoadContainerFailed, ex));
+        throw new CoreException(StatusUtil.error(this, Messages.getString("LoadContainerFailed"), ex));
       }
     } else {
-      throw new CoreException(StatusUtil.error(this, NLS.bind(Messages.ContainerPathNotTwoSegments,
-                                                              containerPath.toString())));
+      throw new CoreException(StatusUtil.error(this,
+          Messages.getString("ContainerPathNotTwoSegments", containerPath.toString())));
     }
   }
 
-  private void validateJarPaths(LibraryClasspathContainer container) throws LibraryRepositoryServiceException {
+  private void validateJarPaths(LibraryClasspathContainer container)
+      throws LibraryRepositoryServiceException {
     IClasspathEntry[] classpathEntries = container.getClasspathEntries();
     for (int i = 0; i < classpathEntries.length; i++) {
       IClasspathEntry classpathEntry = classpathEntries[i];
@@ -129,9 +131,12 @@ public class AppEngineLibraryContainerInitializer extends ClasspathContainerInit
     }
   }
 
-  // TODO parse library definition in ILibraryConfigService (or similar) started when the plugin/bundle starts
+  // TODO parse library definition in ILibraryConfigService (or similar) started when the
+  // plugin/bundle starts
   // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/856
-  private void initializeLibraries(IConfigurationElement[] configurationElements, LibraryFactory libraryFactory) {
+  private void initializeLibraries(
+      IConfigurationElement[] configurationElements, LibraryFactory libraryFactory) {
+    
     libraries = new HashMap<>(configurationElements.length);
     for (IConfigurationElement configurationElement : configurationElements) {
       try {

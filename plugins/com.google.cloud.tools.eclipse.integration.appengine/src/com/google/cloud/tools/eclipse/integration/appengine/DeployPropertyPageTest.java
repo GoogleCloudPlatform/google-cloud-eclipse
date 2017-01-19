@@ -25,17 +25,18 @@ import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
+import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.junit.Test;
 
-public class DeployPropertyPageTest extends AbstractProjectTests {
+public class DeployPropertyPageTest extends BaseProjectTest {
   @Test
   public void testPropertyPageTitle_standardProject() throws CoreException {
     String projectName = "foo";
     project = SwtBotAppEngineActions.createNativeWebAppProject(bot, projectName, null, null);
-    IFacetedProject facetedProject = new FacetedProjectHelper().getFacetedProject(project);
+    IFacetedProject facetedProject = ProjectFacetsManager.create(project);
     assertNotNull("Native App Engine projects should be faceted", facetedProject);
     assertTrue(
-        new FacetedProjectHelper().projectHasFacet(facetedProject, AppEngineStandardFacet.ID));
+        FacetedProjectHelper.projectHasFacet(facetedProject, AppEngineStandardFacet.ID));
 
     SwtBotProjectActions.openProjectProperties(bot, projectName);
     bot.tree().expandNode("Google Cloud Platform").select("App Engine Deployment");

@@ -48,11 +48,11 @@ import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.osgi.util.NLS;
 
 public class AppEngineLibraryContainerResolverJob extends Job {
   //TODO duplicate of com.google.cloud.tools.eclipse.appengine.libraries.AppEngineLibraryContainerInitializer.LIBRARIES_EXTENSION_POINT
-  public static final String LIBRARIES_EXTENSION_POINT = "com.google.cloud.tools.eclipse.appengine.libraries"; //$NON-NLS-1$
+  public static final String LIBRARIES_EXTENSION_POINT =
+      "com.google.cloud.tools.eclipse.appengine.libraries"; //$NON-NLS-1$
 
   private static final Logger logger = Logger.getLogger(AppEngineLibraryContainerResolverJob.class.getName());
 
@@ -66,13 +66,13 @@ public class AppEngineLibraryContainerResolverJob extends Job {
   private LibraryClasspathContainerSerializer serializer;
 
   public AppEngineLibraryContainerResolverJob() {
-    super(Messages.AppEngineLibraryContainerResolverJobName);
+    super(Messages.getString("AppEngineLibraryContainerResolverJobName"));
     setUser(true);
   }
 
   @VisibleForTesting
   AppEngineLibraryContainerResolverJob(LibraryClasspathContainerSerializer serializer) {
-    super(Messages.AppEngineLibraryContainerResolverJobName);
+    super(Messages.getString("AppEngineLibraryContainerResolverJobName"));
     Preconditions.checkNotNull(serializer);
     this.serializer = serializer;
     setUser(true);
@@ -96,21 +96,22 @@ public class AppEngineLibraryContainerResolverJob extends Job {
       }
       IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
       SubMonitor subMonitor = SubMonitor.convert(monitor,
-                                                 Messages.TaskResolveLibraries,
-                                                 getTotalwork(rawClasspath));
+          Messages.getString("TaskResolveLibraries"),
+          getTotalwork(rawClasspath));
       for (int i = 0; i < rawClasspath.length; i++) {
         IClasspathEntry classpathEntry = rawClasspath[i];
         String libraryId = classpathEntry.getPath().segment(1);
         Library library = libraries.get(libraryId);
         if (library != null) {
-          LibraryClasspathContainer container = resolveLibraryFiles(classpathEntry, library, subMonitor.newChild(1));
+          LibraryClasspathContainer container =
+              resolveLibraryFiles(classpathEntry, library, subMonitor.newChild(1));
           JavaCore.setClasspathContainer(classpathEntry.getPath(), new IJavaProject[] {javaProject},
                                          new IClasspathContainer[] {container}, null);
           serializer.saveContainer(javaProject, container);
         }
       }
     } catch (LibraryRepositoryServiceException | CoreException | IOException ex) {
-      return StatusUtil.error(this, Messages.TaskResolveLibrariesError, ex);
+      return StatusUtil.error(this, Messages.getString("TaskResolveLibrariesError"), ex);
     }
     return Status.OK_STATUS;
   }
@@ -121,7 +122,7 @@ public class AppEngineLibraryContainerResolverJob extends Job {
                                                             throws LibraryRepositoryServiceException {
     List<LibraryFile> libraryFiles = library.getLibraryFiles();
     SubMonitor subMonitor = SubMonitor.convert(monitor, libraryFiles.size());
-    subMonitor.subTask(NLS.bind(Messages.TaskResolveArtifacts, getLibraryDescription(library)));
+    subMonitor.subTask(Messages.getString("TaskResolveArtifacts", getLibraryDescription(library)));
     SubMonitor child = subMonitor.newChild(libraryFiles.size());
 
     IClasspathEntry[] entries = new IClasspathEntry[libraryFiles.size()];
@@ -131,9 +132,8 @@ public class AppEngineLibraryContainerResolverJob extends Job {
       child.worked(1);
     }
     monitor.done();
-    LibraryClasspathContainer container = new LibraryClasspathContainer(classpathEntry.getPath(),
-                                                                        getLibraryDescription(library),
-                                                                        entries);
+    LibraryClasspathContainer container = new LibraryClasspathContainer(
+        classpathEntry.getPath(), getLibraryDescription(library), entries);
     return container;
   }
 
@@ -148,7 +148,8 @@ public class AppEngineLibraryContainerResolverJob extends Job {
   }
 
   private static boolean isLibraryClasspathEntry(IPath path) {
-    return path != null && path.segmentCount() == 2 && Library.CONTAINER_PATH_PREFIX.equals(path.segment(0));
+    return path != null && path.segmentCount() == 2
+        && Library.CONTAINER_PATH_PREFIX.equals(path.segment(0));
   }
 
   private static String getLibraryDescription(Library library) {
@@ -159,7 +160,8 @@ public class AppEngineLibraryContainerResolverJob extends Job {
     }
   }
 
-  private void initializeLibraries(IConfigurationElement[] configurationElements, LibraryFactory libraryFactory) {
+  private void initializeLibraries(IConfigurationElement[] configurationElements,
+      LibraryFactory libraryFactory) {
     libraries = new HashMap<>(configurationElements.length);
     for (IConfigurationElement configurationElement : configurationElements) {
       try {

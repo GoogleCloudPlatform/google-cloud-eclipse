@@ -7,13 +7,14 @@ Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
-Require-Bundle: org.eclipse.ui.workbench
-Import-Package: com.google.cloud.tools.eclipse.appengine.facets,
- com.google.cloud.tools.eclipse.ui.util,
+Require-Bundle: org.eclipse.ui.workbench,
+ org.eclipse.ui
+Import-Package: com.google.cloud.tools.eclipse.ui.util,
  com.google.cloud.tools.eclipse.util,
  com.google.cloud.tools.eclipse.util.status,
  com.google.cloud.tools.project;version="0.1.9",
  com.google.common.annotations;version="20.0.0",
+ com.google.common.base;version="20.0.0",
  org.eclipse.core.commands,
  org.eclipse.core.databinding.conversion,
  org.eclipse.core.databinding.validation,
@@ -33,6 +34,7 @@ Import-Package: com.google.cloud.tools.eclipse.appengine.facets,
  org.eclipse.ui.browser;ui.workbench=split,
  org.eclipse.ui.console,
  org.eclipse.ui.handlers,
+ org.eclipse.ui.ide,
  org.eclipse.wst.common.project.facet.core
 Export-Package: com.google.cloud.tools.eclipse.ui.util,
  com.google.cloud.tools.eclipse.ui.util.console,

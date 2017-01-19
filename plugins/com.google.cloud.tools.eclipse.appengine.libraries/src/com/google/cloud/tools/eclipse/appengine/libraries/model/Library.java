@@ -29,19 +29,17 @@ import org.eclipse.core.runtime.Path;
  *
  */
 public final class Library {
-  public static final String CONTAINER_PATH_PREFIX = "com.google.cloud.tools.eclipse.appengine.libraries";
+  public static final String CONTAINER_PATH_PREFIX =
+      "com.google.cloud.tools.eclipse.appengine.libraries";
 
-  private String id;
-
+  private final String id;
   private String name;
-
+  private String toolTip;
   private URI siteUri;
-
   private boolean export = true;
-
   private List<LibraryFile> libraryFiles = Collections.emptyList();
 
-  // library IDs of dependencies that are also need to be added to the build path along this library
+  // library IDs of dependencies that also need to be added to the build path with this library
   private List<String> libraryDependencies = new ArrayList<>();
 
   private LibraryRecommendation recommendation = LibraryRecommendation.OPTIONAL;
@@ -66,6 +64,14 @@ public final class Library {
 
   public void setName(String name) {
     this.name = name;
+  }
+  
+  public String getToolTip() {
+    return toolTip;
+  }
+
+  public void setToolTip(String toolTip) {
+    this.toolTip = toolTip;
   }
 
   public URI getSiteUri() {
@@ -101,8 +107,8 @@ public final class Library {
   }
 
   /**
-   * @param libraryDependencies list of libraryIds that are dependencies of this library and should be added to the 
-   * classpath, cannot be <code>null</code>
+   * @param libraryDependencies list of libraryIds that are dependencies of this library
+   * and should be added to the classpath, cannot be <code>null</code>
    */
   public void setLibraryDependencies(List<String> libraryDependencies) {
     Preconditions.checkNotNull(libraryDependencies);

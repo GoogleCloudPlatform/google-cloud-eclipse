@@ -16,9 +16,8 @@
 
 package com.google.cloud.tools.eclipse.appengine.facets;
 
-import org.eclipse.wst.common.project.facet.core.IFacetedProject;
-
 import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
+import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 
 public class AppEngineFlexFacet {
   public static final String ID = "com.google.cloud.tools.eclipse.appengine.facets.flex";
@@ -30,8 +29,7 @@ public class AppEngineFlexFacet {
    * @return true if project has the App Engine Flex facet and false otherwise
    */
   public static boolean hasAppEngineFacet(IFacetedProject project) {
-    FacetedProjectHelper facetedProjectHelper = new FacetedProjectHelper();
-    return facetedProjectHelper.projectHasFacet(project, ID);
+    return FacetedProjectHelper.projectHasFacet(project, ID);
   }
 
 }

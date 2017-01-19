@@ -25,10 +25,13 @@ import com.google.cloud.tools.eclipse.appengine.ui.AppEngineJavaComponentMissing
 import com.google.cloud.tools.eclipse.appengine.ui.CloudSdkMissingPage;
 import com.google.cloud.tools.eclipse.appengine.ui.CloudSdkOutOfDatePage;
 import com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPrompter;
+import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -42,6 +45,7 @@ public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
   private MavenAppEngineStandardWizardPage page;
   private MavenAppEngineStandardArchetypeWizardPage archetypePage;
   private File cloudSdkLocation;
+  private IWorkbench workbench;
 
   public MavenArchetypeProjectWizard() {
     setWindowTitle(Messages.getString("WIZARD_TITLE")); //$NON-NLS-1$
@@ -107,6 +111,11 @@ public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
       boolean fork = true;
       boolean cancelable = true;
       getContainer().run(fork, cancelable, runnable);
+      
+      // open most important file created by wizard in editor
+      IFile file = operation.getMostImportant();
+      WorkbenchUtil.openInEditor(workbench, file);
+      
     } catch (InterruptedException ex) {
       status = Status.CANCEL_STATUS;
     } catch (InvocationTargetException ex) {
@@ -118,6 +127,7 @@ public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
 
   @Override
   public void init(IWorkbench workbench, IStructuredSelection selection) {
+    this.workbench = workbench;
     if (cloudSdkLocation == null) {
       cloudSdkLocation = CloudSdkPrompter.getCloudSdkLocation(getShell());
       // if the user doesn't provide the Cloud SDK then we'll error in performFinish() too

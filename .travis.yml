@@ -2,8 +2,8 @@ sudo: false
 language: java
 install: 
   # download Cloud SDK
-  - wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-135.0.0-linux-x86_64.tar.gz
-  - tar -xzf google-cloud-sdk-135.0.0-linux-x86_64.tar.gz
+  - wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-139.0.1-linux-x86_64.tar.gz
+  - tar -xzf google-cloud-sdk-139.0.1-linux-x86_64.tar.gz
   # update all Cloud SDK components
   - gcloud components update --quiet
   # add App Engine component to Cloud SDK
@@ -34,4 +34,5 @@ addons:
 cache:
   directories:
    - $HOME/.m2
-
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
