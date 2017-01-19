@@ -99,9 +99,28 @@ ANALYTICS_CONSTANT=$( javap -classpath \
     grep ANALYTICS_TRACKING_ID )
 echo -e "$LOGIN_CONSTANTS\n$ANALYTICS_CONSTANT"
 
+# Verify if the constants have been injected.
 if echo -e "$LOGIN_CONSTANTS\n$ANALYTICS_CONSTANT" | \
         grep -q '@oauth.client\|@ga.tracking.id@'; then
     echo "Some constant(s) have not been injected. Halting."
+    exit 1
+fi
+
+# Verify if the injected constants have the right lengths.
+OAUTH_CLIENT_ID=$( echo "$LOGIN_CONSTANTS" | grep "OAUTH_CLIENT_ID" | \
+    sed -e 's/.* = "\(.*\)"; */\1/' )
+OAUTH_CLIENT_SECRET=$( echo "$LOGIN_CONSTANTS" | grep "OAUTH_CLIENT_SECRET" | \
+    sed -e 's/.* = "\(.*\)"; */\1/' )
+ANALYTICS_TRACKING_ID=$( echo "$ANALYTICS_CONSTANT" | \
+    sed -e 's/.* = "\(.*\)"; */\1/' )
+if [ ${#OAUTH_CLIENT_ID} -ne 72 ]; then
+    echo "The length of injected OAUTH_CLIENT_ID is not 72. Halting."
+    exit 1
+elif [ ${#OAUTH_CLIENT_SECRET} -ne 24 ]; then
+    echo "The length of injected OAUTH_CLIENT_SECRET is not 24. Halting."
+    exit 1
+elif [ ${#ANALYTICS_TRACKING_ID} -ne 13 ]; then
+    echo "The length of injected ANALYTICS_TRACKING_ID is not 13. Halting."
     exit 1
 fi
 
