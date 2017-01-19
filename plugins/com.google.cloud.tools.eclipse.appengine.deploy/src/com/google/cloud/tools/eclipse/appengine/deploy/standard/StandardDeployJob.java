@@ -25,7 +25,7 @@ import com.google.cloud.tools.appengine.cloudsdk.process.ProcessStartListener;
 import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineProjectDeployer;
 import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
 import com.google.cloud.tools.eclipse.appengine.login.CredentialHelper;
-import com.google.cloud.tools.eclipse.sdk.OutputCollectorOutputLineListener;
+import com.google.cloud.tools.eclipse.sdk.CollectingLineListener;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Joiner;
@@ -77,7 +77,7 @@ public class StandardDeployJob extends WorkspaceJob {
   private ProcessOutputLineListener stdoutLineListener;
   private ProcessOutputLineListener stderrLineListener;
   private DefaultDeployConfiguration deployConfiguration;
-  private OutputCollectorOutputLineListener errorCollectingLineListener;
+  private CollectingLineListener errorCollectingLineListener;
 
   public StandardDeployJob(IProject project,
                            Credential credential,
@@ -93,14 +93,13 @@ public class StandardDeployJob extends WorkspaceJob {
     this.stderrLineListener = stderrLineListener;
     this.deployConfiguration = deployConfiguration;
     errorCollectingLineListener =
-        new OutputCollectorOutputLineListener(this.stderrLineListener,
-                                              new Predicate<String>() {
-                                                @Override
-                                                public boolean apply(String line) {
-                                                  return line != null
-                                                      && line.startsWith(ERROR_MESSAGE_PREFIX);
-                                                }
-                                              });
+        new CollectingLineListener(new Predicate<String>() {
+                                     @Override
+                                     public boolean apply(String line) {
+                                       return line != null
+                                           && line.startsWith(ERROR_MESSAGE_PREFIX);
+                                     }
+                                   });
   }
 
   @Override
@@ -190,6 +189,7 @@ public class StandardDeployJob extends WorkspaceJob {
   private CloudSdk getCloudSdk(Path credentialFile) {
     CloudSdk cloudSdk = new CloudSdk.Builder()
                           .addStdOutLineListener(stdoutLineListener)
+                          .addStdErrLineListener(stderrLineListener)
                           .addStdErrLineListener(errorCollectingLineListener)
                           .appCommandCredentialFile(credentialFile.toFile())
                           .startListener(new StoreProcessObjectListener())

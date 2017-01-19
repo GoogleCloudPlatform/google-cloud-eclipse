@@ -25,34 +25,27 @@ import java.util.List;
 /**
  * A {@link ProcessOutputLineListener} that collects output lines satisfying some {@link Predicate}.
  */
-public class OutputCollectorOutputLineListener implements ProcessOutputLineListener {
+public class CollectingLineListener implements ProcessOutputLineListener {
 
   private final Predicate<String> condition;
   private final List<String> collectedMessages = new ArrayList<>();
-  private final ProcessOutputLineListener wrappedListener;
 
   /**
    * @param predicate all lines satisfying this predicate will be collected
    */
-  public OutputCollectorOutputLineListener(ProcessOutputLineListener wrappedListener,
-                                           Predicate<String> predicate) {
-    Preconditions.checkNotNull(wrappedListener, "wrappedListener is null");
+  public CollectingLineListener(Predicate<String> predicate) {
     Preconditions.checkNotNull(predicate, "predicate is null");
-    this.wrappedListener = wrappedListener;
     this.condition = predicate;
   }
 
   /**
-   * Evaluates the predicate on <code>line</code> and collects it if it's <code>true</code> then
-   * the <code>wrappedListener</code>'s {@link #onOutputLine(String)} method will be called
-   * (regardless of the result of the predicate evaluation).
+   * Evaluates the predicate on <code>line</code> and collects it if it's <code>true</code>.
    */
   @Override
   public void onOutputLine(String line) {
     if (condition.apply(line)) {
       collectedMessages.add(line);
     }
-    wrappedListener.onOutputLine(line);
   }
 
   public List<String> getCollectedMessages() {
