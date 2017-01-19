@@ -69,6 +69,18 @@ if [ 0 -eq $( ls -1 $SIGNED_DIR | wc -l ) ]; then
     exit 1
 fi
 
+echo "#"
+echo "# Now verifying whether jars are all signed."
+echo "#"
+for jar in $SIGNED_DIR/plugins/com.google.cloud.tools.eclipse.*.jar \
+		$SIGNED_DIR/features/com.google.cloud.tools.eclipse.*.jar; do
+    echo -n "$( basename $jar ): "
+	if ! jarsigner -strict -verify $jar; then
+        echo "unsigned artifact. Halting."
+        exit 1
+	fi
+done
+
 ###############################################################################
 echo
 echo "#"
@@ -76,14 +88,24 @@ echo "# Verify if constants have been injected..."
 echo "#"
 ask_proceed
 
-set -x
-javap -private -classpath $SIGNED_DIR/plugins/com.google.cloud.tools.eclipse.appengine.login_0.1.0.*.jar \
-       -constants com.google.cloud.tools.eclipse.appengine.login.Constants
-javap -classpath $SIGNED_DIR/plugins/com.google.cloud.tools.eclipse.usagetracker_0.1.0.*.jar \
-       -constants com.google.cloud.tools.eclipse.usagetracker.Constants
-set +x
+LOGIN_CONSTANTS=$( javap -private -classpath \
+    $SIGNED_DIR/plugins/com.google.cloud.tools.eclipse.appengine.login_*.jar \
+    -constants com.google.cloud.tools.eclipse.appengine.login.Constants \
+    | grep OAUTH_CLIENT_ )
+ANALYTICS_CONSTANT=$( javap -classpath \
+    $SIGNED_DIR/plugins/com.google.cloud.tools.eclipse.usagetracker_*.jar \
+    -constants com.google.cloud.tools.eclipse.usagetracker.Constants \
+    | grep ANALYTICS_TRACKING_ID )
+echo -e "$LOGIN_CONSTANTS\n$ANALYTICS_CONSTANT"
 
-echo "Check the output above. "
+if echo -e "$LOGIN_CONSTANTS\n$ANALYTICS_CONSTANT" | \
+        grep -q '@oauth.client\|@ga.tracking.id@'; then
+	echo "Some constant(s) have not been injected. Halting."
+	exit 1
+fi
+
+echo
+echo -n "Looks good, but check the output above once more. "
 ask_proceed
 
 ###############################################################################
