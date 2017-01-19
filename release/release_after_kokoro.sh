@@ -53,7 +53,8 @@ echo "#"
 
 echo -n "Enter GCS bucket URL taken from the Kokoro page: "
 read GCS_URL
-GCS_BUCKET_URL=$( echo $GCS_URL | sed -e 's,.*\(signedjars/staging/prod/google-cloud-eclipse/ubuntu/release/[0-9]\+/[0-9-]\+\),\1,' )
+GCS_BUCKET_URL=$( echo $GCS_URL | \
+    sed -e 's,.*\(signedjars/staging/prod/google-cloud-eclipse/ubuntu/release/[0-9]\+/[0-9-]\+\),\1,' )
 echo "GCS URL extracted: $GCS_BUCKET_URL"
 echo -n "Check if the URL is correct. "
 ask_proceed
@@ -73,12 +74,12 @@ echo "#"
 echo "# Now verifying whether jars are all signed."
 echo "#"
 for jar in $SIGNED_DIR/plugins/com.google.cloud.tools.eclipse.*.jar \
-		$SIGNED_DIR/features/com.google.cloud.tools.eclipse.*.jar; do
+        $SIGNED_DIR/features/com.google.cloud.tools.eclipse.*.jar; do
     echo -n "$( basename $jar ): "
-	if ! jarsigner -strict -verify $jar; then
+    if ! jarsigner -strict -verify $jar; then
         echo "unsigned artifact. Halting."
         exit 1
-	fi
+    fi
 done
 
 ###############################################################################
@@ -90,18 +91,18 @@ ask_proceed
 
 LOGIN_CONSTANTS=$( javap -private -classpath \
     $SIGNED_DIR/plugins/com.google.cloud.tools.eclipse.appengine.login_*.jar \
-    -constants com.google.cloud.tools.eclipse.appengine.login.Constants \
-    | grep OAUTH_CLIENT_ )
+    -constants com.google.cloud.tools.eclipse.appengine.login.Constants | \
+    grep OAUTH_CLIENT_ )
 ANALYTICS_CONSTANT=$( javap -classpath \
     $SIGNED_DIR/plugins/com.google.cloud.tools.eclipse.usagetracker_*.jar \
-    -constants com.google.cloud.tools.eclipse.usagetracker.Constants \
-    | grep ANALYTICS_TRACKING_ID )
+    -constants com.google.cloud.tools.eclipse.usagetracker.Constants | \
+    grep ANALYTICS_TRACKING_ID )
 echo -e "$LOGIN_CONSTANTS\n$ANALYTICS_CONSTANT"
 
 if echo -e "$LOGIN_CONSTANTS\n$ANALYTICS_CONSTANT" | \
         grep -q '@oauth.client\|@ga.tracking.id@'; then
-	echo "Some constant(s) have not been injected. Halting."
-	exit 1
+    echo "Some constant(s) have not been injected. Halting."
+    exit 1
 fi
 
 echo
