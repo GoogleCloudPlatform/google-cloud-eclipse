@@ -53,29 +53,30 @@ public class CustomPreferencePageSupportTest {
   @Test
   public void testHandleStatusChange_validStatusButInvalidCodeStatus() {
     IStatus status1 = new Status(Status.OK, "pluginId", Status.ERROR, "", null);
-    assertFalse(CustomPreferencePageSupport.computeValid(false, status1));
     IStatus status2 = new Status(Status.INFO, "pluginId", Status.ERROR, "", null);
-    assertFalse(CustomPreferencePageSupport.computeValid(false, status2));
     IStatus status3 = new Status(Status.WARNING, "pluginId", Status.ERROR, "", null);
-    assertFalse(CustomPreferencePageSupport.computeValid(false, status3));
 
     IStatus status4 = new Status(Status.OK, "pluginId", Status.CANCEL, "", null);
-    assertFalse(CustomPreferencePageSupport.computeValid(false, status4));
     IStatus status5 = new Status(Status.INFO, "pluginId", Status.CANCEL, "", null);
-    assertFalse(CustomPreferencePageSupport.computeValid(false, status5));
     IStatus status6 = new Status(Status.WARNING, "pluginId", Status.CANCEL, "", null);
+
+    assertFalse(CustomPreferencePageSupport.computeValid(false, status1));
+    assertFalse(CustomPreferencePageSupport.computeValid(false, status2));
+    assertFalse(CustomPreferencePageSupport.computeValid(false, status3));
+
+    assertFalse(CustomPreferencePageSupport.computeValid(false, status4));
+    assertFalse(CustomPreferencePageSupport.computeValid(false, status5));
     assertFalse(CustomPreferencePageSupport.computeValid(false, status6));
   }
 
   @Test
   public void testHandleStatusChange_validStatusAndValidCodeStatus() {
-    IStatus status1 = new Status(Status.OK, "pluginId", Status.OK, "", null);
+    IStatus status1 = new Status(Status.WARNING, "pluginId", Status.OK, "", null);
+    IStatus status2 = new Status(Status.WARNING, "pluginId", Status.INFO, "", null);
+    IStatus status3 = new Status(Status.WARNING, "pluginId", Status.WARNING, "", null);
+
     assertTrue(CustomPreferencePageSupport.computeValid(false, status1));
-
-    IStatus status2 = new Status(Status.OK, "pluginId", Status.INFO, "", null);
     assertTrue(CustomPreferencePageSupport.computeValid(false, status2));
-
-    IStatus status3 = new Status(Status.OK, "pluginId", Status.WARNING, "", null);
     assertTrue(CustomPreferencePageSupport.computeValid(false, status3));
   }
 }
