@@ -17,38 +17,42 @@
 package com.google.cloud.tools.eclipse.sdk;
 
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
-import com.google.common.base.Strings;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A {@link ProcessOutputLineListener} which also collects output lines starting with a certain
- * prefix.
- * <p>
- * If the prefix is <code>null</code> or empty, it will not collect any lines.
+ * A {@link ProcessOutputLineListener} that collects output lines satisfying some {@link Predicate}.
  */
 public class OutputCollectorOutputLineListener implements ProcessOutputLineListener {
 
-  private final String prefix;
+  private final Predicate<String> condition;
   private final List<String> collectedMessages = new ArrayList<>();
   private final ProcessOutputLineListener wrappedListener;
 
   /**
-   * @param prefix collects all lines starting with this prefix. If <code>prefix</code> is
-   * <code>null</code> or empty string, it will not collect any lines
+   * @param predicate all lines satisfying this predicate will be collected
    */
   public OutputCollectorOutputLineListener(ProcessOutputLineListener wrappedListener,
-                                           String prefix) {
+                                           Predicate<String> predicate) {
+    Preconditions.checkNotNull(wrappedListener, "wrappedListener is null");
+    Preconditions.checkNotNull(predicate, "predicate is null");
     this.wrappedListener = wrappedListener;
-    this.prefix = prefix;
+    this.condition = predicate;
   }
 
+  /**
+   * Evaluates the predicate on <code>line</code> and collects it if it's <code>true</code> then
+   * the <code>wrappedListener</code>'s {@link #onOutputLine(String)} method will be called
+   * (regardless of the result of the predicate evaluation).
+   */
   @Override
   public void onOutputLine(String line) {
-    wrappedListener.onOutputLine(line);
-    if (!Strings.isNullOrEmpty(prefix) && line.startsWith(prefix)) {
+    if (condition.apply(line)) {
       collectedMessages.add(line);
     }
+    wrappedListener.onOutputLine(line);
   }
 
   public List<String> getCollectedMessages() {

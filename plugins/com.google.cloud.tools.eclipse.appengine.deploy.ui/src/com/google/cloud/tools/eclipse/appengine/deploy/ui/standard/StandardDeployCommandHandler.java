@@ -140,7 +140,7 @@ public class StandardDeployCommandHandler extends AbstractHandler {
     consoleManager.showConsoleView(messageConsole);
   }
 
-  private static String getConsoleName(String project) {
+  private static String getConsoleName(String projectId) {
     Date now = new Date();
     String nowString = DateFormat.getDateTimeInstance(DateFormat.MEDIUM,
                                                       DateFormat.MEDIUM,
@@ -148,7 +148,7 @@ public class StandardDeployCommandHandler extends AbstractHandler {
                                  .format(now);
     return MessageFormat.format("{0} - {1} ({2})",
                                 Messages.getString("deploy.console.name"),
-                                project,
+                                projectId,
                                 nowString);
   }
 

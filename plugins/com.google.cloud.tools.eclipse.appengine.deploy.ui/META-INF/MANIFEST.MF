@@ -9,11 +9,10 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.google.cloud.tools.appengine;bundle-version="0.2.5",
  org.eclipse.ui.workbench,
- org.eclipse.core.commands,
- com.google.cloud.tools.eclipse.appengine.deploy,
- com.google.cloud.tools.eclipse.sdk
+ org.eclipse.core.commands
 Import-Package: com.google.api.client.auth.oauth2,
  com.google.cloud.tools.eclipse.appengine.deploy,
+ com.google.cloud.tools.eclipse.appengine.deploy.flex,
  com.google.cloud.tools.eclipse.appengine.deploy.standard,
  com.google.cloud.tools.eclipse.appengine.facets,
  com.google.cloud.tools.eclipse.appengine.login,

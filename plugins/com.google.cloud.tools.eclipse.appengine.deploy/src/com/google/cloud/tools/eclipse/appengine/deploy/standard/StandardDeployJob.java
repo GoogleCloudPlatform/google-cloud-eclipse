@@ -28,6 +28,7 @@ import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -76,7 +77,13 @@ public class StandardDeployJob extends WorkspaceJob {
     this.config = Preconditions.checkNotNull(config, "config is null");
     errorCollectingLineListener =
         new OutputCollectorOutputLineListener(config.getStderrLineListener(),
-                                              ERROR_MESSAGE_PREFIX);
+                                              new Predicate<String>() {
+                                                @Override
+                                                public boolean apply(String line) {
+                                                  return line != null
+                                                      && line.startsWith(ERROR_MESSAGE_PREFIX);
+                                                }
+                                              });
   }
 
   @Override
