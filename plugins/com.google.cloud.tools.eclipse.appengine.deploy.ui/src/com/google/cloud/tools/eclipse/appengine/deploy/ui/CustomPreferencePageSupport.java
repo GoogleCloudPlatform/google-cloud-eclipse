@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Google Inc.
+ * Copyright 2017 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.databinding.dialog.DialogPageSupport;
@@ -35,19 +36,26 @@ public class CustomPreferencePageSupport extends DialogPageSupport {
     super(preferencePage, dataBindingContext);
   }
 
-  // Most of the code was taken from PreferencePageSupport.handleStatusChanged().
+  // Based on PreferencePageSupport.handleStatusChanged().
   @Override
   protected void handleStatusChanged() {
     super.handleStatusChanged();
-    boolean valid = true;
-    if (currentStatusStale) {
-      valid = false;
-    } else if (currentStatus != null) {
-      valid = !currentStatus.matches(IStatus.ERROR | IStatus.CANCEL)
-          // We check plug-in-specific error message additionally.
-          && currentStatus.getCode() != IStatus.ERROR;
-    }
+    boolean valid = computeValid(currentStatusStale, currentStatus);
     ((PreferencePage) getDialogPage()).setValid(valid);
+  }
+
+  // Based on PreferencePageSupport.handleStatusChanged().
+  @VisibleForTesting
+  static boolean computeValid(boolean statusStale, IStatus status) {
+    if (statusStale) {
+      return false;
+    } else if (status == null) {
+      return true;
+    }
+
+    return !status.matches(IStatus.ERROR | IStatus.CANCEL)
+        // Additionally check plug-in-specific error code.
+        && status.getCode() != IStatus.ERROR && status.getCode() != IStatus.CANCEL;
   }
 }
 
