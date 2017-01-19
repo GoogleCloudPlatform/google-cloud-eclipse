@@ -106,6 +106,7 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
           @Override
           public int getMessageType(ValidationStatusProvider statusProvider) {
             if (statusProvider == null) {
+              setValid(true);
               return IMessageProvider.NONE;
             }
 
