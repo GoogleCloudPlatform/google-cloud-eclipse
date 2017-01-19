@@ -372,9 +372,9 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
    */
   private static class OverrideValidator extends FixedMultiValidator {
 
-    private ISWTObservableValue selectionObservable;
-    private ISWTObservableValue textObservable;
-    private IValidator validator;
+    private final ISWTObservableValue selectionObservable;
+    private final ISWTObservableValue textObservable;
+    private final IValidator validator;
 
     /**
      * @param selection must be an observable for a checkbox, i.e. a {@link Button} with
@@ -415,9 +415,9 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
    * have a valid account.
    */
   private static class AccountSelectorValidator extends FixedMultiValidator {
-    final private boolean requireValues;
-    final private AccountSelectorObservableValue accountSelectorObservableValue;
-    final private AccountSelector accountSelector;
+    private final boolean requireValues;
+    private final AccountSelectorObservableValue accountSelectorObservableValue;
+    private final AccountSelector accountSelector;
 
     private AccountSelectorValidator(boolean requireValues, AccountSelector accountSelector,
         AccountSelectorObservableValue accountSelectorObservableValue) {
