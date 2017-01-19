@@ -20,7 +20,6 @@ import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.appengine.api.deploy.DefaultDeployConfiguration;
 import com.google.cloud.tools.eclipse.appengine.deploy.CleanupOldDeploysJob;
 import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployJob;
-import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployJobConfig;
 import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployPreferences;
 import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployPreferencesConverter;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployConsole;
@@ -120,10 +119,12 @@ public class StandardDeployCommandHandler extends AbstractHandler {
                                               new DeployConsole.Factory());
 
     MessageConsoleStream outputStream = messageConsole.newMessageStream();
-    StandardDeployJobConfig config = createDeployJobConfig(project, credential,
-        workDirectory, outputStream, deployConfiguration);
 
-    StandardDeployJob deploy = new StandardDeployJob(config);
+    StandardDeployJob deploy =
+        new StandardDeployJob(project, credential, workDirectory,
+                              new MessageConsoleWriterOutputLineListener(outputStream),
+                              new MessageConsoleWriterOutputLineListener(outputStream),
+                              deployConfiguration);
     messageConsole.setJob(deploy);
     deploy.addJobChangeListener(new JobChangeAdapter() {
 
@@ -150,21 +151,6 @@ public class StandardDeployCommandHandler extends AbstractHandler {
                                 Messages.getString("deploy.console.name"),
                                 projectId,
                                 nowString);
-  }
-
-  private static StandardDeployJobConfig createDeployJobConfig(IProject project,
-                                                               Credential credential,
-                                                               IPath workDirectory,
-                                                               MessageConsoleStream outputStream,
-                                                               DefaultDeployConfiguration deployConfiguration) {
-    StandardDeployJobConfig config = new StandardDeployJobConfig();
-    config.setProject(project)
-        .setCredential(credential)
-        .setWorkDirectory(workDirectory)
-        .setStdoutLineListener(new MessageConsoleWriterOutputLineListener(outputStream))
-        .setStderrLineListener(new MessageConsoleWriterOutputLineListener(outputStream))
-        .setDeployConfiguration(deployConfiguration);
-    return config;
   }
 
   private static DefaultDeployConfiguration getDeployConfiguration(IProject project)
