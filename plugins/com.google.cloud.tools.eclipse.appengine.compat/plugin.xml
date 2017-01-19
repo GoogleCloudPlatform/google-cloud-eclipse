@@ -3,9 +3,12 @@
 <plugin>
   <!-- Dummy GPE WTP GAE facet definition to enable removing it with CT4E -->
   <extension point="org.eclipse.wst.common.project.facet.core.facets">
-    <project-facet id="com.google.appengine.facet" />
+    <project-facet id="com.google.appengine.facet">
+       <label>%gpeGaeFacetName</label>
+       <description>%obsoleteGpeFacetDescription</description>
+    </project-facet>
     <project-facet-version facet="com.google.appengine.facet" version="1">
-      <action type="INSTALL">
+      <action type="INSTALL">  <!-- Needed only for unit testing -->
         <delegate class="com.google.cloud.tools.eclipse.appengine.compat.DummyDelegate" />
       </action>
       <action type="UNINSTALL">
@@ -16,9 +19,12 @@
 
   <!-- Dummy GPE WTP GAE facet definition to enable removing it with CT4E -->
   <extension point="org.eclipse.wst.common.project.facet.core.facets">
-    <project-facet id="com.google.appengine.facet.ear" />
+    <project-facet id="com.google.appengine.facet.ear">
+       <label>%gpeGaeEarFacetName</label>
+       <description>%obsoleteGpeFacetDescription</description>
+    </project-facet>
     <project-facet-version facet="com.google.appengine.facet.ear" version="1">
-      <action type="INSTALL">
+      <action type="INSTALL">  <!-- Needed only for unit testing -->
         <delegate class="com.google.cloud.tools.eclipse.appengine.compat.DummyDelegate" />
       </action>
       <action type="UNINSTALL">
