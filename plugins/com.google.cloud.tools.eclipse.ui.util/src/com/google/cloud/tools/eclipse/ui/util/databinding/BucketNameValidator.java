@@ -18,9 +18,11 @@ package com.google.cloud.tools.eclipse.ui.util.databinding;
 
 import com.google.cloud.tools.eclipse.ui.util.Messages;
 import java.util.regex.Pattern;
+import org.eclipse.core.databinding.util.Policy;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 /**
  * Implements a simplified (more permissive) bucket name validation for Google Cloud Storage.
@@ -47,7 +49,10 @@ public class BucketNameValidator implements IValidator {
     }
     String value = (String) input;
     if (value.isEmpty()) {
-      return ValidationStatus.error(Messages.getString("bucket.name.empty")); //$NON-NLS-1$
+      // Not using ValidationStatus.error() to show the message as an info while disabling the
+      // "Deploy" button: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1120
+      return new Status(IStatus.INFO, Policy.JFACE_DATABINDING, IStatus.ERROR,
+          Messages.getString("bucket.name.empty"), null /* exception */); //$NON-NLS-1$
     } else if (CLOUD_STORAGE_BUCKET_NAME_PATTERN.matcher(value).matches()) {
       return allComponentsLengthAreValid(value);
     } else {
