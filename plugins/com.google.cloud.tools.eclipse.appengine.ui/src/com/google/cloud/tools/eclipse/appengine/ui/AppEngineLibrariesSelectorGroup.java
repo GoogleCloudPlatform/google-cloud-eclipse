@@ -30,7 +30,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -65,8 +64,6 @@ public class AppEngineLibrariesSelectorGroup implements ISelectionProvider {
     return Arrays.asList(appEngine, endpoints, objectify);
   }
 
-  private Composite parentContainer;
-
   /** The libraries that can be selected. */
   private final Map<String, Library> availableLibraries;
 
@@ -84,15 +81,14 @@ public class AppEngineLibrariesSelectorGroup implements ISelectionProvider {
       Collection<Library> availableLibraries) {
     Preconditions.checkNotNull(parentContainer, "parentContainer is null");
     Preconditions.checkNotNull(availableLibraries, "availableLibraries is null");
-    this.parentContainer = parentContainer;
     this.availableLibraries = new HashMap<>();
     for (Library library : availableLibraries) {
       this.availableLibraries.put(library.getId(), library);
     }
-    createContents();
+    createContents(parentContainer);
   }
 
-  private void createContents() {
+  private void createContents(Composite parentContainer) {
     Group apiGroup = new Group(parentContainer, SWT.NONE);
     apiGroup.setText(Messages.getString("appengine.libraries.group"));
     GridDataFactory.fillDefaults().span(2, 1).applyTo(apiGroup);
@@ -115,22 +111,30 @@ public class AppEngineLibrariesSelectorGroup implements ISelectionProvider {
    */
   public Collection<Library> getSelectedLibraries() {
     Collection<Library> libraries = new HashSet<>(explicitSelectedLibraries);
-    for (Library library : explicitSelectedLibraries) {
-      for (String depId : library.getLibraryDependencies()) {
-        libraries.add(availableLibraries.get(depId));
-      }
-    }
+    libraries.addAll(getLibraryDependencies());
     return libraries;
   }
 
+  private Collection<Library> getLibraryDependencies() {
+    Collection<Library> dependencies = new HashSet<>();
+    for (Library library : explicitSelectedLibraries) {
+      for (String depId : library.getLibraryDependencies()) {
+        dependencies.add(availableLibraries.get(depId));
+      }
+    }
+    return dependencies;
+  }
+
   private void updateButtons() {
-    Set<Library> included = new HashSet<>(getSelectedLibraries());
+    Collection<Library> dependencies = getLibraryDependencies();
     for (Entry<Library, Button> entry : libraryButtons.entrySet()) {
-      Library dependency = entry.getKey();
+      Library thisLibrary = entry.getKey();
       Button button = entry.getValue();
-      button.setSelection(included.contains(dependency));
-      button.setEnabled(
-          !included.contains(dependency) || explicitSelectedLibraries.contains(dependency));
+      boolean shouldCheck =
+          explicitSelectedLibraries.contains(thisLibrary) || dependencies.contains(thisLibrary);
+      button.setSelection(shouldCheck);
+      boolean forcedDependency = dependencies.contains(thisLibrary);
+      button.setEnabled(!forcedDependency);
     }
   }
 
