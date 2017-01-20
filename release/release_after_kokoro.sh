@@ -80,7 +80,7 @@ for jar in $SIGNED_DIR/plugins/com.google.cloud.tools.eclipse.*.jar \
         $SIGNED_DIR/features/com.google.cloud.tools.eclipse.*.jar; do
     echo -n "$( basename $jar ): "
     if ! jarsigner -strict -verify $jar; then
-        die "unsigned artifact. Halting."
+        die "Unsigned artifact found. Halting."
     fi
 done
 
