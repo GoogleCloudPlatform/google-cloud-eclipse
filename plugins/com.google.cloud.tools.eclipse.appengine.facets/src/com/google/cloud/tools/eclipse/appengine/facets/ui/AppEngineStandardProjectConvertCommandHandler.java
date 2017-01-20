@@ -51,7 +51,7 @@ public class AppEngineStandardProjectConvertCommandHandler extends AbstractHandl
       }
 
       Shell shell = HandlerUtil.getActiveShell(event);
-      if (checkFacetCompatibilty(facetedProject, new MessageDialogWrapper(shell))) {
+      if (checkFacetCompatibility(facetedProject, new MessageDialogWrapper(shell))) {
         new AppEngineStandardProjectConvertJob(facetedProject).schedule();
       }
       return null;  // Must return null per method Javadoc.
@@ -61,7 +61,7 @@ public class AppEngineStandardProjectConvertCommandHandler extends AbstractHandl
   }
 
   @VisibleForTesting
-  boolean checkFacetCompatibilty(IFacetedProject facetedProject,
+  boolean checkFacetCompatibility(IFacetedProject facetedProject,
       MessageDialogWrapper dialogWrapper) {
     if (facetedProject.hasProjectFacet(JavaFacet.FACET)) {
       if (!facetedProject.hasProjectFacet(JavaFacet.VERSION_1_7)) {

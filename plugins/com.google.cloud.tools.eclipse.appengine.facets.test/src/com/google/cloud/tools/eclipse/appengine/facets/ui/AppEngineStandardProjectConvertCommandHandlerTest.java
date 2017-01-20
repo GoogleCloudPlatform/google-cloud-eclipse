@@ -55,68 +55,68 @@ public class AppEngineStandardProjectConvertCommandHandlerTest {
   }
 
   @Test
-  public void testCheckFacetCompatibilty_noFacetsInstalled() throws CoreException {
+  public void testCheckFacetCompatibility_noFacetsInstalled() throws CoreException {
     assertFalse(facetedProject.hasProjectFacet(JavaFacet.FACET));
     assertFalse(facetedProject.hasProjectFacet(WebFacetUtils.WEB_FACET));
 
-    assertTrue(commandHandler.checkFacetCompatibilty(facetedProject, mockDialogWrapper));
+    assertTrue(commandHandler.checkFacetCompatibility(facetedProject, mockDialogWrapper));
     verify(mockDialogWrapper, never()).openInformation(anyString(), anyString());
   }
 
   @Test
-  public void testCheckFacetCompatibilty_java1_7FacetIsCompatible() throws CoreException {
+  public void testCheckFacetCompatibility_java1_7FacetIsCompatible() throws CoreException {
     facetedProject.installProjectFacet(JavaFacet.VERSION_1_7, null, null);
     assertTrue(facetedProject.hasProjectFacet(JavaFacet.VERSION_1_7));
 
-    assertTrue(commandHandler.checkFacetCompatibilty(facetedProject, mockDialogWrapper));
+    assertTrue(commandHandler.checkFacetCompatibility(facetedProject, mockDialogWrapper));
     verify(mockDialogWrapper, never()).openInformation(anyString(), anyString());
   }
 
   @Test
-  public void testCheckFacetCompatibilty_web2_5FacetIsCompatible() throws CoreException {
+  public void testCheckFacetCompatibility_web2_5FacetIsCompatible() throws CoreException {
     facetedProject.installProjectFacet(JavaFacet.VERSION_1_7, null, null);
     facetedProject.installProjectFacet(WebFacetUtils.WEB_25, null, null);
     assertTrue(facetedProject.hasProjectFacet(WebFacetUtils.WEB_25));
 
-    assertTrue(commandHandler.checkFacetCompatibilty(facetedProject, mockDialogWrapper));
+    assertTrue(commandHandler.checkFacetCompatibility(facetedProject, mockDialogWrapper));
     verify(mockDialogWrapper, never()).openInformation(anyString(), anyString());
   }
 
   @Test
-  public void testCheckFacetCompatibilty_java1_6FacetIsIncompatible() throws CoreException {
+  public void testCheckFacetCompatibility_java1_6FacetIsIncompatible() throws CoreException {
     facetedProject.installProjectFacet(JavaFacet.VERSION_1_6, null, null);
     assertTrue(facetedProject.hasProjectFacet(JavaFacet.VERSION_1_6));
 
-    assertFalse(commandHandler.checkFacetCompatibilty(facetedProject, mockDialogWrapper));
+    assertFalse(commandHandler.checkFacetCompatibility(facetedProject, mockDialogWrapper));
     verify(mockDialogWrapper, times(1)).openInformation(anyString(), anyString());
   }
 
   @Test
-  public void testCheckFacetCompatibilty_java1_8FacetIsIncompatible() throws CoreException {
+  public void testCheckFacetCompatibility_java1_8FacetIsIncompatible() throws CoreException {
     facetedProject.installProjectFacet(JavaFacet.VERSION_1_8, null, null);
     assertTrue(facetedProject.hasProjectFacet(JavaFacet.VERSION_1_8));
 
-    assertFalse(commandHandler.checkFacetCompatibilty(facetedProject, mockDialogWrapper));
+    assertFalse(commandHandler.checkFacetCompatibility(facetedProject, mockDialogWrapper));
     verify(mockDialogWrapper, times(1)).openInformation(anyString(), anyString());
   }
 
   @Test
-  public void testCheckFacetCompatibilty_web2_4FacetIsIncompatible() throws CoreException {
+  public void testCheckFacetCompatibility_web2_4FacetIsIncompatible() throws CoreException {
     facetedProject.installProjectFacet(JavaFacet.VERSION_1_7, null, null);
     facetedProject.installProjectFacet(WebFacetUtils.WEB_24, null, null);
     assertTrue(facetedProject.hasProjectFacet(WebFacetUtils.WEB_24));
 
-    assertFalse(commandHandler.checkFacetCompatibilty(facetedProject, mockDialogWrapper));
+    assertFalse(commandHandler.checkFacetCompatibility(facetedProject, mockDialogWrapper));
     verify(mockDialogWrapper, times(1)).openInformation(anyString(), anyString());
   }
 
   @Test
-  public void testCheckFacetCompatibilty_web3_0FacetIsIncompatible() throws CoreException {
+  public void testCheckFacetCompatibility_web3_0FacetIsIncompatible() throws CoreException {
     facetedProject.installProjectFacet(JavaFacet.VERSION_1_7, null, null);
     facetedProject.installProjectFacet(WebFacetUtils.WEB_30, null, null);
     assertTrue(facetedProject.hasProjectFacet(WebFacetUtils.WEB_30));
 
-    assertFalse(commandHandler.checkFacetCompatibilty(facetedProject, mockDialogWrapper));
+    assertFalse(commandHandler.checkFacetCompatibility(facetedProject, mockDialogWrapper));
     verify(mockDialogWrapper, times(1)).openInformation(anyString(), anyString());
   }
 }
