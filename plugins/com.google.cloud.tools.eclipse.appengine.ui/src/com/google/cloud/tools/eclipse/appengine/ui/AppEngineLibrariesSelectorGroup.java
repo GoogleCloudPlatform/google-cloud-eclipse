@@ -133,8 +133,8 @@ public class AppEngineLibrariesSelectorGroup implements ISelectionProvider {
       boolean shouldCheck =
           explicitSelectedLibraries.contains(thisLibrary) || dependencies.contains(thisLibrary);
       button.setSelection(shouldCheck);
-      boolean forcedDepdency = dependencies.contains(thisLibrary);
-      button.setEnabled(!forcedDepdency);
+      boolean forcedDependency = dependencies.contains(thisLibrary);
+      button.setEnabled(!forcedDependency);
     }
   }
 
