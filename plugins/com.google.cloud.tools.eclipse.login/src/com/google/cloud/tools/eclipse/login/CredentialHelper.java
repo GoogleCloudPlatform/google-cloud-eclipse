@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.cloud.tools.eclipse.login.Constants;
 import com.google.gson.Gson;
 
 /**

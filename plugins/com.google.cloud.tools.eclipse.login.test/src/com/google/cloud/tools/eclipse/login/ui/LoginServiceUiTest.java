@@ -21,6 +21,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.cloud.tools.eclipse.login.ui.LoginServiceUi.LocalServerReceiverWrapper;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -30,8 +31,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Semaphore;
 import org.junit.Assert;
 import org.junit.Test;
-
-import com.google.cloud.tools.eclipse.login.ui.LoginServiceUi.LocalServerReceiverWrapper;
 
 public class LoginServiceUiTest {
 

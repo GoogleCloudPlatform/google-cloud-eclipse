@@ -17,7 +17,6 @@
 package com.google.cloud.tools.eclipse.login;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
-import com.google.cloud.tools.eclipse.login.Constants;
 import com.google.cloud.tools.eclipse.login.ui.LoginServiceUi;
 import com.google.cloud.tools.ide.login.Account;
 import com.google.cloud.tools.ide.login.GoogleLoginState;
