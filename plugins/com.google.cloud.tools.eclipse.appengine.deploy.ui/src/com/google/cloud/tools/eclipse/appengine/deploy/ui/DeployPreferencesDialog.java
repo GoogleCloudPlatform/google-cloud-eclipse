@@ -105,9 +105,18 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
         .setValidationMessageProvider(new ValidationMessageProvider() {
           @Override
           public int getMessageType(ValidationStatusProvider statusProvider) {
+            if (statusProvider == null) {
+              setValid(true);
+              return IMessageProvider.NONE;
+            }
+
+            IStatus status = (IStatus) statusProvider.getValidationStatus().getValue();
             int type = super.getMessageType(statusProvider);
-            setValid(type != IMessageProvider.ERROR);
-            return type;
+            // status.getCode() != Status.ERROR is to show an "ERROR" validation message as a
+            // different severity message (e.g., INFO) while it's actually an error.
+            // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1120
+            setValid(type != IMessageProvider.ERROR && status.getCode() != Status.ERROR);
+            return super.getMessageType(statusProvider);
           }
         });
     return dialogArea;
