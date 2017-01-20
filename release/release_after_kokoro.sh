@@ -114,11 +114,11 @@ OAUTH_CLIENT_SECRET=$( echo "$LOGIN_CONSTANTS" | grep "OAUTH_CLIENT_SECRET" | \
 ANALYTICS_TRACKING_ID=$( echo "$ANALYTICS_CONSTANT" | \
     sed -e 's/.* = "\(.*\)"; */\1/' )
 [ ${#OAUTH_CLIENT_ID} -ne 72 ] && \
-    die "OAUTH_CLIENT_ID is not 72. Halting."
+    die "OAUTH_CLIENT_ID is not of length 72. Halting."
 [ ${#OAUTH_CLIENT_SECRET} -ne 24 ] && \
-    die "The length of injected OAUTH_CLIENT_SECRET is not 24. Halting."
+    die "OAUTH_CLIENT_SECRET is not of length 24. Halting."
 [ ${#ANALYTICS_TRACKING_ID} -ne 13 ] && \
-    die "The length of injected ANALYTICS_TRACKING_ID is not 13. Halting."
+    die "ANALYTICS_TRACKING_ID is not of length 13. Halting."
 
 echo
 echo -n "Looks good, but check the output above once more. "
