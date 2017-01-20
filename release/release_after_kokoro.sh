@@ -77,8 +77,8 @@ echo "#"
 ask_proceed
 
 set -x
-javap -private -classpath $SIGNED_DIR/plugins/com.google.cloud.tools.eclipse.appengine.login_0.1.0.*.jar \
-       -constants com.google.cloud.tools.eclipse.appengine.login.Constants
+javap -private -classpath $SIGNED_DIR/plugins/com.google.cloud.tools.eclipse.login_0.1.0.*.jar \
+       -constants com.google.cloud.tools.eclipse.login.Constants
 javap -classpath $SIGNED_DIR/plugins/com.google.cloud.tools.eclipse.usagetracker_0.1.0.*.jar \
        -constants com.google.cloud.tools.eclipse.usagetracker.Constants
 set +x

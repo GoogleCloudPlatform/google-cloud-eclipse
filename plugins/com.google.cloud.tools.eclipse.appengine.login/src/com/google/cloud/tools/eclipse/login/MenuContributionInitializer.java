@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.login;
+package com.google.cloud.tools.eclipse.login;
 
 import org.eclipse.ui.IStartup;
 import org.eclipse.ui.IWorkbench;
@@ -30,7 +30,7 @@ public class MenuContributionInitializer implements IStartup {
       @Override
       public void run() {
         workbench.getService(ICommandService.class).refreshElements(
-            "com.google.cloud.tools.eclipse.appengine.login.commands.loginCommand", null); //$NON-NLS-1$
+            "com.google.cloud.tools.eclipse.login.commands.loginCommand", null); //$NON-NLS-1$
       }
     });
   }

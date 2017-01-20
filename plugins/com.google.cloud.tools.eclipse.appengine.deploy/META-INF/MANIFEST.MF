@@ -22,7 +22,7 @@ Export-Package: com.google.cloud.tools.eclipse.appengine.deploy,
  com.google.cloud.tools.eclipse.appengine.deploy.flex,
  com.google.cloud.tools.eclipse.appengine.deploy.standard
 Import-Package: com.google.api.client.auth.oauth2,
- com.google.cloud.tools.eclipse.appengine.login,
+ com.google.cloud.tools.eclipse.login,
  com.google.cloud.tools.eclipse.sdk,
  org.eclipse.core.runtime;bundle-symbolic-name:="org.eclipse.core.runtime",
  org.eclipse.core.runtime.preferences;version="3.3.0",

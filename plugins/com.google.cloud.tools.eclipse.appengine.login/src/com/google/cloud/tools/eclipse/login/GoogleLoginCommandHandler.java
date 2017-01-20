@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.login;
+package com.google.cloud.tools.eclipse.login;
 
-import com.google.cloud.tools.eclipse.appengine.login.ui.AccountsPanel;
+import com.google.cloud.tools.eclipse.login.ui.AccountsPanel;
 import com.google.cloud.tools.eclipse.ui.util.ServiceUtils;
 
 import org.eclipse.core.commands.AbstractHandler;

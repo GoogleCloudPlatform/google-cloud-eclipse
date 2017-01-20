@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.login.ui;
+package com.google.cloud.tools.eclipse.login.ui;
 
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
 import com.google.api.client.repackaged.com.google.common.annotations.VisibleForTesting;
-import com.google.cloud.tools.eclipse.appengine.login.GoogleLoginService;
-import com.google.cloud.tools.eclipse.appengine.login.Messages;
+import com.google.cloud.tools.eclipse.login.GoogleLoginService;
+import com.google.cloud.tools.eclipse.login.Messages;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.cloud.tools.ide.login.UiFacade;
@@ -88,7 +88,7 @@ public class LoginServiceUi implements UiFacade {
       @Override
       public void run() {
         serviceLocator.getService(ICommandService.class).refreshElements(
-            "com.google.cloud.tools.eclipse.appengine.login.commands.loginCommand", //$NON-NLS-1$
+            "com.google.cloud.tools.eclipse.login.commands.loginCommand", //$NON-NLS-1$
             null);
       }
     });

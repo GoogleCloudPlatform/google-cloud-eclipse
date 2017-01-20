@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.login;
+package com.google.cloud.tools.eclipse.login;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -26,7 +26,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.cloud.tools.eclipse.appengine.login.ui.LoginServiceUi;
+import com.google.cloud.tools.eclipse.login.ui.LoginServiceUi;
 import com.google.cloud.tools.ide.login.Account;
 import com.google.cloud.tools.ide.login.GoogleLoginState;
 import com.google.cloud.tools.ide.login.LoggerFacade;

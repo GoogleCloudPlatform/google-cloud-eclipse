@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.login;
+package com.google.cloud.tools.eclipse.login;
 
 import org.eclipse.core.runtime.Platform;
 
