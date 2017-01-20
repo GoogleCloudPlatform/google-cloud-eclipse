@@ -102,7 +102,7 @@ ANALYTICS_CONSTANT=$( javap -classpath \
 echo -e "$LOGIN_CONSTANTS\n$ANALYTICS_CONSTANT"
 
 # Verify if the constants have been injected.
-if [[ "${LOGIN_CONSTANTS}${ANALYTICS_CONSTANT}" =~ "@" ]]; then
+if echo "${LOGIN_CONSTANTS}${ANALYTICS_CONSTANT}" | grep -q @; then
     die "Some constant(s) have not been injected. Halting."
 fi
 
