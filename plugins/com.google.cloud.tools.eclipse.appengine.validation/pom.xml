@@ -8,19 +8,11 @@
     <version>0.1.0-SNAPSHOT</version>
     <relativePath>../../</relativePath>
   </parent>
-  <artifactId>com.google.cloud.tools.eclipse.appengine.whitelist.test</artifactId>
+  <artifactId>com.google.cloud.tools.eclipse.appengine.validation</artifactId>
   <version>0.1.0-SNAPSHOT</version>
-  <packaging>eclipse-test-plugin</packaging>
-
-  <build>
-    <sourceDirectory>src</sourceDirectory>
-    <plugins>
-      <plugin>
-        <groupId>org.eclipse.tycho</groupId>
-        <artifactId>tycho-surefire-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
+  <packaging>eclipse-plugin</packaging>
+  
+  <dependencies>
+  </dependencies>
+        
 </project>
-
-

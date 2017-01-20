@@ -8,7 +8,7 @@
       point="org.eclipse.jdt.core.compilationParticipant">
      <compilationParticipant
          createsProblems="true"
-         class="com.google.cloud.tools.eclipse.appengine.whitelist.JreWhitelistChecker"
+         class="com.google.cloud.tools.eclipse.appengine.validation.JreWhitelistChecker"
          id="APT"
          requiredSourceLevel="1.5">
      </compilationParticipant>

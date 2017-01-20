@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.whitelist;
+package com.google.cloud.tools.eclipse.appengine.validation;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.compiler.CompilationParticipant;
 
-public class JreWhitelistCheckerTest {
+// see JavaCompilationParticipant.java in old plugin
+public class JreWhitelistChecker extends CompilationParticipant {
 
-  private JreWhitelistChecker checker = new JreWhitelistChecker();
-
-  @Test
-  public void test() {
-    Assert.assertFalse(checker.isActive(null));
+  @Override
+  public boolean isActive(IJavaProject project) {
+    return false;
   }
-
+  
 }
