@@ -92,7 +92,7 @@ echo "#"
 ask_proceed
 
 LOGIN_CONSTANTS=$( javap -private -classpath \
-    $SIGNED_DIR/plugins/com.google.cloud.tools.eclipse.appengine.login_*.jar \
+    $SIGNED_DIR/plugins/com.google.cloud.tools.eclipse.login_*.jar \
     -constants com.google.cloud.tools.eclipse.login.Constants | \
     grep OAUTH_CLIENT_ )
 ANALYTICS_CONSTANT=$( javap -classpath \
