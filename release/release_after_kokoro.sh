@@ -3,22 +3,26 @@
 # This script starts with Step 14 in the release process (i.e., after Kokoro
 # has built and signed the binaries.)
 #
-# It is safe to re-run this script again when something goes wrong, provided
+# It is safe to rerun this script again when something goes wrong, provided
 # that you didn't complete the final step, which means you are done. (The final
-# step grants public access to files uploaded to cloud-tools-for-eclipse.)
+# step grants public access to the files uploaded to cloud-tools-for-eclipse.)
 #
 # Note: this script clears and creates "$HOME/CT4E_release_work" (after
-# confirmation) for temporary work directory, which can be inspected later
+# confirmation) for a temporary work directory, which can be inspected later
 # and/or deleted safely anytime.
 
-if [ -z "$ECLIPSE_HOME" ]; then
-    echo 'The release steps require running an Eclipse binary.'
-    echo 'Set $ECLIPSE_HOME before running this script.'
+die() {
+    for line in "$@"; do
+        echo $line
+    done
     exit 1
-elif [ ! -x "$ECLIPSE_HOME/eclipse" ]; then
-    echo "'$ECLIPSE_HOME/eclipse' is not an executable. Halting."
-    exit 1
-fi
+}
+
+[ -z "$ECLIPSE_HOME" ] && \
+    die 'The release steps require running an Eclipse binary.' \
+        'Set $ECLIPSE_HOME before running this script.'
+[ ! -x "$ECLIPSE_HOME/eclipse" ] && \
+    die "'$ECLIPSE_HOME/eclipse' is not an executable. Halting."
 
 WORK_DIR=$HOME/CT4E_release_work
 SIGNED_DIR=$WORK_DIR/signed
@@ -53,7 +57,8 @@ echo "#"
 
 echo -n "Enter GCS bucket URL taken from the Kokoro page: "
 read GCS_URL
-GCS_BUCKET_URL=$( echo $GCS_URL | sed -e 's,.*\(signedjars/staging/prod/google-cloud-eclipse/ubuntu/release/[0-9]\+/[0-9-]\+\),\1,' )
+GCS_BUCKET_URL=$( echo $GCS_URL | \
+    sed -e 's,.*\(signedjars/staging/prod/google-cloud-eclipse/ubuntu/release/[0-9]\+/[0-9-]\+\),\1,' )
 echo "GCS URL extracted: $GCS_BUCKET_URL"
 echo -n "Check if the URL is correct. "
 ask_proceed
@@ -64,10 +69,20 @@ mkdir $SIGNED_DIR && \
 set +x
 
 if [ 0 -eq $( ls -1 $SIGNED_DIR | wc -l ) ]; then
-    echo "'$SIGNED_DIR' is empty. Wrong GCS bucket URL provided?"
-    echo "Fix the problem and rerun the script. Halting."
-    exit 1
+    die "'$SIGNED_DIR' is empty. Wrong GCS bucket URL provided?" \
+        "Fix the problem and rerun the script. Halting."
 fi
+
+echo "#"
+echo "# Now verifying whether jars are all signed."
+echo "#"
+for jar in $SIGNED_DIR/plugins/com.google.cloud.tools.eclipse.*.jar \
+        $SIGNED_DIR/features/com.google.cloud.tools.eclipse.*.jar; do
+    echo -n "$( basename $jar ): "
+    if ! jarsigner -strict -verify $jar; then
+        die "Unsigned artifact found. Halting."
+    fi
+done
 
 ###############################################################################
 echo
@@ -76,14 +91,37 @@ echo "# Verify if constants have been injected..."
 echo "#"
 ask_proceed
 
-set -x
-javap -private -classpath $SIGNED_DIR/plugins/com.google.cloud.tools.eclipse.appengine.login_0.1.0.*.jar \
-       -constants com.google.cloud.tools.eclipse.appengine.login.Constants
-javap -classpath $SIGNED_DIR/plugins/com.google.cloud.tools.eclipse.usagetracker_0.1.0.*.jar \
-       -constants com.google.cloud.tools.eclipse.usagetracker.Constants
-set +x
+LOGIN_CONSTANTS=$( javap -private -classpath \
+    $SIGNED_DIR/plugins/com.google.cloud.tools.eclipse.login_*.jar \
+    -constants com.google.cloud.tools.eclipse.login.Constants | \
+    grep OAUTH_CLIENT_ )
+ANALYTICS_CONSTANT=$( javap -classpath \
+    $SIGNED_DIR/plugins/com.google.cloud.tools.eclipse.usagetracker_*.jar \
+    -constants com.google.cloud.tools.eclipse.usagetracker.Constants | \
+    grep ANALYTICS_TRACKING_ID )
+echo -e "$LOGIN_CONSTANTS\n$ANALYTICS_CONSTANT"
 
-echo "Check the output above. "
+# Verify if the constants have been injected.
+if echo "${LOGIN_CONSTANTS}${ANALYTICS_CONSTANT}" | grep -q @; then
+    die "Some constant(s) have not been injected. Halting."
+fi
+
+# Verify if the injected constants have the right lengths.
+OAUTH_CLIENT_ID=$( echo "$LOGIN_CONSTANTS" | grep "OAUTH_CLIENT_ID" | \
+    sed -e 's/.* = "\(.*\)"; */\1/' )
+OAUTH_CLIENT_SECRET=$( echo "$LOGIN_CONSTANTS" | grep "OAUTH_CLIENT_SECRET" | \
+    sed -e 's/.* = "\(.*\)"; */\1/' )
+ANALYTICS_TRACKING_ID=$( echo "$ANALYTICS_CONSTANT" | \
+    sed -e 's/.* = "\(.*\)"; */\1/' )
+[ ${#OAUTH_CLIENT_ID} -ne 72 ] && \
+    die "OAUTH_CLIENT_ID is not of length 72. Halting."
+[ ${#OAUTH_CLIENT_SECRET} -ne 24 ] && \
+    die "OAUTH_CLIENT_SECRET is not of length 24. Halting."
+[ ${#ANALYTICS_TRACKING_ID} -ne 13 ] && \
+    die "ANALYTICS_TRACKING_ID is not of length 13. Halting."
+
+echo
+echo -n "Looks good, but check the output above once more. "
 ask_proceed
 
 ###############################################################################
@@ -110,8 +148,7 @@ $ECLIPSE_HOME/eclipse -nosplash -consolelog \
 set +x
 
 if [ ! -e "$LOCAL_REPO/artifacts.xml" -o ! -e "$LOCAL_REPO/content.xml" ]; then
-    echo "The files have not been generated. Halting."
-    exit 1
+    die "The files have not been generated. Halting."
 fi
 
 ###############################################################################
@@ -127,8 +164,7 @@ gsutil cp gs://gcloud-for-eclipse-testing/category.xml $WORK_DIR
 set +x
 
 if [ ! -e "$WORK_DIR/category.xml" ]; then
-    echo "The file was not copied. Halting."
-    exit 1
+    die "The file was not copied. Halting."
 fi
 
 ###############################################################################

@@ -29,7 +29,6 @@ import java.io.IOException;
 import java.nio.file.NotDirectoryException;
 import java.nio.file.Paths;
 import java.util.Collection;
-import org.eclipse.aether.repository.RepositoryPolicy;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
@@ -40,7 +39,6 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.wizard.WizardPage;
-import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -285,17 +283,8 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     if (!validateAppEngineProjectDetails()) {
       return false;
     }
-    checkMavenUpdateSettings();
 
     return true;
-  }
-
-  private void checkMavenUpdateSettings() {
-    String globalUpdatePolicy = MavenPlugin.getMavenConfiguration().getGlobalUpdatePolicy();
-    if (!appEngineLibrariesSelectorGroup.getSelectedLibraries().isEmpty()
-        && RepositoryPolicy.UPDATE_POLICY_NEVER.equals(globalUpdatePolicy)) {
-      setMessage(Messages.getString("M2E_GLOBAL_UPDATES_PREVENT_CHECKS"), WARNING); //$NON-NLS-1$
-    }
   }
 
   @VisibleForTesting

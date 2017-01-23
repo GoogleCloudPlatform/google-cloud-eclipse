@@ -17,21 +17,27 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.standard;
 
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.cloud.tools.appengine.api.deploy.DefaultDeployConfiguration;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessExitListener;
+import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessStartListener;
 import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineProjectDeployer;
 import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
-import com.google.cloud.tools.eclipse.appengine.login.CredentialHelper;
+import com.google.cloud.tools.eclipse.login.CredentialHelper;
+import com.google.cloud.tools.eclipse.sdk.CollectingLineListener;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
-import com.google.common.base.Preconditions;
+import com.google.common.base.Joiner;
+import com.google.common.base.Predicate;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -57,6 +63,7 @@ public class StandardDeployJob extends WorkspaceJob {
   private static final String STAGING_DIRECTORY_NAME = "staging";
   private static final String EXPLODED_WAR_DIRECTORY_NAME = "exploded-war";
   private static final String CREDENTIAL_FILENAME = "gcloud-credentials.json";
+  private static final String ERROR_MESSAGE_PREFIX = "ERROR:";
 
   private static final Logger logger = Logger.getLogger(StandardDeployJob.class.getName());
 
@@ -64,11 +71,35 @@ public class StandardDeployJob extends WorkspaceJob {
   private IStatus cloudSdkProcessStatus = Status.OK_STATUS;
   private Process process;
 
-  private final StandardDeployJobConfig config;
+  private IProject project;
+  private Credential credential;
+  protected IPath workDirectoryParent;
+  private ProcessOutputLineListener stdoutLineListener;
+  private ProcessOutputLineListener stderrLineListener;
+  private DefaultDeployConfiguration deployConfiguration;
+  private CollectingLineListener errorCollectingLineListener;
 
-  public StandardDeployJob(StandardDeployJobConfig config) {
+  public StandardDeployJob(IProject project,
+                           Credential credential,
+                           IPath workDirectoryParent,
+                           ProcessOutputLineListener stdoutLineListener,
+                           ProcessOutputLineListener stderrLineListener,
+                           DefaultDeployConfiguration deployConfiguration) {
     super(Messages.getString("deploy.standard.runnable.name")); //$NON-NLS-1$
-    this.config = Preconditions.checkNotNull(config, "config is null");
+    this.project = project;
+    this.credential = credential;
+    this.workDirectoryParent = workDirectoryParent;
+    this.stdoutLineListener = stdoutLineListener;
+    this.stderrLineListener = stderrLineListener;
+    this.deployConfiguration = deployConfiguration;
+    errorCollectingLineListener =
+        new CollectingLineListener(new Predicate<String>() {
+                                     @Override
+                                     public boolean apply(String line) {
+                                       return line != null
+                                           && line.startsWith(ERROR_MESSAGE_PREFIX);
+                                     }
+                                   });
   }
 
   @Override
@@ -76,21 +107,21 @@ public class StandardDeployJob extends WorkspaceJob {
     SubMonitor progress = SubMonitor.convert(monitor, 100);
     Path credentialFile = null;
     try {
-      IPath workDirectory = config.getWorkDirectory();
+      IPath workDirectory = workDirectoryParent;
       IPath explodedWarDirectory = workDirectory.append(EXPLODED_WAR_DIRECTORY_NAME);
       IPath stagingDirectory = workDirectory.append(STAGING_DIRECTORY_NAME);
       credentialFile = workDirectory.append(CREDENTIAL_FILENAME).toFile().toPath();
-      saveCredential(credentialFile, config.getCredential());
+      saveCredential(credentialFile, credential);
       CloudSdk cloudSdk = getCloudSdk(credentialFile);
 
       try {
-        getJobManager().beginRule(config.getProject(), progress);
+        getJobManager().beginRule(project, progress);
         new ExplodedWarPublisher().publish(
-            config.getProject(), explodedWarDirectory, progress.newChild(10));
+            project, explodedWarDirectory, progress.newChild(10));
         new StandardProjectStaging().stage(
             explodedWarDirectory, stagingDirectory, cloudSdk, progress.newChild(20));
       } finally {
-        getJobManager().endRule(config.getProject());
+        getJobManager().endRule(project);
       }
 
       if (!cloudSdkProcessStatus.isOK()) {
@@ -98,13 +129,17 @@ public class StandardDeployJob extends WorkspaceJob {
           return cloudSdkProcessStatus;
         }
         // temporary way of error handling, after #439 is fixed, it'll be cleaner
-        return StatusUtil.error(getClass(), "Staging failed, check the error message in the Console View");
+        String errorMessage =
+            getErrorMessageOrDefault(Messages.getString("deploy.job.staging.failed"));
+        return StatusUtil.error(getClass(), errorMessage);
       }
       new AppEngineProjectDeployer().deploy(
-          stagingDirectory, cloudSdk, config.getDeployConfiguration(), progress.newChild(70));
+          stagingDirectory, cloudSdk, deployConfiguration, progress.newChild(70));
       if (!cloudSdkProcessStatus.isOK() && cloudSdkProcessStatus != Status.CANCEL_STATUS) {
         // temporary way of error handling, after #439 is fixed, it'll be cleaner
-        return StatusUtil.error(getClass(), "Deploy failed, check the error message in the Console View");
+        String errorMessage =
+            getErrorMessageOrDefault(Messages.getString("deploy.job.deploy.failed"));
+        return StatusUtil.error(getClass(), errorMessage);
       }
 
       return cloudSdkProcessStatus;
@@ -133,15 +168,29 @@ public class StandardDeployJob extends WorkspaceJob {
     super.canceling();
   }
 
-  private void saveCredential(Path destination, Credential credential) throws IOException {
+  /**
+   * @return the error message obtained from <code>config.getErrorMessageProvider()</code> or
+   * <code>defaultMessage</code>
+   */
+  private String getErrorMessageOrDefault(String defaultMessage) {
+    List<String> messages = errorCollectingLineListener.getCollectedMessages();
+    if (!messages.isEmpty()) {
+      return Joiner.on('\n').join(messages);
+    } else {
+      return defaultMessage;
+    }
+  }
+
+  private static void saveCredential(Path destination, Credential credential) throws IOException {
     String jsonCredential = new CredentialHelper().toJson(credential);
     Files.write(destination, jsonCredential.getBytes(StandardCharsets.UTF_8));
   }
 
   private CloudSdk getCloudSdk(Path credentialFile) {
     CloudSdk cloudSdk = new CloudSdk.Builder()
-                          .addStdOutLineListener(config.getStdoutLineListener())
-                          .addStdErrLineListener(config.getStderrLineListener())
+                          .addStdOutLineListener(stdoutLineListener)
+                          .addStdErrLineListener(stderrLineListener)
+                          .addStdErrLineListener(errorCollectingLineListener)
                           .appCommandCredentialFile(credentialFile.toFile())
                           .startListener(new StoreProcessObjectListener())
                           .exitListener(new RecordProcessError())

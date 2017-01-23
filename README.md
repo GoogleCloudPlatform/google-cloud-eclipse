@@ -210,33 +210,39 @@ described below.
 	 and follow the process to install the recommended plugin
 	 connectors.
 
-  1. Right-click the `gcloud-eclipse-tools.launch` file under the `trunk` module in the
-  `Package Explorer`.
+5. Create and initialize a launch configuration:
 
-  1. Select `Run Configurations...`
+  1. Right-click the `gcloud-eclipse-tools.launch` file under the
+  `google-cloud-eclipse` module in the `Package Explorer`.
 
-  1. Go to the second tab for `Arguments`
+  1. Select `Run As` > `Run Configurations...`
 
-  1. Click the `Variables...` button
+  1. Set variables required for launch:
 
-  1. Click the `Edit variables...` button
+    1. Go to the second tab for `Arguments`
 
-  1. Click `New...`
+    1. Click the `Variables...` button for `VM argument:`
 
-  1. Set the name to `oauth_id`, and the value to the value you want to use, description optional
+    1. Click the `Edit variables...` button
 
-  1. Click `OK`, the variable will appear in the list
+    1. Click `New...`
 
-  1. Repeat steps 6-8 but use `oauth_secret` as the name and use the corresponding value
+    1. Set the name to `oauth_id`, and the value to the value you want to use
+    (description optional)
 
-  1. Click `OK` to close the edit variables dialog
+    1. Click `OK`, the variable will appear in the list
 
-  1. Click `Cancel` to close the variable selection dialog
+    1. Repeat steps 6-8 but use `oauth_secret` as the name and use the
+    corresponding value
 
-  1. Click `Apply` to apply the changes to the run config
+    1. Click `OK` to close the edit variables dialog
+
+    1. Click `Cancel` to close the variable selection dialog
+
+    1. Click `Apply` to apply the changes to the run config
+
+  1. From the `Run` menu, select `Run History > gcloud-eclipse-tools`
   
-  1. From the `Run` menu select `Run History > gcloud-eclipse-tools`
-
   1. A new instance of Eclipse launches with the plugin installed.
 
 

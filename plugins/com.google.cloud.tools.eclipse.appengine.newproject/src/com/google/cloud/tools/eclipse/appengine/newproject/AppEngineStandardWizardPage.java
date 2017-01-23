@@ -66,7 +66,7 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
 
     ModifyListener pageValidator = new PageValidator();
     createCustomFields(container, pageValidator);
-    
+
     // Manage APIs
     appEngineLibrariesSelectorGroup = new AppEngineLibrariesSelectorGroup(container);
 
@@ -74,17 +74,18 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
     // Show enter project name on opening
     setErrorMessage(null);
     setMessage(Messages.getString("enter.project.name"));
-    
+
     Dialog.applyDialogFont(container);
   }
 
   private void createCustomFields(Composite container, ModifyListener pageValidator) {
     Composite composite = new Composite(container, SWT.NONE);
-    
+    GridDataFactory.fillDefaults().applyTo(composite);
+
     GridLayout layout = new GridLayout();
     layout.numColumns = 2;
     composite.setLayout(layout);
-    
+
     createPackageField(composite, pageValidator);
     createServiceField(composite, pageValidator);
   }
@@ -94,7 +95,7 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
     Label packageNameLabel = new Label(parent, SWT.LEAD);
     packageNameLabel.setText(Messages.getString("java.package")); //$NON-NLS-1$
     javaPackageField = new Text(parent, SWT.BORDER);
-    
+
     javaPackageField.addModifyListener(pageValidator);
 
     GridDataFactory.fillDefaults().grab(true, false).applyTo(javaPackageField);
@@ -110,13 +111,13 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
     serviceNameField.addModifyListener(pageValidator);
 
     GridDataFactory.fillDefaults().grab(true, false).applyTo(serviceNameField);
-  }  
-  
+  }
+
   @Override
   public boolean validatePage() {
     setErrorMessage(null);
     setMessage(null);
-    
+
     if (!super.validatePage()) {
       return false;
     }

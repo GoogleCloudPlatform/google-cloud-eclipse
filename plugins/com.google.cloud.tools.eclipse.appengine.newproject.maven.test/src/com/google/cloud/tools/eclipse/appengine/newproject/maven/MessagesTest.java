@@ -26,5 +26,10 @@ public class MessagesTest {
     Assert.assertEquals(
         "Maven-based App Engine Standard Project", Messages.getString("WIZARD_TITLE"));
   }
-
+  
+  @Test
+  public void testIllegalPackageName() {
+    Assert.assertEquals("Illegal Java package name: com.example.foo",
+        Messages.getString("ILLEGAL_PACKAGE_NAME", "com.example.foo"));
+  }
 }
