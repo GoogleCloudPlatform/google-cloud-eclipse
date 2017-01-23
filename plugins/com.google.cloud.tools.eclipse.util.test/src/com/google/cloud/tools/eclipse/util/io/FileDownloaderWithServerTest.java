@@ -28,6 +28,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.junit.Rule;
 import org.junit.Test;
@@ -48,7 +49,7 @@ public class FileDownloaderWithServerTest {
   @Test
   public void testDownload_successful() throws IOException {
     FileDownloader fileDownloader = new FileDownloader(new Path(temporaryFolder.newFolder().getAbsolutePath()));
-    IPath downloadPath = fileDownloader.download(new URL(server.getAddress() + "/" + FILE_TO_DOWNLOAD));
+    IPath downloadPath = fileDownloader.download(new URL(server.getAddress() + "/" + FILE_TO_DOWNLOAD), new NullProgressMonitor());
     assertNotNull(downloadPath);
     File downloadedFile = downloadPath.toFile();
     assertTrue(downloadedFile.exists());

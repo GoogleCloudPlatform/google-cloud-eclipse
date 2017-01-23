@@ -245,7 +245,7 @@ public class AppEngineLibrariesInPluginXmlTest {
   private static Library getLibraryWithId(String libraryId) throws LibraryFactoryException {
     IExtensionRegistry registry = RegistryFactory.getRegistry();
     IConfigurationElement[] configurationElements = registry
-          .getConfigurationElementsFor(AppEngineLibraryContainerInitializer.LIBRARIES_EXTENSION_POINT);
+          .getConfigurationElementsFor(ILibraryClasspathContainerResolverService.LIBRARIES_EXTENSION_POINT);
     for (IConfigurationElement configurationElement : configurationElements) {
       if (configurationElement.getAttribute("id").equals(libraryId)) {
         return new LibraryFactory().create(configurationElement);

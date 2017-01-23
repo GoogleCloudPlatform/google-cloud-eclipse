@@ -51,9 +51,6 @@ public class MavenCoordinates {
     this.artifactId = artifactId;
   }
 
-  /**
-   * Copy constructor
-   */
   public MavenCoordinates(MavenCoordinates mavenCoordinates) {
     repository = mavenCoordinates.repository;
     groupId = mavenCoordinates.groupId;

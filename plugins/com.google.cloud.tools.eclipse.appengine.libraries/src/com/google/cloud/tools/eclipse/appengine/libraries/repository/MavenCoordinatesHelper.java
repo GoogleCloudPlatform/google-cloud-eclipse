@@ -17,19 +17,20 @@
 package com.google.cloud.tools.eclipse.appengine.libraries.repository;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.maven.artifact.Artifact;
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.JavaCore;
 
 /**
- * Provides methods to convert a {@link MavenCoordinates} object to a {@link IClasspathAttribute} and vice versa.
+ * Provides methods to convert a {@link MavenCoordinates} object to a {@link IClasspathAttribute}
+ * and vice versa.
  */
-public class MavenCoordinatesClasspathAttributesTransformer {
+public class MavenCoordinatesHelper {
 
   private static final String CLASSPATH_ATTRIBUTE_REPOSITORY =
       "com.google.cloud.tools.eclipse.appengine.libraries.repository";
@@ -44,22 +45,31 @@ public class MavenCoordinatesClasspathAttributesTransformer {
   private static final String CLASSPATH_ATTRIBUTE_CLASSIFIER =
       "com.google.cloud.tools.eclipse.appengine.libraries.classifier";
 
-  public List<IClasspathAttribute> createClasspathAttributes(Artifact artifact,
-                                                                            MavenCoordinates mavenCoordinates) {
+  private MavenCoordinatesHelper() { }
+
+  public static List<IClasspathAttribute> createClasspathAttributes(MavenCoordinates mavenCoordinates,
+                                                                    String actualVersion) {
     List<IClasspathAttribute> attributes = Lists.newArrayList(
-        JavaCore.newClasspathAttribute(CLASSPATH_ATTRIBUTE_REPOSITORY, mavenCoordinates.getRepository()),
-        JavaCore.newClasspathAttribute(CLASSPATH_ATTRIBUTE_GROUP_ID, artifact.getGroupId()),
-        JavaCore.newClasspathAttribute(CLASSPATH_ATTRIBUTE_ARTIFACT_ID, artifact.getArtifactId()),
-        JavaCore.newClasspathAttribute(CLASSPATH_ATTRIBUTE_TYPE, artifact.getType()),
-        JavaCore.newClasspathAttribute(CLASSPATH_ATTRIBUTE_VERSION, artifact.getVersion())
+        JavaCore.newClasspathAttribute(CLASSPATH_ATTRIBUTE_REPOSITORY,
+                                       mavenCoordinates.getRepository()),
+        JavaCore.newClasspathAttribute(CLASSPATH_ATTRIBUTE_GROUP_ID,
+                                       mavenCoordinates.getGroupId()),
+        JavaCore.newClasspathAttribute(CLASSPATH_ATTRIBUTE_ARTIFACT_ID,
+                                       mavenCoordinates.getArtifactId()),
+        JavaCore.newClasspathAttribute(CLASSPATH_ATTRIBUTE_TYPE,
+                                       mavenCoordinates.getType()),
+        JavaCore.newClasspathAttribute(CLASSPATH_ATTRIBUTE_VERSION,
+                                       actualVersion)
         );
-    if (artifact.getClassifier() != null) {
-      attributes.add(JavaCore.newClasspathAttribute(CLASSPATH_ATTRIBUTE_CLASSIFIER, artifact.getClassifier()));
+    if (mavenCoordinates.getClassifier() != null) {
+      attributes.add(JavaCore.newClasspathAttribute(CLASSPATH_ATTRIBUTE_CLASSIFIER,
+                                                    mavenCoordinates.getClassifier()));
     }
     return attributes;
   }
 
-  public MavenCoordinates createMavenCoordinates(IClasspathAttribute[] attributes) throws LibraryRepositoryServiceException {
+  public static MavenCoordinates createMavenCoordinates(IClasspathAttribute[] attributes) {
+    Preconditions.checkNotNull(attributes, "attributes is null");
     Map<String, String> attributeMap = new HashMap<>(attributes.length);
     for (IClasspathAttribute attribute : attributes) {
       attributeMap.put(attribute.getName(), attribute.getValue());
@@ -67,10 +77,10 @@ public class MavenCoordinatesClasspathAttributesTransformer {
     String groupId = attributeMap.get(CLASSPATH_ATTRIBUTE_GROUP_ID);
     String artifactId = attributeMap.get(CLASSPATH_ATTRIBUTE_ARTIFACT_ID);
     if (Strings.isNullOrEmpty(groupId)) {
-      throw new LibraryRepositoryServiceException("Attribute value for Maven group ID not found");
+      throw new IllegalArgumentException("Attribute value for Maven group ID not found");
     }
     if (Strings.isNullOrEmpty(artifactId)) {
-      throw new LibraryRepositoryServiceException("Attribute value for Maven artifact ID not found");
+      throw new IllegalArgumentException("Attribute value for Maven artifact ID not found");
     }
     MavenCoordinates mavenCoordinates = new MavenCoordinates(groupId, artifactId);
     if (attributeMap.containsKey(CLASSPATH_ATTRIBUTE_REPOSITORY)) {

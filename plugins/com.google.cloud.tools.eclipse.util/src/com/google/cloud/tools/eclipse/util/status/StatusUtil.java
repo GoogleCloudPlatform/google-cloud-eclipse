@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.util.status;
 
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
@@ -68,5 +69,21 @@ public class StatusUtil {
       return clazz.getName(); // what else can we do?
     }
     return bundle.getSymbolicName();
+  }
+
+  public static IStatus merge(IStatus status, IStatus newStatus) {
+    if (status == null) {
+      return newStatus;
+    } else {
+      if (status instanceof MultiStatus) {
+        ((MultiStatus) status).merge(newStatus);
+        return status;
+      } else {
+        MultiStatus  merged = new MultiStatus(status.getPlugin(), status.getCode(), status.getMessage(), status.getException());
+        merged.merge(newStatus);
+        return merged;
+      }
+    }
+    
   }
 }
