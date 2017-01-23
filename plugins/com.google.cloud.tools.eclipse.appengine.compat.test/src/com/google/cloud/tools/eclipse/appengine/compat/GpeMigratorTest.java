@@ -25,7 +25,6 @@ import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jst.server.core.FacetUtil;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
-import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.common.project.facet.core.runtime.IRuntime;
 import org.eclipse.wst.server.core.ServerCore;
@@ -55,28 +54,6 @@ public class GpeMigratorTest {
 
     GpeMigrator.removeObsoleteGpeFixtures(facetedProject, null /* monitor */);
     assertFalse(project.hasNature("com.google.appengine.eclipse.core.gaeNature"));
-  }
-
-  @Test
-  public void testRemoveObsoleteGpeFixtures_removeGpeGaeFacet() throws CoreException {
-    IProjectFacetVersion gpeGaeFacet =
-        ProjectFacetsManager.getProjectFacet("com.google.appengine.facet").getVersion("1");
-    facetedProject.installProjectFacet(gpeGaeFacet, null, null);
-    assertTrue(facetedProject.hasProjectFacet(gpeGaeFacet));
-
-    GpeMigrator.removeObsoleteGpeFixtures(facetedProject, null /* monitor */);
-    assertFalse(facetedProject.hasProjectFacet(gpeGaeFacet));
-  }
-
-  @Test
-  public void testRemoveObsoleteGpeFixtures_removeGpeGaeEarFacet() throws CoreException {
-    IProjectFacetVersion gpeGaeEarFacet =
-        ProjectFacetsManager.getProjectFacet("com.google.appengine.facet.ear").getVersion("1");
-    facetedProject.installProjectFacet(gpeGaeEarFacet, null, null);
-    assertTrue(facetedProject.hasProjectFacet(gpeGaeEarFacet));
-
-    GpeMigrator.removeObsoleteGpeFixtures(facetedProject, null /* monitor */);
-    assertFalse(facetedProject.hasProjectFacet(gpeGaeEarFacet));
   }
 
   @Test

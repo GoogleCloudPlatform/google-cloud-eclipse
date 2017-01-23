@@ -1,38 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-  <!-- Dummy GPE WTP GAE facet definition to enable removing it with CT4E -->
-  <extension point="org.eclipse.wst.common.project.facet.core.facets">
-    <project-facet id="com.google.appengine.facet">
-      <label>%gpeGaeFacetName</label>
-      <description>%obsoleteGpeFacetDescription</description>
-    </project-facet>
-    <project-facet-version facet="com.google.appengine.facet" version="1">
-      <action type="INSTALL">  <!-- Needed only for unit testing -->
-        <delegate class="com.google.cloud.tools.eclipse.appengine.compat.DummyDelegate" />
-      </action>
-      <action type="UNINSTALL">
-        <delegate class="com.google.cloud.tools.eclipse.appengine.compat.DummyDelegate" />
-      </action>
-    </project-facet-version>
-  </extension>
-
-  <!-- Dummy GPE WTP GAE facet definition to enable removing it with CT4E -->
-  <extension point="org.eclipse.wst.common.project.facet.core.facets">
-    <project-facet id="com.google.appengine.facet.ear">
-      <label>%gpeGaeEarFacetName</label>
-      <description>%obsoleteGpeFacetDescription</description>
-    </project-facet>
-    <project-facet-version facet="com.google.appengine.facet.ear" version="1">
-      <action type="INSTALL">  <!-- Needed only for unit testing -->
-        <delegate class="com.google.cloud.tools.eclipse.appengine.compat.DummyDelegate" />
-      </action>
-      <action type="UNINSTALL">
-        <delegate class="com.google.cloud.tools.eclipse.appengine.compat.DummyDelegate" />
-      </action>
-    </project-facet-version>
-  </extension>
-
   <!-- Dummy GPE GAE nature definition; required only for enabling unit testing -->
   <extension point="org.eclipse.core.resources.natures"
              id="com.google.appengine.eclipse.core.gaeNature">
