@@ -16,6 +16,11 @@
 
 package com.google.cloud.tools.eclipse.test.util;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Set;
+
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.RegistryFactory;
@@ -30,14 +35,20 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.google.common.collect.Sets;
+
 /**
  * Generic tests that should be true of all plugins.
  */
 @SuppressWarnings("restriction")
-public class BasePluginXmlTest {
+public abstract class BasePluginXmlTest {
 
-  @Rule public final PluginXmlDocument pluginXmlDocument = new PluginXmlDocument();
-  @Rule public final PluginProperties pluginProperties = new PluginProperties();
+  @Rule
+  public final PluginXmlDocument pluginXmlDocument = new PluginXmlDocument();
+  @Rule
+  public final EclipseProperties pluginProperties = new EclipseProperties("plugin.properties");
+  @Rule
+  public final EclipseProperties buildProperties = new EclipseProperties("build.properties");
   
   private Document doc;
 
@@ -87,6 +98,34 @@ public class BasePluginXmlTest {
   }
   
   @Test
+  public final void testBuildProperties() throws IOException {
+    String[] binIncludes = buildProperties.get("bin.includes").split(",\\s*");
+    Set<String> includes = Sets.newHashSet(binIncludes);
+    
+    Assert.assertTrue(includes.contains("plugin.xml"));
+    Assert.assertTrue(includes.contains("plugin.properties"));
+    Assert.assertTrue(includes.contains("."));
+    Assert.assertTrue(includes.contains("META-INF/"));
+    
+    testIncludedIfPresent(includes, "helpContexts.xml");
+    testIncludedIfPresent(includes, "icons/");
+    testIncludedIfPresent(includes, "lib/");
+    testIncludedIfPresent(includes, "README.md");
+    testIncludedIfPresent(includes, "epl-v10.html");
+    testIncludedIfPresent(includes, "OSGI-INF/");
+    testIncludedIfPresent(includes, "fragment.xml");
+    testIncludedIfPresent(includes, "fragment.properties");
+  }
+
+  private static void testIncludedIfPresent(Set<String> includes, String name) 
+      throws IOException {
+    String path = EclipseProperties.getHostBundlePath() + "/" + name;
+    if (Files.exists(Paths.get(path))) {
+      Assert.assertTrue(includes.contains(name));
+    }
+  }
+  
+  @Test
   public final void testPropertiesDefined() {
     assertPropertiesDefined(getDocument().getDocumentElement());
   }
@@ -110,7 +149,7 @@ public class BasePluginXmlTest {
 
   private void assertPropertyDefined(String name) {
     if (name.startsWith("%")) {
-      String value = pluginProperties.get().getProperty(name.substring(1));
+      String value = pluginProperties.get(name.substring(1));
       Assert.assertNotNull(name + " is not defined");
       Assert.assertFalse(name + " is not defined", value.isEmpty());
     }

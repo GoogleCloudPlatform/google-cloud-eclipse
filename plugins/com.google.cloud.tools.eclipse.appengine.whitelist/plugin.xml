@@ -4,7 +4,7 @@
 
   <extension
       id="appEngineWhitelist"
-      name="App Engine JRE Whitelist"
+      name="%extension.name"
       point="org.eclipse.jdt.core.compilationParticipant">
      <compilationParticipant
          createsProblems="true"

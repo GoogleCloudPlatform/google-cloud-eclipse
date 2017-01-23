@@ -9,6 +9,7 @@ Export-Package: com.google.cloud.tools.eclipse.preferences,
  com.google.cloud.tools.eclipse.preferences.areas
 Bundle-Activator: com.google.cloud.tools.eclipse.preferences.Activator
 Bundle-ActivationPolicy: lazy
+Bundle-Localization: plugin
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime
 Import-Package: org.eclipse.core.resources

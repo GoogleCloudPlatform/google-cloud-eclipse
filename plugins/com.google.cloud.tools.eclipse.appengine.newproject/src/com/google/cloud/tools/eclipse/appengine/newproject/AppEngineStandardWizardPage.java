@@ -26,10 +26,10 @@ import java.util.Collection;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridDataFactory;
-import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -65,9 +65,8 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
         "com.google.cloud.tools.eclipse.appengine.newproject.NewProjectContext"); //$NON-NLS-1$
 
     ModifyListener pageValidator = new PageValidator();
-    createPackageField(container, pageValidator);
-    createServiceField(container, pageValidator);
-    
+    createCustomFields(container, pageValidator);
+
     // Manage APIs
     appEngineLibrariesSelectorGroup = new AppEngineLibrariesSelectorGroup(container);
 
@@ -75,48 +74,50 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
     // Show enter project name on opening
     setErrorMessage(null);
     setMessage(Messages.getString("enter.project.name"));
-    
+
     Dialog.applyDialogFont(container);
   }
 
-  // Java package name
-  // todo should we turn Label + TextField into a widget of its own? 
-  private void createPackageField(Composite container, ModifyListener pageValidator) {
+  private void createCustomFields(Composite container, ModifyListener pageValidator) {
     Composite composite = new Composite(container, SWT.NONE);
-    // assumed that container has a single-column GridLayout
     GridDataFactory.fillDefaults().applyTo(composite);
 
-    Label packageNameLabel = new Label(composite, SWT.LEAD);
+    GridLayout layout = new GridLayout();
+    layout.numColumns = 2;
+    composite.setLayout(layout);
+
+    createPackageField(composite, pageValidator);
+    createServiceField(composite, pageValidator);
+  }
+
+  // Java package name
+  private void createPackageField(Composite parent, ModifyListener pageValidator) {
+    Label packageNameLabel = new Label(parent, SWT.LEAD);
     packageNameLabel.setText(Messages.getString("java.package")); //$NON-NLS-1$
-    javaPackageField = new Text(composite, SWT.BORDER);
-    
+    javaPackageField = new Text(parent, SWT.BORDER);
+
     javaPackageField.addModifyListener(pageValidator);
 
     GridDataFactory.fillDefaults().grab(true, false).applyTo(javaPackageField);
-    GridLayoutFactory.swtDefaults().numColumns(2).applyTo(composite);
   }
 
   // App Engine service name
-  private void createServiceField(Composite container, ModifyListener pageValidator) {
-    Composite composite = new Composite(container, SWT.NONE);
-    // assumed that container has a single-column GridLayout
-    GridDataFactory.fillDefaults().applyTo(composite);
+  private void createServiceField(Composite parent, ModifyListener pageValidator) {
 
-    Label serviceNameLabel = new Label(composite, SWT.LEAD);
-    serviceNameLabel.setText("App Engine service:");
-    serviceNameField = new Text(composite, SWT.BORDER);
-    serviceNameField.setMessage("default");
+    Label serviceNameLabel = new Label(parent, SWT.LEAD);
+    serviceNameLabel.setText(Messages.getString("app.engine.service"));
+    serviceNameField = new Text(parent, SWT.BORDER);
+    serviceNameField.setMessage("default");  //$NON-NLS-1$
     serviceNameField.addModifyListener(pageValidator);
 
     GridDataFactory.fillDefaults().grab(true, false).applyTo(serviceNameField);
-    GridLayoutFactory.swtDefaults().numColumns(2).applyTo(composite);
-  }  
-  
+  }
+
   @Override
   public boolean validatePage() {
     setErrorMessage(null);
     setMessage(null);
-    
+
     if (!super.validatePage()) {
       return false;
     }
@@ -137,7 +138,8 @@ public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
     File parent = getLocationPath().toFile();
     File projectDirectory = new File(parent, getProjectName());
     if (projectDirectory.exists()) {
-      setErrorMessage(Messages.getString("project.location.exists", projectDirectory)); //$NON-NLS-1$
+      setErrorMessage(
+          Messages.getString("project.location.exists", projectDirectory)); //$NON-NLS-1$
       return false;
     }
 

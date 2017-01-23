@@ -20,13 +20,12 @@ import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.appengine.api.deploy.DefaultDeployConfiguration;
 import com.google.cloud.tools.eclipse.appengine.deploy.CleanupOldDeploysJob;
 import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployJob;
-import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployJobConfig;
 import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployPreferences;
 import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployPreferencesConverter;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployConsole;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPreferencesDialog;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
-import com.google.cloud.tools.eclipse.appengine.login.IGoogleLoginService;
+import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListener;
 import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities;
 import com.google.cloud.tools.eclipse.ui.util.ProjectFromSelectionHelper;
@@ -67,8 +66,6 @@ import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
  */
 public class StandardDeployCommandHandler extends AbstractHandler {
 
-  private static final String CONSOLE_NAME = "App Engine Deploy";
-
   @Override
   public Object execute(ExecutionEvent event) throws ExecutionException {
     try {
@@ -108,8 +105,8 @@ public class StandardDeployCommandHandler extends AbstractHandler {
     return severity != IMarker.SEVERITY_ERROR;
   }
 
-  private void launchDeployJob(IProject project, Credential credential)
-      throws IOException, ExecutionException {
+  private static void launchDeployJob(IProject project, Credential credential)
+                                                            throws IOException, ExecutionException {
 
     AnalyticsPingManager.getInstance().sendPing(
         AnalyticsEvents.APP_ENGINE_DEPLOY, AnalyticsEvents.APP_ENGINE_DEPLOY_STANDARD, null);
@@ -122,10 +119,12 @@ public class StandardDeployCommandHandler extends AbstractHandler {
                                               new DeployConsole.Factory());
 
     MessageConsoleStream outputStream = messageConsole.newMessageStream();
-    StandardDeployJobConfig config = getDeployJobConfig(project, credential,
-        workDirectory, outputStream, deployConfiguration);
 
-    StandardDeployJob deploy = new StandardDeployJob(config);
+    StandardDeployJob deploy =
+        new StandardDeployJob(project, credential, workDirectory,
+                              new MessageConsoleWriterOutputLineListener(outputStream),
+                              new MessageConsoleWriterOutputLineListener(outputStream),
+                              deployConfiguration);
     messageConsole.setJob(deploy);
     deploy.addJobChangeListener(new JobChangeAdapter() {
 
@@ -142,28 +141,20 @@ public class StandardDeployCommandHandler extends AbstractHandler {
     consoleManager.showConsoleView(messageConsole);
   }
 
-  private String getConsoleName(String project) {
+  private static String getConsoleName(String projectId) {
     Date now = new Date();
-    String nowString = DateFormat.getDateTimeInstance(
-        DateFormat.MEDIUM, DateFormat.MEDIUM, Locale.getDefault()).format(now);
-    return MessageFormat.format("{0} - {1} ({2})", CONSOLE_NAME, project, nowString);
+    String nowString = DateFormat.getDateTimeInstance(DateFormat.MEDIUM,
+                                                      DateFormat.MEDIUM,
+                                                      Locale.getDefault())
+                                 .format(now);
+    return MessageFormat.format("{0} - {1} ({2})",
+                                Messages.getString("deploy.console.name"),
+                                projectId,
+                                nowString);
   }
 
-  private StandardDeployJobConfig getDeployJobConfig(IProject project, Credential credential,
-      IPath workDirectory, MessageConsoleStream outputStream,
-      DefaultDeployConfiguration deployConfiguration) {
-    StandardDeployJobConfig config = new StandardDeployJobConfig();
-    config.setProject(project)
-        .setCredential(credential)
-        .setWorkDirectory(workDirectory)
-        .setStdoutLineListener(new MessageConsoleWriterOutputLineListener(outputStream))
-        .setStderrLineListener(new MessageConsoleWriterOutputLineListener(outputStream))
-        .setDeployConfiguration(deployConfiguration);
-    return config;
-  }
-
-  private DefaultDeployConfiguration getDeployConfiguration(IProject project)
-      throws ExecutionException {
+  private static DefaultDeployConfiguration getDeployConfiguration(IProject project)
+                                                                        throws ExecutionException {
     StandardDeployPreferences deployPreferences = new StandardDeployPreferences(project);
     if (deployPreferences.getProjectId() == null || deployPreferences.getProjectId().isEmpty()) {
       throw new ExecutionException(Messages.getString("error.projectId.missing"));
@@ -171,18 +162,18 @@ public class StandardDeployCommandHandler extends AbstractHandler {
     return new StandardDeployPreferencesConverter(deployPreferences).toDeployConfiguration();
   }
 
-  private IPath createWorkDirectory() throws IOException {
+  private static IPath createWorkDirectory() throws IOException {
     String now = Long.toString(System.currentTimeMillis());
     IPath workDirectory = getTempDir().append(now);
     Files.createDirectories(workDirectory.toFile().toPath());
     return workDirectory;
   }
 
-  private void launchCleanupJob() {
+  private static void launchCleanupJob() {
     new CleanupOldDeploysJob(getTempDir()).schedule();
   }
 
-  private IPath getTempDir() {
+  private static IPath getTempDir() {
     return Platform
         .getStateLocation(Platform.getBundle("com.google.cloud.tools.eclipse.appengine.deploy"))
         .append("tmp");

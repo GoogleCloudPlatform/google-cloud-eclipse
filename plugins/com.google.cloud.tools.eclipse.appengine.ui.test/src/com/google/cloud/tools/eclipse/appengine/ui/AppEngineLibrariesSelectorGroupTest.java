@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.ui;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -63,7 +64,7 @@ public class AppEngineLibrariesSelectorGroupTest {
       }
     });
   }
-  
+
   @Test
   public void testToolTips() {
     assertTrue(appengineButton.getToolTipText().length() > 0);
@@ -195,7 +196,7 @@ public class AppEngineLibrariesSelectorGroupTest {
   }
 
   @Test
-  public void testSelectAppengineApiThenEndpointsThenUnselectEndpointsShouldKeepAppEngineSelected() {
+  public void testSelectAppEngineApiThenEndpointsThenUnselectEndpointsShouldKeepAppEngineSelected() {
     syncExec(new Runnable() {
 
       @Override
@@ -211,7 +212,7 @@ public class AppEngineLibrariesSelectorGroupTest {
   }
 
   @Test
-  public void testSelectAppengineApiThenObjectifyThenUnselectObjectifyShouldKeepAppEngineSelected() {
+  public void testSelectAppEngineApiThenObjectifyThenUnselectObjectifyShouldKeepAppEngineSelected() {
     syncExec(new Runnable() {
 
       @Override
@@ -228,7 +229,7 @@ public class AppEngineLibrariesSelectorGroupTest {
 
   // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/954
   @Test
-  public void testSelectAndUnselectAppengineApiThenSelectEndpointsShouldKeepAppEngineSelected() {
+  public void testSelectAndUnselectAppEngineApiThenSelectEndpointsShouldKeepAppEngineSelected() {
     syncExec(new Runnable() {
 
       @Override
@@ -241,6 +242,25 @@ public class AppEngineLibrariesSelectorGroupTest {
         assertThat(selectedLibraries.size(), is(2));
         assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
         assertThat(selectedLibraries.get(1).getId(), is("appengine-endpoints"));
+      }});
+  }
+
+  // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1254
+  @Test
+  public void testSelectAppEngineApiThenSelectObjectifyShouldDisableAppEngine() {
+    syncExec(new Runnable() {
+
+      @Override
+      public void run() {
+        appengineButton.click();
+        objectifyButton.click();
+        List<Library> selectedLibraries = getSelectedLibrariesSorted();
+        assertNotNull(selectedLibraries);
+        assertThat(selectedLibraries.size(), is(2));
+        assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
+        assertThat(selectedLibraries.get(1).getId(), is("objectify"));
+        assertFalse(appengineButton.isEnabled());
+        assertTrue(objectifyButton.isEnabled());
       }});
   }
 
