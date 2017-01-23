@@ -11,13 +11,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * This class is created only for the purpose of demonstrating unit testing of the
- * {@link HelloAppEngine} class. Only those methods have meaningful implementation
- * which are used in the unit test.
+ * This mock class is created to enable basic unit testing of the
+ * {@link HelloAppEngine} class. Only methods used in the unit test
+ * have a non-trivial implementation.
  * 
  * Feel free to change this class or replace it using other ways for testing
  * {@link HttpServlet}s, e.g. Spring MVC Test or Mockito to suit your needs.
- *
  */
 public class MockHttpServletResponse implements HttpServletResponse {
 
