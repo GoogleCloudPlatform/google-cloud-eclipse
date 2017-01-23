@@ -18,7 +18,6 @@ package com.google.cloud.tools.eclipse.appengine.libraries.repository;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
-import com.google.cloud.tools.eclipse.appengine.libraries.util.PathUtil;
 import com.google.cloud.tools.eclipse.util.io.FileDownloader;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
@@ -90,7 +89,7 @@ public class M2RepositoryService implements ILibraryRepositoryService {
   private static IPath getDownloadedSourceLocation(MavenCoordinates mavenCoordinates, URL sourceUrl,
                                                    IProgressMonitor monitor) {
     try {
-      IPath downloadFolder = PathUtil.bundleStateBasedMavenFolder(mavenCoordinates);
+      IPath downloadFolder = MavenHelper.bundleStateBasedMavenFolder(mavenCoordinates);
       return new FileDownloader(downloadFolder).download(sourceUrl, monitor);
     } catch (IOException e) {
       // source file is failed to download, this is not an error

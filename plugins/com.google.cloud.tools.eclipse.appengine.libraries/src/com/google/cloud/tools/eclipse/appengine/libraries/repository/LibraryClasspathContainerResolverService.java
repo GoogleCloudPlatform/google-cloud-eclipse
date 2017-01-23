@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.libraries;
+package com.google.cloud.tools.eclipse.appengine.libraries.repository;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.ILibraryClasspathContainerResolverService;
+import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainer;
+import com.google.cloud.tools.eclipse.appengine.libraries.Messages;
+import com.google.cloud.tools.eclipse.appengine.libraries.SourceAttacherJob;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Filter;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFactory;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFactoryException;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer;
-import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
-import com.google.cloud.tools.eclipse.appengine.libraries.repository.MavenCoordinatesHelper;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -40,12 +42,12 @@ import java.util.logging.Logger;
 import org.apache.maven.artifact.Artifact;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.RegistryFactory;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
@@ -71,6 +73,7 @@ public class LibraryClasspathContainerResolverService
       Logger.getLogger(LibraryClasspathContainerResolverService.class.getName());
 
   private ILibraryRepositoryService repositoryService;
+  private IExtensionRegistry extensionRegistry;
   private LibraryFactory libraryFactory;
   private LibraryClasspathContainerSerializer serializer;
   private Map<String, Library> libraries;
@@ -248,7 +251,7 @@ public class LibraryClasspathContainerResolverService
     libraryFactory = new LibraryFactory();
     serializer = new LibraryClasspathContainerSerializer();
     IConfigurationElement[] configurationElements =
-    RegistryFactory.getRegistry().getConfigurationElementsFor(LIBRARIES_EXTENSION_POINT);
+        extensionRegistry.getConfigurationElementsFor(LIBRARIES_EXTENSION_POINT);
     libraries = new HashMap<>(configurationElements.length);
     for (IConfigurationElement configurationElement : configurationElements) {
       try {
@@ -310,6 +313,17 @@ public class LibraryClasspathContainerResolverService
   public void unsetRepositoryService(ILibraryRepositoryService repositoryService) {
     if (this.repositoryService == repositoryService) {
       this.repositoryService = null;
+    }
+  }
+
+  @Reference
+  public void setExtensionRegistry(IExtensionRegistry extensionRegistry) {
+    this.extensionRegistry = extensionRegistry;
+  }
+
+  public void unsetExtensionRegistry(IExtensionRegistry extensionRegistry) {
+    if (this.extensionRegistry == extensionRegistry) {
+      this.extensionRegistry = null;
     }
   }
 }

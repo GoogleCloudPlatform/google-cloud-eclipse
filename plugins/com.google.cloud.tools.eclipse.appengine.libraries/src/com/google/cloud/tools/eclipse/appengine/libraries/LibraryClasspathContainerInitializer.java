@@ -21,6 +21,7 @@ import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryCla
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
+import java.text.MessageFormat;
 import javax.inject.Inject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -61,14 +62,16 @@ public class LibraryClasspathContainerInitializer extends ClasspathContainerInit
   @Override
   public void initialize(IPath containerPath, IJavaProject project) throws CoreException {
     if (containerPath.segmentCount() != 2) {
-      throw new CoreException(StatusUtil.error(this, Messages.getString("ContainerPathNotTwoSegments",
-                                                                        containerPath.toString())));
+      throw new CoreException(StatusUtil.error(this,
+                                               "containerPath does not have exactly 2 segments: "
+                                                   + containerPath.toString()));
     }
     if (!containerPath.segment(0).equals(containerPathPrefix)) {
-      throw new CoreException(StatusUtil.error(this,
-                                               Messages.getString("ContainerPathInvalidFirstSegment",
-                                                                  containerPathPrefix,
-                                                                  containerPath.segment(0))));
+      throw new CoreException(
+          StatusUtil.error(this, MessageFormat.format("Unexpected first segment of container path, "
+                                                          + "expected: {0} was: {1}",
+                                                      containerPathPrefix,
+                                                      containerPath.segment(0))));
     }
     try {
       LibraryClasspathContainer container = serializer.loadContainer(project, containerPath);
@@ -81,7 +84,9 @@ public class LibraryClasspathContainerInitializer extends ClasspathContainerInit
         resolverService.resolveContainer(project, containerPath, new NullProgressMonitor());
       }
     } catch (IOException ex) {
-      throw new CoreException(StatusUtil.error(this, Messages.getString("LoadContainerFailed"), ex));
+      throw new CoreException(StatusUtil.error(this,
+                                               "Failed to load persisted container descriptor",
+                                               ex));
     }
   }
 

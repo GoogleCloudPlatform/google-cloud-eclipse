@@ -27,7 +27,7 @@ import org.eclipse.jdt.core.JavaCore;
  * return {@link Status#OK_STATUS} as this is not considered an error that the user should be
  * notified of.
  */
-class SourceAttacherJob extends Job {
+public class SourceAttacherJob extends Job {
   
   private static final Logger logger = Logger.getLogger(SourceAttacherJob.class.getName());
   
@@ -37,7 +37,7 @@ class SourceAttacherJob extends Job {
   private final Callable<IPath> sourceArtifactPathProvider;
   private final LibraryClasspathContainerSerializer serializer;
 
-  SourceAttacherJob(IJavaProject javaProject, IPath containerPath, IPath libraryPath,
+  public SourceAttacherJob(IJavaProject javaProject, IPath containerPath, IPath libraryPath,
                     Callable<IPath> sourceArtifactPathProvider) {
     super(Messages.getString("SourceAttachmentDownloaderJobName",
                              javaProject.getProject().getName()));

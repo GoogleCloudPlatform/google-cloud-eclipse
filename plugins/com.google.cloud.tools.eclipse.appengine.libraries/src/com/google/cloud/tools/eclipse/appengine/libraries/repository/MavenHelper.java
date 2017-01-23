@@ -20,6 +20,8 @@ import com.google.cloud.tools.eclipse.appengine.libraries.Messages;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
+import com.google.common.base.Preconditions;
+import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
@@ -27,7 +29,11 @@ import java.util.List;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
+import org.osgi.framework.FrameworkUtil;
 
 /**
  * Wrapper class around {@link MavenUtils} to enable mocking in unit tests.
@@ -71,4 +77,29 @@ public class MavenHelper {
                                                exception));
     }
   }
+
+  /**
+   * Returns the folder to which the file described by <code>artifact</code> should be
+   * downloaded.
+   * <p>
+   * The folder is created as follows:
+   * <code>&lt;bundle_state_location&gt;/downloads/&lt;groupId&gt;/&lt;artifactId&gt;/&lt;version&gt;</code>
+   * <p>
+   * The <code>&lt;bundle_state_location&gt;</code> is determined by using the bundle containing
+   * {@link MavenHelper}.
+   * 
+   * @return the location of the download folder, may not exist
+   */
+  public static IPath bundleStateBasedMavenFolder(MavenCoordinates mavenCoordinates) {
+    Preconditions.checkArgument(!mavenCoordinates.getVersion().equals(MavenCoordinates.LATEST_VERSION));
+    File downloadedSources =
+        Platform.getStateLocation(FrameworkUtil.getBundle(MavenHelper.class))
+        .append("downloads")
+        .append(mavenCoordinates.getGroupId())
+        .append(mavenCoordinates.getArtifactId())
+        .append(mavenCoordinates.getVersion())
+        .toFile();
+    return new Path(downloadedSources.getAbsolutePath());
+  }
+
 }

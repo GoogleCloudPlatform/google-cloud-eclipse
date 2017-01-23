@@ -22,6 +22,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -32,6 +33,7 @@ import java.io.IOException;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -79,14 +81,14 @@ public class LibraryClasspathContainerInitializerTest {
   public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
   @Test(expected = CoreException.class)
-  public void testInitialize_containerPathConsistsOfOneSegment() throws CoreException {
+  public void testInitialize_shouldFailIfContainerPathConsistsOfOneSegment() throws CoreException {
     LibraryClasspathContainerInitializer containerInitializer =
         new LibraryClasspathContainerInitializer(TEST_CONTAINER_PATH, serializer, resolverService);
     containerInitializer.initialize(new Path("single.segment.id"), testProject.getJavaProject());
   }
 
   @Test(expected = CoreException.class)
-  public void testInitialize_containerPathConsistsOfThreeSegments() throws CoreException {
+  public void testInitialize_shouldFailIfContainerPathConsistsOfThreeSegments() throws CoreException {
     LibraryClasspathContainerInitializer containerInitializer =
         new LibraryClasspathContainerInitializer(TEST_CONTAINER_PATH, serializer, resolverService);
     containerInitializer.initialize(new Path("first.segment/second.segment/third.segment"),
@@ -94,21 +96,21 @@ public class LibraryClasspathContainerInitializerTest {
   }
 
   @Test(expected = CoreException.class)
-  public void testInitialize_containerPathHasWrongFirstSegment() throws CoreException {
+  public void testInitialize_shouldFailIfContainerPathHasWrongFirstSegment() throws CoreException {
     LibraryClasspathContainerInitializer containerInitializer =
         new LibraryClasspathContainerInitializer(TEST_CONTAINER_PATH, serializer, resolverService);
     containerInitializer.initialize(new Path("first.segment/second.segment"), testProject.getJavaProject());
   }
 
   @Test
-  public void testInitialize_serializerReturnsNull() throws IOException, CoreException {
+  public void testInitialize_ifSerializerReturnsNullResolverServiceIsCalled() throws IOException,
+                                                                                     CoreException {
     when(serializer.loadContainer(any(IJavaProject.class), any(IPath.class))).thenReturn(null);
     LibraryClasspathContainerInitializer containerInitializer =
         new LibraryClasspathContainerInitializer(TEST_CONTAINER_PATH, serializer, resolverService);
     containerInitializer.initialize(new Path(TEST_CONTAINER_PATH + "/second.segment"),
                                     testProject.getJavaProject());
-    verify(resolverService).resolveContainer(any(IJavaProject.class), any(IPath.class),
-                                             any(IProgressMonitor.class));
+    verifyContainerResolvedFromScratch();
   }
 
   @Test(expected = CoreException.class)
@@ -121,7 +123,8 @@ public class LibraryClasspathContainerInitializerTest {
   }
 
   @Test
-  public void testInitialize_invalidArtifactJarPath() throws CoreException, IOException {
+  public void testInitialize_ifArtifactJarPathIsInvalidContainerResolvedFromScratch() throws CoreException,
+                                                                                             IOException {
     assertFalse(new File(NON_EXISTENT_FILE).exists());
     
     IClasspathEntry entry = mock(IClasspathEntry.class);
@@ -135,12 +138,12 @@ public class LibraryClasspathContainerInitializerTest {
         new LibraryClasspathContainerInitializer(TEST_CONTAINER_PATH, serializer, resolverService);
     containerInitializer.initialize(new Path(TEST_LIBRARY_PATH), testProject.getJavaProject());
     
-    verify(resolverService).resolveContainer(any(IJavaProject.class), any(IPath.class),
-                                             any(IProgressMonitor.class));
+    verifyContainerResolvedFromScratch();
   }
 
   @Test
-  public void testInitialize_invalidSourceArtifactJarPath() throws CoreException, IOException {
+  public void testInitialize_ifSourceArtifactJarPathInvalidContainerResolvedFromScratch() throws CoreException,
+                                                                                                 IOException {
     File artifactFile = temporaryFolder.newFile();
     assertFalse(new File(NON_EXISTENT_FILE).exists());
     
@@ -156,12 +159,11 @@ public class LibraryClasspathContainerInitializerTest {
         new LibraryClasspathContainerInitializer(TEST_CONTAINER_PATH, serializer, resolverService);
     containerInitializer.initialize(new Path(TEST_LIBRARY_PATH), testProject.getJavaProject());
     
-    verify(resolverService).resolveContainer(any(IJavaProject.class), any(IPath.class),
-                                             any(IProgressMonitor.class));
+    verifyContainerResolvedFromScratch();
   }
 
   @Test
-  public void testInitialize_ifSourcePathIsNullContainerIsResolved() throws CoreException, IOException {
+  public void testInitialize_ifSourcePathIsNullContainerIsNotResolvedAgain() throws CoreException, IOException {
     File artifactFile = temporaryFolder.newFile();
     
     IClasspathEntry entry = JavaCore.newLibraryEntry(new Path(artifactFile.getAbsolutePath()), null, null);
@@ -177,10 +179,11 @@ public class LibraryClasspathContainerInitializerTest {
     IClasspathEntry[] resolvedClasspath = testProject.getJavaProject().getResolvedClasspath(false);
     assertThat(resolvedClasspath.length, is(2));
     assertThat(resolvedClasspath[1].getPath().toString(), is(artifactFile.getAbsolutePath()));
+    verifyContainerWasNotResolvedFromScratch();
   }
 
   @Test
-  public void testInitialize_ifSourcePathIsValidContainerIsResolved() throws CoreException, IOException {
+  public void testInitialize_ifSourcePathIsValidContainerIsNotResolvedAgain() throws CoreException, IOException {
     File artifactFile = temporaryFolder.newFile();
     File sourceArtifactFile = temporaryFolder.newFile();
     
@@ -201,5 +204,16 @@ public class LibraryClasspathContainerInitializerTest {
     assertThat(resolvedClasspath[1].getPath().toString(), is(artifactFile.getAbsolutePath()));
     assertThat(resolvedClasspath[1].getSourceAttachmentPath().toString(),
                is(sourceArtifactFile.getAbsolutePath()));
+    verifyContainerWasNotResolvedFromScratch();
+  }
+
+  private IStatus verifyContainerResolvedFromScratch() {
+    return verify(resolverService).resolveContainer(any(IJavaProject.class), any(IPath.class),
+                                                    any(IProgressMonitor.class));
+  }
+
+  private IStatus verifyContainerWasNotResolvedFromScratch() {
+    return verify(resolverService, never()).resolveContainer(any(IJavaProject.class), any(IPath.class),
+                                                      any(IProgressMonitor.class));
   }
 }

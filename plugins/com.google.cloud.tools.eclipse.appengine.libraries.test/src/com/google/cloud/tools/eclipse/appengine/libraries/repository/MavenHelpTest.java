@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.libraries.util;
+package com.google.cloud.tools.eclipse.appengine.libraries.repository;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
@@ -27,7 +27,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class PathUtilTest {
+public class MavenHelpTest {
 
   private static final String EXPECTED_DOWNLOAD_FOLDER =
       ".metadata/.plugins/com.google.cloud.tools.eclipse.appengine.libraries/downloads/groupId/artifactId/1.0.0";
@@ -39,13 +39,13 @@ public class PathUtilTest {
     when(artifact.getGroupId()).thenReturn("groupId");
     when(artifact.getArtifactId()).thenReturn("artifactId");
     when(artifact.getVersion()).thenReturn("1.0.0");
-    IPath folder = PathUtil.bundleStateBasedMavenFolder(artifact);
+    IPath folder = MavenHelper.bundleStateBasedMavenFolder(artifact);
     assertTrue(folder.toString().endsWith(EXPECTED_DOWNLOAD_FOLDER));
   }
   
   @Test(expected = IllegalArgumentException.class)
   public void testBundleStateBasedMavenFolder_withLatestVersion() {
     when(artifact.getVersion()).thenReturn("LATEST");
-    PathUtil.bundleStateBasedMavenFolder(artifact);
+    MavenHelper.bundleStateBasedMavenFolder(artifact);
   }
 }
