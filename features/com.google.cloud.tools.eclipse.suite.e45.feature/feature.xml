@@ -100,7 +100,7 @@
          unpack="false"/>
 
    <plugin
-         id="com.google.cloud.tools.eclipse.appengine.whitelist"
+         id="com.google.cloud.tools.eclipse.appengine.validation"
          download-size="0"
          install-size="0"
          version="0.0.0"
