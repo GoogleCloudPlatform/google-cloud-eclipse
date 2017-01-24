@@ -7,7 +7,8 @@ Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
-Service-Component: OSGI-INF/com.google.cloud.tools.eclipse.appengine.libraries.repository.M2RepositoryService.xml
+Service-Component: OSGI-INF/com.google.cloud.tools.eclipse.appengine.libraries.repository.M2RepositoryService.xml,
+ OSGI-INF/com.google.cloud.tools.eclipse.appengine.libraries.repository.LibraryClasspathContainerResolverService.xml
 Require-Bundle: org.eclipse.equinox.common,
  org.eclipse.m2e.maven.runtime,
  org.eclipse.m2e.core

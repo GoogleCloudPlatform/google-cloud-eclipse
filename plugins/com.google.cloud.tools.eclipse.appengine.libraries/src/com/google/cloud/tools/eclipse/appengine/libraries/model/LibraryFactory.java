@@ -84,7 +84,7 @@ public class LibraryFactory {
     }
   }
 
-  private List<LibraryFile> getLibraryFiles(IConfigurationElement[] children) 
+  private static List<LibraryFile> getLibraryFiles(IConfigurationElement[] children) 
       throws InvalidRegistryObjectException, URISyntaxException {
     List<LibraryFile> libraryFiles = new ArrayList<>();
     for (IConfigurationElement libraryFileElement : children) {
@@ -115,7 +115,7 @@ public class LibraryFactory {
     }
   }
 
-  private MavenCoordinates getMavenCoordinates(IConfigurationElement[] children) {
+  private static MavenCoordinates getMavenCoordinates(IConfigurationElement[] children) {
     if (children.length != 1) {
       logger.warning(
           "Single configuration element for MavenCoordinates was expected, found: " //$NON-NLS-1$
@@ -162,7 +162,7 @@ public class LibraryFactory {
     return filters;
   }
 
-  private List<String> getLibraryDependencies(IConfigurationElement[] children) {
+  private static List<String> getLibraryDependencies(IConfigurationElement[] children) {
     List<String> libraryDependencies = new ArrayList<>();
     for (IConfigurationElement libraryDependencyElement : children) {
       String libraryId = libraryDependencyElement.getAttribute(ATTRIBUTE_NAME_ID);

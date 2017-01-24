@@ -18,6 +18,11 @@
       <plugin>
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>tycho-surefire-plugin</artifactId>
+        <configuration>
+          <useUIHarness>true</useUIHarness>
+          <useUIThread>true</useUIThread>
+          <product>org.eclipse.platform.ide</product>
+        </configuration>
       </plugin>
     </plugins>
   </build>

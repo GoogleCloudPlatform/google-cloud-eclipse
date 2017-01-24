@@ -37,6 +37,15 @@ public class LibraryClasspathContainer implements IClasspathContainer {
     this.classpathEntries = classpathEntries;
   }
 
+  /**
+   * Creates a new {@link LibraryClasspathContainer} with the same path and description,
+   * but with the <code>classpathEntries</code>.
+   * @param classpathEntries the classpath entries of the new container
+   */
+  public LibraryClasspathContainer copyWithNewEntries(IClasspathEntry[] classpathEntries) {
+    return new LibraryClasspathContainer(containerPath, description, classpathEntries);
+  }
+
   @Override
   public IPath getPath() {
     return containerPath;

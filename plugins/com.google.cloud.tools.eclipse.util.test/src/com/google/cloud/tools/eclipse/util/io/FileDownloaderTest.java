@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.util.io;
 
 import java.io.IOException;
 import java.net.URL;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.junit.Rule;
 import org.junit.Test;
@@ -40,12 +41,12 @@ public class FileDownloaderTest {
   @Test(expected = NullPointerException.class)
   public void testDownload_null() throws IOException {
     FileDownloader fileDownloader = new FileDownloader(new Path(temporaryFolder.newFolder().getAbsolutePath()));
-    fileDownloader.download(null);
+    fileDownloader.download(null, new NullProgressMonitor());
   }
 
   @Test(expected = IOException.class)
   public void testDownload_cannotCreateDownloadFolder() throws IOException {
     FileDownloader fileDownloader = new FileDownloader(new Path("/dev/null/foo"));
-    fileDownloader.download(new URL("http://google.com"));
+    fileDownloader.download(new URL("http://example.com/dummy.zip"), new NullProgressMonitor());
   }
 }

@@ -20,6 +20,22 @@ import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+//  public static String AppEngineLibraryContainerResolverJobName;
+//  public static String ContainerClassUnexpected;
+//  public static String ContainerPathInvalidFirstSegment;
+//  public static String ContainerPathNotTwoSegments;
+//  public static String CreateLibraryError;
+//  public static String InvalidLibraryId;
+//  public static String LoadContainerFailed;
+//  public static String SourceAttachmentDownloaderJobName;
+//  public static String RepositoryUriInvalid;
+//  public static String RepositoryUriNotAbsolute;
+//  public static String SourceAttachmentFailed;
+//  public static String TaskResolveArtifacts;
+//  public static String TaskResolveContainerError;
+//  public static String TaskResolveLibraries;
+//  public static String TaskResolveLibrariesError;
+//  public static String UnexpectedConfigurationElement;
 public class Messages {
 
   private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle(

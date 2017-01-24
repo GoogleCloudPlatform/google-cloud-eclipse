@@ -78,9 +78,10 @@ public class LibraryClasspathContainerSerializer {
     IPath getBaseLocation();
   }
 
-  private LibraryContainerStateLocationProvider stateLocationProvider;
-  private ArtifactBaseLocationProvider binaryArtifactBaseLocationProvider;
-  private ArtifactBaseLocationProvider sourceBaseLocationProvider;
+  private final LibraryContainerStateLocationProvider stateLocationProvider;
+  private final ArtifactBaseLocationProvider binaryArtifactBaseLocationProvider;
+  private final ArtifactBaseLocationProvider sourceBaseLocationProvider;
+  private final Gson gson;
 
   public LibraryClasspathContainerSerializer() {
     this(new DefaultStateLocationProvider(),
@@ -96,6 +97,7 @@ public class LibraryClasspathContainerSerializer {
     this.stateLocationProvider = stateLocationProvider;
     this.binaryArtifactBaseLocationProvider = binaryBaseLocationProvider;
     this.sourceBaseLocationProvider = sourceBaseLocationProvider;
+    gson = new GsonBuilder().setPrettyPrinting().create();
   }
 
   public void saveContainer(IJavaProject javaProject, LibraryClasspathContainer container)
@@ -107,10 +109,11 @@ public class LibraryClasspathContainerSerializer {
     }
     try (OutputStreamWriter out =
         new OutputStreamWriter(new FileOutputStream(stateFile), StandardCharsets.UTF_8)) {
-      Gson gson = new GsonBuilder().setPrettyPrinting().create();
-      out.write(gson.toJson(new SerializableLibraryClasspathContainer(container,
-          binaryArtifactBaseLocationProvider.getBaseLocation(),
-          sourceBaseLocationProvider.getBaseLocation())));
+      SerializableLibraryClasspathContainer serializableContainer =
+          new SerializableLibraryClasspathContainer(container,
+                                                    binaryArtifactBaseLocationProvider.getBaseLocation(),
+                                                    sourceBaseLocationProvider.getBaseLocation());
+      out.write(gson.toJson(serializableContainer));
     }
   }
 
@@ -121,9 +124,11 @@ public class LibraryClasspathContainerSerializer {
       return null;
     }
     try (Reader reader = new InputStreamReader(new FileInputStream(stateFile), StandardCharsets.UTF_8)) {
-      Gson gson = new GsonBuilder().create();
       SerializableLibraryClasspathContainer fromJson =
           gson.fromJson(reader, SerializableLibraryClasspathContainer.class);
+      if (fromJson == null) {
+        return null;
+      }
       return fromJson.toLibraryClasspathContainer(
           binaryArtifactBaseLocationProvider.getBaseLocation(),
           sourceBaseLocationProvider.getBaseLocation());
@@ -132,17 +137,16 @@ public class LibraryClasspathContainerSerializer {
 
   private File getContainerStateFile(IJavaProject javaProject, IPath containerPath, boolean create)
       throws CoreException {
-    IPath containerStateFile =
-        stateLocationProvider.getContainerStateFile(javaProject, containerPath, create);
+    IPath containerStateFile = stateLocationProvider.getContainerStateFile(javaProject,
+                                                                           containerPath,
+                                                                           create);
     if (containerStateFile != null && containerStateFile.toFile().exists()) {
       return containerStateFile.toFile();
-    } else {
-      return null;
     }
+    return null;
   }
 
-  private static class DefaultStateLocationProvider
-      implements LibraryContainerStateLocationProvider {
+  private static class DefaultStateLocationProvider implements LibraryContainerStateLocationProvider {
 
     /*
      * The IFile and IFolder methods do not validate whether the underlying resources exist.
