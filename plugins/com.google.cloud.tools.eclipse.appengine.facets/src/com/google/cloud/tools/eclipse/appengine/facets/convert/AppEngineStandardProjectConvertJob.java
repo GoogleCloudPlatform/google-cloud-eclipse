@@ -49,11 +49,12 @@ public class AppEngineStandardProjectConvertJob extends Job {
     // Updating project before installing App Engine facet to avoid
     // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1155.
     try {
-      GpeMigrator.removeObsoleteGpeFixtures(facetedProject, subMonitor.newChild(20));
+      GpeMigrator.removeObsoleteGpeRemnants(facetedProject, subMonitor.newChild(20));
     } catch (CoreException ex) {
-      // Failed to remove GPE fixtures; live with it.
+      // Failed to remove GPE remnants; live with it.
+      subMonitor.setWorkRemaining(20);
       subMonitor.worked(20);
-      logger.log(Level.WARNING, "Error while removing GPE fixtures", ex);
+      logger.log(Level.WARNING, "Error while removing GPE remnants", ex);
     }
 
     try {

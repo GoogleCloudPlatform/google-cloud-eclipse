@@ -44,7 +44,7 @@ public class GpeMigratorTest {
   }
 
   @Test
-  public void testRemoveObsoleteGpeFixtures_removeGpeGaeNature() throws CoreException {
+  public void testRemoveObsoleteGpeRemnants_removeGpeGaeNature() throws CoreException {
     // For testing purposes, install GPE nature first.
     IProject project = projectCreator.getProject();
     IProjectDescription description = project.getDescription();
@@ -52,12 +52,12 @@ public class GpeMigratorTest {
     project.setDescription(description, null);
     assertTrue(project.hasNature("com.google.appengine.eclipse.core.gaeNature"));
 
-    GpeMigrator.removeObsoleteGpeFixtures(facetedProject, null /* monitor */);
+    GpeMigrator.removeObsoleteGpeRemnants(facetedProject, null /* monitor */);
     assertFalse(project.hasNature("com.google.appengine.eclipse.core.gaeNature"));
   }
 
   @Test
-  public void testRemoveObsoleteGpeFixtures_removeGpeGaeRuntime() throws CoreException {
+  public void testRemoveObsoleteGpeRemnants_removeGpeGaeRuntime() throws CoreException {
     // For testing purposes, install GPE runtime first.
     ServerCore.findRuntimeType("com.google.appengine.runtime.id1")
         .createRuntime("com.google.appengine.runtime.id", null).save(true, null);
@@ -66,7 +66,7 @@ public class GpeMigratorTest {
     facetedProject.addTargetedRuntime(facetRuntime, null);
     assertTrue(facetedProject.getTargetedRuntimes().contains(facetRuntime));
 
-    GpeMigrator.removeObsoleteGpeFixtures(facetedProject, null /* monitor */);
+    GpeMigrator.removeObsoleteGpeRemnants(facetedProject, null /* monitor */);
     assertFalse(facetedProject.getTargetedRuntimes().contains(facetRuntime));
   }
 }

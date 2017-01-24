@@ -37,9 +37,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceRunnable;
-import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -47,6 +45,7 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.internal.FacetedProject;
 import org.eclipse.wst.common.project.facet.core.runtime.IRuntime;
@@ -77,50 +76,74 @@ public class GpeMigrator {
   private static final String ELEMENT_NAME_INSTALLED_FACET = "installed";
   private static final String ATTRIBUTE_NAME_FACET_ID = "facet";
 
-  public static void removeObsoleteGpeFixtures(
+  /**
+   * Removes various GPE-related remnants. Any error during operation is logged but ignored.
+   *
+   * 1. Removes classpath entries from GPE.
+   * 2. Removes the GPE nature.
+   * 3. Removes the GPE runtime.
+   * 4. Removes the GPE facets.
+   */
+  public static void removeObsoleteGpeRemnants(
       final IFacetedProject facetedProject, IProgressMonitor monitor) throws CoreException {
-    SubMonitor subMonitor = SubMonitor.convert(monitor, 40);
+    SubMonitor subMonitor = SubMonitor.convert(monitor, 50);
+    IProject project = facetedProject.getProject();
 
-    // 1. Remove classpath entries from GPE.
-    IJavaProject javaProject = JavaCore.create(facetedProject.getProject());
-    List<IClasspathEntry> newEntries = new ArrayList<>();
-    for (IClasspathEntry entry : javaProject.getRawClasspath()) {
-      String path = entry.getPath().toString();  // note: '/' is a path separator.
-      if (!GPE_CLASSPATH_ENTRIES_PATH.contains(path)) {
-        newEntries.add(entry);
+    removeGpeClasspathEntries(project);
+    subMonitor.worked(10);
+
+    removeGpeNature(project);
+    subMonitor.worked(10);
+
+    removeGpeRuntime(facetedProject);
+    subMonitor.worked(10);
+
+    removeGpeFacets(facetedProject);
+    subMonitor.worked(10);
+  }
+
+  @VisibleForTesting
+  static void removeGpeClasspathEntries(IProject project) {
+    try {
+      IJavaProject javaProject = JavaCore.create(project);
+      List<IClasspathEntry> newEntries = new ArrayList<>();
+      for (IClasspathEntry entry : javaProject.getRawClasspath()) {
+        String path = entry.getPath().toString();  // note: '/' is a path separator.
+        if (!GPE_CLASSPATH_ENTRIES_PATH.contains(path)) {
+          newEntries.add(entry);
+        }
       }
+
+      IClasspathEntry[] rawEntries = newEntries.toArray(new IClasspathEntry[0]);
+      javaProject.setRawClasspath(rawEntries, new NullProgressMonitor());
+      javaProject.save(new NullProgressMonitor(), true);
+
+    } catch (JavaModelException ex) {
+      logger.log(Level.WARNING, "Failed to remove GPE classpath entries.", ex);
     }
+  }
 
-    IClasspathEntry[] rawEntries = newEntries.toArray(new IClasspathEntry[0]);
-    javaProject.setRawClasspath(rawEntries, subMonitor.newChild(10));
-    javaProject.save(new NullProgressMonitor(), true);
-
-    // 2. Remove JARs under "WEB-INF/lib" added by GPE.
-
-
-    // 3. Remove GPE nature.
-    NatureUtils.removeNature(facetedProject.getProject(), GPE_GAE_NATURE_ID);
-    subMonitor.worked(10);
-
-    // 4. Remove GPE runtime.
-    Set<IRuntime> runtimes = facetedProject.getTargetedRuntimes();
-    for (IRuntime runtime : runtimes) {
-      if (GPE_WTP_GAE_RUNTIME.equals(runtime.getProperty("id"))) {
-        facetedProject.removeTargetedRuntime(runtime, null /* monitor */);
-      }
+  @VisibleForTesting
+  static void removeGpeNature(IProject project) {
+    try {
+      NatureUtils.removeNature(project, GPE_GAE_NATURE_ID);
+    } catch (CoreException ex) {
+      logger.log(Level.WARNING, "Failed to remove GPE nature.", ex);
     }
-    subMonitor.worked(10);
+  }
 
-    // 5. Remove GPE facets.
-    IWorkspaceRunnable runnable = new IWorkspaceRunnable() {
-      @Override
-      public void run(IProgressMonitor monitor) throws CoreException {
-        removeGpeFacets(facetedProject);
+  @VisibleForTesting
+  static void removeGpeRuntime(IFacetedProject facetedProject) {
+    try {
+      Set<IRuntime> runtimes = facetedProject.getTargetedRuntimes();
+      for (IRuntime runtime : runtimes) {
+        if (GPE_WTP_GAE_RUNTIME.equals(runtime.getProperty("id"))) {
+          facetedProject.removeTargetedRuntime(runtime, null /* monitor */);
+        }
       }
-    };
-    IWorkspace workspace = ResourcesPlugin.getWorkspace();
-    workspace.run(runnable, workspace.getRoot(), IWorkspace.AVOID_UPDATE, null);
-    subMonitor.worked(10);
+    } catch (CoreException ex) {
+      logger.log(Level.WARNING, "Failed to remove GPE runtime.", ex);
+    }
   }
 
   @VisibleForTesting
