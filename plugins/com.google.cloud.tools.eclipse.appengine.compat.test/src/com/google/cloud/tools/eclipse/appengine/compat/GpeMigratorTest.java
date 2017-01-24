@@ -25,7 +25,6 @@ import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jst.server.core.FacetUtil;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
-import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.common.project.facet.core.runtime.IRuntime;
 import org.eclipse.wst.server.core.ServerCore;
@@ -45,7 +44,7 @@ public class GpeMigratorTest {
   }
 
   @Test
-  public void testRemoveObsoleteGpeFixtures_removeGpeGaeNature() throws CoreException {
+  public void testRemoveObsoleteGpeRemnants_removeGpeGaeNature() throws CoreException {
     // For testing purposes, install GPE nature first.
     IProject project = projectCreator.getProject();
     IProjectDescription description = project.getDescription();
@@ -53,34 +52,12 @@ public class GpeMigratorTest {
     project.setDescription(description, null);
     assertTrue(project.hasNature("com.google.appengine.eclipse.core.gaeNature"));
 
-    GpeMigrator.removeObsoleteGpeFixtures(facetedProject, null /* monitor */);
+    GpeMigrator.removeObsoleteGpeRemnants(facetedProject, null /* monitor */);
     assertFalse(project.hasNature("com.google.appengine.eclipse.core.gaeNature"));
   }
 
   @Test
-  public void testRemoveObsoleteGpeFixtures_removeGpeGaeFacet() throws CoreException {
-    IProjectFacetVersion gpeGaeFacet =
-        ProjectFacetsManager.getProjectFacet("com.google.appengine.facet").getVersion("1");
-    facetedProject.installProjectFacet(gpeGaeFacet, null, null);
-    assertTrue(facetedProject.hasProjectFacet(gpeGaeFacet));
-
-    GpeMigrator.removeObsoleteGpeFixtures(facetedProject, null /* monitor */);
-    assertFalse(facetedProject.hasProjectFacet(gpeGaeFacet));
-  }
-
-  @Test
-  public void testRemoveObsoleteGpeFixtures_removeGpeGaeEarFacet() throws CoreException {
-    IProjectFacetVersion gpeGaeEarFacet =
-        ProjectFacetsManager.getProjectFacet("com.google.appengine.facet.ear").getVersion("1");
-    facetedProject.installProjectFacet(gpeGaeEarFacet, null, null);
-    assertTrue(facetedProject.hasProjectFacet(gpeGaeEarFacet));
-
-    GpeMigrator.removeObsoleteGpeFixtures(facetedProject, null /* monitor */);
-    assertFalse(facetedProject.hasProjectFacet(gpeGaeEarFacet));
-  }
-
-  @Test
-  public void testRemoveObsoleteGpeFixtures_removeGpeGaeRuntime() throws CoreException {
+  public void testRemoveObsoleteGpeRemnants_removeGpeGaeRuntime() throws CoreException {
     // For testing purposes, install GPE runtime first.
     ServerCore.findRuntimeType("com.google.appengine.runtime.id1")
         .createRuntime("com.google.appengine.runtime.id", null).save(true, null);
@@ -89,7 +66,7 @@ public class GpeMigratorTest {
     facetedProject.addTargetedRuntime(facetRuntime, null);
     assertTrue(facetedProject.getTargetedRuntimes().contains(facetRuntime));
 
-    GpeMigrator.removeObsoleteGpeFixtures(facetedProject, null /* monitor */);
+    GpeMigrator.removeObsoleteGpeRemnants(facetedProject, null /* monitor */);
     assertFalse(facetedProject.getTargetedRuntimes().contains(facetRuntime));
   }
 }
