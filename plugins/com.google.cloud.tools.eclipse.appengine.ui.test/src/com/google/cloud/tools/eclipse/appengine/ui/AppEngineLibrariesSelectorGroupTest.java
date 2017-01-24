@@ -76,12 +76,12 @@ public class AppEngineLibrariesSelectorGroupTest {
       public void run() {
         Control groupAsControl = shell.getChildren()[0];
         assertThat(groupAsControl, instanceOf(Group.class));
-        Control[] buttonsAsControls = ((Group)groupAsControl).getChildren();
+        Control[] buttonsAsControls = ((Group) groupAsControl).getChildren();
         String[] expectedLibraryOrder = new String[]{ "appengine-api", "appengine-endpoints", "objectify" };
         for (int i = 0; i < buttonsAsControls.length; i++) {
           Control control = buttonsAsControls[i];
           assertThat(control, instanceOf(Button.class));
-          Button button = (Button)control;
+          Button button = (Button) control;
           assertNotNull(button.getData());
           assertThat(button.getData(), instanceOf(Library.class));
           Library library = (Library) button.getData();
