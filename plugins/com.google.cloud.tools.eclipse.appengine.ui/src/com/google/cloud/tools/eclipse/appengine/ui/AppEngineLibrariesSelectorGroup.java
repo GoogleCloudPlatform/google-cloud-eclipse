@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -81,7 +80,7 @@ public class AppEngineLibrariesSelectorGroup implements ISelectionProvider {
       Collection<Library> availableLibraries) {
     Preconditions.checkNotNull(parentContainer, "parentContainer is null");
     Preconditions.checkNotNull(availableLibraries, "availableLibraries is null");
-    this.availableLibraries = new HashMap<>();
+    this.availableLibraries = new LinkedHashMap<>();
     for (Library library : availableLibraries) {
       this.availableLibraries.put(library.getId(), library);
     }
