@@ -19,8 +19,6 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.google.cloud.tools.eclipse.appengine.validation.JreWhitelistChecker;
-
 public class JreWhitelistCheckerTest {
 
   private JreWhitelistChecker checker = new JreWhitelistChecker();
