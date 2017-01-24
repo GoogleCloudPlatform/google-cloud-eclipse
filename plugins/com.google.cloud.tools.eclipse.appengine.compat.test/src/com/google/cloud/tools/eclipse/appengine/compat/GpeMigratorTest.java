@@ -16,57 +16,14 @@
 
 package com.google.cloud.tools.eclipse.appengine.compat;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectDescription;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jst.server.core.FacetUtil;
-import org.eclipse.wst.common.project.facet.core.IFacetedProject;
-import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
-import org.eclipse.wst.common.project.facet.core.runtime.IRuntime;
-import org.eclipse.wst.server.core.ServerCore;
-import org.junit.Before;
-import org.junit.Rule;
+import java.io.IOException;
+import javax.xml.transform.TransformerException;
 import org.junit.Test;
 
 public class GpeMigratorTest {
 
-  @Rule public final TestProjectCreator projectCreator = new TestProjectCreator();
-
-  private IFacetedProject facetedProject;
-
-  @Before
-  public void setUp() throws CoreException {
-    facetedProject = ProjectFacetsManager.create(projectCreator.getProject());
-  }
-
   @Test
-  public void testRemoveObsoleteGpeRemnants_removeGpeGaeNature() throws CoreException {
-    // For testing purposes, install GPE nature first.
-    IProject project = projectCreator.getProject();
-    IProjectDescription description = project.getDescription();
-    description.setNatureIds(new String[]{"com.google.appengine.eclipse.core.gaeNature"});
-    project.setDescription(description, null);
-    assertTrue(project.hasNature("com.google.appengine.eclipse.core.gaeNature"));
-
-    GpeMigrator.removeObsoleteGpeRemnants(facetedProject, null /* monitor */);
-    assertFalse(project.hasNature("com.google.appengine.eclipse.core.gaeNature"));
-  }
-
-  @Test
-  public void testRemoveObsoleteGpeRemnants_removeGpeGaeRuntime() throws CoreException {
-    // For testing purposes, install GPE runtime first.
-    ServerCore.findRuntimeType("com.google.appengine.runtime.id1")
-        .createRuntime("com.google.appengine.runtime.id", null).save(true, null);
-    IRuntime facetRuntime = FacetUtil.getRuntime(
-        ServerCore.findRuntime("com.google.appengine.runtime.id"));
-    facetedProject.addTargetedRuntime(facetRuntime, null);
-    assertTrue(facetedProject.getTargetedRuntimes().contains(facetRuntime));
-
-    GpeMigrator.removeObsoleteGpeRemnants(facetedProject, null /* monitor */);
-    assertFalse(facetedProject.getTargetedRuntimes().contains(facetRuntime));
+  public void testApplyXslt() throws IOException, TransformerException {
+    GpeMigrator.applyXslt(null /* document */, null /* stylesheet */);
   }
 }
