@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.whitelist;
+package com.google.cloud.tools.eclipse.appengine.validation;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.google.cloud.tools.eclipse.appengine.validation.AppEngineJreWhitelist;
 
 public class AppEngineJreWhitelistTest {
 

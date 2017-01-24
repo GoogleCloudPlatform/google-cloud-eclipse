@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
+<<<<<<< HEAD:plugins/com.google.cloud.tools.eclipse.login.test/.project
 	<name>com.google.cloud.tools.eclipse.login.test</name>
+=======
+	<name>com.google.cloud.tools.eclipse.appengine.validation</name>
+>>>>>>> abe20d20e47bb38c0f296a878b3bc795ffe2d7a1:plugins/com.google.cloud.tools.eclipse.appengine.whitelist/.project
 	<comment></comment>
 	<projects>
 	</projects>
