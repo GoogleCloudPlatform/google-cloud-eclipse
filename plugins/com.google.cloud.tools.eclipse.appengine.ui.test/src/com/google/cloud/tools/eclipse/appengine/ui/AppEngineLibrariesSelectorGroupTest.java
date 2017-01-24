@@ -82,7 +82,6 @@ public class AppEngineLibrariesSelectorGroupTest {
           Control control = buttonsAsControls[i];
           assertThat(control, instanceOf(Button.class));
           Button button = (Button) control;
-          assertNotNull(button.getData());
           assertThat(button.getData(), instanceOf(Library.class));
           Library library = (Library) button.getData();
           assertThat(library.getId(), is(expectedLibraryOrder[i]));
