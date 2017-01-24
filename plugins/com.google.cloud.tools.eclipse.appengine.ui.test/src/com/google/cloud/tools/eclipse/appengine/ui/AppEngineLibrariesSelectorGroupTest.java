@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.ui;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -31,7 +32,9 @@ import java.util.Comparator;
 import java.util.List;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotCheckBox;
 import org.junit.Before;
@@ -61,6 +64,29 @@ public class AppEngineLibrariesSelectorGroupTest {
         appengineButton = getButton("appengine-api");
         endpointsButton = getButton("appengine-endpoints");
         objectifyButton = getButton("objectify");
+      }
+    });
+  }
+
+  @Test
+  public void testButtonOrder() {
+    syncExec(new Runnable() {
+
+      @Override
+      public void run() {
+        Control groupAsControl = shell.getChildren()[0];
+        assertThat(groupAsControl, instanceOf(Group.class));
+        Control[] buttonsAsControls = ((Group)groupAsControl).getChildren();
+        String[] expectedLibraryOrder = new String[]{ "appengine-api", "appengine-endpoints", "objectify" };
+        for (int i = 0; i < buttonsAsControls.length; i++) {
+          Control control = buttonsAsControls[i];
+          assertThat(control, instanceOf(Button.class));
+          Button button = (Button)control;
+          assertNotNull(button.getData());
+          assertThat(button.getData(), instanceOf(Library.class));
+          Library library = (Library) button.getData();
+          assertThat(library.getId(), is(expectedLibraryOrder[i]));
+        }
       }
     });
   }
