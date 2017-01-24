@@ -82,7 +82,7 @@ public class AppEngineTemplateUtility {
   }
 
   private static Configuration createConfiguration() {
-    Configuration configuration = new Configuration(Configuration.VERSION_2_3_23);
+    Configuration configuration = new Configuration(Configuration.VERSION_2_3_25);
     configuration.setClassForTemplateLoading(
         AppEngineTemplateUtility.class, "/templates/appengine");
     configuration.setDefaultEncoding(StandardCharsets.UTF_8.name());
