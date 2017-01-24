@@ -33,7 +33,6 @@ import java.util.List;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotCheckBox;
@@ -53,10 +52,6 @@ public class AppEngineLibrariesSelectorGroupTest {
 
   @Before
   public void setUp() throws Exception {
-    Display.getDefault().syncExec(new Runnable() {
-
-      @Override
-      public void run() {
         shell = shellTestResource.getShell();
         shell.setLayout(new FillLayout());
         librariesSelector = new AppEngineLibrariesSelectorGroup(shell);
@@ -64,16 +59,10 @@ public class AppEngineLibrariesSelectorGroupTest {
         appengineButton = getButton("appengine-api");
         endpointsButton = getButton("appengine-endpoints");
         objectifyButton = getButton("objectify");
-      }
-    });
   }
 
   @Test
   public void testButtonOrder() {
-    syncExec(new Runnable() {
-
-      @Override
-      public void run() {
         Control groupAsControl = shell.getChildren()[0];
         assertThat(groupAsControl, instanceOf(Group.class));
         Control[] buttonsAsControls = ((Group) groupAsControl).getChildren();
@@ -87,8 +76,6 @@ public class AppEngineLibrariesSelectorGroupTest {
           Library library = (Library) button.getData();
           assertThat(library.getId(), is(expectedLibraryOrder[i]));
         }
-      }
-    });
   }
 
   @Test
@@ -100,66 +87,40 @@ public class AppEngineLibrariesSelectorGroupTest {
 
   @Test
   public void testInitiallyNoLibrariesSelected() {
-    syncExec(new Runnable() {
-
-      @Override
-      public void run() {
         assertTrue(getSelectedLibrariesSorted().isEmpty());
-      }
-    });
   }
 
   @Test
   public void testSelectAppEngineApi() {
-    syncExec(new Runnable() {
-
-      @Override
-      public void run() {
         appengineButton.click();
         List<Library> selectedLibraries = getSelectedLibrariesSorted();
         assertNotNull(selectedLibraries);
         assertThat(selectedLibraries.size(), is(1));
         assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
-      }
-    });
   }
 
   @Test
   public void testSelectEndpointsSelectsAppEngineApiAsWell() {
-    syncExec(new Runnable() {
-
-      @Override
-      public void run() {
         endpointsButton.click();
         List<Library> selectedLibraries = getSelectedLibrariesSorted();
         assertNotNull(selectedLibraries);
         assertThat(selectedLibraries.size(), is(2));
         assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
         assertThat(selectedLibraries.get(1).getId(), is("appengine-endpoints"));
-      }});
   }
 
   @Test
   public void testSelectObjectifySelectsAppEngineApiAsWell() {
-    syncExec(new Runnable() {
-
-      @Override
-      public void run() {
         objectifyButton.click();
         List<Library> selectedLibraries = getSelectedLibrariesSorted();
         assertNotNull(selectedLibraries);
         assertThat(selectedLibraries.size(), is(2));
         assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
         assertThat(selectedLibraries.get(1).getId(), is("objectify"));
-      }});
   }
 
   @Test
   public void testSelectObjectifyAndEndpointsSelectsAppEngineApiAsWell() {
-    syncExec(new Runnable() {
-
-      @Override
-      public void run() {
         objectifyButton.click();
         endpointsButton.click();
         List<Library> selectedLibraries = getSelectedLibrariesSorted();
@@ -168,15 +129,10 @@ public class AppEngineLibrariesSelectorGroupTest {
         assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
         assertThat(selectedLibraries.get(1).getId(), is("appengine-endpoints"));
         assertThat(selectedLibraries.get(2).getId(), is("objectify"));
-      }});
   }
 
   @Test
   public void testSelectObjectifyAndEndpointsThenUnselectObjectifyShouldKeepAppEngineApiSelected() {
-    syncExec(new Runnable() {
-
-      @Override
-      public void run() {
         objectifyButton.click();
         endpointsButton.click();
         objectifyButton.click();
@@ -185,15 +141,10 @@ public class AppEngineLibrariesSelectorGroupTest {
         assertThat(selectedLibraries.size(), is(2));
         assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
         assertThat(selectedLibraries.get(1).getId(), is("appengine-endpoints"));
-      }});
   }
 
   @Test
   public void testSelectObjectifyAndEndpointsThenUnselectEndpointsShouldKeepAppEngineApiSelected() {
-    syncExec(new Runnable() {
-
-      @Override
-      public void run() {
         endpointsButton.click();
         objectifyButton.click();
         endpointsButton.click();
@@ -202,15 +153,10 @@ public class AppEngineLibrariesSelectorGroupTest {
         assertThat(selectedLibraries.size(), is(2));
         assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
         assertThat(selectedLibraries.get(1).getId(), is("objectify"));
-      }});
   }
 
   @Test
   public void testSelectObjectifyAndEndpointsThenUnselectBothShouldMakeAppEngineApiUnSelected() {
-    syncExec(new Runnable() {
-
-      @Override
-      public void run() {
         objectifyButton.click();
         endpointsButton.click();
         objectifyButton.click();
@@ -218,15 +164,10 @@ public class AppEngineLibrariesSelectorGroupTest {
         List<Library> selectedLibraries = getSelectedLibrariesSorted();
         assertNotNull(selectedLibraries);
         assertTrue(selectedLibraries.isEmpty());
-      }});
   }
 
   @Test
   public void testSelectAppEngineApiThenEndpointsThenUnselectEndpointsShouldKeepAppEngineSelected() {
-    syncExec(new Runnable() {
-
-      @Override
-      public void run() {
         appengineButton.click();
         endpointsButton.click();
         endpointsButton.click();
@@ -234,15 +175,10 @@ public class AppEngineLibrariesSelectorGroupTest {
         assertNotNull(selectedLibraries);
         assertThat(selectedLibraries.size(), is(1));
         assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
-      }});
   }
 
   @Test
   public void testSelectAppEngineApiThenObjectifyThenUnselectObjectifyShouldKeepAppEngineSelected() {
-    syncExec(new Runnable() {
-
-      @Override
-      public void run() {
         appengineButton.click();
         objectifyButton.click();
         objectifyButton.click();
@@ -250,16 +186,11 @@ public class AppEngineLibrariesSelectorGroupTest {
         assertNotNull(selectedLibraries);
         assertThat(selectedLibraries.size(), is(1));
         assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
-      }});
   }
 
   // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/954
   @Test
   public void testSelectAndUnselectAppEngineApiThenSelectEndpointsShouldKeepAppEngineSelected() {
-    syncExec(new Runnable() {
-
-      @Override
-      public void run() {
         appengineButton.click();
         appengineButton.click();
         endpointsButton.click();
@@ -268,16 +199,11 @@ public class AppEngineLibrariesSelectorGroupTest {
         assertThat(selectedLibraries.size(), is(2));
         assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
         assertThat(selectedLibraries.get(1).getId(), is("appengine-endpoints"));
-      }});
   }
 
   // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1254
   @Test
   public void testSelectAppEngineApiThenSelectObjectifyShouldDisableAppEngine() {
-    syncExec(new Runnable() {
-
-      @Override
-      public void run() {
         appengineButton.click();
         objectifyButton.click();
         List<Library> selectedLibraries = getSelectedLibrariesSorted();
@@ -287,7 +213,6 @@ public class AppEngineLibrariesSelectorGroupTest {
         assertThat(selectedLibraries.get(1).getId(), is("objectify"));
         assertFalse(appengineButton.isEnabled());
         assertTrue(objectifyButton.isEnabled());
-      }});
   }
 
   private SWTBotCheckBox getButton(String libraryId) {
@@ -298,10 +223,6 @@ public class AppEngineLibrariesSelectorGroupTest {
     }
     fail("Could not find button for " + libraryId);
     return null; // won't be reached
-  }
-
-  private void syncExec(Runnable runnable) {
-    shell.getDisplay().syncExec(runnable);
   }
 
   private List<Library> getSelectedLibrariesSorted() {
