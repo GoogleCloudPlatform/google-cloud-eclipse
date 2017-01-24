@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
@@ -36,6 +35,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -48,23 +48,12 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.internal.FacetedProject;
-import org.eclipse.wst.common.project.facet.core.runtime.IRuntime;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 public class GpeMigrator {
 
   private static final Logger logger = Logger.getLogger(GpeMigrator.class.getName());
-
-  private static final String GPE_GAE_NATURE_ID = "com.google.appengine.eclipse.core.gaeNature";
-
-  private static final String GPE_WTP_GAE_FACET_ID = "com.google.appengine.facet";
-  private static final String GPE_WTP_GAE_EAR_FACET_ID = "com.google.appengine.facet.ear";
-
-  private static final String GPE_WTP_GAE_RUNTIME = "com.google.appengine.runtime.id";
 
   private static final ImmutableList<String> GPE_CLASSPATH_ENTRIES_PATH = ImmutableList.of(
       "org.eclipse.jst.server.core.container/com.google.appengine.server.runtimeTarget/Google App Engine",
@@ -72,17 +61,13 @@ public class GpeMigrator {
       "com.google.appengine.eclipse.wtp.GAE_WTP_CONTAINER"
   );
 
-  // XML element and attribute name used to save installed facets in WTP facet settings XML file.
-  private static final String ELEMENT_NAME_INSTALLED_FACET = "installed";
-  private static final String ATTRIBUTE_NAME_FACET_ID = "facet";
+  private static final String GPE_GAE_NATURE_ID = "com.google.appengine.eclipse.core.gaeNature";
+
+  private static final String WTP_METADATA_XSLT = "/xslt/wtpMetadata.xsl";
 
   /**
-   * Removes various GPE-related remnants. Any error during operation is logged but ignored.
-   *
-   * 1. Removes classpath entries from GPE.
-   * 2. Removes the GPE nature.
-   * 3. Removes the GPE runtime.
-   * 4. Removes the GPE facets.
+   * Removes various GPE-related remnants: classpath entries, nature, runtime, and facets. Any
+   * error during operation is logged but ignored.
    */
   public static void removeObsoleteGpeRemnants(
       final IFacetedProject facetedProject, IProgressMonitor monitor) throws CoreException {
@@ -95,11 +80,8 @@ public class GpeMigrator {
     removeGpeNature(project);
     subMonitor.worked(10);
 
-    removeGpeRuntime(facetedProject);
-    subMonitor.worked(10);
-
-    removeGpeFacets(facetedProject);
-    subMonitor.worked(10);
+    removeGpeRuntimeAndFacets(facetedProject);
+    subMonitor.worked(20);
   }
 
   @VisibleForTesting
@@ -133,72 +115,40 @@ public class GpeMigrator {
   }
 
   @VisibleForTesting
-  static void removeGpeRuntime(IFacetedProject facetedProject) {
-    try {
-      Set<IRuntime> runtimes = facetedProject.getTargetedRuntimes();
-      for (IRuntime runtime : runtimes) {
-        if (GPE_WTP_GAE_RUNTIME.equals(runtime.getProperty("id"))) {
-          facetedProject.removeTargetedRuntime(runtime, null /* monitor */);
-        }
+  static void removeGpeRuntimeAndFacets(IFacetedProject facetedProject) {
+    // To remove the facets, we will directly modify the WTP facet metadata file (using XSLT):
+    // .settings/org.eclipse.wst.common.project.facet.core.xml
+    IFile metadataFile = facetedProject.getProject().getFile(FacetedProject.METADATA_FILE);
+
+    try (InputStream metadataStream = metadataFile.getContents();
+        InputStream stylesheetStream = GpeMigrator.class.getResourceAsStream(WTP_METADATA_XSLT)) {
+
+      DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+      Document document = builder.parse(metadataStream);
+
+      try (InputStream resultStream = applyXslt(document, stylesheetStream)) {
+        metadataFile.setContents(resultStream, IFile.FORCE, null /* monitor */);
       }
-    } catch (CoreException ex) {
-      logger.log(Level.WARNING, "Failed to remove GPE runtime.", ex);
-    }
-  }
-
-  @VisibleForTesting
-  static void removeGpeFacets(IFacetedProject facetedProject) {
-    try {
-      // To remove the facets, we will directly modify the WTP facet metadata file:
-      // .settings/org.eclipse.wst.common.project.facet.core.xml
-      IFile metadataFile = facetedProject.getProject().getFile(FacetedProject.METADATA_FILE);
-      try (InputStream stream = metadataFile.getContents()) {
-
-        DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        Element root = builder.parse(stream).getDocumentElement();
-
-        List<Node> gpeFacetNodes = collectGpeFacetNodes(root);
-        for (Node gpeNode : gpeFacetNodes) {
-          root.removeChild(gpeNode);
-        }
-
-        saveDomToFile(root.getOwnerDocument(), metadataFile);
-      }
-
     } catch (ParserConfigurationException | SAXException
         | IOException | TransformerException | CoreException ex) {
-      logger.log(Level.WARNING, "Cannot modify WTP facet metadata file to remove GEP facets.", ex);
+      logger.log(Level.WARNING, "Failed to modify WTP facet metadata.", ex);
     }
   }
 
+  /**
+   * Applies XSLT transformation.
+   *
+   * @return the result of transformation as {@link InputStream}
+   */
   @VisibleForTesting
-  static List<Node> collectGpeFacetNodes(Element root) {
-    List<Node> gpeFacetNodes = new ArrayList<>();
-
-    NodeList nodeList = root.getChildNodes();
-    for (int i = 0; i < nodeList.getLength(); i++) {
-      Node node = nodeList.item(i);
-
-      if (node.getNodeType() == Node.ELEMENT_NODE
-          && ELEMENT_NAME_INSTALLED_FACET.equals(node.getNodeName())) {
-        String facetId = ((Element) node).getAttribute(ATTRIBUTE_NAME_FACET_ID);
-        if (GPE_WTP_GAE_FACET_ID.equals(facetId) || GPE_WTP_GAE_EAR_FACET_ID.equals(facetId)) {
-          gpeFacetNodes.add(node);
-        }
-      }
-    }
-    return gpeFacetNodes;
-  }
-
-  @VisibleForTesting
-  static void saveDomToFile(Document document, IFile file)
-      throws IOException, TransformerException, CoreException {
+  static InputStream applyXslt(Document document, InputStream stylesheet)
+      throws IOException, TransformerException {
     try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-      Transformer transformer = TransformerFactory.newInstance().newTransformer();
+      TransformerFactory factory = TransformerFactory.newInstance();
+      Transformer transformer = factory.newTransformer(new StreamSource(stylesheet));
       transformer.transform(new DOMSource(document), new StreamResult(outputStream));
-      InputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
 
-      file.setContents(inputStream, IFile.FORCE, null /* monitor */);
+      return new ByteArrayInputStream(outputStream.toByteArray());
     }
   }
 }
