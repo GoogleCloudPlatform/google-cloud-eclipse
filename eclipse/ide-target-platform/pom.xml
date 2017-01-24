@@ -13,6 +13,10 @@
   <version>0.1.0-SNAPSHOT</version>
   <packaging>eclipse-repository</packaging>
 
+  <properties>    
+    <cobertura.skip>true</cobertura.skip>
+  </properties>
+
   <build>
     <plugins>
       <plugin>
