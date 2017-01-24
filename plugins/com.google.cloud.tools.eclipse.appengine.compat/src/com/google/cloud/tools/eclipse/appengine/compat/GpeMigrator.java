@@ -86,7 +86,7 @@ public class GpeMigrator {
    */
   public static void removeObsoleteGpeRemnants(
       final IFacetedProject facetedProject, IProgressMonitor monitor) throws CoreException {
-    SubMonitor subMonitor = SubMonitor.convert(monitor, 50);
+    SubMonitor subMonitor = SubMonitor.convert(monitor, 40);
     IProject project = facetedProject.getProject();
 
     removeGpeClasspathEntries(project);
