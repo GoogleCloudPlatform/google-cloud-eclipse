@@ -50,8 +50,8 @@ public class StandardFacetInstallationTest {
 
   @Test
   public void testStandardFacetInstallation() throws IOException, CoreException {
-    projects =
-        ProjectUtils.importProjects(getClass(), "projects/test-dynamic-web-project.zip", null);
+    projects = ProjectUtils.importProjects(getClass(),
+        "projects/test-dynamic-web-project.zip", true /* checkBuildErrors */, null);
     assertEquals(1, projects.size());
     IProject project = projects.get(0);
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);

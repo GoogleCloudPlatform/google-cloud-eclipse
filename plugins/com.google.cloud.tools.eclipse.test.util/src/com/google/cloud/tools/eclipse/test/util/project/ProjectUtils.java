@@ -56,12 +56,12 @@ public class ProjectUtils {
   /**
    * Import the Eclipse projects found within the bundle containing {@code clazz} at the
    * {@code relativeLocation}. Return the list of projects imported.
-   * 
+   *
    * @throws IOException if the zip cannot be accessed
    * @throws CoreException if a project cannot be imported
    */
   public static List<IProject> importProjects(Class<?> clazz, String relativeLocation,
-      IProgressMonitor monitor)
+      boolean checkBuildErrors, IProgressMonitor monitor)
       throws IOException, CoreException {
     SubMonitor progress = SubMonitor.convert(monitor, 100);
 
@@ -109,7 +109,9 @@ public class ProjectUtils {
 
     // wait for any post-import operations too
     waitUntilIdle();
-    failIfBuildErrors("Imported projects have errors", projects);
+    if (checkBuildErrors) {
+      failIfBuildErrors("Imported projects have errors", projects);
+    }
 
     return projects;
   }

@@ -16,100 +16,111 @@
 
 package com.google.cloud.tools.eclipse.appengine.compat;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
-import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
+import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
+import java.util.List;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.wst.common.project.facet.core.IFacetedProject;
+import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
+import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 public class GpeMigratorTest {
 
-  private static final String WTP_METADATA_XML = "<?xml version='1.0' encoding='UTF-8'?>"
-      + "<faceted-project>"
-      + "  <runtime name='Google App Engine'/>"
-      + "  <runtime name='App Engine Standard Runtime'/>"
-      + "  <installed facet='java' version='1.7'/>"
-      + "  <installed facet='jst.web' version='2.5'/>"
-      + "  <installed facet='com.google.appengine.facet' version='1'/>"
-      + "  <installed facet='com.google.appengine.facet.ear' version='1'/>"
-      + "</faceted-project>";
+  private IProject gpeProject;
 
-  private static final String STYLESHEET = "<?xml version='1.0' encoding='UTF-8'?>"
-      + "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>"
-      + "  <xsl:template match='faceted-project'>"
-      + "    <xsl:copy/>"
-      + "  </xsl:template>"
-      + "</xsl:stylesheet>";
+  @Before
+  public void setUp() throws IOException, CoreException {
+    List<IProject> projects = ProjectUtils.importProjects(getClass(),
+        "test-projects/GPE-project.zip", false /* checkBuildErrors */, null);
+    assertEquals(1, projects.size());
+    gpeProject = projects.get(0);
+  }
 
-  @Test
-  public void testApplyXslt()
-      throws IOException, ParserConfigurationException, SAXException, TransformerException {
-    try (InputStream xmlStream = stringToInputStream(WTP_METADATA_XML);
-        InputStream stylesheetStream = stringToInputStream(STYLESHEET)) {
-
-      DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-      Document document = builder.parse(xmlStream);
-
-      try (InputStream inputStream = GpeMigrator.applyXslt(document, stylesheetStream)) {
-        Document transformed = builder.parse(inputStream);
-
-        assertEquals(12, document.getDocumentElement().getChildNodes().getLength());
-        assertEquals(0, transformed.getDocumentElement().getChildNodes().getLength());
-      }
-    }
+  @After
+  public void tearDown() throws CoreException {
+    gpeProject.delete(true /* force */,  null);
   }
 
   @Test
-  public void testWtpMetadataStylesheet_removesGpeRuntimeAndFacets()
-      throws IOException, ParserConfigurationException, SAXException, TransformerException {
-    try (InputStream xmlStream = stringToInputStream(WTP_METADATA_XML);
-        InputStream stylesheetStream = new FileInputStream(
-            "../com.google.cloud.tools.eclipse.appengine.compat/xslt/wtpMetadata.xsl")) {
+  public void testRemoveGpeNature() throws CoreException {
+    assertTrue(gpeProject.hasNature("com.google.appengine.eclipse.core.gaeNature"));
 
-      DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-      Document document = builder.parse(xmlStream);
+    GpeMigrator.removeGpeNature(gpeProject);
+    assertFalse(gpeProject.hasNature("com.google.appengine.eclipse.core.gaeNature"));
+  }
 
-      try (InputStream inputStream = GpeMigrator.applyXslt(document, stylesheetStream)) {
-        Document transformed = builder.parse(inputStream);
+  @Test
+  public void testRemoveGpeRuntimeAndFacets_facetsRemoved() throws CoreException {
+    IFacetedProject facetedProject = ProjectFacetsManager.create(gpeProject);
 
-        assertArrayEquals(new String[]{"Google App Engine", "App Engine Standard Runtime"},
-            getAttributesByTagNameAndAttributeName(document, "runtime", "name"));
-        assertArrayEquals(new String[]{
-            "java", "jst.web", "com.google.appengine.facet", "com.google.appengine.facet.ear"},
-            getAttributesByTagNameAndAttributeName(document, "installed", "facet"));
+    assertTrue(containsFacet(facetedProject, "com.google.appengine.facet"));
+    assertTrue(containsFacet(facetedProject, "com.google.appengine.facet.ear"));
 
-        assertArrayEquals(new String[]{"App Engine Standard Runtime"},
-            getAttributesByTagNameAndAttributeName(transformed, "runtime", "name"));
-        assertArrayEquals(new String[]{"java", "jst.web"},
-            getAttributesByTagNameAndAttributeName(transformed, "installed", "facet"));
+    GpeMigrator.removeGpeRuntimeAndFacets(facetedProject);
+    assertFalse(containsFacet(facetedProject, "com.google.appengine.facet"));
+    assertFalse(containsFacet(facetedProject, "com.google.appengine.facet.ear"));
+  }
+
+  @Test
+  public void testRemoveGpeRuntimeAndFacets_runtimeRemoved() throws CoreException {
+    IFacetedProject facetedProject = ProjectFacetsManager.create(gpeProject);
+
+    assertEquals(1, facetedProject.getTargetedRuntimes().size());
+    assertEquals("Google App Engine", facetedProject.getPrimaryRuntime().getName());
+    assertEquals("Google App Engine",
+        facetedProject.getTargetedRuntimes().iterator().next().getName());
+
+    GpeMigrator.removeGpeRuntimeAndFacets(facetedProject);
+    assertNull(facetedProject.getPrimaryRuntime());
+    assertTrue(facetedProject.getTargetedRuntimes().isEmpty());
+  }
+
+  @Test
+  public void testRemoveGpeClasspathEntries() throws JavaModelException {
+    IJavaProject javaProject = JavaCore.create(gpeProject);
+
+    assertTrue(containsLibrary(javaProject, "com.google.appengine.eclipse.core.GAE_CONTAINER"));
+    assertTrue(containsLibrary(javaProject, "com.google.appengine.eclipse.wtp.GAE_WTP_CONTAINER"));
+    assertTrue(containsLibrary(javaProject, "org.eclipse.jst.server.core.container/"
+        + "com.google.appengine.server.runtimeTarget/Google App Engine"));
+
+    GpeMigrator.removeGpeClasspathEntries(gpeProject);
+    assertFalse(containsLibrary(javaProject, "com.google.appengine.eclipse.core.GAE_CONTAINER"));
+    assertFalse(containsLibrary(javaProject, "com.google.appengine.eclipse.wtp.GAE_WTP_CONTAINER"));
+    assertFalse(containsLibrary(javaProject, "org.eclipse.jst.server.core.container/"
+        + "com.google.appengine.server.runtimeTarget/Google App Engine"));
+  }
+
+  private static boolean containsFacet(IFacetedProject facetedProject, String facetId) {
+    for (IProjectFacetVersion facet : facetedProject.getProjectFacets()) {
+      if (facet.getProjectFacet().getId().equals(facetId)) {
+        return true;
       }
     }
+    return false;
   }
 
-  private static InputStream stringToInputStream(String string) {
-    return new ByteArrayInputStream(string.getBytes(StandardCharsets.UTF_8));
-  }
-
-  private static String[] getAttributesByTagNameAndAttributeName(
-      Document document, String tagName, String attributeName) {
-    NodeList nodes = document.getElementsByTagName(tagName);
-    String[] attributes = new String[nodes.getLength()];
-
-    for (int i = 0; i < nodes.getLength(); i++) {
-      attributes[i] = ((Element) nodes.item(i)).getAttribute(attributeName);
+  private static boolean containsLibrary(IJavaProject javaProject, String libraryPath)
+      throws JavaModelException {
+    for (IClasspathEntry entry : javaProject.getRawClasspath()) {
+      String path = entry.getPath().toString();  // note: '/' is a path separator.
+      if (path.equals(libraryPath)) {
+        return true;
+      }
     }
-    return attributes;
+    return false;
   }
 }
