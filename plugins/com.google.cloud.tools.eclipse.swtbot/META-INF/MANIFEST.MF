@@ -17,4 +17,4 @@ Export-Package: com.google.cloud.tools.eclipse.swtbot;
    org.eclipse.swtbot.eclipse.finder,
    org.eclipse.swtbot.eclipse.finder.widgets,
    org.eclipse.swtbot.swt.finder"
-Import-Package: com.google.common.base;version="20.0.0"
+Import-Package: com.google.common.base;version="[20.0.0,21.0.0)"
