@@ -134,8 +134,8 @@ echo "#"
 echo "# Run Eclipse from the command line to generate a new p2 repository from"
 echo "# the signed artifacts:"
 echo "#"
-echo "#     $LOCAL_REPO/artifacts.xml"
-echo "#     $LOCAL_REPO/content.xml"
+echo "#     $LOCAL_REPO/artifacts.jar"
+echo "#     $LOCAL_REPO/content.jar"
 echo "#     $LOCAL_REPO/features/*"
 echo "#     $LOCAL_REPO/plugins/*"
 echo "#"
@@ -149,10 +149,11 @@ $ECLIPSE_HOME/eclipse -nosplash -consolelog \
     -artifactRepositoryName 'Google Cloud Tools for Eclipse' \
     -artifactRepository file:$LOCAL_REPO \
     -source $SIGNED_DIR \
-    -publishArtifacts
+    -publishArtifacts \
+    -compress
 set +x
 
-if [ ! -e "$LOCAL_REPO/artifacts.xml" -o ! -e "$LOCAL_REPO/content.xml" ]; then
+if [ ! -e "$LOCAL_REPO/artifacts.jar" -o ! -e "$LOCAL_REPO/content.jar" ]; then
     die "The files have not been generated. Halting."
 fi
 
