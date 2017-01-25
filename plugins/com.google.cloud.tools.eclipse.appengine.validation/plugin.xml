@@ -23,4 +23,20 @@
     <persistent value="true" />
   </extension>
   
+  <extension 
+      name="My Validator" 
+      point="org.eclipse.wst.validation.validatorV2" 
+      id="com.google.cloud.tools.eclipse.appengine.validation.MyValidator">
+    <validator
+    	class="com.google.cloud.tools.eclipse.appengine.validation.MyValidator">
+      <include>
+        <rules>
+          <file
+		      type="file"
+		      name="appengine-web.xml"/>
+        </rules>
+      </include>
+    </validator>
+  </extension>
+  
 </plugin>
