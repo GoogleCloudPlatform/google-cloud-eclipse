@@ -226,6 +226,10 @@ echo "#     $LOCAL_REPO/content.jar"
 echo "#     $LOCAL_REPO/features/*"
 echo "#     $LOCAL_REPO/plugins/*"
 echo "#"
+echo "# along with"
+echo "#"
+echo "#     $SIGNED_DIR/index.html"
+echo "#"
 echo "# into 'gs://cloud-tools-for-eclipse/<VERSION>/'."
 echo "#"
 echo -n "Enter version: "
@@ -234,6 +238,7 @@ ask_proceed
 
 set -x
 gsutil cp $LOCAL_REPO/artifacts.jar $LOCAL_REPO/content.jar \
+    $SIGNED_DIR/index.html \
     gs://cloud-tools-for-eclipse/$VERSION/ && \
 gsutil -m cp -R $LOCAL_REPO/features $LOCAL_REPO/plugins \
     gs://cloud-tools-for-eclipse/$VERSION/
