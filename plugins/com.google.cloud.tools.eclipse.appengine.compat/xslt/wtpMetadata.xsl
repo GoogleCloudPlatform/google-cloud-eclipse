@@ -8,7 +8,7 @@
 
   The metadata file is ".settings/org.eclipse.wst.common.project.facet.core.xml".
 -->
-<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
   <xsl:template match="node()|@*">
     <xsl:copy>
@@ -18,6 +18,6 @@
 
   <xsl:template match="runtime[@name='Google App Engine']"/>
   <xsl:template match="installed[@facet='com.google.appengine.facet']"/>
-  <xsl:template match="insatlled[@facet='com.google.appengine.facet.ear']"/>
+  <xsl:template match="installed[@facet='com.google.appengine.facet.ear']"/>
 
 </xsl:stylesheet>
