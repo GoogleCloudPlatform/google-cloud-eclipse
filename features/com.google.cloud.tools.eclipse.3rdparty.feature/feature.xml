@@ -40,6 +40,13 @@
          unpack="false"/>
 
    <plugin
+         id="org.freemarker.freemarker"
+         download-size="0"
+         install-size="0"
+         version="2.3.25.stable-incubating"
+         unpack="false"/>
+
+   <plugin
          id="jackson-core-asl"
          download-size="0"
          install-size="0"
