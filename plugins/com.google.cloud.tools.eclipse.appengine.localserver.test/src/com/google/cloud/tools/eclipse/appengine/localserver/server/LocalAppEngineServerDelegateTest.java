@@ -18,11 +18,12 @@ package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
+
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
@@ -59,11 +60,11 @@ public class LocalAppEngineServerDelegateTest {
   @Mock private IWebModule webModule2;
   @Mock private IModule module3;
   @Rule public TestProjectCreator dynamicWebProject =
-      new TestProjectCreator().withFacetVersions(Lists.newArrayList(JavaFacet.VERSION_1_7,
+      new TestProjectCreator().withFacetVersions(Arrays.asList(JavaFacet.VERSION_1_7,
                                                                     WebFacetUtils.WEB_25));
   @Rule
   public TestProjectCreator appEngineStandardProject =
-      new TestProjectCreator().withFacetVersions(Lists.newArrayList(JavaFacet.VERSION_1_7,
+      new TestProjectCreator().withFacetVersions(Arrays.asList(JavaFacet.VERSION_1_7,
           WebFacetUtils.WEB_25, APPENGINE_STANDARD_FACET_VERSION_1));
 
   @Test

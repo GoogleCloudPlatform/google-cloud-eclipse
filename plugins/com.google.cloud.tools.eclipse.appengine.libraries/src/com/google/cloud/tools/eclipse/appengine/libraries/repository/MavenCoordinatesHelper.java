@@ -19,7 +19,8 @@ package com.google.cloud.tools.eclipse.appengine.libraries.repository;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
+
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,9 +48,9 @@ public class MavenCoordinatesHelper {
 
   private MavenCoordinatesHelper() { }
 
-  public static List<IClasspathAttribute> createClasspathAttributes(MavenCoordinates mavenCoordinates,
-                                                                    String actualVersion) {
-    List<IClasspathAttribute> attributes = Lists.newArrayList(
+  public static List<IClasspathAttribute> createClasspathAttributes(
+      MavenCoordinates mavenCoordinates, String actualVersion) {
+    List<IClasspathAttribute> attributes = Arrays.asList(
         JavaCore.newClasspathAttribute(CLASSPATH_ATTRIBUTE_REPOSITORY,
                                        mavenCoordinates.getRepository()),
         JavaCore.newClasspathAttribute(CLASSPATH_ATTRIBUTE_GROUP_ID,

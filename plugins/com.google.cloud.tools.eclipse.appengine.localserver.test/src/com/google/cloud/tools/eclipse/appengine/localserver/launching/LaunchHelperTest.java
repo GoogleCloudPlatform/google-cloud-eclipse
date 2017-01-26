@@ -24,7 +24,8 @@ import static org.mockito.Mockito.when;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.localserver.ui.ServerTracker;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
-import com.google.common.collect.Lists;
+
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import org.eclipse.core.commands.ExecutionException;
@@ -61,11 +62,11 @@ public class LaunchHelperTest {
 
   @Rule
   public TestProjectCreator appEngineStandardProject1 =
-      new TestProjectCreator().withFacetVersions(Lists.newArrayList(JavaFacet.VERSION_1_7,
+      new TestProjectCreator().withFacetVersions(Arrays.asList(JavaFacet.VERSION_1_7,
           WebFacetUtils.WEB_25, APPENGINE_STANDARD_FACET_VERSION_1));
   @Rule
   public TestProjectCreator appEngineStandardProject2 =
-      new TestProjectCreator().withFacetVersions(Lists.newArrayList(JavaFacet.VERSION_1_7,
+      new TestProjectCreator().withFacetVersions(Arrays.asList(JavaFacet.VERSION_1_7,
           WebFacetUtils.WEB_25, APPENGINE_STANDARD_FACET_VERSION_1));
 
 
