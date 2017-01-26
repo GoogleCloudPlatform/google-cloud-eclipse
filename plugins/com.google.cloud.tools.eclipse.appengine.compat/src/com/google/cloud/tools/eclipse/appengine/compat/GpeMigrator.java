@@ -119,6 +119,9 @@ public class GpeMigrator {
     // To remove the facets, we will directly modify the WTP facet metadata file (using XSLT):
     // .settings/org.eclipse.wst.common.project.facet.core.xml
     IFile metadataFile = facetedProject.getProject().getFile(FacetedProject.METADATA_FILE);
+    if (!metadataFile.exists()) {
+      return;
+    }
 
     try (InputStream metadataStream = metadataFile.getContents();
         InputStream stylesheetStream = GpeMigrator.class.getResourceAsStream(WTP_METADATA_XSLT)) {
