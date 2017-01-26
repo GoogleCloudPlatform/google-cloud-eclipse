@@ -29,6 +29,7 @@ import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.waits.ICondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
+import org.eclipse.wst.validation.ValidationFramework;
 import org.hamcrest.Matcher;
 
 /**
@@ -70,6 +71,12 @@ public final class SwtBotWorkbenchActions {
       try {
         Job.getJobManager().join(ResourcesPlugin.FAMILY_MANUAL_BUILD, null);
         Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
+        // J2EEElementChangedListener.PROJECT_COMPONENT_UPDATE_JOB_FAMILY
+        Job.getJobManager().join("org.eclipse.jst.j2ee.refactor.component", null);
+        // ServerPlugin.SHUTDOWN_JOB_FAMILY
+        Job.getJobManager().join("org.eclipse.wst.server.core.family", null);
+        Job.getJobManager().join("org.eclipse.wst.server.ui.family", null);
+        ValidationFramework.getDefault().join(null);
       } catch (InterruptedException ex) {
         // interruption likely happened for a reason
         return;

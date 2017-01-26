@@ -31,6 +31,7 @@ Import-Package: com.google.cloud.tools.eclipse.appengine.facets,
  org.eclipse.wst.common.project.facet.core.internal,
  org.eclipse.wst.common.project.facet.core.util.internal,
  org.eclipse.wst.server.core,
+ org.eclipse.wst.validation,
  org.mockito;provider=google;version="1.10.19",
  org.mockito.stubbing;provider=google;version="1.10.19",
  org.osgi.framework;version="1.8.0"

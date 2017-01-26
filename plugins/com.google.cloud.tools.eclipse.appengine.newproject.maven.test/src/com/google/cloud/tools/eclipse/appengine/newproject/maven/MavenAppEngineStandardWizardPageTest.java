@@ -54,7 +54,7 @@ public class MavenAppEngineStandardWizardPageTest {
     assertTrue(page.useDefaults());
     assertTrue(page.useDefaults.getSelection());
     assertFalse(page.locationField.getEnabled());
-    assertEquals("/default/workspace/location", page.locationField.getText());
+    assertEquals(new Path("/default/workspace/location").toOSString(), page.locationField.getText());
     assertEquals("", page.locationField.getData());
 
     assertEquals("/default/workspace/location", page.getLocationPath().toString());
@@ -82,7 +82,7 @@ public class MavenAppEngineStandardWizardPageTest {
     assertTrue(page.useDefaults());
     assertTrue(page.useDefaults.getSelection());
     assertFalse(page.locationField.getEnabled());
-    assertEquals("/default/workspace/location", page.locationField.getText());
+    assertEquals(new Path("/default/workspace/location").toOSString(), page.locationField.getText());
     assertEquals("", page.locationField.getData());
 
     assertEquals("/default/workspace/location", page.getLocationPath().toString());
@@ -95,7 +95,7 @@ public class MavenAppEngineStandardWizardPageTest {
     page.locationField.setText("/manually/entered/path");
     checkBox.click();
 
-    assertEquals("/default/workspace/location", page.locationField.getText());
+    assertEquals(new Path("/default/workspace/location").toOSString(), page.locationField.getText());
     assertEquals("/manually/entered/path", page.locationField.getData());
 
     assertEquals("/default/workspace/location", page.getLocationPath().toString());
@@ -112,6 +112,6 @@ public class MavenAppEngineStandardWizardPageTest {
     assertEquals("/manually/entered/path", page.locationField.getText());
     assertEquals("/manually/entered/path", page.locationField.getData());
 
-    assertEquals("/manually/entered/path", page.getLocationPath().toOSString());
+    assertEquals("/manually/entered/path", page.getLocationPath().toString());
   }
 }

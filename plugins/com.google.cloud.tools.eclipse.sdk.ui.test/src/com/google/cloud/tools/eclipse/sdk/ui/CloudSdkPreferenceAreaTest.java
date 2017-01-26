@@ -71,16 +71,22 @@ public class CloudSdkPreferenceAreaTest {
   public void testInvalidPath() {
     when(preferences.getString(anyString())).thenReturn(null);
 
-    File[] roots = File.listRoots();
-    assertTrue("No root directory!?", roots.length > 0);
+    File root = null;
+    for(File r : File.listRoots()) {
+      if(r.exists()) {
+        // must check as roots includes A: on Windows for the floppy
+        root = r;
+      }
+    }
+    assertTrue("No root directory!?", root.exists());
     // root should exist but not contain a valid Cloud SDK
 
     show();
-    area.setStringValue(roots[0].getAbsolutePath());
+    area.setStringValue(root.getAbsolutePath());
     assertEquals(IStatus.WARNING, area.getStatus().getSeverity());
     
     area.setStringValue("");
-    assertEquals(IStatus.OK, area.getStatus().getSeverity());    
+    assertEquals(IStatus.OK, area.getStatus().getSeverity());
   }
 
   private void show() {

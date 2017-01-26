@@ -58,8 +58,8 @@ public class ServletClasspathProviderTest {
   @Test
   public void testResolveClasspathContainer() {
     IClasspathEntry[] result = provider.resolveClasspathContainer(null, null);
-    Assert.assertTrue(result[0].getPath().toString().endsWith("servlet-api.jar"));
-    Assert.assertTrue(result[1].getPath().toString().endsWith("jsp-api.jar"));
+    Assert.assertTrue(result[0].getPath().lastSegment().equals("servlet-api.jar"));
+    Assert.assertTrue(result[1].getPath().lastSegment().equals("jsp-api.jar"));
   }
 
   @Test

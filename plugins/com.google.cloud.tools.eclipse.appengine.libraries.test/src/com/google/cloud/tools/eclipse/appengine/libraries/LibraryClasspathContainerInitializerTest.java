@@ -178,7 +178,7 @@ public class LibraryClasspathContainerInitializerTest {
     testProject.getJavaProject().getRawClasspath();
     IClasspathEntry[] resolvedClasspath = testProject.getJavaProject().getResolvedClasspath(false);
     assertThat(resolvedClasspath.length, is(2));
-    assertThat(resolvedClasspath[1].getPath().toString(), is(artifactFile.getAbsolutePath()));
+    assertThat(resolvedClasspath[1].getPath().toOSString(), is(artifactFile.getAbsolutePath()));
     verifyContainerWasNotResolvedFromScratch();
   }
 
@@ -201,8 +201,8 @@ public class LibraryClasspathContainerInitializerTest {
     testProject.getJavaProject().getRawClasspath();
     IClasspathEntry[] resolvedClasspath = testProject.getJavaProject().getResolvedClasspath(false);
     assertThat(resolvedClasspath.length, is(2));
-    assertThat(resolvedClasspath[1].getPath().toString(), is(artifactFile.getAbsolutePath()));
-    assertThat(resolvedClasspath[1].getSourceAttachmentPath().toString(),
+    assertThat(resolvedClasspath[1].getPath().toOSString(), is(artifactFile.getAbsolutePath()));
+    assertThat(resolvedClasspath[1].getSourceAttachmentPath().toOSString(),
                is(sourceArtifactFile.getAbsolutePath()));
     verifyContainerWasNotResolvedFromScratch();
   }
