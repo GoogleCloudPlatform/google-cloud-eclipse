@@ -42,7 +42,7 @@ public class ProjectIdInputValidator implements IValidator {
     if (value.isEmpty()) {
       return requireProjectId ?
           ValidationStatus.error(Messages.getString("project.id.empty")) : //$NON-NLS-1$
-            ValidationStatus.ok();
+          ValidationStatus.ok();
     } else if (ProjectIdValidator.validate(value)) {
       return ValidationStatus.ok();
     } else {
