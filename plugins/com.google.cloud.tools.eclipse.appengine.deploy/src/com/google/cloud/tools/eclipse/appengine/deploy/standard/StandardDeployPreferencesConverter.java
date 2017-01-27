@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.standard;
 
 import com.google.cloud.tools.appengine.api.deploy.DefaultDeployConfiguration;
+import com.google.common.base.Strings;
 
 public class StandardDeployPreferencesConverter {
 
@@ -33,10 +34,13 @@ public class StandardDeployPreferencesConverter {
 
     if (preferences.isOverrideDefaultBucket()) {
       String bucketName = preferences.getBucket();
-      if (bucketName.startsWith("gs://")) {
-        configuration.setBucket(bucketName);
-      } else {
-        configuration.setBucket("gs://" + bucketName);
+
+      if (!Strings.isNullOrEmpty(bucketName)) {
+        if (bucketName.startsWith("gs://")) {
+          configuration.setBucket(bucketName);
+        } else {
+          configuration.setBucket("gs://" + bucketName);
+        }
       }
     }
 
