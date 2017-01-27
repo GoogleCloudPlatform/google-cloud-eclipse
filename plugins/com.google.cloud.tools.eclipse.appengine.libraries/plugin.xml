@@ -39,18 +39,18 @@
           siteUri="https://github.com/objectify/objectify/wiki" >
       <libraryDependency id="appengine-api" />
       <libraryFile
-            javadocUri="http://static.javadoc.io/com.googlecode.objectify/objectify/5.1.13/">
+            javadocUri="http://static.javadoc.io/com.googlecode.objectify/objectify/5.1.14/">
         <mavenCoordinates
               artifactId="objectify"
               groupId="com.googlecode.objectify"
-              version="5.1.13" />
+              version="5.1.14" />
       </libraryFile>
       <libraryFile
-            javadocUri="https://google.github.io/guava/releases/18.0/api/docs/">
+            javadocUri="https://google.github.io/guava/releases/20.0/api/docs/">
         <mavenCoordinates
               artifactId="guava"
               groupId="com.google.guava"
-              version="18.0" />
+              version="20.0" />
       </libraryFile>
     </library>
 
