@@ -21,7 +21,6 @@ import com.google.cloud.tools.project.ProjectIdValidator;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 
 public class ProjectIdInputValidator implements IValidator {
   private boolean requireProjectId = true;
@@ -43,9 +42,9 @@ public class ProjectIdInputValidator implements IValidator {
     if (value.isEmpty()) {
       return requireProjectId ?
           ValidationStatus.error(Messages.getString("project.id.empty")) : //$NON-NLS-1$
-          Status.OK_STATUS;
+            ValidationStatus.ok();
     } else if (ProjectIdValidator.validate(value)) {
-      return Status.OK_STATUS;
+      return ValidationStatus.ok();
     } else {
       return ValidationStatus.error(Messages.getString("project.id.invalid")); //$NON-NLS-1$
     }
