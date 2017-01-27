@@ -32,15 +32,12 @@ public class StandardDeployPreferencesConverter {
 
     configuration.setProject(preferences.getProjectId());
 
-    if (preferences.isOverrideDefaultBucket()) {
-      String bucketName = preferences.getBucket();
-
-      if (!Strings.isNullOrEmpty(bucketName)) {
-        if (bucketName.startsWith("gs://")) {
-          configuration.setBucket(bucketName);
-        } else {
-          configuration.setBucket("gs://" + bucketName);
-        }
+    String bucketName = preferences.getBucket();
+    if (!Strings.isNullOrEmpty(bucketName)) {
+      if (bucketName.startsWith("gs://")) {
+        configuration.setBucket(bucketName);
+      } else {
+        configuration.setBucket("gs://" + bucketName);
       }
     }
 
@@ -49,7 +46,7 @@ public class StandardDeployPreferencesConverter {
       configuration.setStopPreviousVersion(preferences.isStopPreviousVersion());
     }
 
-    if (preferences.isOverrideDefaultVersioning()) {
+    if (!Strings.isNullOrEmpty(preferences.getVersion())) {
       configuration.setVersion(preferences.getVersion());
     }
 

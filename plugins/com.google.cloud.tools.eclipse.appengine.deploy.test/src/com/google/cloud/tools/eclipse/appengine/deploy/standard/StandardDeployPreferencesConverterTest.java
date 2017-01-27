@@ -48,18 +48,7 @@ public class StandardDeployPreferencesConverterTest {
   }
 
   @Test
-  public void testToDeployConfiguration_overrideBucketIsNotSet() {
-    when(preferences.get(
-        eq(StandardDeployPreferences.PREF_CUSTOM_BUCKET), anyString())).thenReturn("gs://bucket");
-    DefaultDeployConfiguration configuration = new StandardDeployPreferencesConverter(
-        new StandardDeployPreferences(preferences)).toDeployConfiguration();
-    assertNull(configuration.getBucket());
-  }
-
-  @Test
-  public void testToDeployConfiguration_overrideBucketIsSetBucketNameIsNull() {
-    when(preferences.getBoolean(
-        eq(StandardDeployPreferences.PREF_OVERRIDE_DEFAULT_BUCKET), anyBoolean())).thenReturn(true);
+  public void testToDeployConfiguration_bucketNameIsNull() {
     when(preferences.get(
         eq(StandardDeployPreferences.PREF_CUSTOM_BUCKET), anyString())).thenReturn(null);
     DefaultDeployConfiguration configuration = new StandardDeployPreferencesConverter(
@@ -68,9 +57,7 @@ public class StandardDeployPreferencesConverterTest {
   }
 
   @Test
-  public void testToDeployConfiguration_overrideBucketIsSetBucketNameIsEmpty() {
-    when(preferences.getBoolean(
-        eq(StandardDeployPreferences.PREF_OVERRIDE_DEFAULT_BUCKET), anyBoolean())).thenReturn(true);
+  public void testToDeployConfiguration_bucketNameIsEmpty() {
     when(preferences.get(
         eq(StandardDeployPreferences.PREF_CUSTOM_BUCKET), anyString())).thenReturn("");
     DefaultDeployConfiguration configuration = new StandardDeployPreferencesConverter(
@@ -79,9 +66,7 @@ public class StandardDeployPreferencesConverterTest {
   }
 
   @Test
-  public void testToDeployConfiguration_overrideBucketIsSetBucketNameContainsProtocol() {
-    when(preferences.getBoolean(
-        eq(StandardDeployPreferences.PREF_OVERRIDE_DEFAULT_BUCKET), anyBoolean())).thenReturn(true);
+  public void testToDeployConfiguration_bucketNameContainsProtocol() {
     when(preferences.get(
         eq(StandardDeployPreferences.PREF_CUSTOM_BUCKET), anyString())).thenReturn("gs://bucket");
     DefaultDeployConfiguration configuration = new StandardDeployPreferencesConverter(
@@ -90,9 +75,7 @@ public class StandardDeployPreferencesConverterTest {
   }
 
   @Test
-  public void testToDeployConfiguration_overrideBucketIsSetBucketNameDoesNotContainProtocol() {
-    when(preferences.getBoolean(
-        eq(StandardDeployPreferences.PREF_OVERRIDE_DEFAULT_BUCKET), anyBoolean())).thenReturn(true);
+  public void testToDeployConfiguration_bucketNameDoesNotContainProtocol() {
     when(preferences.get(eq(StandardDeployPreferences.PREF_CUSTOM_BUCKET), anyString()))
         .thenReturn("bucket");
     DefaultDeployConfiguration configuration = new StandardDeployPreferencesConverter(
@@ -141,23 +124,29 @@ public class StandardDeployPreferencesConverterTest {
   }
 
   @Test
-  public void testToDeployConfiguration_overrideVersionIsNotSet() {
-    when(preferences.get(
-        eq(StandardDeployPreferences.PREF_CUSTOM_VERSION), anyString())).thenReturn("version");
+  public void testToDeployConfiguration_version() {
+    when(preferences.get(eq(StandardDeployPreferences.PREF_CUSTOM_VERSION), anyString()))
+        .thenReturn("version");
+    DefaultDeployConfiguration configuration = new StandardDeployPreferencesConverter(
+        new StandardDeployPreferences(preferences)).toDeployConfiguration();
+    assertThat(configuration.getVersion(), is("version"));
+  }
+
+  @Test
+  public void testToDeployConfiguration_versionIsNull() {
+    when(preferences.get(eq(StandardDeployPreferences.PREF_CUSTOM_VERSION), anyString()))
+        .thenReturn(null);
     DefaultDeployConfiguration configuration = new StandardDeployPreferencesConverter(
         new StandardDeployPreferences(preferences)).toDeployConfiguration();
     assertNull(configuration.getVersion());
   }
 
   @Test
-  public void testToDeployConfiguration_overrideVersionIsSet() {
-    when(preferences.getBoolean(
-        eq(StandardDeployPreferences.PREF_OVERRIDE_DEFAULT_VERSIONING), anyBoolean()))
-        .thenReturn(true);
+  public void testToDeployConfiguration_versionIsEmpty() {
     when(preferences.get(eq(StandardDeployPreferences.PREF_CUSTOM_VERSION), anyString()))
-        .thenReturn("version");
+        .thenReturn("");
     DefaultDeployConfiguration configuration = new StandardDeployPreferencesConverter(
         new StandardDeployPreferences(preferences)).toDeployConfiguration();
-    assertThat(configuration.getVersion(), is("version"));
+    assertNull(configuration.getVersion());
   }
 }

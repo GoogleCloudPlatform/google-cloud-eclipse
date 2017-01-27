@@ -16,23 +16,21 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.standard;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.osgi.service.prefs.BackingStoreException;
 
-import com.google.common.annotations.VisibleForTesting;
-
 public class StandardDeployPreferences {
 
-  public static final String PREFERENCE_STORE_QUALIFIER = "com.google.cloud.tools.eclipse.appengine.deploy";
+  public static final String PREFERENCE_STORE_QUALIFIER =
+      "com.google.cloud.tools.eclipse.appengine.deploy";
 
   static final String PREF_ACCOUNT_EMAIL = "account.email";
   static final String PREF_PROJECT_ID = "project.id";
-  static final String PREF_OVERRIDE_DEFAULT_VERSIONING = "project.version.overrideDefault"; // boolean
   static final String PREF_CUSTOM_VERSION = "project.version";
   static final String PREF_ENABLE_AUTO_PROMOTE = "project.promote"; // boolean
-  static final String PREF_OVERRIDE_DEFAULT_BUCKET = "project.bucket.overrideDefault"; // boolean
   static final String PREF_CUSTOM_BUCKET = "project.bucket";
   static final String PREF_STOP_PREVIOUS_VERSION = "project.previousVersion.stop";
 
@@ -73,17 +71,9 @@ public class StandardDeployPreferences {
     preferenceStore.put(PREF_PROJECT_ID, projectId);
   }
 
-  public boolean isOverrideDefaultVersioning() {
-    return preferenceStore.getBoolean(PREF_OVERRIDE_DEFAULT_VERSIONING,
-                                      DeployPreferenceInitializer.DEFAULT_OVERRIDE_DEFAULT_VERSIONING);
-  }
-
-  public void setOverrideDefaultVersioning(boolean overrideDefaultVersioning) {
-    preferenceStore.putBoolean(PREF_OVERRIDE_DEFAULT_VERSIONING, overrideDefaultVersioning);
-  }
-
   public String getVersion() {
-    return preferenceStore.get(PREF_CUSTOM_VERSION, DeployPreferenceInitializer.DEFAULT_CUSTOM_VERSION);
+    return preferenceStore.get(PREF_CUSTOM_VERSION,
+                               DeployPreferenceInitializer.DEFAULT_CUSTOM_VERSION);
   }
 
   public void setVersion(String version) {
@@ -99,17 +89,9 @@ public class StandardDeployPreferences {
     preferenceStore.putBoolean(PREF_ENABLE_AUTO_PROMOTE, autoPromote);
   }
 
-  public boolean isOverrideDefaultBucket() {
-    return preferenceStore.getBoolean(PREF_OVERRIDE_DEFAULT_BUCKET,
-                                      DeployPreferenceInitializer.DEFAULT_OVERRIDE_DEFAULT_BUCKET);
-  }
-
-  public void setOverrideDefaultBucket(boolean overrideDefaultBucket) {
-    preferenceStore.putBoolean(PREF_OVERRIDE_DEFAULT_BUCKET, overrideDefaultBucket);
-  }
-
   public String getBucket() {
-    return preferenceStore.get(PREF_CUSTOM_BUCKET, DeployPreferenceInitializer.DEFAULT_CUSTOM_BUCKET);
+    return preferenceStore.get(PREF_CUSTOM_BUCKET,
+                               DeployPreferenceInitializer.DEFAULT_CUSTOM_BUCKET);
   }
 
   public void setBucket(String bucket) {
