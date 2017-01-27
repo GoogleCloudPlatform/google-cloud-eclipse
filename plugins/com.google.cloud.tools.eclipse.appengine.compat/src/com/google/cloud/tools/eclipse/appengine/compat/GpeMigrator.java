@@ -80,7 +80,7 @@ public class GpeMigrator {
     removeGpeNature(project);
     subMonitor.worked(10);
 
-    removeGpeRuntimeAndFacets(facetedProject);
+    removeGpeRuntimeAndFacets(facetedProject, logger);
     subMonitor.worked(20);
   }
 
@@ -115,7 +115,7 @@ public class GpeMigrator {
   }
 
   @VisibleForTesting
-  static void removeGpeRuntimeAndFacets(IFacetedProject facetedProject) {
+  static void removeGpeRuntimeAndFacets(IFacetedProject facetedProject, Logger logger) {
     // To remove the facets, we will directly modify the WTP facet metadata file (using XSLT):
     // .settings/org.eclipse.wst.common.project.facet.core.xml
     IFile metadataFile = facetedProject.getProject().getFile(FacetedProject.METADATA_FILE);
