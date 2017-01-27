@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import com.google.common.base.Joiner;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -48,8 +49,6 @@ import org.eclipse.wst.common.project.facet.core.util.internal.ZipUtil;
 import org.eclipse.wst.validation.ValidationFramework;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
-
-import com.google.common.base.Joiner;
 
 /**
  * A set of utility methods for dealing with projects.
