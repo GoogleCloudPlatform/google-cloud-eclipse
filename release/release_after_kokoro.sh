@@ -1,21 +1,31 @@
 #!/bin/sh
 
-# This script starts with Step 14 in the release process (i.e., after Kokoro
+# This script starts with Step 15 in the release process (i.e., after Kokoro
 # has built and signed the binaries.)
 #
 # It is safe to rerun this script again when something goes wrong, provided
 # that you didn't complete the final step, which means you are done. (The final
 # step grants public access to the files uploaded to cloud-tools-for-eclipse.)
 #
-# Note: this script clears and creates "$HOME/CT4E_release_work" (after
-# confirmation) for a temporary work directory, which can be inspected later
-# and/or deleted safely anytime.
+# For debugging: this script creates a temp work directory to download and
+# generate various files (typically under "/tmp" on Linux). The directory can
+# be inspected later if anything goes wrong.
 
 die() {
     for line in "$@"; do
         echo $line
     done
     exit 1
+}
+
+ask_proceed() {
+    while true; do
+        echo -n "Proceed ([Y]/n)? "
+        read ANSWER
+        [ "$ANSWER" == 'n' -o "$ANSWER" == 'N' ] && exit 1
+        [ "$ANSWER" == 'y' -o "$ANSWER" == 'Y' -o -z "$ANSWER" ] && break
+        echo -n "Invalid answer. "
+    done
 }
 
 [ -z "$ECLIPSE_HOME" ] && \
@@ -28,29 +38,13 @@ if ! $(command -v xmllint >/dev/null); then
     die "Cannot find xmllint. Halting."
 fi
 
-WORK_DIR=$HOME/CT4E_release_work
+WORK_DIR=$( mktemp -d )
 SIGNED_DIR=$WORK_DIR/signed
 LOCAL_REPO=$WORK_DIR/repository
 
-ask_proceed() {
-    while true; do
-        echo -n "Proceed ([Y]/n)? "
-        read ANSWER
-        [ "$ANSWER" == 'n' -o "$ANSWER" == 'N' ] && exit 1
-        [ "$ANSWER" == 'y' -o "$ANSWER" == 'Y' -o -z "$ANSWER" ] && break
-        echo -n "Invalid answer. "
-    done
-}
-
-###############################################################################
 echo "#"
-echo "# Clear '$WORK_DIR'."
+echo "# Using '$WORK_DIR' as a temp work directory."
 echo "#"
-ask_proceed
-
-set -x
-rm -rf $WORK_DIR && mkdir $WORK_DIR
-set +x
 
 ###############################################################################
 echo
