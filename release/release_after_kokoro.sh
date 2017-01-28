@@ -246,7 +246,6 @@ echo "# FINAL STEP: MAKING IT PUBLIC"
 echo "#"
 echo "# Now give the world read permissions to the uploaded files."
 echo "#"
-ask_proceed
 
 set -x
 gsutil -m acl ch -r -u AllUsers:R gs://cloud-tools-for-eclipse/$VERSION
