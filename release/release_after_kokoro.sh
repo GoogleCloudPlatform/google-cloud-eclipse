@@ -59,17 +59,20 @@ echo "# Copy files built (signed) by Kokoro"
 echo "# into '$SIGNED_DIR'."
 echo "#"
 
-echo -n "Enter GCS bucket URL taken from the Kokoro page: "
-read GCS_URL
-GCS_BUCKET_URL=$( echo $GCS_URL | \
-    sed -e 's,.*\(signedjars/staging/prod/google-cloud-eclipse/ubuntu/release/[0-9]\+/[0-9-]\+\),\1,' )
-echo "GCS URL extracted: $GCS_BUCKET_URL"
-echo -n "Check if the URL is correct. "
-ask_proceed
+while true; do
+    echo -n "Enter GCS bucket URL taken from the Kokoro page: "
+    read GCS_URL
+    GCS_BUCKET_PATH=$( echo $GCS_URL | \
+        grep -o 'signedjars/staging/prod/google-cloud-eclipse/ubuntu/release/[0-9]\+/[0-9-]\+' )
+    if [ $? -eq 0 ]; then
+        break
+    fi
+    echo "Could not extract GCS bucket path from the URL."
+done
 
 set -x
 mkdir $SIGNED_DIR && \
-    gsutil -m cp -R gs://$GCS_BUCKET_URL/gfile/signed/* $SIGNED_DIR
+    gsutil -m cp -R gs://$GCS_BUCKET_PATH/gfile/signed/* $SIGNED_DIR
 set +x
 
 if [ 0 -eq $( ls -1 $SIGNED_DIR | wc -l ) ]; then
@@ -93,7 +96,6 @@ echo
 echo "#"
 echo "# Verify if constants have been injected..."
 echo "#"
-ask_proceed
 
 LOGIN_CONSTANTS=$( javap -private -classpath \
     $SIGNED_DIR/plugins/com.google.cloud.tools.eclipse.login_*.jar \
@@ -124,10 +126,6 @@ ANALYTICS_TRACKING_ID=$( echo "$ANALYTICS_CONSTANT" | \
 [ ${#ANALYTICS_TRACKING_ID} -ne 13 ] && \
     die "ANALYTICS_TRACKING_ID is not of length 13. Halting."
 
-echo
-echo -n "Looks good, but check the output above once more. "
-ask_proceed
-
 ###############################################################################
 echo
 echo "#"
@@ -139,10 +137,9 @@ echo "#     $LOCAL_REPO/content.jar"
 echo "#     $LOCAL_REPO/features/*"
 echo "#     $LOCAL_REPO/plugins/*"
 echo "#"
-ask_proceed
 
 set -x
-$ECLIPSE_HOME/eclipse -nosplash -consolelog \
+"$ECLIPSE_HOME"/eclipse -nosplash -consolelog \
     -application org.eclipse.equinox.p2.publisher.FeaturesAndBundlesPublisher \
     -metadataRepositoryName 'Google Cloud Tools for Eclipse' \
     -metadataRepository file:$LOCAL_REPO \
@@ -163,7 +160,6 @@ echo "#"
 echo "# Copy 'gs://gcloud-for-eclipse-testing/metadata.{product,p2.inf}'"
 echo "# into '$WORK_DIR'."
 echo "#"
-ask_proceed
 
 set -x
 # note that the metadata.p2.inf is renamed p2.inf as required for the p2 ProductPublisher
@@ -183,10 +179,9 @@ echo "# additional p2 metadata for the CT4E repository:"
 echo "#   - copyright and license have been associated with our public feature"
 echo "# Verify using xmllint."
 echo "#"
-ask_proceed
 
 set -x
-$ECLIPSE_HOME/eclipse \
+"$ECLIPSE_HOME"/eclipse \
     -nosplash -console -consolelog \
     -application org.eclipse.equinox.p2.publisher.ProductPublisher \
     -metadataRepository file:$LOCAL_REPO \
