@@ -77,10 +77,9 @@ public class CloudSdkPreferenceAreaTest {
         root = r;
       }
     }
+    // root should exist but not contain a valid Cloud SDK
     assertNotNull("No root directory!?", root);
     assertTrue("Root doesn't exist!?", root.exists());
-    assertTrue("No root directory!?", root != null && root.exists());
-    // root should exist but not contain a valid Cloud SDK
 
     show();
     area.setStringValue(root.getAbsolutePath());
