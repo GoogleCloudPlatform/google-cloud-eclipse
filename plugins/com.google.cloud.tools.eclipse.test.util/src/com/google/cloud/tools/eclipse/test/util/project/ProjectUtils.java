@@ -19,7 +19,6 @@ package com.google.cloud.tools.eclipse.test.util.project;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import com.google.common.base.Joiner;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -29,6 +28,8 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+
+import com.google.common.base.Joiner;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -45,6 +46,7 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.wst.common.project.facet.core.util.internal.ZipUtil;
+import org.eclipse.wst.validation.ValidationFramework;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 
@@ -165,6 +167,12 @@ public class ProjectUtils {
       do {
         Job.getJobManager().join(ResourcesPlugin.FAMILY_MANUAL_BUILD, null);
         Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
+        // J2EEElementChangedListener.PROJECT_COMPONENT_UPDATE_JOB_FAMILY
+        Job.getJobManager().join("org.eclipse.jst.j2ee.refactor.component", null);
+        // ServerPlugin.SHUTDOWN_JOB_FAMILY
+        Job.getJobManager().join("org.eclipse.wst.server.core.family", null);
+        Job.getJobManager().join("org.eclipse.wst.server.ui.family", null);
+        ValidationFramework.getDefault().join(null);
 
         Display display = Display.getCurrent();
         if (display != null) {

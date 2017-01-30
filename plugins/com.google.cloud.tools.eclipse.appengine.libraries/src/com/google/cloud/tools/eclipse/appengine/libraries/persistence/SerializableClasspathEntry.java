@@ -92,7 +92,7 @@ public class SerializableClasspathEntry {
     if (sourceAttachmentPath == null) {
       this.sourceAttachmentPath = "";
     } else {
-      this.sourceAttachmentPath = sourceAttachmentPath.toOSString();
+      this.sourceAttachmentPath = sourceAttachmentPath.toString();
     }
   }
 

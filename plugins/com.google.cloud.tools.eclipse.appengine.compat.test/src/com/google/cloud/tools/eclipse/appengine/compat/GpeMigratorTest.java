@@ -20,10 +20,18 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import java.io.IOException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -33,6 +41,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
+import org.eclipse.wst.common.project.facet.core.internal.FacetedProject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -69,7 +78,7 @@ public class GpeMigratorTest {
     assertTrue(containsFacet(facetedProject, "com.google.appengine.facet"));
     assertTrue(containsFacet(facetedProject, "com.google.appengine.facet.ear"));
 
-    GpeMigrator.removeGpeRuntimeAndFacets(facetedProject);
+    GpeMigrator.removeGpeRuntimeAndFacets(facetedProject, mock(Logger.class));
     assertFalse(containsFacet(facetedProject, "com.google.appengine.facet"));
     assertFalse(containsFacet(facetedProject, "com.google.appengine.facet.ear"));
   }
@@ -83,9 +92,22 @@ public class GpeMigratorTest {
     assertEquals("Google App Engine",
         facetedProject.getTargetedRuntimes().iterator().next().getName());
 
-    GpeMigrator.removeGpeRuntimeAndFacets(facetedProject);
+    GpeMigrator.removeGpeRuntimeAndFacets(facetedProject, mock(Logger.class));
     assertNull(facetedProject.getPrimaryRuntime());
     assertTrue(facetedProject.getTargetedRuntimes().isEmpty());
+  }
+
+  @Test
+  public void testRemoveGpeRuntimeAndFacets_doNotLogIfMetadataFileDoesNotExist()
+      throws CoreException {
+    IFile metadataFile = gpeProject.getFile(FacetedProject.METADATA_FILE);
+    metadataFile.delete(true, null);
+    assertFalse(metadataFile.exists());
+
+    IFacetedProject facetedProject = ProjectFacetsManager.create(gpeProject);
+    Logger logger = mock(Logger.class);
+    GpeMigrator.removeGpeRuntimeAndFacets(facetedProject, logger);
+    verify(logger, never()).log(any(Level.class), anyString(), any(Throwable.class));
   }
 
   @Test
