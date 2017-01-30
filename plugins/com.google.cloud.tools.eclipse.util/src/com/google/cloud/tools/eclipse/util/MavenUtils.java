@@ -53,8 +53,8 @@ public class MavenUtils {
 
   private static final Logger logger = Logger.getLogger(MavenUtils.class.getName());
 
-  private static final String MAVEN_LATEST_VERSION = "LATEST";
-  private static final String POM_XML_NAMESPACE_URI = "http://maven.apache.org/POM/4.0.0";
+  private static final String MAVEN_LATEST_VERSION = "LATEST"; //$NON-NLS-1$
+  private static final String POM_XML_NAMESPACE_URI = "http://maven.apache.org/POM/4.0.0"; //$NON-NLS-1$
   
   /**
    * Returns {@code true} if the given project has the Maven 2 nature. This
@@ -185,8 +185,8 @@ public class MavenUtils {
       Preconditions.checkArgument(!MAVEN_LATEST_VERSION.equals(version));
       String artifactPath =
           MavenPlugin.getMaven().getLocalRepository()
-          .pathOf(new DefaultArtifact(groupId, artifactId, version, null /* scope */, "jar",
-                                      null /*classifier */, new DefaultArtifactHandler("jar")));
+              .pathOf(new DefaultArtifact(groupId, artifactId, version, null /* scope */, "jar",
+                                          null /*classifier */, new DefaultArtifactHandler("jar")));
       return new File(artifactPath).exists();
     } catch (CoreException ex) {
       logger.log(Level.SEVERE, "Could not lookup local repository", ex);

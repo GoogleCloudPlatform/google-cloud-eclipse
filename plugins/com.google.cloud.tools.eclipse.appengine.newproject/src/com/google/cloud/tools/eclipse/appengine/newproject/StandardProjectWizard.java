@@ -146,13 +146,15 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
   // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/819
   private boolean validateDependencies() {
     try {
-      return
-          (MavenUtils.isArtifactAvailableLocally("javax.servlet", "servlet-api", "2.5")
-              || MavenUtils.resolveArtifact(new NullProgressMonitor(),
-                                            "javax.servlet", "servlet-api", "jar", "2.5") != null)
-          && (MavenUtils.isArtifactAvailableLocally("javax.servlet.jsp", "jsp-api", "2.1")
-              || MavenUtils.resolveArtifact(new NullProgressMonitor(),
-                                            "javax.servlet.jsp", "jsp-api", "jar", "2.1") != null);
+      boolean servletApiAvailable =
+          MavenUtils.isArtifactAvailableLocally("javax.servlet", "servlet-api", "2.5")
+          || MavenUtils.resolveArtifact(new NullProgressMonitor(),
+                                        "javax.servlet", "servlet-api", "jar", "2.5") != null;
+
+      boolean jspApiAvailable = MavenUtils.isArtifactAvailableLocally("javax.servlet.jsp", "jsp-api", "2.1")
+          || MavenUtils.resolveArtifact(new NullProgressMonitor(),
+                                        "javax.servlet.jsp", "jsp-api", "jar", "2.1") != null;
+      return servletApiAvailable && jspApiAvailable;
     } catch (CoreException ex) {
       setErrorStatus(this, ex);
       return false;
