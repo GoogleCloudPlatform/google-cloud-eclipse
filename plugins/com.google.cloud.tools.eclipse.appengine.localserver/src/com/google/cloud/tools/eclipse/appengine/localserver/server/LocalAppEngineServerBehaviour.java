@@ -58,6 +58,9 @@ import org.eclipse.wst.server.core.util.SocketUtil;
 /**
  * A {@link ServerBehaviourDelegate} for App Engine Server executed via the Java App Management
  * Client Library.
+ * <p>
+ * {@link IModulePublishHelper} is implemented for addons such as the GWT Plugin that wish to add
+ * and content during local deploys.
  */
 public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     implements IModulePublishHelper {
