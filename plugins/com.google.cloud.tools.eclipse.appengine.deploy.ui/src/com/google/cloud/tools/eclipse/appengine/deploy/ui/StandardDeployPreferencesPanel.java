@@ -266,10 +266,11 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
   private void createProjectVersionSection() {
     Label versionLabel = new Label(this, SWT.LEAD);
-    versionLabel.setText(Messages.getString("use.custom.versioning"));
+    versionLabel.setText(Messages.getString("custom.versioning"));
     versionLabel.setToolTipText(Messages.getString("tooltip.version"));
 
     version = new Text(this, SWT.LEAD | SWT.SINGLE | SWT.BORDER);
+    version.setMessage(Messages.getString("custom.versioning.hint"));
     version.setToolTipText(Messages.getString("tooltip.version"));
     GridData versionGridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
     version.setLayoutData(versionGridData);
@@ -323,10 +324,11 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     Composite bucketComposite = new Composite(parent, SWT.NONE);
 
     Label bucketLabel = new Label(bucketComposite, SWT.LEAD);
-    bucketLabel.setText(Messages.getString("use.custom.bucket"));
+    bucketLabel.setText(Messages.getString("custom.bucket"));
     bucketLabel.setToolTipText(Messages.getString("tooltip.staging.bucket"));
 
     bucket = new Text(bucketComposite, SWT.LEAD | SWT.SINGLE | SWT.BORDER);
+    bucket.setMessage(Messages.getString("custom.bucket.hint"));
     GridData bucketData = new GridData(SWT.FILL, SWT.CENTER, true, false);
     bucket.setLayoutData(bucketData);
 
