@@ -32,6 +32,10 @@ public interface ILibraryClasspathContainerResolverService {
   public static final String LIBRARIES_EXTENSION_POINT =
       "com.google.cloud.tools.eclipse.appengine.libraries"; //$NON-NLS-1$
 
+  public enum Runtime {
+    AppEngineStandard
+  }
+
   /**
    * Resolves all {@link LibraryClasspathContainer}s found on the classpath of
    * <code>javaProject</code>. Source attachment for the resolved libraries will happen
@@ -53,4 +57,7 @@ public interface ILibraryClasspathContainerResolverService {
   public IStatus resolveContainer(IJavaProject javaProject,
                                   IPath continerPath,
                                   IProgressMonitor monitor);
+
+
+  boolean checkRuntimeAvailability(Runtime runtime, IProgressMonitor monitor);
 }

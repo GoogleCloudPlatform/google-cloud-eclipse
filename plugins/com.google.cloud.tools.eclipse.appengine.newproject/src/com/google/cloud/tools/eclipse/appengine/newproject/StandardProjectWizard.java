@@ -20,6 +20,7 @@ import com.google.cloud.tools.appengine.cloudsdk.AppEngineJavaComponentsNotInsta
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkOutOfDateException;
+import com.google.cloud.tools.eclipse.appengine.libraries.ILibraryClasspathContainerResolverService;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineJavaComponentMissingPage;
 import com.google.cloud.tools.eclipse.appengine.ui.CloudSdkMissingPage;
 import com.google.cloud.tools.eclipse.appengine.ui.CloudSdkOutOfDatePage;
@@ -27,22 +28,24 @@ import com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPrompter;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
-import com.google.cloud.tools.eclipse.util.MavenUtils;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.ide.undo.WorkspaceUndoUtil;
 import org.eclipse.ui.statushandlers.StatusManager;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceReference;
 
 public class StandardProjectWizard extends Wizard implements INewWizard {
 
@@ -84,7 +87,21 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
       return true;
     }
 
-    if (!validateDependencies()) {
+    boolean fork = true;
+    boolean cancelable = true;
+    IStatus status = Status.OK_STATUS;
+    try {
+      DependencyValidator dependencyValidator = new DependencyValidator();
+      getContainer().run(fork, cancelable, dependencyValidator);
+      if (!dependencyValidator.result) {
+        return false;
+      }
+    } catch (InvocationTargetException ex) {
+      status = setErrorStatus(this, ex.getCause());
+    } catch (InterruptedException e) {
+      status = Status.CANCEL_STATUS;
+    }
+    if (!status.isOK()) {
       return false;
     }
 
@@ -102,10 +119,7 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
     CreateAppEngineStandardWtpProject runnable =
         new CreateAppEngineStandardWtpProject(config, uiInfoAdapter);
 
-    IStatus status = Status.OK_STATUS;
     try {
-      boolean fork = true;
-      boolean cancelable = true;
       getContainer().run(fork, cancelable, runnable);
       
       // open most important file created by wizard in editor
@@ -142,23 +156,25 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
     }
   }
 
-  // TODO obtain libraries from extension registry/osgi service
-  // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/819
-  private boolean validateDependencies() {
-    try {
-      boolean servletApiAvailable =
-          MavenUtils.isArtifactAvailableLocally("javax.servlet", "servlet-api", "2.5")
-          || MavenUtils.resolveArtifact(new NullProgressMonitor(),
-                                        "javax.servlet", "servlet-api", "jar", "2.5") != null;
+  private static class DependencyValidator implements IRunnableWithProgress {
 
-      boolean jspApiAvailable = MavenUtils.isArtifactAvailableLocally("javax.servlet.jsp", "jsp-api", "2.1")
-          || MavenUtils.resolveArtifact(new NullProgressMonitor(),
-                                        "javax.servlet.jsp", "jsp-api", "jar", "2.1") != null;
-      return servletApiAvailable && jspApiAvailable;
-    } catch (CoreException ex) {
-      setErrorStatus(this, ex);
-      return false;
+    private boolean result = false;
+
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.operation.IRunnableWithProgress#run(org.eclipse.core.runtime.IProgressMonitor)
+     */
+    @Override
+    public void run(IProgressMonitor monitor) throws InvocationTargetException,
+                                              InterruptedException {
+      BundleContext bundleContext = FrameworkUtil.getBundle(getClass()).getBundleContext();
+      ServiceReference<ILibraryClasspathContainerResolverService> serviceReference =
+          bundleContext.getServiceReference(ILibraryClasspathContainerResolverService.class);
+      try {
+        ILibraryClasspathContainerResolverService service = bundleContext.getService(serviceReference);
+        service.checkRuntimeAvailability(ILibraryClasspathContainerResolverService.Runtime.AppEngineStandard, monitor);
+      } finally {
+        bundleContext.ungetService(serviceReference);
+      }
     }
   }
-
 }

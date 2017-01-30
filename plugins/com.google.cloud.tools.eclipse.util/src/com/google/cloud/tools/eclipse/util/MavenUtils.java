@@ -180,13 +180,15 @@ public class MavenUtils {
     return MavenPlugin.getMaven().createArtifactRepository(id, url);
   }
 
-  public static boolean isArtifactAvailableLocally(String groupId, String artifactId, String version) {
+  public static boolean isArtifactAvailableLocally(String groupId, String artifactId,
+                                                   String version, String type,
+                                                   String classifier) {
     try {
       Preconditions.checkArgument(!MAVEN_LATEST_VERSION.equals(version));
       String artifactPath =
           MavenPlugin.getMaven().getLocalRepository()
-              .pathOf(new DefaultArtifact(groupId, artifactId, version, null /* scope */, "jar",
-                                          null /*classifier */, new DefaultArtifactHandler("jar")));
+              .pathOf(new DefaultArtifact(groupId, artifactId, version, null /* scope */, type,
+                                          classifier, new DefaultArtifactHandler(type)));
       return new File(artifactPath).exists();
     } catch (CoreException ex) {
       logger.log(Level.SEVERE, "Could not lookup local repository", ex);

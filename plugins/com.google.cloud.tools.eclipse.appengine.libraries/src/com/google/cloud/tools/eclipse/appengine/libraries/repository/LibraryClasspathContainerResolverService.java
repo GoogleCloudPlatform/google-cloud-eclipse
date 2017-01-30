@@ -25,7 +25,9 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFactory;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFactoryException;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
 import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer;
+import com.google.cloud.tools.eclipse.util.MavenUtils;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -138,7 +140,24 @@ public class LibraryClasspathContainerResolverService
       return StatusUtil.error(this, Messages.getString("TaskResolveContainerError", containerPath), ex);
     }
   }
-  
+
+  public boolean checkRuntimeAvailability(Runtime runtime, IProgressMonitor monitor) {
+    switch (runtime) {
+      case AppEngineStandard:
+        for (String libraryId : new String[]{ "servlet-api", "jsp-api"}) {
+          Library library = libraries.get(libraryId);
+          for (LibraryFile libraryFile : library.getLibraryFiles()) {
+            if (!repositoryService.isArtifactAvailable(libraryFile, monitor)) {
+              return false;
+            }
+          }
+        }
+        return true;
+      default:
+        throw new IllegalArgumentException("Unhandled runtime: " + runtime);
+    }
+  }
+
   private LibraryClasspathContainer resolveLibraryFiles(IJavaProject javaProject,
                                                         IPath containerPath,
                                                         Library library,

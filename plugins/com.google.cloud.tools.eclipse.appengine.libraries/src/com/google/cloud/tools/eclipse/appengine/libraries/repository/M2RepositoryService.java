@@ -109,4 +109,17 @@ public class M2RepositoryService implements ILibraryRepositoryService {
   void setMavenHelper(MavenHelper mavenHelper) {
     this.mavenHelper = mavenHelper;
   }
+
+  /* (non-Javadoc)
+   * @see com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService#isArtifactAvailable(com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile)
+   */
+  @Override
+  public boolean isArtifactAvailable(LibraryFile libraryFile, IProgressMonitor monitor) {
+    try {
+      return mavenHelper.isArtifactLocallyAvailable(libraryFile.getMavenCoordinates())
+          || (mavenHelper.resolveArtifact(libraryFile.getMavenCoordinates(), monitor) != null);
+    } catch (CoreException e) {
+      return false;
+    }
+  }
 }
