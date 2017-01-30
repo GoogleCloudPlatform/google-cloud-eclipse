@@ -49,18 +49,15 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
-import org.eclipse.wst.server.core.internal.IModulePublishHelper;
 import org.eclipse.wst.server.core.model.IModuleResource;
 import org.eclipse.wst.server.core.model.IModuleResourceDelta;
 import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
 import org.eclipse.wst.server.core.util.SocketUtil;
 
 /**
- * A {@link ServerBehaviourDelegate} for App Engine Server executed via the Java App Management
- * Client Library.
+ * A {@link ServerBehaviourDelegate} for the Jetty bundled with DevAppServer.
  */
-public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
-    implements IModulePublishHelper {
+public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate {
 
   public static final String SERVER_PORT_ATTRIBUTE_NAME = "appEngineDevServerPort"; //$NON-NLS-1$
   public static final String ADMIN_PORT_ATTRIBUTE_NAME = "appEngineDevServerAdminPort"; //$NON-NLS-1$
@@ -423,11 +420,4 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     }
   }
 
-  @Override
-  public IPath getPublishDirectory(IModule[] module) {
-    if (module == null || module.length == 0) {
-      return null;
-    }
-    return getModuleDeployDirectory(module[0]);
-  }
 }
