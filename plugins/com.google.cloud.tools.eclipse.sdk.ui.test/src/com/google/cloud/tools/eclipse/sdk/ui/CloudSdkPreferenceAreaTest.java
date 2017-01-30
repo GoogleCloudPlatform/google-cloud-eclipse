@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.sdk.ui;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
@@ -76,6 +77,8 @@ public class CloudSdkPreferenceAreaTest {
         root = r;
       }
     }
+    assertNotNull("No root directory!?", root);
+    assertTrue("Root doesn't exist!?", root.exists());
     assertTrue("No root directory!?", root != null && root.exists());
     // root should exist but not contain a valid Cloud SDK
 
