@@ -56,7 +56,8 @@ public class StandardFacetInstallationTest {
         try {
           project.delete(true, null);
         } catch (IllegalArgumentException ex) {
-          // Try to get more information for diagnosing test failures (#1196)
+          // Get more information to diagnose odd test failures; remove when fixed
+          // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1196
           System.err.println("JobManager state:\n" + Job.getJobManager());
           System.err.println("  Current job: " + Job.getJobManager().currentJob());
           System.err.println("  Current rule: " + Job.getJobManager().currentRule());
