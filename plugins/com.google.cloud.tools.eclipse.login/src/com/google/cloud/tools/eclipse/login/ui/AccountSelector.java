@@ -168,7 +168,7 @@ public class AccountSelector extends Composite {
         } else {
           // login failed, so restore to previous combo state
           int index = selectedAccount != null ? combo.indexOf(selectedAccount.getEmail()) : -1;
-          if (index < 0) {
+          if (index >= 0) {
             combo.select(index);
           } else {
             combo.deselectAll();
