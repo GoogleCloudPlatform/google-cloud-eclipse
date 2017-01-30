@@ -60,7 +60,7 @@ import org.eclipse.wst.server.core.util.SocketUtil;
  * Client Library.
  * <p>
  * {@link IModulePublishHelper} is implemented for addons such as the GWT Plugin that wish to add
- * and content during local deploys.
+ * content during local deploys.
  */
 public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     implements IModulePublishHelper {
