@@ -27,13 +27,15 @@ import com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPrompter;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
+import com.google.cloud.tools.eclipse.util.MavenUtils;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
-
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -80,6 +82,10 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
 
     if (page == null) {
       return true;
+    }
+
+    if (!validateDependencies()) {
+      return false;
     }
 
     config.setServiceName(page.getServiceName());
@@ -135,4 +141,22 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
       }
     }
   }
+
+  // TODO obtain libraries from extension registry/osgi service
+  // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/819
+  private boolean validateDependencies() {
+    try {
+      return
+          (MavenUtils.isArtifactAvailableLocally("javax.servlet", "servlet-api", "2.5")
+              || MavenUtils.resolveArtifact(new NullProgressMonitor(),
+                                            "javax.servlet", "servlet-api", "jar", "2.5") != null)
+          && (MavenUtils.isArtifactAvailableLocally("javax.servlet.jsp", "jsp-api", "2.1")
+              || MavenUtils.resolveArtifact(new NullProgressMonitor(),
+                                            "javax.servlet.jsp", "jsp-api", "jar", "2.1") != null);
+    } catch (CoreException ex) {
+      setErrorStatus(this, ex);
+      return false;
+    }
+  }
+
 }

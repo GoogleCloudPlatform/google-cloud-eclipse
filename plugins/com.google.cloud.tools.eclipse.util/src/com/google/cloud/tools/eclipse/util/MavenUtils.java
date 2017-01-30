@@ -18,8 +18,10 @@ package com.google.cloud.tools.eclipse.util;
 
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Objects;
-
+import com.google.common.base.Preconditions;
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.DefaultArtifact;
+import org.apache.maven.artifact.handler.DefaultArtifactHandler;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.model.Dependency;
 import org.eclipse.core.resources.IProject;
@@ -34,7 +36,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.MessageFormat;
@@ -51,6 +53,7 @@ public class MavenUtils {
 
   private static final Logger logger = Logger.getLogger(MavenUtils.class.getName());
 
+  private static final String MAVEN_LATEST_VERSION = "LATEST";
   private static final String POM_XML_NAMESPACE_URI = "http://maven.apache.org/POM/4.0.0";
   
   /**
@@ -113,7 +116,7 @@ public class MavenUtils {
   public static String resolveLatestReleasedArtifactVersion(IProgressMonitor monitor,
       String groupId, String artifactId, String type, String defaultVersion) {
     try {
-      Artifact artifact = resolveArtifact(monitor, groupId, artifactId, type, "LATEST");
+      Artifact artifact = resolveArtifact(monitor, groupId, artifactId, type, MAVEN_LATEST_VERSION);
       return artifact.getVersion();
     } catch (CoreException ex) {
       logger.log(Level.WARNING,
@@ -175,6 +178,20 @@ public class MavenUtils {
 
   public static ArtifactRepository createRepository(String id, String url) throws CoreException {
     return MavenPlugin.getMaven().createArtifactRepository(id, url);
+  }
+
+  public static boolean isArtifactAvailableLocally(String groupId, String artifactId, String version) {
+    try {
+      Preconditions.checkArgument(!MAVEN_LATEST_VERSION.equals(version));
+      String artifactPath =
+          MavenPlugin.getMaven().getLocalRepository()
+          .pathOf(new DefaultArtifact(groupId, artifactId, version, null /* scope */, "jar",
+                                      null /*classifier */, new DefaultArtifactHandler("jar")));
+      return new File(artifactPath).exists();
+    } catch (CoreException ex) {
+      logger.log(Level.SEVERE, "Could not lookup local repository", ex);
+      return false;
+    }
   }
 
 }
