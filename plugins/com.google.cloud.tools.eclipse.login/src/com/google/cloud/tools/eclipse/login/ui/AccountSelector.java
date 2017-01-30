@@ -124,7 +124,7 @@ public class AccountSelector extends Composite {
       index = 0;
       email = combo.getItem(0);
     }
-    if (index < 0) {
+    if (index >= 0) {
       combo.select(index);
       selectedAccount = (Account) combo.getData(email);
     }
