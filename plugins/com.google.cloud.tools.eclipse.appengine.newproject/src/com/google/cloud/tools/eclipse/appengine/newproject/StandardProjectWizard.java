@@ -31,6 +31,7 @@ import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.util.logging.Logger;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -42,12 +43,13 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.ide.undo.WorkspaceUndoUtil;
-import org.eclipse.ui.statushandlers.StatusManager;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 
 public class StandardProjectWizard extends Wizard implements INewWizard {
+
+  private static final Logger logger = Logger.getLogger(StandardProjectWizard.class.getName());
 
   private AppEngineStandardWizardPage page = null;
   private AppEngineStandardProjectConfig config = new AppEngineStandardProjectConfig();
@@ -93,11 +95,13 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
     try {
       DependencyValidator dependencyValidator = new DependencyValidator();
       getContainer().run(fork, cancelable, dependencyValidator);
-      if (!dependencyValidator.result) {
-        return false;
+      if (!dependencyValidator.result.isOK()) {
+        status = StatusUtil.setErrorStatus(this,
+                                           Messages.getString("project.creation.failed"),
+                                           dependencyValidator.result);
       }
     } catch (InvocationTargetException ex) {
-      status = setErrorStatus(this, ex.getCause());
+      status = StatusUtil.setErrorStatus(this, Messages.getString("project.creation.failed"), ex.getCause());
     } catch (InterruptedException e) {
       status = Status.CANCEL_STATUS;
     }
@@ -128,20 +132,10 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
     } catch (InterruptedException ex) {
       status = Status.CANCEL_STATUS;
     } catch (InvocationTargetException ex) {
-      status = setErrorStatus(this, ex.getCause());
+      status = StatusUtil.setErrorStatus(this, Messages.getString("project.creation.failed"), ex.getCause());
     }
 
     return status.isOK();
-  }
-
-  public static IStatus setErrorStatus(Object origin, Throwable ex) {
-    String message = Messages.getString("project.creation.failed");
-    if (ex.getMessage() != null && !ex.getMessage().isEmpty()) {
-      message += ": " + ex.getMessage();
-    }
-    IStatus status = StatusUtil.error(origin, message, ex);
-    StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.LOG);
-    return status;
   }
 
   @Override
@@ -158,22 +152,27 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
 
   private static class DependencyValidator implements IRunnableWithProgress {
 
-    private boolean result = false;
+    private IStatus result = null;
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.operation.IRunnableWithProgress#run(org.eclipse.core.runtime.IProgressMonitor)
-     */
     @Override
     public void run(IProgressMonitor monitor) throws InvocationTargetException,
                                               InterruptedException {
       BundleContext bundleContext = FrameworkUtil.getBundle(getClass()).getBundleContext();
+      if (bundleContext == null) {
+        logger.severe("BundleContext was null, cannot obtain resolver service");
+        return;
+      }
       ServiceReference<ILibraryClasspathContainerResolverService> serviceReference =
           bundleContext.getServiceReference(ILibraryClasspathContainerResolverService.class);
       try {
         ILibraryClasspathContainerResolverService service = bundleContext.getService(serviceReference);
-        service.checkRuntimeAvailability(ILibraryClasspathContainerResolverService.Runtime.AppEngineStandard, monitor);
+        result =
+            service.checkRuntimeAvailability(ILibraryClasspathContainerResolverService.Runtime.AppEngineStandard,
+                                             monitor);
       } finally {
-        bundleContext.ungetService(serviceReference);
+        if (bundleContext != null) {
+          bundleContext.ungetService(serviceReference);
+        }
       }
     }
   }

@@ -51,5 +51,6 @@ public interface ILibraryRepositoryService {
   /**
    * @return
    */
-  boolean isArtifactAvailable(LibraryFile libraryFile, IProgressMonitor monitor);
+  void checkArtifactAvailable(LibraryFile libraryFile, IProgressMonitor monitor)
+                                                                               throws CoreException;
 }

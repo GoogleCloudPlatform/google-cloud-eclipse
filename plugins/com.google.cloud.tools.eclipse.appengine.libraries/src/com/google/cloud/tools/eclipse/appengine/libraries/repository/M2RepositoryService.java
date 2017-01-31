@@ -114,12 +114,10 @@ public class M2RepositoryService implements ILibraryRepositoryService {
    * @see com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService#isArtifactAvailable(com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile)
    */
   @Override
-  public boolean isArtifactAvailable(LibraryFile libraryFile, IProgressMonitor monitor) {
-    try {
-      return mavenHelper.isArtifactLocallyAvailable(libraryFile.getMavenCoordinates())
-          || (mavenHelper.resolveArtifact(libraryFile.getMavenCoordinates(), monitor) != null);
-    } catch (CoreException e) {
-      return false;
-    }
+  public void checkArtifactAvailable(LibraryFile libraryFile, IProgressMonitor monitor) throws CoreException {
+      if (mavenHelper.isArtifactLocallyAvailable(libraryFile.getMavenCoordinates())) {
+        return;
+      }
+      mavenHelper.resolveArtifact(libraryFile.getMavenCoordinates(), monitor);
   }
 }
