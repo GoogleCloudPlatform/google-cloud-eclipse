@@ -48,7 +48,7 @@ import org.xml.sax.SAXException;
 
 public class MavenUtils {
 
-  public static final String MAVEN2_NATURE_ID = "org.eclipse.m2e.core.maven2Nature";
+  public static final String MAVEN2_NATURE_ID = "org.eclipse.m2e.core.maven2Nature"; //$NON-NLS-1$
 
   private static final Logger logger = Logger.getLogger(MavenUtils.class.getName());
 

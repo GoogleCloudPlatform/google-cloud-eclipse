@@ -142,10 +142,10 @@ public class LibraryClasspathContainerResolverService
   public IStatus checkRuntimeAvailability(Runtime runtime, IProgressMonitor monitor) {
     switch (runtime) {
       case AppEngineStandard:
-      return checkAppEngineStandard(monitor);
+        return checkAppEngineStandard(monitor);
       default:
         throw new IllegalArgumentException("Unhandled runtime: " + runtime);
-      }
+    }
   }
 
   private IStatus checkAppEngineStandard(IProgressMonitor monitor) {
