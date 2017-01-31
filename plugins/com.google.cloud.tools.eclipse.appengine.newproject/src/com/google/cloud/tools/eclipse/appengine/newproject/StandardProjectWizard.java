@@ -154,8 +154,8 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
     private IStatus result = null;
 
     @Override
-    public void run(IProgressMonitor monitor) throws InvocationTargetException,
-                                                     InterruptedException {
+    public void run(IProgressMonitor monitor)
+        throws InvocationTargetException, InterruptedException {
       result = resolverService.checkRuntimeAvailability(AppEngineRuntime.STANDARD_JAVA_7, monitor);
     }
   }
