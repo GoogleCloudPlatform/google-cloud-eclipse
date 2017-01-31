@@ -47,7 +47,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
-import org.eclipse.wst.common.project.facet.core.internal.FacetedProject;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -64,6 +63,10 @@ public class GpeMigrator {
   private static final String GPE_GAE_NATURE_ID = "com.google.appengine.eclipse.core.gaeNature";
 
   private static final String WTP_METADATA_XSLT = "/xslt/wtpMetadata.xsl";
+
+  // FacetedProject.METADATA_FILE = ".settings/" + FacetCorePlugin.PLUGIN_ID + ".xml";
+  @VisibleForTesting
+  static final String FACETS_METADATA_FILE = ".settings/org.eclipse.wst.common.component.xml";
 
   /**
    * Removes various GPE-related remnants: classpath entries, nature, runtime, and facets. Any
@@ -118,7 +121,7 @@ public class GpeMigrator {
   static void removeGpeRuntimeAndFacets(IFacetedProject facetedProject, Logger logger) {
     // To remove the facets, we will directly modify the WTP facet metadata file (using XSLT):
     // .settings/org.eclipse.wst.common.project.facet.core.xml
-    IFile metadataFile = facetedProject.getProject().getFile(FacetedProject.METADATA_FILE);
+    IFile metadataFile = facetedProject.getProject().getFile(FACETS_METADATA_FILE);
     if (!metadataFile.exists()) {
       return;
     }
