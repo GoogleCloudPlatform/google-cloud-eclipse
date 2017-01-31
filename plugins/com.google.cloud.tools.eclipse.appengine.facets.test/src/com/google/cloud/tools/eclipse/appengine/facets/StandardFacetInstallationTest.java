@@ -33,6 +33,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.common.project.facet.core.runtime.IRuntime;
@@ -52,7 +53,15 @@ public class StandardFacetInstallationTest {
   public void tearDown() throws CoreException {
     if (projects != null) {
       for (IProject project : projects) {
-        project.delete(true, null);
+        try {
+          project.delete(true, null);
+        } catch (IllegalArgumentException ex) {
+          // Get more information to diagnose odd test failures; remove when fixed
+          // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1196
+          System.err.println("JobManager state:\n" + Job.getJobManager());
+          System.err.println("  Current job: " + Job.getJobManager().currentJob());
+          System.err.println("  Current rule: " + Job.getJobManager().currentRule());
+        }
       }
     }
   }
