@@ -110,8 +110,9 @@ public class M2RepositoryService implements ILibraryRepositoryService {
     this.mavenHelper = mavenHelper;
   }
 
-  /* (non-Javadoc)
-   * @see com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService#isArtifactAvailable(com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile)
+  /**
+   * First checks if the artifact is available locally. If not, then it tries to resolve it via
+   * Maven.
    */
   @Override
   public void checkArtifactAvailable(LibraryFile libraryFile, IProgressMonitor monitor) throws CoreException {

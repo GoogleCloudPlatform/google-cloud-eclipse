@@ -49,7 +49,8 @@ public interface ILibraryRepositoryService {
                                                                                throws CoreException;
 
   /**
-   * @return
+   * Checks if an artifact described by <code>libraryFile</code> is available. Throws a
+   * {@link CoreException} if the artifact is not available.
    */
   void checkArtifactAvailable(LibraryFile libraryFile, IProgressMonitor monitor)
                                                                                throws CoreException;

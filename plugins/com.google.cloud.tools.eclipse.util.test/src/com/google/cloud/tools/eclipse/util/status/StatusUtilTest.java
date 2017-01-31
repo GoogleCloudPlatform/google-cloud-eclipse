@@ -18,13 +18,12 @@ package com.google.cloud.tools.eclipse.util.status;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
+import com.google.cloud.tools.eclipse.util.io.DeleteAllVisitor;
 import org.eclipse.core.runtime.IStatus;
 import org.junit.Assert;
 import org.junit.Test;
-
-import com.google.cloud.tools.eclipse.util.io.DeleteAllVisitor;
 
 public class StatusUtilTest {
 

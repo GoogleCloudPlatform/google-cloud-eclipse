@@ -19,6 +19,15 @@ package com.google.cloud.tools.eclipse.util;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.MessageFormat;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.handler.DefaultArtifactHandler;
@@ -36,16 +45,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.MessageFormat;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 public class MavenUtils {
 
@@ -180,6 +179,10 @@ public class MavenUtils {
     return MavenPlugin.getMaven().createArtifactRepository(id, url);
   }
 
+  /**
+   * Checks if an artifact is available in the local repository. The artifact <code>version</code>
+   * must be a specific value, cannot be "LATEST".
+   */
   public static boolean isArtifactAvailableLocally(String groupId, String artifactId,
                                                    String version, String type,
                                                    String classifier) {

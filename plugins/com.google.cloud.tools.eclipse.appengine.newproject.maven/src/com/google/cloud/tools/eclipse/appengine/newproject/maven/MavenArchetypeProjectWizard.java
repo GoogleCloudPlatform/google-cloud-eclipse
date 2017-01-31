@@ -20,7 +20,6 @@ import com.google.cloud.tools.appengine.cloudsdk.AppEngineJavaComponentsNotInsta
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkOutOfDateException;
-import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineJavaComponentMissingPage;
 import com.google.cloud.tools.eclipse.appengine.ui.CloudSdkMissingPage;
 import com.google.cloud.tools.eclipse.appengine.ui.CloudSdkOutOfDatePage;
@@ -121,7 +120,7 @@ public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
       status = Status.CANCEL_STATUS;
     } catch (InvocationTargetException ex) {
       status = StatusUtil.setErrorStatus(this,
-                                         Messages.getString("project.creation.failed"),
+                                         Messages.getString("PROJECT_CREATION_FAILED"),
                                          ex.getCause());
     }
 
