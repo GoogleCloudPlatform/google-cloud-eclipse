@@ -139,16 +139,16 @@ public class LibraryClasspathContainerResolverService
     }
   }
 
-  public IStatus checkRuntimeAvailability(Runtime runtime, IProgressMonitor monitor) {
+  public IStatus checkRuntimeAvailability(AppEngineRuntime runtime, IProgressMonitor monitor) {
     switch (runtime) {
-      case AppEngineStandard:
-        return checkAppEngineStandard(monitor);
+      case STANDARD_JAVA_7:
+        return checkAppEngineStandardJava7(monitor);
       default:
         throw new IllegalArgumentException("Unhandled runtime: " + runtime);
     }
   }
 
-  private IStatus checkAppEngineStandard(IProgressMonitor monitor) {
+  private IStatus checkAppEngineStandardJava7(IProgressMonitor monitor) {
     try {
       for (String libraryId : new String[]{ "servlet-api", "jsp-api"}) {
         Library library = libraries.get(libraryId);
@@ -156,7 +156,7 @@ public class LibraryClasspathContainerResolverService
           if (monitor.isCanceled()) {
             return Status.CANCEL_STATUS;
           }
-          repositoryService.checkArtifactAvailable(libraryFile, monitor);
+          repositoryService.makeArtifactAvailable(libraryFile, monitor);
         }
       }
       return Status.OK_STATUS;

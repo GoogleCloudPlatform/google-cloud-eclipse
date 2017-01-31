@@ -33,8 +33,8 @@ public interface ILibraryClasspathContainerResolverService {
   public static final String LIBRARIES_EXTENSION_POINT =
       "com.google.cloud.tools.eclipse.appengine.libraries"; //$NON-NLS-1$
 
-  enum Runtime {
-    AppEngineStandard
+  enum AppEngineRuntime {
+    STANDARD_JAVA_7
   }
 
   /**
@@ -55,9 +55,7 @@ public interface ILibraryClasspathContainerResolverService {
    * in <code>javaProject</code>. Sources for the resolved binary artifacts are resolved
    * asynchronously.
    */
-  IStatus resolveContainer(IJavaProject javaProject,
-                                  IPath continerPath,
-                                  IProgressMonitor monitor);
+  IStatus resolveContainer(IJavaProject javaProject, IPath containerPath, IProgressMonitor monitor);
 
 
   /**
@@ -67,5 +65,5 @@ public interface ILibraryClasspathContainerResolverService {
    * {@link Status#CANCEL_STATUS} if the operation was cancelled via the <code>monitor</code>, or a
    * {@link Status} object describing the error that happened while checking availability
    */
-  IStatus checkRuntimeAvailability(Runtime runtime, IProgressMonitor monitor);
+  IStatus checkRuntimeAvailability(AppEngineRuntime runtime, IProgressMonitor monitor);
 }

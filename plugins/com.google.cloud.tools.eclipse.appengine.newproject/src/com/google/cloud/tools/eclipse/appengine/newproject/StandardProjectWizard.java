@@ -21,6 +21,7 @@ import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkOutOfDateException;
 import com.google.cloud.tools.eclipse.appengine.libraries.ILibraryClasspathContainerResolverService;
+import com.google.cloud.tools.eclipse.appengine.libraries.ILibraryClasspathContainerResolverService.AppEngineRuntime;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineJavaComponentMissingPage;
 import com.google.cloud.tools.eclipse.appengine.ui.CloudSdkMissingPage;
 import com.google.cloud.tools.eclipse.appengine.ui.CloudSdkOutOfDatePage;
@@ -31,7 +32,7 @@ import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
-import java.util.logging.Logger;
+import javax.inject.Inject;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -43,17 +44,15 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.ide.undo.WorkspaceUndoUtil;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.ServiceReference;
 
 public class StandardProjectWizard extends Wizard implements INewWizard {
-
-  private static final Logger logger = Logger.getLogger(StandardProjectWizard.class.getName());
 
   private AppEngineStandardWizardPage page = null;
   private AppEngineStandardProjectConfig config = new AppEngineStandardProjectConfig();
   private IWorkbench workbench;
+
+  @Inject
+  private ILibraryClasspathContainerResolverService resolverService;
 
   public StandardProjectWizard() {
     setWindowTitle(Messages.getString("new.app.engine.standard.project"));
@@ -150,30 +149,14 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
     }
   }
 
-  private static class DependencyValidator implements IRunnableWithProgress {
+  private class DependencyValidator implements IRunnableWithProgress {
 
     private IStatus result = null;
 
     @Override
     public void run(IProgressMonitor monitor) throws InvocationTargetException,
-                                              InterruptedException {
-      BundleContext bundleContext = FrameworkUtil.getBundle(getClass()).getBundleContext();
-      if (bundleContext == null) {
-        logger.severe("BundleContext was null, cannot obtain resolver service");
-        return;
-      }
-      ServiceReference<ILibraryClasspathContainerResolverService> serviceReference =
-          bundleContext.getServiceReference(ILibraryClasspathContainerResolverService.class);
-      try {
-        ILibraryClasspathContainerResolverService service = bundleContext.getService(serviceReference);
-        result =
-            service.checkRuntimeAvailability(ILibraryClasspathContainerResolverService.Runtime.AppEngineStandard,
-                                             monitor);
-      } finally {
-        if (bundleContext != null) {
-          bundleContext.ungetService(serviceReference);
-        }
-      }
+                                                     InterruptedException {
+      result = resolverService.checkRuntimeAvailability(AppEngineRuntime.STANDARD_JAVA_7, monitor);
     }
   }
 }
