@@ -244,8 +244,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
   static String determinePageLocation(IServer server) {
     LocalAppEngineServerBehaviour serverBehaviour = (LocalAppEngineServerBehaviour)
         server.loadAdapter(LocalAppEngineServerBehaviour.class, null /* monitor */);
-
-    return "http://" + server.getHost() + ":" + serverBehaviour.getServerPort(); //$NON-NLS-1$ //$NON-NLS-2$
+    return serverBehaviour.getMainPageLocation();
   }
 
   /**

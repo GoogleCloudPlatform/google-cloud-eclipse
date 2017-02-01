@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
@@ -264,6 +265,24 @@ public class LocalAppEngineServerBehaviourTest {
 
     simulateOutputParsing(serverOutputWithDefaultModule1);
     assertEquals(12345, serverBehavior.getServerPort());
+  }
+
+  @Test
+  public void testExtractModuleUrlFromOutput_firstModuleIsDefault() throws CoreException {
+    serverBehavior.checkAndSetPorts(server, portProber);
+    simulateOutputParsing(serverOutputWithDefaultModule1);
+    assertEquals("http://localhost:55948", serverBehavior.getServiceURL("default"));
+    assertEquals("http://localhost:8081", serverBehavior.getServiceURL("second"));
+  }
+
+  @Test
+  public void testExtractModuleUrlFromOutput_noDefaultModule() throws CoreException {
+    serverBehavior.checkAndSetPorts(server, portProber);
+    simulateOutputParsing(serverOutputWithNoDefaultModule);
+    assertNull(serverBehavior.getServiceURL("default"));
+    assertEquals("http://localhost:8181", serverBehavior.getServiceURL("first"));
+    assertEquals("http://localhost:8182", serverBehavior.getServiceURL("second"));
+    assertEquals("http://localhost:8183", serverBehavior.getServiceURL("third"));
   }
 
   @Test

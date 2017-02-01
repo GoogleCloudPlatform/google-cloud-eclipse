@@ -30,14 +30,21 @@ import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListener;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 import java.io.File;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -52,6 +59,7 @@ import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.internal.IModulePublishHelper;
 import org.eclipse.wst.server.core.model.IModuleResource;
 import org.eclipse.wst.server.core.model.IModuleResourceDelta;
+import org.eclipse.wst.server.core.model.IURLProvider;
 import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
 import org.eclipse.wst.server.core.util.SocketUtil;
 
@@ -82,6 +90,8 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
   @VisibleForTesting int adminPort = -1;
 
   private DevAppServerOutputListener serverOutputListener;
+  
+  private Map<String, String> moduleToUrlMap = Maps.newHashMap();
 
   public LocalAppEngineServerBehaviour () {
     localAppEngineStartListener = new LocalAppEngineStartListener();
@@ -391,11 +401,20 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
    * state changes.
    */
   public class DevAppServerOutputListener implements ProcessOutputLineListener {
+    // DevAppServer outputs the following for module-started and admin line (on one line):
+    // <<HEADER>> Starting module "default" running at: http://localhost:8080
+    // <<HEADER>> Starting admin server at: http://localhost:8000
+    // where <<HEADER>> = INFO 2017-01-31 21:00:40,700 dispatcher.py:197]
+    private Pattern moduleStartedPattern = Pattern.compile(
+        ".*Starting module \"(?<service>[^\"]+)\" running at: (?<url>http://.+:(?<port>[0-9]+))$");
+    private Pattern adminStartedPattern =
+        Pattern.compile(".*Starting admin server at: (?<url>http://.+:(?<port>[0-9]+))$");
 
     private int serverPortCandidate = 0;
 
     @Override
     public void onOutputLine(String line) {
+      Matcher matcher;
       if (line.endsWith("Dev App Server is now running")) { //$NON-NLS-1$
         // App Engine Standard (v1)
         setServerState(IServer.STATE_STARTED);
@@ -408,18 +427,29 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
       } else if (line.contains("Error: A fatal exception has occurred. Program will exit")) { //$NON-NLS-1$
         // terminate the Python process
         stop(false);
-      } else if (line.contains("Starting module")  //$NON-NLS-1$
-          && line.contains("running at: http://")) { //$NON-NLS-1$
-        if (serverPortCandidate == 0 || line.contains("Starting module \"default\"")) { //$NON-NLS-1$
-          serverPortCandidate = extractPortFromServerUrlOutput(line);
+      } else if ((matcher = moduleStartedPattern.matcher(line)).matches()) {
+        String serviceId = matcher.group("service");
+        moduleToUrlMap.put(serviceId, matcher.group("url"));
+        try {
+          int port = Integer.parseInt(matcher.group("port"));
+          if (port > 0 && (serverPortCandidate == 0 || "default".equals(serviceId))) { // $NON-NLS-1$
+            serverPortCandidate = port;
+          }
+        } catch (NumberFormatException e) {
+          // ignore
         }
-
-      } else if (line.contains("Starting admin server at: http://")) { //$NON-NLS-1$
-        if (serverPort == 0) {  // We assume we will no longer see URLs for modules from now on.
-          serverPort = serverPortCandidate;
-        }
-        if (adminPort == 0) {
-          adminPort = extractPortFromServerUrlOutput(line);
+      } else if ((matcher = adminStartedPattern.matcher(line)).matches()) {
+        try {
+          int port = Integer.parseInt(matcher.group("port"));
+          if (port > 0 && adminPort == 0) {
+            adminPort = port;
+          }
+          // Admin comes after other modules, so no more module URLs
+          if (serverPort == 0) {
+            serverPort = serverPortCandidate;
+          }
+        } catch (NumberFormatException e) {
+          // ignore
         }
       }
     }
@@ -431,5 +461,37 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
       return null;
     }
     return getModuleDeployDirectory(module[0]);
+  }
+
+  /**
+   * @see IURLProvider#getModuleRootURL(IModule)
+   */
+  public URL getModuleRootURL(IModule module) {
+    try {
+      int serverState = getServer().getServerState();
+      if (serverState != IServer.STATE_STARTED) {
+        return null;
+      }
+      if (module == null) {
+        return new URL(getMainPageLocation());
+      }
+      String serviceId = ModuleUtils.getServiceId(module); // never null
+      return new URL(getServiceURL(serviceId));
+    } catch (MalformedURLException ex) {
+      /* ignore */
+    }
+    return null;
+
+  }
+
+  @VisibleForTesting
+  String getServiceURL(String serviceId) {
+    Preconditions.checkNotNull(serviceId);
+    return moduleToUrlMap.get(serviceId);
+  }
+
+  // visible for use from LocalAppEngineLaunchConfigurationDelegate
+  String getMainPageLocation() {
+    return "http://" + getServer().getHost() + ":" + getServerPort(); //$NON-NLS-1$ //$NON-NLS-2$ ;
   }
 }

@@ -21,6 +21,7 @@ import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,10 +36,11 @@ import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IModuleType;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.internal.facets.FacetUtil;
+import org.eclipse.wst.server.core.model.IURLProvider;
 import org.eclipse.wst.server.core.model.ServerDelegate;
 
 @SuppressWarnings("restriction") // For FacetUtil
-public class LocalAppEngineServerDelegate extends ServerDelegate {
+public class LocalAppEngineServerDelegate extends ServerDelegate implements IURLProvider {
   public static final String RUNTIME_TYPE_ID =
       "com.google.cloud.tools.eclipse.appengine.standard.runtime"; //$NON-NLS-1$
   public static final String SERVER_TYPE_ID =
@@ -232,5 +234,16 @@ public class LocalAppEngineServerDelegate extends ServerDelegate {
     if (modules != null) {
       setAttribute(ATTR_APP_ENGINE_SERVER_MODULES, modules);
     }
+  }
+
+  @Override
+  public URL getModuleRootURL(IModule module) {
+    // use getAdapter() to avoid unnecessarily loading the class (e.g., not started yet)
+    LocalAppEngineServerBehaviour serverBehaviour =
+        (LocalAppEngineServerBehaviour) getServer().getAdapter(LocalAppEngineServerBehaviour.class);
+    if (serverBehaviour != null) {
+      return serverBehaviour.getModuleRootURL(module);
+    }
+    return null;
   }
 }
