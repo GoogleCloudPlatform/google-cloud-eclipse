@@ -473,7 +473,8 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
         return null;
       }
       if (module == null) {
-        return new URL(getMainPageLocation());
+        String adminPage = "http://" + getServer().getHost() + ":" + adminPort; //$NON-NLS-1$ //$NON-NLS-2$
+        return new URL(adminPage);
       }
       String serviceId = ModuleUtils.getServiceId(module); // never null
       return new URL(getServiceURL(serviceId));
@@ -488,10 +489,5 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
   String getServiceURL(String serviceId) {
     Preconditions.checkNotNull(serviceId);
     return moduleToUrlMap.get(serviceId);
-  }
-
-  // visible for use from LocalAppEngineLaunchConfigurationDelegate
-  String getMainPageLocation() {
-    return "http://" + getServer().getHost() + ":" + getServerPort(); //$NON-NLS-1$ //$NON-NLS-2$ ;
   }
 }
