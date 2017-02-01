@@ -92,6 +92,10 @@
               name="additions"
               visible="true">
         </separator>
+        <separator
+              name="accounts"
+              visible="true">
+        </separator>
      </menuContribution>       
   </extension>
 
