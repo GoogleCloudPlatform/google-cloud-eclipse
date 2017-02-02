@@ -32,7 +32,7 @@ public class SerializableLibraryClasspathContainer {
 
   public SerializableLibraryClasspathContainer(LibraryClasspathContainer container, IPath baseDirectory, IPath sourceBaseDirectory) {
     description = container.getDescription();
-    path = container.getPath().toOSString();
+    path = container.getPath().toString();
     IClasspathEntry[] classpathEntries = container.getClasspathEntries();
     entries = new SerializableClasspathEntry[classpathEntries.length];
     for (int i = 0; i < classpathEntries.length; i++) {

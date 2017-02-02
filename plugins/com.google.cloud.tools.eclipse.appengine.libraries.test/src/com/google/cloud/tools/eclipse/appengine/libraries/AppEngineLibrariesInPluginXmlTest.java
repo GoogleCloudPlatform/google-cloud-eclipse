@@ -40,8 +40,8 @@ import org.eclipse.core.runtime.RegistryFactory;
 import org.junit.Test;
 
 /**
- * This class is intended to test the App Engine libraries set in the plugin.xml to validate that their attributes
- * are correctly set.
+ * This class is intended to test the App Engine libraries set in the plugin.xml to validate that
+ * their attributes are correctly set.
  */
 public class AppEngineLibrariesInPluginXmlTest {
 
@@ -53,11 +53,9 @@ public class AppEngineLibrariesInPluginXmlTest {
 
   @Test
   public void testThereAreExactlyFiveLibraries() {
-    IConfigurationElement[] configurationElements =
-        RegistryFactory.getRegistry()
-          .getConfigurationElementsFor("com.google.cloud.tools.eclipse.appengine",
-                                       "libraries",
-                                       "com.google.cloud.tools.eclipse.appengine.libraries.defaultapis");
+    IConfigurationElement[] configurationElements = RegistryFactory.getRegistry()
+        .getConfigurationElementsFor("com.google.cloud.tools.eclipse.appengine", "libraries",
+            "com.google.cloud.tools.eclipse.appengine.libraries.defaultapis");
     assertThat(configurationElements.length, is(5));
   }
 
@@ -68,12 +66,14 @@ public class AppEngineLibrariesInPluginXmlTest {
                is(Library.CONTAINER_PATH_PREFIX + "/" + APP_ENGINE_API_LIBRARY_ID));
     assertThat(appEngineLibrary.getId(), is(APP_ENGINE_API_LIBRARY_ID));
     assertThat(appEngineLibrary.getName(), is("App Engine API"));
-    assertThat(appEngineLibrary.getSiteUri(), is(new URI("https://cloud.google.com/appengine/docs/java/")));
+    assertThat(appEngineLibrary.getSiteUri(), 
+        is(new URI("https://cloud.google.com/appengine/docs/java/")));
     assertTrue(appEngineLibrary.isExport());
 
     assertThat(appEngineLibrary.getLibraryFiles().size(), is(1));
     LibraryFile libraryFile = appEngineLibrary.getLibraryFiles().get(0);
-    assertThat(libraryFile.getJavadocUri(), is(new URI("https://cloud.google.com/appengine/docs/java/javadoc/")));
+    assertThat(libraryFile.getJavadocUri(), 
+        is(new URI("https://cloud.google.com/appengine/docs/java/javadoc/")));
     assertNull(libraryFile.getSourceUri());
     assertTrue("App Engine API not exported", libraryFile.isExport());
 
@@ -106,7 +106,8 @@ public class AppEngineLibrariesInPluginXmlTest {
                is(Library.CONTAINER_PATH_PREFIX + "/" + APP_ENGINE_ENDPOINTS_LIBRARY_ID));
     assertThat(endpointsLibrary.getId(), is(APP_ENGINE_ENDPOINTS_LIBRARY_ID));
     assertThat(endpointsLibrary.getName(), is("App Engine Endpoints"));
-    assertThat(endpointsLibrary.getSiteUri(), is(new URI("https://cloud.google.com/appengine/docs/java/endpoints/")));
+    assertThat(endpointsLibrary.getSiteUri(), 
+        is(new URI("https://cloud.google.com/appengine/docs/java/endpoints/")));
     assertTrue(endpointsLibrary.isExport());
     assertNotNull(endpointsLibrary.getLibraryDependencies());
     assertThat(endpointsLibrary.getLibraryDependencies().size(), is(1));
@@ -114,7 +115,8 @@ public class AppEngineLibrariesInPluginXmlTest {
 
     assertThat(endpointsLibrary.getLibraryFiles().size(), is(1));
     LibraryFile libraryFile = endpointsLibrary.getLibraryFiles().get(0);
-    assertThat(libraryFile.getJavadocUri(), is(new URI("https://cloud.google.com/appengine/docs/java/endpoints/javadoc/")));
+    assertThat(libraryFile.getJavadocUri(), 
+        is(new URI("https://cloud.google.com/appengine/docs/java/endpoints/javadoc/")));
     assertNull(libraryFile.getSourceUri());
     assertTrue("Endpoints library not exported", libraryFile.isExport());
 
@@ -141,12 +143,14 @@ public class AppEngineLibrariesInPluginXmlTest {
                is(Library.CONTAINER_PATH_PREFIX + "/" + OBJECTIFY_LIBRARY_ID));
     assertThat(objectifyLibrary.getId(), is(OBJECTIFY_LIBRARY_ID));
     assertThat(objectifyLibrary.getName(), is("Objectify"));
-    assertThat(objectifyLibrary.getSiteUri(), is(new URI("https://github.com/objectify/objectify/wiki")));
+    assertThat(objectifyLibrary.getSiteUri(), 
+        is(new URI("https://github.com/objectify/objectify/wiki")));
     assertTrue(objectifyLibrary.isExport());
 
     assertThat(objectifyLibrary.getLibraryFiles().size(), is(2));
     LibraryFile objectifyLibraryFile = objectifyLibrary.getLibraryFiles().get(0);
-    assertThat(objectifyLibraryFile.getJavadocUri(), is(new URI("http://static.javadoc.io/com.googlecode.objectify/objectify/5.1.13/")));
+    assertThat(objectifyLibraryFile.getJavadocUri(), 
+        is(new URI("http://static.javadoc.io/com.googlecode.objectify/objectify/5.1.14/")));
     assertNull(objectifyLibraryFile.getSourceUri());
     assertTrue("Objectify not exported", objectifyLibraryFile.isExport());
 
@@ -155,7 +159,7 @@ public class AppEngineLibrariesInPluginXmlTest {
     assertThat(objectifyMavenCoordinates.getRepository(), is("central"));
     assertThat(objectifyMavenCoordinates.getGroupId(), is("com.googlecode.objectify"));
     assertThat(objectifyMavenCoordinates.getArtifactId(), is("objectify"));
-    assertThat(objectifyMavenCoordinates.getVersion(), is("5.1.13"));
+    assertThat(objectifyMavenCoordinates.getVersion(), is("5.1.14"));
     assertThat(objectifyMavenCoordinates.getType(), is("jar"));
     assertNull(objectifyMavenCoordinates.getClassifier());
 
@@ -163,7 +167,8 @@ public class AppEngineLibrariesInPluginXmlTest {
     assertTrue(objectifyLibraryFile.getFilters().isEmpty());
     
     LibraryFile guavaLibraryFile = objectifyLibrary.getLibraryFiles().get(1);
-    assertThat(guavaLibraryFile.getJavadocUri(), is(new URI("https://google.github.io/guava/releases/18.0/api/docs/")));
+    assertThat(guavaLibraryFile.getJavadocUri(), 
+        is(new URI("https://google.github.io/guava/releases/20.0/api/docs/")));
     assertNull(guavaLibraryFile.getSourceUri());
     assertTrue("Guava not exported", guavaLibraryFile.isExport());
 
@@ -172,7 +177,7 @@ public class AppEngineLibrariesInPluginXmlTest {
     assertThat(guavaMavenCoordinates.getRepository(), is("central"));
     assertThat(guavaMavenCoordinates.getGroupId(), is("com.google.guava"));
     assertThat(guavaMavenCoordinates.getArtifactId(), is("guava"));
-    assertThat(guavaMavenCoordinates.getVersion(), is("18.0"));
+    assertThat(guavaMavenCoordinates.getVersion(), is("20.0"));
     assertThat(guavaMavenCoordinates.getType(), is("jar"));
     assertNull(guavaMavenCoordinates.getClassifier());
 
@@ -187,7 +192,8 @@ public class AppEngineLibrariesInPluginXmlTest {
                is(Library.CONTAINER_PATH_PREFIX + "/" + SERVLET_API_LIBRARY_ID));
     assertThat(servletApiLibrary.getId(), is(SERVLET_API_LIBRARY_ID));
     assertThat(servletApiLibrary.getName(), is("Servlet API 2.5"));
-    assertThat(servletApiLibrary.getSiteUri(), is(new URI("http://www.oracle.com/technetwork/java/javaee/servlet/index.html")));
+    assertThat(servletApiLibrary.getSiteUri(), 
+        is(new URI("http://www.oracle.com/technetwork/java/javaee/servlet/index.html")));
     assertFalse(servletApiLibrary.isExport());
     assertThat(servletApiLibrary.getRecommendation(), is(LibraryRecommendation.REQUIRED));
     assertNotNull(servletApiLibrary.getLibraryDependencies());
@@ -195,7 +201,8 @@ public class AppEngineLibrariesInPluginXmlTest {
 
     assertThat(servletApiLibrary.getLibraryFiles().size(), is(1));
     LibraryFile libraryFile = servletApiLibrary.getLibraryFiles().get(0);
-    assertThat(libraryFile.getJavadocUri(), is(new URI("https://docs.oracle.com/cd/E17802_01/products/products/servlet/2.5/docs/servlet-2_5-mr2/")));
+    assertThat(libraryFile.getJavadocUri(), is(new URI(
+        "https://docs.oracle.com/cd/E17802_01/products/products/servlet/2.5/docs/servlet-2_5-mr2/")));
     assertNull(libraryFile.getSourceUri());
 
     assertNotNull(libraryFile.getMavenCoordinates());
@@ -218,7 +225,8 @@ public class AppEngineLibrariesInPluginXmlTest {
                is(Library.CONTAINER_PATH_PREFIX + "/" + JSP_API_LIBRARY_ID));
     assertThat(servletApiLibrary.getId(), is(JSP_API_LIBRARY_ID));
     assertThat(servletApiLibrary.getName(), is("Java Server Pages API 2.1"));
-    assertThat(servletApiLibrary.getSiteUri(), is(new URI("http://www.oracle.com/technetwork/java/javaee/jsp/index.html")));
+    assertThat(servletApiLibrary.getSiteUri(), 
+        is(new URI("http://www.oracle.com/technetwork/java/javaee/jsp/index.html")));
     assertFalse(servletApiLibrary.isExport());
     assertThat(servletApiLibrary.getRecommendation(), is(LibraryRecommendation.OPTIONAL));
     assertNotNull(servletApiLibrary.getLibraryDependencies());
@@ -226,7 +234,8 @@ public class AppEngineLibrariesInPluginXmlTest {
 
     assertThat(servletApiLibrary.getLibraryFiles().size(), is(1));
     LibraryFile libraryFile = servletApiLibrary.getLibraryFiles().get(0);
-    assertThat(libraryFile.getJavadocUri(), is(new URI("http://docs.oracle.com/cd/E17802_01/products/products/jsp/2.1/docs/jsp-2_1-pfd2/")));
+    assertThat(libraryFile.getJavadocUri(), 
+        is(new URI("http://docs.oracle.com/cd/E17802_01/products/products/jsp/2.1/docs/jsp-2_1-pfd2/")));
     assertNull(libraryFile.getSourceUri());
 
     assertNotNull(libraryFile.getMavenCoordinates());
@@ -245,7 +254,8 @@ public class AppEngineLibrariesInPluginXmlTest {
   private static Library getLibraryWithId(String libraryId) throws LibraryFactoryException {
     IExtensionRegistry registry = RegistryFactory.getRegistry();
     IConfigurationElement[] configurationElements = registry
-          .getConfigurationElementsFor(ILibraryClasspathContainerResolverService.LIBRARIES_EXTENSION_POINT);
+          .getConfigurationElementsFor(
+              ILibraryClasspathContainerResolverService.LIBRARIES_EXTENSION_POINT);
     for (IConfigurationElement configurationElement : configurationElements) {
       if (configurationElement.getAttribute("id").equals(libraryId)) {
         return new LibraryFactory().create(configurationElement);

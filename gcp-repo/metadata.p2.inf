@@ -1,0 +1,40 @@
+#
+# A vehicle for adding any additional p2 metadata to the CT4E repository
+#
+
+############################################################################
+# Add our .suite feature to a category
+# We use this approach to add copyright and license information.
+# Follows the approach shown in
+# http://help.eclipse.org/neon/topic/org.eclipse.platform.doc.isv/guide/p2_customizing_metadata.html?cp=2_0_20_1_2#categoryGen
+
+requires.1.namespace=org.eclipse.equinox.p2.iu
+requires.1.name=com.google.cloud.tools.eclipse.category
+requires.1.range=[1.0.0,1.0.0]
+requires.1.greedy=true
+
+units.1.id=com.google.cloud.tools.eclipse.category
+units.1.version=1.0.0
+units.1.properties.1.name=org.eclipse.equinox.p2.type.category
+units.1.properties.1.value=true
+units.1.properties.2.name=org.eclipse.equinox.p2.name
+units.1.properties.2.value=Cloud Tools for Eclipse
+units.1.properties.3.name=org.eclipse.equinox.p2.provider
+units.1.properties.3.value=Google Inc.
+units.1.properties.4.name=org.eclipse.equinox.p2.contact
+units.1.properties.4.value=https://github.com/GoogleCloudPlatform/google-cloud-eclipse
+units.1.properties.5.name=org.eclipse.equinox.p2.doc.url
+units.1.properties.5.value=https://cloud.google.com/eclipse/docs/
+units.1.provides.1.namespace=org.eclipse.equinox.p2.iu
+units.1.provides.1.name=com.google.cloud.tools.eclipse.category
+units.1.provides.1.version=1.0.0
+units.1.copyright =Copyright 2016, 2017 Google Inc.
+units.1.licenses.0 =\
+Cloud Tools for Eclipse is made available under the Apache License, Version 2.0. \
+Please visit the following URL for details:\n\n\
+  https://www.apache.org/licenses/LICENSE-2.0
+units.1.licenses.0.location = https://www.apache.org/licenses/LICENSE-2.0
+units.1.requires.1.namespace=org.eclipse.equinox.p2.iu
+units.1.requires.1.name=com.google.cloud.tools.eclipse.suite.e45.feature.feature.group
+units.1.requires.1.range=[0.1.0,1.0.0]
+units.1.requires.1.greedy=true

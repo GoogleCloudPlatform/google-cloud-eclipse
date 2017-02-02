@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 
@@ -32,25 +33,37 @@ public interface ILibraryClasspathContainerResolverService {
   public static final String LIBRARIES_EXTENSION_POINT =
       "com.google.cloud.tools.eclipse.appengine.libraries"; //$NON-NLS-1$
 
+  enum AppEngineRuntime {
+    STANDARD_JAVA_7
+  }
+
   /**
    * Resolves all {@link LibraryClasspathContainer}s found on the classpath of
    * <code>javaProject</code>. Source attachment for the resolved libraries will happen
    * asynchronously.
    */
-  public IStatus resolveAll(IJavaProject javaProject, IProgressMonitor monitor);
+  IStatus resolveAll(IJavaProject javaProject, IProgressMonitor monitor);
 
   /**
    * Resolves the binary and source artifacts corresponding to the {@link Library} identified by
    * <code>libraryId</code> synchronously and creates the {@link IClasspathEntry}s referring them.
    */
-  public IClasspathEntry[] resolveLibraryAttachSourcesSync(String libraryId) throws CoreException;
+  IClasspathEntry[] resolveLibraryAttachSourcesSync(String libraryId) throws CoreException;
 
   /**
    * Resolves a single {@link LibraryClasspathContainer} corresponding to <code>containerPath</code>
    * in <code>javaProject</code>. Sources for the resolved binary artifacts are resolved
    * asynchronously.
    */
-  public IStatus resolveContainer(IJavaProject javaProject,
-                                  IPath continerPath,
-                                  IProgressMonitor monitor);
+  IStatus resolveContainer(IJavaProject javaProject, IPath containerPath, IProgressMonitor monitor);
+
+
+  /**
+   * Verifies that dependencies of a given runtime are available either locally or can be downloaded
+   *
+   * @return {@link Status#OK_STATUS} if all dependencies are available,
+   * {@link Status#CANCEL_STATUS} if the operation was cancelled via the <code>monitor</code>, or a
+   * {@link Status} object describing the error that happened while checking availability
+   */
+  IStatus checkRuntimeAvailability(AppEngineRuntime runtime, IProgressMonitor monitor);
 }

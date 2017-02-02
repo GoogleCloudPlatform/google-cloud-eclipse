@@ -18,12 +18,12 @@ package com.google.cloud.tools.eclipse.util.status;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.Assert.*;
-
-import org.eclipse.core.runtime.IStatus;
-import org.junit.Test;
+import static org.junit.Assert.assertThat;
 
 import com.google.cloud.tools.eclipse.util.io.DeleteAllVisitor;
+import org.eclipse.core.runtime.IStatus;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class StatusUtilTest {
 
@@ -67,6 +67,20 @@ public class StatusUtilTest {
     IStatus error = StatusUtil.error((Object) new DeleteAllVisitor().getClass(), "test error msg", exception);
     verifyStatus(error);
     assertThat(error.getException(), is(sameInstance(exception)));
+  }
+
+  @Test
+  public void testErrorMessage_Exception() {
+    RuntimeException ex = new RuntimeException("testing");
+    IStatus status = StatusUtil.setErrorStatus(this, "Failed to create project", ex);
+    Assert.assertEquals("Failed to create project: testing", status.getMessage());
+  }
+
+  @Test
+  public void testErrorMessage_ExceptionWithoutMessage() {
+    RuntimeException ex = new RuntimeException();
+    IStatus status = StatusUtil.setErrorStatus(this, "Failed to create project", ex);
+    Assert.assertEquals("Failed to create project", status.getMessage());
   }
 
   private void verifyStatus(IStatus error) {

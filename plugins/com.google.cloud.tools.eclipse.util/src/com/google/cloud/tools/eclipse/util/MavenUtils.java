@@ -18,8 +18,19 @@ package com.google.cloud.tools.eclipse.util;
 
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Objects;
-
+import com.google.common.base.Preconditions;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.MessageFormat;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.DefaultArtifact;
+import org.apache.maven.artifact.handler.DefaultArtifactHandler;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.model.Dependency;
 import org.eclipse.core.resources.IProject;
@@ -35,23 +46,14 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.MessageFormat;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
 public class MavenUtils {
 
-  public static final String MAVEN2_NATURE_ID = "org.eclipse.m2e.core.maven2Nature";
+  public static final String MAVEN2_NATURE_ID = "org.eclipse.m2e.core.maven2Nature"; //$NON-NLS-1$
 
   private static final Logger logger = Logger.getLogger(MavenUtils.class.getName());
 
-  private static final String POM_XML_NAMESPACE_URI = "http://maven.apache.org/POM/4.0.0";
+  private static final String MAVEN_LATEST_VERSION = "LATEST"; //$NON-NLS-1$
+  private static final String POM_XML_NAMESPACE_URI = "http://maven.apache.org/POM/4.0.0"; //$NON-NLS-1$
   
   /**
    * Returns {@code true} if the given project has the Maven 2 nature. This
@@ -113,7 +115,7 @@ public class MavenUtils {
   public static String resolveLatestReleasedArtifactVersion(IProgressMonitor monitor,
       String groupId, String artifactId, String type, String defaultVersion) {
     try {
-      Artifact artifact = resolveArtifact(monitor, groupId, artifactId, type, "LATEST");
+      Artifact artifact = resolveArtifact(monitor, groupId, artifactId, type, MAVEN_LATEST_VERSION);
       return artifact.getVersion();
     } catch (CoreException ex) {
       logger.log(Level.WARNING,
@@ -175,6 +177,26 @@ public class MavenUtils {
 
   public static ArtifactRepository createRepository(String id, String url) throws CoreException {
     return MavenPlugin.getMaven().createArtifactRepository(id, url);
+  }
+
+  /**
+   * Checks if an artifact is available in the local repository. The artifact <code>version</code>
+   * must be a specific value, cannot be "LATEST".
+   */
+  public static boolean isArtifactAvailableLocally(String groupId, String artifactId,
+                                                   String version, String type,
+                                                   String classifier) {
+    try {
+      Preconditions.checkArgument(!MAVEN_LATEST_VERSION.equals(version));
+      String artifactPath =
+          MavenPlugin.getMaven().getLocalRepository()
+              .pathOf(new DefaultArtifact(groupId, artifactId, version, null /* scope */, type,
+                                          classifier, new DefaultArtifactHandler(type)));
+      return new File(artifactPath).exists();
+    } catch (CoreException ex) {
+      logger.log(Level.SEVERE, "Could not lookup local repository", ex);
+      return false;
+    }
   }
 
 }

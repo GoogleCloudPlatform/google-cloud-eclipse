@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.util.status;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.ui.statushandlers.StatusManager;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 
@@ -85,5 +86,18 @@ public class StatusUtil {
       }
     }
     
+  }
+
+  public static IStatus setErrorStatus(Object origin, String message, IStatus status) {
+    return setErrorStatus(origin, message +  " - " + status.getMessage(), status.getException());
+  }
+
+  public static IStatus setErrorStatus(Object origin, String message, Throwable ex) {
+    if (ex != null && ex.getMessage() != null && !ex.getMessage().isEmpty()) {
+      message += ": " + ex.getMessage();
+    }
+    IStatus status = error(origin, message, ex);
+    StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.LOG);
+    return status;
   }
 }

@@ -102,4 +102,12 @@ public class MavenHelper {
     return new Path(downloadedSources.getAbsolutePath());
   }
 
+  public boolean isArtifactLocallyAvailable(MavenCoordinates mavenCoordinates) {
+    return MavenUtils.isArtifactAvailableLocally(mavenCoordinates.getGroupId(),
+                                                 mavenCoordinates.getArtifactId(),
+                                                 mavenCoordinates.getVersion(),
+                                                 mavenCoordinates.getType(),
+                                                 mavenCoordinates.getClassifier());
+  }
+
 }

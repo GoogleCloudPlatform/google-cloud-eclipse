@@ -17,7 +17,6 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.standard;
 
 import static org.hamcrest.text.IsEmptyString.isEmptyString;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -31,11 +30,6 @@ public class StandardDeployPreferencesTest {
   }
 
   @Test
-  public void testDefaultOverrideDefaultVersioning() {
-    assertFalse(StandardDeployPreferences.DEFAULT.isOverrideDefaultVersioning());
-  }
-
-  @Test
   public void testDefaultVersion() {
     assertThat(StandardDeployPreferences.DEFAULT.getVersion(), isEmptyString());
   }
@@ -43,11 +37,6 @@ public class StandardDeployPreferencesTest {
   @Test
   public void testDefaultAutoPromote() {
     assertTrue(StandardDeployPreferences.DEFAULT.isAutoPromote());
-  }
-
-  @Test
-  public void testDefaultOverrideDefaultBucket() {
-    assertFalse(StandardDeployPreferences.DEFAULT.isOverrideDefaultBucket());
   }
 
   @Test

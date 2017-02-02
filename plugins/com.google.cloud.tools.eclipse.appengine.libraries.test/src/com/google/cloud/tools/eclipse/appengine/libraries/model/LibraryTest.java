@@ -50,7 +50,7 @@ public class LibraryTest {
   @Test
   public void testGetContainerPath() {
     Library library = new Library("a");
-    assertThat(library.getContainerPath().toOSString(),
+    assertThat(library.getContainerPath().toString(),
                is("com.google.cloud.tools.eclipse.appengine.libraries" + "/" + "a"));
   }
 

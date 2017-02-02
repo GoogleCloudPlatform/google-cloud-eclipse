@@ -16,8 +16,8 @@
 
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
+import com.google.cloud.tools.appengine.AppEngineDescriptor;
 import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
-import com.google.cloud.tools.eclipse.util.AppEngineDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.logging.Level;
@@ -35,24 +35,25 @@ public class ModuleUtils {
 
   /**
    * Retrieve the &lt;service&gt; or &lt;module&gt; identifier from <tt>appengine-web.xml</tt>.
-   * If an identifier is not found, then returns "default".
+   * If an identifier is not found, return "default".
    * 
    * @return the identifier, defaulting to "default" if not found
    */
   public static String getServiceId(IModule module) {
     IFile descriptorFile =
         WebProjectUtil.findInWebInf(module.getProject(), new Path("appengine-web.xml"));
-    if (descriptorFile == null) {
-      return "default";
+    if (descriptorFile != null) {
+      try (InputStream contents = descriptorFile.getContents()) {
+        AppEngineDescriptor descriptor = AppEngineDescriptor.parse(contents);
+        String serviceId = descriptor.getServiceId();
+        if (serviceId != null) {
+          return serviceId;
+        }
+      } catch (CoreException | IOException ex) {
+        logger.log(Level.WARNING, "Unable to read " + descriptorFile.getFullPath(), ex);
+      }
     }
     
-    String serviceId = null;
-    try (InputStream contents = descriptorFile.getContents()) {
-      AppEngineDescriptor descriptor = AppEngineDescriptor.parse(contents);
-      serviceId = descriptor.getServiceId();
-    } catch (CoreException | IOException ex) {
-      logger.log(Level.WARNING, "Unable to read " + descriptorFile.getFullPath(), ex);
-    }
-    return serviceId != null ? serviceId : "default";
+    return "default";
   }
 }

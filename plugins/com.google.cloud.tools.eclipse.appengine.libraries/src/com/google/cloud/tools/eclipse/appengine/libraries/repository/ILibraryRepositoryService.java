@@ -45,5 +45,13 @@ public interface ILibraryRepositoryService {
    * is set to latest,  
    * @return a path of the resolved source artifact
    */
-  IPath resolveSourceArtifact(LibraryFile libraryFile, String versionHint, IProgressMonitor monitor) throws CoreException;
+  IPath resolveSourceArtifact(LibraryFile libraryFile, String versionHint, IProgressMonitor monitor)
+                                                                               throws CoreException;
+
+  /**
+   * Checks if an artifact described by <code>libraryFile</code> is available. Throws a
+   * {@link CoreException} if the artifact is not available.
+   */
+  void makeArtifactAvailable(LibraryFile libraryFile,
+                             IProgressMonitor monitor) throws CoreException;
 }

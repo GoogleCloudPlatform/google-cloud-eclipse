@@ -124,11 +124,13 @@ public class AccountSelector extends Composite {
       index = 0;
       email = combo.getItem(0);
     }
-    if (index != -1) {
+    if (index >= 0) {
       combo.select(index);
       selectedAccount = (Account) combo.getData(email);
-      fireSelectionListeners();
     }
+    // Need to fire even if nothing is selected (which is an error state), to show the error
+    // message: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/pull/1303
+    fireSelectionListeners();
     return index;
   }
 
@@ -166,7 +168,7 @@ public class AccountSelector extends Composite {
         } else {
           // login failed, so restore to previous combo state
           int index = selectedAccount != null ? combo.indexOf(selectedAccount.getEmail()) : -1;
-          if (index != -1) {
+          if (index >= 0) {
             combo.select(index);
           } else {
             combo.deselectAll();

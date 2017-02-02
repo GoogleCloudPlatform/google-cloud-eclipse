@@ -109,4 +109,16 @@ public class M2RepositoryService implements ILibraryRepositoryService {
   void setMavenHelper(MavenHelper mavenHelper) {
     this.mavenHelper = mavenHelper;
   }
+
+  /**
+   * First checks if the artifact is available locally. If not, then it tries to resolve it via
+   * Maven.
+   */
+  @Override
+  public void makeArtifactAvailable(LibraryFile libraryFile, IProgressMonitor monitor) throws CoreException {
+      if (mavenHelper.isArtifactLocallyAvailable(libraryFile.getMavenCoordinates())) {
+        return;
+      }
+      mavenHelper.resolveArtifact(libraryFile.getMavenCoordinates(), monitor);
+  }
 }

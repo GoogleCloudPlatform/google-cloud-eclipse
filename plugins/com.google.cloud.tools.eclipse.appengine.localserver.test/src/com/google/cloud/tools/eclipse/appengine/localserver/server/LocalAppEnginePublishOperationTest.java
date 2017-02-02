@@ -48,7 +48,8 @@ public class LocalAppEnginePublishOperationTest {
 
   @Before
   public void setUp() throws IOException, CoreException {
-    projects = ProjectUtils.importProjects(getClass(), "projects/test-submodules.zip", null);
+    projects = ProjectUtils.importProjects(getClass(),
+        "projects/test-submodules.zip", true /* checkBuildErrors */, null);
     assertEquals(2, projects.size());
     assertTrue("sox-server".equals(projects.get(0).getName())
         || "sox-server".equals(projects.get(1).getName()));

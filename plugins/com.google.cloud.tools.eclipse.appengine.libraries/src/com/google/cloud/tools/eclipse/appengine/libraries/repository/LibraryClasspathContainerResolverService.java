@@ -138,7 +138,33 @@ public class LibraryClasspathContainerResolverService
       return StatusUtil.error(this, Messages.getString("TaskResolveContainerError", containerPath), ex);
     }
   }
-  
+
+  public IStatus checkRuntimeAvailability(AppEngineRuntime runtime, IProgressMonitor monitor) {
+    switch (runtime) {
+      case STANDARD_JAVA_7:
+        return checkAppEngineStandardJava7(monitor);
+      default:
+        throw new IllegalArgumentException("Unhandled runtime: " + runtime);
+    }
+  }
+
+  private IStatus checkAppEngineStandardJava7(IProgressMonitor monitor) {
+    try {
+      for (String libraryId : new String[]{ "servlet-api", "jsp-api"}) {
+        Library library = libraries.get(libraryId);
+        for (LibraryFile libraryFile : library.getLibraryFiles()) {
+          if (monitor.isCanceled()) {
+            return Status.CANCEL_STATUS;
+          }
+          repositoryService.makeArtifactAvailable(libraryFile, monitor);
+        }
+      }
+      return Status.OK_STATUS;
+    } catch (CoreException ex) {
+      return StatusUtil.error(this, Messages.getString("LibraryUnavailable"), ex);
+    }
+  }
+
   private LibraryClasspathContainer resolveLibraryFiles(IJavaProject javaProject,
                                                         IPath containerPath,
                                                         Library library,

@@ -31,8 +31,6 @@ location "http://download.eclipse.org/releases/oxygen" {
 	org.eclipse.jetty.servlet
 	org.eclipse.jetty.server
 	org.eclipse.jetty.util
-	
-	ch.qos.logback.slf4j
 }
 
 // /webtools/repository/oxygen currently has some issues
@@ -48,4 +46,6 @@ location "http://download.eclipse.org/webtools/downloads/drops/R3.9.0/S-3.9.0M2-
 
 location "http://download.eclipse.org/tools/orbit/downloads/drops/R20160520211859/repository/" {
     org.hamcrest
+	ch.qos.logback.slf4j
+	org.slf4j.log4j
 }

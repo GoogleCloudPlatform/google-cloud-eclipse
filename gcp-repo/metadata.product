@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
-
+<!--
+  This product exists to (1) bring in any required features, and
+  (2) add any additional metadata for the CT4E repository.
+-->
 <product uid="com.google.cloud.tools.eclipse.dist" version="1.0.0.qualifier" useFeatures="true" includeLaunchers="false">
 
    <configIni use="default">
@@ -10,6 +13,7 @@
    </launcherArgs>
 
    <features>
+      <feature id="com.google.cloud.tools.eclipse.suite.e45.feature" installMode="root"/>
       <feature id="com.google.cloud.tools.eclipse.3rdparty.feature" installMode="root"/>
    </features>
 
