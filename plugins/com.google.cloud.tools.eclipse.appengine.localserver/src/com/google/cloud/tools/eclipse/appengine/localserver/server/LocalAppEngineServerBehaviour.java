@@ -31,14 +31,10 @@ import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListe
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
 import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -59,7 +55,6 @@ import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.internal.IModulePublishHelper;
 import org.eclipse.wst.server.core.model.IModuleResource;
 import org.eclipse.wst.server.core.model.IModuleResourceDelta;
-import org.eclipse.wst.server.core.model.IURLProvider;
 import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
 import org.eclipse.wst.server.core.util.SocketUtil;
 
@@ -71,6 +66,14 @@ import org.eclipse.wst.server.core.util.SocketUtil;
  */
 public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     implements IModulePublishHelper {
+  /** Parse the numeric string. Return {@code defaultValue} if non-numeric. */
+  private static int parseInt(String numeric, int defaultValue) {
+    try {
+      return Integer.parseInt(numeric);
+    } catch (NumberFormatException ex) {
+      return defaultValue;
+    }
+  }
 
   public static final String SERVER_PORT_ATTRIBUTE_NAME = "appEngineDevServerPort"; //$NON-NLS-1$
   public static final String ADMIN_PORT_ATTRIBUTE_NAME = "appEngineDevServerAdminPort"; //$NON-NLS-1$
@@ -91,7 +94,8 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
 
   private DevAppServerOutputListener serverOutputListener;
   
-  private Map<String, String> moduleToUrlMap = Maps.newHashMap();
+  @VisibleForTesting
+  Map<String, String> moduleToUrlMap = new LinkedHashMap<>();
 
   public LocalAppEngineServerBehaviour () {
     localAppEngineStartListener = new LocalAppEngineStartListener();
@@ -256,6 +260,14 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
   }
 
   /**
+   * Returns the admin port of this server. Note that this method returns -1 if the user has never
+   * attempted to launch the server.
+   */
+  public int getAdminPort() {
+    return adminPort;
+  }
+
+  /**
    * Starts the development server.
    *
    * @param runnables the path to directories that contain configuration files such as
@@ -357,6 +369,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
         .build();
 
     devServer = new CloudSdkAppEngineDevServer(cloudSdk);
+    moduleToUrlMap.clear();
   }
 
   /**
@@ -381,19 +394,6 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
       logger.log(Level.FINE, "New Process: " + process); //$NON-NLS-1$
       devProcess = process;
     }
-  }
-
-  @VisibleForTesting
-  static int extractPortFromServerUrlOutput(String line) {
-    try {
-      int urlBegin = line.lastIndexOf("http://"); //$NON-NLS-1$
-      if (urlBegin != -1) {
-        return new URI(line.substring(urlBegin)).getPort();
-      }
-    } catch (URISyntaxException ex) {}
-
-    logger.log(Level.WARNING, "Cannot extract port from server output: " + line); //$NON-NLS-1$
-    return -1;
   }
 
   /**
@@ -430,26 +430,18 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
       } else if ((matcher = moduleStartedPattern.matcher(line)).matches()) {
         String serviceId = matcher.group("service");
         moduleToUrlMap.put(serviceId, matcher.group("url"));
-        try {
-          int port = Integer.parseInt(matcher.group("port"));
-          if (port > 0 && (serverPortCandidate == 0 || "default".equals(serviceId))) { // $NON-NLS-1$
-            serverPortCandidate = port;
-          }
-        } catch (NumberFormatException e) {
-          // ignore
+        int port = parseInt(matcher.group("port"), 0);
+        if (port > 0 && (serverPortCandidate == 0 || "default".equals(serviceId))) { // $NON-NLS-1$
+          serverPortCandidate = port;
         }
       } else if ((matcher = adminStartedPattern.matcher(line)).matches()) {
-        try {
-          int port = Integer.parseInt(matcher.group("port"));
-          if (port > 0 && adminPort == 0) {
-            adminPort = port;
-          }
-          // Admin comes after other modules, so no more module URLs
-          if (serverPort == 0) {
-            serverPort = serverPortCandidate;
-          }
-        } catch (NumberFormatException e) {
-          // ignore
+        int port = parseInt(matcher.group("port"), 0);
+        if (port > 0 && adminPort == 0) {
+          adminPort = port;
+        }
+        // Admin comes after other modules, so no more module URLs
+        if (serverPort == 0) {
+          serverPort = serverPortCandidate;
         }
       }
     }
@@ -463,30 +455,8 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     return getModuleDeployDirectory(module[0]);
   }
 
-  /**
-   * @see IURLProvider#getModuleRootURL(IModule)
-   */
-  public URL getModuleRootURL(IModule module) {
-    try {
-      int serverState = getServer().getServerState();
-      if (serverState != IServer.STATE_STARTED) {
-        return null;
-      }
-      if (module == null) {
-        String adminPage = "http://" + getServer().getHost() + ":" + adminPort; //$NON-NLS-1$ //$NON-NLS-2$
-        return new URL(adminPage);
-      }
-      String serviceId = ModuleUtils.getServiceId(module); // never null
-      return new URL(getServiceURL(serviceId));
-    } catch (MalformedURLException ex) {
-      /* ignore */
-    }
-    return null;
-
-  }
-
-  @VisibleForTesting
-  String getServiceURL(String serviceId) {
+  /** Return the URL for the given service, or {@code null} if unknown. */
+  public String getServiceUrl(String serviceId) {
     Preconditions.checkNotNull(serviceId);
     return moduleToUrlMap.get(serviceId);
   }

@@ -21,11 +21,14 @@ import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -41,6 +44,8 @@ import org.eclipse.wst.server.core.model.ServerDelegate;
 
 @SuppressWarnings("restriction") // For FacetUtil
 public class LocalAppEngineServerDelegate extends ServerDelegate implements IURLProvider {
+  private static final Logger logger =
+      Logger.getLogger(LocalAppEngineServerDelegate.class.getName());
   public static final String RUNTIME_TYPE_ID =
       "com.google.cloud.tools.eclipse.appengine.standard.runtime"; //$NON-NLS-1$
   public static final String SERVER_TYPE_ID =
@@ -79,13 +84,7 @@ public class LocalAppEngineServerDelegate extends ServerDelegate implements IURL
     if (!result.isOK()) {
       return result;
     }
-    return checkConflictingServiceIds(getServer().getModules(), add, remove,
-        new Function<IModule, String>() {
-          @Override
-          public String apply(IModule module) {
-            return ModuleUtils.getServiceId(module);
-          }
-        });
+    return checkConflictingServiceIds(getServer().getModules(), add, remove);
   }
 
   /**
@@ -115,12 +114,12 @@ public class LocalAppEngineServerDelegate extends ServerDelegate implements IURL
    */
   @VisibleForTesting
   IStatus checkConflictingServiceIds(IModule[] current, IModule[] toBeAdded,
-      IModule[] toBeRemoved, Function<IModule, String> serviceIdFunction) {
+      IModule[] toBeRemoved) {
 
     // verify that we do not have conflicting modules by service id
     Map<String, IModule> currentServiceIds = new HashMap<>();
     for (IModule module : current) {
-      String moduleServiceId = serviceIdFunction.apply(module);
+      String moduleServiceId = getServiceId(module);
       if (currentServiceIds.containsKey(moduleServiceId)) {
         // uh oh, we have a conflict within the already-defined modules
         return StatusUtil.error(LocalAppEngineServerDebugTarget.class,
@@ -132,7 +131,7 @@ public class LocalAppEngineServerDelegate extends ServerDelegate implements IURL
     }
     if (toBeRemoved != null) {
       for (IModule module : toBeRemoved) {
-        String moduleServiceId = serviceIdFunction.apply(module);
+        String moduleServiceId = getServiceId(module);
         // could verify that: serviceIds.containsKey(moduleServiceId)
         currentServiceIds.remove(moduleServiceId);
       }
@@ -143,7 +142,7 @@ public class LocalAppEngineServerDelegate extends ServerDelegate implements IURL
           // skip modules that are already present
           continue;
         }
-        String moduleServiceId = serviceIdFunction.apply(module);
+        String moduleServiceId = getServiceId(module);
         if (currentServiceIds.containsKey(moduleServiceId)) {
           return StatusUtil.error(LocalAppEngineServerDebugTarget.class,
               Messages.getString("SERVICES_HAVE_SAME_ID", //$NON-NLS-1$
@@ -154,6 +153,16 @@ public class LocalAppEngineServerDelegate extends ServerDelegate implements IURL
       }
     }
     return Status.OK_STATUS;
+  }
+
+  @VisibleForTesting
+  Function<IModule, String> serviceIdFunction;
+
+  private String getServiceId(IModule module) {
+    if (serviceIdFunction != null) {
+      return serviceIdFunction.apply(module);
+    }
+    return ModuleUtils.getServiceId(module);
   }
 
   private static IStatus hasAppEngineStandardFacet(IModule module) {
@@ -241,8 +250,20 @@ public class LocalAppEngineServerDelegate extends ServerDelegate implements IURL
     // use getAdapter() to avoid unnecessarily loading the class (e.g., not started yet)
     LocalAppEngineServerBehaviour serverBehaviour =
         (LocalAppEngineServerBehaviour) getServer().getAdapter(LocalAppEngineServerBehaviour.class);
-    if (serverBehaviour != null) {
-      return serverBehaviour.getModuleRootURL(module);
+    if (serverBehaviour == null) {
+      return null;
+    }
+    try {
+      String url;
+      if (module == null) {
+        url = "http://" + getServer().getHost() + ":" + serverBehaviour.getAdminPort(); //$NON-NLS-1$ //$NON-NLS-2$
+      } else {
+        String serviceId = getServiceId(module); // never null
+        url = serverBehaviour.getServiceUrl(serviceId);
+      }
+      return new URL(url);
+    } catch (MalformedURLException ex) {
+      logger.log(Level.WARNING, "Generated invalid URL", ex); //$NON-NLS-1$
     }
     return null;
   }

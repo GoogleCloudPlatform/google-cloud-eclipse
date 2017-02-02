@@ -19,7 +19,6 @@ package com.google.cloud.tools.eclipse.appengine.localserver.server;
 import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -57,13 +56,9 @@ public class ModuleUtilsTest {
     Mockito.when(descriptorFile.exists()).thenReturn(true);
   }
 
-  @Test
+  @Test(expected = NullPointerException.class)
   public void testGetServiceId_null() {
-    try {
-      ModuleUtils.getServiceId(null);
-      Assert.fail();
-    } catch (NullPointerException expected) {
-    }
+    ModuleUtils.getServiceId(null);
   }
   
   @Test
