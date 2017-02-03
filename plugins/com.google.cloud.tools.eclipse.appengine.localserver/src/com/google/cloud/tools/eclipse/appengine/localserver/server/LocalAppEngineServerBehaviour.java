@@ -406,9 +406,9 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     // <<HEADER>> Starting admin server at: http://localhost:8000
     // where <<HEADER>> = INFO 2017-01-31 21:00:40,700 dispatcher.py:197]
     private Pattern moduleStartedPattern = Pattern.compile(
-        ".*Starting module \"(?<service>[^\"]+)\" running at: (?<url>http://.+:(?<port>[0-9]+))$");
+        "Starting module \"(?<service>[^\"]+)\" running at: (?<url>http://.+:(?<port>[0-9]+))$");
     private Pattern adminStartedPattern =
-        Pattern.compile(".*Starting admin server at: (?<url>http://.+:(?<port>[0-9]+))$");
+        Pattern.compile("Starting admin server at: (?<url>http://.+:(?<port>[0-9]+))$");
 
     private int serverPortCandidate = 0;
 

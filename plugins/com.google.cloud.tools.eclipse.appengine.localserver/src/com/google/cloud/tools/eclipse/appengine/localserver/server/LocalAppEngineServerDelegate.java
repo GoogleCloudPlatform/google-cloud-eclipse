@@ -264,7 +264,7 @@ public class LocalAppEngineServerDelegate extends ServerDelegate implements IURL
       return new URL(url);
     } catch (MalformedURLException ex) {
       logger.log(Level.WARNING, "Generated invalid URL", ex); //$NON-NLS-1$
+      return null;
     }
-    return null;
   }
 }

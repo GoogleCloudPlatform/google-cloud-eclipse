@@ -24,7 +24,6 @@ import static org.mockito.Mockito.when;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.common.base.Function;
-import com.google.common.base.Functions;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import java.net.URL;
@@ -98,9 +97,12 @@ public class LocalAppEngineServerDelegateTest {
   @Test
   public void testCheckConflictingId_defaultServiceIds() throws CoreException {
     delegate = getDelegateWithServer();
-    // Functions.constant() should have inferred the return type too
-    delegate.serviceIdFunction =
-        (Function<IModule, String>) (Function) Functions.constant("default");
+    delegate.serviceIdFunction = new Function<IModule, String>() {
+      @Override
+      public String apply(IModule module) {
+        return "default";
+      }
+    };
 
     Assert.assertEquals(Status.ERROR, delegate.checkConflictingServiceIds(new IModule[] {module1},
         new IModule[] {module2}, null).getSeverity());
