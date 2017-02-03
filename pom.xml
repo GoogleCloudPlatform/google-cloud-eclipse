@@ -413,7 +413,7 @@
       </activation>
       <properties>
          <jettyMinVersion>9.3</jettyMinVersion>
-         <jettyMaxVersion>9.4</jettyMaxVersion>
+         <jettyMaxVersion>9.5</jettyMaxVersion>
       </properties>
       <!-- build against a known target platform -->
       <modules>
