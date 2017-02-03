@@ -3,7 +3,7 @@
 
 This project provides an Eclipse plugin for building, debugging, and deploying Google Cloud Platform applications.
 
-[End user documentation and installation instructions can be found in the Github Wiki.](https://github.com/GoogleCloudPlatform/google-cloud-eclipse/wiki/Google-Cloud-Tools-for-Eclipse)
+[End user documentation and installation instructions can be found on cloud.google.com.](https://cloud.google.com/eclipse/docs/)
 
 _TL;DR_: `mvn -Dtycho.toolchains=SYSTEM package` should
 generate a p2-accessible repository in `gcp-repo/target/repository`.
