@@ -28,7 +28,7 @@
       point="org.eclipse.wst.validation.validatorV2" 
       id="com.google.cloud.tools.eclipse.appengine.validation.MyValidator">
     <validator
-    	class="com.google.cloud.tools.eclipse.appengine.validation.MyValidator">
+    	class="com.google.cloud.tools.eclipse.appengine.validation.AppEngineWebXmlValidator">
       <include>
         <rules>
           <file
