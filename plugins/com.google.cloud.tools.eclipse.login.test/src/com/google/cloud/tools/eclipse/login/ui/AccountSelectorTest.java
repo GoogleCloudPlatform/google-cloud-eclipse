@@ -23,7 +23,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.api.client.auth.oauth2.Credential;
@@ -33,9 +32,8 @@ import com.google.cloud.tools.ide.login.Account;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotCombo;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -399,7 +397,6 @@ public class AccountSelectorTest {
   }
 
   private void simulateSelect(AccountSelector selector, int index) {
-    selector.combo.select(index);
-    selector.combo.notifyListeners(SWT.Selection, mock(Event.class));
+    new SWTBotCombo(selector.combo).setSelection(index);
   }
 }

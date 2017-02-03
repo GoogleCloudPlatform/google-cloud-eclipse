@@ -41,7 +41,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
-import org.eclipse.wst.common.project.facet.core.internal.FacetedProject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -100,7 +99,7 @@ public class GpeMigratorTest {
   @Test
   public void testRemoveGpeRuntimeAndFacets_doNotLogIfMetadataFileDoesNotExist()
       throws CoreException {
-    IFile metadataFile = gpeProject.getFile(FacetedProject.METADATA_FILE);
+    IFile metadataFile = gpeProject.getFile(GpeMigrator.FACETS_METADATA_FILE);
     metadataFile.delete(true, null);
     assertFalse(metadataFile.exists());
 

@@ -25,7 +25,6 @@ import com.google.cloud.tools.eclipse.ui.util.databinding.BucketNameValidator;
 import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectIdInputValidator;
 import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectVersionValidator;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -39,7 +38,6 @@ import org.eclipse.core.databinding.observable.Observables;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.WritableValue;
-import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.resources.IProject;
@@ -72,17 +70,14 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
   private AccountSelector accountSelector;
 
-  private Label projectIdLabel;
   private Text projectId;
 
-  private Button overrideDefaultVersionButton;
   private Text version;
 
   private Button autoPromoteButton;
 
   private Button stopPreviousVersionButton;
 
-  private Button overrideDefaultBucketButton;
   private Text bucket;
 
   private ExpandableComposite expandableComposite;
@@ -104,7 +99,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
     GridLayout gridLayout = new GridLayout();
     gridLayout.numColumns = 2;
-    
+
     createCredentialSection(loginService);
 
     createProjectIdSection();
@@ -181,26 +176,13 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   }
 
   private void setupProjectVersionDataBinding(DataBindingContext context) {
-    ISWTObservableValue overrideButton =
-        WidgetProperties.selection().observe(overrideDefaultVersionButton);
     ISWTObservableValue versionField = WidgetProperties.text(SWT.Modify).observe(version);
-    ISWTObservableValue versionFieldEnablement = WidgetProperties.enabled().observe(version);
 
-    // use an intermediary value to control the enabled state of the the field based on the override
-    // checkbox's state
-    WritableValue enablement = new WritableValue();
-    context.bindValue(overrideButton, enablement);
-    context.bindValue(versionFieldEnablement, enablement);
-
-    IObservableValue overrideModel = PojoProperties.value("overrideDefaultVersioning").observe(model);
     IObservableValue versionModel = PojoProperties.value("version").observe(model);
 
-    context.bindValue(enablement, overrideModel);
-    context.bindValue(versionField, versionModel);
-
-    context.addValidationStatusProvider(new OverrideValidator(overrideButton,
-                                                              versionField,
-                                                              new ProjectVersionValidator()));
+    context.bindValue(versionField, versionModel,
+        new UpdateValueStrategy().setAfterGetValidator(new ProjectVersionValidator()),
+        new UpdateValueStrategy().setAfterGetValidator(new ProjectVersionValidator()));
   }
 
   private void setupAutoPromoteDataBinding(DataBindingContext context) {
@@ -217,34 +199,21 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     context.bindValue(stopPreviousVersionEnablement, enablement);
 
     IObservableValue promoteModel = PojoProperties.value("autoPromote").observe(model);
-    IObservableValue stopPreviousVersionModel = PojoProperties.value("stopPreviousVersion").observe(model);
+    IObservableValue stopPreviousVersionModel =
+        PojoProperties.value("stopPreviousVersion").observe(model);
 
     context.bindValue(promoteButton, promoteModel);
     context.bindValue(stopPreviousVersion, stopPreviousVersionModel);
   }
 
   private void setupBucketDataBinding(DataBindingContext context) {
-    ISWTObservableValue overrideButton =
-        WidgetProperties.selection().observe(overrideDefaultBucketButton);
     ISWTObservableValue bucketField = WidgetProperties.text(SWT.Modify).observe(bucket);
-    ISWTObservableValue bucketFieldEnablement = WidgetProperties.enabled().observe(bucket);
 
-    // use an intermediary value to control the enabled state of the label and the field
-    // based on the override checkbox's state
-    WritableValue enablement = new WritableValue();
-    context.bindValue(overrideButton, enablement);
-    context.bindValue(bucketFieldEnablement, enablement);
+    IObservableValue bucketModel = PojoProperties.value("bucket").observe(model);
 
-    IObservableValue overrideModelObservable =
-        PojoProperties.value("overrideDefaultBucket").observe(model);
-    IObservableValue bucketModelObservable = PojoProperties.value("bucket").observe(model);
-
-    context.bindValue(enablement, overrideModelObservable);
-    context.bindValue(bucketField, bucketModelObservable);
-
-    context.addValidationStatusProvider(new OverrideValidator(overrideButton,
-                                                              bucketField,
-                                                              new BucketNameValidator()));
+    context.bindValue(bucketField, bucketModel,
+        new UpdateValueStrategy().setAfterGetValidator(new BucketNameValidator()),
+        new UpdateValueStrategy().setAfterGetValidator(new BucketNameValidator()));
   }
 
   @Override
@@ -285,10 +254,10 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   }
 
   private void createProjectIdSection() {
-    projectIdLabel = new Label(this, SWT.LEAD);
+    Label projectIdLabel = new Label(this, SWT.LEAD);
     projectIdLabel.setText(Messages.getString("project.id"));
     projectIdLabel.setToolTipText(Messages.getString("tooltip.project.id"));
-    
+
     projectId = new Text(this, SWT.LEAD | SWT.SINGLE | SWT.BORDER);
     projectId.setToolTipText(Messages.getString("tooltip.project.id"));
     GridData projectIdTextGridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
@@ -296,13 +265,12 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   }
 
   private void createProjectVersionSection() {
-    overrideDefaultVersionButton = new Button(this, SWT.CHECK);
-    overrideDefaultVersionButton.setText(Messages.getString("use.custom.versioning"));
-    overrideDefaultVersionButton.setToolTipText(Messages.getString("tooltip.version"));
-    GridData overrideDefaultVersionButtonGridData = new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
-    overrideDefaultVersionButton.setLayoutData(overrideDefaultVersionButtonGridData);
+    Label versionLabel = new Label(this, SWT.LEAD);
+    versionLabel.setText(Messages.getString("custom.versioning"));
+    versionLabel.setToolTipText(Messages.getString("tooltip.version"));
 
     version = new Text(this, SWT.LEAD | SWT.SINGLE | SWT.BORDER);
+    version.setMessage(Messages.getString("custom.versioning.hint"));
     version.setToolTipText(Messages.getString("tooltip.version"));
     GridData versionGridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
     version.setLayoutData(versionGridData);
@@ -321,7 +289,8 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     stopPreviousVersionButton = new Button(this, SWT.CHECK);
     stopPreviousVersionButton.setText(Messages.getString("stop.previous.version"));
     stopPreviousVersionButton.setToolTipText(Messages.getString("tooltip.stop.previous.version"));
-    GridData stopPreviousVersionButtonGridData = new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
+    GridData stopPreviousVersionButtonGridData =
+        new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
     stopPreviousVersionButtonGridData.horizontalSpan = 2;
     stopPreviousVersionButton.setLayoutData(stopPreviousVersionButtonGridData);
   }
@@ -329,7 +298,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   private void createAdvancedSection() {
     createExpandableComposite();
     final Composite bucketComposite = createBucketSection(expandableComposite);
-    
+
     expandableComposite.setClient(bucketComposite);
     expandableComposite.addExpansionListener(new ExpansionAdapter() {
       @Override
@@ -354,67 +323,19 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   private Composite createBucketSection(Composite parent) {
     Composite bucketComposite = new Composite(parent, SWT.NONE);
 
-    overrideDefaultBucketButton = new Button(bucketComposite, SWT.CHECK);
-    overrideDefaultBucketButton.setText(Messages.getString("use.custom.bucket"));
-    GridData buttonData = new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
-    overrideDefaultBucketButton.setLayoutData(buttonData);
-    overrideDefaultBucketButton.setToolTipText(Messages.getString("tooltip.staging.bucket"));
+    Label bucketLabel = new Label(bucketComposite, SWT.LEAD);
+    bucketLabel.setText(Messages.getString("custom.bucket"));
+    bucketLabel.setToolTipText(Messages.getString("tooltip.staging.bucket"));
 
     bucket = new Text(bucketComposite, SWT.LEAD | SWT.SINGLE | SWT.BORDER);
+    bucket.setMessage(Messages.getString("custom.bucket.hint"));
     GridData bucketData = new GridData(SWT.FILL, SWT.CENTER, true, false);
     bucket.setLayoutData(bucketData);
-    
+
     bucket.setToolTipText(Messages.getString("tooltip.staging.bucket"));
 
     GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(bucketComposite);
     return bucketComposite;
-  }
-
-  /**
-   * Validates a checkbox and text field as follows:
-   * <ol>
-   * <li>if the checkbox is unselected -> valid
-   * <li>if the checkbox is selected -> the result is determined by the provided
-   * <code>validator</code> used on the value of the text field
-   * </ol>
-   */
-  private static class OverrideValidator extends FixedMultiValidator {
-
-    private ISWTObservableValue selectionObservable;
-    private ISWTObservableValue textObservable;
-    private IValidator validator;
-
-    /**
-     * @param selection must be an observable for a checkbox, i.e. a {@link Button} with
-     *        {@link SWT#CHECK} style
-     * @param text must be an observable for a {@link Text}
-     * @param validator must be a validator for String values, will be applied to
-     *        <code>text.getValue()</code>
-     */
-    public OverrideValidator(ISWTObservableValue selection, ISWTObservableValue text,
-        IValidator validator) {
-      Preconditions.checkArgument(text.getWidget() instanceof Text,
-                                  "text is an observable for {0}, should be for {1}",
-                                  text.getWidget().getClass().getName(),
-                                  Text.class.getName());
-      Preconditions.checkArgument(selection.getWidget() instanceof Button,
-                                  "selection is an observable for {0}, should be for {1}",
-                                  selection.getWidget().getClass().getName(),
-                                  Button.class.getName());
-      Preconditions.checkArgument((selection.getWidget().getStyle() & SWT.CHECK) != 0,
-          "selection must be an observable for a checkbox");
-      this.selectionObservable = selection;
-      this.textObservable = text;
-      this.validator = validator;
-    }
-
-    @Override
-    protected IStatus validate() {
-      if (Boolean.FALSE.equals(selectionObservable.getValue())) {
-        return ValidationStatus.ok();
-      }
-      return validator.validate(textObservable.getValue());
-    }
   }
 
   /**

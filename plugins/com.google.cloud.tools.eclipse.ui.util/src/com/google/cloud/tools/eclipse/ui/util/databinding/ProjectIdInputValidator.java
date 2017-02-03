@@ -16,12 +16,11 @@
 
 package com.google.cloud.tools.eclipse.ui.util.databinding;
 
+import com.google.cloud.tools.eclipse.ui.util.Messages;
+import com.google.cloud.tools.project.ProjectIdValidator;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
-
-import com.google.cloud.tools.eclipse.ui.util.Messages;
-import com.google.cloud.tools.project.ProjectIdValidator;
 
 public class ProjectIdInputValidator implements IValidator {
   private boolean requireProjectId = true;

@@ -23,7 +23,6 @@ import java.util.regex.Pattern;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 
 /**
  * Validate a project version.
@@ -50,12 +49,12 @@ public class ProjectVersionValidator implements IValidator {
     }
     String value = (String) input;
     if (value.isEmpty()) {
-      return ValidationStatus.error(Messages.getString("version.invalid")); //$NON-NLS-1$
+      return ValidationStatus.ok();
     } else if (APPENGINE_PROJECT_VERSION_PATTERN.matcher(value).matches()) {
       if (value.startsWith(RESERVED_PREFIX) || RESERVED_VALUES.contains(value)) {
         return ValidationStatus.error(Messages.getString("version.reserved")); //$NON-NLS-1$
       }
-      return Status.OK_STATUS;
+      return ValidationStatus.ok();
     } else {
       return ValidationStatus.error(Messages.getString("version.invalid")); //$NON-NLS-1$
     }
