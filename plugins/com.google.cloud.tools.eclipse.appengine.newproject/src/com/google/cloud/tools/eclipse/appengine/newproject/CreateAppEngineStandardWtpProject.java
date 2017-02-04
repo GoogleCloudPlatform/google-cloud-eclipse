@@ -109,7 +109,7 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
     addJunit4ToClasspath(subMonitor.newChild(2), newProject);
   }
 
-  private static void addAppEngineLibrariesToBuildPath(IProject newProject, List<Library> libraries,
+  private static void addAppEngineLibrariesToBuildPath(IProject project, List<Library> libraries,
       IProgressMonitor monitor) throws CoreException {
     
     if (libraries.isEmpty()) {
@@ -117,7 +117,7 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
     }
     SubMonitor subMonitor = SubMonitor.convert(monitor,
         Messages.getString("adding.app.engine.libraries"), libraries.size()); //$NON-NLS-1$
-    IJavaProject javaProject = JavaCore.create(newProject);
+    IJavaProject javaProject = JavaCore.create(project);
     IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
     IClasspathEntry[] newRawClasspath =
         Arrays.copyOf(rawClasspath, rawClasspath.length + libraries.size());
