@@ -72,13 +72,12 @@ class BuildPath {
         Arrays.copyOf(rawClasspath, rawClasspath.length + libraries.size());
     for (int i = 0; i < libraries.size(); i++) {
       Library library = libraries.get(i);
-      IClasspathAttribute[] classpathAttributes;
+      IClasspathAttribute[] classpathAttributes = new IClasspathAttribute[1];
       if (library.isExport()) {
-        classpathAttributes = new IClasspathAttribute[] {
-            UpdateClasspathAttributeUtil.createDependencyAttribute(true /* isWebApp */)};
+        boolean isWebApp = true;
+        classpathAttributes[0] = UpdateClasspathAttributeUtil.createDependencyAttribute(isWebApp);
       } else {
-        classpathAttributes =
-            new IClasspathAttribute[] {UpdateClasspathAttributeUtil.createNonDependencyAttribute()};
+        classpathAttributes[0] = UpdateClasspathAttributeUtil.createNonDependencyAttribute();
       }
   
       IClasspathEntry libraryContainer = JavaCore.newContainerEntry(library.getContainerPath(),
