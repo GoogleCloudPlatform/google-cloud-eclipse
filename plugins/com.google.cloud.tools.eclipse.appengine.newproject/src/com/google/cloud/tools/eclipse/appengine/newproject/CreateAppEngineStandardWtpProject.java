@@ -109,9 +109,9 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
     addJunit4ToClasspath(subMonitor.newChild(2), newProject);
   }
 
-  private void addAppEngineLibrariesToBuildPath(IProject newProject,
-                                                List<Library> libraries,
-                                                IProgressMonitor monitor) throws CoreException {
+  private static void addAppEngineLibrariesToBuildPath(IProject newProject, List<Library> libraries,
+      IProgressMonitor monitor) throws CoreException {
+    
     if (libraries.isEmpty()) {
       return;
     }
@@ -144,9 +144,9 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
     runContainerResolverJob(javaProject);
   }
 
-  private void runContainerResolverJob(IJavaProject javaProject) {
-    IEclipseContext context = EclipseContextFactory
-        .getServiceContext(FrameworkUtil.getBundle(getClass()).getBundleContext());
+  private static void runContainerResolverJob(IJavaProject javaProject) {
+    IEclipseContext context = EclipseContextFactory.getServiceContext(
+        FrameworkUtil.getBundle(CreateAppEngineStandardWtpProject.class).getBundleContext());
     final IEclipseContext childContext =
         context.createChild(LibraryClasspathContainerResolverJob.class.getName());
     childContext.set(IJavaProject.class, javaProject);
