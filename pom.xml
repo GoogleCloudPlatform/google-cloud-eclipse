@@ -310,6 +310,7 @@
           <artifactId>tycho-surefire-plugin</artifactId>
           <version>${tycho.version}</version>
           <configuration>
+            <forkedProcessTimeoutInSeconds>120</forkedProcessTimeoutInSeconds>
             <argLine>-Dorg.eclipse.swtbot.search.timeout=${org.eclipse.swtbot.search.timeout} -Xms40m -Xmx1G -XX:MaxPermSize=512m -Djava.awt.headless=true ${os-jvm-flags}</argLine>
           </configuration>
         </plugin>
