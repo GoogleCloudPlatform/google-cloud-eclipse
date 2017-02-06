@@ -56,7 +56,13 @@ public class BaseProjectTest {
       }
       project = null;
     }
-    bot.resetWorkbench();
+
+    // Avoid resetWorkbench() due to Eclipse bug 511729 on Oxygen
+    bot.saveAllEditors();
+    bot.closeAllEditors();
+    bot.resetActivePerspective();
+    bot.defaultPerspective().activate();
+    bot.resetActivePerspective();
   }
 
   /**

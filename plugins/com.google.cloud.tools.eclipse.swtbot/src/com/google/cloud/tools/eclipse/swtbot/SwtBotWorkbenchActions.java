@@ -67,7 +67,7 @@ public final class SwtBotWorkbenchActions {
    * Wait until all background tasks are complete.
    */
   public static void waitForIdle(SWTBot bot) {
-    while (!Job.getJobManager().isIdle()) {
+    // while (!Job.getJobManager().isIdle()) {
       try {
         Job.getJobManager().join(ResourcesPlugin.FAMILY_MANUAL_BUILD, null);
         Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
@@ -83,7 +83,7 @@ public final class SwtBotWorkbenchActions {
       }
 
       bot.sleep(300);
-    }
+    // }
   }
 
   /**
