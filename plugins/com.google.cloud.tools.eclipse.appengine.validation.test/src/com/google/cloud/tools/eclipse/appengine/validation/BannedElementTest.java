@@ -20,12 +20,12 @@ import org.junit.Test;
 
 public class BannedElementTest {
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = NullPointerException.class)
   public void testBannedElementConstructor_nullElementName() {
     BannedElement element = new BannedElement(null);
   }
   
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = NullPointerException.class)
   public void testBannedElementConstructor_nullLocation() {
     BannedElement element = new BannedElement("test", null, 0);
   }

@@ -16,8 +16,10 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
+import com.google.common.base.Preconditions;
+
 /**
- * Class that represents a blacklisted element found in appengine-web.xml
+ * A blacklisted element found in appengine-web.xml
  */
 public class BannedElement {
 
@@ -26,9 +28,8 @@ public class BannedElement {
   private final int length;
   
   public BannedElement(String elementName, DocumentLocation start, int length) {
-    if (elementName == null || start == null) {
-      throw new IllegalArgumentException("Arguments cannot be null.");
-    }
+    Preconditions.checkNotNull(elementName, "elementName is null");
+    Preconditions.checkNotNull(start, "start is null");
     this.message = AppEngineWebBlacklist.getBlacklistElementMessage(elementName);
     this.start = start;
     this.length = length;

@@ -24,8 +24,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class AppEngineWebBlacklistTest {
-
-  private static final String MESSAGE = "project ID tag not recommended";
   
   @Test
   public void testBlacklisted() {
@@ -53,7 +51,9 @@ public class AppEngineWebBlacklistTest {
   }
   
   @Test
-  public void testGetBlacklistElementMessage() { assertEquals(MESSAGE, AppEngineWebBlacklist.getBlacklistElementMessage("application"));
+  public void testGetBlacklistElementMessage() {
+    assertEquals("project ID tag not recommended",
+      AppEngineWebBlacklist.getBlacklistElementMessage("application"));
   }
 }
 

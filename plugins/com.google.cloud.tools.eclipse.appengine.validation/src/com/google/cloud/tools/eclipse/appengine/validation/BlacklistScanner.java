@@ -70,10 +70,9 @@ class BlacklistScanner extends DefaultHandler {
   
   /**
    * Pops the corresponding starting BannedElement off the preBlacklist 
-   * stack then pushes it to the final blacklist stack.
-   * 
-   * Will later use this method add end location to banned element.
-   */
+   * stack, then pushes it to the final blacklist stack.
+   */ 
+   //TODO use this method add end location to banned element.
   @Override
   public void endElement(String uri, String localName, String qName) 
       throws SAXException {
@@ -109,5 +108,5 @@ class BlacklistScanner extends DefaultHandler {
   @Override
   public void warning(SAXParseException exception) throws SAXException { //do nothing
   }
-  
+    
 }

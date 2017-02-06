@@ -71,8 +71,8 @@ public class BlacklistScannerTest {
     try {
       scanner.error(EX);
       fail("Expected SAXException to be thrown");
-    } catch (SAXException exc) {
-      assertEquals(EX, exc.getException());
+    } catch (SAXException expected) {
+      assertEquals(EX, expected.getException());
     }
   }
   
@@ -81,8 +81,8 @@ public class BlacklistScannerTest {
     try {
       scanner.fatalError(EX);
       fail("Expected SAXException to be thrown");
-    } catch (SAXException exc) {
-      assertEquals(EX, exc.getException());
+    } catch (SAXException expected) {
+      assertEquals(EX, expected.getException());
     }
   }
   
