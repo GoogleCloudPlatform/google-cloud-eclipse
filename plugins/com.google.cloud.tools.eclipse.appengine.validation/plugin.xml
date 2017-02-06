@@ -24,9 +24,9 @@
   </extension>
   
   <extension 
-      name="App Engine Descriptor Validator" 
+      name="App Engine Web Xml Validator" 
       point="org.eclipse.wst.validation.validatorV2" 
-      id="com.google.cloud.tools.eclipse.appengine.validation.MyValidator">
+      id="appEngineWebXmlValidator">
     <validator
     	class="com.google.cloud.tools.eclipse.appengine.validation.AppEngineWebXmlValidator">
       <include>
