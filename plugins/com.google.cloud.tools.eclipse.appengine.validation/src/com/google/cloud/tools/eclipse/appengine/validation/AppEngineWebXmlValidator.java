@@ -68,7 +68,7 @@ public class AppEngineWebXmlValidator extends AbstractValidator {
       byte[] bytes = ByteStreams.toByteArray(in);
       return validate(resource, bytes);
     } catch (IOException | CoreException | ParserConfigurationException ex) {
-      logger.log(Level.WARNING, ex.getMessage());
+      logger.log(Level.SEVERE, ex.getMessage());
       return new ValidationResult();
     }
   }
@@ -95,8 +95,8 @@ public class AppEngineWebXmlValidator extends AbstractValidator {
       Stack<BannedElement> blacklist) throws IOException {
     ValidationResult result = new ValidationResult();
     Map<BannedElement, Integer> bannedElementOffsetMap = ValidationUtils.getOffsetMap(bytes, blacklist);
-    for (BannedElement element : bannedElementOffsetMap.keySet()) {
-      result.add(createMessage(resource, element, bannedElementOffsetMap.get(element)));
+    for (Map.Entry<BannedElement, Integer> entry : bannedElementOffsetMap.entrySet()) {
+      result.add(createMessage(resource, entry.getKey(), entry.getValue()));
     }
     return result;
   }

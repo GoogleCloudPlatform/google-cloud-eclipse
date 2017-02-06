@@ -16,13 +16,14 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
 public class AppEngineWebBlacklist {
   
-  private final static ImmutableMap<String, String> BLACKLIST =
+  private static final ImmutableMap<String, String> BLACKLIST =
       ImmutableMap.<String, String>builder()
-        .put("application", "project ID tag not recommended")
+        .put("application", Messages.getString("application.element"))
         .build();
   
   static boolean contains(String elementName) {
@@ -30,8 +31,9 @@ public class AppEngineWebBlacklist {
   }
   
   static String getBlacklistElementMessage(String element) {
-    if (element == null || !BLACKLIST.containsKey(element)) {
-      return "";
+    Preconditions.checkNotNull(element, "element is null");
+    if (!BLACKLIST.containsKey(element)) {
+      throw new IllegalArgumentException("element not blacklisted");
     }
     return BLACKLIST.get(element);
   }

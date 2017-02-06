@@ -20,7 +20,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.util.Stack;
-
 import javax.xml.parsers.ParserConfigurationException;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -39,7 +38,7 @@ public class BlacklistSaxParserTest {
   private static final String XML_WITH_BANNED_ELEMENT = 
       VERSION + ROOT_START_TAG + BANNED_ELEMENT + ROOT_END_TAG;
   private static final String EMPTY_XML = "";
-  private static final String BANNED_ELEMENT_MESSAGE = "project ID tag not recommended";
+  private static final String BANNED_ELEMENT_MESSAGE = "application element not recommended";
   
   @Test
   public void testReadXml_emptyXml()

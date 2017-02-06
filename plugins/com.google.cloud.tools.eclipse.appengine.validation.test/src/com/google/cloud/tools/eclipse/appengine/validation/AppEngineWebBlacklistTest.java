@@ -17,7 +17,6 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Assert;
@@ -40,19 +39,19 @@ public class AppEngineWebBlacklistTest {
     assertTrue(!AppEngineWebBlacklist.contains(null));
   }
   
-  @Test
+  @Test(expected = NullPointerException.class)
   public void testGetBlacklistElementMessage_nullArg() {
-    assertNotNull(AppEngineWebBlacklist.getBlacklistElementMessage(null));
+    AppEngineWebBlacklist.getBlacklistElementMessage(null);
   }
   
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void testGetBlacklistElementMessage_elementNotInBlacklist() {
-    assertNotNull(AppEngineWebBlacklist.getBlacklistElementMessage("test"));
+    AppEngineWebBlacklist.getBlacklistElementMessage("test");
   }
   
   @Test
   public void testGetBlacklistElementMessage() {
-    assertEquals("project ID tag not recommended",
+    assertEquals("application element not recommended",
       AppEngineWebBlacklist.getBlacklistElementMessage("application"));
   }
 }

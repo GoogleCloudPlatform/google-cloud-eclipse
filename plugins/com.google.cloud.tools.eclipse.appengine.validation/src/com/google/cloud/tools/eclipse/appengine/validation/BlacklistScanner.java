@@ -16,13 +16,11 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.util.Stack;
 import org.xml.sax.Attributes;
-import org.xml.sax.Locator;
 import org.xml.sax.helpers.DefaultHandler;
-
-import com.google.common.annotations.VisibleForTesting;
-
+import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 

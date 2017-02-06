@@ -47,7 +47,6 @@ public class BannedElement {
     return start;
   }
   
-  
   public int getLength() {
     return length;
   }
