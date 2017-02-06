@@ -52,16 +52,14 @@ public class ValidationUtilsTest {
   private static final String XML_WITH_PROJECT_ID_FIRST =
       PROJECT_ID;
   
-  private Stack<BannedElement> blacklist;
+  private Stack<BannedElement> blacklist = new Stack<>();
   private BannedElement element;
   
   @Before
   public void setUp() {
-    this.blacklist = new Stack<BannedElement>();
     DocumentLocation start = new DocumentLocation(2, 1);
-    DocumentLocation end = new DocumentLocation(2, 2);
-    element = new BannedElement("message", start, end, 1);
-    blacklist.add(element);
+    element = new BannedElement("message", start, 1);
+    blacklist.push(element);
   }
   
   @Test
@@ -96,8 +94,7 @@ public class ValidationUtilsTest {
     byte[] bytes = MIXED_XML_WITH_PROJECT_ID.getBytes(UTF);
     blacklist.clear();
     DocumentLocation start = new DocumentLocation(3, 1);
-    DocumentLocation end = new DocumentLocation(3, 2);
-    BannedElement element = new BannedElement("message", start, end, 1);
+    BannedElement element = new BannedElement("message", start, 1);
     blacklist.push(element);
     Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, blacklist);
     assertEquals(1, map.size());
@@ -118,9 +115,8 @@ public class ValidationUtilsTest {
   public void testGetOffsetMap_firstElement() throws IOException {
     blacklist.clear();
     DocumentLocation start = new DocumentLocation(1, 1);
-    DocumentLocation end = new DocumentLocation(1, 2);
-    BannedElement newElement = new BannedElement("message", start, end, 1);
-    blacklist.add(newElement);
+    BannedElement newElement = new BannedElement("message", start, 1);
+    blacklist.push(newElement);
     byte[] bytes = XML_WITH_PROJECT_ID_FIRST.getBytes(UTF);
     Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, blacklist);
     assertEquals(1, map.size());

@@ -32,7 +32,6 @@ public class ValidationUtils {
   /**
    * Creates a Map of BannedElements and their respective document-relative
    * character offsets
-   * @throws IOException 
    */
   public static Map<BannedElement, Integer> getOffsetMap(byte[] bytes,
       Stack<BannedElement> blacklist) throws IOException {

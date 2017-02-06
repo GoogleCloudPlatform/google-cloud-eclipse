@@ -41,7 +41,7 @@ class BlacklistSaxParser {
     BlacklistScanner handler = new BlacklistScanner();
     
     reader.setContentHandler(handler);
-    reader.setErrorHandler(new SaxErrorHandler());
+    reader.setErrorHandler(handler);
     reader.parse(is);
     return handler.getBlacklist();
   }

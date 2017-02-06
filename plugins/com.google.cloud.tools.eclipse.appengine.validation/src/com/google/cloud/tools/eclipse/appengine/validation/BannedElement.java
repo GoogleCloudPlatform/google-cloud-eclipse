@@ -17,38 +17,25 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 /**
- * Class that represents a blacklisted element found in a project
- * XML file.
+ * Class that represents a blacklisted element found in appengine-web.xml
  */
 public class BannedElement {
 
   private final String message;
   private final DocumentLocation start;
-  private DocumentLocation end;
   private final int length;
   
-  public BannedElement(String elementName, DocumentLocation start,
-      DocumentLocation end, int length) {
-    this.message = (elementName != null) ?
-        AppEngineWebBlacklist.getBlacklistElementMessage(elementName) : "";
-    this.start = (start != null) ? start : new DocumentLocation(0, 0);
-    this.end = (end != null) ? end : new DocumentLocation(0, 0);
-    this.length = length;
-  }
-  
   public BannedElement(String elementName, DocumentLocation start, int length) {
-    this.message = (elementName != null) ?
-        AppEngineWebBlacklist.getBlacklistElementMessage(elementName) : "";
-    this.start = (start != null) ? start : new DocumentLocation(0, 0);
+    if (elementName == null || start == null) {
+      throw new IllegalArgumentException("Arguments cannot be null.");
+    }
+    this.message = AppEngineWebBlacklist.getBlacklistElementMessage(elementName);
+    this.start = start;
     this.length = length;
   }
   
   public BannedElement(String elementName) {
-    this.message = (elementName != null) ? 
-        AppEngineWebBlacklist.getBlacklistElementMessage(elementName) : "";
-    this.start = new DocumentLocation(0, 0);
-    this.end = new DocumentLocation(0, 0);
-    this.length = 0;
+    this(elementName, new DocumentLocation(0, 0), 0);
   }
   
   public String getMessage() {
@@ -59,15 +46,9 @@ public class BannedElement {
     return start;
   }
   
-  public DocumentLocation getEnd() {
-    return end;
-  }
   
   public int getLength() {
     return length;
   }
-  
-  public void setEnd(DocumentLocation end) {
-    this.end = end;
-  }
+
 }

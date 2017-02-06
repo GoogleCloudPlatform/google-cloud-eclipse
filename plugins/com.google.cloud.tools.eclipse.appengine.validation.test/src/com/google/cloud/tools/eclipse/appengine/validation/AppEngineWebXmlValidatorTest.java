@@ -20,6 +20,8 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Stack;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -41,7 +43,7 @@ public class AppEngineWebXmlValidatorTest {
   private static final String ELEMENT_NAME = "application";
   private static final String ELEMENT_MESSAGE =
       "project ID tag not recommended";
-  private static final String UTF = "UTF-8";
+  private static final Charset UTF = StandardCharsets.UTF_8;
   
   private IResource resource = mock(IResource.class);
   
@@ -52,7 +54,7 @@ public class AppEngineWebXmlValidatorTest {
     byte[] bytes = BAD_XML.getBytes(UTF);
     ValidationResult result = AppEngineWebXmlValidator.validate(resource, bytes);
     ValidatorMessage[] messages = result.getMessages();
-    String resultMessage = (String)messages[0].getAttribute(IMarker.MESSAGE);
+    String resultMessage = (String) messages[0].getAttribute(IMarker.MESSAGE);
     assertEquals(BAD_XML_MESSAGE, resultMessage);
   }
   

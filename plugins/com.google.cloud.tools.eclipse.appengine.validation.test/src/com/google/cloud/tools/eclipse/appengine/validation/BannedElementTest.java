@@ -16,25 +16,18 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
 
 public class BannedElementTest {
 
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void testBannedElementConstructor_nullElementName() {
     BannedElement element = new BannedElement(null);
-    assertNotNull(element.getMessage());
   }
   
-  @Test
-  public void testBannedElementConstructor_nullArgs() {
-    BannedElement element = new BannedElement(null, null, null, 0);
-    assertNotNull(element.getMessage());
-    assertNotNull(element.getStart());
-    assertNotNull(element.getEnd());
-    assertEquals(0, element.getLength());
+  @Test(expected = IllegalArgumentException.class)
+  public void testBannedElementConstructor_nullLocation() {
+    BannedElement element = new BannedElement("test", null, 0);
   }
   
 }

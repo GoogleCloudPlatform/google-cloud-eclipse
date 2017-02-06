@@ -18,10 +18,12 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.AttributesImpl;
 import org.xml.sax.helpers.LocatorImpl;
 
@@ -29,6 +31,9 @@ public class BlacklistScannerTest {
   
   private static final String ELEMENT_NAME = "application";
   private static final String ELEMENT_MESSAGE = "project ID tag not recommended";
+  private static final String EX_MESSAGE = "test message";
+  private static final SAXParseException EX =
+      new SAXParseException(EX_MESSAGE, "", "", 1, 1);
 
   private BlacklistScanner scanner = new BlacklistScanner();
   
@@ -59,6 +64,26 @@ public class BlacklistScannerTest {
     assertEquals(1, scanner.getBlacklist().size());
     String message = scanner.getBlacklist().peek().getMessage();
     assertEquals(ELEMENT_MESSAGE, message);
+  }
+  
+  @Test
+  public void testError() {
+    try {
+      scanner.error(EX);
+      fail("Expected SAXException to be thrown");
+    } catch (SAXException exc) {
+      assertEquals(EX, exc.getException());
+    }
+  }
+  
+  @Test
+  public void testFatalError() {
+    try {
+      scanner.fatalError(EX);
+      fail("Expected SAXException to be thrown");
+    } catch (SAXException exc) {
+      assertEquals(EX, exc.getException());
+    }
   }
   
 }

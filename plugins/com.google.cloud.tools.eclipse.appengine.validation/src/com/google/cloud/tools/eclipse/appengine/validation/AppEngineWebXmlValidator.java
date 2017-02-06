@@ -49,9 +49,9 @@ import org.eclipse.wst.validation.ValidationState;
  */
 public class AppEngineWebXmlValidator extends AbstractValidator {
   
-  private IProject project;
   private static final Logger logger = Logger.getLogger(
       AppEngineWebXmlValidator.class.getName());
+  private IProject project;
   
   @Override
   public void validationStarting(IProject project,

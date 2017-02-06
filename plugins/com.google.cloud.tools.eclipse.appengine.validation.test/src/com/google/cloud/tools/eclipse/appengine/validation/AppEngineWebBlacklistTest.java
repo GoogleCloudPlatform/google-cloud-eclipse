@@ -53,8 +53,7 @@ public class AppEngineWebBlacklistTest {
   }
   
   @Test
-  public void testGetBlacklistElementMessage() {
-    assertEquals(MESSAGE, AppEngineWebBlacklist.getBlacklistElementMessage("application"));
+  public void testGetBlacklistElementMessage() { assertEquals(MESSAGE, AppEngineWebBlacklist.getBlacklistElementMessage("application"));
   }
 }
 

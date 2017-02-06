@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
-
 class DocumentLocation {
 
   private final int lineNumber;

@@ -24,12 +24,13 @@ import org.xml.sax.helpers.DefaultHandler;
 import com.google.common.annotations.VisibleForTesting;
 
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 /**
  * SAX parser handler class. Parses a given XML file and adds blacklisted
  * elements to a Stack.
  * 
- * Two stacks are used in order to maintain BannedElement order as they appear
+ * Two stacks are used to maintain BannedElement order as they appear
  * in the document.
  */
 class BlacklistScanner extends DefaultHandler {
@@ -39,12 +40,12 @@ class BlacklistScanner extends DefaultHandler {
   private Stack<BannedElement> blacklist;
   
   @Override
-  public void setDocumentLocator (Locator locator) {
-      this.locator = locator;
+  public void setDocumentLocator(Locator locator) {
+    this.locator = locator;
   }
   
   /**
-   * Ensures parser always starts with an empty queue
+   * Ensures parser always starts with an empty queue.
    */
   @Override
   public void startDocument() throws SAXException {
@@ -68,17 +69,16 @@ class BlacklistScanner extends DefaultHandler {
   }
   
   /**
-   * Pops the corresponding starting BannedElement off the preBlacklist stack, sets its
-   * ending DocumentLocation, then pushes it to the final blacklist stack.
+   * Pops the corresponding starting BannedElement off the preBlacklist 
+   * stack then pushes it to the final blacklist stack.
+   * 
+   * Will later use this method add end location to banned element.
    */
   @Override
   public void endElement(String uri, String localName, String qName) 
       throws SAXException {
     if (AppEngineWebBlacklist.contains(qName)) {
       BannedElement element = preBlacklist.pop();
-      DocumentLocation end = new DocumentLocation(locator.getLineNumber(),
-          locator.getColumnNumber());
-      element.setEnd(end);
       blacklist.add(element);
     }
   }
@@ -88,11 +88,26 @@ class BlacklistScanner extends DefaultHandler {
   }
   
   /**
-   * Only used for testing
+   * Only used for testing.
    */
   @VisibleForTesting
   Stack<BannedElement> getPreBlacklist() {
     return preBlacklist;
+  }
+  
+  @Override
+  public void error(SAXParseException ex) throws SAXException {
+    //nests ex to conserve exception line number
+    throw new SAXException(ex.getMessage(), ex);
+  }
+  
+  @Override
+  public void fatalError(SAXParseException ex) throws SAXException {
+    throw new SAXException(ex.getMessage(), ex);
+  }
+
+  @Override
+  public void warning(SAXParseException exception) throws SAXException { //do nothing
   }
   
 }
