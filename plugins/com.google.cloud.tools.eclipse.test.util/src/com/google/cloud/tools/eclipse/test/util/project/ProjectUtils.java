@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.test.util.project;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import com.google.common.base.Joiner;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -28,8 +29,6 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-
-import com.google.common.base.Joiner;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -164,7 +163,7 @@ public class ProjectUtils {
   /** Wait for any spawned jobs and builds to complete (e.g., validation jobs). */
   public static void waitUntilIdle() {
     try {
-      do {
+      // do {
         Job.getJobManager().join(ResourcesPlugin.FAMILY_MANUAL_BUILD, null);
         Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
         // J2EEElementChangedListener.PROJECT_COMPONENT_UPDATE_JOB_FAMILY
@@ -181,7 +180,7 @@ public class ProjectUtils {
           }
         }
         Thread.yield();
-      } while (!Job.getJobManager().isIdle());
+      // } while (!Job.getJobManager().isIdle());
     } catch (InterruptedException ex) {
       throw new RuntimeException(ex);
     }
