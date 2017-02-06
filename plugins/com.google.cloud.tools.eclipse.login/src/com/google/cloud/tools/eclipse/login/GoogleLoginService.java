@@ -24,18 +24,16 @@ import com.google.cloud.tools.ide.login.JavaPreferenceOAuthDataStore;
 import com.google.cloud.tools.ide.login.LoggerFacade;
 import com.google.cloud.tools.ide.login.OAuthDataStore;
 import com.google.common.annotations.VisibleForTesting;
-
-import org.eclipse.jface.window.IShellProvider;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.PlatformUI;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.eclipse.jface.window.IShellProvider;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.PlatformUI;
 
 /**
  * Provides service related to login, e.g., account management, getting a credential, etc.
@@ -148,10 +146,7 @@ public class GoogleLoginService implements IGoogleLoginService {
   @Override
   public Set<Account> getAccounts() {
     synchronized (loginState) {
-      // 'accounts' is a reference to a copy of Accounts maintained in 'loginState'.
-      // ('loginState.listAccounts()' returns a copy.) We intend to return this
-      // reference to callers, while never modifying the set itself.
-      return accounts;
+      return new HashSet<Account>(accounts);
     }
   }
 
