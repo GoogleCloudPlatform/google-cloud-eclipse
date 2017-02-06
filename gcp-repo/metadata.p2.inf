@@ -36,5 +36,4 @@ Please visit the following URL for details:\n\n\
 units.1.licenses.0.location = https://www.apache.org/licenses/LICENSE-2.0
 units.1.requires.1.namespace=org.eclipse.equinox.p2.iu
 units.1.requires.1.name=com.google.cloud.tools.eclipse.suite.e45.feature.feature.group
-units.1.requires.1.range=[0.1.0,1.0.0]
 units.1.requires.1.greedy=true
