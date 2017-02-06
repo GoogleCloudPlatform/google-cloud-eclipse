@@ -46,6 +46,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.jst.j2ee.classpathdep.UpdateClasspathAttributeUtil;
+import org.eclipse.jst.j2ee.project.facet.IJ2EEFacetConstants;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.ide.undo.CreateProjectOperation;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
@@ -76,6 +77,10 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
     }
     this.config = config;
     this.uiInfoAdapter = uiInfoAdapter;
+
+    // Workaround deadlock bug described in Eclipse bug (https://bugs.eclipse.org/511793)
+    // by ensuring activation of the org.eclipse.jst.j2ee bundle
+    IJ2EEFacetConstants.DYNAMIC_WEB.toLowerCase();
   }
 
   @Override
