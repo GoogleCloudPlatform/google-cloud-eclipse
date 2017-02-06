@@ -42,10 +42,8 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.IJobChangeListener;
-import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.operation.ModalContext;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.wst.common.project.facet.core.util.internal.ZipUtil;
 import org.eclipse.wst.validation.ValidationFramework;
@@ -65,8 +63,7 @@ public class ProjectUtils {
    * @throws CoreException if a project cannot be imported
    */
   public static List<IProject> importProjects(Class<?> clazz, String relativeLocation,
-      boolean checkBuildErrors, IProgressMonitor monitor)
-      throws IOException, CoreException {
+      boolean checkBuildErrors, IProgressMonitor monitor) throws IOException, CoreException {
     SubMonitor progress = SubMonitor.convert(monitor, 100);
 
     // Resolve the zip from within this bundle
@@ -102,8 +99,7 @@ public class ProjectUtils {
     progress.setWorkRemaining(10 * projectFiles.size() + 10);
     List<IProject> projects = new ArrayList<>(projectFiles.size());
     for (IPath projectFile : projectFiles) {
-      IProjectDescription descriptor =
-          root.getWorkspace().loadProjectDescription(projectFile);
+      IProjectDescription descriptor = root.getWorkspace().loadProjectDescription(projectFile);
       IProject project = root.getProject(descriptor.getName());
       // bring in the project to the workspace
       project.create(descriptor, progress.newChild(2));
@@ -165,42 +161,36 @@ public class ProjectUtils {
 
   /** Wait for any spawned jobs and builds to complete (e.g., validation jobs). */
   public static void waitUntilIdle() {
-    IJobManager jobManager = Job.getJobManager();
-    IJobChangeListener listener = new IJobChangeListener() {
-
+    waitUntilIdle(new Runnable() {
       @Override
-      public void sleeping(IJobChangeEvent event) {
-        System.out.printf("[JOBS] sleeping for %d: %s\n", event.getDelay(), event.getJob());
+      public void run() {
+        Display display = Display.getCurrent();
+        if (display != null) {
+          while (display.readAndDispatch()) {
+            /* spin */
+          }
+          display.timerExec(300, new Runnable() {
+            @Override
+            public void run() {}
+          });
+          display.sleep();
+        }
+        Thread.yield();
       }
+    });
+  }
 
-      @Override
-      public void scheduled(IJobChangeEvent event) {
-        System.out.printf("[JOBS] scheduled (%d): %s\n", event.getDelay(), event.getJob());
-      }
-
-      @Override
-      public void running(IJobChangeEvent event) {
-        System.out.printf("[JOBS] running: %s\n", event.getJob());
-      }
-
-      @Override
-      public void done(IJobChangeEvent event) {
-        System.out.printf("[JOBS] done: %s\n", event.getJob());
-      }
-
-      @Override
-      public void awake(IJobChangeEvent event) {
-        System.out.printf("[JOBS] awake: %s\n", event.getJob());
-      }
-
-      @Override
-      public void aboutToRun(IJobChangeEvent event) {
-        System.out.printf("[JOBS] aboutToRun: %s\n", event.getJob());
-      }
-    };
+  public static void waitUntilIdle(Runnable delayingTactic) {
+    if (Job.getJobManager().isIdle()) {
+      return;
+    }
+    JobsMonitor.INSTANCE.install();
     try {
-      jobManager.addJobChangeListener(listener);
+      // We do one pass waiting for the different jobs we know need checking
+      // *unless* there's a ModalContext dialog open, which we presume to be some
+      // kind of creation/modification in progress
       do {
+        delayingTactic.run();
         Job.getJobManager().join(ResourcesPlugin.FAMILY_MANUAL_BUILD, null);
         Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
         // J2EEElementChangedListener.PROJECT_COMPONENT_UPDATE_JOB_FAMILY
@@ -210,25 +200,15 @@ public class ProjectUtils {
         Job.getJobManager().join("org.eclipse.wst.server.ui.family", null);
         ValidationFramework.getDefault().join(null);
 
-        Display display = Display.getCurrent();
-        if (display != null) {
-          while (display.readAndDispatch()) {
-            /* spin */
-          }
-        }
-        Thread.yield();
         if (!Job.getJobManager().isIdle()) {
-          // Get more information to diagnose odd test failures; remove when fixed
-          // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1345
-          System.err.println("JobManager is not idle");
-          System.err.println("  Current job: " + Job.getJobManager().currentJob());
-          System.err.println("  Current rule: " + Job.getJobManager().currentRule());
+          JobsMonitor.INSTANCE.report(); // report running and ready jobs
         }
-       } while (!Job.getJobManager().isIdle());
+        // repeat while there are jobs and a wizard showing
+      } while (ModalContext.getModalLevel() > 0 && !Job.getJobManager().isIdle());
     } catch (InterruptedException ex) {
       throw new RuntimeException(ex);
     } finally {
-      jobManager.removeJobChangeListener(listener);
+      JobsMonitor.INSTANCE.release();
     }
   }
 
@@ -237,4 +217,5 @@ public class ProjectUtils {
   }
 
   private ProjectUtils() {}
+
 }
