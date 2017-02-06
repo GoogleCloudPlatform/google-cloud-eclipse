@@ -62,10 +62,6 @@ public class GoogleLoginService implements IGoogleLoginService {
         GoogleLoginService.OAUTH_SCOPES).toString();
   }
 
-  // We expose the reference 'accounts' to callers as-is. That is, we simply transfer references
-  // coming from 'GoogleLoginState' to callers. Therefore, 'GoogleLoginService' must not modify
-  // the states of the objects pointed to by the reference (as opposed to updating the reference
-  // itself, e.g., as in 'logOutAll()').
   private Set<Account> accounts = new HashSet<>();
   private GoogleLoginState loginState;
 
