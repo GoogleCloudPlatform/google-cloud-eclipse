@@ -23,6 +23,7 @@ import com.google.cloud.tools.eclipse.swtbot.SwtBotWorkbenchActions;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
+import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.widgets.TimeoutException;
 import org.junit.After;
 import org.junit.BeforeClass;
@@ -41,7 +42,11 @@ public class BaseProjectTest {
     new CloudSdk.Builder().build().validateCloudSdk();
 
     bot = new SWTWorkbenchBot();
-    SwtBotWorkbenchActions.closeWelcome(bot);
+    try {
+      SwtBotWorkbenchActions.closeWelcome(bot);
+    } catch (WidgetNotFoundException ex) {
+      // may receive WNFE: "There is no active view"
+    }
   }
 
   @After
@@ -58,6 +63,7 @@ public class BaseProjectTest {
     }
 
     // Avoid resetWorkbench() due to Eclipse bug 511729 on Oxygen
+    // bot.resetWorkbench();
     bot.saveAllEditors();
     bot.closeAllEditors();
     bot.resetActivePerspective();

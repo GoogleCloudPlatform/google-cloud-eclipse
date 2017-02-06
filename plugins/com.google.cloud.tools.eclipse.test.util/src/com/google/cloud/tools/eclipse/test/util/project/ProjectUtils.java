@@ -42,6 +42,9 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.IJobChangeListener;
+import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.wst.common.project.facet.core.util.internal.ZipUtil;
@@ -162,8 +165,42 @@ public class ProjectUtils {
 
   /** Wait for any spawned jobs and builds to complete (e.g., validation jobs). */
   public static void waitUntilIdle() {
+    IJobManager jobManager = Job.getJobManager();
+    IJobChangeListener listener = new IJobChangeListener() {
+
+      @Override
+      public void sleeping(IJobChangeEvent event) {
+        System.out.printf("[JOBS] sleeping for %d: %s\n", event.getDelay(), event.getJob());
+      }
+
+      @Override
+      public void scheduled(IJobChangeEvent event) {
+        System.out.printf("[JOBS] scheduled (%d): %s\n", event.getDelay(), event.getJob());
+      }
+
+      @Override
+      public void running(IJobChangeEvent event) {
+        System.out.printf("[JOBS] running: %s\n", event.getJob());
+      }
+
+      @Override
+      public void done(IJobChangeEvent event) {
+        System.out.printf("[JOBS] done: %s\n", event.getJob());
+      }
+
+      @Override
+      public void awake(IJobChangeEvent event) {
+        System.out.printf("[JOBS] awake: %s\n", event.getJob());
+      }
+
+      @Override
+      public void aboutToRun(IJobChangeEvent event) {
+        System.out.printf("[JOBS] aboutToRun: %s\n", event.getJob());
+      }
+    };
     try {
-      // do {
+      jobManager.addJobChangeListener(listener);
+      do {
         Job.getJobManager().join(ResourcesPlugin.FAMILY_MANUAL_BUILD, null);
         Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
         // J2EEElementChangedListener.PROJECT_COMPONENT_UPDATE_JOB_FAMILY
@@ -180,16 +217,18 @@ public class ProjectUtils {
           }
         }
         Thread.yield();
-      if (!Job.getJobManager().isIdle()) {
-        // Get more information to diagnose odd test failures; remove when fixed
-        // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1345
-        System.err.println("JobManager state:\n" + Job.getJobManager());
-        System.err.println("  Current job: " + Job.getJobManager().currentJob());
-        System.err.println("  Current rule: " + Job.getJobManager().currentRule());
-      }
-      // } while (!Job.getJobManager().isIdle());
+        if (!Job.getJobManager().isIdle()) {
+          // Get more information to diagnose odd test failures; remove when fixed
+          // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1345
+          System.err.println("JobManager is not idle");
+          System.err.println("  Current job: " + Job.getJobManager().currentJob());
+          System.err.println("  Current rule: " + Job.getJobManager().currentRule());
+        }
+       } while (!Job.getJobManager().isIdle());
     } catch (InterruptedException ex) {
       throw new RuntimeException(ex);
+    } finally {
+      jobManager.removeJobChangeListener(listener);
     }
   }
 

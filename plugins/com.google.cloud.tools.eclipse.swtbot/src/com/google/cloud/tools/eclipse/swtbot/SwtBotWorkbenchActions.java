@@ -18,6 +18,9 @@ package com.google.cloud.tools.eclipse.swtbot;
 
 import java.util.List;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.IJobChangeListener;
+import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
@@ -67,15 +70,50 @@ public final class SwtBotWorkbenchActions {
    * Wait until all background tasks are complete.
    */
   public static void waitForIdle(SWTBot bot) {
-    // while (!Job.getJobManager().isIdle()) {
+    IJobManager jobManager = Job.getJobManager();
+    IJobChangeListener listener = new IJobChangeListener() {
+
+      @Override
+      public void sleeping(IJobChangeEvent event) {
+        System.out.printf("[JOBS] sleeping for %d: %s\n", event.getDelay(), event.getJob());
+      }
+
+      @Override
+      public void scheduled(IJobChangeEvent event) {
+        System.out.printf("[JOBS] scheduled (%d): %s\n", event.getDelay(), event.getJob());
+      }
+
+      @Override
+      public void running(IJobChangeEvent event) {
+        System.out.printf("[JOBS] running: %s\n", event.getJob());
+      }
+
+      @Override
+      public void done(IJobChangeEvent event) {
+        System.out.printf("[JOBS] done: %s\n", event.getJob());
+      }
+
+      @Override
+      public void awake(IJobChangeEvent event) {
+        System.out.printf("[JOBS] awake: %s\n", event.getJob());
+      }
+
+      @Override
+      public void aboutToRun(IJobChangeEvent event) {
+        System.out.printf("[JOBS] aboutToRun: %s\n", event.getJob());
+      }
+    };
+    try {
+    jobManager.addJobChangeListener(listener);
+    while (!jobManager.isIdle()) {
       try {
-        Job.getJobManager().join(ResourcesPlugin.FAMILY_MANUAL_BUILD, null);
-        Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
+        jobManager.join(ResourcesPlugin.FAMILY_MANUAL_BUILD, null);
+        jobManager.join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
         // J2EEElementChangedListener.PROJECT_COMPONENT_UPDATE_JOB_FAMILY
-        Job.getJobManager().join("org.eclipse.jst.j2ee.refactor.component", null);
+        jobManager.join("org.eclipse.jst.j2ee.refactor.component", null);
         // ServerPlugin.SHUTDOWN_JOB_FAMILY
-        Job.getJobManager().join("org.eclipse.wst.server.core.family", null);
-        Job.getJobManager().join("org.eclipse.wst.server.ui.family", null);
+        jobManager.join("org.eclipse.wst.server.core.family", null);
+        jobManager.join("org.eclipse.wst.server.ui.family", null);
         ValidationFramework.getDefault().join(null);
       } catch (InterruptedException ex) {
         // interruption likely happened for a reason
@@ -83,14 +121,17 @@ public final class SwtBotWorkbenchActions {
       }
 
       bot.sleep(300);
-      if(!Job.getJobManager().isIdle()) {
+      if (!jobManager.isIdle()) {
         // Get more information to diagnose odd test failures; remove when fixed
         // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1345
-        System.err.println("JobManager state:\n" + Job.getJobManager());
-        System.err.println("  Current job: " + Job.getJobManager().currentJob());
-        System.err.println("  Current rule: " + Job.getJobManager().currentRule());
+          System.err.println("JobManager is not idle");
+        System.err.println("  Current job: " + jobManager.currentJob());
+        System.err.println("  Current rule: " + jobManager.currentRule());
       }
-    // }
+    }
+    } finally {
+      jobManager.removeJobChangeListener(listener);
+    }
   }
 
   /**
