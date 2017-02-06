@@ -22,7 +22,6 @@ public class AppEngineWebBlacklist {
   
   private final static ImmutableMap<String, String> BLACKLIST =
       ImmutableMap.<String, String>builder()
-        .put("project", "project tag not recommended")
         .put("application", "project ID tag not recommended")
         .build();
   

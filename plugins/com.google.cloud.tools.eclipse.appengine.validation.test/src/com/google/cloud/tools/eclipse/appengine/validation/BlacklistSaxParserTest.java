@@ -34,15 +34,12 @@ public class BlacklistSaxParserTest {
   private static final String ROOT_START_TAG =
       "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>";
   private static final String BANNED_ELEMENT = "<application>" + TEST_ID + "</application>";
-
   private static final String XML_WITHOUT_BANNED_ELEMENT =
       VERSION + ROOT_START_TAG + ROOT_END_TAG;
   private static final String XML_WITH_BANNED_ELEMENT = 
       VERSION + ROOT_START_TAG + BANNED_ELEMENT + ROOT_END_TAG;
   private static final String EMPTY_XML = "";
-  
-  private static final String BANNED_ELEMENT_MESSAGE = 
-      AppEngineWebBlacklist.getBlacklistElementMessage("application");
+  private static final String BANNED_ELEMENT_MESSAGE = "project ID tag not recommended";
   
   @Test
   public void testReadXml_emptyXml()

@@ -45,7 +45,7 @@ class BlacklistScanner extends DefaultHandler {
   }
   
   /**
-   * Ensures parser always starts with an empty queue.
+   * Ensures parser always starts with an empty stack.
    */
   @Override
   public void startDocument() throws SAXException {

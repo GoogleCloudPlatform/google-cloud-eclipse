@@ -16,15 +16,16 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
+import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.io.ByteStreams;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Map;
 import java.util.Stack;
-
 import javax.xml.parsers.ParserConfigurationException;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -35,14 +36,10 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.wst.validation.AbstractValidator;
 import org.eclipse.wst.validation.ValidationEvent;
 import org.eclipse.wst.validation.ValidatorMessage;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.io.ByteStreams;
-
 import org.eclipse.wst.validation.ValidationResult;
 import org.eclipse.wst.validation.ValidationState;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 /**
  * Validator for appengine-web.xml
@@ -64,7 +61,7 @@ public class AppEngineWebXmlValidator extends AbstractValidator {
    */
   @Override
   public ValidationResult validate(ValidationEvent event, ValidationState state,
-      IProgressMonitor argMonitor) {
+      IProgressMonitor monitor) {
     IResource resource = event.getResource();
     IFile file = WebProjectUtil.findInWebInf(project, new Path("appengine-web.xml"));
     try (InputStream in = file.getContents()) {
@@ -125,7 +122,8 @@ public class AppEngineWebXmlValidator extends AbstractValidator {
     ValidatorMessage message = ValidatorMessage.create(e.getMessage(), resource);
     message.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
     message.setAttribute(IMarker.SOURCE_ID, IMarker.PROBLEM);
-    message.setAttribute(IMarker.LINE_NUMBER, ((SAXParseException)e.getException()).getLineNumber());
+    message.setAttribute(IMarker.LINE_NUMBER,
+      ((SAXParseException)e.getException()).getLineNumber());
     result.add(message);
     return result;
   }

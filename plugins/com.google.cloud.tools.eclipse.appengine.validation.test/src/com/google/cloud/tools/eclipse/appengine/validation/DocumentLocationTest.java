@@ -26,6 +26,5 @@ public class DocumentLocationTest {
     DocumentLocation location = new DocumentLocation(1, 2);
     assertEquals(1, location.getLineNumber());
     assertEquals(2, location.getColumnNumber());
-  }
-  
+  } 
 }
