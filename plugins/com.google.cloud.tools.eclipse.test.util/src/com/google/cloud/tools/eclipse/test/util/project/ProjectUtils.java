@@ -180,6 +180,13 @@ public class ProjectUtils {
           }
         }
         Thread.yield();
+      if (!Job.getJobManager().isIdle()) {
+        // Get more information to diagnose odd test failures; remove when fixed
+        // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1345
+        System.err.println("JobManager state:\n" + Job.getJobManager());
+        System.err.println("  Current job: " + Job.getJobManager().currentJob());
+        System.err.println("  Current rule: " + Job.getJobManager().currentRule());
+      }
       // } while (!Job.getJobManager().isIdle());
     } catch (InterruptedException ex) {
       throw new RuntimeException(ex);
