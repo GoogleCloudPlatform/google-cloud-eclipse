@@ -25,7 +25,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
-import com.google.cloud.tools.ide.login.Account;
+import com.google.cloud.tools.login.Account;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;

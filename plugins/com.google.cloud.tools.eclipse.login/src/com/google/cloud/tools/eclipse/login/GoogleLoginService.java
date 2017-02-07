@@ -18,11 +18,11 @@ package com.google.cloud.tools.eclipse.login;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
 import com.google.cloud.tools.eclipse.login.ui.LoginServiceUi;
-import com.google.cloud.tools.ide.login.Account;
-import com.google.cloud.tools.ide.login.GoogleLoginState;
-import com.google.cloud.tools.ide.login.JavaPreferenceOAuthDataStore;
-import com.google.cloud.tools.ide.login.LoggerFacade;
-import com.google.cloud.tools.ide.login.OAuthDataStore;
+import com.google.cloud.tools.login.Account;
+import com.google.cloud.tools.login.GoogleLoginState;
+import com.google.cloud.tools.login.JavaPreferenceOAuthDataStore;
+import com.google.cloud.tools.login.LoggerFacade;
+import com.google.cloud.tools.login.OAuthDataStore;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.Arrays;
 import java.util.Collections;
