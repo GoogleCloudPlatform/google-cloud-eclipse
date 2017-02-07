@@ -58,6 +58,8 @@
     <module>plugins/com.google.cloud.tools.eclipse.appengine.ui.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.preferences</module>
     <module>plugins/com.google.cloud.tools.eclipse.preferences.test</module>
+    <module>plugins/com.google.cloud.tools.eclipse.projectselector</module>
+    <module>plugins/com.google.cloud.tools.eclipse.projectselector.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.sdk</module>
     <module>plugins/com.google.cloud.tools.eclipse.sdk.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.sdk.ui</module>
