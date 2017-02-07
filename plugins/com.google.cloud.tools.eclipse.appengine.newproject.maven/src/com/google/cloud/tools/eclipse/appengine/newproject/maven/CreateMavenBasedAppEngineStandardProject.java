@@ -37,6 +37,7 @@ import org.eclipse.m2e.core.project.IProjectConfigurationManager;
 import org.eclipse.m2e.core.project.ProjectImportConfiguration;
 import org.eclipse.m2e.core.ui.internal.wizards.MappingDiscoveryJob;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
+import org.eclipse.wst.common.componentcore.internal.builder.IDependencyGraph;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
@@ -107,6 +108,12 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
       if (pom.exists()) {
         this.mostImportant = pom;
       }
+
+      // Workaround deadlock bug described in Eclipse bug (https://bugs.eclipse.org/511793).
+      // The graph update job is triggered by the completion of the CreateProjectOperation above
+      // (from resource notifications). So we force the dependency graph update to occur.
+      IDependencyGraph.INSTANCE.getReferencingComponents(project, true);
+
       IFacetedProject facetedProject = ProjectFacetsManager.create(
           project, true, loopMonitor.newChild(1));
       AppEngineStandardFacet.installAppEngineFacet(facetedProject,

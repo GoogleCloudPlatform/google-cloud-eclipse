@@ -46,9 +46,9 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.jst.j2ee.classpathdep.UpdateClasspathAttributeUtil;
-import org.eclipse.jst.j2ee.project.facet.IJ2EEFacetConstants;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.ide.undo.CreateProjectOperation;
+import org.eclipse.wst.common.componentcore.internal.builder.IDependencyGraph;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.osgi.framework.FrameworkUtil;
@@ -77,10 +77,6 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
     }
     this.config = config;
     this.uiInfoAdapter = uiInfoAdapter;
-
-    // Workaround deadlock bug described in Eclipse bug (https://bugs.eclipse.org/511793)
-    // by ensuring activation of the org.eclipse.jst.j2ee bundle
-    IJ2EEFacetConstants.DYNAMIC_WEB.toLowerCase();
   }
 
   @Override
@@ -102,6 +98,11 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
     } catch (ExecutionException ex) {
       throw new InvocationTargetException(ex);
     }
+
+    // Workaround deadlock bug described in Eclipse bug (https://bugs.eclipse.org/511793).
+    // The graph update job is triggered by the completion of the CreateProjectOperation above
+    // (from resource notifications). So we force the dependency graph update to occur.
+    IDependencyGraph.INSTANCE.getReferencingComponents(newProject, true);
 
     IFacetedProject facetedProject = ProjectFacetsManager.create(
         newProject, true, subMonitor.newChild(2));
