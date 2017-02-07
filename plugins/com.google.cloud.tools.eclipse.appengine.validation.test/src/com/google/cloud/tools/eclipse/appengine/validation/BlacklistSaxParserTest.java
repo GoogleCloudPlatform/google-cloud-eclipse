@@ -19,24 +19,16 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
-import java.util.Stack;
+import java.util.Queue;
 import javax.xml.parsers.ParserConfigurationException;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
 public class BlacklistSaxParserTest {
 
-  private static final String TEST_ID = "fooId";
-  private static final String VERSION =
-      "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
-  private static final String ROOT_END_TAG = "</appengine-web-app>";
-  private static final String ROOT_START_TAG =
-      "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>";
-  private static final String BANNED_ELEMENT = "<application>" + TEST_ID + "</application>";
-  private static final String XML_WITHOUT_BANNED_ELEMENT =
-      VERSION + ROOT_START_TAG + ROOT_END_TAG;
-  private static final String XML_WITH_BANNED_ELEMENT = 
-      VERSION + ROOT_START_TAG + BANNED_ELEMENT + ROOT_END_TAG;
+  private static final String BANNED_ELEMENT = "<application></application>";
+  private static final String XML_WITHOUT_BANNED_ELEMENT = "";
+  private static final String XML_WITH_BANNED_ELEMENT = BANNED_ELEMENT;
   private static final String EMPTY_XML = "";
   private static final String BANNED_ELEMENT_MESSAGE = "application element not recommended";
   
@@ -58,8 +50,8 @@ public class BlacklistSaxParserTest {
   public void testReadXml_xmlWithBannedElement()
       throws ParserConfigurationException, IOException, SAXException {
     byte[] bytes = XML_WITH_BANNED_ELEMENT.getBytes();
-    Stack<BannedElement> blacklist = BlacklistSaxParser.readXml(bytes);
-    assertEquals(blacklist.pop().getMessage(), BANNED_ELEMENT_MESSAGE);
+    Queue<BannedElement> blacklist = BlacklistSaxParser.readXml(bytes);
+    assertEquals(blacklist.poll().getMessage(), BANNED_ELEMENT_MESSAGE);
   }
 
 }

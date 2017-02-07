@@ -23,8 +23,9 @@ public class AppEngineWebBlacklist {
   
   private static final ImmutableMap<String, String> BLACKLIST =
       ImmutableMap.<String, String>builder()
-        .put("application", Messages.getString("application.element"))
-        .build();
+          .put("application", Messages.getString("application.element"))
+          .build();
+
   
   static boolean contains(String elementName) {
     return BLACKLIST.containsKey(elementName);
@@ -33,8 +34,9 @@ public class AppEngineWebBlacklist {
   static String getBlacklistElementMessage(String element) {
     Preconditions.checkNotNull(element, "element is null");
     if (!BLACKLIST.containsKey(element)) {
-      throw new IllegalArgumentException("element not blacklisted");
+      throw new IllegalArgumentException("element not in blacklist");
     }
     return BLACKLIST.get(element);
   }
+
 }

@@ -22,33 +22,33 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Stack;
+import java.util.Queue;
 
 /**
  * Utility methods for validating XML files.
  */
 public class ValidationUtils {
-  
+
   /**
    * Creates a Map of BannedElements and their respective document-relative
    * character offsets
    */
   public static Map<BannedElement, Integer> getOffsetMap(byte[] bytes,
-      Stack<BannedElement> blacklist) throws IOException {
+      Queue<BannedElement> blacklist) throws IOException {
     Map<BannedElement, Integer> bannedElementOffsetMap = new HashMap<>();
     ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
     BufferedReader reader = new BufferedReader(new InputStreamReader(bais));
     int i = 1;
     int charOffset = 0;
     while (!blacklist.isEmpty()) {
-      BannedElement element = blacklist.pop();
+      BannedElement element = blacklist.poll();
       while (element.getStart().getLineNumber() > i) {
         String line = reader.readLine();
         charOffset += line.length() + 1;
         i++;
       }
-      charOffset += element.getStart().getColumnNumber() - 1;
-      bannedElementOffsetMap.put(element, charOffset);
+      int start = charOffset + element.getStart().getColumnNumber() - 1;
+      bannedElementOffsetMap.put(element, start);
     }
     reader.close();
     return bannedElementOffsetMap;

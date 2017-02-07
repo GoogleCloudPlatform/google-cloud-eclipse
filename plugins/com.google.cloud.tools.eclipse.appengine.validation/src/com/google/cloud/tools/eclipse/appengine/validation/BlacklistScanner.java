@@ -16,8 +16,8 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
-import com.google.common.annotations.VisibleForTesting;
-import java.util.Stack;
+import java.util.ArrayDeque;
+import java.util.Queue;
 import org.xml.sax.Attributes;
 import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.Locator;
@@ -34,8 +34,7 @@ import org.xml.sax.SAXParseException;
 class BlacklistScanner extends DefaultHandler {
   
   private Locator locator;
-  private Stack<BannedElement> preBlacklist;
-  private Stack<BannedElement> blacklist;
+  private Queue<BannedElement> blacklist;
   
   @Override
   public void setDocumentLocator(Locator locator) {
@@ -47,8 +46,7 @@ class BlacklistScanner extends DefaultHandler {
    */
   @Override
   public void startDocument() throws SAXException {
-    this.preBlacklist = new Stack<>();
-    this.blacklist = new Stack<>();
+    this.blacklist = new ArrayDeque<>();
   }
   
   /**
@@ -62,34 +60,13 @@ class BlacklistScanner extends DefaultHandler {
       DocumentLocation start = new DocumentLocation(locator.getLineNumber(),
           locator.getColumnNumber() - qName.length() - 2);
       BannedElement element = new BannedElement(qName, start, qName.length() + 2);
-      preBlacklist.add(element);
-    }
-  }
-  
-  /**
-   * Pops the corresponding starting BannedElement off the preBlacklist 
-   * stack, then pushes it to the final blacklist stack.
-   */ 
-   //TODO use this method add end location to banned element.
-  @Override
-  public void endElement(String uri, String localName, String qName) 
-      throws SAXException {
-    if (AppEngineWebBlacklist.contains(qName)) {
-      BannedElement element = preBlacklist.pop();
       blacklist.add(element);
     }
   }
-
-  Stack<BannedElement> getBlacklist() {
-    return blacklist;
-  }
   
-  /**
-   * Only used for testing.
-   */
-  @VisibleForTesting
-  Stack<BannedElement> getPreBlacklist() {
-    return preBlacklist;
+
+  Queue<BannedElement> getBlacklist() {
+    return blacklist;
   }
   
   @Override

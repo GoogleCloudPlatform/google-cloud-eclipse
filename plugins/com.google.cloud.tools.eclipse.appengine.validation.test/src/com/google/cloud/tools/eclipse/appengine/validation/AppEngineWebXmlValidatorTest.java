@@ -20,7 +20,8 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Stack;
+import java.util.ArrayDeque;
+import java.util.Queue;
 import javax.xml.parsers.ParserConfigurationException;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
@@ -35,12 +36,8 @@ public class AppEngineWebXmlValidatorTest {
 
   private static final String XML = "<application></application>";
   private static final String BAD_XML = "<";
-  private static final String BAD_XML_MESSAGE =
-      "XML document structures must start and end within the same entity.";
   private static final String ELEMENT_NAME = "application";
-  private static final String ELEMENT_MESSAGE =
-      "application element not recommended";
-  
+  private static final String ELEMENT_MESSAGE = "application element not recommended";
   private IResource resource = mock(IResource.class);
   
   @Test
@@ -51,13 +48,14 @@ public class AppEngineWebXmlValidatorTest {
     ValidationResult result = AppEngineWebXmlValidator.validate(resource, bytes);
     ValidatorMessage[] messages = result.getMessages();
     String resultMessage = (String) messages[0].getAttribute(IMarker.MESSAGE);
-    assertEquals(BAD_XML_MESSAGE, resultMessage);
+    assertEquals("XML document structures must start and end within the same entity.",
+        resultMessage);
   }
   
   @Test
   public void testAddMessage_noBannedTags() throws IOException {
     byte[] bytes = XML.getBytes(StandardCharsets.UTF_8);
-    Stack<BannedElement> blacklist = new Stack<>();
+    Queue<BannedElement> blacklist = new ArrayDeque<>();
     ValidationResult result = AppEngineWebXmlValidator.addMessages(resource, bytes, blacklist);
     ValidatorMessage[] messages = result.getMessages();
     assertEquals(0, messages.length);
@@ -66,7 +64,7 @@ public class AppEngineWebXmlValidatorTest {
   @Test
   public void testAddMessages() throws IOException {
     byte[] bytes = XML.getBytes(StandardCharsets.UTF_8);
-    Stack<BannedElement> blacklist = new Stack<>();
+    Queue<BannedElement> blacklist = new ArrayDeque<>();
     blacklist.add(new BannedElement(ELEMENT_NAME));
     ValidationResult result = AppEngineWebXmlValidator.addMessages(resource, bytes, blacklist);
     ValidatorMessage[] messages = result.getMessages();

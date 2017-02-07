@@ -19,9 +19,9 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayDeque;
 import java.util.Map;
-import java.util.Stack;
-
+import java.util.Queue;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -50,14 +50,14 @@ public class ValidationUtilsTest {
   private static final String XML_WITH_PROJECT_ID_FIRST =
       PROJECT_ID;
   
-  private Stack<BannedElement> blacklist = new Stack<>();
+  private Queue<BannedElement> blacklist = new ArrayDeque<>();
   private BannedElement element;
   
   @Before
   public void setUp() {
     DocumentLocation start = new DocumentLocation(2, 1);
     element = new BannedElement("application", start, 1);
-    blacklist.push(element);
+    blacklist.add(element);
   }
   
   @Test
@@ -93,7 +93,7 @@ public class ValidationUtilsTest {
     blacklist.clear();
     DocumentLocation start = new DocumentLocation(3, 1);
     BannedElement element = new BannedElement("application", start, 1);
-    blacklist.push(element);
+    blacklist.add(element);
     Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, blacklist);
     assertEquals(1, map.size());
     int offset = map.get(element);
@@ -114,7 +114,7 @@ public class ValidationUtilsTest {
     blacklist.clear();
     DocumentLocation start = new DocumentLocation(1, 1);
     BannedElement newElement = new BannedElement("application", start, 1);
-    blacklist.push(newElement);
+    blacklist.add(newElement);
     byte[] bytes = XML_WITH_PROJECT_ID_FIRST.getBytes(StandardCharsets.UTF_8);
     Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, blacklist);
     assertEquals(1, map.size());

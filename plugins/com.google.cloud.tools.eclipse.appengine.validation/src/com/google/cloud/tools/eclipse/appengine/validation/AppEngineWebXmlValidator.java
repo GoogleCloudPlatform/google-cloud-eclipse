@@ -24,7 +24,7 @@ import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Map;
-import java.util.Stack;
+import java.util.Queue;
 import javax.xml.parsers.ParserConfigurationException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -80,7 +80,7 @@ public class AppEngineWebXmlValidator extends AbstractValidator {
   static ValidationResult validate(IResource resource, byte[] bytes) 
       throws CoreException, IOException, ParserConfigurationException {
     try {
-      Stack<BannedElement> blacklist = BlacklistSaxParser.readXml(bytes);
+      Queue<BannedElement> blacklist = BlacklistSaxParser.readXml(bytes);
       return addMessages(resource, bytes, blacklist);
     } catch (SAXException ex) {
       return createSaxErrorMessage(resource, ex);
@@ -92,7 +92,7 @@ public class AppEngineWebXmlValidator extends AbstractValidator {
    */
   @VisibleForTesting
   static ValidationResult addMessages(IResource resource, byte[] bytes,
-      Stack<BannedElement> blacklist) throws IOException {
+      Queue<BannedElement> blacklist) throws IOException {
     ValidationResult result = new ValidationResult();
     Map<BannedElement, Integer> bannedElementOffsetMap = ValidationUtils.getOffsetMap(bytes, blacklist);
     for (Map.Entry<BannedElement, Integer> entry : bannedElementOffsetMap.entrySet()) {
@@ -100,6 +100,16 @@ public class AppEngineWebXmlValidator extends AbstractValidator {
     }
     return result;
   }
+  
+  static ValidatorMessage createMessageTest(IResource resource, BannedElement element,
+                                        DocumentLocation location) {
+   ValidatorMessage message = ValidatorMessage.create(element.getMessage(), resource);
+   message.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_WARNING);
+   message.setAttribute(IMarker.SOURCE_ID, IMarker.PROBLEM);
+   message.setAttribute(IMarker.CHAR_START, location.getLineNumber());
+   message.setAttribute(IMarker.CHAR_END, location.getColumnNumber());
+   return message;
+ }
   
   /**
    * Creates message from given BannedElement and adds message to project's IResource.

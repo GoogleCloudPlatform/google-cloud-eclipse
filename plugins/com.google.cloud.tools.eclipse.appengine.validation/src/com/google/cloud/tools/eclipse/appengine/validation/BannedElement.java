@@ -46,7 +46,7 @@ public class BannedElement {
   public DocumentLocation getStart() {
     return start;
   }
-  
+
   public int getLength() {
     return length;
   }

@@ -19,7 +19,6 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -52,15 +51,6 @@ public class BlacklistScannerTest {
   @Test
   public void testStartElement() throws SAXException {
     scanner.startElement("", "", ELEMENT_NAME, new AttributesImpl());
-    assertEquals(1, scanner.getPreBlacklist().size());
-    String message = scanner.getPreBlacklist().peek().getMessage();
-    assertEquals(ELEMENT_MESSAGE, message);
-  }
-  
-  @Test
-  public void testEndElement() throws SAXException {
-    scanner.startElement("", "", ELEMENT_NAME, new AttributesImpl());
-    scanner.endElement("", "", ELEMENT_NAME);
     assertEquals(1, scanner.getBlacklist().size());
     String message = scanner.getBlacklist().peek().getMessage();
     assertEquals(ELEMENT_MESSAGE, message);
