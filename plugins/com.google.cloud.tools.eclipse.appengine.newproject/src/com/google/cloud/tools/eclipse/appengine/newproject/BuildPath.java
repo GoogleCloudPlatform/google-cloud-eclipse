@@ -42,22 +42,6 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 
 class BuildPath {
 
-  private static void runContainerResolverJob(IJavaProject javaProject) {
-    IEclipseContext context = EclipseContextFactory.getServiceContext(
-        FrameworkUtil.getBundle(CreateAppEngineStandardWtpProject.class).getBundleContext());
-    final IEclipseContext childContext =
-        context.createChild(LibraryClasspathContainerResolverJob.class.getName());
-    childContext.set(IJavaProject.class, javaProject);
-    Job job = ContextInjectionFactory.make(LibraryClasspathContainerResolverJob.class, childContext);
-    job.addJobChangeListener(new JobChangeAdapter() {
-      @Override
-      public void done(IJobChangeEvent event) {
-        childContext.dispose();
-      }
-    });
-    job.schedule();
-  }
-
   static void addLibraries(IProject project, List<Library> libraries, IProgressMonitor monitor)
       throws CoreException {
     
@@ -90,6 +74,22 @@ class BuildPath {
     javaProject.setRawClasspath(newRawClasspath, monitor);
   
     runContainerResolverJob(javaProject);
+  }
+  
+  private static void runContainerResolverJob(IJavaProject javaProject) {
+    IEclipseContext context = EclipseContextFactory.getServiceContext(
+        FrameworkUtil.getBundle(CreateAppEngineStandardWtpProject.class).getBundleContext());
+    final IEclipseContext childContext =
+        context.createChild(LibraryClasspathContainerResolverJob.class.getName());
+    childContext.set(IJavaProject.class, javaProject);
+    Job job = ContextInjectionFactory.make(LibraryClasspathContainerResolverJob.class, childContext);
+    job.addJobChangeListener(new JobChangeAdapter() {
+      @Override
+      public void done(IJobChangeEvent event) {
+        childContext.dispose();
+      }
+    });
+    job.schedule();
   }
 
 }
