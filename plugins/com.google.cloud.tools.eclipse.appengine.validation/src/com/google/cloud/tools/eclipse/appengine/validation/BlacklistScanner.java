@@ -23,11 +23,10 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import com.google.common.annotations.VisibleForTesting;
 
+import org.xml.sax.ext.Locator2Impl;
 import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
-import org.xml.sax.ext.Locator2;
-import org.xml.sax.ext.Locator2Impl;
 
 /**
  * Parses a given XML file and adds blacklisted elements to a {@link Queue}.
@@ -35,14 +34,14 @@ import org.xml.sax.ext.Locator2Impl;
  */
 class BlacklistScanner extends DefaultHandler {
   
-  private Locator2 locator;
+  private Locator locator;
   private Queue<BannedElement> blacklist;
   private String characterEncoding;
   private SaxParserResults results;
   
   @Override
   public void setDocumentLocator(Locator locator) {
-    this.locator = new Locator2Impl(locator);
+    this.locator = locator;
   }
   
   /**
@@ -51,7 +50,7 @@ class BlacklistScanner extends DefaultHandler {
   @Override
   public void startDocument() throws SAXException {
     this.blacklist = new ArrayDeque<>();
-    this.characterEncoding = locator.getEncoding();
+    this.characterEncoding = new Locator2Impl(locator).getEncoding();
   }
   
   /**
