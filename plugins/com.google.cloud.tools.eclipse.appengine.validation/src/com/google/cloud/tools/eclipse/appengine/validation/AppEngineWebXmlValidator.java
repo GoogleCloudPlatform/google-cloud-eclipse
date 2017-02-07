@@ -69,7 +69,7 @@ public class AppEngineWebXmlValidator extends AbstractValidator {
     
   /**
    * Adds a marker to appengine-web.xml for every {@link BannedElement}
-   * found the file.
+   * found in the file.
    */
   static ValidationResult validate(IResource resource, byte[] bytes) 
       throws CoreException, IOException, ParserConfigurationException {
