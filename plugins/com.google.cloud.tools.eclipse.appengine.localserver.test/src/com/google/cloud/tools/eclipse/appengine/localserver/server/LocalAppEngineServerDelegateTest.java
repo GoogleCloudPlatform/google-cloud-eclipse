@@ -16,6 +16,9 @@
 
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
@@ -23,6 +26,7 @@ import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import java.net.URL;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
@@ -93,7 +97,7 @@ public class LocalAppEngineServerDelegateTest {
   @Test
   public void testCheckConflictingId_defaultServiceIds() throws CoreException {
     delegate = getDelegateWithServer();
-    Function<IModule, String> alwaysDefault = new Function<IModule, String>() {
+    delegate.serviceIdFunction = new Function<IModule, String>() {
       @Override
       public String apply(IModule module) {
         return "default";
@@ -101,43 +105,31 @@ public class LocalAppEngineServerDelegateTest {
     };
 
     Assert.assertEquals(Status.ERROR, delegate.checkConflictingServiceIds(new IModule[] {module1},
-        new IModule[] {module2}, null, alwaysDefault).getSeverity());
+        new IModule[] {module2}, null).getSeverity());
 
     // should be ok if we remove module1 and add module2
     Assert.assertEquals(Status.OK, delegate.checkConflictingServiceIds(new IModule[] {module1},
-        new IModule[] {module2}, new IModule[] {module1}, alwaysDefault).getSeverity());
+        new IModule[] {module2}, new IModule[] {module1}).getSeverity());
   }
 
   @Test
   public void testCheckConflictingId_differentServiceIds() throws CoreException {
     delegate = getDelegateWithServer();
-    Function<IModule, String> moduleName = new Function<IModule, String>() {
-      @Override
-      public String apply(IModule module) {
-        Preconditions.checkNotNull(module);
-        return module.getName();
-      }
-    };
+    delegate.serviceIdFunction = new ModuleNameFunction();
     when(module1.getName()).thenReturn("module1");
     when(module2.getName()).thenReturn("module2");
     Assert.assertEquals(Status.OK, delegate.checkConflictingServiceIds(
-        new IModule[] {module1}, new IModule[] {module2}, null, moduleName).getSeverity());
+        new IModule[] {module1}, new IModule[] {module2}, null).getSeverity());
   }
 
   /** https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1029 */
   @Test
   public void testCheckConflictingId_addExitingModule() throws CoreException {
     delegate = getDelegateWithServer();
-    Function<IModule, String> moduleName = new Function<IModule, String>() {
-      @Override
-      public String apply(IModule module) {
-        Preconditions.checkNotNull(module);
-        return module.getName();
-      }
-    };
+    delegate.serviceIdFunction = new ModuleNameFunction();
     when(module1.getName()).thenReturn("module1");
     Assert.assertEquals(Status.OK, delegate.checkConflictingServiceIds(new IModule[] {module1},
-        new IModule[] {module1}, null, moduleName).getSeverity());
+        new IModule[] {module1}, null).getSeverity());
   }
 
   @Test
@@ -195,6 +187,43 @@ public class LocalAppEngineServerDelegateTest {
     Assert.assertEquals("module1", rootModules[0].getId());
   }
 
+  @Test
+  public void testGetModuleUrls_nullOnNoBehaviour() throws CoreException {
+    delegate = getDelegateWithServer();
+    Assert.assertEquals("localhost", delegate.getServer().getHost());
+    LocalAppEngineServerBehaviour behaviour =
+        delegate.getServer().getAdapter(LocalAppEngineServerBehaviour.class);
+    assertNull(behaviour); // since not started, and no loadAdapter
+    assertNull(delegate.getModuleRootURL(null));
+  }
+
+  @Test
+  public void testGetModuleUrls_nullModule() throws CoreException {
+    delegate = getDelegateWithServer();
+    Assert.assertEquals("localhost", delegate.getServer().getHost());
+    LocalAppEngineServerBehaviour behaviour = (LocalAppEngineServerBehaviour) delegate.getServer()
+        .loadAdapter(LocalAppEngineServerBehaviour.class, null);
+    behaviour.adminPort = 9999;
+    URL url = delegate.getModuleRootURL(null);
+    assertNotNull(url);
+    assertEquals("http://localhost:9999", url.toString());
+  }
+
+  @Test
+  public void testGetModuleUrls_baseModule() throws CoreException {
+    delegate = getDelegateWithServer();
+    Assert.assertEquals("localhost", delegate.getServer().getHost());
+    LocalAppEngineServerBehaviour behaviour = (LocalAppEngineServerBehaviour) delegate.getServer()
+        .loadAdapter(LocalAppEngineServerBehaviour.class, null);
+    delegate.serviceIdFunction = new ModuleNameFunction();
+    behaviour.moduleToUrlMap.put("module1", "http://foo:9999");
+    when(module1.getName()).thenReturn("module1");
+
+    URL url = delegate.getModuleRootURL(module1);
+    assertNotNull(url);
+    assertEquals("http://foo:9999", url.toString());
+  }
+
   private LocalAppEngineServerDelegate getDelegateWithServer() throws CoreException {
     IServerWorkingCopy serverWorkingCopy =
         ServerCore.findServerType("com.google.cloud.tools.eclipse.appengine.standard.server")
@@ -206,5 +235,13 @@ public class LocalAppEngineServerDelegateTest {
     serverWorkingCopy.setRuntime(runtime);
     IServer original = serverWorkingCopy.save(true, null);
     return LocalAppEngineServerDelegate.getAppEngineServer(original);
+  }
+
+  private static class ModuleNameFunction implements Function<IModule, String> {
+    @Override
+    public String apply(IModule module) {
+      Preconditions.checkNotNull(module);
+      return module.getName();
+    }
   }
 }
