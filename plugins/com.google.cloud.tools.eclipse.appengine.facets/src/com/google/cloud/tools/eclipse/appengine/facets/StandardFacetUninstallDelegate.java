@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jst.j2ee.refactor.listeners.J2EEElementChangedListener;
 import org.eclipse.wst.common.project.facet.core.IDelegate;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
@@ -31,38 +32,52 @@ import org.eclipse.wst.common.project.facet.core.runtime.IRuntime;
 
 public class StandardFacetUninstallDelegate implements IDelegate {
 
-  @Override
-  public void execute(IProject project, IProjectFacetVersion version, Object config,
-      IProgressMonitor monitor) throws CoreException {
-    uninstallAppEngineRuntimes(project);
-  }
-
   /**
    * Removes all the App Engine server runtimes from the list of targeted runtimes for
    * <code>project</code>.
    */
-  private void uninstallAppEngineRuntimes(final IProject project) {
+  private final class UninstallAppEngineRuntimesJob extends Job {
+    private final IFacetedProject facetedProject;
+
+    private UninstallAppEngineRuntimesJob(IFacetedProject facetedProject) {
+      super(Messages.getString("appengine.remove.runtimes.from.project", // $NON-NLS$
+          facetedProject.getProject().getName()));
+      this.facetedProject = facetedProject;
+    }
+
+    /**
+     * Mark this job as a component update job. Useful for our tests to ensure project configuration
+     * is complete.
+     */
+    @Override
+    public boolean belongsTo(Object family) {
+      return J2EEElementChangedListener.PROJECT_COMPONENT_UPDATE_JOB_FAMILY.equals(family);
+    }
+
+    @Override
+    protected IStatus run(IProgressMonitor monitor) {
+      try {
+        Set<IRuntime> targetedRuntimes = facetedProject.getTargetedRuntimes();
+
+        for (IRuntime targetedRuntime : targetedRuntimes) {
+          if (AppEngineStandardFacet.isAppEngineStandardRuntime(targetedRuntime)) {
+            facetedProject.removeTargetedRuntime(targetedRuntime, monitor);
+          }
+        }
+        return Status.OK_STATUS;
+      } catch (CoreException ex) {
+        return ex.getStatus();
+      }
+    }
+  }
+
+  @Override
+  public void execute(IProject project, IProjectFacetVersion version, Object config,
+      IProgressMonitor monitor) throws CoreException {
     // Modifying targeted runtimes while installing/uninstalling facets is not allowed,
     // so schedule a job as a workaround.
-    Job uninstallJob = new Job("Uninstall App Engine runtimes in " + project.getName()) {
-
-      @Override
-      protected IStatus run(IProgressMonitor monitor) {
-        try {
-          IFacetedProject facetedProject = ProjectFacetsManager.create(project);
-          Set<IRuntime> targetedRuntimes = facetedProject.getTargetedRuntimes();
-
-          for (IRuntime targetedRuntime : targetedRuntimes) {
-            if (AppEngineStandardFacet.isAppEngineStandardRuntime(targetedRuntime)) {
-              facetedProject.removeTargetedRuntime(targetedRuntime, monitor);
-            }
-          }
-          return Status.OK_STATUS;
-        } catch (CoreException ex) {
-          return ex.getStatus();
-        }
-      }
-    };
+    IFacetedProject facetedProject = ProjectFacetsManager.create(project);
+    Job uninstallJob = new UninstallAppEngineRuntimesJob(facetedProject);
     uninstallJob.schedule();
   }
 

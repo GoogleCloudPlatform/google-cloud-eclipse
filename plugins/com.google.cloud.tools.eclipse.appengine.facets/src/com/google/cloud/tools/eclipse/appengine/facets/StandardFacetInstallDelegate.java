@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jst.j2ee.refactor.listeners.J2EEElementChangedListener;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IProjectFacet;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
@@ -55,8 +56,7 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
 
     // Modifying targeted runtimes while installing/uninstalling facets is not allowed,
     // so schedule a job as a workaround.
-    Job installJob = new AppEngineRuntimeInstallJob(
-        "Install App Engine runtimes in " + project.getName(), facetedProject);
+    Job installJob = new AppEngineRuntimeInstallJob(facetedProject);
     // Schedule immediately so that it doesn't go into the SLEEPING state. Ensuring the job is
     // active is necessary for unit testing.
     installJob.schedule();
@@ -70,9 +70,19 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
 
     private IFacetedProject facetedProject;
 
-    private AppEngineRuntimeInstallJob(String name, IFacetedProject facetedProject) {
-      super(name);
+    private AppEngineRuntimeInstallJob(IFacetedProject facetedProject) {
+      super(Messages.getString("appengine.install.runtime.to.project", // $NON-NLS$
+          facetedProject.getProject().getName()));
       this.facetedProject = facetedProject;
+    }
+
+    /**
+     * Mark this job as a component update job. Useful for our tests to ensure project configuration
+     * is complete.
+     */
+    @Override
+    public boolean belongsTo(Object family) {
+      return J2EEElementChangedListener.PROJECT_COMPONENT_UPDATE_JOB_FAMILY.equals(family);
     }
 
     private void waitUntilJsdtIsFixedFacet() {
