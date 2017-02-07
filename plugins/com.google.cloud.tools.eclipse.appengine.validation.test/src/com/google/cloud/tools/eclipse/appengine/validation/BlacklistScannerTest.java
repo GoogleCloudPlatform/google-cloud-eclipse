@@ -19,12 +19,13 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
+import org.xml.sax.ext.Locator2Impl;
 import org.xml.sax.helpers.AttributesImpl;
-import org.xml.sax.helpers.LocatorImpl;
 
 public class BlacklistScannerTest {
   
@@ -38,8 +39,8 @@ public class BlacklistScannerTest {
   
   @Before
   public void setUp() throws SAXException {
+    scanner.setDocumentLocator(new Locator2Impl());
     scanner.startDocument();
-    scanner.setDocumentLocator(new LocatorImpl());
   }
   
   @Test

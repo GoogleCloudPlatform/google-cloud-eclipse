@@ -18,9 +18,11 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.Map;
 import java.util.Queue;
 
@@ -29,28 +31,34 @@ import java.util.Queue;
  */
 public class ValidationUtils {
 
+  private static final Logger logger = Logger.getLogger(ValidationUtils.class.getName());
+  
   /**
-   * Creates a Map of BannedElements and their respective document-relative
+   * Creates a {@link Map} of {@link BannedElement}s and their respective document-relative
    * character offsets
    */
   public static Map<BannedElement, Integer> getOffsetMap(byte[] bytes,
-      Queue<BannedElement> blacklist) throws IOException {
+      SaxParserResults parserResults) {
+    Queue<BannedElement> blacklist = parserResults.getBlacklist();
     Map<BannedElement, Integer> bannedElementOffsetMap = new HashMap<>();
     ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-    BufferedReader reader = new BufferedReader(new InputStreamReader(bais));
-    int i = 1;
-    int charOffset = 0;
-    while (!blacklist.isEmpty()) {
-      BannedElement element = blacklist.poll();
-      while (element.getStart().getLineNumber() > i) {
-        String line = reader.readLine();
-        charOffset += line.length() + 1;
-        i++;
+    try (BufferedReader reader =
+        new BufferedReader(new InputStreamReader(bais, parserResults.getEncoding()))) {
+      int currentLine = 1;
+      int charOffset = 0;
+      while (!blacklist.isEmpty()) {
+        BannedElement element = blacklist.poll();
+        while (element.getStart().getLineNumber() > currentLine) {
+          String line = reader.readLine();
+          charOffset += line.length() + 1;
+          currentLine++;
+        }
+        int start = charOffset + element.getStart().getColumnNumber() - 1;
+        bannedElementOffsetMap.put(element, start);
       }
-      int start = charOffset + element.getStart().getColumnNumber() - 1;
-      bannedElementOffsetMap.put(element, start);
+    } catch (IOException ex) {
+      logger.log(Level.SEVERE, ex.getMessage());
     }
-    reader.close();
     return bannedElementOffsetMap;
   }
 }

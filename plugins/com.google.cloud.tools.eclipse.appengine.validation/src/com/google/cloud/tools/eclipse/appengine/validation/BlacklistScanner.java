@@ -20,25 +20,29 @@ import java.util.ArrayDeque;
 import java.util.Queue;
 import org.xml.sax.Attributes;
 import org.xml.sax.helpers.DefaultHandler;
+
+import com.google.common.annotations.VisibleForTesting;
+
 import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
+import org.xml.sax.ext.Locator2;
+import org.xml.sax.ext.Locator2Impl;
 
 /**
- * SAX parser handler class. Parses a given XML file and adds blacklisted
- * elements to a Stack.
- * 
- * Two stacks are used to maintain BannedElement order as they appear
- * in the document.
+ * Parses a given XML file and adds blacklisted elements to a {@link Queue}.
+ * Wraps blacklisted element Queue and the file's character encoding.
  */
 class BlacklistScanner extends DefaultHandler {
   
-  private Locator locator;
+  private Locator2 locator;
   private Queue<BannedElement> blacklist;
+  private String characterEncoding;
+  private SaxParserResults results;
   
   @Override
   public void setDocumentLocator(Locator locator) {
-    this.locator = locator;
+    this.locator = new Locator2Impl(locator);
   }
   
   /**
@@ -47,6 +51,7 @@ class BlacklistScanner extends DefaultHandler {
   @Override
   public void startDocument() throws SAXException {
     this.blacklist = new ArrayDeque<>();
+    this.characterEncoding = locator.getEncoding();
   }
   
   /**
@@ -64,9 +69,13 @@ class BlacklistScanner extends DefaultHandler {
     }
   }
   
-
-  Queue<BannedElement> getBlacklist() {
-    return blacklist;
+  @Override
+  public void endDocument() throws SAXException {
+    this.results = new SaxParserResults(blacklist, characterEncoding);
+  }
+  
+  SaxParserResults getParserResults() {
+    return results;
   }
   
   @Override
@@ -82,6 +91,11 @@ class BlacklistScanner extends DefaultHandler {
 
   @Override
   public void warning(SAXParseException exception) throws SAXException { //do nothing
+  }
+  
+  @VisibleForTesting
+  public Queue<BannedElement> getBlacklist() {
+    return blacklist;
   }
     
 }

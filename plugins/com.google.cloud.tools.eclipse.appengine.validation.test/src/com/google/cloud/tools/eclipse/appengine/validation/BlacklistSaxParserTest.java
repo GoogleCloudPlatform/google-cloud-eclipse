@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Queue;
 import javax.xml.parsers.ParserConfigurationException;
 import org.junit.Test;
@@ -35,22 +36,22 @@ public class BlacklistSaxParserTest {
   @Test
   public void testReadXml_emptyXml()
       throws ParserConfigurationException, IOException, SAXException {
-    byte[] bytes = EMPTY_XML.getBytes();
-    assert(BlacklistSaxParser.readXml(bytes).isEmpty());
+    byte[] bytes = EMPTY_XML.getBytes(StandardCharsets.UTF_8);
+    assert(BlacklistSaxParser.readXml(bytes).getBlacklist().isEmpty());
   }
   
   @Test
   public void testReadXml_properXml()
       throws ParserConfigurationException, IOException, SAXException {
-    byte[] bytes = XML_WITHOUT_BANNED_ELEMENT.getBytes();
-    assert(BlacklistSaxParser.readXml(bytes).isEmpty());
+    byte[] bytes = XML_WITHOUT_BANNED_ELEMENT.getBytes(StandardCharsets.UTF_8);
+    assert(BlacklistSaxParser.readXml(bytes).getBlacklist().isEmpty());
   }
   
   @Test
   public void testReadXml_xmlWithBannedElement()
       throws ParserConfigurationException, IOException, SAXException {
-    byte[] bytes = XML_WITH_BANNED_ELEMENT.getBytes();
-    Queue<BannedElement> blacklist = BlacklistSaxParser.readXml(bytes);
+    byte[] bytes = XML_WITH_BANNED_ELEMENT.getBytes(StandardCharsets.UTF_8);
+    Queue<BannedElement> blacklist = BlacklistSaxParser.readXml(bytes).getBlacklist();
     assertEquals(blacklist.poll().getMessage(), BANNED_ELEMENT_MESSAGE);
   }
 

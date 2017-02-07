@@ -27,9 +27,14 @@ public class BannedElement {
   private final DocumentLocation start;
   private final int length;
   
+  /**
+   * @param length the length of the marker underline. Length == 0 results in a
+   *        marker in the vertical ruler and no underline
+   */
   public BannedElement(String elementName, DocumentLocation start, int length) {
     Preconditions.checkNotNull(elementName, "elementName is null");
     Preconditions.checkNotNull(start, "start is null");
+    Preconditions.checkArgument(length >= 0, "length < 0");
     this.message = AppEngineWebBlacklist.getBlacklistElementMessage(elementName);
     this.start = start;
     this.length = length;

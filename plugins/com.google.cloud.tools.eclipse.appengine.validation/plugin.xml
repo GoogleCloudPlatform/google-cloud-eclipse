@@ -31,9 +31,7 @@
     	class="com.google.cloud.tools.eclipse.appengine.validation.AppEngineWebXmlValidator">
       <include>
         <rules>
-          <file
-		      type="file"
-		      name="appengine-web.xml"/>
+          <file type="file" name="appengine-web.xml"/>
         </rules>
       </include>
     </validator>

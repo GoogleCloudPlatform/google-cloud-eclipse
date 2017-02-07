@@ -19,13 +19,10 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
-public class AppEngineWebBlacklist {
+class AppEngineWebBlacklist {
   
   private static final ImmutableMap<String, String> BLACKLIST =
-      ImmutableMap.<String, String>builder()
-          .put("application", Messages.getString("application.element"))
-          .build();
-
+      ImmutableMap.of("application", Messages.getString("application.element"));
   
   static boolean contains(String elementName) {
     return BLACKLIST.containsKey(elementName);

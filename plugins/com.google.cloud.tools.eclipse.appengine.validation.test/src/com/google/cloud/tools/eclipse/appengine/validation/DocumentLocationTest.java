@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 
 public class DocumentLocationTest {

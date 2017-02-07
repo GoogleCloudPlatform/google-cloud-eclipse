@@ -18,10 +18,9 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayDeque;
-import java.util.Queue;
 import javax.xml.parsers.ParserConfigurationException;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
@@ -34,6 +33,7 @@ import org.xml.sax.SAXParseException;
 
 public class AppEngineWebXmlValidatorTest {
 
+  private static final String XML_NO_BANNED_ELEMENTS = "<test></test>";
   private static final String XML = "<application></application>";
   private static final String BAD_XML = "<";
   private static final String ELEMENT_NAME = "application";
@@ -53,20 +53,19 @@ public class AppEngineWebXmlValidatorTest {
   }
   
   @Test
-  public void testAddMessage_noBannedTags() throws IOException {
-    byte[] bytes = XML.getBytes(StandardCharsets.UTF_8);
-    Queue<BannedElement> blacklist = new ArrayDeque<>();
-    ValidationResult result = AppEngineWebXmlValidator.addMessages(resource, bytes, blacklist);
+  public void testValidate_noBannedTags()
+      throws IOException, CoreException, ParserConfigurationException {
+    byte[] bytes = XML_NO_BANNED_ELEMENTS.getBytes(StandardCharsets.UTF_8);
+    ValidationResult result = AppEngineWebXmlValidator.validate(resource, bytes);
     ValidatorMessage[] messages = result.getMessages();
     assertEquals(0, messages.length);
   }
-  
+
   @Test
-  public void testAddMessages() throws IOException {
+  public void testValidate()
+      throws IOException, CoreException, ParserConfigurationException {
     byte[] bytes = XML.getBytes(StandardCharsets.UTF_8);
-    Queue<BannedElement> blacklist = new ArrayDeque<>();
-    blacklist.add(new BannedElement(ELEMENT_NAME));
-    ValidationResult result = AppEngineWebXmlValidator.addMessages(resource, bytes, blacklist);
+    ValidationResult result = AppEngineWebXmlValidator.validate(resource, bytes);
     ValidatorMessage[] messages = result.getMessages();
     assertEquals(1, messages.length);
     assertEquals(ELEMENT_MESSAGE, (String) messages[0].getAttribute(IMarker.MESSAGE));

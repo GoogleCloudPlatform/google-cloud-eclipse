@@ -16,15 +16,12 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
-import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.ByteStreams;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Map;
-import java.util.Queue;
 import javax.xml.parsers.ParserConfigurationException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -32,7 +29,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.wst.validation.AbstractValidator;
 import org.eclipse.wst.validation.ValidationEvent;
 import org.eclipse.wst.validation.ValidatorMessage;
@@ -48,22 +44,20 @@ public class AppEngineWebXmlValidator extends AbstractValidator {
   
   private static final Logger logger = Logger.getLogger(
       AppEngineWebXmlValidator.class.getName());
-  private IProject project;
   
   @Override
   public void validationStarting(IProject project,
       ValidationState state, IProgressMonitor monitor) {        
-    this.project = project;
   }
   
   /**
-   * Locates appengine-web.xml in project.
+   * Extracts byte[] from appengine-web.xml. 
    */
   @Override
   public ValidationResult validate(ValidationEvent event, ValidationState state,
       IProgressMonitor monitor) {
     IResource resource = event.getResource();
-    IFile file = WebProjectUtil.findInWebInf(project, new Path("appengine-web.xml"));
+    IFile file = (IFile) resource;
     try (InputStream in = file.getContents()) {
       byte[] bytes = ByteStreams.toByteArray(in);
       return validate(resource, bytes);
@@ -74,45 +68,27 @@ public class AppEngineWebXmlValidator extends AbstractValidator {
   }
     
   /**
-   * Validates given XML file. Assigns markers to all elements found in blacklist.
+   * Adds a marker to appengine-web.xml for every {@link BannedElement}
+   * found the file.
    */
-  @VisibleForTesting
   static ValidationResult validate(IResource resource, byte[] bytes) 
       throws CoreException, IOException, ParserConfigurationException {
     try {
-      Queue<BannedElement> blacklist = BlacklistSaxParser.readXml(bytes);
-      return addMessages(resource, bytes, blacklist);
+      SaxParserResults parserResults = BlacklistSaxParser.readXml(bytes);
+      ValidationResult result = new ValidationResult();
+      Map<BannedElement, Integer> bannedElementOffsetMap =
+          ValidationUtils.getOffsetMap(bytes, parserResults);
+      for (Map.Entry<BannedElement, Integer> entry : bannedElementOffsetMap.entrySet()) {
+        result.add(createMessage(resource, entry.getKey(), entry.getValue()));
+      }
+      return result;
     } catch (SAXException ex) {
       return createSaxErrorMessage(resource, ex);
     }
   }
   
   /**
-   * Adds message to project's IResource for every BannedElement in the blacklist.
-   */
-  @VisibleForTesting
-  static ValidationResult addMessages(IResource resource, byte[] bytes,
-      Queue<BannedElement> blacklist) throws IOException {
-    ValidationResult result = new ValidationResult();
-    Map<BannedElement, Integer> bannedElementOffsetMap = ValidationUtils.getOffsetMap(bytes, blacklist);
-    for (Map.Entry<BannedElement, Integer> entry : bannedElementOffsetMap.entrySet()) {
-      result.add(createMessage(resource, entry.getKey(), entry.getValue()));
-    }
-    return result;
-  }
-  
-  static ValidatorMessage createMessageTest(IResource resource, BannedElement element,
-                                        DocumentLocation location) {
-   ValidatorMessage message = ValidatorMessage.create(element.getMessage(), resource);
-   message.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_WARNING);
-   message.setAttribute(IMarker.SOURCE_ID, IMarker.PROBLEM);
-   message.setAttribute(IMarker.CHAR_START, location.getLineNumber());
-   message.setAttribute(IMarker.CHAR_END, location.getColumnNumber());
-   return message;
- }
-  
-  /**
-   * Creates message from given BannedElement and adds message to project's IResource.
+   * Creates a message from a given {@link BannedElement}
    */
   static ValidatorMessage createMessage(IResource resource, BannedElement element,
                                          int elementOffset) {
@@ -125,7 +101,7 @@ public class AppEngineWebXmlValidator extends AbstractValidator {
   }
   
   /**
-   * Set error marker where SAX parser fails.
+   * Sets error marker where SAX parser fails.
    */
   static ValidationResult createSaxErrorMessage(IResource resource, SAXException e) {
     ValidationResult result = new ValidationResult();

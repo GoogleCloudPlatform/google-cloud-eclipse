@@ -18,8 +18,6 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.ArrayDeque;
-import java.util.Queue;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -29,10 +27,10 @@ import org.xml.sax.helpers.XMLReaderFactory;
 
 class BlacklistSaxParser {
   
-  static Queue<BannedElement> readXml(byte[] bytes)
+  static SaxParserResults readXml(byte[] bytes)
       throws ParserConfigurationException, IOException, SAXException {
     if (bytes.length == 0) { //file is empty
-      return new ArrayDeque<BannedElement>();
+      return new SaxParserResults();
     }
     ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
     InputSource is = new InputSource(bais);
@@ -42,7 +40,7 @@ class BlacklistSaxParser {
     reader.setContentHandler(handler);
     reader.setErrorHandler(handler);
     reader.parse(is);
-    return handler.getBlacklist();
+    return handler.getParserResults();
   }
   
 }

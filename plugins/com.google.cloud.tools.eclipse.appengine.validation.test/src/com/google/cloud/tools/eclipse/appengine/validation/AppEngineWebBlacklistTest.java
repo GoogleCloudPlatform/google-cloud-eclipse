@@ -17,7 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -31,12 +31,12 @@ public class AppEngineWebBlacklistTest {
  
   @Test
   public void testContains() {
-    assertTrue(!AppEngineWebBlacklist.contains("foo"));
+    assertFalse(AppEngineWebBlacklist.contains("foo"));
   }
   
   @Test
   public void testContains_nullArg() {
-    assertTrue(!AppEngineWebBlacklist.contains(null));
+    assertFalse(AppEngineWebBlacklist.contains(null));
   }
   
   @Test(expected = NullPointerException.class)

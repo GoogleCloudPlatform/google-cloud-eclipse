@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
@@ -63,7 +64,8 @@ public class ValidationUtilsTest {
   @Test
   public void testGetOffsetMap_unixXml() throws IOException {
     byte[] bytes = UNIX_XML_WITH_PROJECT_ID.getBytes(StandardCharsets.UTF_8);
-    Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, blacklist);
+    SaxParserResults result = new SaxParserResults(blacklist, "UTF-8");
+    Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, result);
     assertEquals(1, map.size());
     int offset = map.get(element);
     assertEquals(8, offset);
@@ -72,7 +74,8 @@ public class ValidationUtilsTest {
   @Test
   public void testGetOffsetMap_macXml() throws IOException {
     byte[] bytes = MAC_XML_WITH_PROJECT_ID.getBytes(StandardCharsets.ISO_8859_1);
-    Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, blacklist);
+    SaxParserResults result = new SaxParserResults(blacklist, "ISO_8859_1");
+    Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, result);
     assertEquals(1, map.size());
     int offset = map.get(element);
     assertEquals(8, offset);
@@ -81,7 +84,8 @@ public class ValidationUtilsTest {
   @Test
   public void testGetOffsetMap_windowsXml() throws IOException {
     byte[] bytes = WINDOWS_XML_WITH_PROJECT_ID.getBytes("CP1252");
-    Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, blacklist);
+    SaxParserResults result = new SaxParserResults(blacklist, "CP1252");
+    Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, result);
     assertEquals(1, map.size());
     int offset = map.get(element);
     assertEquals(8, offset);
@@ -94,7 +98,8 @@ public class ValidationUtilsTest {
     DocumentLocation start = new DocumentLocation(3, 1);
     BannedElement element = new BannedElement("application", start, 1);
     blacklist.add(element);
-    Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, blacklist);
+    SaxParserResults result = new SaxParserResults(blacklist, "UTF-8");
+    Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, result);
     assertEquals(1, map.size());
     int offset = map.get(element);
     assertEquals(9, offset);
@@ -103,7 +108,8 @@ public class ValidationUtilsTest {
   @Test
   public void testGetOffsetMap_lineWithWhitespace() throws IOException {
     byte[] bytes = XML_WITH_PROJECT_ID_WHITESPACE.getBytes(StandardCharsets.UTF_8);
-    Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, blacklist);
+    SaxParserResults result = new SaxParserResults(blacklist, "UTF-8");
+    Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, result);
     assertEquals(1, map.size());
     int offset = map.get(element);
     assertEquals(2, offset);
@@ -116,7 +122,8 @@ public class ValidationUtilsTest {
     BannedElement newElement = new BannedElement("application", start, 1);
     blacklist.add(newElement);
     byte[] bytes = XML_WITH_PROJECT_ID_FIRST.getBytes(StandardCharsets.UTF_8);
-    Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, blacklist);
+    SaxParserResults result = new SaxParserResults(blacklist, "UTF-8");
+    Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, result);
     assertEquals(1, map.size());
     int offset = map.get(newElement);
     assertEquals(0, offset);
