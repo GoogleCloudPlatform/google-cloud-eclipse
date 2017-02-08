@@ -20,6 +20,7 @@ import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelectorObservableValue;
+import com.google.cloud.tools.eclipse.projectselector.ProjectSelector;
 import com.google.cloud.tools.eclipse.ui.util.FontUtil;
 import com.google.cloud.tools.eclipse.ui.util.databinding.BucketNameValidator;
 import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectIdInputValidator;
@@ -46,6 +47,7 @@ import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
@@ -70,7 +72,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
   private AccountSelector accountSelector;
 
-  private Text projectId;
+//  private Text projectId;
 
   private Text version;
 
@@ -123,7 +125,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     bindingContext = new DataBindingContext();
 
     setupAccountEmailDataBinding(bindingContext);
-    setupProjectIdDataBinding(bindingContext);
+//    setupProjectIdDataBinding(bindingContext);
     setupProjectVersionDataBinding(bindingContext);
     setupAutoPromoteDataBinding(bindingContext);
     setupBucketDataBinding(bindingContext);
@@ -165,15 +167,15 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
         accountSelectorObservableValue));
   }
 
-  private void setupProjectIdDataBinding(DataBindingContext context) {
-    ISWTObservableValue projectIdField = WidgetProperties.text(SWT.Modify).observe(projectId);
-
-    IObservableValue projectIdModel = PojoProperties.value("projectId").observe(model);
-
-    context.bindValue(projectIdField, projectIdModel,
-        new UpdateValueStrategy().setAfterGetValidator(new ProjectIdInputValidator(requireValues)),
-        new UpdateValueStrategy().setAfterGetValidator(new ProjectIdInputValidator(requireValues)));
-  }
+//  private void setupProjectIdDataBinding(DataBindingContext context) {
+//    ISWTObservableValue projectIdField = WidgetProperties.text(SWT.Modify).observe(projectId);
+//
+//    IObservableValue projectIdModel = PojoProperties.value("projectId").observe(model);
+//
+//    context.bindValue(projectIdField, projectIdModel,
+//        new UpdateValueStrategy().setAfterGetValidator(new ProjectIdInputValidator(requireValues)),
+//        new UpdateValueStrategy().setAfterGetValidator(new ProjectIdInputValidator(requireValues)));
+//  }
 
   private void setupProjectVersionDataBinding(DataBindingContext context) {
     ISWTObservableValue versionField = WidgetProperties.text(SWT.Modify).observe(version);
@@ -255,13 +257,18 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
   private void createProjectIdSection() {
     Label projectIdLabel = new Label(this, SWT.LEAD);
-    projectIdLabel.setText(Messages.getString("project.id"));
+    projectIdLabel.setText(Messages.getString("project"));
     projectIdLabel.setToolTipText(Messages.getString("tooltip.project.id"));
-
-    projectId = new Text(this, SWT.LEAD | SWT.SINGLE | SWT.BORDER);
-    projectId.setToolTipText(Messages.getString("tooltip.project.id"));
-    GridData projectIdTextGridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
-    projectId.setLayoutData(projectIdTextGridData);
+    GridDataFactory.swtDefaults().align(SWT.BEGINNING, SWT.BEGINNING).applyTo(projectIdLabel);
+//    projectId = new Text(this, SWT.LEAD | SWT.SINGLE | SWT.BORDER);
+//    projectId.setToolTipText(Messages.getString("tooltip.project.id"));
+//    GridData projectIdTextGridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
+//    projectId.setLayoutData(projectIdTextGridData);
+    ProjectSelector projectSelector = new ProjectSelector(this);
+    GridData projectSelectorGridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
+    projectSelectorGridData.widthHint = 300;
+    projectSelectorGridData.heightHint = 80;
+    projectSelector.setLayoutData(projectSelectorGridData);
   }
 
   private void createProjectVersionSection() {

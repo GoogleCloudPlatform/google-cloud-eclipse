@@ -7,3 +7,9 @@ Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
+Export-Package: com.google.cloud.tools.eclipse.projectselector
+Import-Package: org.eclipse.core.commands.common,
+ org.eclipse.jface.viewers,
+ org.eclipse.swt,
+ org.eclipse.swt.graphics,
+ org.eclipse.swt.widgets
