@@ -13,7 +13,6 @@ Import-Package: com.google.cloud.tools.eclipse.test.util,
  org.eclipse.swtbot.swt.finder,
  org.eclipse.swtbot.swt.finder.exceptions,
  org.eclipse.swtbot.swt.finder.widgets,
- org.hamcrest.beans;version="1.3.0",
  org.mockito;provider=google;version="1.10.19",
  org.mockito.runners;provider=google;version="1.10.19",
  org.mockito.stubbing;provider=google;version="1.10.19"

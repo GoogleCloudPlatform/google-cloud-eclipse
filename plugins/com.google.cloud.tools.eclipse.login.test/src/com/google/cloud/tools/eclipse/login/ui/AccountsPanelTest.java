@@ -16,8 +16,6 @@
 
 package com.google.cloud.tools.eclipse.login.ui;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
@@ -35,8 +33,6 @@ import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotButton;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotLabel;
-import org.hamcrest.CoreMatchers;
-import org.hamcrest.beans.HasPropertyWithValue;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -139,28 +135,23 @@ public class AccountsPanelTest {
     Control control = panel.createDialogArea(shell);
 
     SWTBot bot = new SWTBot(control);
-    List<SWTBotLabel> emailLabels = Arrays.asList(
-        bot.labelWithId(CSS_CLASS_NAME_KEY, "email", 0),
-        bot.labelWithId(CSS_CLASS_NAME_KEY, "email", 1),
-        bot.labelWithId(CSS_CLASS_NAME_KEY, "email", 2));
-    List<SWTBotLabel> nameLabels = Arrays.asList(
-        bot.labelWithId(CSS_CLASS_NAME_KEY, "accountName", 0),
-        bot.labelWithId(CSS_CLASS_NAME_KEY, "accountName", 1),
-        bot.labelWithId(CSS_CLASS_NAME_KEY, "accountName", 2));
+    List<String> emails = Arrays.asList(
+        bot.labelWithId(CSS_CLASS_NAME_KEY, "email", 0).getText(),
+        bot.labelWithId(CSS_CLASS_NAME_KEY, "email", 1).getText(),
+        bot.labelWithId(CSS_CLASS_NAME_KEY, "email", 2).getText());
+    List<String> names = Arrays.asList(
+        bot.labelWithId(CSS_CLASS_NAME_KEY, "accountName", 0).getText(),
+        bot.labelWithId(CSS_CLASS_NAME_KEY, "accountName", 1).getText(),
+        bot.labelWithId(CSS_CLASS_NAME_KEY, "accountName", 2).getText());
 
-    verifyLabelsContains(emailLabels, "alice@example.com");
-    verifyLabelsContains(emailLabels, "bob@example.com");
-    verifyLabelsContains(emailLabels, "charlie@example.com");
-    verifyLabelsContains(nameLabels, "Alice");
-    verifyLabelsContains(nameLabels, "");
-    verifyLabelsContains(nameLabels, "Charlie");
+    assertTrue(emails.contains("alice@example.com"));
+    assertTrue(emails.contains("bob@example.com"));
+    assertTrue(emails.contains("charlie@example.com"));
+    assertTrue(names.contains("Alice"));
+    assertTrue(names.contains(""));
+    assertTrue(names.contains("Charlie"));
 
     bot.labelWithId(CSS_CLASS_NAME_KEY, "email", 3);
-  }
-
-  private void verifyLabelsContains(List<SWTBotLabel> labels, String text) {
-    assertThat(labels, CoreMatchers.hasItem(
-        HasPropertyWithValue.<SWTBotLabel>hasProperty("text", equalTo(text))));
   }
 
   private void setUpLoginService(List<Account> accounts) {
