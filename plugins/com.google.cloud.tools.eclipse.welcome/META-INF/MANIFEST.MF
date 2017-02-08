@@ -1,4 +1,5 @@
 Manifest-Version: 1.0
+Bundle-ClassPath: .
 Bundle-ManifestVersion: 2
 Bundle-Name: Cloud Tools for Eclipse Welcome Page Contribution
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.welcome;singleton:=true
