@@ -69,8 +69,9 @@ public class SwtBotAppEngineActions {
     SwtBotTimeoutManager.setTimeout(libraryResolutionTimeout);
     SwtBotTestingUtilities.clickButtonAndWaitForWindowChange(bot, bot.button("Finish"));
     SwtBotTimeoutManager.resetTimeout();
-    SwtBotWorkbenchActions.waitForIdle(bot);
-    return waitUntilProjectExists(bot, getWorkspaceRoot().getProject(projectName));
+    IProject project = waitUntilProjectExists(bot, getWorkspaceRoot().getProject(projectName));
+    SwtBotWorkbenchActions.waitForProjects(bot, project);
+    return project;
   }
 
   /** Create a new project with the Maven-based Google App Engine Standard Java Project wizard */
@@ -107,8 +108,9 @@ public class SwtBotAppEngineActions {
     SwtBotTimeoutManager.setTimeout(mavenCompletionTimeout);
     SwtBotTestingUtilities.clickButtonAndWaitForWindowChange(bot, bot.button("Finish"));
     SwtBotTimeoutManager.resetTimeout();
-    SwtBotWorkbenchActions.waitForIdle(bot);
-    return waitUntilProjectExists(bot, getWorkspaceRoot().getProject(artifactId));
+    IProject project = waitUntilProjectExists(bot, getWorkspaceRoot().getProject(artifactId));
+    SwtBotWorkbenchActions.waitForProjects(bot, project);
+    return project;
   }
 
   /**

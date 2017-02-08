@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.test.util.project;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import com.google.common.base.Joiner;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -28,8 +29,6 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-
-import com.google.common.base.Joiner;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -110,7 +109,7 @@ public class ProjectUtils {
     }
 
     // wait for any post-import operations too
-    waitUntilIdle();
+    waitForProjects();
     if (checkBuildErrors) {
       failIfBuildErrors("Imported projects have errors", projects);
     }
@@ -162,7 +161,23 @@ public class ProjectUtils {
   }
 
   /** Wait for any spawned jobs and builds to complete (e.g., validation jobs). */
-  public static void waitUntilIdle() {
+  public static void waitForProjects(IProject... projects) {
+    Runnable delayTactic = new Runnable() {
+      public void run() {
+        Display display = Display.getCurrent();
+        if (display != null) {
+          while (display.readAndDispatch()) {
+            /* spin */
+          }
+        }
+        Thread.yield();
+      }
+    };
+    waitForProjects(delayTactic, projects);
+  }
+
+  /** Wait for any spawned jobs and builds to complete (e.g., validation jobs). */
+  public static void waitForProjects(Runnable delayTactic, IProject... projects) {
     try {
       do {
         Job.getJobManager().join(ResourcesPlugin.FAMILY_MANUAL_BUILD, null);
@@ -174,15 +189,9 @@ public class ProjectUtils {
         Job.getJobManager().join("org.eclipse.wst.server.ui.family", null);
         ValidationFramework.getDefault().join(null);
 
-        Display display = Display.getCurrent();
-        if (display != null) {
-          while (display.readAndDispatch()) {
-            /* spin */
-          }
-        }
-        Thread.yield();
-      } while (!Job.getJobManager().isIdle());
-    } catch (InterruptedException ex) {
+        delayTactic.run();
+      } while (!getAllBuildErrors(projects).isEmpty());
+    } catch (CoreException | InterruptedException ex) {
       throw new RuntimeException(ex);
     }
   }

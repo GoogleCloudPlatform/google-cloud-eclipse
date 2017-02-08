@@ -53,7 +53,7 @@ public class BaseProjectTest {
   public void tearDown() {
     if (project != null) {
       // ensure there are no jobs
-      SwtBotWorkbenchActions.waitForIdle(bot);
+      SwtBotWorkbenchActions.waitForProjects(bot, project);
       try {
         SwtBotProjectActions.deleteProject(bot, project.getName());
       } catch (TimeoutException ex) {

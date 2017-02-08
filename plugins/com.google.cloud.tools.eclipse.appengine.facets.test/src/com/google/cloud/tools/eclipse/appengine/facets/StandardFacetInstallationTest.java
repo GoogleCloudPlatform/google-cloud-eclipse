@@ -80,7 +80,7 @@ public class StandardFacetInstallationTest {
     assertTrue(correctAppEngineWebXml.exists());
     assertFalse(wrongAppEngineWebXml.exists());
 
-    ProjectUtils.waitUntilIdle();  // App Engine runtime is added via a Job, so wait.
+    ProjectUtils.waitForProjects(project); // App Engine runtime is added via a Job, so wait.
     IRuntime primaryRuntime = facetedProject.getPrimaryRuntime();
     assertTrue(AppEngineStandardFacet.isAppEngineStandardRuntime(primaryRuntime));
   }
@@ -92,7 +92,7 @@ public class StandardFacetInstallationTest {
 
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);
     AppEngineStandardFacet.installAppEngineFacet(facetedProject, true, null);
-    ProjectUtils.waitUntilIdle();  // App Engine runtime is added via a Job, so wait.
+    ProjectUtils.waitForProjects(project); // App Engine runtime is added via a Job, so wait.
 
     assertTrue(project.getFile("src/main/webapp/WEB-INF/web.xml").exists());
   }
@@ -109,7 +109,7 @@ public class StandardFacetInstallationTest {
 
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);
     AppEngineStandardFacet.installAppEngineFacet(facetedProject, true, null);
-    ProjectUtils.waitUntilIdle();  // App Engine runtime is added via a Job, so wait.
+    ProjectUtils.waitForProjects(project); // App Engine runtime is added via a Job, so wait.
 
     assertEmptyFile(webXml);
   }

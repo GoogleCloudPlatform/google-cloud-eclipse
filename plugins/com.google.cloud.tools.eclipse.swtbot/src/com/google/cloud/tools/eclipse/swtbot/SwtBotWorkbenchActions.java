@@ -16,9 +16,9 @@
 
 package com.google.cloud.tools.eclipse.swtbot;
 
+import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import java.util.List;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
@@ -29,7 +29,6 @@ import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.waits.ICondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
-import org.eclipse.wst.validation.ValidationFramework;
 import org.hamcrest.Matcher;
 
 /**
@@ -66,24 +65,14 @@ public final class SwtBotWorkbenchActions {
   /**
    * Wait until all background tasks are complete.
    */
-  public static void waitForIdle(SWTBot bot) {
-    while (!Job.getJobManager().isIdle()) {
-      try {
-        Job.getJobManager().join(ResourcesPlugin.FAMILY_MANUAL_BUILD, null);
-        Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
-        // J2EEElementChangedListener.PROJECT_COMPONENT_UPDATE_JOB_FAMILY
-        Job.getJobManager().join("org.eclipse.jst.j2ee.refactor.component", null);
-        // ServerPlugin.SHUTDOWN_JOB_FAMILY
-        Job.getJobManager().join("org.eclipse.wst.server.core.family", null);
-        Job.getJobManager().join("org.eclipse.wst.server.ui.family", null);
-        ValidationFramework.getDefault().join(null);
-      } catch (InterruptedException ex) {
-        // interruption likely happened for a reason
-        return;
+  public static void waitForProjects(final SWTBot bot, IProject... projects) {
+    Runnable delayTactic = new Runnable() {
+      @Override
+      public void run() {
+        bot.sleep(300);
       }
-
-      bot.sleep(300);
-    }
+    };
+    ProjectUtils.waitForProjects(delayTactic, projects);
   }
 
   /**

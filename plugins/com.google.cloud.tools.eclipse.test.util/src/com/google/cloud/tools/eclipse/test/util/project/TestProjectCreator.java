@@ -75,7 +75,7 @@ public final class TestProjectCreator extends ExternalResource {
   @Override
   protected void after() {
     // Wait for any jobs to complete as WTP validation runs without the workspace protection lock
-    ProjectUtils.waitUntilIdle();
+    ProjectUtils.waitForProjects(javaProject.getProject());
     try {
       javaProject.getProject().delete(true, null);
     } catch (CoreException e) {
@@ -128,7 +128,8 @@ public final class TestProjectCreator extends ExternalResource {
       IFacetedProject facetedProject = ProjectFacetsManager.create(getProject());
       for (IProjectFacetVersion projectFacetVersion : projectFacetVersions) {
         facetedProject.installProjectFacet(projectFacetVersion, null, null);
-        ProjectUtils.waitUntilIdle();  // App Engine runtime is added via a Job, so wait.
+        // App Engine runtime is added via a Job, so wait.
+        ProjectUtils.waitForProjects(getProject());
       }
     }
   }
