@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.test.util.project;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import com.google.common.base.Joiner;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -28,8 +29,6 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-
-import com.google.common.base.Joiner;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -44,6 +43,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.operation.ModalContext;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.wst.common.project.facet.core.util.internal.ZipUtil;
 import org.eclipse.wst.validation.ValidationFramework;
@@ -63,8 +63,7 @@ public class ProjectUtils {
    * @throws CoreException if a project cannot be imported
    */
   public static List<IProject> importProjects(Class<?> clazz, String relativeLocation,
-      boolean checkBuildErrors, IProgressMonitor monitor)
-      throws IOException, CoreException {
+      boolean checkBuildErrors, IProgressMonitor monitor) throws IOException, CoreException {
     SubMonitor progress = SubMonitor.convert(monitor, 100);
 
     // Resolve the zip from within this bundle
@@ -100,8 +99,7 @@ public class ProjectUtils {
     progress.setWorkRemaining(10 * projectFiles.size() + 10);
     List<IProject> projects = new ArrayList<>(projectFiles.size());
     for (IPath projectFile : projectFiles) {
-      IProjectDescription descriptor =
-          root.getWorkspace().loadProjectDescription(projectFile);
+      IProjectDescription descriptor = root.getWorkspace().loadProjectDescription(projectFile);
       IProject project = root.getProject(descriptor.getName());
       // bring in the project to the workspace
       project.create(descriptor, progress.newChild(2));
@@ -163,8 +161,36 @@ public class ProjectUtils {
 
   /** Wait for any spawned jobs and builds to complete (e.g., validation jobs). */
   public static void waitUntilIdle() {
+    waitUntilIdle(new Runnable() {
+      @Override
+      public void run() {
+        Display display = Display.getCurrent();
+        if (display != null) {
+          while (display.readAndDispatch()) {
+            /* spin */
+          }
+          display.timerExec(300, new Runnable() {
+            @Override
+            public void run() {}
+          });
+          display.sleep();
+        }
+        Thread.yield();
+      }
+    });
+  }
+
+  public static void waitUntilIdle(Runnable delayingTactic) {
+    if (Job.getJobManager().isIdle()) {
+      return;
+    }
+    JobsMonitor.INSTANCE.install();
     try {
+      // We do one pass waiting for the different jobs we know need checking
+      // *unless* there's a ModalContext dialog open, which we presume to be some
+      // kind of creation/modification in progress
       do {
+        delayingTactic.run();
         Job.getJobManager().join(ResourcesPlugin.FAMILY_MANUAL_BUILD, null);
         Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
         // J2EEElementChangedListener.PROJECT_COMPONENT_UPDATE_JOB_FAMILY
@@ -174,16 +200,15 @@ public class ProjectUtils {
         Job.getJobManager().join("org.eclipse.wst.server.ui.family", null);
         ValidationFramework.getDefault().join(null);
 
-        Display display = Display.getCurrent();
-        if (display != null) {
-          while (display.readAndDispatch()) {
-            /* spin */
-          }
+        if (!Job.getJobManager().isIdle()) {
+          JobsMonitor.INSTANCE.report(); // report running and ready jobs
         }
-        Thread.yield();
-      } while (!Job.getJobManager().isIdle());
+        // repeat while there are jobs and a wizard showing
+      } while (ModalContext.getModalLevel() > 0 && !Job.getJobManager().isIdle());
     } catch (InterruptedException ex) {
       throw new RuntimeException(ex);
+    } finally {
+      JobsMonitor.INSTANCE.release();
     }
   }
 
@@ -192,4 +217,5 @@ public class ProjectUtils {
   }
 
   private ProjectUtils() {}
+
 }
