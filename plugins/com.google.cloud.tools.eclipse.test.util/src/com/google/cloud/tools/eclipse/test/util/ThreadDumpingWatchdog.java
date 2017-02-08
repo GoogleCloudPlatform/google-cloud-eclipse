@@ -17,11 +17,11 @@
 package com.google.cloud.tools.eclipse.test.util;
 
 import com.google.common.base.Stopwatch;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
+import java.util.Arrays;
 import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
@@ -72,24 +72,21 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
 
   @Override
   public void run() {
-    Map<Thread, StackTraceElement[]> traces = Thread.getAllStackTraces();
-    List<Thread> threads = new ArrayList<>(traces.keySet());
-    Collections.sort(threads, new Comparator<Thread>() {
+    ThreadMXBean bean = ManagementFactory.getThreadMXBean();
+    ThreadInfo[] infos = bean.dumpAllThreads(true, true);
+    Arrays.sort(infos, new Comparator<ThreadInfo>() {
       @Override
-      public int compare(Thread t1, Thread t2) {
-        return Long.compare(t1.getId(), t2.getId());
+      public int compare(ThreadInfo o1, ThreadInfo o2) {
+        return Long.compare(o1.getThreadId(), o2.getThreadId());
       }
     });
+
     StringBuilder sb = new StringBuilder();
     sb.append("\n+-------------------------------------------------------------------------------");
     sb.append("\n| STACK DUMP @ ").append(stopwatch).append(": ").append(title);
-    for (Thread thread : threads) {
-      sb.append("\n|");
-      sb.append("\n| ").append(thread.getId()).append(": ").append(thread).append(' ')
-          .append(thread.getState()).append(thread.isDaemon() ? ", DAEMON" : "");
-      for (StackTraceElement frame : traces.get(thread)) {
-        sb.append("\n|     ").append(frame);
-      }
+    sb.append("\n|");
+    for (ThreadInfo tinfo : infos) {
+      sb.append("\n| ").append(tinfo.toString().replace("\n", "\n|"));
     }
     sb.append("\n+-------------------------------------------------------------------------------");
     System.err.println(sb.toString());
