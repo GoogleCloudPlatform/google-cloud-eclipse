@@ -1,5 +1,4 @@
 Manifest-Version: 1.0
-Bundle-ClassPath: .
 Bundle-ManifestVersion: 2
 Bundle-Name: Cloud Tools for Eclipse Eclipse UI Components Tests
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7

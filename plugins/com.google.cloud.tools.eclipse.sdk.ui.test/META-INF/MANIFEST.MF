@@ -1,5 +1,4 @@
 Manifest-Version: 1.0
-Bundle-ClassPath: .
 Bundle-ManifestVersion: 2
 Bundle-Name: Tests for UI Support for Google Cloud SDK within the Eclipse IDE
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
