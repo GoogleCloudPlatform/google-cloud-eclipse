@@ -57,7 +57,7 @@ public class CreateAppEngineStandardWtpProjectTest {
 
   @Rule
   public ThreadDumpingWatchdog timer =
-      new ThreadDumpingWatchdog(getClass().getName(), 2, TimeUnit.MINUTES);
+      new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
 
   @Mock private IAdaptable adaptable;
 

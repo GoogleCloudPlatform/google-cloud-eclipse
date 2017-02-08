@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit;
 public class DeployPropertyPageTest extends BaseProjectTest {
   @Rule
   public ThreadDumpingWatchdog timer =
-      new ThreadDumpingWatchdog(getClass().getName(), 2, TimeUnit.MINUTES);
+      new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
 
   @Test
   public void testPropertyPageTitle_standardProject() throws CoreException {

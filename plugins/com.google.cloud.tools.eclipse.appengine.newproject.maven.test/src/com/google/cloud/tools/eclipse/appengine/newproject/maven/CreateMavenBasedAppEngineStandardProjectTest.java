@@ -34,7 +34,7 @@ import org.mockito.runners.MockitoJUnitRunner;;
 public class CreateMavenBasedAppEngineStandardProjectTest {
   @Rule
   public ThreadDumpingWatchdog timer =
-      new ThreadDumpingWatchdog(getClass().getName(), 2, TimeUnit.MINUTES);
+      new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
 
   @Mock
   private IProjectConfigurationManager manager;

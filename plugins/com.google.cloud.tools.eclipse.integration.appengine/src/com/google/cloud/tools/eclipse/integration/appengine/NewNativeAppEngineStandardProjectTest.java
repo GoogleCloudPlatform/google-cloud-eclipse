@@ -43,7 +43,7 @@ import java.util.concurrent.TimeUnit;
 public class NewNativeAppEngineStandardProjectTest extends BaseProjectTest {
   @Rule
   public ThreadDumpingWatchdog timer =
-      new ThreadDumpingWatchdog(getClass().getName(), 2, TimeUnit.MINUTES);
+      new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
 
   @Test
   public void testWithDefaults() throws Exception {

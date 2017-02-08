@@ -58,7 +58,7 @@ import java.util.concurrent.TimeUnit;
 public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
   @Rule
   public ThreadDumpingWatchdog timer =
-      new ThreadDumpingWatchdog(getClass().getName(), 2, TimeUnit.MINUTES);
+      new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
   /**
    * Launch a native application in debug mode and verify that:
    * <ol>

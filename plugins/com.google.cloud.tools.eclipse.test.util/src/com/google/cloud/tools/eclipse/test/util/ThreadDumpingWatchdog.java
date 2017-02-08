@@ -33,20 +33,21 @@ import org.junit.runners.model.Statement;
  * 
  */
 public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
-  private String title;
   private long period;
   private TimeUnit unit;
+
+  private Description description;
   private Timer timer;
   private Stopwatch stopwatch;
 
-  public ThreadDumpingWatchdog(String title, long period, TimeUnit unit) {
-    this.title = title;
+  public ThreadDumpingWatchdog(long period, TimeUnit unit) {
     this.period = period;
     this.unit = unit;
   }
 
   @Override
   public Statement apply(final Statement base, Description description) {
+    this.description = description;
     return new Statement() {
       @Override
       public void evaluate() throws Throwable {
@@ -61,6 +62,9 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
   }
 
   protected void install() {
+    // Surefire doesn't output anything until the test is complete,
+    // so it's hard to tell what test we're associated with
+    System.out.println("[Watchdog] > " + description);
     timer = new Timer("Thread Dumping Watchdog");
     timer.scheduleAtFixedRate(this, unit.toMillis(period), unit.toMillis(period));
     stopwatch = Stopwatch.createStarted();
@@ -83,9 +87,11 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
 
     StringBuilder sb = new StringBuilder();
     sb.append("\n+-------------------------------------------------------------------------------");
-    sb.append("\n| STACK DUMP @ ").append(stopwatch).append(": ").append(title);
+    sb.append("\n| STACK DUMP @ ").append(stopwatch).append(": ").append(description);
     sb.append("\n|");
     for (ThreadInfo tinfo : infos) {
+      // Unfortunately ThreadInfo#toString() only dumps up to 8 stackframes, and
+      // this value is not configurable :-(
       sb.append("\n| ").append(tinfo.toString().replace("\n", "\n|"));
     }
     sb.append("\n+-------------------------------------------------------------------------------");
