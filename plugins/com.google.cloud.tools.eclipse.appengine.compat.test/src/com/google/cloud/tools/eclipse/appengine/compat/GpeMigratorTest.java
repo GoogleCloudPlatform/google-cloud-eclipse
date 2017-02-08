@@ -99,7 +99,8 @@ public class GpeMigratorTest {
   @Test
   public void testRemoveGpeRuntimeAndFacets_doNotLogIfMetadataFileDoesNotExist()
       throws CoreException {
-    IFile metadataFile = gpeProject.getFile(GpeMigrator.FACETS_METADATA_FILE);
+    IFile metadataFile =
+        gpeProject.getFile(".settings/org.eclipse.wst.common.project.facet.core.xml");
     metadataFile.delete(true, null);
     assertFalse(metadataFile.exists());
 
