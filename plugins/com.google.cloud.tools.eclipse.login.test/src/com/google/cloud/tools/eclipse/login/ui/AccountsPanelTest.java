@@ -144,7 +144,7 @@ public class AccountsPanelTest {
         bot.labelWithId(CSS_CLASS_NAME_KEY, "email", 1),
         bot.labelWithId(CSS_CLASS_NAME_KEY, "email", 2));
     List<SWTBotLabel> nameLabels = Arrays.asList(
-        bot.labelWithId(CSS_CLASS_NAME_KEY, "accountName", 1),
+        bot.labelWithId(CSS_CLASS_NAME_KEY, "accountName", 0),
         bot.labelWithId(CSS_CLASS_NAME_KEY, "accountName", 1),
         bot.labelWithId(CSS_CLASS_NAME_KEY, "accountName", 2));
 
