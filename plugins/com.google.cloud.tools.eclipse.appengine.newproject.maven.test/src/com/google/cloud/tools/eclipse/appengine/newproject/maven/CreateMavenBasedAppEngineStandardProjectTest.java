@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import java.lang.reflect.InvocationTargetException;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.m2e.core.project.IProjectConfigurationManager;
@@ -45,7 +46,8 @@ public class CreateMavenBasedAppEngineStandardProjectTest {
     operation.projectConfigurationManager = manager;
 
     operation.execute(monitor);
-    ProjectUtils.waitUntilIdle();  // App Engine runtime is added via a Job, so wait.
+    // App Engine runtime is added via a Job, so wait.
+    ProjectUtils.waitForProjects(operation.getArchetypeProjects().toArray(new IProject[0]));
   }
 
 }

@@ -81,7 +81,7 @@ public class CreateAppEngineStandardWtpProjectTest {
         new CreateAppEngineStandardWtpProject(config, adaptable);
     creator.execute(new NullProgressMonitor());
 
-    ProjectUtils.waitUntilIdle();  // App Engine runtime is added via a Job, so wait.
+    ProjectUtils.waitForProjects(project); // App Engine runtime is added via a Job, so wait.
     assertJunitAndHamcrestAreOnClasspath();
   }
 
@@ -107,7 +107,7 @@ public class CreateAppEngineStandardWtpProjectTest {
         new CreateAppEngineStandardWtpProject(config, adaptable);
     creator.execute(new NullProgressMonitor());
 
-    ProjectUtils.waitUntilIdle();  // App Engine runtime is added via a Job, so wait.
+    ProjectUtils.waitForProjects(project); // App Engine runtime is added via a Job, so wait.
     assertEquals("HelloAppEngine.java", creator.getMostImportant().getName());
   }
 
@@ -115,7 +115,7 @@ public class CreateAppEngineStandardWtpProjectTest {
   public void testAppEngineRuntimeAdded() throws InvocationTargetException, CoreException {
     new CreateAppEngineStandardWtpProject(config, adaptable).execute(null /* monitor */);
 
-    ProjectUtils.waitUntilIdle();  // App Engine runtime is added via a Job, so wait.
+    ProjectUtils.waitForProjects(project); // App Engine runtime is added via a Job, so wait.
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);
     IRuntime primaryRuntime = facetedProject.getPrimaryRuntime();
     assertTrue(AppEngineStandardFacet.isAppEngineStandardRuntime(primaryRuntime));
@@ -124,7 +124,7 @@ public class CreateAppEngineStandardWtpProjectTest {
   @Test
   public void testFaviconAdded() throws InvocationTargetException, CoreException {
     new CreateAppEngineStandardWtpProject(config, adaptable).execute(null /* monitor */);
-    ProjectUtils.waitUntilIdle();
+    ProjectUtils.waitForProjects(project); // App Engine runtime is added via a Job, so wait.
     assertTrue("favicon.ico not found", project.getFile("src/main/webapp/favicon.ico").exists());
   }
 
@@ -136,7 +136,7 @@ public class CreateAppEngineStandardWtpProjectTest {
         new CreateAppEngineStandardWtpProject(config, adaptable);
     creator.execute(new NullProgressMonitor());
 
-    ProjectUtils.waitUntilIdle();  // App Engine runtime is added via a Job, so wait.
+    ProjectUtils.waitForProjects(project); // App Engine runtime is added via a Job, so wait.
     assertAppEngineContainerOnClasspath(library);
   }
 
