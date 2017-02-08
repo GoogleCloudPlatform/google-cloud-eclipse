@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
@@ -168,39 +169,6 @@ public class LocalAppEngineServerBehaviourTest {
     }
   }
 
-  @Test
-  public void testExtractPortFromServerUrlOutput_hostName() {
-    int port = LocalAppEngineServerBehaviour.extractPortFromServerUrlOutput("http://localhost:567");
-    assertEquals(567, port);
-
-    port = LocalAppEngineServerBehaviour.extractPortFromServerUrlOutput("http://my-machine:1234");
-    assertEquals(1234, port);
-
-    port = LocalAppEngineServerBehaviour.extractPortFromServerUrlOutput("http://www.a-b.c.com:80");
-    assertEquals(80, port);
-  }
-
-  @Test
-  public void testExtractPortFromServerUrlOutput_ipv4Address() {
-    int port = LocalAppEngineServerBehaviour.extractPortFromServerUrlOutput("http://0.0.0.0:5678");
-    assertEquals(5678, port);
-
-    port = LocalAppEngineServerBehaviour.extractPortFromServerUrlOutput("http://192.168.1.4:1234");
-    assertEquals(1234, port);
-  }
-
-  @Test
-  public void testExtractPortFromServerUrlOutput_noPortUrl() {
-    int port = LocalAppEngineServerBehaviour.extractPortFromServerUrlOutput("http://localhost");
-    assertEquals(-1, port);
-  }
-
-  @Test
-  public void testExtractPortFromDevServerUrlOutput_noMatch() {
-    int port = LocalAppEngineServerBehaviour.extractPortFromServerUrlOutput("arbitrary string");
-    assertEquals(-1, port);
-  }
-
   private static final String[] serverOutputWithDefaultModule1 = new String[] {
       "WARNING  2016-11-03 21:11:21,930 devappserver2.py:785] DEFAULT_VERSION_HOSTNAME will not be set correctly with --port=0",
       "INFO     2016-11-03 21:11:21,956 api_server.py:205] Starting API server at: http://localhost:52892",
@@ -264,6 +232,24 @@ public class LocalAppEngineServerBehaviourTest {
 
     simulateOutputParsing(serverOutputWithDefaultModule1);
     assertEquals(12345, serverBehavior.getServerPort());
+  }
+
+  @Test
+  public void testExtractModuleUrlFromOutput_firstModuleIsDefault() throws CoreException {
+    serverBehavior.checkAndSetPorts(server, portProber);
+    simulateOutputParsing(serverOutputWithDefaultModule1);
+    assertEquals("http://localhost:55948", serverBehavior.getServiceUrl("default"));
+    assertEquals("http://localhost:8081", serverBehavior.getServiceUrl("second"));
+  }
+
+  @Test
+  public void testExtractModuleUrlFromOutput_noDefaultModule() throws CoreException {
+    serverBehavior.checkAndSetPorts(server, portProber);
+    simulateOutputParsing(serverOutputWithNoDefaultModule);
+    assertNull(serverBehavior.getServiceUrl("default"));
+    assertEquals("http://localhost:8181", serverBehavior.getServiceUrl("first"));
+    assertEquals("http://localhost:8182", serverBehavior.getServiceUrl("second"));
+    assertEquals("http://localhost:8183", serverBehavior.getServiceUrl("third"));
   }
 
   @Test

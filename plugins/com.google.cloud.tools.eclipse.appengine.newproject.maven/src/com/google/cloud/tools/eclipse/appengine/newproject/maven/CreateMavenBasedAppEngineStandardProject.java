@@ -51,6 +51,8 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
   private IPath location;
   private Archetype archetype;
   private HashSet<String> appEngineLibraryIds = new HashSet<String>();
+
+  private List<IProject> archetypeProjects;
   private IFile mostImportant;
   
   /**
@@ -59,6 +61,10 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
    */
   IFile getMostImportant() {
     return mostImportant;
+  }
+
+  List<IProject> getArchetypeProjects() {
+    return archetypeProjects;
   }
 
   @Override
@@ -97,7 +103,7 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
     ProjectImportConfiguration importConfiguration = new ProjectImportConfiguration();
     String packageName = this.packageName == null || this.packageName.isEmpty()
         ? groupId : this.packageName;
-    List<IProject> archetypeProjects = projectConfigurationManager.createArchetypeProjects(location,
+    archetypeProjects = projectConfigurationManager.createArchetypeProjects(location,
         archetype, groupId, artifactId, version, packageName, properties,
         importConfiguration, progress.newChild(40));
     
@@ -107,6 +113,7 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
       if (pom.exists()) {
         this.mostImportant = pom;
       }
+
       IFacetedProject facetedProject = ProjectFacetsManager.create(
           project, true, loopMonitor.newChild(1));
       AppEngineStandardFacet.installAppEngineFacet(facetedProject,
