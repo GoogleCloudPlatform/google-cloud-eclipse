@@ -8,8 +8,26 @@ Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Export-Package: com.google.cloud.tools.eclipse.projectselector
-Import-Package: org.eclipse.core.commands.common,
+Import-Package: com.google.api.client.auth.oauth2,
+ com.google.api.client.googleapis,
+ com.google.api.client.googleapis.services,
+ com.google.api.client.googleapis.services.json,
+ com.google.api.client.http,
+ com.google.api.client.http.javanet,
+ com.google.api.client.json,
+ com.google.api.client.json.jackson,
+ com.google.api.client.util,
+ com.google.cloud.tools.eclipse.login.ui,
+ com.google.common.base;version="20.0.0",
+ com.google.common.collect;version="20.0.0",
+ org.codehaus.jackson,
+ org.eclipse.core.commands.common,
  org.eclipse.jface.viewers,
  org.eclipse.swt,
  org.eclipse.swt.graphics,
  org.eclipse.swt.widgets
+Bundle-ClassPath: lib/google-api-services-cloudresourcemanager-v1-rev355-1.22.0.jar,
+ .,
+ lib/google-api-client-1.22.0.jar,
+ lib/google-http-client-1.22.0.jar,
+ lib/google-http-client-jackson-1.22.0.jar

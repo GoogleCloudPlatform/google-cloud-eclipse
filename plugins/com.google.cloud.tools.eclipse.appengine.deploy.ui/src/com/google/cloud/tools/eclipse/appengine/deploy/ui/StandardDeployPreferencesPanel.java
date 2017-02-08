@@ -264,7 +264,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 //    projectId.setToolTipText(Messages.getString("tooltip.project.id"));
 //    GridData projectIdTextGridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
 //    projectId.setLayoutData(projectIdTextGridData);
-    ProjectSelector projectSelector = new ProjectSelector(this);
+    ProjectSelector projectSelector = new ProjectSelector(this, accountSelector);
     GridData projectSelectorGridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
     projectSelectorGridData.widthHint = 300;
     projectSelectorGridData.heightHint = 80;
