@@ -20,8 +20,6 @@ import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.login.Messages;
 import com.google.cloud.tools.login.Account;
 import com.google.common.annotations.VisibleForTesting;
-import java.util.ArrayList;
-import java.util.List;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.PopupDialog;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -44,10 +42,6 @@ import org.eclipse.swt.widgets.Shell;
 public class AccountsPanel extends PopupDialog {
 
   private final IGoogleLoginService loginService;
-
-  @VisibleForTesting Button logOutButton;
-  @VisibleForTesting final List<Label> nameLabels = new ArrayList<>();
-  @VisibleForTesting final List<Label> emailLabels = new ArrayList<>();
 
   public AccountsPanel(Shell parent, IGoogleLoginService loginService) {
     super(parent, SWT.MODELESS,
@@ -87,14 +81,14 @@ public class AccountsPanel extends PopupDialog {
       if (account.getName() != null) {
         name.setText(account.getName());
       }
-      nameLabels.add(name);
+      name.setData("org.eclipse.e4.ui.css.CssClassName", "accountName");
 
       Label email = new Label(container, SWT.LEAD);
       email.setText(account.getEmail());  // email is never null.
-      emailLabels.add(email);
+      email.setData("org.eclipse.e4.ui.css.CssClassName", "email");
 
       Label separator = new Label(container, SWT.HORIZONTAL | SWT.SEPARATOR);
-      separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+      separator.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
     }
   }
 
@@ -108,9 +102,10 @@ public class AccountsPanel extends PopupDialog {
     GridDataFactory.defaultsFor(addAccountButton).applyTo(addAccountButton);
 
     if (loginService.hasAccounts()) {
-      logOutButton = new Button(buttonArea, SWT.FLAT);
+      Button logOutButton = new Button(buttonArea, SWT.FLAT);
       logOutButton.setText(Messages.getString("BUTTON_ACCOUNTS_PANEL_LOGOUT"));
       logOutButton.addSelectionListener(new LogOutOnClick());
+      logOutButton.setData("org.eclipse.e4.ui.css.CssClassName", "logOutButton");
       GridDataFactory.defaultsFor(logOutButton).applyTo(logOutButton);
     }
   }

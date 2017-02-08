@@ -16,11 +16,10 @@
 
 package com.google.cloud.tools.eclipse.login.ui;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
@@ -30,8 +29,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swtbot.swt.finder.SWTBot;
+import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotButton;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotLabel;
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.beans.HasPropertyWithValue;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -41,6 +46,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AccountsPanelTest {
+
+  private static final String CSS_CLASS_NAME_KEY = "org.eclipse.e4.ui.css.CssClassName";
 
   @Rule public ShellTestResource shellTestResource = new ShellTestResource();
   private Shell shell;
@@ -61,14 +68,14 @@ public class AccountsPanelTest {
     when(account3.getName()).thenReturn("Charlie");
   }
 
-  @Test
+  @Test(expected = WidgetNotFoundException.class)
   public void testLogOutButton_notLoggedIn() {
     setUpLoginService();
 
     AccountsPanel panel = new AccountsPanel(null, loginService);
-    panel.createDialogArea(shell);
+    Control control = panel.createDialogArea(shell);
 
-    assertNull(panel.logOutButton);
+    new SWTBot(control).buttonWithId(CSS_CLASS_NAME_KEY, "logOutButton");
   }
 
   @Test
@@ -76,68 +83,84 @@ public class AccountsPanelTest {
     setUpLoginService(Arrays.asList(account1));
 
     AccountsPanel panel = new AccountsPanel(null, loginService);
-    panel.createDialogArea(shell);
+    Control control = panel.createDialogArea(shell);
 
-    assertNotNull(panel.logOutButton);
+    SWTBotButton button = new SWTBot(control).buttonWithId(CSS_CLASS_NAME_KEY, "logOutButton");
+    assertEquals("Sign Out...", button.getText());
   }
 
-  @Test
+  @Test(expected = WidgetNotFoundException.class)
   public void testAccountsArea_zeroAccounts() {
     setUpLoginService();
 
     AccountsPanel panel = new AccountsPanel(null, loginService);
-    panel.createDialogArea(shell);
+    Control control = panel.createDialogArea(shell);
 
-    assertTrue(panel.emailLabels.isEmpty());
+    new SWTBot(control).labelWithId(CSS_CLASS_NAME_KEY, "email");
   }
 
-  @Test
+  @Test(expected = IndexOutOfBoundsException.class)
   public void testAccountsArea_oneAccount() {
     setUpLoginService(Arrays.asList(account1));
 
     AccountsPanel panel = new AccountsPanel(null, loginService);
-    panel.createDialogArea(shell);
+    Control control = panel.createDialogArea(shell);
 
-    assertEquals(1, panel.emailLabels.size());
-    assertEquals("alice@example.com", panel.emailLabels.get(0).getText());
-    assertEquals("Alice", panel.nameLabels.get(0).getText());
+    SWTBot bot = new SWTBot(control);
+    SWTBotLabel email = bot.labelWithId(CSS_CLASS_NAME_KEY, "email", 0);
+    SWTBotLabel name = bot.labelWithId(CSS_CLASS_NAME_KEY, "accountName", 0);
+    assertEquals("alice@example.com", email.getText());
+    assertEquals("Alice", name.getText());
+
+    bot.labelWithId(CSS_CLASS_NAME_KEY, "email", 1);
   }
 
-  @Test
+  @Test(expected = IndexOutOfBoundsException.class)
   public void testAccountsArea_accountWithNullName() {
     setUpLoginService(Arrays.asList(account2));
 
     AccountsPanel panel = new AccountsPanel(null, loginService);
-    panel.createDialogArea(shell);
+    Control control = panel.createDialogArea(shell);
 
-    assertEquals(1, panel.emailLabels.size());
-    assertEquals("bob@example.com", panel.emailLabels.get(0).getText());
-    assertTrue(panel.nameLabels.get(0).getText().isEmpty());
+    SWTBot bot = new SWTBot(control);
+    SWTBotLabel email = bot.labelWithId(CSS_CLASS_NAME_KEY, "email", 0);
+    SWTBotLabel name = bot.labelWithId(CSS_CLASS_NAME_KEY, "accountName", 0);
+    assertEquals("bob@example.com", email.getText());
+    assertTrue(name.getText().isEmpty());
+
+    bot.labelWithId(CSS_CLASS_NAME_KEY, "email", 1);
   }
 
-  @Test
+  @Test(expected = IndexOutOfBoundsException.class)
   public void testAccountsArea_threeAccounts() {
     setUpLoginService(Arrays.asList(account1, account2, account3));
 
     AccountsPanel panel = new AccountsPanel(null, loginService);
-    panel.createDialogArea(shell);
+    Control control = panel.createDialogArea(shell);
 
-    assertEquals(3, panel.emailLabels.size());
-    verifyLabelsContains(panel.emailLabels, "alice@example.com");
-    verifyLabelsContains(panel.emailLabels, "bob@example.com");
-    verifyLabelsContains(panel.emailLabels, "charlie@example.com");
-    verifyLabelsContains(panel.nameLabels, "Alice");
-    verifyLabelsContains(panel.nameLabels, "");
-    verifyLabelsContains(panel.nameLabels, "Charlie");
+    SWTBot bot = new SWTBot(control);
+    List<SWTBotLabel> emailLabels = Arrays.asList(
+        bot.labelWithId(CSS_CLASS_NAME_KEY, "email", 0),
+        bot.labelWithId(CSS_CLASS_NAME_KEY, "email", 1),
+        bot.labelWithId(CSS_CLASS_NAME_KEY, "email", 2));
+    List<SWTBotLabel> nameLabels = Arrays.asList(
+        bot.labelWithId(CSS_CLASS_NAME_KEY, "accountName", 1),
+        bot.labelWithId(CSS_CLASS_NAME_KEY, "accountName", 1),
+        bot.labelWithId(CSS_CLASS_NAME_KEY, "accountName", 2));
+
+    verifyLabelsContains(emailLabels, "alice@example.com");
+    verifyLabelsContains(emailLabels, "bob@example.com");
+    verifyLabelsContains(emailLabels, "charlie@example.com");
+    verifyLabelsContains(nameLabels, "Alice");
+    verifyLabelsContains(nameLabels, "");
+    verifyLabelsContains(nameLabels, "Charlie");
+
+    bot.labelWithId(CSS_CLASS_NAME_KEY, "email", 3);
   }
 
-  private void verifyLabelsContains(List<Label> labels, String text) {
-    for (Label label : labels) {
-      if (label.getText().equals(text)) {
-        return;
-      }
-    }
-    fail();
+  private void verifyLabelsContains(List<SWTBotLabel> labels, String text) {
+    assertThat(labels, CoreMatchers.hasItem(
+        HasPropertyWithValue.<SWTBotLabel>hasProperty("text", equalTo(text))));
   }
 
   private void setUpLoginService(List<Account> accounts) {
