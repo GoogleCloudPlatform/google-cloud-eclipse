@@ -34,11 +34,14 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.wst.common.componentcore.internal.builder.DependencyGraphImpl;
 import org.eclipse.wst.common.componentcore.internal.builder.IDependencyGraph;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
@@ -140,6 +143,12 @@ public final class TestProjectCreator extends ExternalResource {
       // project facets. So we force the dependency graph to defer updates.
       try {
         IDependencyGraph.INSTANCE.preUpdate();
+        try {
+          Job.getJobManager().join(DependencyGraphImpl.GRAPH_UPDATE_JOB_FAMILY, null);
+        } catch (OperationCanceledException | InterruptedException ex) {
+          throw new RuntimeException("Exception waiting for DependencyGraph job", ex);
+        }
+
         facetedProject.modify(facetInstallSet, null);
       } finally {
         IDependencyGraph.INSTANCE.postUpdate();
