@@ -90,9 +90,21 @@ class NonSystemJobSuspender {
       if (!suspended.get()) {
         return;
       }
-      suspendedJobs.add(new SuspendedJob(job, scheduleDelay));
     }
-    job.cancel(); // This will always succeed since the job is not running yet.
+    // cancel() must be done outside of our synchronization barrier as may trigger events
+    // (and even scheduling other jobs)
+    if (job.cancel()) {
+      // Cancel should always succeed since the job is not running yet
+      synchronized (suspendedJobs) {
+        // check in case the situation has changed during the cancellation
+        if (suspended.get()) {
+          suspendedJobs.add(new SuspendedJob(job, scheduleDelay));
+        } else {
+          // we've since been resumed, so reschedule this job right away
+          job.schedule(scheduleDelay);
+        }
+      }
+    }
   }
 
   private NonSystemJobSuspender() {}
