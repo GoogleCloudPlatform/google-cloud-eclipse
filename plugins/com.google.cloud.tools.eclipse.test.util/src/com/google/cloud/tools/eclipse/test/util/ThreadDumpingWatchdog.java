@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.test.util;
 
+import com.google.cloud.tools.eclipse.test.util.reflection.ReflectionUtil;
 import com.google.common.base.Stopwatch;
 import java.lang.Thread.State;
 import java.lang.management.LockInfo;
@@ -28,6 +29,9 @@ import java.util.Comparator;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
+import org.eclipse.core.internal.jobs.JobManager;
+import org.eclipse.core.internal.jobs.LockManager;
+import org.eclipse.core.runtime.jobs.Job;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -112,8 +116,49 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
         }
       }
     }
+    dumpEclipseLocks(sb, "| ");
     sb.append("\n+-------------------------------------------------------------------------------");
     System.err.println(sb.toString());
+  }
+
+  /**
+   * Attempt to obtain the Eclipse Lock Manager debug output. The output looks like:
+   * 
+   * <pre>
+   * Eclipse Locks:
+   *  :: 
+   *  R/, OrderedLock (4),
+   *  ModalContext :  1, 0,
+   *  Worker-4 :  0, 1,
+   *  Worker-3 :  -1, 0,
+   *  -------
+   * </pre>
+   * 
+   * The row following the "::" are the locks (either an
+   * {@link org.eclipse.core.runtime.jobs.ISchedulingRule ISchedulingRule} or an explicit
+   * {@link org.eclipse.core.runtime.jobs.ILock ILock}. The following rows show each thread and what
+   * the locks they have acquired (&gt; 0) or waiting to acquire (-1). In the above, Worker-3 has
+   * acquired R/ and ModalContext would like to acquire it; Worker-4 is waiting for an ILock.
+   * 
+   * @see org.eclipse.core.internal.jobs.DeadlockDetector
+   */
+  private void dumpEclipseLocks(StringBuilder sb, String linePrefix) {
+    try {
+      // Unfortunately this is not exposed in a nice manner
+      LockManager manager = ((JobManager) Job.getJobManager()).getLockManager();
+      if (manager.isEmpty()) {
+        // don't output anything if no locks are held
+        return;
+      }
+      // locks is an instanceof DeadlockDetector
+      Object locks = ReflectionUtil.getField(manager, "locks", Object.class);
+      String debugOutput = ReflectionUtil.invoke(locks, "toDebugString", String.class);
+      sb.append("\n").append(linePrefix);
+      sb.append("\n").append(linePrefix).append("Eclipse Locks:");
+      sb.append("\n").append(linePrefix).append(debugOutput.replace("\n", "\n" + linePrefix));
+    } catch (Exception e) {
+      sb.append("\n").append(linePrefix).append("Eclipse Lock information not available");
+    }
   }
 
   /**
