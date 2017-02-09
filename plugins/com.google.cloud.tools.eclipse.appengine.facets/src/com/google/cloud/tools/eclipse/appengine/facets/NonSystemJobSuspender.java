@@ -54,25 +54,28 @@ class NonSystemJobSuspender {
 
   /** Once called, it is imperative to call {@link resume()} later. */
   public static void suspendFutureJobs() {
-    Preconditions.checkState(!suspended.getAndSet(true), "Already suspended.");
-    Job.getJobManager().addJobChangeListener(jobScheduleListener);
+    synchronized (suspendedJobs) {
+      Preconditions.checkState(!suspended.getAndSet(true), "Already suspended.");
+      Job.getJobManager().addJobChangeListener(jobScheduleListener);
+    }
   }
 
   public static void resume() {
-    Preconditions.checkState(suspended.getAndSet(false), "Not suspended.");
+    Preconditions.checkState(suspended.get(), "Not suspended.");
     resumeInternal();
   }
 
   @VisibleForTesting
   static void resumeInternal() {
     List<SuspendedJob> copy;
-    // Can't hurt if already suspended
-    suspended.set(false);
     synchronized (suspendedJobs) {
+      if (!suspended.getAndSet(false)) {
+        return;
+      }
+      Job.getJobManager().removeJobChangeListener(jobScheduleListener);
       copy = new ArrayList<>(suspendedJobs);
       suspendedJobs.clear();
     }
-    Job.getJobManager().removeJobChangeListener(jobScheduleListener);
 
     for (SuspendedJob jobInfo : copy) {
       jobInfo.job.schedule(jobInfo.scheduleDelay);
