@@ -141,7 +141,7 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
    *  -------
    * </pre>
    * 
-   * The first row following "::" list the locks. A lock is either an
+   * The first row following "::" lists the locks. A lock is either an
    * {@link org.eclipse.core.runtime.jobs.ISchedulingRule ISchedulingRule} or an explicit
    * {@link org.eclipse.core.runtime.jobs.ILock ILock}. Each subsequent row lists the relationships
    * between a thread and its acquired locks (&gt; 0), the locks it is waiting to acquire (-1), or
@@ -159,13 +159,13 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
         // don't output anything if no locks are held
         return;
       }
-      // locks is an instanceof DeadlockDetector
+      // locks is an instance of DeadlockDetector
       Object locks = ReflectionUtil.getField(manager, "locks", Object.class);
       String debugOutput = ReflectionUtil.invoke(locks, "toDebugString", String.class);
       sb.append("\n").append(linePrefix);
       sb.append("\n").append(linePrefix).append("Eclipse Locks:");
       sb.append("\n").append(linePrefix).append(debugOutput.replace("\n", "\n" + linePrefix));
-    } catch (Exception e) {
+    } catch (SecurityException | IllegalArgumentException | ReflectiveOperationException ex) {
       sb.append("\n").append(linePrefix).append("Eclipse Lock information not available");
     }
   }
