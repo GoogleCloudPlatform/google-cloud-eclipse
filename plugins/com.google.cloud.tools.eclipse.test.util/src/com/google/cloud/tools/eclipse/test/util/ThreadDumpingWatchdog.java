@@ -42,15 +42,20 @@ import org.junit.runners.model.Statement;
 public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
   private final long period;
   private final TimeUnit unit;
-  private final boolean ignoreUselessThreads = true;
+  private final boolean ignoreUselessThreads;
 
   private Description description;
   private Timer timer;
   private Stopwatch stopwatch;
 
   public ThreadDumpingWatchdog(long period, TimeUnit unit) {
+    this(period, unit, true);
+  }
+
+  public ThreadDumpingWatchdog(long period, TimeUnit unit, boolean ignoreUselessThreads) {
     this.period = period;
     this.unit = unit;
+    this.ignoreUselessThreads = ignoreUselessThreads;
   }
 
   @Override
@@ -136,7 +141,7 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
    * 
    * The row following the "::" are the locks (either an
    * {@link org.eclipse.core.runtime.jobs.ISchedulingRule ISchedulingRule} or an explicit
-   * {@link org.eclipse.core.runtime.jobs.ILock ILock}. Each following row shows a thread and the
+   * {@link org.eclipse.core.runtime.jobs.ILock ILock}. Each subequent row shows a thread and the
    * locks it has acquired (&gt; 0) or is waiting to acquire (-1). In the above, <em>Worker-3</em>
    * has acquired {@code R/} (the workspace root), and <em>ModalContext</em> would like to acquire
    * it; <em>Worker-4</em> is waiting for an <em>ILock #4</em>.
@@ -166,6 +171,9 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
    * Identify useless threads, like idle worker pool threads.
    */
   private boolean isUselessThread(ThreadInfo tinfo) {
+    if (!ignoreUselessThreads) {
+      return false;
+    }
     String threadName = tinfo.getThreadName();
     if (tinfo.getThreadState() == State.TIMED_WAITING && tinfo.getLockInfo() != null) {
       String lockClassName = tinfo.getLockInfo().getClassName();
