@@ -22,11 +22,13 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import java.net.URL;
+import java.util.concurrent.TimeUnit;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
@@ -52,6 +54,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 @SuppressWarnings("restriction") //For ModuleType
 @RunWith(MockitoJUnitRunner.class)
 public class LocalAppEngineServerDelegateTest {
+  @Rule
+  public ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
 
   private LocalAppEngineServerDelegate delegate = new LocalAppEngineServerDelegate();
   private static final IProjectFacetVersion APPENGINE_STANDARD_FACET_VERSION_1 =

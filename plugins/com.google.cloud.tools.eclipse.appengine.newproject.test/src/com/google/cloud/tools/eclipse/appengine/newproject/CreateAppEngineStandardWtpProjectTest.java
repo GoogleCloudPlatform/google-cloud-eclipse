@@ -23,9 +23,11 @@ import static org.junit.Assert.fail;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
+import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -42,6 +44,7 @@ import org.eclipse.wst.common.project.facet.core.runtime.IRuntime;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -51,6 +54,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class CreateAppEngineStandardWtpProjectTest {
 
   private static final String APP_ENGINE_API = "appengine-api";
+
+  @Rule
+  public ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
 
   @Mock private IAdaptable adaptable;
 

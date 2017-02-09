@@ -22,6 +22,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
@@ -32,12 +33,14 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Test creation of a new project with the "Maven-Based Google App Engine Standard Java Project"
@@ -45,6 +48,8 @@ import java.io.InputStream;
  */
 @RunWith(SWTBotJunit4ClassRunner.class)
 public class NewMavenBasedAppEngineProjectWizardTest extends BaseProjectTest {
+  @Rule
+  public ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
 
   @Test
   public void testHelloWorld() throws Exception {
