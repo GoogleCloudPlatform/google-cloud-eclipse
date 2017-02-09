@@ -25,7 +25,9 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -37,6 +39,7 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.wst.common.componentcore.internal.builder.IDependencyGraph;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
@@ -126,11 +129,23 @@ public final class TestProjectCreator extends ExternalResource {
   private void addFacets() throws CoreException {
     if (!projectFacetVersions.isEmpty()) {
       IFacetedProject facetedProject = ProjectFacetsManager.create(getProject());
+      Set<IFacetedProject.Action> facetInstallSet = new HashSet<>();
       for (IProjectFacetVersion projectFacetVersion : projectFacetVersions) {
-        facetedProject.installProjectFacet(projectFacetVersion, null, null);
-        // App Engine runtime is added via a Job, so wait.
-        ProjectUtils.waitForProjects(getProject());
+        facetInstallSet.add(new IFacetedProject.Action(IFacetedProject.Action.Type.INSTALL,
+            projectFacetVersion, null));
       }
+      // Workaround deadlock bug described in Eclipse bug (https://bugs.eclipse.org/511793).
+      // There are graph update jobs triggered by the completion of the CreateProjectOperation
+      // above (from resource notifications) and from other resource changes from modifying the
+      // project facets. So we force the dependency graph to defer updates.
+      try {
+        IDependencyGraph.INSTANCE.preUpdate();
+        facetedProject.modify(facetInstallSet, null);
+      } finally {
+        IDependencyGraph.INSTANCE.postUpdate();
+      }
+      // App Engine runtime is added via a Job, so wait.
+      ProjectUtils.waitForProjects(getProject());
     }
   }
 
