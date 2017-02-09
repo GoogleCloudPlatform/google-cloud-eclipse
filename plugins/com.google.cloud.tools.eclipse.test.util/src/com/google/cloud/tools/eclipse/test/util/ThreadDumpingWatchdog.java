@@ -136,9 +136,10 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
    * 
    * The row following the "::" are the locks (either an
    * {@link org.eclipse.core.runtime.jobs.ISchedulingRule ISchedulingRule} or an explicit
-   * {@link org.eclipse.core.runtime.jobs.ILock ILock}. The following rows show each thread and what
-   * the locks they have acquired (&gt; 0) or waiting to acquire (-1). In the above, Worker-3 has
-   * acquired R/ and ModalContext would like to acquire it; Worker-4 is waiting for an ILock.
+   * {@link org.eclipse.core.runtime.jobs.ILock ILock}. Each following row shows a thread and the
+   * locks it has acquired (&gt; 0) or is waiting to acquire (-1). In the above, <em>Worker-3</em>
+   * has acquired {@code R/} (the workspace root), and <em>ModalContext</em> would like to acquire
+   * it; <em>Worker-4</em> is waiting for an <em>ILock #4</em>.
    * 
    * @see org.eclipse.core.internal.jobs.DeadlockDetector
    */
