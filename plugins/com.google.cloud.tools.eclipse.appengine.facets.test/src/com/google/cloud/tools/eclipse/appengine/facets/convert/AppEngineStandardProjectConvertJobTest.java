@@ -31,8 +31,7 @@ import org.junit.Test;
 
 public class AppEngineStandardProjectConvertJobTest {
   @Rule
-  public ThreadDumpingWatchdog timer =
-      new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
+  public ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
 
   @Rule public final TestProjectCreator projectCreator = new TestProjectCreator();
 

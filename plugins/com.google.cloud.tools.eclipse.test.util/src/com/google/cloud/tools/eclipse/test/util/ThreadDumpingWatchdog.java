@@ -30,11 +30,11 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
 /**
- * 
+ * A JUnit test helper that periodically performs stack dumps for the current threads.
  */
 public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
-  private long period;
-  private TimeUnit unit;
+  private final long period;
+  private final TimeUnit unit;
 
   private Description description;
   private Timer timer;

@@ -55,8 +55,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class LocalAppEngineServerDelegateTest {
   @Rule
-  public ThreadDumpingWatchdog timer =
-      new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
+  public ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
 
   private LocalAppEngineServerDelegate delegate = new LocalAppEngineServerDelegate();
   private static final IProjectFacetVersion APPENGINE_STANDARD_FACET_VERSION_1 =

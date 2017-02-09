@@ -49,8 +49,7 @@ import java.util.concurrent.TimeUnit;
 @RunWith(SWTBotJunit4ClassRunner.class)
 public class NewMavenBasedAppEngineProjectWizardTest extends BaseProjectTest {
   @Rule
-  public ThreadDumpingWatchdog timer =
-      new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
+  public ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
 
   @Test
   public void testHelloWorld() throws Exception {

@@ -56,8 +56,7 @@ public class CreateAppEngineStandardWtpProjectTest {
   private static final String APP_ENGINE_API = "appengine-api";
 
   @Rule
-  public ThreadDumpingWatchdog timer =
-      new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
+  public ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
 
   @Mock private IAdaptable adaptable;
 
