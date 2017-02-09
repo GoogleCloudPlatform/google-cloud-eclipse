@@ -20,6 +20,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.eclipse.core.runtime.jobs.Job;
 
 /**
@@ -33,7 +34,6 @@ import org.eclipse.core.runtime.jobs.Job;
  * Not recommended to use for other situations, although the workings of the class are general.
  */
 class NonSystemJobSuspender {
-  private static boolean suspended;
 
   private static class SuspendedJob {
     private Job job;
@@ -45,41 +45,48 @@ class NonSystemJobSuspender {
     }
   }
 
+  private static final AtomicBoolean suspended = new AtomicBoolean(false);
+
   private static final List<SuspendedJob> suspendedJobs = new ArrayList<>();
 
   private static final NonSystemJobScheduleListener jobScheduleListener =
       new NonSystemJobScheduleListener();
 
   /** Once called, it is imperative to call {@link resume()} later. */
-  public static synchronized void suspendFutureJobs() {
-    Preconditions.checkState(!suspended, "Already suspended.");
-    suspended = true;
+  public static void suspendFutureJobs() {
+    Preconditions.checkState(!suspended.getAndSet(true), "Already suspended.");
     Job.getJobManager().addJobChangeListener(jobScheduleListener);
   }
 
-  public static synchronized void resume() {
-    Preconditions.checkState(suspended, "Not suspended.");
+  public static void resume() {
+    Preconditions.checkState(suspended.getAndSet(false), "Not suspended.");
     resumeInternal();
   }
 
   @VisibleForTesting
-  static synchronized void resumeInternal() {
-    suspended = false;
+  static void resumeInternal() {
+    List<SuspendedJob> copy;
+    // Can't hurt if already suspended
+    suspended.set(false);
+    synchronized (suspendedJobs) {
+      copy = new ArrayList<>(suspendedJobs);
+      suspendedJobs.clear();
+    }
     Job.getJobManager().removeJobChangeListener(jobScheduleListener);
 
-    for (SuspendedJob jobInfo : suspendedJobs) {
+    for (SuspendedJob jobInfo : copy) {
       jobInfo.job.schedule(jobInfo.scheduleDelay);
     }
-    suspendedJobs.clear();
   }
 
-  static synchronized void suspendJob(Job job, long scheduleDelay) {
-    if (suspended) {
-      if (!job.isSystem()) {
-        job.cancel();  // This will always succeed since the job is not running yet.
-        suspendedJobs.add(new SuspendedJob(job, scheduleDelay));
-      }
+  static void suspendJob(Job job, long scheduleDelay) {
+    if (!suspended.get() || job.isSystem()) {
+      return;
     }
+    synchronized (suspendedJobs) {
+      suspendedJobs.add(new SuspendedJob(job, scheduleDelay));
+    }
+    job.cancel(); // This will always succeed since the job is not running yet.
   }
 
   private NonSystemJobSuspender() {}
