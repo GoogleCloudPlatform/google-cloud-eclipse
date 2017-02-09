@@ -83,10 +83,13 @@ class NonSystemJobSuspender {
   }
 
   static void suspendJob(Job job, long scheduleDelay) {
-    if (!suspended.get() || job.isSystem()) {
+    if (job.isSystem()) {
       return;
     }
     synchronized (suspendedJobs) {
+      if (!suspended.get()) {
+        return;
+      }
       suspendedJobs.add(new SuspendedJob(job, scheduleDelay));
     }
     job.cancel(); // This will always succeed since the job is not running yet.
