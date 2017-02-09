@@ -16,10 +16,10 @@
 
 package com.google.cloud.tools.eclipse.projectselector;
 
-import org.junit.Test;
+import com.google.api.client.auth.oauth2.Credential;
+import java.util.List;
 
-public class DummyTest {
-  @Test
-  public void test() {
-  }
+public interface ProjectRepository {
+
+  List<GcpProject> getProjects(Credential credential) throws ProjectRepositoryException;
 }

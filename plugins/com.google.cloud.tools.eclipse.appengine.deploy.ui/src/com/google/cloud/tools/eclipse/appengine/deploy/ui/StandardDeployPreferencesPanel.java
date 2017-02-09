@@ -20,10 +20,10 @@ import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelectorObservableValue;
+import com.google.cloud.tools.eclipse.projectselector.GcpProject;
 import com.google.cloud.tools.eclipse.projectselector.ProjectSelector;
 import com.google.cloud.tools.eclipse.ui.util.FontUtil;
 import com.google.cloud.tools.eclipse.ui.util.databinding.BucketNameValidator;
-import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectIdInputValidator;
 import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectVersionValidator;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
@@ -45,6 +45,8 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.jface.databinding.viewers.IViewerObservableValue;
+import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -72,7 +74,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
   private AccountSelector accountSelector;
 
-//  private Text projectId;
+  private ProjectSelector projectSelector;
 
   private Text version;
 
@@ -91,6 +93,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
   private Runnable layoutChangedHandler;
   private boolean requireValues = true;
+
 
   public StandardDeployPreferencesPanel(Composite parent, IProject project,
       IGoogleLoginService loginService, Runnable layoutChangedHandler, boolean requireValues) {
@@ -125,7 +128,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     bindingContext = new DataBindingContext();
 
     setupAccountEmailDataBinding(bindingContext);
-//    setupProjectIdDataBinding(bindingContext);
+    setupProjectIdDataBinding(bindingContext);
     setupProjectVersionDataBinding(bindingContext);
     setupAutoPromoteDataBinding(bindingContext);
     setupBucketDataBinding(bindingContext);
@@ -167,15 +170,32 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
         accountSelectorObservableValue));
   }
 
-//  private void setupProjectIdDataBinding(DataBindingContext context) {
-//    ISWTObservableValue projectIdField = WidgetProperties.text(SWT.Modify).observe(projectId);
-//
-//    IObservableValue projectIdModel = PojoProperties.value("projectId").observe(model);
-//
-//    context.bindValue(projectIdField, projectIdModel,
-//        new UpdateValueStrategy().setAfterGetValidator(new ProjectIdInputValidator(requireValues)),
-//        new UpdateValueStrategy().setAfterGetValidator(new ProjectIdInputValidator(requireValues)));
-//  }
+  private void setupProjectIdDataBinding(DataBindingContext context) {
+    IViewerObservableValue projectList = ViewerProperties.singleSelection().observe(projectSelector.getViewer());
+    IObservableValue projectIdModel = PojoProperties.value("projectId").observe(model);
+    context.bindValue(projectList, projectIdModel,
+      new UpdateValueStrategy()
+        .setConverter(new Converter(GcpProject.class, String.class) {
+          @Override
+          public Object convert(Object fromObject) {
+            if (fromObject == null) {
+              return null;
+            }
+            return ((GcpProject) fromObject).getId();
+          }
+        }),
+        new UpdateValueStrategy()
+          .setConverter(new Converter(String.class, GcpProject.class) {
+            @Override
+            public Object convert(Object fromObject) {
+              if (fromObject == null) {
+                return null;
+              }
+              return projectSelector.getProject((String) fromObject);
+            }
+          })
+      );
+  }
 
   private void setupProjectVersionDataBinding(DataBindingContext context) {
     ISWTObservableValue versionField = WidgetProperties.text(SWT.Modify).observe(version);
@@ -260,11 +280,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     projectIdLabel.setText(Messages.getString("project"));
     projectIdLabel.setToolTipText(Messages.getString("tooltip.project.id"));
     GridDataFactory.swtDefaults().align(SWT.BEGINNING, SWT.BEGINNING).applyTo(projectIdLabel);
-//    projectId = new Text(this, SWT.LEAD | SWT.SINGLE | SWT.BORDER);
-//    projectId.setToolTipText(Messages.getString("tooltip.project.id"));
-//    GridData projectIdTextGridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
-//    projectId.setLayoutData(projectIdTextGridData);
-    ProjectSelector projectSelector = new ProjectSelector(this, accountSelector);
+    projectSelector = new ProjectSelector(this, accountSelector);
     GridData projectSelectorGridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
     projectSelectorGridData.widthHint = 300;
     projectSelectorGridData.heightHint = 80;
