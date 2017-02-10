@@ -102,7 +102,6 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
   private ProjectRepository projectRepository;
 
-
   public StandardDeployPreferencesPanel(Composite parent, IProject project,
       IGoogleLoginService loginService, Runnable layoutChangedHandler, boolean requireValues,
       ProjectRepository projectRepository) {
@@ -388,9 +387,8 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
         return null;
       }
       try {
-        return projectRepository
-            .getProject(accountSelector.getSelectedCredential(),
-                        (String) fromObject);
+        return projectRepository.getProject(accountSelector.getSelectedCredential(),
+                                           (String) fromObject);
       } catch (ProjectRepositoryException e) {
         return null;
       }

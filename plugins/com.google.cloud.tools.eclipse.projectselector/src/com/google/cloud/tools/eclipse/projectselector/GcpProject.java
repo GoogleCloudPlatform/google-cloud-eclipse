@@ -16,6 +16,9 @@
 
 package com.google.cloud.tools.eclipse.projectselector;
 
+/**
+ * Represents a Google Cloud Platform project.
+ */
 public class GcpProject {
 
   private final String name;

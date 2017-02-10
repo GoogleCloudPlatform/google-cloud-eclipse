@@ -33,13 +33,17 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Default implementation of {@link ProjectRepository}.
+ * Wrapper for the GCP Cloud Resource Manager API.
  */
 public class ProjectRepository {
 
   private static final int PROJECT_LIST_PAGESIZE = 300;
   private static final String PROJECT_DELETE_REQUESTED = "DELETE_REQUESTED";
 
+  /**
+   * @return All active projects the account identified by {@code credential} has access to
+   * @throws ProjectRepositoryException if an error happens while communicating with the backend
+   */
   public List<GcpProject> getProjects(Credential credential) throws ProjectRepositoryException {
     // TODO cache results https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1374 
     try {
@@ -56,6 +60,11 @@ public class ProjectRepository {
     }
   }
 
+  /**
+   * @return a project if the projectId identifies an existing project and the account identified by
+   * {@code credential} has access to the project
+   * @throws ProjectRepositoryException if an error happens while communicating with the backend
+   */
   public GcpProject getProject(Credential credential, String projectId) throws ProjectRepositoryException {
     try {
       if (credential != null && !Strings.isNullOrEmpty(projectId)) {
@@ -68,7 +77,7 @@ public class ProjectRepository {
     }
   }
 
-  protected Projects getProjectsApi(Credential credential) {
+  private Projects getProjectsApi(Credential credential) {
     JsonFactory jsonFactory = new JacksonFactory();
     HttpTransport transport = new NetHttpTransport();
     CloudResourceManager resourceManager =

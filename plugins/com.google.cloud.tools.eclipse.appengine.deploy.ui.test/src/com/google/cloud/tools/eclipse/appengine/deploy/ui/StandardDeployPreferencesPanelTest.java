@@ -119,7 +119,7 @@ public class StandardDeployPreferencesPanelTest {
   }
 
   @Test
-  public void test() throws ProjectRepositoryException {
+  public void testProjectSavedInPreferencesSelected() throws ProjectRepositoryException {
     IEclipsePreferences node = new ProjectScope(project).getNode(StandardDeployPreferences.PREFERENCE_STORE_QUALIFIER);
     node.put("project.id", "projectId1");
     node.put("account.email", EMAIL_1);
