@@ -18,4 +18,5 @@ Import-Package: com.google.cloud.tools.eclipse.appengine.facets,
  org.eclipse.core.databinding.validation,
  org.eclipse.core.runtime,
  org.eclipse.core.runtime.jobs,
+ org.eclipse.ui,
  org.eclipse.wst.validation

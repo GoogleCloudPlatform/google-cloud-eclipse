@@ -8,7 +8,7 @@ public class MessagesTest {
   @Test
   public void test() {
     Assert.assertEquals(
-        "application element not recommended",
+      "Project ID should be specified at deploy time.",
         Messages.getString("application.element"));
   }
 

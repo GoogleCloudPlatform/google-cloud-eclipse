@@ -43,12 +43,12 @@ class BlacklistScanner extends DefaultHandler {
   }
   
   /**
-   * Ensures parser always starts with an empty stack.
+   * Ensures parser always starts with an empty queue.
    */
   @Override
   public void startDocument() throws SAXException {
     this.blacklist = new ArrayDeque<>();
-    this.characterEncoding = new Locator2Impl(locator).getEncoding();
+    setCharacterEncoding(new Locator2Impl(locator).getEncoding());
   }
   
   /**
@@ -93,6 +93,14 @@ class BlacklistScanner extends DefaultHandler {
   @VisibleForTesting
   public Queue<BannedElement> getBlacklist() {
     return blacklist;
+  }
+  
+  void setCharacterEncoding(String encoding) {
+    if (encoding != null) {
+      this.characterEncoding = encoding;
+    } else {
+      this.characterEncoding = "UTF-8";
+    }
   }
     
 }
