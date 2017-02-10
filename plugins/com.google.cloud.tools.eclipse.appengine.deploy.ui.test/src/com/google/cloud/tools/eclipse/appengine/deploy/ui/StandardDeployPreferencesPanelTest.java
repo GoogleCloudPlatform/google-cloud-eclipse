@@ -36,6 +36,7 @@ import com.google.cloud.tools.eclipse.projectselector.ProjectSelector;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import com.google.cloud.tools.ide.login.Account;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import org.eclipse.core.databinding.ValidationStatusProvider;
 import org.eclipse.core.resources.IProject;
@@ -56,6 +57,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class StandardDeployPreferencesPanelTest {
 
+  private static final String EMAIL_2 = "some-email-2@example.com";
+  private static final String EMAIL_1 = "some-email-1@example.com";
+
   private Composite parent;
   @Mock private IProject project;
   @Mock private IGoogleLoginService loginService;
@@ -70,8 +74,8 @@ public class StandardDeployPreferencesPanelTest {
   public void setUp() throws Exception {
     parent = new Composite(shellTestResource.getShell(), SWT.NONE);
     when(project.getName()).thenReturn("testProject");
-    when(account1.getEmail()).thenReturn("some-email-1@example.com");
-    when(account2.getEmail()).thenReturn("some-email-2@example.com");
+    when(account1.getEmail()).thenReturn(EMAIL_1);
+    when(account2.getEmail()).thenReturn(EMAIL_2);
     when(account1.getOAuth2Credential()).thenReturn(credential);
     when(account2.getOAuth2Credential()).thenReturn(mock(Credential.class));
   }
@@ -118,7 +122,9 @@ public class StandardDeployPreferencesPanelTest {
   public void test() throws ProjectRepositoryException {
     IEclipsePreferences node = new ProjectScope(project).getNode(StandardDeployPreferences.PREFERENCE_STORE_QUALIFIER);
     node.put("project.id", "projectId1");
+    node.put("account.email", EMAIL_1);
     initializeProjectRepository(projectRepository);
+    when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1, account2)));
     StandardDeployPreferencesPanel deployPanel =
         new StandardDeployPreferencesPanel(parent, project, loginService, layoutChangedHandler,
                                            true, projectRepository);

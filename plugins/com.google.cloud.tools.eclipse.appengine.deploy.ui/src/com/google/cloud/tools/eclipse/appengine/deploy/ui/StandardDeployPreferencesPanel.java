@@ -182,14 +182,6 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   }
 
   private void setupProjectIdDataBinding(DataBindingContext context) {
-    accountSelector.addSelectionListener(new Runnable() {
-      @Override
-      public void run() {
-        Credential selectedCredential = accountSelector.getSelectedCredential();
-        projectSelector.setProjects(retrieveProjects(selectedCredential));
-      }
-    });
-
     IViewerObservableValue projectList = ViewerProperties.singleSelection().observe(projectSelector.getViewer());
     IObservableValue projectIdModel = PojoProperties.value("projectId").observe(model);
     context.bindValue(projectList, projectIdModel,
@@ -283,6 +275,13 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     projectSelector = new ProjectSelector(this);
     GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER)
       .grab(true, false).hint(300, 80).applyTo(projectSelector);
+    accountSelector.addSelectionListener(new Runnable() {
+      @Override
+      public void run() {
+        Credential selectedCredential = accountSelector.getSelectedCredential();
+        projectSelector.setProjects(retrieveProjects(selectedCredential));
+      }
+    });
   }
 
   private void createProjectVersionSection() {
