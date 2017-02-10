@@ -43,8 +43,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class AccountsPanelTest {
 
-  private static final String CSS_CLASS_NAME_KEY = "org.eclipse.e4.ui.css.CssClassName";
-
   @Rule public ShellTestResource shellTestResource = new ShellTestResource();
   private Shell shell;
 
@@ -71,7 +69,7 @@ public class AccountsPanelTest {
     AccountsPanel panel = new AccountsPanel(null, loginService);
     Control control = panel.createDialogArea(shell);
 
-    new SWTBot(control).buttonWithId(CSS_CLASS_NAME_KEY, "logOutButton");
+    new SWTBot(control).buttonWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "logOutButton");
   }
 
   @Test
@@ -81,7 +79,8 @@ public class AccountsPanelTest {
     AccountsPanel panel = new AccountsPanel(null, loginService);
     Control control = panel.createDialogArea(shell);
 
-    SWTBotButton button = new SWTBot(control).buttonWithId(CSS_CLASS_NAME_KEY, "logOutButton");
+    SWTBotButton button =
+        new SWTBot(control).buttonWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "logOutButton");
     assertEquals("Sign Out...", button.getText());
   }
 
@@ -92,7 +91,7 @@ public class AccountsPanelTest {
     AccountsPanel panel = new AccountsPanel(null, loginService);
     Control control = panel.createDialogArea(shell);
 
-    new SWTBot(control).labelWithId(CSS_CLASS_NAME_KEY, "email");
+    new SWTBot(control).labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "email");
   }
 
   @Test(expected = IndexOutOfBoundsException.class)
@@ -103,12 +102,12 @@ public class AccountsPanelTest {
     Control control = panel.createDialogArea(shell);
 
     SWTBot bot = new SWTBot(control);
-    SWTBotLabel email = bot.labelWithId(CSS_CLASS_NAME_KEY, "email", 0);
-    SWTBotLabel name = bot.labelWithId(CSS_CLASS_NAME_KEY, "accountName", 0);
+    SWTBotLabel email = bot.labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "email", 0);
+    SWTBotLabel name = bot.labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "accountName", 0);
     assertEquals("alice@example.com", email.getText());
     assertEquals("Alice", name.getText());
 
-    bot.labelWithId(CSS_CLASS_NAME_KEY, "email", 1);
+    bot.labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "email", 1);
   }
 
   @Test(expected = IndexOutOfBoundsException.class)
@@ -119,12 +118,12 @@ public class AccountsPanelTest {
     Control control = panel.createDialogArea(shell);
 
     SWTBot bot = new SWTBot(control);
-    SWTBotLabel email = bot.labelWithId(CSS_CLASS_NAME_KEY, "email", 0);
-    SWTBotLabel name = bot.labelWithId(CSS_CLASS_NAME_KEY, "accountName", 0);
+    SWTBotLabel email = bot.labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "email", 0);
+    SWTBotLabel name = bot.labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "accountName", 0);
     assertEquals("bob@example.com", email.getText());
     assertTrue(name.getText().isEmpty());
 
-    bot.labelWithId(CSS_CLASS_NAME_KEY, "email", 1);
+    bot.labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "email", 1);
   }
 
   @Test(expected = IndexOutOfBoundsException.class)
@@ -136,13 +135,13 @@ public class AccountsPanelTest {
 
     SWTBot bot = new SWTBot(control);
     List<String> emails = Arrays.asList(
-        bot.labelWithId(CSS_CLASS_NAME_KEY, "email", 0).getText(),
-        bot.labelWithId(CSS_CLASS_NAME_KEY, "email", 1).getText(),
-        bot.labelWithId(CSS_CLASS_NAME_KEY, "email", 2).getText());
+        bot.labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "email", 0).getText(),
+        bot.labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "email", 1).getText(),
+        bot.labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "email", 2).getText());
     List<String> names = Arrays.asList(
-        bot.labelWithId(CSS_CLASS_NAME_KEY, "accountName", 0).getText(),
-        bot.labelWithId(CSS_CLASS_NAME_KEY, "accountName", 1).getText(),
-        bot.labelWithId(CSS_CLASS_NAME_KEY, "accountName", 2).getText());
+        bot.labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "accountName", 0).getText(),
+        bot.labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "accountName", 1).getText(),
+        bot.labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "accountName", 2).getText());
 
     assertTrue(emails.contains("alice@example.com"));
     assertTrue(emails.contains("bob@example.com"));
@@ -151,7 +150,7 @@ public class AccountsPanelTest {
     assertTrue(names.contains(""));
     assertTrue(names.contains("Charlie"));
 
-    bot.labelWithId(CSS_CLASS_NAME_KEY, "email", 3);
+    bot.labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "email", 3);
   }
 
   private void setUpLoginService(List<Account> accounts) {
