@@ -42,8 +42,7 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 
 public class BuildPath {
 
-  public static void addLibraries(IProject project, List<Library> libraries, 
-      IProgressMonitor monitor, Class<?> classFromBundle)
+  public static void addLibraries(IProject project, List<Library> libraries, IProgressMonitor monitor)
       throws CoreException {
     
     if (libraries.isEmpty()) {
@@ -75,7 +74,7 @@ public class BuildPath {
     javaProject.setRawClasspath(newRawClasspath, monitor);
   
     IEclipseContext context = EclipseContextFactory.getServiceContext(
-        FrameworkUtil.getBundle(classFromBundle).getBundleContext());
+        FrameworkUtil.getBundle(BuildPath.class).getBundleContext());
     
     runContainerResolverJob(javaProject, context);
   }
