@@ -100,12 +100,12 @@ public class AppEngineWebXmlValidator extends AbstractValidator {
   /**
    * Sets error marker where SAX parser fails.
    */
-  static void createSaxErrorMessage(IResource resource, SAXException e) throws CoreException {
+  static void createSaxErrorMessage(IResource resource, SAXException ex) throws CoreException {
     IMarker marker = resource.createMarker("org.eclipse.core.resources.problemmarker");
     marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
-    marker.setAttribute(IMarker.MESSAGE, e.getMessage());
+    marker.setAttribute(IMarker.MESSAGE, ex.getMessage());
     marker.setAttribute(IMarker.LINE_NUMBER,
-        ((SAXParseException)e.getException()).getLineNumber());
+        ((SAXParseException) ex.getException()).getLineNumber());
   }
   
 }

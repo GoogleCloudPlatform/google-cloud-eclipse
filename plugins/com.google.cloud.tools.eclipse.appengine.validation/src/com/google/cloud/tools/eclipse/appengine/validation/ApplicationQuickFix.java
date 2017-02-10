@@ -64,8 +64,10 @@ public class ApplicationQuickFix implements IMarkerResolution {
     try (InputStream in = file.getContents();
         InputStream styleSheetStream =
             ApplicationQuickFix.class.getResourceAsStream(APPLICATION_XSLT)) {
-      
-      DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+
+      DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+      builderFactory.setNamespaceAware(true);
+      DocumentBuilder builder = builderFactory.newDocumentBuilder();
       Document document = builder.parse(in);
       
       try (InputStream resultStream = applyXslt(document, styleSheetStream)) {

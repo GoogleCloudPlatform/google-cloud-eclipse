@@ -32,34 +32,27 @@ import org.xml.sax.SAXException;
 
 public class ApplicationQuickFixTest {
   
-  private static final String APPLICATION_XML = "<?xml version='1.0' encoding='utf-8'?>"
-      + "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>"
+  private static final String APPLICATION_XML =
+      "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>"
       + "<application>"
       + "</application>"
       + "</appengine-web-app>";
   
-  private static final String STYLESHEET = "<?xml version='1.0' encoding='UTF-8'?>"
-      + "<xsl:stylesheet version='1.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>"
-      + "<xsl:template match='node()|@*'>"
-      + "<xsl:copy>"
-      + "<xsl:apply-templates select='node()|@*'/>"
-      + "</xsl:copy>"
-      + "</xsl:template>"
-      + "<xsl:template match='application'/>"
-      + "</xsl:stylesheet>";
+  private static final String STYLESHEET = "/xslt/application.xsl";
   
   @Test
   public void testApplyXslt()
       throws IOException, ParserConfigurationException, SAXException, TransformerException {
     try (InputStream xmlStream = stringToInputStream(APPLICATION_XML);
-        InputStream stylesheetStream = stringToInputStream(STYLESHEET)) {
-
-      DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        InputStream stylesheetStream = ApplicationQuickFix.class.getResourceAsStream(STYLESHEET)) {
+      
+      DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+      builderFactory.setNamespaceAware(true);
+      DocumentBuilder builder = builderFactory.newDocumentBuilder();
       Document document = builder.parse(xmlStream);
 
       try (InputStream inputStream = ApplicationQuickFix.applyXslt(document, stylesheetStream)) {
         Document transformed = builder.parse(inputStream);
-
         assertEquals(1, document.getDocumentElement().getChildNodes().getLength());
         assertEquals(0, transformed.getDocumentElement().getChildNodes().getLength());
       }

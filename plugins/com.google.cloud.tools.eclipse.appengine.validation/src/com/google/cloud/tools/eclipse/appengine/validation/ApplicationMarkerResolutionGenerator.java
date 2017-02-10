@@ -28,10 +28,10 @@ public class ApplicationMarkerResolutionGenerator implements IMarkerResolutionGe
 
   @Override
   public IMarkerResolution[] getResolutions(IMarker marker) {
-    IMarkerResolution[] res = new IMarkerResolution[1];
+    IMarkerResolution[] markerResolutions = new IMarkerResolution[1];
     ApplicationQuickFix fix = new ApplicationQuickFix();
-    res[0] = fix;
-    return res;
+    markerResolutions[0] = fix;
+    return markerResolutions;
   }
   
 }

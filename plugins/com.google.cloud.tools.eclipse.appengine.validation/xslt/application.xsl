@@ -2,7 +2,9 @@
 <!--
 	This stylesheet removes an <application/> element from appengine-web.xml
 -->
-<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:stylesheet version="1.0"
+xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+xmlns:ns0="http://appengine.google.com/ns/1.0">
 
   <xsl:template match="node()|@*">
     <xsl:copy>
@@ -10,6 +12,6 @@
     </xsl:copy>
   </xsl:template>
 
-  <xsl:template match="application"/>
+  <xsl:template match="ns0:application"/>
 
 </xsl:stylesheet>

@@ -20,7 +20,7 @@ import com.google.common.annotations.VisibleForTesting;
 import java.util.ArrayDeque;
 import java.util.Queue;
 import org.xml.sax.Attributes;
-import org.xml.sax.ext.Locator2Impl;
+import org.xml.sax.ext.Locator2;
 import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
@@ -32,14 +32,14 @@ import org.xml.sax.SAXParseException;
  */
 class BlacklistScanner extends DefaultHandler {
   
-  private Locator locator;
+  private Locator2 locator;
   private Queue<BannedElement> blacklist;
   private String characterEncoding;
   private SaxParserResults results;
   
   @Override
   public void setDocumentLocator(Locator locator) {
-    this.locator = locator;
+    this.locator = (Locator2) locator;
   }
   
   /**
@@ -48,7 +48,7 @@ class BlacklistScanner extends DefaultHandler {
   @Override
   public void startDocument() throws SAXException {
     this.blacklist = new ArrayDeque<>();
-    setCharacterEncoding(new Locator2Impl(locator).getEncoding());
+    setCharacterEncoding(locator.getEncoding());
   }
   
   /**

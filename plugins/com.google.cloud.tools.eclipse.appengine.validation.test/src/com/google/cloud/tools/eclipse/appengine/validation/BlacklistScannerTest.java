@@ -24,8 +24,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
+import org.xml.sax.ext.Locator2Impl;
 import org.xml.sax.helpers.AttributesImpl;
-import org.xml.sax.helpers.LocatorImpl;
 
 public class BlacklistScannerTest {
   
@@ -39,7 +39,7 @@ public class BlacklistScannerTest {
   
   @Before
   public void setUp() throws SAXException {
-    scanner.setDocumentLocator(new LocatorImpl());
+    scanner.setDocumentLocator(new Locator2Impl());
     scanner.startDocument();
   }
   
