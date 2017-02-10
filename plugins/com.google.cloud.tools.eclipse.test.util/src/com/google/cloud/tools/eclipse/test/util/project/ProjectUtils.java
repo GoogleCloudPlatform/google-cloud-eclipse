@@ -211,6 +211,7 @@ public class ProjectUtils {
             System.err.printf("ProjectUtils#waitForProjects: waiting for %d build errors\n",
                 allBuildErrors.size());
           } else {
+            // report any other jobs found in case we're missing something above
             Job[] otherJobs = jobManager.find(null);
             System.err.printf("Ignoring %d unrelated jobs:\n", otherJobs.length);
             for (Job job : otherJobs) {

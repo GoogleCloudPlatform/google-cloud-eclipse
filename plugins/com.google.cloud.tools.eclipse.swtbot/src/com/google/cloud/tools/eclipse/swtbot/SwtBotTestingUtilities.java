@@ -132,7 +132,7 @@ public class SwtBotTestingUtilities {
   }
 
   /**
-   * Blocks the caller until the given shell is no longer active.
+   * Blocks the caller until the given shell is closed.
    */
   public static void waitUntilShellIsClosed(SWTBot bot, final SWTBotShell shell) {
     bot.waitUntil(new DefaultCondition() {
