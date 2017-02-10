@@ -30,6 +30,6 @@ public class CloudToolsInfo {
   public static String USER_AGENT = METRICS_NAME + "/" + getToolsVersion();
 
   public static String getToolsVersion() {
-    return FrameworkUtil.getBundle(new CloudToolsInfo().getClass()).getVersion().toString();
+    return FrameworkUtil.getBundle(CloudToolsInfo.class).getVersion().toString();
   }
 }
