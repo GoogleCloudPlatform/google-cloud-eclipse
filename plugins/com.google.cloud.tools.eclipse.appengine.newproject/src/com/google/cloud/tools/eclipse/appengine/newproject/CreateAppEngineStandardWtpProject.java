@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.appengine.libraries.BuildPath;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
@@ -95,7 +96,8 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
     AppEngineStandardFacet.installAppEngineFacet(
         facetedProject, true /* installDependentFacets */, subMonitor.newChild(2));
 
-    BuildPath.addLibraries(newProject, config.getAppEngineLibraries(), subMonitor.newChild(2));
+    BuildPath.addLibraries(newProject, config.getAppEngineLibraries(), 
+        subMonitor.newChild(2), CreateAppEngineStandardWtpProject.class);
 
     addJunit4ToClasspath(subMonitor.newChild(2), newProject);
   }
