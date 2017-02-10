@@ -89,12 +89,7 @@ public final class SwtBotProjectActions {
     bot.button("Next >").click();
 
     // open archetype dialog
-    SwtBotTestingUtilities.performAndWaitForWindowChange(bot, new Runnable() {
-      @Override
-      public void run() {
-        bot.button("Add Archetype...").click();
-      }
-    });
+    SwtBotTestingUtilities.clickButtonAndWaitForWindowChange(bot, bot.button("Add Archetype..."));
 
     bot.comboBox(0).setText(archetypeGroupId);
     bot.comboBox(1).setText(archetypeArtifactId);
@@ -102,13 +97,8 @@ public final class SwtBotProjectActions {
     bot.comboBox(3).setText(archetypeUrl);
 
     // close archetype dialog
-    SwtBotTestingUtilities.performAndWaitForWindowChange(bot, new Runnable() {
-      @Override
-      public void run() {
-        // After OK, it will take a minute to download
-        bot.button("OK").click();
-      }
-    });
+    // After OK, it will take a minute to download
+    SwtBotTestingUtilities.clickButtonAndWaitForWindowChange(bot, bot.button("OK"));
 
     // move to last wizard
     bot.button("Next >").click();
