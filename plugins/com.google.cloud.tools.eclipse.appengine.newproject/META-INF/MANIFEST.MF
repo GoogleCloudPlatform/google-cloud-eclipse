@@ -1,4 +1,5 @@
 Manifest-Version: 1.0
+Bundle-ClassPath: .
 Bundle-ManifestVersion: 2
 Bundle-Name: Cloud Tools for Eclipse App Engine New Project Generation
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.appengine.newproject;singleton:=true
@@ -35,8 +36,6 @@ Import-Package: com.google.cloud.tools.eclipse.appengine.facets,
  org.eclipse.core.runtime;version="3.5.0",
  org.eclipse.core.runtime.jobs,
  org.eclipse.core.runtime.preferences;version="3.3.0",
- org.eclipse.e4.core.contexts,
- org.eclipse.e4.core.di,
  org.eclipse.jdt.core,
  org.eclipse.jdt.junit,
  org.eclipse.jface.databinding.swt,

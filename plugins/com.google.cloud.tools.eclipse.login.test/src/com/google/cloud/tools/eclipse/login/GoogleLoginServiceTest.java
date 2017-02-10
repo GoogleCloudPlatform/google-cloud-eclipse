@@ -27,22 +27,20 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.login.ui.LoginServiceUi;
-import com.google.cloud.tools.ide.login.Account;
-import com.google.cloud.tools.ide.login.GoogleLoginState;
-import com.google.cloud.tools.ide.login.LoggerFacade;
-import com.google.cloud.tools.ide.login.OAuthData;
-import com.google.cloud.tools.ide.login.OAuthDataStore;
-
+import com.google.cloud.tools.login.Account;
+import com.google.cloud.tools.login.GoogleLoginState;
+import com.google.cloud.tools.login.LoggerFacade;
+import com.google.cloud.tools.login.OAuthData;
+import com.google.cloud.tools.login.OAuthDataStore;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GoogleLoginServiceTest {

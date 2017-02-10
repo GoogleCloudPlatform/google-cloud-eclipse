@@ -39,7 +39,7 @@ public class ContentXmlTest {
     try (InputStream contentXml = new FileInputStream(
         "../com.google.cloud.tools.eclipse.welcome/intro/cloud-tools-for-eclipse.xml")) {
       Document document = builder.parse(contentXml);
-      assertEquals(3, document.getElementsByTagName("extensionContent").getLength());
+      assertEquals(4, document.getElementsByTagName("extensionContent").getLength());
     }
   }
 }

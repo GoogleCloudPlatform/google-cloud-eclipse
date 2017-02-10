@@ -24,6 +24,7 @@ import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import com.google.cloud.tools.eclipse.appengine.localserver.PreferencesInitializer;
 import com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineConsole;
 import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities;
+import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.common.annotations.VisibleForTesting;
@@ -169,33 +170,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     if (pageLocation == null) {
       return;
     }
-    final IWorkbench workbench = PlatformUI.getWorkbench();
-
-    Job openJob = new UIJob(workbench.getDisplay(), "Launching start page") { //$NON-NLS-1$
-
-      @Override
-      public IStatus runInUIThread(IProgressMonitor monitor) {
-        if (server.getServerState() != IServer.STATE_STARTED) {
-          return Status.CANCEL_STATUS;
-        }
-        try {
-          URL url = new URL(pageLocation);
-          IWorkbenchBrowserSupport browserSupport = workbench.getBrowserSupport();
-          int style = IWorkbenchBrowserSupport.LOCATION_BAR
-              | IWorkbenchBrowserSupport.NAVIGATION_BAR | IWorkbenchBrowserSupport.STATUS;
-          browserSupport.createBrowser(style, server.getId(), server.getName(), server.getName())
-              .openURL(url);
-        } catch (PartInitException ex) {
-          // Unable to use the normal browser support, so punt to the OS
-          logger.log(Level.WARNING, "Cannot launch a browser", ex); //$NON-NLS-1$
-          Program.launch(pageLocation);
-        } catch (MalformedURLException ex) {
-          logger.log(Level.SEVERE, "Invalid dev_appserver URL", ex); //$NON-NLS-1$
-        }
-        return Status.OK_STATUS;
-      }
-    };
-    openJob.schedule();
+    WorkbenchUtil.openInBrowserInUiThread(pageLocation, server.getId(), server.getName(), server.getName());
   }
 
   private void setupDebugTarget(ILaunch launch, int port,

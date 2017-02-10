@@ -21,8 +21,10 @@ import com.google.cloud.tools.appengine.cloudsdk.AppEngineJavaComponentsNotInsta
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkOutOfDateException;
+import com.google.cloud.tools.eclipse.preferences.Messages;
 import com.google.cloud.tools.eclipse.preferences.areas.PreferenceArea;
 import com.google.cloud.tools.eclipse.sdk.internal.PreferenceConstants;
+import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -47,6 +49,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
 public class CloudSdkPreferenceArea extends PreferenceArea {
@@ -128,19 +131,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
   }
 
   protected void openUrl(String urlText) {
-    try {
-      if (getWorkbench() != null) {
-        URL url = new URL(urlText);
-        IWorkbenchBrowserSupport browserSupport = getWorkbench().getBrowserSupport();
-        browserSupport.createBrowser(null).openURL(url);
-      } else {
-        Program.launch(urlText);
-      }
-    } catch (MalformedURLException mue) {
-      logger.log(Level.WARNING, SdkUiMessages.getString("CloudSdkPreferencePage_3"), mue);
-    } catch (PartInitException pie) {
-      logger.log(Level.WARNING, SdkUiMessages.getString("CloudSdkPreferencePage_4"), pie);
-    }
+    WorkbenchUtil.openInBrowser(PlatformUI.getWorkbench(), urlText);
   }
 
   private static Path getDefaultSdkLocation() {

@@ -22,14 +22,18 @@ import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessExitListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessStartListener;
+import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineDeployOutput;
 import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineProjectDeployer;
 import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
+import com.google.cloud.tools.eclipse.appengine.deploy.VersionNotFoundException;
 import com.google.cloud.tools.eclipse.login.CredentialHelper;
 import com.google.cloud.tools.eclipse.sdk.CollectingLineListener;
+import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
+import com.google.gson.JsonParseException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -43,6 +47,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 
@@ -54,6 +59,7 @@ import org.eclipse.core.runtime.SubMonitor;
  *  <li>export exploded WAR</li>
  *  <li>stage project for deploy</li>
  *  <li>deploy staged project</li>
+ *  <li>launch the deployed app in browser</li>
  * </ol>
  * It uses a work directory where it will create separate directories for the exploded WAR and the
  * staging results.
@@ -74,7 +80,8 @@ public class StandardDeployJob extends WorkspaceJob {
   private IProject project;
   private Credential credential;
   protected IPath workDirectoryParent;
-  private ProcessOutputLineListener stdoutLineListener;
+  private ProcessOutputLineListener stagingStdoutLineListener;
+  private ProcessOutputLineListener deployStdoutLineListener;
   private ProcessOutputLineListener stderrLineListener;
   private DefaultDeployConfiguration deployConfiguration;
   private CollectingLineListener errorCollectingLineListener;
@@ -82,16 +89,18 @@ public class StandardDeployJob extends WorkspaceJob {
   public StandardDeployJob(IProject project,
                            Credential credential,
                            IPath workDirectoryParent,
-                           ProcessOutputLineListener stdoutLineListener,
+                           ProcessOutputLineListener stagingStdoutLineListener,
                            ProcessOutputLineListener stderrLineListener,
                            DefaultDeployConfiguration deployConfiguration) {
     super(Messages.getString("deploy.standard.runnable.name")); //$NON-NLS-1$
     this.project = project;
     this.credential = credential;
     this.workDirectoryParent = workDirectoryParent;
-    this.stdoutLineListener = stdoutLineListener;
+    this.stagingStdoutLineListener = stagingStdoutLineListener;
     this.stderrLineListener = stderrLineListener;
     this.deployConfiguration = deployConfiguration;
+    // TODO: change to StringBuilderProcessOutputLineListener from the appengine-plugins-core
+    this.deployStdoutLineListener =  new StringBuilderProcessOutputLineListener();
     errorCollectingLineListener =
         new CollectingLineListener(new Predicate<String>() {
                                      @Override
@@ -106,47 +115,30 @@ public class StandardDeployJob extends WorkspaceJob {
   public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
     SubMonitor progress = SubMonitor.convert(monitor, 100);
     Path credentialFile = null;
+
     try {
       IPath workDirectory = workDirectoryParent;
       IPath explodedWarDirectory = workDirectory.append(EXPLODED_WAR_DIRECTORY_NAME);
       IPath stagingDirectory = workDirectory.append(STAGING_DIRECTORY_NAME);
       credentialFile = workDirectory.append(CREDENTIAL_FILENAME).toFile().toPath();
-      saveCredential(credentialFile, credential);
-      CloudSdk cloudSdk = getCloudSdk(credentialFile);
 
-      try {
-        getJobManager().beginRule(project, progress);
-        new ExplodedWarPublisher().publish(
-            project, explodedWarDirectory, progress.newChild(10));
-        new StandardProjectStaging().stage(
-            explodedWarDirectory, stagingDirectory, cloudSdk, progress.newChild(20));
-      } finally {
-        getJobManager().endRule(project);
+      IStatus saveStatus = saveCredential(credentialFile, credential);
+      if (saveStatus != Status.OK_STATUS) {
+        return saveStatus;
       }
 
-      if (!cloudSdkProcessStatus.isOK()) {
-        if (cloudSdkProcessStatus == Status.CANCEL_STATUS) {
-          return cloudSdkProcessStatus;
-        }
-        // temporary way of error handling, after #439 is fixed, it'll be cleaner
-        String errorMessage =
-            getErrorMessageOrDefault(Messages.getString("deploy.job.staging.failed"));
-        return StatusUtil.error(getClass(), errorMessage);
-      }
-      new AppEngineProjectDeployer().deploy(
-          stagingDirectory, cloudSdk, deployConfiguration, progress.newChild(70));
-      if (!cloudSdkProcessStatus.isOK() && cloudSdkProcessStatus != Status.CANCEL_STATUS) {
-        // temporary way of error handling, after #439 is fixed, it'll be cleaner
-        String errorMessage =
-            getErrorMessageOrDefault(Messages.getString("deploy.job.deploy.failed"));
-        return StatusUtil.error(getClass(), errorMessage);
+      IStatus stagingStatus =
+          stageProject(credentialFile, explodedWarDirectory, stagingDirectory, progress.newChild(30));
+      if (stagingStatus != Status.OK_STATUS) {
+        return stagingStatus;
       }
 
-      return cloudSdkProcessStatus;
-    } catch (IOException exception) {
-      throw new CoreException(StatusUtil.error(getClass(),
-                                               Messages.getString("save.credential.failed"),
-                                               exception));
+      IStatus deployStatus = deployProject(credentialFile, stagingDirectory, progress.newChild(70));
+      if (deployStatus != Status.OK_STATUS) {
+        return deployStatus;
+      }
+
+      return openAppInBrowser();
     } finally {
       if (credentialFile != null) {
         try {
@@ -168,11 +160,83 @@ public class StandardDeployJob extends WorkspaceJob {
     super.canceling();
   }
 
+  private IStatus saveCredential(Path destination, Credential credential) {
+    String jsonCredential = new CredentialHelper().toJson(credential);
+    try {
+      Files.write(destination, jsonCredential.getBytes(StandardCharsets.UTF_8));
+    } catch (IOException ex) {
+      return StatusUtil.error(getClass(), Messages.getString("save.credential.failed"), ex);
+    }
+    return Status.OK_STATUS;
+  }
+
+  private IStatus stageProject(Path credentialFile, IPath explodedWarDirectory, IPath stagingDirectory, IProgressMonitor monitor) {
+    SubMonitor progress = SubMonitor.convert(monitor, 100);
+    RecordProcessError stagingExitListener = new RecordProcessError();
+    CloudSdk cloudSdk = getCloudSdk(credentialFile, stagingStdoutLineListener, stagingExitListener);
+
+    try {
+      getJobManager().beginRule(project, progress);
+      new ExplodedWarPublisher().publish(project, explodedWarDirectory, progress.newChild(40));
+      new StandardProjectStaging().stage(explodedWarDirectory, stagingDirectory, cloudSdk, progress.newChild(60));
+      return stagingExitListener.getExitStatus();
+    } catch (CoreException | IllegalArgumentException | OperationCanceledException ex) {
+      return StatusUtil.error(getClass(), Messages.getString("deploy.job.staging.failed"), ex);
+    } finally {
+      getJobManager().endRule(project);
+    }
+  }
+
+  private IStatus deployProject(Path credentialFile, IPath stagingDirectory, IProgressMonitor monitor) {
+    RecordProcessError deployExitListener = new RecordProcessError();
+    CloudSdk cloudSdk = getCloudSdk(credentialFile, deployStdoutLineListener, deployExitListener);
+    new AppEngineProjectDeployer().deploy(
+        stagingDirectory, cloudSdk, deployConfiguration, monitor);
+    return deployExitListener.getExitStatus();
+  }
+
+  private CloudSdk getCloudSdk(Path credentialFile, ProcessOutputLineListener stdoutLineListener, ProcessExitListener processExitListener) {
+    CloudSdk cloudSdk = new CloudSdk.Builder()
+                          .addStdOutLineListener(stdoutLineListener)
+                          .addStdErrLineListener(stderrLineListener)
+                          .addStdErrLineListener(errorCollectingLineListener)
+                          .appCommandCredentialFile(credentialFile.toFile())
+                          .startListener(new StoreProcessObjectListener())
+                          .exitListener(processExitListener)
+                          .appCommandMetricsEnvironment(CloudToolsInfo.METRICS_NAME)
+                          .appCommandMetricsEnvironmentVersion(CloudToolsInfo.getToolsVersion())
+                          .appCommandOutputFormat("json")
+                          .build();
+    return cloudSdk;
+  }
+
+  private IStatus openAppInBrowser() {
+    final String project = deployConfiguration.getProject();
+    String appLocation = null;
+    if (deployConfiguration.getPromote()) {
+      appLocation = "https://" + project + ".appspot.com";
+    } else {
+      try {
+        String version =  getDeployedAppVersion();
+        appLocation = "https://" + version + "-dot-" + project+ ".appspot.com/";
+      } catch (VersionNotFoundException ex) {
+        return StatusUtil.error(getClass(), Messages.getString("browser.launch.failed"), ex);
+      }
+    }
+
+    String browserTitle = Messages.getString("browser.launch.title", project);
+    WorkbenchUtil.openInBrowserInUiThread(appLocation, null, browserTitle, browserTitle);
+    return Status.OK_STATUS;
+  }
+
   /**
-   * @return the error message obtained from <code>config.getErrorMessageProvider()</code> or
+   * @return the error message obtained from <code>errorCollectingLineListener()</code> or
    * <code>defaultMessage</code>
    */
   private String getErrorMessageOrDefault(String defaultMessage) {
+    // TODO: Check the assumption that if there are error messages during staging collected via
+    // the errorCollectingLineListener, the staging process will have a non-zero exitcode,
+    // making it ok to use the same errorCollectingLineListener for the deploy process
     List<String> messages = errorCollectingLineListener.getCollectedMessages();
     if (!messages.isEmpty()) {
       return Joiner.on('\n').join(messages);
@@ -181,23 +245,14 @@ public class StandardDeployJob extends WorkspaceJob {
     }
   }
 
-  private static void saveCredential(Path destination, Credential credential) throws IOException {
-    String jsonCredential = new CredentialHelper().toJson(credential);
-    Files.write(destination, jsonCredential.getBytes(StandardCharsets.UTF_8));
-  }
-
-  private CloudSdk getCloudSdk(Path credentialFile) {
-    CloudSdk cloudSdk = new CloudSdk.Builder()
-                          .addStdOutLineListener(stdoutLineListener)
-                          .addStdErrLineListener(stderrLineListener)
-                          .addStdErrLineListener(errorCollectingLineListener)
-                          .appCommandCredentialFile(credentialFile.toFile())
-                          .startListener(new StoreProcessObjectListener())
-                          .exitListener(new RecordProcessError())
-                          .appCommandMetricsEnvironment(CloudToolsInfo.METRICS_NAME)
-                          .appCommandMetricsEnvironmentVersion(CloudToolsInfo.getToolsVersion())
-                          .build();
-    return cloudSdk;
+  private String getDeployedAppVersion() throws VersionNotFoundException {
+    try {
+      String rawDeployOutput = deployStdoutLineListener.toString();
+      AppEngineDeployOutput deployOutput = AppEngineDeployOutput.parse(rawDeployOutput);
+      return deployOutput.getVersion();
+    } catch (IndexOutOfBoundsException | JsonParseException ex)  {
+      throw new VersionNotFoundException("Error getting deployed app version", ex);
+    }
   }
 
   private final class StoreProcessObjectListener implements ProcessStartListener {
@@ -207,15 +262,46 @@ public class StandardDeployJob extends WorkspaceJob {
     }
   }
 
-  private final class RecordProcessError implements ProcessExitListener {
-    // temporary way of error handling, after #439 is fixed, it'll be cleaner
+  private class RecordProcessError implements ProcessExitListener {
+    private IStatus status;
+
     @Override
     public void onExit(int exitCode) {
-      // if it's cancelled we don't need to record the exit code from the process, it would be the exit code
-      // that corresponds to the process.destroy()
-      if (cloudSdkProcessStatus != Status.CANCEL_STATUS && exitCode != 0) {
-        cloudSdkProcessStatus = StatusUtil.error(this, Messages.getString("cloudsdk.process.failed", exitCode));
+      if (cloudSdkProcessStatus == Status.CANCEL_STATUS) {
+        status = cloudSdkProcessStatus;
+      } else if (exitCode != 0) {
+        // temporary way of error handling, after #439 is fixed, it'll be cleaner
+        String errorMessage =
+            getErrorMessageOrDefault(Messages.getString("cloudsdk.process.failed", exitCode));
+        status = StatusUtil.error(this, errorMessage);
+      } else {
+        status = Status.OK_STATUS;
       }
     }
+
+    /**
+     * @return the status on exit of the process or null if the process has not exited.
+     */
+    public IStatus getExitStatus() {
+      return status;
+    }
   }
+
+  private class StringBuilderProcessOutputLineListener implements ProcessOutputLineListener {
+    private final StringBuffer buffer = new StringBuffer();
+
+    public StringBuilderProcessOutputLineListener() {
+    }
+
+    @Override
+    public void onOutputLine(String line) {
+      buffer.append(line);
+    }
+
+    @Override
+    public String toString() {
+      return buffer.toString();
+    }
+  }
+
 }

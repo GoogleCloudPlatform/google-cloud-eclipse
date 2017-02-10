@@ -17,7 +17,7 @@
 package com.google.cloud.tools.eclipse.preferences;
 
 import com.google.cloud.tools.eclipse.preferences.areas.PreferenceArea;
-
+import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.SWT;
@@ -75,15 +75,7 @@ public class AnalyticsOptInArea extends PreferenceArea {
       @Override
       public void widgetSelected(SelectionEvent event) {
         // Open a privacy policy web page when the link is clicked.
-        try {
-          URL url = new URL(Messages.getString("GOOGLE_PRIVACY_POLICY_URL"));
-          IWorkbenchBrowserSupport browserSupport = PlatformUI.getWorkbench().getBrowserSupport();
-          browserSupport.createBrowser(null).openURL(url);
-        } catch (MalformedURLException mue) {
-          logger.log(Level.WARNING, "URL malformed", mue);
-        } catch (PartInitException pie) {
-          logger.log(Level.WARNING, "Cannot launch a browser", pie);
-        }
+        WorkbenchUtil.openInBrowser(PlatformUI.getWorkbench(), Messages.getString("GOOGLE_PRIVACY_POLICY_URL"));
       }
     });
     

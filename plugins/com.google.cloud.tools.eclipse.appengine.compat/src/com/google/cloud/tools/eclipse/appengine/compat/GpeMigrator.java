@@ -65,8 +65,8 @@ public class GpeMigrator {
   private static final String WTP_METADATA_XSLT = "/xslt/wtpMetadata.xsl";
 
   // FacetedProject.METADATA_FILE = ".settings/" + FacetCorePlugin.PLUGIN_ID + ".xml";
-  @VisibleForTesting
-  static final String FACETS_METADATA_FILE = ".settings/org.eclipse.wst.common.component.xml";
+  private static final String FACETS_METADATA_FILE =
+      ".settings/org.eclipse.wst.common.project.facet.core.xml";
 
   /**
    * Removes various GPE-related remnants: classpath entries, nature, runtime, and facets. Any

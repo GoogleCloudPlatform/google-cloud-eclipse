@@ -25,13 +25,11 @@ import java.util.Map;
 import javax.xml.parsers.ParserConfigurationException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.validation.AbstractValidator;
 import org.eclipse.wst.validation.ValidationEvent;
-import org.eclipse.wst.validation.ValidatorMessage;
 import org.eclipse.wst.validation.ValidationResult;
 import org.eclipse.wst.validation.ValidationState;
 import org.xml.sax.SAXException;
@@ -45,11 +43,6 @@ public class AppEngineWebXmlValidator extends AbstractValidator {
   private static final Logger logger = Logger.getLogger(
       AppEngineWebXmlValidator.class.getName());
   
-  @Override
-  public void validationStarting(IProject project,
-      ValidationState state, IProgressMonitor monitor) {        
-  }
-  
   /**
    * Extracts byte[] from appengine-web.xml. 
    */
@@ -60,7 +53,8 @@ public class AppEngineWebXmlValidator extends AbstractValidator {
     IFile file = (IFile) resource;
     try (InputStream in = file.getContents()) {
       byte[] bytes = ByteStreams.toByteArray(in);
-      return validate(resource, bytes);
+      validate(resource, bytes);
+      return new ValidationResult();
     } catch (IOException | CoreException | ParserConfigurationException ex) {
       logger.log(Level.SEVERE, ex.getMessage());
       return new ValidationResult();
@@ -68,50 +62,50 @@ public class AppEngineWebXmlValidator extends AbstractValidator {
   }
     
   /**
-   * Adds a marker to appengine-web.xml for every {@link BannedElement}
-   * found in the file.
+   * Clears all problem markers from the resource, then adds a marker to 
+   * appengine-web.xml for every {@link BannedElement} found in the file.
    */
-  static ValidationResult validate(IResource resource, byte[] bytes) 
+  static void validate(IResource resource, byte[] bytes) 
       throws CoreException, IOException, ParserConfigurationException {
     try {
+      deleteApplicationMarkers(resource);
       SaxParserResults parserResults = BlacklistSaxParser.readXml(bytes);
-      ValidationResult result = new ValidationResult();
       Map<BannedElement, Integer> bannedElementOffsetMap =
           ValidationUtils.getOffsetMap(bytes, parserResults);
       for (Map.Entry<BannedElement, Integer> entry : bannedElementOffsetMap.entrySet()) {
-        result.add(createMessage(resource, entry.getKey(), entry.getValue()));
+        createMarker(resource, entry.getKey(), entry.getValue());
       }
-      return result;
     } catch (SAXException ex) {
-      return createSaxErrorMessage(resource, ex);
+      createSaxErrorMessage(resource, ex);
     }
   }
   
+  static void deleteApplicationMarkers(IResource resource) throws CoreException {
+    resource.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
+  }
+  
   /**
-   * Creates a message from a given {@link BannedElement}
+   * Creates a marker from a given {@link BannedElement}
    */
-  static ValidatorMessage createMessage(IResource resource, BannedElement element,
-                                         int elementOffset) {
-    ValidatorMessage message = ValidatorMessage.create(element.getMessage(), resource);
-    message.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_WARNING);
-    message.setAttribute(IMarker.SOURCE_ID, IMarker.PROBLEM);
-    message.setAttribute(IMarker.CHAR_START, elementOffset);
-    message.setAttribute(IMarker.CHAR_END, elementOffset + element.getLength());
-    return message;
+  static void createMarker(IResource resource,
+      BannedElement element, int elementOffset) throws CoreException {
+    String markerID = "com.google.cloud.tools.eclipse.appengine.validation.blacklistMarker";
+    IMarker marker = resource.createMarker(markerID);
+    marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_WARNING);
+    marker.setAttribute(IMarker.MESSAGE, element.getMessage());
+    marker.setAttribute(IMarker.CHAR_START, elementOffset);
+    marker.setAttribute(IMarker.CHAR_END, elementOffset + element.getLength());
   }
   
   /**
    * Sets error marker where SAX parser fails.
    */
-  static ValidationResult createSaxErrorMessage(IResource resource, SAXException e) {
-    ValidationResult result = new ValidationResult();
-    ValidatorMessage message = ValidatorMessage.create(e.getMessage(), resource);
-    message.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
-    message.setAttribute(IMarker.SOURCE_ID, IMarker.PROBLEM);
-    message.setAttribute(IMarker.LINE_NUMBER,
-      ((SAXParseException)e.getException()).getLineNumber());
-    result.add(message);
-    return result;
+  static void createSaxErrorMessage(IResource resource, SAXException ex) throws CoreException {
+    IMarker marker = resource.createMarker("org.eclipse.core.resources.problemmarker");
+    marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
+    marker.setAttribute(IMarker.MESSAGE, ex.getMessage());
+    marker.setAttribute(IMarker.LINE_NUMBER,
+        ((SAXParseException) ex.getException()).getLineNumber());
   }
   
 }

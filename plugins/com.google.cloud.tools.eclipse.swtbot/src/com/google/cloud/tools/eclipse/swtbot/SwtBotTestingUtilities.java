@@ -44,6 +44,16 @@ public class SwtBotTestingUtilities {
     });
   }
 
+  /** Click the button, wait for the window close. */
+  public static void clickButtonAndWaitForWindowClose(SWTBot bot, final SWTBotButton button) {
+    performAndWaitForWindowClose(bot, new Runnable() {
+      @Override
+      public void run() {
+        button.click();
+      }
+    });
+  }
+
   /**
    * Click on all table cells in column {@code col} with the contents {@code value}. Selection
    * should be the last cell clicked upon.
@@ -77,6 +87,16 @@ public class SwtBotTestingUtilities {
   }
 
   /**
+   * Simple wrapper to block for actions that close a window.
+   */
+  public static void performAndWaitForWindowClose(SWTBot bot, Runnable runnable) {
+    SWTBotShell shell = bot.activeShell();
+    runnable.run();
+    waitUntilShellIsClosed(bot, shell);
+  }
+
+
+  /**
    * Injects a key or character via down and up events. Only one of {@code keyCode} or
    * {@code character} must be provided. Use
    * 
@@ -107,6 +127,23 @@ public class SwtBotTestingUtilities {
       @Override
       public boolean test() throws Exception {
         return !shell.isActive();
+      }
+    });
+  }
+
+  /**
+   * Blocks the caller until the given shell is closed.
+   */
+  public static void waitUntilShellIsClosed(SWTBot bot, final SWTBotShell shell) {
+    bot.waitUntil(new DefaultCondition() {
+      @Override
+      public String getFailureMessage() {
+        return "Shell " + shell.getText() + " did not close"; //$NON-NLS-1$
+      }
+
+      @Override
+      public boolean test() throws Exception {
+        return !shell.isOpen();
       }
     });
   }

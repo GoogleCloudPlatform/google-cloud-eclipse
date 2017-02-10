@@ -19,7 +19,7 @@ package com.google.cloud.tools.eclipse.login.ui;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.util.Strings;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
-import com.google.cloud.tools.ide.login.Account;
+import com.google.cloud.tools.login.Account;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.ArrayList;
 import java.util.Collections;

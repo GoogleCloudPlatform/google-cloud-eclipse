@@ -25,18 +25,24 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.wst.common.componentcore.internal.builder.DependencyGraphImpl;
+import org.eclipse.wst.common.componentcore.internal.builder.IDependencyGraph;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
@@ -75,7 +81,7 @@ public final class TestProjectCreator extends ExternalResource {
   @Override
   protected void after() {
     // Wait for any jobs to complete as WTP validation runs without the workspace protection lock
-    ProjectUtils.waitUntilIdle();
+    ProjectUtils.waitForProjects(javaProject.getProject());
     try {
       javaProject.getProject().delete(true, null);
     } catch (CoreException e) {
@@ -126,10 +132,29 @@ public final class TestProjectCreator extends ExternalResource {
   private void addFacets() throws CoreException {
     if (!projectFacetVersions.isEmpty()) {
       IFacetedProject facetedProject = ProjectFacetsManager.create(getProject());
+      Set<IFacetedProject.Action> facetInstallSet = new HashSet<>();
       for (IProjectFacetVersion projectFacetVersion : projectFacetVersions) {
-        facetedProject.installProjectFacet(projectFacetVersion, null, null);
-        ProjectUtils.waitUntilIdle();  // App Engine runtime is added via a Job, so wait.
+        facetInstallSet.add(new IFacetedProject.Action(IFacetedProject.Action.Type.INSTALL,
+            projectFacetVersion, null));
       }
+      // Workaround deadlock bug described in Eclipse bug (https://bugs.eclipse.org/511793).
+      // There are graph update jobs triggered by the completion of the CreateProjectOperation
+      // above (from resource notifications) and from other resource changes from modifying the
+      // project facets. So we force the dependency graph to defer updates.
+      try {
+        IDependencyGraph.INSTANCE.preUpdate();
+        try {
+          Job.getJobManager().join(DependencyGraphImpl.GRAPH_UPDATE_JOB_FAMILY, null);
+        } catch (OperationCanceledException | InterruptedException ex) {
+          throw new RuntimeException("Exception waiting for DependencyGraph job", ex);
+        }
+
+        facetedProject.modify(facetInstallSet, null);
+      } finally {
+        IDependencyGraph.INSTANCE.postUpdate();
+      }
+      // App Engine runtime is added via a Job, so wait.
+      ProjectUtils.waitForProjects(getProject());
     }
   }
 

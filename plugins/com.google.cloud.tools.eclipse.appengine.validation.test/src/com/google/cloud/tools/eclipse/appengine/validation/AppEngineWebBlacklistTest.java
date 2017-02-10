@@ -51,7 +51,7 @@ public class AppEngineWebBlacklistTest {
   
   @Test
   public void testGetBlacklistElementMessage() {
-    assertEquals("application element not recommended",
+    assertEquals("Project ID should be specified at deploy time.",
       AppEngineWebBlacklist.getBlacklistElementMessage("application"));
   }
 }

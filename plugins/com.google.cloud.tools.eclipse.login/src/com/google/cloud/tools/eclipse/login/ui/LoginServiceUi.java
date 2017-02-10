@@ -23,9 +23,15 @@ import com.google.cloud.tools.eclipse.login.GoogleLoginService;
 import com.google.cloud.tools.eclipse.login.Messages;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
-import com.google.cloud.tools.ide.login.UiFacade;
-import com.google.cloud.tools.ide.login.VerificationCodeHolder;
-
+import com.google.cloud.tools.login.UiFacade;
+import com.google.cloud.tools.login.VerificationCodeHolder;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.concurrent.Semaphore;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -39,14 +45,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.services.IServiceLocator;
-
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.concurrent.Semaphore;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class LoginServiceUi implements UiFacade {
 

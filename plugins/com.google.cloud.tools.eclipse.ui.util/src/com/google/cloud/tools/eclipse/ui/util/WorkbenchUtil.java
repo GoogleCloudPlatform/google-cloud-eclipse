@@ -16,14 +16,28 @@
 
 package com.google.cloud.tools.eclipse.ui.util;
 
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.swt.program.Program;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import org.eclipse.ui.ide.IDE;
+import org.eclipse.ui.progress.UIJob;
 
 public class WorkbenchUtil {
+  private static final Logger logger = Logger.getLogger(WorkbenchUtil.class.getName());
 
   /**
    * Open the specified file in the editor.
@@ -43,4 +57,67 @@ public class WorkbenchUtil {
     }
   }
   
+  /**
+   * Opens the specified url in a Web browser instance in a UI thread.
+   *
+   * @param urlPath the URL to display
+   * @param browserId if an instance of a browser with the same id is already opened, it will be
+   *   returned instead of creating a new one. Passing null will create a new instance with a
+   *   generated id.
+   * @param name a name displayed on the tab of the internal browser
+   * @param tooltip the text for a tooltip on the <code>name</code> of the internal browser
+   */
+  public static void openInBrowserInUiThread(final String urlPath, final String browserId,
+      final String name, final String tooltip) {
+    final IWorkbench workbench = PlatformUI.getWorkbench();
+    Job launchBrowserJob = new UIJob(workbench.getDisplay(), name) {
+      @Override
+      public IStatus runInUIThread(IProgressMonitor monitor) {
+        return openInBrowser(workbench, urlPath, browserId, name, tooltip);
+      }
+
+    };
+    launchBrowserJob.schedule();
+  }
+
+  /**
+   * Opens the specified url in a Web browser instance.
+   *
+   * @param workbench the current workbench
+   * @param urlPath the URL to display
+   * @param browserId if an instance of a browser with the same id is already opened, it will be
+   *   returned instead of creating a new one. Passing null will create a new instance with a
+   *   generated id.
+   * @param name a name displayed on the tab of the internal browser
+   * @param tooltip the text for a tooltip on the <code>name</code> of the internal browser
+   * @return resulting status of the operation
+   */
+  public static IStatus openInBrowser(IWorkbench workbench, String urlPath, String browserId,
+      String name, String tooltip) {
+    try {
+      URL url = new URL(urlPath);
+      IWorkbenchBrowserSupport browserSupport = workbench.getBrowserSupport();
+      int style = IWorkbenchBrowserSupport.LOCATION_BAR
+          | IWorkbenchBrowserSupport.NAVIGATION_BAR | IWorkbenchBrowserSupport.STATUS;
+      browserSupport.createBrowser(style, browserId, name, tooltip).openURL(url);
+    } catch (PartInitException ex) {
+      // Unable to use the normal browser support, so push to the OS
+      logger.log(Level.WARNING, "Cannot launch a browser", ex);
+      Program.launch(urlPath);
+    } catch (MalformedURLException ex) {
+      return StatusUtil.error(WorkbenchUtil.class, Messages.getString("invalid.url"), ex);
+    }
+    return Status.OK_STATUS;
+  }
+
+  /**
+   * Opens the specified url in a Web browser instance.
+   *
+   * @param workbench the current workbench
+   * @param urlPath the URL to display
+   * @return resulting status of the operation
+   */
+  public static IStatus openInBrowser(IWorkbench workbench, String urlPath) {
+    return openInBrowser(workbench, urlPath, null, null, null);
+  }
 }

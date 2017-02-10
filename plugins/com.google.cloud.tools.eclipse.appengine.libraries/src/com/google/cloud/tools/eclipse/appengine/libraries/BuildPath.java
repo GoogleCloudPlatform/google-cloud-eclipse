@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.newproject;
+package com.google.cloud.tools.eclipse.appengine.libraries;
 
 import java.util.Arrays;
 import java.util.List;
@@ -40,9 +40,9 @@ import org.osgi.framework.FrameworkUtil;
 import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainerResolverJob;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 
-class BuildPath {
+public class BuildPath {
 
-  static void addLibraries(IProject project, List<Library> libraries, IProgressMonitor monitor)
+  public static void addLibraries(IProject project, List<Library> libraries, IProgressMonitor monitor)
       throws CoreException {
     
     if (libraries.isEmpty()) {
@@ -73,12 +73,13 @@ class BuildPath {
     }
     javaProject.setRawClasspath(newRawClasspath, monitor);
   
-    runContainerResolverJob(javaProject);
+    IEclipseContext context = EclipseContextFactory.getServiceContext(
+        FrameworkUtil.getBundle(BuildPath.class).getBundleContext());
+    
+    runContainerResolverJob(javaProject, context);
   }
   
-  private static void runContainerResolverJob(IJavaProject javaProject) {
-    IEclipseContext context = EclipseContextFactory.getServiceContext(
-        FrameworkUtil.getBundle(CreateAppEngineStandardWtpProject.class).getBundleContext());
+  private static void runContainerResolverJob(IJavaProject javaProject, IEclipseContext context) {
     final IEclipseContext childContext =
         context.createChild(LibraryClasspathContainerResolverJob.class.getName());
     childContext.set(IJavaProject.class, javaProject);

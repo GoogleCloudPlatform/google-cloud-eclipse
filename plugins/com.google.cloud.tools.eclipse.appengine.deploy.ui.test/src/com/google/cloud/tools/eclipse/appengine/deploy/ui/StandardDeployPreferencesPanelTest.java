@@ -34,7 +34,7 @@ import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepositoryException;
 import com.google.cloud.tools.eclipse.projectselector.ProjectSelector;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
-import com.google.cloud.tools.ide.login.Account;
+import com.google.cloud.tools.login.Account;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;

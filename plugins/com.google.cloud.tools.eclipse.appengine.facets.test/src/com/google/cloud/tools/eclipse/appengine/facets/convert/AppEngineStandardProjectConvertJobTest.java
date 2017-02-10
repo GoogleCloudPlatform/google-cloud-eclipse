@@ -19,7 +19,9 @@ package com.google.cloud.tools.eclipse.appengine.facets.convert;
 import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
+import java.util.concurrent.TimeUnit;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
@@ -28,6 +30,8 @@ import org.junit.Rule;
 import org.junit.Test;
 
 public class AppEngineStandardProjectConvertJobTest {
+  @Rule
+  public ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
 
   @Rule public final TestProjectCreator projectCreator = new TestProjectCreator();
 
