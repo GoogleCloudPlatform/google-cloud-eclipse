@@ -274,7 +274,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     GridDataFactory.swtDefaults().align(SWT.BEGINNING, SWT.BEGINNING).applyTo(projectIdLabel);
     projectSelector = new ProjectSelector(this);
     GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER)
-      .grab(true, false).hint(300, 80).applyTo(projectSelector);
+      .grab(true, false).hint(300, 100).applyTo(projectSelector);
     accountSelector.addSelectionListener(new Runnable() {
       @Override
       public void run() {
