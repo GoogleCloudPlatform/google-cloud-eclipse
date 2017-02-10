@@ -25,8 +25,11 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import org.eclipse.core.resources.IMarker;
@@ -42,10 +45,11 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.wst.common.project.facet.core.util.internal.ZipUtil;
-import org.eclipse.wst.validation.ValidationFramework;
+import org.eclipse.wst.validation.internal.operations.ValidationBuilder;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 
@@ -53,6 +57,7 @@ import org.osgi.framework.FrameworkUtil;
  * A set of utility methods for dealing with projects.
  */
 public class ProjectUtils {
+  private static boolean DEBUG = false;
 
   /**
    * Import the Eclipse projects found within the bundle containing {@code clazz} at the
@@ -178,19 +183,43 @@ public class ProjectUtils {
 
   /** Wait for any spawned jobs and builds to complete (e.g., validation jobs). */
   public static void waitForProjects(Runnable delayTactic, IProject... projects) {
+    IJobManager jobManager = Job.getJobManager();
     try {
+      Set<Job> jobs = new LinkedHashSet<>();
+      List<String> allBuildErrors;
       do {
-        Job.getJobManager().join(ResourcesPlugin.FAMILY_MANUAL_BUILD, null);
-        Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
-        // J2EEElementChangedListener.PROJECT_COMPONENT_UPDATE_JOB_FAMILY
-        Job.getJobManager().join("org.eclipse.jst.j2ee.refactor.component", null);
-        // ServerPlugin.SHUTDOWN_JOB_FAMILY
-        Job.getJobManager().join("org.eclipse.wst.server.core.family", null);
-        Job.getJobManager().join("org.eclipse.wst.server.ui.family", null);
-        ValidationFramework.getDefault().join(null);
-
         delayTactic.run();
-      } while (!getAllBuildErrors(projects).isEmpty());
+        for (Job job : jobs) {
+          job.join();
+        }
+        jobs.clear();
+
+        Collections.addAll(jobs, jobManager.find(ResourcesPlugin.FAMILY_MANUAL_BUILD));
+        Collections.addAll(jobs, jobManager.find(ResourcesPlugin.FAMILY_AUTO_BUILD));
+        // J2EEElementChangedListener.PROJECT_COMPONENT_UPDATE_JOB_FAMILY
+        Collections.addAll(jobs, jobManager.find("org.eclipse.jst.j2ee.refactor.component"));
+        // ServerPlugin.SHUTDOWN_JOB_FAMILY
+        Collections.addAll(jobs, jobManager.find("org.eclipse.wst.server.core.family"));
+        Collections.addAll(jobs, jobManager.find("org.eclipse.wst.server.ui.family"));
+        Collections.addAll(jobs, jobManager.find(ValidationBuilder.FAMILY_VALIDATION_JOB));
+        allBuildErrors = getAllBuildErrors(projects);
+        if (DEBUG) {
+          if (!jobs.isEmpty()) {
+            System.err.printf("ProjectUtils#waitForProjects: waiting for %d jobs: %s\n",
+                jobs.size(), jobs);
+          } else if (!allBuildErrors.isEmpty()) {
+            System.err.printf("ProjectUtils#waitForProjects: waiting for %d build errors\n",
+                allBuildErrors.size());
+          } else {
+            Job[] otherJobs = jobManager.find(null);
+            System.err.printf("Ignoring %d unrelated jobs:\n", otherJobs.length);
+            for (Job job : otherJobs) {
+              System.err.printf("  %s: %s\n", job.getClass().getName(), job);
+            }
+            // new ThreadDumpingWatchdog(0, TimeUnit.DAYS).run();
+          }
+        }
+      } while (!(jobs.isEmpty() && allBuildErrors.isEmpty()));
     } catch (CoreException | InterruptedException ex) {
       throw new RuntimeException(ex);
     }

@@ -89,6 +89,7 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
 
   @Override
   public void run() {
+    Stopwatch dumpingTime = Stopwatch.createStarted();
     ThreadMXBean bean = ManagementFactory.getThreadMXBean();
     ThreadInfo[] infos = bean.dumpAllThreads(true, true);
     Arrays.sort(infos, new Comparator<ThreadInfo>() {
@@ -102,6 +103,8 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
     sb.append("\n+-------------------------------------------------------------------------------");
     sb.append("\n| STACK DUMP @ ").append(stopwatch).append(": ").append(description);
     sb.append("\n|");
+    dumpEclipseLocks(sb, "| ");
+
     int uselessThreadsCount = 0;
     for (ThreadInfo tinfo : infos) {
       // Unfortunately ThreadInfo#toString() only dumps up to 8 stackframes, and
@@ -121,7 +124,7 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
         }
       }
     }
-    dumpEclipseLocks(sb, "| ");
+    sb.append("\n| ELAPSED TIME: ").append(dumpingTime);
     sb.append("\n+-------------------------------------------------------------------------------");
     System.err.println(sb.toString());
   }
