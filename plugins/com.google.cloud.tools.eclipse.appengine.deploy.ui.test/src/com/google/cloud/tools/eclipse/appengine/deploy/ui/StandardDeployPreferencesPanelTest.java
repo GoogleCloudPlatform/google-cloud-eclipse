@@ -20,21 +20,32 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployPreferences;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelectorObservableValue;
+import com.google.cloud.tools.eclipse.projectselector.GcpProject;
+import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
+import com.google.cloud.tools.eclipse.projectselector.ProjectRepositoryException;
+import com.google.cloud.tools.eclipse.projectselector.ProjectSelector;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import com.google.cloud.tools.ide.login.Account;
 import java.util.Arrays;
 import java.util.HashSet;
 import org.eclipse.core.databinding.ValidationStatusProvider;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -52,6 +63,7 @@ public class StandardDeployPreferencesPanelTest {
   @Mock private Account account1;
   @Mock private Account account2;
   @Mock private Credential credential;
+  @Mock private ProjectRepository projectRepository;
   @Rule public ShellTestResource shellTestResource = new ShellTestResource();
 
   @Before
@@ -68,7 +80,7 @@ public class StandardDeployPreferencesPanelTest {
   public void testSelectSingleAccount() {
     when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1)));
     StandardDeployPreferencesPanel deployPanel = new StandardDeployPreferencesPanel(
-        parent, project, loginService, layoutChangedHandler, true);
+        parent, project, loginService, layoutChangedHandler, true, projectRepository);
     assertThat(deployPanel.getSelectedCredential(), is(credential));
 
     // todo? assertTrue(deployPanel.getAccountSelector().isAutoSelectAccountIfNone()
@@ -83,7 +95,9 @@ public class StandardDeployPreferencesPanelTest {
 
   @Test
   public void testValidationMessageWhenNotSignedIn() {
-    StandardDeployPreferencesPanel deployPanel = new StandardDeployPreferencesPanel(parent, project, loginService, layoutChangedHandler, true);
+    StandardDeployPreferencesPanel deployPanel =
+        new StandardDeployPreferencesPanel(parent, project, loginService, layoutChangedHandler,
+                                           true, projectRepository);
     IStatus status = getAccountSelectorValidationStatus(deployPanel);
     assertThat(status.getMessage(), is("Sign in to Google."));
   }
@@ -93,9 +107,40 @@ public class StandardDeployPreferencesPanelTest {
     // Return two accounts because the account selector will auto-select if there exists only one.
     when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1, account2)));
 
-    StandardDeployPreferencesPanel deployPanel = new StandardDeployPreferencesPanel(parent, project, loginService, layoutChangedHandler, true);
+    StandardDeployPreferencesPanel deployPanel =
+        new StandardDeployPreferencesPanel(parent, project, loginService, layoutChangedHandler,
+                                           true, projectRepository);
     IStatus status = getAccountSelectorValidationStatus(deployPanel);
     assertThat(status.getMessage(), is("Select an account."));
+  }
+
+  @Test
+  public void test() throws ProjectRepositoryException {
+    IEclipsePreferences node = new ProjectScope(project).getNode(StandardDeployPreferences.PREFERENCE_STORE_QUALIFIER);
+    node.put("project.id", "projectId1");
+    initializeProjectRepository(projectRepository);
+    StandardDeployPreferencesPanel deployPanel =
+        new StandardDeployPreferencesPanel(parent, project, loginService, layoutChangedHandler,
+                                           true, projectRepository);
+    for (Control control : deployPanel.getChildren()) {
+      if (control instanceof ProjectSelector) {
+        ProjectSelector projectSelector = (ProjectSelector) control;
+        IStructuredSelection selection = projectSelector.getViewer().getStructuredSelection();
+        assertThat(selection.size(), is(1));
+        assertThat(((GcpProject) selection.getFirstElement()).getId(), is("projectId1"));
+        return;
+      }
+    };
+    fail("Did not find ProjectSelector widget");
+  }
+
+  private void initializeProjectRepository(ProjectRepository projectRepository) throws ProjectRepositoryException {
+    GcpProject project1 = new GcpProject("Project1", "projectId1");
+    GcpProject project2 = new GcpProject("Project2", "projectId2");
+    when(projectRepository.getProjects(any(Credential.class)))
+      .thenReturn(Arrays.asList(project1, project2));
+    when(projectRepository.getProject(any(Credential.class), eq("projectId1"))).thenReturn(project1);
+    when(projectRepository.getProject(any(Credential.class), eq("projectId2"))).thenReturn(project2);
   }
 
   private IStatus getAccountSelectorValidationStatus(StandardDeployPreferencesPanel deployPanel) {

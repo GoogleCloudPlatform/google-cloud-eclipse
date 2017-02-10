@@ -18,56 +18,29 @@ package com.google.cloud.tools.eclipse.projectselector;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-import com.google.api.client.auth.oauth2.Credential;
-import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.TableColumn;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProjectSelectorTest {
 
   @Rule public ShellTestResource shellResource = new ShellTestResource();
-  @Mock private AccountSelector accountSelector;
-  @Mock private ProjectRepository projectRepository;
-  @Captor ArgumentCaptor<Runnable> accountSelectedHandler;
-
-  @Test
-  public void testIfAccountSelectorChangeThenProjectsAreQueried() throws ProjectRepositoryException {
-    doNothing().when(accountSelector).addSelectionListener(accountSelectedHandler.capture());
-    new ProjectSelector(shellResource.getShell(), accountSelector, projectRepository);
-    accountSelectedHandler.getValue().run();
-    verify(projectRepository).getProjects(any(Credential.class));
-  }
-
-  @Test
-  public void testIfProjectQueryFailsThenEmptyTable() throws ProjectRepositoryException {
-    doNothing().when(accountSelector).addSelectionListener(accountSelectedHandler.capture());
-    when(projectRepository.getProjects(any(Credential.class))).thenThrow(new ProjectRepositoryException("test"));
-    ProjectSelector projectSelector =
-        new ProjectSelector(shellResource.getShell(), accountSelector, projectRepository);
-    accountSelectedHandler.getValue().run();
-    assertThat(projectSelector.getViewer().getTable().getItemCount(), is(0));
-  }
 
   @Test
   public void testCreatedColumns() {
     ProjectSelector projectSelector =
-        new ProjectSelector(shellResource.getShell(), accountSelector, projectRepository);
+        new ProjectSelector(shellResource.getShell());
+
     TableColumn[] columns = projectSelector.getViewer().getTable().getColumns();
     assertThat(columns.length, is(2));
     assertThat(columns[0].getText(), is("Name"));
@@ -76,17 +49,29 @@ public class ProjectSelectorTest {
 
   @Test
   public void testProjectsAreSortedAlphabetically() throws Exception {
-    doNothing().when(accountSelector).addSelectionListener(accountSelectedHandler.capture());
-    when(projectRepository.getProjects(any(Credential.class))).thenReturn(getUnsortedProjectList());
-
     ProjectSelector projectSelector =
-        new ProjectSelector(shellResource.getShell(), accountSelector, projectRepository);
-    accountSelectedHandler.getValue().run();
+        new ProjectSelector(shellResource.getShell());
+    projectSelector.setProjects(getUnsortedProjectList());
 
     assertThat(((GcpProject) projectSelector.getViewer().getElementAt(0)).getName(), is("a"));
     assertThat(((GcpProject) projectSelector.getViewer().getElementAt(1)).getName(), is("b"));
     assertThat(((GcpProject) projectSelector.getViewer().getElementAt(2)).getName(), is("c"));
     assertThat(((GcpProject) projectSelector.getViewer().getElementAt(3)).getName(), is("d"));
+  }
+
+  @Test
+  public void testSetProjectMaintainsSelection() {
+    List<GcpProject> projects = getUnsortedProjectList();
+    GcpProject selectedProject = projects.get(3);
+    
+    ProjectSelector projectSelector = new ProjectSelector(shellResource.getShell());
+    projectSelector.setProjects(projects);
+    projectSelector.getViewer().setSelection(new StructuredSelection(selectedProject));
+    projectSelector.setProjects(projects.subList(2, projects.size()));
+
+    IStructuredSelection selection = projectSelector.getViewer().getStructuredSelection();
+    assertThat(selection.size(), is(1));
+    assertThat((GcpProject) selection.getFirstElement(), is(selectedProject));
   }
 
   private List<GcpProject> getUnsortedProjectList() {

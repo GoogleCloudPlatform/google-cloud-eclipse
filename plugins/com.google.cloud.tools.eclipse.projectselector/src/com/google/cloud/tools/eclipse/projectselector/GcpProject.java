@@ -18,8 +18,6 @@ package com.google.cloud.tools.eclipse.projectselector;
 
 public class GcpProject {
 
-  public static final GcpProject ERROR = new GcpProject("No projects found", "");
-
   private final String name;
   private final String id;
 
@@ -36,29 +34,31 @@ public class GcpProject {
     return id;
   }
 
+  // Simplified from the Eclipse generated hashcode()
   @Override
   public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((id == null) ? 0 : id.hashCode());
-    return result;
+    return id == null ? 0 : id.hashCode();
   }
 
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
+    if (this == obj) {
       return true;
-    if (obj == null)
+    }
+    if (obj == null) {
       return false;
-    if (getClass() != obj.getClass())
+    }
+    if (getClass() != obj.getClass()) {
       return false;
+    }
     GcpProject other = (GcpProject) obj;
     if (id == null) {
-      if (other.id != null)
+      if (other.id != null) {
         return false;
-    } else if (!id.equals(other.id))
+      }
+    } else if (!id.equals(other.id)) {
       return false;
+    }
     return true;
   }
-
 }

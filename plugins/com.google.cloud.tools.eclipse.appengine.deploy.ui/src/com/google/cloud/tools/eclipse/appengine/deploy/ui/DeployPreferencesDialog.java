@@ -23,6 +23,7 @@ import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkOutOfDateException;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
+import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import com.google.common.base.Preconditions;
 import org.eclipse.core.databinding.ValidationStatusProvider;
 import org.eclipse.core.resources.IProject;
@@ -89,7 +90,7 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
 
     Composite container = new Composite(dialogArea, SWT.NONE);
     content = new StandardDeployPreferencesPanel(container, project, loginService,
-        getLayoutChangedHandler(), true /* requireValues */);
+        getLayoutChangedHandler(), true /* requireValues */, new ProjectRepository());
     GridDataFactory.fillDefaults().grab(true, false).applyTo(content);
 
     // we pull in Dialog's content margins which are zeroed out by TitleAreaDialog
