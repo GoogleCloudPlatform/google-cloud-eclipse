@@ -65,7 +65,7 @@ public final class SwtBotProjectActions {
       public void run() {
         bot.activeShell();
         bot.textWithLabel("Name:").setText(className);
-        SwtBotTestingUtilities.clickButtonAndWaitForWindowChange(bot, bot.button("Finish"));
+        SwtBotTestingUtilities.clickButtonAndWaitForWindowClose(bot, bot.button("Finish"));
       }
     });
   }
@@ -118,7 +118,7 @@ public final class SwtBotProjectActions {
     bot.comboBoxWithLabel("Artifact Id:").setText(artifactId);
     bot.comboBoxWithLabel("Package:").setText(javaPackage);
 
-    SwtBotTestingUtilities.clickButtonAndWaitForWindowChange(bot, bot.button("Finish"));
+    SwtBotTestingUtilities.clickButtonAndWaitForWindowClose(bot, bot.button("Finish"));
     return getWorkspaceRoot().getProject("testartifact");
   }
 
@@ -143,7 +143,7 @@ public final class SwtBotProjectActions {
     // Select the "Delete project contents on disk (cannot be undone)"
     bot.checkBox(0).click();
 
-    SwtBotTestingUtilities.clickButtonAndWaitForWindowChange(bot, bot.button("OK"));
+    SwtBotTestingUtilities.clickButtonAndWaitForWindowClose(bot, bot.button("OK"));
   }
 
   /**

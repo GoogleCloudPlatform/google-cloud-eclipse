@@ -90,7 +90,7 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
       }
     });
 
-    SwtBotTestingUtilities.clickButtonAndWaitForWindowChange(bot, bot.button("Finish"));
+    SwtBotTestingUtilities.clickButtonAndWaitForWindowClose(bot, bot.button("Finish"));
 
     bot.perspectiveById("org.eclipse.debug.ui.DebugPerspective").activate(); // IDebugUIConstants.ID_DEBUG_PERSPECTIVE
     SWTBotView debugView = bot.viewById("org.eclipse.debug.ui.DebugView"); // IDebugUIConstants.ID_DEBUG_VIEW
