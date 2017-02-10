@@ -54,11 +54,6 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
   private void installAppEngineRuntimes(IProject project) throws CoreException {
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);
 
-    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1155
-    // The first ConvertJob has already been scheduled (which installs JSDT facet), and
-    // this is to suspend the second ConvertJob temporarily.
-    NonSystemJobSuspender.suspendFutureJobs();
-
     // Modifying targeted runtimes while installing/uninstalling facets is not allowed,
     // so schedule a job as a workaround.
     Job installJob = new AppEngineRuntimeInstallJob(facetedProject);
@@ -107,6 +102,11 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
     @Override
     protected IStatus run(IProgressMonitor monitor) {
       try {
+        // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1155
+        // The first ConvertJob has already been scheduled (which installs JSDT facet), and
+        // this is to suspend the second ConvertJob temporarily.
+        NonSystemJobSuspender.suspendFutureJobs();
+
         // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1155
         // Wait until the first ConvertJob installs the JSDT facet.
         waitUntilJsdtIsFixedFacet();
