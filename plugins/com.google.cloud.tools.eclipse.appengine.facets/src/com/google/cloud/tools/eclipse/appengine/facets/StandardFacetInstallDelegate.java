@@ -60,6 +60,10 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
     // Schedule immediately so that it doesn't go into the SLEEPING state. Ensuring the job is
     // active is necessary for unit testing.
     installJob.schedule();
+    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1155
+    // The first ConvertJob has already been scheduled (which installs JSDT facet), and
+    // this is to suspend the second ConvertJob temporarily.
+    NonSystemJobSuspender.suspendFutureJobs();
   }
 
   private static class AppEngineRuntimeInstallJob extends Job {
@@ -102,11 +106,6 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
     @Override
     protected IStatus run(IProgressMonitor monitor) {
       try {
-        // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1155
-        // The first ConvertJob has already been scheduled (which installs JSDT facet), and
-        // this is to suspend the second ConvertJob temporarily.
-        NonSystemJobSuspender.suspendFutureJobs();
-
         // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1155
         // Wait until the first ConvertJob installs the JSDT facet.
         waitUntilJsdtIsFixedFacet();
