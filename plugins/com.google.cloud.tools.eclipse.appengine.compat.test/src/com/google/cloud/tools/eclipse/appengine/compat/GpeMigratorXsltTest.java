@@ -34,6 +34,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import com.google.cloud.tools.eclipse.util.Xslt;
+
 public class GpeMigratorXsltTest {
 
   private static final String WTP_METADATA_XML = "<?xml version='1.0' encoding='UTF-8'?>"
@@ -47,7 +49,7 @@ public class GpeMigratorXsltTest {
       + "</faceted-project>";
 
   private static final String STYLESHEET = "<?xml version='1.0' encoding='UTF-8'?>"
-      + "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>"
+      + "<xsl:stylesheet version='1.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>"
       + "  <xsl:template match='faceted-project'>"
       + "    <xsl:copy/>"
       + "  </xsl:template>"
@@ -60,12 +62,9 @@ public class GpeMigratorXsltTest {
         InputStream stylesheetStream = stringToInputStream(STYLESHEET)) {
 
       DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-      Document document = builder.parse(xmlStream);
 
-      try (InputStream inputStream = GpeMigrator.applyXslt(document, stylesheetStream)) {
+      try (InputStream inputStream = Xslt.applyXslt(xmlStream, stylesheetStream)) {
         Document transformed = builder.parse(inputStream);
-
-        assertEquals(12, document.getDocumentElement().getChildNodes().getLength());
         assertEquals(0, transformed.getDocumentElement().getChildNodes().getLength());
       }
     }
@@ -79,16 +78,9 @@ public class GpeMigratorXsltTest {
             "../com.google.cloud.tools.eclipse.appengine.compat/xslt/wtpMetadata.xsl")) {
 
       DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-      Document document = builder.parse(xmlStream);
 
-      try (InputStream inputStream = GpeMigrator.applyXslt(document, stylesheetStream)) {
+      try (InputStream inputStream = Xslt.applyXslt(xmlStream, stylesheetStream)) {
         Document transformed = builder.parse(inputStream);
-
-        assertArrayEquals(new String[]{"Google App Engine", "App Engine Standard Runtime"},
-            getAttributesByTagNameAndAttributeName(document, "runtime", "name"));
-        assertArrayEquals(new String[]{
-            "java", "jst.web", "com.google.appengine.facet", "com.google.appengine.facet.ear"},
-            getAttributesByTagNameAndAttributeName(document, "installed", "facet"));
 
         assertArrayEquals(new String[]{"App Engine Standard Runtime"},
             getAttributesByTagNameAndAttributeName(transformed, "runtime", "name"));

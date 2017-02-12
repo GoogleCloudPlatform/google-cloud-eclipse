@@ -8,7 +8,8 @@ Bundle-Vendor: Google Inc.
 Bundle-Version: 0.1.0.qualifier
 Fragment-Host: com.google.cloud.tools.eclipse.appengine.validation
 Require-Bundle: org.junit,
- org.eclipse.equinox.registry
+ org.eclipse.equinox.registry,
+ com.google.cloud.tools.eclipse.test.dependencies
 Import-Package: com.google.cloud.tools.eclipse.appengine.compat,
  com.google.cloud.tools.eclipse.test.util,
  com.google.cloud.tools.eclipse.test.util.project,

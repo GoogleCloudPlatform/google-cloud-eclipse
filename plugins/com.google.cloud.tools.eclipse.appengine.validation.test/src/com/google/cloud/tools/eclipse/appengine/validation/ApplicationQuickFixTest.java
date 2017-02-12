@@ -26,10 +26,22 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
+import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
+import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
+
+/**
+ * Must be run as a plugin test.
+ */
 public class ApplicationQuickFixTest {
   
   private static final String APPLICATION_XML =
@@ -37,26 +49,34 @@ public class ApplicationQuickFixTest {
       + "<application>"
       + "</application>"
       + "</appengine-web-app>";
-  
-  private static final String STYLESHEET = "/xslt/application.xsl";
+    
+  @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
+
+  private ApplicationQuickFix fix = new ApplicationQuickFix();
+
+  @Test 
+  public void testGetLabel() {
+    assertEquals("Remove Application Element", fix.getLabel());
+  }
   
   @Test
-  public void testApplyXslt()
-      throws IOException, ParserConfigurationException, SAXException, TransformerException {
-    try (InputStream xmlStream = stringToInputStream(APPLICATION_XML);
-        InputStream stylesheetStream = ApplicationQuickFix.class.getResourceAsStream(STYLESHEET)) {
-      
-      DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-      builderFactory.setNamespaceAware(true);
-      DocumentBuilder builder = builderFactory.newDocumentBuilder();
-      Document document = builder.parse(xmlStream);
+  public void testRemoveApplicationElements() throws IOException, ParserConfigurationException,
+      SAXException, TransformerException, CoreException {
 
-      try (InputStream inputStream = ApplicationQuickFix.applyXslt(document, stylesheetStream)) {
-        Document transformed = builder.parse(inputStream);
-        assertEquals(1, document.getDocumentElement().getChildNodes().getLength());
-        assertEquals(0, transformed.getDocumentElement().getChildNodes().getLength());
-      }
-    }
+    IProject project = projectCreator.getProject();
+    IFile file = project.getFile("testdata.xml");
+    file.create(stringToInputStream(APPLICATION_XML), IFile.FORCE, null);
+    
+    IMarker marker = Mockito.mock(IMarker.class);
+    Mockito.when(marker.getResource()).thenReturn(file);
+        
+    fix.run(marker);
+
+    DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+    builderFactory.setNamespaceAware(true);
+    DocumentBuilder builder = builderFactory.newDocumentBuilder();
+    Document transformed = builder.parse(file.getContents());
+    assertEquals(0, transformed.getDocumentElement().getChildNodes().getLength());
   }
   
   private static InputStream stringToInputStream(String string) {
