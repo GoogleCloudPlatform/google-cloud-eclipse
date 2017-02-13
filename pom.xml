@@ -263,6 +263,22 @@
                     <exclude>commons-collections:commons-collections:[3.2.1]</exclude>
                   </excludes>
                 </bannedDependencies>
+                <bannedDependencies>
+                  <!--
+                    Ensure our bundles only use Guava 20.0.0. 
+                    Tycho identifies p2-resolved bundles are of form:
+                    p2.eclipse-plugin:com.google.guava:jar:20.0.0:system
+                  -->
+                  <searchTransitive>false</searchTransitive>
+                  <excludes>
+                    <exclude>com.google.guava:guava</exclude>
+                    <exclude>*:com.google.guava</exclude>
+                  </excludes>
+                  <includes>
+                    <include>com.google.guava:guava:[20,21)</include>
+                    <include>*:com.google.guava:[20,21)</include>
+                  </includes>
+                </bannedDependencies>
               </rules>
             </configuration>
           </execution>
