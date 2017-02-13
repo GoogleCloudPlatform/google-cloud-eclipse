@@ -37,12 +37,12 @@ public class Xslt {
   
   private static final TransformerFactory factory = TransformerFactory.newInstance();
 
-  public static void transformInPlace(IFile metadataFile, URL xslt) 
+  public static void transformInPlace(IFile file, URL xslt) 
       throws IOException, CoreException, TransformerException {
-    try (InputStream metadataStream = metadataFile.getContents();
+    try (InputStream in = file.getContents();
         InputStream stylesheetStream = xslt.openStream();
-        InputStream resultStream = applyXslt(metadataStream, stylesheetStream)) {
-      metadataFile.setContents(resultStream, IFile.FORCE, null /* monitor */);
+        InputStream resultStream = applyXslt(in, stylesheetStream)) {
+      file.setContents(resultStream, IFile.FORCE, null /* monitor */);
     }
   }
 
