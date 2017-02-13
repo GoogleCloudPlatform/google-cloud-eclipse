@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.login;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
 import com.google.cloud.tools.eclipse.login.ui.LoginServiceUi;
+import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.cloud.tools.login.Account;
 import com.google.cloud.tools.login.GoogleLoginState;
 import com.google.cloud.tools.login.JavaPreferenceOAuthDataStore;
@@ -86,6 +87,7 @@ public class GoogleLoginService implements IGoogleLoginService {
         Constants.getOAuthClientId(), Constants.getOAuthClientSecret(), OAUTH_SCOPES,
         new JavaPreferenceOAuthDataStore(PREFERENCE_PATH_OAUTH_DATA_STORE, logger),
         loginServiceUi, logger);
+    loginState.setApplicationName(CloudToolsInfo.USER_AGENT);
     accounts = loginState.listAccounts();
   }
 
@@ -107,6 +109,7 @@ public class GoogleLoginService implements IGoogleLoginService {
       OAuthDataStore dataStore, LoginServiceUi uiFacade, LoggerFacade loggerFacade) {
     loginServiceUi = uiFacade;
     this.loginState = loginState;
+    loginState.setApplicationName(CloudToolsInfo.USER_AGENT);
     accounts = loginState.listAccounts();
   }
 
