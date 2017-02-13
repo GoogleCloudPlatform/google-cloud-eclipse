@@ -40,11 +40,10 @@ public class Xslt {
   public static void transformInPlace(IFile metadataFile, URL xslt) 
       throws IOException, CoreException, TransformerException {
     try (InputStream metadataStream = metadataFile.getContents();
-        InputStream stylesheetStream = xslt.openStream()) {
-      try (InputStream resultStream = applyXslt(metadataStream, stylesheetStream)) {
-        metadataFile.setContents(resultStream, IFile.FORCE, null /* monitor */);
-      }
-    } 
+        InputStream stylesheetStream = xslt.openStream();
+        InputStream resultStream = applyXslt(metadataStream, stylesheetStream)) {
+      metadataFile.setContents(resultStream, IFile.FORCE, null /* monitor */);
+    }
   }
 
   /**
