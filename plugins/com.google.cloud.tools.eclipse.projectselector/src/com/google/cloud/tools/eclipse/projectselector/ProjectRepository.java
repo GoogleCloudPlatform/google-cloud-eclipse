@@ -41,7 +41,7 @@ public class ProjectRepository {
   private static final String PROJECT_DELETE_REQUESTED = "DELETE_REQUESTED";
 
   /**
-   * @return All active projects the account identified by {@code credential} has access to
+   * @return all active projects the account identified by {@code credential} has access to
    * @throws ProjectRepositoryException if an error happens while communicating with the backend
    */
   public List<GcpProject> getProjects(Credential credential) throws ProjectRepositoryException {

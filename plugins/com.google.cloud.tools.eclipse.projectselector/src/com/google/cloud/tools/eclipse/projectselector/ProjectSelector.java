@@ -31,8 +31,8 @@ import org.eclipse.swt.widgets.Composite;
 
 public class ProjectSelector extends Composite {
 
-  private TableViewer tableViewer;
-  private WritableList input;
+  private final TableViewer tableViewer;
+  private final WritableList input;
 
   public ProjectSelector(Composite parent) {
     super(parent, SWT.NONE);
@@ -52,12 +52,12 @@ public class ProjectSelector extends Composite {
 
   private void createColumns(TableColumnLayout tableColumnLayout) {
     TableViewerColumn nameColumn = new TableViewerColumn(tableViewer, SWT.LEFT);
-    nameColumn.getColumn().setText(Messages.getString("projectselector.header.name"));
+    nameColumn.getColumn().setText(Messages.getString("projectselector.header.name")); //$NON-NLS-1$
     tableColumnLayout.setColumnData(nameColumn.getColumn(), new ColumnWeightData(1, 200));
 
     TableViewerColumn idColumn = new TableViewerColumn(tableViewer, SWT.LEFT);
     idColumn.getColumn().setWidth(200);
-    idColumn.getColumn().setText(Messages.getString("projectselector.header.id"));
+    idColumn.getColumn().setText(Messages.getString("projectselector.header.id")); //$NON-NLS-1$
     tableColumnLayout.setColumnData(idColumn.getColumn(), new ColumnWeightData(1, 200));
   }
 
