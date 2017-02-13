@@ -65,7 +65,8 @@ public class ProjectRepository {
    * {@code credential} has access to the project
    * @throws ProjectRepositoryException if an error happens while communicating with the backend
    */
-  public GcpProject getProject(Credential credential, String projectId) throws ProjectRepositoryException {
+  public GcpProject getProject(Credential credential,
+                               String projectId) throws ProjectRepositoryException {
     try {
       if (credential != null && !Strings.isNullOrEmpty(projectId)) {
         return convertToGcpProject(getProjectsApi(credential).get(projectId).execute());
@@ -82,7 +83,7 @@ public class ProjectRepository {
     HttpTransport transport = new NetHttpTransport();
     CloudResourceManager resourceManager =
         new CloudResourceManager.Builder(transport, jsonFactory, credential)
-          .setApplicationName(CloudToolsInfo.METRICS_NAME).build();
+            .setApplicationName(CloudToolsInfo.USER_AGENT).build();
     Projects projects = resourceManager.projects();
     return projects;
   }
