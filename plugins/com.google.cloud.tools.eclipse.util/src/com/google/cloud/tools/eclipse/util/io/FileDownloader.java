@@ -17,7 +17,6 @@
 package com.google.cloud.tools.eclipse.util.io;
 
 import com.google.common.base.Preconditions;
-import com.google.common.net.HttpHeaders;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -44,12 +43,14 @@ public class FileDownloader {
   private IPath downloadFolderPath;
 
   /**
-   * Creates a new instance which will download the files to the directory defined by <code>downloadFolderPath</code>.
+   * Creates a new instance which will download the files to the directory defined by
+   * <code>downloadFolderPath</code>.
    * <p>
-   * If the directory does not exist, it will be created on-demand when the first file is downloaded.
+   * If the directory does not exist, it will be created on-demand when the first file is
+   * downloaded.
    *
-   * @param downloadFolderPath path to the directory where the files must be downloaded. Cannot be <code>null</code>,
-   * but does not have to exist, it will be created on demand.
+   * @param downloadFolderPath path to the directory where the files must be downloaded. Cannot be
+   *        <code>null</code>, but does not have to exist. It will be created on demand.
    */
   public FileDownloader(IPath downloadFolderPath) {
     Preconditions.checkNotNull(downloadFolderPath, "downloadFolderPath is null");
@@ -65,8 +66,8 @@ public class FileDownloader {
    *
    * @param url location of the file to download, cannot be <code>null</code>
    * @return a path pointing to the downloaded file
-   * @throws IOException if the URL cannot be opened, the output file cannot be written or the transfer of the remote
-   * file fails
+   * @throws IOException if the URL cannot be opened, the output file cannot be written or the
+   *         transfer of the remote file fails
    */
   public IPath download(URL url, IProgressMonitor monitor) throws IOException {
     Preconditions.checkNotNull(url, "url is null");
@@ -83,7 +84,7 @@ public class FileDownloader {
     URLConnection connection = url.openConnection();
     connection.setConnectTimeout(DEFAULT_CONNECT_TIMEOUT_MS);
     connection.setReadTimeout(DEFAULT_READ_TIMEOUT_MS);
-    connection.setRequestProperty(HttpHeaders.USER_AGENT, USER_AGENT);
+    connection.setRequestProperty("User-Agent", USER_AGENT);
     try (InputStream inputStream = new BufferedInputStream(connection.getInputStream());
          OutputStream outputStream =
              new BufferedOutputStream(new FileOutputStream(downloadedFile))) {
