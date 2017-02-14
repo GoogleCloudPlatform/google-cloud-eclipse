@@ -35,6 +35,7 @@ public class StandardDeployPreferences {
   static final String PREF_STOP_PREVIOUS_VERSION = "project.previousVersion.stop";
 
   private IEclipsePreferences preferenceStore;
+  // todo since this is mutable it shouldn;t be in all caps
   public static final StandardDeployPreferences DEFAULT;
 
   static {
@@ -68,6 +69,9 @@ public class StandardDeployPreferences {
   }
 
   public void setProjectId(String projectId) {
+    if (projectId == null) {
+      projectId = "";
+    }
     preferenceStore.put(PREF_PROJECT_ID, projectId);
   }
 

@@ -17,16 +17,34 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.standard;
 
 import static org.hamcrest.text.IsEmptyString.isEmptyString;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import org.eclipse.core.resources.IProject;
+import org.junit.Rule;
 import org.junit.Test;
+
+import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 
 public class StandardDeployPreferencesTest {
 
+  @Rule public final TestProjectCreator projectCreator = new TestProjectCreator();
+  
   @Test
   public void testDefaultProjectId() {
     assertThat(StandardDeployPreferences.DEFAULT.getProjectId(), isEmptyString());
+  }
+  
+  @Test
+  public void testSetProjectId() {
+    IProject project = projectCreator.getProject();
+    StandardDeployPreferences preferences = new StandardDeployPreferences(project);
+    assertThat(preferences.getProjectId(), isEmptyString());
+    preferences.setProjectId("someproject32");
+    assertEquals("someproject32", preferences.getProjectId());
+    preferences.setProjectId(null);
+    assertThat(preferences.getProjectId(), isEmptyString());
   }
 
   @Test
