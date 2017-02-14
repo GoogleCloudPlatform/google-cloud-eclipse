@@ -16,21 +16,23 @@
 
 package com.google.cloud.tools.eclipse.ui.util;
 
+import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 public class Messages {
-  private static final String BUNDLE_NAME = "com.google.cloud.tools.eclipse.ui.util.messages"; //$NON-NLS-1$
+  private static final String BUNDLE_NAME =
+      "com.google.cloud.tools.eclipse.ui.util.messages"; //$NON-NLS-1$
 
   private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME);
 
   private Messages() {
   }
 
-  public static String getString(String key) {
+  public static String getString(String key, Object... params) {
     try {
-      return RESOURCE_BUNDLE.getString(key);
-    } catch (MissingResourceException e) {
+      return MessageFormat.format(RESOURCE_BUNDLE.getString(key), params);
+    } catch (MissingResourceException ex) {
       return '!' + key + '!';
     }
   }
