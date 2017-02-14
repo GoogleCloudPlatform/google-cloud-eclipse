@@ -183,7 +183,8 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   }
 
   private void setupProjectIdDataBinding(DataBindingContext context) {
-    IViewerObservableValue projectList = ViewerProperties.singleSelection().observe(projectSelector.getViewer());
+    IViewerObservableValue projectList =
+        ViewerProperties.singleSelection().observe(projectSelector.getViewer());
     IObservableValue projectIdModel = PojoProperties.value("projectId").observe(model);
 
     IValidator validator = new ProjectSelectorValidator(requireValues);
