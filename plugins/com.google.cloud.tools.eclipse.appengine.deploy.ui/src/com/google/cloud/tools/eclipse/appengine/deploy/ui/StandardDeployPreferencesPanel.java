@@ -45,6 +45,7 @@ import org.eclipse.core.databinding.observable.Observables;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.WritableValue;
+import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.resources.IProject;
@@ -184,11 +185,13 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   private void setupProjectIdDataBinding(DataBindingContext context) {
     IViewerObservableValue projectList = ViewerProperties.singleSelection().observe(projectSelector.getViewer());
     IObservableValue projectIdModel = PojoProperties.value("projectId").observe(model);
+
+    IValidator validator = new ProjectSelectorValidator(requireValues);
     context.bindValue(projectList, projectIdModel,
                       new UpdateValueStrategy().setConverter(new GcpProjectToProjectIdConverter())
-                          .setAfterConvertValidator(new ProjectSelectorValidator(requireValues)),
+                          .setAfterConvertValidator(validator),
                       new UpdateValueStrategy().setConverter(new ProjectIdToGcpProjectConverter())
-                          .setAfterGetValidator(new ProjectSelectorValidator(requireValues)));
+                          .setAfterGetValidator(validator));
   }
 
   private void setupProjectVersionDataBinding(DataBindingContext context) {
