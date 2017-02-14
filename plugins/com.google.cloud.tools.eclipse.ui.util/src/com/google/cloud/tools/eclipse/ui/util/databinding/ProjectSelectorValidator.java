@@ -17,36 +17,27 @@
 package com.google.cloud.tools.eclipse.ui.util.databinding;
 
 import com.google.cloud.tools.eclipse.ui.util.Messages;
-import com.google.cloud.tools.project.ProjectIdValidator;
+import com.google.common.base.Preconditions;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
 
-public class ProjectIdInputValidator implements IValidator {
+public class ProjectSelectorValidator implements IValidator {
   private boolean requireProjectId = true;
 
-  public ProjectIdInputValidator(boolean requireProjectId) {
+  public ProjectSelectorValidator(boolean requireProjectId) {
     this.requireProjectId = requireProjectId;
   }
 
   @Override
   public IStatus validate(Object input) {
-    if (!(input instanceof String)) {
-      return ValidationStatus.error(Messages.getString("project.id.invalid")); //$NON-NLS-1$
-    }
-    String value = (String) input;
-    return validateString(value);
-  }
+    Preconditions.checkState(input == null || input instanceof String);
 
-  private IStatus validateString(String value) {
-    if (value.isEmpty()) {
-      return requireProjectId ?
-          ValidationStatus.error(Messages.getString("project.id.empty")) : //$NON-NLS-1$
-          ValidationStatus.ok();
-    } else if (ProjectIdValidator.validate(value)) {
-      return ValidationStatus.ok();
-    } else {
-      return ValidationStatus.error(Messages.getString("project.id.invalid")); //$NON-NLS-1$
+    if (requireProjectId) {
+      if (input == null || ((String) input).isEmpty()) {
+        return ValidationStatus.error(Messages.getString("project.not.selected")); //$NON-NLS-1$
+      }
     }
+    return ValidationStatus.ok();
   }
 }

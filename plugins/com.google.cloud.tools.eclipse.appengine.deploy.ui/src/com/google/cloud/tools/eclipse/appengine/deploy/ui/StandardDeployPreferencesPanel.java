@@ -20,12 +20,13 @@ import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelectorObservableValue;
-import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import com.google.cloud.tools.eclipse.projectselector.GcpProject;
+import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepositoryException;
 import com.google.cloud.tools.eclipse.projectselector.ProjectSelector;
 import com.google.cloud.tools.eclipse.ui.util.FontUtil;
 import com.google.cloud.tools.eclipse.ui.util.databinding.BucketNameValidator;
+import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectSelectorValidator;
 import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectVersionValidator;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -184,8 +185,10 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     IViewerObservableValue projectList = ViewerProperties.singleSelection().observe(projectSelector.getViewer());
     IObservableValue projectIdModel = PojoProperties.value("projectId").observe(model);
     context.bindValue(projectList, projectIdModel,
-                      new UpdateValueStrategy().setConverter(new GcpProjectToProjectIdConverter()),
-                      new UpdateValueStrategy().setConverter(new ProjectIdToGcpProjectConverter()));
+                      new UpdateValueStrategy().setConverter(new GcpProjectToProjectIdConverter())
+                          .setAfterConvertValidator(new ProjectSelectorValidator(requireValues)),
+                      new UpdateValueStrategy().setConverter(new ProjectIdToGcpProjectConverter())
+                          .setAfterGetValidator(new ProjectSelectorValidator(requireValues)));
   }
 
   private void setupProjectVersionDataBinding(DataBindingContext context) {
