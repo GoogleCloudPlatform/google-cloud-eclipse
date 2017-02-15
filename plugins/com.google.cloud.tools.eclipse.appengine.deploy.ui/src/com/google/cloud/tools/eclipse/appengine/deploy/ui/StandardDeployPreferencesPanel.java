@@ -496,8 +496,4 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     expandableComposite.setFont(font);
     FontUtil.convertFontToBold(expandableComposite);
   }
-
-  boolean hasSelection() {
-    return projectSelector.hasSelection();
-  }
 }

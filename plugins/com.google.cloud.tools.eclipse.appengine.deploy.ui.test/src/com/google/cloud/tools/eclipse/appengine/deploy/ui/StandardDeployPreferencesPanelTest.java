@@ -17,7 +17,6 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -81,13 +80,6 @@ public class StandardDeployPreferencesPanelTest {
   }
 
   @Test
-  public void testHasSelection() {
-    StandardDeployPreferencesPanel deployPanel = new StandardDeployPreferencesPanel(
-        parent, project, loginService, layoutChangedHandler, true, projectRepository);
-    assertFalse(deployPanel.hasSelection());
-  }
-  
-  @Test
   public void testSelectSingleAccount() {
     when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1)));
     StandardDeployPreferencesPanel deployPanel = new StandardDeployPreferencesPanel(
@@ -148,7 +140,7 @@ public class StandardDeployPreferencesPanelTest {
     fail("Did not find ProjectSelector widget");
   }
 
-  private void initializeProjectRepository(ProjectRepository projectRepository) 
+  private void initializeProjectRepository(ProjectRepository projectRepository)
       throws ProjectRepositoryException {
     GcpProject project1 = new GcpProject("Project1", "projectId1");
     GcpProject project2 = new GcpProject("Project2", "projectId2");
