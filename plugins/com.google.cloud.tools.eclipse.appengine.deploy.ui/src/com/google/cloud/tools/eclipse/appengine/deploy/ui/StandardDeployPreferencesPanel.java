@@ -188,12 +188,17 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
         ViewerProperties.singleSelection().observe(projectSelector.getViewer());
     IObservableValue projectIdModel = PojoProperties.value("projectId").observe(model);
 
-    IValidator validator = requireValues ? new ProjectSelectorValidator() : null;
-    context.bindValue(projectList, projectIdModel,
-                      new UpdateValueStrategy().setConverter(new GcpProjectToProjectIdConverter())
-                          .setAfterConvertValidator(validator),
-                      new UpdateValueStrategy().setConverter(new ProjectIdToGcpProjectConverter())
-                          .setAfterGetValidator(validator));
+    UpdateValueStrategy gcpProjectToProjectId =
+        new UpdateValueStrategy().setConverter(new GcpProjectToProjectIdConverter());
+    UpdateValueStrategy projectIdToGcpProject =
+        new UpdateValueStrategy().setConverter(new ProjectIdToGcpProjectConverter());
+    if (requireValues) {
+      IValidator validator = new ProjectSelectorValidator();
+      gcpProjectToProjectId.setAfterConvertValidator(validator);
+      projectIdToGcpProject.setAfterGetValidator(validator);
+    }
+
+    context.bindValue(projectList, projectIdModel, gcpProjectToProjectId, projectIdToGcpProject);
   }
 
   private void setupProjectVersionDataBinding(DataBindingContext context) {
@@ -391,11 +396,11 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
     @Override
     public Object convert(Object fromObject) {
-      Preconditions.checkArgument(fromObject == null || fromObject instanceof String);
-
       if (fromObject == null) {
         return null;
       }
+
+      Preconditions.checkArgument(fromObject instanceof String);
       try {
         return projectRepository.getProject(accountSelector.getSelectedCredential(),
                                            (String) fromObject);
@@ -413,11 +418,11 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
     @Override
     public Object convert(Object fromObject) {
-      Preconditions.checkArgument(fromObject == null || fromObject instanceof GcpProject);
-
       if (fromObject == null) {
         return null;
       }
+
+      Preconditions.checkArgument(fromObject instanceof GcpProject);
       return ((GcpProject) fromObject).getId();
     }
   }
