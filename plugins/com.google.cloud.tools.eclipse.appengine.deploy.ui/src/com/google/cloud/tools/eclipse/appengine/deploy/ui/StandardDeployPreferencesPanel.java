@@ -30,6 +30,7 @@ import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectSelectorValidat
 import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectVersionValidator;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.util.Collections;
 import java.util.List;
@@ -187,7 +188,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
         ViewerProperties.singleSelection().observe(projectSelector.getViewer());
     IObservableValue projectIdModel = PojoProperties.value("projectId").observe(model);
 
-    IValidator validator = new ProjectSelectorValidator(requireValues);
+    IValidator validator = requireValues ? new ProjectSelectorValidator() : null;
     context.bindValue(projectList, projectIdModel,
                       new UpdateValueStrategy().setConverter(new GcpProjectToProjectIdConverter())
                           .setAfterConvertValidator(validator),
@@ -390,6 +391,8 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
     @Override
     public Object convert(Object fromObject) {
+      Preconditions.checkArgument(fromObject == null || fromObject instanceof String);
+
       if (fromObject == null) {
         return null;
       }
@@ -410,6 +413,8 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
     @Override
     public Object convert(Object fromObject) {
+      Preconditions.checkArgument(fromObject == null || fromObject instanceof GcpProject);
+
       if (fromObject == null) {
         return null;
       }

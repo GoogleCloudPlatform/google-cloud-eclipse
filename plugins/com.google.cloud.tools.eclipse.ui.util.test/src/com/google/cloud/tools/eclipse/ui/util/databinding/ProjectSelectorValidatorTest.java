@@ -26,17 +26,11 @@ public class ProjectSelectorValidatorTest {
 
   @Test
   public void testValidate_nullString() {
-    assertThat(new ProjectSelectorValidator(false /* requireProjectId */)
-        .validate(null).getSeverity(),is(IStatus.OK));
-    assertThat(new ProjectSelectorValidator(true /* requireProjectId */)
-        .validate(null).getSeverity(),is(IStatus.ERROR));
+    assertThat(new ProjectSelectorValidator().validate(null).getSeverity(),is(IStatus.ERROR));
   }
 
   @Test
   public void testValidate_emptyString() {
-    assertThat(new ProjectSelectorValidator(false /* requireProjectId */)
-        .validate("").getSeverity(),is(IStatus.OK));
-    assertThat(new ProjectSelectorValidator(true /* requireProjectId */)
-        .validate("").getSeverity(),is(IStatus.ERROR));
+    assertThat(new ProjectSelectorValidator().validate("").getSeverity(),is(IStatus.ERROR));
   }
 }

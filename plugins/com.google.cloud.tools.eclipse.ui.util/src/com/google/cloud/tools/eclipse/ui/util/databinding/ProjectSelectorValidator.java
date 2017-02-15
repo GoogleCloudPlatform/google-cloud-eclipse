@@ -17,26 +17,16 @@
 package com.google.cloud.tools.eclipse.ui.util.databinding;
 
 import com.google.cloud.tools.eclipse.ui.util.Messages;
-import com.google.common.base.Preconditions;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
 
 public class ProjectSelectorValidator implements IValidator {
-  private boolean requireProjectId = true;
-
-  public ProjectSelectorValidator(boolean requireProjectId) {
-    this.requireProjectId = requireProjectId;
-  }
 
   @Override
   public IStatus validate(Object input) {
-    Preconditions.checkState(input == null || input instanceof String);
-
-    if (requireProjectId) {
-      if (input == null || ((String) input).isEmpty()) {
-        return ValidationStatus.error(Messages.getString("project.not.selected")); //$NON-NLS-1$
-      }
+    if (input == null || ((String) input).isEmpty()) {
+      return ValidationStatus.error(Messages.getString("project.not.selected")); //$NON-NLS-1$
     }
     return ValidationStatus.ok();
   }
