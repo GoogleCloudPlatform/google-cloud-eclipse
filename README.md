@@ -33,7 +33,7 @@ Maven for building Eclipse bundles and features.
 1. git (optional: you can use EGit from within Eclipse instead)
 
 1. Clone the project to a local directory using `git clone
-   https://github.com/GoogleCloudPlatform/cloud-eclipse-for-tools.git`.
+   https://github.com/GoogleCloudPlatform/google-cloud-eclipse.git`.
 
 
 ##Configuring Maven/Tycho Builds
@@ -78,7 +78,7 @@ configure Maven for a Java 7 toolchain on a Mac might be:
       <vendor>oracle</vendor>
     </provides>
     <configuration>
-      <jdkHome>/Library/Java/JavaVirtualMachines/jdk1.7.0_75.jdk/Contents/Home/jre</jdkHome>
+      <jdkHome>/Library/Java/JavaVirtualMachines/jdk1.7.0_79.jdk/Contents/Home/jre</jdkHome>
     </configuration>
   </toolchain>
 </toolchains>

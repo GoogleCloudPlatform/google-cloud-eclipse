@@ -4,7 +4,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Tests for GCloud for Eclipse Login Support
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.appengine.login.test
-Bundle-Vendor: Google, Inc.
+Bundle-Vendor: Google Inc.
 Bundle-Version: 0.1.0.qualifier
 Fragment-Host: com.google.cloud.tools.eclipse.appengine.login
 Require-Bundle: org.junit;bundle-version="4.12.0"

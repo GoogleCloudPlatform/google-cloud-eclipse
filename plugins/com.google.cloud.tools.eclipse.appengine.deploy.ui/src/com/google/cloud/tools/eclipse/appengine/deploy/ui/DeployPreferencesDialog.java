@@ -1,3 +1,19 @@
+/*
+ * Copyright 2016 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
 import org.eclipse.core.databinding.ValidationStatusProvider;
@@ -16,6 +32,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
+import com.google.api.client.auth.oauth2.Credential;
+import com.google.cloud.tools.eclipse.appengine.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
 import com.google.common.base.Preconditions;
 
@@ -25,14 +43,18 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
   // seems like an Eclipse/JFace bug
   private Image titleImage = AppEngineImages.appEngine(64).createImage();
 
-  private DeployPreferencesPanel content;
+  private StandardDeployPreferencesPanel content;
   private IProject project;
+  private IGoogleLoginService loginService;
 
-  public DeployPreferencesDialog(Shell parentShell, IProject project) {
+  public DeployPreferencesDialog(Shell parentShell, IProject project,
+                                 IGoogleLoginService loginService) {
     super(parentShell);
 
     Preconditions.checkNotNull(project, "project is null");
+    Preconditions.checkNotNull(loginService, "loginService is null");
     this.project = project;
+    this.loginService = loginService;
   }
 
   @Override
@@ -46,18 +68,21 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
       setTitleImage(titleImage);
     }
 
+    getButton(IDialogConstants.OK_ID).setText(Messages.getString("deploy"));
+    
     // TitleAreaDialogSupport does not validate initially, let's trigger validation this way
     content.getDataBindingContext().updateTargets();
 
     return contents;
   }
-  
+
   @Override
   protected Control createDialogArea(final Composite parent) {
     Composite dialogArea = (Composite) super.createDialogArea(parent);
 
     Composite container = new Composite(dialogArea, SWT.NONE);
-    content = new DeployPreferencesPanel(container, project, getLayoutChangedHandler());
+    content = new StandardDeployPreferencesPanel(container, project, loginService,
+        getLayoutChangedHandler(), true /* requireValues */);
     GridDataFactory.fillDefaults().grab(true, false).applyTo(content);
 
     // we pull in Dialog's content margins which are zeroed out by TitleAreaDialog
@@ -114,5 +139,9 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
     if (okButton != null) {
       okButton.setEnabled(isValid);
     }
+  }
+
+  public Credential getCredential() {
+    return content.getSelectedCredential();
   }
 }

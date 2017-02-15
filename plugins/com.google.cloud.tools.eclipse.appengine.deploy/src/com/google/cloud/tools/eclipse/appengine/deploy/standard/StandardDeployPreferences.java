@@ -1,3 +1,19 @@
+/*
+ * Copyright 2016 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.google.cloud.tools.eclipse.appengine.deploy.standard;
 
 import org.eclipse.core.resources.IProject;
@@ -11,6 +27,7 @@ public class StandardDeployPreferences {
 
   public static final String PREFERENCE_STORE_QUALIFIER = "com.google.cloud.tools.eclipse.appengine.deploy";
 
+  static final String PREF_ACCOUNT_EMAIL = "account.email";
   static final String PREF_PROJECT_ID = "project.id";
   static final String PREF_OVERRIDE_DEFAULT_VERSIONING = "project.version.overrideDefault"; // boolean
   static final String PREF_CUSTOM_VERSION = "project.version";
@@ -37,6 +54,15 @@ public class StandardDeployPreferences {
 
   public void save() throws BackingStoreException {
     preferenceStore.flush();
+  }
+
+  public String getAccountEmail() {
+    return preferenceStore.get(PREF_ACCOUNT_EMAIL,
+                               DeployPreferenceInitializer.DEFAULT_ACCOUNT_EMAIL);
+  }
+
+  public void setAccountEmail(String accountEmail) {
+    preferenceStore.put(PREF_ACCOUNT_EMAIL, accountEmail);
   }
 
   public String getProjectId() {

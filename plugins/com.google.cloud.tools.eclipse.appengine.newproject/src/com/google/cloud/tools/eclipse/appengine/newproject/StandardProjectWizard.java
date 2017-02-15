@@ -1,5 +1,24 @@
+/*
+ * Copyright 2016 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
+import com.google.cloud.tools.appengine.cloudsdk.AppEngineJavaComponentsNotInstalledException;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineComponentPage;
 import com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPrompter;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
@@ -25,13 +44,17 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
 
   public StandardProjectWizard() {
     this.setWindowTitle("New App Engine Standard Project");
-    page = new AppEngineStandardWizardPage();
     setNeedsProgressMonitor(true);
   }
 
   @Override
   public void addPages() {
-    this.addPage(page);
+    if (appEngineJavaComponentExists()) {
+      page = new AppEngineStandardWizardPage();
+      this.addPage(page);
+    } else {
+      this.addPage(new AppEngineComponentPage(true /* forNativeProjectWizard */));
+    }
   }
 
   @Override
@@ -48,10 +71,8 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
       }
       config.setCloudSdkLocation(location);
     }
-    // todo is this the right time/place to grab these?
-    config.setAppEngineProjectId(page.getAppEngineProjectId());
-    config.setPackageName(page.getPackageName());
 
+    config.setPackageName(page.getPackageName());
     config.setProject(page.getProjectHandle());
     if (!page.useDefaults()) {
       config.setEclipseProjectLocationUri(page.getLocationURI());
@@ -91,6 +112,15 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
 
   @Override
   public void init(IWorkbench workbench, IStructuredSelection selection) {
+  }
+
+  private boolean appEngineJavaComponentExists() {
+    try {
+      new CloudSdk.Builder().build().validateAppEngineJavaComponents();
+      return true;
+    } catch (AppEngineJavaComponentsNotInstalledException ex) {
+      return false;
+    }
   }
 
 }

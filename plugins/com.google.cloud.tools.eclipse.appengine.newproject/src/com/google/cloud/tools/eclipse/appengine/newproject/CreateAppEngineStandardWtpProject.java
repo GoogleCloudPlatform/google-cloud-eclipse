@@ -1,21 +1,42 @@
+/*
+ * Copyright 2016 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.appengine.libraries.AppEngineLibraryContainerResolverJob;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
-
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.EclipseContextFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -28,10 +49,7 @@ import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.ide.undo.CreateProjectOperation;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
-
-import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
-import com.google.cloud.tools.eclipse.appengine.libraries.Library;
-import com.google.common.annotations.VisibleForTesting;
+import org.osgi.framework.FrameworkUtil;
 
 /**
 * Utility to make a new Eclipse project with the App Engine Standard facets in the workspace.  
@@ -74,29 +92,58 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
         facetedProject, true /* installDependentFacets */, monitor);
     AppEngineStandardFacet.installAllAppEngineRuntimes(facetedProject, true /* force */, monitor);
     
-    setProjectIdPreference(newProject);
-
     addAppEngineLibrariesToBuildPath(newProject, config.getAppEngineLibraries(), monitor);
 
     addJunit4ToClasspath(monitor, newProject);
   }
 
-  private void addAppEngineLibrariesToBuildPath(IProject newProject, List<Library> libraries, IProgressMonitor monitor) throws CoreException {
-    SubMonitor subMonitor = SubMonitor.convert(monitor, libraries.size());
-    subMonitor.setTaskName("Adding AppEngine libraries");
+  private void addAppEngineLibrariesToBuildPath(IProject newProject,
+                                                List<Library> libraries,
+                                                IProgressMonitor monitor) throws CoreException {
+    if (libraries.isEmpty()) {
+      return;
+    }
+    SubMonitor subMonitor = SubMonitor.convert(monitor, "Adding App Engine libraries", libraries.size());
     IJavaProject javaProject = JavaCore.create(newProject);
     IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
     IClasspathEntry[] newRawClasspath = Arrays.copyOf(rawClasspath, rawClasspath.length + libraries.size());
     for (int i = 0; i < libraries.size(); i++) {
       Library library = libraries.get(i);
+      IClasspathAttribute[] classpathAttributes;
+      if (library.isExport()) {
+        classpathAttributes =
+            new IClasspathAttribute[] { UpdateClasspathAttributeUtil.createDependencyAttribute(true /* isWebApp */) };
+      } else {
+        classpathAttributes =
+            new IClasspathAttribute[] { UpdateClasspathAttributeUtil.createNonDependencyAttribute() };
+      }
+
       IClasspathEntry libraryContainer = JavaCore.newContainerEntry(library.getContainerPath(),
                                                                     new IAccessRule[0],
-                                                                    new IClasspathAttribute[0],
+                                                                    classpathAttributes,
                                                                     false);
       newRawClasspath[rawClasspath.length + i] = libraryContainer;
       subMonitor.worked(1);
     }
     javaProject.setRawClasspath(newRawClasspath, monitor);
+    
+    runContainerResolverJob(javaProject);
+  }
+
+  private void runContainerResolverJob(IJavaProject javaProject) {
+    IEclipseContext context =
+        EclipseContextFactory.getServiceContext(FrameworkUtil.getBundle(getClass()).getBundleContext());
+    final IEclipseContext childContext = context.createChild(AppEngineLibraryContainerResolverJob.class.getName());
+    childContext.set(IJavaProject.class, javaProject);
+    AppEngineLibraryContainerResolverJob job =
+        ContextInjectionFactory.make(AppEngineLibraryContainerResolverJob.class, childContext);
+    job.addJobChangeListener(new JobChangeAdapter() {
+      @Override
+      public void done(IJobChangeEvent event) {
+        childContext.dispose();
+      }
+    });
+    job.schedule();
   }
 
   private void addJunit4ToClasspath(IProgressMonitor monitor, final IProject newProject) throws CoreException,
@@ -111,16 +158,6 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
     IClasspathEntry[] newRawClasspath = Arrays.copyOf(rawClasspath, rawClasspath.length + 1);
     newRawClasspath[newRawClasspath.length - 1] = junit4Container;
     javaProject.setRawClasspath(newRawClasspath, monitor);
-  }
-
-  @VisibleForTesting
-  void setProjectIdPreference(IProject project) {
-    String projectId = config.getAppEngineProjectId();
-    if (projectId != null && !projectId.isEmpty()) {
-      IEclipsePreferences preferences = new ProjectScope(project)
-          .getNode("com.google.cloud.tools.eclipse.appengine.deploy");
-      preferences.put("project.id", projectId);
-    }
   }
 
 }

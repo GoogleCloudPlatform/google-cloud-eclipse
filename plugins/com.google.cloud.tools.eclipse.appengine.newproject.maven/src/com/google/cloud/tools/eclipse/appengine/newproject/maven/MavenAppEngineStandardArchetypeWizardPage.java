@@ -1,7 +1,23 @@
+/*
+ * Copyright 2016 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 
-import java.util.Arrays;
-import java.util.Collections;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
+import com.google.common.annotations.VisibleForTesting;
 
 import org.apache.maven.archetype.catalog.Archetype;
 import org.eclipse.jface.dialogs.Dialog;
@@ -15,25 +31,26 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.List;
 
-import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
-import com.google.common.annotations.VisibleForTesting;
+import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * UI to select an archetype in creating a new Maven-based App Engine Standard Java project.
  */
 public class MavenAppEngineStandardArchetypeWizardPage extends WizardPage {
-
+  
   @VisibleForTesting
   static final java.util.List<ArchetypeTuple> PRESET_ARCHETYPES =
       Collections.unmodifiableList(Arrays.asList(
           new ArchetypeTuple("com.google.appengine.archetypes", //$NON-NLS-1$
-              "appengine-skeleton-archetype", //$NON-NLS-1$
-              Messages.getString("APPENGINE_SKELETON_ARCHETYPE_DISPLAY_NAME"), //$NON-NLS-1$
-              Messages.getString("APPENGINE_SKELETON_ARCHETYPE_DESCRIPTION")), //$NON-NLS-1$
+              "appengine-standard-archetype", //$NON-NLS-1$
+              Messages.getString("APPENGINE_STANDARD_ARCHETYPE_DISPLAY_NAME"), //$NON-NLS-1$
+              Messages.getString("APPENGINE_STANDARD_ARCHETYPE_DESCRIPTION")), //$NON-NLS-1$
           new ArchetypeTuple("com.google.appengine.archetypes", //$NON-NLS-1$
               "guestbook-archetype", //$NON-NLS-1$
               Messages.getString("APPENGINE_GUESTBOOK_ARCHETYPE_DISPLAY_NAME"), //$NON-NLS-1$
-              Messages.getString("APPENGINE_GUESTBOOK_ARCHETYPE_DESCRIPTION")))); //$NON-NLS-1$
+              Messages.getString("APPENGINE_GUESTBOOK_ARCHETYPE_DESCRIPTION")  //$NON-NLS-1$
+           )));
 
   // UI components
   private List archetypeList;
@@ -41,8 +58,8 @@ public class MavenAppEngineStandardArchetypeWizardPage extends WizardPage {
 
   public MavenAppEngineStandardArchetypeWizardPage() {
     super("newProjectArchetypePage"); //$NON-NLS-1$
-    setTitle("Maven-based App Engine Standard Project");
-    setDescription("Select an Archetype");
+    setTitle(Messages.getString("WIZARD_TITLE")); //$NON-NLS-1$
+    setDescription(Messages.getString("SELECT_AN_ARCHETYPE")); //$NON-NLS-1$
     setImageDescriptor(AppEngineImages.googleCloudPlatform(32));
   }
 
@@ -92,7 +109,7 @@ public class MavenAppEngineStandardArchetypeWizardPage extends WizardPage {
     Archetype archetype;
     String displayName;
     String description;
-
+    
     ArchetypeTuple(String groupId, String artifactId, String displayName, String description) {
       archetype = new Archetype();
       archetype.setGroupId(groupId);

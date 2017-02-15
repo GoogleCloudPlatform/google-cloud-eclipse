@@ -34,13 +34,21 @@
             runtime="true"
             runtimeTypeId="com.google.cloud.tools.eclipse.appengine.standard.runtime"
             startBeforePublish="false"
-            supportsRemoteHosts="false">
+            supportsRemoteHosts="true">
       </serverType>
    </extension>
+
+   <extension point="org.eclipse.wst.server.ui.serverCreationWizardPageExtension">
+      <serverCreationWizardPageExtension
+            class="com.google.cloud.tools.eclipse.appengine.localserver.ui.ServerPortExtension"
+            id="com.google.cloud.tools.eclipse.appengine.standard.server.wizardExtension">
+      </serverCreationWizardPageExtension>
+   </extension>
+
    <extension
          point="org.eclipse.jst.server.core.runtimeClasspathProviders">
       <runtimeClasspathProvider
-            class="com.google.cloud.tools.eclipse.appengine.localserver.ServletClasspathProvider"
+            class="com.google.cloud.tools.eclipse.util.service.ServiceContextFactory:com.google.cloud.tools.eclipse.appengine.localserver.ServletClasspathProvider"
             id="com.google.cloud.tools.eclipse.appengine.standard.runtimeClasspathProvider"
             runtimeTypeIds="com.google.cloud.tools.eclipse.appengine.standard.runtime">
       </runtimeClasspathProvider>
@@ -143,6 +151,19 @@
                 <instanceof value="com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineConsole"/>
               </enablement>    
       </consolePageParticipant>
+   </extension>
+   <extension
+         id="urlLinker"
+         point="org.eclipse.ui.console.consolePatternMatchListeners">
+    <!-- pretty liberal URL pattern matcher -->
+    <consolePatternMatchListener
+      class="com.google.cloud.tools.eclipse.ui.util.console.PatternToHyperlinkConverter"
+      id="com.google.cloud.tools.eclipse.appengine.deploy.consolePatternMatchListener"
+      regex="https?://([\w-]+\.?)+(:\w+)?(/[^\s]*)?">
+      <enablement>
+        <instanceof value="com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineConsole"/>
+      </enablement>
+    </consolePatternMatchListener>
    </extension>
    <extension
          id="com.google.cloud.tools.eclipse.appengineDefaultFacet"

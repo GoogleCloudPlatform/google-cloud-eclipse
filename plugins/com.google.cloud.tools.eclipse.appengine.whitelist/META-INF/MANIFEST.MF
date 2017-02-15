@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Cloud Tools for Eclipse App Engine JRE Whitelist Checks
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.appengine.whitelist;singleton:=true
 Bundle-Version: 0.1.0.qualifier
-Bundle-Vendor: Google, Inc.
+Bundle-Vendor: Google Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Require-Bundle: org.eclipse.core.resources,
   org.eclipse.core.runtime,

@@ -1,11 +1,11 @@
 /*
- * Copyright 2016 Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,14 +18,15 @@ package com.google.cloud.tools.eclipse.integration.appengine;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotProjectActions;
 import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
+import com.google.common.base.Joiner;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
@@ -45,8 +46,7 @@ public class NewNativeAppEngineStandardProjectTest extends AbstractProjectTests 
     String[] projectFiles = {"src/main/java/HelloAppEngine.java",
         "src/main/webapp/META-INF/MANIFEST.MF", "src/main/webapp/WEB-INF/appengine-web.xml",
         "src/main/webapp/WEB-INF/web.xml", "src/main/webapp/index.html"};
-    createAndCheck("appWithDefault", null, null, null, projectFiles);
-    assertNull(SwtBotAppEngineActions.getAppEngineProjectId(project.getFile("src/main/webapp/WEB-INF/appengine-web.xml")));
+    createAndCheck("appWithDefault", null, projectFiles);
   }
 
   @Test
@@ -54,41 +54,30 @@ public class NewNativeAppEngineStandardProjectTest extends AbstractProjectTests 
     String[] projectFiles = {"src/main/java/app/engine/test/HelloAppEngine.java",
         "src/main/webapp/META-INF/MANIFEST.MF", "src/main/webapp/WEB-INF/appengine-web.xml",
         "src/main/webapp/WEB-INF/web.xml", "src/main/webapp/index.html",};
-    createAndCheck("appWithPackage", null, "app.engine.test", null, projectFiles);
-    assertNull(SwtBotAppEngineActions.getAppEngineProjectId(project.getFile("src/main/webapp/WEB-INF/appengine-web.xml")));
-  }
-
-  @Test
-  public void testWithPackageAndProjectId() throws Exception {
-    String[] projectFiles = {"src/main/java/app/engine/test/HelloAppEngine.java",
-        "src/main/webapp/META-INF/MANIFEST.MF", "src/main/webapp/WEB-INF/appengine-web.xml",
-        "src/main/webapp/WEB-INF/web.xml", "src/main/webapp/index.html",};
-    createAndCheck("appWithPackageAndProjectId", null, "app.engine.test", "my-project-id",
-        projectFiles);
-    assertNull(
-        SwtBotAppEngineActions.getAppEngineProjectId(project.getFile("src/main/webapp/WEB-INF/appengine-web.xml")));
+    createAndCheck("appWithPackage", "app.engine.test", projectFiles);
   }
 
   /** Create a project with the given parameters. */
-  private void createAndCheck(String projectName, String location, String packageName,
-      String projectId, String[] projectFiles) throws Exception {
+  private void createAndCheck(String projectName, String packageName, String[] projectFiles)
+                                                                              throws CoreException {
     assertFalse(projectExists(projectName));
-    project = SwtBotAppEngineActions.createNativeWebAppProject(bot, projectName, location,
-        packageName, projectId);
+    project = SwtBotAppEngineActions.createNativeWebAppProject(bot, projectName, null,
+        packageName);
     assertTrue(project.exists());
 
     IFacetedProject facetedProject = new FacetedProjectHelper().getFacetedProject(project);
     assertNotNull("Native App Engine projects should be faceted", facetedProject);
-    assertTrue(
+    assertTrue("Project does not have standard facet",
         new FacetedProjectHelper().projectHasFacet(facetedProject, AppEngineStandardFacet.ID));
 
     for (String projectFile : projectFiles) {
       Path projectFilePath = new Path(projectFile);
       assertTrue(project.exists(projectFilePath));
     }
-    List<String> errorsInProblemsView = SwtBotProjectActions.getErrorsInProblemsView(bot);
-    if (!errorsInProblemsView.isEmpty()) {
-      fail(errorsInProblemsView.get(0));
+    List<String> buildErrors = SwtBotProjectActions.getAllBuildErrors(bot);
+    if (!buildErrors.isEmpty()) {
+      String errorsString = Joiner.on("\n").join(buildErrors);
+      fail(errorsString);
     }
   }
 }

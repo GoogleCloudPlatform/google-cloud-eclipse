@@ -1,11 +1,11 @@
 /*
- * Copyright 2016 Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -67,7 +67,7 @@ public class DebugNativeAppEngineStandardProject extends AbstractProjectTests {
     assertNoService(new URL("http://localhost:8080/hello"));
 
     project = SwtBotAppEngineActions.createNativeWebAppProject(bot, "testapp", null,
-        "app.engine.test", "my-project-id");
+        "app.engine.test");
     assertTrue(project.exists());
 
     SWTBotTreeItem project = SwtBotProjectActions.selectProject(bot, "testapp");
@@ -126,13 +126,12 @@ public class DebugNativeAppEngineStandardProject extends AbstractProjectTests {
     }
   }
 
-
   /**
    * Read the content as a string from the specified URL.
    * 
    * @throws IOException if cannot connect or timeout
    */
-  private String getUrlContents(URL url, int timeoutInMilliseconds) throws IOException {
+  private static String getUrlContents(URL url, int timeoutInMilliseconds) throws IOException {
     StringBuilder content = new StringBuilder();
     URLConnection conn = url.openConnection();
     conn.setConnectTimeout(100); // ms

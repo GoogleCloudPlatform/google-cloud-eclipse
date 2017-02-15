@@ -8,7 +8,6 @@ set -x
 # create a timestamp file
 date +%s > timestamp.txt
 
-cd git/google-cloud-eclipse
-./sign.sh
+git/google-cloud-eclipse/kokoro/ubuntu/sign.sh
 
 

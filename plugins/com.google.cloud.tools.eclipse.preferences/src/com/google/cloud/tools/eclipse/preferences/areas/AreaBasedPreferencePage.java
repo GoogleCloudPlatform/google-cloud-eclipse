@@ -1,11 +1,11 @@
 /*
- * Copyright 2016 Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,7 +24,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.RegistryFactory;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.jface.preference.IPersistentPreferenceStore;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
@@ -50,7 +49,7 @@ import java.util.logging.Logger;
 /**
  * A host preference page that hosts multiple <em>preference areas</em>. These
  * {@link PreferenceArea} are like embedded preference pages, like more complex JFace
- * {@linkplain FieldEditor}s.
+ * {@link org.eclipse.jface.preference.FieldEditor FieldEditor.
  */
 public class AreaBasedPreferencePage extends PreferencePage
     implements IWorkbenchPreferencePage, IExecutableExtension {

@@ -1,11 +1,11 @@
 /*
- * Copyright 2016 Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,7 +17,6 @@
 package com.google.cloud.tools.eclipse.preferences.areas;
 
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -27,7 +26,8 @@ import org.eclipse.ui.IWorkbench;
 
 /**
  * Abstract base class for preference areas. A preference area is somewhat like a
- * {@link FieldEditor} except that it is expected to be configured from an extension point.
+ * {@link org.eclipse.jface.preference.FieldEditor FieldEditor} except that it is expected to be
+ * configured from an extension point.
  * <p>
  * Preference areas should notify its listeners of changes using property change events.
  */

@@ -1,11 +1,11 @@
 /*
- * Copyright 2016 Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,12 +18,12 @@ package com.google.cloud.tools.eclipse.swtbot;
 
 import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widgetOfType;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.Widget;
@@ -35,6 +35,9 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotMenu;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * SWTBot utility methods that perform general workbench actions.
@@ -197,27 +200,36 @@ public final class SwtBotProjectActions {
     return new SWTBotTree(tree);
   }
 
-  /**
-   * Returns true if there are errors in the Problems view. Returns false otherwise.
-   */
-  public static List<String> getErrorsInProblemsView(SWTWorkbenchBot bot) {
-    // Open Problems View by Window -> show view -> Problems
-    bot.menu("Window").menu("Show View").menu("Problems").click();
-
-    SWTBotView view = bot.viewByPartName("Problems");
-    view.show();
-    SWTBotTree tree = view.bot().tree();
-
-    List<String> errors = new ArrayList<>();
-    
-    for (SWTBotTreeItem item : tree.getAllItems()) {
-      String text = item.getText();
-      if (text != null && text.startsWith("Errors")) {
-        errors.add(text);
+  /** Return the list of all problems in the workspace. */
+  public static List<String> getAllBuildErrors(SWTWorkbenchBot bot) {
+    IWorkspaceRoot root = getWorkspaceRoot();
+    List<String> foundProblems = new ArrayList<>();
+    for (IProject project : root.getProjects()) {
+      try {
+        IMarker[] problems = project.findMarkers(IMarker.PROBLEM, true /* includeSubtypes */,
+            IResource.DEPTH_INFINITE);
+        for (IMarker problem : problems) {
+          int severity = problem.getAttribute(IMarker.SEVERITY, IMarker.SEVERITY_INFO);
+          if (severity >= IMarker.SEVERITY_ERROR) {
+            foundProblems.add(formatProblem(problem));
+          }
+        }
+      } catch (CoreException ex) {
+        // re-throw as we shouldn't have problems in tests
+        throw new RuntimeException(ex);
       }
     }
+    return foundProblems;
+  }
 
-    return errors;
+  private static String formatProblem(IMarker problem) {
+    StringBuilder sb = new StringBuilder();
+    sb.append(problem.getResource().getFullPath());
+    sb.append(':');
+    sb.append(problem.getAttribute(IMarker.LINE_NUMBER, -1));
+    sb.append(": ");
+    sb.append(problem.getAttribute(IMarker.MESSAGE, ""));
+    return sb.toString();
   }
 
   /**

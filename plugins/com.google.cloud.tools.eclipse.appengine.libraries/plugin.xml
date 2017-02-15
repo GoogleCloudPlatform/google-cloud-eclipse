@@ -1,4 +1,85 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+  <extension-point id="com.google.cloud.tools.eclipse.appengine.libraries" name="App Engine Libraries" />
+  
+  <extension point="com.google.cloud.tools.eclipse.appengine.libraries"
+             id="com.google.cloud.tools.eclipse.appengine.libraries.defaultapis">
+    <library 
+          id="appengine-api"
+          name="App Engine API"
+          siteUri="https://cloud.google.com/appengine/docs/java/" >
+      <libraryFile
+            javadocUri="https://cloud.google.com/appengine/docs/java/javadoc/">
+        <mavenCoordinates
+              artifactId="appengine-api-1.0-sdk"
+              groupId="com.google.appengine" />
+        <exclusionFilter pattern="com/google/appengine/repackaged/**" />
+        <exclusionFilter pattern="com/google/appengine/labs/repackaged/**" />
+        <inclusionFilter pattern="com/google/apphosting/api/**" />
+        <exclusionFilter pattern="com/google/apphosting/**" />
+      </libraryFile>
+    </library>
+    <library
+          id="appengine-endpoints"
+          name="App Engine Endpoints"
+          siteUri="https://cloud.google.com/appengine/docs/java/endpoints/" >
+      <libraryDependency id="appengine-api" />
+      <libraryFile
+            javadocUri="https://cloud.google.com/appengine/docs/java/endpoints/javadoc/">
+        <mavenCoordinates
+              artifactId="appengine-endpoints"
+              groupId="com.google.appengine" />
+        <exclusionFilter pattern="com/google/appengine/repackaged/**" />
+      </libraryFile>
+    </library>
+    <library
+          id="objectify"
+          name="Objectify"
+          siteUri="https://github.com/objectify/objectify/wiki" >
+      <libraryFile
+            javadocUri="http://www.javadoc.io/doc/com.googlecode.objectify/objectify/">
+        <mavenCoordinates
+              artifactId="objectify"
+              groupId="com.googlecode.objectify" />
+      </libraryFile>
+    </library>
+
+    <library
+          id="servlet-api"
+          name="Servlet API 2.5"
+          siteUri="http://www.oracle.com/technetwork/java/javaee/servlet/index.html"
+          export="false"
+          recommendation="required" >
+      <libraryFile
+            javadocUri="https://docs.oracle.com/cd/E17802_01/products/products/servlet/2.5/docs/servlet-2_5-mr2/">
+        <mavenCoordinates
+              artifactId="servlet-api"
+              groupId="javax.servlet"
+              version="2.5" />
+      </libraryFile>
+    </library>
+
+    <library
+          id="jsp-api"
+          name="Java Server Pages API 2.1"
+          siteUri="http://www.oracle.com/technetwork/java/javaee/jsp/index.html"
+          export="false"
+          recommendation="optional" >
+      <libraryFile
+            javadocUri="http://docs.oracle.com/cd/E17802_01/products/products/jsp/2.1/docs/jsp-2_1-pfd2/">
+        <mavenCoordinates
+              artifactId="jsp-api"
+              groupId="javax.servlet.jsp"
+              version="2.1" />
+      </libraryFile>
+    </library>
+  </extension>
+
+  <extension
+        point="org.eclipse.jdt.core.classpathContainerInitializer">
+     <classpathContainerInitializer
+           class="com.google.cloud.tools.eclipse.appengine.libraries.AppEngineLibraryContainerInitializer"
+           id="com.google.cloud.tools.eclipse.appengine.libraries" />
+  </extension>
 </plugin>

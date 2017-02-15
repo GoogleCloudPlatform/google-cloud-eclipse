@@ -4,7 +4,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: App Engine Facet Tests
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.appengine.facets.test
-Bundle-Vendor: Google, Inc.
+Bundle-Vendor: Google Inc.
 Bundle-Version: 0.1.0.qualifier
 Fragment-Host: com.google.cloud.tools.eclipse.appengine.facets
 Require-Bundle: org.hamcrest;bundle-version="1.1.0",

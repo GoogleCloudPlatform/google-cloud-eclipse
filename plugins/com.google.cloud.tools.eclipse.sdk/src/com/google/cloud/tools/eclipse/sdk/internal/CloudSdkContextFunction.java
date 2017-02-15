@@ -1,11 +1,11 @@
 /*
- * Copyright 2016 Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,7 +22,6 @@ import com.google.common.collect.MapMaker;
 
 import org.eclipse.e4.core.contexts.ContextFunction;
 import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.core.di.IInjector;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -40,7 +39,7 @@ public class CloudSdkContextFunction extends ContextFunction {
   private static final Logger logger = Logger.getLogger(CloudSdkContextFunction.class.getName());
 
   @SuppressWarnings("restriction")
-  static final Object NOT_A_VALUE = IInjector.NOT_A_VALUE;
+  static final Object NOT_A_VALUE = org.eclipse.e4.core.di.IInjector.NOT_A_VALUE;
 
   /**
    * A list of referenced IEclipseContexts that must be updated on preference change.

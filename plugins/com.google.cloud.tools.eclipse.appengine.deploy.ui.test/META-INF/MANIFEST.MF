@@ -4,7 +4,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Tests for Cloud Tools for Eclipse App Engine Deployment Support
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.appengine.deploy.ui.test
-Bundle-Vendor: Google, Inc.
+Bundle-Vendor: Google Inc.
 Bundle-Version: 0.1.0.qualifier
 Fragment-Host: com.google.cloud.tools.eclipse.appengine.deploy.ui
 Require-Bundle: org.hamcrest;bundle-version="1.1.0",

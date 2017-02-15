@@ -63,7 +63,7 @@
     <tycho.showEclipseLog>true</tycho.showEclipseLog>
 
     <!--
-      `SYSTEM` means use the default JDK (necc for Travis).
+      `SYSTEM` means use the default JDK (necessary for Travis).
       `BREE` means find a configured JDK using Maven Toolchains matching
       the Bundle-RequiredExecutionEnvironment. See `README.md` for details.
     -->
@@ -93,7 +93,7 @@
       <!-- bundle: com.google.cloud.tools.app.lib -->
       <groupId>com.google.cloud.tools</groupId>
       <artifactId>appengine-plugins-core</artifactId>
-      <version>0.1.10</version>
+      <version>0.1.13</version>
     </dependency>
     <dependency>
       <!-- bundle: com.google.guava -->
@@ -138,7 +138,7 @@
             avoid access restriction on class due to restriction on
             required library
           -->
-          <compilerArgument>-warn:+discouraged,forbidden</compilerArgument>
+          <compilerArgument>-warn:+discouraged,+forbidden,-unavoidableGenericProblems,-warningToken</compilerArgument>
         </configuration>
       </plugin>
 

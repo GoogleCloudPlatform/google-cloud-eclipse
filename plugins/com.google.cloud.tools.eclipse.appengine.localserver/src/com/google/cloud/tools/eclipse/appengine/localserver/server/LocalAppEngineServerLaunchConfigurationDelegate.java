@@ -1,16 +1,17 @@
 /*
- * Copyright 2016 Google Inc. All Rights Reserved.
+ * Copyright 2016 Google Inc.
  *
- * All rights reserved. This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License v1.0 which
- * accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
@@ -21,8 +22,17 @@ import com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineCon
 import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -51,16 +61,6 @@ import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerListener;
 import org.eclipse.wst.server.core.ServerEvent;
 import org.eclipse.wst.server.core.ServerUtil;
-
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class LocalAppEngineServerLaunchConfigurationDelegate
     extends AbstractJavaLaunchConfigurationDelegate {
@@ -98,7 +98,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
     LocalAppEngineConsole console =
         MessageConsoleUtilities.findOrCreateConsole(configuration.getName(),
-                                            new LocalAppEngineConsole.Factory(serverBehaviour));
+            new LocalAppEngineConsole.Factory(serverBehaviour));
     console.clearConsole();
     console.activate();
 
@@ -118,11 +118,11 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
   /**
    * Listen for the server to enter STARTED and open a web browser on the server's main page
    */
-  protected void openBrowserPage(final ILaunchConfiguration configuration, final IServer server) {
+  protected void openBrowserPage(final IServer server) {
     if (!shouldOpenStartPage()) {
       return;
     }
-    final String pageLocation = determinePageLocation(server, configuration);
+    final String pageLocation = determinePageLocation(server);
     if (pageLocation == null) {
       return;
     }
@@ -162,7 +162,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     IVMConnector connector = JavaRuntime.getVMConnector(
         "com.google.cloud.tools.eclipse.jdt.launching.socketListenerMultipleConnector");
     if (connector == null) {
-      // The 4.7 listen connector supports an acceptCount
+      // The 4.7 listen connector supports a connectionLimit
       connector = JavaRuntime
           .getVMConnector(IJavaLaunchConfigurationConstants.ID_SOCKET_LISTEN_VM_CONNECTOR);
     }
@@ -178,7 +178,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     connectionParameters.put("hostname", DEBUGGER_HOST);
     connectionParameters.put("port", Integer.toString(port));
     connectionParameters.put("timeout", Integer.toString(timeout));
-    connectionParameters.put("acceptCount", "0");
+    connectionParameters.put("connectionLimit", "0");
     connector.connect(connectionParameters, monitor, launch);
   }
 
@@ -198,9 +198,12 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
         PreferencesInitializer.LAUNCH_BROWSER, true, null);
   }
 
-  private String determinePageLocation(IServer server, ILaunchConfiguration config) {
-    // todo[issue #259]: pull this from the server or launch configuration
-    return "http://" + DEBUGGER_HOST + ":8080";
+  @VisibleForTesting
+  static String determinePageLocation(IServer server) {
+    LocalAppEngineServerBehaviour serverBehaviour = (LocalAppEngineServerBehaviour)
+        server.loadAdapter(LocalAppEngineServerBehaviour.class, null /* monitor */);
+
+    return "http://" + server.getHost() + ":" + serverBehaviour.getPort();
   }
 
 
@@ -245,7 +248,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       Preconditions.checkState(server == event.getServer());
       switch (event.getState()) {
         case IServer.STATE_STARTED:
-          openBrowserPage(configuration, server);
+          openBrowserPage(server);
           return;
 
         case IServer.STATE_STOPPED:
