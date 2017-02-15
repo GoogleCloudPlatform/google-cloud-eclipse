@@ -45,8 +45,8 @@ public class DeployPreferencesModel {
     setBucket(preferences.getBucket());
   }
 
-  public void resetToDefaults() {
-    applyPreferences(StandardDeployPreferences.DEFAULT);
+  void resetToDefaults() {
+    applyPreferences(StandardDeployPreferences.getDefaultPreferences());
   }
 
   public void savePreferences() throws BackingStoreException {
