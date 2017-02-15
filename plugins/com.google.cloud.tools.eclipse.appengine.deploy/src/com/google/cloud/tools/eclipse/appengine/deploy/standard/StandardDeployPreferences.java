@@ -17,6 +17,8 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.standard;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
@@ -35,6 +37,7 @@ public class StandardDeployPreferences {
   static final String PREF_STOP_PREVIOUS_VERSION = "project.previousVersion.stop";
 
   private IEclipsePreferences preferenceStore;
+  // todo since this is mutable it shouldn;t be in all caps
   public static final StandardDeployPreferences DEFAULT;
 
   static {
@@ -60,7 +63,7 @@ public class StandardDeployPreferences {
   }
 
   public void setAccountEmail(String accountEmail) {
-    preferenceStore.put(PREF_ACCOUNT_EMAIL, accountEmail);
+    preferenceStore.put(PREF_ACCOUNT_EMAIL, Strings.nullToEmpty(accountEmail));
   }
 
   public String getProjectId() {
@@ -68,7 +71,7 @@ public class StandardDeployPreferences {
   }
 
   public void setProjectId(String projectId) {
-    preferenceStore.put(PREF_PROJECT_ID, projectId);
+    preferenceStore.put(PREF_PROJECT_ID, Strings.nullToEmpty(projectId));
   }
 
   public String getVersion() {
@@ -77,7 +80,7 @@ public class StandardDeployPreferences {
   }
 
   public void setVersion(String version) {
-    preferenceStore.put(PREF_CUSTOM_VERSION, version);
+    preferenceStore.put(PREF_CUSTOM_VERSION, Strings.nullToEmpty(version));
   }
 
   public boolean isAutoPromote() {
@@ -95,7 +98,7 @@ public class StandardDeployPreferences {
   }
 
   public void setBucket(String bucket) {
-    preferenceStore.put(PREF_CUSTOM_BUCKET, bucket);
+    preferenceStore.put(PREF_CUSTOM_BUCKET, Strings.nullToEmpty(bucket));
   }
 
   public boolean isStopPreviousVersion() {

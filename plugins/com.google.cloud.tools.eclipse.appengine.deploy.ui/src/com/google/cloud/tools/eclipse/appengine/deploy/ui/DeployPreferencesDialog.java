@@ -76,7 +76,9 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
       setTitleImage(titleImage);
     }
 
-    getButton(IDialogConstants.OK_ID).setText(Messages.getString("deploy"));
+    Button deployButton = getButton(IDialogConstants.OK_ID);
+    deployButton.setText(Messages.getString("deploy"));
+    deployButton.setEnabled(false);
 
     // TitleAreaDialogSupport does not validate initially, let's trigger validation this way
     content.getDataBindingContext().updateTargets();
@@ -107,7 +109,7 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
           @Override
           public int getMessageType(ValidationStatusProvider statusProvider) {
             int type = super.getMessageType(statusProvider);
-            setValid(type != IMessageProvider.ERROR);
+            setValid(type != IMessageProvider.ERROR && content.hasSelection());
             return type;
           }
         });
@@ -176,9 +178,9 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
   }
 
   private void setValid(boolean isValid) {
-    Button okButton = getButton(IDialogConstants.OK_ID);
-    if (okButton != null) {
-      okButton.setEnabled(isValid);
+    Button deployButton = getButton(IDialogConstants.OK_ID);
+    if (deployButton != null) {
+      deployButton.setEnabled(isValid && content.hasSelection());
     }
   }
 

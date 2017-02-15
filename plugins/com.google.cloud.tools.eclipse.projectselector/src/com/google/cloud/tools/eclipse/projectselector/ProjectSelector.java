@@ -73,4 +73,9 @@ public class ProjectSelector extends Composite {
     }
     tableViewer.setSelection(selection);
   }
+  
+  public boolean hasSelection() {
+    ISelection selection = tableViewer.getSelection();
+    return !selection.isEmpty();
+  }
 }
