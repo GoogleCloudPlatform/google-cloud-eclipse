@@ -16,8 +16,7 @@
 
 package com.google.cloud.tools.eclipse.ui.util.databinding;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertEquals;
 
 import org.eclipse.core.runtime.IStatus;
 import org.junit.Test;
@@ -26,11 +25,11 @@ public class ProjectSelectorValidatorTest {
 
   @Test
   public void testValidate_nullString() {
-    assertThat(new ProjectSelectorValidator().validate(null).getSeverity(), is(IStatus.ERROR));
+    assertEquals(IStatus.ERROR, new ProjectSelectorValidator().validate(null).getSeverity());
   }
 
   @Test
   public void testValidate_emptyString() {
-    assertThat(new ProjectSelectorValidator().validate("").getSeverity(), is(IStatus.ERROR));
+    assertEquals(IStatus.ERROR, new ProjectSelectorValidator().validate("").getSeverity());
   }
 }
