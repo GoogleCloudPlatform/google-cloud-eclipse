@@ -15,7 +15,7 @@ location "http://download.eclipse.org/cbi/updates/license" {
     org.eclipse.license.feature.group    
 }
 
-location "http://download.eclipse.org/releases/oxygen/201702031000/" {
+location "http://download.eclipse.org/releases/oxygen/201612161000/" {
 	org.eclipse.sdk.feature.group
 	org.eclipse.jdt.feature.group
 	org.eclipse.m2e.feature.feature.group
@@ -35,7 +35,7 @@ location "http://download.eclipse.org/releases/oxygen/201702031000/" {
 
 // /webtools/repository/oxygen currently has some issues
 // location "http://download.eclipse.org/webtools/repository/oxygen/" {
-location "http://download.eclipse.org/webtools/downloads/drops/R3.9.0/S-3.9.0M5-20170201000249/repository" {
+location "http://download.eclipse.org/webtools/downloads/drops/R3.9.0/S-3.9.0M4-20161213000057/repository" {
     org.eclipse.jst.web_sdk.feature.feature.group
     org.eclipse.jst.server_sdk.feature.feature.group
     org.eclipse.jst.common.fproj.enablement.jdt.sdk.feature.group
@@ -44,7 +44,7 @@ location "http://download.eclipse.org/webtools/downloads/drops/R3.9.0/S-3.9.0M5-
     org.eclipse.wst.server_adapters.sdk.feature.feature.group
 }
 
-location "http://download.eclipse.org/tools/orbit/downloads/drops/S20170120205402/repository/" {
+location "http://download.eclipse.org/tools/orbit/downloads/drops/S20161205183421/repository/" {
     org.hamcrest
 	ch.qos.logback.slf4j
 	org.slf4j.log4j
