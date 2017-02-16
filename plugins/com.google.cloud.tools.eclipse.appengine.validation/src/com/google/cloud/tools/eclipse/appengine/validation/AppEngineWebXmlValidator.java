@@ -93,6 +93,7 @@ public class AppEngineWebXmlValidator extends AbstractValidator {
     IMarker marker = resource.createMarker(markerID);
     marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_WARNING);
     marker.setAttribute(IMarker.MESSAGE, element.getMessage());
+    marker.setAttribute(IMarker.LOCATION, "line " + element.getStart().getLineNumber());
     marker.setAttribute(IMarker.CHAR_START, elementOffset);
     marker.setAttribute(IMarker.CHAR_END, elementOffset + element.getLength());
   }
@@ -101,11 +102,13 @@ public class AppEngineWebXmlValidator extends AbstractValidator {
    * Sets error marker where SAX parser fails.
    */
   static void createSaxErrorMessage(IResource resource, SAXException ex) throws CoreException {
+    int lineNumber = ((SAXParseException) ex.getException()).getLineNumber();
     IMarker marker = resource.createMarker("org.eclipse.core.resources.problemmarker");
     marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
     marker.setAttribute(IMarker.MESSAGE, ex.getMessage());
     marker.setAttribute(IMarker.LINE_NUMBER,
         ((SAXParseException) ex.getException()).getLineNumber());
+    marker.setAttribute(IMarker.LOCATION, "line " + lineNumber);
   }
   
 }

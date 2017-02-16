@@ -27,7 +27,7 @@ import org.osgi.service.prefs.BackingStoreException;
 public class StandardDeployPreferences {
 
   public static final String PREFERENCE_STORE_QUALIFIER =
-      "com.google.cloud.tools.eclipse.appengine.deploy";
+      "com.google.cloud.tools.eclipse.appengine.deploy";      
 
   static final String PREF_ACCOUNT_EMAIL = "account.email";
   static final String PREF_PROJECT_ID = "project.id";
@@ -37,11 +37,9 @@ public class StandardDeployPreferences {
   static final String PREF_STOP_PREVIOUS_VERSION = "project.previousVersion.stop";
 
   private IEclipsePreferences preferenceStore;
-  // todo since this is mutable it shouldn;t be in all caps
-  public static final StandardDeployPreferences DEFAULT;
 
-  static {
-    DEFAULT = new StandardDeployPreferences(DeployPreferenceInitializer.getDefaultPreferences());
+  public static StandardDeployPreferences getDefaultPreferences() {
+    return new StandardDeployPreferences(DeployPreferenceInitializer.getDefaultPreferences());
   }
 
   public StandardDeployPreferences(IProject project) {

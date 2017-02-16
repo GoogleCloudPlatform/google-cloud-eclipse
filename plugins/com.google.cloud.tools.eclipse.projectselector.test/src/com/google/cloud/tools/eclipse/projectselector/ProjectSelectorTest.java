@@ -18,8 +18,6 @@ package com.google.cloud.tools.eclipse.projectselector;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import java.util.Arrays;
@@ -64,16 +62,14 @@ public class ProjectSelectorTest {
   public void testSetProjectMaintainsSelection() {
     List<GcpProject> projects = getUnsortedProjectList();
     GcpProject selectedProject = projects.get(3);
-    
+
     ProjectSelector projectSelector = new ProjectSelector(shellResource.getShell());
     projectSelector.setProjects(projects);
-    assertFalse(projectSelector.hasSelection());
     projectSelector.getViewer().setSelection(new StructuredSelection(selectedProject));
     projectSelector.setProjects(projects.subList(2, projects.size()));
 
     IStructuredSelection selection = projectSelector.getViewer().getStructuredSelection();
     assertThat(selection.size(), is(1));
-    assertTrue(projectSelector.hasSelection());
     assertThat((GcpProject) selection.getFirstElement(), is(selectedProject));
   }
 
