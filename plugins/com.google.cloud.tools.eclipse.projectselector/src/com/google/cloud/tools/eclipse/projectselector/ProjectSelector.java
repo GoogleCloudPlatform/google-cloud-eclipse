@@ -16,7 +16,10 @@
 
 package com.google.cloud.tools.eclipse.projectselector;
 
-import com.google.cloud.tools.eclipse.ui.util.OpenUrlListener;
+import com.google.cloud.tools.eclipse.ui.util.Messages;
+import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener;
+import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.EmptyQueryParameterProvider;
+import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.ErrorDialogErrorHandler;
 import com.google.common.base.Strings;
 import java.util.List;
 import org.eclipse.core.databinding.beans.PojoProperties;
@@ -63,7 +66,8 @@ public class ProjectSelector extends Composite {
     tableViewer.setComparator(new ViewerComparator());
 
     statusLink = new Link(this, SWT.NONE);
-    statusLink.addSelectionListener(new OpenUrlListener());
+    statusLink.addSelectionListener(
+        new OpenUriSelectionListener(new ErrorDialogErrorHandler(getShell())));
     statusLink.setText("");
     GridDataFactory.fillDefaults().applyTo(statusLink);
   }

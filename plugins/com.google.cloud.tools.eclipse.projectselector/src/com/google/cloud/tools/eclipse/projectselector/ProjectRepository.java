@@ -66,7 +66,7 @@ public class ProjectRepository {
 
   /**
    * @return a project if the projectId identifies an existing project and the account identified by
-   *         {@code credential} has access to the project
+   *     {@code credential} has access to the project
    * @throws ProjectRepositoryException if an error happens while communicating with the backend
    */
   public GcpProject getProject(Credential credential, String projectId) 
@@ -102,9 +102,9 @@ public class ProjectRepository {
 
   /**
    * @return true if the credential has access to the GCP project identified by {@code projectId}
-   * and the project has App Engine application
+   *     and the project has an App Engine application
    * @throws ProjectRepositoryException if an error other than HTTP 404 happens while retrieving the
-   * App Engine application
+   *     App Engine application
    */
   public boolean hasAppEngineApplication(Credential credential, String projectId)
       throws ProjectRepositoryException {
