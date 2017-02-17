@@ -48,7 +48,7 @@ public class ProjectSelectorSelectionChangedListenerTest {
       + "<a href=\"" + EXPECTED_LINK + "\">"
       + "Click here</a> to create it.";
   private static final String EXPECTED_MESSAGE_WHEN_EXCEPTION =
-      "An error occurred while retrieving App Engine application: testException";
+      "An error occurred while retrieving App Engine application:\ntestException";
 
   @Mock private AccountSelector accountSelector;
   @Mock private ProjectSelector projectSelector;
