@@ -37,7 +37,6 @@ import com.google.cloud.tools.eclipse.appengine.libraries.BuildPath;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineLibrariesSelectorGroup;
-import com.google.cloud.tools.eclipse.util.MavenUtils;
 
 /**
  * UI for adding App Engine libraries to an existing project.
@@ -62,9 +61,7 @@ public class AppEngineLibrariesPage extends WizardPage implements IClasspathCont
     Composite composite = new Composite(parent, SWT.BORDER);
     composite.setLayout(new GridLayout(2, true));
     
-    if (!MavenUtils.hasMavenNature(project.getProject())) {
-      librariesSelector = new AppEngineLibrariesSelectorGroup(composite);
-    }
+    librariesSelector = new AppEngineLibrariesSelectorGroup(composite);
     
     setControl(composite);
   }
