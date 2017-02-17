@@ -44,11 +44,13 @@ public class LibraryFactory {
   private static final String ATTRIBUTE_NAME_SOURCE_URI = "sourceUri"; //$NON-NLS-1$
   private static final String ATTRIBUTE_NAME_JAVADOC_URI = "javadocUri"; //$NON-NLS-1$
   private static final String ATTRIBUTE_NAME_PATTERN = "pattern"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_NAME_GROUP = "group"; //$NON-NLS-1$
   private static final String ATTRIBUTE_NAME_GROUP_ID = "groupId"; //$NON-NLS-1$
   private static final String ATTRIBUTE_NAME_REPOSITORY_URI = "repositoryUri"; //$NON-NLS-1$
   private static final String ATTRIBUTE_NAME_ARTIFACT_ID = "artifactId"; //$NON-NLS-1$
   private static final String ATTRIBUTE_NAME_VERSION = "version"; //$NON-NLS-1$
   private static final String ATTRIBUTE_NAME_TYPE = "type"; //$NON-NLS-1$
+  private static final String ATTRIBUTE_NAME_TOOLTIP = "tooltip"; //$NON-NLS-1$
   private static final String ATTRIBUTE_NAME_CLASSIFIER = "classifier"; //$NON-NLS-1$
   private static final String ATTRIBUTE_NAME_EXPORT = "export"; //$NON-NLS-1$
   private static final String ATTRIBUTE_NAME_RECOMMENDATION = "recommendation"; //$NON-NLS-1$
@@ -59,6 +61,8 @@ public class LibraryFactory {
         Library library = new Library(configurationElement.getAttribute(ATTRIBUTE_NAME_ID));
         library.setName(configurationElement.getAttribute(ATTRIBUTE_NAME_NAME));
         library.setSiteUri(new URI(configurationElement.getAttribute(ATTRIBUTE_NAME_SITE_URI)));
+        library.setGroup(configurationElement.getAttribute(ATTRIBUTE_NAME_GROUP));
+        library.setToolTip(configurationElement.getAttribute(ATTRIBUTE_NAME_TOOLTIP));
         library.setLibraryFiles(
             getLibraryFiles(configurationElement.getChildren(ELEMENT_NAME_LIBRARY_FILE)));
         String exportString = configurationElement.getAttribute(ATTRIBUTE_NAME_EXPORT);

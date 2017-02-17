@@ -16,24 +16,25 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Test;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 
 public class AppEngineLibrariesTest {
-
-  @Test
-  public void testTooltipsDefined() {
-    for (Library library : AppEngineLibraries.getAvailableLibraries()) {
-      String toolTip = library.getToolTip();
-      Assert.assertFalse(toolTip, toolTip.startsWith("!"));
-    }
-  }
   
   @Test
   public void testLibrariesAvailable() {
-    Assert.assertEquals(3, AppEngineLibraries.getAvailableLibraries().size());
+    List<Library> libraries = AppEngineLibraries.getAvailableLibraries();
+    for (Library library : libraries) {
+      Assert.assertFalse(library.getLibraryFiles().isEmpty());
+      String tooltip = library.getToolTip();
+      Assert.assertFalse(tooltip.isEmpty());
+      Assert.assertFalse(tooltip, tooltip.startsWith("!"));
+    }
+    Assert.assertEquals(3, libraries.size());
   }
 
 }

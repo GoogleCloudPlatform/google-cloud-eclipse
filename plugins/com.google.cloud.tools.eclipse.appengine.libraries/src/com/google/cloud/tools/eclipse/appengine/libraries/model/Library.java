@@ -44,6 +44,8 @@ public final class Library {
 
   private LibraryRecommendation recommendation = LibraryRecommendation.OPTIONAL;
 
+  private String group;
+
   public Library(String id) {
     Preconditions.checkNotNull(id, "id null");
     Preconditions.checkArgument(!id.isEmpty(), "id empty");
@@ -125,5 +127,16 @@ public final class Library {
 
   public LibraryRecommendation getRecommendation() {
     return recommendation;
+  }
+
+  /**
+   * @param group the collection to which this library belongs
+   */
+  public void setGroup(String group) {
+    this.group = group;
+  }
+
+  public String getGroup() {
+    return group;
   }
 }

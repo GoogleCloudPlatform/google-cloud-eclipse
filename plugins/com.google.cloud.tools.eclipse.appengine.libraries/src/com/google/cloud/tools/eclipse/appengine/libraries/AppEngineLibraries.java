@@ -16,29 +16,44 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.RegistryFactory;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFactory;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFactoryException;
 
 public class AppEngineLibraries {
 
-  // TODO obtain libraries from extension registry
-  // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/819
+  private static final Logger logger = Logger.getLogger(AppEngineLibraries.class.getName());
+  
+  // TODO obtain libraries by group name
+  // TODO cache library list
+  /**
+   * @return the three core appengine libraries
+   */
   public static List<Library> getAvailableLibraries() {
-    Library appEngine = new Library("appengine-api");
-    appEngine.setName("App Engine API");
-    appEngine.setToolTip(Messages.getString("appengine.api.tooltip"));
-    Library endpoints = new Library("appengine-endpoints");
-    endpoints.setName("Google Cloud Endpoints");
-    endpoints.setToolTip(Messages.getString("endpoints.tooltip"));
-    endpoints.setLibraryDependencies(Collections.singletonList("appengine-api"));
-    Library objectify = new Library("objectify");
-    objectify.setName("Objectify");
-    objectify.setToolTip(Messages.getString("objectify.tooltip"));
-    objectify.setLibraryDependencies(Collections.singletonList("appengine-api"));
-    return Arrays.asList(appEngine, endpoints, objectify);
+    
+    IConfigurationElement[] elements = RegistryFactory.getRegistry().getConfigurationElementsFor(
+        "com.google.cloud.tools.eclipse.appengine.libraries");
+    LibraryFactory factory = new LibraryFactory();
+    ArrayList<Library> result = new ArrayList<>();
+    for (IConfigurationElement element : elements) {
+      try {
+        Library library = factory.create(element);
+        if ("appengine".equals(library.getGroup())) {
+          result.add(library);
+        }
+      } catch (LibraryFactoryException ex) {
+        logger.log(Level.SEVERE, "Error loading library definition", ex);
+      }
+    }
+    return result;
   }
   
 }
