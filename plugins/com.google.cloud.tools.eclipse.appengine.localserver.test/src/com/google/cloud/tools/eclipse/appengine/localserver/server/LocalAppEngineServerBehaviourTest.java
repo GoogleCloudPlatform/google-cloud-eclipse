@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -54,13 +55,13 @@ public class LocalAppEngineServerBehaviourTest {
 
   @Test
   public void testCheckPort_nullWith0Default() throws CoreException {
-    LocalAppEngineServerBehaviour.checkPort(null, 0, portProber);
+    assertEquals(0, LocalAppEngineServerBehaviour.checkPort(null, 0, portProber));
     verify(portProber, never()).apply(any(Integer.class));
   }
 
   @Test
   public void testCheckPort_nullWithNotInUseDefault() throws CoreException {
-    LocalAppEngineServerBehaviour.checkPort(null, 1, alwaysFalse);
+    assertEquals(1, LocalAppEngineServerBehaviour.checkPort(null, 1, alwaysFalse));
     verify(alwaysFalse, times(1)).apply(any(Integer.class));
   }
 
@@ -68,6 +69,7 @@ public class LocalAppEngineServerBehaviourTest {
   public void testCheckPort_nullWithInUseDefault() throws CoreException {
     try {
       LocalAppEngineServerBehaviour.checkPort(null, 1, alwaysTrue);
+      fail("Should throw CoreException");
     } catch (CoreException ex) {
       assertEquals("Port 1 is in use.", ex.getMessage());
       verify(alwaysTrue, times(1)).apply(any(Integer.class));
@@ -76,13 +78,13 @@ public class LocalAppEngineServerBehaviourTest {
 
   @Test
   public void testCheckPort_0portWith0Default() throws CoreException {
-    LocalAppEngineServerBehaviour.checkPort(0, 0, portProber);
+    assertEquals(0, LocalAppEngineServerBehaviour.checkPort(0, 0, portProber));
     verify(portProber, never()).apply(any(Integer.class));
   }
 
   @Test
   public void testCheckPort_portWithNotInUse() throws CoreException {
-    LocalAppEngineServerBehaviour.checkPort(65535, 1, alwaysFalse);
+    assertEquals(65535, LocalAppEngineServerBehaviour.checkPort(65535, 1, alwaysFalse));
     verify(alwaysFalse, times(1)).apply(any(Integer.class));
   }
 
@@ -90,6 +92,7 @@ public class LocalAppEngineServerBehaviourTest {
   public void testCheckPort_portWithInUse() throws CoreException {
     try {
       LocalAppEngineServerBehaviour.checkPort(65535, 1, alwaysTrue);
+      fail("Should throw CoreException");
     } catch (CoreException ex) {
       assertEquals("Port 65535 is in use.", ex.getMessage());
       verify(alwaysTrue, times(1)).apply(any(Integer.class));
@@ -97,9 +100,21 @@ public class LocalAppEngineServerBehaviourTest {
   }
 
   @Test
-  public void testCheckPort_portOutOfBounds() throws CoreException {
+  public void testCheckPort_portOutOfBounds_negative() throws CoreException {
     try {
-    LocalAppEngineServerBehaviour.checkPort(-1, 1, portProber);
+      LocalAppEngineServerBehaviour.checkPort(-1, 1, portProber);
+      fail("Should throw CoreException");
+    } catch (CoreException ex) {
+      assertEquals("Port must be between 0 and 65535.", ex.getMessage());
+      verify(portProber, never()).apply(any(Integer.class));
+    }
+  }
+
+  @Test
+  public void testCheckPort_portOutOfBounds_positive() throws CoreException {
+    try {
+      LocalAppEngineServerBehaviour.checkPort(65536, 1, portProber);
+      fail("Should throw CoreException");
     } catch (CoreException ex) {
       assertEquals("Port must be between 0 and 65535.", ex.getMessage());
       verify(portProber, never()).apply(any(Integer.class));

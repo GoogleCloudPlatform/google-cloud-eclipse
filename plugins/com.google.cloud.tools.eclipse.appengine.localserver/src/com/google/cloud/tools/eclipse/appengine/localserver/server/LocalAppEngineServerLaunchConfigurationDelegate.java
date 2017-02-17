@@ -180,9 +180,6 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     } else {
       // adminPort = -1 perform failover if default port is busy
       devServerRunConfiguration.setAdminPort(LocalAppEngineServerBehaviour.DEFAULT_ADMIN_PORT);
-    }
-    if (adminPort < 0) {
-      Preconditions.checkNotNull(devServerRunConfiguration.getAdminPort());
       // adminHost == null is ok as that resolves to null == INADDR_ANY
       InetAddress addr = resolveAddress(devServerRunConfiguration.getAdminHost());
       if (org.eclipse.wst.server.core.util.SocketUtil.isPortInUse(addr,
@@ -207,7 +204,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
   /**
    * Retrieve and resolve a string attribute. If not specified, returns {@code defaultValue}.
    */
-  private String getAttribute(String attributeName, String defaultValue,
+  private static String getAttribute(String attributeName, String defaultValue,
       ILaunchConfiguration configuration, IServer server) {
     try {
       if (configuration.hasAttribute(attributeName)) {
@@ -223,9 +220,9 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
   }
 
   /**
-   * Resolve an host or IP address to an IP address.
+   * Resolve a host or IP address to an IP address.
    * 
-   * @return an {@link InetAddress} or {@code null} if unable to be resolved (equivalent to
+   * @return an {@link InetAddress}, or {@code null} if unable to be resolved (equivalent to
    *         {@code INADDR_ANY})
    */
   private static InetAddress resolveAddress(String ipOrHost) {
