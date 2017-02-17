@@ -31,7 +31,7 @@ import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListe
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -65,6 +65,12 @@ import org.eclipse.wst.server.core.util.SocketUtil;
  */
 public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     implements IModulePublishHelper {
+
+  @VisibleForTesting // and because Java 7
+  public static interface PortChecker {
+    public boolean isInUse(InetAddress addr, int port);
+  }
+
   /** Parse the numeric string. Return {@code defaultValue} if non-numeric. */
   private static int parseInt(String numeric, int defaultValue) {
     try {
@@ -206,23 +212,23 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
   }
 
   /**
-   * Check if the configured port (or its default) is in use. Returns the port to be used, or throws
-   * an exception if the port is in use.
+   * Check whether the provided port is in use. Returns the port if not, or throws an exception if
+   * the port is in use.
    * 
-   * @param portInUse returns true if the argument is a port that is in use
+   * @param addr a machine address or {@code null} for all addresses
+   * @param portInUse returns true if the (host,port) is in use
    * @return the port value ⊂ [0, 65535]
    * @throws CoreException if the port is in use
    */
   @VisibleForTesting
-  static int checkPort(Integer portOrNull, int defaultValue,
-      Predicate<Integer> portInUse)
+  static int checkPort(InetAddress addr, int port, PortChecker portInUse)
       throws CoreException {
-    int port = portOrNull == null ? defaultValue : portOrNull.intValue();
+    Preconditions.checkNotNull(portInUse);
     if (port < 0 || port > 65535) {
       throw new CoreException(newErrorStatus(Messages.getString("PORT_OUT_OF_RANGE")));
     }
 
-    if (port != 0 && portInUse.apply(port)) {
+    if (port != 0 && portInUse.isInUse(addr, port)) {
       throw new CoreException(
           newErrorStatus(Messages.getString("PORT_IN_USE", String.valueOf(port))));
     }
@@ -260,18 +266,33 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
       MessageConsoleStream console)
       throws CoreException {
     
-    // Check ports before setting the STARTING state.
-    Predicate<Integer> portInUse = new Predicate<Integer>() {
+    PortChecker portInUse = new PortChecker() {
       @Override
-      public boolean apply(Integer port) {
+      public boolean isInUse(InetAddress addr, int port) {
         Preconditions.checkNotNull(port);
-        return SocketUtil.isPortInUse(port);
+        return SocketUtil.isPortInUse(addr, port);
       }
     };
 
-    serverPort = checkPort(devServerRunConfiguration.getPort(), DEFAULT_SERVER_PORT, portInUse);
-    adminPort = checkPort(devServerRunConfiguration.getAdminPort(), DEFAULT_ADMIN_PORT, portInUse);
-    checkPort(devServerRunConfiguration.getApiPort(), DEFAULT_API_PORT, portInUse);
+    InetAddress serverHost = InetAddress.getLoopbackAddress();
+    if (devServerRunConfiguration.getHost() != null) {
+      serverHost = LocalAppEngineServerLaunchConfigurationDelegate
+          .resolveAddress(devServerRunConfiguration.getHost());
+    }
+    serverPort = checkPort(serverHost,
+        ifNull(devServerRunConfiguration.getPort(), DEFAULT_SERVER_PORT), portInUse);
+
+    InetAddress adminHost = InetAddress.getLoopbackAddress();
+    if (devServerRunConfiguration.getAdminHost() != null) {
+      adminHost = LocalAppEngineServerLaunchConfigurationDelegate
+          .resolveAddress(devServerRunConfiguration.getAdminHost());
+    }
+    adminPort = checkPort(adminHost,
+        ifNull(devServerRunConfiguration.getAdminPort(), DEFAULT_ADMIN_PORT), portInUse);
+
+    // API port seems on localhost in practice
+    checkPort(InetAddress.getLoopbackAddress(),
+        ifNull(devServerRunConfiguration.getApiPort(), DEFAULT_API_PORT), portInUse);
 
     setServerState(IServer.STATE_STARTING);
 
@@ -287,6 +308,9 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     }
   }
 
+  private static int ifNull(Integer value, int defaultValue) {
+    return value != null ? value : defaultValue;
+  }
 
   private void initializeDevServer(MessageConsoleStream console) {
     MessageConsoleWriterOutputLineListener outputListener =

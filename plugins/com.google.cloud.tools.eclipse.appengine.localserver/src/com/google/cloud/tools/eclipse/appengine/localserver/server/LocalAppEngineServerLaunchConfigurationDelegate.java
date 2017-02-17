@@ -225,7 +225,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
    * @return an {@link InetAddress}, or {@code null} if unable to be resolved (equivalent to
    *         {@code INADDR_ANY})
    */
-  private static InetAddress resolveAddress(String ipOrHost) {
+  static InetAddress resolveAddress(String ipOrHost) {
     if (!Strings.isNullOrEmpty(ipOrHost)) {
       if (InetAddresses.isInetAddress(ipOrHost)) {
         return InetAddresses.forString(ipOrHost);
