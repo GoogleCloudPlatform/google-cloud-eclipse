@@ -120,9 +120,11 @@ public class ProjectRepository {
       return application != null;
     } catch (IOException ex) {
       if (ex instanceof GoogleJsonResponseException) {
-        GoogleJsonResponseException json = (GoogleJsonResponseException) ex;
-        if (json.getStatusCode() == HttpStatusCodes.STATUS_CODE_NOT_FOUND) {
+        GoogleJsonResponseException responseException = (GoogleJsonResponseException) ex;
+        if (responseException.getStatusCode() == HttpStatusCodes.STATUS_CODE_NOT_FOUND) {
           return false;
+        } else {
+          throw new ProjectRepositoryException(responseException.getDetails().getMessage());
         }
       }
       throw new ProjectRepositoryException(ex);
