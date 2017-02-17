@@ -17,6 +17,8 @@
    <feature id="org.eclipse.wst.common.fproj.sdk" version="0.0.0"/>
    <feature id="org.eclipse.wst.web_sdk.feature" version="0.0.0"/>
    <feature id="org.eclipse.wst.server_adapters.sdk.feature" version="0.0.0"/>
+   <feature id="org.eclipse.epp.logging.aeri.feature" version="0.0.0"/>
+   <feature id="org.eclipse.epp.logging.aeri.feature.source" version="0.0.0"/>
    <bundle id="org.eclipse.jetty.http" version="0.0.0"/>
    <bundle id="org.eclipse.jetty.servlet" version="0.0.0"/>
    <bundle id="org.eclipse.jetty.server" version="0.0.0"/>
