@@ -113,7 +113,7 @@ public class OpenUriSelectionListener implements SelectionListener {
 
   public static class ErrorDialogErrorHandler implements ErrorHandler {
 
-    private Shell shell;
+    private final Shell shell;
 
     public ErrorDialogErrorHandler(Shell shell) {
       this.shell = shell;

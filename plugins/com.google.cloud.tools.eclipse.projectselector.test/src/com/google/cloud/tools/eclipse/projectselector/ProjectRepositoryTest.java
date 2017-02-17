@@ -128,7 +128,7 @@ public class ProjectRepositoryTest {
   @Test(expected = ProjectRepositoryException.class)
   public void testGetProject_exceptionInRequest() throws IOException, ProjectRepositoryException {
     Projects projects = mock(Projects.class);
-    when(apiFactory.getProjectsApi(any(Credential.class))).thenReturn(projects);
+    when(apiFactory.newProjectsApi(any(Credential.class))).thenReturn(projects);
     Get get = mock(Get.class);
     when(projects.get(anyString())).thenReturn(get);
     when(get.execute()).thenThrow(new IOException("test exception"));
@@ -139,7 +139,7 @@ public class ProjectRepositoryTest {
   @Test
   public void testGetProject_successful() throws IOException, ProjectRepositoryException {
     Projects projects = mock(Projects.class);
-    when(apiFactory.getProjectsApi(any(Credential.class))).thenReturn(projects);
+    when(apiFactory.newProjectsApi(any(Credential.class))).thenReturn(projects);
     Get get = mock(Get.class);
     when(projects.get(anyString())).thenReturn(get);
     when(get.execute()).thenReturn(project);
@@ -213,7 +213,7 @@ public class ProjectRepositoryTest {
   private com.google.api.services.appengine.v1.Appengine.Apps.Get
   initializeGetRequest() throws IOException {
     Apps apps = mock(Apps.class);
-    when(apiFactory.getAppsApi(any(Credential.class))).thenReturn(apps);
+    when(apiFactory.newAppsApi(any(Credential.class))).thenReturn(apps);
     
     com.google.api.services.appengine.v1.Appengine.Apps.Get get =
         mock(com.google.api.services.appengine.v1.Appengine.Apps.Get.class);
@@ -224,7 +224,7 @@ public class ProjectRepositoryTest {
   private com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects.List
   initializeListRequest() throws IOException {
     Projects projects = mock(Projects.class);
-    when(apiFactory.getProjectsApi(any(Credential.class))).thenReturn(projects);
+    when(apiFactory.newProjectsApi(any(Credential.class))).thenReturn(projects);
     com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects.List list =
         mock(com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects.List.class);
     when(projects.list()).thenReturn(list);

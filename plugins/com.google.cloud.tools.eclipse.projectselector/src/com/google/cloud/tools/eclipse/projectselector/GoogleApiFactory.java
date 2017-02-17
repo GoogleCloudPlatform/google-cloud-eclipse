@@ -18,6 +18,8 @@ package com.google.cloud.tools.eclipse.projectselector;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.javanet.ConnectionFactory;
+import com.google.api.client.http.javanet.DefaultConnectionFactory;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson.JacksonFactory;
@@ -26,19 +28,48 @@ import com.google.api.services.appengine.v1.Appengine.Apps;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 /**
  * Class to obtain various Google cloud Platform related APIs.
+ *
+ * TODO move this class into a separate API bundle
+ * https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1438
  */
 public class GoogleApiFactory {
 
-  private final JsonFactory jsonFactory = new JacksonFactory();
-  private final HttpTransport transport = new NetHttpTransport();
+  private static final class TimeoutAwareConnectionFactory extends DefaultConnectionFactory {
+    private final int connectTimeout;
+    private final int readTimeout;
+
+    private TimeoutAwareConnectionFactory(int connectTimeout, int readTimeout) {
+      super();
+      this.connectTimeout = connectTimeout;
+      this.readTimeout = readTimeout;
+    }
+
+    @Override
+    public HttpURLConnection openConnection(URL url) throws IOException {
+      HttpURLConnection connection = super.openConnection(url);
+      connection.setConnectTimeout(connectTimeout);
+      connection.setReadTimeout(readTimeout);
+      return connection;
+    }
+  }
+
+  private static final int DEFAULT_TIMEOUT_MS = 10000;
+  private static final JsonFactory jsonFactory = new JacksonFactory();
+  private static final ConnectionFactory connectionFactory =
+      new TimeoutAwareConnectionFactory(DEFAULT_TIMEOUT_MS, DEFAULT_TIMEOUT_MS);
+  private static final HttpTransport transport =
+      new NetHttpTransport.Builder().setConnectionFactory(connectionFactory).build();
 
   /**
    * @return the CloudResourceManager/Projects API
    */
-  public Projects getProjectsApi(Credential credential) {
+  public Projects newProjectsApi(Credential credential) {
     CloudResourceManager resourceManager =
         new CloudResourceManager.Builder(transport, jsonFactory, credential)
             .setApplicationName(CloudToolsInfo.USER_AGENT).build();
@@ -49,7 +80,7 @@ public class GoogleApiFactory {
   /**
    * @return the Appengine/Apps API
    */
-  public Apps getAppsApi(Credential credential) {
+  public Apps newAppsApi(Credential credential) {
     Appengine appengine =
         new Appengine.Builder(transport, jsonFactory, credential)
             .setApplicationName(CloudToolsInfo.USER_AGENT).build();

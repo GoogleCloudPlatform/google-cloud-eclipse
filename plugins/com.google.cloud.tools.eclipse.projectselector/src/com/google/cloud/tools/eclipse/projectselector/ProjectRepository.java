@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.projectselector;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.HttpStatusCodes;
+import com.google.api.services.appengine.v1.model.Application;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects;
 import com.google.api.services.cloudresourcemanager.model.ListProjectsResponse;
 import com.google.api.services.cloudresourcemanager.model.Project;
@@ -52,7 +53,7 @@ public class ProjectRepository {
     // TODO cache results https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1374 
     try {
       if (credential != null) {
-        Projects projects = apiFactory.getProjectsApi(credential);
+        Projects projects = apiFactory.newProjectsApi(credential);
         ListProjectsResponse execute =
             projects.list().setPageSize(PROJECT_LIST_PAGESIZE).execute();
         return convertToGcpProjects(execute.getProjects());
@@ -73,7 +74,7 @@ public class ProjectRepository {
       throws ProjectRepositoryException {
     try {
       if (credential != null && !Strings.isNullOrEmpty(projectId)) {
-        return convertToGcpProject(apiFactory.getProjectsApi(credential).get(projectId).execute());
+        return convertToGcpProject(apiFactory.newProjectsApi(credential).get(projectId).execute());
       } else {
         return null;
       }
@@ -112,8 +113,11 @@ public class ProjectRepository {
     Preconditions.checkArgument(!Strings.isNullOrEmpty(projectId));
 
     try {
-      apiFactory.getAppsApi(credential).get(projectId).execute();
-      return true;
+      Application application = apiFactory.newAppsApi(credential).get(projectId).execute();
+
+      // just in case the API changes and exception with 404 won't be
+      // used to indicate a missing application
+      return application != null;
     } catch (IOException ex) {
       if (ex instanceof GoogleJsonResponseException) {
         GoogleJsonResponseException json = (GoogleJsonResponseException) ex;

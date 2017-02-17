@@ -30,15 +30,15 @@ import org.junit.Test;
 public class GoogleApiFactoryTest {
 
   @Test
-  public void testGetAppsApi_userAgentIsSet() throws IOException {
-    Apps api = new GoogleApiFactory().getAppsApi(mock(Credential.class));
+  public void testNewAppsApi_userAgentIsSet() throws IOException {
+    Apps api = new GoogleApiFactory().newAppsApi(mock(Credential.class));
     assertThat(api.get("").getRequestHeaders().getUserAgent(),
                containsString(CloudToolsInfo.USER_AGENT));
   }
 
   @Test
-  public void testGetProjectsApi_userAgentIsSet() throws IOException {
-    Projects api = new GoogleApiFactory().getProjectsApi(mock(Credential.class));
+  public void testNewProjectsApi_userAgentIsSet() throws IOException {
+    Projects api = new GoogleApiFactory().newProjectsApi(mock(Credential.class));
     assertThat(api.get("").getRequestHeaders().getUserAgent(),
                containsString(CloudToolsInfo.USER_AGENT));
   }
