@@ -37,6 +37,7 @@ import com.google.cloud.tools.eclipse.appengine.libraries.BuildPath;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineLibrariesSelectorGroup;
+import com.google.cloud.tools.eclipse.util.MavenUtils;
 
 /**
  * UI for adding App Engine libraries to an existing project.
@@ -98,10 +99,16 @@ public class AppEngineLibrariesPage extends WizardPage implements IClasspathCont
     if (libraries == null || libraries.isEmpty()) {
       return null;
     }
+
     try {
-      IClasspathEntry[] added =
-          BuildPath.addLibraries(project, libraries, new NullProgressMonitor());
-      return added;
+      if (MavenUtils.hasMavenNature(project.getProject())) {
+        BuildPath.addMavenLibraries(project.getProject(), libraries,  new NullProgressMonitor());
+        return new IClasspathEntry[0]; // todo return something
+      } else {
+        IClasspathEntry[] added =
+            BuildPath.addLibraries(project, libraries, new NullProgressMonitor());
+        return added;
+      }
     } catch (CoreException ex) {
       logger.log(Level.WARNING, "Error adding libraries to project", ex);
       return new IClasspathEntry[0];

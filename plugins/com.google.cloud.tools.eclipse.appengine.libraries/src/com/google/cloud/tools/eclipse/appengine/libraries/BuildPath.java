@@ -65,7 +65,7 @@ public class BuildPath {
     }
   }
 
-  private static void addMavenLibraries(IProject project, List<Library> libraries,
+  public static void addMavenLibraries(IProject project, List<Library> libraries,
       IProgressMonitor monitor) throws CoreException {
     // see m2e-core/org.eclipse.m2e.core.ui/src/org/eclipse/m2e/core/ui/internal/actions/AddDependencyAction.java
     // m2e-core/org.eclipse.m2e.core.ui/src/org/eclipse/m2e/core/ui/internal/editing/AddDependencyOperation.java
