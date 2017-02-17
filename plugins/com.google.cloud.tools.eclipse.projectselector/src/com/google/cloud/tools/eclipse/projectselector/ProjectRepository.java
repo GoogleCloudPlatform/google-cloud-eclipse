@@ -124,7 +124,13 @@ public class ProjectRepository {
         if (responseException.getStatusCode() == HttpStatusCodes.STATUS_CODE_NOT_FOUND) {
           return false;
         } else {
-          throw new ProjectRepositoryException(responseException.getDetails().getMessage());
+          String message = responseException.getLocalizedMessage();
+          // the message is a full json string with multiple lines, let's extract only the message
+          // from the detail object if exists
+          if (responseException.getDetails() != null && responseException.getDetails().getMessage() != null) {
+            message = responseException.getDetails().getMessage();
+          }
+          throw new ProjectRepositoryException(message, responseException);
         }
       }
       throw new ProjectRepositoryException(ex);
