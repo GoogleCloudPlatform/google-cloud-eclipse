@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-  <extension-point id="com.google.cloud.tools.eclipse.appengine.libraries" name="App Engine Libraries" />
+  <extension-point id="com.google.cloud.tools.eclipse.appengine.libraries" 
+      name="App Engine Libraries" />
   
   <extension point="com.google.cloud.tools.eclipse.appengine.libraries"
              id="com.google.cloud.tools.eclipse.appengine.libraries.defaultapis">
@@ -93,8 +94,7 @@
     </library>
   </extension>
 
-  <extension
-        point="org.eclipse.jdt.core.classpathContainerInitializer">
+  <extension point="org.eclipse.jdt.core.classpathContainerInitializer">
      <classpathContainerInitializer
            class="com.google.cloud.tools.eclipse.util.service.ServiceContextFactory:com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainerInitializer"
            id="com.google.cloud.tools.eclipse.appengine.libraries" />
