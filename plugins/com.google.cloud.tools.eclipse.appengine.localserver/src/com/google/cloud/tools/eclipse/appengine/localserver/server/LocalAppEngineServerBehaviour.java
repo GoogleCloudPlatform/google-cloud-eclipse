@@ -66,9 +66,9 @@ import org.eclipse.wst.server.core.util.SocketUtil;
 public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     implements IModulePublishHelper {
 
-  @VisibleForTesting // and because Java 7
-  public static interface PortChecker {
-    public boolean isInUse(InetAddress addr, int port);
+  @VisibleForTesting // and should be replaced by Java8 BiFunction
+  public interface PortChecker {
+    boolean isInUse(InetAddress addr, int port);
   }
 
   /** Parse the numeric string. Return {@code defaultValue} if non-numeric. */
