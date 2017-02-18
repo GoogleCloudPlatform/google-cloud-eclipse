@@ -64,7 +64,7 @@ import org.osgi.service.component.annotations.Reference;
 
 @Component
 public class LibraryClasspathContainerResolverService 
-                                       implements ILibraryClasspathContainerResolverService {
+    implements ILibraryClasspathContainerResolverService {
 
   private static final String CLASSPATH_ATTRIBUTE_SOURCE_URL =
       "com.google.cloud.tools.eclipse.appengine.libraries.sourceUrl";
@@ -135,7 +135,8 @@ public class LibraryClasspathContainerResolverService
       }
       return Status.OK_STATUS;
     } catch (CoreException | IOException ex) {
-      return StatusUtil.error(this, Messages.getString("TaskResolveContainerError", containerPath), ex);
+      return StatusUtil.error(this, Messages.getString("TaskResolveContainerError", containerPath),
+          ex);
     }
   }
 

@@ -14,17 +14,22 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.deploy;
+package com.google.cloud.tools.eclipse.ui.util.databinding;
 
-/**
- * Thrown if the version of a deployed App Engine application cannot be determined.
- */
-public class VersionNotFoundException extends Exception {
+import static org.junit.Assert.assertEquals;
 
-  private static final long serialVersionUID = 1L;
-  
-  public VersionNotFoundException(String message, Throwable cause) {
-    super(message, cause);
+import org.eclipse.core.runtime.IStatus;
+import org.junit.Test;
+
+public class ProjectSelectorValidatorTest {
+
+  @Test
+  public void testValidate_nullString() {
+    assertEquals(IStatus.ERROR, new ProjectSelectorValidator().validate(null).getSeverity());
   }
 
+  @Test
+  public void testValidate_emptyString() {
+    assertEquals(IStatus.ERROR, new ProjectSelectorValidator().validate("").getSeverity());
+  }
 }

@@ -29,7 +29,7 @@ public class Messages {
   private Messages() {
   }
 
-  public static String getString(String key, Object... params  ) {
+  public static String getString(String key, Object... params) {
     try {
       return MessageFormat.format(RESOURCE_BUNDLE.getString(key), params);
     } catch (MissingResourceException ex) {

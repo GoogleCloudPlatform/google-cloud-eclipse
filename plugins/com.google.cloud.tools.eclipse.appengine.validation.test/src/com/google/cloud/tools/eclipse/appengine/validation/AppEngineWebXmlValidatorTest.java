@@ -45,7 +45,7 @@ public class AppEngineWebXmlValidatorTest {
   private static final String XML = "<application></application>";
   private static final String BAD_XML = "<";
   private static final String ELEMENT_NAME = "application";
-  private static final String ELEMENT_MESSAGE = "Project ID should be specified at deploy time.";
+  private static final String ELEMENT_MESSAGE = "Project ID should be specified at deploy time";
   private static final String MARKER_TYPE = "org.eclipse.core.resources.problemmarker";
   private static IResource resource;
   private static IProject project;
@@ -96,6 +96,7 @@ public class AppEngineWebXmlValidatorTest {
     IMarker[] markers = resource.findMarkers(MARKER_TYPE, true, IResource.DEPTH_ZERO);
     assertEquals(1, markers.length);
     assertEquals(ELEMENT_MESSAGE, (String) markers[0].getAttribute(IMarker.MESSAGE));
+    assertEquals("line 1", markers[0].getAttribute(IMarker.LOCATION));
   }
   
   @Test

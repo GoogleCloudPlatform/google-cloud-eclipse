@@ -25,12 +25,12 @@ import com.google.cloud.tools.appengine.cloudsdk.process.ProcessStartListener;
 import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineDeployOutput;
 import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineProjectDeployer;
 import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
-import com.google.cloud.tools.eclipse.appengine.deploy.VersionNotFoundException;
 import com.google.cloud.tools.eclipse.login.CredentialHelper;
 import com.google.cloud.tools.eclipse.sdk.CollectingLineListener;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.gson.JsonParseException;
@@ -70,6 +70,7 @@ public class StandardDeployJob extends WorkspaceJob {
   private static final String EXPLODED_WAR_DIRECTORY_NAME = "exploded-war";
   private static final String CREDENTIAL_FILENAME = "gcloud-credentials.json";
   private static final String ERROR_MESSAGE_PREFIX = "ERROR:";
+  private static final String DEFAULT_SERVICE = "default";
 
   private static final Logger logger = Logger.getLogger(StandardDeployJob.class.getName());
 
@@ -211,22 +212,18 @@ public class StandardDeployJob extends WorkspaceJob {
   }
 
   private IStatus openAppInBrowser() {
-    final String project = deployConfiguration.getProject();
-    String appLocation = null;
-    if (deployConfiguration.getPromote()) {
-      appLocation = "https://" + project + ".appspot.com";
-    } else {
-      try {
-        String version =  getDeployedAppVersion();
-        appLocation = "https://" + version + "-dot-" + project+ ".appspot.com/";
-      } catch (VersionNotFoundException ex) {
-        return StatusUtil.error(getClass(), Messages.getString("browser.launch.failed"), ex);
-      }
-    }
+    AppEngineDeployOutput deployOutput = null;
 
-    String browserTitle = Messages.getString("browser.launch.title", project);
-    WorkbenchUtil.openInBrowserInUiThread(appLocation, null, browserTitle, browserTitle);
-    return Status.OK_STATUS;
+    try {
+      deployOutput = getDeployOutput();
+      String appLocation = getDeployedAppUrl(deployOutput);
+      String project = deployConfiguration.getProject();
+      String browserTitle = Messages.getString("browser.launch.title", project);
+      WorkbenchUtil.openInBrowserInUiThread(appLocation, null, browserTitle, browserTitle);
+      return Status.OK_STATUS;
+    } catch (CoreException ex) {
+      return StatusUtil.error(getClass(), Messages.getString("browser.launch.failed"), ex);
+    }
   }
 
   /**
@@ -245,13 +242,31 @@ public class StandardDeployJob extends WorkspaceJob {
     }
   }
 
-  private String getDeployedAppVersion() throws VersionNotFoundException {
+  private AppEngineDeployOutput getDeployOutput() throws CoreException {
     try {
       String rawDeployOutput = deployStdoutLineListener.toString();
-      AppEngineDeployOutput deployOutput = AppEngineDeployOutput.parse(rawDeployOutput);
-      return deployOutput.getVersion();
+      return AppEngineDeployOutput.parse(rawDeployOutput);
     } catch (IndexOutOfBoundsException | JsonParseException ex)  {
-      throw new VersionNotFoundException("Error getting deployed app version", ex);
+      throw new CoreException(StatusUtil.error(getClass(), "Error parsing deploy output", ex));
+    }
+  }
+
+  @VisibleForTesting
+  public String getDeployedAppUrl(AppEngineDeployOutput deployOutput) {
+    String project = deployConfiguration.getProject();
+    boolean promoting = deployConfiguration.getPromote();
+    String version = deployOutput.getVersion();
+    String service = deployOutput.getService();
+    Boolean usingDefaultService = DEFAULT_SERVICE.equals(service);
+
+    if (promoting && usingDefaultService) {
+      return "https://" + project + ".appspot.com";
+    } else if (promoting && !usingDefaultService) {
+      return "https://" + service +  "-dot-"+  project + ".appspot.com";
+    } else if (!promoting && usingDefaultService) {
+      return "https://" + version + "-dot-" + project + ".appspot.com";
+    } else {
+      return "https://" + version + "-dot-" + service +  "-dot-"+  project + ".appspot.com";
     }
   }
 

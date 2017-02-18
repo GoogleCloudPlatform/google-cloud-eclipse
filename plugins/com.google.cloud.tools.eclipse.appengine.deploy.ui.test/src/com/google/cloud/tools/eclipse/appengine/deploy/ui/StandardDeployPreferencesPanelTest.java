@@ -36,7 +36,6 @@ import com.google.cloud.tools.eclipse.projectselector.ProjectSelector;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import com.google.cloud.tools.login.Account;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import org.eclipse.core.databinding.ValidationStatusProvider;
 import org.eclipse.core.resources.IProject;
@@ -120,7 +119,8 @@ public class StandardDeployPreferencesPanelTest {
 
   @Test
   public void testProjectSavedInPreferencesSelected() throws ProjectRepositoryException {
-    IEclipsePreferences node = new ProjectScope(project).getNode(StandardDeployPreferences.PREFERENCE_STORE_QUALIFIER);
+    IEclipsePreferences node =
+        new ProjectScope(project).getNode(StandardDeployPreferences.PREFERENCE_STORE_QUALIFIER);
     node.put("project.id", "projectId1");
     node.put("account.email", EMAIL_1);
     initializeProjectRepository(projectRepository);
@@ -140,13 +140,16 @@ public class StandardDeployPreferencesPanelTest {
     fail("Did not find ProjectSelector widget");
   }
 
-  private void initializeProjectRepository(ProjectRepository projectRepository) throws ProjectRepositoryException {
+  private void initializeProjectRepository(ProjectRepository projectRepository)
+      throws ProjectRepositoryException {
     GcpProject project1 = new GcpProject("Project1", "projectId1");
     GcpProject project2 = new GcpProject("Project2", "projectId2");
     when(projectRepository.getProjects(any(Credential.class)))
       .thenReturn(Arrays.asList(project1, project2));
-    when(projectRepository.getProject(any(Credential.class), eq("projectId1"))).thenReturn(project1);
-    when(projectRepository.getProject(any(Credential.class), eq("projectId2"))).thenReturn(project2);
+    when(projectRepository.getProject(any(Credential.class), eq("projectId1")))
+        .thenReturn(project1);
+    when(projectRepository.getProject(any(Credential.class), eq("projectId2")))
+        .thenReturn(project2);
   }
 
   private IStatus getAccountSelectorValidationStatus(StandardDeployPreferencesPanel deployPanel) {

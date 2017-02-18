@@ -108,7 +108,7 @@ public final class Library {
 
   /**
    * @param libraryDependencies list of libraryIds that are dependencies of this library
-   * and should be added to the classpath, cannot be <code>null</code>
+   *     and should be added to the classpath, cannot be <code>null</code>
    */
   public void setLibraryDependencies(List<String> libraryDependencies) {
     Preconditions.checkNotNull(libraryDependencies);

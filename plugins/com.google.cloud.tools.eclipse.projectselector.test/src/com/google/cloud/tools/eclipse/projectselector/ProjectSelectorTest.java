@@ -21,7 +21,6 @@ import static org.hamcrest.Matchers.is;
 
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -63,7 +62,7 @@ public class ProjectSelectorTest {
   public void testSetProjectMaintainsSelection() {
     List<GcpProject> projects = getUnsortedProjectList();
     GcpProject selectedProject = projects.get(3);
-    
+
     ProjectSelector projectSelector = new ProjectSelector(shellResource.getShell());
     projectSelector.setProjects(projects);
     projectSelector.getViewer().setSelection(new StructuredSelection(selectedProject));

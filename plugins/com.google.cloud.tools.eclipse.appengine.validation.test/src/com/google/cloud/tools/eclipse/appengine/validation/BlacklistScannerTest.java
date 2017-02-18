@@ -30,7 +30,7 @@ import org.xml.sax.helpers.AttributesImpl;
 public class BlacklistScannerTest {
   
   private static final String ELEMENT_NAME = "application";
-  private static final String ELEMENT_MESSAGE = "Project ID should be specified at deploy time.";
+  private static final String ELEMENT_MESSAGE = "Project ID should be specified at deploy time";
   private static final String EX_MESSAGE = "test message";
   private static final SAXParseException EX =
       new SAXParseException(EX_MESSAGE, "", "", 1, 1);

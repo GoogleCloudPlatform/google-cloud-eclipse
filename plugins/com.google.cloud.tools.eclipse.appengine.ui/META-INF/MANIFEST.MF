@@ -8,8 +8,8 @@ Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: com.google.cloud.tools.eclipse.appengine.ui
-Import-Package: com.google.cloud.tools.eclipse.appengine.libraries.model,
- org.eclipse.core.runtime;version="3.5.0",
+Import-Package: com.google.cloud.tools.eclipse.appengine.libraries,
+ com.google.cloud.tools.eclipse.appengine.libraries.model,
  com.google.common.annotations;version="[20.0.0,21.0.0)",
  com.google.common.base;version="[20.0.0,21.0.0)",
  org.eclipse.core.databinding,
@@ -18,6 +18,7 @@ Import-Package: com.google.cloud.tools.eclipse.appengine.libraries.model,
  org.eclipse.core.databinding.observable.list,
  org.eclipse.core.databinding.observable.value,
  org.eclipse.core.databinding.property.value,
+ org.eclipse.core.runtime;version="3.5.0",
  org.eclipse.jface.databinding.swt,
  org.eclipse.jface.dialogs,
  org.eclipse.jface.layout,

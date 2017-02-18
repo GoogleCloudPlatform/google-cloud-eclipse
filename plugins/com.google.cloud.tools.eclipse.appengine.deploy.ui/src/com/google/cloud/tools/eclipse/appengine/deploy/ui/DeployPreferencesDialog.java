@@ -176,9 +176,9 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
   }
 
   private void setValid(boolean isValid) {
-    Button okButton = getButton(IDialogConstants.OK_ID);
-    if (okButton != null) {
-      okButton.setEnabled(isValid);
+    Button deployButton = getButton(IDialogConstants.OK_ID);
+    if (deployButton != null) {
+      deployButton.setEnabled(isValid);
     }
   }
 

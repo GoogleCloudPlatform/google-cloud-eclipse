@@ -27,15 +27,16 @@ import java.util.List;
 // TODO: move into appengine-plugins-core
 // TODO expand to include other Version attributes
 public class AppEngineDeployOutput {
-  private AppEngineDeployOutput() {
-  }
-
   private static class Version {
     String id;
     String service;
   }
 
   private List<Version> versions;
+
+  private AppEngineDeployOutput() {
+
+  }
 
   /**
    * @return version, can be null
