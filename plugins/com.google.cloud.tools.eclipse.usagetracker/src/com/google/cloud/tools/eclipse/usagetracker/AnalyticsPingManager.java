@@ -19,14 +19,9 @@ package com.google.cloud.tools.eclipse.usagetracker;
 import com.google.cloud.tools.eclipse.preferences.Activator;
 import com.google.cloud.tools.eclipse.preferences.AnalyticsPreferences;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
+import com.google.cloud.tools.eclipse.util.io.HttpUtil;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.net.UrlEscapers;
-
 import java.io.IOException;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -200,35 +195,12 @@ public class AnalyticsPingManager {
 
   private void sendPingHelper(PingEvent pingEvent) {
     if (analyticsEnabled && userHasOptedIn()) {
-      Map<String, String> parametersMap = buildParametersMap(getAnonymizedClientId(), pingEvent);
-      sendPostRequest(getParametersString(parametersMap));
-    }
-  }
-
-  private void sendPostRequest(String parametersString) {
-    HttpURLConnection connection = null;
-
-    try {
-      URL url = new URL(ANALYTICS_COLLECTION_URL);
-      connection = (HttpURLConnection) url.openConnection();
-      connection.setDoOutput(true);
-      connection.setRequestMethod("POST");
-      // This prevent Analytics from identifying our pings as spam.
-      connection.setRequestProperty("User-Agent", CloudToolsInfo.USER_AGENT);
-      connection.setReadTimeout(3000);  // milliseconds
-      byte[] bytesToWrite = parametersString.getBytes(StandardCharsets.UTF_8);
-      connection.setFixedLengthStreamingMode(bytesToWrite.length);
-
-      try (OutputStream out = connection.getOutputStream()) {
-        out.write(bytesToWrite);
-        out.flush();
-      }
-    } catch (IOException ex) {
-      // Don't try to recover or retry.
-      logger.log(Level.WARNING, "Failed to send a POST request", ex);
-    } finally {
-      if (connection != null) {
-        connection.disconnect();
+      try {
+        Map<String, String> parametersMap = buildParametersMap(getAnonymizedClientId(), pingEvent);
+        HttpUtil.sendPost(ANALYTICS_COLLECTION_URL, parametersMap);
+      } catch (IOException ex) {
+        // Don't try to recover or retry.
+        logger.log(Level.WARNING, "Failed to send a POST request", ex);
       }
     }
   }
@@ -257,23 +229,6 @@ public class AnalyticsPingManager {
     }
 
     return parametersMap;
-  }
-
-  @VisibleForTesting
-  static String getParametersString(Map<String, String> parametersMap) {
-    StringBuilder resultBuilder = new StringBuilder();
-    boolean ampersandNeeded = false;
-    for (Map.Entry<String, String> entry : parametersMap.entrySet()) {
-      if (ampersandNeeded) {
-        resultBuilder.append('&');
-      } else {
-        ampersandNeeded = true;
-      }
-      resultBuilder.append(entry.getKey());
-      resultBuilder.append('=');
-      resultBuilder.append(UrlEscapers.urlFormParameterEscaper().escape(entry.getValue()));
-    }
-    return resultBuilder.toString();
   }
 
   // To prevent showing multiple opt-in dialogs. Assumes that once a dialog is opened,

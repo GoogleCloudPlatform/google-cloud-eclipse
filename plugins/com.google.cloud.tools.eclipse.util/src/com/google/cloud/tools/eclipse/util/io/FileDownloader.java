@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.util.io;
 
+import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.common.base.Preconditions;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -36,11 +37,7 @@ import org.eclipse.core.runtime.Path;
  */
 public class FileDownloader {
 
-  private static final String USER_AGENT = "google-cloud-eclipse";
-
-  private static final int DEFAULT_CONNECT_TIMEOUT_MS = 3000;
-  private static final int DEFAULT_READ_TIMEOUT_MS = 3000;
-  private IPath downloadFolderPath;
+  private final IPath downloadFolderPath;
 
   /**
    * Creates a new instance which will download the files to the directory defined by
@@ -82,9 +79,9 @@ public class FileDownloader {
 
     ensureDownloadFolderExists();
     URLConnection connection = url.openConnection();
-    connection.setConnectTimeout(DEFAULT_CONNECT_TIMEOUT_MS);
-    connection.setReadTimeout(DEFAULT_READ_TIMEOUT_MS);
-    connection.setRequestProperty("User-Agent", USER_AGENT);
+    connection.setConnectTimeout(HttpUtil.DEFAULT_CONNECT_TIMEOUT_MS);
+    connection.setReadTimeout(HttpUtil.DEFAULT_READ_TIMEOUT_MS);
+    connection.setRequestProperty("User-Agent", CloudToolsInfo.USER_AGENT);
     try (InputStream inputStream = new BufferedInputStream(connection.getInputStream());
          OutputStream outputStream =
              new BufferedOutputStream(new FileOutputStream(downloadedFile))) {

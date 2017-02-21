@@ -32,7 +32,7 @@ public class BlacklistSaxParserTest {
   private static final String XML_WITH_BANNED_ELEMENT = BANNED_ELEMENT;
   private static final String EMPTY_XML = "";
   private static final String BANNED_ELEMENT_MESSAGE =
-      "Project ID should be specified at deploy time.";
+      "Project ID should be specified at deploy time";
   
   @Test
   public void testReadXml_emptyXml()

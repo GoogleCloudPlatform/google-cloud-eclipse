@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension point="org.eclipse.jdt.ui.classpathContainerPage">
+     <classpathContainerPage
+       id="com.google.cloud.tools.eclipse.appengine.libraries.ui"
+       name="App Engine Libraries"
+       class="com.google.cloud.tools.eclipse.appengine.libraries.ui.AppEngineLibrariesPage">
+    </classpathContainerPage>
+ </extension>
+</plugin>

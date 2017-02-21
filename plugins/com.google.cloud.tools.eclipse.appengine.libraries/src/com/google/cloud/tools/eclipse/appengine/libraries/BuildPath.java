@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -34,56 +35,81 @@ import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jst.j2ee.classpathdep.UpdateClasspathAttributeUtil;
 import org.osgi.framework.FrameworkUtil;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainerResolverJob;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
+import com.google.common.annotations.VisibleForTesting;
 
 public class BuildPath {
 
-  public static void addLibraries(IProject project, List<Library> libraries, IProgressMonitor monitor)
-      throws CoreException {
+  public static void addLibraries(IProject project, List<Library> libraries,
+      IProgressMonitor monitor) throws CoreException {
     
     if (libraries.isEmpty()) {
       return;
     }
+    IJavaProject javaProject = JavaCore.create(project);
+    addLibraries(javaProject, libraries, monitor);
+  }
+
+  /**
+   * @return the entries added to the classpath. 
+   *     Does not include entries previously present in classpath.
+   */
+  public static IClasspathEntry[] addLibraries(
+      IJavaProject javaProject, List<Library> libraries, IProgressMonitor monitor)
+          throws JavaModelException, CoreException {
+    
     SubMonitor subMonitor = SubMonitor.convert(monitor,
         Messages.getString("adding.app.engine.libraries"), libraries.size()); //$NON-NLS-1$
-    IJavaProject javaProject = JavaCore.create(project);
+
     IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
-    IClasspathEntry[] newRawClasspath =
-        Arrays.copyOf(rawClasspath, rawClasspath.length + libraries.size());
-    for (int i = 0; i < libraries.size(); i++) {
-      Library library = libraries.get(i);
-      IClasspathAttribute[] classpathAttributes = new IClasspathAttribute[1];
-      if (library.isExport()) {
-        boolean isWebApp = true;
-        classpathAttributes[0] = UpdateClasspathAttributeUtil.createDependencyAttribute(isWebApp);
-      } else {
-        classpathAttributes[0] = UpdateClasspathAttributeUtil.createNonDependencyAttribute();
+    List<IClasspathEntry> newRawClasspath = new ArrayList<>(rawClasspath.length + libraries.size());
+    newRawClasspath.addAll(Arrays.asList(rawClasspath));
+    List<IClasspathEntry> newEntries = new ArrayList<>();
+    for (Library library : libraries) {
+      IClasspathEntry libraryContainer = makeClasspathEntry(library);
+      if (!newRawClasspath.contains(libraryContainer)) {
+        newEntries.add(libraryContainer);
+        newRawClasspath.add(libraryContainer);
       }
-  
-      IClasspathEntry libraryContainer = JavaCore.newContainerEntry(library.getContainerPath(),
-                                                                    new IAccessRule[0],
-                                                                    classpathAttributes,
-                                                                    false);
-      newRawClasspath[rawClasspath.length + i] = libraryContainer;
       subMonitor.worked(1);
     }
-    javaProject.setRawClasspath(newRawClasspath, monitor);
-  
-    IEclipseContext context = EclipseContextFactory.getServiceContext(
-        FrameworkUtil.getBundle(BuildPath.class).getBundleContext());
+    javaProject.setRawClasspath(newRawClasspath.toArray(new IClasspathEntry[0]), subMonitor);
     
-    runContainerResolverJob(javaProject, context);
+    runContainerResolverJob(javaProject);
+    
+    return newEntries.toArray(new IClasspathEntry[0]);
+  }
+
+  @VisibleForTesting
+  static IClasspathEntry makeClasspathEntry(Library library) throws CoreException {
+    IClasspathAttribute[] classpathAttributes = new IClasspathAttribute[1];
+    if (library.isExport()) {
+      boolean isWebApp = true;
+      classpathAttributes[0] = UpdateClasspathAttributeUtil.createDependencyAttribute(isWebApp);
+    } else {
+      classpathAttributes[0] = UpdateClasspathAttributeUtil.createNonDependencyAttribute();
+    }
+ 
+    IClasspathEntry libraryContainer = JavaCore.newContainerEntry(library.getContainerPath(),
+                                                                  new IAccessRule[0],
+                                                                  classpathAttributes,
+                                                                  false);
+    return libraryContainer;
   }
   
-  private static void runContainerResolverJob(IJavaProject javaProject, IEclipseContext context) {
+  private static void runContainerResolverJob(IJavaProject javaProject) {
+    IEclipseContext context = EclipseContextFactory.getServiceContext(
+        FrameworkUtil.getBundle(BuildPath.class).getBundleContext());
     final IEclipseContext childContext =
         context.createChild(LibraryClasspathContainerResolverJob.class.getName());
     childContext.set(IJavaProject.class, javaProject);
-    Job job = ContextInjectionFactory.make(LibraryClasspathContainerResolverJob.class, childContext);
+    Job job =
+        ContextInjectionFactory.make(LibraryClasspathContainerResolverJob.class, childContext);
     job.addJobChangeListener(new JobChangeAdapter() {
       @Override
       public void done(IJobChangeEvent event) {

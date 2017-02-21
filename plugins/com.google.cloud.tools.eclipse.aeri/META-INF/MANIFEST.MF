@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ClassPath: .
+Bundle-ManifestVersion: 2
+Bundle-Name: Cloud Tools for Eclipse Error Reporting
+Bundle-SymbolicName: com.google.cloud.tools.eclipse.aeri;singleton:=true
+Bundle-Version: 0.1.0.qualifier
+Bundle-Vendor: Google Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ActivationPolicy: lazy

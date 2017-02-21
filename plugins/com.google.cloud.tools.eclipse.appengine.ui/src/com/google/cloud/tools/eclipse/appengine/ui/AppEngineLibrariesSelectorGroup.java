@@ -16,14 +16,13 @@
 
 package com.google.cloud.tools.eclipse.appengine.ui;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.AppEngineLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -46,22 +45,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 
 public class AppEngineLibrariesSelectorGroup implements ISelectionProvider {
-  // TODO obtain libraries from extension registry
-  // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/819
-  private static Collection<Library> getAvailableLibraries() {
-    Library appEngine = new Library("appengine-api");
-    appEngine.setName("App Engine API");
-    appEngine.setToolTip(Messages.getString("appengine.api.tooltip"));
-    Library endpoints = new Library("appengine-endpoints");
-    endpoints.setName("Google Cloud Endpoints");
-    endpoints.setToolTip(Messages.getString("endpoints.tooltip"));
-    endpoints.setLibraryDependencies(Collections.singletonList("appengine-api"));
-    Library objectify = new Library("objectify");
-    objectify.setName("Objectify");
-    objectify.setToolTip(Messages.getString("objectify.tooltip"));
-    objectify.setLibraryDependencies(Collections.singletonList("appengine-api"));
-    return Arrays.asList(appEngine, endpoints, objectify);
-  }
 
   /** The libraries that can be selected. */
   private final Map<String, Library> availableLibraries;
@@ -73,13 +56,10 @@ public class AppEngineLibrariesSelectorGroup implements ISelectionProvider {
   private final ListenerList/* <ISelectedChangeListener> */ listeners = new ListenerList/* <> */();
 
   public AppEngineLibrariesSelectorGroup(Composite parentContainer) {
-    this(parentContainer, getAvailableLibraries());
-  }
-
-  public AppEngineLibrariesSelectorGroup(Composite parentContainer,
-      Collection<Library> availableLibraries) {
+    Collection<Library> availableLibraries = AppEngineLibraries.getAvailableLibraries();
     Preconditions.checkNotNull(parentContainer, "parentContainer is null");
     Preconditions.checkNotNull(availableLibraries, "availableLibraries is null");
+    
     this.availableLibraries = new LinkedHashMap<>();
     for (Library library : availableLibraries) {
       this.availableLibraries.put(library.getId(), library);

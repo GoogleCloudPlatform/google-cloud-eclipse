@@ -8,7 +8,7 @@ public class MessagesTest {
   @Test
   public void test() {
     Assert.assertEquals(
-      "Project ID should be specified at deploy time.",
+      "Project ID should be specified at deploy time",
         Messages.getString("application.element"));
   }
 

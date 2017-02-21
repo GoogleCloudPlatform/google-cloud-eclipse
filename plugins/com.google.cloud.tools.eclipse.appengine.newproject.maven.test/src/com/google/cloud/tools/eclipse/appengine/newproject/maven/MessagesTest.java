@@ -28,6 +28,13 @@ public class MessagesTest {
   }
   
   @Test
+  public void testWizardDescription() {
+    Assert.assertEquals(
+        "Create a new Maven-based Eclipse project for App Engine standard environment development.",
+        Messages.getString("WIZARD_DESCRIPTION"));
+  }
+  
+  @Test
   public void testIllegalPackageName() {
     Assert.assertEquals("Illegal Java package name: com.example.foo",
         Messages.getString("ILLEGAL_PACKAGE_NAME", "com.example.foo"));
