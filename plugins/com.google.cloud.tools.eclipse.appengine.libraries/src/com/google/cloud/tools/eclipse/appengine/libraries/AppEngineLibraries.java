@@ -38,11 +38,10 @@ public class AppEngineLibraries {
    * @return the three core appengine libraries
    */
   public static List<Library> getAvailableLibraries() {
-    
     IConfigurationElement[] elements = RegistryFactory.getRegistry().getConfigurationElementsFor(
         "com.google.cloud.tools.eclipse.appengine.libraries");
     LibraryFactory factory = new LibraryFactory();
-    ArrayList<Library> result = new ArrayList<>();
+    List<Library> result = new ArrayList<>();
     for (IConfigurationElement element : elements) {
       try {
         Library library = factory.create(element);
