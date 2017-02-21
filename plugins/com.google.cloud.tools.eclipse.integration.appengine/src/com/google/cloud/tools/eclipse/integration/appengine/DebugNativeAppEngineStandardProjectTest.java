@@ -56,6 +56,9 @@ import java.util.concurrent.TimeUnit;
  */
 @RunWith(SWTBotJunit4ClassRunner.class)
 public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
+
+  private static final long TERMINATE_SERVER_TIMEOUT = 10000L;
+
   @Rule
   public ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
 
@@ -124,7 +127,8 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
       }
     }
     assertNotNull(stopServerButton);
-    SwtBotTreeUtilities.waitUntilTreeContainsText(bot, allItems[0], "<terminated>");
+    SwtBotTreeUtilities.waitUntilTreeContainsText(bot, allItems[0], "<terminated>",
+                                                  TERMINATE_SERVER_TIMEOUT);
     assertNoService(new URL("http://localhost:8080/hello"));
     assertTrue("App Engine console should mark as stopped",
         consoleView.getViewReference().getContentDescription().startsWith("<stopped>"));
