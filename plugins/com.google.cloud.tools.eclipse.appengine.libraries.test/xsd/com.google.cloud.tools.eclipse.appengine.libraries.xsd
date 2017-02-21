@@ -7,8 +7,8 @@
            name="App Engine Libraries"/>
     </xs:appinfo>
     <xs:documentation>
-       Provides an extension point to define libraries that will be resolved using the Maven coordinates.
-       These libraries then can be added to App Engine projects.
+       Provides an extension point to define libraries that will be resolved using the
+        Maven coordinates. These libraries then can be added to App Engine projects.
     </xs:documentation>
   </xs:annotation>
 
@@ -96,8 +96,20 @@ limitations under the License.
                <xs:element ref="libraryFile" />
             </xs:choice>
          </xs:sequence>
-         <xs:attribute name="group" type="xs:string"/>
-         <xs:attribute name="tooltip" type="xs:string"/>
+         <xs:attribute name="group" type="xs:string">
+           <xs:annotation>
+             <xs:documentation>
+               The collection to which this library belongs.
+             </xs:documentation>
+            </xs:annotation>
+         </xs:attribute>
+         <xs:attribute name="tooltip" type="xs:string">
+           <xs:annotation>
+             <xs:documentation>
+               Description of the library for display to the end user.
+             </xs:documentation>
+            </xs:annotation>
+         </xs:attribute>
          <xs:attribute name="id" type="xs:string">
             <xs:annotation>
                <xs:documentation>

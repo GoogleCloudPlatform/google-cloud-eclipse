@@ -103,13 +103,10 @@ public class SerializableClasspathEntry {
   }
 
   public IClasspathEntry toClasspathEntry(IPath baseDirectory, IPath sourceBaseDirectory) {
+    IPath attachmentPath = sourceAttachmentPath.isEmpty() ? null
+        : restoreSourcePath(baseDirectory, sourceBaseDirectory);
     return JavaCore.newLibraryEntry(PathUtil.makePathAbsolute(new Path(path), baseDirectory),
-        sourceAttachmentPath.isEmpty() ? null
-            : restoreSourcePath(baseDirectory, sourceBaseDirectory),
-                                    null,
-                                    getAccessRules(),
-                                    getAttributes(),
-                                    true);
+        attachmentPath, null, getAccessRules(), getAttributes(), true);
   }
 
   private IPath restoreSourcePath(IPath baseDirectory, IPath sourceBaseDirectory) {
