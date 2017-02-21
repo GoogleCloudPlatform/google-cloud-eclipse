@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.projectselector;
+package com.google.cloud.tools.eclipse.projectselector.model;
 
 /**
  * Represents a Google Cloud Platform project.
@@ -23,6 +23,7 @@ public class GcpProject {
 
   private final String name;
   private final String id;
+  private AppEngine appEngine;
 
   public GcpProject(String name, String id) {
     this.name = name;
@@ -63,5 +64,25 @@ public class GcpProject {
       return false;
     }
     return true;
+  }
+
+  /**
+   * @return an AppEngine object if it has been retrieved from the backend or {@code null} if it has
+   * not yet been retrieved
+   */
+  public AppEngine getAppEngine() {
+    return appEngine;
+  }
+
+  public void setAppEngine(AppEngine appEngine) {
+    this.appEngine = appEngine;
+  }
+
+  /**
+   * @return {@code true} if the AppEngine object has been created based on the information
+   * retrieved from the backend
+   */
+  public boolean hasAppEngineInfo() {
+    return appEngine != null;
   }
 }

@@ -25,10 +25,11 @@ import static org.mockito.Mockito.when;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.internal.ProjectSelectorSelectionChangedListener;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
-import com.google.cloud.tools.eclipse.projectselector.GcpProject;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepositoryException;
 import com.google.cloud.tools.eclipse.projectselector.ProjectSelector;
+import com.google.cloud.tools.eclipse.projectselector.model.AppEngine;
+import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.junit.Before;
@@ -73,7 +74,7 @@ public class ProjectSelectorSelectionChangedListenerTest {
   @Test
   public void testSelectionChanged_repositoryException() throws ProjectRepositoryException {
     initSelectionAndAccountSelector();
-    when(projectRepository.hasAppEngineApplication(any(Credential.class), anyString()))
+    when(projectRepository.getAppEngineApplication(any(Credential.class), anyString()))
         .thenThrow(new ProjectRepositoryException("testException"));
 
     listener.selectionChanged(event);
@@ -83,8 +84,8 @@ public class ProjectSelectorSelectionChangedListenerTest {
   @Test
   public void testSelectionChanged_noAppEngineApplication() throws ProjectRepositoryException {
     initSelectionAndAccountSelector();
-    when(projectRepository.hasAppEngineApplication(any(Credential.class), anyString()))
-        .thenReturn(false);
+    when(projectRepository.getAppEngineApplication(any(Credential.class), anyString()))
+        .thenReturn(AppEngine.NO_APPENGINE_APPLICATION);
 
     listener.selectionChanged(event);
     verify(projectSelector).setStatusLink(EXPECTED_MESSAGE_WHEN_NO_APPLICATION, EXPECTED_LINK);
@@ -93,8 +94,8 @@ public class ProjectSelectorSelectionChangedListenerTest {
   @Test
   public void testSelectionChanged_hasAppEngineApplication() throws ProjectRepositoryException {
     initSelectionAndAccountSelector();
-    when(projectRepository.hasAppEngineApplication(any(Credential.class), anyString()))
-        .thenReturn(true);
+    when(projectRepository.getAppEngineApplication(any(Credential.class), anyString()))
+        .thenReturn(AppEngine.withId("id"));
 
     listener.selectionChanged(event);
     verify(projectSelector).clearStatusLink();

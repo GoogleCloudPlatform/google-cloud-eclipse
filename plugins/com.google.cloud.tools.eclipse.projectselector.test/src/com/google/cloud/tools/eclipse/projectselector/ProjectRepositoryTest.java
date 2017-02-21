@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.projectselector;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -38,6 +39,8 @@ import com.google.api.services.cloudresourcemanager.CloudResourceManager.Project
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects.Get;
 import com.google.api.services.cloudresourcemanager.model.ListProjectsResponse;
 import com.google.api.services.cloudresourcemanager.model.Project;
+import com.google.cloud.tools.eclipse.projectselector.model.AppEngine;
+import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -153,26 +156,28 @@ public class ProjectRepositoryTest {
 
   @Test(expected = NullPointerException.class)
   public void testHasAppEngineApplication_nullCredential() throws ProjectRepositoryException {
-    repository.hasAppEngineApplication(null, "projectId");
+    repository.getAppEngineApplication(null, "projectId");
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testHasAppEngineApplication_nullProjectId() throws ProjectRepositoryException {
-    repository.hasAppEngineApplication(mock(Credential.class), null);
+    repository.getAppEngineApplication(mock(Credential.class), null);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testHasAppEngineApplication_emptyProjectId() throws ProjectRepositoryException {
-    repository.hasAppEngineApplication(mock(Credential.class), "");
+    repository.getAppEngineApplication(mock(Credential.class), "");
   }
 
   @Test
   public void testHasAppengineApplication_hasApplication() throws IOException, ProjectRepositoryException {
     com.google.api.services.appengine.v1.Appengine.Apps.Get get = initializeGetRequest();
     Application application = new Application();
+    application.setId("id");
     when(get.execute()).thenReturn(application);
 
-    assertTrue(repository.hasAppEngineApplication(mock(Credential.class), "projectId"));
+    assertThat(repository.getAppEngineApplication(mock(Credential.class), "projectId"),
+        is(not(AppEngine.NO_APPENGINE_APPLICATION)));
   }
 
   @Test
@@ -182,7 +187,8 @@ public class ProjectRepositoryTest {
         GoogleJsonResponseExceptionFactoryTesting.newMock(new JacksonFactory(), 404, "Not found");
     when(get.execute()).thenThrow(notFoundException);
 
-    assertFalse(repository.hasAppEngineApplication(mock(Credential.class), "projectId"));
+    assertThat(repository.getAppEngineApplication(mock(Credential.class), "projectId"),
+        is(AppEngine.NO_APPENGINE_APPLICATION));
   }
 
   @Test(expected = ProjectRepositoryException.class)
@@ -190,7 +196,7 @@ public class ProjectRepositoryTest {
     com.google.api.services.appengine.v1.Appengine.Apps.Get get = initializeGetRequest();
     when(get.execute()).thenThrow(new IOException("test exception"));
 
-    repository.hasAppEngineApplication(mock(Credential.class), "projectId");
+    repository.getAppEngineApplication(mock(Credential.class), "projectId");
   }
 
   @Test(expected = ProjectRepositoryException.class)
@@ -201,7 +207,7 @@ public class ProjectRepositoryTest {
         GoogleJsonResponseExceptionFactoryTesting.newMock(new JacksonFactory(), 500, "Server Error");
     when(get.execute()).thenThrow(exception);
 
-    repository.hasAppEngineApplication(mock(Credential.class), "projectId");
+    repository.getAppEngineApplication(mock(Credential.class), "projectId");
   }
 
   @Test

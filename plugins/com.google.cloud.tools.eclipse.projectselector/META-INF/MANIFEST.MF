@@ -10,7 +10,8 @@ Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
-Export-Package: com.google.cloud.tools.eclipse.projectselector
+Export-Package: com.google.cloud.tools.eclipse.projectselector,
+ com.google.cloud.tools.eclipse.projectselector.model
 Import-Package: com.google.api.client.auth.oauth2,
  com.google.api.client.googleapis,
  com.google.api.client.googleapis.json,

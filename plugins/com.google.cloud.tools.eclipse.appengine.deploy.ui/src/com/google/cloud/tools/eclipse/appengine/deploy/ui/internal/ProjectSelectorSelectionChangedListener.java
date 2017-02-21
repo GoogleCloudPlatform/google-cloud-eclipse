@@ -19,10 +19,11 @@ package com.google.cloud.tools.eclipse.appengine.deploy.ui.internal;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
-import com.google.cloud.tools.eclipse.projectselector.GcpProject;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepositoryException;
 import com.google.cloud.tools.eclipse.projectselector.ProjectSelector;
+import com.google.cloud.tools.eclipse.projectselector.model.AppEngine;
+import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import java.text.MessageFormat;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -51,12 +52,9 @@ public class ProjectSelectorSelectionChangedListener implements ISelectionChange
     try {
       if (!selection.isEmpty()) {
         GcpProject project = (GcpProject) selection.getFirstElement();
-        Credential selectedCredential = accountSelector.getSelectedCredential();
-        String projectId = project.getId();
-        boolean hasAppEngineApplication =
-            projectRepository.hasAppEngineApplication(selectedCredential, projectId);
+        boolean hasAppEngineApplication = hasAppEngineApplication(project);
         if (!hasAppEngineApplication) {
-          String link = MessageFormat.format(CREATE_APP_LINK, projectId);
+          String link = MessageFormat.format(CREATE_APP_LINK, project.getId());
           projectSelector.setStatusLink(
               Messages.getString("projectselector.missing.appengine.application.link",
                                  link), link);
@@ -71,5 +69,21 @@ public class ProjectSelectorSelectionChangedListener implements ISelectionChange
                                                        ex.getLocalizedMessage()),
                                     null /* tooltip */);
     }
+  }
+
+  /**
+   * Lazily queries the backend whether the specified project has an App Engine application.
+   * <p>
+   * The result of the query is stored in the object and the next time it is returned from there
+   * saving a roundtrip to the backend.
+   */
+  private boolean hasAppEngineApplication(GcpProject project) throws ProjectRepositoryException {
+    if (!project.hasAppEngineInfo()) {
+      Credential selectedCredential = accountSelector.getSelectedCredential();
+      AppEngine appEngine =
+          projectRepository.getAppEngineApplication(selectedCredential, project.getId());
+      project.setAppEngine(appEngine);
+    }
+    return project.getAppEngine() != AppEngine.NO_APPENGINE_APPLICATION;
   }
 }

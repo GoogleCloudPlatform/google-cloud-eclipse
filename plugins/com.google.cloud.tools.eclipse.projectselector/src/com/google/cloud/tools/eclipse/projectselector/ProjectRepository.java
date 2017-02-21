@@ -23,6 +23,8 @@ import com.google.api.services.appengine.v1.model.Application;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects;
 import com.google.api.services.cloudresourcemanager.model.ListProjectsResponse;
 import com.google.api.services.cloudresourcemanager.model.Project;
+import com.google.cloud.tools.eclipse.projectselector.model.AppEngine;
+import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -107,7 +109,7 @@ public class ProjectRepository {
    * @throws ProjectRepositoryException if an error other than HTTP 404 happens while retrieving the
    *     App Engine application
    */
-  public boolean hasAppEngineApplication(Credential credential, String projectId)
+  public AppEngine getAppEngineApplication(Credential credential, String projectId)
       throws ProjectRepositoryException {
     Preconditions.checkNotNull(credential);
     Preconditions.checkArgument(!Strings.isNullOrEmpty(projectId));
@@ -117,12 +119,12 @@ public class ProjectRepository {
 
       // just in case the API changes and exception with 404 won't be
       // used to indicate a missing application
-      return application != null;
+      return AppEngine.withId(application.getId());
     } catch (IOException ex) {
       if (ex instanceof GoogleJsonResponseException) {
         GoogleJsonResponseException responseException = (GoogleJsonResponseException) ex;
         if (responseException.getStatusCode() == HttpStatusCodes.STATUS_CODE_NOT_FOUND) {
-          return false;
+          return AppEngine.NO_APPENGINE_APPLICATION;
         } else {
           String message = responseException.getLocalizedMessage();
           // the message is a full json string with multiple lines, let's extract only the message
