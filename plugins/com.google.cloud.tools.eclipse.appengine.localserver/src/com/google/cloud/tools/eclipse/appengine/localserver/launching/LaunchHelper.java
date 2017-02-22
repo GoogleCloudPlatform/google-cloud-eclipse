@@ -131,7 +131,7 @@ public class LaunchHelper {
   protected void launch(IServer server, String launchMode, SubMonitor progress)
       throws CoreException {
     // Explicitly offer to save dirty editors to avoid the puzzling prompt-to-save in
-    // IServer#start() that prompts the user <em>as the server continues to launch</em>.
+    // IServer#start() that prompts the user *as the server continues to launch*.
     // ServerUIPlugin.saveEditors() respects the "Save editors before starting the server"
     // preference.
     if (!ServerUIPlugin.saveEditors()) {
