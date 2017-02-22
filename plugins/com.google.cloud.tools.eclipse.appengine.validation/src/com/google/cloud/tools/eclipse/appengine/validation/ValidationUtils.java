@@ -20,9 +20,22 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.ide.ResourceUtil;
+
+import com.google.common.io.CharStreams;
+
 import java.util.Map;
 import java.util.Queue;
 
@@ -60,5 +73,26 @@ public class ValidationUtils {
       logger.log(Level.SEVERE, ex.getMessage());
     }
     return bannedElementOffsetMap;
+  }
+  
+  /**
+   * Returns {@link IDocument} in the open editor, or null if the editor
+   * is not open.
+   */
+  static IDocument getCurrentDocument(IFile file) {
+    IWorkbench workbench = PlatformUI.getWorkbench();
+    IWorkbenchWindow activeWorkbenchWindow = workbench.getActiveWorkbenchWindow();
+    IWorkbenchPage activePage = activeWorkbenchWindow.getActivePage();
+    IEditorPart editorPart = ResourceUtil.findEditor(activePage, file);
+    if (editorPart != null) {
+      IDocument document = (IDocument) editorPart.getAdapter(IDocument.class);
+      return document;
+    }
+    return null;
+  }
+  
+  public static String convertStreamToString(InputStream is, String charset) throws IOException {
+    String result = CharStreams.toString(new InputStreamReader(is, charset));
+    return result;
   }
 }

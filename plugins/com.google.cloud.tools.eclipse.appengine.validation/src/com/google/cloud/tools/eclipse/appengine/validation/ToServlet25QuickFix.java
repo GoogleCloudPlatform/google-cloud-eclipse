@@ -16,7 +16,9 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,6 +26,7 @@ import javax.xml.transform.TransformerException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.IMarkerResolution;
 import com.google.cloud.tools.eclipse.util.Xslt;
 
@@ -39,14 +42,24 @@ public class ToServlet25QuickFix implements IMarkerResolution {
   public String getLabel() {
     return Messages.getString("convert.servlet");
   }
-
+  
   @Override
   public void run(IMarker marker) {
     try {
       IFile file = (IFile) marker.getResource();
-      URL xslPath = ToServlet25QuickFix.class.getResource("/xslt/servlet.xsl");
-      Xslt.transformInPlace(file, xslPath);
-    } catch (IOException | CoreException| TransformerException ex) {
+      IDocument document = ValidationUtils.getCurrentDocument(file);
+      URL xslPath = ApplicationQuickFix.class.getResource("/xslt/servlet.xsl");
+      if (document != null) {
+        String currentContents = document.get();
+        String encoding = file.getCharset();
+        InputStream documentStream = new ByteArrayInputStream(currentContents.getBytes(encoding));
+        InputStream transformed = Xslt.applyXslt(documentStream, xslPath.openStream());
+        String newDoc = ValidationUtils.convertStreamToString(transformed, encoding);
+        document.set(newDoc);
+      } else {
+        Xslt.transformInPlace(file, xslPath);
+      }
+    } catch (IOException | TransformerException | CoreException ex) {
       logger.log(Level.SEVERE, ex.getMessage());
     }
   }
