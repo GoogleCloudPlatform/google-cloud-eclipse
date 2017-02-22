@@ -20,10 +20,13 @@ import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.ErrorDialogErrorHandler;
 import com.google.common.base.Strings;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 import org.eclipse.core.databinding.beans.PojoProperties;
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.jface.databinding.viewers.ViewerSupport;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ColumnWeightData;
@@ -34,10 +37,16 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Link;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 
 public class ProjectSelector extends Composite {
 
@@ -47,14 +56,14 @@ public class ProjectSelector extends Composite {
 
   public ProjectSelector(Composite parent) {
     super(parent, SWT.NONE);
-    setLayout(new GridLayout());
+    setLayout(new GridLayout(2, false));
 
     Composite tableComposite = new Composite(this, SWT.NONE);
     TableColumnLayout tableColumnLayout = new TableColumnLayout();
     tableComposite.setLayout(tableColumnLayout);
-    GridDataFactory.fillDefaults().grab(true, true).applyTo(tableComposite);
+    GridDataFactory.fillDefaults().grab(true, true).span(1, 2).applyTo(tableComposite);
 
-    tableViewer = new TableViewer(tableComposite, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+    tableViewer = new TableViewer(tableComposite, SWT.SINGLE | SWT.BORDER);
     createColumns(tableColumnLayout);
     tableViewer.getTable().setHeaderVisible(true);
     input = WritableList.withElementType(GcpProject.class);
@@ -64,11 +73,27 @@ public class ProjectSelector extends Composite {
                                                            "id" })); //$NON-NLS-1$
     tableViewer.setComparator(new ViewerComparator());
 
+    Button createProjectButton = new Button(this, SWT.NONE);
+    createProjectButton.setText(Messages.getString("projectselector.create.newproject"));
+    GridDataFactory.swtDefaults().align(SWT.FILL, SWT.BEGINNING).applyTo(createProjectButton);
+    createProjectButton.addSelectionListener(new SelectionListener() {
+      
+      @Override
+      public void widgetSelected(SelectionEvent e) {
+        openCreateProjectDialog();
+      }
+      
+      @Override
+      public void widgetDefaultSelected(SelectionEvent event) {
+        widgetSelected(event);
+      }
+    });
+
     statusLink = new Link(this, SWT.NONE);
     statusLink.addSelectionListener(
         new OpenUriSelectionListener(new ErrorDialogErrorHandler(getShell())));
     statusLink.setText("");
-    GridDataFactory.fillDefaults().applyTo(statusLink);
+    GridDataFactory.fillDefaults().span(2, 1).applyTo(statusLink);
   }
 
   private void createColumns(TableColumnLayout tableColumnLayout) {
@@ -127,4 +152,38 @@ public class ProjectSelector extends Composite {
   public void clearStatusLink() {
     setStatusLink("", "");
   }
+
+  private void openCreateProjectDialog() {
+    new Dialog(this.getShell()) {
+
+      @Override
+      protected Control createDialogArea(Composite parent) {
+        getShell().setText("Create new GCP project");
+        Composite control = (Composite) super.createDialogArea(parent);
+        Link link = new Link(control, SWT.NONE);
+        link.setText("You can create a new GCP project in the <a>Cloud Console</a>");
+        link.addSelectionListener(new SelectionListener() {
+          
+          @Override
+          public void widgetSelected(SelectionEvent e) {
+            try {
+              PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL("https://console.cloud.google.com"));
+            } catch (PartInitException | MalformedURLException e1) {
+              // TODO Auto-generated catch block
+              e1.printStackTrace();
+            }
+          }
+          
+          @Override
+          public void widgetDefaultSelected(SelectionEvent event) {
+            widgetSelected(event);
+          }
+        });
+        return control;
+      }
+      
+    }.open();
+    
+  }
+
 }

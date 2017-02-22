@@ -284,10 +284,10 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     Label projectIdLabel = new Label(this, SWT.LEAD);
     projectIdLabel.setText(Messages.getString("project"));
     projectIdLabel.setToolTipText(Messages.getString("tooltip.project.id"));
-    GridDataFactory.swtDefaults().align(SWT.BEGINNING, SWT.BEGINNING).applyTo(projectIdLabel);
+    GridDataFactory.swtDefaults().align(SWT.BEGINNING, SWT.BEGINNING).span(2, 1).applyTo(projectIdLabel);
     projectSelector = new ProjectSelector(this);
-    GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER)
-      .grab(true, false).hint(400, 150).applyTo(projectSelector);
+    GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).span(2, 1)
+      .grab(true, false).hint(SWT.DEFAULT, 150).applyTo(projectSelector);
     accountSelector.addSelectionListener(new Runnable() {
       @Override
       public void run() {
