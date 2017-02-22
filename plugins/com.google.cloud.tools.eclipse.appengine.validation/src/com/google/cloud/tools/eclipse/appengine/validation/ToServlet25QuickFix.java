@@ -43,6 +43,10 @@ public class ToServlet25QuickFix implements IMarkerResolution {
     return Messages.getString("convert.servlet");
   }
   
+  /**
+   * Attempts to edit the {@link IDocument} in the open editor. If the editor is not open,
+   * reads the file from memory and transforms in place.
+   */
   @Override
   public void run(IMarker marker) {
     try {
