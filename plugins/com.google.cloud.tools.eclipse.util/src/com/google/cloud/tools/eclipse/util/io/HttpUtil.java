@@ -44,7 +44,7 @@ public class HttpUtil {
   private static final String MULTIPART_BOUNDARY =
       "---------------------------45224ee4-f3c1-4b23-8df1-4012f722218c"; // some random UUID
 
-  private static HttpTransport transport = new NetHttpTransport();
+  private static final HttpTransport transport = new NetHttpTransport();
 
   public static int sendPostMultipart(String urlString, Map<String, String> parameters)
       throws IOException {
