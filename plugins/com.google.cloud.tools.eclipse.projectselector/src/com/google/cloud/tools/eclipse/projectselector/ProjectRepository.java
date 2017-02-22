@@ -40,6 +40,9 @@ public class ProjectRepository {
 
   private static final int PROJECT_LIST_PAGESIZE = 300;
   private static final String PROJECT_DELETE_REQUESTED = "DELETE_REQUESTED";
+  
+  private static final JsonFactory jsonFactory = new JacksonFactory();
+  private static final HttpTransport transport = new NetHttpTransport();
 
   /**
    * @return all active projects the account identified by {@code credential} has access to
@@ -80,8 +83,6 @@ public class ProjectRepository {
   }
 
   private static Projects getProjectsApi(Credential credential) {
-    JsonFactory jsonFactory = new JacksonFactory();
-    HttpTransport transport = new NetHttpTransport();
     CloudResourceManager resourceManager =
         new CloudResourceManager.Builder(transport, jsonFactory, credential)
             .setApplicationName(CloudToolsInfo.USER_AGENT).build();
