@@ -97,7 +97,7 @@ public class AppEngineLibrariesInPluginXmlTest {
     assertThat(endpointsLibrary.getContainerPath().toString(),
                is(Library.CONTAINER_PATH_PREFIX + "/" + APP_ENGINE_ENDPOINTS_LIBRARY_ID));
     assertThat(endpointsLibrary.getId(), is(APP_ENGINE_ENDPOINTS_LIBRARY_ID));
-    assertThat(endpointsLibrary.getName(), is("App Engine Endpoints"));
+    assertThat(endpointsLibrary.getName(), is("Google Cloud Endpoints"));
     assertThat(endpointsLibrary.getGroup(), is("appengine"));
     assertThat(endpointsLibrary.getSiteUri(),
         is(new URI("https://cloud.google.com/appengine/docs/java/endpoints/")));
