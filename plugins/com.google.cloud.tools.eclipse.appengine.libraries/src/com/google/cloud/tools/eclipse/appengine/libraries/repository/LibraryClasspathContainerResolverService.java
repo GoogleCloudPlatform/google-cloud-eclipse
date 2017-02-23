@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import org.apache.maven.artifact.Artifact;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -65,6 +66,8 @@ public class LibraryClasspathContainerResolverService
 
   private ILibraryRepositoryService repositoryService;
   private LibraryClasspathContainerSerializer serializer;
+
+  private IExtensionRegistry extensionRegistry;
 
   public IStatus resolveAll(IJavaProject javaProject, IProgressMonitor monitor) {
     IStatus status = null;
@@ -319,6 +322,18 @@ public class LibraryClasspathContainerResolverService
     if (this.repositoryService == repositoryService) {
       this.repositoryService = null;
     }
+  }
+  
+  // todo do we actually need this? The extensionRegistry field is not used in this class.
+  @Reference        
+  public void setExtensionRegistry(IExtensionRegistry extensionRegistry) {        
+     this.extensionRegistry = extensionRegistry;       
+  }       
+  
+  public void unsetExtensionRegistry(IExtensionRegistry extensionRegistry) {      
+    if (this.extensionRegistry == extensionRegistry) {        
+      this.extensionRegistry = null;      
+    }     
   }
 
 }

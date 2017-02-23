@@ -27,6 +27,8 @@ import java.util.logging.Logger;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.InvalidRegistryObjectException;
 
+// todo AppEngineLibraries and LibraryFactory should be in the same package and then this doesn't
+// need to be public
 public class LibraryFactory {
 
   private static final Logger logger = Logger.getLogger(LibraryFactory.class.getName());
