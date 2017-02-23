@@ -63,7 +63,9 @@ public class ModuleUtils {
 
   /**
    * Returns the set of all referenced modules, including child modules. This returns the unique
-   * modules, and doesn't return the module paths.
+   * modules, and doesn't return the module paths. Required as neither
+   * {@code Server#getAllModules()} nor the module-visiting method {@code #visit()} are exposed on
+   * {@link IServer}, and {@code ServerBehaviourDelegate#getAllModules()} is protected.
    */
   public static IModule[] getAllModules(IServer server) {
     Set<IModule> modules = new LinkedHashSet<>();
@@ -78,9 +80,10 @@ public class ModuleUtils {
   private static void addChildModules(IServer server, IModule[] modulePath, Set<IModule> modules) {
     IModule[] newModulePath = Arrays.copyOf(modulePath, modulePath.length + 1);
     for (IModule child : server.getChildModules(modulePath, null)) {
-      modules.add(child);
-      newModulePath[newModulePath.length - 1] = child;
-      addChildModules(server, newModulePath, modules);
+      if (modules.add(child)) {
+        newModulePath[newModulePath.length - 1] = child;
+        addChildModules(server, newModulePath, modules);
+      }
     }
   }
 }

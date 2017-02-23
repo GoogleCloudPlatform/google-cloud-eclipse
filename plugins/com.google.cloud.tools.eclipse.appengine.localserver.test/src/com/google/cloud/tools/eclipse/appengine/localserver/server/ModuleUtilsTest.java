@@ -16,8 +16,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
-import static org.mockito.Matchers.any;
-
 import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -26,22 +24,25 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.wst.server.core.IModule;
-import org.eclipse.wst.server.core.IServer;
-import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.AdditionalMatchers;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.runners.MockitoJUnitRunner;
 
+@RunWith(MockitoJUnitRunner.class)
 public class ModuleUtilsTest {
 
-  private IModule module = Mockito.mock(IModule.class);
-  private IFile descriptorFile = Mockito.mock(IFile.class);
-  private IFolder webinf = Mockito.mock(IFolder.class);
+  @Mock
+  private IModule module;
+  @Mock
+  private IFile descriptorFile;
+  @Mock
+  private IFolder webinf;
 
   @Before
   public void turnOffLogging() {
@@ -101,43 +102,4 @@ public class ModuleUtilsTest {
     InputStream in = this.getClass().getResourceAsStream(testfile);
     Mockito.when(descriptorFile.getContents()).thenReturn(in);
   }
-
-  @Test
-  public void testGetAllModules_single() {
-    IServer server = Mockito.mock(IServer.class);
-    Mockito.when(server.getModules()).thenReturn(new IModule[] {module});
-    Mockito.when(server.getChildModules(any(IModule[].class), any(IProgressMonitor.class)))
-        .thenReturn(new IModule[0]);
-
-    IModule[] result = ModuleUtils.getAllModules(server);
-    Assert.assertNotNull(result);
-    Assert.assertEquals(1, result.length);
-    Assert.assertThat(result[0], Matchers.sameInstance(module));
-  }
-
-  @Test
-  public void testGetAllModules_multi() {
-    IServer server = Mockito.mock(IServer.class);
-    Mockito.when(server.getModules()).thenReturn(new IModule[] {module});
-    Mockito.when(server.getChildModules(any(IModule[].class), any(IProgressMonitor.class)))
-        .thenReturn(new IModule[0]);
-
-    IModule module2a = Mockito.mock(IModule.class, "module2a");
-    IModule module2b = Mockito.mock(IModule.class, "module2b");
-    Mockito.when(server.getChildModules(AdditionalMatchers.aryEq(new IModule[] {module}),
-        any(IProgressMonitor.class))).thenReturn(new IModule[] {module2a, module2b});
-
-    IModule module3 = Mockito.mock(IModule.class, "module3");
-    Mockito.when(server.getChildModules(AdditionalMatchers.aryEq(new IModule[] {module, module2b}),
-        any(IProgressMonitor.class))).thenReturn(new IModule[] {module3});
-
-    IModule[] result = ModuleUtils.getAllModules(server);
-    Assert.assertNotNull(result);
-    Assert.assertEquals(4, result.length);
-    Assert.assertThat(result[0], Matchers.sameInstance(module));
-    Assert.assertThat(result[1], Matchers.sameInstance(module2a));
-    Assert.assertThat(result[2], Matchers.sameInstance(module2b));
-    Assert.assertThat(result[3], Matchers.sameInstance(module3));
-  }
-
 }
