@@ -47,12 +47,12 @@ public class ProjectSelector extends Composite {
 
   public ProjectSelector(Composite parent) {
     super(parent, SWT.NONE);
-    setLayout(new GridLayout(2, false));
+    setLayout(new GridLayout());
 
     Composite tableComposite = new Composite(this, SWT.NONE);
     TableColumnLayout tableColumnLayout = new TableColumnLayout();
     tableComposite.setLayout(tableColumnLayout);
-    GridDataFactory.fillDefaults().grab(true, true).span(1, 2).applyTo(tableComposite);
+    GridDataFactory.fillDefaults().grab(true, true).applyTo(tableComposite);
 
     tableViewer = new TableViewer(tableComposite, SWT.SINGLE | SWT.BORDER);
     createColumns(tableColumnLayout);
@@ -68,7 +68,7 @@ public class ProjectSelector extends Composite {
     statusLink.addSelectionListener(
         new OpenUriSelectionListener(new ErrorDialogErrorHandler(getShell())));
     statusLink.setText("");
-    GridDataFactory.fillDefaults().span(2, 1).applyTo(statusLink);
+    GridDataFactory.fillDefaults().applyTo(statusLink);
   }
 
   private void createColumns(TableColumnLayout tableColumnLayout) {
