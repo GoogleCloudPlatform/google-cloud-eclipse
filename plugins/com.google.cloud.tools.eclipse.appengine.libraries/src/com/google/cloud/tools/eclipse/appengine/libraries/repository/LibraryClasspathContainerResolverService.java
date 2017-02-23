@@ -37,7 +37,6 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import org.apache.maven.artifact.Artifact;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
