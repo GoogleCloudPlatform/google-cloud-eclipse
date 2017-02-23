@@ -26,7 +26,7 @@
     <library
           id="appengine-endpoints"
           group="appengine"
-          name="App Engine Endpoints"
+          name="Google Cloud Endpoints"
           tooltip="%endpoints.tooltip"
           siteUri="https://cloud.google.com/appengine/docs/java/endpoints/" >
       <libraryDependency id="appengine-api" />
