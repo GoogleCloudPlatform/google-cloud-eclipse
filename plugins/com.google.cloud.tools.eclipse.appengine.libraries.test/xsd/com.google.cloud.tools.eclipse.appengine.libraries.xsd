@@ -134,7 +134,7 @@ limitations under the License.
                </xs:documentation>
             </xs:annotation>
          </xs:attribute>
-         <xs:attribute name="siteUri" type="xs:string">
+         <xs:attribute name="siteUri" type="xs:anyURI">
             <xs:annotation>
                <xs:documentation>
                   URL for more
@@ -186,7 +186,7 @@ WAR file of the project, under &lt;tt&gt;WEB-INF/lib&lt;/tt&gt; if the parent &l
          <xs:attribute name="javadocUri" type="xs:anyURI">
             <xs:annotation>
                <xs:documentation>
-                  URI that can be used by the IDE to lookup javadoc for the classes contained in this artifact.If
+                  URL that can be used by the IDE to lookup javadoc for the classes contained in this artifact. If
 unspecified, the javadoc will be downloaded from the artifact location if available.
                </xs:documentation>
             </xs:annotation>
