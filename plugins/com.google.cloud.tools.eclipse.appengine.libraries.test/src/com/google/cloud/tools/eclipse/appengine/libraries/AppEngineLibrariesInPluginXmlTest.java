@@ -40,7 +40,7 @@ import org.junit.Test;
 public class AppEngineLibrariesInPluginXmlTest {
 
   private static final String APP_ENGINE_API_LIBRARY_ID = "appengine-api";
-  private static final String APP_ENGINE_ENDPOINTS_LIBRARY_ID = "appengine-endpoints";
+  private static final String CLOUD_ENDPOINTS_LIBRARY_ID = "appengine-endpoints";
   private static final String OBJECTIFY_LIBRARY_ID = "objectify";
   private static final String SERVLET_API_LIBRARY_ID = "servlet-api";
   private static final String JSP_API_LIBRARY_ID = "jsp-api";
@@ -58,6 +58,8 @@ public class AppEngineLibrariesInPluginXmlTest {
                is(Library.CONTAINER_PATH_PREFIX + "/" + APP_ENGINE_API_LIBRARY_ID));
     assertThat(appEngineLibrary.getId(), is(APP_ENGINE_API_LIBRARY_ID));
     assertThat(appEngineLibrary.getName(), is("App Engine API"));
+    assertThat(appEngineLibrary.getGroup(), is("appengine"));
+    assertFalse(appEngineLibrary.getToolTip().isEmpty());
     assertThat(appEngineLibrary.getSiteUri(), 
         is(new URI("https://cloud.google.com/appengine/docs/java/")));
     assertTrue(appEngineLibrary.isExport());
@@ -93,10 +95,10 @@ public class AppEngineLibrariesInPluginXmlTest {
 
   @Test
   public void testEndpointsLibraryConfig() throws URISyntaxException {
-    Library endpointsLibrary = AppEngineLibraries.getLibrary(APP_ENGINE_ENDPOINTS_LIBRARY_ID);
+    Library endpointsLibrary = AppEngineLibraries.getLibrary(CLOUD_ENDPOINTS_LIBRARY_ID);
     assertThat(endpointsLibrary.getContainerPath().toString(),
-               is(Library.CONTAINER_PATH_PREFIX + "/" + APP_ENGINE_ENDPOINTS_LIBRARY_ID));
-    assertThat(endpointsLibrary.getId(), is(APP_ENGINE_ENDPOINTS_LIBRARY_ID));
+               is(Library.CONTAINER_PATH_PREFIX + "/" + CLOUD_ENDPOINTS_LIBRARY_ID));
+    assertThat(endpointsLibrary.getId(), is(CLOUD_ENDPOINTS_LIBRARY_ID));
     assertThat(endpointsLibrary.getName(), is("Google Cloud Endpoints"));
     assertThat(endpointsLibrary.getGroup(), is("appengine"));
     assertThat(endpointsLibrary.getSiteUri(),
