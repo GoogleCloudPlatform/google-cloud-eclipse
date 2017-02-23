@@ -38,20 +38,20 @@ public interface ILibraryRepositoryService {
    * <p>
    * If <code>libraryFile.getSourceUri()</code> is not null, the source will be downloaded from that
    * URI, otherwise resolving a suitable source artifact is up to the implementation (e.g. using
-   * Maven/M2E)
+   * Maven/M2E).
    *
-   * @param libraryFile describing the artifact whose source artifact needs to be resolved
+   * @param libraryFile the artifact whose source artifact needs to be resolved
    * @param versionHint the actual version to be resolved in case <code>libraryFile</code>'s version
-   * is set to latest,  
+   *     is set to latest
    * @return a path of the resolved source artifact
    */
   IPath resolveSourceArtifact(LibraryFile libraryFile, String versionHint, IProgressMonitor monitor)
-                                                                               throws CoreException;
+      throws CoreException;
 
   /**
    * Checks if an artifact described by <code>libraryFile</code> is available. Throws a
    * {@link CoreException} if the artifact is not available.
    */
-  void makeArtifactAvailable(LibraryFile libraryFile,
-                             IProgressMonitor monitor) throws CoreException;
+  void makeArtifactAvailable(LibraryFile libraryFile, IProgressMonitor monitor)
+      throws CoreException;
 }

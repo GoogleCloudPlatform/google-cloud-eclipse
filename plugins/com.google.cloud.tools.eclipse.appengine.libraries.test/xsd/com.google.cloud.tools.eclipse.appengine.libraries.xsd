@@ -1,13 +1,16 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="unqualified">
-   <xs:annotation>
-      <xs:appinfo>
-         <meta.schema plugin="com.google.cloud.tools.eclipse.appengine.libraries" id="com.google.cloud.tools.eclipse.appengine.libraries" name="App Engine Libraries"/>
-      </xs:appinfo>
-      <xs:documentation>
-         Provides an extension point to define libraries that will be resolved using the Maven coordinates. These libraries then can be added to App Engine projects.
-      </xs:documentation>
-   </xs:annotation>
+  <xs:annotation>
+    <xs:appinfo>
+       <meta.schema plugin="com.google.cloud.tools.eclipse.appengine.libraries" 
+           id="com.google.cloud.tools.eclipse.appengine.libraries" 
+           name="App Engine Libraries"/>
+    </xs:appinfo>
+    <xs:documentation>
+       Provides an extension point to define libraries that will be resolved using the
+        Maven coordinates. These libraries then can be added to App Engine projects.
+    </xs:documentation>
+  </xs:annotation>
 
    <xs:annotation>
       <xs:appinfo>
@@ -80,7 +83,8 @@ limitations under the License.
    <xs:element name="library">
       <xs:annotation>
          <xs:documentation>
-            An App Engine library that can consist of one or more jar files with associated visibility rules and Maven coordinates.
+            An App Engine library that can consist of one or more jar files with associated
+            visibility rules and Maven coordinates.
          </xs:documentation>
       </xs:annotation>
       <xs:complexType>
@@ -92,6 +96,20 @@ limitations under the License.
                <xs:element ref="libraryFile" />
             </xs:choice>
          </xs:sequence>
+         <xs:attribute name="group" type="xs:string">
+           <xs:annotation>
+             <xs:documentation>
+               The collection to which this library belongs.
+             </xs:documentation>
+            </xs:annotation>
+         </xs:attribute>
+         <xs:attribute name="tooltip" type="xs:string">
+           <xs:annotation>
+             <xs:documentation>
+               Description of the library for display to the end user.
+             </xs:documentation>
+            </xs:annotation>
+         </xs:attribute>
          <xs:attribute name="id" type="xs:string">
             <xs:annotation>
                <xs:documentation>
@@ -102,22 +120,25 @@ limitations under the License.
          <xs:attribute name="name" type="xs:string">
             <xs:annotation>
                <xs:documentation>
-                  A user-friendly name for the library that can be displayed in the UI, e.g.: "AppEngine Endpoints".
+                  A user-friendly name for the library that can be displayed in the UI,
+                  e.g.: "AppEngine Endpoints".
                </xs:documentation>
             </xs:annotation>
          </xs:attribute>
          <xs:attribute name="recommendation" type="recommendationType">
             <xs:annotation>
                <xs:documentation>
-                  Recommendation of the library, e.g.: if the library is required, it must always be added to the
-classpath of projects. Defaults to &lt;tt&gt;optional&lt;/tt&gt;.
+                  Recommendation of the library, e.g.: if the library is required,
+                  it must always be added to the
+                  classpath of projects. Defaults to &lt;tt&gt;optional&lt;/tt&gt;.
                </xs:documentation>
             </xs:annotation>
          </xs:attribute>
          <xs:attribute name="siteUri" type="xs:string">
             <xs:annotation>
                <xs:documentation>
-                  URI that can be used to display a link to the user to provide more detailed information about the library, e.g. user guides, wiki, other documentation.
+                  URL for more
+                  detailed information about the library, e.g. user guides, wiki, other documentation.
                </xs:documentation>
             </xs:annotation>
          </xs:attribute>

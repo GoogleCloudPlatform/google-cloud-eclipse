@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Google Inc.
+ * Copyright 2016 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,10 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.validation;
+package com.google.cloud.tools.eclipse.appengine.libraries.persistence;
 
-/**
- * Applies servlet.xsl to web.xml to replace <web-app> element with
- * Servlet 2.5 deployment descriptor.
- */
-public class ToServlet25QuickFix extends XsltQuickFix {
-  
-  public ToServlet25QuickFix() {
-    super("/xslt/servlet.xsl", Messages.getString("convert.servlet"));
-  }
-  
+import org.eclipse.core.runtime.IPath;
+
+public interface ArtifactBaseLocationProvider {
+  IPath getBaseLocation();
 }

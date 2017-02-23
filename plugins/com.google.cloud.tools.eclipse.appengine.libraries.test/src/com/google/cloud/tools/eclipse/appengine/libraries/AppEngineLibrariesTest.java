@@ -16,24 +16,38 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Test;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 
 public class AppEngineLibrariesTest {
-
+  
   @Test
-  public void testTooltipsDefined() {
-    for (Library library : AppEngineLibraries.getAvailableLibraries()) {
-      String toolTip = library.getToolTip();
-      Assert.assertFalse(toolTip, toolTip.startsWith("!"));
+  public void testGetLibraries() {
+    List<Library> libraries = AppEngineLibraries.getLibraries("appengine");
+    for (Library library : libraries) {
+      Assert.assertFalse(library.getLibraryFiles().isEmpty());
+      String tooltip = library.getToolTip();
+      Assert.assertFalse(tooltip.isEmpty());
+      Assert.assertFalse(tooltip, tooltip.startsWith("!"));
     }
+    Assert.assertEquals(3, libraries.size());
   }
   
   @Test
-  public void testLibrariesAvailable() {
-    Assert.assertEquals(3, AppEngineLibraries.getAvailableLibraries().size());
+  public void testGetLibraries_null() {
+    List<Library> libraries = AppEngineLibraries.getLibraries(null);
+    Assert.assertTrue(libraries.isEmpty());
+  }
+  
+  @Test
+  public void testGetLibrary() {
+    Library library = AppEngineLibraries.getLibrary("objectify");
+    Assert.assertEquals(library.getGroup(), "appengine");
+    Assert.assertEquals(library.getName(), "Objectify");
   }
 
 }

@@ -32,8 +32,10 @@ public class PluginXmlValidationTest extends BasePluginXmlTest {
   @Test
   public void validatePluginXml() throws SAXException, IOException {
     SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-    Schema schema = schemaFactory.newSchema(new File("xsd/com.google.cloud.tools.eclipse.appengine.libraries.xsd"));
-    Source source = new StreamSource(new File("../com.google.cloud.tools.eclipse.appengine.libraries/plugin.xml"));
+    Schema schema = schemaFactory
+        .newSchema(new File("xsd/com.google.cloud.tools.eclipse.appengine.libraries.xsd"));
+    Source source = new StreamSource(
+        new File("../com.google.cloud.tools.eclipse.appengine.libraries/plugin.xml"));
     schema.newValidator().validate(source);
   }
 }
