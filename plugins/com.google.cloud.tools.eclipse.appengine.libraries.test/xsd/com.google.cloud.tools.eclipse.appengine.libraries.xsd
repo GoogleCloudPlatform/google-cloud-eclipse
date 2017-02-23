@@ -137,7 +137,7 @@ limitations under the License.
          <xs:attribute name="siteUri" type="xs:string">
             <xs:annotation>
                <xs:documentation>
-                  URI that can be used to display a link to the user to provide more
+                  URL for more
                   detailed information about the library, e.g. user guides, wiki, other documentation.
                </xs:documentation>
             </xs:annotation>

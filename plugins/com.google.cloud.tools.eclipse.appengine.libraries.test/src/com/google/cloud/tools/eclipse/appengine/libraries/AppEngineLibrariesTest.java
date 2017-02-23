@@ -26,7 +26,7 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 public class AppEngineLibrariesTest {
   
   @Test
-  public void testLibrariesAvailable() {
+  public void testGetLibraries() {
     List<Library> libraries = AppEngineLibraries.getLibraries("appengine");
     for (Library library : libraries) {
       Assert.assertFalse(library.getLibraryFiles().isEmpty());
@@ -35,6 +35,19 @@ public class AppEngineLibrariesTest {
       Assert.assertFalse(tooltip, tooltip.startsWith("!"));
     }
     Assert.assertEquals(3, libraries.size());
+  }
+  
+  @Test
+  public void testGetLibraries_null() {
+    List<Library> libraries = AppEngineLibraries.getLibraries(null);
+    Assert.assertTrue(libraries.isEmpty());
+  }
+  
+  @Test
+  public void testGetLibrary() {
+    Library library = AppEngineLibraries.getLibrary("objectify");
+    Assert.assertEquals(library.getGroup(), "appengine");
+    Assert.assertEquals(library.getName(), "Objectify");
   }
 
 }

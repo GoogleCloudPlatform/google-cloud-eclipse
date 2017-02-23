@@ -53,7 +53,7 @@ public class AppEngineLibraries {
   public static List<Library> getLibraries(String group) {
     List<Library> result = new ArrayList<>();
     for (Library library : libraries.values()) {
-      if (group.equals(library.getGroup())) {
+      if (library.getGroup().equals(group)) {
         result.add(library);
       }
     }
