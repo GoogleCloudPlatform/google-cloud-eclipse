@@ -45,7 +45,7 @@ public class ValidationUtils {
   
   /**
    * Creates a {@link Map} of {@link BannedElement}s and their respective document-relative
-   * character offsets
+   * character offsets.
    */
   public static Map<BannedElement, Integer> getOffsetMap(byte[] bytes,
       SaxParserResults parserResults) {
@@ -77,18 +77,23 @@ public class ValidationUtils {
    * is not open.
    */
   static IDocument getCurrentDocument(IFile file) {
-    IWorkbench workbench = PlatformUI.getWorkbench();
-    IWorkbenchWindow activeWorkbenchWindow = workbench.getActiveWorkbenchWindow();
-    IWorkbenchPage activePage = activeWorkbenchWindow.getActivePage();
-    IEditorPart editorPart = ResourceUtil.findEditor(activePage, file);
-    if (editorPart != null) {
-      IDocument document = (IDocument) editorPart.getAdapter(IDocument.class);
-      return document;
+    try {
+      IWorkbench workbench = PlatformUI.getWorkbench();
+      IWorkbenchWindow activeWorkbenchWindow = workbench.getActiveWorkbenchWindow();
+      IWorkbenchPage activePage = activeWorkbenchWindow.getActivePage();
+      IEditorPart editorPart = ResourceUtil.findEditor(activePage, file);
+      if (editorPart != null) {
+        IDocument document = (IDocument) editorPart.getAdapter(IDocument.class);
+        return document;
+      }
+      return null;
+    } catch (IllegalStateException ex) {
+      //If workbench does not exist
+      return null;
     }
-    return null;
   }
   
-  public static String convertStreamToString(InputStream is, String charset) throws IOException {
+  static String convertStreamToString(InputStream is, String charset) throws IOException {
     String result = CharStreams.toString(new InputStreamReader(is, charset));
     return result;
   }
