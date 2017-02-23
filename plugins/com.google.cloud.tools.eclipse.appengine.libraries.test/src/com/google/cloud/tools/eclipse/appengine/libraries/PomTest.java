@@ -16,12 +16,9 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -96,7 +93,7 @@ public class PomTest {
     pom.addDependencies(libraries);
     
     InputStream contents = pomFile.getContents();
-    Document actual = debuggableParse(contents);
+    Document actual = parse(contents);
     
     NodeList dependencies = actual.getElementsByTagName("dependencies");
     Assert.assertEquals(1, dependencies.getLength());
@@ -121,23 +118,10 @@ public class PomTest {
     Assert.assertEquals("LATEST", version3.getTextContent());
   }
 
-  /**
-   * For ease of debugging this method stores the entire file into a string, then parses
-   * that string. 
-   */
-  private static Document debuggableParse(InputStream in)
-      throws ParserConfigurationException, IOException, UnsupportedEncodingException, SAXException {
+  private static Document parse(InputStream in)
+      throws ParserConfigurationException, IOException, SAXException {
     DocumentBuilder builder = factory.newDocumentBuilder();
-    
-    ByteArrayOutputStream out = new ByteArrayOutputStream();
-    for (int i = in.read(); i != -1; i = in.read()) {
-      out.write(i);
-    }
-    
-    byte[] data = out.toByteArray();
-    String xml = new String(data, "UTF-8");
-    System.err.println(xml);
-    Document actual = builder.parse(new ByteArrayInputStream(data));
+    Document actual = builder.parse(in);
     return actual;
   }
 
