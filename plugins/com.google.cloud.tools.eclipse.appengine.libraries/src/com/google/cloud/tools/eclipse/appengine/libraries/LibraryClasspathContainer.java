@@ -27,14 +27,26 @@ public class LibraryClasspathContainer implements IClasspathContainer {
   private final String description;
   private final IClasspathEntry[] classpathEntries;
 
-  public LibraryClasspathContainer(IPath path, String description, IClasspathEntry[] classpathEntries) {
+  public LibraryClasspathContainer(IPath path, String description,
+      IClasspathEntry[] classpathEntries) {
     Preconditions.checkNotNull(path, "path is null");
     Preconditions.checkNotNull(description, "description is null");
     Preconditions.checkArgument(!description.isEmpty(), "description is empty");
     Preconditions.checkNotNull(classpathEntries, "classpathEntries is null");
-    containerPath = path;
+    
+    this.containerPath = path;
     this.description = description;
     this.classpathEntries = classpathEntries;
+  }
+
+  /**
+   * Creates a new {@link LibraryClasspathContainer} with the same path and description,
+   * but with the <code>classpathEntries</code>.
+   * 
+   * @param classpathEntries the classpath entries of the new container
+   */
+  public LibraryClasspathContainer copyWithNewEntries(IClasspathEntry[] classpathEntries) {
+    return new LibraryClasspathContainer(containerPath, description, classpathEntries);
   }
 
   @Override

@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ClassPath: .
+Bundle-ManifestVersion: 2
+Bundle-Name: Tests for Cloud Tools for Eclipse GPE Migration Support for App Engine Project Conversion
+Bundle-SymbolicName: com.google.cloud.tools.eclipse.appengine.compat.test;singleton:=true
+Bundle-Version: 0.1.0.qualifier
+Bundle-Vendor: Google Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Fragment-Host: com.google.cloud.tools.eclipse.appengine.compat
+Require-Bundle: org.junit;bundle-version="4.12.0"
+Import-Package: com.google.cloud.tools.eclipse.test.util.project,
+ org.eclipse.wst.common.project.facet.core.runtime,
+ org.mockito;provider=google;version="1.10.19"

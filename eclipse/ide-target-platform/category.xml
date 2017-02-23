@@ -17,6 +17,8 @@
    <feature id="org.eclipse.wst.common.fproj.sdk" version="0.0.0"/>
    <feature id="org.eclipse.wst.web_sdk.feature" version="0.0.0"/>
    <feature id="org.eclipse.wst.server_adapters.sdk.feature" version="0.0.0"/>
+   <feature id="org.eclipse.epp.logging.aeri.feature" version="0.0.0"/>
+   <feature id="org.eclipse.epp.logging.aeri.feature.source" version="0.0.0"/>
    <bundle id="org.eclipse.jetty.http" version="0.0.0"/>
    <bundle id="org.eclipse.jetty.servlet" version="0.0.0"/>
    <bundle id="org.eclipse.jetty.server" version="0.0.0"/>
@@ -24,9 +26,11 @@
    <bundle id="org.hamcrest" version="1.1.0.v20090501071000"/>
    <bundle id="org.mortbay.jetty.server" version="6.1.26"/>
    <bundle id="org.mortbay.jetty.util" version="6.1.26"/>
-   <bundle id="com.google.guava" version="20.0"/>
-   <bundle id="com.google.gson" version="2.7"/>
+   <bundle id="org.freemarker.freemarker" version="2.3.25.stable-incubating"/>
+   <bundle id="com.google.guava" version="20.0.0"/>
+   <bundle id="com.google.gson" version="2.7.0"/>
    <bundle id="com.google.cloud.tools.appengine" version="0.0.0"/>
    <bundle id="jackson-core-asl" version="1.9.13"/>
    <bundle id="ch.qos.logback.slf4j" version="0.0.0"/>
+   <bundle id="org.slf4j.log4j" version="0.0.0"/>
 </site>

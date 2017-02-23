@@ -20,6 +20,8 @@ import com.google.cloud.tools.appengine.cloudsdk.AppEngineJavaComponentsNotInsta
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkOutOfDateException;
+import com.google.cloud.tools.eclipse.appengine.libraries.ILibraryClasspathContainerResolverService;
+import com.google.cloud.tools.eclipse.appengine.libraries.ILibraryClasspathContainerResolverService.AppEngineRuntime;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineJavaComponentMissingPage;
 import com.google.cloud.tools.eclipse.appengine.ui.CloudSdkMissingPage;
 import com.google.cloud.tools.eclipse.appengine.ui.CloudSdkOutOfDatePage;
@@ -30,23 +32,27 @@ import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
-
+import javax.inject.Inject;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.ide.undo.WorkspaceUndoUtil;
-import org.eclipse.ui.statushandlers.StatusManager;
 
 public class StandardProjectWizard extends Wizard implements INewWizard {
 
   private AppEngineStandardWizardPage page = null;
   private AppEngineStandardProjectConfig config = new AppEngineStandardProjectConfig();
   private IWorkbench workbench;
+
+  @Inject
+  private ILibraryClasspathContainerResolverService resolverService;
 
   public StandardProjectWizard() {
     setWindowTitle(Messages.getString("new.app.engine.standard.project"));
@@ -82,6 +88,26 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
       return true;
     }
 
+    boolean fork = true;
+    boolean cancelable = true;
+    IStatus status = Status.OK_STATUS;
+    try {
+      DependencyValidator dependencyValidator = new DependencyValidator();
+      getContainer().run(fork, cancelable, dependencyValidator);
+      if (!dependencyValidator.result.isOK()) {
+        status = StatusUtil.setErrorStatus(this,
+                                           Messages.getString("project.creation.failed"),
+                                           dependencyValidator.result);
+      }
+    } catch (InvocationTargetException ex) {
+      status = StatusUtil.setErrorStatus(this, Messages.getString("project.creation.failed"), ex.getCause());
+    } catch (InterruptedException e) {
+      status = Status.CANCEL_STATUS;
+    }
+    if (!status.isOK()) {
+      return false;
+    }
+
     config.setServiceName(page.getServiceName());
     config.setPackageName(page.getPackageName());
     config.setProject(page.getProjectHandle());
@@ -96,10 +122,7 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
     CreateAppEngineStandardWtpProject runnable =
         new CreateAppEngineStandardWtpProject(config, uiInfoAdapter);
 
-    IStatus status = Status.OK_STATUS;
     try {
-      boolean fork = true;
-      boolean cancelable = true;
       getContainer().run(fork, cancelable, runnable);
       
       // open most important file created by wizard in editor
@@ -108,20 +131,10 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
     } catch (InterruptedException ex) {
       status = Status.CANCEL_STATUS;
     } catch (InvocationTargetException ex) {
-      status = setErrorStatus(this, ex.getCause());
+      status = StatusUtil.setErrorStatus(this, Messages.getString("project.creation.failed"), ex.getCause());
     }
 
     return status.isOK();
-  }
-
-  public static IStatus setErrorStatus(Object origin, Throwable ex) {
-    String message = Messages.getString("project.creation.failed");
-    if (ex.getMessage() != null && !ex.getMessage().isEmpty()) {
-      message += ": " + ex.getMessage();
-    }
-    IStatus status = StatusUtil.error(origin, message, ex);
-    StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.LOG);
-    return status;
   }
 
   @Override
@@ -133,6 +146,17 @@ public class StandardProjectWizard extends Wizard implements INewWizard {
       if (location != null) {
         config.setCloudSdkLocation(location);
       }
+    }
+  }
+
+  private class DependencyValidator implements IRunnableWithProgress {
+
+    private IStatus result = null;
+
+    @Override
+    public void run(IProgressMonitor monitor)
+        throws InvocationTargetException, InterruptedException {
+      result = resolverService.checkRuntimeAvailability(AppEngineRuntime.STANDARD_JAVA_7, monitor);
     }
   }
 }

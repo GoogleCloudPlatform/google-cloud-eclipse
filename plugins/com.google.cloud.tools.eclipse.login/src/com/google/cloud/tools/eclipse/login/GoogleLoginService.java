@@ -18,24 +18,23 @@ package com.google.cloud.tools.eclipse.login;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
 import com.google.cloud.tools.eclipse.login.ui.LoginServiceUi;
-import com.google.cloud.tools.ide.login.Account;
-import com.google.cloud.tools.ide.login.GoogleLoginState;
-import com.google.cloud.tools.ide.login.JavaPreferenceOAuthDataStore;
-import com.google.cloud.tools.ide.login.LoggerFacade;
-import com.google.cloud.tools.ide.login.OAuthDataStore;
+import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
+import com.google.cloud.tools.login.Account;
+import com.google.cloud.tools.login.GoogleLoginState;
+import com.google.cloud.tools.login.JavaPreferenceOAuthDataStore;
+import com.google.cloud.tools.login.LoggerFacade;
+import com.google.cloud.tools.login.OAuthDataStore;
 import com.google.common.annotations.VisibleForTesting;
-
-import org.eclipse.jface.window.IShellProvider;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.PlatformUI;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.eclipse.jface.window.IShellProvider;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.PlatformUI;
 
 /**
  * Provides service related to login, e.g., account management, getting a credential, etc.
@@ -64,10 +63,6 @@ public class GoogleLoginService implements IGoogleLoginService {
         GoogleLoginService.OAUTH_SCOPES).toString();
   }
 
-  // We expose the reference 'accounts' to callers as-is. That is, we simply transfer references
-  // coming from 'GoogleLoginState' to callers. Therefore, 'GoogleLoginService' must not modify
-  // the states of the objects pointed to by the reference (as opposed to updating the reference
-  // itself, e.g., as in 'logOutAll()').
   private Set<Account> accounts = new HashSet<>();
   private GoogleLoginState loginState;
 
@@ -92,6 +87,7 @@ public class GoogleLoginService implements IGoogleLoginService {
         Constants.getOAuthClientId(), Constants.getOAuthClientSecret(), OAUTH_SCOPES,
         new JavaPreferenceOAuthDataStore(PREFERENCE_PATH_OAUTH_DATA_STORE, logger),
         loginServiceUi, logger);
+    loginState.setApplicationName(CloudToolsInfo.USER_AGENT);
     accounts = loginState.listAccounts();
   }
 
@@ -113,6 +109,7 @@ public class GoogleLoginService implements IGoogleLoginService {
       OAuthDataStore dataStore, LoginServiceUi uiFacade, LoggerFacade loggerFacade) {
     loginServiceUi = uiFacade;
     this.loginState = loginState;
+    loginState.setApplicationName(CloudToolsInfo.USER_AGENT);
     accounts = loginState.listAccounts();
   }
 
@@ -148,10 +145,7 @@ public class GoogleLoginService implements IGoogleLoginService {
   @Override
   public Set<Account> getAccounts() {
     synchronized (loginState) {
-      // 'accounts' is a reference to a copy of Accounts maintained in 'loginState'.
-      // ('loginState.listAccounts()' returns a copy.) We intend to return this
-      // reference to callers, while never modifying the set itself.
-      return accounts;
+      return new HashSet<Account>(accounts);
     }
   }
 

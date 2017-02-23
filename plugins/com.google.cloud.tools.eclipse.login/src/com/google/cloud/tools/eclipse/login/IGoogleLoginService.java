@@ -16,8 +16,7 @@
 
 package com.google.cloud.tools.eclipse.login;
 
-import com.google.cloud.tools.ide.login.Account;
-
+import com.google.cloud.tools.login.Account;
 import java.util.Set;
 
 /**

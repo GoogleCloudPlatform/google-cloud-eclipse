@@ -18,9 +18,8 @@ package com.google.cloud.tools.eclipse.login.ui;
 
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.login.Messages;
-import com.google.cloud.tools.ide.login.Account;
+import com.google.cloud.tools.login.Account;
 import com.google.common.annotations.VisibleForTesting;
-
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.PopupDialog;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -29,14 +28,12 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A panel listing all currently logged-in accounts. The panel allows adding new accounts and
@@ -44,10 +41,10 @@ import java.util.List;
  */
 public class AccountsPanel extends PopupDialog {
 
-  private IGoogleLoginService loginService;
+  @VisibleForTesting
+  static final String CSS_CLASS_NAME_KEY = "org.eclipse.e4.ui.css.CssClassName";
 
-  @VisibleForTesting Button logOutButton;
-  @VisibleForTesting List<Label> accountLabels = new ArrayList<>();
+  private final IGoogleLoginService loginService;
 
   public AccountsPanel(Shell parent, IGoogleLoginService loginService) {
     super(parent, SWT.MODELESS,
@@ -83,9 +80,18 @@ public class AccountsPanel extends PopupDialog {
   @VisibleForTesting
   void createAccountsPane(Composite container) {
     for (Account account : loginService.getAccounts()) {
-      Label label = new Label(container, SWT.NONE);
-      label.setText(account.getEmail());
-      accountLabels.add(label);
+      Label name = new Label(container, SWT.LEAD);
+      if (account.getName() != null) {
+        name.setText(account.getName());
+      }
+      name.setData(CSS_CLASS_NAME_KEY, "accountName");
+
+      Label email = new Label(container, SWT.LEAD);
+      email.setText(account.getEmail());  // email is never null.
+      email.setData(CSS_CLASS_NAME_KEY, "email");
+
+      Label separator = new Label(container, SWT.HORIZONTAL | SWT.SEPARATOR);
+      separator.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
     }
   }
 
@@ -99,9 +105,10 @@ public class AccountsPanel extends PopupDialog {
     GridDataFactory.defaultsFor(addAccountButton).applyTo(addAccountButton);
 
     if (loginService.hasAccounts()) {
-      logOutButton = new Button(buttonArea, SWT.FLAT);
+      Button logOutButton = new Button(buttonArea, SWT.FLAT);
       logOutButton.setText(Messages.getString("BUTTON_ACCOUNTS_PANEL_LOGOUT"));
       logOutButton.addSelectionListener(new LogOutOnClick());
+      logOutButton.setData(CSS_CLASS_NAME_KEY, "logOutButton");
       GridDataFactory.defaultsFor(logOutButton).applyTo(logOutButton);
     }
   }

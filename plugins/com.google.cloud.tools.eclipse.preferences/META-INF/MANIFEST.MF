@@ -1,4 +1,5 @@
 Manifest-Version: 1.0
+Bundle-ClassPath: .
 Bundle-ManifestVersion: 2
 Bundle-Name: Cloud Tools for Eclipse Preferences
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.preferences;singleton:=true
@@ -12,4 +13,5 @@ Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime
-Import-Package: org.eclipse.core.resources
+Import-Package: com.google.cloud.tools.eclipse.ui.util,
+ org.eclipse.core.resources

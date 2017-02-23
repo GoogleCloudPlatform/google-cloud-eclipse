@@ -7,7 +7,7 @@
       license-feature="com.google.licenses.apache_v2">
 
    <description>
-      A collection of the 3rd Party Dependencies.
+      A collection of the third party dependencies.
    </description>
 
    <copyright>
@@ -36,7 +36,7 @@
          id="com.google.gson"
          download-size="0"
          install-size="0"
-         version="2.7"
+         version="2.7.0"
          unpack="false"/>
 
    <plugin
@@ -59,5 +59,12 @@
          install-size="0"
          version="6.1.26"
          unpack="false"/>
+         
+   <plugin
+         id="org.freemarker.freemarker"
+         download-size="0"
+         install-size="0"
+         version="2.3.25.stable-incubating"
+         unpack="false"/>       
 
 </feature>

@@ -30,14 +30,16 @@ import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListener;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
-import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
+import com.google.common.base.Preconditions;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -56,17 +58,37 @@ import org.eclipse.wst.server.core.model.ServerBehaviourDelegate;
 import org.eclipse.wst.server.core.util.SocketUtil;
 
 /**
- * A {@link ServerBehaviourDelegate} for App Engine Server executed via the Java App Management
- * Client Library.
+ * A {@link ServerBehaviourDelegate} for DevAppServer.
+ * <p>
+ * {@link IModulePublishHelper} is implemented for addons such as the GWT Plugin that wish to add
+ * content during local deploys.
  */
 public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     implements IModulePublishHelper {
 
+  @VisibleForTesting // and should be replaced by Java8 BiFunction
+  public interface PortChecker {
+    boolean isInUse(InetAddress addr, int port);
+  }
+
+  /** Parse the numeric string. Return {@code defaultValue} if non-numeric. */
+  private static int parseInt(String numeric, int defaultValue) {
+    try {
+      return Integer.parseInt(numeric);
+    } catch (NumberFormatException ex) {
+      return defaultValue;
+    }
+  }
+
   public static final String SERVER_PORT_ATTRIBUTE_NAME = "appEngineDevServerPort"; //$NON-NLS-1$
+  public static final String ADMIN_HOST_ATTRIBUTE_NAME = "appEngineDevServerAdminHost"; //$NON-NLS-1$
   public static final String ADMIN_PORT_ATTRIBUTE_NAME = "appEngineDevServerAdminPort"; //$NON-NLS-1$
 
+  // These are the default values used by Cloud SDK's dev_appserver
   public static final int DEFAULT_SERVER_PORT = 8080;
+  public static final String DEFAULT_ADMIN_HOST = "localhost"; //$NON-NLS-1$
   public static final int DEFAULT_ADMIN_PORT = 8000;
+  public static final int DEFAULT_API_PORT = 0; // allocated at random
 
   private static final Logger logger =
       Logger.getLogger(LocalAppEngineServerBehaviour.class.getName());
@@ -76,10 +98,15 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
   private AppEngineDevServer devServer;
   private Process devProcess;
 
-  private int serverPort = -1;
-  @VisibleForTesting int adminPort = -1;
+  @VisibleForTesting
+  int serverPort = -1;
+  @VisibleForTesting
+  int adminPort = -1;
 
   private DevAppServerOutputListener serverOutputListener;
+  
+  @VisibleForTesting
+  Map<String, String> moduleToUrlMap = new LinkedHashMap<>();
 
   public LocalAppEngineServerBehaviour () {
     localAppEngineStartListener = new LocalAppEngineStartListener();
@@ -184,50 +211,28 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     workingCopy.setMappedResources(projects.toArray(new IResource[projects.size()]));
   }
 
-  private void checkAndSetPorts() throws CoreException {
-    checkAndSetPorts(getServer(), new PortProber() {
-      @Override
-      public boolean isPortInUse(int port) {
-        return SocketUtil.isPortInUse(port);
-      }
-    });
-  }
-
+  /**
+   * Check whether the provided port is in use. Returns the port if not, or throws an exception if
+   * the port is in use.
+   * 
+   * @param addr a machine address or {@code null} for all addresses
+   * @param portInUse returns true if the (host,port) is in use
+   * @return the port value ⊂ [0, 65535]
+   * @throws CoreException if the port is in use
+   */
   @VisibleForTesting
-  public interface PortProber {
-    boolean isPortInUse(int port);
-  }
-
-  @VisibleForTesting
-  void checkAndSetPorts(IServer server, PortProber portProber) throws CoreException {
-    serverPort = checkPortAttribute(server, portProber,
-        SERVER_PORT_ATTRIBUTE_NAME, DEFAULT_SERVER_PORT);
-    adminPort = checkPortAttribute(server, portProber,
-        ADMIN_PORT_ATTRIBUTE_NAME, DEFAULT_ADMIN_PORT);
-  }
-
-  private static int checkPortAttribute(IServer server, PortProber portProber,
-      String attribute, int defaultPort) throws CoreException {
-    int port = server.getAttribute(attribute, defaultPort);
+  static int checkPort(InetAddress addr, int port, PortChecker portInUse)
+      throws CoreException {
+    Preconditions.checkNotNull(portInUse);
     if (port < 0 || port > 65535) {
       throw new CoreException(newErrorStatus(Messages.getString("PORT_OUT_OF_RANGE")));
     }
 
-    if (port != 0 && portProber.isPortInUse(port)) {
-      boolean failover = !hasAttribute(server, attribute);
-      if (failover) {
-        logger.log(Level.INFO, attribute + ": port " + port + " in use. Picking an unused port.");
-        port = 0;
-      } else {
-        throw new CoreException(
-            newErrorStatus(Messages.getString("PORT_IN_USE", String.valueOf(port))));
-      }
+    if (port != 0 && portInUse.isInUse(addr, port)) {
+      throw new CoreException(
+          newErrorStatus(Messages.getString("PORT_IN_USE", String.valueOf(port))));
     }
     return port;
-  }
-
-  private static boolean hasAttribute(IServer server, String attribute) {
-    return server.getAttribute(attribute, (String) null) != null;
   }
 
   /**
@@ -244,30 +249,55 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
   }
 
   /**
+   * Returns the admin port of this server. Note that this method returns -1 if the user has never
+   * attempted to launch the server.
+   */
+  public int getAdminPort() {
+    return adminPort;
+  }
+
+  /**
    * Starts the development server.
    *
-   * @param runnables the path to directories that contain configuration files such as
-   *        appengine-web.xml
    * @param console the stream (Eclipse console) to send development server process output to
    * @param arguments JVM arguments to pass to the dev server
    */
-  void startDevServer(List<File> runnables, MessageConsoleStream console, List<String> vmArguments)
+  void startDevServer(DefaultRunConfiguration devServerRunConfiguration,
+      MessageConsoleStream console)
       throws CoreException {
     
-    checkAndSetPorts();  // Must be called before setting the STARTING state.
+    PortChecker portInUse = new PortChecker() {
+      @Override
+      public boolean isInUse(InetAddress addr, int port) {
+        Preconditions.checkNotNull(port);
+        return SocketUtil.isPortInUse(addr, port);
+      }
+    };
+
+    InetAddress serverHost = InetAddress.getLoopbackAddress();
+    if (devServerRunConfiguration.getHost() != null) {
+      serverHost = LocalAppEngineServerLaunchConfigurationDelegate
+          .resolveAddress(devServerRunConfiguration.getHost());
+    }
+    serverPort = checkPort(serverHost,
+        ifNull(devServerRunConfiguration.getPort(), DEFAULT_SERVER_PORT), portInUse);
+
+    InetAddress adminHost = InetAddress.getLoopbackAddress();
+    if (devServerRunConfiguration.getAdminHost() != null) {
+      adminHost = LocalAppEngineServerLaunchConfigurationDelegate
+          .resolveAddress(devServerRunConfiguration.getAdminHost());
+    }
+    adminPort = checkPort(adminHost,
+        ifNull(devServerRunConfiguration.getAdminPort(), DEFAULT_ADMIN_PORT), portInUse);
+
+    // API port seems on localhost in practice
+    checkPort(InetAddress.getLoopbackAddress(),
+        ifNull(devServerRunConfiguration.getApiPort(), DEFAULT_API_PORT), portInUse);
+
     setServerState(IServer.STATE_STARTING);
 
     // Create dev app server instance
     initializeDevServer(console);
-
-    // Create run configuration
-    DefaultRunConfiguration devServerRunConfiguration = new DefaultRunConfiguration();
-    devServerRunConfiguration.setAutomaticRestart(false);
-    devServerRunConfiguration.setAppYamls(runnables);
-    devServerRunConfiguration.setHost(getServer().getHost());
-    devServerRunConfiguration.setPort(serverPort);
-    devServerRunConfiguration.setAdminPort(adminPort);
-    devServerRunConfiguration.setJvmFlags(vmArguments);
 
     // Run server
     try {
@@ -278,56 +308,8 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     }
   }
 
-  /**
-   * Starts the development server in debug mode.
-   *
-   * @param runnables the path to directories that contain configuration files like
-   *        appengine-web.xml
-   * @param console the stream (Eclipse console) to send development server process output to
-   * @param debugPort the port to attach a debugger to if launch is in debug mode
-   * @param arguments JVM arguments to pass to the dev server
-   */
-  void startDebugDevServer(List<File> runnables, MessageConsoleStream console, int debugPort, 
-      List<String> vmArguments)
-      throws CoreException {
-    checkAndSetPorts();  // Must be called before setting the STARTING state.
-    setServerState(IServer.STATE_STARTING);
-
-    // Create dev app server instance
-    initializeDevServer(console);
-    
-    // Create run configuration
-    DefaultRunConfiguration devServerRunConfiguration = new DefaultRunConfiguration();
-    devServerRunConfiguration.setAutomaticRestart(false);
-    devServerRunConfiguration.setAppYamls(runnables);
-    devServerRunConfiguration.setHost(getServer().getHost());
-    devServerRunConfiguration.setPort(serverPort);
-    devServerRunConfiguration.setAdminPort(adminPort);
-
-    // todo: make this a configurable option, but default to
-    // 1 instance to simplify debugging
-    devServerRunConfiguration.setMaxModuleInstances(1);
-
-    List<String> jvmFlags = new ArrayList<String>();
-
-    // todo only real difference between this method and startDevServer are these two extra 
-    // JVM flags. Just set them and call startDevServer
-    if (debugPort <= 0 || debugPort > 65535) {
-      throw new IllegalArgumentException("Debug port is set to " + debugPort //$NON-NLS-1$
-                                      + ", should be between 1-65535"); //$NON-NLS-1$
-    }
-    jvmFlags.add("-Xdebug"); //$NON-NLS-1$
-    jvmFlags.add("-Xrunjdwp:transport=dt_socket,server=n,suspend=y,quiet=y,address=" + debugPort); //$NON-NLS-1$
-    jvmFlags.addAll(vmArguments);
-    devServerRunConfiguration.setJvmFlags(jvmFlags);
-
-    // Run server
-    try {
-      devServer.run(devServerRunConfiguration);
-    } catch (AppEngineException ex) {
-      Activator.logError("Error starting server: " + ex.getMessage()); //$NON-NLS-1$
-      stop(true);
-    }
+  private static int ifNull(Integer value, int defaultValue) {
+    return value != null ? value : defaultValue;
   }
 
   private void initializeDevServer(MessageConsoleStream console) {
@@ -345,6 +327,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
         .build();
 
     devServer = new CloudSdkAppEngineDevServer(cloudSdk);
+    moduleToUrlMap.clear();
   }
 
   /**
@@ -371,29 +354,25 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     }
   }
 
-  @VisibleForTesting
-  static int extractPortFromServerUrlOutput(String line) {
-    try {
-      int urlBegin = line.lastIndexOf("http://"); //$NON-NLS-1$
-      if (urlBegin != -1) {
-        return new URI(line.substring(urlBegin)).getPort();
-      }
-    } catch (URISyntaxException ex) {}
-
-    logger.log(Level.WARNING, "Cannot extract port from server output: " + line); //$NON-NLS-1$
-    return -1;
-  }
-
   /**
    * An output listener that monitors for well-known key dev_appserver output and affects server
    * state changes.
    */
   public class DevAppServerOutputListener implements ProcessOutputLineListener {
+    // DevAppServer outputs the following for module-started and admin line (on one line):
+    // <<HEADER>> Starting module "default" running at: http://localhost:8080
+    // <<HEADER>> Starting admin server at: http://localhost:8000
+    // where <<HEADER>> = INFO 2017-01-31 21:00:40,700 dispatcher.py:197]
+    private Pattern moduleStartedPattern = Pattern.compile(
+        "INFO .*Starting module \"(?<service>[^\"]+)\" running at: (?<url>http://.+:(?<port>[0-9]+))$");
+    private Pattern adminStartedPattern =
+        Pattern.compile("INFO .*Starting admin server at: (?<url>http://.+:(?<port>[0-9]+))$");
 
     private int serverPortCandidate = 0;
 
     @Override
     public void onOutputLine(String line) {
+      Matcher matcher;
       if (line.endsWith("Dev App Server is now running")) { //$NON-NLS-1$
         // App Engine Standard (v1)
         setServerState(IServer.STATE_STARTED);
@@ -406,18 +385,21 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
       } else if (line.contains("Error: A fatal exception has occurred. Program will exit")) { //$NON-NLS-1$
         // terminate the Python process
         stop(false);
-      } else if (line.contains("Starting module")  //$NON-NLS-1$
-          && line.contains("running at: http://")) { //$NON-NLS-1$
-        if (serverPortCandidate == 0 || line.contains("Starting module \"default\"")) { //$NON-NLS-1$
-          serverPortCandidate = extractPortFromServerUrlOutput(line);
+      } else if ((matcher = moduleStartedPattern.matcher(line)).matches()) {
+        String serviceId = matcher.group("service");
+        moduleToUrlMap.put(serviceId, matcher.group("url"));
+        int port = parseInt(matcher.group("port"), 0);
+        if (port > 0 && (serverPortCandidate == 0 || "default".equals(serviceId))) { // $NON-NLS-1$
+          serverPortCandidate = port;
         }
-
-      } else if (line.contains("Starting admin server at: http://")) { //$NON-NLS-1$
-        if (serverPort == 0) {  // We assume we will no longer see URLs for modules from now on.
+      } else if ((matcher = adminStartedPattern.matcher(line)).matches()) {
+        int port = parseInt(matcher.group("port"), 0);
+        if (port > 0 && adminPort == 0) {
+          adminPort = port;
+        }
+        // Admin comes after other modules, so no more module URLs
+        if (serverPort == 0) {
           serverPort = serverPortCandidate;
-        }
-        if (adminPort == 0) {
-          adminPort = extractPortFromServerUrlOutput(line);
         }
       }
     }
@@ -429,5 +411,11 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
       return null;
     }
     return getModuleDeployDirectory(module[0]);
+  }
+
+  /** Return the URL for the given service, or {@code null} if unknown. */
+  public String getServiceUrl(String serviceId) {
+    Preconditions.checkNotNull(serviceId);
+    return moduleToUrlMap.get(serviceId);
   }
 }

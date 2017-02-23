@@ -73,11 +73,13 @@ public abstract class BasePluginXmlTest {
         "plugin.xml must contain at least one extension point", extensions.getLength() > 0);
         
     IExtensionRegistry registry = RegistryFactory.getRegistry();
+    Assert.assertNotNull("Make sure you're running this as a plugin test", registry);
     for (int i = 0; i < extensions.getLength(); i++) {
       Element extension = (Element) extensions.item(i);
       String point = extension.getAttribute("point");
+      Assert.assertNotNull("Could not load " + extension.getAttribute("id"), point);
       IExtensionPoint extensionPoint = registry.getExtensionPoint(point);
-      Assert.assertNotNull(extensionPoint);
+      Assert.assertNotNull("Could not load " + extension.getAttribute("id"), extensionPoint);
     }
   }
   

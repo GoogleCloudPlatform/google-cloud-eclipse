@@ -47,6 +47,7 @@ import org.eclipse.wst.server.core.IServerType;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.core.ServerCore;
 import org.eclipse.wst.server.core.ServerUtil;
+import org.eclipse.wst.server.ui.internal.ServerUIPlugin;
 
 /**
  * A helper class for launching modules on a server
@@ -127,9 +128,15 @@ public class LaunchHelper {
     return serverWorkingCopy.save(false, progress.newChild(2));
   }
 
-  @VisibleForTesting
   protected void launch(IServer server, String launchMode, SubMonitor progress)
       throws CoreException {
+    // Explicitly offer to save dirty editors to avoid the puzzling prompt-to-save in
+    // IServer#start() that prompts the user *as the server continues to launch*.
+    // ServerUIPlugin.saveEditors() respects the "Save editors before starting the server"
+    // preference.
+    if (!ServerUIPlugin.saveEditors()) {
+      return;
+    }
     server.start(launchMode, progress);
   }
 

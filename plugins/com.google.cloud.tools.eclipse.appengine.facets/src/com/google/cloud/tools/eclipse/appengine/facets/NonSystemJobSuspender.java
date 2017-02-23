@@ -20,6 +20,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.eclipse.core.runtime.jobs.Job;
 
 /**
@@ -33,7 +34,6 @@ import org.eclipse.core.runtime.jobs.Job;
  * Not recommended to use for other situations, although the workings of the class are general.
  */
 class NonSystemJobSuspender {
-  private static boolean suspended;
 
   private static class SuspendedJob {
     private Job job;
@@ -45,39 +45,64 @@ class NonSystemJobSuspender {
     }
   }
 
+  private static final AtomicBoolean suspended = new AtomicBoolean(false);
+
   private static final List<SuspendedJob> suspendedJobs = new ArrayList<>();
 
   private static final NonSystemJobScheduleListener jobScheduleListener =
       new NonSystemJobScheduleListener();
 
   /** Once called, it is imperative to call {@link resume()} later. */
-  public static synchronized void suspendFutureJobs() {
-    Preconditions.checkState(!suspended, "Already suspended.");
-    suspended = true;
-    Job.getJobManager().addJobChangeListener(jobScheduleListener);
+  public static void suspendFutureJobs() {
+    synchronized (suspendedJobs) {
+      Preconditions.checkState(!suspended.getAndSet(true), "Already suspended.");
+      Job.getJobManager().addJobChangeListener(jobScheduleListener);
+    }
   }
 
-  public static synchronized void resume() {
-    Preconditions.checkState(suspended, "Not suspended.");
+  public static void resume() {
+    Preconditions.checkState(suspended.get(), "Not suspended.");
     resumeInternal();
   }
 
   @VisibleForTesting
-  static synchronized void resumeInternal() {
-    suspended = false;
-    Job.getJobManager().removeJobChangeListener(jobScheduleListener);
+  static void resumeInternal() {
+    List<SuspendedJob> copy;
+    synchronized (suspendedJobs) {
+      if (!suspended.getAndSet(false)) {
+        return;
+      }
+      Job.getJobManager().removeJobChangeListener(jobScheduleListener);
+      copy = new ArrayList<>(suspendedJobs);
+      suspendedJobs.clear();
+    }
 
-    for (SuspendedJob jobInfo : suspendedJobs) {
+    for (SuspendedJob jobInfo : copy) {
       jobInfo.job.schedule(jobInfo.scheduleDelay);
     }
-    suspendedJobs.clear();
   }
 
-  static synchronized void suspendJob(Job job, long scheduleDelay) {
-    if (suspended) {
-      if (!job.isSystem()) {
-        job.cancel();  // This will always succeed since the job is not running yet.
-        suspendedJobs.add(new SuspendedJob(job, scheduleDelay));
+  static void suspendJob(Job job, long scheduleDelay) {
+    if (job.isSystem()) {
+      return;
+    }
+    synchronized (suspendedJobs) {
+      if (!suspended.get()) {
+        return;
+      }
+    }
+    // cancel() must be done outside of our synchronization barrier as may trigger events
+    // (and even scheduling other jobs)
+    if (job.cancel()) {
+      // Cancel should always succeed since the job is not running yet
+      synchronized (suspendedJobs) {
+        // check in case the situation has changed during the cancellation
+        if (suspended.get()) {
+          suspendedJobs.add(new SuspendedJob(job, scheduleDelay));
+        } else {
+          // we've since been resumed, so reschedule this job right away
+          job.schedule(scheduleDelay);
+        }
       }
     }
   }

@@ -67,10 +67,11 @@ public class SwtBotAppEngineActions {
     // can take a loooong time to resolve jars (e.g. servlet-api.jar) from Maven Central
     int libraryResolutionTimeout = 60000/* ms */;
     SwtBotTimeoutManager.setTimeout(libraryResolutionTimeout);
-    SwtBotTestingUtilities.clickButtonAndWaitForWindowChange(bot, bot.button("Finish"));
+    SwtBotTestingUtilities.clickButtonAndWaitForWindowClose(bot, bot.button("Finish"));
     SwtBotTimeoutManager.resetTimeout();
-    SwtBotWorkbenchActions.waitForIdle(bot);
-    return waitUntilProjectExists(bot, getWorkspaceRoot().getProject(projectName));
+    IProject project = waitUntilProjectExists(bot, getWorkspaceRoot().getProject(projectName));
+    SwtBotWorkbenchActions.waitForProjects(bot, project);
+    return project;
   }
 
   /** Create a new project with the Maven-based Google App Engine Standard Java Project wizard */
@@ -105,10 +106,11 @@ public class SwtBotAppEngineActions {
 
     int mavenCompletionTimeout = 60000/* ms */; // can take a loooong time to fetch archetypes
     SwtBotTimeoutManager.setTimeout(mavenCompletionTimeout);
-    SwtBotTestingUtilities.clickButtonAndWaitForWindowChange(bot, bot.button("Finish"));
+    SwtBotTestingUtilities.clickButtonAndWaitForWindowClose(bot, bot.button("Finish"));
     SwtBotTimeoutManager.resetTimeout();
-    SwtBotWorkbenchActions.waitForIdle(bot);
-    return waitUntilProjectExists(bot, getWorkspaceRoot().getProject(artifactId));
+    IProject project = waitUntilProjectExists(bot, getWorkspaceRoot().getProject(artifactId));
+    SwtBotWorkbenchActions.waitForProjects(bot, project);
+    return project;
   }
 
   /**

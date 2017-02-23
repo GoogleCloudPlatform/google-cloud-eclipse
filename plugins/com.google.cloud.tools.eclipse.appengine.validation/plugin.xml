@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+  <extension
+      id="appEngineWhitelist"
+      name="%extension.name"
+      point="org.eclipse.jdt.core.compilationParticipant">
+     <compilationParticipant
+         createsProblems="true"
+         class="com.google.cloud.tools.eclipse.appengine.validation.JreWhitelistChecker"
+         id="APT"
+         requiredSourceLevel="1.5">
+     </compilationParticipant>
+  </extension>
+  
+  <extension 
+      id="blacklistedClass" 
+      name="App Engine Whitelist Marker"
+      point="org.eclipse.core.resources.markers">
+    <super type="org.eclipse.core.resources.problemmarker" />
+    <super type="org.eclipse.core.resources.textmarker" />
+    <persistent value="true" />
+  </extension>
+  
+  <extension 
+      name="%appengine.web"
+      point="org.eclipse.wst.validation.validatorV2" 
+      id="appEngineWebXmlValidator">
+    <validator
+    	class="com.google.cloud.tools.eclipse.appengine.validation.AppEngineWebXmlValidator"
+      	markerId="com.google.cloud.tools.eclipse.appengine.validation.blacklistMarker">
+      <include>
+        <rules>
+          <file type="file" name="appengine-web.xml"/>
+        </rules>
+      </include>
+    </validator>
+  </extension>
+  
+  <extension
+      id="blacklistMarker"
+      name="%blacklist.marker"
+      point="org.eclipse.core.resources.markers">
+    <super type="org.eclipse.jdt.core.problem" />
+    <super type="org.eclipse.core.resources.problemmarker" />
+    <super type="org.eclipse.core.resources.textmarker" />
+    <persistent value="true" />
+  </extension>
+ 
+  <extension
+      point="org.eclipse.ui.ide.markerResolution">
+    <markerResolutionGenerator
+      class="com.google.cloud.tools.eclipse.appengine.validation.ApplicationMarkerResolutionGenerator"
+      markerType="com.google.cloud.tools.eclipse.appengine.validation.blacklistMarker">
+    </markerResolutionGenerator>
+  </extension>
+  
+    <extension 
+      name="%web.xml"
+      point="org.eclipse.wst.validation.validatorV2" 
+      id="webXmlValidator">
+    <validator
+    	class="com.google.cloud.tools.eclipse.appengine.validation.WebXmlValidator"
+    	markerId="com.google.cloud.tools.eclipse.appengine.validation.servletMarker">
+      <include>
+        <rules>
+          <file type="file" name="web.xml"/>
+        </rules>
+      </include>
+    </validator>
+  </extension>
+  
+  <extension
+      id="servletMarker"
+      name="%servlet.marker"
+      point="org.eclipse.core.resources.markers">
+    <super type="org.eclipse.jdt.core.problem" />
+    <super type="org.eclipse.core.resources.problemmarker" />
+    <super type="org.eclipse.core.resources.textmarker" />
+    <persistent value="true" />
+  </extension>
+  
+    <extension
+      point="org.eclipse.ui.ide.markerResolution">
+    <markerResolutionGenerator
+      class="com.google.cloud.tools.eclipse.appengine.validation.ServletMarkerResolutionGenerator"
+      markerType="com.google.cloud.tools.eclipse.appengine.validation.servletMarker">
+    </markerResolutionGenerator>
+  </extension>
+
+</plugin>

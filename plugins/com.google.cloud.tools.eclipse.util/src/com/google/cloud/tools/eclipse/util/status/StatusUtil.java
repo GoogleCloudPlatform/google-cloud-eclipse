@@ -17,7 +17,9 @@
 package com.google.cloud.tools.eclipse.util.status;
 
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.ui.statushandlers.StatusManager;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 
@@ -53,6 +55,14 @@ public class StatusUtil {
     return new Status(IStatus.INFO, getBundleId(origin), message, error);
   }
 
+  public static MultiStatus multi(Object origin, String message) {
+    return new MultiStatus(getBundleId(origin), 0, message, null);
+  }
+
+  public static MultiStatus multi(Object origin, String message, Throwable error) {
+    return new MultiStatus(getBundleId(origin), 0, message, error);
+  }
+
   private static String getBundleId(Object origin) {
     Class<?> clazz = null;
     if (origin == null) {
@@ -68,5 +78,52 @@ public class StatusUtil {
       return clazz.getName(); // what else can we do?
     }
     return bundle.getSymbolicName();
+  }
+
+  public static IStatus merge(IStatus status, IStatus newStatus) {
+    if (status == null) {
+      return newStatus;
+    } else {
+      if (status instanceof MultiStatus) {
+        ((MultiStatus) status).merge(newStatus);
+        return status;
+      } else {
+        MultiStatus merged = new MultiStatus(status.getPlugin(), status.getCode(),
+            status.getMessage(), status.getException());
+        merged.merge(newStatus);
+        return merged;
+      }
+    }
+    
+  }
+
+  public static IStatus setErrorStatus(Object origin, String message, IStatus status) {
+    return setErrorStatus(origin, message +  " - " + status.getMessage(), status.getException());
+  }
+
+  public static IStatus setErrorStatus(Object origin, String message, Throwable ex) {
+    if (ex != null && ex.getMessage() != null && !ex.getMessage().isEmpty()) {
+      message += ": " + ex.getMessage();
+    }
+    IStatus status = error(origin, message, ex);
+    StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.LOG);
+    return status;
+  }
+
+  /**
+   * Return a simplified status by discarding all OK child statuses.
+   */
+  public static IStatus filter(IStatus status) {
+    if (!status.isMultiStatus()) {
+      return status;
+    }
+    MultiStatus newStatus = new MultiStatus(status.getPlugin(), status.getCode(),
+        status.getMessage(), status.getException());
+    for (IStatus child : status.getChildren()) {
+      if (!child.isOK()) {
+        newStatus.add(filter(child));
+      }
+    }
+    return newStatus;
   }
 }

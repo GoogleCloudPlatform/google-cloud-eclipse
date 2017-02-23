@@ -1,4 +1,5 @@
 Manifest-Version: 1.0
+Bundle-ClassPath: .
 Bundle-ManifestVersion: 2
 Bundle-Name: %fragmentName
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.jdt.launching;singleton:=true

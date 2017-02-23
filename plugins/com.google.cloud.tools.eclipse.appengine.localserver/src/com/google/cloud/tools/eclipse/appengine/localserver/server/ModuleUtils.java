@@ -16,16 +16,20 @@
 
 package com.google.cloud.tools.eclipse.appengine.localserver.server;
 
+import com.google.cloud.tools.appengine.AppEngineDescriptor;
 import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
-import com.google.cloud.tools.eclipse.util.AppEngineDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.wst.server.core.IModule;
+import org.eclipse.wst.server.core.IServer;
 
 /**
  * A set of utility methods for dealing with WTP {@link IModule}s.
@@ -35,24 +39,51 @@ public class ModuleUtils {
 
   /**
    * Retrieve the &lt;service&gt; or &lt;module&gt; identifier from <tt>appengine-web.xml</tt>.
-   * If an identifier is not found, then returns "default".
+   * If an identifier is not found, return "default".
    * 
    * @return the identifier, defaulting to "default" if not found
    */
   public static String getServiceId(IModule module) {
     IFile descriptorFile =
         WebProjectUtil.findInWebInf(module.getProject(), new Path("appengine-web.xml"));
-    if (descriptorFile == null) {
-      return "default";
+    if (descriptorFile != null) {
+      try (InputStream contents = descriptorFile.getContents()) {
+        AppEngineDescriptor descriptor = AppEngineDescriptor.parse(contents);
+        String serviceId = descriptor.getServiceId();
+        if (serviceId != null) {
+          return serviceId;
+        }
+      } catch (CoreException | IOException ex) {
+        logger.log(Level.WARNING, "Unable to read " + descriptorFile.getFullPath(), ex);
+      }
     }
     
-    String serviceId = null;
-    try (InputStream contents = descriptorFile.getContents()) {
-      AppEngineDescriptor descriptor = AppEngineDescriptor.parse(contents);
-      serviceId = descriptor.getServiceId();
-    } catch (CoreException | IOException ex) {
-      logger.log(Level.WARNING, "Unable to read " + descriptorFile.getFullPath(), ex);
+    return "default";
+  }
+
+  /**
+   * Returns the set of all referenced modules, including child modules. This returns the unique
+   * modules, and doesn't return the module paths. Required as neither
+   * {@code Server#getAllModules()} nor the module-visiting method {@code #visit()} are exposed on
+   * {@link IServer}, and {@code ServerBehaviourDelegate#getAllModules()} is protected.
+   */
+  public static IModule[] getAllModules(IServer server) {
+    Set<IModule> modules = new LinkedHashSet<>();
+    for (IModule module : server.getModules()) {
+      modules.add(module);
+      addChildModules(server, new IModule[] {module}, modules);
     }
-    return serviceId != null ? serviceId : "default";
+    return modules.toArray(new IModule[modules.size()]);
+  }
+
+  /** Recursively walk the children from {@code modulePath}. */
+  private static void addChildModules(IServer server, IModule[] modulePath, Set<IModule> modules) {
+    IModule[] newModulePath = Arrays.copyOf(modulePath, modulePath.length + 1);
+    for (IModule child : server.getChildModules(modulePath, null)) {
+      if (modules.add(child)) {
+        newModulePath[newModulePath.length - 1] = child;
+        addChildModules(server, newModulePath, modules);
+      }
+    }
   }
 }

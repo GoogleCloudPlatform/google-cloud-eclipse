@@ -37,6 +37,24 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>target-platform-configuration</artifactId>
+        <configuration>
+          <environments>
+            <!--
+              We use a product as a convenience for pulling in
+              features and adding p2 metadata to create categories.
+              As we don't have any platform-specific bundles, specify
+              a single platform to save build time.
+            -->
+            <environment>
+              <os>linux</os> <ws>gtk</ws> <arch>x86_64</arch>
+            </environment>
+          </environments>
+          <pomDependencies>consider</pomDependencies>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 

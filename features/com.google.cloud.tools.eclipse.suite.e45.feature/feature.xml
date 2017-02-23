@@ -2,7 +2,7 @@
 <feature
       id="com.google.cloud.tools.eclipse.suite.e45.feature"
       label="Google Cloud Platform for Eclipse 4.5 and later"
-      version="0.1.0.qualifier"
+      version="1.0.0.qualifier"
       provider-name="Google, Inc."
       plugin="com.google.cloud.tools.eclipse.appengine.ui"
       license-feature="com.google.licenses.apache_v2">
@@ -29,8 +29,16 @@
       <import feature="org.eclipse.wst.web_ui.feature" version="3.7.1.v201602111638" match="greaterOrEqual"/>
    </requires>
 
+   <!-- appengine-plugins-core -->
    <plugin
          id="com.google.cloud.tools.appengine"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.google.cloud.tools.eclipse.appengine.compat"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -100,7 +108,7 @@
          unpack="false"/>
 
    <plugin
-         id="com.google.cloud.tools.eclipse.appengine.whitelist"
+         id="com.google.cloud.tools.eclipse.appengine.validation"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -122,6 +130,13 @@
 
    <plugin
          id="com.google.cloud.tools.eclipse.sdk.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.google.cloud.tools.eclipse.projectselector"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -150,6 +165,13 @@
 
    <plugin
          id="com.google.cloud.tools.eclipse.welcome"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.google.cloud.tools.eclipse.aeri"
          download-size="0"
          install-size="0"
          version="0.0.0"

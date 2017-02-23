@@ -17,27 +17,28 @@
 package com.google.cloud.tools.eclipse.login.ui;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
-import com.google.cloud.tools.ide.login.Account;
-
+import com.google.cloud.tools.login.Account;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swtbot.swt.finder.SWTBot;
+import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotButton;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotLabel;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AccountsPanelTest {
@@ -53,19 +54,22 @@ public class AccountsPanelTest {
   @Before
   public void setUp() {
     shell = shellTestResource.getShell();
-    when(account1.getEmail()).thenReturn("some-email-1@example.com");
-    when(account2.getEmail()).thenReturn("some-email-2@example.com");
-    when(account3.getEmail()).thenReturn("some-email-3@example.com");
+    when(account1.getEmail()).thenReturn("alice@example.com");
+    when(account2.getEmail()).thenReturn("bob@example.com");
+    when(account3.getEmail()).thenReturn("charlie@example.com");
+    when(account1.getName()).thenReturn("Alice");
+    when(account2.getName()).thenReturn(null);
+    when(account3.getName()).thenReturn("Charlie");
   }
 
-  @Test
+  @Test(expected = WidgetNotFoundException.class)
   public void testLogOutButton_notLoggedIn() {
     setUpLoginService();
 
     AccountsPanel panel = new AccountsPanel(null, loginService);
-    panel.createDialogArea(shell);
+    Control control = panel.createDialogArea(shell);
 
-    assertNull(panel.logOutButton);
+    new SWTBot(control).buttonWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "logOutButton");
   }
 
   @Test
@@ -73,46 +77,80 @@ public class AccountsPanelTest {
     setUpLoginService(Arrays.asList(account1));
 
     AccountsPanel panel = new AccountsPanel(null, loginService);
-    panel.createDialogArea(shell);
+    Control control = panel.createDialogArea(shell);
 
-    assertNotNull(panel.logOutButton);
+    SWTBotButton button =
+        new SWTBot(control).buttonWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "logOutButton");
+    assertEquals("Sign Out...", button.getText());
   }
 
-  @Test
+  @Test(expected = WidgetNotFoundException.class)
   public void testAccountsArea_zeroAccounts() {
     setUpLoginService();
 
     AccountsPanel panel = new AccountsPanel(null, loginService);
-    panel.createDialogArea(shell);
+    Control control = panel.createDialogArea(shell);
 
-    assertTrue(panel.accountLabels.isEmpty());
+    new SWTBot(control).labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "email");
   }
 
-  @Test
+  @Test(expected = IndexOutOfBoundsException.class)
   public void testAccountsArea_oneAccount() {
     setUpLoginService(Arrays.asList(account1));
 
     AccountsPanel panel = new AccountsPanel(null, loginService);
-    panel.createDialogArea(shell);
+    Control control = panel.createDialogArea(shell);
 
-    assertEquals(1, panel.accountLabels.size());
-    panel.accountLabels.get(0).getText().contains(account2.getEmail());
+    SWTBot bot = new SWTBot(control);
+    SWTBotLabel email = bot.labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "email", 0);
+    SWTBotLabel name = bot.labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "accountName", 0);
+    assertEquals("alice@example.com", email.getText());
+    assertEquals("Alice", name.getText());
+
+    bot.labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "email", 1);
   }
 
-  @Test
+  @Test(expected = IndexOutOfBoundsException.class)
+  public void testAccountsArea_accountWithNullName() {
+    setUpLoginService(Arrays.asList(account2));
+
+    AccountsPanel panel = new AccountsPanel(null, loginService);
+    Control control = panel.createDialogArea(shell);
+
+    SWTBot bot = new SWTBot(control);
+    SWTBotLabel email = bot.labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "email", 0);
+    SWTBotLabel name = bot.labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "accountName", 0);
+    assertEquals("bob@example.com", email.getText());
+    assertTrue(name.getText().isEmpty());
+
+    bot.labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "email", 1);
+  }
+
+  @Test(expected = IndexOutOfBoundsException.class)
   public void testAccountsArea_threeAccounts() {
     setUpLoginService(Arrays.asList(account1, account2, account3));
 
     AccountsPanel panel = new AccountsPanel(null, loginService);
-    panel.createDialogArea(shell);
+    Control control = panel.createDialogArea(shell);
 
-    assertEquals(3, panel.accountLabels.size());
-    String text1 = panel.accountLabels.get(0).getText();
-    String text2 = panel.accountLabels.get(1).getText();
-    String text3 = panel.accountLabels.get(2).getText();
-    assertTrue((text1 + text2 + text3).contains(account1.getEmail()));
-    assertTrue((text1 + text2 + text3).contains(account2.getEmail()));
-    assertTrue((text1 + text2 + text3).contains(account3.getEmail()));
+    SWTBot bot = new SWTBot(control);
+    List<String> emails = Arrays.asList(
+        bot.labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "email", 0).getText(),
+        bot.labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "email", 1).getText(),
+        bot.labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "email", 2).getText());
+    List<String> names = Arrays.asList(
+        bot.labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "accountName", 0).getText(),
+        bot.labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "accountName", 1).getText(),
+        bot.labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "accountName", 2).getText());
+
+    assertTrue(emails.contains("alice@example.com"));
+    assertTrue(emails.contains("bob@example.com"));
+    assertTrue(emails.contains("charlie@example.com"));
+    assertTrue(names.contains("Alice"));
+    assertTrue(names.contains(""));
+    assertTrue(names.contains("Charlie"));
+
+    bot.labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "email", 3);
   }
 
   private void setUpLoginService(List<Account> accounts) {

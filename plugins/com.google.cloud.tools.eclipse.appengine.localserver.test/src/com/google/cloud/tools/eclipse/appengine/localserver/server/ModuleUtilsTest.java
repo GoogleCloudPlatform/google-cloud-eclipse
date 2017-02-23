@@ -19,7 +19,6 @@ package com.google.cloud.tools.eclipse.appengine.localserver.server;
 import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -30,13 +29,20 @@ import org.eclipse.wst.server.core.IModule;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.runners.MockitoJUnitRunner;
 
+@RunWith(MockitoJUnitRunner.class)
 public class ModuleUtilsTest {
 
-  private IModule module = Mockito.mock(IModule.class);
-  private IFile descriptorFile = Mockito.mock(IFile.class);
-  private IFolder webinf = Mockito.mock(IFolder.class);
+  @Mock
+  private IModule module;
+  @Mock
+  private IFile descriptorFile;
+  @Mock
+  private IFolder webinf;
 
   @Before
   public void turnOffLogging() {
@@ -57,13 +63,9 @@ public class ModuleUtilsTest {
     Mockito.when(descriptorFile.exists()).thenReturn(true);
   }
 
-  @Test
+  @Test(expected = NullPointerException.class)
   public void testGetServiceId_null() {
-    try {
-      ModuleUtils.getServiceId(null);
-      Assert.fail();
-    } catch (NullPointerException expected) {
-    }
+    ModuleUtils.getServiceId(null);
   }
   
   @Test
@@ -100,5 +102,4 @@ public class ModuleUtilsTest {
     InputStream in = this.getClass().getResourceAsStream(testfile);
     Mockito.when(descriptorFile.getContents()).thenReturn(in);
   }
-
 }

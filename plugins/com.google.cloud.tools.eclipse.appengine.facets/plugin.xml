@@ -46,4 +46,43 @@
     </listener>
   </extension>
 
+  <extension point="org.eclipse.ui.commands">
+    <command
+      description="%convertToAppEngineStandardCommandDescription"
+      id="com.google.cloud.tools.eclipse.appengine.facets.convertToStandard"
+      name="%convertToAppEngineStandardCommandName">
+    </command>
+  </extension>
+
+  <extension point="org.eclipse.ui.menus">
+    <menuContribution
+      allPopups="false"
+      locationURI="popup:org.eclipse.ui.projectConfigure?after=additions">
+      <command
+        commandId="com.google.cloud.tools.eclipse.appengine.facets.convertToStandard">
+        <visibleWhen checkEnabled="true" />
+      </command>
+    </menuContribution>
+  </extension>
+
+  <extension point="org.eclipse.ui.handlers">
+    <handler
+      class="com.google.cloud.tools.eclipse.appengine.facets.ui.AppEngineStandardProjectConvertCommandHandler"
+      commandId="com.google.cloud.tools.eclipse.appengine.facets.convertToStandard">
+      <enabledWhen>
+        <and>
+          <count value="1" />  <!-- enabled when exactly one project is selected -->
+          <iterate>
+            <adapt type="org.eclipse.core.resources.IProject" />
+          </iterate>
+          <not>
+            <iterate>
+              <reference definitionId="com.google.cloud.tools.eclipse.appengine.onlyInGCPProjects" />
+            </iterate>
+          </not>
+        </and>
+      </enabledWhen>
+    </handler>
+  </extension>
+
 </plugin>

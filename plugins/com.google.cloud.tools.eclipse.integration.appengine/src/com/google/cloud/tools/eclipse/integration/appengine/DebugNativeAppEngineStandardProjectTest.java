@@ -26,6 +26,7 @@ import static org.junit.Assert.fail;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotProjectActions;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotTestingUtilities;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotTreeUtilities;
+import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.swt.custom.StyledText;
@@ -37,6 +38,7 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotStyledText;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotToolbarButton;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.osgi.service.prefs.Preferences;
@@ -46,6 +48,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Create a native App Engine Standard project, launch in debug mode, verify working, and then
@@ -53,6 +56,12 @@ import java.nio.charset.StandardCharsets;
  */
 @RunWith(SWTBotJunit4ClassRunner.class)
 public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
+
+  private static final long TERMINATE_SERVER_TIMEOUT = 10000L;
+
+  @Rule
+  public ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
+
   /**
    * Launch a native application in debug mode and verify that:
    * <ol>
@@ -84,7 +93,7 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
       }
     });
 
-    SwtBotTestingUtilities.clickButtonAndWaitForWindowChange(bot, bot.button("Finish"));
+    SwtBotTestingUtilities.clickButtonAndWaitForWindowClose(bot, bot.button("Finish"));
 
     bot.perspectiveById("org.eclipse.debug.ui.DebugPerspective").activate(); // IDebugUIConstants.ID_DEBUG_PERSPECTIVE
     SWTBotView debugView = bot.viewById("org.eclipse.debug.ui.DebugView"); // IDebugUIConstants.ID_DEBUG_VIEW
@@ -118,7 +127,8 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
       }
     }
     assertNotNull(stopServerButton);
-    SwtBotTreeUtilities.waitUntilTreeContainsText(bot, allItems[0], "<terminated>");
+    SwtBotTreeUtilities.waitUntilTreeContainsText(bot, allItems[0], "<terminated>",
+                                                  TERMINATE_SERVER_TIMEOUT);
     assertNoService(new URL("http://localhost:8080/hello"));
     assertTrue("App Engine console should mark as stopped",
         consoleView.getViewReference().getContentDescription().startsWith("<stopped>"));

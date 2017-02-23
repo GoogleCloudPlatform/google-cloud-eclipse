@@ -16,7 +16,11 @@
 
 package com.google.cloud.tools.eclipse.util;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.runtime.CoreException;
 
 public class NatureUtils {
@@ -24,11 +28,26 @@ public class NatureUtils {
   /**
    * Returns {@code true} if the project is accessible and has the
    * specified nature ID.
-   * 
+   *
    * @return {@code true} if the project is accessible and has the
    *         specified nature ID
    */
   public static boolean hasNature(IProject project, String natureId) throws CoreException {
     return project.isAccessible() && project.hasNature(natureId);
+  }
+
+  /**
+   * Removes nature identified by {@code natureId}. If the {@code project} does not have the
+   * nature, this method does nothing.
+   */
+  public static void removeNature(IProject project, String natureId) throws CoreException {
+    if (project.hasNature(natureId)) {
+      // Remove the nature ID from the natures in the project description
+      IProjectDescription description = project.getDescription();
+      List<String> natures = new ArrayList<>(Arrays.asList(description.getNatureIds()));
+      natures.remove(natureId);
+      description.setNatureIds(natures.toArray(new String[0]));
+      project.setDescription(description, null /* monitor */);
+    }
   }
 }

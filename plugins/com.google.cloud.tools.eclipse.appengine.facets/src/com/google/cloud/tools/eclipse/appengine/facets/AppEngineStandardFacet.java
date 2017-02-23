@@ -17,16 +17,26 @@
 package com.google.cloud.tools.eclipse.appengine.facets;
 
 import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.common.project.facet.core.JavaFacetInstallConfig;
 import org.eclipse.jst.j2ee.project.facet.IJ2EEFacetInstallDataModelProperties;
@@ -35,6 +45,8 @@ import org.eclipse.jst.j2ee.web.project.facet.IWebFacetInstallDataModelPropertie
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetInstallDataModelProvider;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.jst.server.core.FacetUtil;
+import org.eclipse.wst.common.componentcore.internal.builder.DependencyGraphImpl;
+import org.eclipse.wst.common.componentcore.internal.builder.IDependencyGraph;
 import org.eclipse.wst.common.frameworks.datamodel.DataModelFactory;
 import org.eclipse.wst.common.frameworks.datamodel.IDataModel;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
@@ -47,6 +59,7 @@ import org.eclipse.wst.server.core.IRuntimeWorkingCopy;
 import org.eclipse.wst.server.core.ServerCore;
 
 public class AppEngineStandardFacet {
+  private static final Logger logger = Logger.getLogger(AppEngineStandardFacet.class.getName());
 
   public static final String ID = "com.google.cloud.tools.eclipse.appengine.facets.standard";
 
@@ -141,7 +154,24 @@ public class AppEngineStandardFacet {
       Object config = null;
       facetInstallSet.add(new IFacetedProject.Action(
           IFacetedProject.Action.Type.INSTALL, appEngineFacetVersion, config));
-      facetedProject.modify(facetInstallSet, subMonitor.newChild(100));
+
+      // Workaround deadlock bug described in Eclipse bug (https://bugs.eclipse.org/511793).
+      // There are graph update jobs triggered by the completion of the CreateProjectOperation
+      // above (from resource notifications) and from other resource changes from modifying the
+      // project facets. So we force the dependency graph to defer updates.
+      try {
+        IDependencyGraph.INSTANCE.preUpdate();
+        try {
+          Job.getJobManager().join(DependencyGraphImpl.GRAPH_UPDATE_JOB_FAMILY,
+              subMonitor.newChild(10));
+        } catch (OperationCanceledException | InterruptedException ex) {
+          logger.log(Level.WARNING, "Exception waiting for WTP Graph Update job", ex);
+        }
+
+        facetedProject.modify(facetInstallSet, subMonitor.newChild(90));
+      } finally {
+        IDependencyGraph.INSTANCE.postUpdate();
+      }
     }
   }
 
@@ -165,22 +195,41 @@ public class AppEngineStandardFacet {
       }
     }
 
-    org.eclipse.wst.server.core.IRuntime[] appEngineRuntimes = getAppEngineRuntimes();
-    if (appEngineRuntimes.length > 0) {
-      IRuntime appEngineFacetRuntime = null;
-      for (org.eclipse.wst.server.core.IRuntime appEngineRuntime : appEngineRuntimes) {
-        appEngineFacetRuntime = FacetUtil.getRuntime(appEngineRuntime);
-        project.addTargetedRuntime(appEngineFacetRuntime, monitor);
-      }
-      project.setPrimaryRuntime(appEngineFacetRuntime, monitor);
-    } else { // Create a new App Engine runtime
-      IRuntime appEngineFacetRuntime = createAppEngineFacetRuntime(monitor);
-      if (appEngineFacetRuntime == null) {
-        throw new NullPointerException("Could not locate App Engine facet runtime");
+    SubMonitor progress = SubMonitor.convert(monitor, 100);
+
+    // Workaround deadlock bug described in Eclipse bug (https://bugs.eclipse.org/511793).
+    // There are graph update jobs triggered by the completion of the CreateProjectOperation
+    // above (from resource notifications) and from other resource changes from modifying the
+    // project facets. So we force the dependency graph to defer updates.
+    try {
+      IDependencyGraph.INSTANCE.preUpdate();
+      try {
+        Job.getJobManager().join(DependencyGraphImpl.GRAPH_UPDATE_JOB_FAMILY,
+            progress.newChild(10));
+      } catch (OperationCanceledException | InterruptedException ex) {
+        logger.log(Level.WARNING, "Exception waiting for WTP Graph Update job", ex);
       }
 
-      project.addTargetedRuntime(appEngineFacetRuntime, monitor);
-      project.setPrimaryRuntime(appEngineFacetRuntime, monitor);
+      org.eclipse.wst.server.core.IRuntime[] appEngineRuntimes = getAppEngineRuntimes();
+      if (appEngineRuntimes.length > 0) {
+        IRuntime appEngineFacetRuntime = null;
+        progress.setWorkRemaining(appEngineRuntimes.length);
+        for (org.eclipse.wst.server.core.IRuntime appEngineRuntime : appEngineRuntimes) {
+          appEngineFacetRuntime = FacetUtil.getRuntime(appEngineRuntime);
+          project.addTargetedRuntime(appEngineFacetRuntime, progress.newChild(1));
+        }
+        project.setPrimaryRuntime(appEngineFacetRuntime, monitor);
+      } else { // Create a new App Engine runtime
+        IRuntime appEngineFacetRuntime = createAppEngineFacetRuntime(progress.newChild(10));
+        if (appEngineFacetRuntime == null) {
+          throw new NullPointerException("Could not locate App Engine facet runtime");
+        }
+
+        project.addTargetedRuntime(appEngineFacetRuntime, progress.newChild(10));
+        project.setPrimaryRuntime(appEngineFacetRuntime, progress.newChild(10));
+      }
+    } finally {
+      IDependencyGraph.INSTANCE.postUpdate();
     }
   }
 
@@ -233,11 +282,17 @@ public class AppEngineStandardFacet {
       return;
     }
 
+    String webAppDirectory = "src/main/webapp";
+    IPath webAppDirectoryFound = findMainWebAppDirectory(facetedProject.getProject());
+    if (webAppDirectoryFound != null) {
+      webAppDirectory = webAppDirectoryFound.toOSString();
+    }
+
     IDataModel webModel = DataModelFactory.createDataModel(new WebFacetInstallDataModelProvider());
     webModel.setBooleanProperty(IJ2EEModuleFacetInstallDataModelProperties.ADD_TO_EAR, false);
-    webModel.setBooleanProperty(IJ2EEFacetInstallDataModelProperties.GENERATE_DD, false);
+    webModel.setBooleanProperty(IJ2EEFacetInstallDataModelProperties.GENERATE_DD, true);
     webModel.setBooleanProperty(IWebFacetInstallDataModelProperties.INSTALL_WEB_LIBRARY, false);
-    webModel.setStringProperty(IWebFacetInstallDataModelProperties.CONFIG_FOLDER, "src/main/webapp");
+    webModel.setStringProperty(IWebFacetInstallDataModelProperties.CONFIG_FOLDER, webAppDirectory);
     facetInstallSet.add(new IFacetedProject.Action(
         IFacetedProject.Action.Type.INSTALL, WebFacetUtils.WEB_25, webModel));
   }
@@ -257,4 +312,51 @@ public class AppEngineStandardFacet {
     return appEngineRuntimes.toArray(appEngineRuntimesArray);
   }
 
+  /**
+   * Attempts to find a main web application directory, by the following logic:
+   *
+   * 1. If there is no {@code WEB-INF} folder in the {@code project}, returns {@code null}.
+   * 2. Otherwise, if there is at least one {@code WEB-INF} folder that contains {@code web.xml},
+   *     returns the parent directory of one of such {@code WEB-INF} folders.
+   * 3. Otherwise, returns the parent directory of an arbitrary {@code WEB-INF}.
+   *
+   * @return path of the main web application directory, relative to {@code project}, if found;
+   *     otherwise, {@code null}
+   */
+  @VisibleForTesting
+  static IPath findMainWebAppDirectory(IProject project) {
+    List<IFolder> webInfFolders = findAllWebInfFolders(project);
+    if (webInfFolders.isEmpty()) {
+      return null;
+    }
+
+    for (IFolder webInf : webInfFolders) {
+      if (webInf.getFile("web.xml").exists()) {
+        return webInf.getParent().getProjectRelativePath();
+      }
+    }
+    return webInfFolders.get(0).getParent().getProjectRelativePath();
+  }
+
+  @VisibleForTesting
+  static List<IFolder> findAllWebInfFolders(IContainer container) {
+    final List<IFolder> webInfFolders = new ArrayList<>();
+
+    try {
+      IResourceVisitor webInfCollector = new IResourceVisitor() {
+        @Override
+        public boolean visit(IResource resource) throws CoreException {
+          if (resource.getType() == IResource.FOLDER && "WEB-INF".equals(resource.getName())) {
+            webInfFolders.add((IFolder) resource);
+            return false;  // No need to visit sub-directories.
+          }
+          return true;
+        }
+      };
+      container.accept(webInfCollector);
+    } catch (CoreException ex) {
+      // Our attempt to find folders failed, but don't error out.
+    }
+    return webInfFolders;
+  }
 }

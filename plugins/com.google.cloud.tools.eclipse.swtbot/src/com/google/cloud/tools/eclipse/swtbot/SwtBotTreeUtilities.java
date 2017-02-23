@@ -24,6 +24,7 @@ import org.eclipse.swtbot.swt.finder.finders.UIThreadRunnable;
 import org.eclipse.swtbot.swt.finder.results.Result;
 import org.eclipse.swtbot.swt.finder.results.VoidResult;
 import org.eclipse.swtbot.swt.finder.results.WidgetResult;
+import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
 import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
@@ -340,10 +341,21 @@ public class SwtBotTreeUtilities {
   }
 
   /**
-   * Wait until the tree item contains the given text
+   * Wait until the tree item contains the given text with the
+   * timeout {@link SWTBotPreferences#TIMEOUT}.
    */
   public static void waitUntilTreeContainsText(SWTWorkbenchBot bot, final SWTBotTreeItem treeItem,
       final String text) {
+    waitUntilTreeContainsText(bot, treeItem, text, SWTBotPreferences.TIMEOUT);
+  }
+
+  /**
+   * Wait until the tree item contains the given text with the timeout specified.
+   */
+  public static void waitUntilTreeContainsText(SWTWorkbenchBot bot,
+                                               final SWTBotTreeItem treeItem,
+                                               final String text,
+                                               long timeout) {
     bot.waitUntil(new DefaultCondition() {
       @Override
       public boolean test() throws Exception {
@@ -354,6 +366,6 @@ public class SwtBotTreeUtilities {
       public String getFailureMessage() {
         return "Text never appeared";
       }
-    });
+    }, timeout);
   }
 }

@@ -48,7 +48,8 @@ public class AppEngineStandardWizardPageTest {
   
   @Test
   public void testDescription() {
-    Assert.assertEquals("Create a new App Engine standard environment project in the workspace.",
+    Assert.assertEquals(
+        "Create a new Eclipse project for App Engine standard environment development.",
         page.getDescription());
   }
   

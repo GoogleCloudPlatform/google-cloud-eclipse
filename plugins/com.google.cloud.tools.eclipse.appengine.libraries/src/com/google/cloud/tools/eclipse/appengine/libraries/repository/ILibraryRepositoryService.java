@@ -18,7 +18,10 @@ package com.google.cloud.tools.eclipse.appengine.libraries.repository;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
-import org.eclipse.jdt.core.IClasspathEntry;
+import org.apache.maven.artifact.Artifact;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 /**
  * Service interface for obtaining local paths for artifacts described by {@link MavenCoordinates}
@@ -26,21 +29,29 @@ import org.eclipse.jdt.core.IClasspathEntry;
 public interface ILibraryRepositoryService {
 
   /**
-   * Creates a classpath entry with the kind {@link IClasspathEntry#CPE_LIBRARY} that refers to the artifact defined
-   * by the <code>libraryFile</code> parameter.
-   *
-   * @return a classpath entry with reference to the artifact file resolved by this service and javadoc and source
-   * attachment information if available
-   * @throws LibraryRepositoryServiceException if the classpath entry cannot be created, e.g. cannot be resolved based
-   * on the Maven coordinates or because of a network problem
+   * @return an <code>artifact</code> that is described by <code>libraryFile</code>
    */
-  IClasspathEntry getLibraryClasspathEntry(LibraryFile libraryFile) throws LibraryRepositoryServiceException;
+  Artifact resolveArtifact(LibraryFile libraryFile, IProgressMonitor monitor) throws CoreException;
 
   /**
-   * Returns a new {@link IClasspathEntry} instance with the kind {@link IClasspathEntry#CPE_LIBRARY} which has the
-   * same properties as the input, except for the path which is resolved afresh.
+   * Resolves a source artifact for the binary artifact described by a {@link LibraryFile}.
+   * <p>
+   * If <code>libraryFile.getSourceUri()</code> is not null, the source will be downloaded from that
+   * URI, otherwise resolving a suitable source artifact is up to the implementation (e.g. using
+   * Maven/M2E).
    *
-   * @throws LibraryRepositoryServiceException if the artifact resolution fails.
+   * @param libraryFile the artifact whose source artifact needs to be resolved
+   * @param versionHint the actual version to be resolved in case <code>libraryFile</code>'s version
+   *     is set to latest
+   * @return a path of the resolved source artifact
    */
-  IClasspathEntry rebuildClasspathEntry(IClasspathEntry classpathEntry) throws LibraryRepositoryServiceException;
+  IPath resolveSourceArtifact(LibraryFile libraryFile, String versionHint, IProgressMonitor monitor)
+      throws CoreException;
+
+  /**
+   * Checks if an artifact described by <code>libraryFile</code> is available. Throws a
+   * {@link CoreException} if the artifact is not available.
+   */
+  void makeArtifactAvailable(LibraryFile libraryFile, IProgressMonitor monitor)
+      throws CoreException;
 }

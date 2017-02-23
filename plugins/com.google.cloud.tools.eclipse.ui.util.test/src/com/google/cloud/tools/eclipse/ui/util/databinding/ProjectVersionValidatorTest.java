@@ -33,19 +33,19 @@ public class ProjectVersionValidatorTest {
 
   @Test
   public void testValidate_emptyString() {
-    assertThat(new ProjectVersionValidator().validate("").getSeverity(), is(IStatus.ERROR));
+    assertThat(new ProjectVersionValidator().validate("").getSeverity(), is(IStatus.OK));
   }
 
   @Test
   public void testValidate_reservedPrefix() {
     assertThat(new ProjectVersionValidator().validate("ah-asdfgh").getSeverity(), is(IStatus.ERROR));
   }
-  
+
   @Test
   public void testValidate_reservedWordDefault() {
     assertThat(new ProjectVersionValidator().validate("default").getSeverity(), is(IStatus.ERROR));
   }
-  
+
   @Test
   public void testValidate_reservedWordLatest() {
     assertThat(new ProjectVersionValidator().validate("latest").getSeverity(), is(IStatus.ERROR));
@@ -65,7 +65,7 @@ public class ProjectVersionValidatorTest {
   public void testValidate_minimalLengthName() {
     assertThat(new ProjectVersionValidator().validate("a").getSeverity(), is(IStatus.OK));
   }
-  
+
   @Test
   public void testValidate_maxLengthName() {
     assertThat(new ProjectVersionValidator().validate(LENGTH_63).getSeverity(), is(IStatus.OK));

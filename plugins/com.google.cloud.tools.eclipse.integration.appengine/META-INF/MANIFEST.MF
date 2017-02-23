@@ -1,4 +1,5 @@
 Manifest-Version: 1.0
+Bundle-ClassPath: .
 Bundle-ManifestVersion: 2
 Bundle-Name: Integration tests for App Engine functionality
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.integration.appengine
@@ -20,7 +21,7 @@ Require-Bundle: com.google.cloud.tools.eclipse.swtbot,
  org.eclipse.wst.common.project.facet.core,
  org.junit;bundle-version="4.12.0",
  com.google.cloud.tools.eclipse.test.util;bundle-version="0.1.0"
-Import-Package: com.google.cloud.tools.appengine.cloudsdk;version="0.2.5",
- com.google.common.base;version="20.0.0",
+Import-Package: com.google.cloud.tools.appengine.cloudsdk;version="0.2.6",
+ com.google.common.base;version="[20.0.0,21.0.0)",
  org.eclipse.core.runtime.preferences,
  org.osgi.service.prefs;version="1.1.1"

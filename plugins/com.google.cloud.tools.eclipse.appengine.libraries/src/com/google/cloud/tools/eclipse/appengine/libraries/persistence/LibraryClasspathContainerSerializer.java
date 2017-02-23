@@ -52,35 +52,10 @@ public class LibraryClasspathContainerSerializer {
   private static final Logger logger =
       Logger.getLogger(LibraryClasspathContainerSerializer.class.getName());
 
-  /**
-   * Implementers of this interface provide a location of a file that can be used to save and load
-   * {@link LibraryClasspathContainer}s
-   */
-  public interface LibraryContainerStateLocationProvider {
-
-    /**
-     * Based on the parameters <code>javaProject</code> and <code>containerPath</code> will return
-     * an {@link IPath} to a file that can be used to save and load
-     * {@link LibraryClasspathContainer} instances.
-     *
-     * @param javaProject the project the {@link LibraryClasspathContainer} belongs to
-     * @param containerPath the container path of the {@link LibraryClasspathContainer}
-     * @param create if true the file and parent folders will be created if needed, if false the
-     *        location returned may not refer to an existing file.
-     *
-     * @throws CoreException if an error happens while creating the necessary folders or file
-     */
-    IPath getContainerStateFile(IJavaProject javaProject, IPath containerPath, boolean create)
-        throws CoreException;
-  }
-
-  public interface ArtifactBaseLocationProvider {
-    IPath getBaseLocation();
-  }
-
-  private LibraryContainerStateLocationProvider stateLocationProvider;
-  private ArtifactBaseLocationProvider binaryArtifactBaseLocationProvider;
-  private ArtifactBaseLocationProvider sourceBaseLocationProvider;
+  private final LibraryContainerStateLocationProvider stateLocationProvider;
+  private final ArtifactBaseLocationProvider binaryArtifactBaseLocationProvider;
+  private final ArtifactBaseLocationProvider sourceBaseLocationProvider;
+  private final Gson gson;
 
   public LibraryClasspathContainerSerializer() {
     this(new DefaultStateLocationProvider(),
@@ -96,6 +71,7 @@ public class LibraryClasspathContainerSerializer {
     this.stateLocationProvider = stateLocationProvider;
     this.binaryArtifactBaseLocationProvider = binaryBaseLocationProvider;
     this.sourceBaseLocationProvider = sourceBaseLocationProvider;
+    gson = new GsonBuilder().setPrettyPrinting().create();
   }
 
   public void saveContainer(IJavaProject javaProject, LibraryClasspathContainer container)
@@ -107,10 +83,11 @@ public class LibraryClasspathContainerSerializer {
     }
     try (OutputStreamWriter out =
         new OutputStreamWriter(new FileOutputStream(stateFile), StandardCharsets.UTF_8)) {
-      Gson gson = new GsonBuilder().setPrettyPrinting().create();
-      out.write(gson.toJson(new SerializableLibraryClasspathContainer(container,
-          binaryArtifactBaseLocationProvider.getBaseLocation(),
-          sourceBaseLocationProvider.getBaseLocation())));
+      SerializableLibraryClasspathContainer serializableContainer =
+          new SerializableLibraryClasspathContainer(container,
+              binaryArtifactBaseLocationProvider.getBaseLocation(),
+              sourceBaseLocationProvider.getBaseLocation());
+      out.write(gson.toJson(serializableContainer));
     }
   }
 
@@ -120,10 +97,13 @@ public class LibraryClasspathContainerSerializer {
     if (stateFile == null) {
       return null;
     }
-    try (Reader reader = new InputStreamReader(new FileInputStream(stateFile), StandardCharsets.UTF_8)) {
-      Gson gson = new GsonBuilder().create();
+    try (Reader reader =
+        new InputStreamReader(new FileInputStream(stateFile), StandardCharsets.UTF_8)) {
       SerializableLibraryClasspathContainer fromJson =
           gson.fromJson(reader, SerializableLibraryClasspathContainer.class);
+      if (fromJson == null) {
+        return null;
+      }
       return fromJson.toLibraryClasspathContainer(
           binaryArtifactBaseLocationProvider.getBaseLocation(),
           sourceBaseLocationProvider.getBaseLocation());
@@ -132,13 +112,13 @@ public class LibraryClasspathContainerSerializer {
 
   private File getContainerStateFile(IJavaProject javaProject, IPath containerPath, boolean create)
       throws CoreException {
-    IPath containerStateFile =
-        stateLocationProvider.getContainerStateFile(javaProject, containerPath, create);
+    IPath containerStateFile = stateLocationProvider.getContainerStateFile(javaProject,
+                                                                           containerPath,
+                                                                           create);
     if (containerStateFile != null && containerStateFile.toFile().exists()) {
       return containerStateFile.toFile();
-    } else {
-      return null;
     }
+    return null;
   }
 
   private static class DefaultStateLocationProvider
@@ -168,7 +148,7 @@ public class LibraryClasspathContainerSerializer {
   private static class M2LocalRepositoryLocationProvider implements ArtifactBaseLocationProvider {
 
     /**
-     * @see com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer.ArtifactBaseLocationProvider#getBaseLocation()
+     * @see com.google.cloud.tools.eclipse.appengine.libraries.persistence.ArtifactBaseLocationProvider#getBaseLocation()
      */
     @Override
     public IPath getBaseLocation() {
@@ -184,7 +164,7 @@ public class LibraryClasspathContainerSerializer {
         "com.google.cloud.tools.eclipse.appengine.libraries";
 
     /**
-     * @see com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer.ArtifactBaseLocationProvider#getBaseLocation()
+     * @see com.google.cloud.tools.eclipse.appengine.libraries.persistence.ArtifactBaseLocationProvider#getBaseLocation()
      */
     @Override
     public IPath getBaseLocation() {
