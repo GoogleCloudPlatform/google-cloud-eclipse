@@ -29,7 +29,7 @@
       id="appEngineWebXmlValidator">
     <validator
     	class="com.google.cloud.tools.eclipse.appengine.validation.AppEngineWebXmlValidator"
-      	markerId="com.google.cloud.tools.eclipse.appengine.validation.blacklistMarker">
+      	markerId="com.google.cloud.tools.eclipse.appengine.validation.appEngineBlacklistMarker">
       <include>
         <rules>
           <file type="file" name="appengine-web.xml"/>
@@ -39,8 +39,8 @@
   </extension>
   
   <extension
-      id="blacklistMarker"
-      name="%blacklist.marker"
+      id="appEngineBlacklistMarker"
+      name="%appengine.blacklist.marker"
       point="org.eclipse.core.resources.markers">
     <super type="org.eclipse.jdt.core.problem" />
     <super type="org.eclipse.core.resources.problemmarker" />
@@ -52,7 +52,7 @@
       point="org.eclipse.ui.ide.markerResolution">
     <markerResolutionGenerator
       class="com.google.cloud.tools.eclipse.appengine.validation.ApplicationMarkerResolutionGenerator"
-      markerType="com.google.cloud.tools.eclipse.appengine.validation.blacklistMarker">
+      markerType="com.google.cloud.tools.eclipse.appengine.validation.appEngineBlacklistMarker">
     </markerResolutionGenerator>
   </extension>
   
