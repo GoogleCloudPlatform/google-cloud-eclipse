@@ -62,6 +62,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -285,14 +287,36 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     projectIdLabel.setText(Messages.getString("project"));
     projectIdLabel.setToolTipText(Messages.getString("tooltip.project.id"));
     GridDataFactory.swtDefaults().align(SWT.BEGINNING, SWT.BEGINNING).span(2, 1).applyTo(projectIdLabel);
-    projectSelector = new ProjectSelector(this);
-    GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).span(2, 1)
-      .grab(true, false).hint(SWT.DEFAULT, 150).applyTo(projectSelector);
+
+    Composite projectSelectorComposite = new Composite(this, SWT.NONE);
+    GridLayoutFactory.fillDefaults().numColumns(2).spacing(0, 0).applyTo(projectSelectorComposite);
+    GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).span(2, 1)
+        .grab(true, false).applyTo(projectSelectorComposite);
+
+    projectSelector = new ProjectSelector(projectSelectorComposite);
+    GridDataFactory.fillDefaults().grab(true, false).hint(SWT.DEFAULT, 200)
+        .applyTo(projectSelector);
+
+    Button createProjectButton = new Button(projectSelectorComposite, SWT.NONE);
+    createProjectButton.setText(Messages.getString("projectselector.create.newproject"));
+    GridDataFactory.swtDefaults().align(SWT.FILL, SWT.BEGINNING).applyTo(createProjectButton);
+    createProjectButton.addSelectionListener(new SelectionListener() {
+
+      @Override
+      public void widgetSelected(SelectionEvent e) {
+        openCreateProjectDialog();
+      }
+
+      @Override
+      public void widgetDefaultSelected(SelectionEvent event) {
+        widgetSelected(event);
+      }
+    });
+
     accountSelector.addSelectionListener(new Runnable() {
       @Override
       public void run() {
-        Credential selectedCredential = accountSelector.getSelectedCredential();
-        projectSelector.setProjects(retrieveProjects(selectedCredential));
+        loadProjectsForCredential();
       }
     });
     projectSelector.addSelectionChangedListener(
@@ -373,6 +397,16 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
     GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(bucketComposite);
     return bucketComposite;
+  }
+
+  private void openCreateProjectDialog() {
+    new CreateGcpProjectwithAppengineDialog(this.getShell()).open();
+    loadProjectsForCredential();
+  }
+
+  private void loadProjectsForCredential() {
+    Credential selectedCredential = accountSelector.getSelectedCredential();
+    projectSelector.setProjects(retrieveProjects(selectedCredential));
   }
 
   private List<GcpProject> retrieveProjects(Credential selectedCredential) {

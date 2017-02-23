@@ -14,18 +14,25 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.projectselector;
+package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.ErrorDialogErrorHandler;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 
+/**
+ * Dialog to create a GCP project with App Engine application.
+ */
 public class CreateGcpProjectwithAppengineDialog extends Dialog {
+
+  private static final String CREATE_PROJECT_WITH_APPENGINE_URL =
+      "https://console.cloud.google.com/projectselector/appengine/create?lang=java";
 
   public CreateGcpProjectwithAppengineDialog(Shell parentShell) {
     super(parentShell);
@@ -33,11 +40,18 @@ public class CreateGcpProjectwithAppengineDialog extends Dialog {
 
   @Override
   protected Control createDialogArea(Composite parent) {
-    getShell().setText(Messages.getString("dialog.createproject.title"));
+    getShell().setText(Messages.getString("projectselector.dialog.createproject.title"));
     Composite control = (Composite) super.createDialogArea(parent);
     Link link = new Link(control, SWT.NONE);
-    link.setText("You can create a new GCP project in the <a href=\"https://console.cloud.google.com/projectselector/appengine/create?lang=java\">Cloud Console</a>");
+    link.setText(
+        Messages.getString("projectselector.dialog.createproject.message",
+            CREATE_PROJECT_WITH_APPENGINE_URL));
     link.addSelectionListener(new OpenUriSelectionListener(new ErrorDialogErrorHandler(getShell())));
     return control;
+  }
+
+  @Override
+  protected void createButtonsForButtonBar(Composite parent) {
+    createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
   }
 }

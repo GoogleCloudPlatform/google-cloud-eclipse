@@ -34,11 +34,8 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Link;
 
@@ -66,22 +63,6 @@ public class ProjectSelector extends Composite {
                        PojoProperties.values(new String[]{ "name", //$NON-NLS-1$
                                                            "id" })); //$NON-NLS-1$
     tableViewer.setComparator(new ViewerComparator());
-
-    Button createProjectButton = new Button(this, SWT.NONE);
-    createProjectButton.setText(Messages.getString("projectselector.create.newproject"));
-    GridDataFactory.swtDefaults().align(SWT.FILL, SWT.BEGINNING).applyTo(createProjectButton);
-    createProjectButton.addSelectionListener(new SelectionListener() {
-      
-      @Override
-      public void widgetSelected(SelectionEvent e) {
-        openCreateProjectDialog();
-      }
-      
-      @Override
-      public void widgetDefaultSelected(SelectionEvent event) {
-        widgetSelected(event);
-      }
-    });
 
     statusLink = new Link(this, SWT.NONE);
     statusLink.addSelectionListener(
@@ -146,9 +127,4 @@ public class ProjectSelector extends Composite {
   public void clearStatusLink() {
     setStatusLink("", "");
   }
-
-  private void openCreateProjectDialog() {
-    new CreateGcpProjectwithAppengineDialog(this.getShell()).open();
-  }
-
 }
