@@ -73,7 +73,9 @@ public class PomTest {
     Pom pom = Pom.parse(pomFile);
     List<Library> libraries = AppEngineLibraries.getLibraries("appengine");
     
-    LibraryFile file0 = new LibraryFile(new MavenCoordinates("com.example.group0", "artifact0"));
+    MavenCoordinates coordinates0 = new MavenCoordinates("com.example.group0", "artifact0");
+    coordinates0.setVersion("1.2.3");
+    LibraryFile file0 = new LibraryFile(coordinates0);
     List<LibraryFile> list0 = new ArrayList<>();
     list0.add(file0);
     
@@ -107,12 +109,16 @@ public class PomTest {
     Assert.assertEquals("com.example.group0", groupId.getTextContent());
     Element artifactId = getOnlyChild(child0, "artifactId");
     Assert.assertEquals("artifact0", artifactId.getTextContent());
+    Element version = getOnlyChild(child0, "version");
+    Assert.assertEquals("1.2.3", version.getTextContent());
     
     Element child3 = (Element) children.item(3);
     Element groupId3 = getOnlyChild(child3, "groupId");
     Assert.assertEquals("com.example.group3", groupId3.getTextContent());
     Element artifactId3 = getOnlyChild(child3, "artifactId");
     Assert.assertEquals("artifact3", artifactId3.getTextContent());
+    Element version3 = getOnlyChild(child3, "version");
+    Assert.assertEquals("LATEST", version3.getTextContent());
   }
 
   /**

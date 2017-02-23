@@ -77,9 +77,7 @@ class Pom {
     }
   }
 
-  public void addDependencies(List<Library> libraries) throws CoreException {
-    // TODO Auto-generated method stub
-    
+  public void addDependencies(List<Library> libraries) throws CoreException {    
     NodeList dependenciesList = document.getElementsByTagName("dependencies");
     Element dependencies;
     if (dependenciesList.getLength() > 0) {
@@ -98,8 +96,11 @@ class Pom {
         groupId.setTextContent(coordinates.getGroupId());
         Element artifactId = document.createElement("artifactId");
         artifactId.setTextContent(coordinates.getArtifactId());
+        Element version = document.createElement("version");
+        version.setTextContent(coordinates.getVersion());
         dependency.appendChild(groupId);
         dependency.appendChild(artifactId);
+        dependency.appendChild(version);
         
         dependencies.appendChild(dependency);
       }
@@ -125,7 +126,7 @@ class Pom {
     InputStream in = new ByteArrayInputStream(stringWriter.toString().getBytes(StandardCharsets.UTF_8));
     // todo: do we really want to force?
     // todo: monitor
-    // todo: DOMException, LSExcepiton
+    // todo: DOMException, LSException
     pomFile.setContents(in, IFile.FORCE, null);
   }
 
