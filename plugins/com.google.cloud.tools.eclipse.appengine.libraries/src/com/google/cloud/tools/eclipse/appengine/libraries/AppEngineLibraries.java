@@ -31,6 +31,18 @@ import com.google.common.collect.ImmutableMap;
 
 public class AppEngineLibraries {
 
+  /**
+   * Library files for App Engine Standard environment applications; specifically
+   * Objectify, App Engine API, and Google Cloud Endpoints.
+   */
+  public static final String APP_ENGINE_GROUP = "appengine";
+  
+  /**
+   * Library files for all Java servlet applications; specifically
+   * servlet.jar and jsp-api.jar.
+   */
+  public static final String SERVLET_GROUP = "servlet";
+  
   private static final Logger logger = Logger.getLogger(AppEngineLibraries.class.getName());
   private static final ImmutableMap<String, Library> libraries = loadLibraryDefinitions();
   
