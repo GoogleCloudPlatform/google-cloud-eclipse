@@ -39,7 +39,7 @@ public class AppEngineWebXmlSourceValidator extends AbstractXmlSourceValidator {
       SaxParserResults parserResults = BlacklistSaxParser.readXml(bytes);
       Map<BannedElement, Integer> bannedElementOffsetMap =
           ValidationUtils.getOffsetMap(bytes, parserResults);
-      String markerId = "com.google.cloud.tools.eclipse.appengine.validation.blacklistMarker";
+      String markerId = "com.google.cloud.tools.eclipse.appengine.validation.appEngineBlacklistMarker";
       for (Map.Entry<BannedElement, Integer> entry : bannedElementOffsetMap.entrySet()) {
         this.createMessage(reporter, entry.getKey(), entry.getValue(),
             markerId, IMessage.NORMAL_SEVERITY);
