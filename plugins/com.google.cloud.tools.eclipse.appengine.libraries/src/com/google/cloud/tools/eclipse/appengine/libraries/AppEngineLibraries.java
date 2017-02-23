@@ -48,6 +48,14 @@ public class AppEngineLibraries {
     }
     return result;
   }
+  
+  /**
+   * @return all libraries deifned in plugin.xml
+   */
+  public static ImmutableList<Library> getLibraries() {
+    return libraries;
+  }
+  
 
   static Library getLibrary(String id) {
     for (Library library : libraries) {
