@@ -27,7 +27,7 @@ public class AppEngineLibrariesTest {
   
   @Test
   public void testLibrariesAvailable() {
-    List<Library> libraries = AppEngineLibraries.getAvailableLibraries();
+    List<Library> libraries = AppEngineLibraries.getLibraries("appengine");
     for (Library library : libraries) {
       Assert.assertFalse(library.getLibraryFiles().isEmpty());
       String tooltip = library.getToolTip();

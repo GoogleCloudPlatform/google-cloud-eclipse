@@ -56,7 +56,7 @@ public class AppEngineLibrariesSelectorGroup implements ISelectionProvider {
   private final ListenerList/* <ISelectedChangeListener> */ listeners = new ListenerList/* <> */();
 
   public AppEngineLibrariesSelectorGroup(Composite parentContainer) {
-    Collection<Library> availableLibraries = AppEngineLibraries.getAvailableLibraries();
+    Collection<Library> availableLibraries = AppEngineLibraries.getLibraries("appengine");
     Preconditions.checkNotNull(parentContainer, "parentContainer is null");
     Preconditions.checkNotNull(availableLibraries, "availableLibraries is null");
     

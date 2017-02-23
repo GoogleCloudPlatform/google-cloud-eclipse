@@ -27,32 +27,50 @@ import org.eclipse.core.runtime.RegistryFactory;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFactory;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFactoryException;
+import com.google.common.collect.ImmutableList;
 
 public class AppEngineLibraries {
 
   private static final Logger logger = Logger.getLogger(AppEngineLibraries.class.getName());
+  private static final ImmutableList<Library> libraries = loadLibraryDefinitions();
   
-  // TODO obtain libraries by group name
-  // TODO cache library list
+  // todo consider caching maps of group to libraries and id to library
+
   /**
-   * @return the three core appengine libraries
+   * @return libraries in the named group
    */
-  public static List<Library> getAvailableLibraries() {
-    IConfigurationElement[] elements = RegistryFactory.getRegistry().getConfigurationElementsFor(
-        "com.google.cloud.tools.eclipse.appengine.libraries");
-    LibraryFactory factory = new LibraryFactory();
+  public static List<Library> getLibraries(String group) {
     List<Library> result = new ArrayList<>();
-    for (IConfigurationElement element : elements) {
-      try {
-        Library library = factory.create(element);
-        if ("appengine".equals(library.getGroup())) {
-          result.add(library);
-        }
-      } catch (LibraryFactoryException ex) {
-        logger.log(Level.SEVERE, "Error loading library definition", ex);
+    for (Library library : libraries) {
+      if (group.equals(library.getGroup())) {
+        result.add(library);
       }
     }
     return result;
   }
+
+  static Library getLibrary(String id) {
+    for (Library library : libraries) {
+      if (library.getId().equals(id)) {
+        return library;
+      }
+    }
+    return null;
+  }
   
+  private static ImmutableList<Library> loadLibraryDefinitions() {
+    IConfigurationElement[] elements = RegistryFactory.getRegistry().getConfigurationElementsFor(
+        "com.google.cloud.tools.eclipse.appengine.libraries");
+    LibraryFactory factory = new LibraryFactory();
+    ImmutableList.Builder<Library> builder = ImmutableList.builder();
+    for (IConfigurationElement element : elements) {
+      try {
+        Library library = factory.create(element);
+        builder.add(library);
+      } catch (LibraryFactoryException ex) {
+        logger.log(Level.SEVERE, "Error loading library definition", ex);
+      }
+    }
+    return builder.build();
+  }
 }
