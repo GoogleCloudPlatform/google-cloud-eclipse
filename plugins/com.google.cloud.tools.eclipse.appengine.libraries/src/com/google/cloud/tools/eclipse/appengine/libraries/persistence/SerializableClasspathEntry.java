@@ -37,34 +37,40 @@ public class SerializableClasspathEntry {
   private String path;
   private SerializableAttribute[] attributes;
 
-  public SerializableClasspathEntry(IClasspathEntry entry, IPath baseDirectory, IPath sourceBaseDirectory) {
+  public SerializableClasspathEntry(IClasspathEntry entry, IPath baseDirectory,
+      IPath sourceBaseDirectory) {
     setAttributes(entry.getExtraAttributes());
     setAccessRules(entry.getAccessRules());
-    setSourcePath(relativizeSourcePath(entry.getSourceAttachmentPath(), baseDirectory, sourceBaseDirectory));
+    setSourcePath(
+        relativizeSourcePath(entry.getSourceAttachmentPath(), baseDirectory, sourceBaseDirectory));
     setPath(PathUtil.relativizePath(entry.getPath(), baseDirectory).toString());
   }
 
   /**
-   * Relativizes the source attachment path with respect to the base directories used to store source and binary
-   * artifacts.
+   * Relativizes the source attachment path with respect to the base directories used to store
+   * source and binary artifacts.
    * <p>
-   * Tries to make the source attachment path relative to <code>sourceBaseDirectory</code>. If the source attachment
-   * path is not relative to the sourceBaseDirectory, it will try to make it relative to <code>baseDirectory</code>.
-   * If the source attachment path is not relative to <code>baseDirectory</code> either, it will return it unchanged.
+   * Tries to make the source attachment path relative to <code>sourceBaseDirectory</code>. If the
+   * source attachment path is not relative to the sourceBaseDirectory, it will try to make it
+   * relative to <code>baseDirectory</code>. If the source attachment path is not relative to
+   * <code>baseDirectory</code> either, it will return it unchanged.
    * <p>
    * If the source attachment path is relative to either to <code>sourceBaseDirectory</code> or
    * <code>baseDirectory</code>, it will be prefixed with {@value #SOURCE_REPO_RELATIVE_PREFIX} or
    * {@value #BINARY_REPO_RELATIVE_PREFIX} respectively to inform the deserialization process.
    */
-  private static IPath relativizeSourcePath(IPath sourceAttachmentPath, IPath baseDirectory, IPath sourceBaseDirectory) {
+  private static IPath relativizeSourcePath(IPath sourceAttachmentPath, IPath baseDirectory,
+      IPath sourceBaseDirectory) {
     if (sourceAttachmentPath == null) {
       return null;
     }
-    IPath pathRelativeToSourceBase = PathUtil.relativizePathStrict(sourceAttachmentPath, sourceBaseDirectory);
+    IPath pathRelativeToSourceBase =
+        PathUtil.relativizePathStrict(sourceAttachmentPath, sourceBaseDirectory);
     if (pathRelativeToSourceBase != null) {
       return new Path(SOURCE_REPO_RELATIVE_PREFIX).append(pathRelativeToSourceBase);
     } else {
-      return new Path(BINARY_REPO_RELATIVE_PREFIX).append(PathUtil.relativizePath(sourceAttachmentPath, baseDirectory));
+      return new Path(BINARY_REPO_RELATIVE_PREFIX)
+          .append(PathUtil.relativizePath(sourceAttachmentPath, baseDirectory));
     }
   }
 
@@ -97,13 +103,10 @@ public class SerializableClasspathEntry {
   }
 
   public IClasspathEntry toClasspathEntry(IPath baseDirectory, IPath sourceBaseDirectory) {
+    IPath attachmentPath = sourceAttachmentPath.isEmpty() ? null
+        : restoreSourcePath(baseDirectory, sourceBaseDirectory);
     return JavaCore.newLibraryEntry(PathUtil.makePathAbsolute(new Path(path), baseDirectory),
-                                    sourceAttachmentPath.isEmpty() ? null : restoreSourcePath(baseDirectory, 
-                                                                                              sourceBaseDirectory),
-                                    null,
-                                    getAccessRules(),
-                                    getAttributes(),
-                                    true);
+        attachmentPath, null, getAccessRules(), getAttributes(), true);
   }
 
   private IPath restoreSourcePath(IPath baseDirectory, IPath sourceBaseDirectory) {

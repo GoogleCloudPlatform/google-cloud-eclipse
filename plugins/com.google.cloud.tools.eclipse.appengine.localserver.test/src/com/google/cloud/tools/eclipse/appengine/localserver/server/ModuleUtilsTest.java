@@ -29,13 +29,20 @@ import org.eclipse.wst.server.core.IModule;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.runners.MockitoJUnitRunner;
 
+@RunWith(MockitoJUnitRunner.class)
 public class ModuleUtilsTest {
 
-  private IModule module = Mockito.mock(IModule.class);
-  private IFile descriptorFile = Mockito.mock(IFile.class);
-  private IFolder webinf = Mockito.mock(IFolder.class);
+  @Mock
+  private IModule module;
+  @Mock
+  private IFile descriptorFile;
+  @Mock
+  private IFolder webinf;
 
   @Before
   public void turnOffLogging() {
@@ -95,5 +102,4 @@ public class ModuleUtilsTest {
     InputStream in = this.getClass().getResourceAsStream(testfile);
     Mockito.when(descriptorFile.getContents()).thenReturn(in);
   }
-
 }
