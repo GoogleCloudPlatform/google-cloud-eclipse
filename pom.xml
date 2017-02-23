@@ -96,7 +96,7 @@
     <tycho.showEclipseLog>true</tycho.showEclipseLog>
 
     <!--
-      A round-about way for the maven-jacoco-plugin to provide its
+      A round-about way for the jacoco-maven-plugin to provide its
       JaCoCo agent arguments required as we specify an Tycho Surefire
       <argLine/>.
     -->
@@ -504,11 +504,14 @@
     <profile>
       <id>jacoco</id>
       <!--
-        This rigamarole is required to provide the JaCoCo agent argline.
-        By default, `prepare-agent` attempts to populate `tycho.testArgLine`,
-        but it is ignored as we explicitly configure our own `<argLine/>`.
-        Maven errors if we reference an undeclared property from our `<argLine/>`.
-        But `prepare-agent` is unable to override a declared property.
+        This rigamarole is required to obtain the JaCoCo agent argline
+        from the jacoco-maven-plugin.  By default, `prepare-agent`
+        attempts to populate `tycho.testArgLine`, but that property
+        is ignored since we explicitly configure our own `<argLine/>`.
+        If we reference `${jacocoArgLine}` in our `<argLine/>` without
+        previously declaring it in a `<properties/>`, then Maven
+        raises an error.  But `prepare-agent` is unable to override
+        a declared property.
       -->
       <properties>
         <jacoco.agentArgLine>${jacocoArgLine}</jacoco.agentArgLine>
