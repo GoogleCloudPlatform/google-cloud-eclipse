@@ -41,4 +41,5 @@ cache:
   directories:
    - $HOME/.m2
 after_success:
-  - bash <(curl -s https://codecov.io/bash)
+  # test req'd as we don't run coverage on all elements of the matrix
+  - if [ -d build/jacoco/target ]; then bash <(curl -s https://codecov.io/bash); fi
