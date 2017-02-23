@@ -50,14 +50,14 @@ public class AppEngineLibraries {
   }
   
   /**
-   * @return all libraries deifned in plugin.xml
+   * @return all libraries defined in plugin.xml
    */
   public static ImmutableList<Library> getLibraries() {
     return libraries;
   }
   
 
-  static Library getLibrary(String id) {
+  public static Library getLibrary(String id) {
     for (Library library : libraries) {
       if (library.getId().equals(id)) {
         return library;

@@ -28,15 +28,12 @@ import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryCla
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import org.apache.maven.artifact.Artifact;
 import org.eclipse.core.runtime.CoreException;
@@ -68,7 +65,6 @@ public class LibraryClasspathContainerResolverService
 
   private ILibraryRepositoryService repositoryService;
   private LibraryClasspathContainerSerializer serializer;
-  private Map<String, Library> libraries;
 
   public IStatus resolveAll(IJavaProject javaProject, IProgressMonitor monitor) {
     IStatus status = null;
@@ -91,7 +87,7 @@ public class LibraryClasspathContainerResolverService
   }
 
   public IClasspathEntry[] resolveLibraryAttachSourcesSync(String libraryId) throws CoreException {
-    Library library = libraries.get(libraryId);
+    Library library = AppEngineLibraries.getLibrary(libraryId);
     if (library != null) {
       IClasspathEntry[] resolvedEntries = new IClasspathEntry[library.getLibraryFiles().size()];
       int idx = 0;
@@ -110,7 +106,7 @@ public class LibraryClasspathContainerResolverService
     Preconditions.checkArgument(containerPath.segment(0).equals(Library.CONTAINER_PATH_PREFIX));
     try {
       String libraryId = containerPath.segment(1);
-      Library library = libraries.get(libraryId);
+      Library library = AppEngineLibraries.getLibrary(libraryId);
       if (library != null) {
         List<Job> sourceAttacherJobs = new ArrayList<>();
         LibraryClasspathContainer container = resolveLibraryFiles(javaProject, containerPath,
@@ -144,7 +140,7 @@ public class LibraryClasspathContainerResolverService
   private IStatus checkAppEngineStandardJava7(IProgressMonitor monitor) {
     try {
       for (String libraryId : new String[]{ "servlet-api", "jsp-api"}) {
-        Library library = libraries.get(libraryId);
+        Library library = AppEngineLibraries.getLibrary(libraryId);
         for (LibraryFile libraryFile : library.getLibraryFiles()) {
           if (monitor.isCanceled()) {
             return Status.CANCEL_STATUS;
@@ -270,11 +266,6 @@ public class LibraryClasspathContainerResolverService
   @Activate
   protected void initialize() {
     serializer = new LibraryClasspathContainerSerializer();
-    ImmutableList<Library> librariesList = AppEngineLibraries.getLibraries();
-    libraries = new HashMap<>(librariesList.size());
-    for (Library library : librariesList) {
-      libraries.put(library.getId(), library);
-    }
   }
 
   private static IAccessRule[] getAccessRules(List<Filter> filters) {
