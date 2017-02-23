@@ -27,21 +27,20 @@ import org.eclipse.core.runtime.RegistryFactory;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFactory;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFactoryException;
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
 public class AppEngineLibraries {
 
   private static final Logger logger = Logger.getLogger(AppEngineLibraries.class.getName());
-  private static final ImmutableList<Library> libraries = loadLibraryDefinitions();
+  private static final ImmutableMap<String, Library> libraries = loadLibraryDefinitions();
   
-  // todo consider caching maps of group to libraries and id to library
-
+  // todo consider caching maps of group to libraries
   /**
    * @return libraries in the named group
    */
   public static List<Library> getLibraries(String group) {
     List<Library> result = new ArrayList<>();
-    for (Library library : libraries) {
+    for (Library library : libraries.values()) {
       if (group.equals(library.getGroup())) {
         result.add(library);
       }
@@ -50,31 +49,21 @@ public class AppEngineLibraries {
   }
   
   /**
-   * @return all libraries defined in plugin.xml
+   * @return the library with the specified ID, or null if not found
    */
-  public static ImmutableList<Library> getLibraries() {
-    return libraries;
-  }
-  
-
   public static Library getLibrary(String id) {
-    for (Library library : libraries) {
-      if (library.getId().equals(id)) {
-        return library;
-      }
-    }
-    return null;
+    return libraries.get(id);
   }
   
-  private static ImmutableList<Library> loadLibraryDefinitions() {
+  private static ImmutableMap<String, Library> loadLibraryDefinitions() {
     IConfigurationElement[] elements = RegistryFactory.getRegistry().getConfigurationElementsFor(
         "com.google.cloud.tools.eclipse.appengine.libraries");
     LibraryFactory factory = new LibraryFactory();
-    ImmutableList.Builder<Library> builder = ImmutableList.builder();
+    ImmutableMap.Builder<String, Library> builder = ImmutableMap.builder();
     for (IConfigurationElement element : elements) {
       try {
         Library library = factory.create(element);
-        builder.add(library);
+        builder.put(library.getId(), library);
       } catch (LibraryFactoryException ex) {
         logger.log(Level.SEVERE, "Error loading library definition", ex);
       }
