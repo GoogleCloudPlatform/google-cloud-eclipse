@@ -67,8 +67,6 @@ public class LibraryClasspathContainerResolverService
   private ILibraryRepositoryService repositoryService;
   private LibraryClasspathContainerSerializer serializer;
 
-  private IExtensionRegistry extensionRegistry;
-
   public IStatus resolveAll(IJavaProject javaProject, IProgressMonitor monitor) {
     IStatus status = null;
     try {
@@ -322,18 +320,6 @@ public class LibraryClasspathContainerResolverService
     if (this.repositoryService == repositoryService) {
       this.repositoryService = null;
     }
-  }
-  
-  // todo do we actually need this? The extensionRegistry field is not used in this class.
-  @Reference        
-  public void setExtensionRegistry(IExtensionRegistry extensionRegistry) {        
-     this.extensionRegistry = extensionRegistry;       
-  }       
-  
-  public void unsetExtensionRegistry(IExtensionRegistry extensionRegistry) {      
-    if (this.extensionRegistry == extensionRegistry) {        
-      this.extensionRegistry = null;      
-    }     
   }
 
 }
