@@ -34,5 +34,12 @@ public class MessagesTest {
         "com.google. ends with a period.", 
         Messages.getString("package.ends.with.period", "com.google."));
   }
+  
+  @Test
+  public void testWizardDescription() {
+    Assert.assertEquals(
+        "Create a new Eclipse project for App Engine standard environment development.",
+        Messages.getString("create.app.engine.standard.project"));
+  }
 
 }

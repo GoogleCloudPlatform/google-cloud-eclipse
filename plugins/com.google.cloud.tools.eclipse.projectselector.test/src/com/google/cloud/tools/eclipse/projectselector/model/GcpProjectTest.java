@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.projectselector;
+package com.google.cloud.tools.eclipse.projectselector.model;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import org.junit.Test;
 
 public class GcpProjectTest {
@@ -70,6 +73,22 @@ public class GcpProjectTest {
   }
 
   @Test
+  public void testEqualsItself() {
+    GcpProject gcpProject = new GcpProject("name", "id");
+    assertTrue(gcpProject.equals(gcpProject));
+  }
+
+  @Test
+  public void testEqualsWithNull() {
+    assertFalse(new GcpProject("name", "id").equals(null));
+  }
+
+  @Test
+  public void testEqualsWithOtherClass() {
+    assertFalse(new GcpProject("name", "id").equals(new Object()));
+  }
+
+  @Test
   public void testEqualsForSameNameSameId() {
     assertTrue(new GcpProject("name", "id").equals(new GcpProject("name", "id")));
   }
@@ -95,6 +114,11 @@ public class GcpProjectTest {
   }
 
   @Test
+  public void testEqualsForNullIdAndNonNullId() {
+    assertFalse(new GcpProject("name", null).equals(new GcpProject("name", "id")));
+  }
+
+  @Test
   public void testEqualsForEmptyId() {
     assertTrue(new GcpProject("name", "").equals(new GcpProject("name", "")));
   }
@@ -102,5 +126,38 @@ public class GcpProjectTest {
   @Test
   public void testEqualsForEmptyVsNullId() {
     assertFalse(new GcpProject("name", "").equals(new GcpProject("name", null)));
+  }
+
+  @Test
+  public void testHasAppEngineInfo_appEngineNotSet() {
+    assertFalse(new GcpProject("name", "id").hasAppEngineInfo());
+  }
+
+  @Test
+  public void testHasAppEngineInfo_appEngineSetToExisting() {
+    GcpProject gcpProject = new GcpProject("name", "id");
+    gcpProject.setAppEngine(AppEngine.withId("id"));
+    assertTrue(gcpProject.hasAppEngineInfo());
+  }
+
+  @Test
+  public void testHasAppEngineInfo_appEngineSetToNonExistent() {
+    GcpProject gcpProject = new GcpProject("name", "id");
+    gcpProject.setAppEngine(AppEngine.NO_APPENGINE_APPLICATION);
+    assertTrue(gcpProject.hasAppEngineInfo());
+  }
+
+  @Test
+  public void testSetAppEngine_null() {
+    GcpProject gcpProject = new GcpProject("name", "id");
+    gcpProject.setAppEngine(null);
+    assertNull(gcpProject.getAppEngine());
+  }
+
+  @Test
+  public void testSetAppEngine() {
+    GcpProject gcpProject = new GcpProject("name", "id");
+    gcpProject.setAppEngine(AppEngine.withId("id"));
+    assertNotNull(gcpProject.getAppEngine());
   }
 }

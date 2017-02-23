@@ -1,9 +1,9 @@
-/* 
- * Target Platform Definition created using Mikael Barbero's TPD editor 
+/*
+ * Target Platform Definition created using Mikael Barbero's TPD editor
  * <https://github.com/mbarbero/fr.obeo.releng.targetplatform/>
- * 
+ *
  * If you make changes to this file, either:
- * 
+ *
  *    * Right-click in the editor and choose 'Create Target Definition File'
  *      to update the corresponding .target file.
  *    * Right-lick in the editor and choose 'Set as Target Platform'
@@ -12,7 +12,7 @@
 target "GCP for Eclipse Neon" with source requirements
 
 location "http://download.eclipse.org/cbi/updates/license" {
-    org.eclipse.license.feature.group    
+    org.eclipse.license.feature.group
 }
 
 location "http://download.eclipse.org/releases/neon" {
@@ -26,6 +26,9 @@ location "http://download.eclipse.org/releases/neon" {
 	org.eclipse.jpt.jpa.feature.feature.group
 	org.eclipse.datatools.sdk.feature.feature.group
 	org.eclipse.swtbot.eclipse.feature.group
+	
+	org.eclipse.epp.logging.aeri.feature.feature.group
+	org.eclipse.epp.logging.aeri.feature.source.feature.group
 	
 	org.eclipse.jetty.http
 	org.eclipse.jetty.servlet

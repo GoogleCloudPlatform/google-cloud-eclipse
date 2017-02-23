@@ -17,11 +17,15 @@
 package com.google.cloud.tools.eclipse.util.status;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.sameInstance;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 import com.google.cloud.tools.eclipse.util.io.DeleteAllVisitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.Status;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -64,7 +68,8 @@ public class StatusUtilTest {
   @Test
   public void testError_withClassAsObjectAndException() {
     Throwable exception = new Exception();
-    IStatus error = StatusUtil.error((Object) new DeleteAllVisitor().getClass(), "test error msg", exception);
+    IStatus error =
+        StatusUtil.error((Object) new DeleteAllVisitor().getClass(), "test error msg", exception);
     verifyStatus(error);
     assertThat(error.getException(), is(sameInstance(exception)));
   }
@@ -87,5 +92,43 @@ public class StatusUtilTest {
     assertThat(error.getSeverity(), is(IStatus.ERROR));
     assertThat(error.getMessage(), is("test error msg"));
     assertThat(error.getPlugin(), is("com.google.cloud.tools.eclipse.util"));
+  }
+
+  @Test
+  public void testMulti_noError() {
+    IStatus error = StatusUtil.multi(StatusUtil.class, "test error msg");
+    assertThat(error, instanceOf(MultiStatus.class));
+    assertThat(error.getPlugin(), is("com.google.cloud.tools.eclipse.util"));
+    assertThat(error.getMessage(), is("test error msg"));
+  }
+
+  @Test
+  public void testMulti_withError() {
+    Throwable exception = new RuntimeException();
+    IStatus error = StatusUtil.multi(StatusUtil.class, "test error msg", exception);
+    assertThat(error, instanceOf(MultiStatus.class));
+    assertThat(error.getPlugin(), is("com.google.cloud.tools.eclipse.util"));
+    assertThat(error.getMessage(), is("test error msg"));
+    assertThat(error.getException(), is(sameInstance(exception)));
+  }
+
+  @Test
+  public void testFilter_normalStatus() {
+    IStatus error = StatusUtil.error(StatusUtil.class, "test error msg");
+    assertThat(StatusUtil.filter(error), is(sameInstance(error)));
+  }
+
+  @Test
+  public void testFilter_multiStatus() {
+    MultiStatus multi = StatusUtil.multi(StatusUtil.class, "test");
+    multi.add(Status.OK_STATUS);
+    multi.add(StatusUtil.error(StatusUtil.class, "test error msg"));
+    multi.add(Status.OK_STATUS);
+
+    IStatus result = StatusUtil.filter(multi);
+    assertEquals(IStatus.ERROR, result.getSeverity());
+    assertThat(result, instanceOf(MultiStatus.class));
+    assertEquals(1, ((MultiStatus) result).getChildren().length);
+    verifyStatus(((MultiStatus) result).getChildren()[0]);
   }
 }

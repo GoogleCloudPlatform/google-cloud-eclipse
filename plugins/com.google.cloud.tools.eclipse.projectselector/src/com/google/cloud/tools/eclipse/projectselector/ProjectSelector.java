@@ -16,31 +16,46 @@
 
 package com.google.cloud.tools.eclipse.projectselector;
 
+import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
+import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener;
+import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.ErrorDialogErrorHandler;
+import com.google.common.base.Strings;
 import java.util.List;
 import org.eclipse.core.databinding.beans.PojoProperties;
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.jface.databinding.viewers.ViewerSupport;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Link;
 
 public class ProjectSelector extends Composite {
 
   private final TableViewer tableViewer;
   private final WritableList input;
+  private Link statusLink;
 
   public ProjectSelector(Composite parent) {
     super(parent, SWT.NONE);
-    tableViewer = new TableViewer(this, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
-    TableColumnLayout tableColumnLayout = new TableColumnLayout();
-    setLayout(tableColumnLayout);
-    createColumns(tableColumnLayout);
+    setLayout(new GridLayout());
 
+    Composite tableComposite = new Composite(this, SWT.NONE);
+    TableColumnLayout tableColumnLayout = new TableColumnLayout();
+    tableComposite.setLayout(tableColumnLayout);
+    GridDataFactory.fillDefaults().grab(true, true).applyTo(tableComposite);
+
+    tableViewer = new TableViewer(tableComposite, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+    createColumns(tableColumnLayout);
     tableViewer.getTable().setHeaderVisible(true);
     input = WritableList.withElementType(GcpProject.class);
     ViewerSupport.bind(tableViewer,
@@ -48,6 +63,12 @@ public class ProjectSelector extends Composite {
                        PojoProperties.values(new String[]{ "name", //$NON-NLS-1$
                                                            "id" })); //$NON-NLS-1$
     tableViewer.setComparator(new ViewerComparator());
+
+    statusLink = new Link(this, SWT.NONE);
+    statusLink.addSelectionListener(
+        new OpenUriSelectionListener(new ErrorDialogErrorHandler(getShell())));
+    statusLink.setText("");
+    GridDataFactory.fillDefaults().applyTo(statusLink);
   }
 
   private void createColumns(TableColumnLayout tableColumnLayout) {
@@ -72,5 +93,38 @@ public class ProjectSelector extends Composite {
       input.addAll(projects);
     }
     tableViewer.setSelection(selection);
+  }
+
+  public void addSelectionChangedListener(ISelectionChangedListener listener) {
+    tableViewer.addPostSelectionChangedListener(listener);
+  }
+
+  public void removeSelectionChangedListener(ISelectionChangedListener listener) {
+    tableViewer.removePostSelectionChangedListener(listener);
+  }
+
+  public void setStatusLink(String linkText, String tooltip) {
+    statusLink.setText(linkText);
+    setTooltip(tooltip);
+    boolean hide = Strings.isNullOrEmpty(linkText);
+    ((GridData) statusLink.getLayoutData()).exclude = hide;
+    statusLink.setVisible(!hide);
+    layout();
+    IStructuredSelection selection = (IStructuredSelection) tableViewer.getSelection();
+    if (!selection.isEmpty()) {
+      tableViewer.reveal(selection.getFirstElement());
+    }
+  }
+
+  private void setTooltip(String tooltip) {
+    if (Strings.isNullOrEmpty(tooltip)) {
+      statusLink.setToolTipText(null);
+    } else {
+      statusLink.setToolTipText(tooltip);
+    }
+  }
+
+  public void clearStatusLink() {
+    setStatusLink("", "");
   }
 }

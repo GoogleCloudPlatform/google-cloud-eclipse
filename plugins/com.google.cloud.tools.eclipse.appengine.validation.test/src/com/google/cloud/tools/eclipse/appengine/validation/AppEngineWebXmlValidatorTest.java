@@ -35,8 +35,6 @@ import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 
 public class AppEngineWebXmlValidatorTest {
@@ -44,9 +42,8 @@ public class AppEngineWebXmlValidatorTest {
   private static final String XML_NO_BANNED_ELEMENTS = "<test></test>";
   private static final String XML = "<application></application>";
   private static final String BAD_XML = "<";
-  private static final String ELEMENT_NAME = "application";
-  private static final String ELEMENT_MESSAGE = "Project ID should be specified at deploy time";
-  private static final String MARKER_TYPE = "org.eclipse.core.resources.problemmarker";
+  private static final String APPLICATION_MARKER =
+      "com.google.cloud.tools.eclipse.appengine.validation.blacklistMarker";
   private static IResource resource;
   private static IProject project;
   
@@ -61,6 +58,7 @@ public class AppEngineWebXmlValidatorTest {
     resource = webXml;
   }
   
+  
   @After
   public void tearDown() throws CoreException {
     if (resource != null) {
@@ -72,48 +70,36 @@ public class AppEngineWebXmlValidatorTest {
   public void testValidate_badXml()
       throws IOException, CoreException, ParserConfigurationException {
     byte[] bytes = BAD_XML.getBytes(StandardCharsets.UTF_8);
-    AppEngineWebXmlValidator.validate(resource, bytes);
-    IMarker[] markers = resource.findMarkers(MARKER_TYPE, true, IResource.DEPTH_ZERO);
+    AppEngineWebXmlValidator validator = new AppEngineWebXmlValidator();
+    validator.validate(resource, bytes);
+    String problemMarker = "org.eclipse.core.resources.problemmarker";
+    IMarker[] markers = resource.findMarkers(problemMarker, true, IResource.DEPTH_ZERO);
     String resultMessage = (String) markers[0].getAttribute(IMarker.MESSAGE);
     assertEquals("XML document structures must start and end within the same entity.",
         resultMessage);
   }
   
   @Test
-  public void testValidate_noBannedTags()
+  public void testValidate_noBannedElements()
       throws IOException, CoreException, ParserConfigurationException {
     byte[] bytes = XML_NO_BANNED_ELEMENTS.getBytes(StandardCharsets.UTF_8);
-    AppEngineWebXmlValidator.validate(resource, bytes);
-    IMarker[] markers = resource.findMarkers(MARKER_TYPE, true, IResource.DEPTH_ZERO);
+    AppEngineWebXmlValidator validator = new AppEngineWebXmlValidator();
+    validator.validate(resource, bytes);
+    IMarker[] markers = resource.findMarkers(APPLICATION_MARKER, true, IResource.DEPTH_ZERO);
     assertEquals(0, markers.length);
   }
 
   @Test
-  public void testValidate()
+  public void testValidate_withBannedElements()
       throws IOException, CoreException, ParserConfigurationException {
     byte[] bytes = XML.getBytes(StandardCharsets.UTF_8);
-    AppEngineWebXmlValidator.validate(resource, bytes);
-    IMarker[] markers = resource.findMarkers(MARKER_TYPE, true, IResource.DEPTH_ZERO);
+    AppEngineWebXmlValidator validator = new AppEngineWebXmlValidator();
+    validator.validate(resource, bytes);
+    IMarker[] markers = resource.findMarkers(APPLICATION_MARKER, true, IResource.DEPTH_ZERO);
     assertEquals(1, markers.length);
-    assertEquals(ELEMENT_MESSAGE, (String) markers[0].getAttribute(IMarker.MESSAGE));
+    String message = Messages.getString("application.element");
+    assertEquals(message, (String) markers[0].getAttribute(IMarker.MESSAGE));
     assertEquals("line 1", markers[0].getAttribute(IMarker.LOCATION));
-  }
-  
-  @Test
-  public void testCreateMarker() throws CoreException {
-    BannedElement element = new BannedElement(ELEMENT_NAME);
-    AppEngineWebXmlValidator.createMarker(resource, element, 0);
-    IMarker[] markers = resource.findMarkers(MARKER_TYPE, true, IResource.DEPTH_ZERO);
-    assertEquals(ELEMENT_MESSAGE, (String) markers[0].getAttribute(IMarker.MESSAGE));
-  }
-  
-  @Test
-  public void testCreateSAXErrorMessage() throws CoreException {
-    SAXParseException spe = new SAXParseException("", "", "", 1, 1);
-    SAXException ex = new SAXException(ELEMENT_MESSAGE, spe);
-    AppEngineWebXmlValidator.createSaxErrorMessage(resource, ex);
-    IMarker[] markers = resource.findMarkers(MARKER_TYPE, true, IResource.DEPTH_ZERO);
-    assertEquals(ELEMENT_MESSAGE, (String) markers[0].getAttribute(IMarker.MESSAGE));
   }
   
   private static void createFolders(IContainer parent, IPath path) throws CoreException {

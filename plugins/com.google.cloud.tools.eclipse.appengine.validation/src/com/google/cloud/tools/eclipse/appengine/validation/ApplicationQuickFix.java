@@ -20,14 +20,11 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javax.xml.transform.TransformerException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ui.IMarkerResolution;
-
 import com.google.cloud.tools.eclipse.util.Xslt;
 
 /**
@@ -35,27 +32,21 @@ import com.google.cloud.tools.eclipse.util.Xslt;
  */
 public class ApplicationQuickFix implements IMarkerResolution {
   
-  private static final String APPLICATION_XSLT = "/xslt/application.xsl";
   private static final Logger logger = Logger.getLogger(
-    ApplicationQuickFix.class.getName());
+      ApplicationQuickFix.class.getName());
 
   @Override
   public String getLabel() {
-    // TODO localize
-    return "Remove Application Element";
+    return Messages.getString("remove.application.element");
   }
 
   @Override
   public void run(IMarker marker) {
-    removeApplicationElements(marker.getResource());
-  }
-  
-  private static void removeApplicationElements(IResource resource) {
-    IFile file = (IFile) resource;
-    URL xslt = ApplicationQuickFix.class.getResource(APPLICATION_XSLT);
     try {
-      Xslt.transformInPlace(file, xslt);
-    } catch (CoreException | IOException | TransformerException ex) {
+      IFile file = (IFile) marker.getResource();
+      URL xslPath = ApplicationQuickFix.class.getResource("/xslt/application.xsl");
+      Xslt.transformInPlace(file, xslPath);
+    } catch (IOException | CoreException| TransformerException ex) {
       logger.log(Level.SEVERE, ex.getMessage());
     }
   }

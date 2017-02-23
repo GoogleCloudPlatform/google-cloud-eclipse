@@ -24,11 +24,11 @@ import org.eclipse.ui.IMarkerResolution;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-public class MarkerResolutionGeneratorTest {
+public class ServletMarkerResolutionGeneratorTest {
   
   @Test
   public void testGetResolutions() {
-    ApplicationMarkerResolutionGenerator resolution = new ApplicationMarkerResolutionGenerator();
+    ServletMarkerResolutionGenerator resolution = new ServletMarkerResolutionGenerator();
     IMarker marker = Mockito.mock(IMarker.class);
     IMarkerResolution[] resolutions = resolution.getResolutions(marker);
     assertEquals(1, resolutions.length);

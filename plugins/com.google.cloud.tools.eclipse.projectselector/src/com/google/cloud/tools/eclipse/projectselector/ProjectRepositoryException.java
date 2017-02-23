@@ -26,4 +26,7 @@ public class ProjectRepositoryException extends Exception {
     super(reason);
   }
 
+  public ProjectRepositoryException(String reason, Throwable cause) {
+    super(reason, cause);
+  }
 }

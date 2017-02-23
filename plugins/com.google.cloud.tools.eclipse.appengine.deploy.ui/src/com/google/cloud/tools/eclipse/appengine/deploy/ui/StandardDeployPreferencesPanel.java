@@ -17,13 +17,14 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.cloud.tools.eclipse.appengine.deploy.ui.internal.ProjectSelectorSelectionChangedListener;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelectorObservableValue;
-import com.google.cloud.tools.eclipse.projectselector.GcpProject;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepositoryException;
 import com.google.cloud.tools.eclipse.projectselector.ProjectSelector;
+import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.cloud.tools.eclipse.ui.util.FontUtil;
 import com.google.cloud.tools.eclipse.ui.util.databinding.BucketNameValidator;
 import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectSelectorValidator;
@@ -286,7 +287,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     GridDataFactory.swtDefaults().align(SWT.BEGINNING, SWT.BEGINNING).applyTo(projectIdLabel);
     projectSelector = new ProjectSelector(this);
     GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER)
-      .grab(true, false).hint(300, 100).applyTo(projectSelector);
+      .grab(true, false).hint(400, 150).applyTo(projectSelector);
     accountSelector.addSelectionListener(new Runnable() {
       @Override
       public void run() {
@@ -294,6 +295,10 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
         projectSelector.setProjects(retrieveProjects(selectedCredential));
       }
     });
+    projectSelector.addSelectionChangedListener(
+        new ProjectSelectorSelectionChangedListener(accountSelector,
+                                                    projectRepository,
+                                                    projectSelector));
   }
 
   private void createProjectVersionSection() {

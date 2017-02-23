@@ -18,6 +18,8 @@
       <unit id="org.eclipse.jpt.jpa.feature.feature.group" version="3.5.0.v201603181811"/>
       <unit id="org.eclipse.datatools.sdk.feature.feature.group" version="1.13.0.201603142002"/>
       <unit id="org.eclipse.swtbot.eclipse.feature.group" version="2.5.0.201609021837"/>
+      <unit id="org.eclipse.epp.logging.aeri.feature.feature.group" version="2.0.3.v20161205-0933"/>
+      <unit id="org.eclipse.epp.logging.aeri.feature.source.feature.group" version="2.0.3.v20161205-0933"/>
       <unit id="org.eclipse.jetty.http" version="9.3.9.v20160517"/>
       <unit id="org.eclipse.jetty.servlet" version="9.3.9.v20160517"/>
       <unit id="org.eclipse.jetty.server" version="9.3.9.v20160517"/>

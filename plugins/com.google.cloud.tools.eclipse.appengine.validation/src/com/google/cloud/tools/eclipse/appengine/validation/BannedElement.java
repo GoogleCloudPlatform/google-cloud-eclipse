@@ -19,7 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 import com.google.common.base.Preconditions;
 
 /**
- * A blacklisted element found in appengine-web.xml
+ * A blacklisted element that will receive a problem marker. 
  */
 public class BannedElement {
 
@@ -31,17 +31,17 @@ public class BannedElement {
    * @param length the length of the marker underline. Length == 0 results in a
    *        marker in the vertical ruler and no underline
    */
-  public BannedElement(String elementName, DocumentLocation start, int length) {
-    Preconditions.checkNotNull(elementName, "elementName is null");
+  public BannedElement(String message, DocumentLocation start, int length) {
+    Preconditions.checkNotNull(message, "message is null");
     Preconditions.checkNotNull(start, "start is null");
     Preconditions.checkArgument(length >= 0, "length < 0");
-    this.message = AppEngineWebBlacklist.getBlacklistElementMessage(elementName);
+    this.message = message;
     this.start = start;
     this.length = length;
   }
 
-  public BannedElement(String elementName) {
-    this(elementName, new DocumentLocation(0, 0), 0);
+  public BannedElement(String message) {
+    this(message, new DocumentLocation(0, 0), 0);
   }
 
   public String getMessage() {

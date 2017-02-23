@@ -27,6 +27,9 @@ location "http://download.eclipse.org/releases/oxygen/201702031000/" {
 	org.eclipse.datatools.sdk.feature.feature.group
 	org.eclipse.swtbot.eclipse.feature.group
 	
+	org.eclipse.epp.logging.aeri.feature.feature.group
+	org.eclipse.epp.logging.aeri.feature.source.feature.group
+	
 	org.eclipse.jetty.http
 	org.eclipse.jetty.servlet
 	org.eclipse.jetty.server

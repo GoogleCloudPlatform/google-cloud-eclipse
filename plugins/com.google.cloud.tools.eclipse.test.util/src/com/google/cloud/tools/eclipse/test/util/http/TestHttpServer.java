@@ -1,39 +1,47 @@
 package com.google.cloud.tools.eclipse.test.util.http;
 
+import static org.junit.Assert.assertTrue;
+
 import com.google.common.base.Preconditions;
-import java.io.File;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.eclipse.jetty.server.Handler;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.handler.DefaultHandler;
-import org.eclipse.jetty.server.handler.HandlerList;
-import org.eclipse.jetty.server.handler.ResourceHandler;
+import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.junit.rules.ExternalResource;
-import org.junit.rules.TemporaryFolder;
 
 /**
- * Simple HTTP server (wrapping an embedded Jetty server) to serve a file on a random available port.
+ * Simple HTTP server (wrapping an embedded Jetty server) that listens on a random available port.
  * <p>
- * Use {@link #getAddress()} to obtain the server's address after it has been started via the {@link #before()} method.
+ * Use {@link #getAddress()} to obtain the server's address after it has been started via the
+ * {@link #before()} method.
  */
 public class TestHttpServer extends ExternalResource {
 
   private static final Logger logger = Logger.getLogger(TestHttpServer.class.getName());
 
-  private TemporaryFolder temporaryFolder;
   private Server server;
-  private String fileName;
-  private String fileContent;
 
-  public TestHttpServer(TemporaryFolder temporaryFolder, String fileName, String fileContent) {
-    this.temporaryFolder = temporaryFolder;
-    this.fileName = fileName;
-    this.fileContent = fileContent;
+  private boolean requestHandled = false;
+  private String requestMethod;
+  private Map<String, String[]> requestParameters;
+
+  private final String expectedPath;
+  private final String responseContent;
+
+  // Examples: new TestHttpServer("folder/sample.txt", "arbitrary file content");
+  //           new TestHttpServer("", "<html><body>root</body></html>");
+  public TestHttpServer(String expectedPath, String responseContent) {
+    this.expectedPath = expectedPath;
+    this.responseContent = responseContent;
   }
 
   @Override
@@ -44,22 +52,12 @@ public class TestHttpServer extends ExternalResource {
   @Override
   protected void after() {
     stopServer();
+    assertTrue(requestHandled);
   }
 
   private void runServer() throws Exception {
     server = new Server(new InetSocketAddress("127.0.0.1", 0));
-    ResourceHandler resourceHandler = new ResourceHandler();
-
-    File resourceBase = temporaryFolder.newFolder();
-    java.nio.file.Path fileToServe = Files.createFile(resourceBase.toPath().resolve(fileName));
-    Files.write(fileToServe, fileContent.getBytes(StandardCharsets.UTF_8));
-    resourceHandler.setResourceBase(resourceBase.getAbsolutePath());
-
-    HandlerList handlers = new HandlerList();
-    handlers.setHandlers(new Handler[] { resourceHandler, new DefaultHandler() });
-    server.setHandler(handlers);
-
-    server.dumpStdErr();
+    server.setHandler(new RequestHandler());
     server.start();
   }
 
@@ -74,15 +72,45 @@ public class TestHttpServer extends ExternalResource {
   }
 
   /**
-   * Returns the address that can be used to get resources from the server.
+   * Returns the address that can be used to send requests to the server.
    * <p>
    * Initialized only after the server has started.
    *
-   * @return server address in the form of http://127.0.0.1:&lt;port&gt;
+   * @return server address in the form of http://127.0.0.1:&lt;port&gt;/
    */
   public String getAddress() {
     Preconditions.checkNotNull(server, "server isn't started yet");
     // assume a single server connector
-    return "http://127.0.0.1:" + ((ServerConnector) server.getConnectors()[0]).getLocalPort();
+    return "http://127.0.0.1:" + ((ServerConnector) server.getConnectors()[0]).getLocalPort() + "/";
+  }
+
+  public String getRequestMethod() {
+    Preconditions.checkState(requestHandled);
+    return requestMethod;
+  }
+
+  public Map<String, String[]> getRequestParameters() {
+    Preconditions.checkState(requestHandled);
+    return requestParameters;
+  }
+
+  private class RequestHandler extends AbstractHandler {
+
+    @Override
+    public void handle(String target, Request baseRequest, HttpServletRequest request,
+        HttpServletResponse response) throws IOException, ServletException {
+      Preconditions.checkState(!requestHandled);
+
+      if (target.equals("/" + expectedPath)) {
+        requestHandled = true;
+        requestMethod = request.getMethod();
+        requestParameters = request.getParameterMap();
+
+        baseRequest.setHandled(true);
+        byte[] bytes = responseContent.getBytes(StandardCharsets.UTF_8);
+        response.getOutputStream().write(bytes);
+        response.setStatus(HttpServletResponse.SC_OK);
+      }
+    }
   }
 }

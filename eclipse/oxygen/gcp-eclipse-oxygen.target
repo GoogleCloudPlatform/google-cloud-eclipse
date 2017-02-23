@@ -18,10 +18,13 @@
       <unit id="org.eclipse.jpt.jpa.feature.feature.group" version="3.5.0.v201610131832"/>
       <unit id="org.eclipse.datatools.sdk.feature.feature.group" version="1.14.0.201701131441"/>
       <unit id="org.eclipse.swtbot.eclipse.feature.group" version="2.5.0.201609021837"/>
+      <unit id="org.eclipse.epp.logging.aeri.feature.feature.group" version="2.0.3.v20161205-0933"/>
+      <unit id="org.eclipse.epp.logging.aeri.feature.source.feature.group" version="2.0.3.v20161205-0933"/>
       <unit id="org.eclipse.jetty.http" version="9.4.0.v20161208"/>
       <unit id="org.eclipse.jetty.servlet" version="9.4.0.v20161208"/>
       <unit id="org.eclipse.jetty.server" version="9.4.0.v20161208"/>
       <unit id="org.eclipse.jetty.util" version="9.4.0.v20161208"/>
+      <unit id="ch.qos.logback.slf4j" version="1.0.7.v201505121915"/>
       <repository location="http://download.eclipse.org/releases/oxygen/201702031000/"/>
     </location>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">

@@ -55,6 +55,14 @@ public class StatusUtil {
     return new Status(IStatus.INFO, getBundleId(origin), message, error);
   }
 
+  public static MultiStatus multi(Object origin, String message) {
+    return new MultiStatus(getBundleId(origin), 0, message, null);
+  }
+
+  public static MultiStatus multi(Object origin, String message, Throwable error) {
+    return new MultiStatus(getBundleId(origin), 0, message, error);
+  }
+
   private static String getBundleId(Object origin) {
     Class<?> clazz = null;
     if (origin == null) {
@@ -80,7 +88,8 @@ public class StatusUtil {
         ((MultiStatus) status).merge(newStatus);
         return status;
       } else {
-        MultiStatus  merged = new MultiStatus(status.getPlugin(), status.getCode(), status.getMessage(), status.getException());
+        MultiStatus merged = new MultiStatus(status.getPlugin(), status.getCode(),
+            status.getMessage(), status.getException());
         merged.merge(newStatus);
         return merged;
       }
@@ -99,5 +108,22 @@ public class StatusUtil {
     IStatus status = error(origin, message, ex);
     StatusManager.getManager().handle(status, StatusManager.SHOW | StatusManager.LOG);
     return status;
+  }
+
+  /**
+   * Return a simplified status by discarding all OK child statuses.
+   */
+  public static IStatus filter(IStatus status) {
+    if (!status.isMultiStatus()) {
+      return status;
+    }
+    MultiStatus newStatus = new MultiStatus(status.getPlugin(), status.getCode(),
+        status.getMessage(), status.getException());
+    for (IStatus child : status.getChildren()) {
+      if (!child.isOK()) {
+        newStatus.add(filter(child));
+      }
+    }
+    return newStatus;
   }
 }

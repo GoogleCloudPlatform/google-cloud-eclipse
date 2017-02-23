@@ -1,6 +1,7 @@
 Manifest-Version: 1.0
-Bundle-ClassPath: lib/google-api-services-cloudresourcemanager-v1-rev355-1.22.0.jar,
- .
+Bundle-ClassPath: .,
+ lib/google-api-services-cloudresourcemanager-v1-rev355-1.22.0.jar,
+ lib/google-api-services-appengine-v1-rev9-1.21.0.jar
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.projectselector;singleton:=true
@@ -9,9 +10,11 @@ Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
-Export-Package: com.google.cloud.tools.eclipse.projectselector
+Export-Package: com.google.cloud.tools.eclipse.projectselector,
+ com.google.cloud.tools.eclipse.projectselector.model
 Import-Package: com.google.api.client.auth.oauth2,
  com.google.api.client.googleapis,
+ com.google.api.client.googleapis.json,
  com.google.api.client.googleapis.services,
  com.google.api.client.googleapis.services.json,
  com.google.api.client.http,
@@ -20,6 +23,8 @@ Import-Package: com.google.api.client.auth.oauth2,
  com.google.api.client.json.jackson,
  com.google.api.client.util,
  com.google.cloud.tools.eclipse.login.ui,
+ com.google.cloud.tools.eclipse.ui.util,
+ com.google.cloud.tools.eclipse.ui.util.event,
  com.google.cloud.tools.eclipse.util,
  com.google.cloud.tools.eclipse.util.status,
  com.google.common.annotations;version="[20.0.0,21.0.0)",
@@ -36,4 +41,8 @@ Import-Package: com.google.api.client.auth.oauth2,
  org.eclipse.jface.layout,
  org.eclipse.jface.viewers,
  org.eclipse.swt,
- org.eclipse.swt.widgets
+ org.eclipse.swt.events,
+ org.eclipse.swt.layout,
+ org.eclipse.swt.widgets,
+ org.eclipse.ui,
+ org.eclipse.ui.browser;ui.workbench=split

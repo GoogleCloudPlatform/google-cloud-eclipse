@@ -24,7 +24,9 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 
-
+/**
+ * Retrieves and returns the results of the SAX parser.
+ */
 class BlacklistSaxParser {
   
   static SaxParserResults readXml(byte[] bytes)

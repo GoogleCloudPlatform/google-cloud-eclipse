@@ -52,32 +52,6 @@ public class LibraryClasspathContainerSerializer {
   private static final Logger logger =
       Logger.getLogger(LibraryClasspathContainerSerializer.class.getName());
 
-  /**
-   * Implementers of this interface provide a location of a file that can be used to save and load
-   * {@link LibraryClasspathContainer}s
-   */
-  public interface LibraryContainerStateLocationProvider {
-
-    /**
-     * Based on the parameters <code>javaProject</code> and <code>containerPath</code> will return
-     * an {@link IPath} to a file that can be used to save and load
-     * {@link LibraryClasspathContainer} instances.
-     *
-     * @param javaProject the project the {@link LibraryClasspathContainer} belongs to
-     * @param containerPath the container path of the {@link LibraryClasspathContainer}
-     * @param create if true the file and parent folders will be created if needed, if false the
-     *        location returned may not refer to an existing file.
-     *
-     * @throws CoreException if an error happens while creating the necessary folders or file
-     */
-    IPath getContainerStateFile(IJavaProject javaProject, IPath containerPath, boolean create)
-        throws CoreException;
-  }
-
-  public interface ArtifactBaseLocationProvider {
-    IPath getBaseLocation();
-  }
-
   private final LibraryContainerStateLocationProvider stateLocationProvider;
   private final ArtifactBaseLocationProvider binaryArtifactBaseLocationProvider;
   private final ArtifactBaseLocationProvider sourceBaseLocationProvider;
@@ -111,8 +85,8 @@ public class LibraryClasspathContainerSerializer {
         new OutputStreamWriter(new FileOutputStream(stateFile), StandardCharsets.UTF_8)) {
       SerializableLibraryClasspathContainer serializableContainer =
           new SerializableLibraryClasspathContainer(container,
-                                                    binaryArtifactBaseLocationProvider.getBaseLocation(),
-                                                    sourceBaseLocationProvider.getBaseLocation());
+              binaryArtifactBaseLocationProvider.getBaseLocation(),
+              sourceBaseLocationProvider.getBaseLocation());
       out.write(gson.toJson(serializableContainer));
     }
   }
@@ -123,7 +97,8 @@ public class LibraryClasspathContainerSerializer {
     if (stateFile == null) {
       return null;
     }
-    try (Reader reader = new InputStreamReader(new FileInputStream(stateFile), StandardCharsets.UTF_8)) {
+    try (Reader reader =
+        new InputStreamReader(new FileInputStream(stateFile), StandardCharsets.UTF_8)) {
       SerializableLibraryClasspathContainer fromJson =
           gson.fromJson(reader, SerializableLibraryClasspathContainer.class);
       if (fromJson == null) {
@@ -146,7 +121,8 @@ public class LibraryClasspathContainerSerializer {
     return null;
   }
 
-  private static class DefaultStateLocationProvider implements LibraryContainerStateLocationProvider {
+  private static class DefaultStateLocationProvider
+      implements LibraryContainerStateLocationProvider {
 
     /*
      * The IFile and IFolder methods do not validate whether the underlying resources exist.
@@ -172,7 +148,7 @@ public class LibraryClasspathContainerSerializer {
   private static class M2LocalRepositoryLocationProvider implements ArtifactBaseLocationProvider {
 
     /**
-     * @see com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer.ArtifactBaseLocationProvider#getBaseLocation()
+     * @see com.google.cloud.tools.eclipse.appengine.libraries.persistence.ArtifactBaseLocationProvider#getBaseLocation()
      */
     @Override
     public IPath getBaseLocation() {
@@ -188,7 +164,7 @@ public class LibraryClasspathContainerSerializer {
         "com.google.cloud.tools.eclipse.appengine.libraries";
 
     /**
-     * @see com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer.ArtifactBaseLocationProvider#getBaseLocation()
+     * @see com.google.cloud.tools.eclipse.appengine.libraries.persistence.ArtifactBaseLocationProvider#getBaseLocation()
      */
     @Override
     public IPath getBaseLocation() {

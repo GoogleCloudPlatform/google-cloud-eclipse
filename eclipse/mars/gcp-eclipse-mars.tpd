@@ -36,6 +36,11 @@ location "http://download.eclipse.org/releases/mars/" {
 	org.eclipse.jetty.util
 }
 
+location "http://download.eclipse.org/technology/epp/logging/stable/" {
+	org.eclipse.epp.logging.aeri.feature.feature.group
+	org.eclipse.epp.logging.aeri.feature.source.feature.group
+}
+
 location "http://download.eclipse.org/webtools/repository/mars/" {
     org.eclipse.jst.web_sdk.feature.feature.group
     org.eclipse.jst.server_sdk.feature.feature.group

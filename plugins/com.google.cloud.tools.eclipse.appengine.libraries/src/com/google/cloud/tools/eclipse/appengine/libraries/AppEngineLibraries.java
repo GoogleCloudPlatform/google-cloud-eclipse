@@ -16,29 +16,70 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.RegistryFactory;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFactory;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFactoryException;
+import com.google.common.collect.ImmutableMap;
 
 public class AppEngineLibraries {
 
-  // TODO obtain libraries from extension registry
-  // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/819
-  public static List<Library> getAvailableLibraries() {
-    Library appEngine = new Library("appengine-api");
-    appEngine.setName("App Engine API");
-    appEngine.setToolTip(Messages.getString("appengine.api.tooltip"));
-    Library endpoints = new Library("appengine-endpoints");
-    endpoints.setName("Google Cloud Endpoints");
-    endpoints.setToolTip(Messages.getString("endpoints.tooltip"));
-    endpoints.setLibraryDependencies(Collections.singletonList("appengine-api"));
-    Library objectify = new Library("objectify");
-    objectify.setName("Objectify");
-    objectify.setToolTip(Messages.getString("objectify.tooltip"));
-    objectify.setLibraryDependencies(Collections.singletonList("appengine-api"));
-    return Arrays.asList(appEngine, endpoints, objectify);
+  /**
+   * Library files for App Engine Standard environment applications; specifically
+   * Objectify, App Engine API, and Google Cloud Endpoints.
+   */
+  public static final String APP_ENGINE_GROUP = "appengine";
+  
+  /**
+   * Library files for all Java servlet applications; specifically
+   * servlet.jar and jsp-api.jar.
+   */
+  public static final String SERVLET_GROUP = "servlet";
+  
+  private static final Logger logger = Logger.getLogger(AppEngineLibraries.class.getName());
+  private static final ImmutableMap<String, Library> libraries = loadLibraryDefinitions();
+  
+  // todo consider caching maps of group to libraries
+  /**
+   * @return libraries in the named group
+   */
+  public static List<Library> getLibraries(String group) {
+    List<Library> result = new ArrayList<>();
+    for (Library library : libraries.values()) {
+      if (library.getGroup().equals(group)) {
+        result.add(library);
+      }
+    }
+    return result;
   }
   
+  /**
+   * @return the library with the specified ID, or null if not found
+   */
+  public static Library getLibrary(String id) {
+    return libraries.get(id);
+  }
+  
+  private static ImmutableMap<String, Library> loadLibraryDefinitions() {
+    IConfigurationElement[] elements = RegistryFactory.getRegistry().getConfigurationElementsFor(
+        "com.google.cloud.tools.eclipse.appengine.libraries");
+    LibraryFactory factory = new LibraryFactory();
+    ImmutableMap.Builder<String, Library> builder = ImmutableMap.builder();
+    for (IConfigurationElement element : elements) {
+      try {
+        Library library = factory.create(element);
+        builder.put(library.getId(), library);
+      } catch (LibraryFactoryException ex) {
+        logger.log(Level.SEVERE, "Error loading library definition", ex);
+      }
+    }
+    return builder.build();
+  }
 }
