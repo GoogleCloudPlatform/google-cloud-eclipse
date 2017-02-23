@@ -71,7 +71,7 @@ public class PomTest {
     pomFile.create(in, IFile.FORCE, null);
     
     Pom pom = Pom.parse(pomFile);
-    List<Library> libraries = AppEngineLibraries.getAvailableLibraries();
+    List<Library> libraries = AppEngineLibraries.getLibraries("appengine");
     
     LibraryFile file0 = new LibraryFile(new MavenCoordinates("com.example.group0", "artifact0"));
     List<LibraryFile> list0 = new ArrayList<>();
