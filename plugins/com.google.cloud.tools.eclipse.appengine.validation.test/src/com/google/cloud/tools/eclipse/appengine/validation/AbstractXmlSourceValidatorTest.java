@@ -22,6 +22,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.wst.sse.ui.internal.reconcile.validator.IncrementalReporter;
+import org.eclipse.wst.validation.internal.provisional.core.IMessage;
 import org.junit.Rule;
 import org.junit.Test;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
@@ -46,6 +48,15 @@ public class AbstractXmlSourceValidatorTest {
     IDocument document = ValidationTestUtils.getDocument(file);
     
     assertEquals("UTF-8", AbstractXmlSourceValidator.getDocumentEncoding(document));
+  }
+  
+  @Test
+  public void testCreateMessage() throws CoreException {
+    IncrementalReporter reporter = new IncrementalReporter(null /*progress monitor*/);
+    AbstractXmlSourceValidator validator = new AppEngineWebXmlSourceValidator();
+    BannedElement element = new BannedElement("message");
+    validator.createMessage(reporter, element, 0, "", IMessage.NORMAL_SEVERITY);
+    assertEquals(1,reporter.getMessages().size());
   }
   
 }

@@ -58,7 +58,5 @@ public class ApplicationQuickAssistProcessorTest {
     ApplicationQuickAssistProcessor processor = new ApplicationQuickAssistProcessor();
     ICompletionProposal[] proposals = processor.computeQuickAssistProposals(context);
     assertEquals(1, proposals.length);
-    
-    
   }
 }
