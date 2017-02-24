@@ -38,4 +38,5 @@ Export-Package: com.google.api.client.auth.oauth2,
  com.google.api.services.cloudresourcemanager.model,
  com.google.cloud.tools.eclipse.googleapis,
  com.google.cloud.tools.login;version="0.1.1"
-Import-Package: com.google.cloud.tools.eclipse.util
+Import-Package: com.google.cloud.tools.eclipse.util,
+ org.codehaus.jackson
