@@ -27,7 +27,6 @@ import com.google.cloud.tools.eclipse.appengine.facets.ui.AppEngineStandardProje
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -64,7 +63,7 @@ public class AppEngineStandardProjectConvertCommandHandlerTest {
       new AppEngineStandardProjectConvertCommandHandler();
 
   @Before
-  public void setUp() throws CoreException {
+  public void setUp() throws CoreException, OperationCanceledException, InterruptedException {
     facetedProject = ProjectFacetsManager.create(projectCreator.getProject());
 
     // Workaround deadlock bug described in Eclipse bug (https://bugs.eclipse.org/511793).
@@ -72,11 +71,7 @@ public class AppEngineStandardProjectConvertCommandHandlerTest {
     // above (from resource notifications) and from other resource changes from modifying the
     // project facets. So we force the dependency graph to defer updates.
     IDependencyGraph.INSTANCE.preUpdate();
-    try {
-      Job.getJobManager().join(DependencyGraphImpl.GRAPH_UPDATE_JOB_FAMILY, null);
-    } catch (OperationCanceledException | InterruptedException ex) {
-      logger.log(Level.WARNING, "Exception waiting for WTP Graph Update job", ex);
-    }
+    Job.getJobManager().join(DependencyGraphImpl.GRAPH_UPDATE_JOB_FAMILY, null);
   }
 
   @After
