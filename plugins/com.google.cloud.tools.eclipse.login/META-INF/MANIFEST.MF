@@ -31,6 +31,5 @@ Import-Package: com.google.api.client.auth.oauth2,
  org.eclipse.core.databinding.observable,
  org.eclipse.core.databinding.observable.value,
  org.eclipse.core.expressions,
- org.eclipse.jetty.util.security;version="9.2.13",
  org.eclipse.jface.databinding.swt,
  org.osgi.service.component
