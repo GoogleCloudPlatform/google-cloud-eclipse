@@ -32,6 +32,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.w3c.dom.DOMConfiguration;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -116,14 +117,16 @@ class Pom {
   private void writeDocument() throws CoreException {
     DOMImplementationLS domImplementation = (DOMImplementationLS) document.getImplementation();
     LSSerializer serializer = domImplementation.createLSSerializer();
-    
+    DOMConfiguration config = serializer.getDomConfig();
+    config.setParameter("format-pretty-print", true);
     LSOutput lsOutput =  domImplementation.createLSOutput();
     lsOutput.setEncoding("UTF-8");
     Writer stringWriter = new StringWriter();
     lsOutput.setCharacterStream(stringWriter);
     serializer.write(document, lsOutput);  
     
-    InputStream in = new ByteArrayInputStream(stringWriter.toString().getBytes(StandardCharsets.UTF_8));
+    InputStream in =
+        new ByteArrayInputStream(stringWriter.toString().getBytes(StandardCharsets.UTF_8));
     // todo: do we really want to force?
     // todo: monitor
     // todo: DOMException, LSException
