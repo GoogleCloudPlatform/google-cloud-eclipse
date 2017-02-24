@@ -51,17 +51,17 @@ public class ApplicationQuickAssistProcessor implements IQuickAssistProcessor {
   
   @Override
   public String getErrorMessage() {
-    return Messages.getString("no.fixes.found");
+    return null;
   }
 
   @Override
   public boolean canFix(Annotation annotation) {
-    return false;
+    return !annotation.isMarkedDeleted();
   }
 
   @Override
   public boolean canAssist(IQuickAssistInvocationContext invocationContext) {
-    return true;
+    return false;
   }
   
 }

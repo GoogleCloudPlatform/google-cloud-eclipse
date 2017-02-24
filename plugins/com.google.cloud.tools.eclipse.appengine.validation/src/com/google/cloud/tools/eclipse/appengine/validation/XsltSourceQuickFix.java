@@ -54,7 +54,7 @@ public class XsltSourceQuickFix implements ICompletionProposal, ICompletionPropo
   }
 
   /**
-   * Applies the provided Xslt style sheet to the {@link IDocument} in the source editor.
+   * Applies the provided XSLT style sheet to the {@link IDocument} in the source editor.
    */
   @Override
   public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {

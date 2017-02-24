@@ -58,10 +58,10 @@ public abstract class AbstractXmlSourceValidator implements ISourceValidator, IV
   }
   
   /**
-   * Adds an {@link IMessage} to XML file for every 
+   * Adds an {@link IMessage} to the XML file for every 
    * {@link BannedElement} found in the file.
    */
-  abstract protected void validate(IReporter reporter, byte[] bytes) 
+  protected abstract void validate(IReporter reporter, byte[] bytes) 
       throws CoreException, IOException, ParserConfigurationException;
   
   /**
