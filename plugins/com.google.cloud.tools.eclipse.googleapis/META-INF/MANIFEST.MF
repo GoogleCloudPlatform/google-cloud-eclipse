@@ -39,4 +39,7 @@ Export-Package: com.google.api.client.auth.oauth2,
  com.google.cloud.tools.eclipse.googleapis,
  com.google.cloud.tools.login;version="0.1.1"
 Import-Package: com.google.cloud.tools.eclipse.util,
- org.codehaus.jackson
+ javax.servlet.http,
+ org.codehaus.jackson,
+ org.mortbay.jetty,
+ org.mortbay.jetty.handler
