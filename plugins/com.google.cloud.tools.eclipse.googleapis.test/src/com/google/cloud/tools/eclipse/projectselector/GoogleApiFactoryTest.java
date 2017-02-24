@@ -23,6 +23,7 @@ import static org.mockito.Mockito.mock;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.services.appengine.v1.Appengine.Apps;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects;
+import com.google.cloud.tools.eclipse.googleapis.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import java.io.IOException;
 import org.junit.Test;

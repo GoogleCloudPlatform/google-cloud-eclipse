@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.projectselector;
+package com.google.cloud.tools.eclipse.googleapis;
 
 import com.google.api.client.http.javanet.DefaultConnectionFactory;
 import java.io.IOException;
