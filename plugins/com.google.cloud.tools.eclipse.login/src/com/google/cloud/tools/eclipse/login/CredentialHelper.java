@@ -16,11 +16,10 @@
 
 package com.google.cloud.tools.eclipse.login;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.gson.Gson;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Helper class to work with {@link Credential} objects

@@ -2,7 +2,7 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension point="org.eclipse.ui.startup">
-     <startup class="com.google.cloud.tools.eclipse.login.MenuContributionInitializer"/>
+     <startup class="com.google.cloud.tools.eclipse.login.ui.MenuContributionInitializer"/>
    </extension>
 
    <extension
@@ -20,7 +20,7 @@
    <extension
          point="org.eclipse.ui.handlers">
       <handler
-            class="com.google.cloud.tools.eclipse.login.GoogleLoginCommandHandler"
+            class="com.google.cloud.tools.eclipse.login.ui.GoogleLoginCommandHandler"
             commandId="com.google.cloud.tools.eclipse.login.commands.loginCommand">
       </handler>
    </extension>
