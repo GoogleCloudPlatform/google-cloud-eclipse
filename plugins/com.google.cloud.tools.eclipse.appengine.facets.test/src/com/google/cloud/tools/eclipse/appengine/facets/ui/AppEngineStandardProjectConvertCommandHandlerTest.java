@@ -27,7 +27,6 @@ import com.google.cloud.tools.eclipse.appengine.facets.ui.AppEngineStandardProje
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.Job;
@@ -47,9 +46,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AppEngineStandardProjectConvertCommandHandlerTest {
-  private static final Logger logger =
-      Logger.getLogger(AppEngineStandardProjectConvertCommandHandlerTest.class.getName());
-
   @Rule
   public ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
 
