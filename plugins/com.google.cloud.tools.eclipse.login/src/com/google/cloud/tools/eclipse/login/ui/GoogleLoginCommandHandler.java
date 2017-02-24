@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.login;
+package com.google.cloud.tools.eclipse.login.ui;
 
-import com.google.cloud.tools.eclipse.login.ui.AccountsPanel;
+import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
+import com.google.cloud.tools.eclipse.login.Messages;
 import com.google.cloud.tools.eclipse.ui.util.ServiceUtils;
-
+import java.util.Map;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.ui.commands.IElementUpdater;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.menus.UIElement;
-
-import java.util.Map;
 
 public class GoogleLoginCommandHandler extends AbstractHandler implements IElementUpdater {
 

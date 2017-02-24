@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.login;
+package com.google.cloud.tools.eclipse.login.ui;
 
 import org.eclipse.ui.IStartup;
 import org.eclipse.ui.IWorkbench;

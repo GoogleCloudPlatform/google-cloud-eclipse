@@ -73,6 +73,13 @@
          unpack="false"/>
 
    <plugin
+         id="com.google.cloud.tools.eclipse.appengine.libraries.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
          id="com.google.cloud.tools.eclipse.appengine.localserver"
          download-size="0"
          install-size="0"
