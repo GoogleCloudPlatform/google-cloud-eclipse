@@ -27,11 +27,18 @@ import com.google.cloud.tools.eclipse.appengine.facets.ui.AppEngineStandardProje
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
+import org.eclipse.wst.common.componentcore.internal.builder.DependencyGraphImpl;
+import org.eclipse.wst.common.componentcore.internal.builder.IDependencyGraph;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -41,6 +48,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AppEngineStandardProjectConvertCommandHandlerTest {
+  private static final Logger logger =
+      Logger.getLogger(AppEngineStandardProjectConvertCommandHandlerTest.class.getName());
+
   @Rule
   public ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
 
@@ -56,6 +66,22 @@ public class AppEngineStandardProjectConvertCommandHandlerTest {
   @Before
   public void setUp() throws CoreException {
     facetedProject = ProjectFacetsManager.create(projectCreator.getProject());
+
+    // Workaround deadlock bug described in Eclipse bug (https://bugs.eclipse.org/511793).
+    // There are graph update jobs triggered by the completion of the CreateProjectOperation
+    // above (from resource notifications) and from other resource changes from modifying the
+    // project facets. So we force the dependency graph to defer updates.
+    IDependencyGraph.INSTANCE.preUpdate();
+    try {
+      Job.getJobManager().join(DependencyGraphImpl.GRAPH_UPDATE_JOB_FAMILY, null);
+    } catch (OperationCanceledException | InterruptedException ex) {
+      logger.log(Level.WARNING, "Exception waiting for WTP Graph Update job", ex);
+    }
+  }
+
+  @After
+  public void tearDown() {
+    IDependencyGraph.INSTANCE.postUpdate();
   }
 
   @Test
