@@ -19,10 +19,14 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.xml.parsers.ParserConfigurationException;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.wst.sse.core.internal.encoding.EncodingMemento;
+import org.eclipse.wst.sse.core.internal.text.BasicStructuredDocument;
 import org.eclipse.wst.sse.ui.internal.reconcile.validator.ISourceValidator;
 import org.eclipse.wst.validation.internal.core.ValidationException;
 import org.eclipse.wst.validation.internal.operations.LocalizedMessage;
@@ -30,8 +34,6 @@ import org.eclipse.wst.validation.internal.provisional.core.IMessage;
 import org.eclipse.wst.validation.internal.provisional.core.IReporter;
 import org.eclipse.wst.validation.internal.provisional.core.IValidationContext;
 import org.eclipse.wst.validation.internal.provisional.core.IValidator;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 
 /**
  * Abstract source view validator.
@@ -40,20 +42,19 @@ public abstract class AbstractXmlSourceValidator implements ISourceValidator, IV
   IDocument document;
   
   private static final Logger logger = Logger.getLogger(
-      AppEngineWebXmlValidator.class.getName());
+      AbstractXmlSourceValidator.class.getName());
   
   /**
    * Extracts byte[] from XML. 
    */
   public void validate(IValidationContext helper, IReporter reporter) throws ValidationException {
-    String documentContents = document.get();
-    byte[] bytes = documentContents.getBytes();
     try {
+      String encoding = getDocumentEncoding(document);
+      byte[] bytes = document.get().getBytes(encoding);
       this.validate(reporter, bytes);
     } catch (IOException | CoreException | ParserConfigurationException ex) {
       logger.log(Level.SEVERE, ex.getMessage());
     }
-    
   }
   
   /**
@@ -77,16 +78,9 @@ public abstract class AbstractXmlSourceValidator implements ISourceValidator, IV
     reporter.addMessage(this, message);
   }
   
-  /**
-   * Sets error message where SAX parser fails.
-   */
-  void createSaxErrorMessage(IReporter reporter, SAXException ex) throws CoreException {
-    IMessage message = new LocalizedMessage(IMessage.HIGH_SEVERITY, ex.getMessage());
-    message.setTargetObject(this);
-    message.setLineNo(((SAXParseException) ex.getException()).getLineNumber());
-    message.setOffset(1);
-    message.setLength(0);
-    reporter.addMessage(this, message);
+  static String getDocumentEncoding(IDocument document) {
+    EncodingMemento encodingMemento = ((BasicStructuredDocument) document).getEncodingMemento();
+    return encodingMemento.getDetectedCharsetName();
   }
 
   @Override

@@ -45,7 +45,8 @@ public class AppEngineWebXmlSourceValidator extends AbstractXmlSourceValidator {
             markerId, IMessage.NORMAL_SEVERITY);
       }
     } catch (SAXException ex) {
-      //createSaxErrorMessage(reporter, ex);
+      // Do nothing
+      // Default Eclipse parser flags syntax errors
     }
   }
   

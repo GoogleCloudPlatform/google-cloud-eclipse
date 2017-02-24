@@ -30,21 +30,6 @@ import org.eclipse.jface.text.source.ISourceViewer;
 public class ApplicationQuickAssistProcessor implements IQuickAssistProcessor {
 
   @Override
-  public String getErrorMessage() {
-    return "No quick fixes found";
-  }
-
-  @Override
-  public boolean canFix(Annotation annotation) {
-    return false;
-  }
-
-  @Override
-  public boolean canAssist(IQuickAssistInvocationContext invocationContext) {
-    return true;
-  }
-
-  @Override
   public ICompletionProposal[] computeQuickAssistProposals(
       IQuickAssistInvocationContext invocationContext) {
     ISourceViewer viewer = invocationContext.getSourceViewer();
@@ -62,6 +47,21 @@ public class ApplicationQuickAssistProcessor implements IQuickAssistProcessor {
       } 
     }
     return null;
+  }
+  
+  @Override
+  public String getErrorMessage() {
+    return Messages.getString("no.fixes.found");
+  }
+
+  @Override
+  public boolean canFix(Annotation annotation) {
+    return false;
+  }
+
+  @Override
+  public boolean canAssist(IQuickAssistInvocationContext invocationContext) {
+    return true;
   }
   
 }

@@ -17,11 +17,10 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -31,6 +30,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.PlatformUI;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -38,11 +39,12 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
+import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 
 /**
  * Must be run as a plugin test.
  */
-public class ApplicationQuickFixTest {
+public class XsltQuickFixTest {
   
   private static final String APPLICATION_XML =
       "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>"
@@ -52,7 +54,8 @@ public class ApplicationQuickFixTest {
     
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
 
-  private ApplicationQuickFix fix = new ApplicationQuickFix();
+  private XsltQuickFix fix = new XsltQuickFix("/xslt/application.xsl",
+      Messages.getString("remove.application.element"));
 
   @Test 
   public void testGetLabel() {
@@ -60,12 +63,13 @@ public class ApplicationQuickFixTest {
   }
   
   @Test
-  public void testRemoveApplicationElements() throws IOException, ParserConfigurationException,
+  public void testRun() throws IOException, ParserConfigurationException,
       SAXException, TransformerException, CoreException {
 
     IProject project = projectCreator.getProject();
     IFile file = project.getFile("testdata.xml");
-    file.create(stringToInputStream(APPLICATION_XML), IFile.FORCE, null);
+    file.create(ValidationTestUtils.stringToInputStream(
+      APPLICATION_XML), IFile.FORCE, null);
     
     IMarker marker = Mockito.mock(IMarker.class);
     Mockito.when(marker.getResource()).thenReturn(file);
@@ -79,8 +83,29 @@ public class ApplicationQuickFixTest {
     assertEquals(0, transformed.getDocumentElement().getChildNodes().getLength());
   }
   
-  private static InputStream stringToInputStream(String string) {
-    return new ByteArrayInputStream(string.getBytes(StandardCharsets.UTF_8));
+  @Test
+  public void testGetCurrentDocument_existingEditor() throws CoreException {
+    
+    IProject project = projectCreator.getProject();
+    IFile file = project.getFile("testdata.xml");
+    file.create(ValidationTestUtils.stringToInputStream(
+      APPLICATION_XML), IFile.FORCE, null);
+    
+    IWorkbench workbench = PlatformUI.getWorkbench();
+    WorkbenchUtil.openInEditor(workbench, file);
+    
+    assertNotNull(XsltQuickFix.getCurrentDocument(file));
+  }
+  
+  @Test
+  public void testGetCurrentDocument_noEditor() throws CoreException {
+    
+    IProject project = projectCreator.getProject();
+    IFile file = project.getFile("testdata.xml");
+    file.create(ValidationTestUtils.stringToInputStream(
+      APPLICATION_XML), IFile.FORCE, null);
+    
+    assertNull(XsltQuickFix.getCurrentDocument(file));
   }
 
 }

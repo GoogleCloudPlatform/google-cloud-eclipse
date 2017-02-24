@@ -27,7 +27,14 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMarkerResolution;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.ide.ResourceUtil;
+
 import com.google.cloud.tools.eclipse.util.Xslt;
 
 /**
@@ -35,8 +42,7 @@ import com.google.cloud.tools.eclipse.util.Xslt;
  */
 public class XsltQuickFix implements IMarkerResolution {
   
-  private static final Logger logger = Logger.getLogger(
-      XsltQuickFix.class.getName());
+  private static final Logger logger = Logger.getLogger(XsltQuickFix.class.getName());
   private String xsltPath;
   private String message;
 
@@ -58,7 +64,7 @@ public class XsltQuickFix implements IMarkerResolution {
   public void run(IMarker marker) {
     try {
       IFile file = (IFile) marker.getResource();
-      IDocument document = ValidationUtils.getCurrentDocument(file);
+      IDocument document = getCurrentDocument(file);
       URL xslPath = ApplicationQuickFix.class.getResource(xsltPath);
       if (document != null) {
         String currentContents = document.get();
@@ -72,6 +78,27 @@ public class XsltQuickFix implements IMarkerResolution {
       }
     } catch (IOException | TransformerException | CoreException ex) {
       logger.log(Level.SEVERE, ex.getMessage());
+    }
+  }
+  
+  /**
+   * Returns {@link IDocument} in the open editor, or null if the editor
+   * is not open.
+   */
+  static IDocument getCurrentDocument(IFile file) {
+    try {
+      IWorkbench workbench = PlatformUI.getWorkbench();
+      IWorkbenchWindow activeWorkbenchWindow = workbench.getActiveWorkbenchWindow();
+      IWorkbenchPage activePage = activeWorkbenchWindow.getActivePage();
+      IEditorPart editorPart = ResourceUtil.findEditor(activePage, file);
+      if (editorPart != null) {
+        IDocument document = (IDocument) editorPart.getAdapter(IDocument.class);
+        return document;
+      }
+      return null;
+    } catch (IllegalStateException ex) {
+      //If workbench does not exist
+      return null;
     }
   }
   

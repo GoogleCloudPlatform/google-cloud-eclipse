@@ -18,7 +18,9 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.Map;
@@ -127,5 +129,13 @@ public class ValidationUtilsTest {
     assertEquals(1, map.size());
     int offset = map.get(newElement);
     assertEquals(0, offset);
+  }
+  
+  @Test
+  public void testConvertStreamToString() throws IOException {
+    String test = "test string";
+    byte[] bytes = test.getBytes(StandardCharsets.UTF_8);
+    InputStream stream = new ByteArrayInputStream(bytes);
+    assertEquals(test, ValidationUtils.convertStreamToString(stream, "UTF-8"));
   }
 }
