@@ -17,28 +17,27 @@
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.w3c.dom.DOMConfiguration;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.ls.DOMImplementationLS;
-import org.w3c.dom.ls.LSOutput;
-import org.w3c.dom.ls.LSSerializer;
 import org.xml.sax.SAXException;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
@@ -50,6 +49,7 @@ class Pom {
 
   // todo we're doing enough of this we should import or write some utilities
   private static final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+  private static final TransformerFactory transformerFactory = TransformerFactory.newInstance();
   
   static {
     factory.setNamespaceAware(true);
@@ -111,25 +111,19 @@ class Pom {
       document.getDocumentElement().appendChild(dependencies);
     }
     
-    writeDocument();   
+    try {
+      writeDocument();
+    } catch (TransformerException ex) {
+      throw new CoreException(null);
+    }   
   }
 
-  private void writeDocument() throws CoreException {
-    DOMImplementationLS domImplementation = (DOMImplementationLS) document.getImplementation();
-    LSSerializer serializer = domImplementation.createLSSerializer();
-    DOMConfiguration config = serializer.getDomConfig();
-    config.setParameter("format-pretty-print", true);
-    LSOutput lsOutput =  domImplementation.createLSOutput();
-    lsOutput.setEncoding("UTF-8");
-    Writer stringWriter = new StringWriter();
-    lsOutput.setCharacterStream(stringWriter);
-    serializer.write(document, lsOutput);  
+  private void writeDocument() throws CoreException, TransformerException {
+    Transformer transformer = transformerFactory.newTransformer();
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    transformer.transform(new DOMSource(document), new StreamResult(out));
+    InputStream in = new ByteArrayInputStream(out.toByteArray());
     
-    InputStream in =
-        new ByteArrayInputStream(stringWriter.toString().getBytes(StandardCharsets.UTF_8));
-    // todo: do we really want to force?
-    // todo: monitor
-    // todo: DOMException, LSException
     pomFile.setContents(in, IFile.FORCE, null);
   }
 

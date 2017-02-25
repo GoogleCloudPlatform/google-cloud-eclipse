@@ -26,6 +26,7 @@ import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.soap.Node;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -119,6 +120,10 @@ public class PomTest {
     Assert.assertEquals("artifact3", artifactId3.getTextContent());
     Element version3 = getOnlyChild(child3, "version");
     Assert.assertEquals("LATEST", version3.getTextContent());
+    
+    // now make sure the comment didn't move to the end
+    // https://bugs.openjdk.java.net/browse/JDK-8146163
+    Assert.assertEquals(Node.COMMENT_NODE, actual.getChildNodes().item(0).getNodeType());
   }
 
   private static Document parse(InputStream in)
