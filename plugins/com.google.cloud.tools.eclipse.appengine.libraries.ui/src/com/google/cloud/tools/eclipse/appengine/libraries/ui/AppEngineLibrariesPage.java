@@ -91,10 +91,6 @@ public class AppEngineLibrariesPage extends WizardPage implements IClasspathCont
 
   @Override
   public IClasspathEntry[] getNewContainers() {
-    if (librariesSelector == null) { // doesn't yet work in Maven project
-      return new IClasspathEntry[0];
-    }
-    
     List<Library> libraries = new ArrayList<>(librariesSelector.getSelectedLibraries());
     if (libraries == null || libraries.isEmpty()) {
       return null;
@@ -102,7 +98,7 @@ public class AppEngineLibrariesPage extends WizardPage implements IClasspathCont
 
     try {
       if (MavenUtils.hasMavenNature(project.getProject())) {
-        BuildPath.addMavenLibraries(project.getProject(), libraries,  new NullProgressMonitor());
+        BuildPath.addMavenLibraries(project.getProject(), libraries, new NullProgressMonitor());
         return new IClasspathEntry[0]; // todo return something
       } else {
         IClasspathEntry[] added =
