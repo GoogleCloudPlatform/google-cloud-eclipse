@@ -68,7 +68,6 @@ public class PomTest {
     pomFile.create(in, IFile.FORCE, null);
     
     Pom pom = Pom.parse(pomFile);
-    List<Library> libraries = AppEngineLibraries.getLibraries("appengine");
     
     MavenCoordinates coordinates0 = new MavenCoordinates("com.example.group0", "artifact0");
     coordinates0.setVersion("1.2.3");
@@ -86,9 +85,13 @@ public class PomTest {
     list2.add(file2);
     list2.add(file3);
     
-    libraries.get(0).setLibraryFiles(list0 );
-    libraries.get(1).setLibraryFiles(list1);
-    libraries.get(2).setLibraryFiles(list2);
+    Library library0 = new Library("id0", list0);
+    Library library1 = new Library("id1", list1);
+    Library library2 = new Library("id2", list2);
+    List<Library> libraries = new ArrayList<>();
+    libraries.add(library0);
+    libraries.add(library1);
+    libraries.add(library2);
     
     pom.addDependencies(libraries);
     

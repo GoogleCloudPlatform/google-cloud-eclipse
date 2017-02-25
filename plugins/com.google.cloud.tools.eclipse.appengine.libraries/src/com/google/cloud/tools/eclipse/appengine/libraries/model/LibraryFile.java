@@ -39,6 +39,7 @@ public class LibraryFile {
     this.mavenCoordinates = mavenCoordinates;
   }
 
+  // todo Danger! This exposes mutable internal state
   public MavenCoordinates getMavenCoordinates() {
     return mavenCoordinates;
   }
@@ -57,7 +58,7 @@ public class LibraryFile {
     return javadocUri;
   }
 
-  public void setJavadocUri(URI javadocUri) {
+  void setJavadocUri(URI javadocUri) {
     this.javadocUri = javadocUri;
   }
 
@@ -65,7 +66,7 @@ public class LibraryFile {
     return sourceUri;
   }
 
-  public void setSourceUri(URI sourceUri) {
+  void setSourceUri(URI sourceUri) {
     this.sourceUri = sourceUri;
   }
 
@@ -73,7 +74,7 @@ public class LibraryFile {
     return export;
   }
 
-  public void setExport(boolean export) {
+  void setExport(boolean export) {
     this.export = export;
   }
 }
