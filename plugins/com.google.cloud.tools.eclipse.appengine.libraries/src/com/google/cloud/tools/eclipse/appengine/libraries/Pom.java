@@ -25,6 +25,7 @@ import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -48,11 +49,12 @@ import com.google.common.base.Preconditions;
 class Pom {
 
   // todo we're doing enough of this we should import or write some utilities
-  private static final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+  private static final DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
   private static final TransformerFactory transformerFactory = TransformerFactory.newInstance();
   
   static {
-    factory.setNamespaceAware(true);
+    builderFactory.setNamespaceAware(true);
+    transformerFactory.setAttribute("indent-number", 2);
   }
   
   private Document document;
@@ -67,7 +69,7 @@ class Pom {
     Preconditions.checkState(pomFile.exists(), pomFile.getFullPath() + " does not exist");
     
     try {
-      DocumentBuilder builder = factory.newDocumentBuilder();
+      DocumentBuilder builder = builderFactory.newDocumentBuilder();
       Document document = builder.parse(pomFile.getContents());
       Pom pom = new Pom(document, pomFile);
       return pom;
@@ -120,6 +122,7 @@ class Pom {
 
   private void writeDocument() throws CoreException, TransformerException {
     Transformer transformer = transformerFactory.newTransformer();
+    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     transformer.transform(new DOMSource(document), new StreamResult(out));
     InputStream in = new ByteArrayInputStream(out.toByteArray());
