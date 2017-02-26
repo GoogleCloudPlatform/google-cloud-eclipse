@@ -38,6 +38,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -54,7 +55,6 @@ class Pom {
   
   static {
     builderFactory.setNamespaceAware(true);
-    transformerFactory.setAttribute("indent-number", 2);
   }
   
   private Document document;
@@ -80,7 +80,7 @@ class Pom {
     }
   }
 
-  public void addDependencies(List<Library> libraries) throws CoreException {    
+  void addDependencies(List<Library> libraries) throws CoreException {    
     NodeList dependenciesList = document.getElementsByTagName("dependencies");
     Element dependencies;
     if (dependenciesList.getLength() > 0) {
@@ -89,23 +89,27 @@ class Pom {
       dependencies = document.createElement("dependencies");
     }
     
-    //todo dedup
     for (Library library : libraries) {
       for (LibraryFile artifact : library.getLibraryFiles()) {
         Element dependency = document.createElement("dependency");
         MavenCoordinates coordinates = artifact.getMavenCoordinates();
         
-        Element groupId = document.createElement("groupId");
-        groupId.setTextContent(coordinates.getGroupId());
-        Element artifactId = document.createElement("artifactId");
-        artifactId.setTextContent(coordinates.getArtifactId());
-        Element version = document.createElement("version");
-        version.setTextContent(coordinates.getVersion());
-        dependency.appendChild(groupId);
-        dependency.appendChild(artifactId);
-        dependency.appendChild(version);
+        String groupId = coordinates.getGroupId();
+        String artifactId = coordinates.getArtifactId();
         
-        dependencies.appendChild(dependency);
+        if (!dependencyExists(dependencies, groupId, artifactId)) {
+          Element groupIdElement = document.createElement("groupId");
+          groupIdElement.setTextContent(groupId);
+          Element artifactIdElement = document.createElement("artifactId");
+          artifactIdElement.setTextContent(artifactId);
+          Element versionElement = document.createElement("version");
+          versionElement.setTextContent(coordinates.getVersion());
+          dependency.appendChild(groupIdElement);
+          dependency.appendChild(artifactIdElement);
+          dependency.appendChild(versionElement);
+          
+          dependencies.appendChild(dependency);
+        }
       }
     }
     
@@ -118,6 +122,32 @@ class Pom {
     } catch (TransformerException ex) {
       throw new CoreException(null);
     }   
+  }
+
+  private boolean dependencyExists(Element dependencies, String targetGroupId,
+      String targetArtifactId) {
+    
+    NodeList children = dependencies.getChildNodes();
+    for (int i = 0; i < children.getLength(); i++) {
+      Node node = children.item(i);
+      if (node.getNodeType() == Node.ELEMENT_NODE) {
+        Element dependency = (Element) node;
+        String groupId = getValue(dependency, "groupId");
+        String artifactId = getValue(dependency, "artifactId");
+        if (targetGroupId.equals(groupId) && targetArtifactId.equals(artifactId)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  private static String getValue(Element dependency, String childName) {
+    NodeList children = dependency.getElementsByTagName(childName);
+    if (children.getLength() > 0) {
+      return children.item(0).getTextContent();
+    }
+    return null;
   }
 
   private void writeDocument() throws CoreException, TransformerException {

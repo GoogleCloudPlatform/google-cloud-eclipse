@@ -32,6 +32,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -57,18 +58,23 @@ public class PomTest {
     factory.setNamespaceAware(true);
   }
   
-  @Test
-  public void testAddDependencies()
-      throws CoreException, SAXException, IOException, ParserConfigurationException {
-    
+  private Pom pom;
+  private IFile pomFile;
+  
+  @Before
+  public void setUp() throws SAXException, IOException, CoreException {
     IProject project = projectCreator.getProject();
-    IFile pomFile = project.getFile("pom.xml");
-    
+    pomFile = project.getFile("pom.xml");
     InputStream in = new FileInputStream(
-        Paths.get("testdata/testpom.xml").toAbsolutePath().toFile());
+       Paths.get("testdata/testpom.xml").toAbsolutePath().toFile());
     pomFile.create(in, IFile.FORCE, null);
-    
-    Pom pom = Pom.parse(pomFile);
+   
+    pom = Pom.parse(pomFile);
+  }
+  
+  @Test
+  public void testAddDependencies() 
+      throws CoreException, ParserConfigurationException, IOException, SAXException {
     
     MavenCoordinates coordinates0 = new MavenCoordinates("com.example.group0", "artifact0");
     coordinates0.setVersion("1.2.3");
@@ -124,6 +130,49 @@ public class PomTest {
     // now make sure the comment didn't move to the end
     // https://bugs.openjdk.java.net/browse/JDK-8146163
     Assert.assertEquals(Node.COMMENT_NODE, actual.getChildNodes().item(0).getNodeType());
+  }
+  
+
+  @Test
+  public void testAddDependencies_withDuplicates() 
+      throws CoreException, ParserConfigurationException, IOException, SAXException {
+        
+    List<LibraryFile> list1 = new ArrayList<>();
+    LibraryFile file1 = new LibraryFile(new MavenCoordinates("com.example.group1", "artifact1"));
+    list1.add(file1);
+    
+    List<LibraryFile> list2 = new ArrayList<>();
+    LibraryFile file2 = new LibraryFile(new MavenCoordinates("com.example.group2", "artifact2"));
+    list2.add(file1);
+    list2.add(file2);
+    
+    Library library1 = new Library("id1", list1);
+    Library library2 = new Library("id2", list2);
+    List<Library> libraries = new ArrayList<>();
+    libraries.add(library1);
+    libraries.add(library2);
+    
+    pom.addDependencies(libraries);
+    
+    InputStream contents = pomFile.getContents();
+    Document actual = parse(contents);
+    
+    NodeList dependencies = actual.getElementsByTagName("dependencies");
+    NodeList children = ((Element) dependencies.item(0)).getElementsByTagName("dependency");
+    
+    Assert.assertEquals(2, children.getLength());
+    
+    Element child0 = (Element) children.item(0);
+    Element groupId = getOnlyChild(child0, "groupId");
+    Assert.assertEquals("com.example.group1", groupId.getTextContent());
+    Element artifactId = getOnlyChild(child0, "artifactId");
+    Assert.assertEquals("artifact1", artifactId.getTextContent());
+    
+    Element child1 = (Element) children.item(1);
+    Element groupId1 = getOnlyChild(child1, "groupId");
+    Assert.assertEquals("com.example.group2", groupId1.getTextContent());
+    Element artifactId1 = getOnlyChild(child1, "artifactId");
+    Assert.assertEquals("artifact2", artifactId1.getTextContent());
   }
 
   private static Document parse(InputStream in)
