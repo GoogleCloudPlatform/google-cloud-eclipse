@@ -47,6 +47,7 @@ import org.xml.sax.SAXException;
 import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainerResolverJob;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 
 public class BuildPath {
@@ -70,18 +71,14 @@ public class BuildPath {
     // see m2e-core/org.eclipse.m2e.core.ui/src/org/eclipse/m2e/core/ui/internal/actions/AddDependencyAction.java
     // m2e-core/org.eclipse.m2e.core.ui/src/org/eclipse/m2e/core/ui/internal/editing/AddDependencyOperation.java
     
-    // todo use monitor
-    SubMonitor subMonitor = SubMonitor.convert(monitor,
-        Messages.getString("adding.app.engine.libraries"), libraries.size()); //$NON-NLS-1$
-    
     IFile pomFile = project.getFile("pom.xml");
     
     try {
       Pom pom = Pom.parse(pomFile);
       pom.addDependencies(libraries);
     } catch (SAXException | IOException ex) {
-      IStatus status = new Status(IStatus.ERROR,
-          "com.google.cloud.tools.eclipse.appengine.libraries", ex.getMessage(), ex);
+      IStatus status = StatusUtil.error("com.google.cloud.tools.eclipse.appengine.libraries",
+          ex.getMessage(), ex);
       throw new CoreException(status);
     }
   }

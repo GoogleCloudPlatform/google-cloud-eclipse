@@ -35,7 +35,6 @@ import javax.xml.transform.stream.StreamResult;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -45,6 +44,7 @@ import org.xml.sax.SAXException;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Preconditions;
 
 class Pom {
@@ -74,8 +74,8 @@ class Pom {
       Pom pom = new Pom(document, pomFile);
       return pom;
     } catch (ParserConfigurationException ex) {
-      IStatus status = new Status(IStatus.ERROR,
-          "com.google.cloud.tools.eclipse.appengine.libraries", ex.getMessage(), ex);
+      IStatus status = StatusUtil.error("com.google.cloud.tools.eclipse.appengine.libraries",
+          ex.getMessage(), ex);
       throw new CoreException(status);
     }
   }

@@ -99,7 +99,7 @@ public class AppEngineLibrariesPage extends WizardPage implements IClasspathCont
     try {
       if (MavenUtils.hasMavenNature(project.getProject())) {
         BuildPath.addMavenLibraries(project.getProject(), libraries, new NullProgressMonitor());
-        return new IClasspathEntry[0]; // todo return something
+        return new IClasspathEntry[0];
       } else {
         IClasspathEntry[] added =
             BuildPath.addLibraries(project, libraries, new NullProgressMonitor());
