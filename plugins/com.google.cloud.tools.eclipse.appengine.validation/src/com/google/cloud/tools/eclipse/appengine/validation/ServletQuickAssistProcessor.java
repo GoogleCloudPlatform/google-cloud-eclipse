@@ -17,12 +17,12 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 /**
- * Provides quick assists for appengine-web.xml in the source editor.
+ * Provides a quick assist for web.xml in the source editor.
  */
-public class ApplicationQuickAssistProcessor extends AbstractQuickAssistProcessor {
+public class ServletQuickAssistProcessor extends AbstractQuickAssistProcessor {
 
-  public ApplicationQuickAssistProcessor() {
-    super(Messages.getString("application.element"), new ApplicationSourceQuickFix());
+  public ServletQuickAssistProcessor() {
+    super(Messages.getString("web.xml.version"), new ToServlet25SourceQuickFix());
   }
 
 }

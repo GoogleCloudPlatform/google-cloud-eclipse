@@ -35,7 +35,7 @@ import org.junit.Test;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 
-public class ApplicationQuickAssistProcessorTest {
+public class AbstractQuickAssistProcessorTest {
   
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
   
@@ -55,7 +55,7 @@ public class ApplicationQuickAssistProcessorTest {
     model.addAnnotation(new Annotation("type", false, annotationMessage), new Position(1));
     
     TextInvocationContext context = new TextInvocationContext(viewer, 1, 1);
-    ApplicationQuickAssistProcessor processor = new ApplicationQuickAssistProcessor();
+    AbstractQuickAssistProcessor processor = new ApplicationQuickAssistProcessor();
     ICompletionProposal[] proposals = processor.computeQuickAssistProposals(context);
     assertEquals(1, proposals.length);
   }
