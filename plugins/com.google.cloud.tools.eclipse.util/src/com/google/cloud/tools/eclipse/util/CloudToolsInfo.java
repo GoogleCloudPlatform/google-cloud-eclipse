@@ -16,7 +16,9 @@
 
 package com.google.cloud.tools.eclipse.util;
 
-import org.osgi.framework.FrameworkUtil;
+import org.eclipse.core.runtime.IBundleGroup;
+import org.eclipse.core.runtime.IBundleGroupProvider;
+import org.eclipse.core.runtime.Platform;
 
 /**
  * Provides generic information about the plug-in, such as a name to be used for usage
@@ -24,12 +26,28 @@ import org.osgi.framework.FrameworkUtil;
  */
 public class CloudToolsInfo {
 
+  /**
+   * Our main feature identifier, used for branding.
+   */
+  private static final String CLOUD_TOOLS_FOR_ECLIPSE_FEATURE_ID =
+      "com.google.cloud.tools.eclipse.suite.e45.feature";
+
   // Don't change the value; this name is used as an originating "application" of usage metrics.
   public static String METRICS_NAME = "gcloud-eclipse-tools";
 
   public static String USER_AGENT = METRICS_NAME + "/" + getToolsVersion();
 
+  /** Return the version of associated feature. May be slow. */
   public static String getToolsVersion() {
-    return FrameworkUtil.getBundle(CloudToolsInfo.class).getVersion().toString();
+    for(IBundleGroupProvider provider : Platform.getBundleGroupProviders()) {
+      for(IBundleGroup feature : provider.getBundleGroups()) {
+        if(CLOUD_TOOLS_FOR_ECLIPSE_FEATURE_ID.equals(feature.getIdentifier())) {
+          return feature.getVersion();
+        }
+      }
+    }
+    // May not have been installed with via a feature. Although we could report the bundle version,
+    // that may result in a confusing versions.
+    return "UNKNOWN";
   }
 }
