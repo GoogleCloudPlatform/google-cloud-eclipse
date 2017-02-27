@@ -25,7 +25,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import org.junit.Test;
 
 public class PackageImportTest {
@@ -36,11 +36,11 @@ public class PackageImportTest {
   public void testRequiredPackagesImported() throws IOException {
     LocalServerReceiver codeReceiver = new LocalServerReceiver();
     String redirectUri = codeReceiver.getRedirectUri();
-    URLConnection openConnection = new URL(redirectUri).openConnection();
-    openConnection.setDoOutput(true);
-    try (OutputStream outputStream = openConnection.getOutputStream();
-        InputStreamReader reader = new InputStreamReader(openConnection.getInputStream())) {
-      outputStream.write("hello".getBytes(Charset.forName("utf-8")));
+    URLConnection connection = new URL(redirectUri).openConnection();
+    connection.setDoOutput(true);
+    try (OutputStream outputStream = connection.getOutputStream();
+        InputStreamReader reader = new InputStreamReader(connection.getInputStream())) {
+      outputStream.write("hello".getBytes(StandardCharsets.UTF_8));
       StringBuilder response = new StringBuilder();
       char[] buffer = new char[1024];
       while (reader.read(buffer) != -1) {
