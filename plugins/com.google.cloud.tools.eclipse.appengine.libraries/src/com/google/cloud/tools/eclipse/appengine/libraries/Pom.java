@@ -74,8 +74,7 @@ class Pom {
       Pom pom = new Pom(document, pomFile);
       return pom;
     } catch (ParserConfigurationException ex) {
-      IStatus status = StatusUtil.error("com.google.cloud.tools.eclipse.appengine.libraries",
-          ex.getMessage(), ex);
+      IStatus status = StatusUtil.error(Pom.class, ex.getMessage(), ex);
       throw new CoreException(status);
     }
   }

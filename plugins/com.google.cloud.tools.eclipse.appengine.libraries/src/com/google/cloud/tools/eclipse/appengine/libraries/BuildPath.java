@@ -76,8 +76,7 @@ public class BuildPath {
       Pom pom = Pom.parse(pomFile);
       pom.addDependencies(libraries);
     } catch (SAXException | IOException ex) {
-      IStatus status = StatusUtil.error("com.google.cloud.tools.eclipse.appengine.libraries",
-          ex.getMessage(), ex);
+      IStatus status = StatusUtil.error(BuildPath.class, ex.getMessage(), ex);
       throw new CoreException(status);
     }
   }
