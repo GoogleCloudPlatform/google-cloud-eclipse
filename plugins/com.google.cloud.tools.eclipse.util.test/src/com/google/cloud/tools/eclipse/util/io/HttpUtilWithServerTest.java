@@ -30,45 +30,26 @@ public class HttpUtilWithServerTest {
 
   @Rule public TestHttpServer server = new TestHttpServer("", "You're good!");
 
-  private static final String EXPECTED_POST_BODY =
-      "-----------------------------45224ee4-f3c1-4b23-8df1-4012f722218c" + "\r\n" +
-      "Accept-Encoding: gzip" + "\r\n" +
-      "Content-Length: 4" + "\r\n" +
-      "content-disposition: form-data; name=\"product\"" + "\r\n" +
-      "content-transfer-encoding: binary" + "\r\n" +
-      "\r\n" +
-      "CT4E" + "\r\n" +
-      "-----------------------------45224ee4-f3c1-4b23-8df1-4012f722218c" + "\r\n" +
-      "Accept-Encoding: gzip" + "\r\n" +
-      "Content-Length: 100" + "\r\n" +
-      "content-disposition: form-data; name=\"exception_info\"" + "\r\n" +
-      "content-transfer-encoding: binary" + "\r\n" +
-      "\r\n" +
-      "Exception in thread \"main\" java.lang.IllegalArgumentException: Wrong argument!\n" +
-      "\tat B.main(B.java:73)" + "\r\n" +
-      "-----------------------------45224ee4-f3c1-4b23-8df1-4012f722218c" + "\r\n" +
-      "Accept-Encoding: gzip" + "\r\n" +
-      "Content-Length: 40" + "\r\n" +
-      "content-disposition: form-data; name=\"dp\"" + "\r\n" +
-      "content-transfer-encoding: binary" + "\r\n" +
-      "\r\n" +
-      "/virtual/some-event-type/some-event-name" + "\r\n" +
-      "-----------------------------45224ee4-f3c1-4b23-8df1-4012f722218c--\r\n";
+  private static final String LONG_PARAMETER = "Exception in thread \"main\""
+      + " java.lang.IllegalArgumentException: Wrong argument!\n\tat B.main(B.java:73)";
 
   @Test
   public void testSendPostMultipart() throws IOException {
     Map<String, String> parameters = new HashMap<>();
     parameters.put("dp", "/virtual/some-event-type/some-event-name");
-    parameters.put("exception_info",
-        "Exception in thread \"main\" java.lang.IllegalArgumentException: Wrong argument!\n\tat B.main(B.java:73)");
+    parameters.put("exception_info", LONG_PARAMETER);
     parameters.put("product", "CT4E");
 
     assertEquals(200, HttpUtil.sendPostMultipart(server.getAddress(), parameters));
     assertEquals("POST", server.getRequestMethod());
-    assertTrue(server.getRequestHeaders().get("User-Agent").startsWith("gcloud-eclipse-tools/0.1.0."));
-    assertEquals("multipart/form-data; boundary="
-        + "---------------------------45224ee4-f3c1-4b23-8df1-4012f722218c",
-        server.getRequestHeaders().get("Content-Type"));
-    assertEquals(EXPECTED_POST_BODY, server.getRequestBody());
+    assertTrue(server.getRequestHeaders().get("User-Agent")
+        .startsWith("gcloud-eclipse-tools/0.1.0."));
+    assertTrue(server.getRequestHeaders().get("Content-Type")
+        .startsWith("multipart/form-data; boundary="));
+
+    Map<String, String[]> parsedParameters = server.getRequestParameters();
+    assertEquals("/virtual/some-event-type/some-event-name", parsedParameters.get("dp")[0]);
+    assertEquals(LONG_PARAMETER, parsedParameters.get("exception_info")[0]);
+    assertEquals("CT4E", parsedParameters.get("product")[0]);
   }
 }
