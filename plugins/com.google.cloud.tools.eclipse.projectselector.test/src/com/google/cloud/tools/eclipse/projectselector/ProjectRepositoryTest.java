@@ -18,7 +18,6 @@ package com.google.cloud.tools.eclipse.projectselector;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
@@ -39,6 +38,7 @@ import com.google.api.services.cloudresourcemanager.CloudResourceManager.Project
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects.Get;
 import com.google.api.services.cloudresourcemanager.model.ListProjectsResponse;
 import com.google.api.services.cloudresourcemanager.model.Project;
+import com.google.cloud.tools.eclipse.googleapis.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.projectselector.model.AppEngine;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import java.io.IOException;

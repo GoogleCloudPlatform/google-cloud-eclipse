@@ -20,11 +20,14 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Map;
 import java.util.Queue;
+
+import com.google.common.io.CharStreams;
 
 /**
  * Utility methods for validating XML files.
@@ -35,7 +38,7 @@ public class ValidationUtils {
   
   /**
    * Creates a {@link Map} of {@link BannedElement}s and their respective document-relative
-   * character offsets
+   * character offsets.
    */
   public static Map<BannedElement, Integer> getOffsetMap(byte[] bytes,
       SaxParserResults parserResults) {
@@ -61,4 +64,10 @@ public class ValidationUtils {
     }
     return bannedElementOffsetMap;
   }
+  
+  static String convertStreamToString(InputStream is, String charset) throws IOException {
+    String result = CharStreams.toString(new InputStreamReader(is, charset));
+    return result;
+  }
+ 
 }

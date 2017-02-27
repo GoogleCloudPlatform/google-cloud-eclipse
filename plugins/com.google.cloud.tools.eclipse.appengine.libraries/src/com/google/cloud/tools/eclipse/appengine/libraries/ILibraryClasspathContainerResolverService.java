@@ -30,9 +30,6 @@ import org.eclipse.jdt.core.IJavaProject;
  */
 public interface ILibraryClasspathContainerResolverService {
 
-  public static final String LIBRARIES_EXTENSION_POINT =
-      "com.google.cloud.tools.eclipse.appengine.libraries"; //$NON-NLS-1$
-
   enum AppEngineRuntime {
     STANDARD_JAVA_7
   }

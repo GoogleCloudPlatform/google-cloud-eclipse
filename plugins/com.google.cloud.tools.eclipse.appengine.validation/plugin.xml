@@ -29,7 +29,7 @@
       id="appEngineWebXmlValidator">
     <validator
     	class="com.google.cloud.tools.eclipse.appengine.validation.AppEngineWebXmlValidator"
-      	markerId="com.google.cloud.tools.eclipse.appengine.validation.blacklistMarker">
+      	markerId="com.google.cloud.tools.eclipse.appengine.validation.appEngineBlacklistMarker">
       <include>
         <rules>
           <file type="file" name="appengine-web.xml"/>
@@ -39,8 +39,8 @@
   </extension>
   
   <extension
-      id="blacklistMarker"
-      name="%blacklist.marker"
+      id="appEngineBlacklistMarker"
+      name="%appengine.blacklist.marker"
       point="org.eclipse.core.resources.markers">
     <super type="org.eclipse.jdt.core.problem" />
     <super type="org.eclipse.core.resources.problemmarker" />
@@ -52,7 +52,7 @@
       point="org.eclipse.ui.ide.markerResolution">
     <markerResolutionGenerator
       class="com.google.cloud.tools.eclipse.appengine.validation.ApplicationMarkerResolutionGenerator"
-      markerType="com.google.cloud.tools.eclipse.appengine.validation.blacklistMarker">
+      markerType="com.google.cloud.tools.eclipse.appengine.validation.appEngineBlacklistMarker">
     </markerResolutionGenerator>
   </extension>
   
@@ -81,12 +81,45 @@
     <persistent value="true" />
   </extension>
   
-    <extension
-      point="org.eclipse.ui.ide.markerResolution">
+    <extension point="org.eclipse.ui.ide.markerResolution">
     <markerResolutionGenerator
       class="com.google.cloud.tools.eclipse.appengine.validation.ServletMarkerResolutionGenerator"
       markerType="com.google.cloud.tools.eclipse.appengine.validation.servletMarker">
     </markerResolutionGenerator>
+  </extension>
+
+  <extension point="org.eclipse.wst.sse.ui.sourcevalidation">
+  	  <validator
+		  scope="total"
+		  class="com.google.cloud.tools.eclipse.appengine.validation.AppEngineWebXmlSourceValidator"
+		  id="appEngineWebXmlSourceValidator">
+		<contentTypeIdentifier id="appengine-web.xml">
+		  <partitionType id="org.eclipse.wst.xml.XML_DEFAULT"/>
+		</contentTypeIdentifier>
+	  </validator>
+  </extension>
+  
+  <extension point="org.eclipse.core.contenttype.contentTypes"> 
+    <content-type 
+        name="appengine-web.xml"
+        id="appengine-web.xml"
+        base-type="org.eclipse.core.runtime.xml"      
+    	file-names="appengine-web.xml">
+     </content-type> 
+  </extension> 
+
+  <extension point="org.eclipse.wst.sse.ui.quickFixProcessor">
+  	<quickFixProcessor
+  		class="com.google.cloud.tools.eclipse.appengine.validation.ApplicationQuickAssistProcessor">
+  	</quickFixProcessor>
+  </extension>
+
+  <extension point="org.eclipse.wst.sse.ui.editorConfiguration">
+    <provisionalConfiguration
+          class="com.google.cloud.tools.eclipse.appengine.validation.ApplicationQuickAssistProcessor"
+          target="org.eclipse.wst.xml.XML_DEFAULT"
+          type="org.eclipse.jface.text.quickassist.IQuickAssistProcessor">
+    </provisionalConfiguration>
   </extension>
 
 </plugin>

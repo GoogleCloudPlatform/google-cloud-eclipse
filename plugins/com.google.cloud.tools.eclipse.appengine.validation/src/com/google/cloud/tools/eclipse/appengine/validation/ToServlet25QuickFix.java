@@ -16,39 +16,14 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.xml.transform.TransformerException;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.ui.IMarkerResolution;
-import com.google.cloud.tools.eclipse.util.Xslt;
-
 /**
- * Replaces web.xml <web-app> element with Servlet 2.5 deployment descriptor.
+ * Applies servlet.xsl to web.xml to replace <web-app> element with
+ * Servlet 2.5 deployment descriptor.
  */
-public class ToServlet25QuickFix implements IMarkerResolution {
+public class ToServlet25QuickFix extends XsltQuickFix {
   
-  private static final Logger logger = Logger.getLogger(
-      ToServlet25QuickFix.class.getName());
-
-  @Override
-  public String getLabel() {
-    return Messages.getString("convert.servlet");
-  }
-
-  @Override
-  public void run(IMarker marker) {
-    try {
-      IFile file = (IFile) marker.getResource();
-      URL xslPath = ToServlet25QuickFix.class.getResource("/xslt/servlet.xsl");
-      Xslt.transformInPlace(file, xslPath);
-    } catch (IOException | CoreException| TransformerException ex) {
-      logger.log(Level.SEVERE, ex.getMessage());
-    }
+  public ToServlet25QuickFix() {
+    super("/xslt/servlet.xsl", Messages.getString("convert.servlet"));
   }
   
 }

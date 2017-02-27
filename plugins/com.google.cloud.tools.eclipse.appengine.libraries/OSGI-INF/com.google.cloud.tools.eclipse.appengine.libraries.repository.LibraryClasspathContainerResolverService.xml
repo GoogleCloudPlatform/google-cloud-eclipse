@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="initialize" name="com.google.cloud.tools.eclipse.appengine.libraries.repository.LibraryClasspathContainerResolverService">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" 
+               activate="initialize" 
+               name="com.google.cloud.tools.eclipse.appengine.libraries.repository.LibraryClasspathContainerResolverService">
    <service>
       <provide interface="com.google.cloud.tools.eclipse.appengine.libraries.ILibraryClasspathContainerResolverService"/>
    </service>
-   <reference bind="setExtensionRegistry" cardinality="1..1" interface="org.eclipse.core.runtime.IExtensionRegistry" name="ExtensionRegistry" policy="static" unbind="unsetExtensionRegistry"/>
-   <reference bind="setRepositoryService" cardinality="1..1" interface="com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService" name="RepositoryService" policy="static" unbind="unsetRepositoryService"/>
+   <reference bind="setRepositoryService" cardinality="1..1" 
+              interface="com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService"
+              name="RepositoryService" policy="static" unbind="unsetRepositoryService"/>
    <implementation class="com.google.cloud.tools.eclipse.appengine.libraries.repository.LibraryClasspathContainerResolverService"/>
 </scr:component>

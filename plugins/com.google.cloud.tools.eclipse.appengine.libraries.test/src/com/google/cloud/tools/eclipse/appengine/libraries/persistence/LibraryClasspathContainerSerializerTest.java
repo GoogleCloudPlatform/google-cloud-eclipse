@@ -23,8 +23,6 @@ import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainer;
-import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer.ArtifactBaseLocationProvider;
-import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer.LibraryContainerStateLocationProvider;
 import com.google.gson.JsonParser;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

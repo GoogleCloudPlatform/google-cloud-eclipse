@@ -9,7 +9,7 @@ Bundle-Version: 0.1.0.qualifier
 Fragment-Host: com.google.cloud.tools.eclipse.projectselector
 Require-Bundle: org.hamcrest;bundle-version="1.1.0",
  org.junit;bundle-version="4.12.0"
-Import-Package: com.google.api.client.googleapis.testing.json,
+Import-Package: com.google.api.client.googleapis.testing.json;version="[1.22.0,1.23.0)",
  com.google.cloud.tools.eclipse.test.util.ui,
  org.mockito;provider=google;version="1.10.19",
  org.mockito.runners;provider=google;version="1.10.19",

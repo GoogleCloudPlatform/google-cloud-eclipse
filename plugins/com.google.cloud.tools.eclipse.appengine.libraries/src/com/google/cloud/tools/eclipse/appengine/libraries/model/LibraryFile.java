@@ -23,8 +23,8 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * A jar file that is downloaded from the location defined by {@link MavenCoordinates}. It can have associated
- * filters to control visibility of classes and packages contained in the jar file.
+ * A jar file that is downloaded from the location defined by {@link MavenCoordinates}. It can have
+ * associated filters to control visibility of classes and packages contained in the jar file.
  */
 public class LibraryFile {
 
@@ -39,6 +39,7 @@ public class LibraryFile {
     this.mavenCoordinates = mavenCoordinates;
   }
 
+  // todo Danger! This exposes mutable internal state
   public MavenCoordinates getMavenCoordinates() {
     return mavenCoordinates;
   }
@@ -57,7 +58,7 @@ public class LibraryFile {
     return javadocUri;
   }
 
-  public void setJavadocUri(URI javadocUri) {
+  void setJavadocUri(URI javadocUri) {
     this.javadocUri = javadocUri;
   }
 
@@ -65,7 +66,7 @@ public class LibraryFile {
     return sourceUri;
   }
 
-  public void setSourceUri(URI sourceUri) {
+  void setSourceUri(URI sourceUri) {
     this.sourceUri = sourceUri;
   }
 
@@ -73,7 +74,7 @@ public class LibraryFile {
     return export;
   }
 
-  public void setExport(boolean export) {
+  void setExport(boolean export) {
     this.export = export;
   }
 }

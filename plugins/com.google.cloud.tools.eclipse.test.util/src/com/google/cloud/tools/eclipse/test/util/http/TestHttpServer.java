@@ -6,9 +6,12 @@ import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.servlet.MultipartConfigElement;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,8 +34,10 @@ public class TestHttpServer extends ExternalResource {
   private Server server;
 
   private boolean requestHandled = false;
+
   private String requestMethod;
   private Map<String, String[]> requestParameters;
+  private final Map<String, String> requestHeaders = new HashMap<>();
 
   private final String expectedPath;
   private final String responseContent;
@@ -94,6 +99,11 @@ public class TestHttpServer extends ExternalResource {
     return requestParameters;
   }
 
+  public Map<String, String> getRequestHeaders() {
+    Preconditions.checkState(requestHandled);
+    return requestHeaders;
+  }
+
   private class RequestHandler extends AbstractHandler {
 
     @Override
@@ -101,10 +111,20 @@ public class TestHttpServer extends ExternalResource {
         HttpServletResponse response) throws IOException, ServletException {
       Preconditions.checkState(!requestHandled);
 
+      if (request.getContentType() != null
+          && request.getContentType().startsWith("multipart/form-data")) {
+        request.setAttribute(Request.__MULTIPART_CONFIG_ELEMENT,
+            new MultipartConfigElement(System.getProperty("java.io.tmpdir")));
+      }
+
       if (target.equals("/" + expectedPath)) {
         requestHandled = true;
         requestMethod = request.getMethod();
         requestParameters = request.getParameterMap();
+        for (Enumeration<String> headers = request.getHeaderNames(); headers.hasMoreElements(); ) {
+          String header = headers.nextElement();
+          requestHeaders.put(header, request.getHeader(header));
+        }
 
         baseRequest.setHandled(true);
         byte[] bytes = responseContent.getBytes(StandardCharsets.UTF_8);

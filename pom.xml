@@ -58,6 +58,8 @@
     <module>plugins/com.google.cloud.tools.eclipse.appengine.validation.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.ui</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.ui.test</module>
+    <module>plugins/com.google.cloud.tools.eclipse.googleapis</module>
+    <module>plugins/com.google.cloud.tools.eclipse.googleapis.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.preferences</module>
     <module>plugins/com.google.cloud.tools.eclipse.preferences.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.projectselector</module>
@@ -94,6 +96,13 @@
 
     <!-- log surefire tests to stdout -->
     <tycho.showEclipseLog>true</tycho.showEclipseLog>
+
+    <!--
+      A round-about way for the jacoco-maven-plugin to provide its
+      JaCoCo agent arguments required as we specify an Tycho Surefire
+      <argLine/>.
+    -->
+    <jacoco.agentArgLine/>
 
     <!--
       `SYSTEM` means use the default JDK (necessary for Travis).
@@ -333,7 +342,7 @@
           <version>${tycho.version}</version>
           <configuration>
             <forkedProcessTimeoutInSeconds>600</forkedProcessTimeoutInSeconds>
-            <argLine>-Dorg.eclipse.swtbot.search.timeout=${org.eclipse.swtbot.search.timeout} -Xms40m -Xmx1G -XX:MaxPermSize=512m -Djava.awt.headless=true ${os-jvm-flags}</argLine>
+            <argLine>${jacoco.agentArgLine} -Dorg.eclipse.swtbot.search.timeout=${org.eclipse.swtbot.search.timeout} -Xms40m -Xmx1G -XX:MaxPermSize=512m -Djava.awt.headless=true ${os-jvm-flags}</argLine>
           </configuration>
         </plugin>
 
@@ -341,6 +350,12 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-enforcer-plugin</artifactId>
           <version>1.4.1</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>0.7.8</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -457,18 +472,6 @@
             </target>
            </configuration>
           </plugin>
-          <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>cobertura-maven-plugin</artifactId>
-            <version>2.7</version>
-            <configuration>
-              <formats>
-                <format>html</format>
-                <format>xml</format>
-              </formats>
-              <check />
-            </configuration>
-          </plugin>
         </plugins>
       </build>
     </profile>
@@ -498,6 +501,44 @@
         <module>eclipse/ide-target-platform</module>
         <module>build/verify-feature-completeness</module>
       </modules>
+    </profile>
+
+    <profile>
+      <id>jacoco</id>
+      <!--
+        This rigamarole is required to obtain the JaCoCo agent argline
+        from the jacoco-maven-plugin.  By default, `prepare-agent`
+        attempts to populate `tycho.testArgLine`, but that property
+        is ignored since we explicitly configure our own `<argLine/>`.
+        If we reference `${jacocoArgLine}` in our `<argLine/>` without
+        previously declaring it in a `<properties/>`, then Maven
+        raises an error.  But `prepare-agent` is unable to override
+        a declared property.
+      -->
+      <properties>
+        <jacoco.agentArgLine>${jacocoArgLine}</jacoco.agentArgLine>
+      </properties>
+      <modules>
+        <module>build/jacoco</module>
+      </modules>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>prepare-agent</goal>
+                </goals>
+                <configuration>
+                  <propertyName>jacocoArgLine</propertyName>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
 

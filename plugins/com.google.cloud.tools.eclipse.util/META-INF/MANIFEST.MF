@@ -26,6 +26,7 @@ Import-Package: com.google.common.annotations;version="[20.0.0,21.0.0)",
  org.eclipse.wst.common.project.facet.core,
  org.osgi.framework
 Bundle-ClassPath: .,
- templates/appengine/
+ templates/appengine/,
+ lib/google-http-client-1.22.0.jar
 Require-Bundle: org.eclipse.m2e.maven.runtime,
  org.eclipse.m2e.core;bundle-version="1.6.2"

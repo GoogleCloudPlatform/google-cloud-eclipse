@@ -41,11 +41,14 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -451,6 +454,34 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
         server.loadAdapter(LocalAppEngineServerBehaviour.class, null /* monitor */);
 
     return "http://" + server.getHost() + ":" + serverBehaviour.getServerPort(); //$NON-NLS-1$ //$NON-NLS-2$
+  }
+
+  @Override
+  protected IProject[] getBuildOrder(ILaunchConfiguration configuration, String mode)
+      throws CoreException {
+    IProject[] projects = getReferencedProjects(configuration);
+    return computeBuildOrder(projects);
+  }
+
+  @Override
+  protected IProject[] getProjectsForProblemSearch(ILaunchConfiguration configuration, String mode)
+      throws CoreException {
+    IProject[] projects = getReferencedProjects(configuration);
+    return computeReferencedBuildOrder(projects);
+  }
+
+  private static IProject[] getReferencedProjects(ILaunchConfiguration configuration)
+      throws CoreException {
+    IServer thisServer = ServerUtil.getServer(configuration);
+    IModule[] modules = ModuleUtils.getAllModules(thisServer);
+    Set<IProject> projects = new HashSet<>();
+    for (IModule module : modules) {
+      IProject project = module.getProject();
+      if (project != null) {
+        projects.add(project);
+      }
+    }
+    return projects.toArray(new IProject[projects.size()]);
   }
 
   /**

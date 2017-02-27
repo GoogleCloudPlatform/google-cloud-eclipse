@@ -43,7 +43,7 @@ public class AppEngineWebXmlValidatorTest {
   private static final String XML = "<application></application>";
   private static final String BAD_XML = "<";
   private static final String APPLICATION_MARKER =
-      "com.google.cloud.tools.eclipse.appengine.validation.blacklistMarker";
+      "com.google.cloud.tools.eclipse.appengine.validation.appEngineBlacklistMarker";
   private static IResource resource;
   private static IProject project;
   

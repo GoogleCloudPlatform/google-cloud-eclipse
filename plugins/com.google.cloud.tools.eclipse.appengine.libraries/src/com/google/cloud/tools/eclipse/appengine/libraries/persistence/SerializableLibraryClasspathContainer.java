@@ -22,7 +22,8 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 
 /**
- * Represents a {@link LibraryClasspathContainer} in such a way that it can be easily transformed into JSON.
+ * Represents a {@link LibraryClasspathContainer} in such a way that it can be easily transformed
+ * into JSON.
  */
 public class SerializableLibraryClasspathContainer {
 
@@ -30,17 +31,20 @@ public class SerializableLibraryClasspathContainer {
   private String path;
   private SerializableClasspathEntry[] entries;
 
-  public SerializableLibraryClasspathContainer(LibraryClasspathContainer container, IPath baseDirectory, IPath sourceBaseDirectory) {
+  public SerializableLibraryClasspathContainer(LibraryClasspathContainer container,
+      IPath baseDirectory, IPath sourceBaseDirectory) {
     description = container.getDescription();
     path = container.getPath().toString();
     IClasspathEntry[] classpathEntries = container.getClasspathEntries();
     entries = new SerializableClasspathEntry[classpathEntries.length];
     for (int i = 0; i < classpathEntries.length; i++) {
-      entries[i] = new SerializableClasspathEntry(classpathEntries[i], baseDirectory, sourceBaseDirectory);
+      entries[i] =
+          new SerializableClasspathEntry(classpathEntries[i], baseDirectory, sourceBaseDirectory);
     }
   }
 
-  public LibraryClasspathContainer toLibraryClasspathContainer(IPath baseDirectory, IPath sourceBaseDirectory) {
+  public LibraryClasspathContainer toLibraryClasspathContainer(IPath baseDirectory,
+      IPath sourceBaseDirectory) {
     IClasspathEntry[] classpathEntries = new IClasspathEntry[entries.length];
     for (int i = 0; i < entries.length; i++) {
       classpathEntries[i] = entries[i].toClasspathEntry(baseDirectory, sourceBaseDirectory);

@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ClassPath: .
+Bundle-ManifestVersion: 2
+Bundle-Name: Front End App Engine Flexible Support
+Bundle-SymbolicName: com.google.cloud.tools.eclipse.appengine.flex;singleton:=true
+Bundle-Version: 0.1.0.qualifier
+Bundle-Vendor: Google Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-Localization: plugin
+Require-Bundle: org.eclipse.wst.common.project.facet.core
+Import-Package: com.google.cloud.tools.eclipse.appengine.facets

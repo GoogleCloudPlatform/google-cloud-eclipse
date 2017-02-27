@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-  <extension-point id="com.google.cloud.tools.eclipse.appengine.libraries" name="App Engine Libraries" />
+  <extension-point id="com.google.cloud.tools.eclipse.appengine.libraries" 
+      name="App Engine Libraries" />
   
   <extension point="com.google.cloud.tools.eclipse.appengine.libraries"
              id="com.google.cloud.tools.eclipse.appengine.libraries.defaultapis">
     <library 
           id="appengine-api"
+          group="appengine"
           name="App Engine API"
+          tooltip="%appengine.api.tooltip"
           siteUri="https://cloud.google.com/appengine/docs/java/" >
       <libraryFile
             javadocUri="https://cloud.google.com/appengine/docs/java/javadoc/">
@@ -22,7 +25,9 @@
     </library>
     <library
           id="appengine-endpoints"
-          name="App Engine Endpoints"
+          group="appengine"
+          name="Google Cloud Endpoints"
+          tooltip="%endpoints.tooltip"
           siteUri="https://cloud.google.com/appengine/docs/java/endpoints/" >
       <libraryDependency id="appengine-api" />
       <libraryFile
@@ -35,7 +40,9 @@
     </library>
     <library
           id="objectify"
+          group="appengine"
           name="Objectify"
+          tooltip="%objectify.tooltip"
           siteUri="https://github.com/objectify/objectify/wiki" >
       <libraryDependency id="appengine-api" />
       <libraryFile
@@ -57,9 +64,10 @@
     <library
           id="servlet-api"
           name="Servlet API 2.5"
+          group="servlet"
           siteUri="http://www.oracle.com/technetwork/java/javaee/servlet/index.html"
           export="false"
-          recommendation="required" >
+          recommendation="required">
       <libraryFile
             javadocUri="https://docs.oracle.com/cd/E17802_01/products/products/servlet/2.5/docs/servlet-2_5-mr2/">
         <mavenCoordinates
@@ -71,6 +79,7 @@
 
     <library
           id="jsp-api"
+          group="servlet"
           name="Java Server Pages API 2.1"
           siteUri="http://www.oracle.com/technetwork/java/javaee/jsp/index.html"
           export="false"
@@ -85,8 +94,7 @@
     </library>
   </extension>
 
-  <extension
-        point="org.eclipse.jdt.core.classpathContainerInitializer">
+  <extension point="org.eclipse.jdt.core.classpathContainerInitializer">
      <classpathContainerInitializer
            class="com.google.cloud.tools.eclipse.util.service.ServiceContextFactory:com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainerInitializer"
            id="com.google.cloud.tools.eclipse.appengine.libraries" />
