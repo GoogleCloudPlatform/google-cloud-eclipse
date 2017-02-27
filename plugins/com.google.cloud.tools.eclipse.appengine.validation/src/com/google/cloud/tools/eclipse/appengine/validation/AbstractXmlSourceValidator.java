@@ -39,13 +39,14 @@ import org.eclipse.wst.validation.internal.provisional.core.IValidator;
  * Abstract source view validator.
  */
 public abstract class AbstractXmlSourceValidator implements ISourceValidator, IValidator {
-  IDocument document;
   
   private static final Logger logger = Logger.getLogger(
       AbstractXmlSourceValidator.class.getName());
   
+  private IDocument document;
+  
   /**
-   * Extracts byte[] from XML. 
+   * Validates a given {@link IDocument}.
    */
   public void validate(IValidationContext helper, IReporter reporter) throws ValidationException {
     try {

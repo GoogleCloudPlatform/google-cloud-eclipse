@@ -56,7 +56,7 @@ public class AbstractXmlSourceValidatorTest {
     AbstractXmlSourceValidator validator = new AppEngineWebXmlSourceValidator();
     BannedElement element = new BannedElement("message");
     validator.createMessage(reporter, element, 0, "", IMessage.NORMAL_SEVERITY);
-    assertEquals(1,reporter.getMessages().size());
+    assertEquals(1, reporter.getMessages().size());
   }
   
 }

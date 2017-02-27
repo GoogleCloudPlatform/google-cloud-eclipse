@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -37,7 +38,7 @@ public class AppEngineWebXmlSourceValidatorTest {
   public void testValidate_noBannedElements() throws CoreException, IOException, ParserConfigurationException {
     AppEngineWebXmlSourceValidator validator = new AppEngineWebXmlSourceValidator();
     validator.validate(reporter, XML_NO_BANNED_ELEMENTS);
-    assertEquals(0, reporter.getMessages().size());
+    assertTrue(reporter.getMessages().isEmpty());
   }
   
   @Test
@@ -46,5 +47,6 @@ public class AppEngineWebXmlSourceValidatorTest {
     validator.validate(reporter, XML);
     assertEquals(1, reporter.getMessages().size());
     reporter.removeAllMessages(validator);
+    assertTrue(reporter.getMessages().isEmpty());
   }
 }
