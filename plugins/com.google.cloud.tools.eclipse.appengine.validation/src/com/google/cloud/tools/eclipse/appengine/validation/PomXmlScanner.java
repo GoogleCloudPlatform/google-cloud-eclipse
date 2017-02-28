@@ -27,83 +27,99 @@ import com.google.common.annotations.VisibleForTesting;
  */
 class PomXmlScanner extends AbstractScanner {
 
-  private boolean foundBuild;
-  private boolean foundGroupId;
+  private boolean insidePlugin;
+  private boolean foundAppEngineGroupId;
   private boolean foundArtifactId;
-  private boolean foundOldPlugin;
-  private StringBuffer groupIdContents;
-  private StringBuffer artifactIdContents;
+  private boolean saveContents;
+  private StringBuilder elementContents;
   private int lineNumber;
   private int columnNumber;
   
   /**
-   * Checks for opening <build> and <groupId> elements.
+   * Checks for opening <build> and <groupId> tags within a <plugin> element.
    */
   @Override
   public void startElement(String uri, String localName, String qName, Attributes attributes)
       throws SAXException {
-    Locator2 locator = getLocator();
-    if ("build".equalsIgnoreCase(localName)) {
-      foundBuild = true;
-    } else if (foundBuild && "artifactId".equalsIgnoreCase(localName)) {
-      foundArtifactId = true;
-      artifactIdContents = new StringBuffer();
-    } else if (foundBuild && "groupId".equalsIgnoreCase(localName)) {
-      foundGroupId = true;
-      groupIdContents = new StringBuffer();
+    if ("plugin".equalsIgnoreCase(localName)) {
+      insidePlugin = true;
+    } else if (insidePlugin && "artifactId".equalsIgnoreCase(localName)) {
+      saveContents = true;
+      elementContents = new StringBuilder();
+    } else if (insidePlugin && "groupId".equalsIgnoreCase(localName)) {
+      Locator2 locator = getLocator();
+      saveContents = true;
+      elementContents = new StringBuilder();
       lineNumber = locator.getLineNumber();
       columnNumber = locator.getColumnNumber();
     }
   }
   
   /**
-   * Retrieves the contents of the <groupId> element.
+   * Retrieves the contents of the <groupId> or <artifactId> element.
    */
   @Override
   public void characters (char ch[], int start, int length)
       throws SAXException {
-    if (foundGroupId) {
-      groupIdContents.append(ch, start, length);
-    } else if (foundArtifactId) {
-      artifactIdContents.append(ch, start, length);
+    if (saveContents) {
+      elementContents.append(ch, start, length);
     }
   }
   
   /**
-   * Checks for closing <build> and <groupId> elements. If a closing <groupId> element is found
-   * with a parent <build> element and the Maven plugin version is out of date, a
+   * Checks for closing <build> and <groupId> tags. If a closing <groupId> tag
+   * with an out of date Maven plugin and an <artifactId> tag with
+   * value "appengine-maven-plugin" are found within the same <plugin>, a
    * {@link BannedElement} is added to the blacklist queue.
    */
   @Override
   public void endElement (String uri, String localName, String qName)
       throws SAXException {
-    if ("build".equalsIgnoreCase(localName)) {
-      foundBuild = false;
-    } else if (foundBuild && "groupId".equals(localName)) {
-      foundGroupId = false;
-      if ("com.google.appengine".equals(groupIdContents.toString())) {
-        foundOldPlugin = true;
+    if ("plugin".equalsIgnoreCase(localName)) {
+      // Found closing <plugin> tag
+      resetFlags();
+    } else if (insidePlugin && "groupId".equals(localName)) {
+      // Found closing <groupId> tag with parent <plugin>
+      saveContents = false;
+      if ("com.google.appengine".equals(elementContents.toString())) {
+        foundAppEngineGroupId = true;
       }
-    } else if (foundOldPlugin && "artifactId".equalsIgnoreCase(localName)) {
-      foundOldPlugin = false;
+    } else if (insidePlugin && "artifactId".equalsIgnoreCase(localName)) {
+      // Found closing <artifactId> tag with parent <plugin>
+      saveContents = false;
+      if ("appengine-maven-plugin".equalsIgnoreCase(elementContents.toString())) {
+        foundArtifactId = true;
+      }
+    }
+    if (foundAppEngineGroupId && foundArtifactId) {
+      // Found old Maven plugin and App Engine artifact ID with the same <plugin> parent
+      DocumentLocation start = new DocumentLocation(lineNumber, columnNumber - 9);
+      String message = Messages.getString("maven.plugin");
+      BannedElement element = new BannedElement(message, start, 9 /*length of <groupId>*/);
+      addToBlacklist(element);
+      foundAppEngineGroupId = false;
       foundArtifactId = false;
-      if ("appengine-maven-plugin".equalsIgnoreCase(artifactIdContents.toString())) {
-        DocumentLocation start = new DocumentLocation(lineNumber, columnNumber - 9);
-        String message = Messages.getString("maven.plugin");
-        BannedElement element = new BannedElement(message, start, 9 /*length of <groupId>*/);
-        addToBlacklist(element);
-      }
     }
   }
   
-  @VisibleForTesting
-  boolean getFoundBuild() {
-    return foundBuild;
+  /**
+   * Resets all the position flags. 
+   */
+  private void resetFlags() {
+    insidePlugin = false;
+    foundAppEngineGroupId = false;
+    foundArtifactId = false;
+    saveContents = false;
   }
   
   @VisibleForTesting
-  boolean getFoundGroupId() {
-    return foundGroupId;
+  boolean getInsideBuild() {
+    return insidePlugin;
+  }
+  
+  @VisibleForTesting
+  boolean getSaveContents() {
+    return saveContents;
   }
   
 }

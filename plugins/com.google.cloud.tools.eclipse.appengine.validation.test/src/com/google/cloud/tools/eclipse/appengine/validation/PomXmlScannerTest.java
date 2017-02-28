@@ -39,31 +39,31 @@ public class PomXmlScannerTest {
   
   @Test
   public void testStartElement_build() throws SAXException {
-    scanner.startElement("", "build", "", new AttributesImpl());
+    scanner.startElement("", "plugin", "", new AttributesImpl());
     assertEquals(0, scanner.getBlacklist().size());
-    assertTrue(scanner.getFoundBuild());
+    assertTrue(scanner.getInsideBuild());
   }
   
   @Test
   public void testStartElement_groupId() throws SAXException {
-    scanner.startElement("", "build", "", new AttributesImpl());
+    scanner.startElement("", "plugin", "", new AttributesImpl());
     scanner.startElement("", "groupId", "", new AttributesImpl());
-    assertTrue(scanner.getFoundGroupId());
+    assertTrue(scanner.getSaveContents());
   }
   
   @Test
   public void testStartElement_groupIdNoParent() throws SAXException {
     scanner.startElement("", "groupId", "", new AttributesImpl());
-    assertFalse(scanner.getFoundGroupId());
+    assertFalse(scanner.getSaveContents());
   }
   
   @Test
   public void testEndElement() throws SAXException {
-    scanner.startElement("", "build", "", new AttributesImpl());
+    scanner.startElement("", "plugin", "", new AttributesImpl());
     scanner.startElement("", "groupId", "", new AttributesImpl());
     scanner.characters("com.google.appengine".toCharArray(), 0, 20);
     scanner.endElement("", "groupId", "");
-    assertFalse(scanner.getFoundGroupId());
+    assertFalse(scanner.getSaveContents());
     scanner.startElement("", "artifactId", "", new AttributesImpl());
     scanner.characters("appengine-maven-plugin".toCharArray(), 0, 22);
     scanner.endElement("", "artifactId", "");
