@@ -311,7 +311,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     accountSelector.addSelectionListener(new Runnable() {
       @Override
       public void run() {
-        loadProjectsForCredential();
+        refreshProjectsForSelectedCredential();
       }
     });
 
@@ -326,7 +326,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     refreshProjectsButton.addSelectionListener(new SelectionAdapter() {
       @Override
       public void widgetSelected(SelectionEvent e) {
-        loadProjectsForCredential();
+        refreshProjectsForSelectedCredential();
       }
     });
 
@@ -413,7 +413,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     return bucketComposite;
   }
 
-  private void loadProjectsForCredential() {
+  private void refreshProjectsForSelectedCredential() {
     Credential selectedCredential = accountSelector.getSelectedCredential();
     projectSelector.setProjects(retrieveProjects(selectedCredential));
   }
