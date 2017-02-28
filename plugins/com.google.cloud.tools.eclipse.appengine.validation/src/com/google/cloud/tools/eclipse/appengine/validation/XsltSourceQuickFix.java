@@ -74,7 +74,7 @@ public class XsltSourceQuickFix implements ICompletionProposal, ICompletionPropo
   
   @Override
   public String getDisplayString() {
-    return Messages.getString(message);
+    return message;
   }
   
   byte[] getDocumentBytes(IDocument document) {

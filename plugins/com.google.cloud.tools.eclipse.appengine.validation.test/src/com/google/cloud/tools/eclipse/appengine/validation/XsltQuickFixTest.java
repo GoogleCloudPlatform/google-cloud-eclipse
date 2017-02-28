@@ -59,7 +59,7 @@ public class XsltQuickFixTest {
 
   @Test 
   public void testGetLabel() {
-    assertEquals("Remove Application Element", fix.getLabel());
+    assertEquals("Remove application element", fix.getLabel());
   }
   
   @Test
