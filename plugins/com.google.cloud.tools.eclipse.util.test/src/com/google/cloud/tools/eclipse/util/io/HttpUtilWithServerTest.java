@@ -43,7 +43,7 @@ public class HttpUtilWithServerTest {
     assertEquals(200, HttpUtil.sendPostMultipart(server.getAddress(), parameters));
     assertEquals("POST", server.getRequestMethod());
     assertTrue(server.getRequestHeaders().get("User-Agent")
-        .startsWith("gcloud-eclipse-tools/0.1.0."));
+        .startsWith("gcloud-eclipse-tools/"));
     assertTrue(server.getRequestHeaders().get("Content-Type")
         .startsWith("multipart/form-data; boundary="));
 
