@@ -16,13 +16,16 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
@@ -38,9 +41,12 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jst.j2ee.classpathdep.UpdateClasspathAttributeUtil;
 import org.osgi.framework.FrameworkUtil;
+import org.xml.sax.SAXException;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainerResolverJob;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
+import com.google.cloud.tools.eclipse.util.MavenUtils;
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 
 public class BuildPath {
@@ -51,8 +57,28 @@ public class BuildPath {
     if (libraries.isEmpty()) {
       return;
     }
-    IJavaProject javaProject = JavaCore.create(project);
-    addLibraries(javaProject, libraries, monitor);
+    if (MavenUtils.hasMavenNature(project)) {
+      addMavenLibraries(project, libraries, monitor);
+    } else {
+      IJavaProject javaProject = JavaCore.create(project);
+      addLibraries(javaProject, libraries, monitor);
+    }
+  }
+
+  public static void addMavenLibraries(IProject project, List<Library> libraries,
+      IProgressMonitor monitor) throws CoreException {
+    // see m2e-core/org.eclipse.m2e.core.ui/src/org/eclipse/m2e/core/ui/internal/actions/AddDependencyAction.java
+    // m2e-core/org.eclipse.m2e.core.ui/src/org/eclipse/m2e/core/ui/internal/editing/AddDependencyOperation.java
+    
+    IFile pomFile = project.getFile("pom.xml");
+    
+    try {
+      Pom pom = Pom.parse(pomFile);
+      pom.addDependencies(libraries);
+    } catch (SAXException | IOException ex) {
+      IStatus status = StatusUtil.error(BuildPath.class, ex.getMessage(), ex);
+      throw new CoreException(status);
+    }
   }
 
   /**

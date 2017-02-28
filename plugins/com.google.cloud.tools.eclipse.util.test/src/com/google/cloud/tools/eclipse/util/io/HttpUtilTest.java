@@ -24,6 +24,7 @@ import org.junit.Test;
 
 public class HttpUtilTest {
 
+  @SuppressWarnings("serial")
   private static final Map<String, String> RANDOM_PARAMETERS = Collections.unmodifiableMap(
       new HashMap<String, String>() {
         {
@@ -43,6 +44,7 @@ public class HttpUtilTest {
         }
       });
 
+  @SuppressWarnings("serial")
   private static final Map<String, String> ENCODED_PARAMETERS = Collections.unmodifiableMap(
       new HashMap<String, String>() {
         {
