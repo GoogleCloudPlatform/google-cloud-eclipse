@@ -90,7 +90,7 @@ public class MavenCoordinates {
    * @param type the Maven packaging type, defaults to <code>jar</code>, cannot be <code>null</code>
    *     or empty string.
    */
-  void setType(String type) {
+  public void setType(String type) {
     Preconditions.checkNotNull(type, "type is null");
     Preconditions.checkArgument(!type.isEmpty(), "type is empty");
     this.type = type;
@@ -122,7 +122,7 @@ public class MavenCoordinates {
    * @param repository the URI or the identifier of the repository used to download the artifact
    *        from, cannot be <code>null</code> or empty string.
    */
-  void setRepository(String repository) {
+  public void setRepository(String repository) {
     Preconditions.checkNotNull(repository, "repository null");
     Preconditions.checkArgument(!repository.isEmpty(), "repository is empty");
     this.repository = repository;
