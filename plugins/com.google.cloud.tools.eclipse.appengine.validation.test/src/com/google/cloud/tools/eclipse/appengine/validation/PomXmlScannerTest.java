@@ -41,7 +41,7 @@ public class PomXmlScannerTest {
   public void testStartElement_build() throws SAXException {
     scanner.startElement("", "plugin", "", new AttributesImpl());
     assertEquals(0, scanner.getBlacklist().size());
-    assertTrue(scanner.getInsideBuild());
+    assertTrue(scanner.getInsidePlugin());
   }
   
   @Test

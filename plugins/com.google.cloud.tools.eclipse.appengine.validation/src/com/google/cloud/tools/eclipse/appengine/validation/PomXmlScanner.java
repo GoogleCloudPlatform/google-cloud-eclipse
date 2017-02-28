@@ -113,7 +113,7 @@ class PomXmlScanner extends AbstractScanner {
   }
   
   @VisibleForTesting
-  boolean getInsideBuild() {
+  boolean getInsidePlugin() {
     return insidePlugin;
   }
   
