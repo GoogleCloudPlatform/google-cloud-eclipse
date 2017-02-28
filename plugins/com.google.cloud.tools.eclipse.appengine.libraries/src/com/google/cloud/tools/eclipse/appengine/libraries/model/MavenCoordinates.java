@@ -71,9 +71,9 @@ public class MavenCoordinates {
 
   /**
    * @param version the Maven version of the artifact, defaults to special value
-   *        {@link MavenCoordinates#LATEST_VERSION}, cannot be <code>null</code> or empty string.
+   *     {@link MavenCoordinates#LATEST_VERSION}, cannot be <code>null</code> or empty string.
    */
-  void setVersion(String version) {
+  public void setVersion(String version) {
     Preconditions.checkNotNull(version, "version is null");
     Preconditions.checkArgument(!version.isEmpty(), "version is empty");
     this.version = version;
@@ -88,7 +88,7 @@ public class MavenCoordinates {
 
   /**
    * @param type the Maven packaging type, defaults to <code>jar</code>, cannot be <code>null</code>
-   *        or empty string.
+   *     or empty string.
    */
   void setType(String type) {
     Preconditions.checkNotNull(type, "type is null");
@@ -106,7 +106,7 @@ public class MavenCoordinates {
   /**
    * @param classifier the Maven classifier, defaults to null.
    */
-  void setClassifier(String classifier) {
+  public void setClassifier(String classifier) {
     this.classifier = classifier;
   }
 
