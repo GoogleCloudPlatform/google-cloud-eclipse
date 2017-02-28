@@ -33,6 +33,12 @@ public class CloudToolsInfoTest {
   public IBundleGroup bundleGroup;
 
   @Test
+  public void testGetToolsVersion_featureId() {
+    Assert.assertEquals("com.google.cloud.tools.eclipse.suite.e45.feature",
+        CloudToolsInfo.CLOUD_TOOLS_FOR_ECLIPSE_FEATURE_ID);
+  }
+
+  @Test
   public void testGetToolsVersion_noFeature() {
     Assert.assertEquals("0.0.0", CloudToolsInfo.getToolsVersion(new IBundleGroupProvider[0]));
   }
@@ -47,9 +53,6 @@ public class CloudToolsInfoTest {
     Assert.assertEquals("123.456.789",
         CloudToolsInfo.getToolsVersion(new IBundleGroupProvider[] {bundleGroupProvider}));
   }
-
-
-  // Assert.assertTrue(CloudToolsInfo.getToolsVersion().startsWith("0.1.0."));
 
   @Test
   public void testUserAgent() {
