@@ -45,8 +45,8 @@ import org.eclipse.core.databinding.beans.PojoProperties;
 import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.Observables;
 import org.eclipse.core.databinding.observable.list.IObservableList;
+import org.eclipse.core.databinding.observable.value.ComputedValue;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
-import org.eclipse.core.databinding.observable.value.WritableValue;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
@@ -213,24 +213,50 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   }
 
   private void setupAutoPromoteDataBinding(DataBindingContext context) {
-    ISWTObservableValue promoteButton = WidgetProperties.selection().observe(autoPromoteButton);
-    ISWTObservableValue stopPreviousVersion =
+    ISWTObservableValue promoteButton =
+        WidgetProperties.selection().observe(autoPromoteButton);
+    final ISWTObservableValue stopPreviousVersion =
         WidgetProperties.selection().observe(stopPreviousVersionButton);
-    ISWTObservableValue stopPreviousVersionEnablement =
+    final ISWTObservableValue stopPreviousVersionEnablement =
         WidgetProperties.enabled().observe(stopPreviousVersionButton);
 
-    // use an intermediary value to control the enabled state of stopPreviousVersionButton
-    // based on the promote checkbox's state
-    WritableValue enablement = new WritableValue();
-    context.bindValue(promoteButton, enablement);
-    context.bindValue(stopPreviousVersionEnablement, enablement);
+    context.bindValue(stopPreviousVersionEnablement, promoteButton);
 
     IObservableValue promoteModel = PojoProperties.value("autoPromote").observe(model);
-    IObservableValue stopPreviousVersionModel =
+    final IObservableValue stopPreviousVersionModel =
         PojoProperties.value("stopPreviousVersion").observe(model);
 
     context.bindValue(promoteButton, promoteModel);
-    context.bindValue(stopPreviousVersion, stopPreviousVersionModel);
+
+    // One-way update: button selection <-- latest user choice
+    // Update the button (to match the user choice), if enabled; if not, force unchecking.
+    context.bindValue(stopPreviousVersion, new ComputedValue() {
+      @Override
+      protected Object calculate() {
+        boolean buttonEnabled = (boolean) stopPreviousVersionEnablement.getValue();
+        boolean currentValue = (boolean) stopPreviousVersionModel.getValue();
+        if (!buttonEnabled) {
+          return Boolean.FALSE;  // Force uncheck the stop previous button if it is disabled.
+        }
+        // Otherwise, check the button according to the latest user choice.
+        return currentValue;
+      }
+    }, new UpdateValueStrategy(UpdateValueStrategy.POLICY_NEVER), null);
+
+    // One-way update: latest user choice <-- button selection
+    // Update the choice (to match the button selection), only when the button is enabled.
+    context.bindValue(stopPreviousVersionModel, new ComputedValue() {
+      @Override
+      protected Object calculate() {
+        boolean buttonEnabled = (boolean) stopPreviousVersionEnablement.getValue();
+        boolean buttonValue = (boolean) stopPreviousVersion.getValue();
+        boolean currentValue = (boolean) stopPreviousVersionModel.getValue();
+        if (buttonEnabled) {
+          return buttonValue;
+        }
+        return currentValue;
+      }
+    }, new UpdateValueStrategy(UpdateValueStrategy.POLICY_NEVER), null);
   }
 
   private void setupBucketDataBinding(DataBindingContext context) {
