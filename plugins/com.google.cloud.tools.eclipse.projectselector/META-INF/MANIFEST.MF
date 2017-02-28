@@ -43,5 +43,6 @@ Import-Package: com.google.api.client.auth.oauth2;version="[1.22.0,1.23.0)",
  org.eclipse.jface.layout,
  org.eclipse.jface.viewers,
  org.eclipse.swt,
+ org.eclipse.swt.events,
  org.eclipse.swt.layout,
  org.eclipse.swt.widgets
