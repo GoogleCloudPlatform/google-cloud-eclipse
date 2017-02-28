@@ -29,6 +29,9 @@ import com.google.cloud.tools.eclipse.ui.util.FontUtil;
 import com.google.cloud.tools.eclipse.ui.util.databinding.BucketNameValidator;
 import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectSelectorValidator;
 import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectVersionValidator;
+import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener;
+import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.ErrorDialogErrorHandler;
+import com.google.cloud.tools.eclipse.ui.util.images.SharedImages;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -62,14 +65,16 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
@@ -80,6 +85,8 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
   private static final String APPENGINE_VERSIONS_URL =
       "https://console.cloud.google.com/appengine/versions";
+  private static final String CREATE_GCP_PROJECT_WITH_GAE_URL =
+      "https://console.cloud.google.com/projectselector/appengine/create?lang=java";
 
   private static final Logger logger = Logger.getLogger(
       StandardDeployPreferencesPanel.class.getName());
@@ -97,6 +104,8 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   private Text bucket;
 
   private ExpandableComposite expandableComposite;
+
+  private Image refreshIcon;
 
   @VisibleForTesting
   DeployPreferencesModel model;
@@ -120,6 +129,8 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     gridLayout.numColumns = 2;
 
     this.projectRepository = projectRepository;
+
+    refreshIcon = SharedImages.getRefreshIcon(getDisplay());
 
     createCredentialSection(loginService);
 
@@ -286,32 +297,16 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     Label projectIdLabel = new Label(this, SWT.LEAD);
     projectIdLabel.setText(Messages.getString("project"));
     projectIdLabel.setToolTipText(Messages.getString("tooltip.project.id"));
-    GridDataFactory.swtDefaults().align(SWT.BEGINNING, SWT.BEGINNING).span(2, 1).applyTo(projectIdLabel);
+    GridDataFactory.swtDefaults().align(SWT.BEGINNING, SWT.BEGINNING).span(2, 1)
+        .applyTo(projectIdLabel);
 
     Composite projectSelectorComposite = new Composite(this, SWT.NONE);
     GridLayoutFactory.fillDefaults().numColumns(2).spacing(0, 0).applyTo(projectSelectorComposite);
-    GridDataFactory.fillDefaults().align(SWT.FILL, SWT.FILL).span(2, 1)
-        .grab(true, false).applyTo(projectSelectorComposite);
+    GridDataFactory.fillDefaults().grab(true, false).span(2, 1).applyTo(projectSelectorComposite);
 
     projectSelector = new ProjectSelector(projectSelectorComposite);
     GridDataFactory.fillDefaults().grab(true, false).hint(SWT.DEFAULT, 200)
         .applyTo(projectSelector);
-
-    Button createProjectButton = new Button(projectSelectorComposite, SWT.NONE);
-    createProjectButton.setText(Messages.getString("projectselector.create.newproject"));
-    GridDataFactory.swtDefaults().align(SWT.FILL, SWT.BEGINNING).applyTo(createProjectButton);
-    createProjectButton.addSelectionListener(new SelectionListener() {
-
-      @Override
-      public void widgetSelected(SelectionEvent e) {
-        openCreateProjectDialog();
-      }
-
-      @Override
-      public void widgetDefaultSelected(SelectionEvent event) {
-        widgetSelected(event);
-      }
-    });
 
     accountSelector.addSelectionListener(new Runnable() {
       @Override
@@ -319,10 +314,29 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
         loadProjectsForCredential();
       }
     });
+
     projectSelector.addSelectionChangedListener(
         new ProjectSelectorSelectionChangedListener(accountSelector,
                                                     projectRepository,
                                                     projectSelector));
+
+    Button refreshProjectsButton = new Button(projectSelectorComposite, SWT.NONE);
+    refreshProjectsButton.setImage(refreshIcon);
+    GridDataFactory.swtDefaults().align(SWT.END, SWT.BEGINNING).applyTo(refreshProjectsButton);
+    refreshProjectsButton.addSelectionListener(new SelectionAdapter() {
+      @Override
+      public void widgetSelected(SelectionEvent e) {
+        loadProjectsForCredential();
+      }
+    });
+
+    Link createNewProject = new Link(this, SWT.NONE);
+    createNewProject.setText(Messages.getString("projectselector.createproject",
+        CREATE_GCP_PROJECT_WITH_GAE_URL));
+    createNewProject.setToolTipText(Messages.getString("projectselector.createproject.tooltip"));
+    createNewProject.addSelectionListener(
+        new OpenUriSelectionListener(new ErrorDialogErrorHandler(getShell())));
+    GridDataFactory.swtDefaults().align(SWT.FILL, SWT.BEGINNING).span(2, 1).applyTo(createNewProject);
   }
 
   private void createProjectVersionSection() {
@@ -397,11 +411,6 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
     GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(bucketComposite);
     return bucketComposite;
-  }
-
-  private void openCreateProjectDialog() {
-    new CreateGcpProjectwithAppengineDialog(this.getShell()).open();
-    loadProjectsForCredential();
   }
 
   private void loadProjectsForCredential() {
@@ -529,6 +538,9 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     }
     if (observables != null) {
       observables.dispose();
+    }
+    if (refreshIcon != null) {
+      refreshIcon.dispose();
     }
     super.dispose();
   }

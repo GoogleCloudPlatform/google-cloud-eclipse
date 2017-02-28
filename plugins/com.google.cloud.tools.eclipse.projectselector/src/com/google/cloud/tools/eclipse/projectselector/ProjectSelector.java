@@ -89,6 +89,7 @@ public class ProjectSelector extends Composite {
   public void setProjects(List<GcpProject> projects) {
     ISelection selection = tableViewer.getSelection();
     input.clear();
+    clearStatusLink(); // otherwise revealing selection is off sometimes
     if (projects != null) {
       input.addAll(projects);
     }
