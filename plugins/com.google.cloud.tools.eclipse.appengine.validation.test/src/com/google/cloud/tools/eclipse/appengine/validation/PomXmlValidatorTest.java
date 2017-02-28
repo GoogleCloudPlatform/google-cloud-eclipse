@@ -41,7 +41,8 @@ public class PomXmlValidatorTest {
 
   private static final String XML_NO_BANNED_ELEMENTS = "<test></test>";
   private static final String XML =
-      "<build><groupId>com.google.appengine</groupId></build>";
+      "<build><plugins><plugin><groupId>com.google.appengine</groupId>"
+      + "<artifactId>appengine-maven-plugin</artifactId></plugin></plugins></build>";
   private static final String PLUGIN_MARKER =
       "com.google.cloud.tools.eclipse.appengine.validation.mavenPluginMarker";
   private static IResource resource;

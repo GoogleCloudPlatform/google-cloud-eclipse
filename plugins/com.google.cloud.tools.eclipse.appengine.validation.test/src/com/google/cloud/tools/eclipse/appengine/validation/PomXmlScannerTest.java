@@ -64,6 +64,9 @@ public class PomXmlScannerTest {
     scanner.characters("com.google.appengine".toCharArray(), 0, 20);
     scanner.endElement("", "groupId", "");
     assertFalse(scanner.getFoundGroupId());
+    scanner.startElement("", "artifactId", "", new AttributesImpl());
+    scanner.characters("appengine-maven-plugin".toCharArray(), 0, 22);
+    scanner.endElement("", "artifactId", "");
     assertEquals(1, scanner.getBlacklist().size());
     String message = scanner.getBlacklist().peek().getMessage();
     assertEquals(ELEMENT_MESSAGE, message);

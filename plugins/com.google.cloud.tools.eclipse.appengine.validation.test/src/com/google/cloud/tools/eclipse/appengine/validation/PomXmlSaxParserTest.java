@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -39,11 +40,23 @@ public class PomXmlSaxParserTest {
   public void testReadXml_xmlWithBannedElement()
       throws ParserConfigurationException, IOException, SAXException {
     String xml =
-        "<build><groupId>com.google.appengine</groupId></build>";
+        "<build><plugins><plugin><groupId>com.google.appengine</groupId>"
+        + "<artifactId>appengine-maven-plugin</artifactId></plugin></plugins></build>";
     byte[] bytes = xml.getBytes(StandardCharsets.UTF_8);
     Queue<BannedElement> blacklist = PomXmlSaxParser.readXml(bytes).getBlacklist();
     String message = Messages.getString("maven.plugin");
     assertEquals(blacklist.poll().getMessage(), message);
+  }
+  
+  @Test
+  public void testReadXml_noBannedElements()
+      throws ParserConfigurationException, IOException, SAXException {
+    String xml =
+        "<build><plugins><plugin><groupId>com.google.tools</groupId>"
+        + "<artifactId>appengine-maven-plugin</artifactId></plugin></plugins></build>";
+    byte[] bytes = xml.getBytes(StandardCharsets.UTF_8);
+    Queue<BannedElement> blacklist = PomXmlSaxParser.readXml(bytes).getBlacklist();
+    assertTrue(blacklist.isEmpty());
   }
 
 }

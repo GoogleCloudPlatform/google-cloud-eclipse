@@ -29,7 +29,10 @@ class PomXmlScanner extends AbstractScanner {
 
   private boolean foundBuild;
   private boolean foundGroupId;
+  private boolean foundArtifactId;
+  private boolean foundOldPlugin;
   private StringBuffer groupIdContents;
+  private StringBuffer artifactIdContents;
   private int lineNumber;
   private int columnNumber;
   
@@ -42,6 +45,9 @@ class PomXmlScanner extends AbstractScanner {
     Locator2 locator = getLocator();
     if ("build".equalsIgnoreCase(localName)) {
       foundBuild = true;
+    } else if (foundBuild && "artifactId".equalsIgnoreCase(localName)) {
+      foundArtifactId = true;
+      artifactIdContents = new StringBuffer();
     } else if (foundBuild && "groupId".equalsIgnoreCase(localName)) {
       foundGroupId = true;
       groupIdContents = new StringBuffer();
@@ -58,6 +64,8 @@ class PomXmlScanner extends AbstractScanner {
       throws SAXException {
     if (foundGroupId) {
       groupIdContents.append(ch, start, length);
+    } else if (foundArtifactId) {
+      artifactIdContents.append(ch, start, length);
     }
   }
   
@@ -74,10 +82,15 @@ class PomXmlScanner extends AbstractScanner {
     } else if (foundBuild && "groupId".equals(localName)) {
       foundGroupId = false;
       if ("com.google.appengine".equals(groupIdContents.toString())) {
-        DocumentLocation start = new DocumentLocation(lineNumber,
-            columnNumber - qName.length() - 2);
+        foundOldPlugin = true;
+      }
+    } else if (foundOldPlugin && "artifactId".equalsIgnoreCase(localName)) {
+      foundOldPlugin = false;
+      foundArtifactId = false;
+      if ("appengine-maven-plugin".equalsIgnoreCase(artifactIdContents.toString())) {
+        DocumentLocation start = new DocumentLocation(lineNumber, columnNumber - 9);
         String message = Messages.getString("maven.plugin");
-        BannedElement element = new BannedElement(message, start, qName.length() + 2);
+        BannedElement element = new BannedElement(message, start, 9 /*length of <groupId>*/);
         addToBlacklist(element);
       }
     }
