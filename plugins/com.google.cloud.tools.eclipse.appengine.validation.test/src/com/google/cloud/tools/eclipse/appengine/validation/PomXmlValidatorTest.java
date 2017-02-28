@@ -53,9 +53,8 @@ public class PomXmlValidatorTest {
   public static void setUp() throws CoreException {
     project = projectCreator.getProject();
     createFolders(project, new Path("src/main/webapp/WEB-INF"));
-    IFile webXml = project.getFile("src/main/webapp/WEB-INF/web.xml");
-    webXml.create(new ByteArrayInputStream(new byte[0]), true, null);
-    resource = webXml;
+    resource = project.getFile("src/main/webapp/WEB-INF/web.xml");
+    ((IFile) resource).create(new ByteArrayInputStream(new byte[0]), true, null);
   }
   
   
