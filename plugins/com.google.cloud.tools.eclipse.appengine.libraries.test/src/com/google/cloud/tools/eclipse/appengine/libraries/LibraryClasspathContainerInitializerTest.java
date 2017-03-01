@@ -27,9 +27,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer;
+import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -64,9 +66,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class LibraryClasspathContainerInitializerTest {
 
-/**
-   * 
-   */
   private static final String NON_EXISTENT_FILE = "/non/existent/file";
   private static final String TEST_CONTAINER_PATH = "test.appengine.libraries";
   private static final String TEST_LIBRARY_ID = "libraryId";
@@ -74,6 +73,9 @@ public class LibraryClasspathContainerInitializerTest {
 
   @Mock private ILibraryClasspathContainerResolverService resolverService;
   @Mock private LibraryClasspathContainerSerializer serializer;
+
+  @Rule
+  public ThreadDumpingWatchdog watchdog = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
 
   @Rule
   public TestProjectCreator testProject = new TestProjectCreator().withClasspathContainerPath(TEST_LIBRARY_PATH);
