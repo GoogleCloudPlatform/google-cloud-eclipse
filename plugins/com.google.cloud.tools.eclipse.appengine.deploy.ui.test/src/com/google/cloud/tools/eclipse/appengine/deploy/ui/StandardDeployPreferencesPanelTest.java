@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -46,6 +47,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotCheckBox;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -117,6 +119,46 @@ public class StandardDeployPreferencesPanelTest {
     assertThat(status.getMessage(), is("Select an account."));
   }
 
+  // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1229
+  @Test
+  public void testUncheckStopPreviousVersionButtonWhenDisabled() {
+    StandardDeployPreferencesPanel panel = new StandardDeployPreferencesPanel(
+        parent, project, loginService, layoutChangedHandler, true, projectRepository);
+
+    SWTBotCheckBox promote = new SWTBotCheckBox(panel.autoPromoteButton);
+    SWTBotCheckBox stopPreviousVersion = new SWTBotCheckBox(panel.stopPreviousVersionButton);
+
+    // Initially, everything is checked and enabled.
+    assertTrue(panel.autoPromoteButton.getSelection());
+    assertTrue(panel.stopPreviousVersionButton.getSelection());
+    assertTrue(panel.stopPreviousVersionButton.getEnabled());
+
+    promote.click();
+    assertFalse(panel.autoPromoteButton.getSelection());
+    assertFalse(panel.stopPreviousVersionButton.getSelection());
+    assertFalse(panel.stopPreviousVersionButton.getEnabled());
+
+    promote.click();
+    assertTrue(panel.autoPromoteButton.getSelection());
+    assertTrue(panel.stopPreviousVersionButton.getSelection());
+    assertTrue(panel.stopPreviousVersionButton.getEnabled());
+
+    stopPreviousVersion.click();
+    assertTrue(panel.autoPromoteButton.getSelection());
+    assertFalse(panel.stopPreviousVersionButton.getSelection());
+    assertTrue(panel.stopPreviousVersionButton.getEnabled());
+
+    promote.click();
+    assertFalse(panel.autoPromoteButton.getSelection());
+    assertFalse(panel.stopPreviousVersionButton.getSelection());
+    assertFalse(panel.stopPreviousVersionButton.getEnabled());
+
+    promote.click();
+    assertTrue(panel.autoPromoteButton.getSelection());
+    assertFalse(panel.stopPreviousVersionButton.getSelection());
+    assertTrue(panel.stopPreviousVersionButton.getEnabled());
+  }
+
   @Test
   public void testProjectSavedInPreferencesSelected() throws ProjectRepositoryException {
     IEclipsePreferences node =
@@ -170,5 +212,4 @@ public class StandardDeployPreferencesPanelTest {
     }
     return status;
   }
-
 }

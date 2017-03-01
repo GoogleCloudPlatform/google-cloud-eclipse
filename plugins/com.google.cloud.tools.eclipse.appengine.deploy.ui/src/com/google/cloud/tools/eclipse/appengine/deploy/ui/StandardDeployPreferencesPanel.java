@@ -89,9 +89,11 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
   private Text version;
 
-  private Button autoPromoteButton;
+  @VisibleForTesting
+  Button autoPromoteButton;
 
-  private Button stopPreviousVersionButton;
+  @VisibleForTesting
+  Button stopPreviousVersionButton;
 
   private Text bucket;
 
@@ -229,6 +231,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
     context.bindValue(promoteButton, promoteModel);
 
+    // Intermediary model necessary for "Restore Defaults" to work.
     final IObservableValue currentStopPreviousVersionChoice = new WritableValue();
     context.bindValue(currentStopPreviousVersionChoice, stopPreviousVersionModel);
 
