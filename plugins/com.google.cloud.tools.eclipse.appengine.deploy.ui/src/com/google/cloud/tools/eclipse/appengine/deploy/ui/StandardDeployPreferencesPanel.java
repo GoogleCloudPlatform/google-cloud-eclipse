@@ -243,15 +243,15 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
         boolean buttonEnabled = (boolean) stopPreviousVersionEnablement.getValue();
         boolean currentValue = (boolean) currentStopPreviousVersionChoice.getValue();
         if (!buttonEnabled) {
-          return Boolean.FALSE;  // Force uncheck the stop previous button if it is disabled.
+          return Boolean.FALSE;  // Force unchecking the stop previous button if it is disabled.
         }
-        // Otherwise, check the button according to the latest user choice.
-        return currentValue;
+        return currentValue;  // Otherwise, check the button according to the latest user choice.
+
       }
     }, new UpdateValueStrategy(UpdateValueStrategy.POLICY_NEVER), null);
 
     // One-way update: button selection --> latest user choice
-    // Update the choice (to match the button selection), only when the button is enabled.
+    // Update the user choice (to match the button selection), only when the button is enabled.
     context.bindValue(new ComputedValue() {
       @Override
       protected Object calculate() {
@@ -259,9 +259,9 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
         boolean buttonValue = (boolean) stopPreviousVersion.getValue();
         boolean currentValue = (boolean) currentStopPreviousVersionChoice.getValue();
         if (buttonEnabled) {
-          return buttonValue;
+          return buttonValue;  // Remember the button state as the latest choice if it is enabled.
         }
-        return currentValue;
+        return currentValue;  // Otherwise, retain the latest (current) user choice.
       }
     }, stopPreviousVersionModel, null, new UpdateValueStrategy(UpdateValueStrategy.POLICY_NEVER));
   }
