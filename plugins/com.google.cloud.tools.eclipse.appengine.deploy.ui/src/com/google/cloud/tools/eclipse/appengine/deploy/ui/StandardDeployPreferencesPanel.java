@@ -47,6 +47,7 @@ import org.eclipse.core.databinding.observable.Observables;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.value.ComputedValue;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.core.databinding.observable.value.WritableValue;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
@@ -223,10 +224,13 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     context.bindValue(stopPreviousVersionEnablement, promoteButton);
 
     IObservableValue promoteModel = PojoProperties.value("autoPromote").observe(model);
-    final IObservableValue stopPreviousVersionModel =
+    IObservableValue stopPreviousVersionModel =
         PojoProperties.value("stopPreviousVersion").observe(model);
 
     context.bindValue(promoteButton, promoteModel);
+
+    final IObservableValue currentStopPreviousVersionChoice = new WritableValue();
+    context.bindValue(currentStopPreviousVersionChoice, stopPreviousVersionModel);
 
     // One-way update: button selection <-- latest user choice
     // Update the button (to match the user choice), if enabled; if not, force unchecking.
@@ -234,7 +238,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
       @Override
       protected Object calculate() {
         boolean buttonEnabled = (boolean) stopPreviousVersionEnablement.getValue();
-        boolean currentValue = (boolean) stopPreviousVersionModel.getValue();
+        boolean currentValue = (boolean) currentStopPreviousVersionChoice.getValue();
         if (!buttonEnabled) {
           return Boolean.FALSE;  // Force uncheck the stop previous button if it is disabled.
         }
@@ -250,7 +254,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
       protected Object calculate() {
         boolean buttonEnabled = (boolean) stopPreviousVersionEnablement.getValue();
         boolean buttonValue = (boolean) stopPreviousVersion.getValue();
-        boolean currentValue = (boolean) stopPreviousVersionModel.getValue();
+        boolean currentValue = (boolean) currentStopPreviousVersionChoice.getValue();
         if (buttonEnabled) {
           return buttonValue;
         }
