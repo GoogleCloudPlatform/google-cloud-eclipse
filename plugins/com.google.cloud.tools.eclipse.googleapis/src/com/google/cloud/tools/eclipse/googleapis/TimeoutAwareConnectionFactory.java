@@ -19,13 +19,11 @@ package com.google.cloud.tools.eclipse.googleapis;
 import com.google.api.client.http.javanet.DefaultConnectionFactory;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.Proxy;
 import java.net.URL;
 
 /**
  * Extends the {@link DefaultConnectionFactory} with option to specify connect and read timeout.
- *
- * TODO move this class into a separate API bundle
- * https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1438
  */
 class TimeoutAwareConnectionFactory extends DefaultConnectionFactory {
   private final int connectTimeout;
@@ -33,6 +31,12 @@ class TimeoutAwareConnectionFactory extends DefaultConnectionFactory {
 
   TimeoutAwareConnectionFactory(int connectTimeout, int readTimeout) {
     super();
+    this.connectTimeout = connectTimeout;
+    this.readTimeout = readTimeout;
+  }
+
+  TimeoutAwareConnectionFactory(Proxy proxy, int connectTimeout, int readTimeout) {
+    super(proxy);
     this.connectTimeout = connectTimeout;
     this.readTimeout = readTimeout;
   }

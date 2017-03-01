@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.googleapis;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.ConnectionFactory;
+import com.google.api.client.http.javanet.DefaultConnectionFactory;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson.JacksonFactory;
@@ -27,6 +28,18 @@ import com.google.api.services.appengine.v1.Appengine.Apps;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
+import java.net.Authenticator;
+import java.net.InetSocketAddress;
+import java.net.PasswordAuthentication;
+import java.net.Proxy;
+import java.net.Proxy.Type;
+import java.net.URI;
+import java.net.URISyntaxException;
+import org.eclipse.core.net.proxy.IProxyData;
+import org.eclipse.core.net.proxy.IProxyService;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * Class to obtain various Google cloud Platform related APIs.
@@ -34,14 +47,25 @@ import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
  * TODO move this class into a separate API bundle
  * https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1438
  */
+@Component
 public class GoogleApiFactory {
 
+  private static final String GOOGLEAPIS_URL = "https://appengine.googleapis.com";
   private static final int DEFAULT_TIMEOUT_MS = 1000;
-  private static final JsonFactory jsonFactory = new JacksonFactory();
-  private static final ConnectionFactory connectionFactory =
-      new TimeoutAwareConnectionFactory(DEFAULT_TIMEOUT_MS, DEFAULT_TIMEOUT_MS);
-  private static final HttpTransport transport =
-      new NetHttpTransport.Builder().setConnectionFactory(connectionFactory).build();
+  private JsonFactory jsonFactory;
+  private ConnectionFactory connectionFactory;
+  private HttpTransport transport;
+
+  private IProxyService proxyService;
+
+  @Activate
+  public void init() throws URISyntaxException {
+    jsonFactory = new JacksonFactory();
+    connectionFactory =
+        new TimeoutAwareConnectionFactory(createProxy(), DEFAULT_TIMEOUT_MS, DEFAULT_TIMEOUT_MS);
+    transport =
+        new NetHttpTransport.Builder().setConnectionFactory(connectionFactory).build();
+  }
 
   /**
    * @return the CloudResourceManager/Projects API
@@ -63,5 +87,20 @@ public class GoogleApiFactory {
             .setApplicationName(CloudToolsInfo.USER_AGENT).build();
     Apps apps = appengine.apps();
     return apps;
+  }
+
+  private Proxy createProxy() throws URISyntaxException {
+    IProxyData[] proxyData = proxyService.select(new URI(GOOGLEAPIS_URL));
+    for (final IProxyData iProxyData : proxyData) {
+      if (IProxyData.HTTPS_PROXY_TYPE.equals(iProxyData.getType())) {
+        return new Proxy(Type.HTTP, new InetSocketAddress(iProxyData.getHost(), iProxyData.getPort()));
+      }
+    }
+    return Proxy.NO_PROXY;
+  }
+
+  @Reference(unbind="-")
+  public void setProxyService(IProxyService proxyService) {
+    this.proxyService = proxyService;
   }
 }
