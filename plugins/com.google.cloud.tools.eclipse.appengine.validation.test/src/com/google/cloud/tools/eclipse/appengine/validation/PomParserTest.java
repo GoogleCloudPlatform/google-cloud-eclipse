@@ -28,7 +28,7 @@ import org.xml.sax.SAXException;
 
 public class PomParserTest {
   
-  private static final String NAMESPACE = "<project xmlns='http://maven.apache.org/POM/4.0.0' "
+  private static final String PROJECT_START_TAG = "<project xmlns='http://maven.apache.org/POM/4.0.0' "
       + "xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' "
       + "xsi:schemaLocation='http://maven.apache.org/POM/4.0.0 "
       + "http://maven.apache.org/xsd/maven-4.0.0.xsd'>";
@@ -44,7 +44,7 @@ public class PomParserTest {
   @Test
   public void testReadXml_xmlWithBannedElement()
       throws ParserConfigurationException, IOException, SAXException {
-    String xml = NAMESPACE
+    String xml = PROJECT_START_TAG
         + "<build><plugins><plugin><groupId>com.google.appengine</groupId>"
         + "<artifactId>appengine-maven-plugin</artifactId></plugin></plugins></build></project>";
     byte[] bytes = xml.getBytes(StandardCharsets.UTF_8);
@@ -56,7 +56,7 @@ public class PomParserTest {
   @Test
   public void testReadXml_differentOrder()
       throws ParserConfigurationException, IOException, SAXException {
-    String xml = NAMESPACE
+    String xml = PROJECT_START_TAG
         + "<build><plugins><plugin><artifactId>appengine-maven-plugin</artifactId>"
         + "<groupId>com.google.appengine</groupId></plugin></plugins></build></project>";
     byte[] bytes = xml.getBytes(StandardCharsets.UTF_8);
@@ -68,7 +68,7 @@ public class PomParserTest {
   @Test
   public void testReadXml_noBannedElements()
       throws ParserConfigurationException, IOException, SAXException {
-    String xml = NAMESPACE
+    String xml = PROJECT_START_TAG
         + "<build><plugins><plugin><groupId>com.google.tools</groupId>"
         + "<artifactId>appengine-maven-plugin</artifactId></plugin></plugins></build></project>";
     byte[] bytes = xml.getBytes(StandardCharsets.UTF_8);

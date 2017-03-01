@@ -39,12 +39,12 @@ import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 
 public class PomXmlValidatorTest {
 
-  private static final String NAMESPACE = "<project xmlns='http://maven.apache.org/POM/4.0.0' "
+  private static final String PROJECT_START_TAG = "<project xmlns='http://maven.apache.org/POM/4.0.0' "
       + "xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' "
       + "xsi:schemaLocation='http://maven.apache.org/POM/4.0.0 "
       + "http://maven.apache.org/xsd/maven-4.0.0.xsd'>";
-  private static final String XML_NO_BANNED_ELEMENTS = NAMESPACE + "<test></test></project>";
-  private static final String XML = NAMESPACE
+  private static final String XML_NO_BANNED_ELEMENTS = PROJECT_START_TAG + "<test></test></project>";
+  private static final String XML = PROJECT_START_TAG
       + "<build><plugins><plugin><groupId>com.google.appengine</groupId>"
       + "<artifactId>appengine-maven-plugin</artifactId></plugin></plugins></build></project>";
   private static final String PLUGIN_MARKER =
