@@ -97,7 +97,7 @@ class PomXmlScanner extends AbstractScanner {
       // with the same <plugin> parent
       DocumentLocation start = new DocumentLocation(lineNumber, columnNumber - 9);
       String message = Messages.getString("maven.plugin");
-      BannedElement element = new BannedElement(message, start, 9 /*length of <groupId>*/);
+      BannedElement element = new MavenPluginElement(message, start, 9 /*length of <groupId>*/);
       addToBlacklist(element);
       foundAppEngineGroupId = false;
       foundArtifactId = false;

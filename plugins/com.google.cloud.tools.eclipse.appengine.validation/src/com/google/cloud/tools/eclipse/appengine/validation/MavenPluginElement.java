@@ -19,16 +19,16 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 import org.eclipse.core.resources.IMarker;
 
 /**
- * A blacklisted java servlet element that will receive a servlet marker. 
+ * A blacklisted group ID element that will receive an App Engine Maven plugin marker. 
  */
-public class JavaServletElement extends BannedElement {
+public class MavenPluginElement extends BannedElement {
 
   private static final String markerId = 
-      "com.google.cloud.tools.eclipse.appengine.validation.servletMarker";
-  private static final int severity = IMarker.SEVERITY_ERROR;
+      "com.google.cloud.tools.eclipse.appengine.validation.mavenPluginMarker";
+  private static final int severity = IMarker.SEVERITY_WARNING;
   
-  public JavaServletElement(String message, DocumentLocation start, int length) {
+  public MavenPluginElement(String message, DocumentLocation start, int length) {
     super(message, markerId, severity, start, length);
   }
-
+  
 }

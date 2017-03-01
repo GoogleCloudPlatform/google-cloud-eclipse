@@ -31,12 +31,4 @@ public class AppEngineBlacklistElement extends BannedElement {
     super(message, markerId, severity, start, length);
   }
   
-  String getMarkerId() {
-    return markerId;
-  }
-  
-  int getSeverity() {
-    return severity;
-  }
-
 }
