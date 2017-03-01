@@ -246,7 +246,6 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
           return Boolean.FALSE;  // Force unchecking the stop previous button if it is disabled.
         }
         return currentValue;  // Otherwise, check the button according to the latest user choice.
-
       }
     }, new UpdateValueStrategy(UpdateValueStrategy.POLICY_NEVER), null);
 
