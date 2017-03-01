@@ -89,11 +89,9 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
   private Text version;
 
-  @VisibleForTesting
-  Button autoPromoteButton;
+  private Button autoPromoteButton;
 
-  @VisibleForTesting
-  Button stopPreviousVersionButton;
+  private Button stopPreviousVersionButton;
 
   private Text bucket;
 
