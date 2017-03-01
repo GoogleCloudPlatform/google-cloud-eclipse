@@ -21,7 +21,6 @@ import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.xml.sax.SAXException;
@@ -40,10 +39,8 @@ public class PomXmlValidator extends AbstractXmlValidator {
       SaxParserResults parserResults = PomParser.readXml(bytes);
       Map<BannedElement, Integer> bannedElementOffsetMap =
           ValidationUtils.getOffsetMap(bytes, parserResults);
-      String markerId = "com.google.cloud.tools.eclipse.appengine.validation.mavenPluginMarker";
       for (Map.Entry<BannedElement, Integer> entry : bannedElementOffsetMap.entrySet()) {
-        createMarker(resource, entry.getKey(), entry.getValue(),
-            markerId, IMarker.SEVERITY_WARNING);
+        createMarker(resource, entry.getKey(), entry.getValue());
       }
     } catch (SAXException ex) {
       createSaxErrorMessage(resource, ex);

@@ -42,9 +42,7 @@ public class WebXmlValidator extends AbstractXmlValidator {
       Map<BannedElement, Integer> bannedElementOffsetMap =
           ValidationUtils.getOffsetMap(bytes, parserResults);
       for (Map.Entry<BannedElement, Integer> entry : bannedElementOffsetMap.entrySet()) {
-        BannedElement element = entry.getKey();
-        createMarker(resource, element, entry.getValue(),
-            element.getMarkerId(), element.getSeverity());
+        createMarker(resource, entry.getKey(), entry.getValue());
       }
     } catch (SAXException ex) {
       createSaxErrorMessage(resource, ex);

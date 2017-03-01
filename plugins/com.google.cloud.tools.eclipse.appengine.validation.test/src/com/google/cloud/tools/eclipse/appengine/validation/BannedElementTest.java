@@ -27,7 +27,7 @@ public class BannedElementTest {
 
   @Test(expected = NullPointerException.class)
   public void testBannedElementConstructor_nullLocation() {
-    new BannedElement("test", "", 1, null, 0);
+    new BannedElement("test", "org.eclipse.core.resources.problemmarker", 1, null, 0);
   }
 
 }
