@@ -243,9 +243,9 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
       }
     }, new UpdateValueStrategy(UpdateValueStrategy.POLICY_NEVER), null);
 
-    // One-way update: latest user choice <-- button selection
+    // One-way update: button selection --> latest user choice
     // Update the choice (to match the button selection), only when the button is enabled.
-    context.bindValue(stopPreviousVersionModel, new ComputedValue() {
+    context.bindValue(new ComputedValue() {
       @Override
       protected Object calculate() {
         boolean buttonEnabled = (boolean) stopPreviousVersionEnablement.getValue();
@@ -256,7 +256,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
         }
         return currentValue;
       }
-    }, new UpdateValueStrategy(UpdateValueStrategy.POLICY_NEVER), null);
+    }, stopPreviousVersionModel, null, new UpdateValueStrategy(UpdateValueStrategy.POLICY_NEVER));
   }
 
   private void setupBucketDataBinding(DataBindingContext context) {
