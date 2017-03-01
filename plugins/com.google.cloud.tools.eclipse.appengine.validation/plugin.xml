@@ -105,7 +105,7 @@
 		class="com.google.cloud.tools.eclipse.appengine.validation.WebXmlSourceValidator"
 		id="webXmlSourceValidator">
 	  <contentTypeIdentifier id="web.xml">
-	    <partitionType id="org.eclipse.wst.xml.XML_PI"/>
+	    <partitionType id="org.eclipse.wst.xml.XML_DEFAULT"/>
 	  </contentTypeIdentifier>
 	</validator>
   </extension>
