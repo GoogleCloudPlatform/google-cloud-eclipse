@@ -23,7 +23,8 @@ import org.xml.sax.ext.Locator2;
 import com.google.common.annotations.VisibleForTesting;
 
 /**
- * Adds <groupId> element to {@link BannedElement} queue if the Maven plugin is not up to date.
+ * Adds <groupId> element to {@link BannedElement} queue if a deprecated
+ * App Engine Maven plugin is used.
  */
 class PomXmlScanner extends AbstractScanner {
 
@@ -68,7 +69,7 @@ class PomXmlScanner extends AbstractScanner {
   
   /**
    * Checks for closing <build> and <groupId> tags. If a closing <groupId> tag
-   * with an out of date Maven plugin and an <artifactId> tag with
+   * with a deprecated App Engine Maven plugin and an <artifactId> tag with
    * value "appengine-maven-plugin" are found within the same <plugin>, a
    * {@link BannedElement} is added to the blacklist queue.
    */
@@ -92,7 +93,8 @@ class PomXmlScanner extends AbstractScanner {
       }
     }
     if (foundAppEngineGroupId && foundArtifactId) {
-      // Found old Maven plugin and App Engine artifact ID with the same <plugin> parent
+      // Found deprecated App Engine Maven plugin and App Engine artifact ID
+      // with the same <plugin> parent
       DocumentLocation start = new DocumentLocation(lineNumber, columnNumber - 9);
       String message = Messages.getString("maven.plugin");
       BannedElement element = new BannedElement(message, start, 9 /*length of <groupId>*/);

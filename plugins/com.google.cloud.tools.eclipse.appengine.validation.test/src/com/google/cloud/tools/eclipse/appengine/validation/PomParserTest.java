@@ -26,7 +26,12 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-public class PomXmlSaxParserTest {
+public class PomParserTest {
+  
+  private static final String NAMESPACE = "<project xmlns='http://maven.apache.org/POM/4.0.0' "
+      + "xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' "
+      + "xsi:schemaLocation='http://maven.apache.org/POM/4.0.0 "
+      + "http://maven.apache.org/xsd/maven-4.0.0.xsd'>";
   
   @Test
   public void testReadXml_emptyXml()
@@ -39,11 +44,11 @@ public class PomXmlSaxParserTest {
   @Test
   public void testReadXml_xmlWithBannedElement()
       throws ParserConfigurationException, IOException, SAXException {
-    String xml =
-        "<build><plugins><plugin><groupId>com.google.appengine</groupId>"
-        + "<artifactId>appengine-maven-plugin</artifactId></plugin></plugins></build>";
+    String xml = NAMESPACE
+        + "<build><plugins><plugin><groupId>com.google.appengine</groupId>"
+        + "<artifactId>appengine-maven-plugin</artifactId></plugin></plugins></build></project>";
     byte[] bytes = xml.getBytes(StandardCharsets.UTF_8);
-    Queue<BannedElement> blacklist = PomXmlSaxParser.readXml(bytes).getBlacklist();
+    Queue<BannedElement> blacklist = PomParser.readXml(bytes).getBlacklist();
     String message = Messages.getString("maven.plugin");
     assertEquals(blacklist.poll().getMessage(), message);
   }
@@ -51,11 +56,11 @@ public class PomXmlSaxParserTest {
   @Test
   public void testReadXml_differentOrder()
       throws ParserConfigurationException, IOException, SAXException {
-    String xml =
-        "<build><plugins><plugin><artifactId>appengine-maven-plugin</artifactId>"
-        + "<groupId>com.google.appengine</groupId></plugin></plugins></build>";
+    String xml = NAMESPACE
+        + "<build><plugins><plugin><artifactId>appengine-maven-plugin</artifactId>"
+        + "<groupId>com.google.appengine</groupId></plugin></plugins></build></project>";
     byte[] bytes = xml.getBytes(StandardCharsets.UTF_8);
-    Queue<BannedElement> blacklist = PomXmlSaxParser.readXml(bytes).getBlacklist();
+    Queue<BannedElement> blacklist = PomParser.readXml(bytes).getBlacklist();
     String message = Messages.getString("maven.plugin");
     assertEquals(blacklist.poll().getMessage(), message);
   }
@@ -63,11 +68,11 @@ public class PomXmlSaxParserTest {
   @Test
   public void testReadXml_noBannedElements()
       throws ParserConfigurationException, IOException, SAXException {
-    String xml =
-        "<build><plugins><plugin><groupId>com.google.tools</groupId>"
-        + "<artifactId>appengine-maven-plugin</artifactId></plugin></plugins></build>";
+    String xml = NAMESPACE
+        + "<build><plugins><plugin><groupId>com.google.tools</groupId>"
+        + "<artifactId>appengine-maven-plugin</artifactId></plugin></plugins></build></project>";
     byte[] bytes = xml.getBytes(StandardCharsets.UTF_8);
-    Queue<BannedElement> blacklist = PomXmlSaxParser.readXml(bytes).getBlacklist();
+    Queue<BannedElement> blacklist = PomParser.readXml(bytes).getBlacklist();
     assertTrue(blacklist.isEmpty());
   }
 

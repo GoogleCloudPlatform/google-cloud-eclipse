@@ -27,7 +27,7 @@ import org.xml.sax.helpers.XMLReaderFactory;
 /**
  * Retrieves and returns the results of the SAX parser.
  */
-class PomXmlSaxParser {
+class PomParser {
   
   static SaxParserResults readXml(byte[] bytes)
       throws ParserConfigurationException, IOException, SAXException {

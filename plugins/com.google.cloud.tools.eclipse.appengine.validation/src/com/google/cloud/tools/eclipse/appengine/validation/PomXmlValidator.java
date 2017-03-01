@@ -30,14 +30,14 @@ public class PomXmlValidator extends AbstractXmlValidator {
 
   /**
    * Clears all problem markers from the resource, then adds a Maven plugin marker
-   * to pom.xml if the Maven plugin is out of date.
+   * to pom.xml if the App Engine Maven plugin is obsolete.
    */
   @Override
   protected void validate(IResource resource, byte[] bytes)
       throws CoreException, IOException, ParserConfigurationException {
     try {
       deleteMarkers(resource);
-      SaxParserResults parserResults = PomXmlSaxParser.readXml(bytes);
+      SaxParserResults parserResults = PomParser.readXml(bytes);
       Map<BannedElement, Integer> bannedElementOffsetMap =
           ValidationUtils.getOffsetMap(bytes, parserResults);
       String markerId = "com.google.cloud.tools.eclipse.appengine.validation.mavenPluginMarker";
