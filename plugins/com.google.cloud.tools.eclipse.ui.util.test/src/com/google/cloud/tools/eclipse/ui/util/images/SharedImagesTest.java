@@ -27,7 +27,7 @@ public class SharedImagesTest {
   @Rule public ShellTestResource shell = new ShellTestResource();
 
   @Test
-  public void test() {
+  public void testCreateRefreshIcon() {
     assertNotNull(SharedImages.createRefreshIcon(shell.getDisplay()));
   }
 
