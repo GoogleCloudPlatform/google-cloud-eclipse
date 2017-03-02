@@ -39,7 +39,6 @@ public class AppEngineLibrariesPageTest {
     Assert.assertTrue(page.finish());
   }
   
-  
   @Test
   public void testGetSelection() {
     Assert.assertNull(page.getSelection());
