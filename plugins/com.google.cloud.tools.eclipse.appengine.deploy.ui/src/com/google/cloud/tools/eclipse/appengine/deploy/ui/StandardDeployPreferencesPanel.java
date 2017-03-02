@@ -130,7 +130,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
     this.projectRepository = projectRepository;
 
-    refreshIcon = SharedImages.getRefreshIcon(getDisplay());
+    refreshIcon = SharedImages.createRefreshIcon(getDisplay());
 
     createCredentialSection(loginService);
 
@@ -297,16 +297,35 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     Label projectIdLabel = new Label(this, SWT.LEAD);
     projectIdLabel.setText(Messages.getString("project"));
     projectIdLabel.setToolTipText(Messages.getString("tooltip.project.id"));
-    GridDataFactory.swtDefaults().align(SWT.BEGINNING, SWT.BEGINNING).span(2, 1)
+    GridDataFactory.swtDefaults().align(SWT.BEGINNING, SWT.BEGINNING).span(1, 2)
         .applyTo(projectIdLabel);
+
+    Link createNewProject = new Link(this, SWT.NONE);
+    createNewProject.setText(Messages.getString("projectselector.createproject",
+                                                CREATE_GCP_PROJECT_WITH_GAE_URL));
+    createNewProject.setToolTipText(Messages.getString("projectselector.createproject.tooltip"));
+    createNewProject.addSelectionListener(
+        new OpenUriSelectionListener(new ErrorDialogErrorHandler(getShell())));
+    GridDataFactory.swtDefaults().align(SWT.FILL, SWT.BEGINNING)
+        .applyTo(createNewProject);
 
     Composite projectSelectorComposite = new Composite(this, SWT.NONE);
     GridLayoutFactory.fillDefaults().numColumns(2).spacing(0, 0).applyTo(projectSelectorComposite);
-    GridDataFactory.fillDefaults().grab(true, false).span(2, 1).applyTo(projectSelectorComposite);
+    GridDataFactory.fillDefaults().grab(true, false).applyTo(projectSelectorComposite);
 
     projectSelector = new ProjectSelector(projectSelectorComposite);
     GridDataFactory.fillDefaults().grab(true, false).hint(SWT.DEFAULT, 200)
         .applyTo(projectSelector);
+
+    Button refreshProjectsButton = new Button(projectSelectorComposite, SWT.NONE);
+    refreshProjectsButton.setImage(refreshIcon);
+    GridDataFactory.swtDefaults().align(SWT.END, SWT.BEGINNING).applyTo(refreshProjectsButton);
+    refreshProjectsButton.addSelectionListener(new SelectionAdapter() {
+      @Override
+      public void widgetSelected(SelectionEvent e) {
+        refreshProjectsForSelectedCredential();
+      }
+    });
 
     accountSelector.addSelectionListener(new Runnable() {
       @Override
@@ -319,24 +338,6 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
         new ProjectSelectorSelectionChangedListener(accountSelector,
                                                     projectRepository,
                                                     projectSelector));
-
-    Button refreshProjectsButton = new Button(projectSelectorComposite, SWT.NONE);
-    refreshProjectsButton.setImage(refreshIcon);
-    GridDataFactory.swtDefaults().align(SWT.END, SWT.BEGINNING).applyTo(refreshProjectsButton);
-    refreshProjectsButton.addSelectionListener(new SelectionAdapter() {
-      @Override
-      public void widgetSelected(SelectionEvent e) {
-        refreshProjectsForSelectedCredential();
-      }
-    });
-
-    Link createNewProject = new Link(this, SWT.NONE);
-    createNewProject.setText(Messages.getString("projectselector.createproject",
-        CREATE_GCP_PROJECT_WITH_GAE_URL));
-    createNewProject.setToolTipText(Messages.getString("projectselector.createproject.tooltip"));
-    createNewProject.addSelectionListener(
-        new OpenUriSelectionListener(new ErrorDialogErrorHandler(getShell())));
-    GridDataFactory.swtDefaults().align(SWT.FILL, SWT.BEGINNING).span(2, 1).applyTo(createNewProject);
   }
 
   private void createProjectVersionSection() {

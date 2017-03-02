@@ -23,11 +23,28 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 public class SharedImages {
 
-  private static final ImageDescriptor refreshImageDescriptor =
+  private static final ImageDescriptor refreshGifImageDescriptor =
       AbstractUIPlugin.imageDescriptorFromPlugin("org.eclipse.search",
                                                  "icons/full/elcl16/refresh.gif");
 
-  public static Image getRefreshIcon(Device device) {
-    return refreshImageDescriptor.createImage(device);
+  private static final ImageDescriptor refreshPngImageDescriptor =
+      AbstractUIPlugin.imageDescriptorFromPlugin("org.eclipse.search",
+                                                 "icons/full/elcl16/refresh.png");
+
+  /**
+   * Creates an {@link Image} to be used to indicate a 'refresh' action.
+   * <p>
+   * The caller is responsible for properly disposing the Image once it's not needed anymore by
+   * calling {@link Image#dispose()} on the image object.
+   * @return the image or null if the image was not found
+   */
+  public static Image createRefreshIcon(Device device) {
+    if (refreshGifImageDescriptor != null) {
+      return refreshGifImageDescriptor.createImage(device);
+    } else if (refreshPngImageDescriptor != null) {
+      return refreshPngImageDescriptor.createImage(device);
+    } else {
+      return null;
+    }
   }
 }

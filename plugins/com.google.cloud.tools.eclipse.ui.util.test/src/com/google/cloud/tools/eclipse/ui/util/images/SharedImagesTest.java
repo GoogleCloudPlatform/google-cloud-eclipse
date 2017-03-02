@@ -28,7 +28,7 @@ public class SharedImagesTest {
 
   @Test
   public void test() {
-    assertNotNull(SharedImages.getRefreshIcon(shell.getDisplay()));
+    assertNotNull(SharedImages.createRefreshIcon(shell.getDisplay()));
   }
 
 }
