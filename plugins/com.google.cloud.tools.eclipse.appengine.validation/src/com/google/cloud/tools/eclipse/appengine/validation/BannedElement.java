@@ -23,7 +23,7 @@ import com.google.common.base.Preconditions;
 /**
  * A blacklisted element that will receive a problem marker. 
  */
-public class BannedElement {
+class BannedElement {
 
   private final String message;
   private final DocumentLocation start;
@@ -35,7 +35,7 @@ public class BannedElement {
    * @param length the length of the marker underline. Length == 0 results in a
    *        marker in the vertical ruler and no underline
    */
-  public BannedElement(String message, String markerId, int severity,
+  BannedElement(String message, String markerId, int severity,
       DocumentLocation start, int length) {
     Preconditions.checkNotNull(message, "message is null");
     Preconditions.checkNotNull(markerId, "markerId is null");
@@ -48,20 +48,20 @@ public class BannedElement {
     this.severity = severity;
   }
 
-  public BannedElement(String message) {
+  BannedElement(String message) {
     this(message, "org.eclipse.core.resources.problemmarker",
       1, new DocumentLocation(0, 0), 0);
   }
 
-  public String getMessage() {
+  String getMessage() {
     return message;
   }
 
-  public DocumentLocation getStart() {
+  DocumentLocation getStart() {
     return start;
   }
 
-  public int getLength() {
+  int getLength() {
     return length;
   }
   
@@ -73,6 +73,10 @@ public class BannedElement {
     return severity;
   }
   
+  /**
+   * BannedElements are equal if they represent the same marker type (marker ID),
+   * have the same location within a document, and will display the same message.
+   */
   @Override
   public boolean equals(Object object) {
     if (object == this) {
@@ -83,13 +87,14 @@ public class BannedElement {
     } 
     BannedElement element = (BannedElement) object;
     return Objects.equals(markerId, element.getMarkerId()) &&
+        Objects.equals(message, element.getMessage()) &&
         start.getLineNumber() == element.getStart().getLineNumber() &&
-        start.getColumnNumber() == element.getStart().getLineNumber();
+        start.getColumnNumber() == element.getStart().getColumnNumber();
   }
   
   @Override
   public int hashCode() {
-    return Objects.hash(markerId, start.getLineNumber(), start.getColumnNumber());
+    return Objects.hash(markerId, message, start.getLineNumber(), start.getColumnNumber());
   }
 
 }
