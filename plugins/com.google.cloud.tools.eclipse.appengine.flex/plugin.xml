@@ -34,7 +34,7 @@
           id="com.google.cloud.tools.eclipse.appengine.FlexFacetPropertyTester"
           namespace="com.google.cloud.tools.eclipse.appengine.flex"
           properties="flexFacetExists"
-          type="java.util.Collections$SingletonSet">
+          type="java.lang.Object">
     </propertyTester>
   </extension>
 
