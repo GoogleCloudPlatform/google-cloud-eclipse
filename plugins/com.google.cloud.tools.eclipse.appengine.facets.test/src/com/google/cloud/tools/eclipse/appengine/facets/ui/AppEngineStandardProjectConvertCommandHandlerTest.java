@@ -28,10 +28,15 @@ import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
+import org.eclipse.wst.common.componentcore.internal.builder.DependencyGraphImpl;
+import org.eclipse.wst.common.componentcore.internal.builder.IDependencyGraph;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -54,8 +59,20 @@ public class AppEngineStandardProjectConvertCommandHandlerTest {
       new AppEngineStandardProjectConvertCommandHandler();
 
   @Before
-  public void setUp() throws CoreException {
+  public void setUp() throws CoreException, OperationCanceledException, InterruptedException {
     facetedProject = ProjectFacetsManager.create(projectCreator.getProject());
+
+    // Workaround deadlock bug described in Eclipse bug (https://bugs.eclipse.org/511793).
+    // There are graph update jobs triggered by the completion of the CreateProjectOperation
+    // above (from resource notifications) and from other resource changes from modifying the
+    // project facets. So we force the dependency graph to defer updates.
+    IDependencyGraph.INSTANCE.preUpdate();
+    Job.getJobManager().join(DependencyGraphImpl.GRAPH_UPDATE_JOB_FAMILY, null);
+  }
+
+  @After
+  public void tearDown() {
+    IDependencyGraph.INSTANCE.postUpdate();
   }
 
   @Test

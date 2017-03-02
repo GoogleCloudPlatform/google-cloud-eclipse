@@ -27,7 +27,7 @@
       <delegate class="com.google.cloud.tools.eclipse.appengine.facets.FlexFacetUninstallDelegate"/>
     </action>
   </extension>
-  
+
   <extension point="org.eclipse.core.expressions.propertyTesters">
     <propertyTester
           class="com.google.cloud.tools.eclipse.appengine.flex.FlexFacetPropertyTester"

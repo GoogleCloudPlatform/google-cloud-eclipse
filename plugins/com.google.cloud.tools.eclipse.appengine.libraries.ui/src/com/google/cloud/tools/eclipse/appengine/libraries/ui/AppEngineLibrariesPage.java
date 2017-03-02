@@ -62,9 +62,7 @@ public class AppEngineLibrariesPage extends WizardPage implements IClasspathCont
     Composite composite = new Composite(parent, SWT.BORDER);
     composite.setLayout(new GridLayout(2, true));
     
-    if (!MavenUtils.hasMavenNature(project.getProject())) {
-      librariesSelector = new AppEngineLibrariesSelectorGroup(composite);
-    }
+    librariesSelector = new AppEngineLibrariesSelectorGroup(composite);
     
     setControl(composite);
   }
@@ -93,18 +91,20 @@ public class AppEngineLibrariesPage extends WizardPage implements IClasspathCont
 
   @Override
   public IClasspathEntry[] getNewContainers() {
-    if (librariesSelector == null) { // doesn't yet work in Maven project
-      return new IClasspathEntry[0];
-    }
-    
     List<Library> libraries = new ArrayList<>(librariesSelector.getSelectedLibraries());
     if (libraries == null || libraries.isEmpty()) {
       return null;
     }
+
     try {
-      IClasspathEntry[] added =
-          BuildPath.addLibraries(project, libraries, new NullProgressMonitor());
-      return added;
+      if (MavenUtils.hasMavenNature(project.getProject())) {
+        BuildPath.addMavenLibraries(project.getProject(), libraries, new NullProgressMonitor());
+        return new IClasspathEntry[0];
+      } else {
+        IClasspathEntry[] added =
+            BuildPath.addLibraries(project, libraries, new NullProgressMonitor());
+        return added;
+      }
     } catch (CoreException ex) {
       logger.log(Level.WARNING, "Error adding libraries to project", ex);
       return new IClasspathEntry[0];

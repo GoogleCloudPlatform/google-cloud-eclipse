@@ -3,17 +3,15 @@ package com.google.cloud.tools.eclipse.test.util.http;
 import static org.junit.Assert.assertTrue;
 
 import com.google.common.base.Preconditions;
-import com.google.common.io.CharStreams;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.servlet.MultipartConfigElement;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -38,7 +36,6 @@ public class TestHttpServer extends ExternalResource {
   private boolean requestHandled = false;
 
   private String requestMethod;
-  private String requestBody;
   private Map<String, String[]> requestParameters;
   private final Map<String, String> requestHeaders = new HashMap<>();
 
@@ -107,27 +104,18 @@ public class TestHttpServer extends ExternalResource {
     return requestHeaders;
   }
 
-  public String getRequestBody() {
-    Preconditions.checkState(requestHandled);
-    return requestBody;
-  }
-
-  public boolean requestParametersContain(String key, String value) {
-    Preconditions.checkState(requestHandled);
-    String[] values = requestParameters.get(key);
-    if (values == null) {
-      return false;
-    }
-
-    return Arrays.asList(values).contains(value);
-  }
-
   private class RequestHandler extends AbstractHandler {
 
     @Override
     public void handle(String target, Request baseRequest, HttpServletRequest request,
         HttpServletResponse response) throws IOException, ServletException {
       Preconditions.checkState(!requestHandled);
+
+      if (request.getContentType() != null
+          && request.getContentType().startsWith("multipart/form-data")) {
+        request.setAttribute(Request.__MULTIPART_CONFIG_ELEMENT,
+            new MultipartConfigElement(System.getProperty("java.io.tmpdir")));
+      }
 
       if (target.equals("/" + expectedPath)) {
         requestHandled = true;
@@ -137,9 +125,6 @@ public class TestHttpServer extends ExternalResource {
           String header = headers.nextElement();
           requestHeaders.put(header, request.getHeader(header));
         }
-
-        requestBody = CharStreams.toString(
-            new InputStreamReader(request.getInputStream(), StandardCharsets.UTF_8));
 
         baseRequest.setHandled(true);
         byte[] bytes = responseContent.getBytes(StandardCharsets.UTF_8);

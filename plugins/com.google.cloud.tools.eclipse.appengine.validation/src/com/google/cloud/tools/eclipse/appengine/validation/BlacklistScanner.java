@@ -34,7 +34,7 @@ class BlacklistScanner extends AbstractScanner {
       DocumentLocation start = new DocumentLocation(locator.getLineNumber(),
           locator.getColumnNumber() - qName.length() - 2);
       String message = AppEngineWebBlacklist.getBlacklistElementMessage(qName);
-      BannedElement element = new BannedElement(message, start, qName.length() + 2);
+      BannedElement element = new AppEngineBlacklistElement(message, start, qName.length() + 2);
       addToBlacklist(element);
     }
   }

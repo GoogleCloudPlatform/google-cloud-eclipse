@@ -18,7 +18,9 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.Map;
@@ -57,7 +59,7 @@ public class ValidationUtilsTest {
   @Before
   public void setUp() {
     DocumentLocation start = new DocumentLocation(2, 1);
-    element = new BannedElement("application", start, 1);
+    element = new BannedElement("application", "", 1, start, 1);
     blacklist.add(element);
   }
   
@@ -96,7 +98,7 @@ public class ValidationUtilsTest {
     byte[] bytes = MIXED_XML_WITH_PROJECT_ID.getBytes(StandardCharsets.UTF_8);
     blacklist.clear();
     DocumentLocation start = new DocumentLocation(3, 1);
-    BannedElement element = new BannedElement("application", start, 1);
+    BannedElement element = new BannedElement("application", "", 1, start, 1);
     blacklist.add(element);
     SaxParserResults result = new SaxParserResults(blacklist, "UTF-8");
     Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, result);
@@ -119,7 +121,7 @@ public class ValidationUtilsTest {
   public void testGetOffsetMap_firstElement() throws IOException {
     blacklist.clear();
     DocumentLocation start = new DocumentLocation(1, 1);
-    BannedElement newElement = new BannedElement("application", start, 1);
+    BannedElement newElement = new BannedElement("application", "", 1, start, 1);
     blacklist.add(newElement);
     byte[] bytes = XML_WITH_PROJECT_ID_FIRST.getBytes(StandardCharsets.UTF_8);
     SaxParserResults result = new SaxParserResults(blacklist, "UTF-8");
@@ -127,5 +129,13 @@ public class ValidationUtilsTest {
     assertEquals(1, map.size());
     int offset = map.get(newElement);
     assertEquals(0, offset);
+  }
+  
+  @Test
+  public void testConvertStreamToString() throws IOException {
+    String test = "test string";
+    byte[] bytes = test.getBytes(StandardCharsets.UTF_8);
+    InputStream stream = new ByteArrayInputStream(bytes);
+    assertEquals(test, ValidationUtils.convertStreamToString(stream, "UTF-8"));
   }
 }
