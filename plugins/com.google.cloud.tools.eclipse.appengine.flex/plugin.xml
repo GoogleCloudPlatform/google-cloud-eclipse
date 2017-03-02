@@ -28,16 +28,6 @@
     </action>
   </extension>
 
-  <extension point="org.eclipse.core.expressions.propertyTesters">
-    <propertyTester
-          class="com.google.cloud.tools.eclipse.appengine.flex.FlexFacetPropertyTester"
-          id="com.google.cloud.tools.eclipse.appengine.FlexFacetPropertyTester"
-          namespace="com.google.cloud.tools.eclipse.appengine.flex"
-          properties="flexFacetExists"
-          type="java.lang.Object">
-    </propertyTester>
-  </extension>
-
   <extension point="org.eclipse.ui.newWizards">
      <wizard
             id="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineFlex"

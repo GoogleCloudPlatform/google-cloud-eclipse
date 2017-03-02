@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.flex;
+package com.google.cloud.tools.eclipse.util;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.eclipse.core.expressions.PropertyTester;
+import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
 /**
- * Unit tests for {@link FlexFacetPropertyTester}
+ * A {@link PropertyTester} that checks if the facet specified in <@code>expectedValue</@code> exists.
  */
-public class FlexFacetPropertyTesterTest {
-  private FlexFacetPropertyTester propertyTester = new FlexFacetPropertyTester();
-
-  @Test
-  public void testPropertyTester() {
-    Assert.assertTrue(propertyTester.test(null /* receiver */, "flexFacetExists", null /* args */, null /* expectedValue */));
+// TODO: rename class; suggestions?
+public class FacetExistsPropertyTester extends PropertyTester {
+  @Override
+  public boolean test(Object receiver, String property, Object[] args, Object expectedValue) {
+    return ProjectFacetsManager.isProjectFacetDefined(expectedValue.toString());
   }
+
 }
