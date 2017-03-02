@@ -87,6 +87,31 @@
       markerType="com.google.cloud.tools.eclipse.appengine.validation.servletMarker">
     </markerResolutionGenerator>
   </extension>
+  
+  <extension 
+      name="%pom.validator"
+      point="org.eclipse.wst.validation.validatorV2" 
+      id="pomXmlValidator">
+    <validator
+    	class="com.google.cloud.tools.eclipse.appengine.validation.PomXmlValidator"
+      	markerId="com.google.cloud.tools.eclipse.appengine.validation.mavenPluginMarker">
+      <include>
+        <rules>
+          <file type="file" name="pom.xml"/>
+        </rules>
+      </include>
+    </validator>
+  </extension>
+  
+  <extension
+      id="mavenPluginMarker"
+      name="%maven.plugin.marker"
+      point="org.eclipse.core.resources.markers">
+    <super type="org.eclipse.jdt.core.problem" />
+    <super type="org.eclipse.core.resources.problemmarker" />
+    <super type="org.eclipse.core.resources.textmarker" />
+    <persistent value="true" />
+  </extension>
 
   <extension point="org.eclipse.wst.sse.ui.sourcevalidation">
   	  <validator

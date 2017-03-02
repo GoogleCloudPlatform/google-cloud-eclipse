@@ -110,8 +110,6 @@ public class AppEngineLibrariesInPluginXmlTest {
 
     assertThat(endpointsLibrary.getLibraryFiles().size(), is(1));
     LibraryFile libraryFile = endpointsLibrary.getLibraryFiles().get(0);
-    assertThat(libraryFile.getJavadocUri(), 
-        is(new URI("https://cloud.google.com/appengine/docs/java/endpoints/javadoc/")));
     assertNull(libraryFile.getSourceUri());
     assertTrue("Endpoints library not exported", libraryFile.isExport());
 
@@ -123,6 +121,8 @@ public class AppEngineLibrariesInPluginXmlTest {
     assertThat(mavenCoordinates.getVersion(), is("LATEST"));
     assertThat(mavenCoordinates.getType(), is("jar"));
     assertNull(mavenCoordinates.getClassifier());
+    assertThat(libraryFile.getJavadocUri(), 
+        is(new URI("https://cloud.google.com/appengine/docs/java/endpoints/javadoc/")));
 
     assertNotNull(libraryFile.getFilters());
     List<Filter> filters = libraryFile.getFilters();
@@ -145,8 +145,6 @@ public class AppEngineLibrariesInPluginXmlTest {
 
     assertThat(objectifyLibrary.getLibraryFiles().size(), is(2));
     LibraryFile objectifyLibraryFile = objectifyLibrary.getLibraryFiles().get(0);
-    assertThat(objectifyLibraryFile.getJavadocUri(), 
-        is(new URI("http://static.javadoc.io/com.googlecode.objectify/objectify/5.1.14/")));
     assertNull(objectifyLibraryFile.getSourceUri());
     assertTrue("Objectify not exported", objectifyLibraryFile.isExport());
 
@@ -161,6 +159,8 @@ public class AppEngineLibrariesInPluginXmlTest {
 
     assertNotNull(objectifyLibraryFile.getFilters());
     assertTrue(objectifyLibraryFile.getFilters().isEmpty());
+    assertThat(objectifyLibraryFile.getJavadocUri(), 
+        is(new URI("http://static.javadoc.io/com.googlecode.objectify/objectify/5.1.14/")));
     
     LibraryFile guavaLibraryFile = objectifyLibrary.getLibraryFiles().get(1);
     assertThat(guavaLibraryFile.getJavadocUri(), 

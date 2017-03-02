@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-api-client-1.22.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-http-client-1.22.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-http-client-jackson-1.22.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-api-services-appengine-v1-rev9-1.21.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-api-services-cloudresourcemanager-v1-rev355-1.22.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-api-services-oauth2-v2-rev114-1.22.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-oauth-client-1.22.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-oauth-client-java6-1.22.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-oauth-client-jetty-1.22.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/plugins-login-common-0.1.1-SNAPSHOT.jar"/>
+	<classpathentry kind="output" path="target/classes"/>
+</classpath>

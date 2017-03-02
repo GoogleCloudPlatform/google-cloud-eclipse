@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.Map;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.xml.sax.SAXException;
@@ -31,8 +30,8 @@ import org.xml.sax.SAXException;
 public class WebXmlValidator extends AbstractXmlValidator {
    
   /**
-   * Clears all problem markers from the resource, then creates a servlet marker in 
-   * web.xml if the servlet is not version 2.5.
+   * Clears all problem markers from the resource, then adds a marker in 
+   * web.xml for every {@link BannedElement} found in the file.
    */
   @Override
   protected void validate(IResource resource, byte[] bytes) 
@@ -42,10 +41,8 @@ public class WebXmlValidator extends AbstractXmlValidator {
       SaxParserResults parserResults = WebXmlSaxParser.readXml(bytes);
       Map<BannedElement, Integer> bannedElementOffsetMap =
           ValidationUtils.getOffsetMap(bytes, parserResults);
-      String markerId = "com.google.cloud.tools.eclipse.appengine.validation.servletMarker";
       for (Map.Entry<BannedElement, Integer> entry : bannedElementOffsetMap.entrySet()) {
-        createMarker(resource, entry.getKey(), entry.getValue(),
-            markerId, IMarker.SEVERITY_ERROR);
+        createMarker(resource, entry.getKey(), entry.getValue());
       }
     } catch (SAXException ex) {
       createSaxErrorMessage(resource, ex);

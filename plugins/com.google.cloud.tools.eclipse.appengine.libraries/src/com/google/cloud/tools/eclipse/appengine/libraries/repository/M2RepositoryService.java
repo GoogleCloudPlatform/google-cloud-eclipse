@@ -115,10 +115,11 @@ public class M2RepositoryService implements ILibraryRepositoryService {
    * Maven.
    */
   @Override
-  public void makeArtifactAvailable(LibraryFile libraryFile, IProgressMonitor monitor) throws CoreException {
-      if (mavenHelper.isArtifactLocallyAvailable(libraryFile.getMavenCoordinates())) {
-        return;
-      }
-      mavenHelper.resolveArtifact(libraryFile.getMavenCoordinates(), monitor);
+  public void makeArtifactAvailable(LibraryFile libraryFile, IProgressMonitor monitor)
+      throws CoreException {
+    if (mavenHelper.isArtifactLocallyAvailable(libraryFile.getMavenCoordinates())) {
+      return;
+    }
+    mavenHelper.resolveArtifact(libraryFile.getMavenCoordinates(), monitor);
   }
 }

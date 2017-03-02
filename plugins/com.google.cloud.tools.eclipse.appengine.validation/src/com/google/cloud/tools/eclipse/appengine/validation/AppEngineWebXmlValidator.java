@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.Map;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.xml.sax.SAXException;
@@ -31,7 +30,7 @@ import org.xml.sax.SAXException;
 public class AppEngineWebXmlValidator extends AbstractXmlValidator {
     
   /**
-   * Clears all problem markers from the resource, then adds a blacklist marker to 
+   * Clears all problem markers from the resource, then adds a marker to 
    * appengine-web.xml for every {@link BannedElement} found in the file.
    */
   @Override
@@ -42,10 +41,8 @@ public class AppEngineWebXmlValidator extends AbstractXmlValidator {
       SaxParserResults parserResults = BlacklistSaxParser.readXml(bytes);
       Map<BannedElement, Integer> bannedElementOffsetMap =
           ValidationUtils.getOffsetMap(bytes, parserResults);
-      String markerId = "com.google.cloud.tools.eclipse.appengine.validation.appEngineBlacklistMarker";
       for (Map.Entry<BannedElement, Integer> entry : bannedElementOffsetMap.entrySet()) {
-        createMarker(resource, entry.getKey(), entry.getValue(),
-            markerId, IMarker.SEVERITY_WARNING);
+        createMarker(resource, entry.getKey(), entry.getValue());
       }
     } catch (SAXException ex) {
       createSaxErrorMessage(resource, ex);

@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.net.URI;
 import java.util.ArrayList;
@@ -38,13 +39,11 @@ public final class Library {
   private URI siteUri;
   private boolean export = true;
   private List<LibraryFile> libraryFiles = Collections.emptyList();
-
-  // library IDs of dependencies that also need to be added to the build path with this library
-  private List<String> libraryDependencies = new ArrayList<>();
-
   private LibraryRecommendation recommendation = LibraryRecommendation.OPTIONAL;
-
   private String group;
+
+  // IDs of other libraries that also need to be added to the build path with this library
+  private List<String> libraryDependencies = new ArrayList<>();
 
   public Library(String id) {
     Preconditions.checkNotNull(id, "id null");
@@ -52,6 +51,13 @@ public final class Library {
     this.id = id;
   }
 
+  @VisibleForTesting
+  public Library(String id, List<LibraryFile> libraryFiles) {
+    this.id = id;
+    this.libraryFiles = libraryFiles;
+  }
+
+  
   public String getId() {
     return id;
   }
@@ -64,7 +70,7 @@ public final class Library {
     return name;
   }
 
-  public void setName(String name) {
+  void setName(String name) {
     this.name = name;
   }
   
@@ -72,7 +78,7 @@ public final class Library {
     return toolTip;
   }
 
-  public void setToolTip(String toolTip) {
+  void setToolTip(String toolTip) {
     this.toolTip = toolTip;
   }
 
@@ -80,7 +86,7 @@ public final class Library {
     return siteUri;
   }
 
-  public void setSiteUri(URI siteUri) {
+  void setSiteUri(URI siteUri) {
     this.siteUri = siteUri;
   }
 
@@ -91,7 +97,7 @@ public final class Library {
   /**
    * @param libraryFiles artifacts associated with this library, cannot be <code>null</code>
    */
-  public void setLibraryFiles(List<LibraryFile> libraryFiles) {
+  void setLibraryFiles(List<LibraryFile> libraryFiles) {
     Preconditions.checkNotNull(libraryFiles);
     this.libraryFiles = new ArrayList<>(libraryFiles);
   }
@@ -100,7 +106,7 @@ public final class Library {
     return export;
   }
 
-  public void setExport(boolean export) {
+  void setExport(boolean export) {
     this.export = export;
   }
 
@@ -112,7 +118,7 @@ public final class Library {
    * @param libraryDependencies list of libraryIds that are dependencies of this library
    *     and should be added to the classpath, cannot be <code>null</code>
    */
-  public void setLibraryDependencies(List<String> libraryDependencies) {
+  void setLibraryDependencies(List<String> libraryDependencies) {
     Preconditions.checkNotNull(libraryDependencies);
     this.libraryDependencies = new ArrayList<>(libraryDependencies);
   }
@@ -120,7 +126,7 @@ public final class Library {
   /**
    * @param recommendation the level of recommendation for this library, cannot be <code>null</code>
    */
-  public void setRecommendation(LibraryRecommendation recommendation) {
+  void setRecommendation(LibraryRecommendation recommendation) {
     Preconditions.checkNotNull(recommendation);
     this.recommendation = recommendation;
   }
@@ -132,7 +138,7 @@ public final class Library {
   /**
    * @param group the collection to which this library belongs
    */
-  public void setGroup(String group) {
+  void setGroup(String group) {
     this.group = group;
   }
 

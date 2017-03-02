@@ -67,10 +67,10 @@ public abstract class AbstractXmlValidator extends AbstractValidator {
   /**
    * Creates a marker from a given {@link BannedElement}
    */
-  static void createMarker(IResource resource, BannedElement element,
-      int elementOffset, String markerId, int severity) throws CoreException {
-    IMarker marker = resource.createMarker(markerId);
-    marker.setAttribute(IMarker.SEVERITY, severity);
+  static void createMarker(IResource resource, BannedElement element, int elementOffset)
+      throws CoreException {
+    IMarker marker = resource.createMarker(element.getMarkerId());
+    marker.setAttribute(IMarker.SEVERITY, element.getSeverity());
     marker.setAttribute(IMarker.MESSAGE, element.getMessage());
     marker.setAttribute(IMarker.LOCATION, "line " + element.getStart().getLineNumber());
     marker.setAttribute(IMarker.CHAR_START, elementOffset);
