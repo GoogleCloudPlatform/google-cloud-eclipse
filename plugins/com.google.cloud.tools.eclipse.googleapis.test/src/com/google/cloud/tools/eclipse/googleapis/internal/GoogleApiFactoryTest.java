@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.googleapis;
+package com.google.cloud.tools.eclipse.googleapis.internal;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -31,6 +32,7 @@ import com.google.api.services.cloudresourcemanager.CloudResourceManager.Project
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Map;
 import org.eclipse.core.net.proxy.IProxyChangeListener;
 import org.eclipse.core.net.proxy.IProxyData;
 import org.eclipse.core.net.proxy.IProxyService;
@@ -45,7 +47,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class GoogleApiFactoryTest {
 
-  @Mock private HttpTransport transport;
   @Mock private JsonFactory jsonFactory;
   @Mock private IProxyService proxyService;
   @Mock private Credential credential;
@@ -57,7 +58,9 @@ public class GoogleApiFactoryTest {
   @Before
   public void setUp() {
     googleApiFactory = new GoogleApiFactory();
-    googleApiFactory.setTransport(transport);
+    Map<String, HttpTransport> transports = mock(Map.class);
+    when(transports.get(anyString())).thenReturn(mock(HttpTransport.class));
+    googleApiFactory.setTransport(transports);
     googleApiFactory.setJsonFactory(jsonFactory);
     googleApiFactory.setProxyService(proxyService);
   }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.googleapis;
+package com.google.cloud.tools.eclipse.googleapis.internal;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.http.HttpTransport;
@@ -22,18 +22,21 @@ import com.google.api.client.http.javanet.ConnectionFactory;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson.JacksonFactory;
-import com.google.api.client.repackaged.com.google.common.base.Preconditions;
 import com.google.api.services.appengine.v1.Appengine;
 import com.google.api.services.appengine.v1.Appengine.Apps;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects;
+import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.Proxy.Type;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.net.proxy.IProxyChangeEvent;
@@ -50,49 +53,36 @@ import org.osgi.service.component.annotations.Reference;
 @Component
 public class GoogleApiFactory implements IGoogleApiFactory {
 
-  private static final String GOOGLEAPIS_URL = "https://appengine.googleapis.com";
   private static final int DEFAULT_TIMEOUT_MS = 1000;
 
   private static final Logger logger = Logger.getLogger(GoogleApiFactory.class.getName());
 
   private JsonFactory jsonFactory;
-  private HttpTransport transport;
+  private Map<String, HttpTransport> transports = new HashMap<>();
 
   private IProxyService proxyService;
-  private String googleApiUrl;
+  private GoogleApiUrls googleApiUrls;
 
   public GoogleApiFactory() {
-    this(GOOGLEAPIS_URL);
+    this(new GoogleApiUrls());
   }
 
   @VisibleForTesting
-  GoogleApiFactory(String googleApiUrl) {
-    this.googleApiUrl = googleApiUrl;
+  GoogleApiFactory(GoogleApiUrls googleApiUrls) {
+    this.googleApiUrls = googleApiUrls;
   }
 
   @Activate
   public void init() {
     Preconditions.checkNotNull(proxyService, "proxyService is null");
     jsonFactory = new JacksonFactory();
-    buildTransport();
+    buildTransports();
     proxyService.addProxyChangeListener(new IProxyChangeListener() {
       @Override
       public void proxyInfoChanged(IProxyChangeEvent event) {
-        buildTransport();
+        buildTransports();
       }
     });
-  }
-
-  private void buildTransport() {
-    try {
-    ConnectionFactory connectionFactory =
-        new TimeoutAwareConnectionFactory(createProxy(), DEFAULT_TIMEOUT_MS, DEFAULT_TIMEOUT_MS);
-    transport =
-        new NetHttpTransport.Builder().setConnectionFactory(connectionFactory).build();
-    } catch (URISyntaxException ex) {
-      logger.log(Level.SEVERE, "Could not create transport using the proxy settings", ex);
-      transport = null;
-    }
   }
 
   /**
@@ -100,12 +90,15 @@ public class GoogleApiFactory implements IGoogleApiFactory {
    */
   @Override
   public Projects newProjectsApi(Credential credential) {
-    checkFields();
-    CloudResourceManager resourceManager =
-        new CloudResourceManager.Builder(transport, jsonFactory, credential)
-            .setApplicationName(CloudToolsInfo.USER_AGENT).build();
-    Projects projects = resourceManager.projects();
-    return projects;
+    synchronized (transports) {
+      checkFields();
+      CloudResourceManager resourceManager =
+          new CloudResourceManager.Builder(transports.get(googleApiUrls.cloudResourceManagerUrl()),
+                                           jsonFactory, credential)
+          .setApplicationName(CloudToolsInfo.USER_AGENT).build();
+      Projects projects = resourceManager.projects();
+      return projects;
+    }
   }
 
   /**
@@ -113,27 +106,58 @@ public class GoogleApiFactory implements IGoogleApiFactory {
    */
   @Override
   public Apps newAppsApi(Credential credential) {
-    checkFields();
-    Appengine appengine =
-        new Appengine.Builder(transport, jsonFactory, credential)
-            .setApplicationName(CloudToolsInfo.USER_AGENT).build();
-    Apps apps = appengine.apps();
-    return apps;
+    synchronized (transports) {
+      checkFields();
+      Appengine appengine =
+          new Appengine.Builder(transports.get(googleApiUrls.appEngineAdminUrl()), jsonFactory,
+                                credential)
+          .setApplicationName(CloudToolsInfo.USER_AGENT).build();
+      Apps apps = appengine.apps();
+      return apps;
+    }
   }
 
   private void checkFields() {
-    Preconditions.checkNotNull(transport, "transport is null");
+    Preconditions.checkNotNull(transports, "transport is null");
     Preconditions.checkNotNull(jsonFactory, "jsonFactory is null");
   }
 
-  private Proxy createProxy() throws URISyntaxException {
-    Preconditions.checkNotNull(proxyService, "proxyService is null");
-    Preconditions.checkNotNull(googleApiUrl, "googleApiUrl is null");
+  private void buildTransports() {
+    synchronized (transports) {
+      try {
+        buildAppEngineAdminTransport();
+        buildCloudResourceManagerTransport();
+      } catch (URISyntaxException ex) {
+        logger.log(Level.SEVERE, "Could not create transport using the proxy settings", ex);
+        transports = null;
+      }
+    }
+  }
 
-    IProxyData[] proxyData = proxyService.select(new URI(googleApiUrl));
+  private void buildAppEngineAdminTransport() throws URISyntaxException {
+    buildTransportForUrl(googleApiUrls.appEngineAdminUrl());
+  }
+
+  private void buildCloudResourceManagerTransport() throws URISyntaxException {
+    buildTransportForUrl(googleApiUrls.cloudResourceManagerUrl());
+  }
+
+  private void buildTransportForUrl(String url) throws URISyntaxException {
+    ConnectionFactory connectionFactory =
+        new TimeoutAwareConnectionFactory(createProxy(url), DEFAULT_TIMEOUT_MS, DEFAULT_TIMEOUT_MS);
+    transports.put(url,
+                   new NetHttpTransport.Builder().setConnectionFactory(connectionFactory).build());
+  }
+
+  private Proxy createProxy(String url) throws URISyntaxException {
+    Preconditions.checkNotNull(proxyService, "proxyService is null");
+    Preconditions.checkNotNull(googleApiUrls, "googleApiUrl is null");
+
+    IProxyData[] proxyData = proxyService.select(new URI(url));
     for (final IProxyData iProxyData : proxyData) {
       if (IProxyData.HTTPS_PROXY_TYPE.equals(iProxyData.getType())) {
-        return new Proxy(Type.HTTP, new InetSocketAddress(iProxyData.getHost(), iProxyData.getPort()));
+        return new Proxy(Type.HTTP, new InetSocketAddress(iProxyData.getHost(),
+                                                          iProxyData.getPort()));
       }
     }
     return Proxy.NO_PROXY;
@@ -145,13 +169,13 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   }
 
   @VisibleForTesting
-  void setTransport(HttpTransport transport) {
-    this.transport = transport;
+  void setTransport(Map<String, HttpTransport> transport) {
+    this.transports = transport;
   }
 
   @VisibleForTesting
-  HttpTransport getTransport() {
-    return transport;
+  Map<String, HttpTransport> getTransports() {
+    return transports;
   }
 
   @VisibleForTesting
