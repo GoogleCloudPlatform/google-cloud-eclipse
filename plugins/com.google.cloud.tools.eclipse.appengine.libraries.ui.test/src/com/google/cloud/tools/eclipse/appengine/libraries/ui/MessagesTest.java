@@ -32,5 +32,12 @@ public class MessagesTest {
         "Additional jars commonly used in App Engine Standard Environment applications", 
         Messages.getString("description"));
   }
+  
+
+  @Test
+  public void testUnknownMessage() {
+    Assert.assertEquals("!foo.bar!",  Messages.getString("foo.bar"));
+  }
+  
 
 }
