@@ -37,6 +37,9 @@ public class BannedElementTest {
   @Test
   public void testEquals() {
     BannedElement element1 = new BannedElement("message");
+    BannedElement element1_copy = element1;
+    assertTrue(element1.equals(element1_copy));
+    
     BannedElement element2 = new BannedElement("message");
     assertTrue(element1.equals(element2));
     assertTrue(element2.equals(element1));
