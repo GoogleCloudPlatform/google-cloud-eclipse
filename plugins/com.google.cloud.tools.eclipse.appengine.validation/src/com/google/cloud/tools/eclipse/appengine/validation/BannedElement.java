@@ -16,6 +16,8 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
+import java.util.Objects;
+
 import com.google.common.base.Preconditions;
 
 /**
@@ -69,6 +71,25 @@ public class BannedElement {
   
   int getSeverity() {
     return severity;
+  }
+  
+  @Override
+  public boolean equals(Object object) {
+    if (object == this) {
+      return true;
+    }
+    if (object == null || !(object instanceof BannedElement)) {
+      return false;
+    } 
+    BannedElement element = (BannedElement) object;
+    return Objects.equals(markerId, element.getMarkerId()) &&
+        start.getLineNumber() == element.getStart().getLineNumber() &&
+        start.getColumnNumber() == element.getStart().getLineNumber();
+  }
+  
+  @Override
+  public int hashCode() {
+    return Objects.hash(markerId, start.getLineNumber(), start.getColumnNumber());
   }
 
 }
