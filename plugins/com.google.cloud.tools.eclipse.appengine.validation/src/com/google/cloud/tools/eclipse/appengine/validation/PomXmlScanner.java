@@ -88,8 +88,8 @@ class PomXmlScanner extends AbstractScanner {
     } else if (insidePlugin && "artifactId".equalsIgnoreCase(localName)) {
       // Found closing <artifactId> tag with parent <plugin>
       saveContents = false;
-      if ("appengine-maven-plugin".equalsIgnoreCase(elementContents.toString()) || 
-          "gcloud-maven-plugin".equalsIgnoreCase(elementContents.toString())) {
+      if ("appengine-maven-plugin".equals(elementContents.toString()) || 
+          "gcloud-maven-plugin".equals(elementContents.toString())) {
         foundArtifactId = true;
       }
     }
