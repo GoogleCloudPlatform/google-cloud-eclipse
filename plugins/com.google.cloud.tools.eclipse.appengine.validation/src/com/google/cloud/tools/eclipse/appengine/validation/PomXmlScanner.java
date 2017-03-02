@@ -34,6 +34,7 @@ class PomXmlScanner extends AbstractScanner {
   private boolean saveContents;
   private StringBuilder elementContents;
   private int lineNumber;
+  private int columnNumber;
   
   /**
    * Checks for opening <build> and <groupId> tags within a <plugin> element.
@@ -51,6 +52,7 @@ class PomXmlScanner extends AbstractScanner {
       saveContents = true;
       elementContents = new StringBuilder();
       lineNumber = locator.getLineNumber();
+      columnNumber = locator.getColumnNumber();
     }
   }
   
@@ -86,7 +88,7 @@ class PomXmlScanner extends AbstractScanner {
     } else if (insidePlugin && "artifactId".equalsIgnoreCase(localName)) {
       // Found closing <artifactId> tag with parent <plugin>
       saveContents = false;
-      if ("appengine-maven-plugin".equalsIgnoreCase(elementContents.toString()) ||
+      if ("appengine-maven-plugin".equalsIgnoreCase(elementContents.toString()) || 
           "gcloud-maven-plugin".equalsIgnoreCase(elementContents.toString())) {
         foundArtifactId = true;
       }
@@ -94,7 +96,7 @@ class PomXmlScanner extends AbstractScanner {
     if (foundAppEngineGroupId && foundArtifactId) {
       // Found deprecated App Engine Maven plugin and App Engine artifact ID
       // with the same <plugin> parent
-      DocumentLocation start = new DocumentLocation(lineNumber, 0);
+      DocumentLocation start = new DocumentLocation(lineNumber, columnNumber - 9);
       String message = Messages.getString("maven.plugin");
       BannedElement element = new MavenPluginElement(message, start, 0);
       addToBlacklist(element);
