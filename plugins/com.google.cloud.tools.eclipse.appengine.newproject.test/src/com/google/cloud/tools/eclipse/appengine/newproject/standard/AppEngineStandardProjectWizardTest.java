@@ -14,23 +14,24 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.newproject;
+package com.google.cloud.tools.eclipse.appengine.newproject.standard;
 
+import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectWizard;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class StandardProjectWizardTest {
+public class AppEngineStandardProjectWizardTest {
 
-  private StandardProjectWizard wizard;
+  private AppEngineProjectWizard wizard;
 
   @Before
   public void setUp() {
     try {
-      wizard = new StandardProjectWizard();
+      wizard = new AppEngineStandardProjectWizard();
       // I don't know why this fails the first time and passes the second, but it does.
     } catch (NullPointerException ex) {
-      wizard = new StandardProjectWizard();
+      wizard = new AppEngineStandardProjectWizard();
     }
   }
 

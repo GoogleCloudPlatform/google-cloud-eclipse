@@ -16,19 +16,19 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
-import org.junit.Test;
+import org.eclipse.core.resources.IMarker;
 
-public class BannedElementTest {
+/**
+ * A blacklisted group ID element that will receive an App Engine Maven plugin marker. 
+ */
+public class MavenPluginElement extends BannedElement {
 
-  @Test(expected = NullPointerException.class)
-  public void testBannedElementConstructor_nullElementName() {
-    new BannedElement(null);
+  private static final String markerId = 
+      "com.google.cloud.tools.eclipse.appengine.validation.mavenPluginMarker";
+  private static final int severity = IMarker.SEVERITY_WARNING;
+  
+  public MavenPluginElement(String message, DocumentLocation start, int length) {
+    super(message, markerId, severity, start, length);
   }
-
-  @Test(expected = NullPointerException.class)
-  public void testBannedElementConstructor_nullLocation() {
-    new BannedElement("test", "org.eclipse.core.resources.problemmarker", 1, null, 0);
-  }
-
+  
 }
-

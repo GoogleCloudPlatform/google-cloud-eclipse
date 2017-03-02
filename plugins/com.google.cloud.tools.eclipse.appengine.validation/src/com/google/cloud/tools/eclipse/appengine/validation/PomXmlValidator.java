@@ -18,27 +18,25 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 
 import java.io.IOException;
 import java.util.Map;
+
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.xml.sax.SAXException;
 
-/**
- * Validator for appengine-web.xml
- */
-public class AppEngineWebXmlValidator extends AbstractXmlValidator {
-    
+public class PomXmlValidator extends AbstractXmlValidator {
+
   /**
-   * Clears all problem markers from the resource, then adds a marker to 
-   * appengine-web.xml for every {@link BannedElement} found in the file.
+   * Clears all problem markers from the resource, then adds a Maven plugin marker
+   * to pom.xml if the App Engine Maven plugin is obsolete.
    */
   @Override
-  protected void validate(IResource resource, byte[] bytes) 
+  protected void validate(IResource resource, byte[] bytes)
       throws CoreException, IOException, ParserConfigurationException {
     try {
       deleteMarkers(resource);
-      SaxParserResults parserResults = BlacklistSaxParser.readXml(bytes);
+      SaxParserResults parserResults = PomParser.readXml(bytes);
       Map<BannedElement, Integer> bannedElementOffsetMap =
           ValidationUtils.getOffsetMap(bytes, parserResults);
       for (Map.Entry<BannedElement, Integer> entry : bannedElementOffsetMap.entrySet()) {

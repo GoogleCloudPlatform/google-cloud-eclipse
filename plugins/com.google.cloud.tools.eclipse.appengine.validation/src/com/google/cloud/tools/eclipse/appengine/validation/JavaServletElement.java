@@ -16,19 +16,19 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
-import org.junit.Test;
+import org.eclipse.core.resources.IMarker;
 
-public class BannedElementTest {
+/**
+ * A blacklisted java servlet element that will receive a servlet marker. 
+ */
+public class JavaServletElement extends BannedElement {
 
-  @Test(expected = NullPointerException.class)
-  public void testBannedElementConstructor_nullElementName() {
-    new BannedElement(null);
-  }
-
-  @Test(expected = NullPointerException.class)
-  public void testBannedElementConstructor_nullLocation() {
-    new BannedElement("test", "org.eclipse.core.resources.problemmarker", 1, null, 0);
+  private static final String markerId = 
+      "com.google.cloud.tools.eclipse.appengine.validation.servletMarker";
+  private static final int severity = IMarker.SEVERITY_ERROR;
+  
+  public JavaServletElement(String message, DocumentLocation start, int length) {
+    super(message, markerId, severity, start, length);
   }
 
 }
-

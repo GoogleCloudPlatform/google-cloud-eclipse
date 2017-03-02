@@ -14,21 +14,25 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.validation;
+package com.google.cloud.tools.eclipse.appengine.newproject.flex;
 
-import org.junit.Test;
+import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineWizardPage;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Shell;
 
-public class BannedElementTest {
-
-  @Test(expected = NullPointerException.class)
-  public void testBannedElementConstructor_nullElementName() {
-    new BannedElement(null);
+public class AppEngineFlexWizardPage extends AppEngineWizardPage {
+  public AppEngineFlexWizardPage() {
+    // TODO: set title and description
   }
 
-  @Test(expected = NullPointerException.class)
-  public void testBannedElementConstructor_nullLocation() {
-    new BannedElement("test", "org.eclipse.core.resources.problemmarker", 1, null, 0);
+  @Override
+  public void sendAnalyticsPing(Shell shell) {
+    // TODO: send analytics ping
+  }
+
+  @Override
+  public void setHelp(Composite container) {
+    // TODO: add flex help context
   }
 
 }
-

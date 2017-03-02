@@ -26,9 +26,9 @@ import java.util.List;
 import org.eclipse.core.resources.IProject;
 
 /**
- * Collects all data needed to create and configure an App Engine Standard Project.
+ * Collects all data needed to create and configure an App Engine Eclipse Project.
  */
-class AppEngineStandardProjectConfig {
+public class AppEngineProjectConfig {
   private File cloudSdkLocation = null;
   private URI eclipseProjectLocationUri = null;
   private String packageName = "";
@@ -36,54 +36,54 @@ class AppEngineStandardProjectConfig {
   private List<Library> appEngineLibraries = Collections.emptyList();
   private String serviceName;
 
-  File getCloudSdkLocation() {
+  public File getCloudSdkLocation() {
     return cloudSdkLocation;
   }
 
-  void setCloudSdkLocation(File cloudSdkLocation) {
+  public void setCloudSdkLocation(File cloudSdkLocation) {
     this.cloudSdkLocation = cloudSdkLocation;
   }
   
-  void setPackageName(String name) {
+  public void setPackageName(String name) {
     this.packageName = name;
   }
 
-  String getPackageName() {
+  public String getPackageName() {
     return this.packageName;
   }
 
   /**
    * Null project location URI means the default location.
    */
-  void setProject(IProject project) {
+  public void setProject(IProject project) {
     this.project = project;
   }
 
-  IProject getProject() {
+  public IProject getProject() {
     return this.project;
   }
 
-  URI getEclipseProjectLocationUri() {
+  public URI getEclipseProjectLocationUri() {
     return this.eclipseProjectLocationUri;
   }
 
-  void setEclipseProjectLocationUri(URI uri) {
+  public void setEclipseProjectLocationUri(URI uri) {
     this.eclipseProjectLocationUri = uri;
   }
 
-  List<Library> getAppEngineLibraries() {
+  public List<Library> getAppEngineLibraries() {
     return appEngineLibraries;
   }
 
-  void setAppEngineLibraries(Collection<Library> libraries) {
+  public void setAppEngineLibraries(Collection<Library> libraries) {
     this.appEngineLibraries = new ArrayList<>(libraries);
   }
 
-  String getServiceName() {
+  public String getServiceName() {
     return serviceName;
   }
   
-  void setServiceName(String serviceName) {
+  public void setServiceName(String serviceName) {
     this.serviceName = serviceName;
   }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.newproject;
+package com.google.cloud.tools.eclipse.appengine.newproject.standard;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
