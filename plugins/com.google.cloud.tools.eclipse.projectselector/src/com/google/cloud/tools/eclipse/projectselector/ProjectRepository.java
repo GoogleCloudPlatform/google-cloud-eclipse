@@ -23,7 +23,7 @@ import com.google.api.services.appengine.v1.model.Application;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects;
 import com.google.api.services.cloudresourcemanager.model.ListProjectsResponse;
 import com.google.api.services.cloudresourcemanager.model.Project;
-import com.google.cloud.tools.eclipse.googleapis.GoogleApiFactory;
+import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.projectselector.model.AppEngine;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.common.annotations.VisibleForTesting;
@@ -42,9 +42,9 @@ public class ProjectRepository {
   private static final int PROJECT_LIST_PAGESIZE = 300;
   private static final String PROJECT_DELETE_REQUESTED = "DELETE_REQUESTED";
 
-  private final GoogleApiFactory apiFactory;
+  private final IGoogleApiFactory apiFactory;
 
-  public ProjectRepository(GoogleApiFactory apiFactory) {
+  public ProjectRepository(IGoogleApiFactory apiFactory) {
     this.apiFactory = apiFactory;
   }
 

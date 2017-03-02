@@ -18,28 +18,70 @@ package com.google.cloud.tools.eclipse.googleapis;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.json.JsonFactory;
 import com.google.api.services.appengine.v1.Appengine.Apps;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import java.io.IOException;
+import java.net.URI;
+import org.eclipse.core.net.proxy.IProxyChangeListener;
+import org.eclipse.core.net.proxy.IProxyData;
+import org.eclipse.core.net.proxy.IProxyService;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
+@RunWith(MockitoJUnitRunner.class)
 public class GoogleApiFactoryTest {
+
+  @Mock private HttpTransport transport;
+  @Mock private JsonFactory jsonFactory;
+  @Mock private IProxyService proxyService;
+  @Mock private Credential credential;
+  @Captor private ArgumentCaptor<IProxyChangeListener> proxyListenerCaptor =
+      ArgumentCaptor.forClass(IProxyChangeListener.class);
+
+  private GoogleApiFactory googleApiFactory;
+
+  @Before
+  public void setUp() {
+    googleApiFactory = new GoogleApiFactory();
+    googleApiFactory.setTransport(transport);
+    googleApiFactory.setJsonFactory(jsonFactory);
+    googleApiFactory.setProxyService(proxyService);
+  }
 
   @Test
   public void testNewAppsApi_userAgentIsSet() throws IOException {
-    Apps api = new GoogleApiFactory().newAppsApi(mock(Credential.class));
+    Apps api = googleApiFactory.newAppsApi(mock(Credential.class));
     assertThat(api.get("").getRequestHeaders().getUserAgent(),
                containsString(CloudToolsInfo.USER_AGENT));
   }
 
   @Test
   public void testNewProjectsApi_userAgentIsSet() throws IOException {
-    Projects api = new GoogleApiFactory().newProjectsApi(mock(Credential.class));
+    Projects api = googleApiFactory.newProjectsApi(mock(Credential.class));
     assertThat(api.get("").getRequestHeaders().getUserAgent(),
                containsString(CloudToolsInfo.USER_AGENT));
+  }
+
+  @Test
+  public void testInit_ProxyChangeHandlerIsSet() {
+    when(proxyService.select(any(URI.class))).thenReturn(new IProxyData[0]);
+
+    googleApiFactory.init();
+
+    verify(proxyService).addProxyChangeListener(any(IProxyChangeListener.class));
   }
 }
