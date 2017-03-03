@@ -46,20 +46,6 @@
                  style="push">
               <parameter
                     name="newWizardId"
-                    value="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineFlex">
-              </parameter>
-              <visibleWhen>
-                  <test
-                        forcePluginActivation="true"
-                        property="com.google.cloud.tools.eclipse.util.facetExists"
-                        value="com.google.cloud.tools.eclipse.appengine.facets.flex"/>
-              </visibleWhen>
-           </command>
-           <command
-                 commandId="org.eclipse.ui.newWizard"
-                 style="push">
-              <parameter
-                    name="newWizardId"
                     value="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineStandard">
               </parameter>
            </command>

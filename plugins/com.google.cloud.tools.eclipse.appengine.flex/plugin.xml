@@ -73,4 +73,20 @@
      </perspectiveExtension>
   </extension>
 
+  <extension
+        point="org.eclipse.ui.menus">
+     <menuContribution
+           allPopups="false"
+           locationURI="menu:com.google.cloud.tools.eclipse.appengine.actions.new">
+        <command
+              commandId="org.eclipse.ui.newWizard"
+              style="push">
+           <parameter
+                 name="newWizardId"
+                 value="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineFlex">
+           </parameter>
+        </command>
+     </menuContribution>
+  </extension>
+
 </plugin>
