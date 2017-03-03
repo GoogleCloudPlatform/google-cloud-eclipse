@@ -62,7 +62,6 @@ public class GoogleApiFactoryTest {
     when(transports.get(anyString())).thenReturn(mock(HttpTransport.class));
     googleApiFactory.setTransport(transports);
     googleApiFactory.setJsonFactory(jsonFactory);
-    googleApiFactory.setProxyService(proxyService);
   }
 
   @Test
@@ -82,6 +81,7 @@ public class GoogleApiFactoryTest {
   @Test
   public void testInit_ProxyChangeHandlerIsSet() {
     when(proxyService.select(any(URI.class))).thenReturn(new IProxyData[0]);
+    googleApiFactory.setProxyService(proxyService);
 
     googleApiFactory.init();
 

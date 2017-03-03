@@ -46,6 +46,8 @@ import org.eclipse.core.net.proxy.IProxyService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 
 /**
  * Class to obtain various Google cloud Platform related APIs.
@@ -74,15 +76,8 @@ public class GoogleApiFactory implements IGoogleApiFactory {
 
   @Activate
   public void init() {
-    Preconditions.checkNotNull(proxyService, "proxyService is null");
     jsonFactory = new JacksonFactory();
     buildTransports();
-    proxyService.addProxyChangeListener(new IProxyChangeListener() {
-      @Override
-      public void proxyInfoChanged(IProxyChangeEvent event) {
-        buildTransports();
-      }
-    });
   }
 
   /**
@@ -91,11 +86,14 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   @Override
   public Projects newProjectsApi(Credential credential) {
     synchronized (transports) {
-      checkFields();
+      HttpTransport transport = transports.get(googleApiUrls.cloudResourceManagerUrl());
+      Preconditions.checkNotNull(jsonFactory, "jsonFactory is null");
+      Preconditions.checkNotNull(transport, "transport is null");
+
       CloudResourceManager resourceManager =
           new CloudResourceManager.Builder(transports.get(googleApiUrls.cloudResourceManagerUrl()),
                                            jsonFactory, credential)
-          .setApplicationName(CloudToolsInfo.USER_AGENT).build();
+              .setApplicationName(CloudToolsInfo.USER_AGENT).build();
       Projects projects = resourceManager.projects();
       return projects;
     }
@@ -107,19 +105,17 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   @Override
   public Apps newAppsApi(Credential credential) {
     synchronized (transports) {
-      checkFields();
+      HttpTransport transport = transports.get(googleApiUrls.appEngineAdminUrl());
+      Preconditions.checkNotNull(jsonFactory, "jsonFactory is null");
+      Preconditions.checkNotNull(transport, "transport is null");
+
       Appengine appengine =
-          new Appengine.Builder(transports.get(googleApiUrls.appEngineAdminUrl()), jsonFactory,
+          new Appengine.Builder(transport, jsonFactory,
                                 credential)
-          .setApplicationName(CloudToolsInfo.USER_AGENT).build();
+              .setApplicationName(CloudToolsInfo.USER_AGENT).build();
       Apps apps = appengine.apps();
       return apps;
     }
-  }
-
-  private void checkFields() {
-    Preconditions.checkNotNull(transports, "transport is null");
-    Preconditions.checkNotNull(jsonFactory, "jsonFactory is null");
   }
 
   private void buildTransports() {
@@ -129,7 +125,6 @@ public class GoogleApiFactory implements IGoogleApiFactory {
         buildCloudResourceManagerTransport();
       } catch (URISyntaxException ex) {
         logger.log(Level.SEVERE, "Could not create transport using the proxy settings", ex);
-        transports = null;
       }
     }
   }
@@ -150,22 +145,46 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   }
 
   private Proxy createProxy(String url) throws URISyntaxException {
-    Preconditions.checkNotNull(proxyService, "proxyService is null");
     Preconditions.checkNotNull(googleApiUrls, "googleApiUrl is null");
+    Preconditions.checkArgument(!url.startsWith("http://"), "http is not supported schema");
+
+    if (proxyService == null) {
+      return Proxy.NO_PROXY;
+    }
 
     IProxyData[] proxyData = proxyService.select(new URI(url));
     for (final IProxyData iProxyData : proxyData) {
-      if (IProxyData.HTTPS_PROXY_TYPE.equals(iProxyData.getType())) {
-        return new Proxy(Type.HTTP, new InetSocketAddress(iProxyData.getHost(),
-                                                          iProxyData.getPort()));
+      switch (iProxyData.getType()) {
+        case IProxyData.HTTPS_PROXY_TYPE:
+          return new Proxy(Type.HTTP, new InetSocketAddress(iProxyData.getHost(),
+                                                            iProxyData.getPort()));
+        case IProxyData.SOCKS_PROXY_TYPE:
+          return new Proxy(Type.SOCKS, new InetSocketAddress(iProxyData.getHost(),
+                                                             iProxyData.getPort()));
+        default:
+          return Proxy.NO_PROXY;
       }
     }
     return Proxy.NO_PROXY;
   }
 
-  @Reference(unbind="-")
+  @Reference(policy=ReferencePolicy.DYNAMIC, cardinality=ReferenceCardinality.OPTIONAL)
   public void setProxyService(IProxyService proxyService) {
     this.proxyService = proxyService;
+    this.proxyService.addProxyChangeListener(new IProxyChangeListener() {
+      @Override
+      public void proxyInfoChanged(IProxyChangeEvent event) {
+        buildTransports();
+      }
+    });
+    buildTransports();
+  }
+
+  public void unsetProxyService(IProxyService proxyService) {
+    if (this.proxyService == proxyService) {
+      this.proxyService = null;
+      buildTransports();
+    }
   }
 
   @VisibleForTesting
