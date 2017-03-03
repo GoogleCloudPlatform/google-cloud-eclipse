@@ -39,8 +39,8 @@ import org.osgi.service.component.annotations.Component;
  * artifacts and store them in the local Maven repository pointed to by M2Eclipse's M2_REPO
  * variable.
  * <p>
- * In case <code>libraryfile.getSourceUri()</code> is null, M2Eclipse is used to resolve the source
- * artifact by using the "sources" classifier with the binary artifact's {@link MavenCoordinates}.;
+ * In case <code>libraryfile.getSourceUri()</code> is null, M2Eclipse resolves the source
+ * artifact by using the "sources" classifier with the binary artifact's {@link MavenCoordinates}.
  */
 @Component
 public class M2RepositoryService implements ILibraryRepositoryService {
@@ -92,7 +92,7 @@ public class M2RepositoryService implements ILibraryRepositoryService {
       IPath downloadFolder = MavenHelper.bundleStateBasedMavenFolder(mavenCoordinates);
       return new FileDownloader(downloadFolder).download(sourceUrl, monitor);
     } catch (IOException e) {
-      // source file is failed to download, this is not an error
+      // source file failed to download; this is not an error
       return null;
     }
   }
@@ -115,10 +115,11 @@ public class M2RepositoryService implements ILibraryRepositoryService {
    * Maven.
    */
   @Override
-  public void makeArtifactAvailable(LibraryFile libraryFile, IProgressMonitor monitor) throws CoreException {
-      if (mavenHelper.isArtifactLocallyAvailable(libraryFile.getMavenCoordinates())) {
-        return;
-      }
-      mavenHelper.resolveArtifact(libraryFile.getMavenCoordinates(), monitor);
+  public void makeArtifactAvailable(LibraryFile libraryFile, IProgressMonitor monitor)
+      throws CoreException {
+    if (mavenHelper.isArtifactLocallyAvailable(libraryFile.getMavenCoordinates())) {
+      return;
+    }
+    mavenHelper.resolveArtifact(libraryFile.getMavenCoordinates(), monitor);
   }
 }
