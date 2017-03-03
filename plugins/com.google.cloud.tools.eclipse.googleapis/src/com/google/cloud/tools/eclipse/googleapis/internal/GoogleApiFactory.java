@@ -159,8 +159,8 @@ public class GoogleApiFactory implements IGoogleApiFactory {
       return Proxy.NO_PROXY;
     }
 
-    IProxyData[] proxyData = proxyService.select(new URI(url));
-    for (final IProxyData iProxyData : proxyData) {
+    IProxyData[] proxyDataForUri = proxyService.select(new URI(url));
+    for (final IProxyData iProxyData : proxyDataForUri) {
       switch (iProxyData.getType()) {
         case IProxyData.HTTPS_PROXY_TYPE:
           return new Proxy(Type.HTTP, new InetSocketAddress(iProxyData.getHost(),
@@ -169,7 +169,8 @@ public class GoogleApiFactory implements IGoogleApiFactory {
           return new Proxy(Type.SOCKS, new InetSocketAddress(iProxyData.getHost(),
                                                              iProxyData.getPort()));
         default:
-          return Proxy.NO_PROXY;
+          logger.warning("Unsupported proxy type: " + iProxyData.getType());
+          break;
       }
     }
     return Proxy.NO_PROXY;
