@@ -22,7 +22,6 @@ import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 /**
  * A {@link PropertyTester} that checks if the facet specified in <@code>expectedValue</@code> exists.
  */
-// TODO: rename class; suggestions?
 public class FacetExistsPropertyTester extends PropertyTester {
   @Override
   public boolean test(Object receiver, String property, Object[] args, Object expectedValue) {

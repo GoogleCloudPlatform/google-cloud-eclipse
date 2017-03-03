@@ -12,4 +12,5 @@ Require-Bundle: org.eclipse.core.expressions,
  org.eclipse.core.runtime,
  org.eclipse.wst.common.project.facet.core
 Import-Package: com.google.cloud.tools.eclipse.appengine.facets,
+ com.google.cloud.tools.eclipse.appengine.newproject,
  com.google.cloud.tools.eclipse.util.service

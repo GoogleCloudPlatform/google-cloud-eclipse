@@ -21,7 +21,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * Unit tests for {@link DoesFacetExistPropertyTester}
+ * Unit tests for {@link FacetExistsPropertyTester}
  */
 public class FacetExistsPropertyTesterTest {
   private FacetExistsPropertyTester propertyTester = new FacetExistsPropertyTester();
