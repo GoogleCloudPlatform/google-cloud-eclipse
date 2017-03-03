@@ -50,4 +50,5 @@ Import-Package: com.google.cloud.tools.eclipse.appengine.facets,
  org.eclipse.wst.server.core.internal,
  org.osgi.framework;version="1.8.0",
  org.osgi.service.prefs;version="1.1.1"
-Export-Package: com.google.cloud.tools.eclipse.appengine.newproject;version="0.1.0";x-friends:="com.google.cloud.tools.eclipse.appengine.newproject.maven"
+Export-Package: com.google.cloud.tools.eclipse.appengine.newproject;version="0.1.0";x-friends:="com.google.cloud.tools.eclipse.appengine.newproject.maven",
+ com.google.cloud.tools.eclipse.appengine.newproject.flex

@@ -10,6 +10,7 @@ Bundle-Localization: plugin
 Require-Bundle: org.eclipse.wst.common.project.facet.core
 Import-Package: com.google.cloud.tools.eclipse.appengine.facets,
  com.google.cloud.tools.eclipse.appengine.newproject,
+ com.google.cloud.tools.eclipse.appengine.newproject.flex,
  com.google.cloud.tools.eclipse.util.service,
  org.eclipse.core.expressions,
  org.eclipse.core.resources,
