@@ -65,6 +65,13 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   private IProxyService proxyService;
   private GoogleApiUrls googleApiUrls;
 
+  private final IProxyChangeListener proxyChangeListener = new IProxyChangeListener() {
+    @Override
+    public void proxyInfoChanged(IProxyChangeEvent event) {
+      buildTransports();
+    }
+  };
+
   public GoogleApiFactory() {
     this(new GoogleApiUrls());
   }
@@ -171,17 +178,13 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   @Reference(policy=ReferencePolicy.DYNAMIC, cardinality=ReferenceCardinality.OPTIONAL)
   public void setProxyService(IProxyService proxyService) {
     this.proxyService = proxyService;
-    this.proxyService.addProxyChangeListener(new IProxyChangeListener() {
-      @Override
-      public void proxyInfoChanged(IProxyChangeEvent event) {
-        buildTransports();
-      }
-    });
+    this.proxyService.addProxyChangeListener(proxyChangeListener);
     buildTransports();
   }
 
   public void unsetProxyService(IProxyService proxyService) {
     if (this.proxyService == proxyService) {
+      proxyService.removeProxyChangeListener(proxyChangeListener);
       this.proxyService = null;
       buildTransports();
     }
