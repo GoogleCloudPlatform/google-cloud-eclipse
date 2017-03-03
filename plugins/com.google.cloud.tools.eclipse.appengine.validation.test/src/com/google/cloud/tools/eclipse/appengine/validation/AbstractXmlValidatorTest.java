@@ -39,7 +39,6 @@ import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 public class AbstractXmlValidatorTest {
 
   private final String ELEMENT_MESSAGE = "Project ID should be specified at deploy time.";
-  private final String SERVLET_MARKER = "com.google.cloud.tools.eclipse.appengine.validation.servletMarker";
   private static IResource resource;
   private static IProject project;
   
@@ -64,9 +63,9 @@ public class AbstractXmlValidatorTest {
   @Test
   public void testCreateMarker() throws CoreException {
     BannedElement element = new BannedElement(ELEMENT_MESSAGE);
-    AppEngineWebXmlValidator.createMarker(
-        resource, element, 0, SERVLET_MARKER, IMarker.SEVERITY_ERROR);
-    IMarker[] markers = resource.findMarkers(SERVLET_MARKER, true, IResource.DEPTH_ZERO);
+    String markerId = "org.eclipse.core.resources.problemmarker";
+    AppEngineWebXmlValidator.createMarker(resource, element, 0);
+    IMarker[] markers = resource.findMarkers(markerId, true, IResource.DEPTH_ZERO);
     assertEquals(ELEMENT_MESSAGE, (String) markers[0].getAttribute(IMarker.MESSAGE));
   }
   

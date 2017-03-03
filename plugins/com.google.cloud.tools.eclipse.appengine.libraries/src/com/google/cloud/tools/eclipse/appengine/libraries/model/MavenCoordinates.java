@@ -36,8 +36,9 @@ public class MavenCoordinates {
   private String classifier;
 
   /**
-   * @param repository the URI or the identifier of the repository used to download the artifact from. It is treated
-   * as an URI if it starts with <code>&lt;protocol&gt;://</code>. Cannot be <code>null</code>.
+   * @param repository the URI or the identifier of the repository used to download the artifact
+   *        from. It is treated as an URI if it starts with <code>&lt;protocol&gt;://</code>. Cannot
+   *        be <code>null</code>.
    * @param groupId the Maven group ID, cannot be <code>null</code>
    * @param artifactId the Maven artifact ID, cannot be <code>null</code>
    */
@@ -61,16 +62,16 @@ public class MavenCoordinates {
   }
 
   /**
-   * @return the Maven version of the artifact, defaults to special value {@link MavenCoordinates#LATEST_VERSION}, never
-   * <code>null</code>
+   * @return the Maven version of the artifact, defaults to special value
+   *         {@link MavenCoordinates#LATEST_VERSION}, never <code>null</code>
    */
   public String getVersion() {
     return version;
   }
 
   /**
-   * @param version the Maven version of the artifact, defaults to special value {@link MavenCoordinates#LATEST_VERSION},
-   * cannot be <code>null</code> or empty string.
+   * @param version the Maven version of the artifact, defaults to special value
+   *     {@link MavenCoordinates#LATEST_VERSION}, cannot be <code>null</code> or empty string.
    */
   public void setVersion(String version) {
     Preconditions.checkNotNull(version, "version is null");
@@ -86,8 +87,8 @@ public class MavenCoordinates {
   }
 
   /**
-   * @param type the Maven packaging type, defaults to <code>jar</code>, cannot be <code>null</code> or empty 
-   * string.
+   * @param type the Maven packaging type, defaults to <code>jar</code>, cannot be <code>null</code>
+   *     or empty string.
    */
   public void setType(String type) {
     Preconditions.checkNotNull(type, "type is null");
@@ -110,15 +111,16 @@ public class MavenCoordinates {
   }
 
   /**
-   * @return the URI or the identifier of the repository used to download the artifact from, never <code>null</code>
+   * @return the URI or the identifier of the repository used to download the artifact from, never
+   *         <code>null</code>
    */
   public String getRepository() {
     return repository;
   }
 
   /**
-   * @param repository the URI or the identifier of the repository used to download the artifact from, cannot be
-   * <code>null</code> or empty string.
+   * @param repository the URI or the identifier of the repository used to download the artifact
+   *        from, cannot be <code>null</code> or empty string.
    */
   public void setRepository(String repository) {
     Preconditions.checkNotNull(repository, "repository null");

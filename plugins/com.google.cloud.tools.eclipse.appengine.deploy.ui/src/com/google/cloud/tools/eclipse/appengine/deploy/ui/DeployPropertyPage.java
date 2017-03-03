@@ -18,8 +18,8 @@ package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.googleapis.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
-import com.google.cloud.tools.eclipse.projectselector.GoogleApiFactory;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import com.google.cloud.tools.eclipse.util.AdapterUtil;
 import java.util.logging.Level;

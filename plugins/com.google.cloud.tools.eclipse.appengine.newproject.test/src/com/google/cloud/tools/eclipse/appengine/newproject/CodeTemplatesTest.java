@@ -73,7 +73,7 @@ public class CodeTemplatesTest {
   @Test
   public void testMaterialize() 
       throws CoreException, ParserConfigurationException, SAXException, IOException {
-    AppEngineStandardProjectConfig config = new AppEngineStandardProjectConfig();
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
     
     IFile mostImportant = CodeTemplates.materialize(project, config, monitor);
     

@@ -27,6 +27,5 @@
       <delegate class="com.google.cloud.tools.eclipse.appengine.facets.FlexFacetUninstallDelegate"/>
     </action>
   </extension>
-  
 
 </plugin>
