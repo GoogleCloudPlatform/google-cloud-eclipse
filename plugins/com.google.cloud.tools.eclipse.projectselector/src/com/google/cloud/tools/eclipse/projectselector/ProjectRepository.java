@@ -23,6 +23,7 @@ import com.google.api.services.appengine.v1.model.Application;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects;
 import com.google.api.services.cloudresourcemanager.model.ListProjectsResponse;
 import com.google.api.services.cloudresourcemanager.model.Project;
+import com.google.cloud.tools.eclipse.googleapis.GoogleApiException;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.projectselector.model.AppEngine;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
@@ -63,7 +64,7 @@ public class ProjectRepository {
       } else {
         return Collections.emptyList();
       }
-    } catch (IOException ex) {
+    } catch (IOException | GoogleApiException ex) {
       throw new ProjectRepositoryException(ex);
     }
   }
@@ -81,7 +82,7 @@ public class ProjectRepository {
       } else {
         return null;
       }
-    } catch (IOException ex) {
+    } catch (IOException | GoogleApiException ex) {
       throw new ProjectRepositoryException(ex);
     }
   }
@@ -121,7 +122,7 @@ public class ProjectRepository {
       // just in case the API changes and exception with 404 won't be
       // used to indicate a missing application
       return AppEngine.withId(application.getId());
-    } catch (IOException ex) {
+    } catch (IOException | GoogleApiException ex) {
       if (ex instanceof GoogleJsonResponseException) {
         GoogleJsonResponseException responseException = (GoogleJsonResponseException) ex;
         if (responseException.getStatusCode() == HttpStatusCodes.STATUS_CODE_NOT_FOUND) {

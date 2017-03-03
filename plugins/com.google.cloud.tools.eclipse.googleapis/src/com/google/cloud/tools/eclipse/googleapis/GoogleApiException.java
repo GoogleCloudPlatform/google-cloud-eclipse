@@ -16,23 +16,10 @@
 
 package com.google.cloud.tools.eclipse.googleapis;
 
-import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.services.appengine.v1.Appengine.Apps;
-import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects;
+public class GoogleApiException extends Exception {
 
-/**
- * 
- */
-public interface IGoogleApiFactory {
-
-  /**
-   * @return the Appengine/Apps API
-   */
-  Apps newAppsApi(Credential credential) throws GoogleApiException;
-
-  /**
-   * @return the CloudResourceManager/Projects API
-   */
-  Projects newProjectsApi(Credential credential) throws GoogleApiException;
+  public GoogleApiException(Exception ex) {
+    super(ex);
+  }
 
 }

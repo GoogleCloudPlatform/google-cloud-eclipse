@@ -29,6 +29,7 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.services.appengine.v1.Appengine.Apps;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects;
+import com.google.cloud.tools.eclipse.googleapis.GoogleApiException;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import java.io.IOException;
 import java.net.URI;
@@ -60,19 +61,18 @@ public class GoogleApiFactoryTest {
     googleApiFactory = new GoogleApiFactory();
     Map<String, HttpTransport> transports = mock(Map.class);
     when(transports.get(anyString())).thenReturn(mock(HttpTransport.class));
-    googleApiFactory.setTransport(transports);
     googleApiFactory.setJsonFactory(jsonFactory);
   }
 
   @Test
-  public void testNewAppsApi_userAgentIsSet() throws IOException {
+  public void testNewAppsApi_userAgentIsSet() throws IOException, GoogleApiException {
     Apps api = googleApiFactory.newAppsApi(mock(Credential.class));
     assertThat(api.get("").getRequestHeaders().getUserAgent(),
                containsString(CloudToolsInfo.USER_AGENT));
   }
 
   @Test
-  public void testNewProjectsApi_userAgentIsSet() throws IOException {
+  public void testNewProjectsApi_userAgentIsSet() throws IOException, GoogleApiException {
     Projects api = googleApiFactory.newProjectsApi(mock(Credential.class));
     assertThat(api.get("").getRequestHeaders().getUserAgent(),
                containsString(CloudToolsInfo.USER_AGENT));

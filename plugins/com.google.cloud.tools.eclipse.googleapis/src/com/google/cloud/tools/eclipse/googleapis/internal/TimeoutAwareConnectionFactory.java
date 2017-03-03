@@ -26,8 +26,15 @@ import java.net.URL;
  * Extends the {@link DefaultConnectionFactory} with option to specify connect and read timeout.
  */
 class TimeoutAwareConnectionFactory extends DefaultConnectionFactory {
+
+  private static final int DEFAULT_TIMEOUT_MS = 1000;
+
   private final int connectTimeout;
   private final int readTimeout;
+
+  TimeoutAwareConnectionFactory(Proxy proxy) {
+    this(proxy, DEFAULT_TIMEOUT_MS, DEFAULT_TIMEOUT_MS);
+  }
 
   TimeoutAwareConnectionFactory(int connectTimeout, int readTimeout) {
     super();

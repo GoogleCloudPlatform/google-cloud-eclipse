@@ -16,17 +16,18 @@
 
 package com.google.cloud.tools.eclipse.googleapis.internal;
 
-public class GoogleApiUrls {
+public enum GoogleApiUrl {
 
-  private static final String APPENGINE_ADMIN_API_URL = "https://appengine.googleapis.com";
-  private static final String CLOUDRESOURCE_MANAGER_API_URL =
-      "https://cloudresourcemanager.googleapis.com";
+  APPENGINE_ADMIN_API("https://appengine.googleapis.com"),
+  CLOUDRESOURCE_MANAGER_API("https://cloudresourcemanager.googleapis.com");
 
-  public String appEngineAdminUrl() {
-    return APPENGINE_ADMIN_API_URL;
+  private String url;
+
+  private GoogleApiUrl(String url) {
+    this.url = url;
   }
 
-  public String cloudResourceManagerUrl() {
-    return CLOUDRESOURCE_MANAGER_API_URL;
+  public String getUrl() {
+    return url;
   }
 }
