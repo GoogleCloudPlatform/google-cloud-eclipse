@@ -36,6 +36,7 @@ public class SharedImages {
    * <p>
    * The caller is responsible for disposing the Image once it's not needed anymore by
    * calling {@link Image#dispose()} on the image object.
+   *
    * @return the image or null if the image was not found
    */
   public static Image createRefreshIcon(Device device) {
