@@ -65,11 +65,11 @@ public class FontUtil {
    * several {@link DisposeListener}s that can lead to high resource allocation</em>
    *
    * @param control whose font will be changed
-   * @param style  e.g. SWT.BOLD or SWT.ITALIC
+   * @param style e.g. SWT.BOLD or SWT.ITALIC
    */
   public static void convertFont(Control control, int style) {
     for (FontData fontData : control.getFont().getFontData()) {
-      if ((fontData.getStyle() & style) != 0) {
+      if (hasStyle(fontData, style)) {
         return;
       }
     }
@@ -82,5 +82,9 @@ public class FontUtil {
         boldFont.dispose();
       }
     });
+  }
+
+  private static boolean hasStyle(FontData fontData, int style) {
+    return (fontData.getStyle() & style) != 0;
   }
 }
