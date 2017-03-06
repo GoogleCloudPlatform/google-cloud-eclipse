@@ -19,10 +19,7 @@ package com.google.cloud.tools.eclipse.googleapis.internal;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -35,9 +32,10 @@ import com.google.cloud.tools.eclipse.googleapis.GoogleApiException;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.common.cache.LoadingCache;
 import java.io.IOException;
+import java.net.URI;
 import java.util.concurrent.ExecutionException;
-import org.eclipse.core.net.proxy.IProxyChangeEvent;
 import org.eclipse.core.net.proxy.IProxyChangeListener;
+import org.eclipse.core.net.proxy.IProxyData;
 import org.eclipse.core.net.proxy.IProxyService;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,21 +46,20 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class GoogleApiFactoryTest {
+public class GoogleApiFactoryWithProxyServerTest {
 
   @Mock private JsonFactory jsonFactory;
   @Mock private IProxyService proxyService;
   @Mock private Credential credential;
   @Mock LoadingCache<GoogleApiUrl, HttpTransport> transportCache;
-  @Mock private ProxyFactory proxyFactory;
-  @Captor private ArgumentCaptor<IProxyChangeListener> proxyChangeListenerCaptor =
+  @Captor private ArgumentCaptor<IProxyChangeListener> proxyListenerCaptor =
       ArgumentCaptor.forClass(IProxyChangeListener.class);
 
   private GoogleApiFactory googleApiFactory;
 
   @Before
   public void setUp() throws ExecutionException {
-    googleApiFactory = new GoogleApiFactory(proxyFactory);
+    googleApiFactory = new GoogleApiFactory();
     when(transportCache.get(any(GoogleApiUrl.class))).thenReturn(mock(HttpTransport.class));
     googleApiFactory.setJsonFactory(jsonFactory);
     googleApiFactory.setTransportCache(transportCache);
@@ -75,14 +72,6 @@ public class GoogleApiFactoryTest {
                containsString(CloudToolsInfo.USER_AGENT));
   }
 
-  @Test(expected = GoogleApiException.class)
-  public void testNewAppsApi_transportCacheErrorTranslatedToGoogleApiException()
-      throws ExecutionException, GoogleApiException {
-    when(transportCache.get(any(GoogleApiUrl.class)))
-        .thenThrow(new ExecutionException(new Exception("test")));
-    googleApiFactory.newAppsApi(mock(Credential.class));
-  }
-
   @Test
   public void testNewProjectsApi_userAgentIsSet() throws IOException, GoogleApiException {
     Projects api = googleApiFactory.newProjectsApi(mock(Credential.class));
@@ -90,53 +79,13 @@ public class GoogleApiFactoryTest {
                containsString(CloudToolsInfo.USER_AGENT));
   }
 
-  @Test(expected = GoogleApiException.class)
-  public void testNewProjectsApi_transportCacheErrorTranslatedToGoogleApiException()
-      throws ExecutionException, GoogleApiException {
-    when(transportCache.get(any(GoogleApiUrl.class)))
-        .thenThrow(new ExecutionException(new Exception("test")));
-    googleApiFactory.newProjectsApi(mock(Credential.class));
-  }
-
   @Test
-  public void testSetProxyService() {
+  public void testInit_ProxyChangeHandlerIsSet() {
+    when(proxyService.select(any(URI.class))).thenReturn(new IProxyData[0]);
     googleApiFactory.setProxyService(proxyService);
+
+    googleApiFactory.init();
 
     verify(proxyService).addProxyChangeListener(any(IProxyChangeListener.class));
-    verify(proxyFactory).setProxyService(proxyService);
-    verify(transportCache).invalidateAll();
-  }
-
-  @Test
-  public void testUnsetDifferentProxyService() {
-    googleApiFactory.setProxyService(proxyService);
-    googleApiFactory.unsetProxyService(mock(IProxyService.class));
-
-    verify(proxyService, never()).removeProxyChangeListener(any(IProxyChangeListener.class));
-    verify(proxyFactory, never()).setProxyService(null);
-    // called once when setProxyService() is called
-    verify(transportCache).invalidateAll();
-  }
-
-  @Test
-  public void testSetAndUnsetProxyService() {
-    googleApiFactory.setProxyService(proxyService);
-    googleApiFactory.unsetProxyService(proxyService);
-
-    verify(proxyService).addProxyChangeListener(any(IProxyChangeListener.class));
-    verify(proxyService).removeProxyChangeListener(any(IProxyChangeListener.class));
-    verify(proxyFactory).setProxyService(proxyService);
-    verify(proxyFactory).setProxyService(null);
-    verify(transportCache, times(2)).invalidateAll();
-  }
-
-  @Test
-  public void testProxyChangeListenerInvalidatesCache() {
-    doNothing().when(proxyService).addProxyChangeListener(proxyChangeListenerCaptor.capture());
-    googleApiFactory.setProxyService(proxyService);
-    verify(transportCache).invalidateAll();
-
-    proxyChangeListenerCaptor.getValue().proxyInfoChanged(mock(IProxyChangeEvent.class));
-    verify(transportCache, times(2)).invalidateAll();
   }
 }

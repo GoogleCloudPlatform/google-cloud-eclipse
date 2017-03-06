@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.googleapis.internal;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -26,14 +27,19 @@ import java.util.logging.Logger;
 import org.eclipse.core.net.proxy.IProxyData;
 import org.eclipse.core.net.proxy.IProxyService;
 
-class ProxyFactory {
+// needs to be public for Mockito
+@VisibleForTesting
+public class ProxyFactory {
 
   private static final Logger logger = Logger.getLogger(ProxyFactory.class.getName());
 
   private IProxyService proxyService;
   
-  Proxy createProxy(String url) throws URISyntaxException {
-    Preconditions.checkArgument(!url.startsWith("http://"), "http is not supported schema");
+  // needs to be public for Mockito
+  @VisibleForTesting
+  public Proxy createProxy(String url) throws URISyntaxException {
+    Preconditions.checkNotNull(url, "url is null");
+    Preconditions.checkArgument(!url.startsWith("http://"), "http is not a supported schema");
     
     IProxyService proxyServiceCopy = proxyService;
     if (proxyServiceCopy == null) {
@@ -57,7 +63,9 @@ class ProxyFactory {
     return Proxy.NO_PROXY;
   }
 
-  void setProxyService(IProxyService proxyService) {
+  // needs to be public for Mockito
+  @VisibleForTesting
+  public void setProxyService(IProxyService proxyService) {
     this.proxyService = proxyService;
   }
 }

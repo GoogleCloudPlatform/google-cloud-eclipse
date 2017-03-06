@@ -16,6 +16,13 @@
 
 package com.google.cloud.tools.eclipse.googleapis;
 
+import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory;
+
+/**
+ * Exception thrown when an error occurs during creating an API client.
+ *
+ * @see GoogleApiFactory
+ */
 public class GoogleApiException extends Exception {
 
   public GoogleApiException(Exception ex) {

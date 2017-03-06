@@ -50,28 +50,39 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   private IProxyService proxyService;
 
   private JsonFactory jsonFactory;
-  private ProxyFactory proxyFactory;
-  private LoadingCache<GoogleApiUrl, HttpTransport> cache;
+  private final ProxyFactory proxyFactory;
+  private LoadingCache<GoogleApiUrl, HttpTransport> transportCache;
 
   private final IProxyChangeListener proxyChangeListener = new IProxyChangeListener() {
     @Override
     public void proxyInfoChanged(IProxyChangeEvent event) {
-      cache.invalidateAll();
+      if (transportCache != null) {
+        transportCache.invalidateAll();
+      }
     }
   };
+
+  public GoogleApiFactory() {
+    proxyFactory = new ProxyFactory();
+  }
+
+  @VisibleForTesting
+  public GoogleApiFactory(ProxyFactory proxyFactory) {
+    Preconditions.checkNotNull(proxyFactory, "proxyFactory is null");
+    this.proxyFactory = proxyFactory;
+  }
 
   @Activate
   public void init() {
     jsonFactory = new JacksonFactory();
-    proxyFactory = new ProxyFactory();
-    proxyFactory.setProxyService(proxyService);
-    cache = CacheBuilder.newBuilder().weakValues().build(new TransportCacheLoader(proxyFactory));
+    transportCache = CacheBuilder.newBuilder().weakValues().build(new TransportCacheLoader(proxyFactory));
   }
 
   @Override
   public Projects newProjectsApi(Credential credential) throws GoogleApiException {
     try {
-      HttpTransport transport = cache.get(GoogleApiUrl.CLOUDRESOURCE_MANAGER_API);
+      Preconditions.checkNotNull(transportCache, "transportCache is null");
+      HttpTransport transport = transportCache.get(GoogleApiUrl.CLOUDRESOURCE_MANAGER_API);
       Preconditions.checkNotNull(transport, "transport is null");
       Preconditions.checkNotNull(jsonFactory, "jsonFactory is null");
 
@@ -87,7 +98,8 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   @Override
   public Apps newAppsApi(Credential credential) throws GoogleApiException {
     try {
-      HttpTransport transport = cache.get(GoogleApiUrl.APPENGINE_ADMIN_API);
+      Preconditions.checkNotNull(transportCache, "transportCache is null");
+      HttpTransport transport = transportCache.get(GoogleApiUrl.APPENGINE_ADMIN_API);
       Preconditions.checkNotNull(transport, "transport is null");
       Preconditions.checkNotNull(jsonFactory, "jsonFactory is null");
 
@@ -104,11 +116,9 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   public void setProxyService(IProxyService proxyService) {
     this.proxyService = proxyService;
     this.proxyService.addProxyChangeListener(proxyChangeListener);
-    if (proxyFactory != null) {
-      proxyFactory.setProxyService(this.proxyService);
-    }
-    if (cache != null) {
-      cache.invalidateAll();
+    proxyFactory.setProxyService(this.proxyService);
+    if (transportCache != null) {
+      transportCache.invalidateAll();
     }
   }
 
@@ -116,11 +126,9 @@ public class GoogleApiFactory implements IGoogleApiFactory {
     if (this.proxyService == proxyService) {
       proxyService.removeProxyChangeListener(proxyChangeListener);
       this.proxyService = null;
-      if (proxyFactory != null) {
-        proxyFactory.setProxyService(null);
-      }
-      if (cache != null) {
-        cache.invalidateAll();
+      proxyFactory.setProxyService(null);
+      if (transportCache != null) {
+        transportCache.invalidateAll();
       }
     }
   }
@@ -128,5 +136,10 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   @VisibleForTesting
   void setJsonFactory(JsonFactory jsonFactory) {
     this.jsonFactory = jsonFactory;
+  }
+
+  @VisibleForTesting
+  void setTransportCache(LoadingCache<GoogleApiUrl, HttpTransport> transportCache) {
+    this.transportCache = transportCache;
   }
 }
