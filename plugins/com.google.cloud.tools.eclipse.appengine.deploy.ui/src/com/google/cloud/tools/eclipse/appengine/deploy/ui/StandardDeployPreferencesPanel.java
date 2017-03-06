@@ -323,7 +323,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     GridDataFactory.fillDefaults().grab(true, false).hint(SWT.DEFAULT, 200)
         .applyTo(projectSelector);
 
-    Button refreshProjectsButton = new Button(projectSelectorComposite, SWT.NONE);
+    final Button refreshProjectsButton = new Button(projectSelectorComposite, SWT.NONE);
     refreshProjectsButton.setImage(refreshIcon);
     GridDataFactory.swtDefaults().align(SWT.END, SWT.BEGINNING).applyTo(refreshProjectsButton);
     refreshProjectsButton.addSelectionListener(new SelectionAdapter() {
@@ -337,6 +337,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
       @Override
       public void run() {
         refreshProjectsForSelectedCredential();
+        refreshProjectsButton.setEnabled(accountSelector.getSelectedCredential() != null);
       }
     });
 
@@ -344,9 +345,6 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
         new ProjectSelectorSelectionChangedListener(accountSelector,
                                                     projectRepository,
                                                     projectSelector));
-    
-    
-
   }
 
   private void createProjectVersionSection() {
