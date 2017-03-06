@@ -41,4 +41,16 @@ public class FontUtilTest {
     }
   }
 
+  @Test
+  public void testConvertFontToItalic() {
+    Shell shell = new Shell();
+    Label label = new Label(shell, SWT.NONE);
+    for (FontData fontData : label.getFont().getFontData()) {
+      assertThat(fontData.getStyle(), is(not(SWT.ITALIC)));
+    }
+    FontUtil.convertFontToItalic(label);
+    for (FontData fontData : label.getFont().getFontData()) {
+      assertThat(fontData.getStyle(), is(SWT.ITALIC));
+    }
+  }
 }

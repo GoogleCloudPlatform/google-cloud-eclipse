@@ -297,13 +297,19 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     Label projectIdLabel = new Label(this, SWT.LEAD);
     projectIdLabel.setText(Messages.getString("project"));
     projectIdLabel.setToolTipText(Messages.getString("tooltip.project.id"));
-    GridDataFactory.swtDefaults().align(SWT.BEGINNING, SWT.BEGINNING).span(1, 2)
+    GridDataFactory.swtDefaults().align(SWT.BEGINNING, SWT.BEGINNING).span(1, 3)
         .applyTo(projectIdLabel);
+
+    Label select = new Label(this, SWT.WRAP);
+    select.setText(Messages.getString("projectselector.selectProject"));
+    GridDataFactory.swtDefaults().align(SWT.FILL, SWT.BEGINNING)
+        .applyTo(select);
 
     Link createNewProject = new Link(this, SWT.NONE);
     createNewProject.setText(Messages.getString("projectselector.createproject",
                                                 CREATE_GCP_PROJECT_WITH_GAE_URL));
     createNewProject.setToolTipText(Messages.getString("projectselector.createproject.tooltip"));
+    FontUtil.convertFontToItalic(createNewProject);
     createNewProject.addSelectionListener(
         new OpenUriSelectionListener(new ErrorDialogErrorHandler(getShell())));
     GridDataFactory.swtDefaults().align(SWT.FILL, SWT.BEGINNING)
@@ -338,6 +344,9 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
         new ProjectSelectorSelectionChangedListener(accountSelector,
                                                     projectRepository,
                                                     projectSelector));
+    
+    
+
   }
 
   private void createProjectVersionSection() {
