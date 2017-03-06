@@ -23,7 +23,7 @@ import com.google.common.cache.CacheLoader;
 
 class TransportCacheLoader extends CacheLoader<GoogleApiUrl, HttpTransport> {
   
-  private ProxyFactory proxyFactory;
+  private final ProxyFactory proxyFactory;
 
   TransportCacheLoader(ProxyFactory proxyFactory) {
     this.proxyFactory = proxyFactory;

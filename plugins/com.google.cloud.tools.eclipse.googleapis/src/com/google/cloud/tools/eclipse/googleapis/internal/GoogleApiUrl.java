@@ -21,7 +21,7 @@ public enum GoogleApiUrl {
   APPENGINE_ADMIN_API("https://appengine.googleapis.com"),
   CLOUDRESOURCE_MANAGER_API("https://cloudresourcemanager.googleapis.com");
 
-  private String url;
+  private final String url;
 
   private GoogleApiUrl(String url) {
     this.url = url;

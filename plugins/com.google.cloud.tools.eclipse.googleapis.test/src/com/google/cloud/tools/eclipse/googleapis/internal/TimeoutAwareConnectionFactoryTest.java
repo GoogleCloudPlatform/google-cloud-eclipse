@@ -18,9 +18,9 @@ package com.google.cloud.tools.eclipse.googleapis.internal;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 
 import com.google.cloud.tools.eclipse.test.util.http.TestHttpServer;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -38,12 +38,15 @@ public class TimeoutAwareConnectionFactoryTest {
 
   private static final String NONEXISTENTDOMAIN =
       "http://nonexistentdomain" + new Random(System.currentTimeMillis()).nextLong() + ".com";
-  @Rule public TestHttpServer proxyServer = new TestHttpServer("", "");
+  private static final String PROXY_RESPONSE = "Proxy connected to " + NONEXISTENTDOMAIN;
+
+  @Rule public TestHttpServer proxyServer = new TestHttpServer("", PROXY_RESPONSE);
 
   @Test
   public void testConstructorWithTimeouts() throws MalformedURLException, IOException {
     HttpURLConnection connection =
-        new TimeoutAwareConnectionFactory(1764, 42).openConnection(new URL(proxyServer.getAddress()));
+        new TimeoutAwareConnectionFactory(1764, 42)
+            .openConnection(new URL(proxyServer.getAddress()));
     assertThat(connection.getConnectTimeout(), is(1764));
     assertThat(connection.getReadTimeout(), is(42));
     connectReadAndDisconnect(connection);
@@ -65,7 +68,8 @@ public class TimeoutAwareConnectionFactoryTest {
         new Proxy(Type.HTTP,
                   new InetSocketAddress(proxyServer.getHostname(), proxyServer.getPort()));
     HttpURLConnection connection =
-        new TimeoutAwareConnectionFactory(proxy, 1764, 3528).openConnection(new URL(NONEXISTENTDOMAIN));
+        new TimeoutAwareConnectionFactory(proxy, 1764, 3528)
+            .openConnection(new URL(NONEXISTENTDOMAIN));
     connectReadAndDisconnect(connection);
     assertThat(connection.getConnectTimeout(), is(1764));
     assertThat(connection.getReadTimeout(), is(3528));
@@ -73,12 +77,11 @@ public class TimeoutAwareConnectionFactoryTest {
 
   private void connectReadAndDisconnect(HttpURLConnection connection) throws IOException {
     connection.connect();
-    try (InputStreamReader reader =
-        new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8)) {
-      char[] buffer = new char[1024];
-      while (reader.read(buffer) != -1) {
-        fail("Test server is not expected to return anything");
-      }
+    assertThat(connection.getResponseCode(), is(200));
+    try (BufferedReader reader =
+        new BufferedReader(
+            new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
+      assertThat(reader.readLine(), is(PROXY_RESPONSE));
     } finally {
       connection.disconnect();
     }

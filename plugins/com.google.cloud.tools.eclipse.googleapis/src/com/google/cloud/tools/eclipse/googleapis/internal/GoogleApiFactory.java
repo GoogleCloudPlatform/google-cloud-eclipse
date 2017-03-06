@@ -63,7 +63,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   };
 
   public GoogleApiFactory() {
-    proxyFactory = new ProxyFactory();
+    this(new ProxyFactory());
   }
 
   @VisibleForTesting
@@ -75,7 +75,8 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   @Activate
   public void init() {
     jsonFactory = new JacksonFactory();
-    transportCache = CacheBuilder.newBuilder().weakValues().build(new TransportCacheLoader(proxyFactory));
+    transportCache =
+        CacheBuilder.newBuilder().weakValues().build(new TransportCacheLoader(proxyFactory));
   }
 
   @Override

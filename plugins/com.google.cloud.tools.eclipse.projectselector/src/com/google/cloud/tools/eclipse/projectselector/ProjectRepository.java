@@ -122,21 +122,19 @@ public class ProjectRepository {
       // just in case the API changes and exception with 404 won't be
       // used to indicate a missing application
       return AppEngine.withId(application.getId());
-    } catch (IOException | GoogleApiException ex) {
-      if (ex instanceof GoogleJsonResponseException) {
-        GoogleJsonResponseException responseException = (GoogleJsonResponseException) ex;
-        if (responseException.getStatusCode() == HttpStatusCodes.STATUS_CODE_NOT_FOUND) {
-          return AppEngine.NO_APPENGINE_APPLICATION;
-        } else {
-          String message = responseException.getLocalizedMessage();
-          // the message is a full json string with multiple lines, let's extract only the message
-          // from the detail object if exists
-          if (responseException.getDetails() != null && responseException.getDetails().getMessage() != null) {
-            message = responseException.getDetails().getMessage();
-          }
-          throw new ProjectRepositoryException(message, responseException);
+    } catch (GoogleJsonResponseException ex) {
+      if (ex.getStatusCode() == HttpStatusCodes.STATUS_CODE_NOT_FOUND) {
+        return AppEngine.NO_APPENGINE_APPLICATION;
+      } else {
+        String message = ex.getLocalizedMessage();
+        // the message is a full json string with multiple lines, let's extract only the message
+        // from the detail object if exists
+        if (ex.getDetails() != null && ex.getDetails().getMessage() != null) {
+          message = ex.getDetails().getMessage();
         }
+        throw new ProjectRepositoryException(message, ex);
       }
+    } catch (IOException | GoogleApiException ex) {
       throw new ProjectRepositoryException(ex);
     }
   }
