@@ -20,7 +20,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.test.util.http.TestHttpServer;
-import com.google.cloud.tools.eclipse.usagetracker.HttpUtil;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
