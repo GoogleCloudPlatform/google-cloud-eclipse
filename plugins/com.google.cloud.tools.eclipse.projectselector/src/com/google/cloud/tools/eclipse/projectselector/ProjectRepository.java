@@ -23,7 +23,8 @@ import com.google.api.services.appengine.v1.model.Application;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects;
 import com.google.api.services.cloudresourcemanager.model.ListProjectsResponse;
 import com.google.api.services.cloudresourcemanager.model.Project;
-import com.google.cloud.tools.eclipse.googleapis.GoogleApiFactory;
+import com.google.cloud.tools.eclipse.googleapis.GoogleApiException;
+import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.projectselector.model.AppEngine;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.common.annotations.VisibleForTesting;
@@ -42,9 +43,9 @@ public class ProjectRepository {
   private static final int PROJECT_LIST_PAGESIZE = 300;
   private static final String PROJECT_DELETE_REQUESTED = "DELETE_REQUESTED";
 
-  private final GoogleApiFactory apiFactory;
+  private final IGoogleApiFactory apiFactory;
 
-  public ProjectRepository(GoogleApiFactory apiFactory) {
+  public ProjectRepository(IGoogleApiFactory apiFactory) {
     this.apiFactory = apiFactory;
   }
 
@@ -63,7 +64,7 @@ public class ProjectRepository {
       } else {
         return Collections.emptyList();
       }
-    } catch (IOException ex) {
+    } catch (IOException | GoogleApiException ex) {
       throw new ProjectRepositoryException(ex);
     }
   }
@@ -81,7 +82,7 @@ public class ProjectRepository {
       } else {
         return null;
       }
-    } catch (IOException ex) {
+    } catch (IOException | GoogleApiException ex) {
       throw new ProjectRepositoryException(ex);
     }
   }
@@ -121,21 +122,19 @@ public class ProjectRepository {
       // just in case the API changes and exception with 404 won't be
       // used to indicate a missing application
       return AppEngine.withId(application.getId());
-    } catch (IOException ex) {
-      if (ex instanceof GoogleJsonResponseException) {
-        GoogleJsonResponseException responseException = (GoogleJsonResponseException) ex;
-        if (responseException.getStatusCode() == HttpStatusCodes.STATUS_CODE_NOT_FOUND) {
-          return AppEngine.NO_APPENGINE_APPLICATION;
-        } else {
-          String message = responseException.getLocalizedMessage();
-          // the message is a full json string with multiple lines, let's extract only the message
-          // from the detail object if exists
-          if (responseException.getDetails() != null && responseException.getDetails().getMessage() != null) {
-            message = responseException.getDetails().getMessage();
-          }
-          throw new ProjectRepositoryException(message, responseException);
+    } catch (GoogleJsonResponseException ex) {
+      if (ex.getStatusCode() == HttpStatusCodes.STATUS_CODE_NOT_FOUND) {
+        return AppEngine.NO_APPENGINE_APPLICATION;
+      } else {
+        String message = ex.getLocalizedMessage();
+        // the message is a full json string with multiple lines, let's extract only the message
+        // from the detail object if exists
+        if (ex.getDetails() != null && ex.getDetails().getMessage() != null) {
+          message = ex.getDetails().getMessage();
         }
+        throw new ProjectRepositoryException(message, ex);
       }
+    } catch (IOException | GoogleApiException ex) {
       throw new ProjectRepositoryException(ex);
     }
   }
