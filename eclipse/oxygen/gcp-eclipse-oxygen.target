@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde?>
 <!-- generated with https://github.com/mbarbero/fr.obeo.releng.targetplatform -->
-<target name="GCP for Eclipse Oxygen" sequenceNumber="1486144192">
+<target name="GCP for Eclipse Oxygen" sequenceNumber="1488904345">
   <locations>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
       <unit id="org.eclipse.license.feature.group" version="1.0.1.v20140414-1359"/>
@@ -24,7 +24,6 @@
       <unit id="org.eclipse.jetty.servlet" version="9.4.0.v20161208"/>
       <unit id="org.eclipse.jetty.server" version="9.4.0.v20161208"/>
       <unit id="org.eclipse.jetty.util" version="9.4.0.v20161208"/>
-      <unit id="ch.qos.logback.slf4j" version="1.0.7.v201505121915"/>
       <repository location="http://download.eclipse.org/releases/oxygen/201702031000/"/>
     </location>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
