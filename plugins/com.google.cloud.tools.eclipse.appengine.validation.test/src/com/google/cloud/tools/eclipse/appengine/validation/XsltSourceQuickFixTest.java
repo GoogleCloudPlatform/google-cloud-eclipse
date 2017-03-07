@@ -19,51 +19,55 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
+import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import org.junit.Rule;
 import org.junit.Test;
 
-import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
-import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
-
 public class XsltSourceQuickFixTest {
-  
+
   private static final String APPLICATION_XML =
       "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>"
       + "<application>"
       + "</application>"
       + "</appengine-web-app>";
-  
+
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
-  
+
   @Test
   public void testApply() throws CoreException {
-    
+
     IProject project = projectCreator.getProject();
     IFile file = project.getFile("testdata.xml");
     file.create(ValidationTestUtils.stringToInputStream(
       APPLICATION_XML), IFile.FORCE, null);
-    
+
     IWorkbench workbench = PlatformUI.getWorkbench();
-    WorkbenchUtil.openInEditor(workbench, file);
+    IEditorPart editorPart = WorkbenchUtil.openInEditor(workbench, file);
     ITextViewer viewer = ValidationTestUtils.getViewer(file);
     String preContents = viewer.getDocument().get();
-    
+
     assertTrue(preContents.contains("application"));
-    
+
     XsltSourceQuickFix quickFix = new XsltSourceQuickFix("/xslt/application.xsl",
         Messages.getString("remove.application.element"));
     quickFix.apply(viewer, 'a', 0, 0);
-    
+
     IDocument document = viewer.getDocument();
     String contents = document.get();
     assertFalse(contents.contains("application"));
+
+    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1527
+    editorPart.doSave(new NullProgressMonitor());
   }
-  
+
 }
