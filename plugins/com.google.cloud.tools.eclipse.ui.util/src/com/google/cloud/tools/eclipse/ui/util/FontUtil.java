@@ -85,6 +85,6 @@ public class FontUtil {
   }
 
   private static boolean hasStyle(FontData fontData, int style) {
-    return (fontData.getStyle() & style) != 0;
+    return (fontData.getStyle() & style) == style;
   }
 }
