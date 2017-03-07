@@ -20,6 +20,8 @@ import com.google.cloud.tools.eclipse.preferences.Activator;
 import com.google.cloud.tools.eclipse.preferences.AnalyticsPreferences;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -76,13 +78,13 @@ public class AnalyticsPingManager {
 
   private static AnalyticsPingManager instance;
 
+  private final String endpointUrl;
   // Preference store (should be configuration scoped) from which we get UUID, opt-in status, etc.
-  private IEclipsePreferences preferences;
-  private Display display;
-  private boolean analyticsEnabled;
+  private final IEclipsePreferences preferences;
+  private final Display display;
 
-  private ConcurrentLinkedQueue<PingEvent> pingEventQueue;
-  private Job eventFlushJob = new Job("Analytics Event Submission") {
+  private final ConcurrentLinkedQueue<PingEvent> pingEventQueue;
+  private final Job eventFlushJob = new Job("Analytics Event Submission") {
     @Override
     protected IStatus run(IProgressMonitor monitor) {
       while (!pingEventQueue.isEmpty()) {
@@ -95,26 +97,25 @@ public class AnalyticsPingManager {
   };
 
   @VisibleForTesting
-  AnalyticsPingManager(IEclipsePreferences preferences, Display display,
-      ConcurrentLinkedQueue<PingEvent> concurrentLinkedQueue, boolean analyticsEnabled) {
-    this.preferences = preferences;
+  AnalyticsPingManager(String endpointUrl, IEclipsePreferences preferences, Display display,
+      ConcurrentLinkedQueue<PingEvent> concurrentLinkedQueue) {
+    this.endpointUrl = endpointUrl;
+    this.preferences = Preconditions.checkNotNull(preferences);
     this.display = display;
     this.pingEventQueue = concurrentLinkedQueue;
-    this.analyticsEnabled = analyticsEnabled;
   }
 
   public static synchronized AnalyticsPingManager getInstance() {
     if (instance == null) {
       IEclipsePreferences preferences = ConfigurationScope.INSTANCE.getNode(PREFERENCES_PLUGIN_ID);
-      if (preferences == null) {
-        throw new NullPointerException("Preference store cannot be null.");
+      Display display = PlatformUI.getWorkbench().getDisplay();
+
+      String endpointUrl = null;
+      if (!Platform.inDevelopmentMode() && isTrackingIdDefined()) {
+        endpointUrl = ANALYTICS_COLLECTION_URL;  // Enable only in production env.
       }
-
-      boolean analyticsEnabled = !Platform.inDevelopmentMode() && isTrackingIdDefined();
-      Display display = !analyticsEnabled ? null : PlatformUI.getWorkbench().getDisplay();
-
-      instance = new AnalyticsPingManager(preferences, display,
-          new ConcurrentLinkedQueue<PingEvent>(), analyticsEnabled);
+      instance = new AnalyticsPingManager(endpointUrl, preferences, display,
+          new ConcurrentLinkedQueue<PingEvent>());
     }
     return instance;
   }
@@ -124,7 +125,8 @@ public class AnalyticsPingManager {
         && Constants.ANALYTICS_TRACKING_ID.startsWith("UA-");
   }
 
-  private String getAnonymizedClientId() {
+  @VisibleForTesting
+  String getAnonymizedClientId() {
     String clientId = preferences.get(AnalyticsPreferences.ANALYTICS_CLIENT_ID, null);
     if (clientId == null) {
       clientId = UUID.randomUUID().toString();
@@ -178,11 +180,16 @@ public class AnalyticsPingManager {
     sendPing(eventName, metadataKey, metadataValue, null);
   }
 
-  @VisibleForTesting
-  boolean unitTestMode;
   public void sendPing(String eventName,
       String metadataKey, String metadataValue, Shell parentShell) {
-    if (analyticsEnabled || unitTestMode) {
+    Preconditions.checkArgument(!Strings.isNullOrEmpty(eventName));
+    if (metadataValue != null) {
+      Preconditions.checkArgument(!metadataValue.isEmpty());
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(metadataKey),
+          "key cannot be null or empty if value is given");
+    }
+
+    if (endpointUrl != null) {
       // Note: always enqueue if a user has not seen the opt-in dialog yet; enqueuing itself
       // doesn't mean that the event ping will be posted.
       if (userHasOptedIn() || !userHasRegisteredOptInStatus()) {
@@ -192,11 +199,12 @@ public class AnalyticsPingManager {
     }
   }
 
-  private void sendPingHelper(PingEvent pingEvent) {
-    if (analyticsEnabled && userHasOptedIn()) {
+  @VisibleForTesting
+  void sendPingHelper(PingEvent pingEvent) {
+    if (userHasOptedIn()) {
       try {
         Map<String, String> parametersMap = buildParametersMap(getAnonymizedClientId(), pingEvent);
-        HttpUtil.sendPost(ANALYTICS_COLLECTION_URL, parametersMap);
+        HttpUtil.sendPost(endpointUrl, parametersMap);
       } catch (IOException ex) {
         // Don't try to recover or retry.
         logger.log(Level.WARNING, "Failed to send a POST request", ex);
