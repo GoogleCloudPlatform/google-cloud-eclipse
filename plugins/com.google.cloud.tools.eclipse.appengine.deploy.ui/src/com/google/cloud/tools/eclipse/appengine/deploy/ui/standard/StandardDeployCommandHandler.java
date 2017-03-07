@@ -25,6 +25,7 @@ import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployPr
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployConsole;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPreferencesDialog;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
+import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListener;
 import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities;
@@ -86,8 +87,10 @@ public class StandardDeployCommandHandler extends AbstractHandler {
       }
 
       IGoogleLoginService loginService = ServiceUtils.getService(event, IGoogleLoginService.class);
+      IGoogleApiFactory googleApiFactory = ServiceUtils.getService(event, IGoogleApiFactory.class);
       DeployPreferencesDialog dialog =
-          new DeployPreferencesDialog(HandlerUtil.getActiveShell(event), project, loginService);
+          new DeployPreferencesDialog(HandlerUtil.getActiveShell(event), project, loginService,
+                                      googleApiFactory);
       if (dialog.open() == Window.OK) {
         launchDeployJob(project, dialog.getCredential());
       }

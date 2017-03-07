@@ -22,7 +22,7 @@ import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkOutOfDateException;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
-import com.google.cloud.tools.eclipse.googleapis.GoogleApiFactory;
+import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import com.google.common.base.Preconditions;
@@ -56,14 +56,19 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
   private IProject project;
   private IGoogleLoginService loginService;
 
+  private IGoogleApiFactory googleApiFactory;
+
   public DeployPreferencesDialog(Shell parentShell, IProject project,
-                                 IGoogleLoginService loginService) {
+                                 IGoogleLoginService loginService,
+                                 IGoogleApiFactory googleApiFactory) {
     super(parentShell);
 
     Preconditions.checkNotNull(project, "project is null");
     Preconditions.checkNotNull(loginService, "loginService is null");
+    Preconditions.checkNotNull(googleApiFactory, "googleApiFactory is null");
     this.project = project;
     this.loginService = loginService;
+    this.googleApiFactory = googleApiFactory;
   }
 
   @Override
@@ -92,7 +97,7 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
     Composite container = new Composite(dialogArea, SWT.NONE);
     content = new StandardDeployPreferencesPanel(container, project, loginService,
         getLayoutChangedHandler(), true /* requireValues */,
-        new ProjectRepository(new GoogleApiFactory()));
+        new ProjectRepository(googleApiFactory));
     GridDataFactory.fillDefaults().grab(true, false).applyTo(content);
 
     // we pull in Dialog's content margins which are zeroed out by TitleAreaDialog

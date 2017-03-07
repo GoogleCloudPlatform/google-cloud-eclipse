@@ -86,7 +86,15 @@ public class TestHttpServer extends ExternalResource {
   public String getAddress() {
     Preconditions.checkNotNull(server, "server isn't started yet");
     // assume a single server connector
-    return "http://127.0.0.1:" + ((ServerConnector) server.getConnectors()[0]).getLocalPort() + "/";
+    return "http://" + getHostname() + ":" + getPort() + "/";
+  }
+
+  public String getHostname() {
+    return "127.0.0.1";
+  }
+
+  public int getPort() {
+    return ((ServerConnector) server.getConnectors()[0]).getLocalPort();
   }
 
   public String getRequestMethod() {
