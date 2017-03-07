@@ -29,7 +29,7 @@ import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -41,8 +41,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class AnalyticsPingManagerWithServerTest {
 
   @Mock private IEclipsePreferences preferences;
-  @Mock private Display display;
-  @Mock private ConcurrentLinkedQueue<PingEvent> pingEventQueue;
 
   @Rule public TestHttpServer server = new TestHttpServer("", "");
 
@@ -54,16 +52,14 @@ public class AnalyticsPingManagerWithServerTest {
         .thenReturn(true);  // Simulate user has opted in.
 
     pingManager = new AnalyticsPingManager(
-        server.getAddress(), "unique-client-id", preferences, display, pingEventQueue);
+        server.getAddress(), "unique-client-id", preferences,
+        PlatformUI.getWorkbench().getDisplay(), new ConcurrentLinkedQueue<PingEvent>());
   }
 
   @Test
-  public void testSubmitPingInternal_noMetadata() {
-    when(preferences.getBoolean(eq(AnalyticsPreferences.ANALYTICS_OPT_IN), anyBoolean()))
-        .thenReturn(true);  // Simulate user has opted in.
-
-    PingEvent event = new PingEvent("some.event-name", null, null, null);
-    pingManager.sendPingHelper(event);
+  public void testSendPing_noMetadata() throws InterruptedException {
+    pingManager.sendPing("some.event-name", null, null, null);
+    pingManager.eventFlushJob.join();
 
     Map<String, String[]> parameters = server.getRequestParameters();
     verifyCommonParameters(parameters, "some.event-name");
@@ -71,9 +67,9 @@ public class AnalyticsPingManagerWithServerTest {
   }
 
   @Test
-  public void testSubmitPingInternal_withMetadata() {
-    PingEvent event = new PingEvent("another.event-name", "times-happened", "1234", null);
-    pingManager.sendPingHelper(event);
+  public void testSendPing_withMetadata() throws InterruptedException {
+    pingManager.sendPing("another.event-name", "times-happened", "1234", null);
+    pingManager.eventFlushJob.join();
 
     Map<String, String[]> parameters = server.getRequestParameters();
     verifyCommonParameters(parameters, "another.event-name");

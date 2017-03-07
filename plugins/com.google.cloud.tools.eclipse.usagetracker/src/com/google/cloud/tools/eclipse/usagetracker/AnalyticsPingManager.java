@@ -85,7 +85,8 @@ public class AnalyticsPingManager {
   private final Display display;
 
   private final ConcurrentLinkedQueue<PingEvent> pingEventQueue;
-  private final Job eventFlushJob = new Job("Analytics Event Submission") {
+  @VisibleForTesting
+  final Job eventFlushJob = new Job("Analytics Event Submission") {
     @Override
     protected IStatus run(IProgressMonitor monitor) {
       while (!pingEventQueue.isEmpty()) {
@@ -202,8 +203,7 @@ public class AnalyticsPingManager {
     }
   }
 
-  @VisibleForTesting
-  void sendPingHelper(PingEvent pingEvent) {
+  private void sendPingHelper(PingEvent pingEvent) {
     if (userHasOptedIn()) {
       try {
         Map<String, String> parametersMap = buildParametersMap(clientId, pingEvent);
