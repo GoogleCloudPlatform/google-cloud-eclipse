@@ -41,6 +41,10 @@
         <menu
               id="com.google.cloud.tools.eclipse.appengine.actions.new"
               label="%createNewProject">
+           <separator
+                 name="com.google.cloud.tools.eclipse.appengine.standard"
+                 visible="true">
+           </separator>
            <command
                  commandId="org.eclipse.ui.newWizard"
                  style="push">
@@ -57,6 +61,10 @@
                     value="com.google.cloud.tools.eclipse.appengine.newproject.MavenAppEngineStandard">
               </parameter>
            </command>
+           <separator
+                 name="com.google.cloud.tools.eclipse.appengine.flexible"
+                 visible="true">
+           </separator>
         </menu>
         <separator
               name="launch"

@@ -77,7 +77,7 @@
         point="org.eclipse.ui.menus">
      <menuContribution
            allPopups="false"
-           locationURI="menu:com.google.cloud.tools.eclipse.appengine.actions.new">
+           locationURI="menu:com.google.cloud.tools.eclipse.appengine.actions.new?after=com.google.cloud.tools.eclipse.appengine.flexible">
         <command
               commandId="org.eclipse.ui.newWizard"
               style="push">
