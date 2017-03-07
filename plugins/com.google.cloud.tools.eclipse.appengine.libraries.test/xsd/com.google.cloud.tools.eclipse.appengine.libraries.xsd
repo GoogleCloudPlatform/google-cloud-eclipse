@@ -251,23 +251,21 @@ build path <a href="http://help.eclipse.org/neon/index.jsp?topic=%2Forg.eclipse.
          according to the schema, so these are removed here -->
          <xs:attribute name="repositoryUri" type="xs:string">
             <xs:annotation>
-               <xs:documentation>
-                  URI pointing to a repository location or an ID of a repository defined in the POM or the Maven
-settings. If the value starts with [protocol]:// then it is treated as a URI, otherwise an ID of a repository that is
-expected to be defined. Defaults to 'central' denoting the Maven Central repository.
+			  <xs:documentation>
+				URI pointing to a repository location or an ID of a repository defined
+				in the POM or the Maven settings. If the value starts with [protocol]:// 
+				then it is treated as a URI otherwise an ID of a repository that is
+				expected to be defined. Defaults to 'central' denoting the Maven Central
+				repository.
                </xs:documentation>
             </xs:annotation>
          </xs:attribute>
          <xs:attribute name="groupId" type="xs:string" use="required" />
          <xs:attribute name="artifactId" type="xs:string" use="required" />
-         <!-- the original exsd contains this line
-         <xs:attribute name="version" type="xs:string" use="default" value="LATEST">
-         however it has an invalid attribute (value) and and invalid attribute value (default for use)
-         according to the schema, so these are removed here -->
-         <xs:attribute name="version" type="xs:string">
+         <xs:attribute name="version" type="xs:string" use="required">
             <xs:annotation>
                <xs:documentation>
-                  Version of the maven artifact, defaults to LATEST.
+                  Version of the Maven artifact.
                </xs:documentation>
             </xs:annotation>
          </xs:attribute>
