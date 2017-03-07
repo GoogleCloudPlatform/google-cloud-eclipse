@@ -17,14 +17,28 @@
 package com.google.cloud.tools.eclipse.ui.util.databinding;
 
 import com.google.cloud.tools.eclipse.ui.util.Messages;
+import com.google.common.base.Supplier;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IStatus;
 
 public class ProjectSelectorValidator implements IValidator {
 
+  private Supplier<Boolean> projectsFound;
+
+  /**
+   * @param projectsFound should return true if there are projects in the project selector,
+   * false otherwise
+   */
+  public ProjectSelectorValidator(Supplier<Boolean> projectsFound) {
+    this.projectsFound = projectsFound;
+  }
+
   @Override
   public IStatus validate(Object input) {
+    if (!projectsFound.get()) {
+      return ValidationStatus.error(Messages.getString("no.projects")); //$NON-NLS-1$
+    }
     if (input == null || ((String) input).isEmpty()) {
       return ValidationStatus.error(Messages.getString("project.not.selected")); //$NON-NLS-1$
     }

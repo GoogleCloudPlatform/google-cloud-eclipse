@@ -33,6 +33,7 @@ import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.google.common.base.Supplier;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
@@ -197,7 +198,12 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     UpdateValueStrategy projectIdToGcpProject =
         new UpdateValueStrategy().setConverter(new ProjectIdToGcpProjectConverter());
     if (requireValues) {
-      IValidator validator = new ProjectSelectorValidator();
+      IValidator validator = new ProjectSelectorValidator(new Supplier<Boolean>() {
+        @Override
+        public Boolean get() {
+          return projectSelector.hasProjects();
+        }
+      });
       gcpProjectToProjectId.setAfterConvertValidator(validator);
       projectIdToGcpProject.setAfterGetValidator(validator);
     }
