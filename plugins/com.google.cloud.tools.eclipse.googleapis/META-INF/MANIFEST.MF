@@ -7,6 +7,7 @@ Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
+Service-Component: OSGI-INF/com.google.cloud.tools.eclipse.googleapis.internal.GoogleApiFactory.xml
 Bundle-Classpath: .,
  lib/google-api-client-1.22.0.jar,
  lib/google-http-client-1.22.0.jar,
@@ -41,5 +42,7 @@ Export-Package: com.google.api.client.auth.oauth2;version="1.22.0",
 Import-Package: com.google.cloud.tools.eclipse.util,
  javax.servlet.http,
  org.codehaus.jackson,
+ org.eclipse.core.net.proxy,
  org.mortbay.jetty,
- org.mortbay.jetty.handler
+ org.mortbay.jetty.handler,
+ org.osgi.service.component.annotations;version="1.2.0"

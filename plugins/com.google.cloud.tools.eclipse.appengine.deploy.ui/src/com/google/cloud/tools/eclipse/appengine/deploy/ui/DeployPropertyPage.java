@@ -18,7 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
-import com.google.cloud.tools.eclipse.googleapis.GoogleApiFactory;
+import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import com.google.cloud.tools.eclipse.util.AdapterUtil;
@@ -149,14 +149,17 @@ public class DeployPropertyPage extends PropertyPage {
 
   private DeployPreferencesPanel getPreferencesPanel(IProject project,
       IFacetedProject facetedProject, Composite container) {
+
     IGoogleLoginService loginService =
         PlatformUI.getWorkbench().getService(IGoogleLoginService.class);
+    IGoogleApiFactory googleApiFactory =
+        PlatformUI.getWorkbench().getService(IGoogleApiFactory.class);
 
     if (AppEngineStandardFacet.hasAppEngineFacet(facetedProject)) {
       setTitle(Messages.getString("standard.page.title"));
       return new StandardDeployPreferencesPanel(
           container, project, loginService, getLayoutChangedHandler(), false /* requireValues */,
-          new ProjectRepository(new GoogleApiFactory()));
+          new ProjectRepository(googleApiFactory));
     } else if (AppEngineFlexFacet.hasAppEngineFacet(facetedProject)) {
       setTitle(Messages.getString("flex.page.title"));
       return new FlexDeployPreferencesPanel(container, project);
