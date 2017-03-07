@@ -37,6 +37,9 @@ import org.eclipse.core.runtime.Path;
  */
 public class FileDownloader {
 
+  private static final int DEFAULT_CONNECT_TIMEOUT_MS = 3000;
+  private static final int DEFAULT_READ_TIMEOUT_MS = 3000;
+
   private final IPath downloadFolderPath;
 
   /**
@@ -79,8 +82,8 @@ public class FileDownloader {
 
     ensureDownloadFolderExists();
     URLConnection connection = url.openConnection();
-    connection.setConnectTimeout(HttpUtil.DEFAULT_CONNECT_TIMEOUT_MS);
-    connection.setReadTimeout(HttpUtil.DEFAULT_READ_TIMEOUT_MS);
+    connection.setConnectTimeout(DEFAULT_CONNECT_TIMEOUT_MS);
+    connection.setReadTimeout(DEFAULT_READ_TIMEOUT_MS);
     connection.setRequestProperty("User-Agent", CloudToolsInfo.USER_AGENT);
     try (InputStream inputStream = new BufferedInputStream(connection.getInputStream());
          OutputStream outputStream =

@@ -14,30 +14,27 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.libraries.ui;
+package com.google.cloud.tools.eclipse.util;
 
+import com.google.cloud.tools.eclipse.util.FacetExistsPropertyTester;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class MessagesTest {
+/**
+ * Unit tests for {@link FacetExistsPropertyTester}
+ */
+public class FacetExistsPropertyTesterTest {
+  private FacetExistsPropertyTester propertyTester = new FacetExistsPropertyTester();
 
   @Test
-  public void testTitle() {
-    Assert.assertEquals("App Engine Standard Environment Libraries",  Messages.getString("title"));
+  public void test_facetExist() {
+    Assert.assertTrue(propertyTester.test(null /* receiver */, "facetExists", null /* args */,
+        "com.google.cloud.tools.eclipse.appengine.facets.standard"));
   }
-  
-  @Test
-  public void testDescription() {
-    Assert.assertEquals(
-        "Additional jars commonly used in App Engine Standard Environment applications", 
-        Messages.getString("description"));
-  }
-  
 
   @Test
-  public void testUnknownMessage() {
-    Assert.assertEquals("!foo.bar!",  Messages.getString("foo.bar"));
+  public void test_facetDoesNotExist() {
+    Assert.assertFalse(propertyTester.test(null /* receiver */, "facetExists", null /* args */,
+        "fake.facet"));
   }
-  
-
 }

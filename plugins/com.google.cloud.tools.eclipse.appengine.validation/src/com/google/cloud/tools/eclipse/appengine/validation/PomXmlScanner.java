@@ -88,7 +88,8 @@ class PomXmlScanner extends AbstractScanner {
     } else if (insidePlugin && "artifactId".equalsIgnoreCase(localName)) {
       // Found closing <artifactId> tag with parent <plugin>
       saveContents = false;
-      if ("appengine-maven-plugin".equalsIgnoreCase(elementContents.toString())) {
+      if ("appengine-maven-plugin".equals(elementContents.toString()) || 
+          "gcloud-maven-plugin".equals(elementContents.toString())) {
         foundArtifactId = true;
       }
     }
@@ -97,7 +98,7 @@ class PomXmlScanner extends AbstractScanner {
       // with the same <plugin> parent
       DocumentLocation start = new DocumentLocation(lineNumber, columnNumber - 9);
       String message = Messages.getString("maven.plugin");
-      BannedElement element = new MavenPluginElement(message, start, 9 /*length of <groupId>*/);
+      BannedElement element = new MavenPluginElement(message, start, 0);
       addToBlacklist(element);
       foundAppEngineGroupId = false;
       foundArtifactId = false;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.util.io;
+package com.google.cloud.tools.eclipse.usagetracker;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

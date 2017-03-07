@@ -19,25 +19,29 @@ package com.google.cloud.tools.eclipse.appengine.libraries.ui;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class MessagesTest {
+public class AppEngineLibrariesPageTest {
+
+  private AppEngineLibrariesPage page = new AppEngineLibrariesPage();
 
   @Test
-  public void testTitle() {
-    Assert.assertEquals("App Engine Standard Environment Libraries",  Messages.getString("title"));
-  }
-  
-  @Test
-  public void testDescription() {
+  public void testConstructor() {
+    Assert.assertEquals("App Engine Standard Environment Libraries", page.getTitle());
+    Assert.assertNull(page.getMessage());
+    Assert.assertNull(page.getErrorMessage());
     Assert.assertEquals(
-        "Additional jars commonly used in App Engine Standard Environment applications", 
-        Messages.getString("description"));
+        "Additional jars commonly used in App Engine Standard Environment applications",
+        page.getDescription());
+    Assert.assertNotNull(page.getImage());
   }
   
-
   @Test
-  public void testUnknownMessage() {
-    Assert.assertEquals("!foo.bar!",  Messages.getString("foo.bar"));
+  public void testFinish() {
+    Assert.assertTrue(page.finish());
   }
   
+  @Test
+  public void testGetSelection() {
+    Assert.assertNull(page.getSelection());
+  }
 
 }

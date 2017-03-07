@@ -72,4 +72,23 @@ public class PomXmlScannerTest {
     assertEquals(ELEMENT_MESSAGE, message);
   }
   
+  @Test
+  public void testEndElement_gcloudPlugin() throws SAXException {
+    scanner.startElement("", "plugin", "", new AttributesImpl());
+    scanner.startElement("", "groupId", "", new AttributesImpl());
+    String groupId = "com.google.appengine";
+    scanner.characters(groupId.toCharArray(), 0, groupId.length());
+    scanner.endElement("", "groupId", "");
+    assertFalse(scanner.getSaveContents());
+    
+    scanner.startElement("", "artifactId", "", new AttributesImpl());
+    String artifactId = "gcloud-maven-plugin";
+    scanner.characters(artifactId.toCharArray(), 0, artifactId.length());
+    scanner.endElement("", "artifactId", "");
+    assertEquals(1, scanner.getBlacklist().size());
+    
+    String message = scanner.getBlacklist().peek().getMessage();
+    assertEquals(ELEMENT_MESSAGE, message);
+  }
+  
 }
