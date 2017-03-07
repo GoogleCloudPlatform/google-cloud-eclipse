@@ -33,12 +33,12 @@ public class HttpUtilWithServerTest {
   private static final String LONG_PARAMETER = "Exception in thread \"main\""
       + " java.lang.IllegalArgumentException: Wrong argument!\n\tat B.main(B.java:73)";
 
-  private static final Map<String, String> testParameters = new HashMap<String, String>() {
-    {
-      put("dp", "/virtual/some-event-type/some-event-name");
-      put("exception_info", LONG_PARAMETER);
-      put("product", "CT4E");
-    }
+  private static final Map<String, String> testParameters;
+  static {
+    testParameters = new HashMap<>();
+    testParameters.put("dp", "/virtual/some-event-type/some-event-name");
+    testParameters.put("exception_info", LONG_PARAMETER);
+    testParameters.put("product", "CT4E");
   };
 
   @Test
