@@ -79,6 +79,7 @@ public class AnalyticsPingManager {
   private static AnalyticsPingManager instance;
 
   private final String endpointUrl;
+  private final String clientId;
   // Preference store (should be configuration scoped) from which we get UUID, opt-in status, etc.
   private final IEclipsePreferences preferences;
   private final Display display;
@@ -97,9 +98,10 @@ public class AnalyticsPingManager {
   };
 
   @VisibleForTesting
-  AnalyticsPingManager(String endpointUrl, IEclipsePreferences preferences, Display display,
-      ConcurrentLinkedQueue<PingEvent> concurrentLinkedQueue) {
+  AnalyticsPingManager(String endpointUrl, String clientId, IEclipsePreferences preferences,
+      Display display, ConcurrentLinkedQueue<PingEvent> concurrentLinkedQueue) {
     this.endpointUrl = endpointUrl;
+    this.clientId = clientId;
     this.preferences = Preconditions.checkNotNull(preferences);
     this.display = display;
     this.pingEventQueue = concurrentLinkedQueue;
@@ -108,13 +110,14 @@ public class AnalyticsPingManager {
   public static synchronized AnalyticsPingManager getInstance() {
     if (instance == null) {
       IEclipsePreferences preferences = ConfigurationScope.INSTANCE.getNode(PREFERENCES_PLUGIN_ID);
+      String clientId = getAnonymizedClientId(preferences);
       Display display = PlatformUI.getWorkbench().getDisplay();
 
       String endpointUrl = null;
       if (!Platform.inDevelopmentMode() && isTrackingIdDefined()) {
         endpointUrl = ANALYTICS_COLLECTION_URL;  // Enable only in production env.
       }
-      instance = new AnalyticsPingManager(endpointUrl, preferences, display,
+      instance = new AnalyticsPingManager(endpointUrl, clientId, preferences, display,
           new ConcurrentLinkedQueue<PingEvent>());
     }
     return instance;
@@ -126,12 +129,12 @@ public class AnalyticsPingManager {
   }
 
   @VisibleForTesting
-  String getAnonymizedClientId() {
+  static String getAnonymizedClientId(IEclipsePreferences preferences) {
     String clientId = preferences.get(AnalyticsPreferences.ANALYTICS_CLIENT_ID, null);
     if (clientId == null) {
       clientId = UUID.randomUUID().toString();
       preferences.put(AnalyticsPreferences.ANALYTICS_CLIENT_ID, clientId);
-      flushPreferences();
+      flushPreferences(preferences);
     }
     return clientId;
   }
@@ -162,7 +165,7 @@ public class AnalyticsPingManager {
   void registerOptInStatus(boolean optedIn) {
     preferences.putBoolean(AnalyticsPreferences.ANALYTICS_OPT_IN, optedIn);
     preferences.putBoolean(AnalyticsPreferences.ANALYTICS_OPT_IN_REGISTERED, true);
-    flushPreferences();
+    flushPreferences(preferences);
   }
 
   /**
@@ -203,7 +206,7 @@ public class AnalyticsPingManager {
   void sendPingHelper(PingEvent pingEvent) {
     if (userHasOptedIn()) {
       try {
-        Map<String, String> parametersMap = buildParametersMap(getAnonymizedClientId(), pingEvent);
+        Map<String, String> parametersMap = buildParametersMap(clientId, pingEvent);
         HttpUtil.sendPost(endpointUrl, parametersMap);
       } catch (IOException ex) {
         // Don't try to recover or retry.
@@ -279,7 +282,7 @@ public class AnalyticsPingManager {
     return display != null ? display.getActiveShell() : null;
   }
 
-  private void flushPreferences() {
+  private static void flushPreferences(IEclipsePreferences preferences) {
     try {
       preferences.flush();
     } catch (BackingStoreException bse) {

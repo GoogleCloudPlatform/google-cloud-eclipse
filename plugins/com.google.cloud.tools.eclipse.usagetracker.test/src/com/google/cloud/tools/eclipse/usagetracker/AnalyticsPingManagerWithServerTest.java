@@ -19,7 +19,6 @@ package com.google.cloud.tools.eclipse.usagetracker;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -53,19 +52,15 @@ public class AnalyticsPingManagerWithServerTest {
   public void setUp() {
     when(preferences.getBoolean(eq(AnalyticsPreferences.ANALYTICS_OPT_IN), anyBoolean()))
         .thenReturn(true);  // Simulate user has opted in.
-    when(preferences.get(eq(AnalyticsPreferences.ANALYTICS_CLIENT_ID), anyString()))
-        .thenReturn("unique-client-id");
 
     pingManager = new AnalyticsPingManager(
-        server.getAddress(), preferences, display, pingEventQueue);
+        server.getAddress(), "unique-client-id", preferences, display, pingEventQueue);
   }
 
   @Test
   public void testSubmitPingInternal_noMetadata() {
     when(preferences.getBoolean(eq(AnalyticsPreferences.ANALYTICS_OPT_IN), anyBoolean()))
         .thenReturn(true);  // Simulate user has opted in.
-    when(preferences.get(eq(AnalyticsPreferences.ANALYTICS_CLIENT_ID), anyString()))
-        .thenReturn("unique-client-id");
 
     PingEvent event = new PingEvent("some.event-name", null, null, null);
     pingManager.sendPingHelper(event);

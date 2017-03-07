@@ -56,7 +56,7 @@ public class AnalyticsPingManagerTest {
     when(pingEventQueue.isEmpty()).thenReturn(true);
 
     pingManager = new AnalyticsPingManager("https://non-null-url-to-enable-mananger",
-        preferences, display, pingEventQueue);
+        "clientId", preferences, display, pingEventQueue);
   }
 
   @Test
@@ -78,6 +78,13 @@ public class AnalyticsPingManagerTest {
     PingEvent event = new PingEvent("some.event-name", "times-happened", "1234", null);
     Map<String, String> parameters = AnalyticsPingManager.buildParametersMap("clientId", event);
     assertEquals("times-happened=1234", parameters.get("dt"));
+  }
+
+  @Test
+  public void testClientId() {
+    PingEvent event = new PingEvent("some.event-name", null, null, null);
+    Map<String, String> parameters = AnalyticsPingManager.buildParametersMap("clientId", event);
+    assertEquals("clientId", parameters.get("cid"));
   }
 
   @Test
@@ -161,7 +168,7 @@ public class AnalyticsPingManagerTest {
   public void testGetAnonymizedClientId_generateNewId() {
     when(preferences.get(eq(AnalyticsPreferences.ANALYTICS_CLIENT_ID), anyString()))
         .thenReturn(null);  // Simulate that client ID has never been generated.
-    String clientId = pingManager.getAnonymizedClientId();
+    String clientId = AnalyticsPingManager.getAnonymizedClientId(preferences);
     assertFalse(clientId.isEmpty());
     verify(preferences).put(AnalyticsPreferences.ANALYTICS_CLIENT_ID, clientId);
   }
@@ -170,7 +177,7 @@ public class AnalyticsPingManagerTest {
   public void testGetAnonymizedClientId_useSavedId() {
     when(preferences.get(eq(AnalyticsPreferences.ANALYTICS_CLIENT_ID), anyString()))
         .thenReturn("some-unique-client-id");
-    String clientId = pingManager.getAnonymizedClientId();
+    String clientId = AnalyticsPingManager.getAnonymizedClientId(preferences);
     assertEquals("some-unique-client-id", clientId);
     verify(preferences, never()).put(AnalyticsPreferences.ANALYTICS_CLIENT_ID, clientId);
   }
