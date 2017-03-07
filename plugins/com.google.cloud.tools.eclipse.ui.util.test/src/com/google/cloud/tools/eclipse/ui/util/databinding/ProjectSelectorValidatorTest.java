@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.ui.util.databinding;
 
 import static org.junit.Assert.assertEquals;
 
+import com.google.common.base.Suppliers;
 import org.eclipse.core.runtime.IStatus;
 import org.junit.Test;
 
@@ -25,11 +26,25 @@ public class ProjectSelectorValidatorTest {
 
   @Test
   public void testValidate_nullString() {
-    assertEquals(IStatus.ERROR, new ProjectSelectorValidator().validate(null).getSeverity());
+    assertEquals(IStatus.ERROR, new ProjectSelectorValidator(Suppliers.ofInstance(Boolean.TRUE))
+        .validate(null).getSeverity());
   }
 
   @Test
   public void testValidate_emptyString() {
-    assertEquals(IStatus.ERROR, new ProjectSelectorValidator().validate("").getSeverity());
+    assertEquals(IStatus.ERROR, new ProjectSelectorValidator(Suppliers.ofInstance(Boolean.TRUE))
+        .validate("").getSeverity());
+  }
+
+  @Test
+  public void testValidate_noProjectsFound() {
+    assertEquals(IStatus.ERROR, new ProjectSelectorValidator(Suppliers.ofInstance(Boolean.FALSE))
+        .validate("").getSeverity());
+  }
+
+  @Test
+  public void testValidate_valid() {
+    assertEquals(IStatus.OK, new ProjectSelectorValidator(Suppliers.ofInstance(Boolean.TRUE))
+        .validate("foo").getSeverity());
   }
 }
