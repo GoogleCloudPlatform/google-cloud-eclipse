@@ -19,8 +19,6 @@ package com.google.cloud.tools.eclipse.appengine.newproject;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineLibrariesSelectorGroup;
-import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
-import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import java.io.File;
 import java.util.Collection;
 import org.eclipse.core.runtime.IStatus;
@@ -32,37 +30,35 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 
 /**
- * UI to collect all information necessary to create a new App Engine Standard Java Eclipse project.
+ * UI to collect all information necessary to create a new App Engine Java Eclipse project.
  */
-public class AppEngineStandardWizardPage extends WizardNewProjectCreationPage {
+public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
 
   private Text javaPackageField;
   private AppEngineLibrariesSelectorGroup appEngineLibrariesSelectorGroup;
   private Text serviceNameField;
 
-  public AppEngineStandardWizardPage() {
+  public AppEngineWizardPage() {
     super("basicNewProjectPage"); //$NON-NLS-1$
-    setTitle(Messages.getString("app.engine.standard.project")); //$NON-NLS-1$
-    setDescription(Messages.getString("create.app.engine.standard.project")); //$NON-NLS-1$
     setImageDescriptor(AppEngineImages.appEngine(64));
   }
+
+  public abstract void sendAnalyticsPing(Shell parentShell);
+
+  public abstract void setHelp(Composite container);
 
   @Override
   public void createControl(Composite parent) {
     super.createControl(parent);
-    AnalyticsPingManager.getInstance().sendPing(
-        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD,
-        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
-        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE, parent.getShell());
+    sendAnalyticsPing(parent.getShell());
 
     Composite container = (Composite) getControl();
-    PlatformUI.getWorkbench().getHelpSystem().setHelp(container,
-        "com.google.cloud.tools.eclipse.appengine.newproject.NewProjectContext"); //$NON-NLS-1$
+    setHelp(container);
 
     ModifyListener pageValidator = new PageValidator();
     createCustomFields(container, pageValidator);

@@ -1,4 +1,5 @@
 [![unstable](http://badges.github.io/stability-badges/dist/unstable.svg)](http://github.com/badges/stability-badges)
+[![Build Status](https://travis-ci.org/GoogleCloudPlatform/google-cloud-eclipse.svg?branch=master)](https://travis-ci.org/GoogleCloudPlatform/google-cloud-eclipse)
 
 
 This project provides an Eclipse plugin for building, debugging, and deploying Google Cloud Platform applications.

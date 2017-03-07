@@ -16,44 +16,85 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
+import java.util.Objects;
+
 import com.google.common.base.Preconditions;
 
 /**
  * A blacklisted element that will receive a problem marker. 
  */
-public class BannedElement {
+class BannedElement {
 
   private final String message;
   private final DocumentLocation start;
   private final int length;
+  private final String markerId;
+  private final int severity;
 
   /**
    * @param length the length of the marker underline. Length == 0 results in a
    *        marker in the vertical ruler and no underline
    */
-  public BannedElement(String message, DocumentLocation start, int length) {
+  BannedElement(String message, String markerId, int severity,
+      DocumentLocation start, int length) {
     Preconditions.checkNotNull(message, "message is null");
+    Preconditions.checkNotNull(markerId, "markerId is null");
     Preconditions.checkNotNull(start, "start is null");
     Preconditions.checkArgument(length >= 0, "length < 0");
     this.message = message;
     this.start = start;
     this.length = length;
+    this.markerId = markerId;
+    this.severity = severity;
   }
 
-  public BannedElement(String message) {
-    this(message, new DocumentLocation(0, 0), 0);
+  BannedElement(String message) {
+    this(message, "org.eclipse.core.resources.problemmarker",
+      1, new DocumentLocation(0, 0), 0);
   }
 
-  public String getMessage() {
+  String getMessage() {
     return message;
   }
 
-  public DocumentLocation getStart() {
+  DocumentLocation getStart() {
     return start;
   }
 
-  public int getLength() {
+  int getLength() {
     return length;
+  }
+  
+  String getMarkerId() {
+    return markerId;
+  }
+  
+  int getSeverity() {
+    return severity;
+  }
+  
+  /**
+   * BannedElements are equal if they represent the same marker type (marker ID),
+   * have the same location within a document, and will display the same message.
+   */
+  @Override
+  public boolean equals(Object object) {
+    if (object == this) {
+      return true;
+    }
+    if (object == null || !(object instanceof BannedElement)) {
+      return false;
+    } 
+    BannedElement element = (BannedElement) object;
+    return Objects.equals(markerId, element.getMarkerId()) &&
+        Objects.equals(message, element.getMessage()) &&
+        start.getLineNumber() == element.getStart().getLineNumber() &&
+        start.getColumnNumber() == element.getStart().getColumnNumber();
+  }
+  
+  @Override
+  public int hashCode() {
+    return Objects.hash(markerId, message, start.getLineNumber(), start.getColumnNumber());
   }
 
 }

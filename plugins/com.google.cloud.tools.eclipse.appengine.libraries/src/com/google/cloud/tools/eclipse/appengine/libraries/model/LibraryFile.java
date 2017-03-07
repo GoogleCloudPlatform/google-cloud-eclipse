@@ -48,7 +48,7 @@ public class LibraryFile {
     return new ArrayList<>(filters);
   }
 
-  public void setFilters(List<Filter> filters) {
+  void setFilters(List<Filter> filters) {
     if (filters != null) {
       this.filters = new ArrayList<>(filters);
     }

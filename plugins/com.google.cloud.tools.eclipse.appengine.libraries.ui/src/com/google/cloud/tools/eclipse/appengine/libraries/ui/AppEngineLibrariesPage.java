@@ -52,8 +52,8 @@ public class AppEngineLibrariesPage extends WizardPage implements IClasspathCont
 
   public AppEngineLibrariesPage() {
     super("appengine-libraries-page"); //$NON-NLS-1$
-    setTitle(Messages.getString("title"));
-    setDescription(Messages.getString("description"));
+    setTitle(Messages.getString("title"));  //$NON-NLS-1$
+    setDescription(Messages.getString("description"));  //$NON-NLS-1$
     setImageDescriptor(AppEngineImages.appEngine(64));
   }
 

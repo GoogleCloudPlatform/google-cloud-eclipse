@@ -91,7 +91,8 @@ public class MavenHelper {
    * @return the location of the download folder, may not exist
    */
   public static IPath bundleStateBasedMavenFolder(MavenCoordinates mavenCoordinates) {
-    Preconditions.checkArgument(!mavenCoordinates.getVersion().equals(MavenCoordinates.LATEST_VERSION));
+    Preconditions.checkArgument(
+        !mavenCoordinates.getVersion().equals(MavenCoordinates.LATEST_VERSION));
     File downloadedSources =
         Platform.getStateLocation(FrameworkUtil.getBundle(MavenHelper.class))
         .append("downloads")

@@ -14,6 +14,8 @@
              id="com.google.cloud.tools.eclipse.appengine.ui.AppEngineKeyword"/>
     <keyword label="%appEngineNameWithSpace" 
              id="com.google.cloud.tools.eclipse.appengine.ui.AppSpaceEngineKeyword"/>
+    <keyword label="%appEngineFlexAbbreviation"
+             id="com.google.cloud.tools.eclipse.appengine.ui.FlexKeyword"/>
   </extension>
   <extension
         point="org.eclipse.ui.menus">

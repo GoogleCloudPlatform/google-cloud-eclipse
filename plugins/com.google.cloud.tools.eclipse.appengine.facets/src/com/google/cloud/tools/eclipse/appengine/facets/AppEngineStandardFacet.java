@@ -67,7 +67,7 @@ public class AppEngineStandardFacet {
   static final String DEFAULT_RUNTIME_ID =
       "com.google.cloud.tools.eclipse.appengine.standard.runtime";
   static final String DEFAULT_RUNTIME_NAME = "App Engine Standard";
-  public static final String DEFAULT_APPENGINE_SDK_VERSION = "1.9.46";
+  public static final String DEFAULT_APPENGINE_SDK_VERSION = "1.9.49";
   public static final String DEFAULT_GCLOUD_PLUGIN_VERSION = "2.0.9.133.v201611104";
 
   /**

@@ -31,9 +31,9 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class AppEngineStandardProjectConfigTest {
+public class AppEngineProjectConfigTest {
 
-  private AppEngineStandardProjectConfig config = new AppEngineStandardProjectConfig();
+  private AppEngineProjectConfig config = new AppEngineProjectConfig();
   
   public void testProject() throws CoreException {
     try {

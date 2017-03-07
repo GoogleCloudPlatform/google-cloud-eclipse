@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.newproject;
+package com.google.cloud.tools.eclipse.appengine.newproject.standard;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -23,6 +23,8 @@ import static org.junit.Assert.fail;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
+import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectConfig;
+import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import java.lang.reflect.InvocationTargetException;
@@ -61,7 +63,7 @@ public class CreateAppEngineStandardWtpProjectTest {
   @Mock private IAdaptable adaptable;
 
   private NullProgressMonitor monitor = new NullProgressMonitor();
-  private AppEngineStandardProjectConfig config = new AppEngineStandardProjectConfig();
+  private AppEngineProjectConfig config = new AppEngineProjectConfig();
   private IProject project;
 
   @Before
@@ -83,7 +85,7 @@ public class CreateAppEngineStandardWtpProjectTest {
 
   @Test
   public void testUnitTestCreated() throws InvocationTargetException, CoreException {
-    CreateAppEngineStandardWtpProject creator =
+    CreateAppEngineWtpProject creator =
         new CreateAppEngineStandardWtpProject(config, adaptable);
     creator.execute(new NullProgressMonitor());
 
@@ -109,7 +111,7 @@ public class CreateAppEngineStandardWtpProjectTest {
 
   @Test
   public void testMostImportantFile() throws InvocationTargetException, CoreException {
-    CreateAppEngineStandardWtpProject creator =
+    CreateAppEngineWtpProject creator =
         new CreateAppEngineStandardWtpProject(config, adaptable);
     creator.execute(new NullProgressMonitor());
 
@@ -138,7 +140,7 @@ public class CreateAppEngineStandardWtpProjectTest {
   public void testAppEngineLibrariesAdded() throws InvocationTargetException, CoreException {
     Library library = new Library(APP_ENGINE_API);
     config.setAppEngineLibraries(Collections.singletonList(library));
-    CreateAppEngineStandardWtpProject creator =
+    CreateAppEngineWtpProject creator =
         new CreateAppEngineStandardWtpProject(config, adaptable);
     creator.execute(new NullProgressMonitor());
 

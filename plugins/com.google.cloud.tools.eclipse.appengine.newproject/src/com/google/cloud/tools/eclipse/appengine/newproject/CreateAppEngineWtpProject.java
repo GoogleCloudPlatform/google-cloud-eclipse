@@ -16,9 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
-import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.libraries.BuildPath;
-
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.Arrays;
@@ -42,27 +40,39 @@ import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.jst.j2ee.classpathdep.UpdateClasspathAttributeUtil;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.ide.undo.CreateProjectOperation;
-import org.eclipse.wst.common.project.facet.core.IFacetedProject;
-import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
 /**
-* Utility to make a new Eclipse project with the App Engine Standard facets in the workspace.
+* Utility to make a new Eclipse App Engine project in the workspace.
 */
-class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
+public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation {
 
-  private final AppEngineStandardProjectConfig config;
+  private final AppEngineProjectConfig config;
   private final IAdaptable uiInfoAdapter;
   private IFile mostImportant = null;
+
+  public abstract void addAppEngineFacet(IProject newProject, IProgressMonitor monitor) throws CoreException;
+
+  /**
+   * Returns a user visible name for the resource operation that generates the files
+   * for the App Engine WTP project.
+   */
+  public abstract String getDescription();
+
+  /**
+   * Returns the most important file created that the IDE will open in the editor.
+   */
+  public abstract IFile createProjectFiles(IProject newProject, AppEngineProjectConfig config,
+      IProgressMonitor monitor) throws CoreException;
 
   /**
    * @return the file in the project that should be opened in an editor when the wizard finishes;
    *     may be null
    */
-  IFile getMostImportant() {
+  public IFile getMostImportant() {
     return mostImportant;
   }
 
-  CreateAppEngineStandardWtpProject(AppEngineStandardProjectConfig config,
+  protected CreateAppEngineWtpProject(AppEngineProjectConfig config,
       IAdaptable uiInfoAdapter) {
     if (config == null) {
       throw new NullPointerException("Null App Engine configuration"); //$NON-NLS-1$
@@ -80,21 +90,18 @@ class CreateAppEngineStandardWtpProject extends WorkspaceModifyOperation {
     String name = newProject.getName();
     IProjectDescription description = workspace.newProjectDescription(name);
     description.setLocationURI(location);
-    SubMonitor subMonitor = SubMonitor.convert(monitor,
-        Messages.getString("creating.app.engine.standard.project"), 100); //$NON-NLS-1$
-    CreateProjectOperation operation = new CreateProjectOperation(
-        description, Messages.getString("creating.new.app.engine.standard.project")); //$NON-NLS-1$
+
+    String operationLabel = getDescription();
+    SubMonitor subMonitor = SubMonitor.convert(monitor, operationLabel, 100);
+    CreateProjectOperation operation = new CreateProjectOperation(description, operationLabel); 
     try {
       operation.execute(subMonitor.newChild(10), uiInfoAdapter);
-      mostImportant = CodeTemplates.materialize(newProject, config, subMonitor.newChild(80));
+      mostImportant = createProjectFiles(newProject, config, subMonitor.newChild(80));
     } catch (ExecutionException ex) {
       throw new InvocationTargetException(ex);
     }
 
-    IFacetedProject facetedProject = ProjectFacetsManager.create(
-        newProject, true, subMonitor.newChild(2));
-    AppEngineStandardFacet.installAppEngineFacet(
-        facetedProject, true /* installDependentFacets */, subMonitor.newChild(2));
+    addAppEngineFacet(newProject, subMonitor.newChild(4));
 
     BuildPath.addLibraries(newProject, config.getAppEngineLibraries(), subMonitor.newChild(2));
 

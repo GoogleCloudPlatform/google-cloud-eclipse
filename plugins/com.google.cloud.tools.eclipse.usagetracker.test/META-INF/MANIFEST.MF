@@ -11,3 +11,4 @@ Require-Bundle: org.junit,
  org.eclipse.equinox.preferences,
  com.google.cloud.tools.eclipse.test.dependencies;bundle-version="0.1.0",
  org.eclipse.swt
+Import-Package: com.google.cloud.tools.eclipse.test.util.http

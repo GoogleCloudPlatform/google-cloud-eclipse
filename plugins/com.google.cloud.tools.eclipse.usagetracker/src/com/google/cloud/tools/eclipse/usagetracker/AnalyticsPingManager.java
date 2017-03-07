@@ -19,7 +19,6 @@ package com.google.cloud.tools.eclipse.usagetracker;
 import com.google.cloud.tools.eclipse.preferences.Activator;
 import com.google.cloud.tools.eclipse.preferences.AnalyticsPreferences;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
-import com.google.cloud.tools.eclipse.util.io.HttpUtil;
 import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
 import java.util.Collections;

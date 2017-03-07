@@ -44,7 +44,7 @@ public class CodeTemplates {
    * @param name directory from which to load template
    * @return the most important file created that should be opened in an editor
    */
-  public static IFile materialize(IProject project, AppEngineStandardProjectConfig config,
+  public static IFile materialize(IProject project, AppEngineProjectConfig config,
       IProgressMonitor monitor) throws CoreException {
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
     subMonitor.setTaskName("Generating code");
