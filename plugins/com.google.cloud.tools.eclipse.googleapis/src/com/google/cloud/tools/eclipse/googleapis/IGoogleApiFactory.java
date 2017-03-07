@@ -21,7 +21,10 @@ import com.google.api.services.appengine.v1.Appengine.Apps;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects;
 
 /**
- * 
+ * Interface for factory classes to create clients for Google APIs.
+ * <p>
+ * <i>This interface exists because of the requirement on OSGi services that they need to implement
+ * an interface</i>
  */
 public interface IGoogleApiFactory {
 

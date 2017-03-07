@@ -61,7 +61,6 @@ public class GoogleApiFactoryWithProxyServerTest {
   public void setUp() throws ExecutionException {
     googleApiFactory = new GoogleApiFactory();
     when(transportCache.get(any(GoogleApiUrl.class))).thenReturn(mock(HttpTransport.class));
-    googleApiFactory.setJsonFactory(jsonFactory);
     googleApiFactory.setTransportCache(transportCache);
   }
 
