@@ -73,13 +73,13 @@ public class FontUtil {
         return;
       }
     }
-    FontDescriptor boldDescriptor = FontDescriptor.createFrom(control.getFont()).setStyle(style);
-    final Font boldFont = boldDescriptor.createFont(control.getDisplay());
-    control.setFont(boldFont);
+    FontDescriptor fontDescriptor = FontDescriptor.createFrom(control.getFont()).setStyle(style);
+    final Font newFont = fontDescriptor.createFont(control.getDisplay());
+    control.setFont(newFont);
     control.addDisposeListener(new DisposeListener() {
       @Override
       public void widgetDisposed(DisposeEvent event) {
-        boldFont.dispose();
+        newFont.dispose();
       }
     });
   }

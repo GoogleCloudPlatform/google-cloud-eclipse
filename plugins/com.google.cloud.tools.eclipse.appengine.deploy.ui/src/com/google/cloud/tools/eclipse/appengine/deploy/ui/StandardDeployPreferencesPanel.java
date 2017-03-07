@@ -358,18 +358,13 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     GridDataFactory.swtDefaults().align(SWT.END, SWT.BEGINNING).applyTo(refreshProjectsButton);
     refreshProjectsButton.addSelectionListener(new SelectionAdapter() {
       @Override
-      public void widgetSelected(SelectionEvent e) {
+      public void widgetSelected(SelectionEvent event) {
         refreshProjectsForSelectedCredential();
       }
     });
 
-    accountSelector.addSelectionListener(new Runnable() {
-      @Override
-      public void run() {
-        refreshProjectsForSelectedCredential();
-        refreshProjectsButton.setEnabled(accountSelector.getSelectedCredential() != null);
-      }
-    });
+    accountSelector.addSelectionListener(
+        new RefreshProjectOnAccountSelection(refreshProjectsButton));
 
     projectSelector.addSelectionChangedListener(
         new ProjectSelectorSelectionChangedListener(accountSelector,
@@ -415,7 +410,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     expandableComposite.setClient(bucketComposite);
     expandableComposite.addExpansionListener(new ExpansionAdapter() {
       @Override
-      public void expansionStateChanged(ExpansionEvent e) {
+      public void expansionStateChanged(ExpansionEvent event) {
         handleExpansionStateChanged();
       }
     });
@@ -474,6 +469,21 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     }
   }
 
+  public final class RefreshProjectOnAccountSelection implements Runnable {
+
+    private final Button refreshProjectsButton;
+
+    public RefreshProjectOnAccountSelection(Button refreshProjectsButton) {
+      this.refreshProjectsButton = refreshProjectsButton;
+    }
+
+    @Override
+    public void run() {
+      refreshProjectsForSelectedCredential();
+      refreshProjectsButton.setEnabled(accountSelector.getSelectedCredential() != null);
+    }
+  }
+
   private final class ProjectIdToGcpProjectConverter extends Converter {
 
     private ProjectIdToGcpProjectConverter() {
@@ -490,7 +500,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
       try {
         return projectRepository.getProject(accountSelector.getSelectedCredential(),
                                            (String) fromObject);
-      } catch (ProjectRepositoryException e) {
+      } catch (ProjectRepositoryException ex) {
         return null;
       }
     }
