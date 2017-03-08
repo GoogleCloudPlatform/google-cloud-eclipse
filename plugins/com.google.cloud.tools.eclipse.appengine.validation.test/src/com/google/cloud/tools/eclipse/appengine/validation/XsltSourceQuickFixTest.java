@@ -20,7 +20,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
@@ -39,7 +38,6 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
-import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -54,11 +52,8 @@ public class XsltSourceQuickFixTest {
       + "</application>"
       + "</appengine-web-app>";
 
-  private static final IProjectFacetVersion APPENGINE_STANDARD_FACET_VERSION_1 =
-      ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID).getVersion("1");
-
   private static final List<IProjectFacetVersion> facetsToInstall = Arrays.asList(
-      JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, APPENGINE_STANDARD_FACET_VERSION_1);
+      JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
 
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator()
       .withFacetVersions(facetsToInstall);
