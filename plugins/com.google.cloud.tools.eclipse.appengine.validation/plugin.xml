@@ -118,7 +118,7 @@
 		  scope="total"
 		  class="com.google.cloud.tools.eclipse.appengine.validation.AppEngineWebXmlSourceValidator"
 		  id="appEngineWebXmlSourceValidator">
-		<contentTypeIdentifier id="com.google.appengine.dd.xml">
+		<contentTypeIdentifier id="com.google.appengine.configuration.xml">
 		  <partitionType id="org.eclipse.wst.xml.XML_DEFAULT"/>
 		</contentTypeIdentifier>
 	  </validator>
@@ -138,7 +138,7 @@
   <extension point="org.eclipse.core.contenttype.contentTypes"> 
     <content-type 
         name="appengine-web.xml"
-        id="com.google.appengine.dd.xml"
+        id="com.google.appengine.configuration.xml"
         base-type="org.eclipse.core.runtime.xml"      
     	file-names="appengine-web.xml">
     </content-type>
