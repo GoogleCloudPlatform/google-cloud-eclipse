@@ -479,12 +479,16 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
     @Override
     protected IStatus validate() {
-      // this access is recorded and ensures that changes are tracked
+      // this access is recorded and ensures that changes are tracked, don't move it inside the if
       Collection<?> projects = (Collection<?>) projectInput.getValue();
       // this access is recorded and ensures that changes are tracked, don't move it inside the if
       Object selectedProject = projectSelection.getValue();
       if (projects.isEmpty()) {
-        return ValidationStatus.info(Messages.getString("projectselector.no.projects"));
+        if (requireValues) {
+          return ValidationStatus.error(Messages.getString("projectselector.no.projects")); //$NON-NLS-1$
+        } else {
+          return ValidationStatus.info(Messages.getString("projectselector.no.projects")); //$NON-NLS-1$
+        }
       }
       if (requireValues) {
         if (selectedProject == null) {
