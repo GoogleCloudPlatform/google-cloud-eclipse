@@ -16,24 +16,37 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
+import java.util.Arrays;
+import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jst.common.project.facet.core.JavaFacet;
+import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
+import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.junit.Rule;
 import org.junit.Test;
 
 public class XsltSourceQuickFixTest {
+
+  private static final String BLACKLIST_MARKER =
+      "com.google.cloud.tools.eclipse.appengine.validation.appEngineBlacklistMarker";
 
   private static final String APPLICATION_XML =
       "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>"
@@ -41,15 +54,21 @@ public class XsltSourceQuickFixTest {
       + "</application>"
       + "</appengine-web-app>";
 
-  @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
+  private static final IProjectFacetVersion APPENGINE_STANDARD_FACET_VERSION_1 =
+      ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID).getVersion("1");
+
+  private static final List<IProjectFacetVersion> facetsToInstall = Arrays.asList(
+      JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, APPENGINE_STANDARD_FACET_VERSION_1);
+
+  @Rule public TestProjectCreator projectCreator = new TestProjectCreator()
+      .withFacetVersions(facetsToInstall);
 
   @Test
   public void testApply() throws CoreException {
 
     IProject project = projectCreator.getProject();
-    IFile file = project.getFile("testdata.xml");
-    file.create(ValidationTestUtils.stringToInputStream(
-      APPLICATION_XML), IFile.FORCE, null);
+    IFile file = project.getFile("appengine-web.xml");
+    file.create(ValidationTestUtils.stringToInputStream(APPLICATION_XML), IFile.FORCE, null);
 
     IWorkbench workbench = PlatformUI.getWorkbench();
     IEditorPart editorPart = WorkbenchUtil.openInEditor(workbench, file);
@@ -57,6 +76,9 @@ public class XsltSourceQuickFixTest {
     String preContents = viewer.getDocument().get();
 
     assertTrue(preContents.contains("application"));
+
+    ProjectUtils.waitForProjects(project);
+    assertEquals(1, file.findMarkers(BLACKLIST_MARKER, true, IResource.DEPTH_ZERO).length);
 
     XsltSourceQuickFix quickFix = new XsltSourceQuickFix("/xslt/application.xsl",
         Messages.getString("remove.application.element"));
@@ -68,6 +90,9 @@ public class XsltSourceQuickFixTest {
 
     // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1527
     editorPart.doSave(new NullProgressMonitor());
+
+    ProjectUtils.waitForProjects(project);
+    assertEquals(0, file.findMarkers(BLACKLIST_MARKER, true, IResource.DEPTH_ZERO).length);
   }
 
 }
