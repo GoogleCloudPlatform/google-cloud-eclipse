@@ -20,6 +20,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Stopwatch;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -27,9 +28,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import org.eclipse.core.resources.IMarker;
@@ -184,9 +187,12 @@ public class ProjectUtils {
   /** Wait for any spawned jobs and builds to complete (e.g., validation jobs). */
   public static void waitForProjects(Runnable delayTactic, IProject... projects) {
     IJobManager jobManager = Job.getJobManager();
+    Stopwatch timer = Stopwatch.createStarted();
     try {
       Set<Job> jobs = new LinkedHashSet<>();
       List<String> allBuildErrors;
+      int numberOfPreviousBuildErrors = -1;
+      boolean buildErrorsChanging;
       do {
         delayTactic.run();
         for (Job job : jobs) {
@@ -202,25 +208,50 @@ public class ProjectUtils {
         Collections.addAll(jobs, jobManager.find("org.eclipse.wst.server.core.family"));
         Collections.addAll(jobs, jobManager.find("org.eclipse.wst.server.ui.family"));
         Collections.addAll(jobs, jobManager.find(ValidationBuilder.FAMILY_VALIDATION_JOB));
+
+        // Remove SLEEPING jobs as they may not run for a long time.
+        // May be specific to FAMILY_AUTO_BUILD jobs.
+        for (Iterator<Job> iter = jobs.iterator(); iter.hasNext();) {
+          Job job = iter.next();
+          if (job.getState() != Job.RUNNING && job.getState() != Job.WAITING) {
+            iter.remove();
+          }
+        }
+
+        // track whether we've reached a fixpoint in the build errors
         allBuildErrors = getAllBuildErrors(projects);
-        if (DEBUG) {
+        buildErrorsChanging =
+            numberOfPreviousBuildErrors < 0 || numberOfPreviousBuildErrors != allBuildErrors.size();
+        numberOfPreviousBuildErrors = allBuildErrors.size();
+
+        if (DEBUG || timer.elapsed(TimeUnit.SECONDS) > 10) {
+          System.err.printf("ProjectUtils#waitForProjects: waiting %s\n", timer);
           if (!jobs.isEmpty()) {
             System.err.printf("ProjectUtils#waitForProjects: waiting for %d jobs: %s\n",
                 jobs.size(), jobs);
-          } else if (!allBuildErrors.isEmpty()) {
+          }
+          if (!allBuildErrors.isEmpty()) {
             System.err.printf("ProjectUtils#waitForProjects: waiting for %d build errors\n",
                 allBuildErrors.size());
-          } else {
+            // don't report unchanged errors
+            if (buildErrorsChanging) {
+              for (String buildError : allBuildErrors) {
+                System.err.printf("  error: " + buildError);
+              }
+            }
+          }
+          if (timer.elapsed(TimeUnit.SECONDS) > 60) {
             // report any other jobs found in case we're missing something above
             Job[] otherJobs = jobManager.find(null);
-            System.err.printf("Ignoring %d unrelated jobs:\n", otherJobs.length);
-            for (Job job : otherJobs) {
-              System.err.printf("  %s: %s\n", job.getClass().getName(), job);
+            if (otherJobs.length > 0) {
+              System.err.printf("Ignoring %d unrelated jobs:\n", otherJobs.length);
+              for (Job job : otherJobs) {
+                System.err.printf("  %s: %s\n", job.getClass().getName(), job);
+              }
             }
-            // new ThreadDumpingWatchdog(0, TimeUnit.DAYS).run();
           }
         }
-      } while (!(jobs.isEmpty() && allBuildErrors.isEmpty()));
+      } while (!jobs.isEmpty() || buildErrorsChanging);
     } catch (CoreException | InterruptedException ex) {
       throw new RuntimeException(ex);
     }
