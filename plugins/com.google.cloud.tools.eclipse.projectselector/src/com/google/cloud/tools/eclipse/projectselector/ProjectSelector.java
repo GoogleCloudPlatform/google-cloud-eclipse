@@ -127,11 +127,4 @@ public class ProjectSelector extends Composite {
   public void clearStatusLink() {
     setStatusLink("", "");
   }
-
-  /**
-   * @return true if there are projects in the selector, false otherwise
-   */
-  public boolean hasProjects() {
-    return !input.isEmpty();
-  }
 }
