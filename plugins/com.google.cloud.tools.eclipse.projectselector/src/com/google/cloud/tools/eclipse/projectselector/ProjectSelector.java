@@ -131,7 +131,7 @@ public class ProjectSelector extends Composite {
   /**
    * @return true if there are projects in the selector, false otherwise
    */
-  public Boolean hasProjects() {
+  public boolean hasProjects() {
     return !input.isEmpty();
   }
 }

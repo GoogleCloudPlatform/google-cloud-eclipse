@@ -27,7 +27,7 @@ public class ProjectSelectorValidator implements IValidator {
   private Supplier<Boolean> projectsFound;
 
   /**
-   * @param projectsFound should return true if there are projects in the project selector,
+   * @param projectsFound returns true if there are projects in the project selector,
    * false otherwise
    */
   public ProjectSelectorValidator(Supplier<Boolean> projectsFound) {
