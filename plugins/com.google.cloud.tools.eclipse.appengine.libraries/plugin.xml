@@ -91,6 +91,9 @@
               groupId="javax.servlet.jsp"
               version="2.1" />
       </libraryFile>
+      <libraryFile javadocUri="https://jstl.java.net/">
+        <mavenCoordinates artifactId="jstl" groupId="javax.servlet" version="1.2" />
+      </libraryFile>
     </library>
   </extension>
 
