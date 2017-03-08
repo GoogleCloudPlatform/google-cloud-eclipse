@@ -201,14 +201,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     UpdateValueStrategy projectIdToGcpProject =
         new UpdateValueStrategy().setConverter(new ProjectIdToGcpProjectConverter());
 
-    final Binding binding =
-        context.bindValue(projectList, projectIdModel, gcpProjectToProjectId, projectIdToGcpProject);
-    accountSelector.addSelectionListener(new Runnable() {
-      @Override
-      public void run() {
-        binding.validateTargetToModel();
-      }
-    });
+    context.bindValue(projectList, projectIdModel, gcpProjectToProjectId, projectIdToGcpProject);
   }
 
   private void setupProjectVersionDataBinding(DataBindingContext context) {
