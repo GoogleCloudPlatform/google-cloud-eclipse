@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 
 import static org.junit.Assert.assertEquals;
 
+import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.io.ByteArrayInputStream;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -34,16 +35,15 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
-import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 
 public class AbstractXmlValidatorTest {
 
   private final String ELEMENT_MESSAGE = "Project ID should be specified at deploy time.";
   private static IResource resource;
   private static IProject project;
-  
+
   @ClassRule public static TestProjectCreator projectCreator = new TestProjectCreator();
-  
+
   @BeforeClass
   public static void setUp() throws CoreException {
     project = projectCreator.getProject();
@@ -52,33 +52,31 @@ public class AbstractXmlValidatorTest {
     webXml.create(new ByteArrayInputStream(new byte[0]), true, null);
     resource = webXml;
   }
-  
+
   @After
   public void tearDown() throws CoreException {
     if (resource != null) {
       resource.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
     }
   }
-  
+
   @Test
   public void testCreateMarker() throws CoreException {
     BannedElement element = new BannedElement(ELEMENT_MESSAGE);
-    String markerId = "org.eclipse.core.resources.problemmarker";
     AppEngineWebXmlValidator.createMarker(resource, element, 0);
-    IMarker[] markers = resource.findMarkers(markerId, true, IResource.DEPTH_ZERO);
-    assertEquals(ELEMENT_MESSAGE, (String) markers[0].getAttribute(IMarker.MESSAGE));
+    IMarker[] markers = resource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
+    assertEquals(ELEMENT_MESSAGE, markers[0].getAttribute(IMarker.MESSAGE));
   }
-  
+
   @Test
   public void testCreateSAXErrorMessage() throws CoreException {
     SAXParseException spe = new SAXParseException("", "", "", 1, 1);
     SAXException ex = new SAXException(ELEMENT_MESSAGE, spe);
     AppEngineWebXmlValidator.createSaxErrorMessage(resource, ex);
-    String problemMarker = "org.eclipse.core.resources.problemmarker";
-    IMarker[] markers = resource.findMarkers(problemMarker, true, IResource.DEPTH_ZERO);
-    assertEquals(ELEMENT_MESSAGE, (String) markers[0].getAttribute(IMarker.MESSAGE));
+    IMarker[] markers = resource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
+    assertEquals(ELEMENT_MESSAGE, markers[0].getAttribute(IMarker.MESSAGE));
   }
-  
+
   private static void createFolders(IContainer parent, IPath path) throws CoreException {
     if (!path.isEmpty()) {
       IFolder folder = parent.getFolder(new Path(path.segment(0)));
@@ -86,5 +84,5 @@ public class AbstractXmlValidatorTest {
       createFolders(folder, path.removeFirstSegments(1));
     }
   }
-  
+
 }

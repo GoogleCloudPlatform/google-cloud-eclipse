@@ -124,8 +124,6 @@ public class PomTest {
     Assert.assertEquals("com.example.group3", groupId3.getTextContent());
     Element artifactId3 = getOnlyChild(child3, "artifactId");
     Assert.assertEquals("artifact3", artifactId3.getTextContent());
-    Element version3 = getOnlyChild(child3, "version");
-    Assert.assertEquals("LATEST", version3.getTextContent());
     
     // now make sure the comment didn't move to the end
     // https://bugs.openjdk.java.net/browse/JDK-8146163

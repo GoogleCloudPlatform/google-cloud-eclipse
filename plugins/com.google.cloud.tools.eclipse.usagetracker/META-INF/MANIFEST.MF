@@ -10,7 +10,11 @@ Export-Package: com.google.cloud.tools.eclipse.usagetracker
 Require-Bundle: org.eclipse.core.runtime;bundle-version="3.11.1",
  org.eclipse.jface,
  org.eclipse.ui.workbench
-Import-Package: com.google.cloud.tools.eclipse.preferences,
+Import-Package: com.google.api.client.http;version="[1.22.0,1.23.0)",
+ com.google.api.client.http.javanet;version="[1.22.0,1.23.0)",
+ com.google.cloud.tools.eclipse.preferences,
  com.google.cloud.tools.eclipse.util,
- com.google.cloud.tools.eclipse.util.io,
- com.google.common.annotations;version="[20.0.0,21.0.0)"
+ com.google.common.annotations;version="[20.0.0,21.0.0)",
+ com.google.common.base;version="[20.0.0,21.0.0)",
+ com.google.common.escape;version="[20.0.0,21.0.0)",
+ com.google.common.net;version="[20.0.0,21.0.0)"

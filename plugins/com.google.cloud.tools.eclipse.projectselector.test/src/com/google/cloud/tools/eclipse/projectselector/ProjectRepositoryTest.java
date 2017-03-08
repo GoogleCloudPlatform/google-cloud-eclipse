@@ -38,7 +38,8 @@ import com.google.api.services.cloudresourcemanager.CloudResourceManager.Project
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects.Get;
 import com.google.api.services.cloudresourcemanager.model.ListProjectsResponse;
 import com.google.api.services.cloudresourcemanager.model.Project;
-import com.google.cloud.tools.eclipse.googleapis.GoogleApiFactory;
+import com.google.cloud.tools.eclipse.googleapis.GoogleApiException;
+import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.projectselector.model.AppEngine;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import java.io.IOException;
@@ -54,7 +55,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class ProjectRepositoryTest {
 
-  @Mock private GoogleApiFactory apiFactory;
+  @Mock private IGoogleApiFactory apiFactory;
   private ProjectRepository repository;
   private Project project;
 
@@ -73,7 +74,8 @@ public class ProjectRepositoryTest {
   }
 
   @Test(expected = ProjectRepositoryException.class)
-  public void testGetProjects_exceptionInRequest() throws IOException, ProjectRepositoryException {
+  public void testGetProjects_exceptionInRequest()
+      throws IOException, ProjectRepositoryException, GoogleApiException {
     com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects.List list =
         initializeListRequest();
     when(list.execute()).thenThrow(new IOException("test exception"));
@@ -82,7 +84,8 @@ public class ProjectRepositoryTest {
   }
 
   @Test
-  public void testGetProjects_successful() throws IOException, ProjectRepositoryException {
+  public void testGetProjects_successful()
+      throws IOException, ProjectRepositoryException, GoogleApiException {
     com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects.List list =
         initializeListRequest();
     ListProjectsResponse response = new ListProjectsResponse();
@@ -99,7 +102,8 @@ public class ProjectRepositoryTest {
   }
 
   @Test
-  public void testGetProjects_onlyDeletedProjectsReturned() throws IOException, ProjectRepositoryException {
+  public void testGetProjects_onlyDeletedProjectsReturned()
+      throws IOException, ProjectRepositoryException, GoogleApiException {
     com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects.List list =
         initializeListRequest();
     ListProjectsResponse response = new ListProjectsResponse();
@@ -129,7 +133,8 @@ public class ProjectRepositoryTest {
   }
 
   @Test(expected = ProjectRepositoryException.class)
-  public void testGetProject_exceptionInRequest() throws IOException, ProjectRepositoryException {
+  public void testGetProject_exceptionInRequest()
+      throws IOException, ProjectRepositoryException, GoogleApiException {
     Projects projects = mock(Projects.class);
     when(apiFactory.newProjectsApi(any(Credential.class))).thenReturn(projects);
     Get get = mock(Get.class);
@@ -140,7 +145,8 @@ public class ProjectRepositoryTest {
   }
 
   @Test
-  public void testGetProject_successful() throws IOException, ProjectRepositoryException {
+  public void testGetProject_successful()
+      throws IOException, ProjectRepositoryException, GoogleApiException {
     Projects projects = mock(Projects.class);
     when(apiFactory.newProjectsApi(any(Credential.class))).thenReturn(projects);
     Get get = mock(Get.class);
@@ -170,7 +176,8 @@ public class ProjectRepositoryTest {
   }
 
   @Test
-  public void testHasAppengineApplication_hasApplication() throws IOException, ProjectRepositoryException {
+  public void testHasAppengineApplication_hasApplication()
+      throws IOException, ProjectRepositoryException, GoogleApiException {
     com.google.api.services.appengine.v1.Appengine.Apps.Get get = initializeGetRequest();
     Application application = new Application();
     application.setId("id");
@@ -181,7 +188,8 @@ public class ProjectRepositoryTest {
   }
 
   @Test
-  public void testHasAppengineApplication_noApplication() throws IOException, ProjectRepositoryException {
+  public void testHasAppengineApplication_noApplication()
+      throws IOException, ProjectRepositoryException, GoogleApiException {
     com.google.api.services.appengine.v1.Appengine.Apps.Get get = initializeGetRequest();
     GoogleJsonResponseException notFoundException =
         GoogleJsonResponseExceptionFactoryTesting.newMock(new JacksonFactory(), 404, "Not found");
@@ -192,7 +200,8 @@ public class ProjectRepositoryTest {
   }
 
   @Test(expected = ProjectRepositoryException.class)
-  public void testHasAppengineApplication_exception() throws IOException, ProjectRepositoryException {
+  public void testHasAppengineApplication_exception()
+      throws IOException, ProjectRepositoryException, GoogleApiException {
     com.google.api.services.appengine.v1.Appengine.Apps.Get get = initializeGetRequest();
     when(get.execute()).thenThrow(new IOException("test exception"));
 
@@ -201,7 +210,7 @@ public class ProjectRepositoryTest {
 
   @Test(expected = ProjectRepositoryException.class)
   public void testHasAppengineApplication_GoogleJsonResponseException()
-      throws IOException, ProjectRepositoryException {
+      throws IOException, ProjectRepositoryException, GoogleApiException {
     com.google.api.services.appengine.v1.Appengine.Apps.Get get = initializeGetRequest();
     GoogleJsonResponseException exception =
         GoogleJsonResponseExceptionFactoryTesting.newMock(new JacksonFactory(), 500, "Server Error");
@@ -217,7 +226,7 @@ public class ProjectRepositoryTest {
   }
 
   private com.google.api.services.appengine.v1.Appengine.Apps.Get
-  initializeGetRequest() throws IOException {
+  initializeGetRequest() throws IOException, GoogleApiException {
     Apps apps = mock(Apps.class);
     when(apiFactory.newAppsApi(any(Credential.class))).thenReturn(apps);
     
@@ -228,7 +237,7 @@ public class ProjectRepositoryTest {
   }
   
   private com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects.List
-  initializeListRequest() throws IOException {
+  initializeListRequest() throws IOException, GoogleApiException {
     Projects projects = mock(Projects.class);
     when(apiFactory.newProjectsApi(any(Credential.class))).thenReturn(projects);
     com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects.List list =

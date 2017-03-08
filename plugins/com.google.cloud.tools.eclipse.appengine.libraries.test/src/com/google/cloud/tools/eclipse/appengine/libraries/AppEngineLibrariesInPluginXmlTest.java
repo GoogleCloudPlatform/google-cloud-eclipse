@@ -76,7 +76,7 @@ public class AppEngineLibrariesInPluginXmlTest {
     assertThat(mavenCoordinates.getRepository(), is("central"));
     assertThat(mavenCoordinates.getGroupId(), is("com.google.appengine"));
     assertThat(mavenCoordinates.getArtifactId(), is("appengine-api-1.0-sdk"));
-    assertThat(mavenCoordinates.getVersion(), is("LATEST"));
+    assertThat(mavenCoordinates.getVersion(), is("1.9.50"));
     assertThat(mavenCoordinates.getType(), is("jar"));
     assertNull(mavenCoordinates.getClassifier());
 
@@ -118,7 +118,7 @@ public class AppEngineLibrariesInPluginXmlTest {
     assertThat(mavenCoordinates.getRepository(), is("central"));
     assertThat(mavenCoordinates.getGroupId(), is("com.google.appengine"));
     assertThat(mavenCoordinates.getArtifactId(), is("appengine-endpoints"));
-    assertThat(mavenCoordinates.getVersion(), is("LATEST"));
+    assertThat(mavenCoordinates.getVersion(), is("1.9.50"));
     assertThat(mavenCoordinates.getType(), is("jar"));
     assertNull(mavenCoordinates.getClassifier());
     assertThat(libraryFile.getJavadocUri(), 
@@ -153,7 +153,7 @@ public class AppEngineLibrariesInPluginXmlTest {
     assertThat(objectifyMavenCoordinates.getRepository(), is("central"));
     assertThat(objectifyMavenCoordinates.getGroupId(), is("com.googlecode.objectify"));
     assertThat(objectifyMavenCoordinates.getArtifactId(), is("objectify"));
-    assertThat(objectifyMavenCoordinates.getVersion(), is("5.1.14"));
+    assertThat(objectifyMavenCoordinates.getVersion(), is("5.1.15"));
     assertThat(objectifyMavenCoordinates.getType(), is("jar"));
     assertNull(objectifyMavenCoordinates.getClassifier());
 
@@ -230,14 +230,14 @@ public class AppEngineLibrariesInPluginXmlTest {
     assertNotNull(jspApiLibrary.getLibraryDependencies());
     assertTrue(jspApiLibrary.getLibraryDependencies().isEmpty());
 
-    assertThat(jspApiLibrary.getLibraryFiles().size(), is(1));
-    LibraryFile libraryFile = jspApiLibrary.getLibraryFiles().get(0);
-    assertThat(libraryFile.getJavadocUri(), is(new URI(
+    assertThat(jspApiLibrary.getLibraryFiles().size(), is(2));
+    LibraryFile jspApi = jspApiLibrary.getLibraryFiles().get(0);
+    assertThat(jspApi.getJavadocUri(), is(new URI(
         "http://docs.oracle.com/cd/E17802_01/products/products/jsp/2.1/docs/jsp-2_1-pfd2/")));
-    assertNull(libraryFile.getSourceUri());
+    assertNull(jspApi.getSourceUri());
 
-    assertNotNull(libraryFile.getMavenCoordinates());
-    MavenCoordinates mavenCoordinates = libraryFile.getMavenCoordinates();
+    assertNotNull(jspApi.getMavenCoordinates());
+    MavenCoordinates mavenCoordinates = jspApi.getMavenCoordinates();
     assertThat(mavenCoordinates.getRepository(), is("central"));
     assertThat(mavenCoordinates.getGroupId(), is("javax.servlet.jsp"));
     assertThat(mavenCoordinates.getArtifactId(), is("jsp-api"));
@@ -245,8 +245,22 @@ public class AppEngineLibrariesInPluginXmlTest {
     assertThat(mavenCoordinates.getType(), is("jar"));
     assertNull(mavenCoordinates.getClassifier());
 
-    assertNotNull(libraryFile.getFilters());
-    assertTrue(libraryFile.getFilters().isEmpty());
+    assertTrue(jspApi.getFilters().isEmpty());
+    
+    LibraryFile jstlApi = jspApiLibrary.getLibraryFiles().get(1);
+    assertThat(jstlApi.getJavadocUri(), is(new URI("https://jstl.java.net/")));
+    assertNull(jstlApi.getSourceUri());
+
+    assertNotNull(jstlApi.getMavenCoordinates());
+    MavenCoordinates jstlCoordinates = jstlApi.getMavenCoordinates();
+    assertThat(jstlCoordinates.getRepository(), is("central"));
+    assertThat(jstlCoordinates.getGroupId(), is("javax.servlet"));
+    assertThat(jstlCoordinates.getArtifactId(), is("jstl"));
+    assertThat(jstlCoordinates.getVersion(), is("1.2"));
+    assertThat(jstlCoordinates.getType(), is("jar"));
+    assertNull(jstlCoordinates.getClassifier());
+
+    assertTrue(jstlApi.getFilters().isEmpty());
   }
 
 }

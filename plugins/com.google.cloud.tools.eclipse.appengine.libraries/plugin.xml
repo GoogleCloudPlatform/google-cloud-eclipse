@@ -12,11 +12,11 @@
           name="App Engine API"
           tooltip="%appengine.api.tooltip"
           siteUri="https://cloud.google.com/appengine/docs/java/" >
-      <libraryFile
-            javadocUri="https://cloud.google.com/appengine/docs/java/javadoc/">
+      <libraryFile javadocUri="https://cloud.google.com/appengine/docs/java/javadoc/">
         <mavenCoordinates
               artifactId="appengine-api-1.0-sdk"
-              groupId="com.google.appengine" />
+              groupId="com.google.appengine" 
+              version="1.9.50" />
         <exclusionFilter pattern="com/google/appengine/repackaged/**" />
         <exclusionFilter pattern="com/google/appengine/labs/repackaged/**" />
         <inclusionFilter pattern="com/google/apphosting/api/**" />
@@ -34,7 +34,8 @@
             javadocUri="https://cloud.google.com/appengine/docs/java/endpoints/javadoc/">
         <mavenCoordinates
               artifactId="appengine-endpoints"
-              groupId="com.google.appengine" />
+              groupId="com.google.appengine" 
+              version="1.9.50" />
         <exclusionFilter pattern="com/google/appengine/repackaged/**" />
       </libraryFile>
     </library>
@@ -50,7 +51,7 @@
         <mavenCoordinates
               artifactId="objectify"
               groupId="com.googlecode.objectify"
-              version="5.1.14" />
+              version="5.1.15" />
       </libraryFile>
       <libraryFile
             javadocUri="https://google.github.io/guava/releases/20.0/api/docs/">
@@ -90,6 +91,9 @@
               artifactId="jsp-api"
               groupId="javax.servlet.jsp"
               version="2.1" />
+      </libraryFile>
+      <libraryFile javadocUri="https://jstl.java.net/">
+        <mavenCoordinates artifactId="jstl" groupId="javax.servlet" version="1.2" />
       </libraryFile>
     </library>
   </extension>

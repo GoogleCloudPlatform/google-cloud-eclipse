@@ -25,6 +25,7 @@ import org.eclipse.core.databinding.beans.PojoProperties;
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.jface.databinding.viewers.ViewerSupport;
 import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ISelection;
@@ -35,7 +36,6 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Link;
 
@@ -47,14 +47,14 @@ public class ProjectSelector extends Composite {
 
   public ProjectSelector(Composite parent) {
     super(parent, SWT.NONE);
-    setLayout(new GridLayout());
+    GridLayoutFactory.fillDefaults().numColumns(2).applyTo(this);
 
     Composite tableComposite = new Composite(this, SWT.NONE);
     TableColumnLayout tableColumnLayout = new TableColumnLayout();
     tableComposite.setLayout(tableColumnLayout);
     GridDataFactory.fillDefaults().grab(true, true).applyTo(tableComposite);
 
-    tableViewer = new TableViewer(tableComposite, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+    tableViewer = new TableViewer(tableComposite, SWT.SINGLE | SWT.BORDER);
     createColumns(tableColumnLayout);
     tableViewer.getTable().setHeaderVisible(true);
     input = WritableList.withElementType(GcpProject.class);
@@ -68,7 +68,7 @@ public class ProjectSelector extends Composite {
     statusLink.addSelectionListener(
         new OpenUriSelectionListener(new ErrorDialogErrorHandler(getShell())));
     statusLink.setText("");
-    GridDataFactory.fillDefaults().applyTo(statusLink);
+    GridDataFactory.fillDefaults().span(2, 1).applyTo(statusLink);
   }
 
   private void createColumns(TableColumnLayout tableColumnLayout) {
@@ -89,6 +89,7 @@ public class ProjectSelector extends Composite {
   public void setProjects(List<GcpProject> projects) {
     ISelection selection = tableViewer.getSelection();
     input.clear();
+    clearStatusLink(); // otherwise revealing selection is off sometimes
     if (projects != null) {
       input.addAll(projects);
     }

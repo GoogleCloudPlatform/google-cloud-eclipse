@@ -9,7 +9,6 @@
   <version>0.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-
   <name>Google Cloud Platform plugin for Eclipse</name>
   <description>
     An Eclipse plugin for building, debugging, and deploying Google
@@ -42,6 +41,8 @@
     <module>plugins/com.google.cloud.tools.eclipse.appengine.deploy.ui.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.facets</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.facets.test</module>
+    <module>plugins/com.google.cloud.tools.eclipse.appengine.flex</module>
+    <module>plugins/com.google.cloud.tools.eclipse.appengine.flex.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.libraries</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.libraries.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.libraries.ui</module>

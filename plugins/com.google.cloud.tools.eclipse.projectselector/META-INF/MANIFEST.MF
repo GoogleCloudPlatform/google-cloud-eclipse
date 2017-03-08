@@ -40,12 +40,9 @@ Import-Package: com.google.api.client.auth.oauth2;version="[1.22.0,1.23.0)",
  org.eclipse.core.databinding.property.value,
  org.eclipse.core.runtime;bundle-symbolic-name="org.eclipse.core.runtime",
  org.eclipse.jface.databinding.viewers,
- org.eclipse.jface.dialogs,
  org.eclipse.jface.layout,
  org.eclipse.jface.viewers,
  org.eclipse.swt,
  org.eclipse.swt.events,
  org.eclipse.swt.layout,
- org.eclipse.swt.widgets,
- org.eclipse.ui,
- org.eclipse.ui.browser;ui.workbench=split
+ org.eclipse.swt.widgets
