@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -60,7 +59,7 @@ import org.osgi.framework.FrameworkUtil;
  * A set of utility methods for dealing with projects.
  */
 public class ProjectUtils {
-  private static boolean DEBUG = false;
+  private static boolean DEBUG = true;
 
   /**
    * Import the Eclipse projects found within the bundle containing {@code clazz} at the
@@ -208,15 +207,6 @@ public class ProjectUtils {
         Collections.addAll(jobs, jobManager.find("org.eclipse.wst.server.core.family"));
         Collections.addAll(jobs, jobManager.find("org.eclipse.wst.server.ui.family"));
         Collections.addAll(jobs, jobManager.find(ValidationBuilder.FAMILY_VALIDATION_JOB));
-
-        // Remove SLEEPING jobs as they may not run for a long time.
-        // May be specific to FAMILY_AUTO_BUILD jobs.
-        for (Iterator<Job> iter = jobs.iterator(); iter.hasNext();) {
-          Job job = iter.next();
-          if (job.getState() != Job.RUNNING && job.getState() != Job.WAITING) {
-            iter.remove();
-          }
-        }
 
         // track whether we've reached a fixpoint in the build errors
         allBuildErrors = getAllBuildErrors(projects);
