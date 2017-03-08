@@ -208,7 +208,14 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
       projectIdToGcpProject.setAfterGetValidator(validator);
     }
 
-    context.bindValue(projectList, projectIdModel, gcpProjectToProjectId, projectIdToGcpProject);
+    final Binding binding =
+        context.bindValue(projectList, projectIdModel, gcpProjectToProjectId, projectIdToGcpProject);
+    accountSelector.addSelectionListener(new Runnable() {
+      @Override
+      public void run() {
+        binding.validateTargetToModel();
+      }
+    });
   }
 
   private void setupProjectVersionDataBinding(DataBindingContext context) {
