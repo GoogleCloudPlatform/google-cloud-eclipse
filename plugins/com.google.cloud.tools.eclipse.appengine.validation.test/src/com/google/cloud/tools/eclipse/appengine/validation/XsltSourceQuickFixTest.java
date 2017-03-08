@@ -24,7 +24,6 @@ import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import java.util.Arrays;
-import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -37,7 +36,6 @@ import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -52,11 +50,8 @@ public class XsltSourceQuickFixTest {
       + "</application>"
       + "</appengine-web-app>";
 
-  private static final List<IProjectFacetVersion> facetsToInstall = Arrays.asList(
-      JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
-
-  @Rule public TestProjectCreator projectCreator = new TestProjectCreator()
-      .withFacetVersions(facetsToInstall);
+  @Rule public TestProjectCreator projectCreator = new TestProjectCreator().withFacetVersions(
+      Arrays.asList(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25));
 
   @Test
   public void testApply() throws CoreException {
