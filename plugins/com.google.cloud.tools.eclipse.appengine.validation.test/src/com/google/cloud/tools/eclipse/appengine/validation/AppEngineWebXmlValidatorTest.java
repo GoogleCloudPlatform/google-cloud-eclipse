@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 
 import static org.junit.Assert.assertEquals;
 
+import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -35,7 +36,6 @@ import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
-import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 
 public class AppEngineWebXmlValidatorTest {
 
@@ -46,9 +46,9 @@ public class AppEngineWebXmlValidatorTest {
       "com.google.cloud.tools.eclipse.appengine.validation.appEngineBlacklistMarker";
   private static IResource resource;
   private static IProject project;
-  
+
   @ClassRule public static TestProjectCreator projectCreator = new TestProjectCreator();
-  
+
   @BeforeClass
   public static void setUp() throws CoreException {
     project = projectCreator.getProject();
@@ -57,28 +57,27 @@ public class AppEngineWebXmlValidatorTest {
     webXml.create(new ByteArrayInputStream(new byte[0]), true, null);
     resource = webXml;
   }
-  
-  
+
+
   @After
   public void tearDown() throws CoreException {
     if (resource != null) {
       resource.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
     }
   }
-  
+
   @Test
   public void testValidate_badXml()
       throws IOException, CoreException, ParserConfigurationException {
     byte[] bytes = BAD_XML.getBytes(StandardCharsets.UTF_8);
     AppEngineWebXmlValidator validator = new AppEngineWebXmlValidator();
     validator.validate(resource, bytes);
-    String problemMarker = "org.eclipse.core.resources.problemmarker";
-    IMarker[] markers = resource.findMarkers(problemMarker, true, IResource.DEPTH_ZERO);
+    IMarker[] markers = resource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
     String resultMessage = (String) markers[0].getAttribute(IMarker.MESSAGE);
     assertEquals("XML document structures must start and end within the same entity.",
         resultMessage);
   }
-  
+
   @Test
   public void testValidate_noBannedElements()
       throws IOException, CoreException, ParserConfigurationException {
@@ -98,10 +97,10 @@ public class AppEngineWebXmlValidatorTest {
     IMarker[] markers = resource.findMarkers(APPLICATION_MARKER, true, IResource.DEPTH_ZERO);
     assertEquals(1, markers.length);
     String message = Messages.getString("application.element");
-    assertEquals(message, (String) markers[0].getAttribute(IMarker.MESSAGE));
+    assertEquals(message, markers[0].getAttribute(IMarker.MESSAGE));
     assertEquals("line 1", markers[0].getAttribute(IMarker.LOCATION));
   }
-  
+
   private static void createFolders(IContainer parent, IPath path) throws CoreException {
     if (!path.isEmpty()) {
       IFolder folder = parent.getFolder(new Path(path.segment(0)));

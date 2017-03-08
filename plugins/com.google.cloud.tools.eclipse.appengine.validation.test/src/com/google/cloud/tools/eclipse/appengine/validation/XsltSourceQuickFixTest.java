@@ -16,54 +16,73 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
+import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
+import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
+import java.util.Arrays;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jst.common.project.facet.core.JavaFacet;
+import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import org.junit.Rule;
 import org.junit.Test;
 
-import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
-import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
-
 public class XsltSourceQuickFixTest {
-  
+
+  private static final String BLACKLIST_MARKER =
+      "com.google.cloud.tools.eclipse.appengine.validation.appEngineBlacklistMarker";
+
   private static final String APPLICATION_XML =
       "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>"
       + "<application>"
       + "</application>"
       + "</appengine-web-app>";
-  
-  @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
-  
+
+  @Rule public TestProjectCreator projectCreator = new TestProjectCreator().withFacetVersions(
+      Arrays.asList(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25));
+
   @Test
   public void testApply() throws CoreException {
-    
+
     IProject project = projectCreator.getProject();
-    IFile file = project.getFile("testdata.xml");
-    file.create(ValidationTestUtils.stringToInputStream(
-      APPLICATION_XML), IFile.FORCE, null);
-    
+    IFile file = project.getFile("appengine-web.xml");
+    file.create(ValidationTestUtils.stringToInputStream(APPLICATION_XML), IFile.FORCE, null);
+
     IWorkbench workbench = PlatformUI.getWorkbench();
-    WorkbenchUtil.openInEditor(workbench, file);
+    IEditorPart editorPart = WorkbenchUtil.openInEditor(workbench, file);
     ITextViewer viewer = ValidationTestUtils.getViewer(file);
     String preContents = viewer.getDocument().get();
-    
+
     assertTrue(preContents.contains("application"));
-    
+
+    ProjectUtils.waitForProjects(project);
+    assertEquals(1, file.findMarkers(BLACKLIST_MARKER, true, IResource.DEPTH_ZERO).length);
+
     XsltSourceQuickFix quickFix = new XsltSourceQuickFix("/xslt/application.xsl",
         Messages.getString("remove.application.element"));
     quickFix.apply(viewer, 'a', 0, 0);
-    
+
     IDocument document = viewer.getDocument();
     String contents = document.get();
     assertFalse(contents.contains("application"));
+
+    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1527
+    editorPart.doSave(new NullProgressMonitor());
+
+    ProjectUtils.waitForProjects(project);
+    assertEquals(0, file.findMarkers(BLACKLIST_MARKER, true, IResource.DEPTH_ZERO).length);
   }
-  
+
 }

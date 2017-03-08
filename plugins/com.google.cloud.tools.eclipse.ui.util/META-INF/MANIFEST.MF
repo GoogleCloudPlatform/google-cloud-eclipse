@@ -9,7 +9,8 @@ Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.eclipse.ui.workbench,
- org.eclipse.ui
+ org.eclipse.ui,
+ org.eclipse.search
 Import-Package: com.google.cloud.tools.eclipse.ui.util,
  com.google.cloud.tools.eclipse.util,
  com.google.cloud.tools.eclipse.util.status,
@@ -40,4 +41,5 @@ Import-Package: com.google.cloud.tools.eclipse.ui.util,
 Export-Package: com.google.cloud.tools.eclipse.ui.util,
  com.google.cloud.tools.eclipse.ui.util.console,
  com.google.cloud.tools.eclipse.ui.util.databinding,
- com.google.cloud.tools.eclipse.ui.util.event
+ com.google.cloud.tools.eclipse.ui.util.event,
+ com.google.cloud.tools.eclipse.ui.util.images

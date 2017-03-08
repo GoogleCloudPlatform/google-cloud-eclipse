@@ -7,8 +7,8 @@
            name="App Engine Libraries"/>
     </xs:appinfo>
     <xs:documentation>
-       Provides an extension point to define libraries that will be resolved using the
-        Maven coordinates. These libraries then can be added to App Engine projects.
+     Provides an extension point to define libraries that will be resolved using the
+     Maven coordinates. These libraries then can be added to App Engine projects.
     </xs:documentation>
   </xs:annotation>
 
@@ -82,10 +82,10 @@ limitations under the License.
 
    <xs:element name="library">
       <xs:annotation>
-         <xs:documentation>
-            An App Engine library that can consist of one or more jar files with associated
-            visibility rules and Maven coordinates.
-         </xs:documentation>
+        <xs:documentation>
+           An App Engine library that can consist of one or more jar files with associated
+           visibility rules and Maven coordinates.
+        </xs:documentation>
       </xs:annotation>
       <xs:complexType>
          <xs:sequence>
@@ -121,14 +121,14 @@ limitations under the License.
             <xs:annotation>
                <xs:documentation>
                   A user-friendly name for the library that can be displayed in the UI,
-                  e.g.: "AppEngine Endpoints".
+                  e.g.: "App Engine Endpoints".
                </xs:documentation>
             </xs:annotation>
          </xs:attribute>
          <xs:attribute name="recommendation" type="recommendationType">
             <xs:annotation>
                <xs:documentation>
-                  Recommendation of the library, e.g.: if the library is required,
+                  Recommendation of the library. E.g.: if the library is required,
                   it must always be added to the
                   classpath of projects. Defaults to &lt;tt&gt;optional&lt;/tt&gt;.
                </xs:documentation>
@@ -138,7 +138,7 @@ limitations under the License.
             <xs:annotation>
                <xs:documentation>
                   URL for more
-                  detailed information about the library, e.g. user guides, wiki, other documentation.
+                  detailed information about the library; e.g. user guides, wiki, other documentation.
                </xs:documentation>
             </xs:annotation>
          </xs:attribute>
@@ -193,9 +193,9 @@ unspecified, the javadoc will be downloaded from the artifact location if availa
          </xs:attribute>
          <xs:attribute name="sourceUri" type="xs:anyURI">
             <xs:annotation>
-               <xs:documentation>
-                  URI that can be used by the IDE to lookup sources for the classes contained in this artifact. If
-unspecified, the source will be downloaded from the artifact location if available.
+              <xs:documentation>
+                URI that can be used by the IDE to lookup sources for the classes contained in this artifact. If
+                unspecified, the source will be downloaded from the artifact location if available.
                </xs:documentation>
             </xs:annotation>
          </xs:attribute>
@@ -205,8 +205,8 @@ unspecified, the source will be downloaded from the artifact location if availab
    <xs:element name="libraryDependency">
       <xs:annotation>
          <xs:documentation>
-            An id of another library defined through this extension point that must be also added to the classpath of
-the project, if this library is added.
+            An id of another library defined through this extension point that must be also added to the
+            classpath of the project, if this library is added.
          </xs:documentation>
       </xs:annotation>
       <xs:complexType>
@@ -217,8 +217,8 @@ the project, if this library is added.
    <xs:element name="exclusionFilter">
       <xs:annotation>
          <xs:documentation>
-            A pattern that can be used to exclude classes and packages to be visible. Uses the same format as the JDT's
-build path <a href="http://help.eclipse.org/neon/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Forg%2Feclipse%2Fjdt%2Fcore%2FIClasspathEntry.html&amp;anchor=getExclusionPatterns--">inclusion/exclusion filters</a>
+            A pattern that can be used to exclude classes and packages to be visible. 
+            Uses the same format as the JDT's build path <a href="http://help.eclipse.org/neon/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Forg%2Feclipse%2Fjdt%2Fcore%2FIClasspathEntry.html&amp;anchor=getExclusionPatterns--">inclusion/exclusion filters</a>
          </xs:documentation>
       </xs:annotation>
       <xs:complexType>
@@ -229,8 +229,11 @@ build path <a href="http://help.eclipse.org/neon/index.jsp?topic=%2Forg.eclipse.
    <xs:element name="inclusionFilter">
       <xs:annotation>
          <xs:documentation>
-            A pattern that can be used to include classes and packages to be visible. Uses the same format as the JDT's
-build path <a href="http://help.eclipse.org/neon/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Forg%2Feclipse%2Fjdt%2Fcore%2FIClasspathEntry.html&amp;anchor=getInclusionPatterns--">inclusion/exclusion filters</a>
+A pattern that can be used to include classes and packages to be
+visible. Uses the same format as the JDT's
+build path
+<a
+href="http://help.eclipse.org/neon/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Forg%2Feclipse%2Fjdt%2Fcore%2FIClasspathEntry.html&amp;anchor=getInclusionPatterns--">inclusion/exclusion filters</a>
          </xs:documentation>
       </xs:annotation>
       <xs:complexType>
@@ -250,38 +253,35 @@ build path <a href="http://help.eclipse.org/neon/index.jsp?topic=%2Forg.eclipse.
          however it has an invalid attribute (value) and and invalid attribute value (default for use)
          according to the schema, so these are removed here -->
          <xs:attribute name="repositoryUri" type="xs:string">
-            <xs:annotation>
-               <xs:documentation>
-                  URI pointing to a repository location or an ID of a repository defined in the POM or the Maven
-settings. If the value starts with [protocol]:// then it is treated as a URI, otherwise an ID of a repository that is
-expected to be defined. Defaults to 'central' denoting the Maven Central repository.
+           <xs:annotation>
+             <xs:documentation>
+               URL pointing to a repository location or the ID of a repository defined
+               in the POM or the Maven settings. If the value starts with [protocol]:// 
+               then it is treated as a URI. Otherwise it is treated as an ID of a repository.
+               Defaults to 'central' denoting the Maven Central repository.
                </xs:documentation>
             </xs:annotation>
          </xs:attribute>
          <xs:attribute name="groupId" type="xs:string" use="required" />
          <xs:attribute name="artifactId" type="xs:string" use="required" />
-         <!-- the original exsd contains this line
-         <xs:attribute name="version" type="xs:string" use="default" value="LATEST">
-         however it has an invalid attribute (value) and and invalid attribute value (default for use)
-         according to the schema, so these are removed here -->
-         <xs:attribute name="version" type="xs:string">
-            <xs:annotation>
-               <xs:documentation>
-                  Version of the maven artifact, defaults to LATEST.
-               </xs:documentation>
-            </xs:annotation>
+         <xs:attribute name="version" type="xs:string" use="required">
+           <xs:annotation>
+             <xs:documentation>
+               Version of the Maven artifact.
+             </xs:documentation>
+           </xs:annotation>
          </xs:attribute>
          <xs:attribute name="type" type="xs:string">
-            <xs:annotation>
-               <xs:documentation>
-                  The packaging type of the artifact, e.g. jar, war, zip. Currently only jar is supported.
-               </xs:documentation>
-            </xs:annotation>
+           <xs:annotation>
+             <xs:documentation>
+              The packaging type of the artifact, e.g. jar, war, zip. Currently only
+              jar is supported.
+             </xs:documentation>
+           </xs:annotation>
          </xs:attribute>
          <xs:attribute name="classifier" type="xs:string" />
       </xs:complexType>
    </xs:element>
-
 
    <xs:annotation>
       <xs:appinfo>
@@ -325,7 +325,8 @@ will determine how to resolve the entries associated with the container.
          <meta.section type="xs:implementation"/>
       </xs:appinfo>
       <xs:documentation>
-         See the plugin.xml of the com.google.cloud.tools.eclipse.appengine.libraries for an example of how to contribute to the extension point.
+        See the plugin.xml of the com.google.cloud.tools.eclipse.appengine.libraries for an example of how
+        to contribute to the extension point.
       </xs:documentation>
    </xs:annotation>
 

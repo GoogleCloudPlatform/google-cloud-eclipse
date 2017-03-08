@@ -33,19 +33,36 @@ public class HttpUtilWithServerTest {
   private static final String LONG_PARAMETER = "Exception in thread \"main\""
       + " java.lang.IllegalArgumentException: Wrong argument!\n\tat B.main(B.java:73)";
 
+  private static final Map<String, String> testParameters;
+  static {
+    testParameters = new HashMap<>();
+    testParameters.put("dp", "/virtual/some-event-type/some-event-name");
+    testParameters.put("exception_info", LONG_PARAMETER);
+    testParameters.put("product", "CT4E");
+  };
+
   @Test
   public void testSendPostMultipart() throws IOException {
-    Map<String, String> parameters = new HashMap<>();
-    parameters.put("dp", "/virtual/some-event-type/some-event-name");
-    parameters.put("exception_info", LONG_PARAMETER);
-    parameters.put("product", "CT4E");
+    assertEquals(200, HttpUtil.sendPostMultipart(server.getAddress(), testParameters));
+    assertTrue(server.getRequestHeaders().get("Content-Type")
+        .startsWith("multipart/form-data; boundary="));
 
-    assertEquals(200, HttpUtil.sendPostMultipart(server.getAddress(), parameters));
+    verifyPostRequest();
+  }
+
+  @Test
+  public void testSendPost() throws IOException {
+    assertEquals(200, HttpUtil.sendPost(server.getAddress(), testParameters));
+    assertEquals("application/x-www-form-urlencoded",
+        server.getRequestHeaders().get("Content-Type"));
+
+    verifyPostRequest();
+  }
+
+  private void verifyPostRequest() {
     assertEquals("POST", server.getRequestMethod());
     assertTrue(server.getRequestHeaders().get("User-Agent")
         .startsWith("gcloud-eclipse-tools/"));
-    assertTrue(server.getRequestHeaders().get("Content-Type")
-        .startsWith("multipart/form-data; boundary="));
 
     Map<String, String[]> parsedParameters = server.getRequestParameters();
     assertEquals("/virtual/some-event-type/some-event-name", parsedParameters.get("dp")[0]);

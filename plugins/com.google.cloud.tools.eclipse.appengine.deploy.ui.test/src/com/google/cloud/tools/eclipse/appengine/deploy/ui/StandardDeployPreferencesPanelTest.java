@@ -36,8 +36,10 @@ import com.google.cloud.tools.eclipse.projectselector.ProjectSelector;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import com.google.cloud.tools.login.Account;
+import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Queue;
 import org.eclipse.core.databinding.ValidationStatusProvider;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
@@ -186,13 +188,17 @@ public class StandardDeployPreferencesPanelTest {
     StandardDeployPreferencesPanel deployPanel =
         new StandardDeployPreferencesPanel(parent, project, loginService, layoutChangedHandler,
                                            true, projectRepository);
-    for (Control control : deployPanel.getChildren()) {
+    Queue<Control> children = new ArrayDeque<>(Arrays.asList(deployPanel.getChildren()));
+    while (!children.isEmpty()) {
+      Control control = children.poll();
       if (control instanceof ProjectSelector) {
         ProjectSelector projectSelector = (ProjectSelector) control;
         IStructuredSelection selection = projectSelector.getViewer().getStructuredSelection();
         assertThat(selection.size(), is(1));
         assertThat(((GcpProject) selection.getFirstElement()).getId(), is("projectId1"));
         return;
+      } else if (control instanceof Composite) {
+        children.addAll(Arrays.asList(((Composite) control).getChildren()));
       }
     };
     fail("Did not find ProjectSelector widget");

@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.program.Program;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -41,22 +42,23 @@ public class WorkbenchUtil {
 
   /**
    * Open the specified file in the editor.
-   * 
+   *
    * @param workbench the active workbench
    * @param file the file to open
    */
-  public static void openInEditor(IWorkbench workbench, IFile file) {
+  public static IEditorPart openInEditor(IWorkbench workbench, IFile file) {
     IWorkbenchWindow window = workbench.getActiveWorkbenchWindow();
     if (window != null && file != null) {
       IWorkbenchPage page = window.getActivePage();
       try {
-        IDE.openEditor(page, file, true);
+        return IDE.openEditor(page, file, true);
       } catch (PartInitException ex) {
         // ignore; we don't have to open the file
       }
     }
+    return null;
   }
-  
+
   /**
    * Opens the specified url in a Web browser instance in a UI thread.
    *
