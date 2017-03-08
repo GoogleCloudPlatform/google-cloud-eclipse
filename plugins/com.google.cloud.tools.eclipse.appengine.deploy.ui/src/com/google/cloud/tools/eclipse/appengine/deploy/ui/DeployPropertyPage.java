@@ -47,7 +47,7 @@ import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 public class DeployPropertyPage extends PropertyPage {
 
   private DeployPreferencesPanel content;
-  private boolean canSetMessage;
+  private boolean canSetMessage = true;
   private boolean isStandardPanel;
   private IFacetedProject facetedProject = null;
   private String invalidFacetConfigErrorMessage = "";
@@ -202,7 +202,7 @@ public class DeployPropertyPage extends PropertyPage {
   private void updatePageBasedOnFacetConfig(boolean hasCorrectFacetConfiguration) {
     if (hasCorrectFacetConfiguration) {
       canSetMessage = true;
-      setErrorMessage(null);
+      content.getDataBindingContext().updateTargets();
     } else {
       setErrorMessage(invalidFacetConfigErrorMessage);
       canSetMessage = false;
