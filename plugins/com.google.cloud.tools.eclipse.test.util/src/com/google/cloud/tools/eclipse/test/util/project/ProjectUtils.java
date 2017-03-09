@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -59,7 +60,7 @@ import org.osgi.framework.FrameworkUtil;
  * A set of utility methods for dealing with projects.
  */
 public class ProjectUtils {
-  private static boolean DEBUG = true;
+  private static boolean DEBUG = false;
 
   /**
    * Import the Eclipse projects found within the bundle containing {@code clazz} at the
@@ -137,13 +138,13 @@ public class ProjectUtils {
 
   /** Fail if there are any build errors on the specified projects. */
   public static void failIfBuildErrors(String message, IProject... projects) throws CoreException {
-    List<String> errors = getAllBuildErrors(projects);
+    Set<String> errors = getAllBuildErrors(projects);
     assertTrue(message + "\n" + Joiner.on("\n").join(errors), errors.isEmpty());
   }
 
   /** Return a list of all build errors on the specified projects. */
-  public static List<String> getAllBuildErrors(IProject... projects) throws CoreException {
-    List<String> errors = new ArrayList<>();
+  public static Set<String> getAllBuildErrors(IProject... projects) throws CoreException {
+    Set<String> errors = new LinkedHashSet<>();
     for (IProject project : projects) {
       IMarker[] problems = project.findMarkers(IMarker.PROBLEM, true /* includeSubtypes */,
           IResource.DEPTH_INFINITE);
@@ -185,66 +186,65 @@ public class ProjectUtils {
 
   /** Wait for any spawned jobs and builds to complete (e.g., validation jobs). */
   public static void waitForProjects(Runnable delayTactic, IProject... projects) {
-    IJobManager jobManager = Job.getJobManager();
     Stopwatch timer = Stopwatch.createStarted();
     try {
-      Set<Job> jobs = new LinkedHashSet<>();
-      List<String> allBuildErrors;
-      int numberOfPreviousBuildErrors = -1;
+      Collection<Job> jobs = Collections.emptyList();
+      Set<String> previousBuildErrors = Collections.emptySet();
       boolean buildErrorsChanging;
       do {
+        // wait a little bit to give the builders a chance
         delayTactic.run();
+        
+        // wait for any previously-identified build jobs
         for (Job job : jobs) {
           job.join();
         }
-        jobs.clear();
 
-        Collections.addAll(jobs, jobManager.find(ResourcesPlugin.FAMILY_MANUAL_BUILD));
-        Collections.addAll(jobs, jobManager.find(ResourcesPlugin.FAMILY_AUTO_BUILD));
-        // J2EEElementChangedListener.PROJECT_COMPONENT_UPDATE_JOB_FAMILY
-        Collections.addAll(jobs, jobManager.find("org.eclipse.jst.j2ee.refactor.component"));
-        // ServerPlugin.SHUTDOWN_JOB_FAMILY
-        Collections.addAll(jobs, jobManager.find("org.eclipse.wst.server.core.family"));
-        Collections.addAll(jobs, jobManager.find("org.eclipse.wst.server.ui.family"));
-        Collections.addAll(jobs, jobManager.find(ValidationBuilder.FAMILY_VALIDATION_JOB));
+        // identify any pending build-related jobs
+        jobs = findPendingBuildJobs();
 
         // track whether we've reached a fixpoint in the build errors
-        allBuildErrors = getAllBuildErrors(projects);
-        buildErrorsChanging =
-            numberOfPreviousBuildErrors < 0 || numberOfPreviousBuildErrors != allBuildErrors.size();
-        numberOfPreviousBuildErrors = allBuildErrors.size();
+        Set<String> currentBuildErrors = getAllBuildErrors(projects);
+        buildErrorsChanging = !previousBuildErrors.equals(currentBuildErrors);
+        previousBuildErrors = currentBuildErrors;
 
         if (DEBUG || timer.elapsed(TimeUnit.SECONDS) > 10) {
-          System.err.printf("ProjectUtils#waitForProjects: waiting %s\n", timer);
           if (!jobs.isEmpty()) {
-            System.err.printf("ProjectUtils#waitForProjects: waiting for %d jobs: %s\n",
+            System.err.printf("ProjectUtils#waitForProjects[%s]: waiting for %d jobs: %s\n", timer,
                 jobs.size(), jobs);
           }
-          if (!allBuildErrors.isEmpty()) {
-            System.err.printf("ProjectUtils#waitForProjects: waiting for %d build errors\n",
-                allBuildErrors.size());
-            // don't report unchanged errors
-            if (buildErrorsChanging) {
-              for (String buildError : allBuildErrors) {
-                System.err.printf("  error: " + buildError);
-              }
-            }
+          if (buildErrorsChanging) {
+            System.err.printf("ProjectUtils#waitForProjects[%s]: waiting for %d build errors\n",
+                timer, currentBuildErrors.size());
           }
-          if (timer.elapsed(TimeUnit.SECONDS) > 60) {
-            // report any other jobs found in case we're missing something above
-            Job[] otherJobs = jobManager.find(null);
-            if (otherJobs.length > 0) {
-              System.err.printf("Ignoring %d unrelated jobs:\n", otherJobs.length);
-              for (Job job : otherJobs) {
-                System.err.printf("  %s: %s\n", job.getClass().getName(), job);
-              }
-            }
-          }
+          // Uncomment if tests are failing to identify any other build-related jobs.
+          // Job[] otherJobs = Job.getJobManager().find(null);
+          // if (otherJobs.length > 0) {
+          // System.err.printf("Ignoring %d unrelated jobs:\n", otherJobs.length);
+          // for (Job job : otherJobs) {
+          // System.err.printf(" %s: %s\n", job.getClass().getName(), job);
+          // }
+          // }
         }
       } while (!jobs.isEmpty() || buildErrorsChanging);
     } catch (CoreException | InterruptedException ex) {
       throw new RuntimeException(ex);
     }
+  }
+
+  /** Identify all jobs that we know of that are related to building. */
+  private static Collection<Job> findPendingBuildJobs() {
+    Set<Job> jobs = new HashSet<>();
+    IJobManager jobManager = Job.getJobManager();
+    Collections.addAll(jobs, jobManager.find(ResourcesPlugin.FAMILY_MANUAL_BUILD));
+    Collections.addAll(jobs, jobManager.find(ResourcesPlugin.FAMILY_AUTO_BUILD));
+    // J2EEElementChangedListener.PROJECT_COMPONENT_UPDATE_JOB_FAMILY
+    Collections.addAll(jobs, jobManager.find("org.eclipse.jst.j2ee.refactor.component"));
+    // ServerPlugin.SHUTDOWN_JOB_FAMILY
+    Collections.addAll(jobs, jobManager.find("org.eclipse.wst.server.core.family"));
+    Collections.addAll(jobs, jobManager.find("org.eclipse.wst.server.ui.family"));
+    Collections.addAll(jobs, jobManager.find(ValidationBuilder.FAMILY_VALIDATION_JOB));
+    return jobs;
   }
 
   private static IWorkspace getWorkspace() {
