@@ -202,7 +202,7 @@ public class DeployPropertyPage extends PropertyPage {
   private void updatePageBasedOnFacetConfig(boolean hasCorrectFacetConfiguration) {
     if (hasCorrectFacetConfiguration) {
       canSetMessage = true;
-      content.getDataBindingContext().updateTargets();
+      content.getDataBindingContext().updateModels();
     } else {
       setErrorMessage(invalidFacetConfigErrorMessage);
       canSetMessage = false;
