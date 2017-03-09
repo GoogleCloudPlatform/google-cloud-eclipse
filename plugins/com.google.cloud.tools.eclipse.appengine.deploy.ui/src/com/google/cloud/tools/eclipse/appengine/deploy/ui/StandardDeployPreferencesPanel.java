@@ -524,7 +524,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     }
   }
 
-  private static class ProjectSelectionValidator extends FixedMultiValidator {
+  static class ProjectSelectionValidator extends FixedMultiValidator {
 
     private final IViewerObservableValue projectInput;
     private final IViewerObservableValue projectSelection;
