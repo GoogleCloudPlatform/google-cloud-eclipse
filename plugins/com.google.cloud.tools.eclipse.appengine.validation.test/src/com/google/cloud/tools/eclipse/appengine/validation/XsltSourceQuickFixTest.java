@@ -24,7 +24,8 @@ import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
-import java.util.Arrays;
+import com.google.common.collect.Lists;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -37,7 +38,7 @@ import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.wst.common.project.facet.core.IFacetedProject;
+import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.junit.Rule;
 import org.junit.Test;
@@ -52,19 +53,20 @@ public class XsltSourceQuickFixTest {
       + "<application>"
       + "</application>"
       + "</appengine-web-app>";
-
-  @Rule public TestProjectCreator projectCreator = new TestProjectCreator().withFacetVersions(
-      Arrays.asList(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25));
+  private static final IProjectFacetVersion APPENGINE_STANDARD_FACET_VERSION_1 =
+      ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID).getVersion("1");
+  
+  @Rule
+  public TestProjectCreator appEngineStandardProject =
+      new TestProjectCreator().withFacetVersions(Lists.newArrayList(JavaFacet.VERSION_1_7,
+          WebFacetUtils.WEB_25, APPENGINE_STANDARD_FACET_VERSION_1));
 
   @Test
   public void testApply() throws CoreException {
 
-    IProject project = projectCreator.getProject();
+    IProject project = appEngineStandardProject.getProject();
     IFile file = project.getFile("appengine-web.xml");
     file.create(ValidationTestUtils.stringToInputStream(APPLICATION_XML), IFile.FORCE, null);
-    
-    IFacetedProject facetedProject = ProjectFacetsManager.create(project);
-    AppEngineStandardFacet.installAppEngineFacet(facetedProject, true, null);
 
     IWorkbench workbench = PlatformUI.getWorkbench();
     IEditorPart editorPart = WorkbenchUtil.openInEditor(workbench, file);

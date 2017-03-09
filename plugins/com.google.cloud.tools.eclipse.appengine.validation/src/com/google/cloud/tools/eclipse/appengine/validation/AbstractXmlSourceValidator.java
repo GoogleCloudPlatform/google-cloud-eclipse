@@ -65,10 +65,10 @@ public abstract class AbstractXmlSourceValidator implements ISourceValidator, IV
     try {
       IFacetedProject facetedProject = ProjectFacetsManager.create(project);
       if (AppEngineStandardFacet.hasAppEngineFacet(facetedProject)) {
-        hasValidated = true;
         String encoding = getDocumentEncoding(document);
         byte[] bytes = document.get().getBytes(encoding);
         this.validate(reporter, bytes);
+        hasValidated = true;
       }
     } catch (IOException | CoreException | ParserConfigurationException ex) {
       logger.log(Level.SEVERE, ex.getMessage());
@@ -116,8 +116,8 @@ public abstract class AbstractXmlSourceValidator implements ISourceValidator, IV
    * Returns the IFile for a given URI or null if the file does
    * not exist in the workspace.
    */
-  IFile getFile(String fileUri) {
-    IPath path = new Path(fileUri);
+  IFile getFile(String filePath) {
+    IPath path = new Path(filePath);
     if (path.segmentCount() > 1) {
       IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
       IFile file = root.getFile(path);
