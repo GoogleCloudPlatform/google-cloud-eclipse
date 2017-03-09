@@ -84,7 +84,7 @@ public class RunAppEngineShortcutTest {
   }
 
   // We need regex matching, since the actual menu name is "<number> App Engine".
-  private boolean appEngineMenuExists(IProject project) {
+  private static boolean appEngineMenuExists(IProject project) {
     SWTBotTreeItem selected = SwtBotProjectActions.selectProject(
         new SWTWorkbenchBot(), project.getName());
     Menu runAsMenu = selected.contextMenu("Run As").widget.getMenu();
