@@ -45,10 +45,10 @@ public class TimeoutAwareConnectionFactoryTest {
   @Test
   public void testConstructorWithTimeouts() throws MalformedURLException, IOException {
     HttpURLConnection connection =
-        new TimeoutAwareConnectionFactory(1764, 42)
+        new TimeoutAwareConnectionFactory(1764, 3528)
             .openConnection(new URL(proxyServer.getAddress()));
     assertThat(connection.getConnectTimeout(), is(1764));
-    assertThat(connection.getReadTimeout(), is(42));
+    assertThat(connection.getReadTimeout(), is(3528));
     connectReadAndDisconnect(connection);
   }
 
