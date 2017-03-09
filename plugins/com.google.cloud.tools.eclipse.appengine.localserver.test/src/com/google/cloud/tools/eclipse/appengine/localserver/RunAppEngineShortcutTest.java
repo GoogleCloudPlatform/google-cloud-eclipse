@@ -16,7 +16,9 @@
 
 package com.google.cloud.tools.eclipse.appengine.localserver;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotProjectActions;
@@ -24,18 +26,23 @@ import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import java.io.ByteArrayInputStream;
 import java.util.Arrays;
+import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
-import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
+import org.eclipse.swtbot.swt.finder.finders.MenuFinder;
+import org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
+import org.hamcrest.Matcher;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -54,19 +61,17 @@ public class RunAppEngineShortcutTest {
   @Test
   public void testRunAppEngine_enabledForAppEngineProject() {
     IProject project = appEngineProjectCreator.getProject();
-    SWTBotTreeItem projectTree = SwtBotProjectActions.selectProject(bot, project.getName());
-    assertNotNull(projectTree.contextMenu("Run As").menu("2 App Engine"));
+    assertTrue(appEngineMenuExists(project));
   }
 
-  @Test(expected = WidgetNotFoundException.class)
+  @Test
   public void testRunAppEngine_hiddenForPlainProject() {
     IProject project = javaProjectCreator.getProject();
-    SWTBotTreeItem projectTree = SwtBotProjectActions.selectProject(bot, project.getName());
-    projectTree.contextMenu("Run As").menu("2 App Engine");
+    assertFalse(appEngineMenuExists(project));
   }
 
   // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1556
-  @Test(expected = WidgetNotFoundException.class)
+  @Test
   public void testRunAppEngine_hiddenEvenIfAppEngineProjectFileIsOpen() throws CoreException {
     // Create an empty file in the App Engine project, and open it in an editor.
     IProject appEngineProject = appEngineProjectCreator.getProject();
@@ -77,7 +82,16 @@ public class RunAppEngineShortcutTest {
     assertNotNull(WorkbenchUtil.openInEditor(workbench, file));
 
     IProject javaProject = javaProjectCreator.getProject();
-    SWTBotTreeItem projectTree = SwtBotProjectActions.selectProject(bot, javaProject.getName());
-    projectTree.contextMenu("Run As").menu("2 App Engine");
+    assertFalse(appEngineMenuExists(javaProject));
+  }
+
+  // We need regex matching, since the actual menu name is "<number> App Engine".
+  private boolean appEngineMenuExists(IProject project) {
+    SWTBotTreeItem projectTree = SwtBotProjectActions.selectProject(bot, project.getName());
+    Menu runAsMenu = projectTree.contextMenu("Run As").widget.getMenu();
+    Matcher<MenuItem> matcher = WidgetMatcherFactory.withRegex("App Engine");
+
+    List<MenuItem> menuItems = new MenuFinder().findMenus(runAsMenu, matcher, false);
+    return !menuItems.isEmpty();
   }
 }
