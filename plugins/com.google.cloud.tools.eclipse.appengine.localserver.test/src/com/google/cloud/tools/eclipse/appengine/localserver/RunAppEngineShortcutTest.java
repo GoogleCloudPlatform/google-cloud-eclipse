@@ -56,8 +56,6 @@ public class RunAppEngineShortcutTest {
       .withFacetVersions(Arrays.asList(
           JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, APP_ENGINE_STANDARD_FACET_1));
 
-  private SWTWorkbenchBot bot = new SWTWorkbenchBot();
-
   @Test
   public void testRunAppEngine_enabledForAppEngineProject() {
     IProject project = appEngineProjectCreator.getProject();
@@ -87,8 +85,9 @@ public class RunAppEngineShortcutTest {
 
   // We need regex matching, since the actual menu name is "<number> App Engine".
   private boolean appEngineMenuExists(IProject project) {
-    SWTBotTreeItem projectTree = SwtBotProjectActions.selectProject(bot, project.getName());
-    Menu runAsMenu = projectTree.contextMenu("Run As").widget.getMenu();
+    SWTBotTreeItem selected = SwtBotProjectActions.selectProject(
+        new SWTWorkbenchBot(), project.getName());
+    Menu runAsMenu = selected.contextMenu("Run As").widget.getMenu();
     Matcher<MenuItem> matcher = WidgetMatcherFactory.withRegex("App Engine");
 
     List<MenuItem> menuItems = new MenuFinder().findMenus(runAsMenu, matcher, false);
