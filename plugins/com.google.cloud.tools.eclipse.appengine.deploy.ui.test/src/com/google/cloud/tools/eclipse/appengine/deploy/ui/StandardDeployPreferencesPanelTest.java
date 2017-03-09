@@ -194,7 +194,7 @@ public class StandardDeployPreferencesPanelTest {
   }
 
   @Test
-  public void testProjectNotSelectedIsAnErrorWhenRequireValuesIsFalse() {
+  public void testProjectNotSelectedIsNotAnErrorWhenRequireValuesIsFalse() {
     deployPanel = createPanel(false /* requireValues */);
     assertThat(getProjectSelectionValidator().getSeverity(), is(IStatus.INFO));
   }
