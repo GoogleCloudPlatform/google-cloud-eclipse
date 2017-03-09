@@ -17,7 +17,6 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -76,8 +75,9 @@ public class AbstractXmlSourceValidatorTest {
     
     AbstractXmlSourceValidator validator = new AppEngineWebXmlSourceValidator();
     validator.connect(document);
-    validator.validate(helper, new IncrementalReporter(null));
-    assertTrue(validator.hasValidated());
+    IncrementalReporter reporter = new IncrementalReporter(null);
+    validator.validate(helper, reporter);
+    assertEquals(1, reporter.getMessages().size());
   }
   
   @Test
@@ -96,8 +96,9 @@ public class AbstractXmlSourceValidatorTest {
     
     AbstractXmlSourceValidator validator = new AppEngineWebXmlSourceValidator();
     validator.connect(document);
-    validator.validate(helper, new IncrementalReporter(null));
-    assertFalse(validator.hasValidated());
+    IncrementalReporter reporter = new IncrementalReporter(null);
+    validator.validate(helper, reporter);
+    assertEquals(0, reporter.getMessages().size());
   }
   
   @Test
@@ -130,9 +131,8 @@ public class AbstractXmlSourceValidatorTest {
     
     assertTrue(file.exists());
     
-    AbstractXmlSourceValidator validator = new WebXmlSourceValidator();
     IPath path = file.getFullPath();
-    IFile testFile = validator.getFile(path.toString());
+    IFile testFile = AbstractXmlSourceValidator.getFile(path.toString());
     
     assertNotNull(testFile);
     assertEquals(file, testFile);
@@ -151,8 +151,7 @@ public class AbstractXmlSourceValidatorTest {
     IPath path = file.getFullPath();
     helper.setURI(path.toString());
 
-    AbstractXmlSourceValidator validator = new WebXmlSourceValidator();
-    IProject testProject = validator.getProject((IValidationContext) helper);
+    IProject testProject = AbstractXmlSourceValidator.getProject((IValidationContext) helper);
     assertNotNull(testProject);
     assertEquals(project, testProject);
   }

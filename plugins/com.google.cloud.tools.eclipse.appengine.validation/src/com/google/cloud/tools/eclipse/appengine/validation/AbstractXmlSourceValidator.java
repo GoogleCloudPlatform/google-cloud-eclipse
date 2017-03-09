@@ -44,7 +44,6 @@ import org.eclipse.wst.validation.internal.provisional.core.IValidationContext;
 import org.eclipse.wst.validation.internal.provisional.core.IValidator;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
-import com.google.common.annotations.VisibleForTesting;
 
 /**
  * Abstract source view validator.
@@ -55,7 +54,6 @@ public abstract class AbstractXmlSourceValidator implements ISourceValidator, IV
       AbstractXmlSourceValidator.class.getName());
   
   private IDocument document;
-  private boolean hasValidated;
   
   /**
    * Validates a given {@link IDocument} if the project has the App Engine Standard facet.
@@ -68,7 +66,6 @@ public abstract class AbstractXmlSourceValidator implements ISourceValidator, IV
         String encoding = getDocumentEncoding(document);
         byte[] bytes = document.get().getBytes(encoding);
         this.validate(reporter, bytes);
-        hasValidated = true;
       }
     } catch (IOException | CoreException | ParserConfigurationException ex) {
       logger.log(Level.SEVERE, ex.getMessage());
@@ -101,7 +98,7 @@ public abstract class AbstractXmlSourceValidator implements ISourceValidator, IV
    * null if the IValidationContext does not return any files that need
    * to be validated.
    */
-  IProject getProject(IValidationContext helper) {
+  static IProject getProject(IValidationContext helper) {
     String[] fileUri = helper.getURIs();
     if (fileUri.length > 0) {
       IFile file = getFile(fileUri[0]);
@@ -116,7 +113,7 @@ public abstract class AbstractXmlSourceValidator implements ISourceValidator, IV
    * Returns the IFile for a given URI or null if the file does
    * not exist in the workspace.
    */
-  IFile getFile(String filePath) {
+  static IFile getFile(String filePath) {
     IPath path = new Path(filePath);
     if (path.segmentCount() > 1) {
       IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
@@ -149,11 +146,6 @@ public abstract class AbstractXmlSourceValidator implements ISourceValidator, IV
 
   @Override
   public void validate(IRegion dirtyRegion, IValidationContext helper, IReporter reporter) {
-  }
-  
-  @VisibleForTesting
-  boolean hasValidated() {
-    return hasValidated;
   }
   
 }
