@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.libraries;
+package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
 import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 
-public class AppEngineLibrariesTest {
+public class CloudLibrariesTest {
   
   @Test
   public void testGetLibraries() {
-    List<Library> libraries = AppEngineLibraries.getLibraries("appengine");
+    List<Library> libraries = CloudLibraries.getLibraries("appengine");
     for (Library library : libraries) {
       Assert.assertFalse(library.getLibraryFiles().isEmpty());
       String tooltip = library.getToolTip();
@@ -39,13 +40,13 @@ public class AppEngineLibrariesTest {
   
   @Test
   public void testGetLibraries_null() {
-    List<Library> libraries = AppEngineLibraries.getLibraries(null);
+    List<Library> libraries = CloudLibraries.getLibraries(null);
     Assert.assertTrue(libraries.isEmpty());
   }
   
   @Test
   public void testGetLibrary() {
-    Library library = AppEngineLibraries.getLibrary("objectify");
+    Library library = CloudLibraries.getLibrary("objectify");
     Assert.assertEquals(library.getGroup(), "appengine");
     Assert.assertEquals(library.getName(), "Objectify");
   }

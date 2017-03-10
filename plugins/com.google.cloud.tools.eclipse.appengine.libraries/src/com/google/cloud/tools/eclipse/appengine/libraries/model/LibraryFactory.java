@@ -27,9 +27,7 @@ import java.util.logging.Logger;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.InvalidRegistryObjectException;
 
-// todo AppEngineLibraries and LibraryFactory should be in the same package and then this doesn't
-// need to be public
-public class LibraryFactory {
+class LibraryFactory {
 
   private static final Logger logger = Logger.getLogger(LibraryFactory.class.getName());
 
@@ -57,7 +55,7 @@ public class LibraryFactory {
   private static final String ATTRIBUTE_NAME_EXPORT = "export"; //$NON-NLS-1$
   private static final String ATTRIBUTE_NAME_RECOMMENDATION = "recommendation"; //$NON-NLS-1$
 
-  public Library create(IConfigurationElement configurationElement) throws LibraryFactoryException {
+  Library create(IConfigurationElement configurationElement) throws LibraryFactoryException {
     try {
       if (ELEMENT_NAME_LIBRARY.equals(configurationElement.getName())) {
         Library library = new Library(configurationElement.getAttribute(ATTRIBUTE_NAME_ID));

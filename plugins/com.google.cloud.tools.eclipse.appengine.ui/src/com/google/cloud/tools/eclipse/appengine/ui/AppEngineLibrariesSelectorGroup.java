@@ -16,7 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.ui;
 
-import com.google.cloud.tools.eclipse.appengine.libraries.AppEngineLibraries;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -57,7 +57,7 @@ public class AppEngineLibrariesSelectorGroup implements ISelectionProvider {
 
   public AppEngineLibrariesSelectorGroup(Composite parentContainer) {
     Collection<Library> availableLibraries =
-        AppEngineLibraries.getLibraries(AppEngineLibraries.APP_ENGINE_GROUP);
+        CloudLibraries.getLibraries(CloudLibraries.APP_ENGINE_GROUP);
     Preconditions.checkNotNull(parentContainer, "parentContainer is null");
     Preconditions.checkNotNull(availableLibraries, "availableLibraries is null");
     

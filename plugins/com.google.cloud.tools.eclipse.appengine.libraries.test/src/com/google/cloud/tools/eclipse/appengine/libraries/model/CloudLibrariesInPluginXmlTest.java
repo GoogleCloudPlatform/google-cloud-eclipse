@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.libraries;
+package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertFalse;
@@ -23,6 +23,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Filter;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
@@ -34,10 +35,10 @@ import java.util.List;
 import org.junit.Test;
 
 /**
- * Test the App Engine libraries defined in plugin.xml to validate that
+ * Test the libraries defined in plugin.xml to validate that
  * their attributes are correctly set.
  */
-public class AppEngineLibrariesInPluginXmlTest {
+public class CloudLibrariesInPluginXmlTest {
 
   private static final String APP_ENGINE_API_LIBRARY_ID = "appengine-api";
   private static final String CLOUD_ENDPOINTS_LIBRARY_ID = "appengine-endpoints";
@@ -47,13 +48,13 @@ public class AppEngineLibrariesInPluginXmlTest {
 
   @Test
   public void testLibrarySize() {
-    assertThat(AppEngineLibraries.getLibraries("appengine").size(), is(3));
-    assertThat(AppEngineLibraries.getLibraries("servlet").size(), is(2));
+    assertThat(CloudLibraries.getLibraries("appengine").size(), is(3));
+    assertThat(CloudLibraries.getLibraries("servlet").size(), is(2));
   }
 
   @Test
   public void testAppEngineApiLibraryConfig() throws URISyntaxException {
-    Library appEngineLibrary = AppEngineLibraries.getLibrary(APP_ENGINE_API_LIBRARY_ID);
+    Library appEngineLibrary = CloudLibraries.getLibrary(APP_ENGINE_API_LIBRARY_ID);
     assertThat(appEngineLibrary.getContainerPath().toString(),
                is(Library.CONTAINER_PATH_PREFIX + "/" + APP_ENGINE_API_LIBRARY_ID));
     assertThat(appEngineLibrary.getId(), is(APP_ENGINE_API_LIBRARY_ID));
@@ -95,7 +96,7 @@ public class AppEngineLibrariesInPluginXmlTest {
 
   @Test
   public void testEndpointsLibraryConfig() throws URISyntaxException {
-    Library endpointsLibrary = AppEngineLibraries.getLibrary(CLOUD_ENDPOINTS_LIBRARY_ID);
+    Library endpointsLibrary = CloudLibraries.getLibrary(CLOUD_ENDPOINTS_LIBRARY_ID);
     assertThat(endpointsLibrary.getContainerPath().toString(),
                is(Library.CONTAINER_PATH_PREFIX + "/" + CLOUD_ENDPOINTS_LIBRARY_ID));
     assertThat(endpointsLibrary.getId(), is(CLOUD_ENDPOINTS_LIBRARY_ID));
@@ -133,7 +134,7 @@ public class AppEngineLibrariesInPluginXmlTest {
 
   @Test
   public void testObjectifyLibraryConfig() throws URISyntaxException {
-    Library objectifyLibrary = AppEngineLibraries.getLibrary(OBJECTIFY_LIBRARY_ID);
+    Library objectifyLibrary = CloudLibraries.getLibrary(OBJECTIFY_LIBRARY_ID);
     assertThat(objectifyLibrary.getContainerPath().toString(),
                is(Library.CONTAINER_PATH_PREFIX + "/" + OBJECTIFY_LIBRARY_ID));
     assertThat(objectifyLibrary.getId(), is(OBJECTIFY_LIBRARY_ID));
@@ -183,7 +184,7 @@ public class AppEngineLibrariesInPluginXmlTest {
 
   @Test
   public void testServletApiLibraryConfig() throws URISyntaxException {
-    Library servletApiLibrary = AppEngineLibraries.getLibrary(SERVLET_API_LIBRARY_ID);
+    Library servletApiLibrary = CloudLibraries.getLibrary(SERVLET_API_LIBRARY_ID);
     assertThat(servletApiLibrary.getContainerPath().toString(),
                is(Library.CONTAINER_PATH_PREFIX + "/" + SERVLET_API_LIBRARY_ID));
     assertThat(servletApiLibrary.getId(), is(SERVLET_API_LIBRARY_ID));
@@ -217,7 +218,7 @@ public class AppEngineLibrariesInPluginXmlTest {
 
   @Test
   public void testJspApiLibraryConfig() throws URISyntaxException {
-    Library jspApiLibrary = AppEngineLibraries.getLibrary(JSP_API_LIBRARY_ID);
+    Library jspApiLibrary = CloudLibraries.getLibrary(JSP_API_LIBRARY_ID);
     assertThat(jspApiLibrary.getContainerPath().toString(),
                is(Library.CONTAINER_PATH_PREFIX + "/" + JSP_API_LIBRARY_ID));
     assertThat(jspApiLibrary.getId(), is(JSP_API_LIBRARY_ID));

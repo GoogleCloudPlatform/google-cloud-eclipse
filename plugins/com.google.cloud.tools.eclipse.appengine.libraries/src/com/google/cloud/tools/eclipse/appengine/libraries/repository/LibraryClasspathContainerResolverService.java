@@ -16,11 +16,11 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.repository;
 
-import com.google.cloud.tools.eclipse.appengine.libraries.AppEngineLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.ILibraryClasspathContainerResolverService;
 import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainer;
 import com.google.cloud.tools.eclipse.appengine.libraries.Messages;
 import com.google.cloud.tools.eclipse.appengine.libraries.SourceAttacherJob;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Filter;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
@@ -87,7 +87,7 @@ public class LibraryClasspathContainerResolverService
   }
 
   public IClasspathEntry[] resolveLibraryAttachSourcesSync(String libraryId) throws CoreException {
-    Library library = AppEngineLibraries.getLibrary(libraryId);
+    Library library = CloudLibraries.getLibrary(libraryId);
     if (library != null) {
       IClasspathEntry[] resolvedEntries = new IClasspathEntry[library.getLibraryFiles().size()];
       int idx = 0;
@@ -106,7 +106,7 @@ public class LibraryClasspathContainerResolverService
     Preconditions.checkArgument(containerPath.segment(0).equals(Library.CONTAINER_PATH_PREFIX));
     try {
       String libraryId = containerPath.segment(1);
-      Library library = AppEngineLibraries.getLibrary(libraryId);
+      Library library = CloudLibraries.getLibrary(libraryId);
       if (library != null) {
         List<Job> sourceAttacherJobs = new ArrayList<>();
         LibraryClasspathContainer container = resolveLibraryFiles(javaProject, containerPath,
@@ -140,7 +140,7 @@ public class LibraryClasspathContainerResolverService
   private IStatus checkAppEngineStandardJava7(IProgressMonitor monitor) {
     try {
       for (String libraryId : new String[]{ "servlet-api", "jsp-api"}) {
-        Library library = AppEngineLibraries.getLibrary(libraryId);
+        Library library = CloudLibraries.getLibrary(libraryId);
         for (LibraryFile libraryFile : library.getLibraryFiles()) {
           if (monitor.isCanceled()) {
             return Status.CANCEL_STATUS;

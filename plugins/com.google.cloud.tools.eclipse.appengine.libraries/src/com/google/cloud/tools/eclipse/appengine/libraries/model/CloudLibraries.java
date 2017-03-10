@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.libraries;
+package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,12 +24,9 @@ import java.util.logging.Logger;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.RegistryFactory;
 
-import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
-import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFactory;
-import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFactoryException;
 import com.google.common.collect.ImmutableMap;
 
-public class AppEngineLibraries {
+public class CloudLibraries {
 
   /**
    * Library files for App Engine Standard environment applications; specifically
@@ -43,7 +40,7 @@ public class AppEngineLibraries {
    */
   public static final String SERVLET_GROUP = "servlet";
   
-  private static final Logger logger = Logger.getLogger(AppEngineLibraries.class.getName());
+  private static final Logger logger = Logger.getLogger(CloudLibraries.class.getName());
   private static final ImmutableMap<String, Library> libraries = loadLibraryDefinitions();
   
   // todo consider caching maps of group to libraries
