@@ -32,7 +32,13 @@ public class CloudLibraries {
    * Library files for App Engine Standard environment applications; specifically
    * Objectify, App Engine API, and Google Cloud Endpoints.
    */
-  public static final String APP_ENGINE_GROUP = "appengine";
+  public static final String APP_ENGINE_GROUP = "appengine";   //$NON-NLS-1$
+  
+  /**
+   * Library files for Google Client APIs for Java; specifically
+   * google-api-client, oAuth, and google-http-client.
+   */
+  public static final String CLIENT_APIS_GROUP = "clientapis"; //$NON-NLS-1$
   
   /**
    * Library files for all Java servlet applications; specifically

@@ -16,9 +16,10 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
-import com.google.cloud.tools.eclipse.appengine.ui.AppEngineLibrariesSelectorGroup;
+import com.google.cloud.tools.eclipse.appengine.ui.LibrarySelectorGroup;
 import java.io.File;
 import java.util.Collection;
 import org.eclipse.core.runtime.IStatus;
@@ -40,7 +41,7 @@ import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
 
   private Text javaPackageField;
-  private AppEngineLibrariesSelectorGroup appEngineLibrariesSelectorGroup;
+  private LibrarySelectorGroup appEngineLibrariesSelectorGroup;
   private Text serviceNameField;
 
   public AppEngineWizardPage() {
@@ -64,7 +65,8 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
     createCustomFields(container, pageValidator);
 
     // Manage APIs
-    appEngineLibrariesSelectorGroup = new AppEngineLibrariesSelectorGroup(container);
+    appEngineLibrariesSelectorGroup =
+        new LibrarySelectorGroup(container, CloudLibraries.APP_ENGINE_GROUP);
 
     setPageComplete(validatePage());
     // Show enter project name on opening
