@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject.flex;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexFacet;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectConfig;
 import com.google.cloud.tools.eclipse.appengine.newproject.CodeTemplates;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
@@ -25,6 +26,9 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.wst.common.project.facet.core.IFacetedProject;
+import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
 /**
 * Utility to make a new Eclipse project with the App Engine Flexible facets in the workspace.
@@ -37,7 +41,13 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
 
   @Override
   public void addAppEngineFacet(IProject newProject, IProgressMonitor monitor) throws CoreException {
-    // TODO add flex facet
+    SubMonitor subMonitor = SubMonitor.convert(monitor,
+        Messages.getString("add.appengine.flex.facet"), 100);
+
+    IFacetedProject facetedProject = ProjectFacetsManager.create(
+        newProject, true /* convertIfNecessary */, subMonitor.newChild(50));
+    AppEngineFlexFacet.installAppEngineFacet(
+        facetedProject, true /* installDependentFacets */, subMonitor.newChild(50));
   }
 
   @Override
