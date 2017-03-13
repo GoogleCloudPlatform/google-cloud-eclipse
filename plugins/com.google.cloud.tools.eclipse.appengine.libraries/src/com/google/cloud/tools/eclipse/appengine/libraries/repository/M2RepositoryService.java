@@ -97,8 +97,8 @@ public class M2RepositoryService implements ILibraryRepositoryService {
     }
   }
 
-  @Activate
-  protected void activate() {
+  @Activate // TODO: is it ok to change to public?
+  public void activate() {
     mavenHelper = new MavenHelper();
   }
 
