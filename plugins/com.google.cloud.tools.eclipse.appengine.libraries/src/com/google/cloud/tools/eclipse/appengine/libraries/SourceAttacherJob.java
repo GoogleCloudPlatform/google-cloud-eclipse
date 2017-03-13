@@ -1,6 +1,8 @@
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -28,9 +30,9 @@ import org.eclipse.jdt.core.JavaCore;
  * notified of.
  */
 public class SourceAttacherJob extends Job {
-  
+
   private static final Logger logger = Logger.getLogger(SourceAttacherJob.class.getName());
-  
+
   private final IJavaProject javaProject;
   private final IPath containerPath;
   private final IPath libraryPath;
@@ -54,37 +56,36 @@ public class SourceAttacherJob extends Job {
     try {
       IClasspathContainer container = JavaCore.getClasspathContainer(containerPath, javaProject);
       if (container instanceof LibraryClasspathContainer) {
-        LibraryClasspathContainer libraryClasspathContainer = (LibraryClasspathContainer) container;
-        IClasspathEntry[] classpathEntries = libraryClasspathContainer.getClasspathEntries();
-        IClasspathEntry[] newClasspathEntries = new IClasspathEntry[classpathEntries.length];
-        System.arraycopy(classpathEntries, 0, newClasspathEntries, 0, classpathEntries.length);
-        for (int i = 0; i < newClasspathEntries.length; i++) {
-          IClasspathEntry entry = newClasspathEntries[i];
-          if (entry.getPath().equals(libraryPath)) {
-            IPath sourceArtifactPath = sourceArtifactPathProvider.call();
-            newClasspathEntries[i] = JavaCore.newLibraryEntry(entry.getPath(),
-                                                              sourceArtifactPath,
-                                                              null /* sourceAttachmentRootPath */,
-                                                              entry.getAccessRules(),
-                                                              entry.getExtraAttributes(),
-                                                              entry.isExported());
-          }
-        }
-        LibraryClasspathContainer newContainer =
-            libraryClasspathContainer.copyWithNewEntries(newClasspathEntries);
-        JavaCore.setClasspathContainer(containerPath, new IJavaProject[]{ javaProject },
-                                       new IClasspathContainer[]{ newContainer }, monitor);
-        serializer.saveContainer(javaProject, newContainer);
-      } else {
         logger.log(Level.FINE, Messages.getString("ContainerClassUnexpected",
-                                                  container.getClass().getName(),
-                                                  LibraryClasspathContainer.class.getName()));
+            container.getClass().getName(), LibraryClasspathContainer.class.getName()));
+        return Status.OK_STATUS;
+      };
+
+      LibraryClasspathContainer libraryClasspathContainer = (LibraryClasspathContainer) container;
+      IPath sourceArtifactPath = sourceArtifactPathProvider.call();
+      List<IClasspathEntry> newClasspathEntries = new ArrayList<>();
+
+      for (IClasspathEntry entry : libraryClasspathContainer.getClasspathEntries()) {
+        if (!entry.getPath().equals(libraryPath)) {
+          newClasspathEntries.add(entry);
+        } else {
+          newClasspathEntries.add(JavaCore.newLibraryEntry(
+              entry.getPath(), sourceArtifactPath, null /* sourceAttachmentRootPath */,
+              entry.getAccessRules(), entry.getExtraAttributes(), entry.isExported()));
+        }
       }
+
+      LibraryClasspathContainer newContainer =
+          libraryClasspathContainer.copyWithNewEntries(newClasspathEntries);
+      JavaCore.setClasspathContainer(containerPath, new IJavaProject[]{ javaProject },
+                                     new IClasspathContainer[]{ newContainer }, monitor);
+      serializer.saveContainer(javaProject, newContainer);
+      return Status.OK_STATUS;
+
     } catch (Exception ex) {
       // it's not needed to be logged normally
       logger.log(Level.FINE, Messages.getString("SourceAttachmentFailed"), ex);
+      return Status.OK_STATUS;  // even if it fails, we should not display an error to the user
     }
-    // even if it fails, we should not display an error to the user
-    return Status.OK_STATUS;
   }
 }
