@@ -4,6 +4,14 @@
   <extension-point id="com.google.cloud.tools.eclipse.appengine.libraries" 
       name="App Engine Libraries" />
   
+  <extension point="org.eclipse.jdt.ui.classpathContainerPage">
+    <classpathContainerPage
+       id="com.google.cloud.tools.eclipse.appengine.libraries"
+       name="App Engine Libraries"
+       class="com.google.cloud.tools.eclipse.appengine.libraries.AppEngineLibrariesPage">
+    </classpathContainerPage>
+ </extension>
+  
   <extension point="com.google.cloud.tools.eclipse.appengine.libraries"
              id="com.google.cloud.tools.eclipse.appengine.libraries.defaultapis">
     <library 
