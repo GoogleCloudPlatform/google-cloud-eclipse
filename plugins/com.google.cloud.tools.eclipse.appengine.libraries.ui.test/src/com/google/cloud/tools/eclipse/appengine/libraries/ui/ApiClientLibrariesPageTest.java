@@ -21,7 +21,7 @@ import org.junit.Test;
 
 public class ApiClientLibrariesPageTest {
 
-  private ApiClientLibrariesPage page = new ApiClientLibrariesPage();
+  private final ApiClientLibrariesPage page = new ApiClientLibrariesPage();
 
   @Test
   public void testConstructor() {
