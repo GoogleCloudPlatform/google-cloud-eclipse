@@ -34,6 +34,7 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 public class BuildPathTest {
   
   private final List<Library> libraries = new ArrayList<>();
+  private IJavaProject project = Mockito.mock(IJavaProject.class);
 
   @Test
   public void testAddLibraries_emptyList() throws CoreException {
@@ -43,7 +44,6 @@ public class BuildPathTest {
 
   @Test
   public void testAddLibraries() throws CoreException {
-    IJavaProject project = Mockito.mock(IJavaProject.class);
     IClasspathEntry[] rawClasspath = new IClasspathEntry[0];
     Mockito.when(project.getRawClasspath()).thenReturn(rawClasspath);
     
@@ -53,13 +53,12 @@ public class BuildPathTest {
         BuildPath.addLibraries(project, libraries, new NullProgressMonitor());
     Assert.assertEquals(1, result.length);
     
-    Mockito.verify(project, Mockito.times(1))
+    Mockito.verify(project)
         .setRawClasspath(Mockito.any(IClasspathEntry[].class), Mockito.any(IProgressMonitor.class));
   }
   
   @Test
-  public void testListLibraries() throws CoreException {
-    IJavaProject project = Mockito.mock(IJavaProject.class);
+  public void testListAdditionalLibraries() throws CoreException {
     IClasspathEntry[] rawClasspath = new IClasspathEntry[0];
     Mockito.when(project.getRawClasspath()).thenReturn(rawClasspath);
     
@@ -69,16 +68,14 @@ public class BuildPathTest {
         BuildPath.listAdditionalLibraries(project, libraries, new NullProgressMonitor());
     Assert.assertEquals(1, result.length);
  
-    Mockito.verify(project, Mockito.times(0))
+    Mockito.verify(project, Mockito.never())
         .setRawClasspath(Mockito.any(IClasspathEntry[].class), Mockito.any(IProgressMonitor.class));
   }
   
   @Test
   public void testAddLibraries_noDuplicates() throws CoreException {
     Library library = new Library("libraryId");
-    IClasspathEntry entry = BuildPath.makeClasspathEntry(library);
-    
-    IJavaProject project = Mockito.mock(IJavaProject.class);
+    IClasspathEntry entry = BuildPath.makeClasspathEntry(library);    
     IClasspathEntry[] rawClasspath = {entry};
     Mockito.when(project.getRawClasspath()).thenReturn(rawClasspath);
     
@@ -94,7 +91,6 @@ public class BuildPathTest {
     Library library2 = new Library("library2");
     IClasspathEntry entry = BuildPath.makeClasspathEntry(library1);
     
-    IJavaProject project = Mockito.mock(IJavaProject.class);
     IClasspathEntry[] rawClasspath = {entry};
     Mockito.when(project.getRawClasspath()).thenReturn(rawClasspath);
     
