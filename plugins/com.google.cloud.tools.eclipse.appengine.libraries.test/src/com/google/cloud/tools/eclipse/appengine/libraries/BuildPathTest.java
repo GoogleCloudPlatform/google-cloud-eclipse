@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -31,11 +32,12 @@ import org.mockito.Mockito;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 
 public class BuildPathTest {
+  
+  private final List<Library> libraries = new ArrayList<>();
 
   @Test
   public void testAddLibraries_emptyList() throws CoreException {
     IProject project = null;
-    List<Library> libraries = new ArrayList<>();
     BuildPath.addLibraries(project, libraries, new NullProgressMonitor());
   }
 
@@ -45,12 +47,30 @@ public class BuildPathTest {
     IClasspathEntry[] rawClasspath = new IClasspathEntry[0];
     Mockito.when(project.getRawClasspath()).thenReturn(rawClasspath);
     
-    List<Library> libraries = new ArrayList<>();
     Library library = new Library("libraryId");
     libraries.add(library);
     IClasspathEntry[] result =
         BuildPath.addLibraries(project, libraries, new NullProgressMonitor());
     Assert.assertEquals(1, result.length);
+    
+    Mockito.verify(project, Mockito.times(1))
+        .setRawClasspath(Mockito.any(IClasspathEntry[].class), Mockito.any(IProgressMonitor.class));
+  }
+  
+  @Test
+  public void testListLibraries() throws CoreException {
+    IJavaProject project = Mockito.mock(IJavaProject.class);
+    IClasspathEntry[] rawClasspath = new IClasspathEntry[0];
+    Mockito.when(project.getRawClasspath()).thenReturn(rawClasspath);
+    
+    Library library = new Library("libraryId");
+    libraries.add(library);
+    IClasspathEntry[] result =
+        BuildPath.listAdditionalLibraries(project, libraries, new NullProgressMonitor());
+    Assert.assertEquals(1, result.length);
+ 
+    Mockito.verify(project, Mockito.times(0))
+        .setRawClasspath(Mockito.any(IClasspathEntry[].class), Mockito.any(IProgressMonitor.class));
   }
   
   @Test
@@ -62,7 +82,6 @@ public class BuildPathTest {
     IClasspathEntry[] rawClasspath = {entry};
     Mockito.when(project.getRawClasspath()).thenReturn(rawClasspath);
     
-    List<Library> libraries = new ArrayList<>();
     libraries.add(library);
     IClasspathEntry[] result =
         BuildPath.addLibraries(project, libraries, new NullProgressMonitor());
@@ -79,7 +98,6 @@ public class BuildPathTest {
     IClasspathEntry[] rawClasspath = {entry};
     Mockito.when(project.getRawClasspath()).thenReturn(rawClasspath);
     
-    List<Library> libraries = new ArrayList<>();
     libraries.add(library1);
     libraries.add(library2);
     IClasspathEntry[] result =

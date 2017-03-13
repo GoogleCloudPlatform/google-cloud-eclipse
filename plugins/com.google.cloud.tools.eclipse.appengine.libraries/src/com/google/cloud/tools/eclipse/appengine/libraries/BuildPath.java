@@ -89,6 +89,12 @@ public class BuildPath {
       IJavaProject javaProject, List<Library> libraries, IProgressMonitor monitor)
           throws JavaModelException, CoreException {
     
+    return prepareLibraries(javaProject, libraries, monitor, true);
+  }
+
+  private static IClasspathEntry[] prepareLibraries(IJavaProject javaProject,
+      List<Library> libraries, IProgressMonitor monitor, boolean addToClasspath)
+          throws JavaModelException, CoreException {
     SubMonitor subMonitor = SubMonitor.convert(monitor,
         Messages.getString("adding.app.engine.libraries"), libraries.size()); //$NON-NLS-1$
 
@@ -104,11 +110,23 @@ public class BuildPath {
       }
       subMonitor.worked(1);
     }
-    javaProject.setRawClasspath(newRawClasspath.toArray(new IClasspathEntry[0]), subMonitor);
+    
+    if (addToClasspath) {
+      javaProject.setRawClasspath(newRawClasspath.toArray(new IClasspathEntry[0]), subMonitor);
+    }
     
     runContainerResolverJob(javaProject);
     
     return newEntries.toArray(new IClasspathEntry[0]);
+  }
+  
+  /**
+   * @return the entries to be added to the classpath. Does not add them to the classpath.
+   */
+  public static IClasspathEntry[] listAdditionalLibraries(
+      IJavaProject javaProject, List<Library> libraries, IProgressMonitor monitor)
+          throws JavaModelException, CoreException {
+    return prepareLibraries(javaProject, libraries, monitor, false);
   }
 
   @VisibleForTesting

@@ -102,7 +102,7 @@ public class AppEngineLibrariesPage extends WizardPage implements IClasspathCont
         return new IClasspathEntry[0];
       } else {
         IClasspathEntry[] added =
-            BuildPath.addLibraries(project, libraries, new NullProgressMonitor());
+            BuildPath.listAdditionalLibraries(project, libraries, new NullProgressMonitor());
         return added;
       }
     } catch (CoreException ex) {
