@@ -99,7 +99,9 @@ public class BuildPath {
         Messages.getString("adding.app.engine.libraries"), libraries.size()); //$NON-NLS-1$
 
     IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
-    List<IClasspathEntry> newRawClasspath = new ArrayList<>(rawClasspath.length + libraries.size());
+    
+    // + 1 because we pass the submonitor along below
+    List<IClasspathEntry> newRawClasspath = new ArrayList<>(rawClasspath.length + libraries.size() + 1);
     newRawClasspath.addAll(Arrays.asList(rawClasspath));
     List<IClasspathEntry> newEntries = new ArrayList<>();
     for (Library library : libraries) {
@@ -113,9 +115,8 @@ public class BuildPath {
     
     if (addToClasspath) {
       javaProject.setRawClasspath(newRawClasspath.toArray(new IClasspathEntry[0]), subMonitor);
+      runContainerResolverJob(javaProject);
     }
-    
-    runContainerResolverJob(javaProject);
     
     return newEntries.toArray(new IClasspathEntry[0]);
   }
