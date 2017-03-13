@@ -45,7 +45,6 @@ public class SerializableLibraryClasspathContainer {
 
   public LibraryClasspathContainer toLibraryClasspathContainer(IPath baseDirectory,
       IPath sourceBaseDirectory) {
-
     List<IClasspathEntry> classpathEntries = new ArrayList<>();
     for (SerializableClasspathEntry entry : entries) {
       classpathEntries.add(entry.toClasspathEntry(baseDirectory, sourceBaseDirectory));
