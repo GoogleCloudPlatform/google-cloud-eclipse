@@ -117,7 +117,7 @@ public class ProjectUtils {
     }
 
     // wait for any post-import operations too
-    waitForProjects();
+    waitForProjects(projects.toArray(new IProject[0]));
     if (checkBuildErrors) {
       failIfBuildErrors("Imported projects have errors", projects);
     }
@@ -171,6 +171,7 @@ public class ProjectUtils {
   /** Wait for any spawned jobs and builds to complete (e.g., validation jobs). */
   public static void waitForProjects(IProject... projects) {
     Runnable delayTactic = new Runnable() {
+      @Override
       public void run() {
         Display display = Display.getCurrent();
         if (display != null) {
@@ -194,7 +195,7 @@ public class ProjectUtils {
       do {
         // wait a little bit to give the builders a chance
         delayTactic.run();
-        
+
         // wait for any previously-identified build jobs
         for (Job job : jobs) {
           job.join();
