@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -32,6 +33,14 @@ public class WebXmlScannerTest {
   public void setUp() throws SAXException {
     scanner.setDocumentLocator(new Locator2Impl());
     scanner.startDocument();
+  }
+  
+  @Test
+  public void testCaseSensitive() throws SAXException {
+    AttributesImpl attributes = new AttributesImpl();
+    attributes.addAttribute("", "", "version", "", "3.1");
+    scanner.startElement("http://xmlns.jcp.org/xml/ns/javaee", "Web-App", "", attributes);
+    assertTrue(scanner.getBlacklist().isEmpty());
   }
   
   @Test
