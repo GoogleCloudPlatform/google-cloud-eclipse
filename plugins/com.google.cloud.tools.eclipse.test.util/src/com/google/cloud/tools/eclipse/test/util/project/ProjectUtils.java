@@ -117,7 +117,7 @@ public class ProjectUtils {
     }
 
     // wait for any post-import operations too
-    waitForProjects(projects.toArray(new IProject[0]));
+    waitForProjects(projects);
     if (checkBuildErrors) {
       failIfBuildErrors("Imported projects have errors", projects);
     }
@@ -166,6 +166,10 @@ public class ProjectUtils {
     sb.append(": ");
     sb.append(problem.getAttribute(IMarker.MESSAGE, ""));
     return sb.toString();
+  }
+
+  public static void waitForProjects(Collection<IProject> projects) {
+    waitForProjects(projects.toArray(new IProject[0]));
   }
 
   /** Wait for any spawned jobs and builds to complete (e.g., validation jobs). */
