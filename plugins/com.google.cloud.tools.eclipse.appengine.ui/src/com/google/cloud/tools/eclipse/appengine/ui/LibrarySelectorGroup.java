@@ -45,7 +45,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 
 /**
- * A radio button group to choose libraries defined in plugin.xml.
+ * A checkbox group to choose libraries defined in plugin.xml.
  */
 public class LibrarySelectorGroup implements ISelectionProvider {
 
