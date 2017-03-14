@@ -40,6 +40,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -78,7 +79,9 @@ public class LibraryClasspathContainerInitializerTest {
   public ThreadDumpingWatchdog watchdog = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
 
   @Rule
-  public TestProjectCreator testProject = new TestProjectCreator().withClasspathContainerPath(TEST_LIBRARY_PATH);
+  public TestProjectCreator testProject = new TestProjectCreator()
+      .withFacetVersions(JavaFacet.VERSION_1_7).withClasspathContainerPath(TEST_LIBRARY_PATH);
+
   @Rule
   public TemporaryFolder temporaryFolder = new TemporaryFolder();
 

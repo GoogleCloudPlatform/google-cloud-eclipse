@@ -130,8 +130,8 @@ public final class TestProjectCreator extends ExternalResource {
   }
 
   private void addContainerPathToRawClasspath() throws JavaModelException {
-    Preconditions.checkNotNull(javaProject);
     if (!Strings.isNullOrEmpty(containerPath)) {
+      Preconditions.checkNotNull(javaProject);
       IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
       IClasspathEntry[] newRawClasspath = new IClasspathEntry[rawClasspath.length + 1];
       System.arraycopy(rawClasspath, 0, newRawClasspath, 0, rawClasspath.length);
@@ -142,9 +142,6 @@ public final class TestProjectCreator extends ExternalResource {
   }
 
   private void addFacets() throws CoreException {
-    if (projectFacetVersions.isEmpty()) {
-      projectFacetVersions.add(JavaFacet.VERSION_1_7);
-    }
     IFacetedProject facetedProject = ProjectFacetsManager.create(getProject());
 
     Set<IFacetedProject.Action> facetInstallSet = new HashSet<>();
