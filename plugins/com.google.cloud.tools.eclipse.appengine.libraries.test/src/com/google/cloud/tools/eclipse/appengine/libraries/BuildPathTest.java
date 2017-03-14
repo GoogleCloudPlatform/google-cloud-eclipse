@@ -34,7 +34,7 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 public class BuildPathTest {
   
   private final List<Library> libraries = new ArrayList<>();
-  private IJavaProject project = Mockito.mock(IJavaProject.class);
+  private final IJavaProject project = Mockito.mock(IJavaProject.class);
 
   @Test
   public void testAddLibraries_emptyList() throws CoreException {

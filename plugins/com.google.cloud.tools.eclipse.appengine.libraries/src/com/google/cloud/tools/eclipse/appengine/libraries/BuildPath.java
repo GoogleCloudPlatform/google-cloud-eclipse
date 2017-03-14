@@ -96,12 +96,12 @@ public class BuildPath {
       List<Library> libraries, IProgressMonitor monitor, boolean addToClasspath)
           throws JavaModelException, CoreException {
     SubMonitor subMonitor = SubMonitor.convert(monitor,
-        Messages.getString("adding.app.engine.libraries"), libraries.size()); //$NON-NLS-1$
+        Messages.getString("adding.app.engine.libraries"), //$NON-NLS-1$
+        libraries.size() + 1); // + 1 because we pass the submonitor along below
 
     IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
     
-    // + 1 because we pass the submonitor along below
-    List<IClasspathEntry> newRawClasspath = new ArrayList<>(rawClasspath.length + libraries.size() + 1);
+    List<IClasspathEntry> newRawClasspath = new ArrayList<>(rawClasspath.length + libraries.size());
     newRawClasspath.addAll(Arrays.asList(rawClasspath));
     List<IClasspathEntry> newEntries = new ArrayList<>();
     for (Library library : libraries) {
