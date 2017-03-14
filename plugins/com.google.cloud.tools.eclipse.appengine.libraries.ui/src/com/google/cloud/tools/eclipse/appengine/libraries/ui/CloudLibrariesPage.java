@@ -42,7 +42,7 @@ import com.google.cloud.tools.eclipse.util.MavenUtils;
 public abstract class CloudLibrariesPage extends WizardPage implements IClasspathContainerPage,
     IClasspathContainerPageExtension, IClasspathContainerPageExtension2 {
 
-  private static final Logger logger = Logger.getLogger(AppEngineLibrariesPage.class.getName());
+  private static final Logger logger = Logger.getLogger(CloudLibrariesPage.class.getName());
   private LibrarySelectorGroup librariesSelector;
   private IJavaProject project;
   private final String group;
