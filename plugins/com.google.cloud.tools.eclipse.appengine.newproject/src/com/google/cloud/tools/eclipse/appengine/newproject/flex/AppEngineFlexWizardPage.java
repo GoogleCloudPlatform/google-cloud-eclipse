@@ -17,12 +17,16 @@
 package com.google.cloud.tools.eclipse.appengine.newproject.flex;
 
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineWizardPage;
+import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 
 public class AppEngineFlexWizardPage extends AppEngineWizardPage {
   public AppEngineFlexWizardPage() {
-    // TODO: set title and description
+    super(false);
+    setTitle(Messages.getString("app.engine.flex.project")); //$NON-NLS-1$
+    setDescription(Messages.getString("create.app.engine.flex.project")); //$NON-NLS-1$
   }
 
   @Override
@@ -32,7 +36,8 @@ public class AppEngineFlexWizardPage extends AppEngineWizardPage {
 
   @Override
   public void setHelp(Composite container) {
-    // TODO: add flex help context
+    PlatformUI.getWorkbench().getHelpSystem().setHelp(container,
+        "com.google.cloud.tools.eclipse.appengine.newproject.NewFlexProjectContext"); //$NON-NLS-1$
   }
 
 }

@@ -53,6 +53,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.wst.common.project.facet.core.util.internal.ZipUtil;
 import org.eclipse.wst.validation.internal.operations.ValidationBuilder;
+import org.eclipse.wst.validation.internal.operations.ValidatorManager;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 
@@ -117,7 +118,7 @@ public class ProjectUtils {
     }
 
     // wait for any post-import operations too
-    waitForProjects();
+    waitForProjects(projects);
     if (checkBuildErrors) {
       failIfBuildErrors("Imported projects have errors", projects);
     }
@@ -168,9 +169,14 @@ public class ProjectUtils {
     return sb.toString();
   }
 
+  public static void waitForProjects(Collection<IProject> projects) {
+    waitForProjects(projects.toArray(new IProject[0]));
+  }
+
   /** Wait for any spawned jobs and builds to complete (e.g., validation jobs). */
   public static void waitForProjects(IProject... projects) {
     Runnable delayTactic = new Runnable() {
+      @Override
       public void run() {
         Display display = Display.getCurrent();
         if (display != null) {
@@ -186,6 +192,9 @@ public class ProjectUtils {
 
   /** Wait for any spawned jobs and builds to complete (e.g., validation jobs). */
   public static void waitForProjects(Runnable delayTactic, IProject... projects) {
+    if (projects.length == 0) {
+      projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+    }
     Stopwatch timer = Stopwatch.createStarted();
     try {
       Collection<Job> jobs = Collections.emptyList();
@@ -194,14 +203,14 @@ public class ProjectUtils {
       do {
         // wait a little bit to give the builders a chance
         delayTactic.run();
-        
+
         // wait for any previously-identified build jobs
         for (Job job : jobs) {
           job.join();
         }
 
         // identify any pending build-related jobs
-        jobs = findPendingBuildJobs();
+        jobs = findPendingBuildJobs(projects);
 
         // track whether we've reached a fixpoint in the build errors
         Set<String> currentBuildErrors = getAllBuildErrors(projects);
@@ -233,7 +242,7 @@ public class ProjectUtils {
   }
 
   /** Identify all jobs that we know of that are related to building. */
-  private static Collection<Job> findPendingBuildJobs() {
+  private static Collection<Job> findPendingBuildJobs(IProject... projects) {
     Set<Job> jobs = new HashSet<>();
     IJobManager jobManager = Job.getJobManager();
     Collections.addAll(jobs, jobManager.find(ResourcesPlugin.FAMILY_MANUAL_BUILD));
@@ -244,6 +253,10 @@ public class ProjectUtils {
     Collections.addAll(jobs, jobManager.find("org.eclipse.wst.server.core.family"));
     Collections.addAll(jobs, jobManager.find("org.eclipse.wst.server.ui.family"));
     Collections.addAll(jobs, jobManager.find(ValidationBuilder.FAMILY_VALIDATION_JOB));
+    for (IProject project : projects) {
+      Collections.addAll(jobs, jobManager.find(
+          project.getName() + ValidatorManager.VALIDATOR_JOB_FAMILY));
+    }
     return jobs;
   }
 

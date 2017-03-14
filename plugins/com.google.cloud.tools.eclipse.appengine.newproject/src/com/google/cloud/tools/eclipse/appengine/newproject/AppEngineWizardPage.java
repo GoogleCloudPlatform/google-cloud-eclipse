@@ -22,6 +22,7 @@ import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
 import com.google.cloud.tools.eclipse.appengine.ui.LibrarySelectorGroup;
 import java.io.File;
 import java.util.Collection;
+import java.util.HashSet;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -43,10 +44,12 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
   private Text javaPackageField;
   private LibrarySelectorGroup appEngineLibrariesSelectorGroup;
   private Text serviceNameField;
+  private final boolean showLibrariesSelectorGroup;
 
-  public AppEngineWizardPage() {
+  public AppEngineWizardPage(boolean showLibrariesSelectorGroup) {
     super("basicNewProjectPage"); //$NON-NLS-1$
     setImageDescriptor(AppEngineImages.appEngine(64));
+    this.showLibrariesSelectorGroup = showLibrariesSelectorGroup;
   }
 
   public abstract void sendAnalyticsPing(Shell parentShell);
@@ -65,8 +68,11 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
     createCustomFields(container, pageValidator);
 
     // Manage APIs
-    appEngineLibrariesSelectorGroup =
-        new LibrarySelectorGroup(container, CloudLibraries.APP_ENGINE_GROUP);
+    // todo we don't need this if; can do with subclasses
+    if (showLibrariesSelectorGroup) {
+      appEngineLibrariesSelectorGroup =
+          new LibrarySelectorGroup(container, CloudLibraries.APP_ENGINE_GROUP);
+    }
 
     setPageComplete(validatePage());
     // Show enter project name on opening
@@ -156,12 +162,18 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
   }
 
   public Collection<Library> getSelectedLibraries() {
-    return appEngineLibrariesSelectorGroup.getSelectedLibraries();
+    if (appEngineLibrariesSelectorGroup == null) {
+      return new HashSet<Library>();
+    } else {
+      return appEngineLibrariesSelectorGroup.getSelectedLibraries();
+    }
   }
 
   @Override
   public void dispose() {
-    appEngineLibrariesSelectorGroup.dispose();
+    if (appEngineLibrariesSelectorGroup != null) {
+      appEngineLibrariesSelectorGroup.dispose();
+    }
     super.dispose();
   }
 

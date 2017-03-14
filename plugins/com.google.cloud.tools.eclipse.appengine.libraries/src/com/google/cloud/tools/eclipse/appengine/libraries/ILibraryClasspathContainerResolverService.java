@@ -56,7 +56,7 @@ public interface ILibraryClasspathContainerResolverService {
 
 
   /**
-   * Verifies that dependencies of a given runtime are available either locally or can be downloaded
+   * Verifies that dependencies of a given runtime are available locally or can be downloaded.
    *
    * @return {@link Status#OK_STATUS} if all dependencies are available,
    * {@link Status#CANCEL_STATUS} if the operation was cancelled via the <code>monitor</code>, or a

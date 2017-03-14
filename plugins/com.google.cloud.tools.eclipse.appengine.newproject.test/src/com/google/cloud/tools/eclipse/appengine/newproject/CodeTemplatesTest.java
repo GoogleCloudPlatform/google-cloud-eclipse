@@ -69,14 +69,27 @@ public class CodeTemplatesTest {
     parent.delete(true, monitor);
     project.delete(true, monitor);
   }
-  
+
   @Test
-  public void testMaterialize() 
+  public void testMaterializeAppEngineStandardFiles()
       throws CoreException, ParserConfigurationException, SAXException, IOException {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
-    
-    IFile mostImportant = CodeTemplates.materialize(project, config, monitor);
-    
+    IFile mostImportant = CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
+    validateNonConfigFiles(mostImportant);
+    validateAppEngineWebXml();
+  }
+
+  @Test
+  public void testMaterializeAppEngineFlexFiles()
+      throws CoreException, ParserConfigurationException, SAXException, IOException {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    IFile mostImportant = CodeTemplates.materializeAppEngineFlexFiles(project, config, monitor);
+    validateNonConfigFiles(mostImportant);
+    validateAppYaml();
+  }
+
+  private void validateNonConfigFiles(IFile mostImportant)
+      throws ParserConfigurationException, SAXException, IOException, CoreException {
     IFolder src = project.getFolder("src");
     IFolder main = src.getFolder("main");
     IFolder java = main.getFolder("java");
@@ -86,20 +99,6 @@ public class CodeTemplatesTest {
     
     IFolder webapp = main.getFolder("webapp");
     IFolder webinf = webapp.getFolder("WEB-INF");
-    IFile appengineWebXml = webinf.getFile("appengine-web.xml");
-    Assert.assertTrue(appengineWebXml.exists());
-    Document doc = buildDocument(appengineWebXml);
-    NodeList threadsafeElements = doc.getDocumentElement().getElementsByTagName("threadsafe");
-    Assert.assertEquals("Must have exactly one threadsafe", 1, threadsafeElements.getLength());
-    String threadsafe = threadsafeElements.item(0).getTextContent();
-    Assert.assertEquals("true", threadsafe);
-    NodeList sessionsEnabledElements 
-        = doc.getDocumentElement().getElementsByTagName("sessions-enabled");
-    Assert.assertEquals("Must have exactly one sessions-enabled", 
-        1, sessionsEnabledElements.getLength());
-    String sessionsEnabled = sessionsEnabledElements.item(0).getTextContent();
-    Assert.assertEquals("false", sessionsEnabled);
-    
     IFile webXml = webinf.getFile("web.xml");
     Element root = buildDocument(webXml).getDocumentElement();
     Assert.assertEquals("web-app", root.getNodeName());
@@ -120,6 +119,38 @@ public class CodeTemplatesTest {
     Assert.assertTrue(servletTest.exists());
     IFile mockServletResponse = testJava.getFile("MockHttpServletResponse.java");
     Assert.assertTrue(mockServletResponse.exists());
+  }
+
+  private void validateAppEngineWebXml()
+      throws ParserConfigurationException, SAXException, IOException, CoreException {
+    IFolder webinf = project.getFolder("src/main/webapp/WEB-INF");
+    IFile appengineWebXml = webinf.getFile("appengine-web.xml");
+    Assert.assertTrue(appengineWebXml.exists());
+    Document doc = buildDocument(appengineWebXml);
+    NodeList threadsafeElements = doc.getDocumentElement().getElementsByTagName("threadsafe");
+    Assert.assertEquals("Must have exactly one threadsafe", 1, threadsafeElements.getLength());
+    String threadsafe = threadsafeElements.item(0).getTextContent();
+    Assert.assertEquals("true", threadsafe);
+    NodeList sessionsEnabledElements
+    = doc.getDocumentElement().getElementsByTagName("sessions-enabled");
+    Assert.assertEquals("Must have exactly one sessions-enabled",
+        1, sessionsEnabledElements.getLength());
+    String sessionsEnabled = sessionsEnabledElements.item(0).getTextContent();
+    Assert.assertEquals("false", sessionsEnabled);
+  }
+
+  private void validateAppYaml() throws IOException, CoreException {
+    IFolder webinf = project.getFolder("src/main/webapp/WEB-INF");
+    IFile appYaml = webinf.getFile("app.yaml");
+    Assert.assertTrue(appYaml.exists());
+
+    try (BufferedReader reader = new BufferedReader(
+        new InputStreamReader(appYaml.getContents(), StandardCharsets.UTF_8.name()))) {
+      Assert.assertEquals("runtime: java", reader.readLine());
+      Assert.assertEquals("env: flex", reader.readLine());
+      Assert.assertEquals("env_variables:", reader.readLine());
+      Assert.assertEquals("  'DBG_ENABLE': 'true'", reader.readLine());
+    }
   }
 
   private Document buildDocument(IFile appengineWebXml)
