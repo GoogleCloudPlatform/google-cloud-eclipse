@@ -1,11 +1,69 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension point="org.eclipse.jdt.ui.classpathContainerPage">
+
+  <extension point="org.eclipse.jdt.ui.classpathContainerPage">
      <classpathContainerPage
        id="com.google.cloud.tools.eclipse.appengine.libraries.ui"
        name="App Engine Libraries"
        class="com.google.cloud.tools.eclipse.appengine.libraries.ui.AppEngineLibrariesPage">
     </classpathContainerPage>
- </extension>
+  </extension>
+
+  <extension point="org.eclipse.ui.commands">
+    <command
+      description="%addAppEngineLibraryCommandDescription"
+      id="com.google.cloud.tools.eclipse.appengine.libraries.ui.AddAppEngineLibrary"
+      name="%addAppEngineLibraryCommandName">
+    </command>
+  </extension>
+
+  <extension point="org.eclipse.ui.menus">
+    <menuContribution
+      allPopups="false"
+      locationURI="popup:org.eclipse.jdt.ui.buildpath.menu?after=additions">
+      
+      <!-- 
+      
+      locationURI="popup:org.eclipse.ui.popup.any?after=additions"
+      
+      public class GenerateBuildPathActionGroup extends ActionGroup {
+    /**
+     * Pop-up menu: id of the source sub menu (value <code>org.eclipse.jdt.ui.buildpath.menu</code>).
+     *
+     * @since 3.1
+     */
+    public static final String MENU_ID= "org.eclipse.jdt.ui.buildpath.menu"; //$NON-NLS-1$
+
+    /**
+     * Pop-up menu: id of the build path (add /remove) group of the build path sub menu (value
+     * <code>buildpathGroup</code>).
+     *
+     * @since 3.1
+     */
+    public static final String GROUP_BUILDPATH= "buildpathGroup";  //$NON-NLS-1$
+       -->
+      <command
+        commandId="com.google.cloud.tools.eclipse.appengine.libraries.ui.AddAppEngineLibrary"
+        label="%addAppEngineLibraryLabel"
+        style="push">
+        <visibleWhen checkEnabled="true" />
+      </command>
+    </menuContribution>
+  </extension>
+
+  <extension point="org.eclipse.ui.handlers">
+    <handler
+      class="com.google.cloud.tools.eclipse.appengine.libraries.ui.AddAppEngineLibraryCommandHandler"
+      commandId="com.google.cloud.tools.eclipse.appengine.libraries.ui.AddAppEngineLibrary">
+      <enabledWhen>
+        <and>
+          <count value="1" />
+          <iterate>
+            <reference definitionId="com.google.cloud.tools.eclipse.appengine.onlyInGCPProjects" />
+          </iterate>
+        </and>
+      </enabledWhen>
+    </handler>
+  </extension>
 </plugin>
