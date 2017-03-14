@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -39,7 +40,7 @@ public class WebXmlScannerTest {
     AttributesImpl attributes = new AttributesImpl();
     attributes.addAttribute("", "", "version", "", "3.1");
     scanner.startElement("http://xmlns.jcp.org/xml/ns/javaee", "Web-App", "", attributes);
-    assertEquals(0, scanner.getBlacklist().size());
+    assertTrue(scanner.getBlacklist().isEmpty());
   }
   
   @Test
