@@ -128,18 +128,18 @@ public class LibraryClasspathContainerInitializerTest {
   public void testInitialize_ifArtifactJarPathIsInvalidContainerResolvedFromScratch() throws CoreException,
                                                                                              IOException {
     assertFalse(new File(NON_EXISTENT_FILE).exists());
-    
+
     IClasspathEntry entry = mock(IClasspathEntry.class);
     when(entry.getPath()).thenReturn(new Path(NON_EXISTENT_FILE));
     IClasspathEntry[] entries = new IClasspathEntry[]{ entry };
     LibraryClasspathContainer container = mock(LibraryClasspathContainer.class);
     when(container.getClasspathEntries()).thenReturn(entries);
     when(serializer.loadContainer(any(IJavaProject.class), any(IPath.class))).thenReturn(container);
-    
+
     LibraryClasspathContainerInitializer containerInitializer =
         new LibraryClasspathContainerInitializer(TEST_CONTAINER_PATH, serializer, resolverService);
     containerInitializer.initialize(new Path(TEST_LIBRARY_PATH), testProject.getJavaProject());
-    
+
     verifyContainerResolvedFromScratch();
   }
 
@@ -148,7 +148,7 @@ public class LibraryClasspathContainerInitializerTest {
                                                                                                  IOException {
     File artifactFile = temporaryFolder.newFile();
     assertFalse(new File(NON_EXISTENT_FILE).exists());
-    
+
     IClasspathEntry entry = mock(IClasspathEntry.class);
     when(entry.getPath()).thenReturn(new Path(artifactFile.getAbsolutePath()));
     when(entry.getSourceAttachmentPath()).thenReturn(new Path(NON_EXISTENT_FILE));
@@ -156,24 +156,24 @@ public class LibraryClasspathContainerInitializerTest {
     LibraryClasspathContainer container = mock(LibraryClasspathContainer.class);
     when(container.getClasspathEntries()).thenReturn(entries);
     when(serializer.loadContainer(any(IJavaProject.class), any(IPath.class))).thenReturn(container);
-    
+
     LibraryClasspathContainerInitializer containerInitializer =
         new LibraryClasspathContainerInitializer(TEST_CONTAINER_PATH, serializer, resolverService);
     containerInitializer.initialize(new Path(TEST_LIBRARY_PATH), testProject.getJavaProject());
-    
+
     verifyContainerResolvedFromScratch();
   }
 
   @Test
   public void testInitialize_ifSourcePathIsNullContainerIsNotResolvedAgain() throws CoreException, IOException {
     File artifactFile = temporaryFolder.newFile();
-    
+
     IClasspathEntry entry = JavaCore.newLibraryEntry(new Path(artifactFile.getAbsolutePath()), null, null);
     IClasspathEntry[] entries = new IClasspathEntry[]{ entry };
     LibraryClasspathContainer container = mock(LibraryClasspathContainer.class);
     when(container.getClasspathEntries()).thenReturn(entries);
     when(serializer.loadContainer(any(IJavaProject.class), any(IPath.class))).thenReturn(container);
-    
+
     LibraryClasspathContainerInitializer containerInitializer =
         new LibraryClasspathContainerInitializer(TEST_CONTAINER_PATH, serializer, resolverService);
     containerInitializer.initialize(new Path(TEST_LIBRARY_PATH), testProject.getJavaProject());
@@ -188,7 +188,7 @@ public class LibraryClasspathContainerInitializerTest {
   public void testInitialize_ifSourcePathIsValidContainerIsNotResolvedAgain() throws CoreException, IOException {
     File artifactFile = temporaryFolder.newFile();
     File sourceArtifactFile = temporaryFolder.newFile();
-    
+
     IClasspathEntry entry = JavaCore.newLibraryEntry(new Path(artifactFile.getAbsolutePath()),
                                                      new Path(sourceArtifactFile.getAbsolutePath()),
                                                      null);
@@ -196,7 +196,7 @@ public class LibraryClasspathContainerInitializerTest {
     LibraryClasspathContainer container = mock(LibraryClasspathContainer.class);
     when(container.getClasspathEntries()).thenReturn(entries);
     when(serializer.loadContainer(any(IJavaProject.class), any(IPath.class))).thenReturn(container);
-    
+
     LibraryClasspathContainerInitializer containerInitializer =
         new LibraryClasspathContainerInitializer(TEST_CONTAINER_PATH, serializer, resolverService);
     containerInitializer.initialize(new Path(TEST_LIBRARY_PATH), testProject.getJavaProject());

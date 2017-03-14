@@ -16,9 +16,9 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -27,8 +27,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 
 public class BuildPathTest {
 
@@ -44,7 +42,7 @@ public class BuildPathTest {
     IJavaProject project = Mockito.mock(IJavaProject.class);
     IClasspathEntry[] rawClasspath = new IClasspathEntry[0];
     Mockito.when(project.getRawClasspath()).thenReturn(rawClasspath);
-    
+
     List<Library> libraries = new ArrayList<>();
     Library library = new Library("libraryId");
     libraries.add(library);
@@ -52,33 +50,33 @@ public class BuildPathTest {
         BuildPath.addLibraries(project, libraries, new NullProgressMonitor());
     Assert.assertEquals(1, result.length);
   }
-  
+
   @Test
   public void testAddLibraries_noDuplicates() throws CoreException {
     Library library = new Library("libraryId");
     IClasspathEntry entry = BuildPath.makeClasspathEntry(library);
-    
+
     IJavaProject project = Mockito.mock(IJavaProject.class);
     IClasspathEntry[] rawClasspath = {entry};
     Mockito.when(project.getRawClasspath()).thenReturn(rawClasspath);
-    
+
     List<Library> libraries = new ArrayList<>();
     libraries.add(library);
     IClasspathEntry[] result =
         BuildPath.addLibraries(project, libraries, new NullProgressMonitor());
     Assert.assertEquals(0, result.length);
   }
-  
+
   @Test
   public void testAddLibraries_withDuplicates() throws CoreException {
     Library library1 = new Library("library1");
     Library library2 = new Library("library2");
     IClasspathEntry entry = BuildPath.makeClasspathEntry(library1);
-    
+
     IJavaProject project = Mockito.mock(IJavaProject.class);
     IClasspathEntry[] rawClasspath = {entry};
     Mockito.when(project.getRawClasspath()).thenReturn(rawClasspath);
-    
+
     List<Library> libraries = new ArrayList<>();
     libraries.add(library1);
     libraries.add(library2);
@@ -88,5 +86,5 @@ public class BuildPathTest {
     Assert.assertTrue(result[0].getPath().toString()
         .endsWith("com.google.cloud.tools.eclipse.appengine.libraries/library2"));
   }
-  
+
 }

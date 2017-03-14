@@ -1,6 +1,7 @@
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryClasspathContainerSerializer;
+import com.google.common.annotations.VisibleForTesting;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -55,37 +56,42 @@ public class SourceAttacherJob extends Job {
   protected IStatus run(IProgressMonitor monitor) {
     try {
       IClasspathContainer container = JavaCore.getClasspathContainer(containerPath, javaProject);
-      if (container instanceof LibraryClasspathContainer) {
-        logger.log(Level.FINE, Messages.getString("ContainerClassUnexpected",
-            container.getClass().getName(), LibraryClasspathContainer.class.getName()));
-        return Status.OK_STATUS;
-      };
+      LibraryClasspathContainer newContainer = attachSource(container);
 
-      LibraryClasspathContainer libraryClasspathContainer = (LibraryClasspathContainer) container;
-      IPath sourceArtifactPath = sourceArtifactPathProvider.call();
-      List<IClasspathEntry> newClasspathEntries = new ArrayList<>();
-
-      for (IClasspathEntry entry : libraryClasspathContainer.getClasspathEntries()) {
-        if (!entry.getPath().equals(libraryPath)) {
-          newClasspathEntries.add(entry);
-        } else {
-          newClasspathEntries.add(JavaCore.newLibraryEntry(
-              entry.getPath(), sourceArtifactPath, null /* sourceAttachmentRootPath */,
-              entry.getAccessRules(), entry.getExtraAttributes(), entry.isExported()));
-        }
+      if (newContainer != null) {
+        JavaCore.setClasspathContainer(containerPath, new IJavaProject[]{ javaProject },
+            new IClasspathContainer[]{ newContainer }, monitor);
+        serializer.saveContainer(javaProject, newContainer);
       }
-
-      LibraryClasspathContainer newContainer =
-          libraryClasspathContainer.copyWithNewEntries(newClasspathEntries);
-      JavaCore.setClasspathContainer(containerPath, new IJavaProject[]{ javaProject },
-                                     new IClasspathContainer[]{ newContainer }, monitor);
-      serializer.saveContainer(javaProject, newContainer);
-      return Status.OK_STATUS;
-
     } catch (Exception ex) {
       // it's not needed to be logged normally
       logger.log(Level.FINE, Messages.getString("SourceAttachmentFailed"), ex);
-      return Status.OK_STATUS;  // even if it fails, we should not display an error to the user
     }
+    return Status.OK_STATUS;  // even if it fails, we should not display an error to the user
+  }
+
+  @VisibleForTesting
+  LibraryClasspathContainer attachSource(IClasspathContainer container) throws Exception {
+    if (!(container instanceof LibraryClasspathContainer)) {
+      logger.log(Level.FINE, Messages.getString("ContainerClassUnexpected",
+          container.getClass().getName(), LibraryClasspathContainer.class.getName()));
+      return null;
+    };
+
+    LibraryClasspathContainer libraryClasspathContainer = (LibraryClasspathContainer) container;
+    IPath sourceArtifactPath = sourceArtifactPathProvider.call();
+    List<IClasspathEntry> newClasspathEntries = new ArrayList<>();
+
+    for (IClasspathEntry entry : libraryClasspathContainer.getClasspathEntries()) {
+      if (!entry.getPath().equals(libraryPath)) {
+        newClasspathEntries.add(entry);
+      } else {
+        newClasspathEntries.add(JavaCore.newLibraryEntry(
+            entry.getPath(), sourceArtifactPath, null /* sourceAttachmentRootPath */,
+            entry.getAccessRules(), entry.getExtraAttributes(), entry.isExported()));
+      }
+    }
+
+    return libraryClasspathContainer.copyWithNewEntries(newClasspathEntries);
   }
 }
