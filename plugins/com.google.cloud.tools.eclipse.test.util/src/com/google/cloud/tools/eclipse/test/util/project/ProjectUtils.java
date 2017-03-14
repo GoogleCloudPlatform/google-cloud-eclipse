@@ -186,6 +186,9 @@ public class ProjectUtils {
 
   /** Wait for any spawned jobs and builds to complete (e.g., validation jobs). */
   public static void waitForProjects(Runnable delayTactic, IProject... projects) {
+    if (projects.length == 0) {
+      projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+    }
     Stopwatch timer = Stopwatch.createStarted();
     try {
       Collection<Job> jobs = Collections.emptyList();
