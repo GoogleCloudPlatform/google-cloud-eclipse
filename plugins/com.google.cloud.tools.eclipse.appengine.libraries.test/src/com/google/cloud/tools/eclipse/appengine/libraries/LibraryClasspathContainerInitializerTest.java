@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.libraries;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -41,6 +42,7 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
+import org.hamcrest.Matchers;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -182,9 +184,14 @@ public class LibraryClasspathContainerInitializerTest {
     containerInitializer.initialize(new Path(TEST_LIBRARY_PATH), testProject.getJavaProject());
     testProject.getJavaProject().getRawClasspath();
     IClasspathEntry[] resolvedClasspath = testProject.getJavaProject().getResolvedClasspath(false);
-    assertThat(resolvedClasspath.length, is(2));
-    assertThat(resolvedClasspath[1].getPath().toOSString(), is(artifactFile.getAbsolutePath()));
-    verifyContainerWasNotResolvedFromScratch();
+    assertThat(resolvedClasspath.length, Matchers.greaterThan(2));
+    for (IClasspathEntry resolvedEntry : resolvedClasspath) {
+      if (resolvedEntry.getPath().toOSString().equals(artifactFile.getAbsolutePath())) {
+        verifyContainerWasNotResolvedFromScratch();
+        return;
+      }
+    }
+    fail("classpath entry not found");
   }
 
   @Test
@@ -205,11 +212,16 @@ public class LibraryClasspathContainerInitializerTest {
     containerInitializer.initialize(new Path(TEST_LIBRARY_PATH), testProject.getJavaProject());
     testProject.getJavaProject().getRawClasspath();
     IClasspathEntry[] resolvedClasspath = testProject.getJavaProject().getResolvedClasspath(false);
-    assertThat(resolvedClasspath.length, is(2));
-    assertThat(resolvedClasspath[1].getPath().toOSString(), is(artifactFile.getAbsolutePath()));
-    assertThat(resolvedClasspath[1].getSourceAttachmentPath().toOSString(),
-               is(sourceArtifactFile.getAbsolutePath()));
-    verifyContainerWasNotResolvedFromScratch();
+    assertThat(resolvedClasspath.length, Matchers.greaterThan(2));
+    for (IClasspathEntry resolvedEntry : resolvedClasspath) {
+      if (resolvedEntry.getPath().toOSString().equals(artifactFile.getAbsolutePath())) {
+        assertThat(resolvedEntry.getSourceAttachmentPath().toOSString(),
+            is(sourceArtifactFile.getAbsolutePath()));
+        verifyContainerWasNotResolvedFromScratch();
+        return;
+      }
+    }
+    fail("classpath entry not found");
   }
 
   private IStatus verifyContainerResolvedFromScratch() {
