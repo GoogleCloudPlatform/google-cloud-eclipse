@@ -7,15 +7,18 @@ before_install:
 install: 
   # use 3.3.9 to ensure faulty test exit states fail the build (#1276)
   - mvn -N io.takari:maven:wrapper -Dmaven=3.3.9
-  # download Cloud SDK
-  - wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-145.0.0-linux-x86_64.tar.gz
-  - tar -xzf google-cloud-sdk-145.0.0-linux-x86_64.tar.gz
+  # download Cloud SDK (into .m2 so that it's cached)
+  - if [ ! -f .m2/google-cloud-sdk-${CLOUDSDK_VERSION}-linux-x86_64.tar.gz ]; then
+      wget -o .m2/google-cloud-sdk-145.0.0-linux-x86_64.tar.gz https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${CLOUDSDK_VERSION}-linux-x86_64.tar.gz
+    fi
+  - tar -xzf .m2/google-cloud-sdk-${CLOUDSDK_VERSION}-linux-x86_64.tar.gz
   # update all Cloud SDK components
   - gcloud components update --quiet
   # add App Engine component to Cloud SDK
   - gcloud components install app-engine-java --quiet
 env:
   global:
+    - CLOUDSDK_VERSION=145.0.0
     - PATH=$PWD/google-cloud-sdk/bin:$PATH
     - CLOUDSDK_CORE_DISABLE_USAGE_REPORTING=true
     - DISPLAY=:99.0
