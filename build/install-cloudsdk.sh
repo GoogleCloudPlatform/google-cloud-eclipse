@@ -31,14 +31,18 @@ fi
 # Remove the install if we are killed
 trap "rm -rf ${CLOUDSDKDIR}" 1 2 15
 rm -rf ${CLOUDSDKDIR}
+
+echo ">> download google-cloud-sdk-${CLOUDSDK_VERSION}"
 wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${CLOUDSDK_VERSION}-linux-x86_64.tar.gz
 tar -xzf google-cloud-sdk-${CLOUDSDK_VERSION}-linux-x86_64.tar.gz -C ${INSTALLDIR}
 
 ## DISABLED: Updating to latest version should be done outside
 ## update all Cloud SDK components
+# echo ">> gcloud components update"
 # ${CLOUDSDKDIR}/bin/gcloud components update --quiet
 
 # add App Engine component to Cloud SDK
+echo ">> gcloud components install app-engine-java"
 ${CLOUDSDKDIR}/bin/gcloud components install app-engine-java --quiet
 
 
