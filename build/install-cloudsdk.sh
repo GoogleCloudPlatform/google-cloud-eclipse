@@ -17,15 +17,13 @@ INSTALLDIR=$2
 
 CLOUDSDKDIR=${INSTALLDIR}/google-cloud-sdk
 
-getCurrentVersion() {
-    if [ -d ${CLOUDSDKDIR} -a -f ${CLOUDSDKDIR}/VERSION ]; then
-        cat ${CLOUDSDKDIR}/VERSION
-    fi
-}
+currentVersion=$([ -f ${CLOUDSDKDIR}/VERSION ] && cat ${CLOUDSDKDIR}/VERSION)
 
-if [ "$(getCurrentVersion)" = "${CLOUDSDK_VERSION}" ]; then
+if [ "${currentVersion}" = "${CLOUDSDK_VERSION}" ]; then
     echo "Google Cloud SDK at version $(cat ${CLOUDSDKDIR}/VERSION)"
     exit 0
+elif [ -n "${currentVersion}" ]; then
+    echo "Replacing found Google Cloud SDK version ${currentVersion}"
 fi
 
 # Remove the install if we are killed
