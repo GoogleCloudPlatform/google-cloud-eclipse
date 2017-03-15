@@ -10,7 +10,7 @@ if [ $# -ne 2 ]; then
 fi
 
 # ensure we error out on failures and unset variables
-set -o pipefail -o errexit -o nounset
+set -o errexit -o nounset
 
 CLOUDSDK_VERSION=$1
 INSTALLDIR=$2
