@@ -75,6 +75,7 @@ public final class TestProjectCreator extends ExternalResource {
     Collections.addAll(this.projectFacetVersions, projectFacetVersions);
     return this;
   }
+
   public TestProjectCreator withFacetVersions(List<IProjectFacetVersion> projectFacetVersions) {
     this.projectFacetVersions.addAll(projectFacetVersions);
     return this;
