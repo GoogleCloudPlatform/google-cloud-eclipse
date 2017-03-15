@@ -52,7 +52,7 @@ The tests need to find the Google Cloud SDK.  You can either:
 
 By default, the build is targeted against Eclipse Mars / 4.5. 
 You can explicitly set the `eclipse.target` property to 
-`neon` (4.6).
+`neon` (4.6) or `oxygen` (4.7).
 ```
 $ mvn -Declipse.target=neon package
 ```
@@ -97,6 +97,17 @@ indicate a misconfigured _jdkHome_.
 
 You can disable the use of toolchains by setting the `tycho.toolchains`
 property to `SYSTEM`.
+
+### Adding a new bundle/fragment
+
+We normally put production code into a bundle and tests as a fragment hosted
+by that bundle, put under the `plugins/` directory. 
+For now we have been committing both the `pom.xml` and Eclipse's
+`.project`, `.classpath`, and `.settings/` files.
+
+Our CI process is configured to run our tests with JaCoCo, which requires
+some additional configuration to add new bundles and fragments
+in `build/jacoco/`.
 
 
 ## Import into Eclipse
@@ -259,6 +270,7 @@ This is currently:
 
   - Eclipse Mars (4.5 SR2): [`eclipse/mars/gcp-eclipse-mars.target`](eclipse/mars/gcp-eclipse-mars.target) 
   - Eclipse Neon (4.6): [`eclipse/neon/gcp-eclipse-neon.target`](eclipse/neon/gcp-eclipse-neon.target)
+  - Eclipse Oxygen (4.7): [`eclipse/oxygen/gcp-eclipse-oxygen.target`](eclipse/oxygen/gcp-eclipse-oxygen.target)
 
 These `.target` files are generated and *should not be manually updated*.
 Updating `.target` files directly becomes a chore once it has more than a 
