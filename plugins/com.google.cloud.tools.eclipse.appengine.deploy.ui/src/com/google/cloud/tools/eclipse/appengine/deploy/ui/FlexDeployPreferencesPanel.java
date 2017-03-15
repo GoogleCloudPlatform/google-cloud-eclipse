@@ -38,7 +38,7 @@ import org.osgi.service.prefs.BackingStoreException;
 public class FlexDeployPreferencesPanel extends DeployPreferencesPanel {
   private static final int LINKED_CHILD_INDENT = 10;
 
-  private static Logger logger = Logger.getLogger(DeployPropertyPage.class.getName());
+  private static Logger logger = Logger.getLogger(FlexDeployPreferencesPanel.class.getName());
 
   private FlexDeployPreferences preferences;
   private Button useValuesButton;
