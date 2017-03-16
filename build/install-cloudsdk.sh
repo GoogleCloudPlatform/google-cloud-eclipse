@@ -28,8 +28,13 @@ fi
 
 # Remove the install if we are killed
 die() {
-    if [ $# -gt 0 ]; then echo "$0: $*" 1>&2; fi
+    if [ $# -gt 0 ]; then
+        echo "$0: $*" 1>&2
+    else
+        echo "$0: ERROR" 1>&2
+    fi
     rm -rf ${CLOUDSDKDIR}
+    exit 1
 }
 
 rm -rf ${CLOUDSDKDIR}
