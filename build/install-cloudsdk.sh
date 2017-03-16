@@ -27,6 +27,7 @@ elif [ -n "${currentVersion}" ]; then
 fi
 
 # Remove the install if we are killed
+# XXX can this be arranged to happen with `set -o errexit`?
 die() {
     if [ $# -gt 0 ]; then
         echo "$0: $*" 1>&2
@@ -40,7 +41,7 @@ die() {
 rm -rf ${CLOUDSDKDIR}
 
 echo ">> download google-cloud-sdk-${CLOUDSDK_VERSION}"
-wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${CLOUDSDK_VERSION}-linux-x86_64.tar.gz
+wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${CLOUDSDK_VERSION}-linux-x86_64.tar.gz || die
 tar -xzf google-cloud-sdk-${CLOUDSDK_VERSION}-linux-x86_64.tar.gz -C ${INSTALLDIR} || die
 
 ## DISABLED: Updating to latest version should be done outside
