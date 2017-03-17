@@ -29,6 +29,7 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.TextInvocationContext;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -37,26 +38,45 @@ import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 
 public class AbstractQuickAssistProcessorTest {
   
+  private ISourceViewer viewer;
+  private IAnnotationModel model;
+  
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
   
-  @Test
-  public void testComputeQuickAssistProposals() throws CoreException {
-    
+  
+  @Before
+  public void setUp() throws CoreException {
     IProject project = projectCreator.getProject();
     IFile file = project.getFile("testdata.xml");
     file.create(ValidationTestUtils.stringToInputStream("test"), IFile.FORCE, null);
     
     IWorkbench workbench = PlatformUI.getWorkbench();
     WorkbenchUtil.openInEditor(workbench, file);
-    ISourceViewer viewer = (ISourceViewer) ValidationTestUtils.getViewer(file);
-    
-    IAnnotationModel model = viewer.getAnnotationModel();
-    String annotationMessage = Messages.getString("application.element");
-    model.addAnnotation(new Annotation("type", false, annotationMessage), new Position(1));
-    
-    TextInvocationContext context = new TextInvocationContext(viewer, 1, 1);
-    AbstractQuickAssistProcessor processor = new ApplicationQuickAssistProcessor();
-    ICompletionProposal[] proposals = processor.computeQuickAssistProposals(context);
-    assertEquals(1, proposals.length);
+    viewer = (ISourceViewer) ValidationTestUtils.getViewer(file);
+    model = viewer.getAnnotationModel();
   }
+  
+  @Test
+  public void testComputeApplicationQuickAssistProposals() {
+    
+    String applicationMessage = Messages.getString("application.element");
+    model.addAnnotation(new Annotation("application", false, applicationMessage), new Position(1));
+    TextInvocationContext applicationContext = new TextInvocationContext(viewer, 1, 1);
+    AbstractQuickAssistProcessor processor = new ApplicationQuickAssistProcessor();
+    ICompletionProposal[] proposals = processor.computeQuickAssistProposals(applicationContext);
+    assertEquals(1, proposals.length);
+    assertEquals("Remove application element", proposals[0].getDisplayString());
+  }
+  
+  @Test
+  public void testComputeVersionQuickAssistProposals() {
+    String versionMessage = Messages.getString("version.element");
+    model.addAnnotation(new Annotation("version", false, versionMessage), new Position(1));
+    TextInvocationContext versionContext = new TextInvocationContext(viewer, 1, 1);
+    AbstractQuickAssistProcessor versionProcessor = new VersionQuickAssistProcessor();
+    ICompletionProposal[] versionProposals = versionProcessor.computeQuickAssistProposals(versionContext);
+    assertEquals(1, versionProposals.length);
+    assertEquals("Remove version element", versionProposals[0].getDisplayString());
+  }
+  
 }
