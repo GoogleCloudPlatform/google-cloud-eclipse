@@ -70,8 +70,7 @@ public class AbstractXmlValidatorTest {
         return;
       }
     }
-    // webXmlValidator isn't applied to web.xml
-    fail();
+    fail("webXmlValidator isn't applied to web.xml");
   }
   
   @Test
@@ -81,8 +80,7 @@ public class AbstractXmlValidatorTest {
     for (Validator validator : validators) {
       if ("com.google.cloud.tools.eclipse.appengine.validation.webXmlValidator"
           .equals(validator.getId())) {
-        // webXmlValidator should not be applied in jst.web project
-        fail();
+        fail("webXmlValidator should not be applied in jst.web project");
       }
     }
   }
