@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,8 +44,6 @@ import org.eclipse.wst.validation.internal.provisional.core.IReporter;
 import org.eclipse.wst.validation.internal.provisional.core.IValidationContext;
 import org.eclipse.wst.validation.internal.provisional.core.IValidator;
 
-import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
-
 /**
  * Abstract source view validator.
  */
@@ -65,7 +64,8 @@ public abstract class AbstractXmlSourceValidator implements ISourceValidator, IV
       if (AppEngineStandardFacet.hasAppEngineFacet(facetedProject)) {
         String encoding = getDocumentEncoding(document);
         byte[] bytes = document.get().getBytes(encoding);
-        this.validate(reporter, bytes);
+        IFile source = getFile(helper);
+        this.validate(reporter, source, bytes);
       }
     } catch (IOException | CoreException | ParserConfigurationException ex) {
       logger.log(Level.SEVERE, ex.getMessage());
@@ -76,7 +76,7 @@ public abstract class AbstractXmlSourceValidator implements ISourceValidator, IV
    * Adds an {@link IMessage} to the XML file for every 
    * {@link BannedElement} found in the file.
    */
-  protected abstract void validate(IReporter reporter, byte[] bytes) 
+  protected abstract void validate(IReporter reporter, IFile source, byte[] bytes) 
       throws CoreException, IOException, ParserConfigurationException;
   
   /**
@@ -99,12 +99,9 @@ public abstract class AbstractXmlSourceValidator implements ISourceValidator, IV
    * to be validated.
    */
   static IProject getProject(IValidationContext helper) {
-    String[] fileUri = helper.getURIs();
-    if (fileUri.length > 0) {
-      IFile file = getFile(fileUri[0]);
-      if (file != null) {
-        return file.getProject();
-      }
+    IFile file = getFile(helper);
+    if (file != null) {
+      return file.getProject();
     }
     return null;
   }
@@ -113,6 +110,16 @@ public abstract class AbstractXmlSourceValidator implements ISourceValidator, IV
    * Returns the IFile for a given URI or null if the file does
    * not exist in the workspace.
    */
+  static IFile getFile(IValidationContext helper) {
+    String[] fileUri = helper.getURIs();
+    if (fileUri.length > 0) {
+      IFile file = getFile(fileUri[0]);
+      return file;
+    }
+    return null;
+  }
+  
+  
   static IFile getFile(String filePath) {
     IPath path = new Path(filePath);
     if (path.segmentCount() > 1) {

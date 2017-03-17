@@ -23,17 +23,16 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import javax.xml.parsers.ParserConfigurationException;
-import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jst.common.project.facet.core.JavaFacet;
+import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.junit.After;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 
@@ -44,26 +43,24 @@ public class AppEngineWebXmlValidatorTest {
   private static final String BAD_XML = "<";
   private static final String APPLICATION_MARKER =
       "com.google.cloud.tools.eclipse.appengine.validation.appEngineBlacklistMarker";
-  private static IResource resource;
-  private static IProject project;
+  private IFile webXmlFile;
+  private IProject project;
 
-  @ClassRule public static TestProjectCreator projectCreator = new TestProjectCreator();
+  @ClassRule public static TestProjectCreator projectCreator =
+      new TestProjectCreator()
+      .withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
 
-  @BeforeClass
-  public static void setUp() throws CoreException {
+  @Before
+  public void setUp() throws CoreException {
     project = projectCreator.getProject();
-    createFolders(project, new Path("src/main/webapp/WEB-INF"));
-    IFile webXml = project.getFile("src/main/webapp/WEB-INF/web.xml");
-    webXml.create(new ByteArrayInputStream(new byte[0]), true, null);
-    resource = webXml;
+    ValidationTestUtils.createFolders(project, new Path("src/main/webapp/WEB-INF"));
+    webXmlFile = project.getFile("src/main/webapp/WEB-INF/web.xml");
+    webXmlFile.create(new ByteArrayInputStream(new byte[0]), true, null);
   }
-
-
+  
   @After
   public void tearDown() throws CoreException {
-    if (resource != null) {
-      resource.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
-    }
+    webXmlFile.delete(true, null);
   }
 
   @Test
@@ -71,8 +68,8 @@ public class AppEngineWebXmlValidatorTest {
       throws IOException, CoreException, ParserConfigurationException {
     byte[] bytes = BAD_XML.getBytes(StandardCharsets.UTF_8);
     AppEngineWebXmlValidator validator = new AppEngineWebXmlValidator();
-    validator.validate(resource, bytes);
-    IMarker[] markers = resource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
+    validator.validate(webXmlFile, bytes);
+    IMarker[] markers = webXmlFile.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
     String resultMessage = (String) markers[0].getAttribute(IMarker.MESSAGE);
     assertEquals("XML document structures must start and end within the same entity.",
         resultMessage);
@@ -83,8 +80,8 @@ public class AppEngineWebXmlValidatorTest {
       throws IOException, CoreException, ParserConfigurationException {
     byte[] bytes = XML_NO_BANNED_ELEMENTS.getBytes(StandardCharsets.UTF_8);
     AppEngineWebXmlValidator validator = new AppEngineWebXmlValidator();
-    validator.validate(resource, bytes);
-    IMarker[] markers = resource.findMarkers(APPLICATION_MARKER, true, IResource.DEPTH_ZERO);
+    validator.validate(webXmlFile, bytes);
+    IMarker[] markers = webXmlFile.findMarkers(APPLICATION_MARKER, true, IResource.DEPTH_ZERO);
     assertEquals(0, markers.length);
   }
 
@@ -93,19 +90,11 @@ public class AppEngineWebXmlValidatorTest {
       throws IOException, CoreException, ParserConfigurationException {
     byte[] bytes = XML.getBytes(StandardCharsets.UTF_8);
     AppEngineWebXmlValidator validator = new AppEngineWebXmlValidator();
-    validator.validate(resource, bytes);
-    IMarker[] markers = resource.findMarkers(APPLICATION_MARKER, true, IResource.DEPTH_ZERO);
+    validator.validate(webXmlFile, bytes);
+    IMarker[] markers = webXmlFile.findMarkers(APPLICATION_MARKER, true, IResource.DEPTH_ZERO);
     assertEquals(1, markers.length);
     String message = Messages.getString("application.element");
     assertEquals(message, markers[0].getAttribute(IMarker.MESSAGE));
     assertEquals("line 1", markers[0].getAttribute(IMarker.LOCATION));
-  }
-
-  private static void createFolders(IContainer parent, IPath path) throws CoreException {
-    if (!path.isEmpty()) {
-      IFolder folder = parent.getFolder(new Path(path.segment(0)));
-      folder.create(true,  true,  null);
-      createFolders(folder, path.removeFirstSegments(1));
-    }
   }
 }

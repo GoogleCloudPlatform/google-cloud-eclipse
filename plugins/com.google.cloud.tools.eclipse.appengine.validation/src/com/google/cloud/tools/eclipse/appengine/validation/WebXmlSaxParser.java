@@ -19,6 +19,8 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
+
+import org.eclipse.core.resources.IFile;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
@@ -29,7 +31,7 @@ import org.xml.sax.helpers.XMLReaderFactory;
  */
 class WebXmlSaxParser {
   
-  static SaxParserResults readXml(byte[] bytes)
+  static SaxParserResults readXml(IFile file, byte[] bytes)
       throws ParserConfigurationException, IOException, SAXException {
     if (bytes.length == 0) { //file is empty
       return new SaxParserResults();
@@ -37,7 +39,7 @@ class WebXmlSaxParser {
     ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
     InputSource is = new InputSource(bais);
     XMLReader reader = XMLReaderFactory.createXMLReader();
-    WebXmlScanner handler = new WebXmlScanner();
+    WebXmlScanner handler = new WebXmlScanner(file);
     
     reader.setContentHandler(handler);
     reader.setErrorHandler(handler);

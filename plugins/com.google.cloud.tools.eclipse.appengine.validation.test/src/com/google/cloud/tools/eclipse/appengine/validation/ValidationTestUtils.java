@@ -20,7 +20,12 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextViewer;
@@ -58,6 +63,16 @@ public class ValidationTestUtils {
   
   static InputStream stringToInputStream(String string) {
     return new ByteArrayInputStream(string.getBytes(StandardCharsets.UTF_8));
+  }
+  
+  static void createFolders(IContainer parent, IPath path) throws CoreException {
+    if (!path.isEmpty()) {
+      IFolder folder = parent.getFolder(new Path(path.segment(0)));
+      if (!folder.exists()) {
+        folder.create(true,  true,  null);
+      }
+      createFolders(folder, path.removeFirstSegments(1));
+    }
   }
   
 }
