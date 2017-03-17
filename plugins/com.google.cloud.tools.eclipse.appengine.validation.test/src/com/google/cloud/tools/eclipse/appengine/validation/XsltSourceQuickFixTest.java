@@ -24,8 +24,6 @@ import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
-import com.google.common.collect.Lists;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -55,11 +53,11 @@ public class XsltSourceQuickFixTest {
       + "</appengine-web-app>";
   private static final IProjectFacetVersion APPENGINE_STANDARD_FACET_VERSION_1 =
       ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID).getVersion("1");
-  
+
   @Rule
   public TestProjectCreator appEngineStandardProject =
-      new TestProjectCreator().withFacetVersions(Lists.newArrayList(JavaFacet.VERSION_1_7,
-          WebFacetUtils.WEB_25, APPENGINE_STANDARD_FACET_VERSION_1));
+      new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25,
+          APPENGINE_STANDARD_FACET_VERSION_1);
 
   @Test
   public void testApply() throws CoreException {
