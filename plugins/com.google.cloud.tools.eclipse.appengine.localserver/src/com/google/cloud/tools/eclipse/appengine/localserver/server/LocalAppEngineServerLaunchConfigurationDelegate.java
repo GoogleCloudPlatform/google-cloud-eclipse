@@ -86,7 +86,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
   /**
    * Returns {@code value} unless it's null or empty, then returns {@code nullOrEmptyValue}.
-   * 
+   *
    * @see Strings#isNullOrEmpty(String)
    */
   private static String ifEmptyOrNull(String value, String nullOrEmptyValue) {
@@ -117,10 +117,17 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
   @Override
   public ILaunch getLaunch(ILaunchConfiguration configuration, String mode) throws CoreException {
     IServer thisServer = ServerUtil.getServer(configuration);
-    DefaultRunConfiguration thisConfig = generateServerRunConfiguration(configuration, thisServer);
+    return getLaunchInternal(configuration, mode, thisServer, getLaunchManager());
+  }
 
-    for (ILaunch launch : getLaunchManager().getLaunches()) {
+  @VisibleForTesting
+  ILaunch getLaunchInternal(ILaunchConfiguration configuration, String mode,
+      IServer server, ILaunchManager launchManager) throws CoreException {
+    DefaultRunConfiguration thisConfig = generateServerRunConfiguration(configuration, server);
+
+    for (ILaunch launch : launchManager.getLaunches()) {
       if (launch.isTerminated()
+          || launch.getLaunchConfiguration() == null
           || launch.getLaunchConfiguration().getType() != configuration.getType()) {
         continue;
       }
@@ -224,7 +231,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
   /**
    * Resolve a host or IP address to an IP address.
-   * 
+   *
    * @return an {@link InetAddress}, or {@code null} if unable to be resolved (equivalent to
    *         {@code INADDR_ANY})
    */
@@ -246,7 +253,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
   /**
    * Pull out a port from the specified attribute on the given {@link ILaunchConfiguration} or
    * {@link IServer} instance.
-   * 
+   *
    * @param defaultPort the port if no port attributes are found
    * @return the port, or {@code defaultPort} if no port was found
    */
