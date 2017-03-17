@@ -24,6 +24,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import java.util.ArrayList;
@@ -45,7 +46,7 @@ public class AppEngineLibrariesSelectorGroupTest {
   @Rule public ShellTestResource shellTestResource = new ShellTestResource();
 
   private Shell shell;
-  private AppEngineLibrariesSelectorGroup librariesSelector;
+  private LibrarySelectorGroup librariesSelector;
   private SWTBotCheckBox appengineButton;
   private SWTBotCheckBox endpointsButton;
   private SWTBotCheckBox objectifyButton;
@@ -54,7 +55,8 @@ public class AppEngineLibrariesSelectorGroupTest {
   public void setUp() throws Exception {
         shell = shellTestResource.getShell();
         shell.setLayout(new FillLayout());
-        librariesSelector = new AppEngineLibrariesSelectorGroup(shell);
+        librariesSelector = new LibrarySelectorGroup(
+            shell, CloudLibraries.APP_ENGINE_GROUP);
         shell.open();
         appengineButton = getButton("appengine-api");
         endpointsButton = getButton("appengine-endpoints");

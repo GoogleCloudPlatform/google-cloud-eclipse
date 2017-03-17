@@ -30,7 +30,7 @@ class WebXmlScanner extends AbstractScanner {
       throws SAXException {
     // Checks for expected namespace URI. Assume something else is going on if
     // web.xml has an unexpected root namespace.
-    if ("web-app".equalsIgnoreCase(localName) && ("http://xmlns.jcp.org/xml/ns/javaee".equals(uri)
+    if ("web-app".equals(localName) && ("http://xmlns.jcp.org/xml/ns/javaee".equals(uri)
         || "http://java.sun.com/xml/ns/javaee".equals(uri))) {
       String version = attributes.getValue("version");
       if (!version.equals("2.5")) {

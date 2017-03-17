@@ -22,20 +22,18 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 
+import java.util.Arrays;
+import java.util.List;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 
-@RunWith(MockitoJUnitRunner.class)
 public class LibraryClasspathContainerTest {
 
-  @Mock private IClasspathEntry mockClasspathEntry = mock(IClasspathEntry.class);
+  private List<IClasspathEntry> mockClasspathEntry = Arrays.asList(mock(IClasspathEntry.class));
 
   private LibraryClasspathContainer classpathContainer;
 
@@ -43,35 +41,27 @@ public class LibraryClasspathContainerTest {
   public void setUp() {
     classpathContainer = new LibraryClasspathContainer(new Path("container/path"),
                                                        "description",
-                                                       new IClasspathEntry[]{ mockClasspathEntry });
+                                                       mockClasspathEntry);
   }
 
   @Test(expected = NullPointerException.class)
   public void testConstructor_nullPath() {
-    new LibraryClasspathContainer(null,
-                                  "description",
-                                  new IClasspathEntry[]{ mockClasspathEntry });
+    new LibraryClasspathContainer(null, "description", mockClasspathEntry);
   }
 
   @Test(expected = NullPointerException.class)
   public void testConstructor_nullDescription() {
-    new LibraryClasspathContainer(new Path("container/path"),
-                                  null,
-                                  new IClasspathEntry[]{ mockClasspathEntry });
+    new LibraryClasspathContainer(new Path("container/path"), null, mockClasspathEntry);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testConstructor_emptyDescription() {
-    new LibraryClasspathContainer(new Path("container/path"),
-                                  "",
-                                  new IClasspathEntry[]{ mockClasspathEntry });
+    new LibraryClasspathContainer(new Path("container/path"), "", mockClasspathEntry);
   }
 
   @Test(expected = NullPointerException.class)
   public void testConstructor_nullClasspathEntries() {
-    new LibraryClasspathContainer(new Path("container/path"),
-                                  "description",
-                                  null);
+    new LibraryClasspathContainer(new Path("container/path"), "description", null);
   }
 
   @Test
@@ -94,6 +84,6 @@ public class LibraryClasspathContainerTest {
     IClasspathEntry[] classpathEntries = classpathContainer.getClasspathEntries();
     assertNotNull(classpathEntries);
     assertThat(classpathEntries.length, is(1));
-    assertSame(mockClasspathEntry, classpathEntries[0]);
+    assertSame(mockClasspathEntry.get(0), classpathEntries[0]);
   }
 }

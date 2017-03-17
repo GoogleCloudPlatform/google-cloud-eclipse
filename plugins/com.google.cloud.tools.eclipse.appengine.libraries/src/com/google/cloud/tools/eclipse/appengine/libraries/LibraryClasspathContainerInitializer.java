@@ -92,8 +92,7 @@ public class LibraryClasspathContainerInitializer extends ClasspathContainerInit
 
   private static boolean jarPathsAreValid(LibraryClasspathContainer container) {
     IClasspathEntry[] classpathEntries = container.getClasspathEntries();
-    for (int i = 0; i < classpathEntries.length; i++) {
-      IClasspathEntry classpathEntry = classpathEntries[i];
+    for (IClasspathEntry classpathEntry : classpathEntries) {
       if (!classpathEntry.getPath().toFile().exists()
           || (classpathEntry.getSourceAttachmentPath() != null
           && !classpathEntry.getSourceAttachmentPath().toFile().exists())) {
