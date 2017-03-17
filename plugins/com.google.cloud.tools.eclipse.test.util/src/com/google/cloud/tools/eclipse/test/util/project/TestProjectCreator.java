@@ -20,11 +20,13 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -41,6 +43,7 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.wst.common.componentcore.internal.builder.DependencyGraphImpl;
 import org.eclipse.wst.common.componentcore.internal.builder.IDependencyGraph;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
@@ -51,8 +54,13 @@ import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.ServerUtil;
 import org.junit.rules.ExternalResource;
 
+/**
+ * Utility class to create and configure a Faceted Project. Installs a Java 1.7 facet if no facets
+ * are specified with {@link #withFacetVersions}.
+ */
 public final class TestProjectCreator extends ExternalResource {
 
+  private IProject project;
   private IJavaProject javaProject;
   private String containerPath;
   private String appEngineServiceId;
@@ -60,6 +68,11 @@ public final class TestProjectCreator extends ExternalResource {
 
   public TestProjectCreator withClasspathContainerPath(String containerPath) {
     this.containerPath = containerPath;
+    return this;
+  }
+
+  public TestProjectCreator withFacetVersions(IProjectFacetVersion... projectFacetVersions) {
+    Collections.addAll(this.projectFacetVersions, projectFacetVersions);
     return this;
   }
 
@@ -75,18 +88,22 @@ public final class TestProjectCreator extends ExternalResource {
 
   @Override
   protected void before() throws Throwable {
-    createJavaProject("test" + Math.random());
+    createProject("test" + Math.random());
   }
 
   @Override
   protected void after() {
     // Wait for any jobs to complete as WTP validation runs without the workspace protection lock
-    ProjectUtils.waitForProjects(javaProject.getProject());
+    ProjectUtils.waitForProjects(project);
     try {
-      javaProject.getProject().delete(true, null);
+      project.delete(true, null);
     } catch (CoreException e) {
       fail("Could not delete project");
     }
+  }
+
+  public IModule getModule() {
+    return ServerUtil.getModule(project);
   }
 
   public IJavaProject getJavaProject() {
@@ -94,25 +111,20 @@ public final class TestProjectCreator extends ExternalResource {
   }
 
   public IProject getProject() {
-    return javaProject.getProject();
+    return project;
   }
 
-  public IModule getModule() {
-    return ServerUtil.getModule(javaProject.getProject());
-  }
-
-  private void createJavaProject(String projectName) throws CoreException, JavaModelException {
+  private void createProject(String projectName) throws CoreException, JavaModelException {
     IProjectDescription newProjectDescription =
         ResourcesPlugin.getWorkspace().newProjectDescription(projectName);
     newProjectDescription.setNatureIds(
-        new String[]{JavaCore.NATURE_ID, FacetedProjectNature.NATURE_ID});
-    IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+        new String[] {FacetedProjectNature.NATURE_ID});
+    project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
     project.create(newProjectDescription, null);
     project.open(null);
-    javaProject = JavaCore.create(project);
 
-    addContainerPathToRawClasspath();
     addFacets();
+    addContainerPathToRawClasspath();
     if (appEngineServiceId != null) {
       setAppEngineServiceId(appEngineServiceId);
     }
@@ -120,6 +132,7 @@ public final class TestProjectCreator extends ExternalResource {
 
   private void addContainerPathToRawClasspath() throws JavaModelException {
     if (!Strings.isNullOrEmpty(containerPath)) {
+      Preconditions.checkNotNull(javaProject);
       IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
       IClasspathEntry[] newRawClasspath = new IClasspathEntry[rawClasspath.length + 1];
       System.arraycopy(rawClasspath, 0, newRawClasspath, 0, rawClasspath.length);
@@ -130,31 +143,37 @@ public final class TestProjectCreator extends ExternalResource {
   }
 
   private void addFacets() throws CoreException {
-    if (!projectFacetVersions.isEmpty()) {
-      IFacetedProject facetedProject = ProjectFacetsManager.create(getProject());
-      Set<IFacetedProject.Action> facetInstallSet = new HashSet<>();
-      for (IProjectFacetVersion projectFacetVersion : projectFacetVersions) {
-        facetInstallSet.add(new IFacetedProject.Action(IFacetedProject.Action.Type.INSTALL,
-            projectFacetVersion, null));
-      }
-      // Workaround deadlock bug described in Eclipse bug (https://bugs.eclipse.org/511793).
-      // There are graph update jobs triggered by the completion of the CreateProjectOperation
-      // above (from resource notifications) and from other resource changes from modifying the
-      // project facets. So we force the dependency graph to defer updates.
-      try {
-        IDependencyGraph.INSTANCE.preUpdate();
-        try {
-          Job.getJobManager().join(DependencyGraphImpl.GRAPH_UPDATE_JOB_FAMILY, null);
-        } catch (OperationCanceledException | InterruptedException ex) {
-          throw new RuntimeException("Exception waiting for DependencyGraph job", ex);
-        }
+    IFacetedProject facetedProject = ProjectFacetsManager.create(getProject());
 
-        facetedProject.modify(facetInstallSet, null);
-      } finally {
-        IDependencyGraph.INSTANCE.postUpdate();
+    Set<IFacetedProject.Action> facetInstallSet = new HashSet<>();
+    for (IProjectFacetVersion projectFacetVersion : projectFacetVersions) {
+      facetInstallSet.add(new IFacetedProject.Action(IFacetedProject.Action.Type.INSTALL,
+          projectFacetVersion, null));
+    }
+
+    // Workaround deadlock bug described in Eclipse bug (https://bugs.eclipse.org/511793).
+    // There are graph update jobs triggered by the completion of the CreateProjectOperation
+    // above (from resource notifications) and from other resource changes from modifying the
+    // project facets. So we force the dependency graph to defer updates.
+    try {
+      IDependencyGraph.INSTANCE.preUpdate();
+      try {
+        Job.getJobManager().join(DependencyGraphImpl.GRAPH_UPDATE_JOB_FAMILY, null);
+      } catch (OperationCanceledException | InterruptedException ex) {
+        throw new RuntimeException("Exception waiting for DependencyGraph job", ex);
       }
-      // App Engine runtime is added via a Job, so wait.
-      ProjectUtils.waitForProjects(getProject());
+
+      facetedProject.modify(facetInstallSet, null);
+    } finally {
+      IDependencyGraph.INSTANCE.postUpdate();
+    }
+
+    // App Engine runtime is added via a Job, so wait.
+    ProjectUtils.waitForProjects(getProject());
+
+    if (facetedProject.hasProjectFacet(JavaFacet.FACET)) {
+      javaProject = JavaCore.create(project);
+      assertTrue(javaProject.exists());
     }
   }
 

@@ -44,7 +44,10 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 
-public class AppEngineLibrariesSelectorGroup implements ISelectionProvider {
+/**
+ * A checkbox group to choose libraries defined in plugin.xml.
+ */
+public class LibrarySelectorGroup implements ISelectionProvider {
 
   /** The libraries that can be selected. */
   private final Map<String, Library> availableLibraries;
@@ -55,9 +58,8 @@ public class AppEngineLibrariesSelectorGroup implements ISelectionProvider {
   private final Map<Library, Button> libraryButtons = new LinkedHashMap<>();
   private final ListenerList/* <ISelectedChangeListener> */ listeners = new ListenerList/* <> */();
 
-  public AppEngineLibrariesSelectorGroup(Composite parentContainer) {
-    Collection<Library> availableLibraries =
-        CloudLibraries.getLibraries(CloudLibraries.APP_ENGINE_GROUP);
+  public LibrarySelectorGroup(Composite parentContainer, String groupName) {
+    Collection<Library> availableLibraries = CloudLibraries.getLibraries(groupName);
     Preconditions.checkNotNull(parentContainer, "parentContainer is null");
     Preconditions.checkNotNull(availableLibraries, "availableLibraries is null");
     

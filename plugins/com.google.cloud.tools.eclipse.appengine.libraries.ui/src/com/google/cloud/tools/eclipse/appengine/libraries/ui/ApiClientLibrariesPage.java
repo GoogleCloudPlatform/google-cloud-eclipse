@@ -18,13 +18,10 @@ package com.google.cloud.tools.eclipse.appengine.libraries.ui;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 
-/**
- * UI for adding App Engine libraries to an existing project.
- */
-public class AppEngineLibrariesPage extends CloudLibrariesPage {
+public class ApiClientLibrariesPage extends CloudLibrariesPage {
 
-  public AppEngineLibrariesPage() {
-    super(CloudLibraries.APP_ENGINE_GROUP);
+  public ApiClientLibrariesPage() {
+    super(CloudLibraries.CLIENT_APIS_GROUP);
   }
 
 }

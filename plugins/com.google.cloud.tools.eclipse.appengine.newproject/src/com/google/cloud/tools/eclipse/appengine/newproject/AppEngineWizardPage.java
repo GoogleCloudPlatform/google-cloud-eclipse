@@ -16,9 +16,10 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
-import com.google.cloud.tools.eclipse.appengine.ui.AppEngineLibrariesSelectorGroup;
+import com.google.cloud.tools.eclipse.appengine.ui.LibrarySelectorGroup;
 import java.io.File;
 import java.util.Collection;
 import java.util.HashSet;
@@ -41,7 +42,7 @@ import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
 
   private Text javaPackageField;
-  private AppEngineLibrariesSelectorGroup appEngineLibrariesSelectorGroup;
+  private LibrarySelectorGroup appEngineLibrariesSelectorGroup;
   private Text serviceNameField;
   private final boolean showLibrariesSelectorGroup;
 
@@ -67,8 +68,10 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
     createCustomFields(container, pageValidator);
 
     // Manage APIs
+    // todo we don't need this if; can do with subclasses
     if (showLibrariesSelectorGroup) {
-      appEngineLibrariesSelectorGroup = new AppEngineLibrariesSelectorGroup(container);
+      appEngineLibrariesSelectorGroup =
+          new LibrarySelectorGroup(container, CloudLibraries.APP_ENGINE_GROUP);
     }
 
     setPageComplete(validatePage());

@@ -28,7 +28,6 @@ import com.google.cloud.tools.eclipse.appengine.libraries.persistence.LibraryCla
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -57,7 +56,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 @Component
-public class LibraryClasspathContainerResolverService 
+public class LibraryClasspathContainerResolverService
     implements ILibraryClasspathContainerResolverService {
 
   private static final String CLASSPATH_ATTRIBUTE_SOURCE_URL =
@@ -66,9 +65,10 @@ public class LibraryClasspathContainerResolverService
   private ILibraryRepositoryService repositoryService;
   private LibraryClasspathContainerSerializer serializer;
 
+  @Override
   public IStatus resolveAll(IJavaProject javaProject, IProgressMonitor monitor) {
-    IStatus status = null;
     try {
+      IStatus status = Status.OK_STATUS;
       IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
       SubMonitor subMonitor = SubMonitor.convert(monitor,
                                                  Messages.getString("TaskResolveLibraries"),
@@ -80,28 +80,29 @@ public class LibraryClasspathContainerResolverService
                                                              subMonitor.newChild(1)));
         }
       }
+      return status;
     } catch (CoreException ex) {
       return StatusUtil.error(this, Messages.getString("TaskResolveLibrariesError"), ex);
     }
-    return status == null ? Status.OK_STATUS : status;
   }
 
+  @Override
   public IClasspathEntry[] resolveLibraryAttachSourcesSync(String libraryId) throws CoreException {
     Library library = CloudLibraries.getLibrary(libraryId);
-    if (library != null) {
-      IClasspathEntry[] resolvedEntries = new IClasspathEntry[library.getLibraryFiles().size()];
-      int idx = 0;
-      for (LibraryFile libraryFile : library.getLibraryFiles()) {
-        resolvedEntries[idx++] = resolveLibraryFileAttachSourceSync(libraryFile);
-      }
-      return resolvedEntries;
-    } else {
+    if (library == null) {
       throw new CoreException(StatusUtil.error(this, Messages.getString("InvalidLibraryId",
-                                                                        libraryId)));
+          libraryId)));
     }
+
+    List<IClasspathEntry> resolvedEntries = new ArrayList<>();
+    for (LibraryFile libraryFile : library.getLibraryFiles()) {
+      resolvedEntries.add(resolveLibraryFileAttachSourceSync(libraryFile));
+    }
+    return resolvedEntries.toArray(new IClasspathEntry[0]);
   }
 
-  public IStatus resolveContainer(IJavaProject javaProject, IPath containerPath, 
+  @Override
+  public IStatus resolveContainer(IJavaProject javaProject, IPath containerPath,
                                   IProgressMonitor monitor) {
     Preconditions.checkArgument(containerPath.segment(0).equals(Library.CONTAINER_PATH_PREFIX));
     try {
@@ -128,6 +129,7 @@ public class LibraryClasspathContainerResolverService
     }
   }
 
+  @Override
   public IStatus checkRuntimeAvailability(AppEngineRuntime runtime, IProgressMonitor monitor) {
     switch (runtime) {
       case STANDARD_JAVA_7:
@@ -158,20 +160,19 @@ public class LibraryClasspathContainerResolverService
                                                         IPath containerPath,
                                                         Library library,
                                                         List<Job> sourceAttacherJobs,
-                                                        IProgressMonitor monitor) 
+                                                        IProgressMonitor monitor)
                                                             throws CoreException {
     List<LibraryFile> libraryFiles = library.getLibraryFiles();
     SubMonitor subMonitor = SubMonitor.convert(monitor, libraryFiles.size());
     subMonitor.subTask(Messages.getString("TaskResolveArtifacts", getLibraryDescription(library)));
     SubMonitor child = subMonitor.newChild(libraryFiles.size());
 
-    IClasspathEntry[] entries = new IClasspathEntry[libraryFiles.size()];
-    int idx = 0;
+    List<IClasspathEntry> entries = new ArrayList<>();
     for (final LibraryFile libraryFile : libraryFiles) {
       IClasspathEntry newLibraryEntry =
           resolveLibraryFileAttachSourceAsync(javaProject, containerPath, libraryFile,
                                               sourceAttacherJobs, monitor);
-      entries[idx++] = newLibraryEntry;
+      entries.add(newLibraryEntry);
       child.worked(1);
     }
     monitor.done();
@@ -220,7 +221,7 @@ public class LibraryClasspathContainerResolverService
 
   private IClasspathEntry resolveLibraryFileAttachSourceSync(final LibraryFile libraryFile)
       throws CoreException {
-    
+
     final Artifact artifact =
         repositoryService.resolveArtifact(libraryFile, new NullProgressMonitor());
     IPath libraryPath = new Path(artifact.getFile().getAbsolutePath());
@@ -309,7 +310,7 @@ public class LibraryClasspathContainerResolverService
       // disregard invalid URL
     }
   }
-  
+
   @Reference
   public void setRepositoryService(ILibraryRepositoryService repositoryService) {
     this.repositoryService = repositoryService;
