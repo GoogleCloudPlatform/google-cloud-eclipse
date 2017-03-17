@@ -69,7 +69,7 @@ public class XsltQuickFixTest {
     IProject project = projectCreator.getProject();
     IFile file = project.getFile("testdata.xml");
     file.create(ValidationTestUtils.stringToInputStream(
-      APPLICATION_XML), IFile.FORCE, null);
+        APPLICATION_XML), IFile.FORCE, null);
     
     IMarker marker = Mockito.mock(IMarker.class);
     Mockito.when(marker.getResource()).thenReturn(file);
@@ -89,7 +89,7 @@ public class XsltQuickFixTest {
     IProject project = projectCreator.getProject();
     IFile file = project.getFile("testdata.xml");
     file.create(ValidationTestUtils.stringToInputStream(
-      APPLICATION_XML), IFile.FORCE, null);
+        APPLICATION_XML), IFile.FORCE, null);
     
     IWorkbench workbench = PlatformUI.getWorkbench();
     WorkbenchUtil.openInEditor(workbench, file);
@@ -103,7 +103,7 @@ public class XsltQuickFixTest {
     IProject project = projectCreator.getProject();
     IFile file = project.getFile("testdata.xml");
     file.create(ValidationTestUtils.stringToInputStream(
-      APPLICATION_XML), IFile.FORCE, null);
+        APPLICATION_XML), IFile.FORCE, null);
     
     assertNull(XsltQuickFix.getCurrentDocument(file));
   }
