@@ -34,7 +34,7 @@ import org.eclipse.wst.sse.ui.internal.reconcile.validator.IncrementalReporter;
 import org.eclipse.wst.validation.internal.core.ValidationException;
 import org.eclipse.wst.validation.internal.provisional.core.IMessage;
 import org.eclipse.wst.validation.internal.provisional.core.IValidationContext;
-import org.junit.Rule;
+import org.junit.ClassRule;
 import org.junit.Test;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
@@ -48,19 +48,19 @@ public class AbstractXmlSourceValidatorTest {
       + "<application>"
       + "</application>"
       + "</appengine-web-app>";
+  private static IProjectFacetVersion APPENGINE_STANDARD_FACET_VERSION_1 =
+      ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID).getVersion("1");
   
-  @Rule public TestProjectCreator dynamicWebProject =
+  @ClassRule public static TestProjectCreator dynamicWebProject =
       new TestProjectCreator().withFacetVersions(Lists.newArrayList(JavaFacet.VERSION_1_7,
           WebFacetUtils.WEB_25));
   
+  @ClassRule public static TestProjectCreator appEngineStandardProject =
+      new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7,
+        WebFacetUtils.WEB_25, APPENGINE_STANDARD_FACET_VERSION_1);
+  
   @Test
   public void testValidate_appEngineStandardFacet() throws CoreException, ValidationException {
-    IProjectFacetVersion appEngineStandardFacetVersion1 =
-        ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID).getVersion("1");
-    TestProjectCreator appEngineStandardProject =
-        new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7,
-            WebFacetUtils.WEB_25, appEngineStandardFacetVersion1);
-    
     IProject project = appEngineStandardProject.getProject();
     IFile file = project.getFile("testdata.xml");
     file.create(ValidationTestUtils.stringToInputStream(
@@ -78,6 +78,7 @@ public class AbstractXmlSourceValidatorTest {
     IncrementalReporter reporter = new IncrementalReporter(null);
     validator.validate(helper, reporter);
     assertEquals(1, reporter.getMessages().size());
+    file.delete(true, null);
   }
   
   @Test
@@ -99,11 +100,11 @@ public class AbstractXmlSourceValidatorTest {
     IncrementalReporter reporter = new IncrementalReporter(null);
     validator.validate(helper, reporter);
     assertEquals(0, reporter.getMessages().size());
+    file.delete(true, null);
   }
   
   @Test
   public void getDocumentEncodingTest() throws CoreException {
-    
     IProject project = dynamicWebProject.getProject();
     IFile file = project.getFile("testdata.xml");
     file.create(ValidationTestUtils.stringToInputStream(
@@ -111,6 +112,7 @@ public class AbstractXmlSourceValidatorTest {
     IDocument document = ValidationTestUtils.getDocument(file);
     
     assertEquals("UTF-8", AbstractXmlSourceValidator.getDocumentEncoding(document));
+    file.delete(true, null);
   }
   
   @Test
@@ -136,6 +138,7 @@ public class AbstractXmlSourceValidatorTest {
     
     assertNotNull(testFile);
     assertEquals(file, testFile);
+    file.delete(true, null);
   }
   
   @Test
@@ -154,6 +157,7 @@ public class AbstractXmlSourceValidatorTest {
     IProject testProject = AbstractXmlSourceValidator.getProject((IValidationContext) helper);
     assertNotNull(testProject);
     assertEquals(project, testProject);
+    file.delete(true, null);
   }
   
 }
