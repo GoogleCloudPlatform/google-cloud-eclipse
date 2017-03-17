@@ -19,8 +19,6 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 import static org.junit.Assert.assertEquals;
 
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
-import com.google.common.collect.Lists;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -50,7 +48,7 @@ public class AppEngineWebXmlValidatorTest {
 
   @ClassRule public static TestProjectCreator projectCreator =
       new TestProjectCreator()
-      .withFacetVersions(Lists.newArrayList(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25));
+      .withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
 
   @Before
   public void setUp() throws CoreException {

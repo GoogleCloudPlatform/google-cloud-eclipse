@@ -23,12 +23,9 @@ import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 
-import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
@@ -129,7 +126,7 @@ public class WebXmlScannerTest {
   
   @Test
   public void testFindClass_inPackage() {
-    assertTrue(WebXmlScanner.classExists(javaProject, "src.com.example.ServletClassInPackage"));
+    assertTrue(WebXmlScanner.classExists(javaProject, "com.example.ServletClassInPackage"));
   }
   
 }
