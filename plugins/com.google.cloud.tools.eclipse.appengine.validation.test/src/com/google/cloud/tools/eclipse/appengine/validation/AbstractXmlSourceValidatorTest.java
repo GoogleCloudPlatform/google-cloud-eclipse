@@ -48,7 +48,7 @@ public class AbstractXmlSourceValidatorTest {
       + "<application>"
       + "</application>"
       + "</appengine-web-app>";
-  private static IProjectFacetVersion APPENGINE_STANDARD_FACET_VERSION_1 =
+  private static final IProjectFacetVersion APPENGINE_STANDARD_FACET_VERSION_1 =
       ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID).getVersion("1");
   
   @ClassRule public static TestProjectCreator dynamicWebProject =
