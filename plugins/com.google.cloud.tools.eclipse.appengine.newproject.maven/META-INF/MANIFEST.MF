@@ -32,6 +32,7 @@ Import-Package: com.google.cloud.tools.eclipse.appengine.facets,
  com.google.cloud.tools.eclipse.util.status,
  org.apache.maven.archetype.catalog;provider=m2e,
  org.apache.maven.artifact;provider=m2e,
+ org.eclipse.wst.common.componentcore.internal.builder,
  org.eclipse.wst.common.project.facet.core
 
 
