@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
-import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.common.io.ByteStreams;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,12 +24,9 @@ import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.wst.common.project.facet.core.IFacetedProject;
-import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.validation.AbstractValidator;
 import org.eclipse.wst.validation.ValidationEvent;
 import org.eclipse.wst.validation.ValidationResult;
@@ -49,16 +45,11 @@ public abstract class AbstractXmlValidator extends AbstractValidator {
   @Override
   public ValidationResult validate(ValidationEvent event, ValidationState state,
       IProgressMonitor monitor) {
-    IProject project = event.getResource().getProject();
     try {
-      IFacetedProject facetedProject = ProjectFacetsManager.create(project);
-      if (AppEngineStandardFacet.hasAppEngineFacet(facetedProject)) {
-        IResource resource = event.getResource();
-        IFile file = (IFile) resource;
-        try (InputStream in = file.getContents()) {
-          byte[] bytes = ByteStreams.toByteArray(in);
-          validate(resource, bytes);
-        }
+      IFile file = (IFile) event.getResource();
+      try (InputStream in = file.getContents()) {
+        byte[] bytes = ByteStreams.toByteArray(in);
+        validate(file, bytes);
       }
     } catch (IOException | CoreException | ParserConfigurationException ex) {
       logger.log(Level.SEVERE, ex.getMessage());
@@ -66,7 +57,7 @@ public abstract class AbstractXmlValidator extends AbstractValidator {
     return new ValidationResult();
   }
     
-  abstract protected void validate(IResource resource, byte[] bytes) 
+  abstract protected void validate(IFile resource, byte[] bytes) 
       throws CoreException, IOException, ParserConfigurationException;
   
   static void deleteMarkers(IResource resource) throws CoreException {
@@ -82,8 +73,7 @@ public abstract class AbstractXmlValidator extends AbstractValidator {
     marker.setAttribute(IMarker.SEVERITY, element.getSeverity());
     marker.setAttribute(IMarker.MESSAGE, element.getMessage());
     marker.setAttribute(IMarker.LOCATION, "line " + element.getStart().getLineNumber());
-    marker.setAttribute(IMarker.CHAR_START, elementOffset);
-    marker.setAttribute(IMarker.CHAR_END, elementOffset + element.getLength());
+    marker.setAttribute(IMarker.LINE_NUMBER, element.getStart().getLineNumber());
   }
   
   /**
