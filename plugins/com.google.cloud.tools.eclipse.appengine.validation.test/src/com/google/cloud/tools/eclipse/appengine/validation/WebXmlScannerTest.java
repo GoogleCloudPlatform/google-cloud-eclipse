@@ -59,9 +59,7 @@ public class WebXmlScannerTest {
     IProject project = projectCreator.getProject();
     javaProject = projectCreator.getJavaProject();
     
-    ValidationTestUtils.createFolders(project, new Path("src/main/webapp/WEB-INF"));
-    resource = project.getFile("src/main/webapp/WEB-INF/web.xml");
-    resource.create(new ByteArrayInputStream(new byte[0]), true, null);
+    resource = project.getFile("WebContent/WEB-INF/web.xml");
     
     ValidationTestUtils.createFolders(project, new Path("src/main/java"));
     IFile servletClass = project.getFile("src/main/java/ServletClass.java");
@@ -69,8 +67,8 @@ public class WebXmlScannerTest {
     	new ByteArrayInputStream("public class ServletClass {}".getBytes(StandardCharsets.UTF_8)),
     	true, null);
     
-    ValidationTestUtils.createFolders(project, new Path("com/example"));
-    IFile servletClassInPackage = project.getFile("com/example/ServletClassInPackage.java");
+    ValidationTestUtils.createFolders(project, new Path("src/com/example"));
+    IFile servletClassInPackage = project.getFile("src/com/example/ServletClassInPackage.java");
     servletClassInPackage.create(
         new ByteArrayInputStream("package com.example; public class ServletClassInPackage {}"
             .getBytes(StandardCharsets.UTF_8)), true, null);
@@ -131,7 +129,7 @@ public class WebXmlScannerTest {
   
   @Test
   public void testFindClass_inPackage() {
-    assertTrue(WebXmlScanner.classExists(javaProject, "com.example.ServletClassInPackage"));
+    assertTrue(WebXmlScanner.classExists(javaProject, "src.com.example.ServletClassInPackage"));
   }
   
 }

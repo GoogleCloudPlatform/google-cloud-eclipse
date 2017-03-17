@@ -58,25 +58,17 @@ public class AbstractXmlValidatorTest {
   
   @ClassRule public static TestProjectCreator dynamicWebProjectCreator =
       new TestProjectCreator().withFacetVersions(Lists.newArrayList(JavaFacet.VERSION_1_7,
-                                                                    WebFacetUtils.WEB_25));
+          WebFacetUtils.WEB_25));
 
   @Before
   public void setUp() throws CoreException {
     IProject project = dynamicWebProjectCreator.getProject();
-    createFolders(project, new Path("src/main/webapp/WEB-INF"));
-    resource = project.getFile("src/main/webapp/WEB-INF/web.xml");
-    resource.create(new ByteArrayInputStream(new byte[0]), true, null);
-  }
-  
-  @After
-  public void tearDown() throws CoreException {
-    resource.delete(true, null);
+    resource = project.getFile("WebContent/WEB-INF/web.xml");
   }
   
   @Test
   public void testValidate_appEngineStandard() throws CoreException {
     IProject project = appEngineStandardProjectCreator.getProject();
-    createFolders(project, new Path("src/main/webapp/WEB-INF"));
     IFile file = project.getFile("src/main/webapp/WEB-INF/web.xml");
     ValidationFramework framework = ValidationFramework.getDefault();
     Validator[] validators = framework.getValidatorsFor(file);
@@ -86,6 +78,7 @@ public class AbstractXmlValidatorTest {
         return;
       }
     }
+    // webXmlValidator isn't applied to web.xml
     fail();
   }
   
@@ -96,6 +89,7 @@ public class AbstractXmlValidatorTest {
     for (Validator validator : validators) {
       if ("com.google.cloud.tools.eclipse.appengine.validation.webXmlValidator"
           .equals(validator.getId())) {
+        // webXmlValidator should not be applied in jst.web project
         fail();
       }
     }
@@ -118,16 +112,6 @@ public class AbstractXmlValidatorTest {
     AppEngineWebXmlValidator.createSaxErrorMessage(resource, ex);
     IMarker[] markers = resource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
     assertEquals(message, markers[0].getAttribute(IMarker.MESSAGE));
-  }
-
-  private static void createFolders(IContainer parent, IPath path) throws CoreException {
-    if (!path.isEmpty()) {
-      IFolder folder = parent.getFolder(new Path(path.segment(0)));
-      if (!folder.exists()) {
-        folder.create(true,  true,  null);
-      }
-      createFolders(folder, path.removeFirstSegments(1));
-    }
   }
 
 }
