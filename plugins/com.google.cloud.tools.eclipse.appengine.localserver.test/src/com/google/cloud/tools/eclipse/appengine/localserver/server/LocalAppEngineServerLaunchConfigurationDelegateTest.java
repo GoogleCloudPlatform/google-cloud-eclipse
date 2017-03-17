@@ -27,7 +27,6 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -143,31 +142,31 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
 
   @Test
   public void testGetPortAttribute_launchAttribute() throws CoreException {
-    when(launchConfiguration.getAttribute(eq(attributeName), eq(-1))).thenReturn(65535);
+    when(launchConfiguration.getAttribute(attributeName, -1)).thenReturn(65535);
     assertEquals(65535, LocalAppEngineServerLaunchConfigurationDelegate
         .getPortAttribute(attributeName, 0, launchConfiguration, server));
-    verify(launchConfiguration, times(1)).getAttribute(eq(attributeName), anyInt());
+    verify(launchConfiguration).getAttribute(eq(attributeName), anyInt());
     verify(server, never()).getAttribute(eq(attributeName), anyInt());
   }
 
   @Test
   public void testGetPortAttribute_noLaunchAttribute() throws CoreException {
-    when(launchConfiguration.getAttribute(eq(attributeName), eq(-1))).thenReturn(-1);
-    when(server.getAttribute(eq(attributeName), eq(0))).thenReturn(65535);
+    when(launchConfiguration.getAttribute(attributeName, -1)).thenReturn(-1);
+    when(server.getAttribute(attributeName, 0)).thenReturn(65535);
     assertEquals(65535, LocalAppEngineServerLaunchConfigurationDelegate
         .getPortAttribute(attributeName, 0, launchConfiguration, server));
-    verify(launchConfiguration, times(1)).getAttribute(eq(attributeName), anyInt());
-    verify(server, times(1)).getAttribute(eq(attributeName), eq(0));
+    verify(launchConfiguration).getAttribute(eq(attributeName), anyInt());
+    verify(server).getAttribute(attributeName, 0);
   }
 
   @Test
   public void testGetPortAttribute_noLaunchOrServerAttributes() throws CoreException {
-    when(launchConfiguration.getAttribute(eq(attributeName), eq(-1))).thenReturn(-1);
-    when(server.getAttribute(eq(attributeName), eq(65535))).thenReturn(65535);
+    when(launchConfiguration.getAttribute(attributeName, -1)).thenReturn(-1);
+    when(server.getAttribute(attributeName, 65535)).thenReturn(65535);
     assertEquals(65535, LocalAppEngineServerLaunchConfigurationDelegate
         .getPortAttribute(attributeName, 65535, launchConfiguration, server));
-    verify(launchConfiguration, times(1)).getAttribute(eq(attributeName), anyInt());
-    verify(server, times(1)).getAttribute(eq(attributeName), anyInt());
+    verify(launchConfiguration).getAttribute(eq(attributeName), anyInt());
+    verify(server).getAttribute(eq(attributeName), anyInt());
   }
 
   @Test
@@ -218,7 +217,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
 
     assertNotNull(config.getPort());
     assertEquals(9999, (int) config.getPort());
-    verify(launchConfiguration, times(1))
+    verify(launchConfiguration)
         .getAttribute(eq(LocalAppEngineServerBehaviour.SERVER_PORT_ATTRIBUTE_NAME), anyInt());
     verify(server, never()).getAttribute(anyString(), anyInt());
   }
@@ -236,7 +235,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
 
     assertNotNull(config.getAdminPort());
     assertEquals(9999, (int) config.getAdminPort());
-    verify(launchConfiguration, times(1))
+    verify(launchConfiguration)
         .getAttribute(eq(LocalAppEngineServerBehaviour.ADMIN_PORT_ATTRIBUTE_NAME), anyInt());
     verify(server, never()).getAttribute(anyString(), anyInt());
   }
@@ -273,7 +272,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
 
     assertNotNull(config.getJvmFlags());
     assertEquals(Arrays.asList("a", "b", "c d"), config.getJvmFlags());
-    verify(launchConfiguration, times(1))
+    verify(launchConfiguration)
         .getAttribute(eq(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS), anyString());
   }
 }
