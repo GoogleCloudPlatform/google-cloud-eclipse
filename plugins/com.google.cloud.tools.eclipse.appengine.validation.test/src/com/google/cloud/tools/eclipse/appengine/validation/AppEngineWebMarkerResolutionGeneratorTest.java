@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ui.IMarkerResolution;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -27,9 +28,11 @@ import org.mockito.Mockito;
 public class AppEngineWebMarkerResolutionGeneratorTest {
   
   @Test
-  public void testGetResolutions() {
+  public void testGetResolutions() throws CoreException {
     AppEngineWebMarkerResolutionGenerator resolution = new AppEngineWebMarkerResolutionGenerator();
     IMarker marker = Mockito.mock(IMarker.class);
+    String markerMessage = Messages.getString("application.element");
+    Mockito.when(marker.getAttribute(IMarker.MESSAGE)).thenReturn(markerMessage);
     IMarkerResolution[] resolutions = resolution.getResolutions(marker);
     assertEquals(1, resolutions.length);
     assertNotNull(resolutions[0]);

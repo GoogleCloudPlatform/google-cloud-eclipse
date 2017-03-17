@@ -48,19 +48,19 @@ public class AbstractXmlSourceValidatorTest {
       + "<application>"
       + "</application>"
       + "</appengine-web-app>";
-  private static final IProjectFacetVersion APPENGINE_STANDARD_FACET_VERSION_1 =
-      ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID).getVersion("1");
   
   @Rule public TestProjectCreator dynamicWebProject =
       new TestProjectCreator().withFacetVersions(Lists.newArrayList(JavaFacet.VERSION_1_7,
-                                                                    WebFacetUtils.WEB_25));
-  @Rule
-  public TestProjectCreator appEngineStandardProject =
-      new TestProjectCreator().withFacetVersions(Lists.newArrayList(JavaFacet.VERSION_1_7,
-          WebFacetUtils.WEB_25, APPENGINE_STANDARD_FACET_VERSION_1));
+          WebFacetUtils.WEB_25));
   
   @Test
   public void testValidate_appEngineStandardFacet() throws CoreException, ValidationException {
+    IProjectFacetVersion appEngineStandardFacetVersion1 =
+        ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID).getVersion("1");
+    TestProjectCreator appEngineStandardProject =
+        new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7,
+            WebFacetUtils.WEB_25, appEngineStandardFacetVersion1);
+    
     IProject project = appEngineStandardProject.getProject();
     IFile file = project.getFile("testdata.xml");
     file.create(ValidationTestUtils.stringToInputStream(
@@ -104,7 +104,7 @@ public class AbstractXmlSourceValidatorTest {
   @Test
   public void getDocumentEncodingTest() throws CoreException {
     
-    IProject project = appEngineStandardProject.getProject();
+    IProject project = dynamicWebProject.getProject();
     IFile file = project.getFile("testdata.xml");
     file.create(ValidationTestUtils.stringToInputStream(
       APPLICATION_XML), IFile.FORCE, null);
@@ -124,7 +124,7 @@ public class AbstractXmlSourceValidatorTest {
   
   @Test
   public void testGetFile() throws CoreException {
-    IProject project = appEngineStandardProject.getProject();
+    IProject project = dynamicWebProject.getProject();
     IFile file = project.getFile("testdata.xml");
     file.create(ValidationTestUtils.stringToInputStream(
         APPLICATION_XML), 0, null);
@@ -140,7 +140,7 @@ public class AbstractXmlSourceValidatorTest {
   
   @Test
   public void testGetProject() throws CoreException {
-    IProject project = appEngineStandardProject.getProject();
+    IProject project = dynamicWebProject.getProject();
     IFile file = project.getFile("testdata.xml");
     file.create(ValidationTestUtils.stringToInputStream(
         APPLICATION_XML), 0, null);

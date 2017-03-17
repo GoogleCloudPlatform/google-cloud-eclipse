@@ -22,8 +22,9 @@ import com.google.common.collect.ImmutableMap;
 class AppEngineWebBlacklist {
   
   private static final ImmutableMap<String, String> BLACKLIST =
-      ImmutableMap.of("application", Messages.getString("application.element"),
-        "version", Messages.getString("version.element"));
+      ImmutableMap.of(
+          "application", Messages.getString("application.element"),
+          "version", Messages.getString("version.element"));
   
   static boolean contains(String elementName) {
     return BLACKLIST.containsKey(elementName);
