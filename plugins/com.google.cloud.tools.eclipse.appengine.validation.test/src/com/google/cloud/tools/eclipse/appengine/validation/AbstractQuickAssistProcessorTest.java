@@ -27,33 +27,44 @@ import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.TextInvocationContext;
+import org.eclipse.jst.common.project.facet.core.JavaFacet;
+import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
+import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
+import org.junit.ClassRule;
 import org.junit.Test;
 
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
+import com.google.common.collect.Lists;
 
 public class AbstractQuickAssistProcessorTest {
   
+  private IFile file;
   private ISourceViewer viewer;
   private IAnnotationModel model;
   
-  @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
-  
+  @ClassRule public static TestProjectCreator projectCreator =
+      new TestProjectCreator().withFacetVersions(Lists.newArrayList(JavaFacet.VERSION_1_7,
+          WebFacetUtils.WEB_25));;
   
   @Before
   public void setUp() throws CoreException {
     IProject project = projectCreator.getProject();
-    IFile file = project.getFile("testdata.xml");
+    file = project.getFile("testdata.xml");
     file.create(ValidationTestUtils.stringToInputStream("test"), IFile.FORCE, null);
     
     IWorkbench workbench = PlatformUI.getWorkbench();
     WorkbenchUtil.openInEditor(workbench, file);
     viewer = (ISourceViewer) ValidationTestUtils.getViewer(file);
     model = viewer.getAnnotationModel();
+  }
+  
+  @After
+  public void tearDown() throws CoreException {
+    file.delete(true, null);
   }
   
   @Test
