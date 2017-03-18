@@ -24,13 +24,11 @@ import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import com.google.cloud.tools.eclipse.util.AdapterUtil;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.inject.Inject;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.databinding.preference.PreferencePageSupport;
 import org.eclipse.jface.layout.GridDataFactory;
-import org.eclipse.jface.preference.PreferenceDialog;
-import org.eclipse.jface.preference.PreferenceNode;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.StackLayout;
@@ -38,7 +36,6 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PropertyPage;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
@@ -51,9 +48,12 @@ import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
  */
 public class DeployPropertyPage extends PropertyPage {
 
-  private static final String FACET_PAGE_ID =
-      "org.eclipse.wst.common.project.facet.ui.FacetsPropertyPage";
   private static final Logger logger = Logger.getLogger(DeployPropertyPage.class.getName());
+
+  @Inject
+  private IGoogleLoginService loginService;
+  @Inject
+  private IGoogleApiFactory googleApiFactory;
 
   private IFacetedProject facetedProject = null;
   private FlexDeployPreferencesPanel flexPreferencesPanel;
@@ -171,29 +171,11 @@ public class DeployPropertyPage extends PropertyPage {
   private void createBlankPanelIfNeeded() {
     if (blankPreferencesPanel == null) {
       blankPreferencesPanel = new BlankDeployPreferencesPanel(container);
-      blankPreferencesPanel.setFacetPageSelector(new Runnable() {
-        @Override
-        public void run() {
-          PreferenceDialog preferenceDialog = (PreferenceDialog)getContainer();
-          TreeItem[] items = preferenceDialog.getTreeViewer().getTree().getItems();
-          for (TreeItem treeItem : items) {
-            if (FACET_PAGE_ID.equals(((PreferenceNode)treeItem.getData()).getId())) {
-              preferenceDialog.getTreeViewer().setSelection(
-                  new StructuredSelection(treeItem.getData()), true);
-            }
-          }
-        }
-      });
     }
   }
 
   private void createStandardPanelIfNeeded() {
     if (standardPreferencesPanel == null) {
-      IGoogleLoginService loginService =
-          PlatformUI.getWorkbench().getService(IGoogleLoginService.class);
-      IGoogleApiFactory googleApiFactory =
-          PlatformUI.getWorkbench().getService(IGoogleApiFactory.class);
-
       standardPreferencesPanel = new StandardDeployPreferencesPanel(
           container, facetedProject.getProject(), loginService, getLayoutChangedHandler(),
           false /* requireValues */, new ProjectRepository(googleApiFactory));

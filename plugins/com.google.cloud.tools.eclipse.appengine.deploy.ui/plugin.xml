@@ -72,7 +72,7 @@
         id="com.google.cloud.tools.eclipse.appengine.deploy"
         name="App Engine Deployment"
         category="com.google.cloud.tools.eclipse"
-        class="com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPropertyPage">
+        class="com.google.cloud.tools.eclipse.util.service.ServiceContextFactory:com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPropertyPage">
       <enabledWhen>
         <instanceof value="org.eclipse.core.resources.IProject" />
       </enabledWhen>

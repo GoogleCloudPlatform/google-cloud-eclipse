@@ -35,7 +35,7 @@ public class PluginXmlTest extends BasePluginXmlTest {
     NodeList pages = getDocument().getElementsByTagName("page");
     Assert.assertEquals(2, pages.getLength());
     NodeList enabledWhen = getDocument().getElementsByTagName("enabledWhen");
-    Assert.assertEquals(1, enabledWhen.getLength());
+    Assert.assertEquals(3, enabledWhen.getLength());
     NodeList tests = getDocument().getElementsByTagName("test");
     Assert.assertEquals(3, tests.getLength());
     NodeList adapts = getDocument().getElementsByTagName("adapt");
