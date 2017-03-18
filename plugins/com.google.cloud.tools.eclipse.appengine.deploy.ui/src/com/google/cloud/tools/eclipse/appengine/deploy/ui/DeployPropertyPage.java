@@ -22,6 +22,7 @@ import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import com.google.cloud.tools.eclipse.util.AdapterUtil;
+import com.google.common.annotations.VisibleForTesting;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Inject;
@@ -186,5 +187,21 @@ public class DeployPropertyPage extends PropertyPage {
     if (flexPreferencesPanel == null) {
       flexPreferencesPanel = new FlexDeployPreferencesPanel(container, facetedProject.getProject());
     }
+  }
+
+  /**
+   * Used only in tests.
+   */
+  @VisibleForTesting
+  void setLoginService(IGoogleLoginService loginService) {
+    this.loginService = loginService;
+  }
+
+  /**
+   * Used only in tests.
+   */
+  @VisibleForTesting
+  void setGoogleApiFactory(IGoogleApiFactory googleApiFactory) {
+    this.googleApiFactory = googleApiFactory;
   }
 }
