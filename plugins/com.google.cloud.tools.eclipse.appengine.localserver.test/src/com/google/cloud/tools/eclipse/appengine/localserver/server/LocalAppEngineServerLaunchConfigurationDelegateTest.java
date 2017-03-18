@@ -41,7 +41,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.wst.server.core.IServer;
 import org.junit.Before;
@@ -283,15 +282,11 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
   // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1609
   @Test
   public void testLaunch_noNullPointerExceptionWhenLaunchHasNoConfiguration() throws CoreException {
-    when(launchConfiguration.getAttribute(
-        eq(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS), anyString())).thenReturn("");
-
-    ILaunchManager launchManager = mock(ILaunchManager.class);
     ILaunch launch = mock(ILaunch.class);
+    ILaunch[] launches = new ILaunch[] {launch};
     when(launch.getLaunchConfiguration()).thenReturn(null);
-    when(launchManager.getLaunches()).thenReturn(new ILaunch[] {launch});
 
-    assertNull(new LocalAppEngineServerLaunchConfigurationDelegate()
-        .getLaunchInternal(launchConfiguration, "run", server, launchManager));
+    new LocalAppEngineServerLaunchConfigurationDelegate()
+        .checkConflictingLaunches(null, mock(DefaultRunConfiguration.class), launches);
   }
 }

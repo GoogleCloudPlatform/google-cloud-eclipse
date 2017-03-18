@@ -60,6 +60,7 @@ import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.ILaunchesListener2;
 import org.eclipse.jdt.launching.AbstractJavaLaunchConfigurationDelegate;
@@ -116,25 +117,27 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
   @Override
   public ILaunch getLaunch(ILaunchConfiguration configuration, String mode) throws CoreException {
-    IServer thisServer = ServerUtil.getServer(configuration);
-    return getLaunchInternal(configuration, mode, thisServer, getLaunchManager());
+    IServer server = ServerUtil.getServer(configuration);
+    DefaultRunConfiguration runConfig = generateServerRunConfiguration(configuration, server);
+    ILaunch[] launches = getLaunchManager().getLaunches();
+    checkConflictingLaunches(configuration.getType(), runConfig, launches);
+    return super.getLaunch(configuration, mode);
   }
 
   @VisibleForTesting
-  ILaunch getLaunchInternal(ILaunchConfiguration configuration, String mode,
-      IServer server, ILaunchManager launchManager) throws CoreException {
-    DefaultRunConfiguration thisConfig = generateServerRunConfiguration(configuration, server);
+  void checkConflictingLaunches(ILaunchConfigurationType launchConfigType,
+      DefaultRunConfiguration runConfig, ILaunch[] launches) throws CoreException {
 
-    for (ILaunch launch : launchManager.getLaunches()) {
+    for (ILaunch launch : launches) {
       if (launch.isTerminated()
           || launch.getLaunchConfiguration() == null
-          || launch.getLaunchConfiguration().getType() != configuration.getType()) {
+          || launch.getLaunchConfiguration().getType() != launchConfigType) {
         continue;
       }
       IServer otherServer = ServerUtil.getServer(launch.getLaunchConfiguration());
-      DefaultRunConfiguration otherConfig =
+      DefaultRunConfiguration otherRunConfig =
           generateServerRunConfiguration(launch.getLaunchConfiguration(), otherServer);
-      IStatus conflicts = checkConflicts(thisConfig, otherConfig,
+      IStatus conflicts = checkConflicts(runConfig, otherRunConfig,
           new MultiStatus(Activator.PLUGIN_ID, 0,
               MessageFormat.format("Conflicts with running server \"{0}\"", otherServer.getName()),
               null));
@@ -142,7 +145,6 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
         throw new CoreException(StatusUtil.filter(conflicts));
       }
     }
-    return super.getLaunch(configuration, mode);
   }
 
   /**
