@@ -43,7 +43,7 @@ public class ProjectSelectorSelectionChangedListenerTest {
 
   private static final String EXPECTED_LINK =
       "https://console.cloud.google.com/appengine/create?lang=java&project=projectId"
-      + "&authuser=user@example.com";
+      + "&authuser=user%40example.com";
   private static final String EXPECTED_MESSAGE_WHEN_NO_APPLICATION =
       "This project does not have an App Engine application which is\n"
           + "required for deployment. <a href=\"" + EXPECTED_LINK + "\">Create an App Engine "
