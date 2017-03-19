@@ -154,7 +154,9 @@ public class DeployPropertyPage extends PropertyPage {
       stackLayout.topControl = standardPreferencesPanel;
       databindingSupport =
           PreferencePageSupport.create(this, standardPreferencesPanel.getDataBindingContext());
-    } else if (facetedProject != null && AppEngineFlexFacet.hasAppEngineFacet(facetedProject)) {
+    } else if (facetedProject != null 
+        && ProjectFacetsManager.isProjectFacetDefined(AppEngineFlexFacet.ID) 
+        && AppEngineFlexFacet.hasAppEngineFacet(facetedProject)) {
       createFlexPanelIfNeeded();
       stackLayout.topControl = flexPreferencesPanel;
       databindingSupport =
