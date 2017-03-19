@@ -38,6 +38,13 @@ public class PomXmlScannerTest {
   }
   
   @Test
+  public void testCaseSensitive() throws SAXException {
+    scanner.startElement("", "Plugin", "", new AttributesImpl());
+    assertEquals(0, scanner.getBlacklist().size());
+    assertFalse(scanner.getInsidePlugin());
+  }
+  
+  @Test
   public void testStartElement_build() throws SAXException {
     scanner.startElement("", "plugin", "", new AttributesImpl());
     assertEquals(0, scanner.getBlacklist().size());

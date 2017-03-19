@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.libraries.ui;
+package com.google.cloud.tools.eclipse.appengine.validation;
 
-import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchRequestor;
 
-/**
- * UI for adding App Engine libraries to an existing project.
- */
-public class AppEngineLibrariesPage extends CloudLibrariesPage {
+class TypeSearchRequestor extends SearchRequestor {
 
-  public AppEngineLibrariesPage() {
-    super(CloudLibraries.APP_ENGINE_GROUP);
+  private int matchCount;
+  
+  @Override
+  public void acceptSearchMatch(SearchMatch match) throws CoreException {
+    matchCount++;
+  }
+  
+  boolean foundMatch() {
+    return matchCount > 0;
   }
 
 }

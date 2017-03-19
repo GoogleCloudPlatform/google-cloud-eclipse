@@ -117,7 +117,9 @@ public class StandardFacetInstallationTest {
   private static void createFolders(IContainer parent, IPath path) throws CoreException {
     if (!path.isEmpty()) {
       IFolder folder = parent.getFolder(new Path(path.segment(0)));
-      folder.create(true,  true,  null);
+      if (!folder.exists()) {
+        folder.create(true, true, null);
+      }
       createFolders(folder, path.removeFirstSegments(1));
     }
   }

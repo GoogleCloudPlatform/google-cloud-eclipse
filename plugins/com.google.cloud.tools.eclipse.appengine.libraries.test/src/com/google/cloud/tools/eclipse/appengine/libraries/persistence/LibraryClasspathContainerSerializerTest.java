@@ -28,6 +28,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
+import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -89,12 +91,12 @@ public class LibraryClasspathContainerSerializerTest {
 
   @Before
   public void setUp() throws Exception {
-    IClasspathEntry[] classpathEntries =
-        new IClasspathEntry[] {getClasspathEntry(IClasspathEntry.CPE_LIBRARY, "/test/path/to/jar",
-            "/test/path/to/src", new IClasspathAttribute[] {getAttribute("attrName", "attrValue")},
-            new IAccessRule[] {getAccessRule("/com/example/accessible", true /* accessible */),
-                getAccessRule("/com/example/nonaccessible", false /* accessible */)},
-            true)};
+    List<IClasspathEntry> classpathEntries = Arrays.asList(
+        newClasspathEntry(IClasspathEntry.CPE_LIBRARY, "/test/path/to/jar",
+            "/test/path/to/src", new IClasspathAttribute[] {newAttribute("attrName", "attrValue")},
+            new IAccessRule[] {newAccessRule("/com/example/accessible", true /* accessible */),
+                newAccessRule("/com/example/nonaccessible", false /* accessible */)},
+            true));
     when(binaryBaseLocationProvider.getBaseLocation()).thenReturn(new Path("/test"));
     when(sourceBaseLocationProvider.getBaseLocation()).thenReturn(new Path("/test"));
     container = new LibraryClasspathContainer(new Path(CONTAINER_PATH), CONTAINER_DESCRIPTION,
@@ -185,7 +187,7 @@ public class LibraryClasspathContainerSerializerTest {
     }
   }
 
-  private IClasspathEntry getClasspathEntry(final int entryKind, final String path,
+  private static IClasspathEntry newClasspathEntry(final int entryKind, final String path,
       final String sourceAttachmentPath, final IClasspathAttribute[] attributes,
       final IAccessRule[] accessRules, final boolean isExported) {
     return new IClasspathEntry() {
@@ -263,7 +265,7 @@ public class LibraryClasspathContainerSerializerTest {
     };
   }
 
-  private IClasspathAttribute getAttribute(final String name, final String value) {
+  private static IClasspathAttribute newAttribute(final String name, final String value) {
     return new IClasspathAttribute() {
 
       @Override
@@ -278,7 +280,7 @@ public class LibraryClasspathContainerSerializerTest {
     };
   }
 
-  private IAccessRule getAccessRule(final String pattern, final boolean accessible) {
+  private static IAccessRule newAccessRule(final String pattern, final boolean accessible) {
     return new IAccessRule() {
 
       @Override

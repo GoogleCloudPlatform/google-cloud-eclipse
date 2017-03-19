@@ -19,6 +19,8 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 import java.io.IOException;
 import java.util.Map;
 import javax.xml.parsers.ParserConfigurationException;
+
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.wst.validation.internal.provisional.core.IMessage;
 import org.eclipse.wst.validation.internal.provisional.core.IReporter;
@@ -36,7 +38,7 @@ public class AppEngineWebXmlSourceValidator extends AbstractXmlSourceValidator {
    * Adds an {@link IMessage} to appengine-web.xml for every 
    * {@link BannedElement} found in the file.
    */
-  protected void validate(IReporter reporter, byte[] bytes) 
+  protected void validate(IReporter reporter, IFile file, byte[] bytes) 
       throws CoreException, IOException, ParserConfigurationException {
     try {
       SaxParserResults parserResults = BlacklistSaxParser.readXml(bytes);

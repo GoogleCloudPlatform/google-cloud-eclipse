@@ -38,14 +38,14 @@ public class WebXmlSourceValidatorTest {
   @Test
   public void testValidate_noBannedElements() throws CoreException, IOException, ParserConfigurationException {
     WebXmlSourceValidator validator = new WebXmlSourceValidator();
-    validator.validate(reporter, XML_NO_BANNED_ELEMENTS);
+    validator.validate(reporter, null, XML_NO_BANNED_ELEMENTS);
     assertTrue(reporter.getMessages().isEmpty());
   }
   
   @Test
   public void testValidate() throws CoreException, IOException, ParserConfigurationException {
     WebXmlSourceValidator validator = new WebXmlSourceValidator();
-    validator.validate(reporter, XML_BYTES);
+    validator.validate(reporter, null, XML_BYTES);
     assertEquals(1, reporter.getMessages().size());
     reporter.removeAllMessages(validator);
     assertTrue(reporter.getMessages().isEmpty());

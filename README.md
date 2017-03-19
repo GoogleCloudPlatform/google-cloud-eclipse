@@ -52,7 +52,7 @@ The tests need to find the Google Cloud SDK.  You can either:
 
 By default, the build is targeted against Eclipse Mars / 4.5. 
 You can explicitly set the `eclipse.target` property to 
-`neon` (4.6).
+`neon` (4.6) or `oxygen` (4.7).
 ```
 $ mvn -Declipse.target=neon package
 ```
@@ -98,6 +98,17 @@ indicate a misconfigured _jdkHome_.
 You can disable the use of toolchains by setting the `tycho.toolchains`
 property to `SYSTEM`.
 
+### Adding a new bundle/fragment
+
+We normally put production code into a bundle and tests as a fragment hosted
+by that bundle, put under the `plugins/` directory. 
+For now we have been committing both the `pom.xml` and Eclipse's
+`.project`, `.classpath`, and `.settings/` files.
+
+Our CI process is configured to run our tests with JaCoCo, which requires
+some additional configuration to add new bundles and fragments
+in `build/jacoco/`.
+
 
 ## Import into Eclipse
 
@@ -111,17 +122,23 @@ through to set up a working development environment.
 The Eclipse IDE and Tycho both use a _Target Platform_ to manage
 the dependencies for the source bundles and features under development.
 Although Tycho can pull dependencies directly from Maven-style
-repositories, Eclipse cannot.  So we use Tycho to cobble together
-a target platform suitable for the Eclipse IDE.
+repositories (like [Maven Central](https://search.maven.org)), Eclipse
+cannot.  So we use Tycho to cobble together
+a target platform suitable for the Eclipse IDE with the following command.
 ```
-$ mvn -Pide-target-platform package
+$ (cd eclipse; mvn package)        # may want -Declipse.target=XXX
 ```
-This command builds the project, but also creates a local copy of the
+This command creates a local copy of the
 target platform, including any Maven dependencies, into
 [`eclipse/ide-target-platform/target/repository`](eclipse/ide-target-platform/target/repository).
+You will use this repository to create a target platform within the IDE,
+as described below.
 
-The target platform is affected by the `eclipse.target` property,
-described below.
+The Eclipse version used for the target platform is affected by the
+`eclipse.target` property, described below.
+
+You must regenerate the target platform and reconfigure the IDE's
+target platform whenever dependencies are updated.
 
 ### Steps to import into the Eclipse IDE
 
@@ -259,6 +276,7 @@ This is currently:
 
   - Eclipse Mars (4.5 SR2): [`eclipse/mars/gcp-eclipse-mars.target`](eclipse/mars/gcp-eclipse-mars.target) 
   - Eclipse Neon (4.6): [`eclipse/neon/gcp-eclipse-neon.target`](eclipse/neon/gcp-eclipse-neon.target)
+  - Eclipse Oxygen (4.7): [`eclipse/oxygen/gcp-eclipse-oxygen.target`](eclipse/oxygen/gcp-eclipse-oxygen.target)
 
 These `.target` files are generated and *should not be manually updated*.
 Updating `.target` files directly becomes a chore once it has more than a 

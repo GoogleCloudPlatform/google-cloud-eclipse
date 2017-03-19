@@ -42,12 +42,12 @@ class PomXmlScanner extends AbstractScanner {
   @Override
   public void startElement(String uri, String localName, String qName, Attributes attributes)
       throws SAXException {
-    if ("plugin".equalsIgnoreCase(localName)) {
+    if ("plugin".equals(localName)) {
       insidePlugin = true;
-    } else if (insidePlugin && "artifactId".equalsIgnoreCase(localName)) {
+    } else if (insidePlugin && "artifactId".equals(localName)) {
       saveContents = true;
       elementContents = new StringBuilder();
-    } else if (insidePlugin && "groupId".equalsIgnoreCase(localName)) {
+    } else if (insidePlugin && "groupId".equals(localName)) {
       Locator2 locator = getLocator();
       saveContents = true;
       elementContents = new StringBuilder();
@@ -76,7 +76,7 @@ class PomXmlScanner extends AbstractScanner {
   @Override
   public void endElement (String uri, String localName, String qName)
       throws SAXException {
-    if ("plugin".equalsIgnoreCase(localName)) {
+    if ("plugin".equals(localName)) {
       // Found closing <plugin> tag
       resetFlags();
     } else if (insidePlugin && "groupId".equals(localName)) {
@@ -85,7 +85,7 @@ class PomXmlScanner extends AbstractScanner {
       if ("com.google.appengine".equals(elementContents.toString())) {
         foundAppEngineGroupId = true;
       }
-    } else if (insidePlugin && "artifactId".equalsIgnoreCase(localName)) {
+    } else if (insidePlugin && "artifactId".equals(localName)) {
       // Found closing <artifactId> tag with parent <plugin>
       saveContents = false;
       if ("appengine-maven-plugin".equals(elementContents.toString()) || 

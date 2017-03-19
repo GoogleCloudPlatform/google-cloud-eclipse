@@ -21,7 +21,7 @@ import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.xml.sax.SAXException;
 
@@ -32,7 +32,7 @@ public class PomXmlValidator extends AbstractXmlValidator {
    * to pom.xml if the App Engine Maven plugin is obsolete.
    */
   @Override
-  protected void validate(IResource resource, byte[] bytes)
+  protected void validate(IFile resource, byte[] bytes)
       throws CoreException, IOException, ParserConfigurationException {
     try {
       deleteMarkers(resource);

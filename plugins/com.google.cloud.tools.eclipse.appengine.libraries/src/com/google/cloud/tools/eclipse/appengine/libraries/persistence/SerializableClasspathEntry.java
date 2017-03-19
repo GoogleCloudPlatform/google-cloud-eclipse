@@ -111,22 +111,23 @@ public class SerializableClasspathEntry {
 
   private IPath restoreSourcePath(IPath baseDirectory, IPath sourceBaseDirectory) {
     Path path = new Path(sourceAttachmentPath);
-    if (path.segmentCount() > 0) {
-      switch (path.segment(0)) {
-        case SOURCE_REPO_RELATIVE_PREFIX:
-          return PathUtil.makePathAbsolute(path.removeFirstSegments(1), sourceBaseDirectory);
-        case BINARY_REPO_RELATIVE_PREFIX:
-          return PathUtil.makePathAbsolute(path.removeFirstSegments(1), baseDirectory);
-        default:
-          // Unknown prefix, use path only if valid
-          if (path.toFile().exists()) {
-            return path;
-          } else {
-            return null;
-          }
-      }
+    if (path.segmentCount() == 0) {
+      return path;
     }
-    return path;
+
+    switch (path.segment(0)) {
+      case SOURCE_REPO_RELATIVE_PREFIX:
+        return PathUtil.makePathAbsolute(path.removeFirstSegments(1), sourceBaseDirectory);
+      case BINARY_REPO_RELATIVE_PREFIX:
+        return PathUtil.makePathAbsolute(path.removeFirstSegments(1), baseDirectory);
+      default:
+        // Unknown prefix, use path only if valid
+        if (path.toFile().exists()) {
+          return path;
+        } else {
+          return null;
+        }
+    }
   }
 
   private IClasspathAttribute[] getAttributes() {

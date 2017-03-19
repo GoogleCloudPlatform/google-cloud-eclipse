@@ -7,13 +7,8 @@ before_install:
 install: 
   # use 3.3.9 to ensure faulty test exit states fail the build (#1276)
   - mvn -N io.takari:maven:wrapper -Dmaven=3.3.9
-  # download Cloud SDK
-  - wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-145.0.0-linux-x86_64.tar.gz
-  - tar -xzf google-cloud-sdk-145.0.0-linux-x86_64.tar.gz
-  # update all Cloud SDK components
-  - gcloud components update --quiet
-  # add App Engine component to Cloud SDK
-  - gcloud components install app-engine-java --quiet
+  # download and install Cloud SDK (may be cached)
+  - build/install-cloudsdk.sh 147.0.0 $HOME
 env:
   global:
     - PATH=$PWD/google-cloud-sdk/bin:$PATH
@@ -40,6 +35,7 @@ addons:
 cache:
   directories:
    - $HOME/.m2
+   - $HOME/google-cloud-sdk
 after_success:
   # test req'd as we don't run coverage on all elements of the matrix
   - if [ -d build/jacoco/target ]; then bash <(curl -s https://codecov.io/bash); fi

@@ -24,6 +24,7 @@ import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.junit.Rule;
@@ -33,7 +34,9 @@ public class AppEngineStandardProjectConvertJobTest {
   @Rule
   public ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
 
-  @Rule public final TestProjectCreator projectCreator = new TestProjectCreator();
+  @Rule
+  public final TestProjectCreator projectCreator =
+      new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7);
 
   @Test
   public void testAppEngineFacetAdded() throws CoreException, InterruptedException {
