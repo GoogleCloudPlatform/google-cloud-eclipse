@@ -249,7 +249,8 @@ public class CloudLibrariesInPluginXmlTest {
     assertTrue(jspApi.getFilters().isEmpty());
     
     LibraryFile jstlApi = jspApiLibrary.getLibraryFiles().get(1);
-    assertThat(jstlApi.getJavadocUri(), is(new URI("https://jstl.java.net/")));
+    assertThat(jstlApi.getJavadocUri(), 
+        is(new URI("https://tomcat.apache.org/taglibs/standard/apidocs/")));
     assertNull(jstlApi.getSourceUri());
 
     assertNotNull(jstlApi.getMavenCoordinates());
