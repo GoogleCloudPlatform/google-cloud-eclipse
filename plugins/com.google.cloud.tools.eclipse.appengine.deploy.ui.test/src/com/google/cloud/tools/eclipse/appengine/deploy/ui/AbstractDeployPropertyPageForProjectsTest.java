@@ -29,8 +29,9 @@ public abstract class AbstractDeployPropertyPageForProjectsTest<P extends Deploy
 
   protected static final IProjectFacetVersion APP_ENGINE_STANDARD_FACET_1 =
       ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID).getVersion("1");
-  protected static final IProjectFacetVersion APP_ENGINE_FLEX_FACET_1 =
-      ProjectFacetsManager.getProjectFacet(AppEngineFlexFacet.ID).getVersion("1");
+  // commented out until Flex facet is enabled
+//  protected static final IProjectFacetVersion APP_ENGINE_FLEX_FACET_1 =
+//      ProjectFacetsManager.getProjectFacet(AppEngineFlexFacet.ID).getVersion("1");
 
   @Rule
   public ShellTestResource shellTestResource = new ShellTestResource();
