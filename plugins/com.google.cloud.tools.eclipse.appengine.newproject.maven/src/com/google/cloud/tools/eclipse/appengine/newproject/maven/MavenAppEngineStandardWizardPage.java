@@ -16,10 +16,11 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.newproject.JavaPackageValidator;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
-import com.google.cloud.tools.eclipse.appengine.ui.AppEngineLibrariesSelectorGroup;
+import com.google.cloud.tools.eclipse.appengine.ui.LibrarySelectorGroup;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.cloud.tools.io.FilePermissions;
@@ -69,7 +70,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
   private Text artifactIdField;
   private Text versionField;
   @VisibleForTesting Text javaPackageField;
-  private AppEngineLibrariesSelectorGroup appEngineLibrariesSelectorGroup;
+  private LibrarySelectorGroup appEngineLibrariesSelectorGroup;
 
   private boolean canFlipPage;
 
@@ -115,7 +116,8 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     createLocationArea(container, pageValidator);
     createMavenCoordinatesArea(container, pageValidator);
     createAppEngineProjectDetailsArea(container, pageValidator);
-    appEngineLibrariesSelectorGroup = new AppEngineLibrariesSelectorGroup(container);
+    appEngineLibrariesSelectorGroup =
+        new LibrarySelectorGroup(container, CloudLibraries.APP_ENGINE_GROUP);
     appEngineLibrariesSelectorGroup.addSelectionChangedListener(new ISelectionChangedListener() {
       @Override
       public void selectionChanged(SelectionChangedEvent event) {

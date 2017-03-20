@@ -17,7 +17,6 @@
 package com.google.cloud.tools.eclipse.login.ui;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -48,7 +47,7 @@ public class LoginServiceUiTest {
         .scheduleCodeWaitingJob(codeReceiver, wait, codeHolder, exceptionHolder)
         .join();
 
-    verify(codeReceiver, times(1)).stop();
+    verify(codeReceiver).stop();
     Assert.assertEquals("some valid authorization code", codeHolder[0]);
     Assert.assertNull(exceptionHolder[0]);
     Assert.assertEquals(1, wait.availablePermits());
@@ -68,7 +67,7 @@ public class LoginServiceUiTest {
         .scheduleCodeWaitingJob(codeReceiver, wait, codeHolder, exceptionHolder)
         .join();
 
-    verify(codeReceiver, times(1)).stop();
+    verify(codeReceiver).stop();
     Assert.assertNull(codeHolder[0]);
     Assert.assertEquals("some IOException", exceptionHolder[0].getMessage());
     Assert.assertEquals(1, wait.availablePermits());

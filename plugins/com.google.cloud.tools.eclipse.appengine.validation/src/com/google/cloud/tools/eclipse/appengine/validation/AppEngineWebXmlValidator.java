@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.util.Map;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.xml.sax.SAXException;
 
@@ -34,7 +34,7 @@ public class AppEngineWebXmlValidator extends AbstractXmlValidator {
    * appengine-web.xml for every {@link BannedElement} found in the file.
    */
   @Override
-  protected void validate(IResource resource, byte[] bytes) 
+  protected void validate(IFile resource, byte[] bytes) 
       throws CoreException, IOException, ParserConfigurationException {
     try {
       deleteMarkers(resource);

@@ -25,8 +25,8 @@ import org.eclipse.jdt.core.JavaCore;
  */
 public class SerializableAccessRules {
 
-  private AccessRuleKind ruleKind;
-  private String pattern;
+  private final AccessRuleKind ruleKind;
+  private final String pattern;
 
   public SerializableAccessRules(IAccessRule rule) {
     ruleKind = AccessRuleKind.forInt(rule.getKind());
@@ -38,11 +38,11 @@ public class SerializableAccessRules {
   }
 
   private static enum AccessRuleKind {
-    ACCESSIBLE(IAccessRule.K_ACCESSIBLE), 
-    DISCOURAGED(IAccessRule.K_DISCOURAGED), 
+    ACCESSIBLE(IAccessRule.K_ACCESSIBLE),
+    DISCOURAGED(IAccessRule.K_DISCOURAGED),
     FORBIDDEN(IAccessRule.K_NON_ACCESSIBLE);
 
-    int kind;
+    private final int kind;
 
     AccessRuleKind(int kind) {
       this.kind = kind;

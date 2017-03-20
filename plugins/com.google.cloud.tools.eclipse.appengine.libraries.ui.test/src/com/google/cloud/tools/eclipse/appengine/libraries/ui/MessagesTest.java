@@ -22,15 +22,26 @@ import org.junit.Test;
 public class MessagesTest {
 
   @Test
-  public void testTitle() {
-    Assert.assertEquals("App Engine Standard Environment Libraries",  Messages.getString("title"));
+  public void testAppEngineTitle() {
+    Assert.assertEquals("App Engine Standard Environment Libraries",  Messages.getString("appengine-title"));
+  }
+  
+  @Test
+  public void testClientApisTitle() {
+    Assert.assertEquals("Google Client APIs for Java",  Messages.getString("clientapis-title"));
+  }
+  
+  @Test
+  public void testClientApisDescription() {
+    Assert.assertEquals("Additional jars used by Google Client APIs for Java", 
+        Messages.getString("clientapis-description"));
   }
   
   @Test
   public void testDescription() {
     Assert.assertEquals(
         "Additional jars commonly used in App Engine Standard Environment applications", 
-        Messages.getString("description"));
+        Messages.getString("appengine-description"));
   }
   
 

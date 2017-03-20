@@ -17,15 +17,11 @@
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
 import java.util.List;
-
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
-import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
-
 public class CloudLibrariesTest {
-  
+
   @Test
   public void testGetLibraries() {
     List<Library> libraries = CloudLibraries.getLibraries("appengine");
@@ -37,13 +33,13 @@ public class CloudLibrariesTest {
     }
     Assert.assertEquals(3, libraries.size());
   }
-  
+
   @Test
   public void testGetLibraries_null() {
     List<Library> libraries = CloudLibraries.getLibraries(null);
     Assert.assertTrue(libraries.isEmpty());
   }
-  
+
   @Test
   public void testGetLibrary() {
     Library library = CloudLibraries.getLibrary("objectify");

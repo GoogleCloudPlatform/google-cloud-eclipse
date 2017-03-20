@@ -35,6 +35,11 @@
           <file type="file" name="appengine-web.xml"/>
         </rules>
       </include>
+      <include>
+        <rules>
+          <facet id="com.google.cloud.tools.eclipse.appengine.facets.standard" version="*"/>
+        </rules>
+      </include>
     </validator>
   </extension>
   
@@ -56,7 +61,7 @@
     </markerResolutionGenerator>
   </extension>
   
-    <extension 
+  <extension 
       name="%web.xml"
       point="org.eclipse.wst.validation.validatorV2" 
       id="webXmlValidator">
@@ -66,6 +71,11 @@
       <include>
         <rules>
           <file type="file" name="web.xml"/>
+        </rules>
+      </include>
+      <include>
+        <rules>
+          <facet id="com.google.cloud.tools.eclipse.appengine.facets.standard" version="*"/>
         </rules>
       </include>
     </validator>
@@ -79,6 +89,36 @@
     <super type="org.eclipse.core.resources.problemmarker" />
     <super type="org.eclipse.core.resources.textmarker" />
     <persistent value="true" />
+  </extension>
+  
+  <extension
+      id="undefinedServletMarker"
+      name="%undefined.servlet.marker"
+      point="org.eclipse.core.resources.markers">
+    <super type="org.eclipse.jdt.core.problem" />
+    <super type="org.eclipse.core.resources.problemmarker" />
+    <super type="org.eclipse.core.resources.textmarker" />
+    <persistent value="true" />
+  </extension>
+  
+  <extension 
+      name="%web.xml"
+      point="org.eclipse.wst.validation.validatorV2" 
+      id="webXmlValidator">
+    <validator
+    	class="com.google.cloud.tools.eclipse.appengine.validation.WebXmlValidator"
+    	markerId="com.google.cloud.tools.eclipse.appengine.validation.undefinedServletMarker">
+      <include>
+        <rules>
+          <file type="file" name="web.xml"/>
+        </rules>
+      </include>
+      <include>
+        <rules>
+          <facet id="com.google.cloud.tools.eclipse.appengine.facets.standard" version="*"/>
+        </rules>
+      </include>
+    </validator>
   </extension>
   
     <extension point="org.eclipse.ui.ide.markerResolution">
@@ -98,6 +138,11 @@
       <include>
         <rules>
           <file type="file" name="pom.xml"/>
+        </rules>
+      </include>
+      <include>
+        <rules>
+          <facet id="com.google.cloud.tools.eclipse.appengine.facets.standard" version="*"/>
         </rules>
       </include>
     </validator>

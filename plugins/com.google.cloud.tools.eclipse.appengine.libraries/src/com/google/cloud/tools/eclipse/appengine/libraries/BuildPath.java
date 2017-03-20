@@ -89,10 +89,18 @@ public class BuildPath {
       IJavaProject javaProject, List<Library> libraries, IProgressMonitor monitor)
           throws JavaModelException, CoreException {
     
+    return prepareLibraries(javaProject, libraries, monitor, true);
+  }
+
+  private static IClasspathEntry[] prepareLibraries(IJavaProject javaProject,
+      List<Library> libraries, IProgressMonitor monitor, boolean addToClasspath)
+          throws JavaModelException, CoreException {
     SubMonitor subMonitor = SubMonitor.convert(monitor,
-        Messages.getString("adding.app.engine.libraries"), libraries.size()); //$NON-NLS-1$
+        Messages.getString("adding.app.engine.libraries"), //$NON-NLS-1$
+        libraries.size() + 1); // + 1 because we pass the submonitor along below
 
     IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
+    
     List<IClasspathEntry> newRawClasspath = new ArrayList<>(rawClasspath.length + libraries.size());
     newRawClasspath.addAll(Arrays.asList(rawClasspath));
     List<IClasspathEntry> newEntries = new ArrayList<>();
@@ -104,11 +112,22 @@ public class BuildPath {
       }
       subMonitor.worked(1);
     }
-    javaProject.setRawClasspath(newRawClasspath.toArray(new IClasspathEntry[0]), subMonitor);
     
-    runContainerResolverJob(javaProject);
+    if (addToClasspath) {
+      javaProject.setRawClasspath(newRawClasspath.toArray(new IClasspathEntry[0]), subMonitor);
+      runContainerResolverJob(javaProject);
+    }
     
     return newEntries.toArray(new IClasspathEntry[0]);
+  }
+  
+  /**
+   * @return the entries to be added to the classpath. Does not add them to the classpath.
+   */
+  public static IClasspathEntry[] listAdditionalLibraries(
+      IJavaProject javaProject, List<Library> libraries, IProgressMonitor monitor)
+          throws JavaModelException, CoreException {
+    return prepareLibraries(javaProject, libraries, monitor, false);
   }
 
   @VisibleForTesting

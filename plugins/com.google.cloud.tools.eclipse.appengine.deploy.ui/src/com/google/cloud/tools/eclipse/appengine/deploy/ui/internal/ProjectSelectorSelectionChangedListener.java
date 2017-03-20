@@ -24,6 +24,7 @@ import com.google.cloud.tools.eclipse.projectselector.ProjectRepositoryException
 import com.google.cloud.tools.eclipse.projectselector.ProjectSelector;
 import com.google.cloud.tools.eclipse.projectselector.model.AppEngine;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
+import com.google.common.net.UrlEscapers;
 import java.text.MessageFormat;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -32,7 +33,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 public class ProjectSelectorSelectionChangedListener implements ISelectionChangedListener {
 
   private static String CREATE_APP_LINK =
-      "https://console.cloud.google.com/appengine/create?lang=java&project={0}";
+      "https://console.cloud.google.com/appengine/create?lang=java&project={0}&authuser={1}";
 
   private final AccountSelector accountSelector;
   private final ProjectRepository projectRepository;
@@ -54,7 +55,9 @@ public class ProjectSelectorSelectionChangedListener implements ISelectionChange
         GcpProject project = (GcpProject) selection.getFirstElement();
         boolean hasAppEngineApplication = hasAppEngineApplication(project);
         if (!hasAppEngineApplication) {
-          String link = MessageFormat.format(CREATE_APP_LINK, project.getId());
+          String link = MessageFormat.format(
+              CREATE_APP_LINK, project.getId(),
+              UrlEscapers.urlFormParameterEscaper().escape(accountSelector.getSelectedEmail()));
           projectSelector.setStatusLink(
               Messages.getString("projectselector.missing.appengine.application.link",
                                  link), link);

@@ -23,7 +23,6 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -54,8 +53,9 @@ public class FlexDeployPreferencesTest {
 
   @Test
   public void testGetAppEngineDirectory() {
-    when(mockEclipsePreferences.get(eq(FlexDeployPreferences.PREF_APP_ENGINE_DIRECTORY), anyString()))
-      .thenReturn("configFolder");
+    when(mockEclipsePreferences.get(
+        eq(FlexDeployPreferences.PREF_APP_ENGINE_DIRECTORY), anyString()))
+            .thenReturn("configFolder");
     FlexDeployPreferences flexDeployPreferences = new FlexDeployPreferences(mockEclipsePreferences);
     assertThat(flexDeployPreferences.getAppEngineDirectory(), is("configFolder"));
   }
@@ -64,13 +64,14 @@ public class FlexDeployPreferencesTest {
   public void testSetAppEngineDirectory() {
     FlexDeployPreferences flexDeployPreferences = new FlexDeployPreferences(mockEclipsePreferences);
     flexDeployPreferences.setAppEngineDirectory("configFolder");
-    verify(mockEclipsePreferences, times(1)).put(eq(FlexDeployPreferences.PREF_APP_ENGINE_DIRECTORY), eq("configFolder"));
+    verify(mockEclipsePreferences)
+        .put(FlexDeployPreferences.PREF_APP_ENGINE_DIRECTORY, "configFolder");
   }
 
   @Test
   public void testGetDockerDirectory() {
     when(mockEclipsePreferences.get(eq(FlexDeployPreferences.PREF_DOCKER_DIRECTORY), anyString()))
-      .thenReturn("DockerDirectory");
+        .thenReturn("DockerDirectory");
     FlexDeployPreferences flexDeployPreferences = new FlexDeployPreferences(mockEclipsePreferences);
     assertThat(flexDeployPreferences.getDockerDirectory(), is("DockerDirectory"));
   }
@@ -79,13 +80,15 @@ public class FlexDeployPreferencesTest {
   public void testSetDockerDirectory() {
     FlexDeployPreferences flexDeployPreferences = new FlexDeployPreferences(mockEclipsePreferences);
     flexDeployPreferences.setDockerDirectory("DockerDirectory");
-    verify(mockEclipsePreferences, times(1)).put(eq(FlexDeployPreferences.PREF_DOCKER_DIRECTORY), eq("DockerDirectory"));
+    verify(mockEclipsePreferences)
+        .put(FlexDeployPreferences.PREF_DOCKER_DIRECTORY, "DockerDirectory");
   }
 
   @Test
   public void testGetUseDeploymentPreferences() {
-    when(mockEclipsePreferences.getBoolean(eq(FlexDeployPreferences.PREF_USE_DEPLOYMENT_PREFERENCES), anyBoolean()))
-      .thenReturn(false);
+    when(mockEclipsePreferences.getBoolean(
+        eq(FlexDeployPreferences.PREF_USE_DEPLOYMENT_PREFERENCES), anyBoolean()))
+            .thenReturn(false);
     FlexDeployPreferences flexDeployPreferences = new FlexDeployPreferences(mockEclipsePreferences);
     assertFalse(flexDeployPreferences.getUseDeploymentPreferences());
   }
@@ -94,6 +97,7 @@ public class FlexDeployPreferencesTest {
   public void testSetUseDeploymentPreferences() {
     FlexDeployPreferences flexDeployPreferences = new FlexDeployPreferences(mockEclipsePreferences);
     flexDeployPreferences.setUseDeploymentPreferences(true);
-    verify(mockEclipsePreferences, times(1)).putBoolean(eq(FlexDeployPreferences.PREF_USE_DEPLOYMENT_PREFERENCES), eq(true));
+    verify(mockEclipsePreferences)
+        .putBoolean(FlexDeployPreferences.PREF_USE_DEPLOYMENT_PREFERENCES, true);
   }
 }

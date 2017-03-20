@@ -88,7 +88,7 @@ class LibraryFactory {
     }
   }
 
-  private static List<LibraryFile> getLibraryFiles(IConfigurationElement[] children) 
+  private static List<LibraryFile> getLibraryFiles(IConfigurationElement[] children)
       throws InvalidRegistryObjectException, URISyntaxException {
     List<LibraryFile> libraryFiles = new ArrayList<>();
     for (IConfigurationElement libraryFileElement : children) {
@@ -112,7 +112,7 @@ class LibraryFactory {
   }
 
   private static URI getUri(String uriString) throws URISyntaxException {
-    if (uriString == null || uriString.isEmpty()) {
+    if (Strings.isNullOrEmpty(uriString)) {
       return null;
     } else {
       return new URI(uriString);

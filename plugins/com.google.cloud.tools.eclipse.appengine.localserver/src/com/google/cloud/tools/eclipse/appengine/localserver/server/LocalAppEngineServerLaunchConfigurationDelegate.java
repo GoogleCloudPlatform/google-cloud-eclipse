@@ -86,7 +86,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
   /**
    * Returns {@code value} unless it's null or empty, then returns {@code nullOrEmptyValue}.
-   * 
+   *
    * @see Strings#isNullOrEmpty(String)
    */
   private static String ifEmptyOrNull(String value, String nullOrEmptyValue) {
@@ -224,7 +224,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
   /**
    * Resolve a host or IP address to an IP address.
-   * 
+   *
    * @return an {@link InetAddress}, or {@code null} if unable to be resolved (equivalent to
    *         {@code INADDR_ANY})
    */
@@ -246,7 +246,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
   /**
    * Pull out a port from the specified attribute on the given {@link ILaunchConfiguration} or
    * {@link IServer} instance.
-   * 
+   *
    * @param defaultPort the port if no port attributes are found
    * @return the port, or {@code defaultPort} if no port was found
    */
@@ -348,7 +348,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
     setDefaultSourceLocator(launch, configuration);
 
-    List<File> runnables = new ArrayList<File>();
+    List<File> runnables = new ArrayList<>();
     for (IModule module : modules) {
       IPath deployPath = serverBehaviour.getModuleDeployDirectory(module);
       runnables.add(deployPath.toFile());

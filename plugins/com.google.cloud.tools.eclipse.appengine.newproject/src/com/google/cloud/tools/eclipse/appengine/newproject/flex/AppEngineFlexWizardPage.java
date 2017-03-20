@@ -24,6 +24,7 @@ import org.eclipse.ui.PlatformUI;
 
 public class AppEngineFlexWizardPage extends AppEngineWizardPage {
   public AppEngineFlexWizardPage() {
+    super(false);
     setTitle(Messages.getString("app.engine.flex.project")); //$NON-NLS-1$
     setDescription(Messages.getString("create.app.engine.flex.project")); //$NON-NLS-1$
   }

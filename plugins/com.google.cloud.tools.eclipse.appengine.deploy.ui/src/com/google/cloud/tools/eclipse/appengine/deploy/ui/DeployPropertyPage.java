@@ -22,21 +22,24 @@ import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import com.google.cloud.tools.eclipse.util.AdapterUtil;
+import com.google.common.annotations.VisibleForTesting;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.inject.Inject;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.databinding.preference.PreferencePageSupport;
 import org.eclipse.jface.layout.GridDataFactory;
-import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.custom.StackLayout;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PropertyPage;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
-import org.eclipse.wst.common.project.facet.core.IProjectFacet;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
 /**
@@ -46,17 +49,27 @@ import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
  */
 public class DeployPropertyPage extends PropertyPage {
 
-  private DeployPreferencesPanel content;
-  private boolean canSetMessage = true;
-  private boolean isStandardPanel;
-  private IFacetedProject facetedProject = null;
-  private String invalidFacetConfigErrorMessage = "";
   private static final Logger logger = Logger.getLogger(DeployPropertyPage.class.getName());
+
+  @Inject
+  private IGoogleLoginService loginService;
+  @Inject
+  private IGoogleApiFactory googleApiFactory;
+
+  private IFacetedProject facetedProject = null;
+  private FlexDeployPreferencesPanel flexPreferencesPanel;
+  private StandardDeployPreferencesPanel standardPreferencesPanel;
+  private BlankDeployPreferencesPanel blankPreferencesPanel;
+  private StackLayout stackLayout;
+  private PreferencePageSupport databindingSupport;
+  private Composite container;
 
   @Override
   protected Control createContents(Composite parent) {
-    Composite container = new Composite(parent, SWT.NONE);
-    
+    container = new Composite(parent, SWT.NONE);
+    stackLayout = new StackLayout();
+    container.setLayout(stackLayout);
+
     PlatformUI.getWorkbench().getHelpSystem().setHelp(parent,
         "com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployAppEngineStandardProjectContext"); //$NON-NLS-1$
     
@@ -69,18 +82,17 @@ public class DeployPropertyPage extends PropertyPage {
       return container;
     }
 
-    content = getPreferencesPanel(project, facetedProject, container);
-    if (content == null) {
-      return container;
-    }
-    isStandardPanel = content instanceof StandardDeployPreferencesPanel;
-
-    GridDataFactory.fillDefaults().grab(true, false).applyTo(content);
     GridDataFactory.fillDefaults().grab(true, true).applyTo(container);
-    GridLayoutFactory.fillDefaults().generateLayout(container);
 
-    PreferencePageSupport.create(this, content.getDataBindingContext());
-    return content;
+    getControl().addDisposeListener(new DisposeListener() {
+      @Override
+      public void widgetDisposed(DisposeEvent e) {
+        if (databindingSupport != null) {
+          databindingSupport.dispose();
+        }
+      }
+    });
+    return container;
   }
 
   private Runnable getLayoutChangedHandler() {
@@ -89,12 +101,12 @@ public class DeployPropertyPage extends PropertyPage {
       @Override
       public void run() {
         // resize the page to work around https://bugs.eclipse.org/bugs/show_bug.cgi?id=265237
-        Composite parent = content.getParent();
+        Composite parent = getActivePanel().getParent();
         while (parent != null) {
           if (parent instanceof ScrolledComposite) {
             ScrolledComposite scrolledComposite = (ScrolledComposite) parent;
-            scrolledComposite.setMinSize(content.getParent().computeSize(SWT.DEFAULT, SWT.DEFAULT));
-            content.layout();
+            scrolledComposite.setMinSize(getActivePanel().getParent().computeSize(SWT.DEFAULT, SWT.DEFAULT));
+            getActivePanel().layout();
             return;
           }
           parent = parent.getParent();
@@ -105,109 +117,93 @@ public class DeployPropertyPage extends PropertyPage {
 
   @Override
   public boolean performOk() {
-    // Content can be null if Properties Page is opened and App Engine facets are uninstalled
     if (isValid()) {
-      if (content == null) {
-        return true;
-      } else {
-        return content.savePreferences();
-      }
+      return getActivePanel().savePreferences();
     }
     return false;
   }
 
   @Override
   protected void performDefaults() {
-    content.resetToDefaults();
+    // should we reset all panels?
+    getActivePanel().resetToDefaults();
     super.performDefaults();
   }
 
-  @Override
-  public void dispose() {
-    if (content != null) {
-      // Content can be null if Properties Page is opened and App Engine facets are uninstalled
-      content.dispose();
-    }
-    super.dispose();
-  }
-
-  @Override
-  public void setErrorMessage(String newMessage) {
-    if (!canSetMessage) {
-      return;
-    }
-    super.setErrorMessage(newMessage);
-  }
-
-  @Override
-  public void setMessage(String newMessage, int newType) {
-    if (!canSetMessage) {
-      return;
-    }
-    super.setMessage(newMessage, newType);
-  }
-
-  private DeployPreferencesPanel getPreferencesPanel(IProject project,
-      IFacetedProject facetedProject, Composite container) {
-
-    IGoogleLoginService loginService =
-        PlatformUI.getWorkbench().getService(IGoogleLoginService.class);
-    IGoogleApiFactory googleApiFactory =
-        PlatformUI.getWorkbench().getService(IGoogleApiFactory.class);
-
-    if (AppEngineStandardFacet.hasAppEngineFacet(facetedProject)) {
-      setTitle(Messages.getString("standard.page.title"));
-      return new StandardDeployPreferencesPanel(
-          container, project, loginService, getLayoutChangedHandler(), false /* requireValues */,
-          new ProjectRepository(googleApiFactory));
-    } else if (AppEngineFlexFacet.hasAppEngineFacet(facetedProject)) {
-      setTitle(Messages.getString("flex.page.title"));
-      return new FlexDeployPreferencesPanel(container, project);
-    } else {
-      logger.log(Level.WARNING,
-          "App Engine Deployment property page is only visible if project contains an App Engine facet");
-      return null;
-    }
+  private DeployPreferencesPanel getActivePanel() {
+    return (DeployPreferencesPanel) stackLayout.topControl;
   }
 
   @Override
   public void setVisible(boolean visible) {
     super.setVisible(visible);
-    evaluateFacetConfiguration();
+    if (visible) {
+      evaluateFacetConfiguration();
+    }
   }
 
   /**
-   * Checks to see if the project associated with this Property dialog still has a valid
-   * App Engine facet. If it does, allow messages to be displayed. If it doesn't display
-   * appropriate error message and prevent other messages from being displayed.
+   * Displays the appropriate deploy preferences panel based on the project's facet configuration.
    */
   private void evaluateFacetConfiguration() {
-    if (isStandardPanel && !AppEngineStandardFacet.hasAppEngineFacet(facetedProject)) {
-      IProjectFacet projectFacet = ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID);
-      invalidFacetConfigErrorMessage =
-          Messages.getString("invalid.deploy.page.state", projectFacet.getLabel());
-      updatePageBasedOnFacetConfig(false);
-    } else if (!isStandardPanel && !AppEngineFlexFacet.hasAppEngineFacet(facetedProject)) {
-      IProjectFacet projectFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexFacet.ID);
-      invalidFacetConfigErrorMessage =
-          Messages.getString("invalid.deploy.page.state", projectFacet.getLabel());
-      updatePageBasedOnFacetConfig(false);
-    } else {
-      invalidFacetConfigErrorMessage = "";
-      updatePageBasedOnFacetConfig(true);
+    if (databindingSupport != null) {
+      databindingSupport.dispose();
     }
+    if (facetedProject != null && AppEngineStandardFacet.hasAppEngineFacet(facetedProject)) {
+      createStandardPanelIfNeeded();
+      stackLayout.topControl = standardPreferencesPanel;
+      databindingSupport =
+          PreferencePageSupport.create(this, standardPreferencesPanel.getDataBindingContext());
+    } else if (facetedProject != null 
+        && ProjectFacetsManager.isProjectFacetDefined(AppEngineFlexFacet.ID) 
+        && AppEngineFlexFacet.hasAppEngineFacet(facetedProject)) {
+      createFlexPanelIfNeeded();
+      stackLayout.topControl = flexPreferencesPanel;
+      databindingSupport =
+          PreferencePageSupport.create(this, flexPreferencesPanel.getDataBindingContext());
+    } else {
+      createBlankPanelIfNeeded();
+      stackLayout.topControl = blankPreferencesPanel;
+      databindingSupport =
+          PreferencePageSupport.create(this, blankPreferencesPanel.getDataBindingContext());
+    }
+    container.layout();
 
   }
 
-  private void updatePageBasedOnFacetConfig(boolean hasCorrectFacetConfiguration) {
-    if (hasCorrectFacetConfiguration) {
-      canSetMessage = true;
-      content.getDataBindingContext().updateModels();
-    } else {
-      setErrorMessage(invalidFacetConfigErrorMessage);
-      canSetMessage = false;
+  private void createBlankPanelIfNeeded() {
+    if (blankPreferencesPanel == null) {
+      blankPreferencesPanel = new BlankDeployPreferencesPanel(container);
     }
-    
   }
- 
+
+  private void createStandardPanelIfNeeded() {
+    if (standardPreferencesPanel == null) {
+      standardPreferencesPanel = new StandardDeployPreferencesPanel(
+          container, facetedProject.getProject(), loginService, getLayoutChangedHandler(),
+          false /* requireValues */, new ProjectRepository(googleApiFactory));
+    }
+  }
+
+  private void createFlexPanelIfNeeded() {
+    if (flexPreferencesPanel == null) {
+      flexPreferencesPanel = new FlexDeployPreferencesPanel(container, facetedProject.getProject());
+    }
+  }
+
+  /**
+   * Used only in tests.
+   */
+  @VisibleForTesting
+  void setLoginService(IGoogleLoginService loginService) {
+    this.loginService = loginService;
+  }
+
+  /**
+   * Used only in tests.
+   */
+  @VisibleForTesting
+  void setGoogleApiFactory(IGoogleApiFactory googleApiFactory) {
+    this.googleApiFactory = googleApiFactory;
+  }
 }
