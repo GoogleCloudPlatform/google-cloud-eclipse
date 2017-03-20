@@ -330,13 +330,8 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     Label projectIdLabel = new Label(this, SWT.LEAD);
     projectIdLabel.setText(Messages.getString("project"));
     projectIdLabel.setToolTipText(Messages.getString("tooltip.project.id"));
-    GridDataFactory.swtDefaults().align(SWT.BEGINNING, SWT.BEGINNING).span(1, 3)
+    GridDataFactory.swtDefaults().align(SWT.BEGINNING, SWT.BEGINNING).span(1, 2)
         .applyTo(projectIdLabel);
-
-    Label select = new Label(this, SWT.WRAP);
-    select.setText(Messages.getString("projectselector.selectProject"));
-    GridDataFactory.swtDefaults().align(SWT.FILL, SWT.BEGINNING)
-        .applyTo(select);
 
     Link createNewProject = new Link(this, SWT.NONE);
     createNewProject.setText(Messages.getString("projectselector.createproject",
@@ -354,8 +349,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
             }
           }
         }, new ErrorDialogErrorHandler(getShell())));
-    GridDataFactory.swtDefaults().align(SWT.FILL, SWT.BEGINNING)
-        .applyTo(createNewProject);
+    GridDataFactory.swtDefaults().applyTo(createNewProject);
 
     Composite projectSelectorComposite = new Composite(this, SWT.NONE);
     GridLayoutFactory.fillDefaults().numColumns(2).spacing(0, 0).applyTo(projectSelectorComposite);
