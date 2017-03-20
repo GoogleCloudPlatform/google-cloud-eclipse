@@ -34,10 +34,15 @@ import org.apache.maven.artifact.Artifact;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
@@ -46,8 +51,8 @@ import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
  * the workspace.
  */
 public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
-  // TODO: is map the best collection type?
   private static final Map<String, String> PROJECT_DEPENDENCIES;
+  // TODO: jstl does not get added
   static {
     Map<String, String> projectDependencies = new HashMap<String, String>();
     projectDependencies.put("javax.servlet", "servlet-api");
@@ -79,8 +84,9 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
   @Override
   public IFile createProjectFiles(IProject newProject, AppEngineProjectConfig config, IProgressMonitor monitor)
       throws CoreException {
+    IFile mostImportantFile =  CodeTemplates.materializeAppEngineFlexFiles(newProject, config, monitor);
     addDependenciesToProject(newProject, monitor);
-    return CodeTemplates.materializeAppEngineFlexFiles(newProject, config, monitor);
+    return mostImportantFile;
   }
 
   // TODO: should this be wrapped around a workspace operation?
@@ -88,25 +94,23 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
 
     // Create a lib folder
-    IFolder libFolder = newProject.getFolder("lib");
-    if (!libFolder.exists()) {
-      libFolder.create(true, true, subMonitor.newChild(10));
-    }
+    IFolder libFolder = createLibFolder(newProject, subMonitor.newChild(10));
 
     // Download the dependencies from maven
     M2RepositoryService repoService = new M2RepositoryService();
     repoService.activate();
     int ticks = 90 / PROJECT_DEPENDENCIES.size();
-    for (Map.Entry<String, String> entry : PROJECT_DEPENDENCIES.entrySet()) {
-      LibraryFile libraryFile = new LibraryFile(new MavenCoordinates(entry.getKey(), entry.getValue()));
+    for (Map.Entry<String, String> dependency : PROJECT_DEPENDENCIES.entrySet()) {
+      LibraryFile libraryFile = new LibraryFile(new MavenCoordinates(dependency.getKey(), dependency.getValue()));
       Artifact artifact = null;
       try {
         artifact = repoService.resolveArtifact(libraryFile, subMonitor.newChild(ticks));
       } catch (CoreException e1) {
         // log and continue
+        continue;
       }
 
-      // Copy into lib folder
+      // Copy dependency from maven repo into lib folder
       // TODO: could artifact be null?
       if (artifact != null) {
         File artifactFile = artifact.getFile();
@@ -119,6 +123,41 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
       }
 
     }
+  }
+
+  // TODO: add the source files
+  // TODO: WebAppProjectCreator#setProjectClasspath
+  // TODO: monitor
+  private IFolder createLibFolder(IProject project, IProgressMonitor monitor) throws CoreException {
+    // Create a lib folder
+    IFolder libFolder = project.getFolder("lib");
+    if (!libFolder.exists()) {
+      libFolder.create(true, true, monitor);
+    }  
+
+    addJavaNature(project);
+    addClasspathLibraryEntry(project, libFolder.getLocation(), monitor);
+    return libFolder;
+  }
+
+  private void addJavaNature(IProject project) throws CoreException {
+    IProjectDescription description = project.getDescription();
+    String[] natureIds = description.getNatureIds();
+    String[] updatesNatureIds = new String[natureIds.length + 1];
+    System.arraycopy(natureIds, 0, updatesNatureIds, 0, natureIds.length);
+    updatesNatureIds[natureIds.length] = JavaCore.NATURE_ID;
+    description.setNatureIds(updatesNatureIds);
+    project.setDescription(description, null);
+  }
+
+  private void addClasspathLibraryEntry(IProject project, IPath libraryPath, IProgressMonitor monitor)  throws CoreException {
+    IJavaProject javaProject = JavaCore.create(project);
+    IClasspathEntry[] entries = javaProject.getRawClasspath();
+    IClasspathEntry[] newEntries = new IClasspathEntry[entries.length + 1];
+    System.arraycopy(entries, 0, newEntries, 0, entries.length);
+
+    newEntries[entries.length] = JavaCore.newLibraryEntry(libraryPath, null, null);
+    javaProject.setRawClasspath(newEntries, monitor);
   }
 
 }
