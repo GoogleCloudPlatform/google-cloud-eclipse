@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.newproject.flex;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexFacet;
+import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.M2RepositoryService;
@@ -27,37 +28,43 @@ import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.maven.artifact.Artifact;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jst.common.project.facet.core.JavaFacet;
+import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
 /**
- * Utility to make a new Eclipse project with the App Engine Flexible facets in
- * the workspace.
+ * Utility to make a new App Engine Flexible Eclipse project.
  */
 public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
+  private static final Logger logger = Logger.getLogger(CreateAppEngineFlexWtpProject.class.getName());
   private static final Map<String, String> PROJECT_DEPENDENCIES;
-  // TODO: jstl does not get added
   static {
     Map<String, String> projectDependencies = new HashMap<String, String>();
     projectDependencies.put("javax.servlet", "servlet-api");
-    projectDependencies.put("javax.servlet.jsp", "javax.servlet.jsp-api");
-    projectDependencies.put("jstl", "jstl");
     PROJECT_DEPENDENCIES = Collections.unmodifiableMap(projectDependencies);
   }
 
@@ -82,82 +89,89 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
   }
 
   @Override
-  public IFile createProjectFiles(IProject newProject, AppEngineProjectConfig config, IProgressMonitor monitor)
-      throws CoreException {
-    IFile mostImportantFile =  CodeTemplates.materializeAppEngineFlexFiles(newProject, config, monitor);
-    addDependenciesToProject(newProject, monitor);
+  public IFile createAndConfigureProjectContent(IProject newProject, AppEngineProjectConfig config,
+      IProgressMonitor monitor) throws CoreException {
+    SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
+    IFile mostImportantFile =  CodeTemplates.materializeAppEngineFlexFiles(newProject, config,
+        subMonitor.newChild(30));
+    configureFacets(newProject, subMonitor.newChild(20));
+    addDependenciesToProject(newProject, subMonitor.newChild(50));
     return mostImportantFile;
   }
 
-  // TODO: should this be wrapped around a workspace operation?
-  private void addDependenciesToProject(IProject newProject, IProgressMonitor monitor) throws CoreException {
+  /**
+   * Add Java 8 and Dynamic Web Module facet
+   */
+  private void configureFacets(IProject project, IProgressMonitor monitor) throws CoreException {
+    SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
+    IFacetedProject facetedProject = ProjectFacetsManager.create(
+        project, true /* convertIfNecessary */, subMonitor.newChild(50));
+    Set<IFacetedProject.Action> facetInstallSet = new HashSet<>();
+    WebProjectUtil.addJavaFacetToBatch(JavaFacet.VERSION_1_8, facetedProject, facetInstallSet);
+    WebProjectUtil.addWebFacetToBatch(WebFacetUtils.WEB_30, facetedProject, facetInstallSet);
+    WebProjectUtil.addFacetSetToProject(facetedProject, facetInstallSet, subMonitor.newChild(50));
+  }
+
+  private void addDependenciesToProject(IProject project, IProgressMonitor monitor)
+      throws CoreException {
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
 
     // Create a lib folder
-    IFolder libFolder = createLibFolder(newProject, subMonitor.newChild(10));
+    IFolder libFolder = project.getFolder("lib");
+    if (!libFolder.exists()) {
+      libFolder.create(true, true, subMonitor.newChild(10));
+    }
 
     // Download the dependencies from maven
     M2RepositoryService repoService = new M2RepositoryService();
     repoService.activate();
     int ticks = 90 / PROJECT_DEPENDENCIES.size();
     for (Map.Entry<String, String> dependency : PROJECT_DEPENDENCIES.entrySet()) {
-      LibraryFile libraryFile = new LibraryFile(new MavenCoordinates(dependency.getKey(), dependency.getValue()));
+      LibraryFile libraryFile = new LibraryFile(new MavenCoordinates(dependency.getKey(),
+          dependency.getValue()));
       Artifact artifact = null;
       try {
         artifact = repoService.resolveArtifact(libraryFile, subMonitor.newChild(ticks));
-      } catch (CoreException e1) {
-        // log and continue
+      } catch (CoreException ex) {
+        logger.log(Level.WARNING, "Error downloading " +
+      libraryFile.getMavenCoordinates().toString() + " from maven", ex);
         continue;
       }
 
-      // Copy dependency from maven repo into lib folder
-      // TODO: could artifact be null?
+      // Copy dependency from local maven repo into lib folder
       if (artifact != null) {
         File artifactFile = artifact.getFile();
         IFile destFile = libFolder.getFile(artifactFile.getName());
         try {
           destFile.create(new FileInputStream(artifactFile), true, subMonitor);
-        } catch (FileNotFoundException e) {
-          // TODO log and continue
+        } catch (FileNotFoundException ex) {
+          logger.log(Level.WARNING, "Error copying over " + artifactFile.toString() + " to " +
+        libFolder.getFullPath().toPortableString(), ex);
+          continue;
         }
       }
-
     }
+
+    addDependenciesToClasspath(project, libFolder.getLocation().toString(), subMonitor.newChild(10));
   }
 
-  // TODO: add the source files
-  // TODO: WebAppProjectCreator#setProjectClasspath
-  // TODO: monitor
-  private IFolder createLibFolder(IProject project, IProgressMonitor monitor) throws CoreException {
-    // Create a lib folder
-    IFolder libFolder = project.getFolder("lib");
-    if (!libFolder.exists()) {
-      libFolder.create(true, true, monitor);
-    }  
-
-    addJavaNature(project);
-    addClasspathLibraryEntry(project, libFolder.getLocation(), monitor);
-    return libFolder;
-  }
-
-  private void addJavaNature(IProject project) throws CoreException {
-    IProjectDescription description = project.getDescription();
-    String[] natureIds = description.getNatureIds();
-    String[] updatesNatureIds = new String[natureIds.length + 1];
-    System.arraycopy(natureIds, 0, updatesNatureIds, 0, natureIds.length);
-    updatesNatureIds[natureIds.length] = JavaCore.NATURE_ID;
-    description.setNatureIds(updatesNatureIds);
-    project.setDescription(description, null);
-  }
-
-  private void addClasspathLibraryEntry(IProject project, IPath libraryPath, IProgressMonitor monitor)  throws CoreException {
+  private void addDependenciesToClasspath(IProject project, String libraryPath,
+      IProgressMonitor monitor)  throws CoreException {
     IJavaProject javaProject = JavaCore.create(project);
     IClasspathEntry[] entries = javaProject.getRawClasspath();
-    IClasspathEntry[] newEntries = new IClasspathEntry[entries.length + 1];
-    System.arraycopy(entries, 0, newEntries, 0, entries.length);
+    List<IClasspathEntry> newEntries = new ArrayList<IClasspathEntry>();
+    newEntries.addAll(Arrays.asList(entries));
 
-    newEntries[entries.length] = JavaCore.newLibraryEntry(libraryPath, null, null);
-    javaProject.setRawClasspath(newEntries, monitor);
+    // Add all the jars under lib folder to the classpath
+    File libFolder = new File(libraryPath);
+    File[] listOfFiles = libFolder.listFiles();
+
+    for (int i = 0; i < listOfFiles.length; i++) {
+      IPath path = Path.fromOSString(listOfFiles[i].toPath().toString());
+      newEntries.add(JavaCore.newLibraryEntry(path, null, null));
+    }
+
+    javaProject.setRawClasspath(newEntries.toArray(new IClasspathEntry[0]), monitor);
   }
 
 }
