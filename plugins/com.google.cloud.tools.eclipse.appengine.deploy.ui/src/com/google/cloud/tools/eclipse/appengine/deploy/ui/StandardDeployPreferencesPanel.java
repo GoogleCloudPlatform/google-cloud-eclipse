@@ -653,4 +653,9 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     expandableComposite.setFont(font);
     FontUtil.convertFontToBold(expandableComposite);
   }
+
+  @Override
+  protected String getHelpContextId() {
+    return "com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployAppEngineStandardProjectContext"; //$NON-NLS-1$
+  }
 }

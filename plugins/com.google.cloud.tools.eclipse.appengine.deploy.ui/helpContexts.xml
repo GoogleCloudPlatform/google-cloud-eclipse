@@ -23,4 +23,13 @@
      The Google Cloud Storage bucket used to stage files associated with the deployment. If this argument is not specified, the application's default code bucket is used.
     </description>
   </context>
+
+  <context id="DeployAppEngineFlexProjectContext" title="App Engine Deployment - Flexible Environment">
+    <!-- Eclipse requires escaped pseudo-HTML here -->
+    <description>Fake help page
+
+     &lt;b>Bar&lt;/b>
+     Baaaaz
+    </description>
+  </context>
 </contexts>

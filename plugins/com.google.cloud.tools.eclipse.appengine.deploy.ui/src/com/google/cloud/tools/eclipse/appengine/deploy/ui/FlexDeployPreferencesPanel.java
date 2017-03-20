@@ -169,4 +169,8 @@ public class FlexDeployPreferencesPanel extends DeployPreferencesPanel {
     updateControls();
   }
 
+  @Override
+  protected String getHelpContextId() {
+    return "com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployAppEngineFlexProjectContext"; //$NON-NLS-1$
+  }
 }

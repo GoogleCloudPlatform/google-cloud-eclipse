@@ -70,9 +70,6 @@ public class DeployPropertyPage extends PropertyPage {
     stackLayout = new StackLayout();
     container.setLayout(stackLayout);
 
-    PlatformUI.getWorkbench().getHelpSystem().setHelp(parent,
-        "com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployAppEngineStandardProjectContext"); //$NON-NLS-1$
-    
     IProject project = AdapterUtil.adapt(getElement(), IProject.class);
 
     try {
@@ -151,24 +148,25 @@ public class DeployPropertyPage extends PropertyPage {
     }
     if (facetedProject != null && AppEngineStandardFacet.hasAppEngineFacet(facetedProject)) {
       createStandardPanelIfNeeded();
-      stackLayout.topControl = standardPreferencesPanel;
-      databindingSupport =
-          PreferencePageSupport.create(this, standardPreferencesPanel.getDataBindingContext());
+      showPanel(standardPreferencesPanel);
     } else if (facetedProject != null 
         && ProjectFacetsManager.isProjectFacetDefined(AppEngineFlexFacet.ID) 
         && AppEngineFlexFacet.hasAppEngineFacet(facetedProject)) {
       createFlexPanelIfNeeded();
-      stackLayout.topControl = flexPreferencesPanel;
-      databindingSupport =
-          PreferencePageSupport.create(this, flexPreferencesPanel.getDataBindingContext());
+      showPanel(flexPreferencesPanel);
     } else {
       createBlankPanelIfNeeded();
-      stackLayout.topControl = blankPreferencesPanel;
-      databindingSupport =
-          PreferencePageSupport.create(this, blankPreferencesPanel.getDataBindingContext());
+      showPanel(blankPreferencesPanel);
     }
     container.layout();
+  }
 
+  private void showPanel(DeployPreferencesPanel deployPreferencesPanel) {
+    stackLayout.topControl = deployPreferencesPanel;
+    databindingSupport =
+        PreferencePageSupport.create(this, deployPreferencesPanel.getDataBindingContext());
+    PlatformUI.getWorkbench().getHelpSystem().setHelp(container.getParent(),
+                                                      deployPreferencesPanel.getHelpContextId());
   }
 
   private void createBlankPanelIfNeeded() {

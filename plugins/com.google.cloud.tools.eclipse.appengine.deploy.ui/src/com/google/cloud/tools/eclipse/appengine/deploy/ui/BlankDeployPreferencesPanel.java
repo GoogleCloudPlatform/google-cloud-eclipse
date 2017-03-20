@@ -27,4 +27,9 @@ public class BlankDeployPreferencesPanel extends DeployPreferencesPanel {
   boolean savePreferences() {
     return true;
   }
+
+  @Override
+  protected String getHelpContextId() {
+    return null;
+  }
 }
