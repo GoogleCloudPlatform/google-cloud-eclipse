@@ -17,7 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.newproject.flex;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexFacet;
-import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
+import com.google.cloud.tools.eclipse.appengine.facets.FacetUtil;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.M2RepositoryService;
@@ -107,9 +107,9 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
     IFacetedProject facetedProject = ProjectFacetsManager.create(
         project, true /* convertIfNecessary */, subMonitor.newChild(50));
     Set<IFacetedProject.Action> facetInstallSet = new HashSet<>();
-    WebProjectUtil.addJavaFacetToBatch(JavaFacet.VERSION_1_8, facetedProject, facetInstallSet);
-    WebProjectUtil.addWebFacetToBatch(WebFacetUtils.WEB_30, facetedProject, facetInstallSet);
-    WebProjectUtil.addFacetSetToProject(facetedProject, facetInstallSet, subMonitor.newChild(50));
+    FacetUtil.addJavaFacetToBatch(JavaFacet.VERSION_1_8, facetedProject, facetInstallSet);
+    FacetUtil.addWebFacetToBatch(WebFacetUtils.WEB_30, facetedProject, facetInstallSet);
+    FacetUtil.addFacetSetToProject(facetedProject, facetInstallSet, subMonitor.newChild(50));
   }
 
   private void addDependenciesToProject(IProject project, IProgressMonitor monitor)
