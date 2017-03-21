@@ -54,8 +54,6 @@ public class AppEngineFlexFacet {
    */
   public static void installAppEngineFacet(IFacetedProject facetedProject,
       boolean installDependentFacets, IProgressMonitor monitor) throws CoreException {
-
-    SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
     Set<IFacetedProject.Action> facetInstallSet = new HashSet<>();
 
     IProjectFacet appEngineFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexFacet.ID);
@@ -73,6 +71,6 @@ public class AppEngineFlexFacet {
         appEngineFacet.getVersion(AppEngineFlexFacet.VERSION);
     facetInstallSet.add(new IFacetedProject.Action(
         IFacetedProject.Action.Type.INSTALL, appEngineFacetVersion, null /* config */));
-    FacetUtil.addFacetSetToProject(facetedProject, facetInstallSet, subMonitor.newChild(90));
+    FacetUtil.addFacetSetToProject(facetedProject, facetInstallSet, monitor);
   }
 }

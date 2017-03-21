@@ -125,7 +125,7 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
     // Download the dependencies from maven
     M2RepositoryService repoService = new M2RepositoryService();
     repoService.activate();
-    int ticks = 90 / PROJECT_DEPENDENCIES.size();
+    int ticks = 50 / PROJECT_DEPENDENCIES.size();
     for (Map.Entry<String, String> dependency : PROJECT_DEPENDENCIES.entrySet()) {
       LibraryFile libraryFile = new LibraryFile(new MavenCoordinates(dependency.getKey(),
           dependency.getValue()));
@@ -143,7 +143,7 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
         File artifactFile = artifact.getFile();
         IFile destFile = libFolder.getFile(artifactFile.getName());
         try {
-          destFile.create(new FileInputStream(artifactFile), true, subMonitor);
+          destFile.create(new FileInputStream(artifactFile), true, subMonitor.newChild(30));
         } catch (FileNotFoundException ex) {
           logger.log(Level.WARNING, "Error copying over " + artifactFile.toString() + " to " +
         libFolder.getFullPath().toPortableString(), ex);
@@ -164,10 +164,9 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
 
     // Add all the jars under lib folder to the classpath
     File libFolder = new File(libraryPath);
-    File[] listOfFiles = libFolder.listFiles();
 
-    for (int i = 0; i < listOfFiles.length; i++) {
-      IPath path = Path.fromOSString(listOfFiles[i].toPath().toString());
+    for(File file : libFolder.listFiles()) {
+      IPath path = Path.fromOSString(file.toPath().toString());
       newEntries.add(JavaCore.newLibraryEntry(path, null, null));
     }
 
