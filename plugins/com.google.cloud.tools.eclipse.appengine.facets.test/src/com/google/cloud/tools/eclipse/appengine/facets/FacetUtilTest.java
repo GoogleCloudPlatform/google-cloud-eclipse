@@ -178,6 +178,17 @@ public class FacetUtilTest {
     Assert.assertEquals(new Path("webapps/second-webapp"), mainWebApp);
   }
 
+  @Test
+  public void testFindMainWebAppDirectory_multipleFoldersWithWebXmls() throws CoreException {
+    IProject project = projectCreator.getProject();
+    createEmptyFile(project, new Path("webapps/first-webapp/WEB-INF/web.xml"));
+    createEmptyFile(project, new Path("webapps/second-webapp/WEB-INF/web.xml"));
+    createPath(project, new Path("WEB-INF"));
+
+    IPath mainWebApp = FacetUtil.findMainWebAppDirectory(project);
+    Assert.assertEquals(new Path("webapps/first-webapp"), mainWebApp);
+  }
+
   private static void createEmptyFile(IProject project, IPath relativePath) throws CoreException {
     createPath(project, relativePath.removeLastSegments(1));
 
