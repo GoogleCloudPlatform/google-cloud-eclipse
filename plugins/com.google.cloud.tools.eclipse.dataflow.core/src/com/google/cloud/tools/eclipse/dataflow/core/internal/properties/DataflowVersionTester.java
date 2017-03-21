@@ -35,7 +35,6 @@ public class DataflowVersionTester extends PropertyTester {
 
   private DataflowDependencyManager dependencyManager;
 
-  @SuppressWarnings("unused")
   public DataflowVersionTester() {
     this(DataflowDependencyManager.create());
   }

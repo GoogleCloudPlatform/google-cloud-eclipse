@@ -179,6 +179,7 @@ public class LibraryClasspathContainerInitializerTest {
     IPath sourceAttachmentPath = null;
     IClasspathEntry entry = JavaCore.newLibraryEntry(new Path(artifactFile.getAbsolutePath()),
         sourceAttachmentPath, sourceAttachmentRootPath);
+
     IClasspathEntry[] entries = new IClasspathEntry[]{ entry };
     LibraryClasspathContainer container = mock(LibraryClasspathContainer.class);
     when(container.getClasspathEntries()).thenReturn(entries);
