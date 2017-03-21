@@ -65,5 +65,5 @@ abstract class DeployPreferencesPanel extends Composite {
     }
   }
 
-  abstract protected String getHelpContextId();
+  abstract String getHelpContextId();
 }

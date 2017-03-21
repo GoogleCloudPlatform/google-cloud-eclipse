@@ -2,13 +2,13 @@
 <contexts>
   <context id="DeployAppEngineStandardProjectContext" title="App Engine Deployment - Standard Environment">
     <!-- Eclipse requires escaped pseudo-HTML here -->
-    <description>Properties used when deploying the project to the App Engine Standard environment.
+    <description>Properties used when deploying the project to the App Engine standard environment.
      
      &lt;b>Account&lt;/b>
      Google user account with permissions to deploy the project.
      
      &lt;b>Project&lt;/b>
-     The Google Cloud Platform project that will be the target for the deployment. If you want to create a new project, you can click on the link to open the Cloud Console.
+     The Google Cloud Platform project that is the deployment target. If you want to create a new project, follow the link to open the Cloud Console.
      
      &lt;b>Version&lt;/b>
      The version of the app that will be created or replaced by this deployment. If you do not specify a version, one will be generated for you.
@@ -26,13 +26,13 @@
 
   <context id="DeployAppEngineFlexProjectContext" title="App Engine Deployment - Flexible Environment">
     <!-- Eclipse requires escaped pseudo-HTML here -->
-    <description>Properties used when deploying the project to the App Engine Flexible environment.
+    <description>Properties used when deploying the project to the App Engine flexible environment.
 
      &lt;b>App Engine configuration folder&lt;/b>
-     The folder that contains the various configuration files used for the deployment, e.g. the app.yml.
+     The folder that contains the configuration files used for the deployment, such as app.yml.
 
      &lt;b>Docker file location&lt;/b>
-     In case of a custom runtime, the path of the Docker image file to be used.
+     The path to the Docker image to be used for a custom runtime.
     </description>
   </context>
 </contexts>

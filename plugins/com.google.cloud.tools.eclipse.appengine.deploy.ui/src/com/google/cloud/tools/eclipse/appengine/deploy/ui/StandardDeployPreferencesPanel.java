@@ -290,7 +290,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   }
 
   @Override
-  public boolean savePreferences() {
+  boolean savePreferences() {
     try {
       model.savePreferences();
       return true;
@@ -617,12 +617,12 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   };
 
   @Override
-  public DataBindingContext getDataBindingContext() {
+  DataBindingContext getDataBindingContext() {
     return bindingContext;
   }
 
   @Override
-  public void resetToDefaults() {
+  void resetToDefaults() {
     model.resetToDefaults();
     bindingContext.updateTargets();
   }
@@ -655,7 +655,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   }
 
   @Override
-  protected String getHelpContextId() {
+  String getHelpContextId() {
     return "com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployAppEngineStandardProjectContext"; //$NON-NLS-1$
   }
 }
