@@ -42,7 +42,6 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
-import org.hamcrest.Matchers;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -190,7 +189,6 @@ public class LibraryClasspathContainerInitializerTest {
     containerInitializer.initialize(new Path(TEST_LIBRARY_PATH), testProject.getJavaProject());
     testProject.getJavaProject().getRawClasspath();
     IClasspathEntry[] resolvedClasspath = testProject.getJavaProject().getResolvedClasspath(false);
-    assertThat(resolvedClasspath.length, Matchers.equalTo(15));
     
     for (IClasspathEntry resolvedEntry : resolvedClasspath) {
       if (resolvedEntry.getPath().toOSString().equals(artifactFile.getAbsolutePath())) {
@@ -220,12 +218,7 @@ public class LibraryClasspathContainerInitializerTest {
     containerInitializer.initialize(new Path(TEST_LIBRARY_PATH), testProject.getJavaProject());
     testProject.getJavaProject().getRawClasspath();
     IClasspathEntry[] resolvedClasspath = testProject.getJavaProject().getResolvedClasspath(false);
-    assertThat(resolvedClasspath.length, Matchers.equalTo(15));
-    
-    for (IClasspathEntry resolvedEntry : resolvedClasspath) {
-      System.err.println(resolvedEntry.getPath());
-    }
-    
+
     for (IClasspathEntry resolvedEntry : resolvedClasspath) {
       if (resolvedEntry.getPath().toOSString().equals(artifactFile.getAbsolutePath())) {
         assertThat(resolvedEntry.getSourceAttachmentPath().toOSString(),
