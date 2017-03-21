@@ -17,8 +17,6 @@
 package com.google.cloud.tools.eclipse.dataflow.core.project;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -27,8 +25,6 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.MockitoAnnotations;
-
-import com.google.api.services.storage.model.Bucket;
 
 /**
  * Tests for {@link GcsDataflowProjectClient}.
@@ -74,12 +70,6 @@ public class GcsDataflowProjectClientTest {
   public void testToGcsLocationUriWithBucketNameOnlyReturnsWithPrefix() {
     String location = "foo-bar";
     assertEquals("gs://foo-bar", client.toGcsLocationUri(location));
-  }
-
-  private Bucket bucket(String bucketName) {
-    Bucket result = mock(Bucket.class);
-    when(result.getName()).thenReturn(bucketName);
-    return result;
   }
 }
 
