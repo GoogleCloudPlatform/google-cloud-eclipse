@@ -98,7 +98,7 @@ public class M2RepositoryService implements ILibraryRepositoryService {
   }
 
   @Activate
-  public void activate() {
+  protected void activate() {
     mavenHelper = new MavenHelper();
   }
 

@@ -20,7 +20,7 @@ import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.FacetUtil;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
-import com.google.cloud.tools.eclipse.appengine.libraries.repository.M2RepositoryService;
+import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectConfig;
 import com.google.cloud.tools.eclipse.appengine.newproject.CodeTemplates;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
@@ -69,8 +69,12 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
     PROJECT_DEPENDENCIES = Collections.unmodifiableMap(projectDependencies);
   }
 
-  CreateAppEngineFlexWtpProject(AppEngineProjectConfig config, IAdaptable uiInfoAdapter) {
+  private ILibraryRepositoryService repositoryService;
+
+  CreateAppEngineFlexWtpProject(AppEngineProjectConfig config, IAdaptable uiInfoAdapter,
+      ILibraryRepositoryService repositoryService) {
     super(config, uiInfoAdapter);
+    this.repositoryService = repositoryService;
   }
 
   @Override
@@ -124,15 +128,13 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
     }
 
     // Download the dependencies from maven
-    M2RepositoryService repoService = new M2RepositoryService();
-    repoService.activate();
     int ticks = 50 / PROJECT_DEPENDENCIES.size();
     for (Map.Entry<String, String> dependency : PROJECT_DEPENDENCIES.entrySet()) {
       LibraryFile libraryFile = new LibraryFile(new MavenCoordinates(dependency.getKey(),
           dependency.getValue()));
       Artifact artifact = null;
       try {
-        artifact = repoService.resolveArtifact(libraryFile, subMonitor.newChild(ticks));
+        artifact = repositoryService.resolveArtifact(libraryFile, subMonitor.newChild(ticks));
       } catch (CoreException ex) {
         logger.log(Level.WARNING, "Error downloading " +
       libraryFile.getMavenCoordinates().toString() + " from maven", ex);
