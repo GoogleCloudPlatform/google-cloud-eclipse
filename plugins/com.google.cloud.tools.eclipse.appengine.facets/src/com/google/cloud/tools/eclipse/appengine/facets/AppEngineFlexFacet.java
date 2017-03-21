@@ -21,7 +21,6 @@ import java.util.HashSet;
 import java.util.Set;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IProjectFacet;
@@ -43,8 +42,7 @@ public class AppEngineFlexFacet {
   }
 
   /**
-   * Checks to see if <code>facetedProject</code> has the App Engine Flexible facet.
-   * If not, it installs the App Engine Flexible facet.
+   * Installs the App Engine Flexible facet if {@code facetedProject} does not have it already.
    *
    * @param facetedProject the faceted project receiving the App Engine facet
    * @param installDependentFacets true if the facets required by the App Engine facet should be
@@ -61,12 +59,10 @@ public class AppEngineFlexFacet {
       return;
     }
 
-    // Get the Java 8 facet
     if (installDependentFacets) {
       FacetUtil.addJavaFacetToBatch(JavaFacet.VERSION_1_8, facetedProject, facetInstallSet);
     }
 
-    // Get App Engine facet version
     IProjectFacetVersion appEngineFacetVersion =
         appEngineFacet.getVersion(AppEngineFlexFacet.VERSION);
     facetInstallSet.add(new IFacetedProject.Action(

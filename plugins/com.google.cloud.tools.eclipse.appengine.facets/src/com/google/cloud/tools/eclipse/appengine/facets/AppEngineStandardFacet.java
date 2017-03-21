@@ -126,7 +126,6 @@ public class AppEngineStandardFacet {
     // facet only after the batch is complete, which in turn prevents the first ConvertJob from
     // scheduling the second ConvertJob (triggered by installing the JSDT facet.)
     Set<IFacetedProject.Action> facetInstallSet = new HashSet<>();
-    // Install required App Engine facets i.e. Java 1.7 and Dynamic Web Module 2.5
     if (installDependentFacets) {
       FacetUtil.addJavaFacetToBatch(JavaFacet.VERSION_1_7, facetedProject, facetInstallSet);
       FacetUtil.addWebFacetToBatch(WebFacetUtils.WEB_25, facetedProject, facetInstallSet);

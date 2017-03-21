@@ -57,11 +57,12 @@ import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
 /**
- * Utility to make a new App Engine Flexible Eclipse project.
+ * Utility to create a new App Engine Flexible Eclipse project.
  */
 public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
   private static final Logger logger = Logger.getLogger(CreateAppEngineFlexWtpProject.class.getName());
   private static final Map<String, String> PROJECT_DEPENDENCIES;
+
   static {
     Map<String, String> projectDependencies = new HashMap<String, String>();
     projectDependencies.put("javax.servlet", "servlet-api");

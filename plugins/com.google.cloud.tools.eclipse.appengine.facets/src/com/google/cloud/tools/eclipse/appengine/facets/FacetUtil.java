@@ -75,11 +75,11 @@ public class FacetUtil {
      return false;
    }
 
-   // TODO use "src/main/java" for only maven projects
    JavaFacetInstallConfig javaConfig = new JavaFacetInstallConfig();
    List<IPath> sourcePaths = new ArrayList<>();
 
    IProject project = facetedProject.getProject();
+   // TODO: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/490
    if (project.getFolder("src/main/java").exists()) {
      sourcePaths.add(new Path("src/main/java"));
    }

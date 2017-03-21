@@ -52,7 +52,7 @@ public class FacetUtilTest {
   private Set<IFacetedProject.Action> facetInstallSet = new HashSet<>();
 
   @Test
-  public void TestAddJavaFacetToBatch_facetDoesNotExitsInProject() throws CoreException
+  public void testAddJavaFacetToBatch_facetDoesNotExitsInProject() throws CoreException
   {
     when(mockFacetedProject.hasProjectFacet(JavaFacet.VERSION_1_7)).thenReturn(false);
     when(mockFacetedProject.getProject()).thenReturn(projectCreator.getProject());
@@ -62,7 +62,7 @@ public class FacetUtilTest {
   }
 
   @Test
-  public void TestAddJavaFacetToBatch_facetExitsInProject() throws CoreException
+  public void testAddJavaFacetToBatch_facetExitsInProject() throws CoreException
   {
     when(mockFacetedProject.hasProjectFacet(JavaFacet.VERSION_1_7)).thenReturn(true);
     
@@ -71,13 +71,13 @@ public class FacetUtilTest {
   }
 
   @Test(expected = CoreException.class)
-  public void TestAddJavaFacetToBatch_nonJavaFacet() throws CoreException
+  public void testAddJavaFacetToBatch_nonJavaFacet() throws CoreException
   {
     FacetUtil.addJavaFacetToBatch(WebFacetUtils.WEB_25, mockFacetedProject, facetInstallSet);
   }
 
   @Test
-  public void TestAddWebFacetToBatch_facetDoesNotExitsInProject() throws CoreException
+  public void testAddWebFacetToBatch_facetDoesNotExitsInProject() throws CoreException
   {
     when(mockFacetedProject.hasProjectFacet(WebFacetUtils.WEB_25)).thenReturn(false);
     when(mockFacetedProject.getProject()).thenReturn(projectCreator.getProject());
@@ -87,7 +87,7 @@ public class FacetUtilTest {
   }
 
   @Test
-  public void TestAddWebFacetToBatch_facetExitsInProject() throws CoreException
+  public void testAddWebFacetToBatch_facetExitsInProject() throws CoreException
   {
     when(mockFacetedProject.hasProjectFacet(WebFacetUtils.WEB_25)).thenReturn(true);
     
@@ -96,13 +96,13 @@ public class FacetUtilTest {
   }
 
   @Test(expected = CoreException.class)
-  public void TestAddWebFacetToBatch_nonWebFacet() throws CoreException
+  public void testAddWebFacetToBatch_nonWebFacet() throws CoreException
   {
     FacetUtil.addWebFacetToBatch(JavaFacet.VERSION_1_7, mockFacetedProject, facetInstallSet);
   }
 
   @Test
-  public void TestAddFacetSetToProject_emptyFacetSet() throws CoreException {
+  public void testAddFacetSetToProject_emptyFacetSet() throws CoreException {
     IFacetedProject facetedProject = ProjectFacetsManager.create(projectCreator.getProject());
     FacetUtil.addFacetSetToProject(facetedProject, facetInstallSet, null);
     Set<IProjectFacetVersion> listOfFacets = facetedProject.getProjectFacets();
@@ -110,7 +110,7 @@ public class FacetUtilTest {
   }
 
   @Test
-  public void TestAddFacetSetToProject_nonEmptyfacetSet() throws CoreException {
+  public void testAddFacetSetToProject_nonEmptyfacetSet() throws CoreException {
     IFacetedProject facetedProject = ProjectFacetsManager.create(projectCreator.getProject());
     FacetUtil.addJavaFacetToBatch(JavaFacet.VERSION_1_7, facetedProject, facetInstallSet);
     FacetUtil.addFacetSetToProject(facetedProject, facetInstallSet, null);
@@ -186,6 +186,7 @@ public class FacetUtilTest {
     Assert.assertTrue(project.getFile(relativePath).exists());
   }
 
+  // TODO: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1573
   private static void createPath(IContainer parent, IPath relativePath) throws CoreException {
     if (!relativePath.isEmpty()) {
       String firstSegment = relativePath.segment(0);
