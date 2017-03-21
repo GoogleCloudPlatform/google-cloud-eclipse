@@ -71,7 +71,7 @@ public class CloudSdkPreferenceAreaTest {
     when(preferences.getString(anyString())).thenReturn(null);
 
     File root = null;
-    for(File directory : File.listRoots()) {
+    for (File directory : File.listRoots()) {
       if (directory.exists()) {
         // must check as roots includes A: on Windows for the floppy
         root = directory;
