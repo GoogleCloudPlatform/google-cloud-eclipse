@@ -17,14 +17,8 @@
 package com.google.cloud.tools.eclipse.dataflow.core.project;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
-import com.google.api.services.storage.Storage;
-import com.google.api.services.storage.model.Bucket;
-import com.google.api.services.storage.model.Buckets;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -32,21 +26,15 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.google.api.services.storage.model.Bucket;
 
 /**
  * Tests for {@link GcsDataflowProjectClient}.
  */
 @RunWith(JUnit4.class)
 public class GcsDataflowProjectClientTest {
-  private static final String PROJECT = "myProject";
 
   @Rule
   public ExpectedException thrown = ExpectedException.none();
