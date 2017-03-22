@@ -16,7 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNull;
 
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import org.junit.Rule;
