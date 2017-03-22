@@ -24,10 +24,7 @@
     <menuContribution
         allPopups="false"
         locationURI="menu:com.google.cloud.tools.eclipse.appengine.actions?after=bugReport">
-      <command
-          commandId="com.google.cloud.tools.eclipse.bugreport.bugReportCommand"
-          tooltip="%bugReportTooltip">
-      </command>
+      <command commandId="com.google.cloud.tools.eclipse.bugreport.bugReportCommand"/>
     </menuContribution>
   </extension>
 </plugin>
