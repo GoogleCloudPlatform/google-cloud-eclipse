@@ -71,10 +71,10 @@ public class CloudSdkPreferenceAreaTest {
     when(preferences.getString(anyString())).thenReturn(null);
 
     File root = null;
-    for(File r : File.listRoots()) {
-      if(r.exists()) {
+    for (File directory : File.listRoots()) {
+      if (directory.exists()) {
         // must check as roots includes A: on Windows for the floppy
-        root = r;
+        root = directory;
       }
     }
     // root should exist but not contain a valid Cloud SDK

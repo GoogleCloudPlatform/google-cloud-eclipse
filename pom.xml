@@ -84,6 +84,8 @@
     <module>plugins/com.google.cloud.tools.eclipse.welcome.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.aeri</module>
     <module>plugins/com.google.cloud.tools.eclipse.aeri.test</module>
+    <module>plugins/com.google.cloud.tools.eclipse.dataflow.core</module>
+    <module>plugins/com.google.cloud.tools.eclipse.dataflow.core.test</module>
 
     <module>third_party/com.google.cloud.tools.eclipse.jdt.launching</module>
     <module>third_party/com.google.cloud.tools.eclipse.jst.server.core</module>

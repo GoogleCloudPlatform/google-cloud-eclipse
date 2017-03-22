@@ -208,6 +208,12 @@ public class StandardDeployPreferencesPanelTest {
     assertThat(getProjectSelectionValidator().getSeverity(), is(IStatus.OK));
   }
 
+  @Test
+  public void testGetHelpContextId() throws Exception {
+    assertThat(createPanel(false).getHelpContextId(),
+        is("com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployAppEngineStandardProjectContext"));
+  }
+
   private Button getButtonWithText(String text) {
     for (Control control : deployPanel.getChildren()) {
       if (control instanceof Button) {

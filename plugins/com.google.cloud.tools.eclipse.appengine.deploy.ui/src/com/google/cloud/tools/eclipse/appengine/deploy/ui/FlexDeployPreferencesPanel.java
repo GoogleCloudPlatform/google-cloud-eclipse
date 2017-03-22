@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexDeployPreferences;
+import com.google.common.annotations.VisibleForTesting;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.databinding.DataBindingContext;
@@ -50,25 +51,31 @@ public class FlexDeployPreferencesPanel extends DeployPreferencesPanel {
   private Button dockerFileBrowseButton;
 
   public FlexDeployPreferencesPanel(Composite parent, IProject project) {
+    this(parent, project, new FlexDeployPreferences(project));
+  }
+
+  @VisibleForTesting
+  public FlexDeployPreferencesPanel(Composite parent, IProject project,
+      FlexDeployPreferences preferences) {
     super(parent, SWT.NONE);
     createConfigurationFilesSection();
-    preferences = new FlexDeployPreferences(project);
+    this.preferences = preferences;
     applyPreferences(preferences);
   }
 
   @Override
-  public DataBindingContext getDataBindingContext() {
+  DataBindingContext getDataBindingContext() {
     // provides default validation status
     return new DataBindingContext();
   }
 
   @Override
-  public void resetToDefaults() {
+  void resetToDefaults() {
     applyPreferences(FlexDeployPreferences.DEFAULT);
   }
 
   @Override
-  public boolean savePreferences() {
+  boolean savePreferences() {
     preferences.setUseDeploymentPreferences(useValuesButton.getSelection());
     preferences.setAppEngineDirectory(gaeConfigFolderText.getText().trim());
     preferences.setDockerDirectory(dockerFileText.getText().trim());
@@ -164,9 +171,12 @@ public class FlexDeployPreferencesPanel extends DeployPreferencesPanel {
 
   private void applyPreferences(FlexDeployPreferences preferences) {
     useValuesButton.setSelection(preferences.getUseDeploymentPreferences());
-    gaeConfigFolderText.setText(preferences.getAppEngineDirectory());
     dockerFileText.setText(preferences.getDockerDirectory());
     updateControls();
   }
 
+  @Override
+  String getHelpContextId() {
+    return "com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployAppEngineFlexProjectContext"; //$NON-NLS-1$
+  }
 }

@@ -42,7 +42,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class ProjectSelectorSelectionChangedListenerTest {
 
   private static final String EXPECTED_LINK =
-      "https://console.cloud.google.com/appengine/create?lang=java&project=projectId";
+      "https://console.cloud.google.com/appengine/create?lang=java&project=projectId"
+      + "&authuser=user%40example.com";
   private static final String EXPECTED_MESSAGE_WHEN_NO_APPLICATION =
       "This project does not have an App Engine application which is\n"
           + "required for deployment. <a href=\"" + EXPECTED_LINK + "\">Create an App Engine "
@@ -105,5 +106,6 @@ public class ProjectSelectorSelectionChangedListenerTest {
         new StructuredSelection(new GcpProject("projectName", "projectId"));
     when(event.getSelection()).thenReturn(selection);
     when(accountSelector.getSelectedCredential()).thenReturn(mock(Credential.class));
+    when(accountSelector.getSelectedEmail()).thenReturn("user@example.com");
   }
 }

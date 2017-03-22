@@ -47,8 +47,7 @@ public class AppEngineWebXmlValidatorTest {
   private IProject project;
 
   @ClassRule public static TestProjectCreator projectCreator =
-      new TestProjectCreator()
-      .withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
+      new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
 
   @Before
   public void setUp() throws CoreException {

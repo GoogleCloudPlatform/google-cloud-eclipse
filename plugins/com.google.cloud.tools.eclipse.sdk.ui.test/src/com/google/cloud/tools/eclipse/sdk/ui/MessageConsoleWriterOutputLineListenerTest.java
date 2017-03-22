@@ -16,8 +16,6 @@
 
 package com.google.cloud.tools.eclipse.sdk.ui;
 
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import org.eclipse.ui.console.MessageConsoleStream;
@@ -25,8 +23,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-
-import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListener;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MessageConsoleWriterOutputLineListenerTest {
@@ -41,7 +37,7 @@ public class MessageConsoleWriterOutputLineListenerTest {
     String message = "a message";
     MessageConsoleWriterOutputLineListener listener = new MessageConsoleWriterOutputLineListener(mockConsoleStream);
     listener.onOutputLine(message);
-    verify(mockConsoleStream, times(1)).println(eq(message));
+    verify(mockConsoleStream).println(message);
   }
 
 }
