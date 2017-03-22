@@ -40,6 +40,7 @@ public class FlexFacetInstallDelegate extends AppEngineFacetInstallDelegate {
   }
 
   // TODO: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1640
+  // TODO: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1642
   private void createConfigFiles(IProject project, IProgressMonitor monitor) throws CoreException {
     SubMonitor progress = SubMonitor.convert(monitor, 10);
 
@@ -56,7 +57,5 @@ public class FlexFacetInstallDelegate extends AppEngineFacetInstallDelegate {
     String appYamlLocation = appYaml.getLocation().toString();
     AppEngineTemplateUtility.copyFileContent(appYamlLocation, AppEngineTemplateUtility.APP_YAML);
     appYaml.refreshLocal(IResource.DEPTH_ZERO, monitor);
-    
-    // TODO: Set default editor for app.yaml, if not it opens app.yaml as text file outside eclipse
   }
 }
