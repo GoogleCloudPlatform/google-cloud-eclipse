@@ -48,7 +48,7 @@ import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.Err
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.QueryParameterProvider;
 
 @RunWith(MockitoJUnitRunner.class)
-public class OpenUrlSelectionListenerTest {
+public class OpenUriSelectionListenerTest {
 
   private static final String URL_PARAM_PROJECT = "project";
   private static final String VALID_URI = "http://example.org";
