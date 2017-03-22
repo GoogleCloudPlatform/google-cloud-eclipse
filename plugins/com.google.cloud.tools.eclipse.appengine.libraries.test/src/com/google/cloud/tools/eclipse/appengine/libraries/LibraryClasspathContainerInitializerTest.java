@@ -175,8 +175,8 @@ public class LibraryClasspathContainerInitializerTest {
       throws CoreException, IOException {
     File artifactFile = temporaryFolder.newFile();
 
-    IPath sourceAttachmentRootPath = null;
     IPath sourceAttachmentPath = null;
+    IPath sourceAttachmentRootPath = null;
     IClasspathEntry entry = JavaCore.newLibraryEntry(new Path(artifactFile.getAbsolutePath()),
         sourceAttachmentPath, sourceAttachmentRootPath);
 
