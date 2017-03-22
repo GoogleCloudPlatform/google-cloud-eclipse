@@ -32,13 +32,12 @@ import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.ErrorDialogErrorHandler;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.QueryParameterProvider;
 import com.google.cloud.tools.eclipse.ui.util.images.SharedImages;
-import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -57,12 +56,12 @@ import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.IViewerObservableValue;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -452,26 +451,22 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     return bucketComposite;
   }
 
-  private void refreshProjectsForSelectedCredential() {
-    Credential selectedCredential = accountSelector.getSelectedCredential();
-    projectSelector.setProjects(retrieveProjects(selectedCredential));
-  }
+  private Job latestGcpProjectQueryJob;
+  private Predicate<Job> isLatestQueryJob = new Predicate<Job>() {
+    @Override
+    public boolean apply(Job job) {
+      return job == latestGcpProjectQueryJob;
+    }
+  };
 
-  private List<GcpProject> retrieveProjects(Credential selectedCredential) {
-    try {
-      if (selectedCredential == null) {
-        return Collections.emptyList();
-      }
-      return projectRepository.getProjects(selectedCredential);
-    } catch (ProjectRepositoryException ex) {
-      ErrorDialog.openError(getShell(),
-                            Messages.getString("projectselector.retrieveproject.error.title"),
-                            Messages.getString("projectselector.retrieveproject.error.message",
-                                               ex.getLocalizedMessage()),
-                            StatusUtil.error(this,
-                                             Messages.getString("projectselector.retrieveproject.error.title"),
-                                             ex));
-      return Collections.emptyList();
+  private void refreshProjectsForSelectedCredential() {
+    projectSelector.setProjects(Collections.<GcpProject>emptyList());
+
+    Credential selectedCredential = accountSelector.getSelectedCredential();
+    if (selectedCredential != null) {
+      latestGcpProjectQueryJob = new GcpProjectQueryJob(selectedCredential,
+          projectRepository, projectSelector, isLatestQueryJob);
+      latestGcpProjectQueryJob.schedule();
     }
   }
 

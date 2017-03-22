@@ -32,7 +32,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -54,16 +53,13 @@ public class ProjectRepository {
    * @throws ProjectRepositoryException if an error happens while communicating with the backend
    */
   public List<GcpProject> getProjects(Credential credential) throws ProjectRepositoryException {
-    // TODO cache results https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1374 
+    Preconditions.checkNotNull(credential);
+    // TODO cache results https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1374
     try {
-      if (credential != null) {
-        Projects projects = apiFactory.newProjectsApi(credential);
-        ListProjectsResponse execute =
-            projects.list().setPageSize(PROJECT_LIST_PAGESIZE).execute();
-        return convertToGcpProjects(execute.getProjects());
-      } else {
-        return Collections.emptyList();
-      }
+      Projects projects = apiFactory.newProjectsApi(credential);
+      ListProjectsResponse execute =
+          projects.list().setPageSize(PROJECT_LIST_PAGESIZE).execute();
+      return convertToGcpProjects(execute.getProjects());
     } catch (IOException | GoogleApiException ex) {
       throw new ProjectRepositoryException(ex);
     }
@@ -74,7 +70,7 @@ public class ProjectRepository {
    *     {@code credential} has access to the project
    * @throws ProjectRepositoryException if an error happens while communicating with the backend
    */
-  public GcpProject getProject(Credential credential, String projectId) 
+  public GcpProject getProject(Credential credential, String projectId)
       throws ProjectRepositoryException {
     try {
       if (credential != null && !Strings.isNullOrEmpty(projectId)) {
