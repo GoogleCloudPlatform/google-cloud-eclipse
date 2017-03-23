@@ -6,4 +6,4 @@ set -e
 set -x
 
 cd github/google-cloud-eclipse
-mvn verify
+mvn -Ptravis --fail-at-end verify
