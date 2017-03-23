@@ -27,37 +27,46 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.XMLReaderFactory;
 
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 
 public class StandardFacetInstallDelegateTest {
 
+  @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
+  
   private StandardFacetInstallDelegate delegate = new StandardFacetInstallDelegate();
   private IProgressMonitor monitor = new NullProgressMonitor(); 
   private IProject project;
-
-  @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
+  
+  @Before 
+  public void setUp() {
+    project = projectCreator.getProject();
+  }
   
   @Test
-  public void testCreateConfigFiles() throws CoreException, IOException {
-    project = projectCreator.getProject();
+  public void testCreateConfigFiles() throws CoreException, IOException, SAXException {
     delegate.createConfigFiles(project, monitor);
     
     IFile appengineWebXml = project.getFile("src/main/webapp/WEB-INF/appengine-web.xml");
     Assert.assertTrue(appengineWebXml.exists());
     
     try (InputStream in = appengineWebXml.getContents()) {
-      Assert.assertEquals('<', in.read());       
+      XMLReader parser = XMLReaderFactory.createXMLReader();
+      parser.parse(new InputSource(in));       
     }
   }
   
   @Test
   public void testCreateConfigFiles_dontOverwrite() 
       throws CoreException, IOException {
-    project = projectCreator.getProject();
     
     IFolder webInfDir = project.getFolder("src/main/webapp/WEB-INF");
     ResourceUtils.createFolders(webInfDir, monitor);
