@@ -62,10 +62,12 @@ public class GcpProjectQueryJob extends Job {
       final Job thisJob = this;
       final List<GcpProject> projects = projectRepository.getProjects(credential);
 
+      // The selector may have been disposed (i.e., dialog closed); check it in the UI thread.
       projectSelector.getDisplay().syncExec(new Runnable() {
         @Override
         public void run() {
-          if (!projectSelector.getShell().isDisposed() && isLatestQueryJob.apply(thisJob)) {
+          if (!projectSelector.getShell().isDisposed()
+              && isLatestQueryJob.apply(thisJob) /* intentionally checking in UI context */) {
             projectSelector.setProjects(projects);
           }
         }
@@ -76,4 +78,4 @@ public class GcpProjectQueryJob extends Job {
           Messages.getString("projectselector.retrieveproject.error.message"), ex);
     }
   }
-};
+}
