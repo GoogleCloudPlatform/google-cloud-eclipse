@@ -122,17 +122,23 @@ through to set up a working development environment.
 The Eclipse IDE and Tycho both use a _Target Platform_ to manage
 the dependencies for the source bundles and features under development.
 Although Tycho can pull dependencies directly from Maven-style
-repositories, Eclipse cannot.  So we use Tycho to cobble together
-a target platform suitable for the Eclipse IDE.
+repositories (like [Maven Central](https://search.maven.org)), Eclipse
+cannot.  So we use Tycho to cobble together
+a target platform suitable for the Eclipse IDE with the following command.
 ```
-$ mvn -Pide-target-platform package
+$ (cd eclipse; mvn package)        # may want -Declipse.target=XXX
 ```
-This command builds the project, but also creates a local copy of the
+This command creates a local copy of the
 target platform, including any Maven dependencies, into
 [`eclipse/ide-target-platform/target/repository`](eclipse/ide-target-platform/target/repository).
+You will use this repository to create a target platform within the IDE,
+as described below.
 
-The target platform is affected by the `eclipse.target` property,
-described below.
+The Eclipse version used for the target platform is affected by the
+`eclipse.target` property, described below.
+
+You must regenerate the target platform and reconfigure the IDE's
+target platform whenever dependencies are updated.
 
 ### Steps to import into the Eclipse IDE
 

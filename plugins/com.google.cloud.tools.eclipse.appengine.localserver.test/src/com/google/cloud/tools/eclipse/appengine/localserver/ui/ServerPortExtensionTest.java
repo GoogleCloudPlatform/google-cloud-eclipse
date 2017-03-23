@@ -21,7 +21,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -151,7 +150,7 @@ public class ServerPortExtensionTest {
     portExtension.portText.setText("12345");
     portExtension.portText.setText("12A345");
     assertEquals("12345", portExtension.portText.getText());
-    verify(server, times(1)).setAttribute("appEngineDevServerPort", 12345);
+    verify(server).setAttribute("appEngineDevServerPort", 12345);
   }
 
   @Test
@@ -159,7 +158,7 @@ public class ServerPortExtensionTest {
     portExtension.portText.setText("12345");
     portExtension.portText.setText("-12345");
     assertEquals("12345", portExtension.portText.getText());
-    verify(server, times(1)).setAttribute("appEngineDevServerPort", 12345);
+    verify(server).setAttribute("appEngineDevServerPort", 12345);
   }
 
   @Test

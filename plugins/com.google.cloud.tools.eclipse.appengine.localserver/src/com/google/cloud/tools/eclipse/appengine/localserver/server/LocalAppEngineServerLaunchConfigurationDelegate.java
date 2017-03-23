@@ -60,6 +60,7 @@ import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.ILaunchesListener2;
 import org.eclipse.jdt.launching.AbstractJavaLaunchConfigurationDelegate;
@@ -86,7 +87,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
   /**
    * Returns {@code value} unless it's null or empty, then returns {@code nullOrEmptyValue}.
-   * 
+   *
    * @see Strings#isNullOrEmpty(String)
    */
   private static String ifEmptyOrNull(String value, String nullOrEmptyValue) {
@@ -116,18 +117,27 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
   @Override
   public ILaunch getLaunch(ILaunchConfiguration configuration, String mode) throws CoreException {
-    IServer thisServer = ServerUtil.getServer(configuration);
-    DefaultRunConfiguration thisConfig = generateServerRunConfiguration(configuration, thisServer);
+    IServer server = ServerUtil.getServer(configuration);
+    DefaultRunConfiguration runConfig = generateServerRunConfiguration(configuration, server);
+    ILaunch[] launches = getLaunchManager().getLaunches();
+    checkConflictingLaunches(configuration.getType(), runConfig, launches);
+    return super.getLaunch(configuration, mode);
+  }
 
-    for (ILaunch launch : getLaunchManager().getLaunches()) {
+  @VisibleForTesting
+  void checkConflictingLaunches(ILaunchConfigurationType launchConfigType,
+      DefaultRunConfiguration runConfig, ILaunch[] launches) throws CoreException {
+
+    for (ILaunch launch : launches) {
       if (launch.isTerminated()
-          || launch.getLaunchConfiguration().getType() != configuration.getType()) {
+          || launch.getLaunchConfiguration() == null
+          || launch.getLaunchConfiguration().getType() != launchConfigType) {
         continue;
       }
       IServer otherServer = ServerUtil.getServer(launch.getLaunchConfiguration());
-      DefaultRunConfiguration otherConfig =
+      DefaultRunConfiguration otherRunConfig =
           generateServerRunConfiguration(launch.getLaunchConfiguration(), otherServer);
-      IStatus conflicts = checkConflicts(thisConfig, otherConfig,
+      IStatus conflicts = checkConflicts(runConfig, otherRunConfig,
           new MultiStatus(Activator.PLUGIN_ID, 0,
               MessageFormat.format("Conflicts with running server \"{0}\"", otherServer.getName()),
               null));
@@ -135,7 +145,6 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
         throw new CoreException(StatusUtil.filter(conflicts));
       }
     }
-    return super.getLaunch(configuration, mode);
   }
 
   /**
@@ -224,7 +233,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
   /**
    * Resolve a host or IP address to an IP address.
-   * 
+   *
    * @return an {@link InetAddress}, or {@code null} if unable to be resolved (equivalent to
    *         {@code INADDR_ANY})
    */
@@ -246,7 +255,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
   /**
    * Pull out a port from the specified attribute on the given {@link ILaunchConfiguration} or
    * {@link IServer} instance.
-   * 
+   *
    * @param defaultPort the port if no port attributes are found
    * @return the port, or {@code defaultPort} if no port was found
    */
@@ -348,7 +357,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
     setDefaultSourceLocator(launch, configuration);
 
-    List<File> runnables = new ArrayList<File>();
+    List<File> runnables = new ArrayList<>();
     for (IModule module : modules) {
       IPath deployPath = serverBehaviour.getModuleDeployDirectory(module);
       runnables.add(deployPath.toFile());

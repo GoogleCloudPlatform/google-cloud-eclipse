@@ -20,6 +20,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -33,16 +35,11 @@ import org.eclipse.wst.sse.ui.internal.reconcile.validator.IncrementalHelper;
 import org.eclipse.wst.sse.ui.internal.reconcile.validator.IncrementalReporter;
 import org.eclipse.wst.validation.internal.core.ValidationException;
 import org.eclipse.wst.validation.internal.provisional.core.IMessage;
-import org.eclipse.wst.validation.internal.provisional.core.IValidationContext;
 import org.junit.Rule;
 import org.junit.Test;
 
-import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
-import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
-import com.google.common.collect.Lists;
-
 public class AbstractXmlSourceValidatorTest {
-  
+
   private static final String APPLICATION_XML =
       "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>"
       + "<application>"
@@ -50,69 +47,68 @@ public class AbstractXmlSourceValidatorTest {
       + "</appengine-web-app>";
   private static final IProjectFacetVersion APPENGINE_STANDARD_FACET_VERSION_1 =
       ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID).getVersion("1");
-  
+
   @Rule public TestProjectCreator dynamicWebProject =
-      new TestProjectCreator().withFacetVersions(Lists.newArrayList(JavaFacet.VERSION_1_7,
-                                                                    WebFacetUtils.WEB_25));
+      new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
   @Rule
   public TestProjectCreator appEngineStandardProject =
-      new TestProjectCreator().withFacetVersions(Lists.newArrayList(JavaFacet.VERSION_1_7,
-          WebFacetUtils.WEB_25, APPENGINE_STANDARD_FACET_VERSION_1));
-  
+      new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25,
+          APPENGINE_STANDARD_FACET_VERSION_1);
+
   @Test
   public void testValidate_appEngineStandardFacet() throws CoreException, ValidationException {
     IProject project = appEngineStandardProject.getProject();
     IFile file = project.getFile("testdata.xml");
     file.create(ValidationTestUtils.stringToInputStream(
         APPLICATION_XML), 0, null);
-    
+
     IDocument document = ValidationTestUtils.getDocument(file);
-    
+
     // Adds the URI of the file to be validated to the IncrementalHelper.
     IncrementalHelper helper = new IncrementalHelper(document, project);
     IPath path = file.getFullPath();
     helper.setURI(path.toString());
-    
+
     AbstractXmlSourceValidator validator = new AppEngineWebXmlSourceValidator();
     validator.connect(document);
     IncrementalReporter reporter = new IncrementalReporter(null);
     validator.validate(helper, reporter);
     assertEquals(1, reporter.getMessages().size());
   }
-  
+
   @Test
   public void testValidate_dynamicWebProject() throws CoreException, ValidationException {
     IProject project = dynamicWebProject.getProject();
     IFile file = project.getFile("testdata.xml");
     file.create(ValidationTestUtils.stringToInputStream(
         APPLICATION_XML), 0, null);
-    
+
     IDocument document = ValidationTestUtils.getDocument(file);
-    
+
     // Adds the URI of the file to be validated to the IncrementalHelper.
     IncrementalHelper helper = new IncrementalHelper(document, project);
     IPath path = file.getFullPath();
     helper.setURI(path.toString());
-    
+
     AbstractXmlSourceValidator validator = new AppEngineWebXmlSourceValidator();
     validator.connect(document);
     IncrementalReporter reporter = new IncrementalReporter(null);
     validator.validate(helper, reporter);
     assertEquals(0, reporter.getMessages().size());
   }
-  
+
   @Test
   public void getDocumentEncodingTest() throws CoreException {
-    
+
     IProject project = appEngineStandardProject.getProject();
     IFile file = project.getFile("testdata.xml");
     file.create(ValidationTestUtils.stringToInputStream(
       APPLICATION_XML), IFile.FORCE, null);
     IDocument document = ValidationTestUtils.getDocument(file);
-    
+
     assertEquals("UTF-8", AbstractXmlSourceValidator.getDocumentEncoding(document));
   }
-  
+
   @Test
   public void testCreateMessage() throws CoreException {
     IncrementalReporter reporter = new IncrementalReporter(null /*progress monitor*/);
@@ -121,39 +117,39 @@ public class AbstractXmlSourceValidatorTest {
     validator.createMessage(reporter, element, 0, "", IMessage.NORMAL_SEVERITY);
     assertEquals(1, reporter.getMessages().size());
   }
-  
+
   @Test
   public void testGetFile() throws CoreException {
     IProject project = appEngineStandardProject.getProject();
     IFile file = project.getFile("testdata.xml");
     file.create(ValidationTestUtils.stringToInputStream(
         APPLICATION_XML), 0, null);
-    
+
     assertTrue(file.exists());
-    
+
     IPath path = file.getFullPath();
     IFile testFile = AbstractXmlSourceValidator.getFile(path.toString());
-    
+
     assertNotNull(testFile);
     assertEquals(file, testFile);
   }
-  
+
   @Test
   public void testGetProject() throws CoreException {
     IProject project = appEngineStandardProject.getProject();
     IFile file = project.getFile("testdata.xml");
     file.create(ValidationTestUtils.stringToInputStream(
         APPLICATION_XML), 0, null);
-    
+
     IDocument document = ValidationTestUtils.getDocument(file);
-    
+
     IncrementalHelper helper = new IncrementalHelper(document, project);
     IPath path = file.getFullPath();
     helper.setURI(path.toString());
 
-    IProject testProject = AbstractXmlSourceValidator.getProject((IValidationContext) helper);
+    IProject testProject = AbstractXmlSourceValidator.getProject(helper);
     assertNotNull(testProject);
     assertEquals(project, testProject);
   }
-  
+
 }

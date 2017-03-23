@@ -17,20 +17,23 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
-import java.io.ByteArrayInputStream;
-import org.eclipse.core.resources.IContainer;
+
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
-import org.junit.After;
-import org.junit.BeforeClass;
+import org.eclipse.jst.common.project.facet.core.JavaFacet;
+import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
+import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
+import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
+import org.eclipse.wst.validation.ValidationFramework;
+import org.eclipse.wst.validation.Validator;
+import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -38,51 +41,67 @@ import org.xml.sax.SAXParseException;
 
 public class AbstractXmlValidatorTest {
 
-  private final String ELEMENT_MESSAGE = "Project ID should be specified at deploy time.";
-  private static IResource resource;
-  private static IProject project;
+  private static final IProjectFacetVersion APPENGINE_STANDARD_FACET_VERSION_1 =
+      ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID).getVersion("1");
+  private IFile resource;
 
-  @ClassRule public static TestProjectCreator projectCreator = new TestProjectCreator();
+  @ClassRule public static TestProjectCreator appEngineStandardProjectCreator =
+      new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7,
+          WebFacetUtils.WEB_25, APPENGINE_STANDARD_FACET_VERSION_1);
+  
+  @ClassRule public static TestProjectCreator dynamicWebProjectCreator =
+      new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
 
-  @BeforeClass
-  public static void setUp() throws CoreException {
-    project = projectCreator.getProject();
-    createFolders(project, new Path("src/main/webapp/WEB-INF"));
-    IFile webXml = project.getFile("src/main/webapp/WEB-INF/web.xml");
-    webXml.create(new ByteArrayInputStream(new byte[0]), true, null);
-    resource = webXml;
+  @Before
+  public void setUp() throws CoreException {
+    IProject project = dynamicWebProjectCreator.getProject();
+    resource = project.getFile("WebContent/WEB-INF/web.xml");
   }
-
-  @After
-  public void tearDown() throws CoreException {
-    if (resource != null) {
-      resource.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
+  
+  @Test
+  public void testValidate_appEngineStandard() throws CoreException {
+    IProject project = appEngineStandardProjectCreator.getProject();
+    IFile file = project.getFile("src/main/webapp/WEB-INF/web.xml");
+    ValidationFramework framework = ValidationFramework.getDefault();
+    Validator[] validators = framework.getValidatorsFor(file);
+    for (Validator validator : validators) {
+      if ("com.google.cloud.tools.eclipse.appengine.validation.webXmlValidator"
+          .equals(validator.getId())) {
+        return;
+      }
+    }
+    fail("webXmlValidator isn't applied to web.xml");
+  }
+  
+  @Test
+  public void testValidate_dynamicWebProject() throws CoreException {
+    ValidationFramework framework = ValidationFramework.getDefault();
+    Validator[] validators = framework.getValidatorsFor(resource);
+    for (Validator validator : validators) {
+      if ("com.google.cloud.tools.eclipse.appengine.validation.webXmlValidator"
+          .equals(validator.getId())) {
+        fail("webXmlValidator should not be applied in jst.web project");
+      }
     }
   }
-
+  
   @Test
   public void testCreateMarker() throws CoreException {
-    BannedElement element = new BannedElement(ELEMENT_MESSAGE);
+    String message = "Project ID should be specified at deploy time.";
+    BannedElement element = new BannedElement(message);
     AppEngineWebXmlValidator.createMarker(resource, element, 0);
     IMarker[] markers = resource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
-    assertEquals(ELEMENT_MESSAGE, markers[0].getAttribute(IMarker.MESSAGE));
+    assertEquals(message, markers[0].getAttribute(IMarker.MESSAGE));
   }
 
   @Test
   public void testCreateSAXErrorMessage() throws CoreException {
+    String message = "Project ID should be specified at deploy time.";
     SAXParseException spe = new SAXParseException("", "", "", 1, 1);
-    SAXException ex = new SAXException(ELEMENT_MESSAGE, spe);
+    SAXException ex = new SAXException(message, spe);
     AppEngineWebXmlValidator.createSaxErrorMessage(resource, ex);
     IMarker[] markers = resource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
-    assertEquals(ELEMENT_MESSAGE, markers[0].getAttribute(IMarker.MESSAGE));
-  }
-
-  private static void createFolders(IContainer parent, IPath path) throws CoreException {
-    if (!path.isEmpty()) {
-      IFolder folder = parent.getFolder(new Path(path.segment(0)));
-      folder.create(true,  true,  null);
-      createFolders(folder, path.removeFirstSegments(1));
-    }
+    assertEquals(message, markers[0].getAttribute(IMarker.MESSAGE));
   }
 
 }

@@ -9,6 +9,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/google-api-services-appengine-v1-rev9-1.21.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-api-services-cloudresourcemanager-v1-rev355-1.22.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-api-services-oauth2-v2-rev114-1.22.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-api-services-storage-v1-rev98-1.22.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-oauth-client-1.22.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-oauth-client-java6-1.22.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-oauth-client-jetty-1.22.0.jar"/>

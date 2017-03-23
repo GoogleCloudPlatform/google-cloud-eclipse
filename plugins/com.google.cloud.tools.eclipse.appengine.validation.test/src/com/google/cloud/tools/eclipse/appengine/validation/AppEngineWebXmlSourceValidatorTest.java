@@ -37,14 +37,14 @@ public class AppEngineWebXmlSourceValidatorTest {
   @Test
   public void testValidate_noBannedElements() throws CoreException, IOException, ParserConfigurationException {
     AppEngineWebXmlSourceValidator validator = new AppEngineWebXmlSourceValidator();
-    validator.validate(reporter, XML_NO_BANNED_ELEMENTS);
+    validator.validate(reporter, null, XML_NO_BANNED_ELEMENTS);
     assertTrue(reporter.getMessages().isEmpty());
   }
   
   @Test
   public void testValidate() throws CoreException, IOException, ParserConfigurationException {
     AppEngineWebXmlSourceValidator validator = new AppEngineWebXmlSourceValidator();
-    validator.validate(reporter, XML);
+    validator.validate(reporter, null, XML);
     assertEquals(1, reporter.getMessages().size());
     reporter.removeAllMessages(validator);
     assertTrue(reporter.getMessages().isEmpty());
