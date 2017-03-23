@@ -107,7 +107,7 @@
               visible="true">
         </separator>
         <separator
-              name="bugReport"
+              name="feedback"
               visible="true">
         </separator>
      </menuContribution>       
