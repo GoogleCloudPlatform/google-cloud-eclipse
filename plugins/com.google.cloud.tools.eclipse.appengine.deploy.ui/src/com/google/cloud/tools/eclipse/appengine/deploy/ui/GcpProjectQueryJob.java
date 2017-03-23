@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.swt.widgets.Display;
 
 /**
  * Generic {@link Job} that queries GCP projects of given {@link Credential} through
@@ -42,22 +43,25 @@ public class GcpProjectQueryJob extends Job {
   private final ProjectSelector projectSelector;
   private final DataBindingContext dataBindingContext;
   private final Predicate<Job> isLatestQueryJob;
+  private final Display display;
 
   /**
    * @param projectRepository {@link ProjectRepository#getProjects} must be thread-safe
+   * @param dataBindingContext data binding context that binds {@link #projectSelector}
    * @param isLatestQueryJob predicate that lazily determines if this job is the latest query job,
    *     which determines if the job should update {@link ProjectSelector} or die silently. This
    *     predicate is executed in the UI context
    */
   GcpProjectQueryJob(Credential credential, ProjectRepository projectRepository,
       ProjectSelector projectSelector, DataBindingContext dataBindingContext,
-      Predicate<Job> isLatestQueryJob) {
+      Predicate<Job> isLatestQueryJob, Display display) {
     super("Google Cloud Platform Projects Query Job");
     this.credential = Preconditions.checkNotNull(credential);
     this.projectRepository = Preconditions.checkNotNull(projectRepository);
     this.projectSelector = Preconditions.checkNotNull(projectSelector);
     this.dataBindingContext = Preconditions.checkNotNull(dataBindingContext);
     this.isLatestQueryJob = Preconditions.checkNotNull(isLatestQueryJob);
+    this.display = Preconditions.checkNotNull(display);
   }
 
   @Override
@@ -67,7 +71,7 @@ public class GcpProjectQueryJob extends Job {
       final List<GcpProject> projects = projectRepository.getProjects(credential);
 
       // The selector may have been disposed (i.e., dialog closed); check it in the UI thread.
-      projectSelector.getDisplay().syncExec(new Runnable() {
+      display.syncExec(new Runnable() {
         @Override
         public void run() {
           if (!projectSelector.isDisposed()

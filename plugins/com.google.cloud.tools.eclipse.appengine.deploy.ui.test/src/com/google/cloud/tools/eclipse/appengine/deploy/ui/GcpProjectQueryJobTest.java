@@ -46,9 +46,11 @@ public class GcpProjectQueryJobTest {
   @Mock private Credential credential;
   @Mock private ProjectRepository projectRepository;
   @Mock private ProjectSelector projectSelector;
-  @Mock private DataBindingContext dataBindingContext;
   @Mock private Predicate<Job> isLatestQueryJob;
   @Mock private List<GcpProject> projects;
+
+  // DataBindingContext.updateTargets() is not mockable.
+  private final DataBindingContext dataBindingContext = new DataBindingContext();
 
   private Job queryJob;
 
@@ -56,10 +58,9 @@ public class GcpProjectQueryJobTest {
   public void setUp() throws ProjectRepositoryException {
     assertNotNull(Display.getCurrent());
 
-    queryJob = new GcpProjectQueryJob(
-        credential, projectRepository, projectSelector, dataBindingContext, isLatestQueryJob);
+    queryJob = new GcpProjectQueryJob(credential, projectRepository, projectSelector,
+        dataBindingContext, isLatestQueryJob, Display.getCurrent());
 
-    when(projectSelector.getDisplay()).thenReturn(Display.getCurrent());
     when(projectSelector.isDisposed()).thenReturn(false);
     when(projectRepository.getProjects(credential)).thenReturn(projects);
     when(isLatestQueryJob.apply(queryJob)).thenReturn(true);
@@ -72,8 +73,8 @@ public class GcpProjectQueryJobTest {
 
   @Test(expected = NullPointerException.class)
   public void testNullCredential() {
-    new GcpProjectQueryJob(null /* credential */,
-        projectRepository, projectSelector, dataBindingContext, isLatestQueryJob);
+    new GcpProjectQueryJob(null /* credential */, projectRepository, projectSelector,
+        dataBindingContext, isLatestQueryJob, Display.getCurrent());
   }
 
   @Test
@@ -120,8 +121,8 @@ public class GcpProjectQueryJobTest {
     when(projectRepository2.getProjects(staleCredential)).thenReturn(anotherProjectList);
 
     Predicate<Job> notLatest = mock(Predicate.class);
-    Job staleJob = new GcpProjectQueryJob(
-        staleCredential, projectRepository2, projectSelector, dataBindingContext, notLatest);
+    Job staleJob = new GcpProjectQueryJob(staleCredential, projectRepository2,
+        projectSelector, dataBindingContext, notLatest, Display.getCurrent());
 
     // This second job is stale, i.e., it was fired, but user has selected another credential.
     when(notLatest.apply(staleJob)).thenReturn(false);

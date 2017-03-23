@@ -133,11 +133,7 @@ public class AccountSelector extends Composite {
       selectedAccount = (Account) combo.getData(email);
     }
 
-    // About "firstTimeInitialization": need to fire even if nothing is selected (which is an error
-    // state), to make the data binding framework trigger validation:
-    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/pull/1303
-    if (firstTimeInitialization || oldIndex != index) {
-      firstTimeInitialization = false;
+    if (oldIndex != index) {
       fireSelectionListeners();
     }
     return index;
