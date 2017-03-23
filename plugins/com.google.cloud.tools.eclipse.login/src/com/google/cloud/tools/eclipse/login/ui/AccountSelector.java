@@ -47,8 +47,6 @@ public class AccountSelector extends Composite {
    */
   private boolean selectDefaultSingleAccount = true;
 
-  private boolean firstTimeInitialization = true;
-
   @VisibleForTesting Combo combo;
   @VisibleForTesting LogInOnSelect logInOnSelect = new LogInOnSelect();
 
