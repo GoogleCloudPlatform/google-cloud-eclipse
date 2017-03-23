@@ -16,7 +16,12 @@
 
 package com.google.cloud.tools.eclipse.appengine.facets;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -26,6 +31,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
+import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 
 public class StandardFacetInstallDelegateTest {
 
@@ -36,12 +42,37 @@ public class StandardFacetInstallDelegateTest {
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
   
   @Test
-  public void testCreateConfigFiles() throws CoreException {
+  public void testCreateConfigFiles() throws CoreException, IOException {
     project = projectCreator.getProject();
     delegate.createConfigFiles(project, monitor);
     
-    IFile appengineWebAppXml = project.getFile("src/main/webapp/WEB-INF/appengine-web.xml");
-    Assert.assertTrue(appengineWebAppXml.exists());
+    IFile appengineWebXml = project.getFile("src/main/webapp/WEB-INF/appengine-web.xml");
+    Assert.assertTrue(appengineWebXml.exists());
+    
+    try (InputStream in = appengineWebXml.getContents()) {
+      Assert.assertEquals('<', in.read());       
+    }
+  }
+  
+  @Test
+  public void testCreateConfigFiles_dontOverwrite() 
+      throws CoreException, IOException {
+    project = projectCreator.getProject();
+    
+    IFolder webInfDir = project.getFolder("src/main/webapp/WEB-INF");
+    ResourceUtils.createFolders(webInfDir, monitor);
+    IFile appengineWebXml = project.getFile("src/main/webapp/WEB-INF/appengine-web.xml");
+    appengineWebXml.create(new ByteArrayInputStream(new byte[0]), true, monitor);
+
+    Assert.assertTrue(appengineWebXml.exists());
+    
+    delegate.createConfigFiles(project, monitor);
+    
+    // Make sure createConfigFiles did not write any data into appengine-web.xml
+    try (InputStream in = appengineWebXml.getContents()) {
+      Assert.assertEquals("appengine-web.xml is not empty", -1, in.read());       
+    }
+
   }
 
 }
