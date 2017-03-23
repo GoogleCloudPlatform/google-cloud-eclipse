@@ -19,10 +19,14 @@ package com.google.cloud.tools.eclipse.appengine.facets;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.wst.common.componentcore.ComponentCore;
 import org.eclipse.wst.common.componentcore.resources.IVirtualComponent;
 import org.eclipse.wst.common.componentcore.resources.IVirtualFolder;
+
+import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 
 /**
  * Utility classes for processing WTP Web Projects (jst.web and jst.utility).
@@ -52,8 +56,14 @@ public class WebProjectUtil {
     IFolder defaultLocation = project.getFolder(DEFAULT_WEB_PATH).getFolder(WEB_INF);
     if (defaultLocation.exists()) {
       return defaultLocation;
+    } else {
+      try {
+        ResourceUtils.createFolders(defaultLocation, new NullProgressMonitor());
+        return defaultLocation;
+      } catch (CoreException ex) {
+        return null;
+      }
     }
-    return null;
   }
 
   /**
