@@ -47,11 +47,11 @@ public class SelectFirstMatchingPrefixListener implements ModifyListener {
   }
 
   public void setContents(SortedSet<String> contents) {
-    this.contents = contents;
+    this.contents = ImmutableSortedSet.copyOf(contents);
   }
 
   @Override
-  public void modifyText(ModifyEvent e) {
+  public void modifyText(ModifyEvent event) {
     String lastAsOfEvent = lastString;
     String prefix = targetCombo.getText();
     try {
