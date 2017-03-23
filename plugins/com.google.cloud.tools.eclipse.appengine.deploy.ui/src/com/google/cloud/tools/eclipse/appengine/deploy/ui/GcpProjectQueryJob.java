@@ -25,6 +25,7 @@ import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import java.util.List;
+import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -39,6 +40,7 @@ public class GcpProjectQueryJob extends Job {
   private final Credential credential;
   private final ProjectRepository projectRepository;
   private final ProjectSelector projectSelector;
+  private final DataBindingContext dataBindingContext;
   private final Predicate<Job> isLatestQueryJob;
 
   /**
@@ -48,11 +50,13 @@ public class GcpProjectQueryJob extends Job {
    *     predicate is executed in the UI context
    */
   GcpProjectQueryJob(Credential credential, ProjectRepository projectRepository,
-      ProjectSelector projectSelector, Predicate<Job> isLatestQueryJob) {
+      ProjectSelector projectSelector, DataBindingContext dataBindingContext,
+      Predicate<Job> isLatestQueryJob) {
     super("Google Cloud Platform Projects Query Job");
     this.credential = Preconditions.checkNotNull(credential);
     this.projectRepository = Preconditions.checkNotNull(projectRepository);
     this.projectSelector = Preconditions.checkNotNull(projectSelector);
+    this.dataBindingContext = Preconditions.checkNotNull(dataBindingContext);
     this.isLatestQueryJob = Preconditions.checkNotNull(isLatestQueryJob);
   }
 
@@ -66,9 +70,10 @@ public class GcpProjectQueryJob extends Job {
       projectSelector.getDisplay().syncExec(new Runnable() {
         @Override
         public void run() {
-          if (!projectSelector.getShell().isDisposed()
+          if (!projectSelector.isDisposed()
               && isLatestQueryJob.apply(thisJob) /* intentionally checking in UI context */) {
             projectSelector.setProjects(projects);
+            dataBindingContext.updateTargets();  // Select saved choice, if any.
           }
         }
       });

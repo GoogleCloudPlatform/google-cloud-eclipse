@@ -451,7 +451,9 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     return bucketComposite;
   }
 
-  private Job latestGcpProjectQueryJob;
+  @VisibleForTesting
+  Job latestGcpProjectQueryJob;  // Must be updated/accessed in the UI context.
+
   private Predicate<Job> isLatestQueryJob = new Predicate<Job>() {
     @Override
     public boolean apply(Job job) {
@@ -465,7 +467,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     Credential selectedCredential = accountSelector.getSelectedCredential();
     if (selectedCredential != null) {
       latestGcpProjectQueryJob = new GcpProjectQueryJob(selectedCredential,
-          projectRepository, projectSelector, isLatestQueryJob);
+          projectRepository, projectSelector, bindingContext, isLatestQueryJob);
       latestGcpProjectQueryJob.schedule();
     }
   }

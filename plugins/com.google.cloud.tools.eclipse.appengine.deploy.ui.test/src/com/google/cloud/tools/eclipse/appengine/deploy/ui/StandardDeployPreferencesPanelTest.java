@@ -18,6 +18,9 @@ package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -46,12 +49,14 @@ import org.eclipse.core.databinding.ValidationStatusProvider;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Table;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotCheckBox;
 import org.junit.Before;
 import org.junit.Rule;
@@ -59,6 +64,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.osgi.service.prefs.BackingStoreException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StandardDeployPreferencesPanelTest {
@@ -78,7 +84,7 @@ public class StandardDeployPreferencesPanelTest {
   @Rule public ShellTestResource shellTestResource = new ShellTestResource();
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     parent = new Composite(shellTestResource.getShell(), SWT.NONE);
     when(project.getName()).thenReturn("testProject");
     when(account1.getEmail()).thenReturn(EMAIL_1);
@@ -163,7 +169,8 @@ public class StandardDeployPreferencesPanelTest {
   }
 
   @Test
-  public void testProjectSavedInPreferencesSelected() throws ProjectRepositoryException {
+  public void testProjectSavedInPreferencesSelected()
+      throws ProjectRepositoryException, InterruptedException, BackingStoreException {
     IEclipsePreferences node =
         new ProjectScope(project).getNode(StandardDeployPreferences.PREFERENCE_STORE_QUALIFIER);
     node.put("project.id", "projectId1");
@@ -171,20 +178,26 @@ public class StandardDeployPreferencesPanelTest {
     initializeProjectRepository();
     when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1, account2)));
     deployPanel = createPanel(true /* requireValues */);
+    deployPanel.latestGcpProjectQueryJob.join();
+    node.clear();
+
+    ProjectSelector projectSelector = getProjectSelector();
+    IStructuredSelection selection = projectSelector.getViewer().getStructuredSelection();
+    assertThat(selection.size(), is(1));
+    assertThat(((GcpProject) selection.getFirstElement()).getId(), is("projectId1"));
+  }
+
+  private ProjectSelector getProjectSelector() {
     Queue<Control> children = new ArrayDeque<>(Arrays.asList(deployPanel.getChildren()));
     while (!children.isEmpty()) {
       Control control = children.poll();
       if (control instanceof ProjectSelector) {
-        ProjectSelector projectSelector = (ProjectSelector) control;
-        IStructuredSelection selection = projectSelector.getViewer().getStructuredSelection();
-        assertThat(selection.size(), is(1));
-        assertThat(((GcpProject) selection.getFirstElement()).getId(), is("projectId1"));
-        return;
+        return (ProjectSelector) control;
       } else if (control instanceof Composite) {
         children.addAll(Arrays.asList(((Composite) control).getChildren()));
       }
-    };
-    fail("Did not find ProjectSelector widget");
+    }
+    return null;
   }
 
   @Test
@@ -200,11 +213,13 @@ public class StandardDeployPreferencesPanelTest {
   }
 
   @Test
-  public void testProjectsExistThenNoProjectNotFoundError() throws ProjectRepositoryException {
+  public void testProjectsExistThenNoProjectNotFoundError()
+      throws ProjectRepositoryException, InterruptedException {
     when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1)));
     initializeProjectRepository();
     deployPanel = createPanel(false /* requireValues */);
     selectAccount(account1);
+    deployPanel.latestGcpProjectQueryJob.join();
     assertThat(getProjectSelectionValidator().getSeverity(), is(IStatus.OK));
   }
 
@@ -212,6 +227,50 @@ public class StandardDeployPreferencesPanelTest {
   public void testGetHelpContextId() throws Exception {
     assertThat(createPanel(false).getHelpContextId(),
         is("com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployAppEngineStandardProjectContext"));
+  }
+
+  @Test
+  public void testRefreshProjectsForSelectedCredential()
+      throws ProjectRepositoryException, InterruptedException {
+    System.out.println("Start");
+    when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1, account2)));
+    initializeProjectRepository();
+
+    deployPanel = createPanel(false /* requireValues */);
+    Table projectTable = getProjectSelector().getViewer().getTable();
+    assertNull(deployPanel.latestGcpProjectQueryJob);
+    assertThat(projectTable.getItemCount(), is(0));
+
+    selectAccount(account1);
+    assertNotNull(deployPanel.latestGcpProjectQueryJob);
+    deployPanel.latestGcpProjectQueryJob.join();
+    assertThat(projectTable.getItemCount(), is(2));
+    assertThat(((GcpProject) projectTable.getItem(0).getData()).getId(), is("projectId1"));
+    assertThat(((GcpProject) projectTable.getItem(1).getData()).getId(), is("projectId2"));
+    System.out.println("End");
+  }
+
+  @Test
+  public void testRefreshProjectsForSelectedCredential_switchAccounts()
+      throws ProjectRepositoryException, InterruptedException {
+    when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1, account2)));
+    initializeProjectRepository();
+
+    deployPanel = createPanel(false /* requireValues */);
+    Table projectTable = getProjectSelector().getViewer().getTable();
+    assertNull(deployPanel.latestGcpProjectQueryJob);
+    assertThat(projectTable.getItemCount(), is(0));
+
+    selectAccount(account1);
+    Job jobForAccount1 = deployPanel.latestGcpProjectQueryJob;
+    jobForAccount1.join();
+    assertThat(projectTable.getItemCount(), is(2));
+
+    selectAccount(account2);
+    assertNotEquals(jobForAccount1, deployPanel.latestGcpProjectQueryJob);
+    deployPanel.latestGcpProjectQueryJob.join();
+    assertThat(projectTable.getItemCount(), is(1));
+    assertThat(((GcpProject) projectTable.getItem(0).getData()).getId(), is("projectId2"));
   }
 
   private Button getButtonWithText(String text) {
@@ -251,12 +310,12 @@ public class StandardDeployPreferencesPanelTest {
     return null;
   }
 
-  private void initializeProjectRepository()
-      throws ProjectRepositoryException {
+  private void initializeProjectRepository() throws ProjectRepositoryException {
     GcpProject project1 = new GcpProject("Project1", "projectId1");
     GcpProject project2 = new GcpProject("Project2", "projectId2");
     when(projectRepository.getProjects(any(Credential.class)))
-      .thenReturn(Arrays.asList(project1, project2));
+      .thenReturn(Arrays.asList(project1, project2))
+      .thenReturn(Arrays.asList(project2));
     when(projectRepository.getProject(any(Credential.class), eq("projectId1")))
         .thenReturn(project1);
     when(projectRepository.getProject(any(Credential.class), eq("projectId2")))

@@ -47,6 +47,8 @@ public class AccountSelector extends Composite {
    */
   private boolean selectDefaultSingleAccount = true;
 
+  private boolean firstTimeInitialization = true;
+
   @VisibleForTesting Combo combo;
   @VisibleForTesting LogInOnSelect logInOnSelect = new LogInOnSelect();
 
@@ -119,6 +121,8 @@ public class AccountSelector extends Composite {
    *         empty string, or if there is no matching account
    */
   public int selectAccount(String email) {
+    int oldIndex = combo.getSelectionIndex();
+
     int index = Strings.isNullOrEmpty(email) ? -1 : combo.indexOf(email);
     if (index < 0 && selectDefaultSingleAccount && getAccountCount() == 1) {
       index = 0;
@@ -128,9 +132,14 @@ public class AccountSelector extends Composite {
       combo.select(index);
       selectedAccount = (Account) combo.getData(email);
     }
-    // Need to fire even if nothing is selected (which is an error state), to show the error
-    // message: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/pull/1303
-    fireSelectionListeners();
+
+    // About "firstTimeInitialization": need to fire even if nothing is selected (which is an error
+    // state), to make the data binding framework trigger validation:
+    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/pull/1303
+    if (firstTimeInitialization || oldIndex != index) {
+      firstTimeInitialization = false;
+      fireSelectionListeners();
+    }
     return index;
   }
 
