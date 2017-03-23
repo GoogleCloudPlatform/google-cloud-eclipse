@@ -232,7 +232,6 @@ public class StandardDeployPreferencesPanelTest {
   @Test
   public void testRefreshProjectsForSelectedCredential()
       throws ProjectRepositoryException, InterruptedException {
-    System.out.println("Start");
     when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1, account2)));
     initializeProjectRepository();
 
@@ -247,7 +246,6 @@ public class StandardDeployPreferencesPanelTest {
     assertThat(projectTable.getItemCount(), is(2));
     assertThat(((GcpProject) projectTable.getItem(0).getData()).getId(), is("projectId1"));
     assertThat(((GcpProject) projectTable.getItem(1).getData()).getId(), is("projectId2"));
-    System.out.println("End");
   }
 
   @Test
