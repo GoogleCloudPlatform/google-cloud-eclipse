@@ -5,4 +5,5 @@ set -e
 # Display commands being run.
 set -x
 
+cd github/google-cloud-eclipse
 mvn verify
