@@ -17,9 +17,11 @@
 package com.google.cloud.tools.eclipse.ui.util.images;
 
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 public class SharedImages {
 
   public static final ImageDescriptor REFRESH_IMAGE_DESCRIPTOR =
-      ImageDescriptor.createFromFile(SharedImages.class, "/icons/refresh.png");
+      AbstractUIPlugin.imageDescriptorFromPlugin("org.eclipse.debug.ui",
+                                                 "icons/full/obj16/refresh_tab.png");
 }
