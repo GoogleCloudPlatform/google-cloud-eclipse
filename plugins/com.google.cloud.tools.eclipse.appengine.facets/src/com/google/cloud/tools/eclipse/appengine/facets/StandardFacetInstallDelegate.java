@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.facets;
 
+import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 import com.google.cloud.tools.eclipse.util.templates.appengine.AppEngineTemplateUtility;
 import com.google.common.annotations.VisibleForTesting;
 
@@ -27,6 +28,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
@@ -132,6 +134,13 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
     // The virtual component model is very flexible, but we assume that
     // the WEB-INF/appengine-web.xml isn't a virtual file remapped elsewhere
     IFolder webInfDir = WebProjectUtil.getWebInfDirectory(project);
+    
+    if (webInfDir == null) {
+      webInfDir =
+          project.getFolder(WebProjectUtil.DEFAULT_WEB_PATH).getFolder(WebProjectUtil.WEB_INF);
+      ResourceUtils.createFolders(webInfDir, new NullProgressMonitor());
+    }
+    
     progress.worked(1);
     
     IFile appEngineWebXml = webInfDir.getFile(APPENGINE_WEB_XML);

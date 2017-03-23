@@ -32,9 +32,9 @@ import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
  * Utility classes for processing WTP Web Projects (jst.web and jst.utility).
  */
 public class WebProjectUtil {
-  private final static String DEFAULT_WEB_PATH = "src/main/webapp";
+  final static String DEFAULT_WEB_PATH = "src/main/webapp";
 
-  private final static String WEB_INF = "WEB-INF/";
+  final static String WEB_INF = "WEB-INF/";
 
   /**
    * Return the project's <code>WEB-INF</code> directory. There is no guarantee that the contents
@@ -57,12 +57,7 @@ public class WebProjectUtil {
     if (defaultLocation.exists()) {
       return defaultLocation;
     } else {
-      try {
-        ResourceUtils.createFolders(defaultLocation, new NullProgressMonitor());
-        return defaultLocation;
-      } catch (CoreException ex) {
-        return null;
-      }
+      return null;
     }
   }
 
