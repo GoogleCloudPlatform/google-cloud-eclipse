@@ -1,4 +1,4 @@
-package com.google.cloud.tools.eclipse.appengine.flex;
+package com.google.cloud.tools.eclipse.appengine.flex.deploy;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
