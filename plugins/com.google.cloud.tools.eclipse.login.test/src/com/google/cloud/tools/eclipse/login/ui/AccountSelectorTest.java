@@ -173,6 +173,19 @@ public class AccountSelectorTest {
   }
 
   @Test
+  public void testSelectAccount_nonExistingEmailClearsSelection() {
+    when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1, account2)));
+    AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
+
+    selector.selectAccount("some-email-2@example.com");
+    assertEquals("some-email-2@example.com", selector.getSelectedEmail());
+
+    selector.selectAccount("non-existing-email@example.com");
+    assertEquals(-1, selector.combo.getSelectionIndex());
+    assertTrue(selector.getSelectedEmail().isEmpty());
+  }
+
+  @Test
   public void testSelectAccount_nonExistingEmail() {
     when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1, account2)));
     AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
@@ -182,19 +195,6 @@ public class AccountSelectorTest {
 
     selector.selectAccount("non-existing-email@example.com");
 
-    assertEquals(-1, selector.combo.getSelectionIndex());
-    assertTrue(selector.getSelectedEmail().isEmpty());
-  }
-
-  @Test
-  public void testSelectAccount_nonExistingEmailClearsSelection() {
-    when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1, account2)));
-    AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
-
-    selector.selectAccount("some-email-2@example.com");
-    assertEquals("some-email-2@example.com", selector.getSelectedEmail());
-
-    selector.selectAccount("non-existing-email@example.com");
     assertEquals(-1, selector.combo.getSelectionIndex());
     assertTrue(selector.getSelectedEmail().isEmpty());
   }
