@@ -23,7 +23,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.cloud.tools.eclipse.appengine.deploy.ui.internal.ProjectSelectorSelectionChangedListener;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepositoryException;
@@ -41,14 +40,14 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class ProjectSelectorSelectionChangedListenerTest {
 
-  private static final String EXPECTED_LINK =
+  static final String EXPECTED_LINK =
       "https://console.cloud.google.com/appengine/create?lang=java&project=projectId"
       + "&authuser=user%40example.com";
-  private static final String EXPECTED_MESSAGE_WHEN_NO_APPLICATION =
+  static final String EXPECTED_MESSAGE_WHEN_NO_APPLICATION =
       "This project does not have an App Engine application which is\n"
           + "required for deployment. <a href=\"" + EXPECTED_LINK + "\">Create an App Engine "
           + "application in the\nCloud Console</a>.";
-  private static final String EXPECTED_MESSAGE_WHEN_EXCEPTION =
+  static final String EXPECTED_MESSAGE_WHEN_EXCEPTION =
       "An error occurred while retrieving App Engine application:\ntestException";
 
   @Mock private AccountSelector accountSelector;
@@ -61,7 +60,7 @@ public class ProjectSelectorSelectionChangedListenerTest {
   @Before
   public void setUp() throws Exception {
     listener = new ProjectSelectorSelectionChangedListener(accountSelector, projectRepository,
-                                                           projectSelector); 
+                                                           projectSelector);
   }
 
   @Test
