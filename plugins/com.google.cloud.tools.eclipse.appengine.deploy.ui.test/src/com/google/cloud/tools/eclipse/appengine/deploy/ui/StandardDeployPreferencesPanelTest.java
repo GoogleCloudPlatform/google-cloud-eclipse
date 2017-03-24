@@ -94,7 +94,7 @@ public class StandardDeployPreferencesPanelTest {
   }
 
   @Test
-  public void testSelectSingleAccount() {
+  public void testAutoSelectSingleAccount() {
     when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1)));
     deployPanel = createPanel(true /* requireValues */);
     assertThat(deployPanel.getSelectedCredential(), is(credential));
@@ -107,6 +107,19 @@ public class StandardDeployPreferencesPanelTest {
 
     assertThat("auto-selected value should be propagated back to model",
         deployPanel.model.getAccountEmail(), is(account1.getEmail()));
+  }
+
+  @Test
+  public void testAutoSelectSingleAccount_loadGcpProjects()
+      throws ProjectRepositoryException, InterruptedException {
+    when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1)));
+    initializeProjectRepository();
+    deployPanel = createPanel(true /* requireValues */);
+    assertNotNull(deployPanel.latestGcpProjectQueryJob);
+    deployPanel.latestGcpProjectQueryJob.join();
+
+    Table projectTable = getProjectSelector().getViewer().getTable();
+    assertThat(projectTable.getItemCount(), is(2));
   }
 
   @Test
