@@ -173,18 +173,21 @@ public class StandardDeployPreferencesPanelTest {
       throws ProjectRepositoryException, InterruptedException, BackingStoreException {
     IEclipsePreferences node =
         new ProjectScope(project).getNode(StandardDeployPreferences.PREFERENCE_STORE_QUALIFIER);
-    node.put("project.id", "projectId1");
-    node.put("account.email", EMAIL_1);
-    initializeProjectRepository();
-    when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1, account2)));
-    deployPanel = createPanel(true /* requireValues */);
-    deployPanel.latestGcpProjectQueryJob.join();
-    node.clear();
+    try {
+      node.put("project.id", "projectId1");
+      node.put("account.email", EMAIL_1);
+      initializeProjectRepository();
+      when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1, account2)));
+      deployPanel = createPanel(true /* requireValues */);
+      deployPanel.latestGcpProjectQueryJob.join();
 
-    ProjectSelector projectSelector = getProjectSelector();
-    IStructuredSelection selection = projectSelector.getViewer().getStructuredSelection();
-    assertThat(selection.size(), is(1));
-    assertThat(((GcpProject) selection.getFirstElement()).getId(), is("projectId1"));
+      ProjectSelector projectSelector = getProjectSelector();
+      IStructuredSelection selection = projectSelector.getViewer().getStructuredSelection();
+      assertThat(selection.size(), is(1));
+      assertThat(((GcpProject) selection.getFirstElement()).getId(), is("projectId1"));
+    } finally {
+      node.clear();
+    }
   }
 
   private ProjectSelector getProjectSelector() {
@@ -197,6 +200,7 @@ public class StandardDeployPreferencesPanelTest {
         children.addAll(Arrays.asList(((Composite) control).getChildren()));
       }
     }
+    fail("Did not find ProjectSelector widget");
     return null;
   }
 
