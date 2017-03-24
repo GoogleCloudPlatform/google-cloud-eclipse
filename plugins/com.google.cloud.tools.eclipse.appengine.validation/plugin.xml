@@ -52,12 +52,36 @@
     <super type="org.eclipse.core.resources.textmarker" />
     <persistent value="true" />
   </extension>
+  
+  <extension
+      id="applicationMarker"
+      name="%appengine.blacklist.marker"
+      point="org.eclipse.core.resources.markers">
+    <super type="com.google.cloud.tools.eclipse.appengine.validation.appEngineBlacklistMarker" />
+    <persistent value="true" />
+  </extension>
+  
+  <extension
+      id="versionMarker"
+      name="%appengine.blacklist.marker"
+      point="org.eclipse.core.resources.markers">
+    <super type="com.google.cloud.tools.eclipse.appengine.validation.appEngineBlacklistMarker" />
+    <persistent value="true" />
+  </extension>
  
   <extension
       point="org.eclipse.ui.ide.markerResolution">
     <markerResolutionGenerator
       class="com.google.cloud.tools.eclipse.appengine.validation.AppEngineWebMarkerResolutionGenerator"
-      markerType="com.google.cloud.tools.eclipse.appengine.validation.appEngineBlacklistMarker">
+      markerType="com.google.cloud.tools.eclipse.appengine.validation.versionMarker">
+    </markerResolutionGenerator>
+  </extension>
+  
+    <extension
+      point="org.eclipse.ui.ide.markerResolution">
+    <markerResolutionGenerator
+      class="com.google.cloud.tools.eclipse.appengine.validation.AppEngineWebMarkerResolutionGenerator"
+      markerType="com.google.cloud.tools.eclipse.appengine.validation.applicationMarker">
     </markerResolutionGenerator>
   </extension>
   

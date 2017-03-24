@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 import java.util.Iterator;
+
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext;
 import org.eclipse.jface.text.quickassist.IQuickAssistProcessor;
@@ -32,8 +33,8 @@ public abstract class AbstractQuickAssistProcessor implements IQuickAssistProces
   private String annotationText;
   private ICompletionProposal fix;
   
-  AbstractQuickAssistProcessor(String annotationText, XsltSourceQuickFix fix) {
-    this.annotationText = annotationText;
+  AbstractQuickAssistProcessor(String annotationType, XsltSourceQuickFix fix) {
+    this.annotationText = annotationType;
     this.fix = fix;
   }
   

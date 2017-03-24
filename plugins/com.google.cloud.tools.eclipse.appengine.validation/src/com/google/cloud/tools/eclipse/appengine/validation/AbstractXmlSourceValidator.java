@@ -91,6 +91,7 @@ public abstract class AbstractXmlSourceValidator implements ISourceValidator, IV
     message.setOffset(elementOffset);
     message.setLength(element.getLength());
     reporter.addMessage(this, message);
+
   }
   
   /**

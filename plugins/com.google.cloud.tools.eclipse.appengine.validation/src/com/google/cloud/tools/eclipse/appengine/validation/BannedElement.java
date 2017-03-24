@@ -37,7 +37,7 @@ class BannedElement {
    */
   BannedElement(String message, String markerId, int severity,
       DocumentLocation start, int length) {
-    Preconditions.checkNotNull(message, "message is null");
+    Preconditions.checkNotNull(message, "element name is null");
     Preconditions.checkNotNull(markerId, "markerId is null");
     Preconditions.checkNotNull(start, "start is null");
     Preconditions.checkArgument(length >= 0, "length < 0");
@@ -50,7 +50,7 @@ class BannedElement {
 
   BannedElement(String message) {
     this(message, "org.eclipse.core.resources.problemmarker",
-      1, new DocumentLocation(0, 0), 0);
+        1, new DocumentLocation(0, 0), 0);
   }
 
   String getMessage() {

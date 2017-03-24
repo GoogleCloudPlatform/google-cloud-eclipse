@@ -16,15 +16,22 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
 class AppEngineWebBlacklist {
   
-  private static final ImmutableMap<String, String> BLACKLIST =
+  private static final ImmutableMap<String, List<String>> BLACKLIST =
       ImmutableMap.of(
-          "application", Messages.getString("application.element"),
-          "version", Messages.getString("version.element"));
+          "application",
+          Arrays.asList(Messages.getString("application.element"), 
+              "com.google.cloud.tools.eclipse.appengine.validation.applicationMarker"),
+          "version",
+          Arrays.asList(Messages.getString("version.element"),
+              "com.google.cloud.tools.eclipse.appengine.validation.versionMarker"));
   
   static boolean contains(String elementName) {
     return BLACKLIST.containsKey(elementName);
@@ -35,7 +42,17 @@ class AppEngineWebBlacklist {
     if (!BLACKLIST.containsKey(element)) {
       throw new IllegalArgumentException("element not in blacklist");
     }
-    return BLACKLIST.get(element);
+    List<String> values = BLACKLIST.get(element);
+    return values.get(0); 
+  }
+  
+  static String getMarkerId(String element) {
+    Preconditions.checkNotNull(element, "element is null");
+    if (!BLACKLIST.containsKey(element)) {
+      throw new IllegalArgumentException("element not in blacklist");
+    }
+    List<String> values = BLACKLIST.get(element);
+    return values.get(1);
   }
 
 }

@@ -38,7 +38,6 @@ import org.junit.Test;
 
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
-import com.google.common.collect.Lists;
 
 public class AbstractQuickAssistProcessorTest {
   
@@ -47,8 +46,7 @@ public class AbstractQuickAssistProcessorTest {
   private IAnnotationModel model;
   
   @ClassRule public static TestProjectCreator projectCreator =
-      new TestProjectCreator().withFacetVersions(Lists.newArrayList(JavaFacet.VERSION_1_7,
-          WebFacetUtils.WEB_25));;
+      new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
   
   @Before
   public void setUp() throws CoreException {

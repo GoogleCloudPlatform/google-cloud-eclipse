@@ -73,7 +73,7 @@ public class XsltQuickFixTest {
   
   @Test 
   public void testGetLabel() {
-    XsltQuickFix fix = new XsltQuickFix("/xslt/application.xsl",
+    XsltQuickFix fix = new XsltQuickFix("/xslt/removeApplication.xsl",
         Messages.getString("remove.application.element"));
     assertEquals("Remove application element", fix.getLabel());
   }
@@ -86,7 +86,7 @@ public class XsltQuickFixTest {
     IMarker marker = Mockito.mock(IMarker.class);
     Mockito.when(marker.getResource()).thenReturn(file);
     
-    XsltQuickFix fix = new XsltQuickFix("/xslt/application.xsl",
+    XsltQuickFix fix = new XsltQuickFix("/xslt/removeApplication.xsl",
         Messages.getString("remove.application.element"));
     fix.run(marker);
 

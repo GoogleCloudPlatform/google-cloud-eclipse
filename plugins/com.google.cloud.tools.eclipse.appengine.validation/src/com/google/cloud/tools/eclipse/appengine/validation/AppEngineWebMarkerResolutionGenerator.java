@@ -36,13 +36,13 @@ public class AppEngineWebMarkerResolutionGenerator implements IMarkerResolutionG
   @Override
   public IMarkerResolution[] getResolutions(IMarker marker) {
     IMarkerResolution[] markerResolutions = new IMarkerResolution[1];
-    String markerMessage;
     try {
-      markerMessage = (String) marker.getAttribute(IMarker.MESSAGE);
-      if (Messages.getString("application.element").equals(markerMessage)) {
+      if ("com.google.cloud.tools.eclipse.appengine.validation.applicationMarker"
+          .equals(marker.getType())) {
         IMarkerResolution fix = new ApplicationQuickFix();
         markerResolutions[0] = fix;
-      } else if (Messages.getString("version.element").equals(markerMessage)) {
+      } else if ("com.google.cloud.tools.eclipse.appengine.validation.versionMarker"
+          .equals(marker.getType())) {
         IMarkerResolution fix = new VersionQuickFix();
         markerResolutions[0] = fix;
       }

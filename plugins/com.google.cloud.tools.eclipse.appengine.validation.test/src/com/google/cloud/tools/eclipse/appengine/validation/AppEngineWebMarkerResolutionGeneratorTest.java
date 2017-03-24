@@ -17,8 +17,6 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ui.IMarkerResolution;
@@ -28,14 +26,26 @@ import org.mockito.Mockito;
 public class AppEngineWebMarkerResolutionGeneratorTest {
   
   @Test
-  public void testGetResolutions() throws CoreException {
+  public void testGetResolutions_versionElement() throws CoreException {
     AppEngineWebMarkerResolutionGenerator resolution = new AppEngineWebMarkerResolutionGenerator();
     IMarker marker = Mockito.mock(IMarker.class);
-    String markerMessage = Messages.getString("application.element");
-    Mockito.when(marker.getAttribute(IMarker.MESSAGE)).thenReturn(markerMessage);
+    Mockito.when(marker.getType())
+        .thenReturn("com.google.cloud.tools.eclipse.appengine.validation.versionMarker");
     IMarkerResolution[] resolutions = resolution.getResolutions(marker);
     assertEquals(1, resolutions.length);
-    assertNotNull(resolutions[0]);
+    assertEquals(VersionQuickFix.class, resolutions[0].getClass());
   }
+  
+  @Test
+  public void testGetResolutions_applicationElement() throws CoreException {
+    AppEngineWebMarkerResolutionGenerator resolution = new AppEngineWebMarkerResolutionGenerator();
+    IMarker marker = Mockito.mock(IMarker.class);
+    Mockito.when(marker.getType())
+        .thenReturn("com.google.cloud.tools.eclipse.appengine.validation.applicationMarker");
+    IMarkerResolution[] resolutions = resolution.getResolutions(marker);
+    assertEquals(1, resolutions.length);
+    assertEquals(ApplicationQuickFix.class, resolutions[0].getClass());
+  }
+
 
 }
