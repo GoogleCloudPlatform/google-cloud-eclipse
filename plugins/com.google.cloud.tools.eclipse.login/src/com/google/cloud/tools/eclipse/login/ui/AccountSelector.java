@@ -103,10 +103,8 @@ public class AccountSelector extends Composite {
 
   /**
    * Selects an account corresponding to the given {@code email} and returns its index of the combo
-   * item. If there is no account corresponding to the {@code email}, <b>and</b> there is exactly 1
-   * known account and {@link #selectDefaultSingleAccount} is true, then we automatically select
-   * that single account; otherwise this method does returns -1 while retaining current selection
-   * (if any).
+   * item. If there is no account corresponding to the {@code email}, clears any selection and
+   * returns -1.
    *
    * @param email email address to use to select an account
    * @return index of the newly selected combo item; -1 if {@code email} is {@code null} or the
