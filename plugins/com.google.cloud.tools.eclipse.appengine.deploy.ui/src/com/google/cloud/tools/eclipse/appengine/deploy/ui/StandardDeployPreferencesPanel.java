@@ -172,12 +172,15 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     UpdateValueStrategy modelToTarget =
         new UpdateValueStrategy().setConverter(new Converter(String.class, String.class) {
           @Override
-          public Object convert(Object expectedEmail) {
-            // Expected to be an email address, but must also ensure is a currently logged-in
-            // account
-            if (expectedEmail instanceof String
-                && accountSelector.isEmailAvailable((String) expectedEmail)) {
-              return expectedEmail;
+          public Object convert(Object savedEmail) {
+            Preconditions.checkArgument(savedEmail instanceof String);
+            // Check if the saved email is available in AccountSelector (i.e., logged in).
+            if (accountSelector.isEmailAvailable((String) savedEmail)) {
+              return savedEmail;
+            // Let data binding auto-select an account if it's the only available one.
+            // (However, if we don't require values, then don't auto-select.)
+            } else if (requireValues && accountSelector.getAccountCount() == 1) {
+              return accountSelector.getFirstEmail();
             } else {
               return null;
             }
@@ -318,9 +321,8 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     accountLabel.setText(Messages.getString("deploy.preferences.dialog.label.selectAccount"));
     accountLabel.setToolTipText(Messages.getString("tooltip.account"));
 
-    // If we don't require values, then don't auto-select accounts
     accountSelector = new AccountSelector(this, loginService,
-        Messages.getString("deploy.preferences.dialog.accountSelector.login"), requireValues);
+        Messages.getString("deploy.preferences.dialog.accountSelector.login"));
     accountSelector.setToolTipText(Messages.getString("tooltip.account"));
     GridData accountSelectorGridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
     accountSelector.setLayoutData(accountSelectorGridData);

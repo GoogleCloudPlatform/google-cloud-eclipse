@@ -93,8 +93,6 @@ public class StandardDeployPreferencesPanelTest {
     deployPanel = createPanel(true /* requireValues */);
     assertThat(deployPanel.getSelectedCredential(), is(credential));
 
-    // todo? assertTrue(deployPanel.getAccountSelector().isAutoSelectAccountIfNone()
-
     // verify not in error
     IStatus status = getAccountSelectorValidationStatus();
     assertTrue("account selector is in error: " + status.getMessage(), status.isOK());
