@@ -58,7 +58,7 @@ public class StandardFacetInstallDelegateTest {
     IFile appengineWebXml = project.getFile("src/main/webapp/WEB-INF/appengine-web.xml");
     Assert.assertTrue(appengineWebXml.exists());
     
-    try (InputStream in = appengineWebXml.getContents()) {
+    try (InputStream in = appengineWebXml.getContents(true)) {
       XMLReader parser = XMLReaderFactory.createXMLReader();
       parser.parse(new InputSource(in));       
     }
@@ -78,7 +78,7 @@ public class StandardFacetInstallDelegateTest {
     delegate.createConfigFiles(project, monitor);
     
     // Make sure createConfigFiles did not write any data into appengine-web.xml
-    try (InputStream in = appengineWebXml.getContents()) {
+    try (InputStream in = appengineWebXml.getContents(true)) {
       Assert.assertEquals("appengine-web.xml is not empty", -1, in.read());       
     }
 
