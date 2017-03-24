@@ -30,6 +30,7 @@ import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import com.google.cloud.tools.login.Account;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import org.eclipse.swt.widgets.Shell;
@@ -85,7 +86,7 @@ public class AccountSelectorTest {
 
   @Test
   public void testComboSetup_oneAccount() {
-    when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1)));
+    when(loginService.getAccounts()).thenReturn(Collections.singleton(account1));
 
     AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
     assertEquals(-1, selector.combo.getSelectionIndex());
@@ -285,7 +286,7 @@ public class AccountSelectorTest {
 
   @Test
   public void testIsSignedIn_signedIn() {
-    when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1)));
+    when(loginService.getAccounts()).thenReturn(Collections.singleton(account1));
     AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
     assertTrue(selector.isSignedIn());
   }
@@ -298,7 +299,7 @@ public class AccountSelectorTest {
 
   @Test
   public void testGetAccountCount_oneAccount() {
-    when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1)));
+    when(loginService.getAccounts()).thenReturn(Collections.singleton(account1));
     AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
     assertEquals(1, selector.getAccountCount());
   }
@@ -322,7 +323,7 @@ public class AccountSelectorTest {
     assertEquals(account3.getEmail(), selector.combo.getItem(2));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = IllegalStateException.class)
   public void testGetFirstEmail_noAccount() {
     AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
     selector.getFirstEmail();
@@ -330,8 +331,7 @@ public class AccountSelectorTest {
 
   @Test
   public void testGetFirstEmail_oneAccount() {
-    when(loginService.getAccounts())
-        .thenReturn(new LinkedHashSet<>(Arrays.asList(account2)));
+    when(loginService.getAccounts()).thenReturn(Collections.singleton(account2));
     AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
     assertEquals(account2.getEmail(), selector.getFirstEmail());
   }

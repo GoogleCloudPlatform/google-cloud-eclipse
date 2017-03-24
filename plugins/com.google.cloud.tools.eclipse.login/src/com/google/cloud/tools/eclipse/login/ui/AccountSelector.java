@@ -95,9 +95,11 @@ public class AccountSelector extends Composite {
     return combo.getText();
   }
 
-  /** @exception IllegalArgumentException if there is no account logged in */
+  /**
+   * @exception IllegalArgumentException if there is no account logged in
+   */
   public String getFirstEmail() {
-    Preconditions.checkArgument(getAccountCount() > 0);
+    Preconditions.checkState(getAccountCount() > 0);
     return combo.getItem(0);
   }
 

@@ -174,11 +174,8 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
           @Override
           public Object convert(Object savedEmail) {
             Preconditions.checkArgument(savedEmail instanceof String);
-            // Check if the saved email is available in AccountSelector (i.e., logged in).
             if (accountSelector.isEmailAvailable((String) savedEmail)) {
               return savedEmail;
-            // Let data binding auto-select an account if it's the only available one.
-            // (However, if we don't require values, then don't auto-select.)
             } else if (requireValues && accountSelector.getAccountCount() == 1) {
               return accountSelector.getFirstEmail();
             } else {
