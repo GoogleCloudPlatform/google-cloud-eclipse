@@ -61,14 +61,12 @@ public class AppEngineApplicationQueryJob extends Job {
 
   @Override
   protected IStatus run(IProgressMonitor monitor) {
-    AppEngine appEngine = null;
     String statusMessage = "";
     String statusTooltip = null;
 
     try {
-      // The original design was to cache the returned "appEngine" right after querying, but
-      // because we are in a non-UI thread, defer caching it until we get into the UI thread.
-      appEngine = projectRepository.getAppEngineApplication(credential, project.getId());
+      AppEngine appEngine = projectRepository.getAppEngineApplication(credential, project.getId());
+      project.setAppEngine(appEngine);
 
       if (appEngine == AppEngine.NO_APPENGINE_APPLICATION) {
         statusMessage = Messages.getString(
@@ -80,14 +78,13 @@ public class AppEngineApplicationQueryJob extends Job {
           "projectselector.retrieveapplication.error.message", ex.getLocalizedMessage());
     }
 
-    if (appEngine != null || !statusMessage.isEmpty()) {
-      updateInUiThread(appEngine, statusMessage, statusTooltip);
+    if (!statusMessage.isEmpty()) {
+      updateStatus(statusMessage, statusTooltip);
     }
     return Status.OK_STATUS;
   }
 
-  private void updateInUiThread(final AppEngine appEngine,
-      final String statusMessage, final String statusTooltip) {
+  private void updateStatus(final String statusMessage, final String statusTooltip) {
     final Job thisJob = this;
 
     // The selector may have been disposed (i.e., dialog closed); check it in the UI thread.
@@ -96,7 +93,6 @@ public class AppEngineApplicationQueryJob extends Job {
       public void run() {
         if (!projectSelector.isDisposed()
             && isLatestAppQueryJob.apply(thisJob) /* intentionally checking in UI context */) {
-          project.setAppEngine(appEngine);
           projectSelector.setStatusLink(statusMessage, statusTooltip);
         }
       }

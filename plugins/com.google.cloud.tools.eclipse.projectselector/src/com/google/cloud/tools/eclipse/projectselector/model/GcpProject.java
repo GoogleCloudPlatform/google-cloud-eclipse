@@ -70,11 +70,11 @@ public class GcpProject {
    * @return an AppEngine object if it has been retrieved from the backend or {@code null} if it has
    * not yet been retrieved
    */
-  public AppEngine getAppEngine() {
+  public synchronized AppEngine getAppEngine() {
     return appEngine;
   }
 
-  public void setAppEngine(AppEngine appEngine) {
+  public synchronized void setAppEngine(AppEngine appEngine) {
     this.appEngine = appEngine;
   }
 
@@ -82,7 +82,7 @@ public class GcpProject {
    * @return {@code true} if the AppEngine object has been created based on the information
    * retrieved from the backend
    */
-  public boolean hasAppEngineInfo() {
+  public synchronized boolean hasAppEngineInfo() {
     return appEngine != null;
   }
 }
