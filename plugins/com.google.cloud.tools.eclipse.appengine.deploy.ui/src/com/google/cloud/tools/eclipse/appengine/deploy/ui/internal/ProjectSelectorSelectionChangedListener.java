@@ -24,11 +24,17 @@ import com.google.cloud.tools.eclipse.projectselector.ProjectRepositoryException
 import com.google.cloud.tools.eclipse.projectselector.ProjectSelector;
 import com.google.cloud.tools.eclipse.projectselector.model.AppEngine;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
+import com.google.common.base.Predicate;
 import com.google.common.net.UrlEscapers;
 import java.text.MessageFormat;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.swt.widgets.Display;
 
 public class ProjectSelectorSelectionChangedListener implements ISelectionChangedListener {
 
@@ -49,44 +55,116 @@ public class ProjectSelectorSelectionChangedListener implements ISelectionChange
 
   @Override
   public void selectionChanged(SelectionChangedEvent event) {
+    projectSelector.clearStatusLink();
+
     IStructuredSelection selection = (IStructuredSelection) event.getSelection();
-    try {
-      if (!selection.isEmpty()) {
-        GcpProject project = (GcpProject) selection.getFirstElement();
-        boolean hasAppEngineApplication = hasAppEngineApplication(project);
-        if (!hasAppEngineApplication) {
-          String link = MessageFormat.format(
-              CREATE_APP_LINK, project.getId(),
-              UrlEscapers.urlFormParameterEscaper().escape(accountSelector.getSelectedEmail()));
-          projectSelector.setStatusLink(
-              Messages.getString("projectselector.missing.appengine.application.link",
-                                 link), link);
-        } else {
-          projectSelector.clearStatusLink();
+    if (!selection.isEmpty()) {
+      GcpProject project = (GcpProject) selection.getFirstElement();
+
+      String email = accountSelector.getSelectedEmail();
+      String createAppLink = MessageFormat.format(CREATE_APP_LINK,
+          project.getId(), UrlEscapers.urlFormParameterEscaper().escape(email));
+
+      boolean alreadyQueried = project.hasAppEngineInfo();
+      if (alreadyQueried) {
+        if (project.getAppEngine() == AppEngine.NO_APPENGINE_APPLICATION) {
+          projectSelector.setStatusLink(Messages.getString(
+              "projectselector.missing.appengine.application.link", createAppLink),
+              createAppLink /* tooltip */);
         }
       } else {
-        projectSelector.clearStatusLink();
+        Display display = projectSelector.getDisplay();
+        Credential credential = accountSelector.getSelectedCredential();
+        Predicate<Job> p = new Predicate<Job>(){
+          @Override
+          public boolean apply(Job arg0) {
+            return false;
+          }};
+        Job job = new MyJob(project, credential, projectRepository, projectSelector,
+            createAppLink, p, display);
       }
-    } catch (ProjectRepositoryException ex) {
-      projectSelector.setStatusLink(Messages.getString("projectselector.retrieveapplication.error.message",
-                                                       ex.getLocalizedMessage()),
-                                    null /* tooltip */);
     }
+    /*
+    } catch (ProjectRepositoryException ex) {
+      projectSelector.setStatusLink(
+          Messages.getString("projectselector.retrieveapplication.error.message",
+                             ex.getLocalizedMessage()),
+          null // tooltip
+          );
+    }
+    */
   }
+}
+
+class MyJob extends Job {
+
+  private final GcpProject project;
+  private final Credential credential;
+  private final ProjectRepository projectRepository;
+  private final ProjectSelector projectSelector;
+  private final Predicate<Job> isLatestAppQueryJob;
+  private final String createAppLink;
+  private final Display display;
 
   /**
-   * Lazily queries the backend whether the specified project has an App Engine application.
-   * <p>
-   * The result of the query is stored in the object and the next time it is returned from there
-   * saving a roundtrip to the backend.
+   * @param projectRepository {@link ProjectRepository#getAppEngineApplication} must be thread-safe
+   * @param isLatestAppQueryJob executed in the UI context
+   * @param display
    */
-  private boolean hasAppEngineApplication(GcpProject project) throws ProjectRepositoryException {
-    if (!project.hasAppEngineInfo()) {
-      Credential selectedCredential = accountSelector.getSelectedCredential();
-      AppEngine appEngine =
-          projectRepository.getAppEngineApplication(selectedCredential, project.getId());
-      project.setAppEngine(appEngine);
+  public MyJob(GcpProject project, Credential credential, ProjectRepository projectRepository,
+      ProjectSelector projectSelector, String createAppLink,
+      Predicate<Job> isLatestAppQueryJob, Display display) {
+    super("Checking GCP project has App Engine Application...");
+    this.project = project;
+    this.credential = credential;
+    this.projectRepository = projectRepository;
+    this.projectSelector = projectSelector;
+    this.createAppLink = createAppLink;
+    this.isLatestAppQueryJob = isLatestAppQueryJob;
+    this.display = display;
+  }
+
+  @Override
+  protected IStatus run(IProgressMonitor monitor) {
+    AppEngine appEngine = null;
+    String statusMessage = null;
+    String statusTooltip = null;
+
+    try {
+      // The original design was to cache the returned "appEngine" right after querying, but
+      // because we are in a non-UI thread, defer caching until we get into the UI thread.
+      appEngine = projectRepository.getAppEngineApplication(credential, project.getId());
+
+      if (appEngine == AppEngine.NO_APPENGINE_APPLICATION) {
+        statusMessage = Messages.getString(
+            "projectselector.missing.appengine.application.link", createAppLink);
+        statusTooltip = createAppLink;
+      }
+    } catch (ProjectRepositoryException ex) {
+      statusMessage = Messages.getString(
+          "projectselector.retrieveapplication.error.message", ex.getLocalizedMessage());
     }
-    return project.getAppEngine() != AppEngine.NO_APPENGINE_APPLICATION;
+
+    if (appEngine != null || statusMessage != null) {
+      updateInUiThread(appEngine, statusMessage, statusTooltip);
+    }
+    return Status.OK_STATUS;
+  }
+
+  private void updateInUiThread(final AppEngine appEngine,
+      final String statusMessage, final String statusTooltip) {
+    final Job thisJob = this;
+
+    // The selector may have been disposed (i.e., dialog closed), so check it in the UI thread.
+    display.syncExec(new Runnable() {
+      @Override
+      public void run() {
+        if (!projectSelector.isDisposed()
+            && isLatestAppQueryJob.apply(thisJob) /* intentionally checking in UI context */) {
+          project.setAppEngine(appEngine);
+          projectSelector.setStatusLink(statusMessage, statusTooltip);
+        }
+      }
+    });
   }
 }

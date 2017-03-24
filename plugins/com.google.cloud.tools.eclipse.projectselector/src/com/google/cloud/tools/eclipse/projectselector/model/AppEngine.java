@@ -19,7 +19,7 @@ package com.google.cloud.tools.eclipse.projectselector.model;
 public class AppEngine {
   public static AppEngine NO_APPENGINE_APPLICATION = new AppEngine(null);
   private String id;
-  
+
   private AppEngine(String id) {
     this.id = id;
   }

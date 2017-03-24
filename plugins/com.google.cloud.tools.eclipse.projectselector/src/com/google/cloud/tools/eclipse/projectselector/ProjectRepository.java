@@ -54,7 +54,7 @@ public class ProjectRepository {
    * @throws ProjectRepositoryException if an error happens while communicating with the backend
    */
   public List<GcpProject> getProjects(Credential credential) throws ProjectRepositoryException {
-    // TODO cache results https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1374 
+    // TODO cache results https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1374
     try {
       if (credential != null) {
         Projects projects = apiFactory.newProjectsApi(credential);
@@ -74,7 +74,7 @@ public class ProjectRepository {
    *     {@code credential} has access to the project
    * @throws ProjectRepositoryException if an error happens while communicating with the backend
    */
-  public GcpProject getProject(Credential credential, String projectId) 
+  public GcpProject getProject(Credential credential, String projectId)
       throws ProjectRepositoryException {
     try {
       if (credential != null && !Strings.isNullOrEmpty(projectId)) {
@@ -106,8 +106,9 @@ public class ProjectRepository {
   }
 
   /**
-   * @return true if the credential has access to the GCP project identified by {@code projectId}
-   *     and the project has an App Engine application
+   * @return {@link AppEngine} that is not {@link AppEngine#NO_APPENGINE_APPLICATION} if the
+   *     credential has access to the GCP project identified by {@code projectId} and the project
+   *     has an App Engine application
    * @throws ProjectRepositoryException if an error other than HTTP 404 happens while retrieving the
    *     App Engine application
    */
