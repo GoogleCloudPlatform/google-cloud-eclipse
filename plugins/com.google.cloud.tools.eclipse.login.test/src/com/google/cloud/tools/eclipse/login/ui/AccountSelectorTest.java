@@ -32,7 +32,6 @@ import com.google.cloud.tools.login.Account;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotCombo;
 import org.junit.Before;
@@ -315,7 +314,7 @@ public class AccountSelectorTest {
   @Test
   public void testInitialItemOrder() {
     when(loginService.getAccounts())
-        .thenReturn(new LinkedHashSet<>(Arrays.asList(account3, account2, account1)));
+        .thenReturn(new HashSet<>(Arrays.asList(account3, account2, account1)));
     AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
     assertEquals(4, selector.combo.getItemCount());
     assertEquals(account1.getEmail(), selector.combo.getItem(0));
@@ -339,7 +338,7 @@ public class AccountSelectorTest {
   @Test
   public void testGetFirstEmail_threeAccounts() {
     when(loginService.getAccounts())
-       .thenReturn(new LinkedHashSet<>(Arrays.asList(account3, account2, account1)));
+       .thenReturn(new HashSet<>(Arrays.asList(account3, account2, account1)));
     AccountSelector selector = new AccountSelector(shell, loginService, "<select this to login>");
     assertEquals(account1.getEmail(), selector.getFirstEmail());  // Accounts are sorted.
   }
