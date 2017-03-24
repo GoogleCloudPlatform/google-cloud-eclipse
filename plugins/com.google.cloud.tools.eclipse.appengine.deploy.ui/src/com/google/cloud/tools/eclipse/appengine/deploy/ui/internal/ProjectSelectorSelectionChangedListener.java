@@ -24,6 +24,7 @@ import com.google.cloud.tools.eclipse.projectselector.ProjectRepositoryException
 import com.google.cloud.tools.eclipse.projectselector.ProjectSelector;
 import com.google.cloud.tools.eclipse.projectselector.model.AppEngine;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
 import com.google.common.net.UrlEscapers;
 import java.text.MessageFormat;
@@ -45,6 +46,15 @@ public class ProjectSelectorSelectionChangedListener implements ISelectionChange
   private final ProjectRepository projectRepository;
   private final ProjectSelector projectSelector;
 
+  @VisibleForTesting
+  Job latestQueryJob;
+  private Predicate<Job> isLatestQueryJob = new Predicate<Job>() {
+    @Override
+    public boolean apply(Job job) {
+      return job == latestQueryJob;
+    }
+  };
+
   public ProjectSelectorSelectionChangedListener(AccountSelector accountSelector,
                                                  ProjectRepository projectRepository,
                                                  ProjectSelector projectSelector) {
@@ -58,45 +68,34 @@ public class ProjectSelectorSelectionChangedListener implements ISelectionChange
     projectSelector.clearStatusLink();
 
     IStructuredSelection selection = (IStructuredSelection) event.getSelection();
-    if (!selection.isEmpty()) {
-      GcpProject project = (GcpProject) selection.getFirstElement();
+    if (selection.isEmpty()) {
+      return;
+    }
 
-      String email = accountSelector.getSelectedEmail();
-      String createAppLink = MessageFormat.format(CREATE_APP_LINK,
-          project.getId(), UrlEscapers.urlFormParameterEscaper().escape(email));
+    GcpProject project = (GcpProject) selection.getFirstElement();
+    String email = accountSelector.getSelectedEmail();
+    String createAppLink = MessageFormat.format(CREATE_APP_LINK,
+        project.getId(), UrlEscapers.urlFormParameterEscaper().escape(email));
 
-      boolean alreadyQueried = project.hasAppEngineInfo();
-      if (alreadyQueried) {
-        if (project.getAppEngine() == AppEngine.NO_APPENGINE_APPLICATION) {
-          projectSelector.setStatusLink(Messages.getString(
-              "projectselector.missing.appengine.application.link", createAppLink),
-              createAppLink /* tooltip */);
-        }
-      } else {
-        Display display = projectSelector.getDisplay();
-        Credential credential = accountSelector.getSelectedCredential();
-        Predicate<Job> p = new Predicate<Job>(){
-          @Override
-          public boolean apply(Job arg0) {
-            return false;
-          }};
-        Job job = new MyJob(project, credential, projectRepository, projectSelector,
-            createAppLink, p, display);
+    boolean queryCached = project.hasAppEngineInfo();
+    if (queryCached) {
+      if (project.getAppEngine() == AppEngine.NO_APPENGINE_APPLICATION) {
+        projectSelector.setStatusLink(
+            Messages.getString("projectselector.missing.appengine.application.link", createAppLink),
+            createAppLink /* tooltip */);
       }
+    } else {
+      Credential credential = accountSelector.getSelectedCredential();
+      Display display = projectSelector.getDisplay();
+
+      latestQueryJob = new AppEngineApplicationQueryJob(project, credential, projectRepository,
+          projectSelector, createAppLink, isLatestQueryJob, display);
+      latestQueryJob.schedule();
     }
-    /*
-    } catch (ProjectRepositoryException ex) {
-      projectSelector.setStatusLink(
-          Messages.getString("projectselector.retrieveapplication.error.message",
-                             ex.getLocalizedMessage()),
-          null // tooltip
-          );
-    }
-    */
   }
 }
 
-class MyJob extends Job {
+class AppEngineApplicationQueryJob extends Job {
 
   private final GcpProject project;
   private final Credential credential;
@@ -108,31 +107,32 @@ class MyJob extends Job {
 
   /**
    * @param projectRepository {@link ProjectRepository#getAppEngineApplication} must be thread-safe
-   * @param isLatestAppQueryJob executed in the UI context
-   * @param display
+   * @param isLatestQueryJob predicate that lazily determines if this job is the latest query job,
+   *     which determines if the job should update {@link ProjectSelector} or die silently. This
+   *     predicate is executed in the UI context
    */
-  public MyJob(GcpProject project, Credential credential, ProjectRepository projectRepository,
-      ProjectSelector projectSelector, String createAppLink,
-      Predicate<Job> isLatestAppQueryJob, Display display) {
+  public AppEngineApplicationQueryJob(GcpProject project, Credential credential,
+      ProjectRepository projectRepository, ProjectSelector projectSelector, String createAppLink,
+      Predicate<Job> isLatestQueryJob, Display display) {
     super("Checking GCP project has App Engine Application...");
     this.project = project;
     this.credential = credential;
     this.projectRepository = projectRepository;
     this.projectSelector = projectSelector;
     this.createAppLink = createAppLink;
-    this.isLatestAppQueryJob = isLatestAppQueryJob;
+    this.isLatestAppQueryJob = isLatestQueryJob;
     this.display = display;
   }
 
   @Override
   protected IStatus run(IProgressMonitor monitor) {
     AppEngine appEngine = null;
-    String statusMessage = null;
+    String statusMessage = "";
     String statusTooltip = null;
 
     try {
       // The original design was to cache the returned "appEngine" right after querying, but
-      // because we are in a non-UI thread, defer caching until we get into the UI thread.
+      // because we are in a non-UI thread, defer caching it until we get into the UI thread.
       appEngine = projectRepository.getAppEngineApplication(credential, project.getId());
 
       if (appEngine == AppEngine.NO_APPENGINE_APPLICATION) {
@@ -145,7 +145,7 @@ class MyJob extends Job {
           "projectselector.retrieveapplication.error.message", ex.getLocalizedMessage());
     }
 
-    if (appEngine != null || statusMessage != null) {
+    if (appEngine != null || !statusMessage.isEmpty()) {
       updateInUiThread(appEngine, statusMessage, statusTooltip);
     }
     return Status.OK_STATUS;
@@ -155,7 +155,7 @@ class MyJob extends Job {
       final String statusMessage, final String statusTooltip) {
     final Job thisJob = this;
 
-    // The selector may have been disposed (i.e., dialog closed), so check it in the UI thread.
+    // The selector may have been disposed (i.e., dialog closed); check it in the UI thread.
     display.syncExec(new Runnable() {
       @Override
       public void run() {
