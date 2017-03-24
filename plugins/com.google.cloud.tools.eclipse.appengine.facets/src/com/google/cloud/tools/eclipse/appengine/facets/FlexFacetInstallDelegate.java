@@ -16,6 +16,46 @@
 
 package com.google.cloud.tools.eclipse.appengine.facets;
 
-public class FlexFacetInstallDelegate extends AppEngineFacetInstallDelegate {
+import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexDeployPreferences;
+import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
+import com.google.cloud.tools.eclipse.util.templates.appengine.AppEngineTemplateUtility;
+import java.io.ByteArrayInputStream;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 
+public class FlexFacetInstallDelegate extends AppEngineFacetInstallDelegate {
+  @Override
+  public void execute(IProject project,
+                      IProjectFacetVersion version,
+                      Object config,
+                      IProgressMonitor monitor) throws CoreException {
+    super.execute(project, version, config, monitor);
+    createConfigFiles(project, monitor);
+  }
+
+  // TODO: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1640
+  // TODO: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1642
+  private void createConfigFiles(IProject project, IProgressMonitor monitor) throws CoreException {
+    SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
+
+    FlexDeployPreferences flexDeployPreferences = new FlexDeployPreferences(project);
+    String appYamlParentPath = flexDeployPreferences.getAppEngineDirectory();
+    IFolder appYamlParentFolder = project.getFolder(appYamlParentPath);
+    IFile appYaml = appYamlParentFolder.getFile(AppEngineTemplateUtility.APP_YAML);
+    if (appYaml.exists()) {
+      return;
+    }
+
+    ResourceUtils.createFolders(appYamlParentFolder, subMonitor.newChild(40));
+    appYaml.create(new ByteArrayInputStream(new byte[0]), true, subMonitor.newChild(30));
+    String appYamlLocation = appYaml.getLocation().toString();
+    AppEngineTemplateUtility.copyFileContent(appYamlLocation, AppEngineTemplateUtility.APP_YAML);
+    appYaml.refreshLocal(IResource.DEPTH_ZERO, subMonitor.newChild(30));
+  }
 }
