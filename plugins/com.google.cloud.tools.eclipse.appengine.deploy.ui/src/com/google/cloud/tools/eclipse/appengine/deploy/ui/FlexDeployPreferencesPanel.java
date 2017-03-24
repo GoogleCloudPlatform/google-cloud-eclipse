@@ -171,6 +171,7 @@ public class FlexDeployPreferencesPanel extends DeployPreferencesPanel {
 
   private void applyPreferences(FlexDeployPreferences preferences) {
     useValuesButton.setSelection(preferences.getUseDeploymentPreferences());
+    gaeConfigFolderText.setText(preferences.getAppEngineDirectory());
     dockerFileText.setText(preferences.getDockerDirectory());
     updateControls();
   }

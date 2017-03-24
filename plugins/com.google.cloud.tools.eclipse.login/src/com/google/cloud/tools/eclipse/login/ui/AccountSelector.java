@@ -20,6 +20,7 @@ import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.login.Account;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,25 +42,13 @@ public class AccountSelector extends Composite {
   private Account selectedAccount;
   private ListenerList selectionListeners = new ListenerList();
 
-  /**
-   * If true and if there is no selected account and there is exactly one logged-in account, then
-   * select that account.
-   */
-  private boolean selectDefaultSingleAccount = true;
-
   @VisibleForTesting Combo combo;
   @VisibleForTesting LogInOnSelect logInOnSelect = new LogInOnSelect();
 
   public AccountSelector(Composite parent, IGoogleLoginService loginService, String loginMessage) {
-    this(parent, loginService, loginMessage, false);
-  }
-
-  public AccountSelector(Composite parent, IGoogleLoginService loginService,
-      String loginMessage, boolean selectDefaultSingleAccount) {
     super(parent, SWT.NONE);
     this.loginService = loginService;
     this.loginMessage = loginMessage;
-    this.selectDefaultSingleAccount = selectDefaultSingleAccount;
     GridLayoutFactory.fillDefaults().generateLayout(this);
 
     combo = new Combo(this, SWT.READ_ONLY);
@@ -78,7 +67,6 @@ public class AccountSelector extends Composite {
     }
     combo.add(loginMessage);
     combo.addSelectionListener(logInOnSelect);
-    selectAccount(null);
   }
 
   /**
@@ -108,29 +96,36 @@ public class AccountSelector extends Composite {
   }
 
   /**
+   * @exception IllegalArgumentException if there is no account logged in
+   */
+  public String getFirstEmail() {
+    Preconditions.checkState(getAccountCount() > 0);
+    return combo.getItem(0);
+  }
+
+  /**
    * Selects an account corresponding to the given {@code email} and returns its index of the combo
-   * item. If there is no account corresponding to the {@code email}, <b>and</b> there is exactly 1
-   * known account and {@link #selectDefaultSingleAccount} is true, then we automatically select
-   * that single account; otherwise this method does returns -1 while retaining current selection
-   * (if any).
+   * item. If there is no account corresponding to the {@code email}, clears any selection and
+   * returns -1.
    *
    * @param email email address to use to select an account
    * @return index of the newly selected combo item; -1 if {@code email} is {@code null} or the
    *         empty string, or if there is no matching account
    */
   public int selectAccount(String email) {
+    int oldIndex = combo.getSelectionIndex();
     int index = Strings.isNullOrEmpty(email) ? -1 : combo.indexOf(email);
-    if (index < 0 && selectDefaultSingleAccount && getAccountCount() == 1) {
-      index = 0;
-      email = combo.getItem(0);
-    }
-    if (index >= 0) {
+    if (index == -1) {
+      combo.deselectAll();
+      selectedAccount = null;
+    } else {
       combo.select(index);
       selectedAccount = (Account) combo.getData(email);
     }
-    // Need to fire even if nothing is selected (which is an error state), to show the error
-    // message: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/pull/1303
-    fireSelectionListeners();
+
+    if (oldIndex != index) {
+      fireSelectionListeners();
+    }
     return index;
   }
 
