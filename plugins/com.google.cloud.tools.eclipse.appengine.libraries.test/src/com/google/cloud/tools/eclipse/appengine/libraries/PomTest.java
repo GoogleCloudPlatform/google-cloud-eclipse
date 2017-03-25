@@ -102,6 +102,8 @@ public class PomTest {
     
     pom.addDependencies(libraries);
     
+    Assert.assertEquals(1, pomFile.getHistory(null).length);
+    
     InputStream contents = pomFile.getContents();
     Document actual = parse(contents);
     
@@ -129,7 +131,6 @@ public class PomTest {
     // https://bugs.openjdk.java.net/browse/JDK-8146163
     Assert.assertEquals(Node.COMMENT_NODE, actual.getChildNodes().item(0).getNodeType());
   }
-  
 
   @Test
   public void testAddDependencies_withDuplicates() 
