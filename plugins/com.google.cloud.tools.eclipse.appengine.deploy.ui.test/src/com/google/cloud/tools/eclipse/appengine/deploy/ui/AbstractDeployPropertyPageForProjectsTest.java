@@ -83,8 +83,8 @@ public abstract class AbstractDeployPropertyPageForProjectsTest<P extends Deploy
     fail("Did not find the deploy preferences panel");
   }
 
-  abstract protected IProject getProject();
+  protected abstract IProject getProject();
 
-  abstract protected Class<P> getPanelClass();
+  protected abstract Class<P> getPanelClass();
 
 }
