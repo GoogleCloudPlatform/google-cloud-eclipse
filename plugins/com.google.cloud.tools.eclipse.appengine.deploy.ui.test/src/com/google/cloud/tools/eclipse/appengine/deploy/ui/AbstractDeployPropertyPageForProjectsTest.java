@@ -20,7 +20,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.fail;
 
-import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
@@ -45,7 +44,7 @@ public abstract class AbstractDeployPropertyPageForProjectsTest<P extends Deploy
 
   protected static final IProjectFacetVersion APP_ENGINE_STANDARD_FACET_1 =
       ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID).getVersion("1");
-  // commented out until Flex facet is enabled
+  // TODO: uncomment when Flex facet is enabled
 //  protected static final IProjectFacetVersion APP_ENGINE_FLEX_FACET_1 =
 //      ProjectFacetsManager.getProjectFacet(AppEngineFlexFacet.ID).getVersion("1");
 
@@ -85,7 +84,7 @@ public abstract class AbstractDeployPropertyPageForProjectsTest<P extends Deploy
   }
 
   abstract protected IProject getProject();
-  
+
   abstract protected Class<P> getPanelClass();
 
 }
