@@ -106,6 +106,10 @@
               name="accounts"
               visible="true">
         </separator>
+        <separator
+              name="feedback"
+              visible="true">
+        </separator>
      </menuContribution>       
   </extension>
 

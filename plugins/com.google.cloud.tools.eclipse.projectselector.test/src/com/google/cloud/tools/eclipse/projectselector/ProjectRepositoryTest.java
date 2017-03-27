@@ -66,11 +66,10 @@ public class ProjectRepositoryTest {
     project.setName("projectName").setProjectId("projectId");
   }
 
-  @Test
+  @Test(expected = NullPointerException.class)
   public void testGetProjects_nullCredential() throws ProjectRepositoryException {
     Credential credential = null;
-    List<GcpProject> projects = repository.getProjects(credential);
-    Assert.assertTrue(projects.isEmpty());
+    repository.getProjects(credential);
   }
 
   @Test(expected = ProjectRepositoryException.class)
@@ -229,13 +228,13 @@ public class ProjectRepositoryTest {
   initializeGetRequest() throws IOException, GoogleApiException {
     Apps apps = mock(Apps.class);
     when(apiFactory.newAppsApi(any(Credential.class))).thenReturn(apps);
-    
+
     com.google.api.services.appengine.v1.Appengine.Apps.Get get =
         mock(com.google.api.services.appengine.v1.Appengine.Apps.Get.class);
     when(apps.get(anyString())).thenReturn(get);
     return get;
   }
-  
+
   private com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects.List
   initializeListRequest() throws IOException, GoogleApiException {
     Projects projects = mock(Projects.class);

@@ -28,9 +28,9 @@ import org.eclipse.wst.common.componentcore.resources.IVirtualFolder;
  * Utility classes for processing WTP Web Projects (jst.web and jst.utility).
  */
 public class WebProjectUtil {
-  private final static String DEFAULT_WEB_PATH = "src/main/webapp";
+  final static String DEFAULT_WEB_PATH = "src/main/webapp";
 
-  private final static String WEB_INF = "WEB-INF/";
+  final static String WEB_INF = "WEB-INF/";
 
   /**
    * Return the project's <code>WEB-INF</code> directory. There is no guarantee that the contents
@@ -52,8 +52,9 @@ public class WebProjectUtil {
     IFolder defaultLocation = project.getFolder(DEFAULT_WEB_PATH).getFolder(WEB_INF);
     if (defaultLocation.exists()) {
       return defaultLocation;
+    } else {
+      return null;
     }
-    return null;
   }
 
   /**

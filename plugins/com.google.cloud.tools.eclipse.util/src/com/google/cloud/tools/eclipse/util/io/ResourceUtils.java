@@ -33,11 +33,13 @@ public class ResourceUtils {
    * Create the components of the provided folder as required. Assumes the containing project
    * already exists.
    * 
-   * @param folder the path to be created if necessary
+   * @param folder the path to be created if it does not already exist
    * @param monitor may be {@code null}
    * @throws CoreException on error
    */
-  public static void createFolders(IFolder folder, IProgressMonitor monitor) throws CoreException {
+  public static void createFolders(IContainer folder, IProgressMonitor monitor)
+      throws CoreException {
+    
     IPath path = folder.getProjectRelativePath();
     IContainer current = folder.getProject();
     SubMonitor progress = SubMonitor.convert(monitor, path.segmentCount());

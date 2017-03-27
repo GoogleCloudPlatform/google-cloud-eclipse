@@ -50,8 +50,6 @@
     <module>plugins/com.google.cloud.tools.eclipse.appengine.libraries.ui.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.localserver</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.localserver.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.login</module>
-    <module>plugins/com.google.cloud.tools.eclipse.login.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.newproject</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.newproject.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.newproject.maven</module>
@@ -60,8 +58,12 @@
     <module>plugins/com.google.cloud.tools.eclipse.appengine.validation.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.ui</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.ui.test</module>
+    <module>plugins/com.google.cloud.tools.eclipse.bugreport</module>
+    <module>plugins/com.google.cloud.tools.eclipse.bugreport.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.googleapis</module>
     <module>plugins/com.google.cloud.tools.eclipse.googleapis.test</module>
+    <module>plugins/com.google.cloud.tools.eclipse.login</module>
+    <module>plugins/com.google.cloud.tools.eclipse.login.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.preferences</module>
     <module>plugins/com.google.cloud.tools.eclipse.preferences.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.projectselector</module>
