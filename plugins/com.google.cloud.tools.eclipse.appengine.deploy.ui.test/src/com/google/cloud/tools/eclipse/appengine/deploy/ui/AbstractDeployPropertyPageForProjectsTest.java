@@ -20,7 +20,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.fail;
 
-import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
@@ -31,8 +30,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
-import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,12 +38,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public abstract class AbstractDeployPropertyPageForProjectsTest<P extends DeployPreferencesPanel> {
-
-  protected static final IProjectFacetVersion APP_ENGINE_STANDARD_FACET_1 =
-      ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID).getVersion("1");
-  // TODO: uncomment when Flex facet is enabled
-//  protected static final IProjectFacetVersion APP_ENGINE_FLEX_FACET_1 =
-//      ProjectFacetsManager.getProjectFacet(AppEngineFlexFacet.ID).getVersion("1");
 
   @Rule
   public ShellTestResource shellTestResource = new ShellTestResource();

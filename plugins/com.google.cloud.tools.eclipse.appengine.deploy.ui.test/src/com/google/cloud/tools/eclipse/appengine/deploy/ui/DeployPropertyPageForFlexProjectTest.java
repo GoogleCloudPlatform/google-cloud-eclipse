@@ -16,24 +16,31 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexFacet;
+import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.jst.common.project.facet.core.JavaFacet;
+import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
+import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
+import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.junit.Ignore;
+import org.junit.Rule;
 
 // TODO: uncomment when Flex facet is enabled
 @Ignore
 public class DeployPropertyPageForFlexProjectTest
     extends AbstractDeployPropertyPageForProjectsTest<FlexDeployPreferencesPanel> {
 
-  // TODO: uncomment when Flex facet is enabled
-//  @Rule
-//  public TestProjectCreator flexProjectCreator = new TestProjectCreator().withFacetVersions(
-//      JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, APP_ENGINE_FLEX_FACET_1);
+  protected static final IProjectFacetVersion APP_ENGINE_FLEX_FACET_1 =
+      ProjectFacetsManager.getProjectFacet(AppEngineFlexFacet.ID).getVersion("1");
+
+  @Rule
+  public TestProjectCreator flexProjectCreator = new TestProjectCreator().withFacetVersions(
+      JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, APP_ENGINE_FLEX_FACET_1);
 
   @Override
   protected IProject getProject() {
-    // TODO: uncomment when Flex facet is enabled
-//    return flexProjectCreator.getProject();
-    return null;
+    return flexProjectCreator.getProject();
   }
 
   @Override
