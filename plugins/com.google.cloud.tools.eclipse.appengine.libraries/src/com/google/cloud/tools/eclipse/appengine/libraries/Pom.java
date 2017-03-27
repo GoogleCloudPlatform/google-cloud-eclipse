@@ -161,7 +161,7 @@ class Pom {
     transformer.transform(new DOMSource(document), new StreamResult(out));
     InputStream in = new ByteArrayInputStream(out.toByteArray());
     
-    pomFile.setContents(in, IFile.FORCE, null);
+    pomFile.setContents(in, true, true, null);
   }
 
 }

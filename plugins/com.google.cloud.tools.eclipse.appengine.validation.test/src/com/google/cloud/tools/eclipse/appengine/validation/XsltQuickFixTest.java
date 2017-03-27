@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import javax.xml.parsers.DocumentBuilder;
@@ -81,8 +82,10 @@ public class XsltQuickFixTest {
   @Test
   public void testRun_removeApplicationElement() throws IOException, ParserConfigurationException,
       SAXException, TransformerException, CoreException {
-    file.create(ValidationTestUtils.stringToInputStream(
-        APPLICATION_XML), IFile.FORCE, null);
+    IProject project = projectCreator.getProject();
+    IFile file = project.getFile("testdata.xml");
+    file.create(ValidationTestUtils.stringToInputStream(APPLICATION_XML), IFile.FORCE, null);
+    
     IMarker marker = Mockito.mock(IMarker.class);
     Mockito.when(marker.getResource()).thenReturn(file);
     
@@ -114,6 +117,9 @@ public class XsltQuickFixTest {
     DocumentBuilder builder = builderFactory.newDocumentBuilder();
     Document transformed = builder.parse(file.getContents());
     assertEquals(0, transformed.getDocumentElement().getChildNodes().getLength());
+    
+    assertTrue(file.isSynchronized(0));
+    assertEquals(1, file.getHistory(null).length);
   }
   
   @Test
@@ -121,8 +127,7 @@ public class XsltQuickFixTest {
     
     IProject project = projectCreator.getProject();
     IFile file = project.getFile("testdata.xml");
-    file.create(ValidationTestUtils.stringToInputStream(
-        APPLICATION_XML), IFile.FORCE, null);
+    file.create(ValidationTestUtils.stringToInputStream(APPLICATION_XML), IFile.FORCE, null);
     
     IWorkbench workbench = PlatformUI.getWorkbench();
     WorkbenchUtil.openInEditor(workbench, file);
@@ -135,8 +140,7 @@ public class XsltQuickFixTest {
     
     IProject project = projectCreator.getProject();
     IFile file = project.getFile("testdata.xml");
-    file.create(ValidationTestUtils.stringToInputStream(
-        APPLICATION_XML), IFile.FORCE, null);
+    file.create(ValidationTestUtils.stringToInputStream(APPLICATION_XML), IFile.FORCE, null);
     
     assertNull(XsltQuickFix.getCurrentDocument(file));
   }

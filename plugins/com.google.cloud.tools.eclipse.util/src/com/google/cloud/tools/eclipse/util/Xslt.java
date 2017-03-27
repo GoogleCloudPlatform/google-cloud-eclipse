@@ -42,7 +42,9 @@ public class Xslt {
     try (InputStream in = file.getContents();
         InputStream stylesheetStream = xslt.openStream();
         InputStream resultStream = applyXslt(in, stylesheetStream)) {
-      file.setContents(resultStream, IFile.FORCE, null /* monitor */);
+      boolean force = true;
+      boolean keepHistory = true;
+      file.setContents(resultStream, force, keepHistory, null /* monitor */);
     }
   }
 

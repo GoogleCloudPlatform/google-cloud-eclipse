@@ -13,6 +13,7 @@ Require-Bundle: org.eclipse.wst.common.project.facet.core,
  com.google.guava,
  com.google.cloud.tools.eclipse.test.dependencies
 Fragment-Host: com.google.cloud.tools.eclipse.appengine.flex
-Import-Package: org.mockito;provider=google;version="1.10.19",
+Import-Package: com.google.cloud.tools.eclipse.test.util.project,
+ org.mockito;provider=google;version="1.10.19",
  org.mockito.runners;provider=google;version="1.10.19",
  org.mockito.stubbing;provider=google;version="1.10.19"

@@ -42,7 +42,6 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
-import org.hamcrest.Matchers;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -176,8 +175,11 @@ public class LibraryClasspathContainerInitializerTest {
       throws CoreException, IOException {
     File artifactFile = temporaryFolder.newFile();
 
-    IClasspathEntry entry =
-        JavaCore.newLibraryEntry(new Path(artifactFile.getAbsolutePath()), null, null);
+    IPath sourceAttachmentPath = null;
+    IPath sourceAttachmentRootPath = null;
+    IClasspathEntry entry = JavaCore.newLibraryEntry(new Path(artifactFile.getAbsolutePath()),
+        sourceAttachmentPath, sourceAttachmentRootPath);
+
     IClasspathEntry[] entries = new IClasspathEntry[]{ entry };
     LibraryClasspathContainer container = mock(LibraryClasspathContainer.class);
     when(container.getClasspathEntries()).thenReturn(entries);
@@ -188,7 +190,7 @@ public class LibraryClasspathContainerInitializerTest {
     containerInitializer.initialize(new Path(TEST_LIBRARY_PATH), testProject.getJavaProject());
     testProject.getJavaProject().getRawClasspath();
     IClasspathEntry[] resolvedClasspath = testProject.getJavaProject().getResolvedClasspath(false);
-    assertThat(resolvedClasspath.length, Matchers.greaterThan(2));
+    
     for (IClasspathEntry resolvedEntry : resolvedClasspath) {
       if (resolvedEntry.getPath().toOSString().equals(artifactFile.getAbsolutePath())) {
         verifyContainerWasNotResolvedFromScratch();
@@ -217,7 +219,7 @@ public class LibraryClasspathContainerInitializerTest {
     containerInitializer.initialize(new Path(TEST_LIBRARY_PATH), testProject.getJavaProject());
     testProject.getJavaProject().getRawClasspath();
     IClasspathEntry[] resolvedClasspath = testProject.getJavaProject().getResolvedClasspath(false);
-    assertThat(resolvedClasspath.length, Matchers.greaterThan(2));
+
     for (IClasspathEntry resolvedEntry : resolvedClasspath) {
       if (resolvedEntry.getPath().toOSString().equals(artifactFile.getAbsolutePath())) {
         assertThat(resolvedEntry.getSourceAttachmentPath().toOSString(),

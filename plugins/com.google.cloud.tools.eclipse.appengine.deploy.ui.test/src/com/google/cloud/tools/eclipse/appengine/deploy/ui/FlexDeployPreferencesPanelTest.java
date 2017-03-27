@@ -17,7 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexDeployPreferences;
@@ -41,6 +41,7 @@ public class FlexDeployPreferencesPanelTest {
   public void testGetHelpContextId() throws Exception {
     when(preferences.getUseDeploymentPreferences()).thenReturn(false);
     when(preferences.getDockerDirectory()).thenReturn("/non/existent/docker/directory");
+    when(preferences.getAppEngineDirectory()).thenReturn("/non/existent/appengine/directory");
     Shell parent = shellTestResource.getShell();
     assertThat(new FlexDeployPreferencesPanel(parent, project, preferences).getHelpContextId(),
         is("com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployAppEngineFlexProjectContext"));

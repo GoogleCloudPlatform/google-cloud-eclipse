@@ -38,7 +38,8 @@ public class FlexDeployPreferencesTest {
 
   @Test
   public void testDefaultAppEngineDirectory() {
-    assertThat(FlexDeployPreferences.DEFAULT.getAppEngineDirectory(), isEmptyString());
+    assertThat(FlexDeployPreferences.DEFAULT.getAppEngineDirectory(),
+        is(FlexDeployPreferenceInitializer.DEFAULT_APP_ENGINE_DIRECTORY));
   }
 
   @Test
