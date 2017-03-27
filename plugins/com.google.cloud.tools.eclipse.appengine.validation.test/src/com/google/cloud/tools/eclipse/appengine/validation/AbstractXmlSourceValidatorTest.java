@@ -35,8 +35,6 @@ import org.eclipse.wst.sse.ui.internal.reconcile.validator.IncrementalHelper;
 import org.eclipse.wst.sse.ui.internal.reconcile.validator.IncrementalReporter;
 import org.eclipse.wst.validation.internal.core.ValidationException;
 import org.eclipse.wst.validation.internal.provisional.core.IMessage;
-import org.eclipse.wst.validation.internal.provisional.core.IValidationContext;
-
 import org.junit.ClassRule;
 import org.junit.Test;
 
@@ -51,8 +49,7 @@ public class AbstractXmlSourceValidatorTest {
       ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID).getVersion("1");
   
   @ClassRule public static TestProjectCreator dynamicWebProject =
-      new TestProjectCreator().withFacetVersions(Lists.newArrayList(JavaFacet.VERSION_1_7,
-          WebFacetUtils.WEB_25));
+      new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
   
   @ClassRule public static TestProjectCreator appEngineStandardProject =
       new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7,
