@@ -18,9 +18,11 @@ package com.google.cloud.tools.eclipse.appengine.deploy.ui.internal;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -54,6 +56,8 @@ public class ProjectSelectorSelectionChangedListenerTest {
           + "application in the\nCloud Console</a>.";
   static final String EXPECTED_MESSAGE_WHEN_EXCEPTION =
       "An error occurred while retrieving App Engine application:\ntestException";
+
+  private final GcpProject gcpProject = new GcpProject("projectName", "projectId");
 
   @Mock private AccountSelector accountSelector;
   @Mock private ProjectSelector projectSelector;
@@ -93,6 +97,7 @@ public class ProjectSelectorSelectionChangedListenerTest {
 
     listener.selectionChanged(event);
     listener.getLatestQueryJob().join();
+    verify(projectSelector).clearStatusLink();  // Should clear initially.
     verify(projectSelector).setStatusLink(EXPECTED_MESSAGE_WHEN_EXCEPTION, null /* tooltip */);
   }
 
@@ -105,6 +110,7 @@ public class ProjectSelectorSelectionChangedListenerTest {
 
     listener.selectionChanged(event);
     listener.getLatestQueryJob().join();
+    verify(projectSelector).clearStatusLink();  // Should clear initially.
     verify(projectSelector).setStatusLink(EXPECTED_MESSAGE_WHEN_NO_APPLICATION, EXPECTED_LINK);
   }
 
@@ -120,9 +126,31 @@ public class ProjectSelectorSelectionChangedListenerTest {
     verify(projectSelector).clearStatusLink();
   }
 
+  @Test
+  public void testSelectionChanged_doNotRunQueryJobIfCached() throws ProjectRepositoryException {
+    initSelectionAndAccountSelector();
+    gcpProject.setAppEngine(AppEngine.withId("id"));
+
+    listener.selectionChanged(event);
+    assertNull(listener.getLatestQueryJob());
+    verify(projectRepository, never()).getAppEngineApplication(any(Credential.class), anyString());
+    verify(projectSelector).clearStatusLink();
+  }
+
+  @Test
+  public void testSelectionChanged_whenCachedResultIsNoAppEngineApplication()
+      throws ProjectRepositoryException {
+    initSelectionAndAccountSelector();
+    gcpProject.setAppEngine(AppEngine.NO_APPENGINE_APPLICATION);
+
+    listener.selectionChanged(event);
+    assertNull(listener.getLatestQueryJob());
+    verify(projectRepository, never()).getAppEngineApplication(any(Credential.class), anyString());
+    verify(projectSelector).setStatusLink(EXPECTED_MESSAGE_WHEN_NO_APPLICATION, EXPECTED_LINK);
+  }
+
   private void initSelectionAndAccountSelector() {
-    StructuredSelection selection =
-        new StructuredSelection(new GcpProject("projectName", "projectId"));
+    StructuredSelection selection = new StructuredSelection(gcpProject);
     when(event.getSelection()).thenReturn(selection);
     when(accountSelector.getSelectedCredential()).thenReturn(mock(Credential.class));
     when(accountSelector.getSelectedEmail()).thenReturn("user@example.com");
