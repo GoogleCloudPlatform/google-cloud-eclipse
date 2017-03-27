@@ -215,17 +215,23 @@
 
   <extension point="org.eclipse.wst.sse.ui.quickFixProcessor">
   	<quickFixProcessor
-  		class="com.google.cloud.tools.eclipse.appengine.validation.ApplicationQuickAssistProcessor">
+  		class="com.google.cloud.tools.eclipse.appengine.validation.XsltQuickAssistProcessor:applicationMarker:com.google.cloud.tools.eclipse.appengine.validation.ApplicationQuickAssistProcessor">
   	</quickFixProcessor>
   	<quickFixProcessor
-  	    class="com.google.cloud.tools.eclipse.appengine.validation.VersionQuickAssistProcessor">
+  	    class="com.google.cloud.tools.eclipse.appengine.validation.XsltQuickAssistProcessor:versionMarker:com.google.cloud.tools.eclipse.appengine.validation.VersionQuickAssistProcessor">
   	</quickFixProcessor>
   	<quickFixProcessor
-  		class="com.google.cloud.tools.eclipse.appengine.validation.ServletQuickAssistProcessor">
+  		class="com.google.cloud.tools.eclipse.appengine.validation.XsltQuickAssistProcessor:servletMarker:com.google.cloud.tools.eclipse.appengine.validation.ServletQuickAssistProcessor">
   	</quickFixProcessor>
   </extension>
 
   <extension point="org.eclipse.wst.sse.ui.editorConfiguration">
+    <provisionalConfiguration
+          class="com.google.cloud.tools.eclipse.appengine.validation.XsltQuickAssistProcessor"
+          target="org.eclipse.wst.xml.XML_DEFAULT"
+          type="org.eclipse.jface.text.quickassist.IQuickAssistProcessor">
+    </provisionalConfiguration>
+  <!--
     <provisionalConfiguration
           class="com.google.cloud.tools.eclipse.appengine.validation.ApplicationQuickAssistProcessor"
           target="org.eclipse.wst.xml.XML_DEFAULT"
@@ -241,6 +247,8 @@
           target="org.eclipse.wst.xml.XML_DEFAULT"
           type="org.eclipse.jface.text.quickassist.IQuickAssistProcessor">
     </provisionalConfiguration>
+    
+    -->
   </extension>
 
 </plugin>
