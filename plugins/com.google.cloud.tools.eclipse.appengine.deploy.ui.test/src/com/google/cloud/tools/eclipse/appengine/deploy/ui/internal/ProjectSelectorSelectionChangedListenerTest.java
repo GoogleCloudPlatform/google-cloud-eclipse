@@ -16,6 +16,8 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.ui.internal;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -29,8 +31,11 @@ import com.google.cloud.tools.eclipse.projectselector.ProjectRepositoryException
 import com.google.cloud.tools.eclipse.projectselector.ProjectSelector;
 import com.google.cloud.tools.eclipse.projectselector.model.AppEngine;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.swt.widgets.Display;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -58,9 +63,18 @@ public class ProjectSelectorSelectionChangedListenerTest {
   private ProjectSelectorSelectionChangedListener listener;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
+    assertNotNull(Display.getCurrent());
     listener = new ProjectSelectorSelectionChangedListener(accountSelector, projectRepository,
                                                            projectSelector);
+    when(projectSelector.getDisplay()).thenReturn(Display.getCurrent());
+  }
+
+  @After
+  public void tearDown() {
+    if (listener.getLatestQueryJob() != null) {
+      assertEquals(Job.NONE, listener.getLatestQueryJob().getState());
+    }
   }
 
   @Test
@@ -71,32 +85,38 @@ public class ProjectSelectorSelectionChangedListenerTest {
   }
 
   @Test
-  public void testSelectionChanged_repositoryException() throws ProjectRepositoryException {
+  public void testSelectionChanged_repositoryException()
+      throws ProjectRepositoryException, InterruptedException {
     initSelectionAndAccountSelector();
     when(projectRepository.getAppEngineApplication(any(Credential.class), anyString()))
         .thenThrow(new ProjectRepositoryException("testException"));
 
     listener.selectionChanged(event);
+    listener.getLatestQueryJob().join();
     verify(projectSelector).setStatusLink(EXPECTED_MESSAGE_WHEN_EXCEPTION, null /* tooltip */);
   }
 
   @Test
-  public void testSelectionChanged_noAppEngineApplication() throws ProjectRepositoryException {
+  public void testSelectionChanged_noAppEngineApplication()
+      throws ProjectRepositoryException, InterruptedException {
     initSelectionAndAccountSelector();
     when(projectRepository.getAppEngineApplication(any(Credential.class), anyString()))
         .thenReturn(AppEngine.NO_APPENGINE_APPLICATION);
 
     listener.selectionChanged(event);
+    listener.getLatestQueryJob().join();
     verify(projectSelector).setStatusLink(EXPECTED_MESSAGE_WHEN_NO_APPLICATION, EXPECTED_LINK);
   }
 
   @Test
-  public void testSelectionChanged_hasAppEngineApplication() throws ProjectRepositoryException {
+  public void testSelectionChanged_hasAppEngineApplication()
+      throws ProjectRepositoryException, InterruptedException {
     initSelectionAndAccountSelector();
     when(projectRepository.getAppEngineApplication(any(Credential.class), anyString()))
         .thenReturn(AppEngine.withId("id"));
 
     listener.selectionChanged(event);
+    listener.getLatestQueryJob().join();
     verify(projectSelector).clearStatusLink();
   }
 
