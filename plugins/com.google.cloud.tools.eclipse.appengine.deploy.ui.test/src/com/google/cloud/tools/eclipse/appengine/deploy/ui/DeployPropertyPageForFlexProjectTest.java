@@ -23,14 +23,13 @@ import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
-import org.junit.Ignore;
 import org.junit.Rule;
 
-// TODO: uncomment when Flex facet is enabled
-@Ignore
 public class DeployPropertyPageForFlexProjectTest
     extends AbstractDeployPropertyPageForProjectsTest<FlexDeployPreferencesPanel> {
 
+  // TODO: remove "Required-Bundle: com.google.cloud.tools.eclipse.appengine.flex" from
+  // "MANIFEST.MF" once the flex facet is fully available.
   protected static final IProjectFacetVersion APP_ENGINE_FLEX_FACET_1 =
       ProjectFacetsManager.getProjectFacet(AppEngineFlexFacet.ID).getVersion("1");
 
