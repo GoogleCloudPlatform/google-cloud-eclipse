@@ -78,8 +78,8 @@ public class ProjectSelectorSelectionChangedListenerTest {
 
   @After
   public void tearDown() {
-    if (listener.getLatestQueryJob() != null) {
-      assertEquals(Job.NONE, listener.getLatestQueryJob().getState());
+    if (listener.latestQueryJob != null) {
+      assertEquals(Job.NONE, listener.latestQueryJob.getState());
     }
   }
 
@@ -98,7 +98,7 @@ public class ProjectSelectorSelectionChangedListenerTest {
         .thenThrow(new ProjectRepositoryException("testException"));
 
     listener.selectionChanged(event);
-    listener.getLatestQueryJob().join();
+    listener.latestQueryJob.join();
     verify(projectSelector).clearStatusLink();  // Should clear initially.
     verify(projectSelector).setStatusLink(EXPECTED_MESSAGE_WHEN_EXCEPTION, null /* tooltip */);
   }
@@ -111,7 +111,7 @@ public class ProjectSelectorSelectionChangedListenerTest {
         .thenReturn(AppEngine.NO_APPENGINE_APPLICATION);
 
     listener.selectionChanged(event);
-    listener.getLatestQueryJob().join();
+    listener.latestQueryJob.join();
     verify(projectSelector).clearStatusLink();  // Should clear initially.
     verify(projectSelector).setStatusLink(EXPECTED_MESSAGE_WHEN_NO_APPLICATION, EXPECTED_LINK);
   }
@@ -124,7 +124,7 @@ public class ProjectSelectorSelectionChangedListenerTest {
         .thenReturn(AppEngine.withId("id"));
 
     listener.selectionChanged(event);
-    listener.getLatestQueryJob().join();
+    listener.latestQueryJob.join();
     verify(projectSelector).clearStatusLink();
   }
 
@@ -135,7 +135,7 @@ public class ProjectSelectorSelectionChangedListenerTest {
     gcpProject.setAppEngine(AppEngine.withId("id"));
 
     listener.selectionChanged(event);
-    assertNull(listener.getLatestQueryJob());
+    assertNull(listener.latestQueryJob);
     verify(projectRepository, never()).getAppEngineApplication(any(Credential.class), anyString());
     verify(projectSelector).clearStatusLink();
   }
@@ -148,7 +148,7 @@ public class ProjectSelectorSelectionChangedListenerTest {
     gcpProject.setAppEngine(AppEngine.NO_APPENGINE_APPLICATION);
 
     listener.selectionChanged(event);
-    assertNull(listener.getLatestQueryJob());
+    assertNull(listener.latestQueryJob);
     verify(projectRepository, never()).getAppEngineApplication(any(Credential.class), anyString());
     verify(projectSelector).setStatusLink(EXPECTED_MESSAGE_WHEN_NO_APPLICATION, EXPECTED_LINK);
   }
@@ -164,14 +164,14 @@ public class ProjectSelectorSelectionChangedListenerTest {
     initSelectionAndAccountSelector(new GcpProject("oldProjectName", "oldProjectId"));
     listener.selectionChanged(event);
 
-    Job oldJob = listener.getLatestQueryJob();
+    Job oldJob = listener.latestQueryJob;
     assertNotNull(oldJob);
     oldJob.join();
 
     initSelectionAndAccountSelector();
     listener.selectionChanged(event);
 
-    Job newJob = listener.getLatestQueryJob();
+    Job newJob = listener.latestQueryJob;
     assertNotNull(newJob);
     assertNotEquals(oldJob, newJob);
     newJob.join();

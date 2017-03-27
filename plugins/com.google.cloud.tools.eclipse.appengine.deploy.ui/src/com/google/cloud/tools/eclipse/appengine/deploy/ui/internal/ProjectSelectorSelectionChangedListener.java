@@ -42,19 +42,14 @@ public class ProjectSelectorSelectionChangedListener implements ISelectionChange
   private final ProjectRepository projectRepository;
   private final ProjectSelector projectSelector;
 
-  private Job latestQueryJob;
-
+  @VisibleForTesting
+  Job latestQueryJob;
   private Predicate<Job> isLatestQueryJob = new Predicate<Job>() {
     @Override
     public boolean apply(Job job) {
       return job == latestQueryJob;
     }
   };
-
-  @VisibleForTesting
-  Job getLatestQueryJob() {
-    return latestQueryJob;
-  }
 
   public ProjectSelectorSelectionChangedListener(AccountSelector accountSelector,
                                                  ProjectRepository projectRepository,
