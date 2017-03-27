@@ -19,6 +19,8 @@ package com.google.cloud.tools.eclipse.projectselector.model;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -142,5 +144,19 @@ public class GcpProjectTest {
     GcpProject gcpProject = new GcpProject("name", "id");
     gcpProject.setAppEngine(AppEngine.NO_APPENGINE_APPLICATION);
     assertTrue(gcpProject.hasAppEngineInfo());
+  }
+
+  @Test
+  public void testSetAppEngine_null() {
+    GcpProject gcpProject = new GcpProject("name", "id");
+    gcpProject.setAppEngine(null);
+    assertNull(gcpProject.getAppEngine());
+  }
+
+  @Test
+  public void testSetAppEngine() {
+    GcpProject gcpProject = new GcpProject("name", "id");
+    gcpProject.setAppEngine(AppEngine.withId("id"));
+    assertNotNull(gcpProject.getAppEngine());
   }
 }
