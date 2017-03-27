@@ -35,7 +35,10 @@ class BlacklistScanner extends AbstractScanner {
           locator.getColumnNumber() - qName.length() - 2);
       String message = AppEngineWebBlacklist.getBlacklistElementMessage(qName);
       String markerId = AppEngineWebBlacklist.getMarkerId(qName);
-      BannedElement element = new AppEngineBlacklistElement(message, markerId, start, qName.length() + 2);
+      AbstractQuickAssistProcessor quickAssistProcessor =
+          AppEngineWebBlacklist.getQuickAssistProcessor(qName);
+      BannedElement element = new AppEngineBlacklistElement(
+          message, markerId, start, qName.length() + 2, quickAssistProcessor);
       addToBlacklist(element);
     }
   }

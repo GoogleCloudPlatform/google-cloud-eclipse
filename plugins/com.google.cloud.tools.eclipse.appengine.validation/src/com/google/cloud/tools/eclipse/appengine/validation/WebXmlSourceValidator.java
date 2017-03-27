@@ -45,7 +45,8 @@ public class WebXmlSourceValidator extends AbstractXmlSourceValidator {
       Map<BannedElement, Integer> bannedElementOffsetMap =
           ValidationUtils.getOffsetMap(bytes, parserResults);
       for (Map.Entry<BannedElement, Integer> entry : bannedElementOffsetMap.entrySet()) {
-        this.createMessage(reporter, entry.getKey(), entry.getValue(),
+        BannedElement element = entry.getKey();
+        this.createMessage(reporter, element, entry.getValue(),
               MARKER_ID, IMessage.HIGH_SEVERITY);
       }
     } catch (SAXException ex) {

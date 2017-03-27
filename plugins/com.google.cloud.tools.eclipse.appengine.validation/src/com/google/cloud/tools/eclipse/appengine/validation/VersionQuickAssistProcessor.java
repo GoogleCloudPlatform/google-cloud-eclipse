@@ -22,7 +22,7 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 public class VersionQuickAssistProcessor extends AbstractQuickAssistProcessor {
 
   public VersionQuickAssistProcessor() {
-    super(Messages.getString("version.element"), new VersionSourceQuickFix());
+    super(new VersionSourceQuickFix());
   }
 
 }

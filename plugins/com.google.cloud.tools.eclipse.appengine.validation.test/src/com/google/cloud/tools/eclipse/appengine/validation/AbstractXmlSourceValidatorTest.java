@@ -20,6 +20,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.List;
+
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import org.eclipse.core.resources.IFile;
@@ -27,6 +29,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.quickassist.IQuickAssistProcessor;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
@@ -115,9 +118,15 @@ public class AbstractXmlSourceValidatorTest {
   public void testCreateMessage() throws CoreException {
     IncrementalReporter reporter = new IncrementalReporter(null /*progress monitor*/);
     AbstractXmlSourceValidator validator = new AppEngineWebXmlSourceValidator();
-    BannedElement element = new BannedElement("message");
+    ApplicationQuickAssistProcessor processor = new ApplicationQuickAssistProcessor();
+    BannedElement element = new AppEngineBlacklistElement(
+        "message", "markerId", new DocumentLocation(5, 17), 0, processor);
     validator.createMessage(reporter, element, 0, "", IMessage.NORMAL_SEVERITY);
-    assertEquals(1, reporter.getMessages().size());
+    List<IMessage> messages = reporter.getMessages();
+    assertEquals(1, messages.size());
+    IMessage iMessage = messages.get(0);
+    Object attribute = iMessage.getAttribute(IQuickAssistProcessor.class.getName());
+    assertEquals(processor, attribute);
   }
 
   @Test

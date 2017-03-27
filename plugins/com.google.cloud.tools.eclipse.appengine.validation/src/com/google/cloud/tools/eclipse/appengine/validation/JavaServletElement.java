@@ -28,7 +28,7 @@ public class JavaServletElement extends BannedElement {
   private static final int severity = IMarker.SEVERITY_ERROR;
   
   public JavaServletElement(String message, DocumentLocation start, int length) {
-    super(message, markerId, severity, start, length);
+    super(message, markerId, severity, start, length, null /* No source quick fix */);
   }
 
 }

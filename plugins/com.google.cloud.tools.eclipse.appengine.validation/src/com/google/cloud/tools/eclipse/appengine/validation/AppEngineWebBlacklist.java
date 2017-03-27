@@ -33,6 +33,14 @@ class AppEngineWebBlacklist {
           Arrays.asList(Messages.getString("version.element"),
               "com.google.cloud.tools.eclipse.appengine.validation.versionMarker"));
   
+  /**
+   * The {@link AbstractQuickAssistProcessor} for each tag.
+   */
+  private static final ImmutableMap<String, AbstractQuickAssistProcessor> QUICK_ASSIST_PROCESSORS =
+      ImmutableMap.of(
+          "application", new ApplicationQuickAssistProcessor(),
+          "version", new VersionQuickAssistProcessor());
+  
   static boolean contains(String elementName) {
     return BLACKLIST.containsKey(elementName);
   }
@@ -53,6 +61,11 @@ class AppEngineWebBlacklist {
     }
     List<String> values = BLACKLIST.get(element);
     return values.get(1);
+  }
+  
+  static AbstractQuickAssistProcessor getQuickAssistProcessor(String element) {
+    Preconditions.checkNotNull(element, "element is null");
+    return QUICK_ASSIST_PROCESSORS.get(element);
   }
 
 }

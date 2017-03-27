@@ -18,74 +18,25 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 
 import static org.junit.Assert.assertEquals;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.eclipse.jface.text.source.Annotation;
-import org.eclipse.jface.text.source.IAnnotationModel;
-import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.jface.text.source.TextInvocationContext;
-import org.eclipse.jst.common.project.facet.core.JavaFacet;
-import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.PlatformUI;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.ClassRule;
 import org.junit.Test;
 
-import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
-import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
-
 public class AbstractQuickAssistProcessorTest {
-  
-  private IFile file;
-  private ISourceViewer viewer;
-  private IAnnotationModel model;
-  
-  @ClassRule public static TestProjectCreator projectCreator =
-      new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
-  
-  @Before
-  public void setUp() throws CoreException {
-    IProject project = projectCreator.getProject();
-    file = project.getFile("testdata.xml");
-    file.create(ValidationTestUtils.stringToInputStream("test"), IFile.FORCE, null);
-    
-    IWorkbench workbench = PlatformUI.getWorkbench();
-    WorkbenchUtil.openInEditor(workbench, file);
-    viewer = (ISourceViewer) ValidationTestUtils.getViewer(file);
-    model = viewer.getAnnotationModel();
-  }
-  
-  @After
-  public void tearDown() throws CoreException {
-    file.delete(true, null);
-  }
-  
+
   @Test
   public void testComputeApplicationQuickAssistProposals() {
-    
-    String applicationMessage = Messages.getString("application.element");
-    model.addAnnotation(new Annotation("application", false, applicationMessage), new Position(1));
-    TextInvocationContext applicationContext = new TextInvocationContext(viewer, 1, 1);
     AbstractQuickAssistProcessor processor = new ApplicationQuickAssistProcessor();
-    ICompletionProposal[] proposals = processor.computeQuickAssistProposals(applicationContext);
-    assertEquals(1, proposals.length);
-    assertEquals("Remove application element", proposals[0].getDisplayString());
+    ICompletionProposal[] fixes =  processor.computeQuickAssistProposals(null);
+    assertEquals(1, fixes.length);
+    assertEquals(ApplicationSourceQuickFix.class.getName(), fixes[0].getClass().getName());
   }
   
   @Test
   public void testComputeVersionQuickAssistProposals() {
-    String versionMessage = Messages.getString("version.element");
-    model.addAnnotation(new Annotation("version", false, versionMessage), new Position(1));
-    TextInvocationContext versionContext = new TextInvocationContext(viewer, 1, 1);
-    AbstractQuickAssistProcessor versionProcessor = new VersionQuickAssistProcessor();
-    ICompletionProposal[] versionProposals = versionProcessor.computeQuickAssistProposals(versionContext);
-    assertEquals(1, versionProposals.length);
-    assertEquals("Remove version element", versionProposals[0].getDisplayString());
+    AbstractQuickAssistProcessor processor = new VersionQuickAssistProcessor();
+    ICompletionProposal[] fixes =  processor.computeQuickAssistProposals(null);
+    assertEquals(1, fixes.length);
+    assertEquals(VersionSourceQuickFix.class.getName(), fixes[0].getClass().getName());
   }
   
 }
