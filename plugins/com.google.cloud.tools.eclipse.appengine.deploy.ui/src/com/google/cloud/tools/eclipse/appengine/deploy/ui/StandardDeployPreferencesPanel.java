@@ -30,6 +30,7 @@ import com.google.cloud.tools.eclipse.ui.util.databinding.BucketNameValidator;
 import com.google.cloud.tools.eclipse.ui.util.databinding.ProjectVersionValidator;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.ErrorDialogErrorHandler;
+import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.QueryParameterProvider;
 import com.google.cloud.tools.eclipse.ui.util.images.SharedImages;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -38,6 +39,7 @@ import com.google.common.base.Strings;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.databinding.Binding;
@@ -130,7 +132,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
     this.projectRepository = projectRepository;
 
-    refreshIcon = SharedImages.createRefreshIcon(getDisplay());
+    refreshIcon = SharedImages.REFRESH_IMAGE_DESCRIPTOR.createImage(getDisplay());
 
     createCredentialSection(loginService);
 
@@ -170,12 +172,12 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     UpdateValueStrategy modelToTarget =
         new UpdateValueStrategy().setConverter(new Converter(String.class, String.class) {
           @Override
-          public Object convert(Object expectedEmail) {
-            // Expected to be an email address, but must also ensure is a currently logged-in
-            // account
-            if (expectedEmail instanceof String
-                && accountSelector.isEmailAvailable((String) expectedEmail)) {
-              return expectedEmail;
+          public Object convert(Object savedEmail) {
+            Preconditions.checkArgument(savedEmail instanceof String);
+            if (accountSelector.isEmailAvailable((String) savedEmail)) {
+              return savedEmail;
+            } else if (requireValues && accountSelector.getAccountCount() == 1) {
+              return accountSelector.getFirstEmail();
             } else {
               return null;
             }
@@ -288,7 +290,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   }
 
   @Override
-  public boolean savePreferences() {
+  boolean savePreferences() {
     try {
       model.savePreferences();
       return true;
@@ -316,9 +318,8 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     accountLabel.setText(Messages.getString("deploy.preferences.dialog.label.selectAccount"));
     accountLabel.setToolTipText(Messages.getString("tooltip.account"));
 
-    // If we don't require values, then don't auto-select accounts
     accountSelector = new AccountSelector(this, loginService,
-        Messages.getString("deploy.preferences.dialog.accountSelector.login"), requireValues);
+        Messages.getString("deploy.preferences.dialog.accountSelector.login"));
     accountSelector.setToolTipText(Messages.getString("tooltip.account"));
     GridData accountSelectorGridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
     accountSelector.setLayoutData(accountSelectorGridData);
@@ -328,13 +329,8 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     Label projectIdLabel = new Label(this, SWT.LEAD);
     projectIdLabel.setText(Messages.getString("project"));
     projectIdLabel.setToolTipText(Messages.getString("tooltip.project.id"));
-    GridDataFactory.swtDefaults().align(SWT.BEGINNING, SWT.BEGINNING).span(1, 3)
+    GridDataFactory.swtDefaults().align(SWT.BEGINNING, SWT.BEGINNING).span(1, 2)
         .applyTo(projectIdLabel);
-
-    Label select = new Label(this, SWT.WRAP);
-    select.setText(Messages.getString("projectselector.selectProject"));
-    GridDataFactory.swtDefaults().align(SWT.FILL, SWT.BEGINNING)
-        .applyTo(select);
 
     Link createNewProject = new Link(this, SWT.NONE);
     createNewProject.setText(Messages.getString("projectselector.createproject",
@@ -342,9 +338,17 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     createNewProject.setToolTipText(Messages.getString("projectselector.createproject.tooltip"));
     FontUtil.convertFontToItalic(createNewProject);
     createNewProject.addSelectionListener(
-        new OpenUriSelectionListener(new ErrorDialogErrorHandler(getShell())));
-    GridDataFactory.swtDefaults().align(SWT.FILL, SWT.BEGINNING)
-        .applyTo(createNewProject);
+        new OpenUriSelectionListener(new QueryParameterProvider() {
+          @Override
+          public Map<String, String> getParameters() {
+            if (accountSelector.getSelectedEmail().isEmpty()) {
+              return Collections.emptyMap();
+            } else {
+              return Collections.singletonMap("authuser", accountSelector.getSelectedEmail());
+            }
+          }
+        }, new ErrorDialogErrorHandler(getShell())));
+    GridDataFactory.swtDefaults().applyTo(createNewProject);
 
     Composite projectSelectorComposite = new Composite(this, SWT.NONE);
     GridLayoutFactory.fillDefaults().numColumns(2).spacing(0, 0).applyTo(projectSelectorComposite);
@@ -606,12 +610,12 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
   };
 
   @Override
-  public DataBindingContext getDataBindingContext() {
+  DataBindingContext getDataBindingContext() {
     return bindingContext;
   }
 
   @Override
-  public void resetToDefaults() {
+  void resetToDefaults() {
     model.resetToDefaults();
     bindingContext.updateTargets();
   }
@@ -641,5 +645,10 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     super.setFont(font);
     expandableComposite.setFont(font);
     FontUtil.convertFontToBold(expandableComposite);
+  }
+
+  @Override
+  String getHelpContextId() {
+    return "com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployAppEngineStandardProjectContext"; //$NON-NLS-1$
   }
 }

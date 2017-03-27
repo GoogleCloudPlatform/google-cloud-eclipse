@@ -93,8 +93,6 @@ public class StandardDeployPreferencesPanelTest {
     deployPanel = createPanel(true /* requireValues */);
     assertThat(deployPanel.getSelectedCredential(), is(credential));
 
-    // todo? assertTrue(deployPanel.getAccountSelector().isAutoSelectAccountIfNone()
-
     // verify not in error
     IStatus status = getAccountSelectorValidationStatus();
     assertTrue("account selector is in error: " + status.getMessage(), status.isOK());
@@ -206,6 +204,12 @@ public class StandardDeployPreferencesPanelTest {
     deployPanel = createPanel(false /* requireValues */);
     selectAccount(account1);
     assertThat(getProjectSelectionValidator().getSeverity(), is(IStatus.OK));
+  }
+
+  @Test
+  public void testGetHelpContextId() throws Exception {
+    assertThat(createPanel(false).getHelpContextId(),
+        is("com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployAppEngineStandardProjectContext"));
   }
 
   private Button getButtonWithText(String text) {

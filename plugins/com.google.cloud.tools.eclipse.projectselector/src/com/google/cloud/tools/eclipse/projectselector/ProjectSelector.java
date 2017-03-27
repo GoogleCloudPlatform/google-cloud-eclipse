@@ -121,7 +121,8 @@ public class ProjectSelector extends Composite {
     if (Strings.isNullOrEmpty(tooltip)) {
       statusLink.setToolTipText(null);
     } else {
-      statusLink.setToolTipText(tooltip);
+      // & is not displayed in tooltip unless doubled
+      statusLink.setToolTipText(tooltip.replace("&", "&&"));
     }
   }
 

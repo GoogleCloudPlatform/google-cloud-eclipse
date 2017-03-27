@@ -22,7 +22,6 @@ import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -65,7 +64,7 @@ public class LocalAppEngineServerBehaviourTest {
   @Test
   public void testCheckPort_portNotInUse() throws CoreException {
     assertEquals(1, LocalAppEngineServerBehaviour.checkPort(null, 1, alwaysFalse));
-    verify(alwaysFalse, times(1)).isInUse(any(InetAddress.class), any(Integer.class));
+    verify(alwaysFalse).isInUse(any(InetAddress.class), any(Integer.class));
   }
 
   @Test
@@ -75,7 +74,7 @@ public class LocalAppEngineServerBehaviourTest {
       fail("Should throw CoreException");
     } catch (CoreException ex) {
       assertEquals("Port 1 is in use.", ex.getMessage());
-      verify(alwaysTrue, times(1)).isInUse(any(InetAddress.class), any(Integer.class));
+      verify(alwaysTrue).isInUse(any(InetAddress.class), any(Integer.class));
     }
   }
 

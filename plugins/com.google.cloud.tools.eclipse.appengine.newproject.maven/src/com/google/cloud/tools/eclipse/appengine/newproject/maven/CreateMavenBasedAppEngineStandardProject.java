@@ -24,12 +24,15 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.maven.archetype.catalog.Archetype;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.m2e.core.MavenPlugin;
@@ -37,10 +40,16 @@ import org.eclipse.m2e.core.project.IProjectConfigurationManager;
 import org.eclipse.m2e.core.project.ProjectImportConfiguration;
 import org.eclipse.m2e.core.ui.internal.wizards.MappingDiscoveryJob;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
+import org.eclipse.wst.common.componentcore.internal.builder.DependencyGraphImpl;
+import org.eclipse.wst.common.componentcore.internal.builder.IDependencyGraph;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
 public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOperation {
+
+  private static final Logger logger =
+      Logger.getLogger(CreateMavenBasedAppEngineStandardProject.class.getName());
+
   IProjectConfigurationManager projectConfigurationManager =
       MavenPlugin.getProjectConfigurationManager();
 
@@ -50,11 +59,11 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
   private String version;
   private IPath location;
   private Archetype archetype;
-  private HashSet<String> appEngineLibraryIds = new HashSet<String>();
+  private HashSet<String> appEngineLibraryIds = new HashSet<>();
 
   private List<IProject> archetypeProjects;
   private IFile mostImportant;
-  
+
   /**
    * @return the file in the project that should be opened in an editor when the wizard finishes;
    *     may be null
@@ -103,10 +112,24 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
     ProjectImportConfiguration importConfiguration = new ProjectImportConfiguration();
     String packageName = this.packageName == null || this.packageName.isEmpty()
         ? groupId : this.packageName;
-    archetypeProjects = projectConfigurationManager.createArchetypeProjects(location,
-        archetype, groupId, artifactId, version, packageName, properties,
-        importConfiguration, progress.newChild(40));
-    
+
+    // Workaround deadlock bug described in Eclipse bug (https://bugs.eclipse.org/511793).
+    try {
+      IDependencyGraph.INSTANCE.preUpdate();
+      try {
+        Job.getJobManager().join(DependencyGraphImpl.GRAPH_UPDATE_JOB_FAMILY,
+            progress.newChild(10));
+      } catch (OperationCanceledException | InterruptedException ex) {
+        logger.log(Level.WARNING, "Exception waiting for WTP Graph Update job", ex);
+      }
+
+      archetypeProjects = projectConfigurationManager.createArchetypeProjects(location,
+          archetype, groupId, artifactId, version, packageName, properties,
+          importConfiguration, progress.newChild(40));
+    } finally {
+      IDependencyGraph.INSTANCE.postUpdate();
+    }
+
     SubMonitor loopMonitor = progress.newChild(30).setWorkRemaining(3 * archetypeProjects.size());
     for (IProject project : archetypeProjects) {
       IFile pom = project.getFile("pom.xml");
@@ -165,7 +188,7 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
   }
 
   void setAppEngineLibraryIds(Collection<Library> libraries) {
-    appEngineLibraryIds = new HashSet<String>();
+    appEngineLibraryIds = new HashSet<>();
     for (Library library : libraries) {
       appEngineLibraryIds.add(library.getId());
     }

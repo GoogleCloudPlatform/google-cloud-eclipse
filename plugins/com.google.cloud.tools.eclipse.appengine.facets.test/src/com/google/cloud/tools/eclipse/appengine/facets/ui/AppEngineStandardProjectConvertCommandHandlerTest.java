@@ -20,7 +20,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import com.google.cloud.tools.eclipse.appengine.facets.ui.AppEngineStandardProjectConvertCommandHandler.MessageDialogWrapper;
@@ -109,7 +108,7 @@ public class AppEngineStandardProjectConvertCommandHandlerTest {
     assertTrue(facetedProject.hasProjectFacet(JavaFacet.VERSION_1_6));
 
     assertFalse(commandHandler.checkFacetCompatibility(facetedProject, mockDialogWrapper));
-    verify(mockDialogWrapper, times(1)).openInformation(anyString(), anyString());
+    verify(mockDialogWrapper).openInformation(anyString(), anyString());
   }
 
   @Test
@@ -118,7 +117,7 @@ public class AppEngineStandardProjectConvertCommandHandlerTest {
     assertTrue(facetedProject.hasProjectFacet(JavaFacet.VERSION_1_8));
 
     assertFalse(commandHandler.checkFacetCompatibility(facetedProject, mockDialogWrapper));
-    verify(mockDialogWrapper, times(1)).openInformation(anyString(), anyString());
+    verify(mockDialogWrapper).openInformation(anyString(), anyString());
   }
 
   @Test
@@ -128,7 +127,7 @@ public class AppEngineStandardProjectConvertCommandHandlerTest {
     assertTrue(facetedProject.hasProjectFacet(WebFacetUtils.WEB_24));
 
     assertFalse(commandHandler.checkFacetCompatibility(facetedProject, mockDialogWrapper));
-    verify(mockDialogWrapper, times(1)).openInformation(anyString(), anyString());
+    verify(mockDialogWrapper).openInformation(anyString(), anyString());
   }
 
   @Test
@@ -138,6 +137,6 @@ public class AppEngineStandardProjectConvertCommandHandlerTest {
     assertTrue(facetedProject.hasProjectFacet(WebFacetUtils.WEB_30));
 
     assertFalse(commandHandler.checkFacetCompatibility(facetedProject, mockDialogWrapper));
-    verify(mockDialogWrapper, times(1)).openInformation(anyString(), anyString());
+    verify(mockDialogWrapper).openInformation(anyString(), anyString());
   }
 }

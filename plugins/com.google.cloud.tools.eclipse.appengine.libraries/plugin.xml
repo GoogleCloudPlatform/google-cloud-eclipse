@@ -92,7 +92,7 @@
               groupId="javax.servlet.jsp"
               version="2.1" />
       </libraryFile>
-      <libraryFile javadocUri="https://jstl.java.net/">
+      <libraryFile javadocUri="https://tomcat.apache.org/taglibs/standard/apidocs/">
         <mavenCoordinates artifactId="jstl" groupId="javax.servlet" version="1.2" />
       </libraryFile>
     </library>
