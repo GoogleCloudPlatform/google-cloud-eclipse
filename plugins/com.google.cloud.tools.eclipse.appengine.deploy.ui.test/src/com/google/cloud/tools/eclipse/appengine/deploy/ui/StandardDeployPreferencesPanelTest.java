@@ -113,8 +113,8 @@ public class StandardDeployPreferencesPanelTest {
     when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1)));
     initializeProjectRepository();
     deployPanel = createPanel(true /* requireValues */);
-    assertNotNull(deployPanel.latestGcpProjectQueryJob);
-    deployPanel.latestGcpProjectQueryJob.join();
+    assertNotNull(deployPanel.getLatestGcpProjectQueryJob());
+    deployPanel.getLatestGcpProjectQueryJob().join();
 
     Table projectTable = getProjectSelector().getViewer().getTable();
     assertThat(projectTable.getItemCount(), is(2));
@@ -190,7 +190,7 @@ public class StandardDeployPreferencesPanelTest {
       initializeProjectRepository();
       when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1, account2)));
       deployPanel = createPanel(true /* requireValues */);
-      deployPanel.latestGcpProjectQueryJob.join();
+      deployPanel.getLatestGcpProjectQueryJob().join();
 
       ProjectSelector projectSelector = getProjectSelector();
       IStructuredSelection selection = projectSelector.getViewer().getStructuredSelection();
@@ -234,7 +234,7 @@ public class StandardDeployPreferencesPanelTest {
     initializeProjectRepository();
     deployPanel = createPanel(false /* requireValues */);
     selectAccount(account1);
-    deployPanel.latestGcpProjectQueryJob.join();
+    deployPanel.getLatestGcpProjectQueryJob().join();
     assertThat(getProjectSelectionValidator().getSeverity(), is(IStatus.OK));
   }
 
@@ -252,12 +252,12 @@ public class StandardDeployPreferencesPanelTest {
 
     deployPanel = createPanel(false /* requireValues */);
     Table projectTable = getProjectSelector().getViewer().getTable();
-    assertNull(deployPanel.latestGcpProjectQueryJob);
+    assertNull(deployPanel.getLatestGcpProjectQueryJob());
     assertThat(projectTable.getItemCount(), is(0));
 
     selectAccount(account1);
-    assertNotNull(deployPanel.latestGcpProjectQueryJob);
-    deployPanel.latestGcpProjectQueryJob.join();
+    assertNotNull(deployPanel.getLatestGcpProjectQueryJob());
+    deployPanel.getLatestGcpProjectQueryJob().join();
     assertThat(projectTable.getItemCount(), is(2));
     assertThat(((GcpProject) projectTable.getItem(0).getData()).getId(), is("projectId1"));
     assertThat(((GcpProject) projectTable.getItem(1).getData()).getId(), is("projectId2"));
@@ -271,17 +271,17 @@ public class StandardDeployPreferencesPanelTest {
 
     deployPanel = createPanel(false /* requireValues */);
     Table projectTable = getProjectSelector().getViewer().getTable();
-    assertNull(deployPanel.latestGcpProjectQueryJob);
+    assertNull(deployPanel.getLatestGcpProjectQueryJob());
     assertThat(projectTable.getItemCount(), is(0));
 
     selectAccount(account1);
-    Job jobForAccount1 = deployPanel.latestGcpProjectQueryJob;
+    Job jobForAccount1 = deployPanel.getLatestGcpProjectQueryJob();
     jobForAccount1.join();
     assertThat(projectTable.getItemCount(), is(2));
 
     selectAccount(account2);
-    assertNotEquals(jobForAccount1, deployPanel.latestGcpProjectQueryJob);
-    deployPanel.latestGcpProjectQueryJob.join();
+    assertNotEquals(jobForAccount1, deployPanel.getLatestGcpProjectQueryJob());
+    deployPanel.getLatestGcpProjectQueryJob().join();
     assertThat(projectTable.getItemCount(), is(1));
     assertThat(((GcpProject) projectTable.getItem(0).getData()).getId(), is("projectId2"));
   }
