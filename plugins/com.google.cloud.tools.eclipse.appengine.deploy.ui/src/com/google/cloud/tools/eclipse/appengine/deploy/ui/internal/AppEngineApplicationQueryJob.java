@@ -61,25 +61,20 @@ public class AppEngineApplicationQueryJob extends Job {
 
   @Override
   protected IStatus run(IProgressMonitor monitor) {
-    String statusMessage = "";
-    String statusTooltip = null;
-
     try {
       AppEngine appEngine = projectRepository.getAppEngineApplication(credential, project.getId());
       project.setAppEngine(appEngine);
 
       if (appEngine == AppEngine.NO_APPENGINE_APPLICATION) {
-        statusMessage = Messages.getString(
+        String statusMessage = Messages.getString(
             "projectselector.missing.appengine.application.link", createAppLink);
-        statusTooltip = createAppLink;
+        String statusTooltip = createAppLink;
+        updateStatus(statusMessage, statusTooltip);
       }
     } catch (ProjectRepositoryException ex) {
-      statusMessage = Messages.getString(
-          "projectselector.retrieveapplication.error.message", ex.getLocalizedMessage());
-    }
-
-    if (!statusMessage.isEmpty()) {
-      updateStatus(statusMessage, statusTooltip);
+      String statusMessage = Messages.getString(
+          "projectselector.retrieveapplication.error.message", ex.getLocalizedMessage(), ex);
+      updateStatus(statusMessage, null /* statusTooltip */);
     }
     return Status.OK_STATUS;
   }

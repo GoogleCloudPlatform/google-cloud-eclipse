@@ -42,14 +42,19 @@ public class ProjectSelectorSelectionChangedListener implements ISelectionChange
   private final ProjectRepository projectRepository;
   private final ProjectSelector projectSelector;
 
-  @VisibleForTesting
-  Job latestQueryJob;
+  private Job latestQueryJob;
+
   private Predicate<Job> isLatestQueryJob = new Predicate<Job>() {
     @Override
     public boolean apply(Job job) {
       return job == latestQueryJob;
     }
   };
+
+  @VisibleForTesting
+  Job getLatestQueryJob() {
+    return latestQueryJob;
+  }
 
   public ProjectSelectorSelectionChangedListener(AccountSelector accountSelector,
                                                  ProjectRepository projectRepository,
@@ -80,7 +85,7 @@ public class ProjectSelectorSelectionChangedListener implements ISelectionChange
             Messages.getString("projectselector.missing.appengine.application.link", createAppLink),
             createAppLink /* tooltip */);
       }
-    } else {
+    } else {  // The project has never been queried.
       Credential credential = accountSelector.getSelectedCredential();
       Display display = projectSelector.getDisplay();
 
