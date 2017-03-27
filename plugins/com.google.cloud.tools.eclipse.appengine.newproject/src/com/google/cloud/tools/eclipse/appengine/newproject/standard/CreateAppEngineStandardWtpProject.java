@@ -59,7 +59,7 @@ public class CreateAppEngineStandardWtpProject extends CreateAppEngineWtpProject
   @Override
   public IFile createProjectFiles(IProject newProject, AppEngineProjectConfig config,
       IProgressMonitor monitor) throws CoreException {
-    return CodeTemplates.materialize(newProject, config, monitor);
+    return CodeTemplates.materializeAppEngineStandardFiles(newProject, config, monitor);
   }
 
 }

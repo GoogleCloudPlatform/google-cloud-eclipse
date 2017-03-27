@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.newproject.flex;
 
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectConfig;
+import com.google.cloud.tools.eclipse.appengine.newproject.CodeTemplates;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
 import org.eclipse.core.resources.IFile;
@@ -47,8 +48,7 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
   @Override
   public IFile createProjectFiles(IProject newProject, AppEngineProjectConfig config, IProgressMonitor monitor)
       throws CoreException {
-    // TODO materizalize flex files
-    return null;
+    return CodeTemplates.materializeAppEngineFlexFiles(newProject, config, monitor);
   }
 
 }

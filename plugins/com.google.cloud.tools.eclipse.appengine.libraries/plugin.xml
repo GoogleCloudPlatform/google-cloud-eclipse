@@ -12,11 +12,11 @@
           name="App Engine API"
           tooltip="%appengine.api.tooltip"
           siteUri="https://cloud.google.com/appengine/docs/java/" >
-      <libraryFile
-            javadocUri="https://cloud.google.com/appengine/docs/java/javadoc/">
+      <libraryFile javadocUri="https://cloud.google.com/appengine/docs/java/javadoc/">
         <mavenCoordinates
               artifactId="appengine-api-1.0-sdk"
-              groupId="com.google.appengine" />
+              groupId="com.google.appengine" 
+              version="1.9.50" />
         <exclusionFilter pattern="com/google/appengine/repackaged/**" />
         <exclusionFilter pattern="com/google/appengine/labs/repackaged/**" />
         <inclusionFilter pattern="com/google/apphosting/api/**" />
@@ -34,7 +34,8 @@
             javadocUri="https://cloud.google.com/appengine/docs/java/endpoints/javadoc/">
         <mavenCoordinates
               artifactId="appengine-endpoints"
-              groupId="com.google.appengine" />
+              groupId="com.google.appengine" 
+              version="1.9.50" />
         <exclusionFilter pattern="com/google/appengine/repackaged/**" />
       </libraryFile>
     </library>
@@ -50,7 +51,7 @@
         <mavenCoordinates
               artifactId="objectify"
               groupId="com.googlecode.objectify"
-              version="5.1.14" />
+              version="5.1.15" />
       </libraryFile>
       <libraryFile
             javadocUri="https://google.github.io/guava/releases/20.0/api/docs/">
@@ -91,12 +92,44 @@
               groupId="javax.servlet.jsp"
               version="2.1" />
       </libraryFile>
+      <libraryFile javadocUri="https://tomcat.apache.org/taglibs/standard/apidocs/">
+        <mavenCoordinates artifactId="jstl" groupId="javax.servlet" version="1.2" />
+      </libraryFile>
+    </library>
+    
+    <library
+          id="googleapiclient"
+          group="clientapis"
+          name="Google API Client Library for Java"
+          tooltip="%googleapiclient.tooltip"
+          siteUri="https://developers.google.com/api-client-library/java/" >
+      <libraryFile
+            javadocUri="https://google.github.io/google-api-java-client/releases/1.21.0/javadoc/index.html">
+        <mavenCoordinates
+              artifactId="google-api-client"
+              groupId="com.google.api-client"
+              version="1.22.0" />
+      </libraryFile>
+      <libraryFile
+            javadocUri="https://google.github.io/google-http-java-client/releases/1.21.0/javadoc/index.html">
+        <mavenCoordinates
+              artifactId="google-http-client"
+              groupId="com.google.http-client"
+              version="1.22.0" />
+      </libraryFile>
+      <libraryFile javadocUri=
+          "https://developers.google.com/api-client-library/java/google-oauth-java-client/reference/1.20.0/">
+        <mavenCoordinates
+              artifactId="google-oauth-client"
+              groupId="com.google.oauth-client"
+              version="1.22.0" />
+      </libraryFile>
     </library>
   </extension>
 
   <extension point="org.eclipse.jdt.core.classpathContainerInitializer">
-     <classpathContainerInitializer
-           class="com.google.cloud.tools.eclipse.util.service.ServiceContextFactory:com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainerInitializer"
-           id="com.google.cloud.tools.eclipse.appengine.libraries" />
+    <classpathContainerInitializer
+        class="com.google.cloud.tools.eclipse.util.service.ServiceContextFactory:com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainerInitializer"
+        id="com.google.cloud.tools.eclipse.appengine.libraries" />
   </extension>
 </plugin>

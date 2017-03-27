@@ -32,7 +32,7 @@ public class WebXmlSaxParserTest {
       throws ParserConfigurationException, IOException, SAXException {
     String emptyXml = "";
     byte[] bytes = emptyXml.getBytes(StandardCharsets.UTF_8);
-    assert(WebXmlSaxParser.readXml(bytes).getBlacklist().isEmpty());
+    assert(WebXmlSaxParser.readXml(null, bytes).getBlacklist().isEmpty());
   }
   
   @Test
@@ -41,7 +41,7 @@ public class WebXmlSaxParserTest {
     String xml = "<web-app xmlns='http://xmlns.jcp.org/xml/ns/javaee'"
         + " version='3.1'></web-app>";
     byte[] bytes = xml.getBytes(StandardCharsets.UTF_8);
-    Queue<BannedElement> blacklist = WebXmlSaxParser.readXml(bytes).getBlacklist();
+    Queue<BannedElement> blacklist = WebXmlSaxParser.readXml(null, bytes).getBlacklist();
     String message = "App Engine Standard does not support this servlet version";
     assertEquals(blacklist.poll().getMessage(), message);
   }

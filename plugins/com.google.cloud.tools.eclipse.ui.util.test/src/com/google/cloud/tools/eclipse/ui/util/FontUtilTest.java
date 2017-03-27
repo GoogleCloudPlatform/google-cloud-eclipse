@@ -20,18 +20,20 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
 
+import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
+import org.junit.Rule;
 import org.junit.Test;
 
 public class FontUtilTest {
 
+  @Rule public ShellTestResource shellTestResource = new ShellTestResource();
+  
   @Test
   public void testConvertFontToBold() {
-    Shell shell = new Shell();
-    Label label = new Label(shell, SWT.NONE);
+    Label label = new Label(shellTestResource.getShell(), SWT.NONE);
     for (FontData fontData : label.getFont().getFontData()) {
       assertThat(fontData.getStyle(), is(not(SWT.BOLD)));
     }
@@ -41,4 +43,15 @@ public class FontUtilTest {
     }
   }
 
+  @Test
+  public void testConvertFontToItalic() {
+    Label label = new Label(shellTestResource.getShell(), SWT.NONE);
+    for (FontData fontData : label.getFont().getFontData()) {
+      assertThat(fontData.getStyle(), is(not(SWT.ITALIC)));
+    }
+    FontUtil.convertFontToItalic(label);
+    for (FontData fontData : label.getFont().getFontData()) {
+      assertThat(fontData.getStyle(), is(SWT.ITALIC));
+    }
+  }
 }

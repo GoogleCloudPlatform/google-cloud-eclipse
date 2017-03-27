@@ -102,6 +102,8 @@ public class PomTest {
     
     pom.addDependencies(libraries);
     
+    Assert.assertEquals(1, pomFile.getHistory(null).length);
+    
     InputStream contents = pomFile.getContents();
     Document actual = parse(contents);
     
@@ -124,14 +126,11 @@ public class PomTest {
     Assert.assertEquals("com.example.group3", groupId3.getTextContent());
     Element artifactId3 = getOnlyChild(child3, "artifactId");
     Assert.assertEquals("artifact3", artifactId3.getTextContent());
-    Element version3 = getOnlyChild(child3, "version");
-    Assert.assertEquals("LATEST", version3.getTextContent());
     
     // now make sure the comment didn't move to the end
     // https://bugs.openjdk.java.net/browse/JDK-8146163
     Assert.assertEquals(Node.COMMENT_NODE, actual.getChildNodes().item(0).getNodeType());
   }
-  
 
   @Test
   public void testAddDependencies_withDuplicates() 

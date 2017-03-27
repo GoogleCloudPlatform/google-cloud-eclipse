@@ -9,4 +9,14 @@
 Adds useful libraries for the App Engine standard environment to your project build path.
     </description>
   </context>
+
+  <context id="NewFlexProjectContext" title="Create App Engine Flexible Project">
+     <description>Create a new Eclipse project that can be deployed to the App Engine flexible environment.
+
+&lt;b&gt;Project name:&lt;/b&gt; An Eclipse project name.
+
+&lt;b&gt;Libraries to add to build path:&lt;/b&gt;
+Adds useful libraries for the App Engine flexible environment to your project build path.
+     </description>
+  </context>
 </contexts>

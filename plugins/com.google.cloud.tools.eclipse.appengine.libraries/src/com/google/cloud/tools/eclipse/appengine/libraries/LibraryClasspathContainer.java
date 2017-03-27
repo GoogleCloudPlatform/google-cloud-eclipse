@@ -17,23 +17,24 @@
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
 import com.google.common.base.Preconditions;
+import java.util.List;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 
 public class LibraryClasspathContainer implements IClasspathContainer {
-  
+
   private final IPath containerPath;
   private final String description;
-  private final IClasspathEntry[] classpathEntries;
+  private final List<IClasspathEntry> classpathEntries;
 
   public LibraryClasspathContainer(IPath path, String description,
-      IClasspathEntry[] classpathEntries) {
+      List<IClasspathEntry> classpathEntries) {
     Preconditions.checkNotNull(path, "path is null");
     Preconditions.checkNotNull(description, "description is null");
     Preconditions.checkArgument(!description.isEmpty(), "description is empty");
     Preconditions.checkNotNull(classpathEntries, "classpathEntries is null");
-    
+
     this.containerPath = path;
     this.description = description;
     this.classpathEntries = classpathEntries;
@@ -42,10 +43,10 @@ public class LibraryClasspathContainer implements IClasspathContainer {
   /**
    * Creates a new {@link LibraryClasspathContainer} with the same path and description,
    * but with the <code>classpathEntries</code>.
-   * 
+   *
    * @param classpathEntries the classpath entries of the new container
    */
-  public LibraryClasspathContainer copyWithNewEntries(IClasspathEntry[] classpathEntries) {
+  public LibraryClasspathContainer copyWithNewEntries(List<IClasspathEntry> classpathEntries) {
     return new LibraryClasspathContainer(containerPath, description, classpathEntries);
   }
 
@@ -66,6 +67,6 @@ public class LibraryClasspathContainer implements IClasspathContainer {
 
   @Override
   public IClasspathEntry[] getClasspathEntries() {
-    return classpathEntries;
+    return classpathEntries.toArray(new IClasspathEntry[0]);
   }
 }

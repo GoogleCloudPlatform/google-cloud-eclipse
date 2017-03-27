@@ -16,99 +16,15 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.ui;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.ui.wizards.IClasspathContainerPage;
-import org.eclipse.jdt.ui.wizards.IClasspathContainerPageExtension;
-import org.eclipse.jdt.ui.wizards.IClasspathContainerPageExtension2;
-import org.eclipse.jface.wizard.WizardPage;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
-
-import com.google.cloud.tools.eclipse.appengine.libraries.BuildPath;
-import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
-import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
-import com.google.cloud.tools.eclipse.appengine.ui.AppEngineLibrariesSelectorGroup;
-import com.google.cloud.tools.eclipse.util.MavenUtils;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 
 /**
  * UI for adding App Engine libraries to an existing project.
  */
-public class AppEngineLibrariesPage extends WizardPage implements IClasspathContainerPage,
-    IClasspathContainerPageExtension, IClasspathContainerPageExtension2 {
-
-  private static final Logger logger = Logger.getLogger(AppEngineLibrariesPage.class.getName());
-  
-  private AppEngineLibrariesSelectorGroup librariesSelector;
-  private IJavaProject project;
+public class AppEngineLibrariesPage extends CloudLibrariesPage {
 
   public AppEngineLibrariesPage() {
-    super("appengine-libraries-page"); //$NON-NLS-1$
-    setTitle(Messages.getString("title"));  //$NON-NLS-1$
-    setDescription(Messages.getString("description"));  //$NON-NLS-1$
-    setImageDescriptor(AppEngineImages.appEngine(64));
-  }
-
-  @Override
-  public void createControl(Composite parent) {
-    Composite composite = new Composite(parent, SWT.BORDER);
-    composite.setLayout(new GridLayout(2, true));
-    
-    librariesSelector = new AppEngineLibrariesSelectorGroup(composite);
-    
-    setControl(composite);
-  }
-
-  @Override
-  public boolean finish() {
-    return true;
-  }
-
-  @Override
-  public IClasspathEntry getSelection() {
-    // Since this class implements IClasspathContainerPageExtension2,
-    // Eclipse calls getNewContainers instead.
-    logger.log(Level.WARNING, "Unexpected call to getSelection()");
-    return null;
-  }
-
-  @Override
-  public void setSelection(IClasspathEntry containerEntry) {
-  }
-
-  @Override
-  public void initialize(IJavaProject project, IClasspathEntry[] currentEntries) {
-    this.project = project;
-  }
-
-  @Override
-  public IClasspathEntry[] getNewContainers() {
-    List<Library> libraries = new ArrayList<>(librariesSelector.getSelectedLibraries());
-    if (libraries == null || libraries.isEmpty()) {
-      return null;
-    }
-
-    try {
-      if (MavenUtils.hasMavenNature(project.getProject())) {
-        BuildPath.addMavenLibraries(project.getProject(), libraries, new NullProgressMonitor());
-        return new IClasspathEntry[0];
-      } else {
-        IClasspathEntry[] added =
-            BuildPath.addLibraries(project, libraries, new NullProgressMonitor());
-        return added;
-      }
-    } catch (CoreException ex) {
-      logger.log(Level.WARNING, "Error adding libraries to project", ex);
-      return new IClasspathEntry[0];
-    }
+    super(CloudLibraries.APP_ENGINE_GROUP);
   }
 
 }

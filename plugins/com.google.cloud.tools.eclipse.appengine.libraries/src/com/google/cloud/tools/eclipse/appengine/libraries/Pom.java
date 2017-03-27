@@ -99,13 +99,18 @@ class Pom {
         if (!dependencyExists(dependencies, groupId, artifactId)) {
           Element groupIdElement = document.createElement("groupId");
           groupIdElement.setTextContent(groupId);
+          dependency.appendChild(groupIdElement);
+
           Element artifactIdElement = document.createElement("artifactId");
           artifactIdElement.setTextContent(artifactId);
-          Element versionElement = document.createElement("version");
-          versionElement.setTextContent(coordinates.getVersion());
-          dependency.appendChild(groupIdElement);
           dependency.appendChild(artifactIdElement);
-          dependency.appendChild(versionElement);
+
+          String version = coordinates.getVersion();
+          if (!MavenCoordinates.LATEST_VERSION.equals(version)) {
+            Element versionElement = document.createElement("version");
+            versionElement.setTextContent(version);
+            dependency.appendChild(versionElement);
+          }
           
           dependencies.appendChild(dependency);
         }
@@ -156,7 +161,7 @@ class Pom {
     transformer.transform(new DOMSource(document), new StreamResult(out));
     InputStream in = new ByteArrayInputStream(out.toByteArray());
     
-    pomFile.setContents(in, IFile.FORCE, null);
+    pomFile.setContents(in, true, true, null);
   }
 
 }

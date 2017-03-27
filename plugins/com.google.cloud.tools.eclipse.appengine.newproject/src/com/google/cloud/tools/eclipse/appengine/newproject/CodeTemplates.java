@@ -36,16 +36,44 @@ import org.eclipse.core.runtime.SubMonitor;
 public class CodeTemplates {
 
   /**
-   * Load the named template into the supplied Eclipse project.
-   *  
+   * Creates files for a sample App Engine Standard project in the supplied Eclipse project.
+   *
    * @param project the Eclipse project to be filled with templated code
    * @param config replacement values
    * @param monitor progress monitor
-   * @param name directory from which to load template
    * @return the most important file created that should be opened in an editor
    */
-  public static IFile materialize(IProject project, AppEngineProjectConfig config,
+  public static IFile materializeAppEngineStandardFiles(IProject project, AppEngineProjectConfig config,
       IProgressMonitor monitor) throws CoreException {
+    return materialize(project, config, true /* isStandardProject */, monitor);
+  }
+
+  /**
+   * Creates files for a sample App Engine Flexible project in the supplied Eclipse project.
+   *
+   * @param project the Eclipse project to be filled with templated code
+   * @param config replacement values
+   * @param monitor progress monitor
+   * @return the most important file created that should be opened in an editor
+   */
+  public static IFile materializeAppEngineFlexFiles(IProject project, AppEngineProjectConfig config,
+      IProgressMonitor monitor) throws CoreException {
+    return materialize(project, config, false /* isStandardProject */, monitor);
+  }
+
+  /**
+   * Creates files for a sample App Engine project in the supplied Eclipse project.
+   *
+   * @param project the Eclipse project to be filled with templated code
+   * @param config replacement values
+   * @param isStandardProject true if project should be configured to have the App Engine Standard
+   *   configuration files and false if project should have the App Engine Flexible configuration
+   *   files.
+   * @param monitor progress monitor
+   * @return the most important file created that should be opened in an editor
+   */
+  private static IFile materialize(IProject project, AppEngineProjectConfig config,
+      boolean isStandardProject, IProgressMonitor monitor) throws CoreException {
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
     subMonitor.setTaskName("Generating code");
     boolean force = true;
@@ -92,8 +120,12 @@ public class CodeTemplates {
       properties.put("service", service);  //$NON-NLS-1$
     }
 
-    createChildFile("appengine-web.xml", AppEngineTemplateUtility.APPENGINE_WEB_XML_TEMPLATE,
-        webinf, subMonitor.newChild(5), properties);
+    if (isStandardProject) {
+      createChildFile("appengine-web.xml", AppEngineTemplateUtility.APPENGINE_WEB_XML_TEMPLATE,
+          webinf, subMonitor.newChild(5), properties);
+    } else {
+      copyChildFile("app.yaml", webinf, subMonitor.newChild(5));
+    }
 
     Map<String, String> packageMap = new HashMap<>();
     String packageValue = config.getPackageName().isEmpty() ? "" : config.getPackageName() + ".";
@@ -164,6 +196,5 @@ public class CodeTemplates {
       child.refreshLocal(IResource.DEPTH_ZERO, monitor);
     }
   }
-
 
 }

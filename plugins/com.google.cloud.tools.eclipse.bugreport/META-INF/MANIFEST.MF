@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ClassPath: .
+Bundle-ManifestVersion: 2
+Bundle-Name: Cloud Tools for Eclipse User Bug Reporting
+Bundle-SymbolicName: com.google.cloud.tools.eclipse.bugreport;singleton:=true
+Bundle-Version: 0.1.0.qualifier
+Bundle-Vendor: Google Inc.
+Bundle-Localization: plugin
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ActivationPolicy: lazy
+Import-Package: com.google.cloud.tools.eclipse.util,
+ com.google.common.annotations;version="[20.0.0,21.0.0)",
+ com.google.common.escape;version="[20.0.0,21.0.0)",
+ com.google.common.net;version="[20.0.0,21.0.0)",
+ org.eclipse.core.commands,
+ org.eclipse.swt.program

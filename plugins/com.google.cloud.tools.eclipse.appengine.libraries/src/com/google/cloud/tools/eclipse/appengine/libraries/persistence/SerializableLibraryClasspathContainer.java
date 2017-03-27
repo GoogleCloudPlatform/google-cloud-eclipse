@@ -17,6 +17,8 @@
 package com.google.cloud.tools.eclipse.appengine.libraries.persistence;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainer;
+import java.util.ArrayList;
+import java.util.List;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -27,27 +29,25 @@ import org.eclipse.jdt.core.IClasspathEntry;
  */
 public class SerializableLibraryClasspathContainer {
 
-  private String description;
-  private String path;
-  private SerializableClasspathEntry[] entries;
+  private final String description;
+  private final String path;
+  private final List<SerializableClasspathEntry> entries = new ArrayList<>();
 
   public SerializableLibraryClasspathContainer(LibraryClasspathContainer container,
       IPath baseDirectory, IPath sourceBaseDirectory) {
     description = container.getDescription();
     path = container.getPath().toString();
-    IClasspathEntry[] classpathEntries = container.getClasspathEntries();
-    entries = new SerializableClasspathEntry[classpathEntries.length];
-    for (int i = 0; i < classpathEntries.length; i++) {
-      entries[i] =
-          new SerializableClasspathEntry(classpathEntries[i], baseDirectory, sourceBaseDirectory);
+
+    for (IClasspathEntry entry : container.getClasspathEntries()) {
+      entries.add(new SerializableClasspathEntry(entry, baseDirectory, sourceBaseDirectory));
     }
   }
 
   public LibraryClasspathContainer toLibraryClasspathContainer(IPath baseDirectory,
       IPath sourceBaseDirectory) {
-    IClasspathEntry[] classpathEntries = new IClasspathEntry[entries.length];
-    for (int i = 0; i < entries.length; i++) {
-      classpathEntries[i] = entries[i].toClasspathEntry(baseDirectory, sourceBaseDirectory);
+    List<IClasspathEntry> classpathEntries = new ArrayList<>();
+    for (SerializableClasspathEntry entry : entries) {
+      classpathEntries.add(entry.toClasspathEntry(baseDirectory, sourceBaseDirectory));
     }
     return new LibraryClasspathContainer(new Path(path), description, classpathEntries);
   }

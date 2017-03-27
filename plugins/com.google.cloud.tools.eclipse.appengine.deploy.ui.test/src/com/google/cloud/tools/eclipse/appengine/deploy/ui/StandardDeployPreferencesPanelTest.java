@@ -28,7 +28,9 @@ import static org.mockito.Mockito.when;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployPreferences;
+import com.google.cloud.tools.eclipse.appengine.deploy.ui.StandardDeployPreferencesPanel.ProjectSelectionValidator;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
+import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelectorObservableValue;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepositoryException;
@@ -36,8 +38,10 @@ import com.google.cloud.tools.eclipse.projectselector.ProjectSelector;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import com.google.cloud.tools.login.Account;
+import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Queue;
 import org.eclipse.core.databinding.ValidationStatusProvider;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
@@ -63,6 +67,7 @@ public class StandardDeployPreferencesPanelTest {
   private static final String EMAIL_1 = "some-email-1@example.com";
 
   private Composite parent;
+  private StandardDeployPreferencesPanel deployPanel;
   @Mock private IProject project;
   @Mock private IGoogleLoginService loginService;
   @Mock private Runnable layoutChangedHandler;
@@ -85,14 +90,11 @@ public class StandardDeployPreferencesPanelTest {
   @Test
   public void testSelectSingleAccount() {
     when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1)));
-    StandardDeployPreferencesPanel deployPanel = new StandardDeployPreferencesPanel(
-        parent, project, loginService, layoutChangedHandler, true, projectRepository);
+    deployPanel = createPanel(true /* requireValues */);
     assertThat(deployPanel.getSelectedCredential(), is(credential));
 
-    // todo? assertTrue(deployPanel.getAccountSelector().isAutoSelectAccountIfNone()
-
     // verify not in error
-    IStatus status = getAccountSelectorValidationStatus(deployPanel);
+    IStatus status = getAccountSelectorValidationStatus();
     assertTrue("account selector is in error: " + status.getMessage(), status.isOK());
 
     assertThat("auto-selected value should be propagated back to model",
@@ -101,10 +103,8 @@ public class StandardDeployPreferencesPanelTest {
 
   @Test
   public void testValidationMessageWhenNotSignedIn() {
-    StandardDeployPreferencesPanel deployPanel =
-        new StandardDeployPreferencesPanel(parent, project, loginService, layoutChangedHandler,
-                                           true, projectRepository);
-    IStatus status = getAccountSelectorValidationStatus(deployPanel);
+    deployPanel = createPanel(true /* requireValues */);
+    IStatus status = getAccountSelectorValidationStatus();
     assertThat(status.getMessage(), is("Sign in to Google."));
   }
 
@@ -113,34 +113,19 @@ public class StandardDeployPreferencesPanelTest {
     // Return two accounts because the account selector will auto-select if there exists only one.
     when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1, account2)));
 
-    StandardDeployPreferencesPanel deployPanel =
-        new StandardDeployPreferencesPanel(parent, project, loginService, layoutChangedHandler,
-                                           true, projectRepository);
-    IStatus status = getAccountSelectorValidationStatus(deployPanel);
+    deployPanel = createPanel(true /* requireValues */);
+    IStatus status = getAccountSelectorValidationStatus();
     assertThat(status.getMessage(), is("Select an account."));
-  }
-
-  private static Button getButtonWithText(Composite parent, String text) {
-    for (Control control : parent.getChildren()) {
-      if (control instanceof Button) {
-        Button button = (Button) control;
-        if (button.getText().equals(text)) {
-          return button;
-        }
-      }
-    }
-    return null;
   }
 
   // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1229
   @Test
   public void testUncheckStopPreviousVersionButtonWhenDisabled() {
-    StandardDeployPreferencesPanel panel = new StandardDeployPreferencesPanel(
-        parent, project, loginService, layoutChangedHandler, true, projectRepository);
+    deployPanel = createPanel(true /* requireValues */);
 
     Button promoteButton =
-        getButtonWithText(panel, "Promote the deployed version to receive all traffic");
-    Button stopButton = getButtonWithText(panel, "Stop previous version");
+        getButtonWithText("Promote the deployed version to receive all traffic");
+    Button stopButton = getButtonWithText("Stop previous version");
     SWTBotCheckBox promote = new SWTBotCheckBox(promoteButton);
     SWTBotCheckBox stop = new SWTBotCheckBox(stopButton);
 
@@ -181,24 +166,90 @@ public class StandardDeployPreferencesPanelTest {
         new ProjectScope(project).getNode(StandardDeployPreferences.PREFERENCE_STORE_QUALIFIER);
     node.put("project.id", "projectId1");
     node.put("account.email", EMAIL_1);
-    initializeProjectRepository(projectRepository);
+    initializeProjectRepository();
     when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1, account2)));
-    StandardDeployPreferencesPanel deployPanel =
-        new StandardDeployPreferencesPanel(parent, project, loginService, layoutChangedHandler,
-                                           true, projectRepository);
-    for (Control control : deployPanel.getChildren()) {
+    deployPanel = createPanel(true /* requireValues */);
+    Queue<Control> children = new ArrayDeque<>(Arrays.asList(deployPanel.getChildren()));
+    while (!children.isEmpty()) {
+      Control control = children.poll();
       if (control instanceof ProjectSelector) {
         ProjectSelector projectSelector = (ProjectSelector) control;
         IStructuredSelection selection = projectSelector.getViewer().getStructuredSelection();
         assertThat(selection.size(), is(1));
         assertThat(((GcpProject) selection.getFirstElement()).getId(), is("projectId1"));
         return;
+      } else if (control instanceof Composite) {
+        children.addAll(Arrays.asList(((Composite) control).getChildren()));
       }
     };
     fail("Did not find ProjectSelector widget");
   }
 
-  private void initializeProjectRepository(ProjectRepository projectRepository)
+  @Test
+  public void testProjectNotSelectedIsAnErrorWhenRequireValuesIsTrue() {
+    deployPanel = createPanel(true /* requireValues */);
+    assertThat(getProjectSelectionValidator().getSeverity(), is(IStatus.ERROR));
+  }
+
+  @Test
+  public void testProjectNotSelectedIsNotAnErrorWhenRequireValuesIsFalse() {
+    deployPanel = createPanel(false /* requireValues */);
+    assertThat(getProjectSelectionValidator().getSeverity(), is(IStatus.INFO));
+  }
+
+  @Test
+  public void testProjectsExistThenNoProjectNotFoundError() throws ProjectRepositoryException {
+    when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1)));
+    initializeProjectRepository();
+    deployPanel = createPanel(false /* requireValues */);
+    selectAccount(account1);
+    assertThat(getProjectSelectionValidator().getSeverity(), is(IStatus.OK));
+  }
+
+  @Test
+  public void testGetHelpContextId() throws Exception {
+    assertThat(createPanel(false).getHelpContextId(),
+        is("com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployAppEngineStandardProjectContext"));
+  }
+
+  private Button getButtonWithText(String text) {
+    for (Control control : deployPanel.getChildren()) {
+      if (control instanceof Button) {
+        Button button = (Button) control;
+        if (button.getText().equals(text)) {
+          return button;
+        }
+      }
+    }
+    return null;
+  }
+
+  private void selectAccount(Account account) {
+    for (Control control : deployPanel.getChildren()) {
+      if (control instanceof AccountSelector) {
+        AccountSelector accountSelector = (AccountSelector) control;
+        accountSelector.selectAccount(account.getEmail());
+      }
+    }
+  }
+
+  private StandardDeployPreferencesPanel createPanel(boolean requireValues) {
+    return new StandardDeployPreferencesPanel(parent, project, loginService, layoutChangedHandler,
+                                              requireValues, projectRepository);
+  }
+
+  private IStatus getProjectSelectionValidator() {
+    for (Object object : deployPanel.getDataBindingContext().getValidationStatusProviders()) {
+      if (object instanceof ProjectSelectionValidator) {
+        ProjectSelectionValidator projectSelectionValidator = (ProjectSelectionValidator) object;
+        return (IStatus) projectSelectionValidator.getValidationStatus().getValue();
+      }
+    }
+    fail("Could not find ProjectSelectionValidator.");
+    return null;
+  }
+
+  private void initializeProjectRepository()
       throws ProjectRepositoryException {
     GcpProject project1 = new GcpProject("Project1", "projectId1");
     GcpProject project2 = new GcpProject("Project2", "projectId2");
@@ -210,7 +261,7 @@ public class StandardDeployPreferencesPanelTest {
         .thenReturn(project2);
   }
 
-  private IStatus getAccountSelectorValidationStatus(StandardDeployPreferencesPanel deployPanel) {
+  private IStatus getAccountSelectorValidationStatus() {
     IStatus status = null;
     for (Object object : deployPanel.getDataBindingContext().getValidationStatusProviders()) {
       ValidationStatusProvider statusProvider = (ValidationStatusProvider) object;

@@ -17,9 +17,11 @@
 package com.google.cloud.tools.eclipse.usagetracker;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -28,12 +30,11 @@ import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.preferences.AnalyticsPreferences;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager.PingEvent;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.swt.widgets.Display;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -43,42 +44,20 @@ import org.mockito.verification.VerificationMode;
 @RunWith(MockitoJUnitRunner.class)
 public class AnalyticsPingManagerTest {
 
-  private static final String UUID = "bee5d838-c3f8-4940-a944-b56973597e74";
-
-  private static final String EVENT_TYPE = "some-event-type";
-  private static final String EVENT_NAME = "some-event-name";
-
-  private static final String VIRTUAL_HOST = "virtual.host";
-  private static final String VIRTUAL_DOCUMENT_PAGE =
-      "/virtual/" + EVENT_TYPE + "/" + EVENT_NAME;
-
-  private static final String METADATA_KEY = "some-custom-key";
-  private static final String METADATA_VALUE = "some-custom-value";
-
-  // TODO(chanseok): add a test to that makes an actual HTTP request (locally) and checks the
-  // incoming request. (https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1437)
-  private static final Map<String, String> RANDOM_PARAMETERS = Collections.unmodifiableMap(
-      new HashMap<String, String>() {
-        {
-          put("v", "1");
-          put("tid", "UA-12345678-1");
-          put("ni", "0");
-          put("t", "pageview");
-          put("cd21", "1");
-          put("cd16", "0");
-          put("cd17", "0");
-          put("cid", UUID);
-          put("cd19", EVENT_TYPE);
-          put("cd20", EVENT_NAME);
-          put("dh", VIRTUAL_HOST);
-          put("dp", VIRTUAL_DOCUMENT_PAGE);
-          put("dt", METADATA_KEY + "=" + METADATA_VALUE);
-        }
-      });
-
   @Mock private IEclipsePreferences preferences;
   @Mock private Display display;
   @Mock private ConcurrentLinkedQueue<PingEvent> pingEventQueue;
+
+  private AnalyticsPingManager pingManager;
+
+  @Before
+  public void setUp() {
+    // Pretend ping event queue is always empty to prevent making actual HTTP requests.
+    when(pingEventQueue.isEmpty()).thenReturn(true);
+
+    pingManager = new AnalyticsPingManager("https://non-null-url-to-enable-mananger",
+        "clientId", preferences, display, pingEventQueue);
+  }
 
   @Test
   public void testEventTypeEventNameConvention() {
@@ -99,6 +78,13 @@ public class AnalyticsPingManagerTest {
     PingEvent event = new PingEvent("some.event-name", "times-happened", "1234", null);
     Map<String, String> parameters = AnalyticsPingManager.buildParametersMap("clientId", event);
     assertEquals("times-happened=1234", parameters.get("dt"));
+  }
+
+  @Test
+  public void testClientId() {
+    PingEvent event = new PingEvent("some.event-name", null, null, null);
+    Map<String, String> parameters = AnalyticsPingManager.buildParametersMap("clientId", event);
+    assertEquals("clientId", parameters.get("cid"));
   }
 
   @Test
@@ -141,9 +127,6 @@ public class AnalyticsPingManagerTest {
   }
 
   private void verifyOptInDialogOpen(VerificationMode verificationMode) {
-    AnalyticsPingManager pingManager =
-        new AnalyticsPingManager(preferences, display, pingEventQueue, true);
-    pingManager.unitTestMode = true;
     pingManager.showOptInDialogIfNeeded(null);
     verify(display, verificationMode).syncExec(any(Runnable.class));
   }
@@ -177,11 +160,60 @@ public class AnalyticsPingManagerTest {
   }
 
   private void verifyPingQueued(VerificationMode verificationMode) {
-    when(pingEventQueue.isEmpty()).thenReturn(true);
-    AnalyticsPingManager pingManager =
-        new AnalyticsPingManager(preferences, display, pingEventQueue, true);
-    pingManager.unitTestMode = true;
     pingManager.sendPing("eventName", "metadataKey", "metadataValue");
     verify(pingEventQueue, verificationMode).add(any(PingEvent.class));
+  }
+
+  @Test
+  public void testGetAnonymizedClientId_generateNewId() {
+    when(preferences.get(eq(AnalyticsPreferences.ANALYTICS_CLIENT_ID), anyString()))
+        .thenReturn(null);  // Simulate that client ID has never been generated.
+    String clientId = AnalyticsPingManager.getAnonymizedClientId(preferences);
+    assertFalse(clientId.isEmpty());
+    verify(preferences).put(AnalyticsPreferences.ANALYTICS_CLIENT_ID, clientId);
+  }
+
+  @Test
+  public void testGetAnonymizedClientId_useSavedId() {
+    when(preferences.get(eq(AnalyticsPreferences.ANALYTICS_CLIENT_ID), anyString()))
+        .thenReturn("some-unique-client-id");
+    String clientId = AnalyticsPingManager.getAnonymizedClientId(preferences);
+    assertEquals("some-unique-client-id", clientId);
+    verify(preferences, never()).put(AnalyticsPreferences.ANALYTICS_CLIENT_ID, clientId);
+  }
+
+  @Test
+  public void testSendPingArguments_validArgumentsDoNotThrowException() {
+    pingManager.sendPing("eventName", "metadataKey", "metadataValue");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testSendPingArguments_nullEventName() {
+    pingManager.sendPing(null, "metadataKey", "metadataValue");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testSendPingArguments_emptyEventName() {
+    pingManager.sendPing("", "metadataKey", "metadataValue");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testSendPingArguments_nullMetadataKeyWithNonNullValue() {
+    pingManager.sendPing("eventName", null, "metadataValue");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testSendPingArguments_emptyMetadataKeyWithNonNullValue() {
+    pingManager.sendPing("eventName", "", "metadataValue");
+  }
+
+  @Test
+  public void testSendPingArguments_nullMetadataValueDoNotThrowException() {
+    pingManager.sendPing("eventName", "metadataKey", null);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testSendPingArguments_emptyMetadataValue() {
+    pingManager.sendPing("eventName", "metadataKey", "");
   }
 }

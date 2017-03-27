@@ -22,7 +22,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -152,7 +151,7 @@ public class GoogleLoginServiceTest {
     when(savedOAuthData.getRefreshToken()).thenReturn(null);
 
     new GoogleLoginService(dataStore, uiFacade, loggerFacade);
-    verify(dataStore, times(1)).removeOAuthData("my-email@example.com");
+    verify(dataStore).removeOAuthData("my-email@example.com");
   }
 
   @Test
@@ -164,7 +163,7 @@ public class GoogleLoginServiceTest {
     when(savedOAuthData.getRefreshToken()).thenReturn("fake_refresh_token");
 
     new GoogleLoginService(dataStore, uiFacade, loggerFacade);
-    verify(dataStore, times(1)).removeOAuthData("my-email@example.com");
+    verify(dataStore).removeOAuthData("my-email@example.com");
   }
 
   @Test

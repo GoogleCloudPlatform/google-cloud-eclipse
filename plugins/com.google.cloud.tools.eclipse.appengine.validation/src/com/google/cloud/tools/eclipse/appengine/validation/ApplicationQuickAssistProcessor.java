@@ -16,52 +16,13 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
-import java.util.Iterator;
-import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext;
-import org.eclipse.jface.text.quickassist.IQuickAssistProcessor;
-import org.eclipse.jface.text.source.Annotation;
-import org.eclipse.jface.text.source.IAnnotationModel;
-import org.eclipse.jface.text.source.ISourceViewer;
-
 /**
- * Provides quick assists for source editor.
+ * Provides quick assists for appengine-web.xml in the source editor.
  */
-public class ApplicationQuickAssistProcessor implements IQuickAssistProcessor {
+public class ApplicationQuickAssistProcessor extends AbstractQuickAssistProcessor {
 
-  @Override
-  public ICompletionProposal[] computeQuickAssistProposals(
-      IQuickAssistInvocationContext invocationContext) {
-    ISourceViewer viewer = invocationContext.getSourceViewer();
-    IAnnotationModel annotationModel = viewer.getAnnotationModel();
-    Iterator iterator = annotationModel.getAnnotationIterator();
-    while (iterator.hasNext()) {
-      Object next = iterator.next();
-      if (next instanceof Annotation) {
-        Annotation annotation = (Annotation) next;
-        String annotationText = Messages.getString("application.element");
-        if (annotation.getText().equals(annotationText)) {
-          ICompletionProposal proposal = new ApplicationSourceQuickFix();
-          return new ICompletionProposal[] {proposal};
-        }
-      } 
-    }
-    return null;
-  }
-  
-  @Override
-  public String getErrorMessage() {
-    return null;
+  public ApplicationQuickAssistProcessor() {
+    super(Messages.getString("application.element"), new ApplicationSourceQuickFix());
   }
 
-  @Override
-  public boolean canFix(Annotation annotation) {
-    return !annotation.isMarkedDeleted();
-  }
-
-  @Override
-  public boolean canAssist(IQuickAssistInvocationContext invocationContext) {
-    return false;
-  }
-  
 }

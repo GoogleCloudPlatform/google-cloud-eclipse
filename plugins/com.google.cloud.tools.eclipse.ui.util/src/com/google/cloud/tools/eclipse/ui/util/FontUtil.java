@@ -38,20 +38,53 @@ public class FontUtil {
    * several {@link DisposeListener}s that can lead to high resource allocation</em>
    */
   public static void convertFontToBold(Control control) {
+    convertFont(control, SWT.BOLD);
+  }
+
+  /**
+   * Changes the font style of the control to italic unless it already is italic.
+   * <p>
+   * If the font is converted to italic, it will attach a {@link DisposeListener}
+   * to the <code>control</code> to dispose the font when it's not needed anymore.
+   * <p>
+   * <em>If converting fonts to italic is a frequent operation, this method will create
+   * several {@link DisposeListener}s that can lead to high resource allocation</em>
+   */
+  public static void convertFontToItalic(Control control) {
+    convertFont(control, SWT.ITALIC);
+  }
+
+  /**
+   * Converts the font of the control by adding a single style bit, unless the font already have
+   * that style.
+   * <p>
+   * If the font is converted, it will attach a {@link DisposeListener}
+   * to the <code>control</code> to dispose the font when it's not needed anymore.
+   * <p>
+   * <em>If converting fonts is a frequent operation, this method will create
+   * several {@link DisposeListener}s that can lead to high resource allocation</em>
+   *
+   * @param control whose font will be changed
+   * @param style e.g. SWT.BOLD or SWT.ITALIC
+   */
+  public static void convertFont(Control control, int style) {
     for (FontData fontData : control.getFont().getFontData()) {
-      if ((fontData.getStyle() & SWT.BOLD) != 0) {
+      if (hasStyle(fontData, style)) {
         return;
       }
     }
-    FontDescriptor boldDescriptor = FontDescriptor.createFrom(control.getFont()).setStyle(SWT.BOLD);
-    final Font boldFont = boldDescriptor.createFont(control.getDisplay());
-    control.setFont(boldFont);
+    FontDescriptor fontDescriptor = FontDescriptor.createFrom(control.getFont()).setStyle(style);
+    final Font newFont = fontDescriptor.createFont(control.getDisplay());
+    control.setFont(newFont);
     control.addDisposeListener(new DisposeListener() {
       @Override
       public void widgetDisposed(DisposeEvent event) {
-        boldFont.dispose();
+        newFont.dispose();
       }
     });
   }
 
+  private static boolean hasStyle(FontData fontData, int style) {
+    return (fontData.getStyle() & style) == style;
+  }
 }

@@ -39,7 +39,7 @@ public class ContextXmlTest {
     try (InputStream contentXml = new FileInputStream(
         "../com.google.cloud.tools.eclipse.appengine.newproject/helpContexts.xml")) {
       Document document = builder.parse(contentXml);
-      assertEquals(1, document.getElementsByTagName("context").getLength());
+      assertEquals(2, document.getElementsByTagName("context").getLength());
     }
   }
 }

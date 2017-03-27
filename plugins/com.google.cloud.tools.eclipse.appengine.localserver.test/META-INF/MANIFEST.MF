@@ -8,12 +8,17 @@ Bundle-Vendor: Google Inc.
 Bundle-Version: 0.1.0.qualifier
 Fragment-Host: com.google.cloud.tools.eclipse.appengine.localserver
 Require-Bundle: org.hamcrest;bundle-version="1.1.0",
- org.junit;bundle-version="4.12.0",
- org.eclipse.jst.j2ee.web
-Import-Package: com.google.cloud.tools.eclipse.test.util,
+ org.junit;bundle-version="4.12.0"
+Import-Package: com.google.cloud.tools.eclipse.swtbot,
+ com.google.cloud.tools.eclipse.test.util,
  com.google.cloud.tools.eclipse.test.util.project,
  com.google.cloud.tools.eclipse.test.util.ui,
- com.google.cloud.tools.eclipse.util.io,
+ org.apache.log4j,
+ org.eclipse.jst.j2ee.web.project.facet,
+ org.eclipse.swtbot.eclipse.finder,
+ org.eclipse.swtbot.swt.finder.finders,
+ org.eclipse.swtbot.swt.finder.matchers,
+ org.eclipse.swtbot.swt.finder.widgets,
  org.mockito;provider=google;version="1.10.19",
  org.mockito.runners;provider=google;version="1.10.19",
  org.mockito.stubbing;provider=google;version="1.10.19",

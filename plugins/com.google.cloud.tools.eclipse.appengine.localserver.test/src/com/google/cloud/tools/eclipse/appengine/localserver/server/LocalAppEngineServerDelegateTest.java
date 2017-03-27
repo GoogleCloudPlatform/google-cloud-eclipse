@@ -26,7 +26,6 @@ import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.core.runtime.CoreException;
@@ -67,12 +66,11 @@ public class LocalAppEngineServerDelegateTest {
   @Mock private IWebModule webModule2;
   @Mock private IModule module3;
   @Rule public TestProjectCreator dynamicWebProject =
-      new TestProjectCreator().withFacetVersions(Lists.newArrayList(JavaFacet.VERSION_1_7,
-                                                                    WebFacetUtils.WEB_25));
+      new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
   @Rule
   public TestProjectCreator appEngineStandardProject =
-      new TestProjectCreator().withFacetVersions(Lists.newArrayList(JavaFacet.VERSION_1_7,
-          WebFacetUtils.WEB_25, APPENGINE_STANDARD_FACET_VERSION_1));
+      new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25,
+          APPENGINE_STANDARD_FACET_VERSION_1);
 
   @Test
   public void testCanModifyModules() throws CoreException {

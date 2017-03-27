@@ -45,19 +45,19 @@ public abstract class AbstractXmlValidator extends AbstractValidator {
   @Override
   public ValidationResult validate(ValidationEvent event, ValidationState state,
       IProgressMonitor monitor) {
-    IResource resource = event.getResource();
-    IFile file = (IFile) resource;
-    try (InputStream in = file.getContents()) {
-      byte[] bytes = ByteStreams.toByteArray(in);
-      validate(resource, bytes);
-      return new ValidationResult();
+    try {
+      IFile file = (IFile) event.getResource();
+      try (InputStream in = file.getContents()) {
+        byte[] bytes = ByteStreams.toByteArray(in);
+        validate(file, bytes);
+      }
     } catch (IOException | CoreException | ParserConfigurationException ex) {
       logger.log(Level.SEVERE, ex.getMessage());
-      return new ValidationResult();
     }
+    return new ValidationResult();
   }
     
-  abstract protected void validate(IResource resource, byte[] bytes) 
+  abstract protected void validate(IFile resource, byte[] bytes) 
       throws CoreException, IOException, ParserConfigurationException;
   
   static void deleteMarkers(IResource resource) throws CoreException {
@@ -73,8 +73,7 @@ public abstract class AbstractXmlValidator extends AbstractValidator {
     marker.setAttribute(IMarker.SEVERITY, element.getSeverity());
     marker.setAttribute(IMarker.MESSAGE, element.getMessage());
     marker.setAttribute(IMarker.LOCATION, "line " + element.getStart().getLineNumber());
-    marker.setAttribute(IMarker.CHAR_START, elementOffset);
-    marker.setAttribute(IMarker.CHAR_END, elementOffset + element.getLength());
+    marker.setAttribute(IMarker.LINE_NUMBER, element.getStart().getLineNumber());
   }
   
   /**

@@ -7,10 +7,10 @@
      &lt;b>Account&lt;/b>
      Google user account with permissions to deploy the project.
      
-     &lt;b>Project ID&lt;/b>
-     The customized name you chose when you created the Cloud Platform project in the Google Cloud Console.
+     &lt;b>Project&lt;/b>
+     The Google Cloud Platform project that is the deployment target. If you want to create a new project, follow the link to open the Cloud Console.
      
-     &lt;b>Specify version&lt;/b>
+     &lt;b>Version&lt;/b>
      The version of the app that will be created or replaced by this deployment. If you do not specify a version, one will be generated for you.
 
      &lt;b>Promote the deployed version to receive all traffic&lt;/b>
@@ -21,6 +21,18 @@
 
      &lt;b>Staging bucket&lt;/b>
      The Google Cloud Storage bucket used to stage files associated with the deployment. If this argument is not specified, the application's default code bucket is used.
+    </description>
+  </context>
+
+  <context id="DeployAppEngineFlexProjectContext" title="App Engine Deployment - Flexible Environment">
+    <!-- Eclipse requires escaped pseudo-HTML here -->
+    <description>Properties used when deploying the project to the App Engine flexible environment.
+
+     &lt;b>App Engine configuration folder&lt;/b>
+     The folder that contains the configuration files used for the deployment, such as app.yml.
+
+     &lt;b>Docker file location&lt;/b>
+     The path to the Docker image to be used for a custom runtime.
     </description>
   </context>
 </contexts>

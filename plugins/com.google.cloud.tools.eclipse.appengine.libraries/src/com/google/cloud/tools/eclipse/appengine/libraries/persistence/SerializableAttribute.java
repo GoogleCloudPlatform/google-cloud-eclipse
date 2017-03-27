@@ -24,8 +24,8 @@ import org.eclipse.jdt.core.JavaCore;
  */
 public class SerializableAttribute {
 
-  private String name;
-  private String value;
+  private final String name;
+  private final String value;
 
   public SerializableAttribute(IClasspathAttribute attribute) {
     name = attribute.getName();

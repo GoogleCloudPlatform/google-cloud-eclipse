@@ -287,24 +287,13 @@
             modes="run,debug">
          <contextualLaunch>
             <enablement>
-              <or>
-                  <with variable="selection">
-                     <iterate>
-                        <adapt type="org.eclipse.core.resources.IProject">
-                           <test
-                                 property="org.eclipse.wst.common.project.facet.core.projectFacet"
-                                 value="com.google.cloud.tools.eclipse.appengine.facets.standard" />
-                           </adapt>
-                     </iterate>
-                  </with>
-                  <with variable="activeEditorInput">
-                     <adapt type="org.eclipse.core.resources.IFile">
-                        <test
-                              property="org.eclipse.wst.common.project.facet.core.projectFacet"
-                              value="com.google.cloud.tools.eclipse.appengine.facets.standard" />
-                     </adapt>
-                  </with>
-               </or>
+               <iterate>
+                  <adapt type="org.eclipse.core.resources.IResource">
+                     <test
+                           property="org.eclipse.wst.common.project.facet.core.projectFacet"
+                           value="com.google.cloud.tools.eclipse.appengine.facets.standard" />
+                  </adapt>
+               </iterate>
             </enablement>
          </contextualLaunch>
          <description

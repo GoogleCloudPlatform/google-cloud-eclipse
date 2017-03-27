@@ -18,6 +18,8 @@ package com.google.cloud.tools.eclipse.appengine.facets;
 
 import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 import com.google.cloud.tools.eclipse.util.templates.appengine.AppEngineTemplateUtility;
+import com.google.common.annotations.VisibleForTesting;
+
 import java.io.ByteArrayInputStream;
 import java.util.Collections;
 import org.eclipse.core.resources.IFile;
@@ -26,6 +28,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
@@ -113,8 +116,7 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
         return Status.OK_STATUS;
       } catch (CoreException ex) {
         return ex.getStatus();
-      }
-      finally {
+      } finally {
         // Now resume all the suspended jobs (including the second ConvertJob).
         NonSystemJobSuspender.resume();
       }
@@ -122,22 +124,30 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
   };
 
   /**
-   * Creates an appengine-web.xml file in the WEB-INF folder if it doesn't exist
+   * Creates an appengine-web.xml file in the WEB-INF folder if it doesn't exist.
    */
-  private void createConfigFiles(IProject project, IProgressMonitor monitor)
+  @VisibleForTesting
+  void createConfigFiles(IProject project, IProgressMonitor monitor)
       throws CoreException {
-    SubMonitor progress = SubMonitor.convert(monitor, 10);
+    SubMonitor progress = SubMonitor.convert(monitor, 9);
 
     // The virtual component model is very flexible, but we assume that
     // the WEB-INF/appengine-web.xml isn't a virtual file remapped elsewhere
     IFolder webInfDir = WebProjectUtil.getWebInfDirectory(project);
+    
+    if (webInfDir == null) {
+      webInfDir =
+          project.getFolder(WebProjectUtil.DEFAULT_WEB_PATH).getFolder(WebProjectUtil.WEB_INF);
+      ResourceUtils.createFolders(webInfDir, new NullProgressMonitor());
+    }
+    
+    progress.worked(1);
+    
     IFile appEngineWebXml = webInfDir.getFile(APPENGINE_WEB_XML);
 
     if (appEngineWebXml.exists()) {
       return;
     }
-
-    ResourceUtils.createFolders(webInfDir, progress.newChild(2));
 
     appEngineWebXml.create(new ByteArrayInputStream(new byte[0]), true, progress.newChild(2));
     String configFileLocation = appEngineWebXml.getLocation().toString();
