@@ -81,7 +81,6 @@ import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerListener;
 import org.eclipse.wst.server.core.ServerEvent;
 import org.eclipse.wst.server.core.ServerUtil;
-import org.osgi.framework.FrameworkUtil;
 
 public class LocalAppEngineServerLaunchConfigurationDelegate
     extends AbstractJavaLaunchConfigurationDelegate {
@@ -595,19 +594,18 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     }
 
     @Override
-    public <T> T getAdapter(Class<T> adapter) {
-      System.out.println(">> getAdapter: " + adapter.getName());
-      return super.getAdapter(adapter);
-    }
-
-    @Override
     public String getName() throws DebugException {
       return serverBehaviour.getDescription();
     }
 
+    /**
+     * Returns an identifier that maps to our
+     * {@link com.google.cloud.tools.eclipse.appengine.localserver.ui.CloudSdkDebugTargetPresentation
+     * presentation} via the {@code org.eclipse.debug.ui.debugModelPresentations} extension point.
+     */
     @Override
     public String getModelIdentifier() {
-      return FrameworkUtil.getBundle(getClass()).getSymbolicName();
+      return "com.google.cloud.tools.eclipse.appengine.localserver.cloudSdkDebugTarget";
     }
 
     @Override

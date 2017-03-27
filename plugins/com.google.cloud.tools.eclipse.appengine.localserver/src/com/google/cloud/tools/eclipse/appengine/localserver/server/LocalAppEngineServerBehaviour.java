@@ -264,7 +264,6 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
    * @return a short pithy description of this server suitable for use in UI elements
    */
   public String getDescription() {
-    System.err.println("ServerBehaviour#getDescription()");
     if (cloudSdk != null) {
       try {
         CloudSdkVersion version = cloudSdk.getVersion();
