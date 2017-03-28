@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Map;
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -24,6 +25,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.wst.validation.internal.provisional.core.IMessage;
 import org.eclipse.wst.validation.internal.provisional.core.IReporter;
+import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 /**
@@ -33,7 +35,6 @@ public class AppEngineWebXmlSourceValidator extends AbstractXmlSourceValidator {
   
   private static final String MARKER_ID =
       "com.google.cloud.tools.eclipse.appengine.validation.appEngineBlacklistMarker";
-  
   /**
    * Adds an {@link IMessage} to appengine-web.xml for every 
    * {@link BannedElement} found in the file.
@@ -41,12 +42,16 @@ public class AppEngineWebXmlSourceValidator extends AbstractXmlSourceValidator {
   protected void validate(IReporter reporter, IFile file, byte[] bytes) 
       throws CoreException, IOException, ParserConfigurationException {
     try {
-      SaxParserResults parserResults = BlacklistSaxParser.readXml(bytes);
-      Map<BannedElement, Integer> bannedElementOffsetMap =
-          ValidationUtils.getOffsetMap(bytes, parserResults);
-      for (Map.Entry<BannedElement, Integer> entry : bannedElementOffsetMap.entrySet()) {
-        this.createMessage(reporter, entry.getKey(), entry.getValue(),
-            MARKER_ID, IMessage.NORMAL_SEVERITY);
+      Document document = BlacklistSaxParser.readXml(bytes);
+      if (document != null) {
+        ArrayList<BannedElement> blacklist = ValidationUtils.checkForElements(document);
+        String encoding = (String) document.getDocumentElement().getUserData("encoding");
+        Map<BannedElement, Integer> bannedElementOffsetMap =
+            ValidationUtils.getOffsetMap(bytes, blacklist, encoding);
+        for (Map.Entry<BannedElement, Integer> entry : bannedElementOffsetMap.entrySet()) {
+          createMessage(reporter, entry.getKey(), entry.getValue(),
+              MARKER_ID, IMessage.NORMAL_SEVERITY);
+        }
       }
     } catch (SAXException ex) {
       // Do nothing

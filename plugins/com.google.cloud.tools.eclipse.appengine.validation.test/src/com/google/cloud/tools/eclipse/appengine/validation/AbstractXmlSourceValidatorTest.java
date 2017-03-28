@@ -22,6 +22,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -35,7 +36,7 @@ import org.eclipse.wst.sse.ui.internal.reconcile.validator.IncrementalHelper;
 import org.eclipse.wst.sse.ui.internal.reconcile.validator.IncrementalReporter;
 import org.eclipse.wst.validation.internal.core.ValidationException;
 import org.eclipse.wst.validation.internal.provisional.core.IMessage;
-import org.junit.Rule;
+import org.junit.ClassRule;
 import org.junit.Test;
 
 public class AbstractXmlSourceValidatorTest {
@@ -47,13 +48,13 @@ public class AbstractXmlSourceValidatorTest {
       + "</appengine-web-app>";
   private static final IProjectFacetVersion APPENGINE_STANDARD_FACET_VERSION_1 =
       ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID).getVersion("1");
-
-  @Rule public TestProjectCreator dynamicWebProject =
+  
+  @ClassRule public static TestProjectCreator dynamicWebProject =
       new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
-  @Rule
-  public TestProjectCreator appEngineStandardProject =
-      new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25,
-          APPENGINE_STANDARD_FACET_VERSION_1);
+  
+  @ClassRule public static TestProjectCreator appEngineStandardProject =
+      new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7,
+          WebFacetUtils.WEB_25, APPENGINE_STANDARD_FACET_VERSION_1);
 
   @Test
   public void testValidate_appEngineStandardFacet() throws CoreException, ValidationException {

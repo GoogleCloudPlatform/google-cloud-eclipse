@@ -16,6 +16,8 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
+import java.util.ArrayList;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
@@ -34,6 +36,14 @@ class AppEngineWebBlacklist {
       throw new IllegalArgumentException("element not in blacklist");
     }
     return BLACKLIST.get(element);
+  }
+  
+  static ArrayList<String> getBlacklistElements() {
+    ArrayList<String> elementList = new ArrayList<>();
+    for (String element : BLACKLIST.keySet()) {
+      elementList.add(element);
+    }
+    return elementList;
   }
 
 }

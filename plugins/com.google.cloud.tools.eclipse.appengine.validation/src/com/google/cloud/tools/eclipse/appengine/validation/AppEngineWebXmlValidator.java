@@ -17,18 +17,20 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Map;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 /**
  * Validator for appengine-web.xml
  */
 public class AppEngineWebXmlValidator extends AbstractXmlValidator {
-    
+  
   /**
    * Clears all problem markers from the resource, then adds a marker to 
    * appengine-web.xml for every {@link BannedElement} found in the file.
@@ -38,11 +40,15 @@ public class AppEngineWebXmlValidator extends AbstractXmlValidator {
       throws CoreException, IOException, ParserConfigurationException {
     try {
       deleteMarkers(resource);
-      SaxParserResults parserResults = BlacklistSaxParser.readXml(bytes);
-      Map<BannedElement, Integer> bannedElementOffsetMap =
-          ValidationUtils.getOffsetMap(bytes, parserResults);
-      for (Map.Entry<BannedElement, Integer> entry : bannedElementOffsetMap.entrySet()) {
-        createMarker(resource, entry.getKey(), entry.getValue());
+      Document document = BlacklistSaxParser.readXml(bytes);
+      if (document != null) {
+        ArrayList<BannedElement> blacklist = ValidationUtils.checkForElements(document);
+        String encoding = (String) document.getDocumentElement().getUserData("encoding");
+        Map<BannedElement, Integer> bannedElementOffsetMap =
+            ValidationUtils.getOffsetMap(bytes, blacklist, encoding);
+        for (Map.Entry<BannedElement, Integer> entry : bannedElementOffsetMap.entrySet()) {
+          createMarker(resource, entry.getKey(), entry.getValue());
+        }
       }
     } catch (SAXException ex) {
       createSaxErrorMessage(resource, ex);

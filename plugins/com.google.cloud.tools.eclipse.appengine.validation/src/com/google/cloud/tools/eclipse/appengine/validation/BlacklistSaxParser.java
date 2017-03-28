@@ -18,31 +18,26 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+
 import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.XMLReaderFactory;
 
 /**
  * Retrieves and returns the results of the SAX parser.
  */
 class BlacklistSaxParser {
   
-  static SaxParserResults readXml(byte[] bytes)
+  static Document readXml(byte[] bytes)
       throws ParserConfigurationException, IOException, SAXException {
     if (bytes.length == 0) { //file is empty
-      return new SaxParserResults();
+      return null;
     }
     ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
     InputSource is = new InputSource(bais);
-    XMLReader reader = XMLReaderFactory.createXMLReader();
-    BlacklistScanner handler = new BlacklistScanner();
-    
-    reader.setContentHandler(handler);
-    reader.setErrorHandler(handler);
-    reader.parse(is);
-    return handler.getParserResults();
+    return PositionalXmlScanner.readXML(is);
   }
   
 }
