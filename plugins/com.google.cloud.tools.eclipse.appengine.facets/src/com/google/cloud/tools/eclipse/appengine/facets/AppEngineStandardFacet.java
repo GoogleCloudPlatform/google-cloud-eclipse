@@ -114,8 +114,16 @@ public class AppEngineStandardFacet {
    */
   public static void installAppEngineFacet(IFacetedProject facetedProject,
       boolean installDependentFacets, IProgressMonitor monitor) throws CoreException {
-
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
+
+    IProjectFacet appEngineFacet = ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID);
+    IProjectFacetVersion appEngineFacetVersion =
+        appEngineFacet.getVersion(AppEngineStandardFacet.VERSION);
+    if (facetedProject.hasProjectFacet(appEngineFacet)) {
+      return;
+    }
+    FacetUtil facetUtil = new FacetUtil(facetedProject);
+    facetUtil.addFacetToBatch(appEngineFacetVersion, null /* config */);
 
     // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1155
     // Instead of calling "IFacetedProject.installProjectFacet()" multiple times, we install facets
@@ -123,20 +131,13 @@ public class AppEngineStandardFacet {
     // installing all the facets. This ensures that the first ConvertJob starts installing the JSDT
     // facet only after the batch is complete, which in turn prevents the first ConvertJob from
     // scheduling the second ConvertJob (triggered by installing the JSDT facet.)
-    FacetUtil facetUtil = new FacetUtil(facetedProject);
+
     if (installDependentFacets) {
       facetUtil.addJavaFacetToBatch(JavaFacet.VERSION_1_7);
       facetUtil.addWebFacetToBatch(WebFacetUtils.WEB_25);
     }
 
-    IProjectFacet appEngineFacet = ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID);
-    IProjectFacetVersion appEngineFacetVersion =
-        appEngineFacet.getVersion(AppEngineStandardFacet.VERSION);
-
-    if (!facetedProject.hasProjectFacet(appEngineFacet)) {
-      facetUtil.addFacetToBatch(appEngineFacetVersion, null /* config */);
-      facetUtil.install(subMonitor.newChild(90));
-    }
+    facetUtil.install(subMonitor.newChild(90));
   }
 
   /**

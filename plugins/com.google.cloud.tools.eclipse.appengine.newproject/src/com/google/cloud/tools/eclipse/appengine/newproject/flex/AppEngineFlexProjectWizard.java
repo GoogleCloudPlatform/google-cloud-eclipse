@@ -29,7 +29,7 @@ import org.eclipse.core.runtime.Status;
 // TODO: update functions
 public class AppEngineFlexProjectWizard extends AppEngineProjectWizard {
   @Inject
-  private ILibraryRepositoryService repositoryService;
+  private final ILibraryRepositoryService repositoryService;
 
   @Override
   public AppEngineWizardPage createWizardPage() {
