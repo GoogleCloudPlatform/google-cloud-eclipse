@@ -19,9 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.facets;
 import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.runtime.CoreException;
@@ -125,10 +123,10 @@ public class AppEngineStandardFacet {
     // installing all the facets. This ensures that the first ConvertJob starts installing the JSDT
     // facet only after the batch is complete, which in turn prevents the first ConvertJob from
     // scheduling the second ConvertJob (triggered by installing the JSDT facet.)
-    Set<IFacetedProject.Action> facetInstallSet = new HashSet<>();
+    FacetUtil facetUtil = new FacetUtil(facetedProject);
     if (installDependentFacets) {
-      FacetUtil.addJavaFacetToBatch(JavaFacet.VERSION_1_7, facetedProject, facetInstallSet);
-      FacetUtil.addWebFacetToBatch(WebFacetUtils.WEB_25, facetedProject, facetInstallSet);
+      facetUtil.addJavaFacetToBatch(JavaFacet.VERSION_1_7);
+      facetUtil.addWebFacetToBatch(WebFacetUtils.WEB_25);
     }
 
     IProjectFacet appEngineFacet = ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID);
@@ -136,11 +134,8 @@ public class AppEngineStandardFacet {
         appEngineFacet.getVersion(AppEngineStandardFacet.VERSION);
 
     if (!facetedProject.hasProjectFacet(appEngineFacet)) {
-      Object config = null;
-      facetInstallSet.add(new IFacetedProject.Action(
-          IFacetedProject.Action.Type.INSTALL, appEngineFacetVersion, config));
-
-      FacetUtil.addFacetSetToProject(facetedProject, facetInstallSet, subMonitor.newChild(90));
+      facetUtil.addFacetToBatch(appEngineFacetVersion, null /* config */);
+      facetUtil.install(subMonitor.newChild(90));
     }
   }
 

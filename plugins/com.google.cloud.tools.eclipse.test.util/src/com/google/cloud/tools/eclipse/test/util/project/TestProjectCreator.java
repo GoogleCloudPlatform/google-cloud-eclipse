@@ -28,9 +28,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -143,13 +141,10 @@ public final class TestProjectCreator extends ExternalResource {
   private void addFacets() throws CoreException {
     IFacetedProject facetedProject = ProjectFacetsManager.create(getProject());
 
-    Set<IFacetedProject.Action> facetInstallSet = new HashSet<>();
+    FacetUtil facetUtil = new FacetUtil(facetedProject);
     for (IProjectFacetVersion projectFacetVersion : projectFacetVersions) {
-      facetInstallSet.add(new IFacetedProject.Action(IFacetedProject.Action.Type.INSTALL,
-          projectFacetVersion, null));
+      facetUtil.addFacetToBatch(projectFacetVersion, null);
     }
-
-    FacetUtil.addFacetSetToProject(facetedProject, facetInstallSet, null);
 
     // App Engine runtime is added via a Job, so wait.
     ProjectUtils.waitForProjects(getProject());

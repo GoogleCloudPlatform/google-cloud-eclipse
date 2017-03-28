@@ -32,10 +32,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.maven.artifact.Artifact;
@@ -111,10 +109,10 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
     IFacetedProject facetedProject = ProjectFacetsManager.create(
         project, true /* convertIfNecessary */, subMonitor.newChild(50));
-    Set<IFacetedProject.Action> facetInstallSet = new HashSet<>();
-    FacetUtil.addJavaFacetToBatch(JavaFacet.VERSION_1_8, facetedProject, facetInstallSet);
-    FacetUtil.addWebFacetToBatch(WebFacetUtils.WEB_30, facetedProject, facetInstallSet);
-    FacetUtil.addFacetSetToProject(facetedProject, facetInstallSet, subMonitor.newChild(50));
+    FacetUtil facetUtil = new FacetUtil(facetedProject);
+    facetUtil.addJavaFacetToBatch(JavaFacet.VERSION_1_8);
+    facetUtil.addWebFacetToBatch(WebFacetUtils.WEB_30);
+    facetUtil.install(subMonitor.newChild(50));
   }
 
   private void addDependenciesToProject(IProject project, IProgressMonitor monitor)

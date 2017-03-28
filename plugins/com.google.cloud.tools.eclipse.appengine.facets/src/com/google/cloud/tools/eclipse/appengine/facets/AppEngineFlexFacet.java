@@ -17,8 +17,6 @@
 package com.google.cloud.tools.eclipse.appengine.facets;
 
 import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
-import java.util.HashSet;
-import java.util.Set;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
@@ -52,21 +50,19 @@ public class AppEngineFlexFacet {
    */
   public static void installAppEngineFacet(IFacetedProject facetedProject,
       boolean installDependentFacets, IProgressMonitor monitor) throws CoreException {
-    Set<IFacetedProject.Action> facetInstallSet = new HashSet<>();
-
     IProjectFacet appEngineFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexFacet.ID);
     if (facetedProject.hasProjectFacet(appEngineFacet)) {
       return;
     }
 
+    FacetUtil facetUtil = new FacetUtil(facetedProject);
     if (installDependentFacets) {
-      FacetUtil.addJavaFacetToBatch(JavaFacet.VERSION_1_8, facetedProject, facetInstallSet);
+      facetUtil.addJavaFacetToBatch(JavaFacet.VERSION_1_8);
     }
 
     IProjectFacetVersion appEngineFacetVersion =
         appEngineFacet.getVersion(AppEngineFlexFacet.VERSION);
-    facetInstallSet.add(new IFacetedProject.Action(
-        IFacetedProject.Action.Type.INSTALL, appEngineFacetVersion, null /* config */));
-    FacetUtil.addFacetSetToProject(facetedProject, facetInstallSet, monitor);
+    facetUtil.addFacetToBatch(appEngineFacetVersion, null /* config */);
+    facetUtil.install(monitor);
   }
 }
