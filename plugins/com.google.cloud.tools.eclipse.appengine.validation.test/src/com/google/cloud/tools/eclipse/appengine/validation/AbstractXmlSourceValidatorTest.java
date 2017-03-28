@@ -62,21 +62,25 @@ public class AbstractXmlSourceValidatorTest {
   public void testValidate_appEngineStandardFacet() throws CoreException, ValidationException {
     IProject project = appEngineStandardProject.getProject();
     IFile file = project.getFile("testdata.xml");
-    file.create(ValidationTestUtils.stringToInputStream(
-        APPLICATION_XML), 0, null);
-
-    IDocument document = ValidationTestUtils.getDocument(file);
-
-    // Adds the URI of the file to be validated to the IncrementalHelper.
-    IncrementalHelper helper = new IncrementalHelper(document, project);
-    IPath path = file.getFullPath();
-    helper.setURI(path.toString());
-
-    AbstractXmlSourceValidator validator = new AppEngineWebXmlSourceValidator();
-    validator.connect(document);
-    IncrementalReporter reporter = new IncrementalReporter(null);
-    validator.validate(helper, reporter);
-    assertEquals(1, reporter.getMessages().size());
+    try {
+      file.create(ValidationTestUtils.stringToInputStream(
+          APPLICATION_XML), 0, null);
+  
+      IDocument document = ValidationTestUtils.getDocument(file);
+  
+      // Adds the URI of the file to be validated to the IncrementalHelper.
+      IncrementalHelper helper = new IncrementalHelper(document, project);
+      IPath path = file.getFullPath();
+      helper.setURI(path.toString());
+  
+      AbstractXmlSourceValidator validator = new AppEngineWebXmlSourceValidator();
+      validator.connect(document);
+      IncrementalReporter reporter = new IncrementalReporter(null);
+      validator.validate(helper, reporter);
+      assertEquals(1, reporter.getMessages().size());
+    } finally {
+      file.delete(true, null);
+    }
   }
 
   @Test
