@@ -377,7 +377,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     console.clearConsole();
     console.activate();
 
-    // A launch must have at least one debug target or process, or it otherwise becomes a zombie
+    // A launch must have at least one debug target or process, or it becomes a zombie
     CloudSdkDebugTarget target = new CloudSdkDebugTarget(launch, serverBehaviour);
     launch.addDebugTarget(target);
     target.engage();
