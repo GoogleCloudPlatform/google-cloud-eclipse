@@ -46,11 +46,10 @@ public class AppEngineWebMarkerResolutionGenerator implements IMarkerResolutionG
         IMarkerResolution fix = new VersionQuickFix();
         markerResolutions[0] = fix;
       }
-      return markerResolutions;
     } catch (CoreException ex) {
       logger.log(Level.SEVERE, ex.getMessage());
-      return markerResolutions;
     }
+    return markerResolutions;
   }
   
 }
