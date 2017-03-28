@@ -136,8 +136,7 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
         artifact = repositoryService.resolveArtifact(libraryFile, subMonitor.newChild(ticks));
       } catch (CoreException ex) {
         logger.log(Level.WARNING, "Error downloading " +
-      libraryFile.getMavenCoordinates().toString() + " from maven", ex);
-        continue;
+            libraryFile.getMavenCoordinates().toString() + " from maven", ex);
       }
 
       // Copy dependency from local maven repo into lib folder
@@ -148,8 +147,7 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
           destFile.create(new FileInputStream(artifactFile), true, subMonitor.newChild(30));
         } catch (FileNotFoundException ex) {
           logger.log(Level.WARNING, "Error copying over " + artifactFile.toString() + " to " +
-        libFolder.getFullPath().toPortableString(), ex);
-          continue;
+              libFolder.getFullPath().toPortableString(), ex);
         }
       }
     }
