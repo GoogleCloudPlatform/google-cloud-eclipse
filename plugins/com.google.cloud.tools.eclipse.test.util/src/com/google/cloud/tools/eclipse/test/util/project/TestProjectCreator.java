@@ -145,6 +145,7 @@ public final class TestProjectCreator extends ExternalResource {
     for (IProjectFacetVersion projectFacetVersion : projectFacetVersions) {
       facetUtil.addFacetToBatch(projectFacetVersion, null);
     }
+    facetUtil.install(null);
 
     // App Engine runtime is added via a Job, so wait.
     ProjectUtils.waitForProjects(getProject());
