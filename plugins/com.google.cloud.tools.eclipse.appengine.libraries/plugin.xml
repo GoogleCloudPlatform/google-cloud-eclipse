@@ -156,7 +156,7 @@
           siteUri="https://cloud.google.com/storage/docs/reference/libraries#client-libraries-install-java" >
       <libraryDependency id="googlecloudcore" />
       <libraryFile
-            javadocUri="https://googlecloudplatform.github.io/google-cloud-java">
+            javadocUri="https://googlecloudplatform.github.io/google-cloud-java/0.10.0/apidocs/">
         <mavenCoordinates
               artifactId="google-cloud-storage"
               groupId="com.google.cloud"
