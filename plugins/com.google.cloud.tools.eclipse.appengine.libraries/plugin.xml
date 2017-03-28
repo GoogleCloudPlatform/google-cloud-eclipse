@@ -100,7 +100,7 @@
     <library
           id="googleapiclient"
           group="clientapis"
-          name="Google API Client Library for Java"
+          name="%googleapiclient.name"
           tooltip="%googleapiclient.tooltip"
           siteUri="https://developers.google.com/api-client-library/java/" >
       <libraryFile
@@ -129,7 +129,7 @@
     <library
           id="googlecloudcore"
           group="clientapis"
-          name="Google Cloud Core Client Library for Java"
+          name="%googlecloudcore.name"
           tooltip="%googlecloudcore.tooltip"
           siteUri="https://googlecloudplatform.github.io/google-cloud-java/" >
       <libraryDependency id="googleapiclient" />
@@ -151,7 +151,7 @@
     <library
           id="googlecloudstorage"
           group="clientapis"
-          name="Google Cloud Storage Client Library for Java"
+          name="%googlecloudstorage.name"
           tooltip="%googlecloudstorage.tooltip"
           siteUri="https://cloud.google.com/storage/docs/reference/libraries#client-libraries-install-java" >
       <libraryDependency id="googlecloudcore" />
