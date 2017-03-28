@@ -23,32 +23,32 @@ public class MessagesTest {
 
   @Test
   public void testAppEngineTitle() {
-    Assert.assertEquals("App Engine Standard Environment Libraries",  Messages.getString("appengine-title"));
+    Assert.assertEquals("App Engine Standard Environment Libraries",
+        Messages.getString("appengine-title"));
   }
-  
+
   @Test
   public void testClientApisTitle() {
-    Assert.assertEquals("Google Client APIs for Java",  Messages.getString("clientapis-title"));
+    Assert.assertEquals("Google Client APIs for Java",
+        Messages.getString("clientapis-title"));
   }
-  
+
   @Test
   public void testClientApisDescription() {
-    Assert.assertEquals("Additional jars used by Google Client APIs for Java", 
+    Assert.assertEquals("Additional jars used by Google Client APIs for Java",
         Messages.getString("clientapis-description"));
   }
-  
+
   @Test
   public void testDescription() {
     Assert.assertEquals(
-        "Additional jars commonly used in App Engine Standard Environment applications", 
+        "Additional jars commonly used in App Engine standard environment applications",
         Messages.getString("appengine-description"));
   }
-  
 
   @Test
   public void testUnknownMessage() {
     Assert.assertEquals("!foo.bar!",  Messages.getString("foo.bar"));
   }
-  
 
 }

@@ -29,16 +29,16 @@ public class AppEngineLibrariesPageTest {
     Assert.assertNull(page.getMessage());
     Assert.assertNull(page.getErrorMessage());
     Assert.assertEquals(
-        "Additional jars commonly used in App Engine Standard Environment applications",
+        "Additional jars commonly used in App Engine standard environment applications",
         page.getDescription());
     Assert.assertNotNull(page.getImage());
   }
-  
+
   @Test
   public void testFinish() {
     Assert.assertTrue(page.finish());
   }
-  
+
   @Test
   public void testGetSelection() {
     Assert.assertNull(page.getSelection());
