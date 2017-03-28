@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-	This stylesheet removes a <application/> element from appengine-web.xml
+	This stylesheet removes a <version/> element from appengine-web.xml
 -->
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
