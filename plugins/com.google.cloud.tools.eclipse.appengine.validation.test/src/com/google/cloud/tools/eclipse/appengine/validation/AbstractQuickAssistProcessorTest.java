@@ -18,45 +18,25 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 
 import static org.junit.Assert.assertEquals;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.eclipse.jface.text.source.Annotation;
-import org.eclipse.jface.text.source.IAnnotationModel;
-import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.jface.text.source.TextInvocationContext;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.PlatformUI;
-import org.junit.Rule;
 import org.junit.Test;
 
-import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
-import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
-
 public class AbstractQuickAssistProcessorTest {
-  
-  @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
+
+  @Test
+  public void testComputeApplicationQuickAssistProposals() {
+    AbstractQuickAssistProcessor processor = new ApplicationQuickAssistProcessor();
+    ICompletionProposal[] fixes =  processor.computeQuickAssistProposals(null);
+    assertEquals(1, fixes.length);
+    assertEquals(ApplicationSourceQuickFix.class.getName(), fixes[0].getClass().getName());
+  }
   
   @Test
-  public void testComputeQuickAssistProposals() throws CoreException {
-    
-    IProject project = projectCreator.getProject();
-    IFile file = project.getFile("testdata.xml");
-    file.create(ValidationTestUtils.stringToInputStream("test"), IFile.FORCE, null);
-    
-    IWorkbench workbench = PlatformUI.getWorkbench();
-    WorkbenchUtil.openInEditor(workbench, file);
-    ISourceViewer viewer = (ISourceViewer) ValidationTestUtils.getViewer(file);
-    
-    IAnnotationModel model = viewer.getAnnotationModel();
-    String annotationMessage = Messages.getString("application.element");
-    model.addAnnotation(new Annotation("type", false, annotationMessage), new Position(1));
-    
-    TextInvocationContext context = new TextInvocationContext(viewer, 1, 1);
-    AbstractQuickAssistProcessor processor = new ApplicationQuickAssistProcessor();
-    ICompletionProposal[] proposals = processor.computeQuickAssistProposals(context);
-    assertEquals(1, proposals.length);
+  public void testComputeVersionQuickAssistProposals() {
+    AbstractQuickAssistProcessor processor = new VersionQuickAssistProcessor();
+    ICompletionProposal[] fixes =  processor.computeQuickAssistProposals(null);
+    assertEquals(1, fixes.length);
+    assertEquals(VersionSourceQuickFix.class.getName(), fixes[0].getClass().getName());
   }
+  
 }

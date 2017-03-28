@@ -28,6 +28,7 @@ public class LibraryRecommendationTest {
     LibraryRecommendation.valueOf("optional");
   }
 
+  @Test
   public void testValueOf_OPTIONAL() {
     assertThat(LibraryRecommendation.valueOf("OPTIONAL"), is(LibraryRecommendation.OPTIONAL));
   }

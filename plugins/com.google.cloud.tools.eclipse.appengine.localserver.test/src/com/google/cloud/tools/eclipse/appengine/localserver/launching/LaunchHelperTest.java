@@ -119,6 +119,7 @@ public class LaunchHelperTest {
     handler.launch(new IModule[] {module1}, ILaunchManager.DEBUG_MODE);
   }
 
+  @Test
   public void testInvariantToModuleOrder() throws CoreException {
     appEngineStandardProject1.setAppEngineServiceId("default");
     IModule module1 = appEngineStandardProject1.getModule();

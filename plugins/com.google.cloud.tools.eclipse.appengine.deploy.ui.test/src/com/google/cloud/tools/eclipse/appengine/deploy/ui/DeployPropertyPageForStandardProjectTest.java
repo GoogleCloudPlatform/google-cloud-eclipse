@@ -16,20 +16,24 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
-import java.util.Arrays;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
+import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
+import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.junit.Rule;
 
 public class DeployPropertyPageForStandardProjectTest
     extends AbstractDeployPropertyPageForProjectsTest<StandardDeployPreferencesPanel> {
 
+  protected static final IProjectFacetVersion APP_ENGINE_STANDARD_FACET_1 =
+      ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID).getVersion("1");
+
   @Rule
-  public TestProjectCreator standardProjectCreator =
-      new TestProjectCreator().withFacetVersions(Arrays.asList(
-          JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, APP_ENGINE_STANDARD_FACET_1));
+  public TestProjectCreator standardProjectCreator = new TestProjectCreator().withFacetVersions(
+      JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, APP_ENGINE_STANDARD_FACET_1);
 
   @Override
   protected IProject getProject() {

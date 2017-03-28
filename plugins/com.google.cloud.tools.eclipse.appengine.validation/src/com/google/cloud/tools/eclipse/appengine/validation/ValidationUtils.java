@@ -108,9 +108,10 @@ public class ValidationUtils {
       for (int i = 0; i < nodeList.getLength(); i++) {
         Node node = nodeList.item(i);
         AppEngineBlacklistElement element = new AppEngineBlacklistElement(
-            AppEngineWebBlacklist.getBlacklistElementMessage(elementName),
+            elementName,
             (DocumentLocation) node.getUserData("location"),
-            node.getTextContent().length());    
+            node.getTextContent().length()
+            );    
         blacklist.add(element);
       }
     }

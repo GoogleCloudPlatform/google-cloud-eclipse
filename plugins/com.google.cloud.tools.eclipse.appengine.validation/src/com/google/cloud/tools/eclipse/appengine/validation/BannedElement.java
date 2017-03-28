@@ -18,6 +18,8 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 
 import java.util.Objects;
 
+import org.eclipse.jface.text.quickassist.IQuickAssistProcessor;
+
 import com.google.common.base.Preconditions;
 
 /**
@@ -30,14 +32,15 @@ class BannedElement {
   private final int length;
   private final String markerId;
   private final int severity;
+  private IQuickAssistProcessor processor;
 
   /**
    * @param length the length of the marker underline. Length == 0 results in a
    *        marker in the vertical ruler and no underline
    */
   BannedElement(String message, String markerId, int severity,
-      DocumentLocation start, int length) {
-    Preconditions.checkNotNull(message, "message is null");
+      DocumentLocation start, int length, IQuickAssistProcessor processor) {
+    Preconditions.checkNotNull(message, "element name is null");
     Preconditions.checkNotNull(markerId, "markerId is null");
     Preconditions.checkNotNull(start, "start is null");
     Preconditions.checkArgument(length >= 0, "length < 0");
@@ -46,11 +49,12 @@ class BannedElement {
     this.length = length;
     this.markerId = markerId;
     this.severity = severity;
+    this.processor = processor;
   }
 
   BannedElement(String message) {
     this(message, "org.eclipse.core.resources.problemmarker",
-      1, new DocumentLocation(0, 0), 0);
+        1, new DocumentLocation(0, 0), 0, null);
   }
 
   String getMessage() {
@@ -71,6 +75,10 @@ class BannedElement {
   
   int getSeverity() {
     return severity;
+  }
+  
+  IQuickAssistProcessor getQuickAssistProcessor() {
+    return processor;
   }
   
   /**
@@ -96,5 +104,5 @@ class BannedElement {
   public int hashCode() {
     return Objects.hash(markerId, message, start.getLineNumber(), start.getColumnNumber());
   }
-
+  
 }

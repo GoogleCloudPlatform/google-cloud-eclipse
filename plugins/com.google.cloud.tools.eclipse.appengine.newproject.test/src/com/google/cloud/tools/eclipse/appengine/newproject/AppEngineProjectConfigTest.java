@@ -34,35 +34,37 @@ import org.junit.Test;
 public class AppEngineProjectConfigTest {
 
   private AppEngineProjectConfig config = new AppEngineProjectConfig();
-  
+
+  @Test
   public void testProject() throws CoreException {
     try {
       IWorkspace workspace = ResourcesPlugin.getWorkspace();
       IProject project = workspace.getRoot().getProject("foobar");
+      project.create(null);
       config.setProject(project);
-      Assert.assertTrue(project.getRawLocationURI().getPath().endsWith("foobar"));
+      Assert.assertTrue(project.getLocationURI().getPath().endsWith("foobar"));
     } finally {
       config.getProject().delete(true, new NullProgressMonitor());
     }
   }
-  
+
   @Test
   public void testPackageName() {
     config.setPackageName("com.foo.bar");
     Assert.assertEquals("com.foo.bar", config.getPackageName());
   }
-  
+
   @Test
   public void testServiceName() {
     Assert.assertNull(config.getServiceName());
     config.setServiceName("foobar");
     Assert.assertEquals("foobar", config.getServiceName());
   }
-  
+
   @Test
-  public void testEclipseProjectLocationUri() throws URISyntaxException {   
-    config.setEclipseProjectLocationUri(new URI("file://foo/bar"));   
-    Assert.assertEquals(new URI("file://foo/bar"), config.getEclipseProjectLocationUri());    
+  public void testEclipseProjectLocationUri() throws URISyntaxException {
+    config.setEclipseProjectLocationUri(new URI("file://foo/bar"));
+    Assert.assertEquals(new URI("file://foo/bar"), config.getEclipseProjectLocationUri());
   }
 
   @Test

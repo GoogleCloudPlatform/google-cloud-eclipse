@@ -76,7 +76,7 @@ public class XsltSourceQuickFixTest {
     ProjectUtils.waitForProjects(project);
     assertEquals(1, file.findMarkers(BLACKLIST_MARKER, true, IResource.DEPTH_ZERO).length);
 
-    XsltSourceQuickFix quickFix = new XsltSourceQuickFix("/xslt/application.xsl",
+    XsltSourceQuickFix quickFix = new XsltSourceQuickFix("/xslt/removeApplication.xsl",
         Messages.getString("remove.application.element"));
     quickFix.apply(viewer, 'a', 0, 0);
 

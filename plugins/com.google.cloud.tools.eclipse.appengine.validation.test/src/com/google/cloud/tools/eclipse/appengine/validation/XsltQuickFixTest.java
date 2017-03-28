@@ -31,8 +31,11 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jst.common.project.facet.core.JavaFacet;
+import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -52,28 +55,61 @@ public class XsltQuickFixTest {
       + "<application>"
       + "</application>"
       + "</appengine-web-app>";
+  private static final String VERSION_XML =
+      "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>"
+      + "<version>"
+      + "</version>"
+      + "</appengine-web-app>";
+  private IProject project;
+  private IFile file;
     
-  @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
+  @Rule public TestProjectCreator projectCreator = 
+      new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
 
-  private XsltQuickFix fix = new XsltQuickFix("/xslt/application.xsl",
-      Messages.getString("remove.application.element"));
-
+  @Before
+  public void setup() {
+    project = projectCreator.getProject();
+    file = project.getFile("testdata.xml");
+  }
+  
   @Test 
   public void testGetLabel() {
+    XsltQuickFix fix = new XsltQuickFix("/xslt/removeApplication.xsl",
+        Messages.getString("remove.application.element"));
     assertEquals("Remove application element", fix.getLabel());
   }
   
   @Test
-  public void testRun() throws IOException, ParserConfigurationException,
+  public void testRun_removeApplicationElement() throws IOException, ParserConfigurationException,
       SAXException, TransformerException, CoreException {
-
     IProject project = projectCreator.getProject();
     IFile file = project.getFile("testdata.xml");
     file.create(ValidationTestUtils.stringToInputStream(APPLICATION_XML), IFile.FORCE, null);
     
     IMarker marker = Mockito.mock(IMarker.class);
     Mockito.when(marker.getResource()).thenReturn(file);
+    
+    XsltQuickFix fix = new XsltQuickFix("/xslt/removeApplication.xsl",
+        Messages.getString("remove.application.element"));
+    fix.run(marker);
+
+    DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+    builderFactory.setNamespaceAware(true);
+    DocumentBuilder builder = builderFactory.newDocumentBuilder();
+    Document transformed = builder.parse(file.getContents());
+    assertEquals(0, transformed.getDocumentElement().getChildNodes().getLength());
+  }
+  
+  @Test
+  public void testRun_removeVersionElement() throws IOException, ParserConfigurationException,
+      SAXException, TransformerException, CoreException {
+    file.create(ValidationTestUtils.stringToInputStream(
+        VERSION_XML), IFile.FORCE, null);
+    IMarker marker = Mockito.mock(IMarker.class);
+    Mockito.when(marker.getResource()).thenReturn(file);
         
+    XsltQuickFix fix = new XsltQuickFix("/xslt/removeVersion.xsl",
+        Messages.getString("remove.version.element"));
     fix.run(marker);
 
     DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();

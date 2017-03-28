@@ -20,6 +20,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.List;
+
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 
@@ -28,6 +30,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.quickassist.IQuickAssistProcessor;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
@@ -60,97 +63,122 @@ public class AbstractXmlSourceValidatorTest {
   public void testValidate_appEngineStandardFacet() throws CoreException, ValidationException {
     IProject project = appEngineStandardProject.getProject();
     IFile file = project.getFile("testdata.xml");
-    file.create(ValidationTestUtils.stringToInputStream(
-        APPLICATION_XML), 0, null);
-
-    IDocument document = ValidationTestUtils.getDocument(file);
-
-    // Adds the URI of the file to be validated to the IncrementalHelper.
-    IncrementalHelper helper = new IncrementalHelper(document, project);
-    IPath path = file.getFullPath();
-    helper.setURI(path.toString());
-
-    AbstractXmlSourceValidator validator = new AppEngineWebXmlSourceValidator();
-    validator.connect(document);
-    IncrementalReporter reporter = new IncrementalReporter(null);
-    validator.validate(helper, reporter);
-    assertEquals(1, reporter.getMessages().size());
+    try {
+      file.create(ValidationTestUtils.stringToInputStream(
+          APPLICATION_XML), 0, null);
+  
+      IDocument document = ValidationTestUtils.getDocument(file);
+  
+      // Adds the URI of the file to be validated to the IncrementalHelper.
+      IncrementalHelper helper = new IncrementalHelper(document, project);
+      IPath path = file.getFullPath();
+      helper.setURI(path.toString());
+  
+      AbstractXmlSourceValidator validator = new AppEngineWebXmlSourceValidator();
+      validator.connect(document);
+      IncrementalReporter reporter = new IncrementalReporter(null);
+      validator.validate(helper, reporter);
+      assertEquals(1, reporter.getMessages().size());
+    } finally {
+      file.delete(true, null);
+    }
   }
 
   @Test
   public void testValidate_dynamicWebProject() throws CoreException, ValidationException {
     IProject project = dynamicWebProject.getProject();
     IFile file = project.getFile("testdata.xml");
-    file.create(ValidationTestUtils.stringToInputStream(
-        APPLICATION_XML), 0, null);
-
-    IDocument document = ValidationTestUtils.getDocument(file);
-
-    // Adds the URI of the file to be validated to the IncrementalHelper.
-    IncrementalHelper helper = new IncrementalHelper(document, project);
-    IPath path = file.getFullPath();
-    helper.setURI(path.toString());
-
-    AbstractXmlSourceValidator validator = new AppEngineWebXmlSourceValidator();
-    validator.connect(document);
-    IncrementalReporter reporter = new IncrementalReporter(null);
-    validator.validate(helper, reporter);
-    assertEquals(0, reporter.getMessages().size());
+    try {
+      file.create(ValidationTestUtils.stringToInputStream(
+          APPLICATION_XML), 0, null);
+  
+      IDocument document = ValidationTestUtils.getDocument(file);
+  
+      // Adds the URI of the file to be validated to the IncrementalHelper.
+      IncrementalHelper helper = new IncrementalHelper(document, project);
+      IPath path = file.getFullPath();
+      helper.setURI(path.toString());
+  
+      AbstractXmlSourceValidator validator = new AppEngineWebXmlSourceValidator();
+      validator.connect(document);
+      IncrementalReporter reporter = new IncrementalReporter(null);
+      validator.validate(helper, reporter);
+      assertEquals(0, reporter.getMessages().size());
+    } finally {
+      file.delete(true, null);
+    }
   }
 
   @Test
   public void getDocumentEncodingTest() throws CoreException {
-
-    IProject project = appEngineStandardProject.getProject();
+    IProject project = dynamicWebProject.getProject();
     IFile file = project.getFile("testdata.xml");
-    file.create(ValidationTestUtils.stringToInputStream(
-      APPLICATION_XML), IFile.FORCE, null);
-    IDocument document = ValidationTestUtils.getDocument(file);
-
-    assertEquals("UTF-8", AbstractXmlSourceValidator.getDocumentEncoding(document));
+    try {
+      file.create(ValidationTestUtils.stringToInputStream(
+        APPLICATION_XML), IFile.FORCE, null);
+      IDocument document = ValidationTestUtils.getDocument(file);
+  
+      assertEquals("UTF-8", AbstractXmlSourceValidator.getDocumentEncoding(document));
+    } finally {
+      file.delete(true, null);
+    }
   }
 
   @Test
   public void testCreateMessage() throws CoreException {
     IncrementalReporter reporter = new IncrementalReporter(null /*progress monitor*/);
     AbstractXmlSourceValidator validator = new AppEngineWebXmlSourceValidator();
-    BannedElement element = new BannedElement("message");
+    ApplicationQuickAssistProcessor processor = new ApplicationQuickAssistProcessor();
+    BannedElement element = new AppEngineBlacklistElement(
+        "message", "markerId", new DocumentLocation(5, 17), 0, processor);
     validator.createMessage(reporter, element, 0, "", IMessage.NORMAL_SEVERITY);
-    assertEquals(1, reporter.getMessages().size());
+    List<IMessage> messages = reporter.getMessages();
+    assertEquals(1, messages.size());
+    IMessage iMessage = messages.get(0);
+    Object attribute = iMessage.getAttribute(IQuickAssistProcessor.class.getName());
+    assertEquals(processor, attribute);
   }
 
   @Test
   public void testGetFile() throws CoreException {
-    IProject project = appEngineStandardProject.getProject();
+    IProject project = dynamicWebProject.getProject();
     IFile file = project.getFile("testdata.xml");
-    file.create(ValidationTestUtils.stringToInputStream(
-        APPLICATION_XML), 0, null);
-
-    assertTrue(file.exists());
-
-    IPath path = file.getFullPath();
-    IFile testFile = AbstractXmlSourceValidator.getFile(path.toString());
-
-    assertNotNull(testFile);
-    assertEquals(file, testFile);
+    try {
+      file.create(ValidationTestUtils.stringToInputStream(
+          APPLICATION_XML), 0, null);
+  
+      assertTrue(file.exists());
+  
+      IPath path = file.getFullPath();
+      IFile testFile = AbstractXmlSourceValidator.getFile(path.toString());
+  
+      assertNotNull(testFile);
+      assertEquals(file, testFile);
+    } finally {
+      file.delete(true, null);
+    }
   }
 
   @Test
   public void testGetProject() throws CoreException {
-    IProject project = appEngineStandardProject.getProject();
+    IProject project = dynamicWebProject.getProject();
     IFile file = project.getFile("testdata.xml");
-    file.create(ValidationTestUtils.stringToInputStream(
-        APPLICATION_XML), 0, null);
-
-    IDocument document = ValidationTestUtils.getDocument(file);
-
-    IncrementalHelper helper = new IncrementalHelper(document, project);
-    IPath path = file.getFullPath();
-    helper.setURI(path.toString());
-
-    IProject testProject = AbstractXmlSourceValidator.getProject(helper);
-    assertNotNull(testProject);
-    assertEquals(project, testProject);
+    try {
+      file.create(ValidationTestUtils.stringToInputStream(
+          APPLICATION_XML), 0, null);
+  
+      IDocument document = ValidationTestUtils.getDocument(file);
+  
+      IncrementalHelper helper = new IncrementalHelper(document, project);
+      IPath path = file.getFullPath();
+      helper.setURI(path.toString());
+  
+      IProject testProject = AbstractXmlSourceValidator.getProject(helper);
+      assertNotNull(testProject);
+      assertEquals(project, testProject);
+    } finally {
+      file.delete(true, null);
+    }
   }
 
 }

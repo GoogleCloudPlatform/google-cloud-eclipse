@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.quickassist.IQuickAssistProcessor;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.sse.core.internal.encoding.EncodingMemento;
@@ -90,6 +91,7 @@ public abstract class AbstractXmlSourceValidator implements ISourceValidator, IV
     message.setLineNo(element.getStart().getLineNumber());
     message.setOffset(elementOffset);
     message.setLength(element.getLength());
+    message.setAttribute(IQuickAssistProcessor.class.getName(), element.getQuickAssistProcessor());
     reporter.addMessage(this, message);
   }
   

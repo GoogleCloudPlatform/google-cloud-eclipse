@@ -16,23 +16,13 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+/**
+ * Provides quick assists for appengine-web.xml in the source editor.
+ */
+public class VersionQuickAssistProcessor extends AbstractQuickAssistProcessor {
 
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.ui.IMarkerResolution;
-import org.junit.Test;
-import org.mockito.Mockito;
-
-public class ApplicationMarkerResolutionGeneratorTest {
-  
-  @Test
-  public void testGetResolutions() {
-    ApplicationMarkerResolutionGenerator resolution = new ApplicationMarkerResolutionGenerator();
-    IMarker marker = Mockito.mock(IMarker.class);
-    IMarkerResolution[] resolutions = resolution.getResolutions(marker);
-    assertEquals(1, resolutions.length);
-    assertNotNull(resolutions[0]);
+  public VersionQuickAssistProcessor() {
+    super(new VersionSourceQuickFix());
   }
 
 }
