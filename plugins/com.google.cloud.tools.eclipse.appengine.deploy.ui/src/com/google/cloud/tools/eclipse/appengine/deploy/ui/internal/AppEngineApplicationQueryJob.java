@@ -44,7 +44,7 @@ public class AppEngineApplicationQueryJob extends Job {
    * @param projectRepository {@link ProjectRepository#getAppEngineApplication} must be thread-safe
    * @param isLatestQueryJob predicate that lazily determines if this job is the latest query job,
    *     which determines if the job should update {@link ProjectSelector} or die silently. This
-   *     predicate is executed in the UI context
+   *     predicate is executed in the UI context.
    */
   public AppEngineApplicationQueryJob(GcpProject project, Credential credential,
       ProjectRepository projectRepository, ProjectSelector projectSelector, String createAppLink,
@@ -87,7 +87,9 @@ public class AppEngineApplicationQueryJob extends Job {
       @Override
       public void run() {
         if (!projectSelector.isDisposed()
-            && isLatestAppQueryJob.apply(thisJob) /* intentionally checking in UI context */) {
+            && isLatestAppQueryJob.apply(thisJob) /* intentionally checking in UI context */
+            // Covers the case where user switches accounts.
+            && !projectSelector.getViewer().getSelection().isEmpty()) {
           projectSelector.setStatusLink(statusMessage, statusTooltip);
         }
       }

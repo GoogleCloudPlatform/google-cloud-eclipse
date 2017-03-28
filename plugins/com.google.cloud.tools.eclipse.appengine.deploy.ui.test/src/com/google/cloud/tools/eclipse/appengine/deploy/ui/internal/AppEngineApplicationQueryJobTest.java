@@ -34,6 +34,8 @@ import com.google.cloud.tools.eclipse.projectselector.model.AppEngine;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.common.base.Predicate;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.widgets.Display;
 import org.junit.After;
 import org.junit.Before;
@@ -57,6 +59,7 @@ public class AppEngineApplicationQueryJobTest {
   @Mock private ProjectRepository projectRepository;
   @Mock private ProjectSelector projectSelector;
   @Mock private Predicate<Job> isLatestQueryJob;
+  @Mock private ISelection projectSelection;
 
   private Job queryJob;
 
@@ -69,6 +72,10 @@ public class AppEngineApplicationQueryJobTest {
 
     when(projectSelector.isDisposed()).thenReturn(false);
     when(isLatestQueryJob.apply(queryJob)).thenReturn(true);
+
+    TableViewer viewer = mock(TableViewer.class);
+    when(viewer.getSelection()).thenReturn(projectSelection);
+    when(projectSelector.getViewer()).thenReturn(viewer);
   }
 
   @After
@@ -89,6 +96,7 @@ public class AppEngineApplicationQueryJobTest {
     verify(projectRepository).getAppEngineApplication(credential, "projectId");
     verify(isLatestQueryJob).apply(queryJob);
     verify(projectSelector).isDisposed();
+    verify(projectSelection).isEmpty();
     verify(projectSelector).setStatusLink(EXPECTED_MESSAGE_WHEN_NO_APPLICATION, EXPECTED_LINK);
 
     assertEquals(AppEngine.NO_APPENGINE_APPLICATION, project.getAppEngine());
@@ -144,6 +152,20 @@ public class AppEngineApplicationQueryJobTest {
     when(isLatestQueryJob.apply(queryJob)).thenReturn(false);
     when(projectRepository.getAppEngineApplication(credential, "projectId"))
         .thenReturn(AppEngine.NO_APPENGINE_APPLICATION);
+
+    queryJob.schedule();
+    queryJob.join();
+
+    verify(isLatestQueryJob).apply(queryJob);
+    verify(projectSelector, never()).setStatusLink(anyString(), anyString());
+  }
+
+  @Test
+  public void testRun_abandonIfProjectSelectorHasNoSelection()
+      throws ProjectRepositoryException, InterruptedException {
+    when(projectRepository.getAppEngineApplication(credential, "projectId"))
+        .thenReturn(AppEngine.NO_APPENGINE_APPLICATION);
+    when(projectSelection.isEmpty()).thenReturn(true);
 
     queryJob.schedule();
     queryJob.join();
