@@ -46,5 +46,9 @@ public class CloudLibrariesTest {
     Assert.assertEquals(library.getGroup(), "appengine");
     Assert.assertEquals(library.getName(), "Objectify");
   }
+  
+  @Test
+  public void testTransitiveDependencies() {
+  }
 
 }
