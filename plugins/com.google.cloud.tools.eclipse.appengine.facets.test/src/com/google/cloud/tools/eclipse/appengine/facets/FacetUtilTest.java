@@ -60,6 +60,11 @@ public class FacetUtilTest {
     new FacetUtil(mockFacetedProject);
   }
 
+  @Test(expected = NullPointerException.class)
+  public void testAddJavaFacetToBatch_nullFacet() {
+    new FacetUtil(mockFacetedProject).addJavaFacetToBatch(null);
+  }
+
   @Test
   public void testAddJavaFacetToBatch_facetDoesNotExitsInProject() {
     when(mockFacetedProject.hasProjectFacet(JavaFacet.VERSION_1_7)).thenReturn(false);
@@ -82,6 +87,11 @@ public class FacetUtilTest {
   @Test(expected = IllegalArgumentException.class)
   public void testAddJavaFacetToBatch_nonJavaFacet() {
     new FacetUtil(mockFacetedProject).addJavaFacetToBatch(WebFacetUtils.WEB_25);
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void testAddWebFacetToBatch_nullFacet() {
+    new FacetUtil(mockFacetedProject).addWebFacetToBatch(null);
   }
 
   @Test
@@ -109,7 +119,7 @@ public class FacetUtilTest {
   }
 
   @Test(expected = NullPointerException.class)
-  public void testAddFacetToBatch_nullFacetSet() {
+  public void testAddFacetToBatch_nullFacet() {
     new FacetUtil(mockFacetedProject).addFacetToBatch(null, null);
   }
 

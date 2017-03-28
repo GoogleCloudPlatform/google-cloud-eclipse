@@ -74,6 +74,7 @@ public class FacetUtil {
    * @param javaFacet the java Facet to be installed
    */
   public FacetUtil addJavaFacetToBatch(IProjectFacetVersion javaFacet) {
+    Preconditions.checkNotNull(javaFacet, "javaFacet is null");
     Preconditions.checkArgument(JavaFacet.FACET.getId().equals(javaFacet.getProjectFacet().getId()),
         javaFacet.toString() + " is not a Java facet");
 
@@ -108,6 +109,7 @@ public class FacetUtil {
    * @param webFacet the web Facet to be installed
    */
   public FacetUtil addWebFacetToBatch(IProjectFacetVersion webFacet) {
+    Preconditions.checkNotNull(webFacet, "webFacet is null");
     Preconditions.checkArgument(WebFacetUtils.WEB_FACET.getId().equals(webFacet.getProjectFacet().getId()),
         webFacet.toString() + " is not a Web facet");
 
@@ -140,7 +142,7 @@ public class FacetUtil {
    * @param config the configuration object or null
    */
   public FacetUtil addFacetToBatch(IProjectFacetVersion facet, Object config) {
-    Preconditions.checkNotNull(facet);
+    Preconditions.checkNotNull(facet, "facet is null");
 
     if (facetedProject.hasProjectFacet(facet)) {
       return this;
