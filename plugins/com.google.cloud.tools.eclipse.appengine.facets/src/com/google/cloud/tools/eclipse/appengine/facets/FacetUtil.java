@@ -118,9 +118,13 @@ public class FacetUtil {
     }
 
     String webAppDirectory = "src/main/webapp";
+    if (overlapsWithJavaSourcePaths(facetedProject, Path.fromPortableString(webAppDirectory))) {
+      logger.info("Default webapp directory overlaps source directory; using WebContent");
+      webAppDirectory = "WebContent"; // WTP's default
+    }
     IPath webAppDirectoryFound = findMainWebAppDirectory(facetedProject.getProject());
     if (webAppDirectoryFound != null) {
-      webAppDirectory = webAppDirectoryFound.toOSString();
+      webAppDirectory = webAppDirectoryFound.toString();
     }
 
     IDataModel webModel = DataModelFactory.createDataModel(new WebFacetInstallDataModelProvider());
@@ -134,9 +138,24 @@ public class FacetUtil {
   }
 
   /**
+   * Return true if the given project is a Java project and has a source path that overlaps with the
+   * given path.
+   */
+  public static boolean overlapsWithJavaSourcePaths(IFacetedProject facetedProject,
+      IPath relativePath) {
+    List<IPath> sourcePaths = WebProjectUtil.getSourcePaths(facetedProject.getProject());
+    for (IPath sourcePath : sourcePaths) {
+      if (sourcePath.isPrefixOf(relativePath)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
    * Adds an install action for {@code facet} with its {@code config} to the list of actions
-   * performed when {@link FacetUtil#install(IProgressMonitor)} is called, if {@code facet} does
-   * not already exist in the configured project.
+   * performed when {@link FacetUtil#install(IProgressMonitor)} is called, if {@code facet} does not
+   * already exist in the configured project.
    *
    * @param facet the facet to be installed
    * @param config the configuration object or null
