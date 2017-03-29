@@ -153,7 +153,7 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
       IProgressMonitor monitor)  throws CoreException {
     IJavaProject javaProject = JavaCore.create(project);
     IClasspathEntry[] entries = javaProject.getRawClasspath();
-    List<IClasspathEntry> newEntries = new ArrayList<IClasspathEntry>();
+    List<IClasspathEntry> newEntries = new ArrayList<>();
     newEntries.addAll(Arrays.asList(entries));
 
     // Add all the jars under lib folder to the classpath
