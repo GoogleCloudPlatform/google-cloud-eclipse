@@ -121,9 +121,9 @@ public class LocalAppEngineServerDelegate extends ServerDelegate implements IURL
     for (IModule module : current) {
       String moduleServiceId = getServiceId(module);
       if (currentServiceIds.containsKey(moduleServiceId)) {
-        // uh oh, we have a conflict within the already-defined modules
-        return StatusUtil.error(this, Messages.getString("SERVICES_HAVE_SAME_ID", //$NON-NLS-1$
-            currentServiceIds.get(moduleServiceId).getName(), module.getName(), moduleServiceId));
+        // should never happen: we have a conflict within the already-defined modules
+        return StatusUtil.error(this, Messages.getString("SERVICE_CONFLICTS", //$NON-NLS-1$
+            module.getName(), currentServiceIds.get(moduleServiceId).getName(), moduleServiceId));
       }
       currentServiceIds.put(moduleServiceId, module);
     }
@@ -142,8 +142,8 @@ public class LocalAppEngineServerDelegate extends ServerDelegate implements IURL
         }
         String moduleServiceId = getServiceId(module);
         if (currentServiceIds.containsKey(moduleServiceId)) {
-          return StatusUtil.error(this, Messages.getString("SERVICES_HAVE_SAME_ID", //$NON-NLS-1$
-              currentServiceIds.get(moduleServiceId).getName(), module.getName(), moduleServiceId));
+          return StatusUtil.error(this, Messages.getString("SERVICE_CONFLICTS", //$NON-NLS-1$
+              module.getName(), currentServiceIds.get(moduleServiceId).getName(), moduleServiceId));
         }
         currentServiceIds.put(moduleServiceId, module);
       }
