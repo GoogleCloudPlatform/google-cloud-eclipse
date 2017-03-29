@@ -29,6 +29,7 @@ public class DeployPreferencesModel {
   private String version;
   private boolean autoPromote;
   private boolean stopPreviousVersion;
+  private boolean configDeploy;
   private String bucket;
 
   public DeployPreferencesModel(IProject project) {
@@ -42,6 +43,7 @@ public class DeployPreferencesModel {
     setVersion(preferences.getVersion());
     setAutoPromote(preferences.isAutoPromote());
     setStopPreviousVersion(preferences.isStopPreviousVersion());
+    setConfigDeploy(preferences.isConfigDeploy());
     setBucket(preferences.getBucket());
   }
 
@@ -55,6 +57,7 @@ public class DeployPreferencesModel {
     preferences.setVersion(getVersion());
     preferences.setAutoPromote(isAutoPromote());
     preferences.setStopPreviousVersion(isStopPreviousVersion());
+    preferences.setConfigDeploy(isConfigDeploy());
     preferences.setBucket(getBucket());
     preferences.save();
   }
@@ -97,6 +100,14 @@ public class DeployPreferencesModel {
 
   public void setStopPreviousVersion(boolean stopPreviousVersion) {
     this.stopPreviousVersion = stopPreviousVersion;
+  }
+
+  public boolean isConfigDeploy() {
+    return configDeploy;
+  }
+
+  public void setConfigDeploy(boolean configDeploy) {
+    this.configDeploy = configDeploy;
   }
 
   public String getBucket() {

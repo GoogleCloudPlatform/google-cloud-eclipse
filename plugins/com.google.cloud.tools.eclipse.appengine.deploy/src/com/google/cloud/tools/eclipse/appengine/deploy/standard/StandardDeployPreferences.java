@@ -34,9 +34,9 @@ public class StandardDeployPreferences {
   static final String PREF_ENABLE_AUTO_PROMOTE = "project.promote"; // boolean
   static final String PREF_CONFIG_DEPLOY = "config.deploy"; // boolean
   static final String PREF_CUSTOM_BUCKET = "project.bucket";
-  static final String PREF_STOP_PREVIOUS_VERSION = "project.previousVersion.stop";
+  static final String PREF_STOP_PREVIOUS_VERSION = "project.previousVersion.stop"; // boolean
 
-  private IEclipsePreferences preferenceStore;
+  private final IEclipsePreferences preferenceStore;
 
   public static StandardDeployPreferences getDefaultPreferences() {
     return new StandardDeployPreferences(DeployPreferenceInitializer.getDefaultPreferences());
