@@ -16,48 +16,35 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Map;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.CoreException;
 import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import com.google.common.annotations.VisibleForTesting;
 
 /**
  * Validator for appengine-web.xml
  */
 public class AppEngineWebXmlValidator extends AbstractXmlValidator {
   
-  /**
-   * Clears all problem markers from the resource, then adds a marker to 
-   * appengine-web.xml for every {@link BannedElement} found in the file.
-   * @throws CoreException 
-   * @throws IOException 
-   * @throws ParserConfigurationException 
-   */
-  @Override
-  protected void validate(IFile resource, byte[] bytes)
-      throws CoreException, ParserConfigurationException, IOException {
-    try {
-      deleteMarkers(resource);
-      Document document = PositionalXmlScanner.parse(bytes);
-      if (document != null) {
-        ArrayList<String> blacklistedElements = AppEngineWebBlacklist.getBlacklistElements();
-        ArrayList<BannedElement> blacklist =
-            ValidationUtils.checkForElements(document, blacklistedElements);
-        String encoding = (String) document.getDocumentElement().getUserData("encoding");
-        Map<BannedElement, Integer> bannedElementOffsetMap =
-            ValidationUtils.getOffsetMap(bytes, blacklist, encoding);
-        for (Map.Entry<BannedElement, Integer> entry : bannedElementOffsetMap.entrySet()) {
-          createMarker(resource, entry.getKey(), entry.getValue());
-        }
+  @VisibleForTesting
+  ArrayList<BannedElement> checkForElements(Document document) {
+    ArrayList<BannedElement> blacklist = new ArrayList<>();
+    ArrayList<String> blacklistedElements = 
+        AppEngineWebBlacklist.getBlacklistElements();
+    for (String elementName : blacklistedElements) {
+      NodeList nodeList = document.getElementsByTagName(elementName);
+      for (int i = 0; i < nodeList.getLength(); i++) {
+        Node node = nodeList.item(i);
+        AppEngineBlacklistElement element = new AppEngineBlacklistElement(
+            elementName,
+            (DocumentLocation) node.getUserData("location"),
+            node.getTextContent().length()
+            );    
+        blacklist.add(element);
       }
-    } catch (SAXException ex) {
-      createSaxErrorMessage(resource, ex);
     }
+    return blacklist;
   }
   
 }

@@ -16,35 +16,53 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
-import java.io.IOException;
-import java.util.Map;
+import java.util.ArrayList;
 
-import javax.xml.parsers.ParserConfigurationException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.CoreException;
-import org.xml.sax.SAXException;
+import com.google.common.annotations.VisibleForTesting;
 
 public class PomXmlValidator extends AbstractXmlValidator {
 
-  /**
-   * Clears all problem markers from the resource, then adds a Maven plugin marker
-   * to pom.xml if the App Engine Maven plugin is obsolete.
-   */
-  @Override
-  protected void validate(IFile resource, byte[] bytes)
-      throws CoreException, IOException, ParserConfigurationException {
-    try {
-      deleteMarkers(resource);
-      SaxParserResults parserResults = PomParser.readXml(bytes);
-      Map<BannedElement, Integer> bannedElementOffsetMap =
-          ValidationUtils.getOffsetMap(bytes, parserResults);
-      for (Map.Entry<BannedElement, Integer> entry : bannedElementOffsetMap.entrySet()) {
-        createMarker(resource, entry.getKey(), entry.getValue());
+  @VisibleForTesting
+  ArrayList<BannedElement> checkForElements(Document document) {
+    boolean foundGroupId = false;
+    boolean foundArtifactId = false;
+    DocumentLocation location = null;
+    ArrayList<BannedElement> blacklist = new ArrayList<>();
+    NodeList nodeList = document.getElementsByTagName("plugin");
+    
+    for (int i = 0; i < nodeList.getLength(); i++) {
+      Node node = nodeList.item(i);
+      NodeList childNodes = node.getChildNodes();
+      
+      for (int j = 0; j < childNodes.getLength(); j++) {
+        Node pluginChild = childNodes.item(j);
+        String localName = pluginChild.getNodeName();
+        String nodeText = pluginChild.getTextContent();
+        
+        if ("groupId".equals(localName)) {
+          if ("com.google.appengine".equals(nodeText)) {
+            foundGroupId = true;
+            location = (DocumentLocation) pluginChild.getUserData("location");
+          }
+        } else if ("artifactId".equals(localName)) {
+          if ("appengine-maven-plugin".equals(nodeText)
+              || "gcloud-maven-plugin".equals(nodeText)) {
+            foundArtifactId = true;
+          }
+        }
+        if (foundGroupId && foundArtifactId) {
+          BannedElement element = new MavenPluginElement(location, nodeText.length());
+          blacklist.add(element);
+        }
       }
-    } catch (SAXException ex) {
-      createSaxErrorMessage(resource, ex);
+      foundGroupId = false;
+      foundArtifactId = false;
     }
+    return blacklist;
   }
   
 }

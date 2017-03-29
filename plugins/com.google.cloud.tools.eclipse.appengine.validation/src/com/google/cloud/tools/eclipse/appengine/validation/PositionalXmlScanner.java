@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
-import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.helpers.XMLReaderFactory;
 
 import java.io.ByteArrayInputStream;
@@ -27,7 +26,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
-class PositionalXmlScanner extends DefaultHandler {
+class PositionalXmlScanner {
   
   static Document parse(byte[] bytes) throws SAXException, ParserConfigurationException, IOException {
     if (bytes.length == 0) { //file is empty

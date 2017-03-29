@@ -19,6 +19,8 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 import com.google.common.io.ByteStreams;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
@@ -31,6 +33,7 @@ import org.eclipse.wst.validation.AbstractValidator;
 import org.eclipse.wst.validation.ValidationEvent;
 import org.eclipse.wst.validation.ValidationResult;
 import org.eclipse.wst.validation.ValidationState;
+import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
@@ -57,8 +60,30 @@ public abstract class AbstractXmlValidator extends AbstractValidator {
     return new ValidationResult();
   }
 
-  protected abstract void validate(IFile resource, byte[] bytes)
-      throws CoreException, IOException, ParserConfigurationException;
+  /**
+   * Clears all problem markers from the resource, then adds a marker to 
+   * the resource for every {@link BannedElement} found in the file. 
+   */
+  void validate(IFile resource, byte[] bytes)
+      throws CoreException, IOException, ParserConfigurationException {
+    try {
+      deleteMarkers(resource);
+      Document document = PositionalXmlScanner.parse(bytes);
+      if (document != null) {
+        ArrayList<BannedElement> blacklist = checkForElements(document);
+        String encoding = (String) document.getDocumentElement().getUserData("encoding");
+        Map<BannedElement, Integer> bannedElementOffsetMap =
+            ValidationUtils.getOffsetMap(bytes, blacklist, encoding);
+        for (Map.Entry<BannedElement, Integer> entry : bannedElementOffsetMap.entrySet()) {
+          createMarker(resource, entry.getKey(), entry.getValue());
+        }
+      }
+    } catch (SAXException ex) {
+      createSaxErrorMessage(resource, ex);
+    }
+  }
+  
+  abstract ArrayList<BannedElement> checkForElements(Document document);
 
   static void deleteMarkers(IResource resource) throws CoreException {
     resource.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);

@@ -110,4 +110,5 @@ public class ValidationUtilsTest {
     InputStream stream = new ByteArrayInputStream(bytes);
     assertEquals(test, ValidationUtils.convertStreamToString(stream, "UTF-8"));
   }
+
 }

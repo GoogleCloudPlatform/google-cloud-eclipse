@@ -31,6 +31,7 @@ import org.w3c.dom.Node;
 import org.xml.sax.Attributes;
 import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 import org.xml.sax.ext.Locator2;
 
 class PositionalXmlHandler extends DefaultHandler {
@@ -109,6 +110,21 @@ class PositionalXmlHandler extends DefaultHandler {
     @VisibleForTesting
     Stack<Element> getElementStack() {
       return elementStack;
+    }
+    
+    @Override
+    public void error(SAXParseException ex) throws SAXException {
+      //nests ex to conserve exception line number
+      throw new SAXException(ex.getMessage(), ex);
+    }
+    
+    @Override
+    public void fatalError(SAXParseException ex) throws SAXException {
+      throw new SAXException(ex.getMessage(), ex);
+    }
+
+    @Override
+    public void warning(SAXParseException exception) throws SAXException { //do nothing
     }
     
 }

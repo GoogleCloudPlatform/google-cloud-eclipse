@@ -23,11 +23,12 @@ import org.eclipse.core.resources.IMarker;
  */
 public class MavenPluginElement extends BannedElement {
 
+  private static final String message = Messages.getString("maven.plugin");
   private static final String markerId = 
       "com.google.cloud.tools.eclipse.appengine.validation.mavenPluginMarker";
   private static final int severity = IMarker.SEVERITY_WARNING;
   
-  public MavenPluginElement(String message, DocumentLocation start, int length) {
+  public MavenPluginElement(DocumentLocation start, int length) {
     super(message, markerId, severity, start, length, null /* Null IQuickAssistProcessor */);
   }
   
