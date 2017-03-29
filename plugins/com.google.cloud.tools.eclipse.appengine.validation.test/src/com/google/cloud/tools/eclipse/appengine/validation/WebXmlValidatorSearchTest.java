@@ -16,14 +16,21 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IJavaProject;
@@ -32,23 +39,27 @@ import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.common.collect.Lists;
 
 public class WebXmlValidatorSearchTest {
  
   private IJavaProject javaProject;
+  private IResource resource;
   
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator()
       .withFacetVersions(Lists.newArrayList(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25));
   
   @Before
-  public void setUpBeforeClass() throws CoreException {
+  public void setUp() throws CoreException {
     // Project's default source folder is the main project folder.
     IProject project = projectCreator.getProject();
     javaProject = projectCreator.getJavaProject();
     
-    //project.getFile("WebContent/WEB-INF/web.xml");
+    resource = project.getFile("WebContent/WEB-INF/web.xml");
     
     ValidationTestUtils.createFolders(project, new Path("src/main/java"));
     IFile servletClass = project.getFile("src/main/java/ServletClass.java");
@@ -61,6 +72,44 @@ public class WebXmlValidatorSearchTest {
     servletClassInPackage.create(
         new ByteArrayInputStream("package com.example; public class ServletClassInPackage {}"
             .getBytes(StandardCharsets.UTF_8)), true, null);
+  }
+  
+  @Test
+  public void testCheckForElements_servletClass() throws ParserConfigurationException {
+    DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+    DocumentBuilder documentBuilder;
+    documentBuilder = builderFactory.newDocumentBuilder();
+    Document document = documentBuilder.newDocument();
+    
+    Element element = document.createElement("servlet-class");
+    element.setTextContent("DoesNotExist");
+    element.setUserData("location", new DocumentLocation(1, 1), null);
+    document.appendChild(element);
+    
+    WebXmlValidator validator = new WebXmlValidator();
+    ArrayList<BannedElement> blacklist = validator.checkForElements(resource, document);
+    
+    assertEquals(1, blacklist.size());
+    String markerId = "com.google.cloud.tools.eclipse.appengine.validation.undefinedServletMarker";
+    assertEquals(markerId, blacklist.get(0).getMarkerId());
+  }
+  
+  @Test
+  public void testCheckForElements_servletClassExists() throws ParserConfigurationException {
+    DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+    DocumentBuilder documentBuilder;
+    documentBuilder = builderFactory.newDocumentBuilder();
+    Document document = documentBuilder.newDocument();
+    
+    Element element = document.createElement("servlet-class");
+    element.setTextContent("ServletClass");
+    element.setUserData("location", new DocumentLocation(1, 1), null);
+    document.appendChild(element);
+    
+    WebXmlValidator validator = new WebXmlValidator();
+    ArrayList<BannedElement> blacklist = validator.checkForElements(resource, document);
+    
+    assertEquals(0, blacklist.size());
   }
   
   @Test

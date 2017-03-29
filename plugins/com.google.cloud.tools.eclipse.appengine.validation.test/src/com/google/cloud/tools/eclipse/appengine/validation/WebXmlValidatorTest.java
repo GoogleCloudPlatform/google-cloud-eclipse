@@ -23,7 +23,9 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.eclipse.core.resources.IFile;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -43,7 +45,7 @@ public class WebXmlValidatorTest {
     document.appendChild(element);
     
     WebXmlValidator validator = new WebXmlValidator();
-    ArrayList<BannedElement> blacklist = validator.checkForElements(document);
+    ArrayList<BannedElement> blacklist = validator.checkForElements(null, document);
     
     assertEquals(1, blacklist.size());
     String markerId = "com.google.cloud.tools.eclipse.appengine.validation.servletMarker";
@@ -64,7 +66,7 @@ public class WebXmlValidatorTest {
     document.appendChild(element);
     
     WebXmlValidator validator = new WebXmlValidator();
-    ArrayList<BannedElement> blacklist = validator.checkForElements(document);
+    ArrayList<BannedElement> blacklist = validator.checkForElements(null, document);
     
     assertEquals(0, blacklist.size());
   }

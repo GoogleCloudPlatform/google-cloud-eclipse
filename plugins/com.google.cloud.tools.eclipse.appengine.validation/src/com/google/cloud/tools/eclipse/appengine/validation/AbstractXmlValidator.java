@@ -70,7 +70,7 @@ public abstract class AbstractXmlValidator extends AbstractValidator {
       deleteMarkers(resource);
       Document document = PositionalXmlScanner.parse(bytes);
       if (document != null) {
-        ArrayList<BannedElement> blacklist = checkForElements(document);
+        ArrayList<BannedElement> blacklist = checkForElements(resource, document);
         String encoding = (String) document.getDocumentElement().getUserData("encoding");
         Map<BannedElement, Integer> bannedElementOffsetMap =
             ValidationUtils.getOffsetMap(bytes, blacklist, encoding);
@@ -83,7 +83,7 @@ public abstract class AbstractXmlValidator extends AbstractValidator {
     }
   }
   
-  abstract ArrayList<BannedElement> checkForElements(Document document);
+  abstract ArrayList<BannedElement> checkForElements(IResource resource, Document document);
 
   static void deleteMarkers(IResource resource) throws CoreException {
     resource.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);

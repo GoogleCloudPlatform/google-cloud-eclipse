@@ -17,6 +17,8 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 import java.util.ArrayList;
+
+import org.eclipse.core.resources.IResource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -28,7 +30,7 @@ import com.google.common.annotations.VisibleForTesting;
 public class AppEngineWebXmlValidator extends AbstractXmlValidator {
   
   @VisibleForTesting
-  ArrayList<BannedElement> checkForElements(Document document) {
+  ArrayList<BannedElement> checkForElements(IResource resource, Document document) {
     ArrayList<BannedElement> blacklist = new ArrayList<>();
     ArrayList<String> blacklistedElements = 
         AppEngineWebBlacklist.getBlacklistElements();

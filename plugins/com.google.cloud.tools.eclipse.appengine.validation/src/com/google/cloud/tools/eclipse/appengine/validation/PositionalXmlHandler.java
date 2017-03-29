@@ -66,6 +66,7 @@ class PositionalXmlHandler extends DefaultHandler {
       for (int i = 0; i < attributes.getLength(); i++) {
         element.setUserData(attributes.getQName(i), attributes.getValue(i), null);
       }
+      element.setUserData("xmlns", uri, null);
       DocumentLocation location = new DocumentLocation(
           locator.getLineNumber(), locator.getColumnNumber());
       element.setUserData("location", location, null);

@@ -16,44 +16,104 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
-import java.io.IOException;
-import java.util.Map;
-import javax.xml.parsers.ParserConfigurationException;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.wst.validation.internal.provisional.core.IMessage;
-import org.eclipse.wst.validation.internal.provisional.core.IReporter;
-import org.xml.sax.SAXException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchParticipant;
+import org.eclipse.jdt.core.search.SearchPattern;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
 
 /**
  * Source validator for web.xml.
  */
 public class WebXmlSourceValidator extends AbstractXmlSourceValidator {
 
-  private static final String MARKER_ID = 
-      "com.google.cloud.tools.eclipse.appengine.validation.servletMarker";
-  /**
-   * Adds an {@link IMessage} to web.xml for every 
-   * {@link BannedElement} found in the file.
-   */
-  @Override
-  protected void validate(IReporter reporter, IFile source, byte[] bytes)
-      throws CoreException, IOException, ParserConfigurationException {
-    try {
-      SaxParserResults parserResults = WebXmlSaxParser.readXml(source, bytes);
-      Map<BannedElement, Integer> bannedElementOffsetMap =
-          ValidationUtils.getOffsetMap(bytes, parserResults);
-      for (Map.Entry<BannedElement, Integer> entry : bannedElementOffsetMap.entrySet()) {
-        BannedElement element = entry.getKey();
-        this.createMessage(reporter, element, entry.getValue(),
-              MARKER_ID, IMessage.HIGH_SEVERITY);
+  private static final Logger logger = Logger.getLogger(WebXmlSourceValidator.class.getName());
+
+  @VisibleForTesting
+  ArrayList<BannedElement> checkForElements(IResource resource, Document document) {
+    ArrayList<BannedElement> blacklist = new ArrayList<>();
+    NodeList webAppList = document.getElementsByTagName("web-app");
+    for (int i = 0; i < webAppList.getLength(); i++) {
+      Node webApp = webAppList.item(i);
+      String namespace = (String) webApp.getUserData("xmlns");
+      String version = (String) webApp.getUserData("version");
+      if ("http://xmlns.jcp.org/xml/ns/javaee".equals(namespace)
+          || "http://java.sun.com/xml/ns/javaee".equals(namespace)) {
+        if (!"2.5".equals(version)) {
+          DocumentLocation location = (DocumentLocation) webApp.getUserData("location");
+          BannedElement element = new JavaServletElement(location, 0);
+          blacklist.add(element);
+        }
       }
-    } catch (SAXException ex) {
-      // Do nothing
-      // Default Eclipse parser flags syntax errors
+    }
+    NodeList servletClassList = document.getElementsByTagName("servlet-class");
+    for (int i = 0; i < servletClassList.getLength(); i++) {
+      Node servletClassNode = servletClassList.item(i);
+      String servletClassName = servletClassNode.getTextContent();
+      IJavaProject project = getProject(resource);
+      if (project != null && !classExists(project, servletClassName)) {
+        DocumentLocation location = (DocumentLocation) servletClassNode.getUserData("location");
+        BannedElement element =
+            new UndefinedServletElement(servletClassName, location, servletClassName.length());
+        blacklist.add(element);
+      }
+    }
+    return blacklist;
+  }
+  
+  private static IJavaProject getProject(IResource resource) {
+    if (resource != null) {
+      return JavaCore.create(resource.getProject());
+    }
+    return null;
+  }
+  
+  @VisibleForTesting
+  static boolean classExists(IJavaProject project, String typeName) {
+    if (Strings.isNullOrEmpty(typeName)) {
+      return false;
+    }
+    SearchPattern pattern = SearchPattern.createPattern(typeName, 
+        IJavaSearchConstants.CLASS,
+        IJavaSearchConstants.DECLARATIONS,
+        SearchPattern.R_EXACT_MATCH | SearchPattern.R_ERASURE_MATCH);
+    IJavaSearchScope scope = project == null ? SearchEngine.createWorkspaceScope()
+        : SearchEngine.createJavaSearchScope(new IJavaElement[] {project});
+    return performSearch(pattern, scope, null);
+  }
+  
+  /**
+   * Searches for a class that matches a pattern.
+   */
+  @VisibleForTesting
+  static boolean performSearch(SearchPattern pattern, IJavaSearchScope scope,
+      IProgressMonitor monitor) {
+    try {
+      SearchEngine searchEngine = new SearchEngine();
+      TypeSearchRequestor requestor = new TypeSearchRequestor();
+      searchEngine.search(pattern,
+          new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() },
+          scope, requestor, monitor);
+      return requestor.foundMatch();
+    } catch (CoreException ex) {
+      logger.log(Level.SEVERE, ex.getMessage());
+      return false;
     }
   }
    
-
 }

@@ -18,6 +18,8 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,6 +27,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -44,6 +47,8 @@ import org.eclipse.wst.validation.internal.provisional.core.IMessage;
 import org.eclipse.wst.validation.internal.provisional.core.IReporter;
 import org.eclipse.wst.validation.internal.provisional.core.IValidationContext;
 import org.eclipse.wst.validation.internal.provisional.core.IValidator;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 /**
  * Abstract source view validator.
@@ -73,21 +78,38 @@ public abstract class AbstractXmlSourceValidator implements ISourceValidator, IV
     }
   }
   
+  abstract ArrayList<BannedElement> checkForElements(IResource resource, Document document);
   /**
    * Adds an {@link IMessage} to the XML file for every 
    * {@link BannedElement} found in the file.
    */
-  protected abstract void validate(IReporter reporter, IFile source, byte[] bytes) 
-      throws CoreException, IOException, ParserConfigurationException;
+  void validate(IReporter reporter, IFile source, byte[] bytes) 
+      throws CoreException, IOException, ParserConfigurationException {
+    try {
+      Document document = PositionalXmlScanner.parse(bytes);
+      if (document != null) {
+        ArrayList<BannedElement> blacklist = checkForElements(source, document);
+        String encoding = (String) document.getDocumentElement().getUserData("encoding");
+        Map<BannedElement, Integer> bannedElementOffsetMap =
+            ValidationUtils.getOffsetMap(bytes, blacklist, encoding);
+        for (Map.Entry<BannedElement, Integer> entry : bannedElementOffsetMap.entrySet()) {
+          createMessage(reporter, entry.getKey(), entry.getValue());
+        }
+      }
+    } catch (SAXException ex) {
+      // Do nothing
+      // Default Eclipse parser flags syntax errors
+    }
+  }
   
   /**
    * Creates a message from a given {@link BannedElement}.
    */
-  void createMessage(IReporter reporter, BannedElement element, int elementOffset,
-      String markerId, int severity) throws CoreException {
-    IMessage message = new LocalizedMessage(severity, element.getMessage());
+  void createMessage(IReporter reporter, BannedElement element, int elementOffset)
+      throws CoreException {
+    IMessage message = new LocalizedMessage(element.getSeverity(), element.getMessage());
     message.setTargetObject(this);
-    message.setMarkerId(markerId);
+    message.setMarkerId(element.getMarkerId());
     message.setLineNo(element.getStart().getLineNumber());
     message.setOffset(elementOffset);
     message.setLength(element.getLength());

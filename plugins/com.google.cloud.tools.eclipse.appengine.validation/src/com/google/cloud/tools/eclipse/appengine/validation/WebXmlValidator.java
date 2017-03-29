@@ -20,10 +20,12 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -43,11 +45,11 @@ public class WebXmlValidator extends AbstractXmlValidator {
   private static final Logger logger = Logger.getLogger(WebXmlValidator.class.getName());
   
   @VisibleForTesting
-  ArrayList<BannedElement> checkForElements(Document document) {
+  ArrayList<BannedElement> checkForElements(IResource resource, Document document) {
     ArrayList<BannedElement> blacklist = new ArrayList<>();
-    NodeList nodeList = document.getElementsByTagName("web-app");
-    for (int i = 0; i < nodeList.getLength(); i++) {
-      Node webApp = nodeList.item(i);
+    NodeList webAppList = document.getElementsByTagName("web-app");
+    for (int i = 0; i < webAppList.getLength(); i++) {
+      Node webApp = webAppList.item(i);
       String namespace = (String) webApp.getUserData("xmlns");
       String version = (String) webApp.getUserData("version");
       if ("http://xmlns.jcp.org/xml/ns/javaee".equals(namespace)
@@ -59,9 +61,28 @@ public class WebXmlValidator extends AbstractXmlValidator {
         }
       }
     }
+    NodeList servletClassList = document.getElementsByTagName("servlet-class");
+    for (int i = 0; i < servletClassList.getLength(); i++) {
+      Node servletClassNode = servletClassList.item(i);
+      String servletClassName = servletClassNode.getTextContent();
+      IJavaProject project = getProject(resource);
+      if (project != null && !classExists(project, servletClassName)) {
+        DocumentLocation location = (DocumentLocation) servletClassNode.getUserData("location");
+        BannedElement element =
+            new UndefinedServletElement(servletClassName, location, servletClassName.length());
+        blacklist.add(element);
+      }
+    }
     return blacklist;
   }
   
+  private static IJavaProject getProject(IResource resource) {
+    if (resource != null) {
+      return JavaCore.create(resource.getProject());
+    }
+    return null;
+  }
+
   @VisibleForTesting
   static boolean classExists(IJavaProject project, String typeName) {
     if (Strings.isNullOrEmpty(typeName)) {

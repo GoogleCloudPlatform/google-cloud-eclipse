@@ -20,7 +20,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
@@ -30,7 +34,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.quickassist.IQuickAssistProcessor;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
@@ -51,6 +54,7 @@ public class AbstractXmlSourceValidatorTest {
       + "</appengine-web-app>";
   private static final IProjectFacetVersion APPENGINE_STANDARD_FACET_VERSION_1 =
       ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID).getVersion("1");
+  private IncrementalReporter reporter = new IncrementalReporter(null);
   
   @ClassRule public static TestProjectCreator dynamicWebProject =
       new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
@@ -76,7 +80,6 @@ public class AbstractXmlSourceValidatorTest {
   
       AbstractXmlSourceValidator validator = new AppEngineWebXmlSourceValidator();
       validator.connect(document);
-      IncrementalReporter reporter = new IncrementalReporter(null);
       validator.validate(helper, reporter);
       assertEquals(1, reporter.getMessages().size());
     } finally {
@@ -101,12 +104,28 @@ public class AbstractXmlSourceValidatorTest {
   
       AbstractXmlSourceValidator validator = new AppEngineWebXmlSourceValidator();
       validator.connect(document);
-      IncrementalReporter reporter = new IncrementalReporter(null);
       validator.validate(helper, reporter);
       assertEquals(0, reporter.getMessages().size());
     } finally {
       file.delete(true, null);
     }
+  }
+  
+  @Test
+  public void testValidate_noBannedElements()
+      throws CoreException, IOException, ParserConfigurationException {
+    WebXmlSourceValidator validator = new WebXmlSourceValidator();
+    byte[] xml = "<test></test>".getBytes(StandardCharsets.UTF_8);
+    validator.validate(reporter, null, xml);
+    assertTrue(reporter.getMessages().isEmpty());
+  }
+  
+  @Test
+  public void testValidate() throws CoreException, IOException, ParserConfigurationException {
+    WebXmlSourceValidator validator = new WebXmlSourceValidator();
+    String xml = "<web-app xmlns='http://xmlns.jcp.org/xml/ns/javaee' version='3.1'></web-app>";
+    validator.validate(reporter, null, xml.getBytes(StandardCharsets.UTF_8));
+    assertEquals(1, reporter.getMessages().size());
   }
 
   @Test
@@ -117,7 +136,6 @@ public class AbstractXmlSourceValidatorTest {
       file.create(ValidationTestUtils.stringToInputStream(
         APPLICATION_XML), IFile.FORCE, null);
       IDocument document = ValidationTestUtils.getDocument(file);
-  
       assertEquals("UTF-8", AbstractXmlSourceValidator.getDocumentEncoding(document));
     } finally {
       file.delete(true, null);
@@ -126,17 +144,15 @@ public class AbstractXmlSourceValidatorTest {
 
   @Test
   public void testCreateMessage() throws CoreException {
-    IncrementalReporter reporter = new IncrementalReporter(null /*progress monitor*/);
     AbstractXmlSourceValidator validator = new AppEngineWebXmlSourceValidator();
-    ApplicationQuickAssistProcessor processor = new ApplicationQuickAssistProcessor();
-    BannedElement element = new AppEngineBlacklistElement(
-        "message", "markerId", new DocumentLocation(5, 17), 0, processor);
-    validator.createMessage(reporter, element, 0, "", IMessage.NORMAL_SEVERITY);
+    BannedElement element =
+        new AppEngineBlacklistElement("application", new DocumentLocation(5, 17), 0);
+    validator.createMessage(reporter, element, 0);
     List<IMessage> messages = reporter.getMessages();
     assertEquals(1, messages.size());
     IMessage iMessage = messages.get(0);
-    Object attribute = iMessage.getAttribute(IQuickAssistProcessor.class.getName());
-    assertEquals(processor, attribute);
+    String markerId = "com.google.cloud.tools.eclipse.appengine.validation.applicationMarker";
+    assertEquals(markerId, iMessage.getMarkerId());
   }
 
   @Test

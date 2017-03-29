@@ -40,7 +40,7 @@ public class AppEngineWebXmlValidatorTest {
     document.appendChild(element);
     
     AppEngineWebXmlValidator validator = new AppEngineWebXmlValidator();
-    ArrayList<BannedElement> blacklist = validator.checkForElements(document);
+    ArrayList<BannedElement> blacklist = validator.checkForElements(null, document);
     assertEquals(1, blacklist.size());
     String markerId = "com.google.cloud.tools.eclipse.appengine.validation.applicationMarker";
     assertEquals(markerId, blacklist.get(0).getMarkerId());

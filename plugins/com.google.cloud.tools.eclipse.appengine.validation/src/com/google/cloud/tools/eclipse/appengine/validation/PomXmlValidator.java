@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 
 import java.util.ArrayList;
 
+import org.eclipse.core.resources.IResource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -27,7 +28,7 @@ import com.google.common.annotations.VisibleForTesting;
 public class PomXmlValidator extends AbstractXmlValidator {
 
   @VisibleForTesting
-  ArrayList<BannedElement> checkForElements(Document document) {
+  ArrayList<BannedElement> checkForElements(IResource resource, Document document) {
     boolean foundGroupId = false;
     boolean foundArtifactId = false;
     DocumentLocation location = null;
