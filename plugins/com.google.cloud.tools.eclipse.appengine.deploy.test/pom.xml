@@ -18,6 +18,21 @@
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>tycho-surefire-plugin</artifactId>
       </plugin>
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>target-platform-configuration</artifactId>
+        <configuration>
+          <dependency-resolution>
+            <extraRequirements>
+              <requirement>
+                <type>eclipse-feature</type>
+                <id>org.eclipse.jst.web_ui.feature</id>
+                <versionRange>0.0.0</versionRange>
+              </requirement>
+            </extraRequirements>
+          </dependency-resolution>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 </project>
