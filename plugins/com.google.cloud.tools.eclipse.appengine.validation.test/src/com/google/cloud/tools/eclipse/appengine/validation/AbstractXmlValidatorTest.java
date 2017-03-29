@@ -105,6 +105,7 @@ public class AbstractXmlValidatorTest {
     String resultMessage = (String) markers[0].getAttribute(IMarker.MESSAGE);
     assertEquals("XML document structures must start and end within the same entity.",
         resultMessage);
+    resource.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
   }
 
   @Test
@@ -128,6 +129,7 @@ public class AbstractXmlValidatorTest {
     String message = Messages.getString("application.element");
     assertEquals(message, markers[0].getAttribute(IMarker.MESSAGE));
     assertEquals("line 1", markers[0].getAttribute(IMarker.LOCATION));
+    resource.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
   }
   
   @Test
@@ -137,6 +139,7 @@ public class AbstractXmlValidatorTest {
     AppEngineWebXmlValidator.createMarker(resource, element, 0);
     IMarker[] markers = resource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
     assertEquals(message, markers[0].getAttribute(IMarker.MESSAGE));
+    resource.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
   }
 
   @Test
@@ -146,7 +149,9 @@ public class AbstractXmlValidatorTest {
     SAXException ex = new SAXException(message, spe);
     AppEngineWebXmlValidator.createSaxErrorMessage(resource, ex);
     IMarker[] markers = resource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
+    assertEquals(1, markers.length);
     assertEquals(message, markers[0].getAttribute(IMarker.MESSAGE));
+    resource.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
   }
 
 }

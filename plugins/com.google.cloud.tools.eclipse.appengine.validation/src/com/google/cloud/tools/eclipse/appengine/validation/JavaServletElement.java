@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.wst.validation.internal.provisional.core.IMessage;
 
 /**
  * A blacklisted java servlet element that will receive a servlet marker. 
@@ -26,10 +27,10 @@ public class JavaServletElement extends BannedElement {
   private static final String message = Messages.getString("web.xml.version");
   private static final String markerId = 
       "com.google.cloud.tools.eclipse.appengine.validation.servletMarker";
-  private static final int severity = IMarker.SEVERITY_ERROR;
   
   public JavaServletElement(DocumentLocation start, int length) {
-    super(message, markerId, severity, start, length, null /* No source quick fix */);
+    super(message, markerId, IMarker.SEVERITY_ERROR, 
+        IMessage.HIGH_SEVERITY, start, length, null /* No source quick fix */);
   }
 
 }

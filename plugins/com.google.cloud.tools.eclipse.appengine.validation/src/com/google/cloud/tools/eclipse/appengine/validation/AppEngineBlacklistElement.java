@@ -17,20 +17,20 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.wst.validation.internal.provisional.core.IMessage;
 
 /**
  * A blacklisted element that will receive an App Engine blacklist marker. 
  */
 public class AppEngineBlacklistElement extends BannedElement {
-
-  private static final int severity = IMarker.SEVERITY_WARNING;
   
   public AppEngineBlacklistElement(String elementName,
       DocumentLocation start, int length) {
     super(
       AppEngineWebBlacklist.getBlacklistElementMessage(elementName),
       AppEngineWebBlacklist.getMarkerId(elementName),
-      severity,
+      IMarker.SEVERITY_WARNING,
+      IMessage.NORMAL_SEVERITY,
       start,
       length,
       AppEngineWebBlacklist.getQuickAssistProcessor(elementName));

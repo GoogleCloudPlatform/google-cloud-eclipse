@@ -25,6 +25,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
+
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.wst.validation.internal.provisional.core.IMessage;
 import org.junit.Test;
 
 public class ValidationUtilsTest {
@@ -86,7 +89,14 @@ public class ValidationUtilsTest {
     blacklist.clear();
     byte[] bytes = MIXED_XML_WITH_PROJECT_ID.getBytes(StandardCharsets.UTF_8);
     DocumentLocation start = new DocumentLocation(3, 13);
-    BannedElement element = new BannedElement("application", "", 1, start, 1, null);
+    BannedElement element = new BannedElement(
+        "application", 
+        "", 
+        IMarker.SEVERITY_WARNING, 
+        IMessage.NORMAL_SEVERITY, 
+        start, 
+        1, 
+        null);
     blacklist.add(element);
     Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, blacklist, "UTF-8");
     assertEquals(1, map.size());

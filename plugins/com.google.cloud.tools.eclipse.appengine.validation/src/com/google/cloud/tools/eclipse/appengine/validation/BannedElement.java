@@ -18,7 +18,9 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 
 import java.util.Objects;
 
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.jface.text.quickassist.IQuickAssistProcessor;
+import org.eclipse.wst.validation.internal.provisional.core.IMessage;
 
 import com.google.common.base.Preconditions;
 
@@ -31,14 +33,15 @@ class BannedElement {
   private final DocumentLocation start;
   private final int length;
   private final String markerId;
-  private final int severity;
+  private final int iMarkerSeverity;
+  private final int iMessageSeverity;
   private IQuickAssistProcessor processor;
 
   /**
    * @param length the length of the marker underline. Length == 0 results in a
    *        marker in the vertical ruler and no underline
    */
-  BannedElement(String message, String markerId, int severity,
+  BannedElement(String message, String markerId, int iMarkerSeverity, int iMessageSeverity,
       DocumentLocation start, int length, IQuickAssistProcessor processor) {
     Preconditions.checkNotNull(message, "element name is null");
     Preconditions.checkNotNull(markerId, "markerId is null");
@@ -48,13 +51,14 @@ class BannedElement {
     this.start = start;
     this.length = length;
     this.markerId = markerId;
-    this.severity = severity;
+    this.iMarkerSeverity = iMarkerSeverity;
+    this.iMessageSeverity = iMessageSeverity;
     this.processor = processor;
   }
 
   BannedElement(String message) {
     this(message, "org.eclipse.core.resources.problemmarker",
-        1, new DocumentLocation(0, 0), 0, null);
+        IMarker.SEVERITY_WARNING, IMessage.NORMAL_SEVERITY, new DocumentLocation(0, 0), 0, null);
   }
 
   String getMessage() {
@@ -73,8 +77,11 @@ class BannedElement {
     return markerId;
   }
   
-  int getSeverity() {
-    return severity;
+  int getIMarkerSeverity() {
+    return iMarkerSeverity;
+  }
+  int getIMessageSeverity() {
+    return iMessageSeverity;
   }
   
   IQuickAssistProcessor getQuickAssistProcessor() {

@@ -107,7 +107,7 @@ public abstract class AbstractXmlSourceValidator implements ISourceValidator, IV
    */
   void createMessage(IReporter reporter, BannedElement element, int elementOffset)
       throws CoreException {
-    IMessage message = new LocalizedMessage(element.getSeverity(), element.getMessage());
+    IMessage message = new LocalizedMessage(element.getIMessageSeverity(), element.getMessage());
     message.setTargetObject(this);
     message.setMarkerId(element.getMarkerId());
     message.setLineNo(element.getStart().getLineNumber());

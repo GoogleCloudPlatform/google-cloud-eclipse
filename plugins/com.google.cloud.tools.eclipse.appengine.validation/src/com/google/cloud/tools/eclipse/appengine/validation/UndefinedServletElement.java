@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.wst.validation.internal.provisional.core.IMessage;
 
 /**
  * A servlet class element that will receive an undefined servlet marker. 
@@ -29,7 +30,7 @@ public class UndefinedServletElement extends BannedElement {
   
   public UndefinedServletElement(String servletClassName, DocumentLocation start, int length) {
     super(Messages.getString("undefined.servlet.class", servletClassName),
-        markerId, IMarker.SEVERITY_ERROR, start, length, null /* Null IQuickAssistProcessor */);
+        markerId, IMarker.SEVERITY_ERROR, IMessage.HIGH_SEVERITY, start, length, null /* Null IQuickAssistProcessor */);
     this.servletClassName = servletClassName;
   }
   
