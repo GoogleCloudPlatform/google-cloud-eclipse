@@ -86,7 +86,7 @@ public class StandardProjectStagingTest {
   }
 
   @Test
-  public void testConfigFilesConversion() throws CoreException {
+  public void testCloudSdkStaging_xmlConfigFilesConvertedToYaml() throws CoreException {
     createConfigFile("cron.xml", cronXml);
     createConfigFile("datastore-indexes.xml", datastoreIndexesXml);
     createConfigFile("dispatch.xml", dispatchXml);
