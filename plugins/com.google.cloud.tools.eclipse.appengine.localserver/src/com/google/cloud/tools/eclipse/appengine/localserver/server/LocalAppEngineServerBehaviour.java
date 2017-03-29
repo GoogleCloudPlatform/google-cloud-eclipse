@@ -25,6 +25,7 @@ import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineDevServer;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessExitListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessStartListener;
+import com.google.cloud.tools.appengine.cloudsdk.serialization.CloudSdkVersion;
 import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
 import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListener;
@@ -95,6 +96,9 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
 
   private LocalAppEngineStartListener localAppEngineStartListener;
   private LocalAppEngineExitListener localAppEngineExitListener;
+
+  /** The {@link CloudSdk} instance currently in use; may be {@code null}. */
+  private CloudSdk cloudSdk;
   private AppEngineDevServer devServer;
   private Process devProcess;
 
@@ -257,6 +261,21 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
   }
 
   /**
+   * @return a short pithy description of this server suitable for use in UI elements
+   */
+  public String getDescription() {
+    if (cloudSdk != null) {
+      try {
+        CloudSdkVersion version = cloudSdk.getVersion();
+        return Messages.getString("cloudsdk.server.description.version", version); //$NON-NLS-1$
+      } catch (AppEngineException ex) {
+        logger.log(Level.WARNING, "Unable to obtain CloudSdk version", ex); //$NON-NLS-1$
+      }
+    }
+    return Messages.getString("cloudsdk.server.description"); //$NON-NLS-1$
+  }
+
+  /**
    * Starts the development server.
    *
    * @param console the stream (Eclipse console) to send development server process output to
@@ -317,7 +336,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
         new MessageConsoleWriterOutputLineListener(console);
 
     // dev_appserver output goes to stderr
-    CloudSdk cloudSdk = new CloudSdk.Builder()
+    cloudSdk = new CloudSdk.Builder()
         .addStdOutLineListener(outputListener)
         .addStdErrLineListener(outputListener)
         .addStdErrLineListener(serverOutputListener)

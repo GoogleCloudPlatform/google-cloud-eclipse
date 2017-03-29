@@ -17,18 +17,18 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.jface.text.quickassist.IQuickAssistProcessor;
 
 /**
  * A blacklisted element that will receive an App Engine blacklist marker. 
  */
 public class AppEngineBlacklistElement extends BannedElement {
 
-  private static final String markerId = 
-      "com.google.cloud.tools.eclipse.appengine.validation.appEngineBlacklistMarker";
   private static final int severity = IMarker.SEVERITY_WARNING;
   
-  public AppEngineBlacklistElement(String message, DocumentLocation start, int length) {
-    super(message, markerId, severity, start, length);
+  public AppEngineBlacklistElement(String message, String markerId,
+      DocumentLocation start, int length, IQuickAssistProcessor processor) {
+    super(message, markerId, severity, start, length, processor);
   }
   
 }

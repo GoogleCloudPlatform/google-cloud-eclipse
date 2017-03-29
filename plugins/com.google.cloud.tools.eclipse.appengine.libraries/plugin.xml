@@ -100,7 +100,7 @@
     <library
           id="googleapiclient"
           group="clientapis"
-          name="Google API Client Library for Java"
+          name="%googleapiclient.name"
           tooltip="%googleapiclient.tooltip"
           siteUri="https://developers.google.com/api-client-library/java/" >
       <libraryFile
@@ -123,6 +123,44 @@
               artifactId="google-oauth-client"
               groupId="com.google.oauth-client"
               version="1.22.0" />
+      </libraryFile>
+    </library>
+    
+    <library
+          id="googlecloudcore"
+          group="clientapis"
+          name="%googlecloudcore.name"
+          tooltip="%googlecloudcore.tooltip"
+          siteUri="https://googlecloudplatform.github.io/google-cloud-java/" >
+      <libraryDependency id="googleapiclient" />
+      <libraryFile
+            javadocUri="https://googlecloudplatform.github.io/google-cloud-java/0.10.0/apidocs/">
+        <mavenCoordinates
+              artifactId="google-cloud-core"
+              groupId="com.google.cloud"
+              version="0.10.0-alpha" />
+      </libraryFile>
+      <libraryFile javadocUri="http://www.joda.org/joda-time/apidocs/">
+        <mavenCoordinates
+              artifactId="joda-time"
+              groupId="joda-time"
+              version="2.9.2" />
+      </libraryFile>
+    </library>
+    
+    <library
+          id="googlecloudstorage"
+          group="clientapis"
+          name="%googlecloudstorage.name"
+          tooltip="%googlecloudstorage.tooltip"
+          siteUri="https://cloud.google.com/storage/docs/reference/libraries#client-libraries-install-java" >
+      <libraryDependency id="googlecloudcore" />
+      <libraryFile
+            javadocUri="https://googlecloudplatform.github.io/google-cloud-java/0.10.0/apidocs/">
+        <mavenCoordinates
+              artifactId="google-cloud-storage"
+              groupId="com.google.cloud"
+              version="0.10.0-beta" />
       </libraryFile>
     </library>
   </extension>

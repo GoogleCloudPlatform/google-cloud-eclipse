@@ -28,7 +28,7 @@ public class MavenPluginElement extends BannedElement {
   private static final int severity = IMarker.SEVERITY_WARNING;
   
   public MavenPluginElement(String message, DocumentLocation start, int length) {
-    super(message, markerId, severity, start, length);
+    super(message, markerId, severity, start, length, null /* Null IQuickAssistProcessor */);
   }
   
 }

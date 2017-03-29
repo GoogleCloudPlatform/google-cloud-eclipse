@@ -48,6 +48,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.eclipse.core.resources.IMarkerDelta;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -56,6 +57,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
@@ -63,6 +65,12 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.ILaunchesListener2;
+import org.eclipse.debug.core.model.DebugElement;
+import org.eclipse.debug.core.model.IBreakpoint;
+import org.eclipse.debug.core.model.IDebugTarget;
+import org.eclipse.debug.core.model.IMemoryBlock;
+import org.eclipse.debug.core.model.IProcess;
+import org.eclipse.debug.core.model.IThread;
 import org.eclipse.jdt.launching.AbstractJavaLaunchConfigurationDelegate;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IVMConnector;
@@ -369,24 +377,28 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     console.clearConsole();
     console.activate();
 
-    new ServerLaunchMonitor(launch, server).engage();
+    // A launch must have at least one debug target or process, or it becomes a zombie
+    CloudSdkDebugTarget target = new CloudSdkDebugTarget(launch, serverBehaviour);
+    launch.addDebugTarget(target);
+    target.engage();
 
     // todo: programArguments is currently ignored
     if (!Strings.isNullOrEmpty(getProgramArguments(configuration))) {
       logger.warning("App Engine Local Server currently ignores program arguments");
     }
-    DefaultRunConfiguration devServerRunConfiguration =
-        generateServerRunConfiguration(configuration, server);
-    devServerRunConfiguration.setAppYamls(runnables);
-
-    if (ILaunchManager.DEBUG_MODE.equals(mode)) {
-      int debugPort = getDebugPort();
-      setupDebugTarget(devServerRunConfiguration, launch, debugPort, monitor);
-    } else {
-      // A launch must have at least one debug target or process, or it otherwise becomes a zombie
-      LocalAppEngineServerDebugTarget.addTarget(launch, serverBehaviour);
+    try {
+      DefaultRunConfiguration devServerRunConfiguration =
+          generateServerRunConfiguration(configuration, server);
+      devServerRunConfiguration.setAppYamls(runnables);
+      if (ILaunchManager.DEBUG_MODE.equals(mode)) {
+        int debugPort = getDebugPort();
+        setupDebugTarget(devServerRunConfiguration, launch, debugPort, monitor);
+      }
+      serverBehaviour.startDevServer(devServerRunConfiguration, console.newMessageStream());
+    } catch (CoreException ex) {
+      launch.terminate();
+      throw ex;
     }
-    serverBehaviour.startDevServer(devServerRunConfiguration, console.newMessageStream());
   }
 
   /**
@@ -494,79 +506,208 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
   }
 
   /**
-   * Monitors the server and launch state. Ensures listeners are properly removed on server stop
-   * and launch termination. It is necessary in part as there may be several launches per
+   * Monitors the server and launch state. Ensures listeners are properly removed on server stop and
+   * launch termination. It is necessary in part as there may be several launches per
    * LaunchConfigurationDelegate.
    * <ul>
    * <li>On server start, open a browser page</li>
    * <li>On launch-termination, stop the server.</li>
-   * <li>On server stop, terminate the launch</li>
+   * <li>On server-stop, terminate the launch</li>
    * </ul>
    */
-  private class ServerLaunchMonitor implements ILaunchesListener2, IServerListener {
+  private class CloudSdkDebugTarget extends DebugElement implements IDebugTarget {
     private ILaunch launch;
+    private LocalAppEngineServerBehaviour serverBehaviour;
     private IServer server;
 
-    /**
-     * Setup the monitor.
-     */
-    ServerLaunchMonitor(ILaunch launch, IServer server) {
+    // Fire a {@link DebugEvent#TERMINATED} event when the server is stopped
+    private IServerListener serverEventsListener = new IServerListener() {
+      @Override
+      public void serverChanged(ServerEvent event) {
+        Preconditions.checkState(server == event.getServer());
+        switch (event.getState()) {
+          case IServer.STATE_STARTED:
+            openBrowserPage(server);
+            fireChangeEvent(DebugEvent.STATE);
+            return;
+
+          case IServer.STATE_STOPPED:
+            disengage();
+            fireTerminateEvent();
+            try {
+              logger.fine("Server stopped; terminating launch"); //$NON-NLS-1$
+              launch.terminate();
+            } catch (DebugException ex) {
+              logger.log(Level.WARNING, "Unable to terminate launch", ex); //$NON-NLS-1$
+            }
+            return;
+
+          default:
+            fireChangeEvent(DebugEvent.STATE);
+            return;
+        }
+      }
+    };
+
+    private ILaunchesListener2 launchesListener = new ILaunchesListener2() {
+      @Override
+      public void launchesTerminated(ILaunch[] launches) {
+        for (ILaunch terminated : launches) {
+          if (terminated == launch) {
+            disengage();
+            if (server.getServerState() == IServer.STATE_STARTED) {
+              logger.fine("Launch terminated; stopping server"); //$NON-NLS-1$
+              server.stop(false);
+            }
+            return;
+          }
+        }
+      }
+
+      @Override
+      public void launchesAdded(ILaunch[] launches) {}
+
+      @Override
+      public void launchesChanged(ILaunch[] launches) {}
+
+      @Override
+      public void launchesRemoved(ILaunch[] launches) {}
+    };
+
+    CloudSdkDebugTarget(ILaunch launch, LocalAppEngineServerBehaviour serverBehaviour) {
+      super(null);
       this.launch = launch;
-      this.server = server;
+      this.serverBehaviour = serverBehaviour;
+      this.server = serverBehaviour.getServer();
     }
 
     /** Add required listeners */
     private void engage() {
-      getLaunchManager().addLaunchListener(this);
-      server.addServerListener(this);
+      getLaunchManager().addLaunchListener(launchesListener);
+      server.addServerListener(serverEventsListener);
     }
 
     /** Remove any installed listeners */
     private void disengage() {
-      getLaunchManager().removeLaunchListener(this);
-      server.removeServerListener(this);
+      getLaunchManager().removeLaunchListener(launchesListener);
+      server.removeServerListener(serverEventsListener);
     }
 
     @Override
-    public void serverChanged(ServerEvent event) {
-      Preconditions.checkState(server == event.getServer());
-      switch (event.getState()) {
-        case IServer.STATE_STARTED:
-          openBrowserPage(server);
-          return;
+    public String getName() throws DebugException {
+      return serverBehaviour.getDescription();
+    }
 
-        case IServer.STATE_STOPPED:
-          disengage();
-          try {
-            logger.fine("Server stopped; terminating launch"); //$NON-NLS-1$
-            launch.terminate();
-          } catch (DebugException ex) {
-            logger.log(Level.WARNING, "Unable to terminate launch", ex); //$NON-NLS-1$
-          }
+    /**
+     * Returns an identifier that maps to our
+     * {@link com.google.cloud.tools.eclipse.appengine.localserver.ui.CloudSdkDebugTargetPresentation
+     * presentation} via the {@code org.eclipse.debug.ui.debugModelPresentations} extension point.
+     */
+    @Override
+    public String getModelIdentifier() {
+      return "com.google.cloud.tools.eclipse.appengine.localserver.cloudSdkDebugTarget";
+    }
+
+    @Override
+    public IDebugTarget getDebugTarget() {
+      return this;
+    }
+
+    @Override
+    public ILaunch getLaunch() {
+      return launch;
+    }
+
+    @Override
+    public boolean canTerminate() {
+      return true;
+    }
+
+    @Override
+    public boolean isTerminated() {
+      int state = server.getServerState();
+      return state == IServer.STATE_STOPPED;
+    }
+
+    @Override
+    public void terminate() throws DebugException {
+      int state = server.getServerState();
+      if (state != IServer.STATE_STOPPED) {
+        serverBehaviour.stop(state == IServer.STATE_STOPPING);
       }
     }
 
     @Override
-    public void launchesTerminated(ILaunch[] launches) {
-      for (ILaunch terminated : launches) {
-        if (terminated == launch) {
-          disengage();
-          if (server.getServerState() == IServer.STATE_STARTED) {
-            logger.fine("Launch terminated; stopping server"); //$NON-NLS-1$
-            server.stop(false);
-          }
-          return;
-        }
-      }
+    public boolean supportsBreakpoint(IBreakpoint breakpoint) {
+      return false;
     }
 
     @Override
-    public void launchesRemoved(ILaunch[] launches) {}
+    public void breakpointAdded(IBreakpoint breakpoint) {}
 
     @Override
-    public void launchesChanged(ILaunch[] launches) {}
+    public void breakpointRemoved(IBreakpoint breakpoint, IMarkerDelta delta) {}
 
     @Override
-    public void launchesAdded(ILaunch[] launches) {}
+    public void breakpointChanged(IBreakpoint breakpoint, IMarkerDelta delta) {}
+
+    @Override
+    public boolean canResume() {
+      return false;
+    }
+
+    @Override
+    public void resume() throws DebugException {}
+
+    @Override
+    public boolean canSuspend() {
+      return false;
+    }
+
+    @Override
+    public boolean isSuspended() {
+      return false;
+    }
+
+    @Override
+    public void suspend() throws DebugException {}
+
+    @Override
+    public boolean canDisconnect() {
+      return false;
+    }
+
+    @Override
+    public boolean isDisconnected() {
+      return false;
+    }
+
+    @Override
+    public void disconnect() throws DebugException {}
+
+    @Override
+    public boolean supportsStorageRetrieval() {
+      return false;
+    }
+
+    @Override
+    public IMemoryBlock getMemoryBlock(long startAddress, long length) throws DebugException {
+      return null;
+    }
+
+    @Override
+    public IProcess getProcess() {
+      return null;
+    }
+
+    @Override
+    public boolean hasThreads() throws DebugException {
+      return false;
+    }
+
+    @Override
+    public IThread[] getThreads() throws DebugException {
+      return new IThread[0];
+    }
   }
 }

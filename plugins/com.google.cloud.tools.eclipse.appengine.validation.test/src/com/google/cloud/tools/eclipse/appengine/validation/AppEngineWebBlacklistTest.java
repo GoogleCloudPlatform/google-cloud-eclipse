@@ -54,5 +54,11 @@ public class AppEngineWebBlacklistTest {
     assertEquals("Project ID should be specified at deploy time",
       AppEngineWebBlacklist.getBlacklistElementMessage("application"));
   }
+  
+  @Test
+  public void testGetQuickAssistProcessor() {
+    assertEquals(VersionQuickAssistProcessor.class.getName(),
+        AppEngineWebBlacklist.getQuickAssistProcessor("version").getClass().getName());
+  }
 }
 

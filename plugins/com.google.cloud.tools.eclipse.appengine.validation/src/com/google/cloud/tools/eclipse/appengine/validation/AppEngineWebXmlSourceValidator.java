@@ -31,9 +31,6 @@ import org.xml.sax.SAXException;
  */
 public class AppEngineWebXmlSourceValidator extends AbstractXmlSourceValidator {
   
-  private static final String MARKER_ID =
-      "com.google.cloud.tools.eclipse.appengine.validation.appEngineBlacklistMarker";
-  
   /**
    * Adds an {@link IMessage} to appengine-web.xml for every 
    * {@link BannedElement} found in the file.
@@ -45,8 +42,9 @@ public class AppEngineWebXmlSourceValidator extends AbstractXmlSourceValidator {
       Map<BannedElement, Integer> bannedElementOffsetMap =
           ValidationUtils.getOffsetMap(bytes, parserResults);
       for (Map.Entry<BannedElement, Integer> entry : bannedElementOffsetMap.entrySet()) {
-        this.createMessage(reporter, entry.getKey(), entry.getValue(),
-            MARKER_ID, IMessage.NORMAL_SEVERITY);
+        BannedElement element = entry.getKey();
+        this.createMessage(reporter, element, entry.getValue(),
+            element.getMarkerId(), IMessage.NORMAL_SEVERITY);
       }
     } catch (SAXException ex) {
       // Do nothing

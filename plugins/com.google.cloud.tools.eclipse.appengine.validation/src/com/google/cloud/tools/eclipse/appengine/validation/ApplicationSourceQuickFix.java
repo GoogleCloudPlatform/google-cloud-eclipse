@@ -22,7 +22,7 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 public class ApplicationSourceQuickFix extends XsltSourceQuickFix {
   
   public ApplicationSourceQuickFix() {
-    super("/xslt/application.xsl", Messages.getString("remove.application.element"));
+    super("/xslt/removeApplication.xsl", Messages.getString("remove.application.element"));
   }
   
 }

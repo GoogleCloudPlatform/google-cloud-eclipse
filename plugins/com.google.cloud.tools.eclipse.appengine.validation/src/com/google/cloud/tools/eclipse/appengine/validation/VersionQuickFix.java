@@ -17,12 +17,12 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 /**
- * Provides a quick assist for web.xml in the source editor.
+ * Applies removeVersion.xsl to appengine-web.xml to remove a <version/> element.
  */
-public class ServletQuickAssistProcessor extends AbstractQuickAssistProcessor {
-
-  public ServletQuickAssistProcessor() {
-    super(Messages.getString("web.xml.version"), new ToServlet25SourceQuickFix());
+public class VersionQuickFix extends XsltQuickFix {
+  
+  public VersionQuickFix() {
+    super("/xslt/removeVersion.xsl", Messages.getString("remove.version.element"));
   }
-
+  
 }

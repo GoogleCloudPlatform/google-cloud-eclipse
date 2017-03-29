@@ -16,22 +16,13 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.ui.IMarkerResolution;
-import org.eclipse.ui.IMarkerResolutionGenerator;
-
 /**
- * Returns possible resolutions for given resource marker. Quick Fix resolutions
- * are available in the Problems view.
+ * Quick fix for appengine-web.xml available in source editor.
  */
-public class ApplicationMarkerResolutionGenerator implements IMarkerResolutionGenerator {
-
-  @Override
-  public IMarkerResolution[] getResolutions(IMarker marker) {
-    IMarkerResolution[] markerResolutions = new IMarkerResolution[1];
-    IMarkerResolution fix = new ApplicationQuickFix();
-    markerResolutions[0] = fix;
-    return markerResolutions;
+public class VersionSourceQuickFix extends XsltSourceQuickFix {
+  
+  public VersionSourceQuickFix() {
+    super("/xslt/removeVersion.xsl", Messages.getString("remove.version.element"));
   }
   
 }

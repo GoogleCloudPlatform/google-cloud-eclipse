@@ -35,12 +35,12 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 public abstract class AbstractXmlValidator extends AbstractValidator {
-  
+
   private static final Logger logger = Logger.getLogger(
       AbstractXmlValidator.class.getName());
-  
+
   /**
-   * Extracts byte[] from XML. 
+   * Extracts byte[] from XML.
    */
   @Override
   public ValidationResult validate(ValidationEvent event, ValidationState state,
@@ -56,14 +56,14 @@ public abstract class AbstractXmlValidator extends AbstractValidator {
     }
     return new ValidationResult();
   }
-    
-  abstract protected void validate(IFile resource, byte[] bytes) 
+
+  protected abstract void validate(IFile resource, byte[] bytes)
       throws CoreException, IOException, ParserConfigurationException;
-  
+
   static void deleteMarkers(IResource resource) throws CoreException {
     resource.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
   }
-  
+
   /**
    * Creates a marker from a given {@link BannedElement}
    */
@@ -75,7 +75,7 @@ public abstract class AbstractXmlValidator extends AbstractValidator {
     marker.setAttribute(IMarker.LOCATION, "line " + element.getStart().getLineNumber());
     marker.setAttribute(IMarker.LINE_NUMBER, element.getStart().getLineNumber());
   }
-  
+
   /**
    * Sets error marker where SAX parser fails.
    */
@@ -87,5 +87,5 @@ public abstract class AbstractXmlValidator extends AbstractValidator {
     marker.setAttribute(IMarker.LINE_NUMBER, lineNumber);
     marker.setAttribute(IMarker.LOCATION, "line " + lineNumber);
   }
-  
+
 }
