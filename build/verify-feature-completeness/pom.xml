@@ -19,10 +19,13 @@
   </description>
 
   <properties>
-    <installIUs>org.eclipse.platform.feature.group,com.google.cloud.tools.eclipse.suite.e45.feature.feature.group</installIUs>
+    <installIUs>org.eclipse.platform.feature.group,com.google.cloud.tools.eclipse.suite.e45.feature.feature.group,${adt.featureIUs}</installIUs>
     <build.rootUri>${project.baseUri}/../..</build.rootUri>
     <eclipse.repoUrl>${build.rootUri}/eclipse/ide-target-platform/target/repository</eclipse.repoUrl>
     <gcp.repoUrl>${build.rootUri}/gcp-repo/target/repository</gcp.repoUrl>
+
+    <adt.repoUrl>http://dl-ssl.google.com/android/eclipse/</adt.repoUrl>
+    <adt.featureIUs>com.android.ide.eclipse.adt.feature.feature.group</adt.featureIUs>
   </properties>
 
   <dependencies>
@@ -66,7 +69,7 @@
             -consoleLog -nosplash
             -application org.eclipse.equinox.p2.director
             -destination ${project.build.directory}/p2-installation
-            -repository ${eclipse.repoUrl},${gcp.repoUrl} 
+            -repository ${eclipse.repoUrl},${gcp.repoUrl},${adt.repoUrl}
             -installIUs ${installIUs}
           </appArgLine>
           <repositories>
