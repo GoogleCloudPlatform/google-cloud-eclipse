@@ -21,9 +21,6 @@ import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineDeployment;
 import com.google.common.annotations.VisibleForTesting;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -60,23 +57,7 @@ public class AppEngineProjectDeployer {
       List<File> deployables = computeDeployables(stagingDirectory, configDeploy);
       configuration.setDeployables(deployables);
       CloudSdkAppEngineDeployment deployment = new CloudSdkAppEngineDeployment(cloudSdk);
-
-      IPath stagingGenerated = stagingDirectory.append("WEB-INF") //$NON-NLS-1$
-          .append("appengine-generated"); //$NON-NLS-1$
-      System.out.println("Directory exists: " + stagingGenerated.toFile().exists());
-      for (File file : stagingGenerated.toFile().listFiles()) {
-        System.out.println(">>> " + file.getName() + ": " + file.exists());
-        if ("app.yaml".equals(file.getName())) continue;
-        try (InputStream is = new FileInputStream(file)) {
-          for (int c = is.read(); c != -1; c = is.read()) {
-            System.out.print((char) c);
-          }
-        } catch (IOException e) {
-          System.out.println("HAVOK");
-        }
-        System.out.println();
-      }
-      //deployment.deploy(configuration);
+      deployment.deploy(configuration);
     } finally {
       progress.worked(1);
     }
@@ -89,7 +70,8 @@ public class AppEngineProjectDeployer {
 
     if (configDeploy) {
       for (String configFile : APP_ENGINE_CONFIG_FILES) {
-        File file = stagingDirectory.append("WEB-INF").append(configFile).toFile(); //$NON-NLS-1$
+        File file = stagingDirectory.append("WEB-INF/appengine-generated") //$NON-NLS-1$
+            .append(configFile).toFile();
         if (file.exists()) {
           deployables.add(file);
         }
