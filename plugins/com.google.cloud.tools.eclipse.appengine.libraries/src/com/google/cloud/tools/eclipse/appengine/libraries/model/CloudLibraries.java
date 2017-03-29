@@ -92,10 +92,20 @@ public class CloudLibraries {
     return map;
   }
 
+  // Only goes one level deeper, which is all we need for now.
+  // Does not recurse.
   private static void resolveTransitiveDependencies(ImmutableMap<String, Library> map) {
     for (Library library : map.values()) {
       List<String> directDependencies = library.getLibraryDependencies();
       List<String> transitiveDependencies = Lists.newArrayList(directDependencies);
+      for (String id : directDependencies) {
+        Library dependency = map.get(id);
+        for (String dependencyId : dependency.getLibraryDependencies()) {
+          if (!transitiveDependencies.contains(dependencyId)) {
+            transitiveDependencies.add(dependencyId);
+          }
+        }
+      }
       library.setLibraryDependencies(transitiveDependencies);
     }    
   }
