@@ -18,7 +18,6 @@ package com.google.cloud.tools.eclipse.appengine.deploy.standard;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
@@ -27,12 +26,13 @@ import org.osgi.service.prefs.BackingStoreException;
 public class StandardDeployPreferences {
 
   public static final String PREFERENCE_STORE_QUALIFIER =
-      "com.google.cloud.tools.eclipse.appengine.deploy";      
+      "com.google.cloud.tools.eclipse.appengine.deploy";
 
   static final String PREF_ACCOUNT_EMAIL = "account.email";
   static final String PREF_PROJECT_ID = "project.id";
   static final String PREF_CUSTOM_VERSION = "project.version";
   static final String PREF_ENABLE_AUTO_PROMOTE = "project.promote"; // boolean
+  static final String PREF_CONFIG_DEPLOY = "config.deploy"; // boolean
   static final String PREF_CUSTOM_BUCKET = "project.bucket";
   static final String PREF_STOP_PREVIOUS_VERSION = "project.previousVersion.stop";
 
@@ -88,6 +88,15 @@ public class StandardDeployPreferences {
 
   public void setAutoPromote(boolean autoPromote) {
     preferenceStore.putBoolean(PREF_ENABLE_AUTO_PROMOTE, autoPromote);
+  }
+
+  public boolean isConfigDeploy() {
+    return preferenceStore.getBoolean(PREF_CONFIG_DEPLOY,
+        DeployPreferenceInitializer.DEFAULT_CONFIG_DEPLOY);
+  }
+
+  public void setConfigDeploy(boolean configDeploy) {
+    preferenceStore.putBoolean(PREF_CONFIG_DEPLOY, configDeploy);
   }
 
   public String getBucket() {
