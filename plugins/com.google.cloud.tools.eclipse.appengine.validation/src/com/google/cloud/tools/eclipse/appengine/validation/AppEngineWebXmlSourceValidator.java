@@ -42,9 +42,11 @@ public class AppEngineWebXmlSourceValidator extends AbstractXmlSourceValidator {
   protected void validate(IReporter reporter, IFile file, byte[] bytes) 
       throws CoreException, IOException, ParserConfigurationException {
     try {
-      Document document = BlacklistSaxParser.readXml(bytes);
+      Document document = PositionalXmlScanner.parse(bytes);
       if (document != null) {
-        ArrayList<BannedElement> blacklist = ValidationUtils.checkForElements(document);
+        ArrayList<String> blacklistedElements = AppEngineWebBlacklist.getBlacklistElements();
+        ArrayList<BannedElement> blacklist =
+            ValidationUtils.checkForElements(document, blacklistedElements);
         String encoding = (String) document.getDocumentElement().getUserData("encoding");
         Map<BannedElement, Integer> bannedElementOffsetMap =
             ValidationUtils.getOffsetMap(bytes, blacklist, encoding);

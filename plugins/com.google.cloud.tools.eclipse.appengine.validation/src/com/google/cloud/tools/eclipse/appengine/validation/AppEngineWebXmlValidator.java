@@ -34,15 +34,20 @@ public class AppEngineWebXmlValidator extends AbstractXmlValidator {
   /**
    * Clears all problem markers from the resource, then adds a marker to 
    * appengine-web.xml for every {@link BannedElement} found in the file.
+   * @throws CoreException 
+   * @throws IOException 
+   * @throws ParserConfigurationException 
    */
   @Override
-  protected void validate(IFile resource, byte[] bytes) 
-      throws CoreException, IOException, ParserConfigurationException {
+  protected void validate(IFile resource, byte[] bytes)
+      throws CoreException, ParserConfigurationException, IOException {
     try {
       deleteMarkers(resource);
-      Document document = BlacklistSaxParser.readXml(bytes);
+      Document document = PositionalXmlScanner.parse(bytes);
       if (document != null) {
-        ArrayList<BannedElement> blacklist = ValidationUtils.checkForElements(document);
+        ArrayList<String> blacklistedElements = AppEngineWebBlacklist.getBlacklistElements();
+        ArrayList<BannedElement> blacklist =
+            ValidationUtils.checkForElements(document, blacklistedElements);
         String encoding = (String) document.getDocumentElement().getUserData("encoding");
         Map<BannedElement, Integer> bannedElementOffsetMap =
             ValidationUtils.getOffsetMap(bytes, blacklist, encoding);

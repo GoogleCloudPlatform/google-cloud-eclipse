@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,8 +32,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.util.Map;
-import java.util.Queue;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.CharStreams;
 
@@ -47,36 +46,6 @@ public class ValidationUtils {
    * Creates a {@link Map} of {@link BannedElement}s and their respective document-relative
    * character offsets.
    */
-  public static Map<BannedElement, Integer> getOffsetMap(byte[] bytes,
-      SaxParserResults parserResults) {
-    Queue<BannedElement> blacklist = parserResults.getBlacklist();
-    Map<BannedElement, Integer> bannedElementOffsetMap = new HashMap<>();
-    ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-    try (BufferedReader reader =
-        new BufferedReader(new InputStreamReader(bais, parserResults.getEncoding()))) {
-      int currentLine = 1;
-      int charOffset = 0;
-      while (!blacklist.isEmpty()) {
-        BannedElement element = blacklist.poll();
-        while (element.getStart().getLineNumber() > currentLine) {
-          String line = reader.readLine();
-          charOffset += line.length() + 1;
-          currentLine++;
-        }
-        int start = charOffset + element.getStart().getColumnNumber() - 1;
-        bannedElementOffsetMap.put(element, start);
-      }
-    } catch (IOException ex) {
-      logger.log(Level.SEVERE, ex.getMessage());
-    }
-    return bannedElementOffsetMap;
-  }
-  
-  static String convertStreamToString(InputStream is, String charset) throws IOException {
-    String result = CharStreams.toString(new InputStreamReader(is, charset));
-    return result;
-  }
-  
   public static Map<BannedElement, Integer> getOffsetMap(byte[] bytes,
       ArrayList<BannedElement> blacklist, String encoding) {
     Map<BannedElement, Integer> bannedElementOffsetMap = new HashMap<>();
@@ -100,10 +69,16 @@ public class ValidationUtils {
     return bannedElementOffsetMap;
   }
   
+  static String convertStreamToString(InputStream is, String charset) throws IOException {
+    String result = CharStreams.toString(new InputStreamReader(is, charset));
+    return result;
+  }
+  
   @VisibleForTesting
-  static ArrayList<BannedElement> checkForElements(Document document) {
+  static ArrayList<BannedElement> checkForElements(
+      Document document, List<String> blacklistedElements) {
     ArrayList<BannedElement> blacklist = new ArrayList<>();
-    for (String elementName : AppEngineWebBlacklist.getBlacklistElements()) {
+    for (String elementName : blacklistedElements) {
       NodeList nodeList = document.getElementsByTagName(elementName);
       for (int i = 0; i < nodeList.getLength(); i++) {
         Node node = nodeList.item(i);
