@@ -143,7 +143,7 @@ public class FacetUtil {
    */
   public static boolean overlapsWithJavaSourcePaths(IFacetedProject facetedProject,
       IPath relativePath) {
-    List<IPath> sourcePaths = WebProjectUtil.getSourcePaths(facetedProject.getProject());
+    List<IPath> sourcePaths = WebProjectUtil.getJavaSourcePaths(facetedProject.getProject());
     for (IPath sourcePath : sourcePaths) {
       if (sourcePath.isPrefixOf(relativePath)) {
         return true;

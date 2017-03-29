@@ -82,7 +82,7 @@ public class WebProjectUtil {
    * Return the set of Java source paths for the given project, relative to the project. Return an
    * empty list if not a Java project.
    */
-  public static List<IPath> getSourcePaths(IProject project) {
+  public static List<IPath> getJavaSourcePaths(IProject project) {
     IJavaProject javaProject = JavaCore.create(project);
     if (!javaProject.exists()) {
       return Collections.emptyList();

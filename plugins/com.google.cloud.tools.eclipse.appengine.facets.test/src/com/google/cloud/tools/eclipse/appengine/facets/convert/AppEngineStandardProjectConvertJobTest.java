@@ -64,7 +64,7 @@ public class AppEngineStandardProjectConvertJobTest {
     // Java 1.7 facet sets the source path to src/ which will overlap with the
     // default src/main/webapp used in the AppEngineStandardFacet installer
     IPath webInfPath = webInfFolder.getProjectRelativePath();
-    List<IPath> sourcePaths = WebProjectUtil.getSourcePaths(project);
+    List<IPath> sourcePaths = WebProjectUtil.getJavaSourcePaths(project);
     for (IPath sourcePath : sourcePaths) {
       assertFalse(sourcePath.isPrefixOf(webInfPath));
     }
