@@ -61,7 +61,7 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
   /**
    * Returns the most important file created that the IDE will open in the editor.
    */
-  public abstract IFile createProjectFiles(IProject newProject, AppEngineProjectConfig config,
+  public abstract IFile createAndConfigureProjectContent(IProject newProject, AppEngineProjectConfig config,
       IProgressMonitor monitor) throws CoreException;
 
   /**
@@ -96,7 +96,7 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
     CreateProjectOperation operation = new CreateProjectOperation(description, operationLabel); 
     try {
       operation.execute(subMonitor.newChild(10), uiInfoAdapter);
-      mostImportant = createProjectFiles(newProject, config, subMonitor.newChild(80));
+      mostImportant = createAndConfigureProjectContent(newProject, config, subMonitor.newChild(80));
     } catch (ExecutionException ex) {
       throw new InvocationTargetException(ex);
     }

@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.test.util.project;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.cloud.tools.eclipse.appengine.facets.FacetUtil;
 import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -27,25 +28,19 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
-import org.eclipse.wst.common.componentcore.internal.builder.DependencyGraphImpl;
-import org.eclipse.wst.common.componentcore.internal.builder.IDependencyGraph;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
@@ -58,6 +53,7 @@ import org.junit.rules.ExternalResource;
  * Utility class to create and configure a Faceted Project. Installs a Java 1.7 facet if no facets
  * are specified with {@link #withFacetVersions}.
  */
+@SuppressWarnings("restriction") // For FacetedProjectNature
 public final class TestProjectCreator extends ExternalResource {
 
   private IProject project;
@@ -145,28 +141,11 @@ public final class TestProjectCreator extends ExternalResource {
   private void addFacets() throws CoreException {
     IFacetedProject facetedProject = ProjectFacetsManager.create(getProject());
 
-    Set<IFacetedProject.Action> facetInstallSet = new HashSet<>();
+    FacetUtil facetUtil = new FacetUtil(facetedProject);
     for (IProjectFacetVersion projectFacetVersion : projectFacetVersions) {
-      facetInstallSet.add(new IFacetedProject.Action(IFacetedProject.Action.Type.INSTALL,
-          projectFacetVersion, null));
+      facetUtil.addFacetToBatch(projectFacetVersion, null);
     }
-
-    // Workaround deadlock bug described in Eclipse bug (https://bugs.eclipse.org/511793).
-    // There are graph update jobs triggered by the completion of the CreateProjectOperation
-    // above (from resource notifications) and from other resource changes from modifying the
-    // project facets. So we force the dependency graph to defer updates.
-    try {
-      IDependencyGraph.INSTANCE.preUpdate();
-      try {
-        Job.getJobManager().join(DependencyGraphImpl.GRAPH_UPDATE_JOB_FAMILY, null);
-      } catch (OperationCanceledException | InterruptedException ex) {
-        throw new RuntimeException("Exception waiting for DependencyGraph job", ex);
-      }
-
-      facetedProject.modify(facetInstallSet, null);
-    } finally {
-      IDependencyGraph.INSTANCE.postUpdate();
-    }
+    facetUtil.install(null);
 
     // App Engine runtime is added via a Job, so wait.
     ProjectUtils.waitForProjects(getProject());

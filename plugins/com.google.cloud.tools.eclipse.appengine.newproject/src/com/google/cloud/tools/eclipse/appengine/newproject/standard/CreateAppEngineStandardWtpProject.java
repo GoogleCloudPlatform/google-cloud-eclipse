@@ -57,7 +57,7 @@ public class CreateAppEngineStandardWtpProject extends CreateAppEngineWtpProject
   }
 
   @Override
-  public IFile createProjectFiles(IProject newProject, AppEngineProjectConfig config,
+  public IFile createAndConfigureProjectContent(IProject newProject, AppEngineProjectConfig config,
       IProgressMonitor monitor) throws CoreException {
     return CodeTemplates.materializeAppEngineStandardFiles(newProject, config, monitor);
   }

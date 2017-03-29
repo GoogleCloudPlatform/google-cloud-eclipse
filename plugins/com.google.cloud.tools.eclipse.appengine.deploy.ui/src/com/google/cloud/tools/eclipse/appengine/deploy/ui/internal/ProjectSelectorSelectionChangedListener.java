@@ -20,15 +20,18 @@ import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
-import com.google.cloud.tools.eclipse.projectselector.ProjectRepositoryException;
 import com.google.cloud.tools.eclipse.projectselector.ProjectSelector;
 import com.google.cloud.tools.eclipse.projectselector.model.AppEngine;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Predicate;
 import com.google.common.net.UrlEscapers;
 import java.text.MessageFormat;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.swt.widgets.Display;
 
 public class ProjectSelectorSelectionChangedListener implements ISelectionChangedListener {
 
@@ -38,6 +41,15 @@ public class ProjectSelectorSelectionChangedListener implements ISelectionChange
   private final AccountSelector accountSelector;
   private final ProjectRepository projectRepository;
   private final ProjectSelector projectSelector;
+
+  @VisibleForTesting
+  Job latestQueryJob;
+  private Predicate<Job> isLatestQueryJob = new Predicate<Job>() {
+    @Override
+    public boolean apply(Job job) {
+      return job == latestQueryJob;
+    }
+  };
 
   public ProjectSelectorSelectionChangedListener(AccountSelector accountSelector,
                                                  ProjectRepository projectRepository,
@@ -49,44 +61,32 @@ public class ProjectSelectorSelectionChangedListener implements ISelectionChange
 
   @Override
   public void selectionChanged(SelectionChangedEvent event) {
-    IStructuredSelection selection = (IStructuredSelection) event.getSelection();
-    try {
-      if (!selection.isEmpty()) {
-        GcpProject project = (GcpProject) selection.getFirstElement();
-        boolean hasAppEngineApplication = hasAppEngineApplication(project);
-        if (!hasAppEngineApplication) {
-          String link = MessageFormat.format(
-              CREATE_APP_LINK, project.getId(),
-              UrlEscapers.urlFormParameterEscaper().escape(accountSelector.getSelectedEmail()));
-          projectSelector.setStatusLink(
-              Messages.getString("projectselector.missing.appengine.application.link",
-                                 link), link);
-        } else {
-          projectSelector.clearStatusLink();
-        }
-      } else {
-        projectSelector.clearStatusLink();
-      }
-    } catch (ProjectRepositoryException ex) {
-      projectSelector.setStatusLink(Messages.getString("projectselector.retrieveapplication.error.message",
-                                                       ex.getLocalizedMessage()),
-                                    null /* tooltip */);
-    }
-  }
+    projectSelector.clearStatusLink();
 
-  /**
-   * Lazily queries the backend whether the specified project has an App Engine application.
-   * <p>
-   * The result of the query is stored in the object and the next time it is returned from there
-   * saving a roundtrip to the backend.
-   */
-  private boolean hasAppEngineApplication(GcpProject project) throws ProjectRepositoryException {
-    if (!project.hasAppEngineInfo()) {
-      Credential selectedCredential = accountSelector.getSelectedCredential();
-      AppEngine appEngine =
-          projectRepository.getAppEngineApplication(selectedCredential, project.getId());
-      project.setAppEngine(appEngine);
+    IStructuredSelection selection = (IStructuredSelection) event.getSelection();
+    if (selection.isEmpty()) {
+      return;
     }
-    return project.getAppEngine() != AppEngine.NO_APPENGINE_APPLICATION;
+
+    GcpProject project = (GcpProject) selection.getFirstElement();
+    String email = accountSelector.getSelectedEmail();
+    String createAppLink = MessageFormat.format(CREATE_APP_LINK,
+        project.getId(), UrlEscapers.urlFormParameterEscaper().escape(email));
+
+    boolean queryCached = project.hasAppEngineInfo();
+    if (queryCached) {
+      if (project.getAppEngine() == AppEngine.NO_APPENGINE_APPLICATION) {
+        projectSelector.setStatusLink(
+            Messages.getString("projectselector.missing.appengine.application.link", createAppLink),
+            createAppLink /* tooltip */);
+      }
+    } else {  // The project has never been queried.
+      Credential credential = accountSelector.getSelectedCredential();
+      Display display = projectSelector.getDisplay();
+
+      latestQueryJob = new AppEngineApplicationQueryJob(project, credential, projectRepository,
+          projectSelector, createAppLink, isLatestQueryJob, display);
+      latestQueryJob.schedule();
+    }
   }
 }
