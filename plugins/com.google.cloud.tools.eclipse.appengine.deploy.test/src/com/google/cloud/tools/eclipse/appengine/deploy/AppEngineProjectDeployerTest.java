@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -39,6 +40,13 @@ public class AppEngineProjectDeployerTest {
   public void setUp() throws IOException {
     stagingDirectory = new Path(tempFolder.getRoot().toString());
     tempFolder.newFile("app.yaml");
+  }
+
+  @Test
+  public void testConfigFilesFile() {
+    assertArrayEquals(
+        new String[] {"cron.yaml", "dispatch.yaml", "dos.yaml", "index.yaml", "queue.yaml"},
+        AppEngineProjectDeployer.APP_ENGINE_CONFIG_FILES.toArray(new String[0]));
   }
 
   @Test
