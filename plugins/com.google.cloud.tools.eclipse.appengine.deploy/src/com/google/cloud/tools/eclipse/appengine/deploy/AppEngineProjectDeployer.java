@@ -19,7 +19,15 @@ package com.google.cloud.tools.eclipse.appengine.deploy;
 import com.google.cloud.tools.appengine.api.deploy.DefaultDeployConfiguration;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineDeployment;
+import com.google.common.annotations.VisibleForTesting;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -35,21 +43,58 @@ import org.eclipse.core.runtime.SubMonitor;
  */
 public class AppEngineProjectDeployer {
 
+  @VisibleForTesting
+  static final List<String> APP_ENGINE_CONFIG_FILES = Collections.unmodifiableList(Arrays.asList(
+      "cron.yaml", "dispatch.yaml", "dos.yaml", "index.yaml", "queue.yaml"));
+
   public void deploy(IPath stagingDirectory, CloudSdk cloudSdk,
                      DefaultDeployConfiguration configuration,
-                     IProgressMonitor monitor) {
+                     boolean configDeploy, IProgressMonitor monitor) {
     if (monitor.isCanceled()) {
       throw new OperationCanceledException();
     }
 
     SubMonitor progress = SubMonitor.convert(monitor, 1);
     progress.setTaskName(Messages.getString("task.name.deploy.project")); //$NON-NLS-1$
-    try  {
-      configuration.setDeployables(Collections.singletonList(stagingDirectory.append("app.yaml").toFile())); //$NON-NLS-1$
+    try {
+      List<File> deployables = computeDeployables(stagingDirectory, configDeploy);
+      configuration.setDeployables(deployables);
       CloudSdkAppEngineDeployment deployment = new CloudSdkAppEngineDeployment(cloudSdk);
-      deployment.deploy(configuration);
+
+      IPath stagingGenerated = stagingDirectory.append("WEB-INF") //$NON-NLS-1$
+          .append("appengine-generated"); //$NON-NLS-1$
+      System.out.println("Directory exists: " + stagingGenerated.toFile().exists());
+      for (File file : stagingGenerated.toFile().listFiles()) {
+        System.out.println(">>> " + file.getName() + ": " + file.exists());
+        if ("app.yaml".equals(file.getName())) continue;
+        try (InputStream is = new FileInputStream(file)) {
+          for (int c = is.read(); c != -1; c = is.read()) {
+            System.out.print((char) c);
+          }
+        } catch (IOException e) {
+          System.out.println("HAVOK");
+        }
+        System.out.println();
+      }
+      //deployment.deploy(configuration);
     } finally {
       progress.worked(1);
     }
+  }
+
+  @VisibleForTesting
+  static List<File> computeDeployables(IPath stagingDirectory, boolean configDeploy) {
+    List<File> deployables = new ArrayList<>();
+    deployables.add(stagingDirectory.append("app.yaml").toFile()); //$NON-NLS-1$
+
+    if (configDeploy) {
+      for (String configFile : APP_ENGINE_CONFIG_FILES) {
+        File file = stagingDirectory.append("WEB-INF").append(configFile).toFile(); //$NON-NLS-1$
+        if (file.exists()) {
+          deployables.add(file);
+        }
+      }
+    }
+    return deployables;
   }
 }

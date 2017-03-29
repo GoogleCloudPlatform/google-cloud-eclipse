@@ -123,11 +123,14 @@ public class StandardDeployCommandHandler extends AbstractHandler {
 
     MessageConsoleStream outputStream = messageConsole.newMessageStream();
 
+    StandardDeployPreferences deployPreferences = new StandardDeployPreferences(project);
+    boolean configDeploy = deployPreferences.isConfigDeploy();
+
     StandardDeployJob deploy =
         new StandardDeployJob(project, credential, workDirectory,
                               new MessageConsoleWriterOutputLineListener(outputStream),
                               new MessageConsoleWriterOutputLineListener(outputStream),
-                              deployConfiguration);
+                              deployConfiguration, configDeploy);
     messageConsole.setJob(deploy);
     deploy.addJobChangeListener(new JobChangeAdapter() {
 

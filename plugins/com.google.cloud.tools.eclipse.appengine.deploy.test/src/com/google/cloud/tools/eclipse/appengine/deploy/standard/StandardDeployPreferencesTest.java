@@ -18,14 +18,14 @@ package com.google.cloud.tools.eclipse.appengine.deploy.standard;
 
 import static org.hamcrest.text.IsEmptyString.isEmptyString;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import org.eclipse.core.resources.IProject;
 import org.junit.Rule;
 import org.junit.Test;
-
-import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 
 public class StandardDeployPreferencesTest {
 
@@ -36,7 +36,7 @@ public class StandardDeployPreferencesTest {
   public void testDefaultProjectId() {
     assertThat(defaultPreferences.getProjectId(), isEmptyString());
   }
-  
+
   @Test
   public void testSetProjectId() {
     IProject project = projectCreator.getProject();
@@ -66,6 +66,11 @@ public class StandardDeployPreferencesTest {
   @Test
   public void testDefaultStopPreviousVersion() {
     assertTrue(defaultPreferences.isStopPreviousVersion());
+  }
+
+  @Test
+  public void testConfigDeploy() {
+    assertFalse(defaultPreferences.isConfigDeploy());
   }
 
 }
