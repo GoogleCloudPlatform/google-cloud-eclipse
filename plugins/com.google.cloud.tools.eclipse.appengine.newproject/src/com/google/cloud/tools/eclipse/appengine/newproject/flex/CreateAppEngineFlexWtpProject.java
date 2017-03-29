@@ -64,7 +64,7 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
   private static final Map<String, String> PROJECT_DEPENDENCIES;
 
   static {
-    Map<String, String> projectDependencies = new HashMap<String, String>();
+    Map<String, String> projectDependencies = new HashMap<>();
     projectDependencies.put("javax.servlet", "servlet-api");
     PROJECT_DEPENDENCIES = Collections.unmodifiableMap(projectDependencies);
   }
@@ -131,24 +131,18 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
     for (Map.Entry<String, String> dependency : PROJECT_DEPENDENCIES.entrySet()) {
       LibraryFile libraryFile = new LibraryFile(new MavenCoordinates(dependency.getKey(),
           dependency.getValue()));
-      Artifact artifact = null;
+      File artifactFile = null;
       try {
-        artifact = repositoryService.resolveArtifact(libraryFile, subMonitor.newChild(ticks));
+        Artifact artifact = repositoryService.resolveArtifact(libraryFile, subMonitor.newChild(ticks));
+        artifactFile = artifact.getFile();
+        IFile destFile = libFolder.getFile(artifactFile.getName());
+        destFile.create(new FileInputStream(artifactFile), true, subMonitor.newChild(30));
       } catch (CoreException ex) {
         logger.log(Level.WARNING, "Error downloading " +
             libraryFile.getMavenCoordinates().toString() + " from maven", ex);
-      }
-
-      // Copy dependency from local maven repo into lib folder
-      if (artifact != null) {
-        File artifactFile = artifact.getFile();
-        IFile destFile = libFolder.getFile(artifactFile.getName());
-        try {
-          destFile.create(new FileInputStream(artifactFile), true, subMonitor.newChild(30));
-        } catch (FileNotFoundException ex) {
-          logger.log(Level.WARNING, "Error copying over " + artifactFile.toString() + " to " +
-              libFolder.getFullPath().toPortableString(), ex);
-        }
+      } catch (FileNotFoundException ex) {
+        logger.log(Level.WARNING, "Error copying over " + artifactFile.toString() + " to " +
+            libFolder.getFullPath().toPortableString(), ex);
       }
     }
 
