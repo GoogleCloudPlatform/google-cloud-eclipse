@@ -16,9 +16,13 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.ByteStreams;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.logging.Level;
@@ -27,6 +31,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.wst.validation.AbstractValidator;
 import org.eclipse.wst.validation.ValidationEvent;
@@ -36,10 +42,12 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-public abstract class AbstractXmlValidator extends AbstractValidator {
+public class XmlValidator
+    extends AbstractValidator implements IExecutableExtension {
 
   private static final Logger logger = Logger.getLogger(
-      AbstractXmlValidator.class.getName());
+      XmlValidator.class.getName());
+  private XmlValidationHelper helper;
 
   /**
    * Extracts byte[] from XML.
@@ -69,7 +77,7 @@ public abstract class AbstractXmlValidator extends AbstractValidator {
       deleteMarkers(resource);
       Document document = PositionalXmlScanner.parse(bytes);
       if (document != null) {
-        ArrayList<BannedElement> blacklist = checkForElements(resource, document);
+        ArrayList<BannedElement> blacklist = helper.checkForElements(resource, document);
         String encoding = (String) document.getDocumentElement().getUserData("encoding");
         Map<BannedElement, Integer> bannedElementOffsetMap =
             ValidationUtils.getOffsetMap(bytes, blacklist, encoding);
@@ -82,7 +90,29 @@ public abstract class AbstractXmlValidator extends AbstractValidator {
     }
   }
   
-  abstract ArrayList<BannedElement> checkForElements(IResource resource, Document document);
+  @Override
+  public void setInitializationData(IConfigurationElement config, String propertyName, Object data)
+      throws CoreException {
+    try {
+      if (data == null || !(data instanceof String)) {
+        throw new CoreException(StatusUtil.error(getClass(), "Data must be a class name"));
+      }
+      String className = (String) data;
+      Class<?> clazz = Class.forName(className);
+      Constructor<?> constructor = clazz.getConstructor();
+      XmlValidationHelper helper = (XmlValidationHelper) constructor.newInstance(new Object[] {});
+      this.setHelper(helper);
+    } catch (ClassNotFoundException | NoSuchMethodException | SecurityException 
+        | InstantiationException | IllegalAccessException | IllegalArgumentException
+        | InvocationTargetException ex) {
+      logger.log(Level.SEVERE, ex.getMessage());
+    }
+  }
+  
+  @VisibleForTesting
+  void setHelper(XmlValidationHelper helper) {
+    this.helper = helper;
+  }
 
   static void deleteMarkers(IResource resource) throws CoreException {
     resource.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);

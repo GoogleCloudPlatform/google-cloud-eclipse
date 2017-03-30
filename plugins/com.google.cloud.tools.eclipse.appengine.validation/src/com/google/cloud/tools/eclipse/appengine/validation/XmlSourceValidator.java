@@ -17,7 +17,12 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
+import com.google.common.annotations.VisibleForTesting;
+
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.logging.Level;
@@ -29,6 +34,8 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.text.IDocument;
@@ -51,12 +58,13 @@ import org.xml.sax.SAXException;
 /**
  * Abstract source view validator.
  */
-public abstract class AbstractXmlSourceValidator implements ISourceValidator, IValidator {
+public class XmlSourceValidator implements ISourceValidator, IValidator, IExecutableExtension {
   
   private static final Logger logger = Logger.getLogger(
-      AbstractXmlSourceValidator.class.getName());
+      XmlSourceValidator.class.getName());
   
   private IDocument document;
+  private XmlValidationHelper helper;
   
   /**
    * Validates a given {@link IDocument} if the project has the App Engine Standard facet.
@@ -76,8 +84,6 @@ public abstract class AbstractXmlSourceValidator implements ISourceValidator, IV
     }
   }
   
-  abstract ArrayList<BannedElement> checkForElements(IResource resource, Document document);
-  
   /**
    * Adds an {@link IMessage} to the XML file for every 
    * {@link BannedElement} found in the file.
@@ -86,7 +92,7 @@ public abstract class AbstractXmlSourceValidator implements ISourceValidator, IV
     try {
       Document document = PositionalXmlScanner.parse(bytes);
       if (document != null) {
-        ArrayList<BannedElement> blacklist = checkForElements(source, document);
+        ArrayList<BannedElement> blacklist = helper.checkForElements(source, document);
         String encoding = (String) document.getDocumentElement().getUserData("encoding");
         Map<BannedElement, Integer> bannedElementOffsetMap =
             ValidationUtils.getOffsetMap(bytes, blacklist, encoding);
@@ -100,6 +106,31 @@ public abstract class AbstractXmlSourceValidator implements ISourceValidator, IV
     }
   }
   
+  @Override
+  public void setInitializationData(IConfigurationElement config, String propertyName, Object data)
+      throws CoreException {
+    try {
+      if (data == null || !(data instanceof String)) {
+        throw new CoreException(StatusUtil.error(getClass(), "Data must be a class name"));
+      }
+      String className = (String) data;
+      Class<?> clazz = Class.forName(className);
+      Constructor<?> constructor = clazz.getConstructor();
+      XmlValidationHelper helper = (XmlValidationHelper) constructor.newInstance(new Object[] {});
+      this.setHelper(helper);
+    } catch (ClassNotFoundException | NoSuchMethodException | SecurityException 
+        | InstantiationException | IllegalAccessException | IllegalArgumentException
+        | InvocationTargetException ex) {
+      logger.log(Level.SEVERE, ex.getMessage());
+    }
+  }
+  
+  @VisibleForTesting
+  void setHelper(XmlValidationHelper helper) {
+    this.helper = helper;;
+    
+  }
+
   /**
    * Creates a message from a given {@link BannedElement}.
    */

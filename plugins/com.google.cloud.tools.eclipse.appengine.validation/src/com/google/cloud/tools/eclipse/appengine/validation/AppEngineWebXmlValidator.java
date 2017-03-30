@@ -27,10 +27,10 @@ import com.google.common.annotations.VisibleForTesting;
 /**
  * Validator for appengine-web.xml
  */
-public class AppEngineWebXmlValidator extends AbstractXmlValidator {
+public class AppEngineWebXmlValidator implements XmlValidationHelper {
   
   @VisibleForTesting
-  ArrayList<BannedElement> checkForElements(IResource resource, Document document) {
+  public ArrayList<BannedElement> checkForElements(IResource resource, Document document) {
     ArrayList<BannedElement> blacklist = new ArrayList<>();
     ArrayList<String> blacklistedElements = 
         AppEngineWebBlacklist.getBlacklistElements();

@@ -42,7 +42,7 @@ import org.junit.Test;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-public class AbstractXmlValidatorTest {
+public class XmlValidatorTest {
 
   private static final String XML_NO_BANNED_ELEMENTS = "<test></test>";
   private static final String XML = "<application></application>";
@@ -96,8 +96,9 @@ public class AbstractXmlValidatorTest {
   @Test
   public void testValidate_badXml() throws IOException, CoreException {
     byte[] bytes = BAD_XML.getBytes(StandardCharsets.UTF_8);
-    AppEngineWebXmlValidator validator = new AppEngineWebXmlValidator();
+    XmlValidator validator = new XmlValidator();
     validator.validate(resource, bytes);
+    validator.setHelper(new AppEngineWebXmlValidator());
     IMarker[] markers = resource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
     String resultMessage = (String) markers[0].getAttribute(IMarker.MESSAGE);
     assertEquals("XML document structures must start and end within the same entity.",
@@ -108,7 +109,8 @@ public class AbstractXmlValidatorTest {
   @Test
   public void testValidate_noBannedElements() throws IOException, CoreException {
     byte[] bytes = XML_NO_BANNED_ELEMENTS.getBytes(StandardCharsets.UTF_8);
-    AppEngineWebXmlValidator validator = new AppEngineWebXmlValidator();
+    XmlValidator validator = new XmlValidator();
+    validator.setHelper(new AppEngineWebXmlValidator());
     validator.validate(resource, bytes);
     IMarker[] markers = resource.findMarkers(APPLICATION_MARKER, true, IResource.DEPTH_ZERO);
     assertEquals(0, markers.length);
@@ -117,7 +119,8 @@ public class AbstractXmlValidatorTest {
   @Test
   public void testValidate_withBannedElements() throws IOException, CoreException {
     byte[] bytes = XML.getBytes(StandardCharsets.UTF_8);
-    AppEngineWebXmlValidator validator = new AppEngineWebXmlValidator();
+    XmlValidator validator = new XmlValidator();
+    validator.setHelper(new AppEngineWebXmlValidator());
     validator.validate(resource, bytes);
     IMarker[] markers = resource.findMarkers(APPLICATION_MARKER, true, IResource.DEPTH_ZERO);
     assertEquals(1, markers.length);
@@ -131,7 +134,7 @@ public class AbstractXmlValidatorTest {
   public void testCreateMarker() throws CoreException {
     String message = "Project ID should be specified at deploy time.";
     BannedElement element = new BannedElement(message);
-    AppEngineWebXmlValidator.createMarker(resource, element, 0);
+    XmlValidator.createMarker(resource, element, 0);
     IMarker[] markers = resource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
     assertEquals(message, markers[0].getAttribute(IMarker.MESSAGE));
     resource.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
@@ -142,7 +145,7 @@ public class AbstractXmlValidatorTest {
     String message = "Project ID should be specified at deploy time.";
     SAXParseException spe = new SAXParseException("", "", "", 1, 1);
     SAXException ex = new SAXException(message, spe);
-    AppEngineWebXmlValidator.createSaxErrorMessage(resource, ex);
+    XmlValidator.createSaxErrorMessage(resource, ex);
     IMarker[] markers = resource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
     assertEquals(1, markers.length);
     assertEquals(message, markers[0].getAttribute(IMarker.MESSAGE));

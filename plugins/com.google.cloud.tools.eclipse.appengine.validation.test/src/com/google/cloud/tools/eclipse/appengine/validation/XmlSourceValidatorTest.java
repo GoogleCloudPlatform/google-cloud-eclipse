@@ -43,7 +43,7 @@ import org.eclipse.wst.validation.internal.provisional.core.IMessage;
 import org.junit.ClassRule;
 import org.junit.Test;
 
-public class AbstractXmlSourceValidatorTest {
+public class XmlSourceValidatorTest {
 
   private static final String APPLICATION_XML =
       "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>"
@@ -76,7 +76,8 @@ public class AbstractXmlSourceValidatorTest {
       IPath path = file.getFullPath();
       helper.setURI(path.toString());
   
-      AbstractXmlSourceValidator validator = new AppEngineWebXmlSourceValidator();
+      XmlSourceValidator validator = new XmlSourceValidator();
+      validator.setHelper(new AppEngineWebXmlValidator());
       validator.connect(document);
       validator.validate(helper, reporter);
       assertEquals(1, reporter.getMessages().size());
@@ -100,7 +101,8 @@ public class AbstractXmlSourceValidatorTest {
       IPath path = file.getFullPath();
       helper.setURI(path.toString());
   
-      AbstractXmlSourceValidator validator = new AppEngineWebXmlSourceValidator();
+      XmlSourceValidator validator = new XmlSourceValidator();
+      validator.setHelper(new AppEngineWebXmlValidator());
       validator.connect(document);
       validator.validate(helper, reporter);
       assertEquals(0, reporter.getMessages().size());
@@ -111,7 +113,8 @@ public class AbstractXmlSourceValidatorTest {
   
   @Test
   public void testValidate_noBannedElements() throws CoreException, IOException {
-    AbstractXmlSourceValidator validator = new WebXmlSourceValidator();
+    XmlSourceValidator validator = new XmlSourceValidator();
+    validator.setHelper(new AppEngineWebXmlValidator());
     byte[] xml = "<test></test>".getBytes(StandardCharsets.UTF_8);
     validator.validate(reporter, null, xml);
     assertTrue(reporter.getMessages().isEmpty());
@@ -119,7 +122,8 @@ public class AbstractXmlSourceValidatorTest {
   
   @Test
   public void testValidate() throws CoreException, IOException {
-    AbstractXmlSourceValidator validator = new WebXmlSourceValidator();
+    XmlSourceValidator validator = new XmlSourceValidator();
+    validator.setHelper(new WebXmlValidator());
     String xml = "<web-app xmlns='http://xmlns.jcp.org/xml/ns/javaee' version='3.1'></web-app>";
     validator.validate(reporter, null, xml.getBytes(StandardCharsets.UTF_8));
     assertEquals(1, reporter.getMessages().size());
@@ -133,7 +137,7 @@ public class AbstractXmlSourceValidatorTest {
       file.create(ValidationTestUtils.stringToInputStream(
         APPLICATION_XML), IFile.FORCE, null);
       IDocument document = ValidationTestUtils.getDocument(file);
-      assertEquals("UTF-8", AbstractXmlSourceValidator.getDocumentEncoding(document));
+      assertEquals("UTF-8", XmlSourceValidator.getDocumentEncoding(document));
     } finally {
       file.delete(true, null);
     }
@@ -141,7 +145,8 @@ public class AbstractXmlSourceValidatorTest {
 
   @Test
   public void testCreateMessage() throws CoreException {
-    AbstractXmlSourceValidator validator = new AppEngineWebXmlSourceValidator();
+    XmlSourceValidator validator = new XmlSourceValidator();
+    validator.setHelper(new AppEngineWebXmlValidator());
     BannedElement element =
         new AppEngineBlacklistElement("application", new DocumentLocation(5, 17), 0);
     validator.createMessage(reporter, element, 0);
@@ -163,7 +168,7 @@ public class AbstractXmlSourceValidatorTest {
       assertTrue(file.exists());
   
       IPath path = file.getFullPath();
-      IFile testFile = AbstractXmlSourceValidator.getFile(path.toString());
+      IFile testFile = XmlSourceValidator.getFile(path.toString());
   
       assertNotNull(testFile);
       assertEquals(file, testFile);
@@ -186,7 +191,7 @@ public class AbstractXmlSourceValidatorTest {
       IPath path = file.getFullPath();
       helper.setURI(path.toString());
   
-      IProject testProject = AbstractXmlSourceValidator.getProject(helper);
+      IProject testProject = XmlSourceValidator.getProject(helper);
       assertNotNull(testProject);
       assertEquals(project, testProject);
     } finally {

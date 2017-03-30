@@ -28,7 +28,7 @@
       point="org.eclipse.wst.validation.validatorV2" 
       id="appEngineWebXmlValidator">
     <validator
-    	class="com.google.cloud.tools.eclipse.appengine.validation.AppEngineWebXmlValidator"
+    	class="com.google.cloud.tools.eclipse.appengine.validation.XmlValidator:com.google.cloud.tools.eclipse.appengine.validation.AppEngineWebXmlValidator"
       	markerId="com.google.cloud.tools.eclipse.appengine.validation.appEngineBlacklistMarker">
       <include>
         <rules>
@@ -48,7 +48,7 @@
       point="org.eclipse.wst.validation.validatorV2" 
       id="webXmlValidator">
     <validator
-    	class="com.google.cloud.tools.eclipse.appengine.validation.WebXmlValidator"
+    	class="com.google.cloud.tools.eclipse.appengine.validation.XmlValidator:com.google.cloud.tools.eclipse.appengine.validation.WebXmlValidator"
     	markerId="com.google.cloud.tools.eclipse.appengine.validation.servletMarker">
       <include>
         <rules>
@@ -68,7 +68,7 @@
       point="org.eclipse.wst.validation.validatorV2" 
       id="webXmlValidator">
     <validator
-    	class="com.google.cloud.tools.eclipse.appengine.validation.WebXmlValidator"
+    	class="com.google.cloud.tools.eclipse.appengine.validation.XmlValidator:com.google.cloud.tools.eclipse.appengine.validation.WebXmlValidator"
     	markerId="com.google.cloud.tools.eclipse.appengine.validation.undefinedServletMarker">
       <include>
         <rules>
@@ -88,7 +88,7 @@
       point="org.eclipse.wst.validation.validatorV2" 
       id="pomXmlValidator">
     <validator
-    	class="com.google.cloud.tools.eclipse.appengine.validation.PomXmlValidator"
+    	class="com.google.cloud.tools.eclipse.appengine.validation.XmlValidator:com.google.cloud.tools.eclipse.appengine.validation.PomXmlValidator"
       	markerId="com.google.cloud.tools.eclipse.appengine.validation.mavenPluginMarker">
       <include>
         <rules>
@@ -186,7 +186,7 @@
   <extension point="org.eclipse.wst.sse.ui.sourcevalidation">
     <validator
 		scope="total"
-		class="com.google.cloud.tools.eclipse.appengine.validation.WebXmlSourceValidator"
+		class="com.google.cloud.tools.eclipse.appengine.validation.XmlSourceValidator:com.google.cloud.tools.eclipse.appengine.validation.WebXmlValidator"
 		id="webXmlSourceValidator">
 	  <contentTypeIdentifier id="org.eclipse.jst.jee.ee5webDD">
 	    <partitionType id="org.eclipse.wst.xml.XML_DEFAULT"/>
@@ -197,7 +197,7 @@
   <extension point="org.eclipse.wst.sse.ui.sourcevalidation">
   	  <validator
 		  scope="total"
-		  class="com.google.cloud.tools.eclipse.appengine.validation.AppEngineWebXmlSourceValidator"
+		  class="com.google.cloud.tools.eclipse.appengine.validation.XmlSourceValidator:com.google.cloud.tools.eclipse.appengine.validation.AppEngineWebXmlValidator"
 		  id="appEngineWebXmlSourceValidator">
 		<contentTypeIdentifier id="com.google.appengine.configuration.xml">
 		  <partitionType id="org.eclipse.wst.xml.XML_DEFAULT"/>

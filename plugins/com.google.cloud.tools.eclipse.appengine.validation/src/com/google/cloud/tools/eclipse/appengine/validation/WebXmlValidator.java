@@ -41,12 +41,12 @@ import com.google.common.base.Strings;
 /**
  * Validator for web.xml.
  */
-public class WebXmlValidator extends AbstractXmlValidator {
+public class WebXmlValidator implements XmlValidationHelper {
   
   private static final Logger logger = Logger.getLogger(WebXmlValidator.class.getName());
   
   @VisibleForTesting
-  ArrayList<BannedElement> checkForElements(IResource resource, Document document) {
+  public ArrayList<BannedElement> checkForElements(IResource resource, Document document) {
     ArrayList<BannedElement> blacklist = new ArrayList<>();
     NodeList webAppList = document.getElementsByTagName("web-app");
     for (int i = 0; i < webAppList.getLength(); i++) {

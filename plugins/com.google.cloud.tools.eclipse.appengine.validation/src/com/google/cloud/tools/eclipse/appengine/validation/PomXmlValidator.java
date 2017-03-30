@@ -25,10 +25,10 @@ import org.w3c.dom.NodeList;
 
 import com.google.common.annotations.VisibleForTesting;
 
-public class PomXmlValidator extends AbstractXmlValidator {
+public class PomXmlValidator implements XmlValidationHelper {
 
   @VisibleForTesting
-  ArrayList<BannedElement> checkForElements(IResource resource, Document document) {
+  public ArrayList<BannedElement> checkForElements(IResource resource, Document document) {
     DocumentLocation location = null;
     ArrayList<BannedElement> blacklist = new ArrayList<>();
     NodeList nodeList = document.getElementsByTagName("plugin");
@@ -38,12 +38,12 @@ public class PomXmlValidator extends AbstractXmlValidator {
       NodeList childNodes = node.getChildNodes();
       boolean foundGroupId = false;
       boolean foundArtifactId = false;
+      String nodeText = "";
       
       for (int j = 0; j < childNodes.getLength(); j++) {
         Node pluginChild = childNodes.item(j);
         String localName = pluginChild.getNodeName();
-        String nodeText = pluginChild.getTextContent();
-        
+        nodeText = pluginChild.getTextContent();
         if ("groupId".equals(localName)) {
           if ("com.google.appengine".equals(nodeText)) {
             foundGroupId = true;
@@ -55,10 +55,10 @@ public class PomXmlValidator extends AbstractXmlValidator {
             foundArtifactId = true;
           }
         }
-        if (foundGroupId && foundArtifactId) {
-          BannedElement element = new MavenPluginElement(location, nodeText.length());
-          blacklist.add(element);
-        }
+      }
+      if (foundGroupId && foundArtifactId) {
+        BannedElement element = new MavenPluginElement(location, nodeText.length());
+        blacklist.add(element);
       }
     }
     return blacklist;
