@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.deploy;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -80,15 +81,18 @@ public class AppEngineProjectDeployerTest {
 
     List<File> deployables =
         AppEngineProjectDeployer.computeDeployables(stagingDirectory, true /* configDeploy */);
-
-    File[] expectedFiles = new File[] {
-        stagingDirectory.append("app.yaml").toFile(),
-        stagingDirectory.append("WEB-INF/appengine-generated/cron.yaml").toFile(),
-        stagingDirectory.append("WEB-INF/appengine-generated/dispatch.yaml").toFile(),
-        stagingDirectory.append("WEB-INF/appengine-generated/dos.yaml").toFile(),
-        stagingDirectory.append("WEB-INF/appengine-generated/index.yaml").toFile(),
-        stagingDirectory.append("WEB-INF/appengine-generated/queue.yaml").toFile() };
-    assertArrayEquals(expectedFiles, deployables.toArray(new File[0]));
+    assertEquals(6, deployables.size());
+    assertTrue(deployables.contains(stagingDirectory.append("app.yaml").toFile()));
+    assertTrue(deployables.contains(stagingDirectory.append(
+        "WEB-INF/appengine-generated/cron.yaml").toFile()));
+    assertTrue(deployables.contains(stagingDirectory.append(
+        "WEB-INF/appengine-generated/index.yaml").toFile()));
+    assertTrue(deployables.contains(stagingDirectory.append(
+        "WEB-INF/appengine-generated/dispatch.yaml").toFile()));
+    assertTrue(deployables.contains(stagingDirectory.append(
+        "WEB-INF/appengine-generated/dos.yaml").toFile()));
+    assertTrue(deployables.contains(stagingDirectory.append(
+        "WEB-INF/appengine-generated/queue.yaml").toFile()));
   }
 
   private void createFakeConfigFiles() throws IOException {
