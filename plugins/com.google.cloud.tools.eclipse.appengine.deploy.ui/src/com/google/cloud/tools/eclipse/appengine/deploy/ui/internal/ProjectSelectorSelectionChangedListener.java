@@ -85,7 +85,7 @@ public class ProjectSelectorSelectionChangedListener implements ISelectionChange
       Display display = projectSelector.getDisplay();
 
       latestQueryJob = new AppEngineApplicationQueryJob(project, credential, projectRepository,
-          projectSelector, createAppLink, isLatestQueryJob, display);
+          projectSelector, createAppLink, isLatestQueryJob);
       latestQueryJob.schedule();
     }
   }

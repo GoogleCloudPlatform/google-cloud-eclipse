@@ -66,9 +66,10 @@ public class AppEngineApplicationQueryJobTest {
   @Before
   public void setUp() throws ProjectRepositoryException {
     assertNotNull(Display.getCurrent());
+    when(projectSelector.getDisplay()).thenReturn(Display.getCurrent());
 
     queryJob = new AppEngineApplicationQueryJob(project, credential, projectRepository,
-        projectSelector, EXPECTED_LINK, isLatestQueryJob, Display.getCurrent());
+        projectSelector, EXPECTED_LINK, isLatestQueryJob);
 
     when(projectSelector.isDisposed()).thenReturn(false);
     when(isLatestQueryJob.apply(queryJob)).thenReturn(true);
@@ -189,7 +190,7 @@ public class AppEngineApplicationQueryJobTest {
 
     Predicate<Job> notLatest = mock(Predicate.class);
     Job staleJob = new AppEngineApplicationQueryJob(staleProject, staleCredential,
-        projectRepository2, projectSelector, EXPECTED_LINK, notLatest, Display.getCurrent());
+        projectRepository2, projectSelector, EXPECTED_LINK, notLatest);
 
     // This second job is stale, i.e., it was fired, but user has selected another credential.
     when(notLatest.apply(staleJob)).thenReturn(false);

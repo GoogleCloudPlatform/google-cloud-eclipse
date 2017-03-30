@@ -48,7 +48,7 @@ public class AppEngineApplicationQueryJob extends Job {
    */
   public AppEngineApplicationQueryJob(GcpProject project, Credential credential,
       ProjectRepository projectRepository, ProjectSelector projectSelector, String createAppLink,
-      Predicate<Job> isLatestQueryJob, Display display) {
+      Predicate<Job> isLatestQueryJob) {
     super("Checking GCP project has App Engine Application...");
     this.project = project;
     this.credential = credential;
@@ -56,7 +56,7 @@ public class AppEngineApplicationQueryJob extends Job {
     this.projectSelector = projectSelector;
     this.createAppLink = createAppLink;
     this.isLatestAppQueryJob = isLatestQueryJob;
-    this.display = display;
+    display = projectSelector.getDisplay();
   }
 
   @Override

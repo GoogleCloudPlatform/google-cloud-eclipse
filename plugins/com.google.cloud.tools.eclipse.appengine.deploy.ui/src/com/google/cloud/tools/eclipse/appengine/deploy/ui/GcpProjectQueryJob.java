@@ -54,14 +54,14 @@ public class GcpProjectQueryJob extends Job {
    */
   GcpProjectQueryJob(Credential credential, ProjectRepository projectRepository,
       ProjectSelector projectSelector, DataBindingContext dataBindingContext,
-      Predicate<Job> isLatestQueryJob, Display display) {
+      Predicate<Job> isLatestQueryJob) {
     super("Google Cloud Platform Projects Query Job");
     this.credential = Preconditions.checkNotNull(credential);
     this.projectRepository = Preconditions.checkNotNull(projectRepository);
     this.projectSelector = Preconditions.checkNotNull(projectSelector);
     this.dataBindingContext = Preconditions.checkNotNull(dataBindingContext);
     this.isLatestQueryJob = Preconditions.checkNotNull(isLatestQueryJob);
-    this.display = Preconditions.checkNotNull(display);
+    display = projectSelector.getDisplay();
   }
 
   @Override

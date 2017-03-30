@@ -470,7 +470,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     Credential selectedCredential = accountSelector.getSelectedCredential();
     if (selectedCredential != null) {
       latestGcpProjectQueryJob = new GcpProjectQueryJob(selectedCredential,
-          projectRepository, projectSelector, bindingContext, isLatestQueryJob, getDisplay());
+          projectRepository, projectSelector, bindingContext, isLatestQueryJob);
       latestGcpProjectQueryJob.schedule();
     }
   }
