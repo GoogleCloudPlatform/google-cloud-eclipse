@@ -29,7 +29,7 @@ public class DeployPreferenceInitializer extends AbstractPreferenceInitializer {
   static final String DEFAULT_PROJECT_ID = "";
   static final String DEFAULT_CUSTOM_VERSION = "";
   static final boolean DEFAULT_ENABLE_AUTO_PROMOTE = true;
-  static final boolean DEFAULT_CONFIG_DEPLOY = false;
+  static final boolean DEFAULT_INCLUDE_OPTIONAL_CONFIGURATION_FILES = false;
   static final String DEFAULT_CUSTOM_BUCKET = "";
   static final boolean DEFAULT_STOP_PREVIOUS_VERSION = true;
 
@@ -40,12 +40,13 @@ public class DeployPreferenceInitializer extends AbstractPreferenceInitializer {
     preferences.put(StandardDeployPreferences.PREF_ACCOUNT_EMAIL, DEFAULT_ACCOUNT_EMAIL);
     preferences.put(StandardDeployPreferences.PREF_PROJECT_ID, DEFAULT_PROJECT_ID);
     preferences.put(StandardDeployPreferences.PREF_CUSTOM_VERSION, DEFAULT_CUSTOM_VERSION);
-    preferences.putBoolean(
-        StandardDeployPreferences.PREF_ENABLE_AUTO_PROMOTE, DEFAULT_ENABLE_AUTO_PROMOTE);
-    preferences.putBoolean(StandardDeployPreferences.PREF_CONFIG_DEPLOY, DEFAULT_CONFIG_DEPLOY);
+    preferences.putBoolean(StandardDeployPreferences.PREF_ENABLE_AUTO_PROMOTE,
+        DEFAULT_ENABLE_AUTO_PROMOTE);
+    preferences.putBoolean(StandardDeployPreferences.PREF_INCLUDE_OPTIONAL_CONFIGURATION_FILES,
+        DEFAULT_INCLUDE_OPTIONAL_CONFIGURATION_FILES);
     preferences.put(StandardDeployPreferences.PREF_CUSTOM_BUCKET, DEFAULT_CUSTOM_BUCKET);
-    preferences.putBoolean(
-        StandardDeployPreferences.PREF_STOP_PREVIOUS_VERSION, DEFAULT_STOP_PREVIOUS_VERSION);
+    preferences.putBoolean(StandardDeployPreferences.PREF_STOP_PREVIOUS_VERSION,
+        DEFAULT_STOP_PREVIOUS_VERSION);
   }
 
   public static IEclipsePreferences getDefaultPreferences() {

@@ -85,7 +85,7 @@ public class StandardDeployJob extends WorkspaceJob {
   private final ProcessOutputLineListener deployStdoutLineListener;
   private final ProcessOutputLineListener stderrLineListener;
   private final DefaultDeployConfiguration deployConfiguration;
-  private final boolean configDeploy;
+  private final boolean includeOptionalConfigurationFiles;
   private final CollectingLineListener errorCollectingLineListener;
 
   public StandardDeployJob(IProject project,
@@ -94,7 +94,7 @@ public class StandardDeployJob extends WorkspaceJob {
                            ProcessOutputLineListener stagingStdoutLineListener,
                            ProcessOutputLineListener stderrLineListener,
                            DefaultDeployConfiguration deployConfiguration,
-                           boolean configDeploy) {
+                           boolean includeOptionalConfigurationFiles) {
     super(Messages.getString("deploy.standard.runnable.name")); //$NON-NLS-1$
     this.project = project;
     this.credential = credential;
@@ -102,7 +102,7 @@ public class StandardDeployJob extends WorkspaceJob {
     this.stagingStdoutLineListener = stagingStdoutLineListener;
     this.stderrLineListener = stderrLineListener;
     this.deployConfiguration = deployConfiguration;
-    this.configDeploy = configDeploy;
+    this.includeOptionalConfigurationFiles = includeOptionalConfigurationFiles;
     // TODO: change to StringBuilderProcessOutputLineListener from the appengine-plugins-core
     deployStdoutLineListener = new StringBuilderProcessOutputLineListener();
     errorCollectingLineListener =
@@ -197,8 +197,8 @@ public class StandardDeployJob extends WorkspaceJob {
       IProgressMonitor monitor) {
     RecordProcessError deployExitListener = new RecordProcessError();
     CloudSdk cloudSdk = getCloudSdk(credentialFile, deployStdoutLineListener, deployExitListener);
-    new AppEngineProjectDeployer().deploy(
-        stagingDirectory, cloudSdk, deployConfiguration, configDeploy, monitor);
+    new AppEngineProjectDeployer().deploy(stagingDirectory, cloudSdk, deployConfiguration,
+        includeOptionalConfigurationFiles, monitor);
     return deployExitListener.getExitStatus();
   }
 

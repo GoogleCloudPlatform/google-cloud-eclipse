@@ -69,8 +69,8 @@ public class StandardDeployPreferencesTest {
   }
 
   @Test
-  public void testConfigDeploy() {
-    assertFalse(defaultPreferences.isConfigDeploy());
+  public void testIncludeOptionalConfigurationFiles() {
+    assertFalse(defaultPreferences.isIncludeOptionalConfigurationFiles());
   }
 
 }

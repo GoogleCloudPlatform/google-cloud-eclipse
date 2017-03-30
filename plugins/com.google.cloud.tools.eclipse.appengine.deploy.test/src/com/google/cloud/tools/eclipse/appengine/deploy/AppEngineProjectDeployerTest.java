@@ -52,37 +52,37 @@ public class AppEngineProjectDeployerTest {
   }
 
   @Test
-  public void testComputeDeployables_noConfigFilesAndNoConfigDeploy() {
-    List<File> deployables =
-        AppEngineProjectDeployer.computeDeployables(stagingDirectory, false /* configDeploy */);
+  public void testComputeDeployables_noConfigFilesAndDoNotIncludeFiles() {
+    List<File> deployables = AppEngineProjectDeployer.computeDeployables(
+        stagingDirectory, false /* don't include files */);
     assertEquals(1, deployables.size());
     assertEquals(stagingDirectory.append("app.yaml").toFile(), deployables.get(0));
   }
 
   @Test
-  public void testComputeDeployables_noConfigFilesAndConfigDeploy() {
-    List<File> deployables =
-        AppEngineProjectDeployer.computeDeployables(stagingDirectory, true /* configDeploy */);
+  public void testComputeDeployables_noConfigFilesAndIncludeFiles() {
+    List<File> deployables = AppEngineProjectDeployer.computeDeployables(
+        stagingDirectory, true /* include files */);
     assertEquals(1, deployables.size());
     assertEquals(stagingDirectory.append("app.yaml").toFile(), deployables.get(0));
   }
 
   @Test
-  public void testComputeDeployables_configFilesExistAndNoConfigDeploy() throws IOException {
+  public void testComputeDeployables_configFilesExistAndIncludeFiles() throws IOException {
     createFakeConfigFiles();
 
-    List<File> deployables =
-        AppEngineProjectDeployer.computeDeployables(stagingDirectory, false /* configDeploy */);
+    List<File> deployables = AppEngineProjectDeployer.computeDeployables(
+        stagingDirectory, false /* don't include files */);
     assertEquals(1, deployables.size());
     assertEquals(stagingDirectory.append("app.yaml").toFile(), deployables.get(0));
   }
 
   @Test
-  public void testComputeDeployables_configFilesExistAndConfigDeploy() throws IOException {
+  public void testComputeDeployables_configFilesExistAndDoNotIncludeFiles() throws IOException {
     createFakeConfigFiles();
 
-    List<File> deployables =
-        AppEngineProjectDeployer.computeDeployables(stagingDirectory, true /* configDeploy */);
+    List<File> deployables = AppEngineProjectDeployer.computeDeployables(
+        stagingDirectory, true/* include files */);
     assertEquals(6, deployables.size());
     assertTrue(deployables.contains(stagingDirectory.append("app.yaml").toFile()));
     assertTrue(deployables.contains(stagingDirectory.append(

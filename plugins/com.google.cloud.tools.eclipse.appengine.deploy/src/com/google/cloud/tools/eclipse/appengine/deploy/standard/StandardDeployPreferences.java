@@ -32,7 +32,8 @@ public class StandardDeployPreferences {
   static final String PREF_PROJECT_ID = "project.id";
   static final String PREF_CUSTOM_VERSION = "project.version";
   static final String PREF_ENABLE_AUTO_PROMOTE = "project.promote"; // boolean
-  static final String PREF_CONFIG_DEPLOY = "config.deploy"; // boolean
+  static final String PREF_INCLUDE_OPTIONAL_CONFIGURATION_FILES =
+      "include.optional.configuration.files"; // boolean
   static final String PREF_CUSTOM_BUCKET = "project.bucket";
   static final String PREF_STOP_PREVIOUS_VERSION = "project.previousVersion.stop"; // boolean
 
@@ -90,13 +91,14 @@ public class StandardDeployPreferences {
     preferenceStore.putBoolean(PREF_ENABLE_AUTO_PROMOTE, autoPromote);
   }
 
-  public boolean isConfigDeploy() {
-    return preferenceStore.getBoolean(PREF_CONFIG_DEPLOY,
-        DeployPreferenceInitializer.DEFAULT_CONFIG_DEPLOY);
+  public boolean isIncludeOptionalConfigurationFiles() {
+    return preferenceStore.getBoolean(PREF_INCLUDE_OPTIONAL_CONFIGURATION_FILES,
+        DeployPreferenceInitializer.DEFAULT_INCLUDE_OPTIONAL_CONFIGURATION_FILES);
   }
 
-  public void setConfigDeploy(boolean configDeploy) {
-    preferenceStore.putBoolean(PREF_CONFIG_DEPLOY, configDeploy);
+  public void setIncludeOptionalConfigurationFiles(boolean includeOptionalConfigurationFiles) {
+    preferenceStore.putBoolean(
+        PREF_INCLUDE_OPTIONAL_CONFIGURATION_FILES, includeOptionalConfigurationFiles);
   }
 
   public String getBucket() {

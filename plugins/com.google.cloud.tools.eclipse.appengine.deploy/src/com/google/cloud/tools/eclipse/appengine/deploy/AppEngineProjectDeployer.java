@@ -46,7 +46,7 @@ public class AppEngineProjectDeployer {
 
   public void deploy(IPath stagingDirectory, CloudSdk cloudSdk,
                      DefaultDeployConfiguration configuration,
-                     boolean configDeploy, IProgressMonitor monitor) {
+                     boolean includeOptionalConfigurationFiles, IProgressMonitor monitor) {
     if (monitor.isCanceled()) {
       throw new OperationCanceledException();
     }
@@ -54,7 +54,8 @@ public class AppEngineProjectDeployer {
     SubMonitor progress = SubMonitor.convert(monitor, 1);
     progress.setTaskName(Messages.getString("task.name.deploy.project")); //$NON-NLS-1$
     try {
-      List<File> deployables = computeDeployables(stagingDirectory, configDeploy);
+      List<File> deployables =
+          computeDeployables(stagingDirectory, includeOptionalConfigurationFiles);
       configuration.setDeployables(deployables);
       CloudSdkAppEngineDeployment deployment = new CloudSdkAppEngineDeployment(cloudSdk);
       deployment.deploy(configuration);
@@ -64,11 +65,12 @@ public class AppEngineProjectDeployer {
   }
 
   @VisibleForTesting
-  static List<File> computeDeployables(IPath stagingDirectory, boolean configDeploy) {
+  static List<File> computeDeployables(
+      IPath stagingDirectory, boolean includeOptionalConfigurationFiles) {
     List<File> deployables = new ArrayList<>();
     deployables.add(stagingDirectory.append("app.yaml").toFile()); //$NON-NLS-1$
 
-    if (configDeploy) {
+    if (includeOptionalConfigurationFiles) {
       for (String configFile : APP_ENGINE_CONFIG_FILES) {
         File file = stagingDirectory.append("WEB-INF/appengine-generated") //$NON-NLS-1$
             .append(configFile).toFile();
