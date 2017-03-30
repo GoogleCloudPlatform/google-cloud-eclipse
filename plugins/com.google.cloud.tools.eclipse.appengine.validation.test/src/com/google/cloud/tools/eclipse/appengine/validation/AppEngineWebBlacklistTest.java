@@ -18,6 +18,9 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -59,6 +62,14 @@ public class AppEngineWebBlacklistTest {
   public void testGetQuickAssistProcessor() {
     assertEquals(VersionQuickAssistProcessor.class.getName(),
         AppEngineWebBlacklist.getQuickAssistProcessor("version").getClass().getName());
+  }
+  
+  @Test
+  public void testGetBlacklistElements() {
+    ArrayList<String> elements = AppEngineWebBlacklist.getBlacklistElements();
+    assertEquals(2, elements.size());
+    assertTrue("application".equals(elements.get(0)) ^ "application".equals(elements.get(1)));
+    assertTrue("version".equals(elements.get(0)) ^ "version".equals(elements.get(1)));
   }
 }
 

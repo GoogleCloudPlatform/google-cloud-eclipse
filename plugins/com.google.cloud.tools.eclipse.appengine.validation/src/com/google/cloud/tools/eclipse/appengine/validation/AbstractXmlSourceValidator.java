@@ -79,6 +79,7 @@ public abstract class AbstractXmlSourceValidator implements ISourceValidator, IV
   }
   
   abstract ArrayList<BannedElement> checkForElements(IResource resource, Document document);
+  
   /**
    * Adds an {@link IMessage} to the XML file for every 
    * {@link BannedElement} found in the file.

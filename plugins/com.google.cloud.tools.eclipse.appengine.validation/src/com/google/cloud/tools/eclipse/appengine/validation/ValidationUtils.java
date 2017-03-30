@@ -49,22 +49,23 @@ public class ValidationUtils {
   public static Map<BannedElement, Integer> getOffsetMap(byte[] bytes,
       ArrayList<BannedElement> blacklist, String encoding) {
     Map<BannedElement, Integer> bannedElementOffsetMap = new HashMap<>();
-    ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-    try (BufferedReader reader =
-        new BufferedReader(new InputStreamReader(bais, encoding))) {
-      int currentLine = 1;
-      int charOffset = 0;
-      for (BannedElement element : blacklist) {
-        while (element.getStart().getLineNumber() > currentLine) {
-          String line = reader.readLine();
-          charOffset += line.length() + 1;
-          currentLine++;
-        }
-        int start = charOffset + element.getStart().getColumnNumber() - 1;
-        bannedElementOffsetMap.put(element, start);
+    for (BannedElement element : blacklist) {
+      ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+      try (BufferedReader reader =
+          new BufferedReader(new InputStreamReader(bais, encoding))) {
+          int currentLine = 1;
+          int charOffset = 0;
+          while (element.getStart().getLineNumber() > currentLine) {
+            String line = reader.readLine();
+            charOffset += line.length() + 1;
+            currentLine++;
+          }
+          int start = charOffset + element.getStart().getColumnNumber() - 1;
+          bannedElementOffsetMap.put(element, start);
+          bais.reset();
+      } catch (IOException ex) {
+        logger.log(Level.SEVERE, ex.getMessage());
       }
-    } catch (IOException ex) {
-      logger.log(Level.SEVERE, ex.getMessage());
     }
     return bannedElementOffsetMap;
   }

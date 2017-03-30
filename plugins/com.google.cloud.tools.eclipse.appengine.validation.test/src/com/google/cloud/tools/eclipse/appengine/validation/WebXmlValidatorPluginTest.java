@@ -45,7 +45,7 @@ import org.w3c.dom.Element;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.common.collect.Lists;
 
-public class WebXmlValidatorSearchTest {
+public class WebXmlValidatorPluginTest {
  
   private IJavaProject javaProject;
   private IResource resource;

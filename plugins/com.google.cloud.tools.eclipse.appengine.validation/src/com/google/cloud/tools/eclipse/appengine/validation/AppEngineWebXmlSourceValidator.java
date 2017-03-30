@@ -37,9 +37,10 @@ public class AppEngineWebXmlSourceValidator extends AbstractXmlSourceValidator {
       NodeList nodeList = document.getElementsByTagName(elementName);
       for (int i = 0; i < nodeList.getLength(); i++) {
         Node node = nodeList.item(i);
+        DocumentLocation userData = (DocumentLocation) node.getUserData("location");
         AppEngineBlacklistElement element = new AppEngineBlacklistElement(
             elementName,
-            (DocumentLocation) node.getUserData("location"),
+            userData,
             node.getTextContent().length()
             );    
         blacklist.add(element);

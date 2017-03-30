@@ -114,6 +114,25 @@ public class ValidationUtilsTest {
   }
   
   @Test
+  public void testGetOffsetMap_orderedElements() throws IOException {
+    
+    DocumentLocation applicationLocation = new DocumentLocation(2, 14);
+    DocumentLocation versionLocation = new DocumentLocation(1, 10);
+    BannedElement application =
+        new AppEngineBlacklistElement("application", applicationLocation, 0);
+    BannedElement version = new AppEngineBlacklistElement("version", versionLocation, 0);
+    ArrayList<BannedElement> blacklist = new ArrayList<>(Arrays.asList(application, version));
+    
+    String xml = "<version>   </version>\n\n<application>   </application>";
+    byte[] bytes = xml.getBytes(StandardCharsets.UTF_8);
+    Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, blacklist, "UTF-8");
+    
+    assertEquals(2, map.size());
+    assertEquals(36, (int) map.get(application));
+    assertEquals(9, (int) map.get(version));
+  }
+  
+  @Test
   public void testConvertStreamToString() throws IOException {
     String test = "test string";
     byte[] bytes = test.getBytes(StandardCharsets.UTF_8);
