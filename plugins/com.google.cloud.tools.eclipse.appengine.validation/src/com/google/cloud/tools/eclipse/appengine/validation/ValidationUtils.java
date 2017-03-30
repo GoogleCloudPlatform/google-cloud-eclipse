@@ -23,16 +23,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 import java.util.Map;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.CharStreams;
 
 /**
@@ -73,25 +67,6 @@ public class ValidationUtils {
   static String convertStreamToString(InputStream is, String charset) throws IOException {
     String result = CharStreams.toString(new InputStreamReader(is, charset));
     return result;
-  }
-  
-  @VisibleForTesting
-  static ArrayList<BannedElement> checkForElements(
-      Document document, List<String> blacklistedElements) {
-    ArrayList<BannedElement> blacklist = new ArrayList<>();
-    for (String elementName : blacklistedElements) {
-      NodeList nodeList = document.getElementsByTagName(elementName);
-      for (int i = 0; i < nodeList.getLength(); i++) {
-        Node node = nodeList.item(i);
-        AppEngineBlacklistElement element = new AppEngineBlacklistElement(
-            elementName,
-            (DocumentLocation) node.getUserData("location"),
-            node.getTextContent().length()
-            );    
-        blacklist.add(element);
-      }
-    }
-    return blacklist;
   }
  
 }
