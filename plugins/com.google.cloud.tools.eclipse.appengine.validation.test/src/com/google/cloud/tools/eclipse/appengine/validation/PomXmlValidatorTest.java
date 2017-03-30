@@ -61,8 +61,7 @@ public class PomXmlValidatorTest {
   @Test
   public void testCheckForElements_noElements() throws ParserConfigurationException {
     DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-    DocumentBuilder documentBuilder;
-    documentBuilder = builderFactory.newDocumentBuilder();
+    DocumentBuilder documentBuilder = builderFactory.newDocumentBuilder();
     Document document = documentBuilder.newDocument();
     
     Element plugin = document.createElementNS("http://maven.apache.org/POM/4.0.0", "plugin");
