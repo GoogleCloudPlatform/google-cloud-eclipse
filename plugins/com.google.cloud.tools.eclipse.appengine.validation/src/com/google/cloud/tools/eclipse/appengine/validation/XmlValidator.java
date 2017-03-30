@@ -42,6 +42,9 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
+/**
+ * Contains the logic for build validation and marker creation.
+ */
 public class XmlValidator
     extends AbstractValidator implements IExecutableExtension {
 
@@ -90,6 +93,10 @@ public class XmlValidator
     }
   }
   
+  /**
+   * Creates an instance of the helper {@link XmlValidationHelper} and sets its 
+   * own helper to this instance.
+   */
   @Override
   public void setInitializationData(IConfigurationElement config, String propertyName, Object data)
       throws CoreException {

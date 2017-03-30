@@ -55,7 +55,7 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 /**
- * Abstract source view validator.
+ * Contains the logic for source validation and message creation.
  */
 public class XmlSourceValidator implements ISourceValidator, IValidator, IExecutableExtension {
   
@@ -105,6 +105,10 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
     }
   }
   
+  /**
+   * Creates an instance of the helper {@link XmlValidationHelper} and sets its 
+   * own helper to this instance.
+   */
   @Override
   public void setInitializationData(IConfigurationElement config, String propertyName, Object data)
       throws CoreException {

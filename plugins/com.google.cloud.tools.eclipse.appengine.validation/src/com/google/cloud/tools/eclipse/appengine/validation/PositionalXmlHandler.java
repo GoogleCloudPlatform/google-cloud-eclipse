@@ -34,6 +34,9 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.ext.Locator2;
 
+/**
+ * Builds a DOM tree that maintains element line and column numbers.
+ */
 class PositionalXmlHandler extends DefaultHandler {
   
     private Document document;
