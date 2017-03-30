@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -44,9 +43,12 @@ public class AppEngineProjectDeployerTest {
 
   @Test
   public void testConfigFilesFile() {
-    assertArrayEquals(
-        new String[] {"cron.yaml", "dispatch.yaml", "dos.yaml", "index.yaml", "queue.yaml"},
-        AppEngineProjectDeployer.APP_ENGINE_CONFIG_FILES.toArray(new String[0]));
+    assertEquals(5, AppEngineProjectDeployer.APP_ENGINE_CONFIG_FILES.size());
+    assertTrue(AppEngineProjectDeployer.APP_ENGINE_CONFIG_FILES.contains("cron.yaml"));
+    assertTrue(AppEngineProjectDeployer.APP_ENGINE_CONFIG_FILES.contains("dispatch.yaml"));
+    assertTrue(AppEngineProjectDeployer.APP_ENGINE_CONFIG_FILES.contains("dos.yaml"));
+    assertTrue(AppEngineProjectDeployer.APP_ENGINE_CONFIG_FILES.contains("index.yaml"));
+    assertTrue(AppEngineProjectDeployer.APP_ENGINE_CONFIG_FILES.contains("queue.yaml"));
   }
 
   @Test
