@@ -37,16 +37,15 @@ import org.xml.sax.ext.Locator2;
 class PositionalXmlHandler extends DefaultHandler {
   
     private Document document;
-    final Stack<Element> elementStack = new Stack<Element>();
-    final StringBuilder textBuffer = new StringBuilder();
+    private StringBuilder textBuffer = new StringBuilder();
     private Locator2 locator;
+    private final Stack<Element> elementStack = new Stack<>();
 
     @Override
     public void startDocument() {
       try {
         DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder documentBuilder;
-        documentBuilder = builderFactory.newDocumentBuilder();
+        DocumentBuilder documentBuilder = builderFactory.newDocumentBuilder();
         document = documentBuilder.newDocument();  
       } catch (ParserConfigurationException ex) {
         throw new RuntimeException("Cannot create document", ex);
@@ -62,11 +61,10 @@ class PositionalXmlHandler extends DefaultHandler {
     public void startElement(String uri, String localName, String qName, Attributes attributes)
         throws SAXException {               
       addText();
-      Element element = document.createElement(qName);
+      Element element = document.createElementNS(uri, qName);
       for (int i = 0; i < attributes.getLength(); i++) {
         element.setUserData(attributes.getQName(i), attributes.getValue(i), null);
       }
-      element.setUserData("xmlns", uri, null);
       DocumentLocation location = new DocumentLocation(
           locator.getLineNumber(), locator.getColumnNumber());
       element.setUserData("location", location, null);
@@ -100,7 +98,7 @@ class PositionalXmlHandler extends DefaultHandler {
         Element element = elementStack.peek();
         Node textNode = document.createTextNode(textBuffer.toString());
         element.appendChild(textNode);
-        textBuffer.delete(0, textBuffer.length());
+        textBuffer = new StringBuilder();
       }
     }
     

@@ -20,7 +20,6 @@ import org.xml.sax.helpers.XMLReaderFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -28,7 +27,7 @@ import org.xml.sax.XMLReader;
 
 class PositionalXmlScanner {
   
-  static Document parse(byte[] bytes) throws SAXException, ParserConfigurationException, IOException {
+  static Document parse(byte[] bytes) throws SAXException, IOException {
     if (bytes.length == 0) { //file is empty
       return null;
     }

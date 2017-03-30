@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import com.google.common.annotations.VisibleForTesting;
@@ -49,8 +50,8 @@ public class WebXmlSourceValidator extends AbstractXmlSourceValidator {
     ArrayList<BannedElement> blacklist = new ArrayList<>();
     NodeList webAppList = document.getElementsByTagName("web-app");
     for (int i = 0; i < webAppList.getLength(); i++) {
-      Node webApp = webAppList.item(i);
-      String namespace = (String) webApp.getUserData("xmlns");
+      Element webApp = (Element) webAppList.item(i);
+      String namespace = webApp.getNamespaceURI();
       String version = (String) webApp.getUserData("version");
       if ("http://xmlns.jcp.org/xml/ns/javaee".equals(namespace)
           || "http://java.sun.com/xml/ns/javaee".equals(namespace)) {

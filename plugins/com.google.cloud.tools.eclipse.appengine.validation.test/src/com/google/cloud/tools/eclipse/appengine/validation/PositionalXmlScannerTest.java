@@ -21,7 +21,6 @@ import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import javax.xml.parsers.ParserConfigurationException;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -30,7 +29,7 @@ import org.xml.sax.SAXException;
 public class PositionalXmlScannerTest {
 
   @Test
-  public void testParse() throws SAXException, ParserConfigurationException, IOException {
+  public void testParse() throws SAXException, IOException {
     byte[] bytes = "<root><child></child></root>".getBytes(StandardCharsets.UTF_8);
     Document document = PositionalXmlScanner.parse(bytes);
     
@@ -42,7 +41,7 @@ public class PositionalXmlScannerTest {
   }
   
   @Test
-  public void testParse_emptyXml() throws SAXException, ParserConfigurationException, IOException {
+  public void testParse_emptyXml() throws SAXException, IOException {
     byte[] bytes = "".getBytes(StandardCharsets.UTF_8);
     Document document = PositionalXmlScanner.parse(bytes);
     assertNull(document);

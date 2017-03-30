@@ -46,17 +46,14 @@ public class ValidationUtils {
     for (BannedElement element : blacklist) {
       ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
       try (BufferedReader reader =
-          new BufferedReader(new InputStreamReader(bais, encoding))) {
-          int currentLine = 1;
-          int charOffset = 0;
-          while (element.getStart().getLineNumber() > currentLine) {
-            String line = reader.readLine();
-            charOffset += line.length() + 1;
-            currentLine++;
-          }
-          int start = charOffset + element.getStart().getColumnNumber() - 1;
-          bannedElementOffsetMap.put(element, start);
-          bais.reset();
+        new BufferedReader(new InputStreamReader(bais, encoding))) {
+        int charOffset = 0;
+        for (int i = 1; i < element.getStart().getLineNumber(); i++) {
+          String line = reader.readLine();
+          charOffset += line.length() + 1;
+        }
+        int start = charOffset + element.getStart().getColumnNumber() - 1;
+        bannedElementOffsetMap.put(element, start);
       } catch (IOException ex) {
         logger.log(Level.SEVERE, ex.getMessage());
       }

@@ -29,8 +29,6 @@ public class PomXmlValidator extends AbstractXmlValidator {
 
   @VisibleForTesting
   ArrayList<BannedElement> checkForElements(IResource resource, Document document) {
-    boolean foundGroupId = false;
-    boolean foundArtifactId = false;
     DocumentLocation location = null;
     ArrayList<BannedElement> blacklist = new ArrayList<>();
     NodeList nodeList = document.getElementsByTagName("plugin");
@@ -38,6 +36,8 @@ public class PomXmlValidator extends AbstractXmlValidator {
     for (int i = 0; i < nodeList.getLength(); i++) {
       Node node = nodeList.item(i);
       NodeList childNodes = node.getChildNodes();
+      boolean foundGroupId = false;
+      boolean foundArtifactId = false;
       
       for (int j = 0; j < childNodes.getLength(); j++) {
         Node pluginChild = childNodes.item(j);
@@ -60,8 +60,6 @@ public class PomXmlValidator extends AbstractXmlValidator {
           blacklist.add(element);
         }
       }
-      foundGroupId = false;
-      foundArtifactId = false;
     }
     return blacklist;
   }

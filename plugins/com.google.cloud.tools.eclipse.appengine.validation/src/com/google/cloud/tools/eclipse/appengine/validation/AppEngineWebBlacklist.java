@@ -22,6 +22,7 @@ import java.util.List;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 
 class AppEngineWebBlacklist {
   
@@ -70,11 +71,7 @@ class AppEngineWebBlacklist {
   }
   
   static ArrayList<String> getBlacklistElements() {
-    ArrayList<String> elementList = new ArrayList<>();
-    for (String element : BLACKLIST.keySet()) {
-      elementList.add(element);
-    }
-    return elementList;
+    return Lists.newArrayList(BLACKLIST.keySet());
   }
 
 }

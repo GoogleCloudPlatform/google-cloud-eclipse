@@ -31,11 +31,11 @@ public class AppEngineWebXmlValidatorTest {
   @Test
   public void testCheckForElements() throws ParserConfigurationException {
     DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-    DocumentBuilder documentBuilder;
-    documentBuilder = builderFactory.newDocumentBuilder();
+    DocumentBuilder documentBuilder  = builderFactory.newDocumentBuilder();
     Document document = documentBuilder.newDocument();
     
-    Element element = document.createElement("application");
+    Element element =
+        document.createElementNS("http://appengine.google.com/ns/1.0", "application");
     element.setUserData("location", new DocumentLocation(3, 15), null);
     document.appendChild(element);
     

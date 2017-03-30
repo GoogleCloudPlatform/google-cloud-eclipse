@@ -112,8 +112,7 @@ public class AbstractXmlSourceValidatorTest {
   }
   
   @Test
-  public void testValidate_noBannedElements()
-      throws CoreException, IOException, ParserConfigurationException {
+  public void testValidate_noBannedElements() throws CoreException, IOException {
     AbstractXmlSourceValidator validator = new WebXmlSourceValidator();
     byte[] xml = "<test></test>".getBytes(StandardCharsets.UTF_8);
     validator.validate(reporter, null, xml);
@@ -121,7 +120,7 @@ public class AbstractXmlSourceValidatorTest {
   }
   
   @Test
-  public void testValidate() throws CoreException, IOException, ParserConfigurationException {
+  public void testValidate() throws CoreException, IOException {
     AbstractXmlSourceValidator validator = new WebXmlSourceValidator();
     String xml = "<web-app xmlns='http://xmlns.jcp.org/xml/ns/javaee' version='3.1'></web-app>";
     validator.validate(reporter, null, xml.getBytes(StandardCharsets.UTF_8));

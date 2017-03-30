@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.xml.parsers.ParserConfigurationException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
@@ -54,7 +53,7 @@ public abstract class AbstractXmlValidator extends AbstractValidator {
         byte[] bytes = ByteStreams.toByteArray(in);
         validate(file, bytes);
       }
-    } catch (IOException | CoreException | ParserConfigurationException ex) {
+    } catch (IOException | CoreException ex) {
       logger.log(Level.SEVERE, ex.getMessage());
     }
     return new ValidationResult();
@@ -65,7 +64,7 @@ public abstract class AbstractXmlValidator extends AbstractValidator {
    * the resource for every {@link BannedElement} found in the file. 
    */
   void validate(IFile resource, byte[] bytes)
-      throws CoreException, IOException, ParserConfigurationException {
+      throws CoreException, IOException {
     try {
       deleteMarkers(resource);
       Document document = PositionalXmlScanner.parse(bytes);

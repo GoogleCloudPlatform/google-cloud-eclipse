@@ -23,8 +23,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -73,7 +71,7 @@ public abstract class AbstractXmlSourceValidator implements ISourceValidator, IV
         IFile source = getFile(helper);
         this.validate(reporter, source, bytes);
       }
-    } catch (IOException | CoreException | ParserConfigurationException ex) {
+    } catch (IOException | CoreException ex) {
       logger.log(Level.SEVERE, ex.getMessage());
     }
   }
@@ -84,8 +82,7 @@ public abstract class AbstractXmlSourceValidator implements ISourceValidator, IV
    * Adds an {@link IMessage} to the XML file for every 
    * {@link BannedElement} found in the file.
    */
-  void validate(IReporter reporter, IFile source, byte[] bytes) 
-      throws CoreException, IOException, ParserConfigurationException {
+  void validate(IReporter reporter, IFile source, byte[] bytes) throws CoreException, IOException {
     try {
       Document document = PositionalXmlScanner.parse(bytes);
       if (document != null) {

@@ -32,12 +32,10 @@ public class WebXmlValidatorTest {
   @Test
   public void testCheckForElements() throws ParserConfigurationException {
     DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-    DocumentBuilder documentBuilder;
-    documentBuilder = builderFactory.newDocumentBuilder();
+    DocumentBuilder documentBuilder = builderFactory.newDocumentBuilder();
     Document document = documentBuilder.newDocument();
-    
-    Element element = document.createElement("web-app");
-    element.setUserData("xmlns", "http://xmlns.jcp.org/xml/ns/javaee", null);
+
+    Element element = document.createElementNS("http://xmlns.jcp.org/xml/ns/javaee", "web-app");
     element.setUserData("version", "3.1", null);
     element.setUserData("location", new DocumentLocation(1, 1), null);
     document.appendChild(element);
@@ -53,12 +51,10 @@ public class WebXmlValidatorTest {
   @Test
   public void testCheckForElements_noElements() throws ParserConfigurationException {
     DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-    DocumentBuilder documentBuilder;
-    documentBuilder = builderFactory.newDocumentBuilder();
+    DocumentBuilder documentBuilder = builderFactory.newDocumentBuilder();
     Document document = documentBuilder.newDocument();
     
-    Element element = document.createElement("web-app");
-    element.setUserData("xmlns", "http://java.sun.com/xml/ns/javaee", null);
+    Element element = document.createElementNS("http://java.sun.com/xml/ns/javaee", "web-app");
     element.setUserData("version", "2.5", null);
     element.setUserData("location", new DocumentLocation(1, 1), null);
     document.appendChild(element);

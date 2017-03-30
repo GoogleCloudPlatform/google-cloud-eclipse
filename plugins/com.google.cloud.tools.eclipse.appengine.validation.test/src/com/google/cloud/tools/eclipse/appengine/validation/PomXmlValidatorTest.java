@@ -32,19 +32,18 @@ public class PomXmlValidatorTest {
   @Test
   public void testCheckForElements() throws ParserConfigurationException {
     DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-    DocumentBuilder documentBuilder;
-    documentBuilder = builderFactory.newDocumentBuilder();
+    DocumentBuilder documentBuilder = builderFactory.newDocumentBuilder();
     Document document = documentBuilder.newDocument();
     
-    Element plugin = document.createElement("plugin");
+    Element plugin = document.createElementNS("http://maven.apache.org/POM/4.0.0", "plugin");
     plugin.setUserData("location", new DocumentLocation(1, 1), null);
     
-    Element groupId = document.createElement("groupId");
+    Element groupId = document.createElementNS("http://maven.apache.org/POM/4.0.0", "groupId");
     groupId.setUserData("location", new DocumentLocation(2, 1), null);
     groupId.setTextContent("com.google.appengine");
     plugin.appendChild(groupId);
     
-    Element artifactId = document.createElement("artifactId");
+    Element artifactId = document.createElementNS("http://maven.apache.org/POM/4.0.0", "artifactId");
     artifactId.setUserData("location", new DocumentLocation(3, 1), null);
     artifactId.setTextContent("appengine-maven-plugin");
     plugin.appendChild(artifactId);
@@ -66,15 +65,15 @@ public class PomXmlValidatorTest {
     documentBuilder = builderFactory.newDocumentBuilder();
     Document document = documentBuilder.newDocument();
     
-    Element plugin = document.createElement("plugin");
+    Element plugin = document.createElementNS("http://maven.apache.org/POM/4.0.0", "plugin");
     plugin.setUserData("location", new DocumentLocation(1, 1), null);
     
-    Element groupId = document.createElement("groupId");
+    Element groupId = document.createElementNS("http://maven.apache.org/POM/4.0.0", "groupId");
     groupId.setUserData("location", new DocumentLocation(2, 1), null);
     groupId.setTextContent("com.google.cloud.tools");
     plugin.appendChild(groupId);
     
-    Element artifactId = document.createElement("artifactId");
+    Element artifactId = document.createElementNS("http://maven.apache.org/POM/4.0.0", "artifactId");
     artifactId.setUserData("location", new DocumentLocation(3, 1), null);
     artifactId.setTextContent("appengine-maven-plugin");
     plugin.appendChild(artifactId);

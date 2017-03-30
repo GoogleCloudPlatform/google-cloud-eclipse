@@ -24,13 +24,13 @@ import org.eclipse.wst.validation.internal.provisional.core.IMessage;
  */
 public class UndefinedServletElement extends BannedElement {
 
-  private static final String markerId = 
+  private static final String MARKERID = 
       "com.google.cloud.tools.eclipse.appengine.validation.undefinedServletMarker";
   private final String servletClassName;
   
   public UndefinedServletElement(String servletClassName, DocumentLocation start, int length) {
     super(Messages.getString("undefined.servlet.class", servletClassName),
-        markerId, IMarker.SEVERITY_ERROR, IMessage.HIGH_SEVERITY, start, length, null /* Null IQuickAssistProcessor */);
+        MARKERID, IMarker.SEVERITY_ERROR, IMessage.HIGH_SEVERITY, start, length, null /* Null IQuickAssistProcessor */);
     this.servletClassName = servletClassName;
   }
   

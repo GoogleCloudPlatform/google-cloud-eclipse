@@ -77,8 +77,7 @@ public class WebXmlValidatorPluginTest {
   @Test
   public void testCheckForElements_servletClass() throws ParserConfigurationException {
     DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-    DocumentBuilder documentBuilder;
-    documentBuilder = builderFactory.newDocumentBuilder();
+    DocumentBuilder documentBuilder = builderFactory.newDocumentBuilder();
     Document document = documentBuilder.newDocument();
     
     Element element = document.createElement("servlet-class");
@@ -97,8 +96,7 @@ public class WebXmlValidatorPluginTest {
   @Test
   public void testCheckForElements_servletClassExists() throws ParserConfigurationException {
     DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-    DocumentBuilder documentBuilder;
-    documentBuilder = builderFactory.newDocumentBuilder();
+    DocumentBuilder documentBuilder = builderFactory.newDocumentBuilder();
     Document document = documentBuilder.newDocument();
     
     Element element = document.createElement("servlet-class");

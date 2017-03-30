@@ -24,12 +24,12 @@ import org.eclipse.wst.validation.internal.provisional.core.IMessage;
  */
 public class JavaServletElement extends BannedElement {
 
-  private static final String message = Messages.getString("web.xml.version");
-  private static final String markerId = 
+  private static final String MESSAGE = Messages.getString("web.xml.version");
+  private static final String MARKERID = 
       "com.google.cloud.tools.eclipse.appengine.validation.servletMarker";
   
   public JavaServletElement(DocumentLocation start, int length) {
-    super(message, markerId, IMarker.SEVERITY_ERROR, 
+    super(MESSAGE, MARKERID, IMarker.SEVERITY_ERROR, 
         IMessage.HIGH_SEVERITY, start, length, null /* No source quick fix */);
   }
 

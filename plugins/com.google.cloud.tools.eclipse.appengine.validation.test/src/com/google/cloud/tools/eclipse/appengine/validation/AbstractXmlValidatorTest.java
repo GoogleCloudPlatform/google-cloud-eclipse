@@ -96,8 +96,7 @@ public class AbstractXmlValidatorTest {
   }
   
   @Test
-  public void testValidate_badXml()
-      throws IOException, CoreException, ParserConfigurationException {
+  public void testValidate_badXml() throws IOException, CoreException {
     byte[] bytes = BAD_XML.getBytes(StandardCharsets.UTF_8);
     AppEngineWebXmlValidator validator = new AppEngineWebXmlValidator();
     validator.validate(resource, bytes);
@@ -109,8 +108,7 @@ public class AbstractXmlValidatorTest {
   }
 
   @Test
-  public void testValidate_noBannedElements()
-      throws IOException, CoreException, ParserConfigurationException {
+  public void testValidate_noBannedElements() throws IOException, CoreException {
     byte[] bytes = XML_NO_BANNED_ELEMENTS.getBytes(StandardCharsets.UTF_8);
     AppEngineWebXmlValidator validator = new AppEngineWebXmlValidator();
     validator.validate(resource, bytes);
@@ -119,8 +117,7 @@ public class AbstractXmlValidatorTest {
   }
 
   @Test
-  public void testValidate_withBannedElements()
-      throws IOException, CoreException, ParserConfigurationException {
+  public void testValidate_withBannedElements() throws IOException, CoreException {
     byte[] bytes = XML.getBytes(StandardCharsets.UTF_8);
     AppEngineWebXmlValidator validator = new AppEngineWebXmlValidator();
     validator.validate(resource, bytes);
