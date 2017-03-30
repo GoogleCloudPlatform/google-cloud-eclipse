@@ -22,14 +22,12 @@ import org.eclipse.core.resources.IResource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import com.google.common.annotations.VisibleForTesting;
 
 /**
  * Validator for appengine-web.xml
  */
 public class AppEngineWebXmlValidator implements XmlValidationHelper {
   
-  @VisibleForTesting
   public ArrayList<BannedElement> checkForElements(IResource resource, Document document) {
     ArrayList<BannedElement> blacklist = new ArrayList<>();
     ArrayList<String> blacklistedElements = 

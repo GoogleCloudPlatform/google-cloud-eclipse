@@ -23,28 +23,23 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.google.common.annotations.VisibleForTesting;
-
 public class PomXmlValidator implements XmlValidationHelper {
 
-  @VisibleForTesting
   public ArrayList<BannedElement> checkForElements(IResource resource, Document document) {
     DocumentLocation location = null;
     ArrayList<BannedElement> blacklist = new ArrayList<>();
     NodeList nodeList = document.getElementsByTagName("plugin");
-    
     for (int i = 0; i < nodeList.getLength(); i++) {
       Node node = nodeList.item(i);
       NodeList childNodes = node.getChildNodes();
       boolean foundGroupId = false;
       boolean foundArtifactId = false;
       String nodeText = "";
-      
       for (int j = 0; j < childNodes.getLength(); j++) {
         Node pluginChild = childNodes.item(j);
         String localName = pluginChild.getNodeName();
-        nodeText = pluginChild.getTextContent();
         if ("groupId".equals(localName)) {
+          nodeText = pluginChild.getTextContent();
           if ("com.google.appengine".equals(nodeText)) {
             foundGroupId = true;
             location = (DocumentLocation) pluginChild.getUserData("location");
