@@ -29,7 +29,7 @@ public class DeployPreferenceInitializer extends AbstractPreferenceInitializer {
   static final String DEFAULT_PROJECT_ID = "";
   static final String DEFAULT_CUSTOM_VERSION = "";
   static final boolean DEFAULT_ENABLE_AUTO_PROMOTE = true;
-  static final boolean DEFAULT_INCLUDE_OPTIONAL_CONFIGURATION_FILES = false;
+  static final boolean DEFAULT_INCLUDE_OPTIONAL_CONFIGURATION_FILES = true;
   static final String DEFAULT_CUSTOM_BUCKET = "";
   static final boolean DEFAULT_STOP_PREVIOUS_VERSION = true;
 

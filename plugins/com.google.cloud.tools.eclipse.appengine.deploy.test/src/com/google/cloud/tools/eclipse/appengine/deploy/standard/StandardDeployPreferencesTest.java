@@ -18,7 +18,6 @@ package com.google.cloud.tools.eclipse.appengine.deploy.standard;
 
 import static org.hamcrest.text.IsEmptyString.isEmptyString;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -30,7 +29,8 @@ import org.junit.Test;
 public class StandardDeployPreferencesTest {
 
   @Rule public final TestProjectCreator projectCreator = new TestProjectCreator();
-  private final StandardDeployPreferences defaultPreferences = StandardDeployPreferences.getDefaultPreferences();
+  private final StandardDeployPreferences defaultPreferences =
+      StandardDeployPreferences.getDefaultPreferences();
 
   @Test
   public void testDefaultProjectId() {
@@ -70,7 +70,7 @@ public class StandardDeployPreferencesTest {
 
   @Test
   public void testIncludeOptionalConfigurationFiles() {
-    assertFalse(defaultPreferences.isIncludeOptionalConfigurationFiles());
+    assertTrue(defaultPreferences.isIncludeOptionalConfigurationFiles());
   }
 
 }
