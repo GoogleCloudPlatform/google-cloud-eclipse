@@ -25,11 +25,12 @@ import org.w3c.dom.NodeList;
 
 public class PomXmlValidator implements XmlValidationHelper {
 
+  @Override
   public ArrayList<BannedElement> checkForElements(IResource resource, Document document) {
-    DocumentLocation location = null;
     ArrayList<BannedElement> blacklist = new ArrayList<>();
     NodeList nodeList = document.getElementsByTagName("plugin");
     for (int i = 0; i < nodeList.getLength(); i++) {
+      DocumentLocation location = null;
       Node node = nodeList.item(i);
       NodeList childNodes = node.getChildNodes();
       boolean foundGroupId = false;

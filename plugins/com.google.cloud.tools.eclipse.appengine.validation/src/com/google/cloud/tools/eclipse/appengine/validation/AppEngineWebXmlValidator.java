@@ -28,6 +28,7 @@ import org.w3c.dom.NodeList;
  */
 public class AppEngineWebXmlValidator implements XmlValidationHelper {
   
+  @Override
   public ArrayList<BannedElement> checkForElements(IResource resource, Document document) {
     ArrayList<BannedElement> blacklist = new ArrayList<>();
     ArrayList<String> blacklistedElements = 

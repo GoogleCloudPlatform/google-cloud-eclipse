@@ -45,6 +45,7 @@ public class WebXmlValidator implements XmlValidationHelper {
   
   private static final Logger logger = Logger.getLogger(WebXmlValidator.class.getName());
   
+  @Override
   public ArrayList<BannedElement> checkForElements(IResource resource, Document document) {
     ArrayList<BannedElement> blacklist = new ArrayList<>();
     NodeList webAppList = document.getElementsByTagName("web-app");
