@@ -39,17 +39,16 @@ public class PomXmlValidator implements XmlValidationHelper {
       for (int j = 0; j < childNodes.getLength(); j++) {
         Node pluginChild = childNodes.item(j);
         String localName = pluginChild.getNodeName();
+        String nodeText = pluginChild.getTextContent();
         if ("groupId".equals(localName)) {
-          String groupIdText = pluginChild.getTextContent();
-          if ("com.google.appengine".equals(groupIdText)) {
-            bannedElementText = groupIdText;
+          if ("com.google.appengine".equals(nodeText)) {
+            bannedElementText = nodeText;
             foundGroupId = true;
             location = (DocumentLocation) pluginChild.getUserData("location");
           }
         } else if ("artifactId".equals(localName)) {
-          String artifactIdText = pluginChild.getTextContent();
-          if ("appengine-maven-plugin".equals(artifactIdText)
-              || "gcloud-maven-plugin".equals(artifactIdText)) {
+          if ("appengine-maven-plugin".equals(nodeText)
+              || "gcloud-maven-plugin".equals(nodeText)) {
             foundArtifactId = true;
           }
         }
