@@ -8,8 +8,7 @@ Bundle-Vendor: %providerName
 Bundle-ClassPath: .
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
-Export-Package: com.google.cloud.tools.eclipse.dataflow.ui.page,
- com.google.cloud.tools.eclipse.dataflow.ui.wizard
+Export-Package: com.google.cloud.tools.eclipse.dataflow.ui.page
 Import-Package: com.google.cloud.tools.eclipse.dataflow.core.launcher,
  com.google.cloud.tools.eclipse.dataflow.core.launcher.options,
  com.google.cloud.tools.eclipse.dataflow.core.natures,
