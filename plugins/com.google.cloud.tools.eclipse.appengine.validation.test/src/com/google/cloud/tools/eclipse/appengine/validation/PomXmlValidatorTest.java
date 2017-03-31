@@ -84,4 +84,68 @@ public class PomXmlValidatorTest {
     
     assertEquals(0, blacklist.size());
   }
+  
+  @Test
+  public void testCheckForElements_multiplePluginTags() throws ParserConfigurationException {
+    DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+    DocumentBuilder documentBuilder = builderFactory.newDocumentBuilder();
+    Document document = documentBuilder.newDocument();
+    Element rootPlugin = document.createElementNS("http://maven.apache.org/POM/4.0.0", "plugins");
+    document.appendChild(rootPlugin);
+    
+    //plugin #1
+    Element markedPlugin = document.createElementNS("http://maven.apache.org/POM/4.0.0", "plugin");
+    markedPlugin.setUserData("location", new DocumentLocation(1, 1), null);
+    
+    Element groupId1 = document.createElementNS("http://maven.apache.org/POM/4.0.0", "groupId");
+    groupId1.setUserData("location", new DocumentLocation(2, 1), null);
+    groupId1.setTextContent("com.google.appengine");
+    markedPlugin.appendChild(groupId1);
+    
+    Element artifactId1 = document.createElementNS("http://maven.apache.org/POM/4.0.0", "artifactId");
+    artifactId1.setUserData("location", new DocumentLocation(3, 1), null);
+    artifactId1.setTextContent("appengine-maven-plugin");
+    markedPlugin.appendChild(artifactId1);
+
+    rootPlugin.appendChild(markedPlugin);
+    
+    //plugin #2
+    Element ignoredPlugin = document.createElementNS("http://maven.apache.org/POM/4.0.0", "plugin");
+    markedPlugin.setUserData("location", new DocumentLocation(1, 1), null);
+    
+    Element groupId2 = document.createElementNS("http://maven.apache.org/POM/4.0.0", "groupId");
+    groupId2.setUserData("location", new DocumentLocation(2, 1), null);
+    groupId2.setTextContent("com.google.cloud.tools");
+    markedPlugin.appendChild(groupId2);
+    
+    Element artifactId2 = document.createElementNS("http://maven.apache.org/POM/4.0.0", "artifactId");
+    artifactId2.setUserData("location", new DocumentLocation(3, 1), null);
+    artifactId2.setTextContent("appengine-maven-plugin");
+    markedPlugin.appendChild(artifactId2);
+
+    rootPlugin.appendChild(ignoredPlugin);
+    
+    //plugin #3
+    Element ignoredPlugin2 = document.createElementNS("http://maven.apache.org/POM/4.0.0", "plugin");
+    markedPlugin.setUserData("location", new DocumentLocation(1, 1), null);
+    
+    Element groupId3 = document.createElementNS("http://maven.apache.org/POM/4.0.0", "groupId");
+    groupId3.setUserData("location", new DocumentLocation(2, 1), null);
+    groupId3.setTextContent("com.google.appengine");
+    markedPlugin.appendChild(groupId3);
+    
+    Element artifactId3 = document.createElementNS("http://maven.apache.org/POM/4.0.0", "artifactId");
+    artifactId3.setUserData("location", new DocumentLocation(3, 1), null);
+    artifactId3.setTextContent("ignore this case");
+    markedPlugin.appendChild(artifactId3);
+
+    rootPlugin.appendChild(ignoredPlugin2);
+    
+    PomXmlValidator validator = new PomXmlValidator();
+    ArrayList<BannedElement> blacklist = validator.checkForElements(null, document);
+    
+    assertEquals(1, blacklist.size());
+    String markerId = "com.google.cloud.tools.eclipse.appengine.validation.mavenPluginMarker";
+    assertEquals(markerId, blacklist.get(0).getMarkerId());
+  }
 }
