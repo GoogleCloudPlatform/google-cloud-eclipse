@@ -106,39 +106,38 @@
           tooltip="%googleapiclient.tooltip"
           siteUri="https://developers.google.com/api-client-library/java/" >
       <libraryFile
-            javadocUri="https://google.github.io/google-api-java-client/releases/1.21.0/javadoc/index.html">
+          javadocUri="https://google.github.io/google-api-java-client/releases/1.21.0/javadoc/index.html">
         <mavenCoordinates
-              artifactId="google-api-client"
-              groupId="com.google.api-client"
-              version="1.22.0" />
+            artifactId="google-api-client"
+            groupId="com.google.api-client"
+            version="1.22.0" />
       </libraryFile>
       <libraryFile
-            javadocUri="https://google.github.io/google-api-java-client/releases/1.21.0/javadoc/index.html">
+          javadocUri="https://google.github.io/google-api-java-client/releases/1.21.0/javadoc/index.html">
         <mavenCoordinates
-              artifactId="google-api-client-appengine"
-              groupId="com.google.api-client"
-              version="1.22.0" />
+            artifactId="google-api-client-appengine"
+            groupId="com.google.api-client"
+            version="1.22.0" />
+      </libraryFile>
+      <libraryFile>
+        <mavenCoordinates
+            artifactId="google-http-client-appengine"
+            groupId="com.google.http-client"
+            version="1.22.0" />
       </libraryFile>
       <libraryFile
-            javadocUri="https://google.github.io/google-api-java-client/releases/1.21.0/javadoc/index.html">
+          javadocUri="https://google.github.io/google-http-java-client/releases/1.21.0/javadoc/index.html">
         <mavenCoordinates
-              artifactId="google-http-client-appengine"
-              groupId="com.google.http-client"
-              version="1.22.0" />
-      </libraryFile>
-      <libraryFile
-            javadocUri="https://google.github.io/google-http-java-client/releases/1.21.0/javadoc/index.html">
-        <mavenCoordinates
-              artifactId="google-http-client"
-              groupId="com.google.http-client"
-              version="1.22.0" />
+            artifactId="google-http-client"
+            groupId="com.google.http-client"
+            version="1.22.0" />
       </libraryFile>
       <libraryFile javadocUri=
           "https://developers.google.com/api-client-library/java/google-oauth-java-client/reference/1.20.0/">
         <mavenCoordinates
-              artifactId="google-oauth-client"
-              groupId="com.google.oauth-client"
-              version="1.22.0" />
+            artifactId="google-oauth-client"
+            groupId="com.google.oauth-client"
+            version="1.22.0" />
       </libraryFile>
       <libraryFile>  <!-- todo javadoc if it's published -->
         <mavenCoordinates
