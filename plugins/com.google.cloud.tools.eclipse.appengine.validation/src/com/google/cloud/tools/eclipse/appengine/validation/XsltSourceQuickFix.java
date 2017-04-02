@@ -64,7 +64,7 @@ public class XsltSourceQuickFix implements ICompletionProposal, ICompletionPropo
     try (InputStream in = new ByteArrayInputStream(bytes);
         InputStream stylesheetStream = xslt.openStream()) {
       InputStream transformed = Xslt.applyXslt(in, stylesheetStream);
-      String encoding = AbstractXmlSourceValidator.getDocumentEncoding(document);
+      String encoding = XmlSourceValidator.getDocumentEncoding(document);
       String result = CharStreams.toString(new InputStreamReader(transformed, encoding));
       document.set(result);
     } catch (IOException | TransformerException ex) {
@@ -78,7 +78,7 @@ public class XsltSourceQuickFix implements ICompletionProposal, ICompletionPropo
   }
   
   byte[] getDocumentBytes(IDocument document) {
-    String encoding = AbstractXmlSourceValidator.getDocumentEncoding(document);
+    String encoding = XmlSourceValidator.getDocumentEncoding(document);
     try {
       byte[] bytes = document.get().getBytes(encoding);
       return bytes;

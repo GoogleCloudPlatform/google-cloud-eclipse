@@ -16,6 +16,8 @@
 
 package com.google.cloud.tools.eclipse.projectselector.model;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 /**
  * Represents a Google Cloud Platform project.
  */
@@ -23,7 +25,7 @@ public class GcpProject {
 
   private final String name;
   private final String id;
-  private AppEngine appEngine;
+  private AtomicReference<AppEngine> appEngine = new AtomicReference<>();
 
   public GcpProject(String name, String id) {
     this.name = name;
@@ -71,11 +73,11 @@ public class GcpProject {
    * not yet been retrieved
    */
   public AppEngine getAppEngine() {
-    return appEngine;
+    return appEngine.get();
   }
 
   public void setAppEngine(AppEngine appEngine) {
-    this.appEngine = appEngine;
+    this.appEngine.set(appEngine);
   }
 
   /**
@@ -83,6 +85,6 @@ public class GcpProject {
    * retrieved from the backend
    */
   public boolean hasAppEngineInfo() {
-    return appEngine != null;
+    return appEngine.get() != null;
   }
 }

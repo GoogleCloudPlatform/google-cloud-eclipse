@@ -17,18 +17,20 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.wst.validation.internal.provisional.core.IMessage;
 
 /**
  * A blacklisted java servlet element that will receive a servlet marker. 
  */
 public class JavaServletElement extends BannedElement {
 
-  private static final String markerId = 
+  private static final String MESSAGE = Messages.getString("web.xml.version");
+  private static final String MARKERID = 
       "com.google.cloud.tools.eclipse.appengine.validation.servletMarker";
-  private static final int severity = IMarker.SEVERITY_ERROR;
   
-  public JavaServletElement(String message, DocumentLocation start, int length) {
-    super(message, markerId, severity, start, length);
+  public JavaServletElement(DocumentLocation start, int length) {
+    super(MESSAGE, MARKERID, IMarker.SEVERITY_ERROR, 
+        IMessage.HIGH_SEVERITY, start, length, null /* No source quick fix */);
   }
 
 }

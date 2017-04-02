@@ -22,10 +22,12 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
-import java.util.Queue;
-import org.junit.Before;
+
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.wst.validation.internal.provisional.core.IMessage;
 import org.junit.Test;
 
 public class ValidationUtilsTest {
@@ -50,85 +52,84 @@ public class ValidationUtilsTest {
   private static final String XML_WITH_PROJECT_ID_WHITESPACE =
       LINE_WITH_WHITESPACE + PROJECT_ID;
   
-  private static final String XML_WITH_PROJECT_ID_FIRST =
-      PROJECT_ID;
-  
-  private Queue<BannedElement> blacklist = new ArrayDeque<>();
-  private BannedElement element;
-  
-  @Before
-  public void setUp() {
-    DocumentLocation start = new DocumentLocation(2, 1);
-    element = new BannedElement("application", "", 1, start, 1);
-    blacklist.add(element);
-  }
+  private DocumentLocation location = new DocumentLocation(2, 13);
+  private BannedElement element =
+      new AppEngineBlacklistElement("application", location, 3);
+  private ArrayList<BannedElement> blacklist = new ArrayList<>(Arrays.asList(element));
   
   @Test
   public void testGetOffsetMap_unixXml() throws IOException {
     byte[] bytes = UNIX_XML_WITH_PROJECT_ID.getBytes(StandardCharsets.UTF_8);
-    SaxParserResults result = new SaxParserResults(blacklist, "UTF-8");
-    Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, result);
+    Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, blacklist, "UTF-8");
     assertEquals(1, map.size());
     int offset = map.get(element);
-    assertEquals(8, offset);
+    assertEquals(20, offset);
   }
   
   @Test
   public void testGetOffsetMap_macXml() throws IOException {
     byte[] bytes = MAC_XML_WITH_PROJECT_ID.getBytes(StandardCharsets.ISO_8859_1);
-    SaxParserResults result = new SaxParserResults(blacklist, "ISO_8859_1");
-    Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, result);
+    Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, blacklist, "ISO_8859_1");
     assertEquals(1, map.size());
     int offset = map.get(element);
-    assertEquals(8, offset);
+    assertEquals(20, offset);
   }
   
   @Test
   public void testGetOffsetMap_windowsXml() throws IOException {
     byte[] bytes = WINDOWS_XML_WITH_PROJECT_ID.getBytes("CP1252");
-    SaxParserResults result = new SaxParserResults(blacklist, "CP1252");
-    Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, result);
+    Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, blacklist, "CP1252");
     assertEquals(1, map.size());
     int offset = map.get(element);
-    assertEquals(8, offset);
+    assertEquals(20, offset);
   }
-  
+
   @Test
   public void testGetOffsetMap_mixedXml() throws IOException {
-    byte[] bytes = MIXED_XML_WITH_PROJECT_ID.getBytes(StandardCharsets.UTF_8);
     blacklist.clear();
-    DocumentLocation start = new DocumentLocation(3, 1);
-    BannedElement element = new BannedElement("application", "", 1, start, 1);
+    byte[] bytes = MIXED_XML_WITH_PROJECT_ID.getBytes(StandardCharsets.UTF_8);
+    DocumentLocation start = new DocumentLocation(3, 13);
+    BannedElement element = new BannedElement(
+        "application", 
+        "", 
+        IMarker.SEVERITY_WARNING, 
+        IMessage.NORMAL_SEVERITY, 
+        start, 
+        1, 
+        null);
     blacklist.add(element);
-    SaxParserResults result = new SaxParserResults(blacklist, "UTF-8");
-    Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, result);
+    Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, blacklist, "UTF-8");
     assertEquals(1, map.size());
     int offset = map.get(element);
-    assertEquals(9, offset);
+    assertEquals(21, offset);
   }
   
   @Test
   public void testGetOffsetMap_lineWithWhitespace() throws IOException {
     byte[] bytes = XML_WITH_PROJECT_ID_WHITESPACE.getBytes(StandardCharsets.UTF_8);
-    SaxParserResults result = new SaxParserResults(blacklist, "UTF-8");
-    Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, result);
+    Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, blacklist, "UTF-8");
     assertEquals(1, map.size());
     int offset = map.get(element);
-    assertEquals(2, offset);
+    assertEquals(14, offset);
   }
   
   @Test
-  public void testGetOffsetMap_firstElement() throws IOException {
-    blacklist.clear();
-    DocumentLocation start = new DocumentLocation(1, 1);
-    BannedElement newElement = new BannedElement("application", "", 1, start, 1);
-    blacklist.add(newElement);
-    byte[] bytes = XML_WITH_PROJECT_ID_FIRST.getBytes(StandardCharsets.UTF_8);
-    SaxParserResults result = new SaxParserResults(blacklist, "UTF-8");
-    Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, result);
-    assertEquals(1, map.size());
-    int offset = map.get(newElement);
-    assertEquals(0, offset);
+  public void testGetOffsetMap_orderedElements() throws IOException {
+    
+    DocumentLocation applicationLocation = new DocumentLocation(2, 14);
+    DocumentLocation versionLocation = new DocumentLocation(1, 10);
+    BannedElement application =
+        new AppEngineBlacklistElement("application", applicationLocation, 0);
+    BannedElement version = new AppEngineBlacklistElement("version", versionLocation, 0);
+    ArrayList<BannedElement> blacklist = new ArrayList<>(Arrays.asList(application, version));
+    
+    String xml = "<version>   </version>\n\n<application>   </application>";
+    byte[] bytes = xml.getBytes(StandardCharsets.UTF_8);
+    Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, blacklist, "UTF-8");
+    
+    assertEquals(2, map.size());
+    assertEquals(36, (int) map.get(application));
+    assertEquals(9, (int) map.get(version));
   }
   
   @Test
@@ -138,4 +139,5 @@ public class ValidationUtilsTest {
     InputStream stream = new ByteArrayInputStream(bytes);
     assertEquals(test, ValidationUtils.convertStreamToString(stream, "UTF-8"));
   }
+
 }

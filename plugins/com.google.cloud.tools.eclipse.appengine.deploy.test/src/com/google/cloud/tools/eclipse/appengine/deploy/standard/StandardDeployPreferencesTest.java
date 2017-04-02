@@ -21,22 +21,22 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import org.eclipse.core.resources.IProject;
 import org.junit.Rule;
 import org.junit.Test;
 
-import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
-
 public class StandardDeployPreferencesTest {
 
   @Rule public final TestProjectCreator projectCreator = new TestProjectCreator();
-  private final StandardDeployPreferences defaultPreferences = StandardDeployPreferences.getDefaultPreferences();
+  private final StandardDeployPreferences defaultPreferences =
+      StandardDeployPreferences.getDefaultPreferences();
 
   @Test
   public void testDefaultProjectId() {
     assertThat(defaultPreferences.getProjectId(), isEmptyString());
   }
-  
+
   @Test
   public void testSetProjectId() {
     IProject project = projectCreator.getProject();
@@ -66,6 +66,11 @@ public class StandardDeployPreferencesTest {
   @Test
   public void testDefaultStopPreviousVersion() {
     assertTrue(defaultPreferences.isStopPreviousVersion());
+  }
+
+  @Test
+  public void testIncludeOptionalConfigurationFiles() {
+    assertTrue(defaultPreferences.isIncludeOptionalConfigurationFiles());
   }
 
 }

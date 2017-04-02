@@ -46,5 +46,14 @@ public class CloudLibrariesTest {
     Assert.assertEquals(library.getGroup(), "appengine");
     Assert.assertEquals(library.getName(), "Objectify");
   }
+  
+  @Test
+  public void testTransitiveDependencies() {
+    Library library = CloudLibraries.getLibrary("googlecloudstorage");
+    List<String> dependencies = library.getLibraryDependencies();
+    Assert.assertEquals(2, dependencies.size());
+    Assert.assertEquals("googlecloudcore", dependencies.get(0));
+    Assert.assertEquals("googleapiclient", dependencies.get(1));
+  }
 
 }

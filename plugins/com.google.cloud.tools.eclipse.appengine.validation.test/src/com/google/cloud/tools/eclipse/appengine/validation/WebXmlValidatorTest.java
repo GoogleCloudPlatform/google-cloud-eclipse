@@ -16,43 +16,53 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
-import static org.mockito.Mockito.when;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import static org.junit.Assert.assertEquals;
+import java.util.ArrayList;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.runtime.CoreException;
 import org.junit.Test;
-import org.mockito.Mockito;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 public class WebXmlValidatorTest {
  
-  IFile file = Mockito.mock(IFile.class);
+  @Test
+  public void testCheckForElements() throws ParserConfigurationException {
+    DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+    DocumentBuilder documentBuilder = builderFactory.newDocumentBuilder();
+    Document document = documentBuilder.newDocument();
+
+    Element element = document.createElementNS("http://xmlns.jcp.org/xml/ns/javaee", "web-app");
+    element.setUserData("version", "3.1", null);
+    element.setUserData("location", new DocumentLocation(1, 1), null);
+    document.appendChild(element);
+    
+    WebXmlValidator validator = new WebXmlValidator();
+    ArrayList<BannedElement> blacklist = validator.checkForElements(null, document);
+    
+    assertEquals(1, blacklist.size());
+    String markerId = "com.google.cloud.tools.eclipse.appengine.validation.servletMarker";
+    assertEquals(markerId, blacklist.get(0).getMarkerId());
+  }
   
- @Test
- public void testValidate() throws CoreException, IOException, ParserConfigurationException {
-   String markerId = "com.google.cloud.tools.eclipse.appengine.validation.servletMarker";
-   when(file.createMarker(markerId)).thenReturn(Mockito.mock(IMarker.class));
-   String xml = 
-       "<web-app xmlns='http://xmlns.jcp.org/xml/ns/javaee' version='3.1'></web-app>";
-   byte[] bytes = xml.getBytes(StandardCharsets.UTF_8);
-   WebXmlValidator validator = new WebXmlValidator();
-   validator.validate(file, bytes);
-   Mockito.verify(file, Mockito.times(1)).createMarker(markerId);
- }
- 
- @Test
- public void testValidate_noMarkers()
-     throws CoreException, IOException, ParserConfigurationException {
-   String xml = 
-       "<web-app xmlns='http://java.sun.com/xml/ns/javaee' version='2.5'></web-app>";
-   byte[] bytes = xml.getBytes(StandardCharsets.UTF_8);
-   WebXmlValidator validator = new WebXmlValidator();
-   validator.validate(file, bytes);
-   String markerId = "com.google.cloud.tools.eclipse.appengine.validation.servletMarker";
-   Mockito.verify(file, Mockito.times(0)).createMarker(markerId);
- }
+  @Test
+  public void testCheckForElements_noElements() throws ParserConfigurationException {
+    DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+    DocumentBuilder documentBuilder = builderFactory.newDocumentBuilder();
+    Document document = documentBuilder.newDocument();
+    
+    Element element = document.createElementNS("http://java.sun.com/xml/ns/javaee", "web-app");
+    element.setUserData("version", "2.5", null);
+    element.setUserData("location", new DocumentLocation(1, 1), null);
+    document.appendChild(element);
+    
+    WebXmlValidator validator = new WebXmlValidator();
+    ArrayList<BannedElement> blacklist = validator.checkForElements(null, document);
+    
+    assertEquals(0, blacklist.size());
+  }
  
 }

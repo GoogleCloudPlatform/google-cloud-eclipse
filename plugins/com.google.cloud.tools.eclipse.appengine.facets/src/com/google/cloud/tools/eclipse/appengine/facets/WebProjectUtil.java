@@ -16,10 +16,17 @@
 
 package com.google.cloud.tools.eclipse.appengine.facets;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.wst.common.componentcore.ComponentCore;
 import org.eclipse.wst.common.componentcore.resources.IVirtualComponent;
 import org.eclipse.wst.common.componentcore.resources.IVirtualFolder;
@@ -69,6 +76,30 @@ public class WebProjectUtil {
     }
     IFile file = webInfFolder.getFile(filePath);
     return file.exists() ? file : null;
+  }
+
+  /**
+   * Return the set of Java source paths for the given project, relative to the project. Return an
+   * empty list if not a Java project.
+   */
+  public static List<IPath> getJavaSourcePaths(IProject project) {
+    IJavaProject javaProject = JavaCore.create(project);
+    if (!javaProject.exists()) {
+      return Collections.emptyList();
+    }
+    try {
+      IClasspathEntry[] classpathEntries = javaProject.getRawClasspath();
+      List<IPath> paths = new ArrayList<>();
+      for (IClasspathEntry entry : classpathEntries) {
+        if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+          // source paths are absolute to the root folder of the project
+          paths.add(entry.getPath().removeFirstSegments(1));
+        }
+      }
+      return paths;
+    } catch (JavaModelException ex) {
+      return Collections.emptyList();
+    }
   }
 
 }

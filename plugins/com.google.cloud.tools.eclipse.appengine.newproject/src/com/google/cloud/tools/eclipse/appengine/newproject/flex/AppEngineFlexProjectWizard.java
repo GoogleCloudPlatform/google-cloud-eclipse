@@ -16,16 +16,20 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject.flex;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectConfig;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectWizard;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineWizardPage;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
+import javax.inject.Inject;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 // TODO: update functions
 public class AppEngineFlexProjectWizard extends AppEngineProjectWizard {
+  @Inject
+  private ILibraryRepositoryService repositoryService;
 
   @Override
   public AppEngineWizardPage createWizardPage() {
@@ -45,7 +49,7 @@ public class AppEngineFlexProjectWizard extends AppEngineProjectWizard {
   @Override
   public CreateAppEngineWtpProject getAppEngineProjectCreationOperation(AppEngineProjectConfig config,
       IAdaptable uiInfoAdapter) {
-    return new CreateAppEngineFlexWtpProject(config, uiInfoAdapter);
+    return new CreateAppEngineFlexWtpProject(config, uiInfoAdapter, repositoryService);
   }
 
 }

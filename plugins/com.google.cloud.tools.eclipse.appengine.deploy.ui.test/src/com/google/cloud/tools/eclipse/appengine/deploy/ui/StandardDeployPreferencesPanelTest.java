@@ -286,6 +286,29 @@ public class StandardDeployPreferencesPanelTest {
     assertThat(((GcpProject) projectTable.getItem(0).getData()).getId(), is("projectId2"));
   }
 
+  // "AppEngineApplicationQueryJob" assumes no project gets selected when switching accounts.
+  @Test
+  public void testNoProjectSelectedWhenSwitchingAccounts()
+      throws ProjectRepositoryException, InterruptedException {
+    when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1, account2)));
+    initializeProjectRepository();
+
+    deployPanel = createPanel(false /* requireValues */);
+    selectAccount(account1);
+    deployPanel.getLatestGcpProjectQueryJob().join();
+
+    Table projectTable = getProjectSelector().getViewer().getTable();
+    assertThat(projectTable.getItemCount(), is(2));
+    projectTable.setSelection(0);
+    assertThat(projectTable.getSelectionCount(), is(1));
+
+    selectAccount(account2);
+    deployPanel.getLatestGcpProjectQueryJob().join();
+
+    assertThat(projectTable.getItemCount(), is(1));
+    assertThat(projectTable.getSelectionCount(), is(0));
+  }
+
   private Button getButtonWithText(String text) {
     for (Control control : deployPanel.getChildren()) {
       if (control instanceof Button) {

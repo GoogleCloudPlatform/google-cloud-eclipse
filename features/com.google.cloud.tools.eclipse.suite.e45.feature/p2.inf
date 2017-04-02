@@ -23,32 +23,3 @@
  requires.4.min = 0
  requires.4.max = 0
 
- requires.5.namespace = org.eclipse.equinox.p2.iu
- requires.5.name = com.android.ide.eclipse.adt.feature.feature.group
- requires.5.min = 0
- requires.5.max = 0
-
- requires.6.namespace = org.eclipse.equinox.p2.iu
- requires.6.name = com.android.ide.eclipse.ddms.feature.feature.group
- requires.6.min = 0
- requires.6.max = 0
-
- requires.7.namespace = org.eclipse.equinox.p2.iu
- requires.7.name = com.android.ide.eclipse.gldebugger.feature.feature.group
- requires.7.min = 0
- requires.7.max = 0
-
- requires.8.namespace = org.eclipse.equinox.p2.iu
- requires.8.name = com.android.ide.eclipse.hierarchyviewer.feature.feature.group
- requires.8.min = 0
- requires.8.max = 0
-
- requires.9.namespace = org.eclipse.equinox.p2.iu
- requires.9.name = com.android.ide.eclipse.ndk.feature.feature.group
- requires.9.min = 0
- requires.9.max = 0
-
- requires.10.namespace = org.eclipse.equinox.p2.iu
- requires.10.name = com.android.ide.eclipse.traceview.feature.feature.group
- requires.10.min = 0
- requires.10.max = 0

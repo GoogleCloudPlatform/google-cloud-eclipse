@@ -102,8 +102,8 @@ public class ProjectRepository {
   }
 
   /**
-   * @return true if the credential has access to the GCP project identified by {@code projectId}
-   *     and the project has an App Engine application
+   * @return {@link AppEngine} if the credential has access to the GCP project identified by
+   *     {@code projectId} and the project has an App Engine application
    * @throws ProjectRepositoryException if an error other than HTTP 404 happens while retrieving the
    *     App Engine application
    */

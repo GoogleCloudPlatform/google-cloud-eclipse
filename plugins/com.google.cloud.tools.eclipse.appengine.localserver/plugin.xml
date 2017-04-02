@@ -307,4 +307,11 @@
       </shortcut>
       
    </extension>
+   <extension
+         point="org.eclipse.debug.ui.debugModelPresentations">
+      <debugModelPresentation
+            class="com.google.cloud.tools.eclipse.appengine.localserver.ui.CloudSdkDebugTargetPresentation"
+            id="com.google.cloud.tools.eclipse.appengine.localserver.cloudSdkDebugTarget">
+      </debugModelPresentation>
+   </extension>
 </plugin>

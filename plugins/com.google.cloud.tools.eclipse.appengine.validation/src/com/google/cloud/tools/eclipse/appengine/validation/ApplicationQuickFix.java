@@ -17,12 +17,12 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 /**
- * Applies application.xsl to appengine-web.xml to remove an <application/> element.
+ * Applies removeApplication.xsl to appengine-web.xml to remove an <application/> element.
  */
 public class ApplicationQuickFix extends XsltQuickFix {
   
   public ApplicationQuickFix() {
-    super("/xslt/application.xsl", Messages.getString("remove.application.element"));
+    super("/xslt/removeApplication.xsl", Messages.getString("remove.application.element"));
   }
   
 }

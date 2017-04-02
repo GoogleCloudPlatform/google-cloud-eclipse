@@ -29,6 +29,8 @@ import java.util.SortedSet;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Widget;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,71 +48,99 @@ public class SelectFirstMatchingPrefixListenerTest {
   private SortedSet<String> elements =
       ImmutableSortedSet.of("collidingText1", "collidingText222", "exampleText");
   private SelectFirstMatchingPrefixListener listener;
-  @Mock private OnCompleteListener onCompleteListener;
-  
+  @Mock
+  private OnCompleteListener onCompleteListener;
+
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
-    
+
     listener = new SelectFirstMatchingPrefixListener(combo);
     listener.setContents(elements);
     listener.addOnCompleteListener(onCompleteListener);
   }
-    
+
   @Test
   public void testBelowPreviousNoAutofill() {
-    when(combo.getText()).thenReturn("long_text_that_doesnt_match");
-    // Updates the 
-    listener.modifyText(mock(ModifyEvent.class));
-    when(combo.getText()).thenReturn("exampleTex");
-    listener.modifyText(mock(ModifyEvent.class));
+    when(combo.getText()).thenReturn("collidingText222");
+    // Updates the combo to be initialized with "collidingText222" as the current value
+    Event event = new Event();
+    event.widget = mock(Widget.class);
+    listener.modifyText(new ModifyEvent(event));
+    when(combo.getText()).thenReturn("collidingText2");
+    listener.modifyText(new ModifyEvent(event));
     verify(combo, never()).select(anyInt());
     verify(combo, never()).setSelection(any(Point.class));
   }
-  
+
   @Test
   public void testBelowThresholdNoAutofill() {
-    when(combo.getText()).thenReturn("long_text_that_doesnt_match");
-    // Updates the combo to be initialized with "long_text_that_doesnt_match" as the current value
-    listener.modifyText(mock(ModifyEvent.class));
+    when(combo.getText()).thenReturn("s");
+    // Updates the combo to be initialized with "s" as the current value
+    Event event = new Event();
+    event.widget = mock(Widget.class);
+    listener.modifyText(new ModifyEvent(event));
     when(combo.getText()).thenReturn("ex");
-    listener.modifyText(mock(ModifyEvent.class));
+    listener.modifyText(new ModifyEvent(event));
     verify(combo, never()).select(anyInt());
-    verify(combo, never()).setSelection(any(Point.class));  
+    verify(combo, never()).setSelection(any(Point.class));
   }
-  
+
   @Test
-  public void testNoPrefixMatchSucceeds() {
-    when(combo.getText()).thenReturn("long_text_that_doesnt_match");
-    // Updates the combo to be initialized with "long_text_that_doesnt_match" as the current value
-    listener.modifyText(mock(ModifyEvent.class));
-    when(combo.getText()).thenReturn("also_doesnt_match");
-    listener.modifyText(mock(ModifyEvent.class));
-    verify(combo, never()).select(anyInt());
-    verify(combo, never()).setSelection(any(Point.class));  
-  }
-  
-  @Test
-  public void testPrefixMatchAutofills() {
-    when(combo.getText()).thenReturn("long_text_that_doesnt_match");
-    // Updates the combo to be initialized with "long_text_that_doesnt_match" as the current value
-    listener.modifyText(mock(ModifyEvent.class));
+  public void testIntermediateCursorNeverAutofills() {
+    when(combo.getText()).thenReturn("short");
+    // Updates the combo to be initialized with "short" as the current value
+    Event event = new Event();
+    event.widget = mock(Widget.class);
+    listener.modifyText(new ModifyEvent(event));
     String prefix = "exampleTe";
     when(combo.getText()).thenReturn(prefix);
-    listener.modifyText(mock(ModifyEvent.class));
-    verify(combo).select(2);
-    verify(combo).setSelection(new Point(prefix.length(), "exampleText".length()));  
+    when(combo.getCaretPosition()).thenReturn(prefix.length() - 2);
+    listener.modifyText(new ModifyEvent(event));
+    verify(combo, never()).select(anyInt());
+    verify(combo, never()).setSelection(any(Point.class));
   }
-  
+
+  @Test
+  public void testNoPrefixMatchSucceeds() {
+    when(combo.getText()).thenReturn("short_text");
+    // Updates the combo to be initialized with "short_text" as the current value
+    Event event = new Event();
+    event.widget = mock(Widget.class);
+    listener.modifyText(new ModifyEvent(event));
+    when(combo.getText()).thenReturn("also_doesnt_match");
+    listener.modifyText(new ModifyEvent(event));
+    verify(combo, never()).select(anyInt());
+    verify(combo, never()).setSelection(any(Point.class));
+  }
+
+  @Test
+  public void testPrefixMatchAutofills() {
+    when(combo.getText()).thenReturn("short");
+    // Updates the combo to be initialized with "short" as the current value
+    Event event = new Event();
+    event.widget = mock(Widget.class);
+    listener.modifyText(new ModifyEvent(event));
+    String prefix = "exampleTe";
+    when(combo.getText()).thenReturn(prefix);
+    when(combo.getCaretPosition()).thenReturn(prefix.length());
+    listener.modifyText(new ModifyEvent(event));
+    verify(combo).select(2);
+    verify(combo).setSelection(new Point(prefix.length(), "exampleText".length()));
+  }
+
   @Test
   public void testPrefixMatchMultipleMatches() {
-    when(combo.getText()).thenReturn("long_text_that_doesnt_match");
-    // Updates the combo to be initialized with "long_text_that_doesnt_match" as the current value
-    listener.modifyText(mock(ModifyEvent.class));
+    when(combo.getText()).thenReturn("short");
+    // Updates the combo to be initialized with "short" as the current value
+    Event event = new Event();
+    event.widget = mock(Widget.class);
+    listener.modifyText(new ModifyEvent(event));
     String prefix = "collidingT";
     when(combo.getText()).thenReturn(prefix);
-    listener.modifyText(mock(ModifyEvent.class));
+    when(combo.getCaretPosition()).thenReturn(prefix.length());
+    listener.modifyText(new ModifyEvent(event));
     verify(combo).select(0); // == "collidingText1" - it's lexicographically the earliest collision
-    verify(combo).setSelection(new Point(prefix.length(), "collidingText1".length()));  
+    verify(combo).setSelection(new Point(prefix.length(), "collidingText1".length()));
   }
 }

@@ -16,41 +16,27 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
-import java.util.Iterator;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext;
 import org.eclipse.jface.text.quickassist.IQuickAssistProcessor;
 import org.eclipse.jface.text.source.Annotation;
-import org.eclipse.jface.text.source.IAnnotationModel;
-import org.eclipse.jface.text.source.ISourceViewer;
 
 /**
  * Provides quick assists for source editor.
  */
 public abstract class AbstractQuickAssistProcessor implements IQuickAssistProcessor {
 
-  private String annotationText;
   private ICompletionProposal fix;
   
-  AbstractQuickAssistProcessor(String annotationText, XsltSourceQuickFix fix) {
-    this.annotationText = annotationText;
+  AbstractQuickAssistProcessor(XsltSourceQuickFix fix) {
     this.fix = fix;
   }
-  
+
   @Override
   public ICompletionProposal[] computeQuickAssistProposals(
       IQuickAssistInvocationContext invocationContext) {
-    ISourceViewer viewer = invocationContext.getSourceViewer();
-    IAnnotationModel annotationModel = viewer.getAnnotationModel();
-    Iterator iterator = annotationModel.getAnnotationIterator();
-    while (iterator.hasNext()) {
-      Object next = iterator.next();
-      if (next instanceof Annotation) {
-        Annotation annotation = (Annotation) next;
-        if (annotation.getText().equals(annotationText)) {
-          return new ICompletionProposal[] {fix};
-        }
-      } 
+    if (fix != null) {
+      return new ICompletionProposal[] {fix};
     }
     return null;
   }

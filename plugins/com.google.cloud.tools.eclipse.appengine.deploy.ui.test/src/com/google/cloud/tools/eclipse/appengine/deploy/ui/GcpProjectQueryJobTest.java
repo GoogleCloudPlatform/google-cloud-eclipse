@@ -57,9 +57,10 @@ public class GcpProjectQueryJobTest {
   @Before
   public void setUp() throws ProjectRepositoryException {
     assertNotNull(Display.getCurrent());
+    when(projectSelector.getDisplay()).thenReturn(Display.getCurrent());
 
     queryJob = new GcpProjectQueryJob(credential, projectRepository, projectSelector,
-        dataBindingContext, isLatestQueryJob, Display.getCurrent());
+        dataBindingContext, isLatestQueryJob);
 
     when(projectSelector.isDisposed()).thenReturn(false);
     when(projectRepository.getProjects(credential)).thenReturn(projects);
@@ -74,7 +75,7 @@ public class GcpProjectQueryJobTest {
   @Test(expected = NullPointerException.class)
   public void testNullCredential() {
     new GcpProjectQueryJob(null /* credential */, projectRepository, projectSelector,
-        dataBindingContext, isLatestQueryJob, Display.getCurrent());
+        dataBindingContext, isLatestQueryJob);
   }
 
   @Test
@@ -122,7 +123,7 @@ public class GcpProjectQueryJobTest {
 
     Predicate<Job> notLatest = mock(Predicate.class);
     Job staleJob = new GcpProjectQueryJob(staleCredential, projectRepository2,
-        projectSelector, dataBindingContext, notLatest, Display.getCurrent());
+        projectSelector, dataBindingContext, notLatest);
 
     // This second job is stale, i.e., it was fired, but user has selected another credential.
     when(notLatest.apply(staleJob)).thenReturn(false);

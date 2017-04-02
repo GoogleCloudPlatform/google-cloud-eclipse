@@ -18,7 +18,6 @@ package com.google.cloud.tools.eclipse.appengine.deploy.standard;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
@@ -27,16 +26,18 @@ import org.osgi.service.prefs.BackingStoreException;
 public class StandardDeployPreferences {
 
   public static final String PREFERENCE_STORE_QUALIFIER =
-      "com.google.cloud.tools.eclipse.appengine.deploy";      
+      "com.google.cloud.tools.eclipse.appengine.deploy";
 
   static final String PREF_ACCOUNT_EMAIL = "account.email";
   static final String PREF_PROJECT_ID = "project.id";
   static final String PREF_CUSTOM_VERSION = "project.version";
   static final String PREF_ENABLE_AUTO_PROMOTE = "project.promote"; // boolean
+  static final String PREF_INCLUDE_OPTIONAL_CONFIGURATION_FILES =
+      "include.optional.configuration.files"; // boolean
   static final String PREF_CUSTOM_BUCKET = "project.bucket";
-  static final String PREF_STOP_PREVIOUS_VERSION = "project.previousVersion.stop";
+  static final String PREF_STOP_PREVIOUS_VERSION = "project.previousVersion.stop"; // boolean
 
-  private IEclipsePreferences preferenceStore;
+  private final IEclipsePreferences preferenceStore;
 
   public static StandardDeployPreferences getDefaultPreferences() {
     return new StandardDeployPreferences(DeployPreferenceInitializer.getDefaultPreferences());
@@ -88,6 +89,16 @@ public class StandardDeployPreferences {
 
   public void setAutoPromote(boolean autoPromote) {
     preferenceStore.putBoolean(PREF_ENABLE_AUTO_PROMOTE, autoPromote);
+  }
+
+  public boolean isIncludeOptionalConfigurationFiles() {
+    return preferenceStore.getBoolean(PREF_INCLUDE_OPTIONAL_CONFIGURATION_FILES,
+        DeployPreferenceInitializer.DEFAULT_INCLUDE_OPTIONAL_CONFIGURATION_FILES);
+  }
+
+  public void setIncludeOptionalConfigurationFiles(boolean includeOptionalConfigurationFiles) {
+    preferenceStore.putBoolean(
+        PREF_INCLUDE_OPTIONAL_CONFIGURATION_FILES, includeOptionalConfigurationFiles);
   }
 
   public String getBucket() {

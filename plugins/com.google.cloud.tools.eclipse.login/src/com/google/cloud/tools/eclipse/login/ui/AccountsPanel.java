@@ -41,9 +41,6 @@ import org.eclipse.swt.widgets.Shell;
  */
 public class AccountsPanel extends PopupDialog {
 
-  @VisibleForTesting
-  static final String CSS_CLASS_NAME_KEY = "org.eclipse.e4.ui.css.CssClassName";
-
   private final IGoogleLoginService loginService;
 
   public AccountsPanel(Shell parent, IGoogleLoginService loginService) {
@@ -84,11 +81,9 @@ public class AccountsPanel extends PopupDialog {
       if (account.getName() != null) {
         name.setText(account.getName());
       }
-      name.setData(CSS_CLASS_NAME_KEY, "accountName");
 
       Label email = new Label(container, SWT.LEAD);
       email.setText(account.getEmail());  // email is never null.
-      email.setData(CSS_CLASS_NAME_KEY, "email");
 
       Label separator = new Label(container, SWT.HORIZONTAL | SWT.SEPARATOR);
       separator.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
@@ -108,7 +103,6 @@ public class AccountsPanel extends PopupDialog {
       Button logOutButton = new Button(buttonArea, SWT.FLAT);
       logOutButton.setText(Messages.getString("BUTTON_ACCOUNTS_PANEL_LOGOUT"));
       logOutButton.addSelectionListener(new LogOutOnClick());
-      logOutButton.setData(CSS_CLASS_NAME_KEY, "logOutButton");
       GridDataFactory.defaultsFor(logOutButton).applyTo(logOutButton);
     }
   }

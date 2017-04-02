@@ -23,14 +23,14 @@ import org.junit.Test;
 
 public class StandardDeployJobTest {
   @Test
-  public void testGetDeployedAppUrl_promoteWithDefaultService() {    
+  public void testGetDeployedAppUrl_promoteWithDefaultService() {
     StandardDeployJob standardDeployJob = createStandardDeployJob(true);
     AppEngineDeployOutput deployOutput = createDeployOutput("version", "default");
 
     Assert.assertEquals("https://testProject.appspot.com",
         standardDeployJob.getDeployedAppUrl(deployOutput));
   }
-  
+
   @Test
   public void testGetDeployedAppUrl_promoteWithNonDefaultService() {
     StandardDeployJob standardDeployJob = createStandardDeployJob(true);
@@ -39,7 +39,7 @@ public class StandardDeployJobTest {
     Assert.assertEquals("https://service-dot-testProject.appspot.com",
         standardDeployJob.getDeployedAppUrl(deployOutput));
   }
-  
+
   @Test
   public void testGetDeployedAppUrl_noPromoteWithDefaultService() {
     StandardDeployJob standardDeployJob = createStandardDeployJob(false);
@@ -62,7 +62,7 @@ public class StandardDeployJobTest {
     DefaultDeployConfiguration config = new DefaultDeployConfiguration();
     config.setPromote(setPromote);
     config.setProject("testProject");
-    return new StandardDeployJob(null, null, null, null, null, config);
+    return new StandardDeployJob(null, null, null, null, null, config, false);
   }
 
   private AppEngineDeployOutput createDeployOutput(String version, String service) {

@@ -27,12 +27,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swtbot.swt.finder.SWTBot;
-import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
-import org.eclipse.swtbot.swt.finder.widgets.SWTBotButton;
-import org.eclipse.swtbot.swt.finder.widgets.SWTBotLabel;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -62,14 +62,16 @@ public class AccountsPanelTest {
     when(account3.getName()).thenReturn("Charlie");
   }
 
-  @Test(expected = WidgetNotFoundException.class)
+  @Test
   public void testLogOutButton_notLoggedIn() {
     setUpLoginService();
 
     AccountsPanel panel = new AccountsPanel(null, loginService);
     Control control = panel.createDialogArea(shell);
 
-    new SWTBot(control).buttonWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "logOutButton");
+    List<String> buttonTexts = collectButtonTexts((Composite) control);
+    assertEquals(1, buttonTexts.size());
+    assertEquals("Add Account...", buttonTexts.get(0));
   }
 
   @Test
@@ -79,78 +81,64 @@ public class AccountsPanelTest {
     AccountsPanel panel = new AccountsPanel(null, loginService);
     Control control = panel.createDialogArea(shell);
 
-    SWTBotButton button =
-        new SWTBot(control).buttonWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "logOutButton");
-    assertEquals("Sign Out...", button.getText());
+    List<String> buttonTexts = collectButtonTexts((Composite) control);
+    assertEquals(2, buttonTexts.size());
+    assertTrue(buttonTexts.contains("Add Account..."));
+    assertTrue(buttonTexts.contains("Sign Out..."));
   }
 
-  @Test(expected = WidgetNotFoundException.class)
+  @Test
   public void testAccountsArea_zeroAccounts() {
     setUpLoginService();
 
     AccountsPanel panel = new AccountsPanel(null, loginService);
     Control control = panel.createDialogArea(shell);
 
-    new SWTBot(control).labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "email");
+    NamesEmails namesEmails = collectNamesEmails(control);
+    assertTrue(namesEmails.emails.isEmpty());
   }
 
-  @Test(expected = IndexOutOfBoundsException.class)
+  @Test
   public void testAccountsArea_oneAccount() {
     setUpLoginService(Arrays.asList(account1));
 
     AccountsPanel panel = new AccountsPanel(null, loginService);
     Control control = panel.createDialogArea(shell);
 
-    SWTBot bot = new SWTBot(control);
-    SWTBotLabel email = bot.labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "email", 0);
-    SWTBotLabel name = bot.labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "accountName", 0);
-    assertEquals("alice@example.com", email.getText());
-    assertEquals("Alice", name.getText());
-
-    bot.labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "email", 1);
+    NamesEmails namesEmails = collectNamesEmails(control);
+    assertEquals(1, namesEmails.emails.size());
+    assertEquals("alice@example.com", namesEmails.emails.get(0));
+    assertEquals("Alice", namesEmails.names.get(0));
   }
 
-  @Test(expected = IndexOutOfBoundsException.class)
+  @Test
   public void testAccountsArea_accountWithNullName() {
     setUpLoginService(Arrays.asList(account2));
 
     AccountsPanel panel = new AccountsPanel(null, loginService);
     Control control = panel.createDialogArea(shell);
 
-    SWTBot bot = new SWTBot(control);
-    SWTBotLabel email = bot.labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "email", 0);
-    SWTBotLabel name = bot.labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "accountName", 0);
-    assertEquals("bob@example.com", email.getText());
-    assertTrue(name.getText().isEmpty());
-
-    bot.labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "email", 1);
+    NamesEmails namesEmails = collectNamesEmails(control);
+    assertEquals(1, namesEmails.emails.size());
+    assertEquals("bob@example.com", namesEmails.emails.get(0));
+    assertTrue(namesEmails.names.get(0).isEmpty());
   }
 
-  @Test(expected = IndexOutOfBoundsException.class)
+  @Test
   public void testAccountsArea_threeAccounts() {
     setUpLoginService(Arrays.asList(account1, account2, account3));
 
     AccountsPanel panel = new AccountsPanel(null, loginService);
     Control control = panel.createDialogArea(shell);
 
-    SWTBot bot = new SWTBot(control);
-    List<String> emails = Arrays.asList(
-        bot.labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "email", 0).getText(),
-        bot.labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "email", 1).getText(),
-        bot.labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "email", 2).getText());
-    List<String> names = Arrays.asList(
-        bot.labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "accountName", 0).getText(),
-        bot.labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "accountName", 1).getText(),
-        bot.labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "accountName", 2).getText());
-
-    assertTrue(emails.contains("alice@example.com"));
-    assertTrue(emails.contains("bob@example.com"));
-    assertTrue(emails.contains("charlie@example.com"));
-    assertTrue(names.contains("Alice"));
-    assertTrue(names.contains(""));
-    assertTrue(names.contains("Charlie"));
-
-    bot.labelWithId(AccountsPanel.CSS_CLASS_NAME_KEY, "email", 3);
+    NamesEmails namesEmails = collectNamesEmails(control);
+    assertEquals(3, namesEmails.emails.size());
+    assertTrue(namesEmails.emails.contains("alice@example.com"));
+    assertTrue(namesEmails.emails.contains("bob@example.com"));
+    assertTrue(namesEmails.emails.contains("charlie@example.com"));
+    assertTrue(namesEmails.names.contains("Alice"));
+    assertTrue(namesEmails.names.contains(""));
+    assertTrue(namesEmails.names.contains("Charlie"));
   }
 
   private void setUpLoginService(List<Account> accounts) {
@@ -160,5 +148,34 @@ public class AccountsPanelTest {
 
   private void setUpLoginService() {
     setUpLoginService(new ArrayList<Account>());  // Simulate no signed-in account.
+  }
+
+  private static List<String> collectButtonTexts(Composite composite) {
+    List<String> buttonTexts = new ArrayList<>();
+    for (Control control : composite.getChildren()) {
+      if (control instanceof Button) {
+        buttonTexts.add(((Button) control).getText());
+      } else if (control instanceof Composite) {
+        buttonTexts.addAll(collectButtonTexts((Composite) control));
+      }
+    }
+    return buttonTexts;
+  }
+
+  private static class NamesEmails {
+    private List<String> names = new ArrayList<>();
+    private List<String> emails = new ArrayList<>();
+  }
+
+  private static NamesEmails collectNamesEmails(Control dialogArea) {
+    NamesEmails namesEmails = new NamesEmails();
+
+    Control controls[] = ((Composite) dialogArea).getChildren();
+    for (int i = 0; i + 3 < controls.length; i += 3) {
+      namesEmails.names.add(((Label) controls[i]).getText());
+      namesEmails.emails.add(((Label) controls[i+1]).getText());
+      assertEquals(SWT.SEPARATOR, ((Label) controls[i+2]).getStyle() & SWT.SEPARATOR);
+    }
+    return namesEmails;
   }
 }

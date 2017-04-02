@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.RegistryFactory;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 
 public class CloudLibraries {
 
@@ -83,6 +84,29 @@ public class CloudLibraries {
         logger.log(Level.SEVERE, "Error loading library definition", ex);
       }
     }
-    return builder.build();
+
+    ImmutableMap<String, Library> map = builder.build();
+    
+    resolveTransitiveDependencies(map);
+    
+    return map;
+  }
+
+  // Only goes one level deeper, which is all we need for now.
+  // Does not recurse.
+  private static void resolveTransitiveDependencies(ImmutableMap<String, Library> map) {
+    for (Library library : map.values()) {
+      List<String> directDependencies = library.getLibraryDependencies();
+      List<String> transitiveDependencies = Lists.newArrayList(directDependencies);
+      for (String id : directDependencies) {
+        Library dependency = map.get(id);
+        for (String dependencyId : dependency.getLibraryDependencies()) {
+          if (!transitiveDependencies.contains(dependencyId)) {
+            transitiveDependencies.add(dependencyId);
+          }
+        }
+      }
+      library.setLibraryDependencies(transitiveDependencies);
+    }    
   }
 }
