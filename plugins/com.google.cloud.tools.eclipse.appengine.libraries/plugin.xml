@@ -139,6 +139,14 @@
             groupId="com.google.oauth-client"
             version="1.22.0" />
       </libraryFile>
+      <libraryFile javadocUri=
+          "https://developers.google.com/api-client-library/java/google-oauth-java-client/reference/1.20.0/">
+        <mavenCoordinates
+            artifactId="google-oauth-client-servlet"
+            groupId="com.google.oauth-client"
+            version="1.22.0" />
+      </libraryFile>
+      
       <libraryFile>  <!-- todo javadoc if it's published -->
         <mavenCoordinates
               artifactId="google-oauth-client-appengine"
