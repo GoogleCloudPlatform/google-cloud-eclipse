@@ -121,14 +121,18 @@ public class CodeTemplates {
     }
 
     if (isStandardProject) {
-      createChildFile("appengine-web.xml", AppEngineTemplateUtility.APPENGINE_WEB_XML_TEMPLATE,
+      createChildFile("appengine-web.xml",  //$NON-NLS-1$
+          AppEngineTemplateUtility.APPENGINE_WEB_XML_TEMPLATE,
           webinf, subMonitor.newChild(5), properties);
+    } else {
+      IFolder appengine = createChildFolder("appengine", main, subMonitor.newChild(5)); //$NON-NLS-1$
+      copyChildFile("app.yaml", appengine, subMonitor.newChild(5));
     }
 
     Map<String, String> packageMap = new HashMap<>();
     String packageValue = config.getPackageName().isEmpty() ? "" : config.getPackageName() + ".";
-    packageMap.put("package", packageValue);
-    createChildFile("web.xml", AppEngineTemplateUtility.WEB_XML_TEMPLATE, webinf,
+    packageMap.put("package", packageValue);  //$NON-NLS-1$
+    createChildFile("web.xml", AppEngineTemplateUtility.WEB_XML_TEMPLATE, webinf,  //$NON-NLS-1$
         subMonitor.newChild(5), packageMap);
 
     createChildFile("index.html", AppEngineTemplateUtility.INDEX_HTML_TEMPLATE, webapp,
