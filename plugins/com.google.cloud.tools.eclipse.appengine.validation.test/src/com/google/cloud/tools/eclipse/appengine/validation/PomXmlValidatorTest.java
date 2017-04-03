@@ -47,16 +47,16 @@ public class PomXmlValidatorTest {
     artifactId.setTextContent("appengine-maven-plugin");
     
     Element plugin = document.createElementNS("http://maven.apache.org/POM/4.0.0", "plugin");
-    plugin.setUserData("location", new DocumentLocation(1, 1), null);
+    plugin.setUserData("location", new DocumentLocation(4, 1), null);
     plugin.appendChild(groupId);
     plugin.appendChild(artifactId);
     
     Element plugins = document.createElementNS("http://maven.apache.org/POM/4.0.0", "plugins");
-    plugins.setUserData("location", new DocumentLocation(1, 1), null);
+    plugins.setUserData("location", new DocumentLocation(5, 1), null);
     plugins.appendChild(plugin);
     
     Element build = document.createElementNS("http://maven.apache.org/POM/4.0.0", "build");
-    build.setUserData("location", new DocumentLocation(1, 1), null);
+    build.setUserData("location", new DocumentLocation(6, 1), null);
     build.appendChild(plugins);
 
     document.appendChild(build);
