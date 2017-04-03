@@ -55,12 +55,12 @@ public class WebXmlValidator implements XmlValidationHelper {
   private static final XPathFactory FACTORY = XPathFactory.newInstance();
   private Document document;
   private IResource resource;
-  ArrayList<BannedElement> blacklist;
+  private ArrayList<BannedElement> blacklist;
   
   @Override
-  public ArrayList<BannedElement> checkForElements(IResource _resource, Document _document) {
-    this.document = _document;
-    this.resource = _resource;
+  public ArrayList<BannedElement> checkForElements(IResource resource, Document document) {
+    this.document = document;
+    this.resource = resource;
     this.blacklist = new ArrayList<>();
     validateJavaServlet();
     validateServletClass();
@@ -89,7 +89,7 @@ public class WebXmlValidator implements XmlValidationHelper {
   }
   
   /**
-   * Validates that all <servlet-class> element exist in the project.
+   * Validates that all <servlet-class> elements exist in the project.
    */
   private void validateServletClass() {
     NodeList servletClassList = document.getElementsByTagName("servlet-class");
@@ -108,8 +108,8 @@ public class WebXmlValidator implements XmlValidationHelper {
   
   /**
    * Adds all defined servlet names to a set, then adds a
-   * {@link ServletMappingElement} to the blacklist for every
-   * <servlet-mapping> element whose <servlet-name> is undefined.
+   * {@link ServletMappingElement} to the blacklist for all
+   * <servlet-mapping> elements whose <servlet-name> is undefined.
    */
   private void validateServletMapping() {
     try {

@@ -25,7 +25,7 @@ import javax.xml.namespace.NamespaceContext;
 
 import com.google.common.base.Preconditions;
 
-public class JavaContext implements NamespaceContext {
+class JavaContext implements NamespaceContext {
 
   @Override
   public String getNamespaceURI(String prefix) {
