@@ -93,11 +93,11 @@ public class CodeTemplates {
     if (packageName != null && !packageName.isEmpty()) {
       templateValues.put("package", packageName);  //$NON-NLS-1$
     } else {
-      templateValues.put("package", ""); 
+      templateValues.put("package", "");
     }
-    
+
     IFolder packageFolder = createFoldersForPackage(java, packageName, subMonitor.newChild(5));
-    IFile hello = createChildFile("HelloAppEngine.java", 
+    IFile hello = createChildFile("HelloAppEngine.java",
         AppEngineTemplateUtility.HELLO_APPENGINE_TEMPLATE,
         packageFolder, subMonitor.newChild(5), templateValues);
 
@@ -108,7 +108,7 @@ public class CodeTemplates {
         AppEngineTemplateUtility.HELLO_APPENGINE_TEST_TEMPLATE, testPackageFolder,
         subMonitor.newChild(5), templateValues);
     createChildFile("MockHttpServletResponse.java", //$NON-NLS-1$
-        AppEngineTemplateUtility.MOCK_HTTPSERVLETRESPONSE_TEMPLATE, testPackageFolder,
+        AppEngineTemplateUtility.MOCK_HTTPSERVLET31RESPONSE_TEMPLATE, testPackageFolder,
         subMonitor.newChild(5), templateValues);
 
     IFolder webapp = createChildFolder("webapp", main, subMonitor.newChild(5)); //$NON-NLS-1$
@@ -159,7 +159,7 @@ public class CodeTemplates {
   }
 
   @VisibleForTesting
-  static IFolder createChildFolder(String name, IFolder parent, SubMonitor monitor) 
+  static IFolder createChildFolder(String name, IFolder parent, SubMonitor monitor)
       throws CoreException {
     monitor.subTask("Creating folder " + name);
 
@@ -171,7 +171,7 @@ public class CodeTemplates {
     }
     return child;
   }
-  
+
   @VisibleForTesting
   static IFile createChildFile(String name, String template, IContainer parent, SubMonitor monitor,
       Map<String, String> values) throws CoreException {
