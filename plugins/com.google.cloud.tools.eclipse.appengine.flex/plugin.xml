@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-    <extension point="org.eclipse.wst.common.project.facet.core.facets">        
+
+  <extension point="org.eclipse.core.contenttype.contentTypes">
+    <content-type id="yaml" 
+        name="YAML"
+        file-extensions="yaml,yml" 
+        base-type="org.eclipse.core.runtime.text" />
+  </extension>
+
+  <extension point="org.eclipse.wst.common.project.facet.core.facets">        
     <project-facet id="com.google.cloud.tools.eclipse.appengine.facets.flex">
        <label>%flexFacetName</label>
        <description>%flexFacetDescription</description>
