@@ -79,7 +79,8 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
   }
 
   @Override
-  public void addAppEngineFacet(IProject newProject, IProgressMonitor monitor) throws CoreException {
+  public void addAppEngineFacet(IProject newProject, IProgressMonitor monitor)
+      throws CoreException {
     // added in configureFacets along with facets sample requires
   }
 
@@ -134,7 +135,8 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
           dependency.getValue()));
       File artifactFile = null;
       try {
-        Artifact artifact = repositoryService.resolveArtifact(libraryFile, subMonitor.newChild(ticks));
+        Artifact artifact = repositoryService.resolveArtifact(
+            libraryFile, subMonitor.newChild(ticks));
         artifactFile = artifact.getFile();
         IFile destFile = libFolder.getFile(artifactFile.getName());
         destFile.create(new FileInputStream(artifactFile), true, subMonitor.newChild(30));
@@ -147,7 +149,8 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
       }
     }
 
-    addDependenciesToClasspath(project, libFolder.getLocation().toString(), subMonitor.newChild(10));
+    addDependenciesToClasspath(project, libFolder.getLocation().toString(),
+        subMonitor.newChild(10));
   }
 
   private void addDependenciesToClasspath(IProject project, String libraryPath,

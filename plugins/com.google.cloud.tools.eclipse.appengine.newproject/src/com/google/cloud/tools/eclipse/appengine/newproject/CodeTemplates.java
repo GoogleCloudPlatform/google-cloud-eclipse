@@ -43,8 +43,8 @@ public class CodeTemplates {
    * @param monitor progress monitor
    * @return the most important file created that should be opened in an editor
    */
-  public static IFile materializeAppEngineStandardFiles(IProject project, AppEngineProjectConfig config,
-      IProgressMonitor monitor) throws CoreException {
+  public static IFile materializeAppEngineStandardFiles(IProject project,
+      AppEngineProjectConfig config, IProgressMonitor monitor) throws CoreException {
     return materialize(project, config, true /* isStandardProject */, monitor);
   }
 
@@ -75,13 +75,14 @@ public class CodeTemplates {
   private static IFile materialize(IProject project, AppEngineProjectConfig config,
       boolean isStandardProject, IProgressMonitor monitor) throws CoreException {
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
-    subMonitor.setTaskName("Generating code");
+    subMonitor.setTaskName("Generating code"); //$NON-NLS-1$
     boolean force = true;
     boolean local = true;
     IFolder src = project.getFolder("src");  //$NON-NLS-1$
     if (!src.exists()) {
       src.create(force, local, subMonitor.newChild(5));
     }
+
     IFolder main = createChildFolder("main", src, subMonitor.newChild(5)); //$NON-NLS-1$
     IFolder java = createChildFolder("java", main, subMonitor.newChild(5)); //$NON-NLS-1$
     IFolder test = createChildFolder("test", src, subMonitor.newChild(5)); //$NON-NLS-1$
@@ -93,23 +94,23 @@ public class CodeTemplates {
     if (packageName != null && !packageName.isEmpty()) {
       templateValues.put("package", packageName);  //$NON-NLS-1$
     } else {
-      templateValues.put("package", ""); 
+      templateValues.put("package", ""); //$NON-NLS-1$ //$NON-NLS-2$
     }
-    
+
     IFolder packageFolder = createFoldersForPackage(java, packageName, subMonitor.newChild(5));
-    IFile hello = createChildFile("HelloAppEngine.java", 
+    IFile hello = createChildFile("HelloAppEngine.java", //$NON-NLS-1$
         AppEngineTemplateUtility.HELLO_APPENGINE_TEMPLATE,
-        packageFolder, subMonitor.newChild(5), templateValues);
+        packageFolder, templateValues, subMonitor.newChild(5));
 
     // now set up the test directory
     IFolder testPackageFolder =
         createFoldersForPackage(testJava, packageName, subMonitor.newChild(5));
     createChildFile("HelloAppEngineTest.java", //$NON-NLS-1$
         AppEngineTemplateUtility.HELLO_APPENGINE_TEST_TEMPLATE, testPackageFolder,
-        subMonitor.newChild(5), templateValues);
+        templateValues, subMonitor.newChild(5));
     createChildFile("MockHttpServletResponse.java", //$NON-NLS-1$
         AppEngineTemplateUtility.MOCK_HTTPSERVLETRESPONSE_TEMPLATE, testPackageFolder,
-        subMonitor.newChild(5), templateValues);
+        templateValues, subMonitor.newChild(5));
 
     IFolder webapp = createChildFolder("webapp", main, subMonitor.newChild(5)); //$NON-NLS-1$
     IFolder webinf = createChildFolder("WEB-INF", webapp, subMonitor.newChild(5)); //$NON-NLS-1$
@@ -123,23 +124,23 @@ public class CodeTemplates {
     if (isStandardProject) {
       createChildFile("appengine-web.xml",  //$NON-NLS-1$
           AppEngineTemplateUtility.APPENGINE_WEB_XML_TEMPLATE,
-          webinf, subMonitor.newChild(5), properties);
+          webinf, properties, subMonitor.newChild(5));
     } else {
       IFolder appengine = createChildFolder("appengine", main, subMonitor.newChild(5)); //$NON-NLS-1$
-      createChildFile("app.yaml", AppEngineTemplateUtility.APP_YAML_TEMPLATE,
-          appengine, subMonitor.newChild(5), properties);
+      createChildFile("app.yaml", AppEngineTemplateUtility.APP_YAML_TEMPLATE, //$NON-NLS-1$
+          appengine, properties, subMonitor.newChild(5));
     }
 
     Map<String, String> packageMap = new HashMap<>();
-    String packageValue = config.getPackageName().isEmpty() ? "" : config.getPackageName() + ".";
+    String packageValue = config.getPackageName().isEmpty() ? "" : config.getPackageName() + "."; //$NON-NLS-1$ //$NON-NLS-2$
     packageMap.put("package", packageValue);  //$NON-NLS-1$
     createChildFile("web.xml", AppEngineTemplateUtility.WEB_XML_TEMPLATE, webinf,  //$NON-NLS-1$
-        subMonitor.newChild(5), packageMap);
+        packageMap, subMonitor.newChild(5));
 
-    createChildFile("index.html", AppEngineTemplateUtility.INDEX_HTML_TEMPLATE, webapp,
-        subMonitor.newChild(5), Collections.<String, String>emptyMap());
+    createChildFile("index.html", AppEngineTemplateUtility.INDEX_HTML_TEMPLATE, webapp, //$NON-NLS-1$
+        Collections.<String, String>emptyMap(), subMonitor.newChild(5));
 
-    copyChildFile("favicon.ico", webapp, subMonitor.newChild(5));
+    copyChildFile("favicon.ico", webapp, subMonitor.newChild(5)); //$NON-NLS-1$
 
     return hello;
   }
@@ -159,9 +160,9 @@ public class CodeTemplates {
   }
 
   @VisibleForTesting
-  static IFolder createChildFolder(String name, IFolder parent, SubMonitor monitor) 
+  static IFolder createChildFolder(String name, IFolder parent, SubMonitor monitor)
       throws CoreException {
-    monitor.subTask("Creating folder " + name);
+    monitor.subTask("Creating folder " + name); //$NON-NLS-1$
 
     boolean force = true;
     boolean local = true;
@@ -171,12 +172,12 @@ public class CodeTemplates {
     }
     return child;
   }
-  
-  @VisibleForTesting
-  static IFile createChildFile(String name, String template, IContainer parent, SubMonitor monitor,
-      Map<String, String> values) throws CoreException {
 
-    monitor.subTask("Creating file " + name);
+  @VisibleForTesting
+  static IFile createChildFile(String name, String template, IContainer parent,
+      Map<String, String> values, SubMonitor monitor) throws CoreException {
+
+    monitor.subTask("Creating file " + name); //$NON-NLS-1$
 
     IFile child = parent.getFile(new Path(name));
     if (!child.exists()) {
@@ -191,7 +192,7 @@ public class CodeTemplates {
   @VisibleForTesting
   static void copyChildFile(String name, IContainer parent, SubMonitor monitor)
       throws CoreException {
-    monitor.subTask("Copying file " + name);
+    monitor.subTask("Copying file " + name); //$NON-NLS-1$
 
     IFile child = parent.getFile(new Path(name));
     if (!child.exists()) {
