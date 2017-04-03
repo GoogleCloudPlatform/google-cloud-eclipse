@@ -10,11 +10,11 @@
 
 requires.1.namespace=org.eclipse.equinox.p2.iu
 requires.1.name=com.google.cloud.tools.eclipse.category
-requires.1.range=[1.0.0,1.0.1]
+requires.1.range=[1.0.0,1.0.2]
 requires.1.greedy=true
 
 units.1.id=com.google.cloud.tools.eclipse.category
-units.1.version=1.0.1
+units.1.version=1.0.2
 units.1.properties.1.name=org.eclipse.equinox.p2.type.category
 units.1.properties.1.value=true
 units.1.properties.2.name=org.eclipse.equinox.p2.name
@@ -27,7 +27,7 @@ units.1.properties.5.name=org.eclipse.equinox.p2.doc.url
 units.1.properties.5.value=https://cloud.google.com/eclipse/docs/
 units.1.provides.1.namespace=org.eclipse.equinox.p2.iu
 units.1.provides.1.name=com.google.cloud.tools.eclipse.category
-units.1.provides.1.version=1.0.1
+units.1.provides.1.version=1.0.2
 units.1.copyright =Copyright 2016, 2017 Google Inc.
 units.1.licenses.0 =\
 Cloud Tools for Eclipse is made available under the Apache License, Version 2.0. \
