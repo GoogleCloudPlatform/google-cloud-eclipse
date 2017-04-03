@@ -103,7 +103,7 @@ public class CodeTemplatesTest {
     Element root = buildDocument(webXml).getDocumentElement();
     Assert.assertEquals("web-app", root.getNodeName());
     // Oracle keeps changing the namespace URI in new versions of Java and JEE.
-    // This is the namespace URI that currently (Q2 2016) works in App Engine.
+    // This is the namespace URI that works in App Engine standard.
     Assert.assertEquals("http://java.sun.com/xml/ns/javaee", root.getNamespaceURI());
     Assert.assertEquals("2.5", root.getAttribute("version"));
     Element servletClass = (Element) root.getElementsByTagName("servlet-class").item(0);
@@ -140,12 +140,13 @@ public class CodeTemplatesTest {
   }
 
   private void validateAppYaml() throws IOException, CoreException {
-    IFolder webinf = project.getFolder("src/main/webapp/WEB-INF");
-    IFile appYaml = webinf.getFile("app.yaml");
+    IFolder appengineFolder = project.getFolder("src/main/appengine");
+    Assert.assertTrue(appengineFolder.exists());
+    IFile appYaml = appengineFolder.getFile("app.yaml");
     Assert.assertTrue(appYaml.exists());
 
     try (BufferedReader reader = new BufferedReader(
-        new InputStreamReader(appYaml.getContents(), StandardCharsets.UTF_8.name()))) {
+        new InputStreamReader(appYaml.getContents(), StandardCharsets.UTF_8))) {
       Assert.assertEquals("runtime: java", reader.readLine());
       Assert.assertEquals("env: flex", reader.readLine());
       Assert.assertEquals("env_variables:", reader.readLine());

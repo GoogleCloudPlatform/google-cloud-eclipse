@@ -4,7 +4,7 @@
   This product exists to (1) bring in any required features, and
   (2) add any additional metadata for the CT4E repository.
 -->
-<product uid="com.google.cloud.tools.eclipse.dist" version="1.0.1.qualifier" useFeatures="true" includeLaunchers="false">
+<product uid="com.google.cloud.tools.eclipse.dist" version="1.0.2.qualifier" useFeatures="true" includeLaunchers="false">
 
    <configIni use="default">
    </configIni>
