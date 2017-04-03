@@ -54,8 +54,8 @@ public class FlexDeployPreferences {
         FlexDeployPreferenceInitializer.DEFAULT_APP_ENGINE_DIRECTORY);
   }
 
-  public void setAppEngineDirectory(String AppEngineDirectory) {
-    preferenceStore.put(PREF_APP_ENGINE_DIRECTORY, AppEngineDirectory);
+  public void setAppEngineDirectory(String appEngineDirectory) {
+    preferenceStore.put(PREF_APP_ENGINE_DIRECTORY, appEngineDirectory);
   }
   
   public String getDockerDirectory() {
@@ -63,8 +63,8 @@ public class FlexDeployPreferences {
         FlexDeployPreferenceInitializer.DEFAULT_DOCKER_DIRECTORY);
   }
 
-  public void setDockerDirectory(String DockerDirectory) {
-    preferenceStore.put(PREF_DOCKER_DIRECTORY, DockerDirectory);
+  public void setDockerDirectory(String dockerDirectory) {
+    preferenceStore.put(PREF_DOCKER_DIRECTORY, dockerDirectory);
   }
 
   public boolean getUseDeploymentPreferences() {

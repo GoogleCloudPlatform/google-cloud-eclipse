@@ -43,7 +43,7 @@ public class AppEngineFlexFacetTest {
     IProjectFacet projectFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexFacet.ID);
     when(facetedProject.hasProjectFacet(projectFacet)).thenReturn(true);
 
-    Assert.assertTrue(AppEngineFlexFacet.hasAppEngineFacet(facetedProject));
+    Assert.assertTrue(AppEngineFlexFacet.hasFacet(facetedProject));
   }
 
   @Test
@@ -51,7 +51,7 @@ public class AppEngineFlexFacetTest {
     IProjectFacet projectFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexFacet.ID);
     when(facetedProject.hasProjectFacet(projectFacet)).thenReturn(false);
 
-    Assert.assertFalse(AppEngineFlexFacet.hasAppEngineFacet(facetedProject));
+    Assert.assertFalse(AppEngineFlexFacet.hasFacet(facetedProject));
   }
 
   @Test

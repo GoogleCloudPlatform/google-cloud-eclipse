@@ -35,7 +35,7 @@ public class AppEngineFlexFacet {
    * @param project should not be null
    * @return true if project has the App Engine Flex facet and false otherwise
    */
-  public static boolean hasAppEngineFacet(IFacetedProject project) {
+  public static boolean hasFacet(IFacetedProject project) {
     return FacetedProjectHelper.projectHasFacet(project, ID);
   }
 

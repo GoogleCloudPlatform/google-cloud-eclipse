@@ -151,7 +151,7 @@ public class DeployPropertyPage extends PropertyPage {
       showPanel(standardPreferencesPanel);
     } else if (facetedProject != null 
         && ProjectFacetsManager.isProjectFacetDefined(AppEngineFlexFacet.ID) 
-        && AppEngineFlexFacet.hasAppEngineFacet(facetedProject)) {
+        && AppEngineFlexFacet.hasFacet(facetedProject)) {
       createFlexPanelIfNeeded();
       showPanel(flexPreferencesPanel);
     } else {

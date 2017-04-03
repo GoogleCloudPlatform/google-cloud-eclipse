@@ -19,8 +19,13 @@ package com.google.cloud.tools.eclipse.appengine.flex;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.FlexFacetInstallDelegate;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
+import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
+
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IProjectFacet;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
@@ -38,13 +43,18 @@ public class FlexFacetInstallDelegateTest {
   @Test
   public void testFacetInstall() throws CoreException {
     IProject project = projectCreator.getProject();
+    
+    IProgressMonitor monitor = new NullProgressMonitor();
+    IFolder main = project.getFolder("src/main");
+    ResourceUtils.createFolders(main, monitor);
+    
     IProjectFacet appEngineFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexFacet.ID);
     IProjectFacetVersion appEngineFacetVersion =
         appEngineFacet.getVersion(AppEngineFlexFacet.VERSION);
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);
-    facetedProject.installProjectFacet(appEngineFacetVersion, null /* config */, null /* monitor */);
+    facetedProject.installProjectFacet(appEngineFacetVersion, null /* config */, monitor);
     
-    Assert.assertTrue(AppEngineFlexFacet.hasAppEngineFacet(facetedProject));
+    Assert.assertTrue(AppEngineFlexFacet.hasFacet(facetedProject));
     Assert.assertTrue(project.getFile("src/main/appengine/app.yaml").exists());
   }
 }
