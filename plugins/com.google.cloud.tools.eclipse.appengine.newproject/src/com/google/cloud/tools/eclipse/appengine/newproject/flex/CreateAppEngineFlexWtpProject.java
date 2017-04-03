@@ -60,7 +60,8 @@ import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
  * Utility to create a new App Engine Flexible Eclipse project.
  */
 public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
-  private static final Logger logger = Logger.getLogger(CreateAppEngineFlexWtpProject.class.getName());
+  private static final Logger logger =
+      Logger.getLogger(CreateAppEngineFlexWtpProject.class.getName());
   private static final Map<String, String> PROJECT_DEPENDENCIES;
 
   static {

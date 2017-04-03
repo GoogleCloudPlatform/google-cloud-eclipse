@@ -123,8 +123,6 @@ public class CodeTemplates {
     if (isStandardProject) {
       createChildFile("appengine-web.xml", AppEngineTemplateUtility.APPENGINE_WEB_XML_TEMPLATE,
           webinf, subMonitor.newChild(5), properties);
-    } else {
-      copyChildFile("app.yaml", webinf, subMonitor.newChild(5));
     }
 
     Map<String, String> packageMap = new HashMap<>();
