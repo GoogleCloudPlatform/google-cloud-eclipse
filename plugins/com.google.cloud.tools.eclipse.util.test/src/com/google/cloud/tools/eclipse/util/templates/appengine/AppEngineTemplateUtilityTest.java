@@ -145,11 +145,11 @@ public class AppEngineTemplateUtilityTest {
   private void compareToFile(String expected) throws CoreException, IOException {
     
     try (InputStream testFileStream = testFile.getContents(true);
-      InputStream expectedFileStream = getDataFile(expected);
-      Scanner expectedScanner = new Scanner(expectedFileStream);
-      Scanner actualScanner = new Scanner(testFileStream)) {
-      String expectedContent = expectedScanner.useDelimiter("\\Z").next();    
-      String actualContent = actualScanner.useDelimiter("\\Z").next();    
+        InputStream expectedFileStream = getDataFile(expected);
+        Scanner expectedScanner = new Scanner(expectedFileStream);
+        Scanner actualScanner = new Scanner(testFileStream)) {
+      String expectedContent = expectedScanner.useDelimiter("\\Z").next();
+      String actualContent = actualScanner.useDelimiter("\\Z").next();
       Assert.assertEquals(expectedContent, actualContent);
     }
   }
