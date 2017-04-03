@@ -36,10 +36,11 @@ public class DeployPropertyPageForFlexProjectTest
   @Rule
   public TestProjectCreator flexProjectCreator = new TestProjectCreator().withFacetVersions(
       JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, APP_ENGINE_FLEX_FACET_1);
-
+  
   @Override
   protected IProject getProject() {
-    return flexProjectCreator.getProject();
+    IProject project = flexProjectCreator.getProject();
+    return project;
   }
 
   @Override

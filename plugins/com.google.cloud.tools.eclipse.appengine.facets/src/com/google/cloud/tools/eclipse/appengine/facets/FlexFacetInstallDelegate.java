@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.facets;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexDeployPreferences;
+import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 import com.google.cloud.tools.eclipse.util.templates.appengine.AppEngineTemplateUtility;
 import java.io.ByteArrayInputStream;
 import java.util.Collections;
@@ -54,7 +55,7 @@ public class FlexFacetInstallDelegate extends AppEngineFacetInstallDelegate {
     }
     
     if (!appYamlParentFolder.exists()) {
-      appYamlParentFolder.create(true, true, subMonitor.newChild(5));
+      ResourceUtils.createFolders(appYamlParentFolder, subMonitor.newChild(5));
     }
 
     appYaml.create(new ByteArrayInputStream(new byte[0]), true, subMonitor.newChild(10));

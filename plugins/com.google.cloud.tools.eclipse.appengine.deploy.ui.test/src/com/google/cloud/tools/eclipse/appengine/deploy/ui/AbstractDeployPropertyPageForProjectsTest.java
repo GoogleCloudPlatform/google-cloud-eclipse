@@ -46,10 +46,6 @@ public abstract class AbstractDeployPropertyPageForProjectsTest<P extends Deploy
   @Mock
   private IGoogleApiFactory googleApiFactory;
 
-  public AbstractDeployPropertyPageForProjectsTest() {
-    super();
-  }
-
   @Test
   public void testCorrectPanelIsShownForFacetedProject() throws CoreException {
     DeployPropertyPage page = new DeployPropertyPage();

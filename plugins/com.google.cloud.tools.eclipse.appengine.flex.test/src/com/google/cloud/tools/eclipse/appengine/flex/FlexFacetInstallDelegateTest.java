@@ -45,9 +45,6 @@ public class FlexFacetInstallDelegateTest {
     IProject project = projectCreator.getProject();
     
     IProgressMonitor monitor = new NullProgressMonitor();
-    IFolder main = project.getFolder("src/main");
-    ResourceUtils.createFolders(main, monitor);
-    
     IProjectFacet appEngineFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexFacet.ID);
     IProjectFacetVersion appEngineFacetVersion =
         appEngineFacet.getVersion(AppEngineFlexFacet.VERSION);
