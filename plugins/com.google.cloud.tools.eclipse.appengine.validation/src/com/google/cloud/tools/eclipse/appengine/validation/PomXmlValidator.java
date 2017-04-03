@@ -17,6 +17,11 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 import java.util.ArrayList;
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 
 import org.eclipse.core.resources.IResource;
 import org.w3c.dom.Document;
@@ -25,38 +30,32 @@ import org.w3c.dom.NodeList;
 
 public class PomXmlValidator implements XmlValidationHelper {
 
+  private static final XPathFactory FACTORY = XPathFactory.newInstance();
+
+  /**
+   * Selects all the <groupId> elements with value "com.google.appengine" whose <artifactId>
+   * sibling has the value "appengine-maven-plugin" or "gcloud-maven-plugin".
+   */
   @Override
   public ArrayList<BannedElement> checkForElements(IResource resource, Document document) {
     ArrayList<BannedElement> blacklist = new ArrayList<>();
-    NodeList nodeList = document.getElementsByTagName("plugin");
-    for (int i = 0; i < nodeList.getLength(); i++) {
-      DocumentLocation location = null;
-      Node node = nodeList.item(i);
-      NodeList childNodes = node.getChildNodes();
-      boolean foundGroupId = false;
-      boolean foundArtifactId = false;
-      String bannedElementText = "";
-      for (int j = 0; j < childNodes.getLength(); j++) {
-        Node pluginChild = childNodes.item(j);
-        String localName = pluginChild.getNodeName();
-        String nodeText = pluginChild.getTextContent();
-        if ("groupId".equals(localName)) {
-          if ("com.google.appengine".equals(nodeText)) {
-            bannedElementText = nodeText;
-            foundGroupId = true;
-            location = (DocumentLocation) pluginChild.getUserData("location");
-          }
-        } else if ("artifactId".equals(localName)) {
-          if ("appengine-maven-plugin".equals(nodeText)
-              || "gcloud-maven-plugin".equals(nodeText)) {
-            foundArtifactId = true;
-          }
-        }
-      }
-      if (foundGroupId && foundArtifactId) {
-        BannedElement element = new MavenPluginElement(location, bannedElementText.length());
+    try {
+      XPath xPath = FACTORY.newXPath();
+      NamespaceContext nsContext = new MavenContext();
+      xPath.setNamespaceContext(nsContext);
+      String selectGroupId = "//prefix:plugin/prefix:groupId[.='com.google.appengine']"
+          + "[../prefix:artifactId[text()='appengine-maven-plugin'"
+          + " or text()='gcloud-maven-plugin']]";
+      NodeList groupIdElements =
+          (NodeList) xPath.compile(selectGroupId).evaluate(document, XPathConstants.NODESET);
+      for (int i = 0; i < groupIdElements.getLength(); i++) {
+        Node child = groupIdElements.item(i);
+        DocumentLocation location = (DocumentLocation) child.getUserData("location");
+        BannedElement element = new MavenPluginElement(location, child.getTextContent().length());
         blacklist.add(element);
       }
+    } catch (XPathExpressionException ex) {
+      throw new RuntimeException("Invalid XPath expression");
     }
     return blacklist;
   }
