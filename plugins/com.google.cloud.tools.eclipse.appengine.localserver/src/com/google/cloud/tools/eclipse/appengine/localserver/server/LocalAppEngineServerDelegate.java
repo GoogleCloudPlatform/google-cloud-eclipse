@@ -163,7 +163,7 @@ public class LocalAppEngineServerDelegate extends ServerDelegate implements IURL
 
   private static IStatus hasAppEngineStandardFacet(IModule module) {
     try {
-      if (AppEngineStandardFacet.hasAppEngineFacet(ProjectFacetsManager.create(module.getProject()))) {
+      if (AppEngineStandardFacet.hasFacet(ProjectFacetsManager.create(module.getProject()))) {
         return Status.OK_STATUS;
       } else {
         String errorMessage = Messages.getString("GAE_STANDARD_FACET_MISSING", module.getName(), //$NON-NLS-1$

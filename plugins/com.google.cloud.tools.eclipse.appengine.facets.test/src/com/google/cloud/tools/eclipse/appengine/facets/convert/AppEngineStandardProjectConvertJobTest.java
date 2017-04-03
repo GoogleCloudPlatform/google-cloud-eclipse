@@ -52,7 +52,7 @@ public class AppEngineStandardProjectConvertJobTest {
     Job convertJob = new AppEngineStandardProjectConvertJob(facetedProject);
     convertJob.schedule();
     convertJob.join();
-    assertTrue(AppEngineStandardFacet.hasAppEngineFacet(facetedProject));
+    assertTrue(AppEngineStandardFacet.hasFacet(facetedProject));
 
     // verify App Engine standard files are present
     IFolder webInfFolder = WebProjectUtil.getWebInfDirectory(project);

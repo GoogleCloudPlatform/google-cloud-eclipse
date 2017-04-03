@@ -149,8 +149,6 @@ public class CodeTemplatesTest {
         new InputStreamReader(appYaml.getContents(), StandardCharsets.UTF_8))) {
       Assert.assertEquals("runtime: java", reader.readLine());
       Assert.assertEquals("env: flex", reader.readLine());
-      Assert.assertEquals("env_variables:", reader.readLine());
-      Assert.assertEquals("  'DBG_ENABLE': 'true'", reader.readLine());
     }
   }
 

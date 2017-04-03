@@ -101,7 +101,7 @@ public class AppEngineStandardRuntimeChangeListener implements IFacetedProjectLi
 
     // Check if the App Engine facet has been installed in the project
     final IFacetedProject facetedProject = runtimeChangeEvent.getProject();
-    if (AppEngineStandardFacet.hasAppEngineFacet(facetedProject)) {
+    if (AppEngineStandardFacet.hasFacet(facetedProject)) {
       return;
     }
 
