@@ -29,7 +29,7 @@ import org.w3c.dom.Element;
 
 public class WebXmlValidatorTest {
  
-  private WebXmlValidator validator = new WebXmlValidator();
+  private final WebXmlValidator validator = new WebXmlValidator();
   
   @Test
   public void testValidateJavaServlet() throws ParserConfigurationException {
