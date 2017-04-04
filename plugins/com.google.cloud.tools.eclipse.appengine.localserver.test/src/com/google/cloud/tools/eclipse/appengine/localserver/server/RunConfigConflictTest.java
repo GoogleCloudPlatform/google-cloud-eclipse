@@ -21,6 +21,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
+
 import com.google.cloud.tools.appengine.api.devserver.DefaultRunConfiguration;
 import com.google.cloud.tools.appengine.api.devserver.RunConfiguration;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
@@ -52,7 +54,7 @@ public class RunConfigConflictTest {
     DefaultRunConfiguration config1 = new DefaultRunConfiguration();
     config1.setPort(0); // random allocation
     config1.setAdminPort(0); // random allocation
-    config1.setStoragePath("/foo/bar");
+    config1.setStoragePath(new File("/foo/bar"));
     DefaultRunConfiguration config2 = new DefaultRunConfiguration();
     IStatus status = LocalAppEngineServerLaunchConfigurationDelegate.checkConflicts(config1,
         config2, StatusUtil.multi(RunConfigConflictTest.class, "Conflict"));
