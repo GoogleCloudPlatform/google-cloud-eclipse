@@ -101,7 +101,7 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
 
     SWTBotTree launchTree =
         new SWTBotTree(bot.widget(widgetOfType(Tree.class), debugView.getWidget()));
-     SwtBotTreeUtilities.waitUntilTreeHasItems(bot, launchTree);
+    SwtBotTreeUtilities.waitUntilTreeHasItems(bot, launchTree);
     SWTBotTreeItem[] allItems = launchTree.getAllItems();
     SwtBotTreeUtilities.waitUntilTreeHasText(bot, allItems[0]);
     assertTrue("No App Engine launch found",
@@ -114,7 +114,7 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
     final SWTBotStyledText consoleContents =
         new SWTBotStyledText(bot.widget(widgetOfType(StyledText.class), consoleView.getWidget()));
     SwtBotTestingUtilities.waitUntilStyledTextContains(bot,
-        "Starting module \"default\" running at: http://localhost:8080", consoleContents);
+        "Module instance default is running at http://localhost:8080", consoleContents);
 
     assertEquals("Hello App Engine!",
         getUrlContents(new URL("http://localhost:8080/hello"), (int) SWTBotPreferences.TIMEOUT));
