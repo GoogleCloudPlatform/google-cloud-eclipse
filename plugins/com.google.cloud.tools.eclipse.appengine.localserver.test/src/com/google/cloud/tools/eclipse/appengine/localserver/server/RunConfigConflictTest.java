@@ -45,7 +45,7 @@ public class RunConfigConflictTest {
     IStatus[] children = ((MultiStatus) status).getChildren();
     assertEquals(3, children.length);
     assertEquals("server port: 8080", children[0].getMessage());
-    assertEquals("admin port: 8000", children[1].getMessage());
+    assertEquals("admin port: 8080", children[1].getMessage());
     assertEquals("storage path: <default location>", children[2].getMessage());
   }
 
