@@ -178,7 +178,7 @@ public class CodeTemplatesTest {
     values.put("package", "com.google.foo.bar");
     
     IFile child = CodeTemplates.createChildFile("HelloAppEngine.java", 
-        AppEngineTemplateUtility.HELLO_APPENGINE_TEMPLATE, parent, monitor, values);
+        AppEngineTemplateUtility.HELLO_APPENGINE_TEMPLATE, parent, values, monitor);
     Assert.assertTrue(child.exists());
     Assert.assertEquals("HelloAppEngine.java", child.getName());
     InputStream in = child.getContents(true);

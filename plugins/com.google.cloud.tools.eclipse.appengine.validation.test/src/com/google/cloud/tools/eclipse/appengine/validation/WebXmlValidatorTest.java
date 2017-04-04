@@ -29,8 +29,10 @@ import org.w3c.dom.Element;
 
 public class WebXmlValidatorTest {
  
+  private final WebXmlValidator validator = new WebXmlValidator();
+  
   @Test
-  public void testCheckForElements() throws ParserConfigurationException {
+  public void testValidateJavaServlet() throws ParserConfigurationException {
     DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
     DocumentBuilder documentBuilder = builderFactory.newDocumentBuilder();
     Document document = documentBuilder.newDocument();
@@ -40,7 +42,6 @@ public class WebXmlValidatorTest {
     element.setUserData("location", new DocumentLocation(1, 1), null);
     document.appendChild(element);
     
-    WebXmlValidator validator = new WebXmlValidator();
     ArrayList<BannedElement> blacklist = validator.checkForElements(null, document);
     
     assertEquals(1, blacklist.size());
@@ -59,10 +60,43 @@ public class WebXmlValidatorTest {
     element.setUserData("location", new DocumentLocation(1, 1), null);
     document.appendChild(element);
     
-    WebXmlValidator validator = new WebXmlValidator();
     ArrayList<BannedElement> blacklist = validator.checkForElements(null, document);
     
     assertEquals(0, blacklist.size());
+  }
+  
+  @Test
+  public void testValidateServletMapping() throws ParserConfigurationException {
+    DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+    DocumentBuilder documentBuilder = builderFactory.newDocumentBuilder();
+    Document document = documentBuilder.newDocument();
+    
+    Element webApp = document.createElementNS("http://java.sun.com/xml/ns/javaee", "web-app");
+    webApp.setUserData("version", "2.5", null);
+    webApp.setUserData("location", new DocumentLocation(1, 1), null);
+    
+    Element servlet = document.createElementNS("http://java.sun.com/xml/ns/javaee", "servlet");
+    servlet.setUserData("location", new DocumentLocation(2, 1), null);
+    
+    Element servletName = document.createElementNS("http://java.sun.com/xml/ns/javaee", "servlet-name");
+    servletName.setTextContent("ServletName");
+    servletName.setUserData("location", new DocumentLocation(3, 1), null);
+    servlet.appendChild(servletName);
+    webApp.appendChild(servlet);
+    
+    Element servletMapping = document.createElementNS("http://java.sun.com/xml/ns/javaee", "servlet-mapping");
+    servletMapping.setUserData("location", new DocumentLocation(4, 1), null);
+    
+    Element servletMappingName = document.createElementNS("http://java.sun.com/xml/ns/javaee", "servlet-name");
+    servletMappingName.setTextContent("NotServletName");
+    servletMappingName.setUserData("location", new DocumentLocation(2, 1), null);
+    servletMapping.appendChild(servletMappingName);
+    webApp.appendChild(servletMapping);
+    
+    document.appendChild(webApp);
+    
+    ArrayList<BannedElement> blacklist = validator.checkForElements(null, document);
+    assertEquals(1, blacklist.size());
   }
  
 }

@@ -17,8 +17,16 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -44,10 +52,26 @@ import com.google.common.base.Strings;
 public class WebXmlValidator implements XmlValidationHelper {
   
   private static final Logger logger = Logger.getLogger(WebXmlValidator.class.getName());
+  private static final XPathFactory FACTORY = XPathFactory.newInstance();
+  private Document document;
+  private IResource resource;
+  private ArrayList<BannedElement> blacklist;
   
   @Override
   public ArrayList<BannedElement> checkForElements(IResource resource, Document document) {
-    ArrayList<BannedElement> blacklist = new ArrayList<>();
+    this.document = document;
+    this.resource = resource;
+    this.blacklist = new ArrayList<>();
+    validateJavaServlet();
+    validateServletClass();
+    validateServletMapping();
+    return blacklist;
+  }
+  
+  /**
+   * Validates that web.xml uses Java Servlet 2.5 deployment descriptor.
+   */
+  private void validateJavaServlet() {
     NodeList webAppList = document.getElementsByTagName("web-app");
     for (int i = 0; i < webAppList.getLength(); i++) {
       Element webApp = (Element) webAppList.item(i);
@@ -62,6 +86,12 @@ public class WebXmlValidator implements XmlValidationHelper {
         }
       }
     }
+  }
+  
+  /**
+   * Validates that all <servlet-class> elements exist in the project.
+   */
+  private void validateServletClass() {
     NodeList servletClassList = document.getElementsByTagName("servlet-class");
     for (int i = 0; i < servletClassList.getLength(); i++) {
       Node servletClassNode = servletClassList.item(i);
@@ -74,7 +104,44 @@ public class WebXmlValidator implements XmlValidationHelper {
         blacklist.add(element);
       }
     }
-    return blacklist;
+  }
+  
+  /**
+   * Adds all defined servlet names to a set, then adds a
+   * {@link ServletMappingElement} to the blacklist for all
+   * <servlet-mapping> elements whose <servlet-name> is undefined.
+   */
+  private void validateServletMapping() {
+    try {
+      XPath xPath = FACTORY.newXPath();
+      NamespaceContext nsContext = new JavaContext();
+      xPath.setNamespaceContext(nsContext);
+      String selectServletNames = "//prefix:servlet/prefix:servlet-name";
+      NodeList servletNameNodes = (NodeList) xPath
+          .compile(selectServletNames)
+          .evaluate(document, XPathConstants.NODESET);
+      Set<String> servletNames = new HashSet<>();
+      for (int i = 0; i < servletNameNodes.getLength(); i++) {
+        String servletName = servletNameNodes.item(i).getTextContent();
+        servletNames.add(servletName);
+      }
+      String selectServletMappings = "//prefix:servlet-mapping/prefix:servlet-name";
+      NodeList servletMappings = (NodeList) xPath
+          .compile(selectServletMappings)
+          .evaluate(document, XPathConstants.NODESET);
+      for (int i = 0; i < servletMappings.getLength(); i++) {
+        Node servletMapping = servletMappings.item(i);
+        String textContent = servletMapping.getTextContent();
+        if (!servletNames.contains(textContent)) {
+          DocumentLocation location = (DocumentLocation) servletMapping.getUserData("location");
+          BannedElement element =
+              new ServletMappingElement(textContent, location, textContent.length());
+          blacklist.add(element);
+        }
+      }
+    } catch (XPathExpressionException ex) {
+      throw new RuntimeException("Invalid XPath expression");
+    }
   }
   
   private static IJavaProject getProject(IResource resource) {

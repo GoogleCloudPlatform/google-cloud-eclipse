@@ -93,15 +93,6 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
   private static final String DEBUGGER_HOST = "localhost"; //$NON-NLS-1$
 
-  /**
-   * Returns {@code value} unless it's null or empty, then returns {@code nullOrEmptyValue}.
-   *
-   * @see Strings#isNullOrEmpty(String)
-   */
-  private static String ifEmptyOrNull(String value, String nullOrEmptyValue) {
-    return !Strings.isNullOrEmpty(value) ? value : nullOrEmptyValue;
-  }
-
   private static int ifNull(Integer value, int nullValue) {
     return value != null ? value : nullValue;
   }
@@ -314,8 +305,9 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     // XXX: does it matter if storage_path is same if all other paths are explicitly specified
     // (e.g., the {blob,data,*search*,logs} paths)
     if (Objects.equals(ours.getStoragePath(), theirs.getStoragePath())) {
-      status.add(StatusUtil.error(clazz, MessageFormat.format("storage path: {0}",
-          ifEmptyOrNull(ours.getStoragePath(), "<default location>"))));
+      String path =
+          ours.getStoragePath() == null ? "<default location>" : ours.getStoragePath().toString();
+      status.add(StatusUtil.error(clazz, "storage path: " + path));
     }
 
     return status;

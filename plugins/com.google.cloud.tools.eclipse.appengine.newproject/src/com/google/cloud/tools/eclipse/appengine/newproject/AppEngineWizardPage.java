@@ -163,7 +163,7 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
 
   public Collection<Library> getSelectedLibraries() {
     if (appEngineLibrariesSelectorGroup == null) {
-      return new HashSet<Library>();
+      return new HashSet<>();
     } else {
       return appEngineLibrariesSelectorGroup.getSelectedLibraries();
     }
