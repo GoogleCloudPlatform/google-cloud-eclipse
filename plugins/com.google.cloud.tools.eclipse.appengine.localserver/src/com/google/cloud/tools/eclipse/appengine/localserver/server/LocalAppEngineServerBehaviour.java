@@ -89,9 +89,10 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
   public static final String ADMIN_PORT_ATTRIBUTE_NAME = "appEngineDevServerAdminPort"; //$NON-NLS-1$
 
   // These are the default values used by Cloud SDK's dev_appserver
+  // TODO the Cloud SDK/ appengineplugins-core should provide these; not us
   public static final int DEFAULT_SERVER_PORT = 8080;
   public static final String DEFAULT_ADMIN_HOST = "localhost"; //$NON-NLS-1$
-  public static final int DEFAULT_ADMIN_PORT = 8000;
+  public static final int DEFAULT_ADMIN_PORT = 8080;
   public static final int DEFAULT_API_PORT = 0; // allocated at random
 
   private static final Logger logger =
