@@ -270,8 +270,8 @@ target platform whenever dependencies are updated.
 
 We use _Target Platform_ files (`.target`) to collect the dependencies used
 for the build.  These targets specify exact versions of the bundles and
-features being built against.  We currently maintain two target platforms,
-targeting the latest version of the current and previous release trains.
+features being built against. We currently maintain three target platforms,
+targeting the latest version of the current, previous, and next releases.
 This is currently:
 
   - Eclipse Mars (4.5 SR2): [`eclipse/mars/gcp-eclipse-mars.target`](eclipse/mars/gcp-eclipse-mars.target) 
