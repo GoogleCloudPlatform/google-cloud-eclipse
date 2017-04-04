@@ -381,7 +381,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     try {
       DefaultRunConfiguration devServerRunConfiguration =
           generateServerRunConfiguration(configuration, server);
-      devServerRunConfiguration.setAppYamls(runnables);
+      devServerRunConfiguration.setServices(runnables);
       if (ILaunchManager.DEBUG_MODE.equals(mode)) {
         int debugPort = getDebugPort();
         setupDebugTarget(devServerRunConfiguration, launch, debugPort, monitor);
