@@ -27,7 +27,7 @@ import com.google.cloud.tools.appengine.api.devserver.DefaultRunConfiguration;
 import com.google.cloud.tools.appengine.api.devserver.RunConfiguration;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.MultiStatus;    
 import org.hamcrest.Matchers;
 import org.junit.Test;
 

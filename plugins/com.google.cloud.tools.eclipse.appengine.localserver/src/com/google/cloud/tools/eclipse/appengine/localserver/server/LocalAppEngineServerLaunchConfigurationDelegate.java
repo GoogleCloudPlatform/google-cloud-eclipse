@@ -305,7 +305,9 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     // XXX: does it matter if storage_path is same if all other paths are explicitly specified
     // (e.g., the {blob,data,*search*,logs} paths)
     if (Objects.equals(ours.getStoragePath(), theirs.getStoragePath())) {
-      status.add(StatusUtil.error(clazz, "storage path: " + ours.getStoragePath()));
+      String path =
+          ours.getStoragePath() == null ? "<default location>" : ours.getStoragePath().toString();
+      status.add(StatusUtil.error(clazz, "storage path: " + path));
     }
 
     return status;
