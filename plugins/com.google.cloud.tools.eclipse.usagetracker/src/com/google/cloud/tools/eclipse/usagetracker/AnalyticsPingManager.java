@@ -53,7 +53,7 @@ public class AnalyticsPingManager {
 
   private static final String PREFERENCES_PLUGIN_ID = Activator.PLUGIN_ID;
 
-  private static final String ANALYTICS_COLLECTION_URL = "https://ssl.google-analytics.com/collect";
+  private static final String ANALYTICS_COLLECTION_URL = "https://www.google-analytics.com/collect";
 
   // Fixed-value query parameters present in every ping, and their fixed values:
   //
