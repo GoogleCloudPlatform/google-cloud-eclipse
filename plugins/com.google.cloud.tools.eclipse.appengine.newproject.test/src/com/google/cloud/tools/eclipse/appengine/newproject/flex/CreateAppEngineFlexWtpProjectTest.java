@@ -66,7 +66,7 @@ public class CreateAppEngineFlexWtpProjectTest {
   }
 
   @Test
-  public void testAppEngineLibrariesAdded() throws InvocationTargetException, CoreException, IOException {
+  public void testServletApi31Added() throws InvocationTargetException, CoreException, IOException {
     final Artifact servletApi31 = mock(Artifact.class);
     File servletApi31Jar = tempFolder.newFile();
     when(servletApi31.getFile()).thenReturn(servletApi31Jar);
@@ -96,7 +96,6 @@ public class CreateAppEngineFlexWtpProjectTest {
         new CreateAppEngineFlexWtpProject(config, mock(IAdaptable.class), repositoryService);
     creator.execute(monitor);
 
-    System.out.println(">>> " + "lib/" + servletApi31Jar.getName());
     assertTrue(project.getFile("lib/" + servletApi31Jar.getName()).exists());
   }
 

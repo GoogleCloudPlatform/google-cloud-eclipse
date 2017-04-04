@@ -107,9 +107,11 @@ public class CodeTemplates {
     createChildFile("HelloAppEngineTest.java", //$NON-NLS-1$
         AppEngineTemplateUtility.HELLO_APPENGINE_TEST_TEMPLATE, testPackageFolder,
         subMonitor.newChild(5), templateValues);
+    String mockHttpServletResponseTemplate = isStandardProject
+        ? AppEngineTemplateUtility.MOCK_HTTPSERVLETRESPONSE_TEMPLATE
+        : AppEngineTemplateUtility.MOCK_HTTPSERVLET31RESPONSE_TEMPLATE;
     createChildFile("MockHttpServletResponse.java", //$NON-NLS-1$
-        AppEngineTemplateUtility.MOCK_HTTPSERVLET31RESPONSE_TEMPLATE, testPackageFolder,
-        subMonitor.newChild(5), templateValues);
+        mockHttpServletResponseTemplate, testPackageFolder, subMonitor.newChild(5), templateValues);
 
     IFolder webapp = createChildFolder("webapp", main, subMonitor.newChild(5)); //$NON-NLS-1$
     IFolder webinf = createChildFolder("WEB-INF", webapp, subMonitor.newChild(5)); //$NON-NLS-1$
