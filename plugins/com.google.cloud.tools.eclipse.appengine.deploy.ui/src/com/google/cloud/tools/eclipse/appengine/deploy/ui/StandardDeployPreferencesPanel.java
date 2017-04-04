@@ -490,6 +490,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
   private void refreshProjectsForSelectedCredential() {
     projectSelector.setProjects(Collections.<GcpProject>emptyList());
+    latestGcpProjectQueryJob = null;
 
     Credential selectedCredential = accountSelector.getSelectedCredential();
     if (selectedCredential != null) {
