@@ -22,11 +22,11 @@ import javax.xml.namespace.NamespaceContext;
 
 import com.google.common.base.Preconditions;
 
-class MavenContext implements NamespaceContext {
+class JavaContext implements NamespaceContext {
 
   @Override
   public String getNamespaceURI(String prefix) {
-    return "http://maven.apache.org/POM/4.0.0";
+    return "http://java.sun.com/xml/ns/javaee";
   }
 
   @Override

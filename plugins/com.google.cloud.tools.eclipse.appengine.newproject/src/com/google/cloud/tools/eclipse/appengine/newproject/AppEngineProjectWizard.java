@@ -115,7 +115,7 @@ public abstract class AppEngineProjectWizard extends Wizard implements INewWizar
     } catch (InterruptedException ex) {
       status = Status.CANCEL_STATUS;
     } catch (InvocationTargetException ex) {
-      String message = Messages.getString("project.creation.failed");
+      String message = Messages.getString("project.creation.failed"); //$NON-NLS-1$
       status = StatusUtil.setErrorStatus(this, message, ex.getCause());
     }
 

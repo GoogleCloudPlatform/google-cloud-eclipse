@@ -61,6 +61,7 @@ public class ProjectSelectorSelectionChangedListener implements ISelectionChange
   @Override
   public void selectionChanged(SelectionChangedEvent event) {
     projectSelector.clearStatusLink();
+    latestQueryJob = null;
 
     IStructuredSelection selection = (IStructuredSelection) event.getSelection();
     if (selection.isEmpty()) {
