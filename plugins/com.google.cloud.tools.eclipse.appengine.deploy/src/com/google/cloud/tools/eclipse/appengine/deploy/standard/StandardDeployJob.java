@@ -263,19 +263,24 @@ public class StandardDeployJob extends WorkspaceJob {
     boolean promoting = deployConfiguration.getPromote();
     String version = deployOutput.getVersion();
     String service = deployOutput.getService();
-    String project = deployOutput.getProject();
+    String projectId = deployOutput.getProject();
     boolean usingDefaultService = DEFAULT_SERVICE.equals(service);
 
-    String domain = project.startsWith("google.com:") ? ".googleplex.com" : ".appspot.com";
+    // todo verify project ID, version, and service contain only URL safe characters
+    String domain = ".appspot.com";
+    if (projectId.startsWith("google.com:")) {
+      domain = ".googleplex.com";
+      projectId = projectId.substring(11); // "google.com:".length()
+    }
     
     if (promoting && usingDefaultService) {
-      return "https://" + project + domain;
+      return "https://" + projectId + domain;
     } else if (promoting && !usingDefaultService) {
-      return "https://" + service +  "-dot-"+  project + domain;
+      return "https://" + service +  "-dot-"+  projectId + domain;
     } else if (!promoting && usingDefaultService) {
-      return "https://" + version + "-dot-" + project + domain;
+      return "https://" + version + "-dot-" + projectId + domain;
     } else {
-      return "https://" + version + "-dot-" + service +  "-dot-"+  project + domain;
+      return "https://" + version + "-dot-" + service +  "-dot-"+  projectId + domain;
     }
   }
 

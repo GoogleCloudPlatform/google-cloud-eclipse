@@ -29,9 +29,7 @@ public class StandardDeployJobTest {
     AppEngineDeployOutput deployOutput =
         createDeployOutput("google.com:notable-torch", "version", "default");
 
-    // todo what do google.com internal URLs actually look like?
-    // i.e. how do they handle the colon?
-    Assert.assertEquals("https://google.com:notable-torch.googleplex.com",
+    Assert.assertEquals("https://notable-torch.googleplex.com",
         standardDeployJob.getDeployedAppUrl(deployOutput));
   }
 
