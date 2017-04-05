@@ -264,7 +264,7 @@ public class StandardDeployJob extends WorkspaceJob {
     boolean promoting = deployConfiguration.getPromote();
     String version = deployOutput.getVersion();
     String service = deployOutput.getService();
-    Boolean usingDefaultService = DEFAULT_SERVICE.equals(service);
+    boolean usingDefaultService = DEFAULT_SERVICE.equals(service);
 
     if (promoting && usingDefaultService) {
       return "https://" + project + ".appspot.com";
