@@ -28,5 +28,7 @@ interface XmlValidationHelper {
    * as a list of {@link BannedElement}s.
    */
   ArrayList<BannedElement> checkForElements(IResource resource, Document document);
+
+  String getXsd();
   
 }

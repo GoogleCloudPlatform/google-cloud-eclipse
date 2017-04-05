@@ -184,4 +184,9 @@ public class WebXmlValidator implements XmlValidationHelper {
     }
   }
 
+  @Override
+  public String getXsd() {
+    return null;
+  }
+
 }

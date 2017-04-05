@@ -59,5 +59,10 @@ public class PomXmlValidator implements XmlValidationHelper {
     }
     return blacklist;
   }
+
+  @Override
+  public String getXsd() {
+    return null;
+  }
   
 }

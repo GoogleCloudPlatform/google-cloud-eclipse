@@ -17,7 +17,6 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 import java.util.ArrayList;
-
 import org.eclipse.core.resources.IResource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -48,5 +47,9 @@ public class AppEngineWebXmlValidator implements XmlValidationHelper {
     }
     return blacklist;
   }
-  
+
+  @Override
+  public String getXsd() {
+    return "/xsd/appengine-web.xsd";
+  }
 }
