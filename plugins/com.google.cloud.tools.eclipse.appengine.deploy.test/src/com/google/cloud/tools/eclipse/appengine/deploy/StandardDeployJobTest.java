@@ -32,6 +32,16 @@ public class StandardDeployJobTest {
     Assert.assertEquals("https://notable-torch.googleplex.com",
         standardDeployJob.getDeployedAppUrl(deployOutput));
   }
+  
+  @Test
+  public void testGetDeployedAppUrl_withPartition() {
+    StandardDeployJob standardDeployJob = createStandardDeployJob(true);
+    AppEngineDeployOutput deployOutput =
+        createDeployOutput("s~google.com:notable-torch", "version", "default");
+
+    Assert.assertEquals("https://notable-torch.googleplex.com",
+        standardDeployJob.getDeployedAppUrl(deployOutput));
+  }
 
   @Test
   public void testGetDeployedAppUrl_promoteWithDefaultService() {

@@ -268,9 +268,10 @@ public class StandardDeployJob extends WorkspaceJob {
 
     // todo verify project ID, version, and service contain only URL safe characters
     String domain = ".appspot.com";
-    if (projectId.startsWith("google.com:")) {
+    int colon = projectId.indexOf(':');
+    if (colon >= 0) {
       domain = ".googleplex.com";
-      projectId = projectId.substring(11); // "google.com:".length()
+      projectId = projectId.substring(colon + 1);
     }
     
     if (promoting && usingDefaultService) {
