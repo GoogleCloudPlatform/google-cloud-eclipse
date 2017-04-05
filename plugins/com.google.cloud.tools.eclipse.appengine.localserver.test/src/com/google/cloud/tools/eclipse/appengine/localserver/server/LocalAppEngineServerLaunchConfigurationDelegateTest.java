@@ -260,7 +260,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
           .generateServerRunConfiguration(launchConfiguration, server);
 
       assertNotNull(config.getAdminPort());
-      assertEquals(0, (int) config.getAdminPort());
+      assertEquals(LocalAppEngineServerBehaviour.DEFAULT_ADMIN_PORT, (int) config.getAdminPort());
     }
   }
 
