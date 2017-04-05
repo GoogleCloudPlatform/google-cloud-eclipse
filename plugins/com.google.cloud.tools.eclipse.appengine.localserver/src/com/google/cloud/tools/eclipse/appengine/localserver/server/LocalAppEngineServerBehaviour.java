@@ -21,7 +21,7 @@ import com.google.cloud.tools.appengine.api.devserver.AppEngineDevServer;
 import com.google.cloud.tools.appengine.api.devserver.DefaultRunConfiguration;
 import com.google.cloud.tools.appengine.api.devserver.DefaultStopConfiguration;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineDevServer1;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineDevServer;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessExitListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessStartListener;
@@ -32,7 +32,6 @@ import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListe
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -87,10 +86,9 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
   public static final String ADMIN_PORT_ATTRIBUTE_NAME = "appEngineDevServerAdminPort"; //$NON-NLS-1$
 
   // These are the default values used by Cloud SDK's dev_appserver
-  // TODO the Cloud SDK/ appengineplugins-core should provide these; not us
   public static final int DEFAULT_SERVER_PORT = 8080;
   public static final String DEFAULT_ADMIN_HOST = "localhost"; //$NON-NLS-1$
-  public static final int DEFAULT_ADMIN_PORT = 8080;
+  public static final int DEFAULT_ADMIN_PORT = 8000;
   public static final int DEFAULT_API_PORT = 0; // allocated at random
 
   private static final Logger logger =
@@ -319,7 +317,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
 
     // Create dev app server instance
     initializeDevServer(console);
-  
+
     // Run server
     try {
       devServer.run(devServerRunConfiguration);
@@ -347,14 +345,14 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
         .async(true)
         .build();
 
-    devServer = new CloudSdkAppEngineDevServer1(cloudSdk);
+    devServer = new CloudSdkAppEngineDevServer(cloudSdk);
     moduleToUrlMap.clear();
   }
 
   /**
    * A {@link ProcessExitListener} for the App Engine server.
    */
-  public class LocalAppEngineExitListener implements ProcessExitListener {
+  private class LocalAppEngineExitListener implements ProcessExitListener {
     @Override
     public void onExit(int exitCode) {
       logger.log(Level.FINE, "Process exit: code=" + exitCode); //$NON-NLS-1$
@@ -367,7 +365,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
   /**
    * A {@link ProcessStartListener} for the App Engine server.
    */
-  public class LocalAppEngineStartListener implements ProcessStartListener {
+  private class LocalAppEngineStartListener implements ProcessStartListener {
     @Override
     public void onStart(Process process) {
       logger.log(Level.FINE, "New Process: " + process); //$NON-NLS-1$
