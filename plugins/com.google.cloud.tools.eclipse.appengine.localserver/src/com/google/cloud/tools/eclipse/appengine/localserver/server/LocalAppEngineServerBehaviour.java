@@ -375,7 +375,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
   }
 
   /**
-   * An output listener that monitors for well-known key dev_appserver output and affects server
+   * An output listener that monitors for well-known key dev_appserver output and effects server
    * state changes.
    */
   public class DevAppServerOutputListener implements ProcessOutputLineListener {
@@ -384,12 +384,18 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     // <<HEADER>> Starting admin server at: http://localhost:8000
     // where <<HEADER>> = INFO 2017-01-31 21:00:40,700 dispatcher.py:197]
     
-    // todo fix for devappserver1
+    // devappserver2 patterns
     private final Pattern moduleStartedPattern = Pattern.compile(
         "INFO .*Starting module \"(?<service>[^\"]+)\" running at: (?<url>http://.+:(?<port>[0-9]+))$");
     private final Pattern adminStartedPattern =
         Pattern.compile("INFO .*Starting admin server at: (?<url>http://.+:(?<port>[0-9]+))$");
 
+    // devappserver1 patterns
+    private final Pattern moduleRunningPattern = Pattern.compile(
+        "INFO: Module instance (?<service>\\w+) is running at (?<url>http://.+:(?<port>[0-9]+)/)$");
+    private final Pattern adminRunningPattern =
+        Pattern.compile("INFO: The admin console is running at (?<url>http://.+:(?<port>[0-9]+))/_ah/admin$");
+      
     private int serverPortCandidate = 0;
 
     @Override
@@ -407,20 +413,24 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
       } else if (line.contains("Error: A fatal exception has occurred. Program will exit")) { //$NON-NLS-1$
         // terminate the Python process
         stop(false);
-      } else if ((matcher = moduleStartedPattern.matcher(line)).matches()) {
+      } else if ((matcher = moduleStartedPattern.matcher(line)).matches()
+          || (matcher = moduleRunningPattern.matcher(line)).matches()) {
         String serviceId = matcher.group("service");
-        moduleToUrlMap.put(serviceId, matcher.group("url"));
-        int port = parseInt(matcher.group("port"), 0);
+        String url = matcher.group("url");
+        moduleToUrlMap.put(serviceId, url);
+        String portString = matcher.group("port");
+        int port = parseInt(portString, 0);
         if (port > 0 && (serverPortCandidate == 0 || "default".equals(serviceId))) { // $NON-NLS-1$
           serverPortCandidate = port;
         }
-      } else if ((matcher = adminStartedPattern.matcher(line)).matches()) {
+      } else if ((matcher = adminStartedPattern.matcher(line)).matches()
+          || (matcher = adminRunningPattern.matcher(line)).matches()) {
         int port = parseInt(matcher.group("port"), 0);
-        if (port > 0 && adminPort == 0) {
+        if (port > 0 && adminPort <= 0) {
           adminPort = port;
         }
         // Admin comes after other modules, so no more module URLs
-        if (serverPort == 0) {
+        if (serverPort <= 0) {
           serverPort = serverPortCandidate;
         }
       }
