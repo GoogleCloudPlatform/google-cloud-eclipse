@@ -266,7 +266,6 @@ public class StandardDeployJob extends WorkspaceJob {
     String projectId = deployOutput.getProject();
     boolean usingDefaultService = DEFAULT_SERVICE.equals(service);
 
-    // todo verify project ID, version, and service contain only URL safe characters
     String domain = ".appspot.com";
     int colon = projectId.indexOf(':');
     if (colon >= 0) {
