@@ -50,7 +50,6 @@ import org.eclipse.wst.validation.ValidationResult;
 import org.eclipse.wst.validation.ValidationState;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 
 /**
  * Contains the logic for build validation and marker creation.
@@ -101,27 +100,26 @@ public class XmlValidator
         }
       }
     } catch (SAXException ex) {
-      createSaxErrorMessage(resource, (SAXParseException) ex.getException());
+      // Do nothing, handled in XmlValidator#xsdValidation
     }
   }
   
   void xsdValidation(IResource resource) throws CoreException {
-    try {
-      String xsd = helper.getXsd();
-      if (xsd != null) {
-        URL xsdPath = AppEngineWebXmlValidator.class.getResource(xsd);
-        InputStream stream = xsdPath.openStream();
+    String xsd = helper.getXsd();
+    if (xsd != null) {
+      URL xsdPath = AppEngineWebXmlValidator.class.getResource(xsd);
+      try (InputStream stream = xsdPath.openStream()) {
         Source source = new StreamSource(stream);
         Schema schema = FACTORY.newSchema(source);
         Validator validator = schema.newValidator();
         validator.setErrorHandler(new SaxErrorHandler(resource));
         IPath path = resource.getLocation();
         validator.validate(new StreamSource(path.toFile()));
+      } catch (IOException ex) {
+        logger.log(Level.SEVERE, ex.getMessage());
+      } catch (SAXException e) {
+        // Do nothing, handled by {@link SaxErrorHandler}
       }
-    } catch (IOException ex) {
-      logger.log(Level.SEVERE, ex.getMessage());
-    } catch (SAXException ex) {
-      createSaxErrorMessage(resource, (SAXParseException) ex);
     }
   }
   
@@ -167,18 +165,6 @@ public class XmlValidator
     marker.setAttribute(IMarker.MESSAGE, element.getMessage());
     marker.setAttribute(IMarker.LOCATION, "line " + element.getStart().getLineNumber());
     marker.setAttribute(IMarker.LINE_NUMBER, element.getStart().getLineNumber());
-  }
-
-  /**
-   * Sets error marker where SAX parser fails.
-   */
-  static void createSaxErrorMessage(IResource resource, SAXParseException ex) throws CoreException {
-    int lineNumber = ex.getLineNumber();
-    IMarker marker = resource.createMarker("org.eclipse.core.resources.problemmarker");
-    marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
-    marker.setAttribute(IMarker.MESSAGE, ex.getMessage());
-    marker.setAttribute(IMarker.LINE_NUMBER, lineNumber);
-    marker.setAttribute(IMarker.LOCATION, "line " + lineNumber);
   }
 
 }

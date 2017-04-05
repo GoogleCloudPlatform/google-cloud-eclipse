@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.xml.sax.ErrorHandler;
@@ -44,23 +45,33 @@ class SaxErrorHandler implements ErrorHandler {
   }
 
   @Override
-  public void error(SAXParseException exception) throws SAXException {
-    try {  
-      XmlValidator.createSaxErrorMessage(resource, exception);
+  public void error(SAXParseException exception) {
+    try {
+      createSaxErrorMessage(resource, exception);
     } catch (CoreException ex) {
       logger.log(Level.SEVERE, ex.getMessage());
     }
   }
 
   @Override
-  public void fatalError(SAXParseException exception) throws SAXException {
-    try {  
-      XmlValidator.createSaxErrorMessage(resource, exception);
+  public void fatalError(SAXParseException exception) {
+    try {
+      createSaxErrorMessage(resource, exception);
     } catch (CoreException ex) {
       logger.log(Level.SEVERE, ex.getMessage());
     }
   }
   
-  
+  /**
+   * Sets error marker where SAX parser fails.
+   */
+  static void createSaxErrorMessage(IResource resource, SAXParseException ex) throws CoreException {
+    int lineNumber = ex.getLineNumber();
+    IMarker marker = resource.createMarker("org.eclipse.core.resources.problemmarker");
+    marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
+    marker.setAttribute(IMarker.MESSAGE, ex.getMessage());
+    marker.setAttribute(IMarker.LINE_NUMBER, lineNumber);
+    marker.setAttribute(IMarker.LOCATION, "line " + lineNumber);
+  }
   
 }

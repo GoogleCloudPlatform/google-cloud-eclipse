@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
@@ -30,6 +31,7 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
@@ -39,8 +41,6 @@ import org.eclipse.wst.validation.Validator;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 
 public class XmlValidatorTest {
 
@@ -95,11 +95,24 @@ public class XmlValidatorTest {
   
   @Test
   public void testValidate_badXml() throws IOException, CoreException {
+    IProject project = dynamicWebProjectCreator.getProject();
+    IFile file = project.getFile("src/test");
     byte[] bytes = BAD_XML.getBytes(StandardCharsets.UTF_8);
+    file.create(new ByteArrayInputStream(bytes), true, null);
+    
     XmlValidator validator = new XmlValidator();
-    validator.validate(resource, bytes);
     validator.setHelper(new AppEngineWebXmlValidator());
-    IMarker[] markers = resource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
+    
+    // This method should not apply any markers for malformed XML
+    validator.validate(file, bytes);
+    IMarker[] emptyMarkers = file.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
+    assertEquals(0, emptyMarkers.length);
+    
+    // This method should apply markers for marlformed XML
+    validator.xsdValidation(file);
+    IMarker[] markers = file.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
+    assertEquals(1, markers.length);
+    
     String resultMessage = (String) markers[0].getAttribute(IMarker.MESSAGE);
     assertEquals("XML document structures must start and end within the same entity.",
         resultMessage);
@@ -131,23 +144,29 @@ public class XmlValidatorTest {
   }
   
   @Test
+  public void testXsdValidation() throws CoreException {
+    String xml = "<?xml version='1.0' encoding='utf-8'?>"
+        + "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>"
+        + "<foo></foo><bar></bar>"
+        + "</appengine-web-app>";
+    XmlValidator validator = new XmlValidator();
+    validator.setHelper(new AppEngineWebXmlValidator());
+    IProject project = appEngineStandardProjectCreator.getProject();
+    ValidationTestUtils.createFolders(project, new Path("src/main/webapp/WEB-INF"));
+    IFile file = project.getFile("src/main/webapp/WEB-INF/appengine-web.xml");
+    file.create(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)), true, null);
+    validator.xsdValidation(file);
+    String problemMarker = "org.eclipse.core.resources.problemmarker";
+    IMarker[] markers = file.findMarkers(problemMarker, true, IResource.DEPTH_ZERO);
+    assertEquals(2, markers.length);
+  }
+  
+  @Test
   public void testCreateMarker() throws CoreException {
     String message = "Project ID should be specified at deploy time.";
     BannedElement element = new BannedElement(message);
     XmlValidator.createMarker(resource, element, 0);
     IMarker[] markers = resource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
-    assertEquals(message, markers[0].getAttribute(IMarker.MESSAGE));
-    resource.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
-  }
-
-  @Test
-  public void testCreateSAXErrorMessage() throws CoreException {
-    String message = "Project ID should be specified at deploy time.";
-    SAXParseException spe = new SAXParseException("", "", "", 1, 1);
-    SAXException ex = new SAXException(message, spe);
-    XmlValidator.createSaxErrorMessage(resource, ex);
-    IMarker[] markers = resource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
-    assertEquals(1, markers.length);
     assertEquals(message, markers[0].getAttribute(IMarker.MESSAGE));
     resource.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
   }
