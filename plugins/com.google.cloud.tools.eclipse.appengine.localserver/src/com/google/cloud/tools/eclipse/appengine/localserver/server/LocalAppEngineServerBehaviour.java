@@ -378,13 +378,15 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
    * state changes.
    */
   public class DevAppServerOutputListener implements ProcessOutputLineListener {
-    // DevAppServer outputs the following for module-started and admin line (on one line):
+    // DevAppServer2 outputs the following for module-started and admin line (on one line):
     // <<HEADER>> Starting module "default" running at: http://localhost:8080
     // <<HEADER>> Starting admin server at: http://localhost:8000
     // where <<HEADER>> = INFO 2017-01-31 21:00:40,700 dispatcher.py:197]
-    private Pattern moduleStartedPattern = Pattern.compile(
+    
+    // todo fix for devappserver1
+    private final Pattern moduleStartedPattern = Pattern.compile(
         "INFO .*Starting module \"(?<service>[^\"]+)\" running at: (?<url>http://.+:(?<port>[0-9]+))$");
-    private Pattern adminStartedPattern =
+    private final Pattern adminStartedPattern =
         Pattern.compile("INFO .*Starting admin server at: (?<url>http://.+:(?<port>[0-9]+))$");
 
     private int serverPortCandidate = 0;
