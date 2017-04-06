@@ -255,7 +255,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
         .thenAnswer(AdditionalAnswers.returnsSecondArg());
 
     // dev_appserver waits on localhost by default
-    try (ServerSocket socket = new ServerSocket(8000, 100, InetAddress.getLoopbackAddress())) {
+    try (ServerSocket socket = new ServerSocket(8080, 100, InetAddress.getLoopbackAddress())) {
       DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
           .generateServerRunConfiguration(launchConfiguration, server);
 
