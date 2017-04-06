@@ -108,7 +108,7 @@ public class XmlValidatorTest {
     IMarker[] emptyMarkers = file.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
     assertEquals(0, emptyMarkers.length);
     
-    // This method should apply markers for marlformed XML
+    // This method should apply markers for malformed XML
     validator.xsdValidation(file);
     IMarker[] markers = file.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
     assertEquals(1, markers.length);
