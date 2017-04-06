@@ -145,8 +145,7 @@ public class XmlValidatorTest {
   
   @Test
   public void testXsdValidation() throws CoreException {
-    String xml = "<?xml version='1.0' encoding='utf-8'?>"
-        + "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>"
+    String xml = "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>"
         + "<foo></foo>"
         + "</appengine-web-app>";
     XmlValidator validator = new XmlValidator();
