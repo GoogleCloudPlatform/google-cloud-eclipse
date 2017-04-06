@@ -76,8 +76,8 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     super("newDataflowProjectWizardLandingPage");
     this.dependencyManager = DataflowDependencyManager.create();
     this.targetCreator = targetCreator;
-    setTitle("Create a Cloud Dataflow Project");
-    setDescription("This wizard creates a new Google Cloud Dataflow project.");
+    setTitle(Messages.getString("CREATE_DATAFLOW_PROJECT"));
+    setDescription(Messages.getString("WIZARD_DESCRIPTION"));
     setPageComplete(false);
   }
 
@@ -126,11 +126,9 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
 
     groupIdInput = addLabeledText(formComposite, "&Group ID:");
     groupIdInput.setMessage(EXAMPLE_GROUP_ID);
-    groupIdInput.setToolTipText(
-        "The Maven Group ID. Should be an alphanumeric path separated by periods.");
+    groupIdInput.setToolTipText(Messages.getString("GROUP_ID_TOOL_TIP"));
     artifactIdInput = addLabeledText(formComposite, "&Artifact ID:");
-    artifactIdInput.setToolTipText(
-        "The Maven Artifact ID. Should be an alphanumeric name separated by dashes.");
+    artifactIdInput.setToolTipText(Messages.getString("ARTIFACT_ID_TOOL_TIP"));
 
     templateDropdown = addCombo(formComposite, "Project &Template:", true);
     for (Template template : Template.values()) {
@@ -142,7 +140,7 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     updateAvailableVersions();
 
     packageInput = addLabeledText(formComposite, "&Package:");
-    packageInput.setToolTipText("If unset this will be the same as the Group ID.");
+    packageInput.setToolTipText(Messages.getString("UNSET_PACKAGE_TOOL_TIP"));
     packageInput.setMessage(EXAMPLE_GROUP_ID);
 
     // Add a labeled text and button for the default location.
@@ -159,8 +157,7 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     locationInput.setText(defaultLocation);
     locationInput.setEnabled(false);
     locationInput.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-    locationInput.setToolTipText(
-        "The location where the project will be created. Must be an existing local directory.");
+    locationInput.setToolTipText(Messages.getString("LOCATION_TOOL_TIP"));
 
     locationBrowse = ButtonFactory.newPushButton(locationGroup, "&Browse");
     locationBrowse.setEnabled(false);
@@ -426,7 +423,7 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
       @Override
       public void widgetSelected(SelectionEvent event) {
         DirectoryDialog dialog = new DirectoryDialog(shell);
-        dialog.setMessage("Select project location");
+        dialog.setMessage(Messages.getString("SELECT_PROJECT_LOCATION"));
         String result = dialog.open();
         if (!Strings.isNullOrEmpty(result)) {
           locationInput.setText(result);

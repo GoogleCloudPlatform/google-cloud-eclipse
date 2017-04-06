@@ -41,8 +41,8 @@ public class NewDataflowProjectWizardDefaultRunOptionsPage extends WizardPage {
   public NewDataflowProjectWizardDefaultRunOptionsPage(DataflowProjectCreator creator) {
     super(PAGE_NAME);
     this.creator = creator;
-    setTitle("Set Default Cloud Dataflow Run Options");
-    setDescription("Set default options for running a Dataflow Pipeline.");
+    setTitle(Messages.getString("SET_RUN_OPTIONS"));
+    setDescription(Messages.getString("DATAFLOW_PIPELINE_OPTIONS"));
     // This page is optional
     setPageComplete(true);
   }
