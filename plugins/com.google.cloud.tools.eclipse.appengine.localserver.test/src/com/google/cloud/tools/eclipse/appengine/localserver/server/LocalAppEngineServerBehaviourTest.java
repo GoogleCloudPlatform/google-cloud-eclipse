@@ -113,14 +113,6 @@ public class LocalAppEngineServerBehaviourTest {
       "Apr 05, 2017 5:25:17 PM com.google.appengine.tools.development.DevAppServerImpl doStart",
   };
   
-  @Test
-  public void testPattern() {
-    Pattern moduleRunningPattern = Pattern.compile(
-        "INFO: Module instance (?<service>\\w+) is running at (?<url>http://.+:(?<port>[0-9]+)/)$");
-    Matcher matcher = moduleRunningPattern.matcher("INFO: Module instance default is running at http://localhost:8080/");
-    assertTrue(matcher.matches());
-  }
-  
   private static final String[] devappserver2OutputWithDefaultModule1 = new String[] {
       "WARNING  2016-11-03 21:11:21,930 devappserver2.py:785] DEFAULT_VERSION_HOSTNAME will not be set correctly with --port=0",
       "INFO     2016-11-03 21:11:21,956 api_server.py:205] Starting API server at: http://localhost:52892",
