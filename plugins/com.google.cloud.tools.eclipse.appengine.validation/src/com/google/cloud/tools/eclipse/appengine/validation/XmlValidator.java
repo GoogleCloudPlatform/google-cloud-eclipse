@@ -117,7 +117,7 @@ public class XmlValidator
         validator.validate(new StreamSource(path.toFile()));
       } catch (IOException ex) {
         logger.log(Level.SEVERE, ex.getMessage());
-      } catch (SAXException e) {
+      } catch (SAXException ex) {
         // Do nothing, handled by {@link SaxErrorHandler}
       }
     }

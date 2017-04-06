@@ -147,7 +147,7 @@ public class XmlValidatorTest {
   public void testXsdValidation() throws CoreException {
     String xml = "<?xml version='1.0' encoding='utf-8'?>"
         + "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>"
-        + "<foo></foo><bar></bar>"
+        + "<foo></foo>"
         + "</appengine-web-app>";
     XmlValidator validator = new XmlValidator();
     validator.setHelper(new AppEngineWebXmlValidator());
@@ -158,7 +158,7 @@ public class XmlValidatorTest {
     validator.xsdValidation(file);
     String problemMarker = "org.eclipse.core.resources.problemmarker";
     IMarker[] markers = file.findMarkers(problemMarker, true, IResource.DEPTH_ZERO);
-    assertEquals(2, markers.length);
+    assertEquals(1, markers.length);
   }
   
   @Test
