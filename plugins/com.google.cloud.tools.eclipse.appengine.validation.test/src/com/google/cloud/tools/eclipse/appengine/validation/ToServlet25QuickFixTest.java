@@ -18,10 +18,8 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -84,7 +82,7 @@ public class ToServlet25QuickFixTest {
       throws CoreException, ParserConfigurationException, SAXException, IOException {
     IProject project = projectCreator.getProject();
     IFile file = project.getFile("testdata.xml");
-    file.create(stringToInputStream(webXml), IFile.FORCE, null);
+    file.create(ValidationTestUtils.stringToInputStream(webXml), IFile.FORCE, null);
     
     IMarker marker = Mockito.mock(IMarker.class);
     Mockito.when(marker.getResource()).thenReturn(file);
@@ -96,10 +94,6 @@ public class ToServlet25QuickFixTest {
     DocumentBuilder builder = builderFactory.newDocumentBuilder();
     InputStream contents = file.getContents();
     return builder.parse(contents);
-  }
-  
-  private static InputStream stringToInputStream(String string) {
-    return new ByteArrayInputStream(string.getBytes(StandardCharsets.UTF_8));
   }
 
 }

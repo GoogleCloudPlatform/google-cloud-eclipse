@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -31,6 +32,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.ui.IWorkbench;
@@ -120,6 +122,32 @@ public class XsltQuickFixTest {
     
     assertTrue(file.isSynchronized(0));
     assertEquals(1, file.getHistory(null).length);
+  }
+  
+  @Test
+  public void testRun_existingEditor()
+      throws CoreException, ParserConfigurationException, SAXException, IOException {
+    
+    IProject project = projectCreator.getProject();
+    IFile file = project.getFile("testdata.xml");
+    file.create(ValidationTestUtils.stringToInputStream(APPLICATION_XML), IFile.FORCE, null);
+    
+    IWorkbench workbench = PlatformUI.getWorkbench();
+    WorkbenchUtil.openInEditor(workbench, file);
+    
+    IDocument preDocument = XsltQuickFix.getCurrentDocument(file);
+    String preContents = preDocument.get();
+    assertTrue(preContents.contains("application"));
+    
+    IMarker marker = Mockito.mock(IMarker.class);
+    Mockito.when(marker.getResource()).thenReturn(file);
+    XsltQuickFix fix = new XsltQuickFix("/xslt/removeApplication.xsl",
+        Messages.getString("remove.application.element"));
+    fix.run(marker);
+    
+    IDocument document = XsltQuickFix.getCurrentDocument(file);
+    String contents = document.get();
+    assertFalse(contents.contains("application"));
   }
   
   @Test
