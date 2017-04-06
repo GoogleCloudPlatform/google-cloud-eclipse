@@ -356,7 +356,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
   /**
    * @return true if and only if we're using devappserver1
    */
-  public boolean isDevAppServer1() {
+  private boolean isDevAppServer1() {
     return devServer instanceof CloudSdkAppEngineDevServer1;
   }
 
@@ -402,7 +402,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
 
     // devappserver1 patterns
     private final Pattern moduleRunningPattern = Pattern.compile(
-        "INFO: Module instance (?<service>\\w+) is running at (?<url>http://.+:(?<port>[0-9]+)/)$");
+        "INFO: Module instance (?<service>[\\w\\d\\-]+) is running at (?<url>http://.+:(?<port>[0-9]+)/)$");
     private final Pattern adminRunningPattern =
         Pattern.compile("INFO: The admin console is running at (?<url>http://.+:(?<port>[0-9]+))/_ah/admin$");
       

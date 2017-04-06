@@ -102,11 +102,11 @@ public class LocalAppEngineServerBehaviourTest {
       "Apr 05, 2017 9:25:17 PM com.google.apphosting.utils.jetty.JettyLogger info",
       "INFO: jetty-6.1.x",
       "Apr 05, 2017 9:25:17 PM com.google.apphosting.utils.jetty.JettyLogger info",
-      "INFO: Started SelectChannelConnector@localhost:8080",
+      "INFO: Started SelectChannelConnector@localhost:7979",
       "Apr 05, 2017 9:25:17 PM com.google.appengine.tools.development.AbstractModule startup",
-      "INFO: Module instance default is running at http://localhost:8080/",
+      "INFO: Module instance default is running at http://localhost:7979/",
       "Apr 05, 2017 9:25:17 PM com.google.appengine.tools.development.AbstractModule startup",
-      "INFO: The admin console is running at http://localhost:8080/_ah/admin",
+      "INFO: The admin console is running at http://localhost:7979/_ah/admin",
       "Apr 05, 2017 5:25:17 PM com.google.appengine.tools.development.DevAppServerImpl doStart",
   };
   
@@ -142,8 +142,8 @@ public class LocalAppEngineServerBehaviourTest {
   public void testExtractServerPortFromOutput_devappserver1() throws CoreException {
     setUpServerPort(0);
     simulateOutputParsing(devappserver1Output);
-    assertEquals(8080, serverBehavior.getServerPort());
-    assertEquals("foo", 8080, serverBehavior.getAdminPort());
+    assertEquals(7979, serverBehavior.getServerPort());
+    assertEquals(7979, serverBehavior.getAdminPort());
   }
 
   @Test
