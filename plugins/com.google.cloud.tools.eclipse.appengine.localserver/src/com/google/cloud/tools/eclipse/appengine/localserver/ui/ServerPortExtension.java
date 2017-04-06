@@ -94,6 +94,7 @@ public class ServerPortExtension extends ServerCreationWizardPageExtension {
   private boolean updatePortAndTriggerDecoration(String newPortString) {
     if (newPortString.isEmpty()) {
       serverWc.setAttribute(LocalAppEngineServerBehaviour.SERVER_PORT_ATTRIBUTE_NAME, 0);
+      serverWc.setAttribute(LocalAppEngineServerBehaviour.ADMIN_PORT_ATTRIBUTE_NAME, 0);
       return true;
     }
 
@@ -111,6 +112,7 @@ public class ServerPortExtension extends ServerCreationWizardPageExtension {
       }
 
       serverWc.setAttribute(LocalAppEngineServerBehaviour.SERVER_PORT_ATTRIBUTE_NAME, port);
+      serverWc.setAttribute(LocalAppEngineServerBehaviour.ADMIN_PORT_ATTRIBUTE_NAME, port);
       return true;
     } catch (NumberFormatException ex) {
       return false;

@@ -171,7 +171,6 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     // don't restart server when on-disk changes detected
     devServerRunConfiguration.setAutomaticRestart(false);
 
-
     int serverPort = getPortAttribute(LocalAppEngineServerBehaviour.SERVER_PORT_ATTRIBUTE_NAME,
         LocalAppEngineServerBehaviour.DEFAULT_SERVER_PORT, configuration, server);
     if (serverPort >= 0) {
@@ -350,7 +349,6 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     if (modules == null || modules.length == 0) {
       return;
     }
-
 
     LocalAppEngineServerBehaviour serverBehaviour = (LocalAppEngineServerBehaviour) server
         .loadAdapter(LocalAppEngineServerBehaviour.class, null);
