@@ -260,20 +260,27 @@ public class StandardDeployJob extends WorkspaceJob {
 
   @VisibleForTesting
   public String getDeployedAppUrl(AppEngineDeployOutput deployOutput) {
-    String project = deployConfiguration.getProject();
     boolean promoting = deployConfiguration.getPromote();
     String version = deployOutput.getVersion();
     String service = deployOutput.getService();
-    Boolean usingDefaultService = DEFAULT_SERVICE.equals(service);
+    String projectId = deployOutput.getProject();
+    boolean usingDefaultService = DEFAULT_SERVICE.equals(service);
 
+    String domain = ".appspot.com";
+    int colon = projectId.indexOf(':');
+    if (colon >= 0) {
+      domain = ".googleplex.com";
+      projectId = projectId.substring(colon + 1);
+    }
+    
     if (promoting && usingDefaultService) {
-      return "https://" + project + ".appspot.com";
+      return "https://" + projectId + domain;
     } else if (promoting && !usingDefaultService) {
-      return "https://" + service +  "-dot-"+  project + ".appspot.com";
+      return "https://" + service +  "-dot-"+  projectId + domain;
     } else if (!promoting && usingDefaultService) {
-      return "https://" + version + "-dot-" + project + ".appspot.com";
+      return "https://" + version + "-dot-" + projectId + domain;
     } else {
-      return "https://" + version + "-dot-" + service +  "-dot-"+  project + ".appspot.com";
+      return "https://" + version + "-dot-" + service +  "-dot-"+  projectId + domain;
     }
   }
 
@@ -309,7 +316,7 @@ public class StandardDeployJob extends WorkspaceJob {
     }
   }
 
-  private class StringBuilderProcessOutputLineListener implements ProcessOutputLineListener {
+  private static class StringBuilderProcessOutputLineListener implements ProcessOutputLineListener {
     private final StringBuffer buffer = new StringBuffer();
 
     public StringBuilderProcessOutputLineListener() {

@@ -68,12 +68,8 @@
   </extension>
 
   <extension point="org.eclipse.ui.newWizards">
-    <category
-        name="Google Cloud Platform"
-        id="com.google.cloud">
-    </category>
     <wizard
-          category="com.google.cloud"
+          category="com.google.cloud.tools.eclipse.wizards"
           class="com.google.cloud.tools.eclipse.dataflow.ui.wizard.NewDataflowProjectWizard"
           icon="icons/Dataflow_128.png"
           id="com.google.cloud.tools.eclipse.dataflow.ui.wizard.NewDataflowProjectWizard"

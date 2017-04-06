@@ -8,7 +8,10 @@ Bundle-ClassPath: .
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Fragment-Host: com.google.cloud.tools.eclipse.dataflow.ui
-Import-Package: org.junit;bundle-version="4.12.0",
+Import-Package: com.google.cloud.tools.eclipse.test.util,
+ com.google.cloud.tools.eclipse.test.util.ui,
+ org.junit;bundle-version="4.12.0",
+ org.junit.rules;bundle-version="4.12.0",
  org.junit.runner;bundle-version="4.12.0",
  org.junit.runners;bundle-version="4.12.0",
  org.mockito;provider=google;version="1.10.19",

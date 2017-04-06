@@ -43,7 +43,7 @@
             class="com.google.cloud.tools.eclipse.util.service.ServiceContextFactory:com.google.cloud.tools.eclipse.appengine.newproject.flex.AppEngineFlexProjectWizard"
             icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gae-16x16.png"
             project="true"
-            category="com.google.cloud.tools.eclipse.appengine.wizards">
+            category="com.google.cloud.tools.eclipse.wizards">
          <description>%flexWizardDescription</description>
          <selection class="org.eclipse.core.resources.IResource"/>
          <keywordReference id="com.google.cloud.tools.eclipse.appengine.ui.FlexKeyword"/>
@@ -55,9 +55,6 @@
          <keywordReference
              id="com.google.cloud.tools.eclipse.appengine.ui.AppSpaceEngineKeyword"/>
     </wizard>
-    <category
-        id="com.google.cloud.tools.eclipse.appengine.wizards"
-        name="%gcpCategory" />
   </extension>
   <extension
         point="org.eclipse.ui.perspectiveExtensions">
