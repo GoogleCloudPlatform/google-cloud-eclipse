@@ -21,7 +21,6 @@ import static org.mockito.Mockito.mock;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.ui.IWorkbench;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
