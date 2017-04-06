@@ -129,7 +129,11 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     if (devServer != null && (!force || serverState != IServer.STATE_STOPPING)) {
       setServerState(IServer.STATE_STOPPING);
       DefaultStopConfiguration stopConfig = new DefaultStopConfiguration();
-      stopConfig.setAdminPort(adminPort);
+      if (isDevAppServer1()) {
+        stopConfig.setAdminPort(serverPort);        
+      } else {
+        stopConfig.setAdminPort(adminPort);
+      }
       try {
         devServer.stop(stopConfig);
       } catch (AppEngineException ex) {
@@ -347,6 +351,13 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
 
     devServer = new CloudSdkAppEngineDevServer1(cloudSdk);
     moduleToUrlMap.clear();
+  }
+  
+  /**
+   * @return true if and only if we're using devappserver1
+   */
+  public boolean isDevAppServer1() {
+    return devServer instanceof CloudSdkAppEngineDevServer1;
   }
 
   /**
