@@ -18,7 +18,6 @@ package com.google.cloud.tools.eclipse.appengine.deploy.standard;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
 import com.google.common.base.Preconditions;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -30,17 +29,27 @@ import org.eclipse.wst.common.componentcore.ComponentCore;
 import org.eclipse.wst.server.core.util.PublishHelper;
 
 /**
- * Writes the exploded WAR file of a project to a staging directory.
+ * Writes a WAR file of a project, or the exploded contents of it, to a staging directory.
  */
-public class ExplodedWarPublisher {
+public class WarPublisher {
 
   /**
    * It does a smart export, i.e. considers the resources to be copied and if the destination
    * directory already contains resources those will be deleted if they are not part of the exploded
    * WAR.
    */
-  public void publish(IProject project, IPath destination, IProgressMonitor monitor)
+  public static void publishExploded(IProject project, IPath destination, IProgressMonitor monitor)
       throws CoreException {
+    publish(project, destination, true /* exploded */, monitor);
+  }
+
+  public static void publishWar(IProject project, IPath destination, IProgressMonitor monitor)
+      throws CoreException {
+    publish(project, destination, false /* exploded */, monitor);
+  }
+
+  private static void publish(IProject project, IPath destination, boolean exploded,
+      IProgressMonitor monitor) throws CoreException {
     if (monitor.isCanceled()) {
       throw new OperationCanceledException();
     }
@@ -54,6 +63,11 @@ public class ExplodedWarPublisher {
     PublishHelper publishHelper = new PublishHelper(null);
     J2EEFlexProjDeployable deployable =
         new J2EEFlexProjDeployable(project, ComponentCore.createComponent(project));
-    publishHelper.publishSmart(deployable.members(), destination, progress.newChild(100));
+
+    if (exploded) {
+      publishHelper.publishSmart(deployable.members(), destination, progress.newChild(100));
+    } else {
+      publishHelper.publishZip(deployable.members(), destination, progress.newChild(100));
+    }
   }
 }
