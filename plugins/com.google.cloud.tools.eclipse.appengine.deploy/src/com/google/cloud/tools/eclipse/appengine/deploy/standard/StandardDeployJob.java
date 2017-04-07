@@ -38,7 +38,6 @@ import com.google.gson.JsonParseException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.logging.Logger;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
@@ -167,7 +166,7 @@ public class StandardDeployJob extends WorkspaceJob {
 
     try {
       getJobManager().beginRule(project, progress);
-      new ExplodedWarPublisher().publish(project, explodedWarDirectory, progress.newChild(40));
+      WarPublisher.publishExploded(project, explodedWarDirectory, progress.newChild(40));
       new StandardProjectStaging().stage(explodedWarDirectory, stagingDirectory,
           cloudSdk, progress.newChild(60));
       return stagingExitListener.getExitStatus();
