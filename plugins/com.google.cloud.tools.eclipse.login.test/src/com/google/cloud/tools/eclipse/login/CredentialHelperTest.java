@@ -16,27 +16,40 @@
 
 package com.google.cloud.tools.eclipse.login;
 
-import org.junit.Assert;
-import org.junit.Test;
-
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson.JacksonFactory;
 import com.google.gson.Gson;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.file.Path;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 public class CredentialHelperTest {
 
-  @Test
-  public void testGetJsonCredential() {
-    Credential credential = createCredential("fake_access_token", "fake_refresh_token");
-    String jsonCredential = new CredentialHelper().toJson(credential);
+  @Rule public TemporaryFolder tempFolder = new TemporaryFolder();
 
-    CredentialType credentialType = new Gson().fromJson(jsonCredential, CredentialType.class);
-    Assert.assertEquals(credentialType.client_id, Constants.getOAuthClientId());
-    Assert.assertEquals(credentialType.client_secret, Constants.getOAuthClientSecret());
-    Assert.assertEquals(credentialType.refresh_token, "fake_refresh_token");
-    Assert.assertEquals(credentialType.type, "authorized_user");
+  @Test
+  public void testToJsonFile() throws IOException {
+    Credential credential = createCredential("fake_access_token", "fake_refresh_token");
+    Path jsonFile = tempFolder.getRoot().toPath().resolve("credential-for-gcloud.json");
+    CredentialHelper.toJsonFile(credential, jsonFile);
+
+    try (InputStream in = new FileInputStream(jsonFile.toFile());
+        Reader reader = new InputStreamReader(in)) {
+      CredentialType credentialType = new Gson().fromJson(reader, CredentialType.class);
+      Assert.assertEquals(credentialType.client_id, Constants.getOAuthClientId());
+      Assert.assertEquals(credentialType.client_secret, Constants.getOAuthClientSecret());
+      Assert.assertEquals(credentialType.refresh_token, "fake_refresh_token");
+      Assert.assertEquals(credentialType.type, "authorized_user");
+    }
   }
 
   private class CredentialType {

@@ -18,11 +18,15 @@ package com.google.cloud.tools.eclipse.login;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.gson.Gson;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Helper class to work with {@link Credential} objects
+ * Helper class to work with {@link Credential} objects.
  */
 public class CredentialHelper {
 
@@ -33,16 +37,17 @@ public class CredentialHelper {
   private static final String GCLOUD_USER_TYPE = "authorized_user";
 
   /**
-   * Writes a {@link Credential} object in the JSON format expected by gcloud's <code>credential-file-override</code>
-   * feature
+   * Writes a {@link Credential} object to a file in the JSON format expected by gcloud's
+   * {@code credential-file-override} feature.
    */
-  public String toJson(Credential credential) {
+  public static void toJsonFile(Credential credential, Path toFile) throws IOException {
     Map<String, String> credentialMap = new HashMap<>();
     credentialMap.put(CLIENT_ID_LABEL, Constants.getOAuthClientId());
     credentialMap.put(CLIENT_SECRET_LABEL, Constants.getOAuthClientSecret());
     credentialMap.put(REFRESH_TOKEN_LABEL, credential.getRefreshToken());
     credentialMap.put(GCLOUD_USER_TYPE_LABEL, GCLOUD_USER_TYPE);
 
-    return new Gson().toJson(credentialMap);
+    String json = new Gson().toJson(credentialMap);
+    Files.write(toFile, json.getBytes(StandardCharsets.UTF_8));
   }
 }

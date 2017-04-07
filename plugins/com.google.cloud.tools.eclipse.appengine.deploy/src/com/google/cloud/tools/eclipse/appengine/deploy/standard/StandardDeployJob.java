@@ -36,11 +36,8 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.gson.JsonParseException;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.WorkspaceJob;
@@ -73,15 +70,13 @@ public class StandardDeployJob extends WorkspaceJob {
   private static final String ERROR_MESSAGE_PREFIX = "ERROR:";
   private static final String DEFAULT_SERVICE = "default";
 
-  private static final Logger logger = Logger.getLogger(StandardDeployJob.class.getName());
-
   //temporary way of error handling, after #439 is fixed, it'll be cleaner
   private IStatus cloudSdkProcessStatus = Status.OK_STATUS;
   private Process process;
 
   private final IProject project;
   private final Credential credential;
-  private final IPath workDirectoryParent;
+  private final IPath workDirectory;
   private final ProcessOutputLineListener stagingStdoutLineListener;
   private final ProcessOutputLineListener deployStdoutLineListener;
   private final ProcessOutputLineListener stderrLineListener;
@@ -91,7 +86,7 @@ public class StandardDeployJob extends WorkspaceJob {
 
   public StandardDeployJob(IProject project,
                            Credential credential,
-                           IPath workDirectoryParent,
+                           IPath workDirectory,
                            ProcessOutputLineListener stagingStdoutLineListener,
                            ProcessOutputLineListener stderrLineListener,
                            DefaultDeployConfiguration deployConfiguration,
@@ -99,7 +94,7 @@ public class StandardDeployJob extends WorkspaceJob {
     super(Messages.getString("deploy.standard.runnable.name")); //$NON-NLS-1$
     this.project = project;
     this.credential = credential;
-    this.workDirectoryParent = workDirectoryParent;
+    this.workDirectory = workDirectory;
     this.stagingStdoutLineListener = stagingStdoutLineListener;
     this.stderrLineListener = stderrLineListener;
     this.deployConfiguration = deployConfiguration;
@@ -118,15 +113,13 @@ public class StandardDeployJob extends WorkspaceJob {
   @Override
   public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
     SubMonitor progress = SubMonitor.convert(monitor, 100);
-    Path credentialFile = null;
 
     try {
-      IPath workDirectory = workDirectoryParent;
       IPath explodedWarDirectory = workDirectory.append(EXPLODED_WAR_DIRECTORY_NAME);
       IPath stagingDirectory = workDirectory.append(STAGING_DIRECTORY_NAME);
-      credentialFile = workDirectory.append(CREDENTIAL_FILENAME).toFile().toPath();
+      Path credentialFile = workDirectory.append(CREDENTIAL_FILENAME).toFile().toPath();
 
-      IStatus saveStatus = saveCredential(credentialFile, credential);
+      IStatus saveStatus = saveCredential(credentialFile);
       if (saveStatus != Status.OK_STATUS) {
         return saveStatus;
       }
@@ -144,13 +137,6 @@ public class StandardDeployJob extends WorkspaceJob {
 
       return openAppInBrowser();
     } finally {
-      if (credentialFile != null) {
-        try {
-          Files.delete(credentialFile);
-        } catch (IOException exception) {
-          logger.log(Level.WARNING, "Could not delete credential file after deploy", exception);
-        }
-      }
       monitor.done();
     }
   }
@@ -164,14 +150,13 @@ public class StandardDeployJob extends WorkspaceJob {
     super.canceling();
   }
 
-  private IStatus saveCredential(Path destination, Credential credential) {
-    String jsonCredential = new CredentialHelper().toJson(credential);
+  private IStatus saveCredential(Path destination) {
     try {
-      Files.write(destination, jsonCredential.getBytes(StandardCharsets.UTF_8));
+      CredentialHelper.toJsonFile(credential, destination);
+      return Status.OK_STATUS;
     } catch (IOException ex) {
-      return StatusUtil.error(getClass(), Messages.getString("save.credential.failed"), ex);
+      return StatusUtil.error(this, Messages.getString("save.credential.failed"), ex);
     }
-    return Status.OK_STATUS;
   }
 
   private IStatus stageProject(Path credentialFile,
@@ -187,7 +172,7 @@ public class StandardDeployJob extends WorkspaceJob {
           cloudSdk, progress.newChild(60));
       return stagingExitListener.getExitStatus();
     } catch (CoreException | IllegalArgumentException | OperationCanceledException ex) {
-      return StatusUtil.error(getClass(), Messages.getString("deploy.job.staging.failed"), ex);
+      return StatusUtil.error(this, Messages.getString("deploy.job.staging.failed"), ex);
     } finally {
       getJobManager().endRule(project);
     }
@@ -205,37 +190,37 @@ public class StandardDeployJob extends WorkspaceJob {
   private CloudSdk getCloudSdk(Path credentialFile,
       ProcessOutputLineListener stdoutLineListener, ProcessExitListener processExitListener) {
     CloudSdk cloudSdk = new CloudSdk.Builder()
-                          .addStdOutLineListener(stdoutLineListener)
-                          .addStdErrLineListener(stderrLineListener)
-                          .addStdErrLineListener(errorCollectingLineListener)
-                          .appCommandCredentialFile(credentialFile.toFile())
-                          .startListener(new StoreProcessObjectListener())
-                          .exitListener(processExitListener)
-                          .appCommandMetricsEnvironment(CloudToolsInfo.METRICS_NAME)
-                          .appCommandMetricsEnvironmentVersion(CloudToolsInfo.getToolsVersion())
-                          .appCommandOutputFormat("json")
-                          .build();
+        .addStdOutLineListener(stdoutLineListener)
+        .addStdErrLineListener(stderrLineListener)
+        .addStdErrLineListener(errorCollectingLineListener)
+        .appCommandCredentialFile(credentialFile.toFile())
+        .startListener(new StoreProcessObjectListener())
+        .exitListener(processExitListener)
+        .appCommandMetricsEnvironment(CloudToolsInfo.METRICS_NAME)
+        .appCommandMetricsEnvironmentVersion(CloudToolsInfo.getToolsVersion())
+        .appCommandOutputFormat("json")
+        .build();
     return cloudSdk;
   }
 
   private IStatus openAppInBrowser() {
-    AppEngineDeployOutput deployOutput = null;
-
     try {
-      deployOutput = getDeployOutput();
-      String appLocation = getDeployedAppUrl(deployOutput);
+      String rawDeployOutput = deployStdoutLineListener.toString();
+      AppEngineDeployOutput structuredOutput = AppEngineDeployOutput.parse(rawDeployOutput);
+
+      String appLocation = getDeployedAppUrl(structuredOutput);
       String project = deployConfiguration.getProject();
       String browserTitle = Messages.getString("browser.launch.title", project);
       WorkbenchUtil.openInBrowserInUiThread(appLocation, null, browserTitle, browserTitle);
       return Status.OK_STATUS;
-    } catch (CoreException ex) {
-      return StatusUtil.error(getClass(), Messages.getString("browser.launch.failed"), ex);
+    } catch (IndexOutOfBoundsException | JsonParseException ex)  {
+      return StatusUtil.error(this, Messages.getString("browser.launch.failed"), ex);
     }
   }
 
   /**
-   * @return the error message obtained from <code>errorCollectingLineListener()</code> or
-   * <code>defaultMessage</code>
+   * @return the error message obtained from {@code errorCollectingLineListener()} or
+   * {@code defaultMessage}.
    */
   private String getErrorMessageOrDefault(String defaultMessage) {
     // TODO: Check the assumption that if there are error messages during staging collected via
@@ -246,15 +231,6 @@ public class StandardDeployJob extends WorkspaceJob {
       return Joiner.on('\n').join(messages);
     } else {
       return defaultMessage;
-    }
-  }
-
-  private AppEngineDeployOutput getDeployOutput() throws CoreException {
-    try {
-      String rawDeployOutput = deployStdoutLineListener.toString();
-      return AppEngineDeployOutput.parse(rawDeployOutput);
-    } catch (IndexOutOfBoundsException | JsonParseException ex)  {
-      throw new CoreException(StatusUtil.error(getClass(), "Error parsing deploy output", ex));
     }
   }
 
@@ -272,7 +248,7 @@ public class StandardDeployJob extends WorkspaceJob {
       domain = ".googleplex.com";
       projectId = projectId.substring(colon + 1);
     }
-    
+
     if (promoting && usingDefaultService) {
       return "https://" + projectId + domain;
     } else if (promoting && !usingDefaultService) {
@@ -297,7 +273,7 @@ public class StandardDeployJob extends WorkspaceJob {
     @Override
     public void onExit(int exitCode) {
       if (cloudSdkProcessStatus == Status.CANCEL_STATUS) {
-        status = cloudSdkProcessStatus;
+        status = Status.CANCEL_STATUS;
       } else if (exitCode != 0) {
         // temporary way of error handling, after #439 is fixed, it'll be cleaner
         String errorMessage =
