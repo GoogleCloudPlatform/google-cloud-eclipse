@@ -16,6 +16,8 @@
 
 package com.google.cloud.tools.eclipse.login;
 
+import static org.junit.Assert.assertEquals;
+
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -27,7 +29,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.file.Path;
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -45,10 +46,10 @@ public class CredentialHelperTest {
     try (InputStream in = new FileInputStream(jsonFile.toFile());
         Reader reader = new InputStreamReader(in)) {
       CredentialType credentialType = new Gson().fromJson(reader, CredentialType.class);
-      Assert.assertEquals(credentialType.client_id, Constants.getOAuthClientId());
-      Assert.assertEquals(credentialType.client_secret, Constants.getOAuthClientSecret());
-      Assert.assertEquals(credentialType.refresh_token, "fake_refresh_token");
-      Assert.assertEquals(credentialType.type, "authorized_user");
+      assertEquals(Constants.getOAuthClientId(), credentialType.client_id);
+      assertEquals(Constants.getOAuthClientSecret(), credentialType.client_secret);
+      assertEquals("fake_refresh_token", credentialType.refresh_token);
+      assertEquals("authorized_user", credentialType.type);
     }
   }
 
