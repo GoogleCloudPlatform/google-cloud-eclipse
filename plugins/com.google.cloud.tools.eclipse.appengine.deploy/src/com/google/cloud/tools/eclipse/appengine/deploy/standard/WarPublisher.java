@@ -29,7 +29,7 @@ import org.eclipse.wst.common.componentcore.ComponentCore;
 import org.eclipse.wst.server.core.util.PublishHelper;
 
 /**
- * Writes a WAR file of a project, or the exploded contents of it, to a staging directory.
+ * Writes a WAR file of a project, or the exploded contents of it to a destination directory.
  */
 public class WarPublisher {
 
