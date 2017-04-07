@@ -32,9 +32,11 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import org.junit.Before;
@@ -44,6 +46,7 @@ import org.mockito.Mockito;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
+import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 
@@ -133,7 +136,7 @@ public class XsltQuickFixTest {
     file.create(ValidationTestUtils.stringToInputStream(APPLICATION_XML), IFile.FORCE, null);
     
     IWorkbench workbench = PlatformUI.getWorkbench();
-    WorkbenchUtil.openInEditor(workbench, file);
+    IEditorPart editor = WorkbenchUtil.openInEditor(workbench, file);
     
     IDocument preDocument = XsltQuickFix.getCurrentDocument(file);
     String preContents = preDocument.get();
@@ -148,6 +151,10 @@ public class XsltQuickFixTest {
     IDocument document = XsltQuickFix.getCurrentDocument(file);
     String contents = document.get();
     assertFalse(contents.contains("application"));
+    
+    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1527
+    editor.doSave(new NullProgressMonitor());
+    ProjectUtils.waitForProjects(project);
   }
   
   @Test
@@ -158,9 +165,13 @@ public class XsltQuickFixTest {
     file.create(ValidationTestUtils.stringToInputStream(APPLICATION_XML), IFile.FORCE, null);
     
     IWorkbench workbench = PlatformUI.getWorkbench();
-    WorkbenchUtil.openInEditor(workbench, file);
+    IEditorPart editor = WorkbenchUtil.openInEditor(workbench, file);
     
     assertNotNull(XsltQuickFix.getCurrentDocument(file));
+    
+    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1527
+    editor.doSave(new NullProgressMonitor());
+    ProjectUtils.waitForProjects(project);
   }
   
   @Test
