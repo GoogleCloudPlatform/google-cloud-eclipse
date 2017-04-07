@@ -126,9 +126,9 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
 
     groupIdInput = addLabeledText(formComposite, "&Group ID:");
     groupIdInput.setMessage(EXAMPLE_GROUP_ID);
-    groupIdInput.setToolTipText(Messages.getString("GROUP_ID_TOOL_TIP"));
+    groupIdInput.setToolTipText(Messages.getString("GROUP_ID_TOOLTIP"));
     artifactIdInput = addLabeledText(formComposite, "&Artifact ID:");
-    artifactIdInput.setToolTipText(Messages.getString("ARTIFACT_ID_TOOL_TIP"));
+    artifactIdInput.setToolTipText(Messages.getString("ARTIFACT_ID_TOOLTIP"));
 
     templateDropdown = addCombo(formComposite, "Project &Template:", true);
     for (Template template : Template.values()) {
@@ -140,7 +140,7 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     updateAvailableVersions();
 
     packageInput = addLabeledText(formComposite, "&Package:");
-    packageInput.setToolTipText(Messages.getString("UNSET_PACKAGE_TOOL_TIP"));
+    packageInput.setToolTipText(Messages.getString("UNSET_PACKAGE_TOOLTIP"));
     packageInput.setMessage(EXAMPLE_GROUP_ID);
 
     // Add a labeled text and button for the default location.
@@ -157,7 +157,7 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     locationInput.setText(defaultLocation);
     locationInput.setEnabled(false);
     locationInput.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-    locationInput.setToolTipText(Messages.getString("LOCATION_TOOL_TIP"));
+    locationInput.setToolTipText(Messages.getString("LOCATION_TOOLTIP"));
 
     locationBrowse = ButtonFactory.newPushButton(locationGroup, "&Browse");
     locationBrowse.setEnabled(false);

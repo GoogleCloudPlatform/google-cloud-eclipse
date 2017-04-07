@@ -32,7 +32,7 @@ import org.eclipse.swt.widgets.Composite;
  * An optional Page to input default run options for a Dataflow Project.
  */
 public class NewDataflowProjectWizardDefaultRunOptionsPage extends WizardPage {
-  private static final String PAGE_NAME = "Dataflow Default Run Options";
+  private static final String PAGE_NAME = Messages.getString("RUN_OPTIONS");
 
   private final DataflowProjectCreator creator;
 
