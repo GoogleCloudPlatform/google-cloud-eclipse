@@ -223,6 +223,14 @@
         base-type="org.eclipse.core.runtime.xml"      
     	file-names="appengine-web.xml">
     </content-type>
-  </extension> 
+  </extension>
+  
+  <extension point="org.eclipse.wst.xml.core.catalogContributions">
+  	<catalogContribution>
+  	  <uri
+  	      name="http://appengine.google.com/ns/1.0"
+  	      uri="xsd/appengine-web.xsd"/>
+  	</catalogContribution>
+  </extension>
 
 </plugin>
