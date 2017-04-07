@@ -171,7 +171,6 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     // don't restart server when on-disk changes detected
     devServerRunConfiguration.setAutomaticRestart(false);
 
-
     int serverPort = getPortAttribute(LocalAppEngineServerBehaviour.SERVER_PORT_ATTRIBUTE_NAME,
         LocalAppEngineServerBehaviour.DEFAULT_SERVER_PORT, configuration, server);
     if (serverPort >= 0) {
@@ -351,7 +350,6 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       return;
     }
 
-
     LocalAppEngineServerBehaviour serverBehaviour = (LocalAppEngineServerBehaviour) server
         .loadAdapter(LocalAppEngineServerBehaviour.class, null);
 
@@ -381,7 +379,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     try {
       DefaultRunConfiguration devServerRunConfiguration =
           generateServerRunConfiguration(configuration, server);
-      devServerRunConfiguration.setAppYamls(runnables);
+      devServerRunConfiguration.setServices(runnables);
       if (ILaunchManager.DEBUG_MODE.equals(mode)) {
         int debugPort = getDebugPort();
         setupDebugTarget(devServerRunConfiguration, launch, debugPort, monitor);

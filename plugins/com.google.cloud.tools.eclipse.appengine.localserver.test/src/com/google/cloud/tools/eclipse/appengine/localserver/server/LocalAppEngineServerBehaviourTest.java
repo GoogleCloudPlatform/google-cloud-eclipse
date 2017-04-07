@@ -27,8 +27,8 @@ import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerBehaviour.PortChecker;
 import java.net.InetAddress;
+
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.wst.server.core.IServer;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,8 +44,6 @@ public class LocalAppEngineServerBehaviourTest {
   @Mock
   private PortChecker portProber;
 
-  @Mock
-  private IServer server;
   private LocalAppEngineServerBehaviour serverBehavior = new LocalAppEngineServerBehaviour();
 
   @Before
@@ -100,7 +98,19 @@ public class LocalAppEngineServerBehaviourTest {
     }
   }
 
-  private static final String[] serverOutputWithDefaultModule1 = new String[] {
+  private static final String[] devappserver1Output = new String[] {
+      "Apr 05, 2017 9:25:17 PM com.google.apphosting.utils.jetty.JettyLogger info",
+      "INFO: jetty-6.1.x",
+      "Apr 05, 2017 9:25:17 PM com.google.apphosting.utils.jetty.JettyLogger info",
+      "INFO: Started SelectChannelConnector@localhost:7979",
+      "Apr 05, 2017 9:25:17 PM com.google.appengine.tools.development.AbstractModule startup",
+      "INFO: Module instance default is running at http://localhost:7979/",
+      "Apr 05, 2017 9:25:17 PM com.google.appengine.tools.development.AbstractModule startup",
+      "INFO: The admin console is running at http://localhost:7979/_ah/admin",
+      "Apr 05, 2017 5:25:17 PM com.google.appengine.tools.development.DevAppServerImpl doStart",
+  };
+  
+  private static final String[] devappserver2OutputWithDefaultModule1 = new String[] {
       "WARNING  2016-11-03 21:11:21,930 devappserver2.py:785] DEFAULT_VERSION_HOSTNAME will not be set correctly with --port=0",
       "INFO     2016-11-03 21:11:21,956 api_server.py:205] Starting API server at: http://localhost:52892",
       "INFO     2016-11-03 21:11:21,959 dispatcher.py:197] Starting module \"default\" running at: http://localhost:55948",
@@ -109,7 +119,7 @@ public class LocalAppEngineServerBehaviourTest {
       "Nov 03, 2016 9:11:23 PM com.google.appengine.tools.development.SystemPropertiesManager setSystemProperties"
   };
 
-  private static final String[] serverOutputWithDefaultModule2 = new String[] {
+  private static final String[] devappserver2OutputWithDefaultModule2 = new String[] {
       "WARNING  2016-11-03 21:11:21,930 devappserver2.py:785] DEFAULT_VERSION_HOSTNAME will not be set correctly with --port=0",
       "INFO     2016-11-03 21:11:21,956 api_server.py:205] Starting API server at: http://localhost:52892",
       "INFO     2016-11-03 21:11:21,959 dispatcher.py:197] Starting module \"first\" running at: http://localhost:55948",
@@ -127,18 +137,26 @@ public class LocalAppEngineServerBehaviourTest {
       "INFO     2016-11-03 21:11:21,959 admin_server.py:116] Starting admin server at: http://localhost:43679",
       "Nov 03, 2016 9:11:23 PM com.google.appengine.tools.development.SystemPropertiesManager setSystemProperties"
   };
+  
+  @Test
+  public void testExtractServerPortFromOutput_devappserver1() throws CoreException {
+    setUpServerPort(0);
+    simulateOutputParsing(devappserver1Output);
+    assertEquals(7979, serverBehavior.getServerPort());
+    assertEquals(7979, serverBehavior.getAdminPort());
+  }
 
   @Test
   public void testExtractServerPortFromOutput_firstModuleIsDefault() throws CoreException {
     setUpServerPort(0);
-    simulateOutputParsing(serverOutputWithDefaultModule1);
+    simulateOutputParsing(devappserver2OutputWithDefaultModule1);
     assertEquals(55948, serverBehavior.getServerPort());
   }
 
   @Test
   public void testExtractServerPortFromOutput_secondModuleIsDefault() throws CoreException {
     setUpServerPort(0);
-    simulateOutputParsing(serverOutputWithDefaultModule2);
+    simulateOutputParsing(devappserver2OutputWithDefaultModule2);
     assertEquals(8081, serverBehavior.getServerPort());
   }
 
@@ -153,13 +171,13 @@ public class LocalAppEngineServerBehaviourTest {
   public void testExtractServerPortFromOutput_defaultModuleDoesNotOverrideUserSpecifiedPort()
       throws CoreException {
     setUpServerPort(12345);
-    simulateOutputParsing(serverOutputWithDefaultModule1);
+    simulateOutputParsing(devappserver2OutputWithDefaultModule1);
     assertEquals(12345, serverBehavior.getServerPort());
   }
 
   @Test
   public void testExtractModuleUrlFromOutput_firstModuleIsDefault() throws CoreException {
-    simulateOutputParsing(serverOutputWithDefaultModule1);
+    simulateOutputParsing(devappserver2OutputWithDefaultModule1);
     assertEquals("http://localhost:55948", serverBehavior.getServiceUrl("default"));
     assertEquals("http://localhost:8081", serverBehavior.getServiceUrl("second"));
   }
@@ -177,7 +195,7 @@ public class LocalAppEngineServerBehaviourTest {
   public void testExtractAdminPortFromOutput() throws CoreException {
     setUpServerPort(9080);
     setUpAdminPort(0);
-    simulateOutputParsing(serverOutputWithDefaultModule1);
+    simulateOutputParsing(devappserver2OutputWithDefaultModule1);
     assertEquals(43679, serverBehavior.adminPort);
   }
 

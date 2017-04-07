@@ -22,6 +22,7 @@ import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessExitListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessStartListener;
+import com.google.cloud.tools.appengine.cloudsdk.process.StringBuilderProcessOutputLineListener;
 import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineDeployOutput;
 import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineProjectDeployer;
 import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
@@ -103,7 +104,6 @@ public class StandardDeployJob extends WorkspaceJob {
     this.stderrLineListener = stderrLineListener;
     this.deployConfiguration = deployConfiguration;
     this.includeOptionalConfigurationFiles = includeOptionalConfigurationFiles;
-    // TODO: change to StringBuilderProcessOutputLineListener from the appengine-plugins-core
     deployStdoutLineListener = new StringBuilderProcessOutputLineListener();
     errorCollectingLineListener =
         new CollectingLineListener(new Predicate<String>() {
@@ -313,23 +313,6 @@ public class StandardDeployJob extends WorkspaceJob {
      */
     public IStatus getExitStatus() {
       return status;
-    }
-  }
-
-  private static class StringBuilderProcessOutputLineListener implements ProcessOutputLineListener {
-    private final StringBuffer buffer = new StringBuffer();
-
-    public StringBuilderProcessOutputLineListener() {
-    }
-
-    @Override
-    public void onOutputLine(String line) {
-      buffer.append(line);
-    }
-
-    @Override
-    public String toString() {
-      return buffer.toString();
     }
   }
 

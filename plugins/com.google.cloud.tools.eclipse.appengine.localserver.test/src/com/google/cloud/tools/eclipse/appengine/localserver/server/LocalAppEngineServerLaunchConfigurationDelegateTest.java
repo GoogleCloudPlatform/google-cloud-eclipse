@@ -255,12 +255,12 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
         .thenAnswer(AdditionalAnswers.returnsSecondArg());
 
     // dev_appserver waits on localhost by default
-    try (ServerSocket socket = new ServerSocket(8000, 100, InetAddress.getLoopbackAddress())) {
+    try (ServerSocket socket = new ServerSocket(8080, 100, InetAddress.getLoopbackAddress())) {
       DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
           .generateServerRunConfiguration(launchConfiguration, server);
 
       assertNotNull(config.getAdminPort());
-      assertEquals(0, (int) config.getAdminPort());
+      assertEquals(LocalAppEngineServerBehaviour.DEFAULT_ADMIN_PORT, (int) config.getAdminPort());
     }
   }
 
