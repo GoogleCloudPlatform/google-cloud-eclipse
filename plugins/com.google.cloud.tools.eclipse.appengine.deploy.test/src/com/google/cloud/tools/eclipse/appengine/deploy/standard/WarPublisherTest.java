@@ -21,7 +21,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
-import java.io.IOException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -80,7 +79,7 @@ public class WarPublisherTest {
   }
 
   @Test
-  public void testPublishWar() throws CoreException, IOException {
+  public void testPublishWar() throws CoreException {
     IProject project = projectCreator.getProject();
     IFile war = project.getFile("my-app.war");
     WarPublisher.publishWar(project, war.getLocation(), monitor);
