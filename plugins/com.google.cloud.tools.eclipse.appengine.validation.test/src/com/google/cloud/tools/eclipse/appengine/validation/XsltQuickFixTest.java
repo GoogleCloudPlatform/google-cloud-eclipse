@@ -46,7 +46,6 @@ import org.mockito.Mockito;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 
@@ -154,7 +153,6 @@ public class XsltQuickFixTest {
     
     // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1527
     editor.doSave(new NullProgressMonitor());
-    ProjectUtils.waitForProjects(project);
   }
   
   @Test
@@ -171,7 +169,6 @@ public class XsltQuickFixTest {
     
     // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1527
     editor.doSave(new NullProgressMonitor());
-    ProjectUtils.waitForProjects(project);
   }
   
   @Test
