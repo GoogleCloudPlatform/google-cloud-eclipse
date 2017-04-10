@@ -177,6 +177,12 @@
       <artifactId>freemarker</artifactId>
       <version>2.3.25-incubating</version>
     </dependency>
+    <dependency>
+      <!-- bundle: org.yaml.snakeyaml -->
+      <groupId>org.yaml</groupId>
+      <artifactId>snakeyaml</artifactId>
+      <version>1.17</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -286,7 +292,7 @@
                 </bannedDependencies>
                 <bannedDependencies>
                   <!--
-                    Ensure our bundles only use Guava 20.0.0. 
+                    Ensure our bundles only use Guava 20.0.0.
                     Tycho identifies p2-resolved bundles are of form:
                     p2.eclipse-plugin:com.google.guava:jar:20.0.0:system
                   -->
