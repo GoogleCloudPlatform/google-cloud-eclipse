@@ -51,12 +51,14 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class DeployStagingTest {
 
-  private static final String cronXml = "<cronentries/>";
-  private static final String datastoreIndexesXml =
+  private static final String APP_YAML = "runtime: java\nenv: flex";
+
+  private static final String CRON_XML = "<cronentries/>";
+  private static final String DATASTORE_INDEXES_XML =
       "<datastore-indexes autoGenerate='true'><datastore-index kind='Person'/></datastore-indexes>";
-  private static final String dispatchXml = "<dispatch-entries/>";
-  private static final String dosXml = "<blacklistentries/>";
-  private static final String queueXml = "<queue-entries/>";
+  private static final String DISPATCH_XML = "<dispatch-entries/>";
+  private static final String DOS_XML = "<blacklistentries/>";
+  private static final String QUEUE_XML = "<queue-entries/>";
 
   private static final IProjectFacetVersion APP_ENGINE_STANDARD_FACET_1 =
       ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID).getVersion("1");
@@ -89,7 +91,7 @@ public class DeployStagingTest {
 
   @Test
   public void testStageStandard() {
-    IPath explodedWarDirectory = project.getFolder("WebContent").getRawLocation();
+    IPath explodedWarDirectory = project.getFolder("WebContent").getLocation();
     DeployStaging.stageStandard(explodedWarDirectory, stagingDirectory, cloudSdk, monitor);
 
     assertTrue(stagingDirectory.append("WEB-INF/web.xml").toFile().exists());
@@ -98,14 +100,14 @@ public class DeployStagingTest {
 
   @Test
   public void testStageFlexible() throws CoreException {
-    IPath deployArtifact = createEmptyFile("my-app.war").getRawLocation();
-
     IFolder appEngineDirectory = project.getFolder("src/main/appengine");
     ResourceUtils.createFolders(appEngineDirectory, monitor);
-    createEmptyFile("src/main/appengine/app.yaml");
+    createFile("src/main/appengine/app.yaml", APP_YAML);
+
+    IPath deployArtifact = createFile("my-app.war", "fake WAR").getLocation();
 
     DeployStaging.stageFlexible(
-        appEngineDirectory.getRawLocation(), deployArtifact, stagingDirectory, monitor);
+        appEngineDirectory.getLocation(), deployArtifact, stagingDirectory, monitor);
 
     assertTrue(stagingDirectory.append("app.yaml").toFile().exists());
     assertTrue(stagingDirectory.append("my-app.war").toFile().exists());
@@ -113,11 +115,11 @@ public class DeployStagingTest {
 
   @Test
   public void testCloudSdkStaging_xmlConfigFilesConvertedToYaml() throws CoreException {
-    createConfigFile("cron.xml", cronXml);
-    createConfigFile("datastore-indexes.xml", datastoreIndexesXml);
-    createConfigFile("dispatch.xml", dispatchXml);
-    createConfigFile("dos.xml", dosXml);
-    createConfigFile("queue.xml", queueXml);
+    createConfigFile("cron.xml", CRON_XML);
+    createConfigFile("datastore-indexes.xml", DATASTORE_INDEXES_XML);
+    createConfigFile("dispatch.xml", DISPATCH_XML);
+    createConfigFile("dos.xml", DOS_XML);
+    createConfigFile("queue.xml", QUEUE_XML);
 
     IPath explodedWarDirectory = project.getFolder("WebContent").getRawLocation();
     DeployStaging.stageStandard(explodedWarDirectory, stagingDirectory, cloudSdk, monitor);
@@ -131,14 +133,13 @@ public class DeployStagingTest {
   }
 
   private void createConfigFile(String filename, String content) throws CoreException {
-    InputStream in = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
-    IFile file = project.getFile("WebContent/WEB-INF/" + filename);
-    file.create(in, true, null);
+    createFile("WebContent/WEB-INF/" + filename, content);
   }
 
-  private IFile createEmptyFile(String path) throws CoreException {
+  private IFile createFile(String path, String content) throws CoreException {
+    InputStream in = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
     IFile file = project.getFile(path);
-    file.create(new ByteArrayInputStream(new byte[0]), true, monitor);
+    file.create(in, true, null);
     return file;
   }
 }
