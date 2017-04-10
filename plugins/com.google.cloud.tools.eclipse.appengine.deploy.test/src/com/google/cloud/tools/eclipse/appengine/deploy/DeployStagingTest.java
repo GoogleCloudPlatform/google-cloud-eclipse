@@ -23,11 +23,13 @@ import static org.mockito.Mockito.when;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
+import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -86,6 +88,30 @@ public class DeployStagingTest {
   }
 
   @Test
+  public void testStageStandard() {
+    IPath explodedWarDirectory = project.getFolder("WebContent").getRawLocation();
+    DeployStaging.stageStandard(explodedWarDirectory, stagingDirectory, cloudSdk, monitor);
+
+    assertTrue(stagingDirectory.append("WEB-INF/web.xml").toFile().exists());
+    assertTrue(stagingDirectory.append("META-INF/MANIFEST.MF").toFile().exists());
+  }
+
+  @Test
+  public void testStageFlexible() throws CoreException {
+    IPath deployArtifact = createEmptyFile("my-app.war").getRawLocation();
+
+    IFolder appEngineDirectory = project.getFolder("src/main/appengine");
+    ResourceUtils.createFolders(appEngineDirectory, monitor);
+    createEmptyFile("src/main/appengine/app.yaml");
+
+    DeployStaging.stageFlexible(
+        appEngineDirectory.getRawLocation(), deployArtifact, stagingDirectory, monitor);
+
+    assertTrue(stagingDirectory.append("app.yaml").toFile().exists());
+    assertTrue(stagingDirectory.append("my-app.war").toFile().exists());
+  }
+
+  @Test
   public void testCloudSdkStaging_xmlConfigFilesConvertedToYaml() throws CoreException {
     createConfigFile("cron.xml", cronXml);
     createConfigFile("datastore-indexes.xml", datastoreIndexesXml);
@@ -108,5 +134,11 @@ public class DeployStagingTest {
     InputStream in = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
     IFile file = project.getFile("WebContent/WEB-INF/" + filename);
     file.create(in, true, null);
+  }
+
+  private IFile createEmptyFile(String path) throws CoreException {
+    IFile file = project.getFile(path);
+    file.create(new ByteArrayInputStream(new byte[0]), true, monitor);
+    return file;
   }
 }
