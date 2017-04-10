@@ -31,12 +31,9 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
 
 /**
- * Deploys a staged App Engine project. The project must be staged first (e.g. in case of App Engine
- * Standard project using
- * {@link com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardProjectStaging
- * StandardProjectStaging}) This class will take the staged project and deploy it to App Engine
- * using {@link CloudSdk}.
- *
+ * Deploys a staged App Engine project. The project must be staged first (e.g. using {@link
+ * DeployStaging}). This class will take the staged project and deploy it to App Engine using
+ * {@link CloudSdk}.
  */
 public class AppEngineProjectDeployer {
 

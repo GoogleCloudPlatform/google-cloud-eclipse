@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.deploy.standard;
+package com.google.cloud.tools.eclipse.appengine.deploy;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -47,7 +47,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class StandardProjectStagingTest {
+public class DeployStagingTest {
 
   private static final String cronXml = "<cronentries/>";
   private static final String datastoreIndexesXml =
@@ -82,7 +82,7 @@ public class StandardProjectStagingTest {
   @Test(expected = OperationCanceledException.class)
   public void testStage_cancelled() {
     when(monitor.isCanceled()).thenReturn(true);
-    new StandardProjectStaging().stage(mock(IPath.class), stagingDirectory, cloudSdk, monitor);
+    new DeployStaging().stage(mock(IPath.class), stagingDirectory, cloudSdk, monitor);
   }
 
   @Test
@@ -94,7 +94,7 @@ public class StandardProjectStagingTest {
     createConfigFile("queue.xml", queueXml);
 
     IPath explodedWarDirectory = project.getFolder("WebContent").getRawLocation();
-    new StandardProjectStaging().stage(explodedWarDirectory, stagingDirectory, cloudSdk, monitor);
+    new DeployStaging().stage(explodedWarDirectory, stagingDirectory, cloudSdk, monitor);
 
     IPath stagingGenerated = stagingDirectory.append("WEB-INF/appengine-generated");
     assertTrue(stagingGenerated.append("cron.yaml").toFile().exists());

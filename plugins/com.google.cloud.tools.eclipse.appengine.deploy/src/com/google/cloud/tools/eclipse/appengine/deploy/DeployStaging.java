@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.deploy.standard;
+package com.google.cloud.tools.eclipse.appengine.deploy;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -24,12 +24,11 @@ import org.eclipse.core.runtime.SubMonitor;
 import com.google.cloud.tools.appengine.api.deploy.DefaultStageStandardConfiguration;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineStandardStaging;
-import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
 
 /**
  * Calls the staging operation on an App Engine Standard project using the {@link CloudSdk}.
  */
-public class StandardProjectStaging {
+public class DeployStaging {
 
   /**
    * @param explodedWarDirectory the input of the staging operation
