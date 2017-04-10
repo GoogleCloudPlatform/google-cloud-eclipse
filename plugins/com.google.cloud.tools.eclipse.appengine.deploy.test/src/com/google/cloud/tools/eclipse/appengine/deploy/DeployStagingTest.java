@@ -82,7 +82,7 @@ public class DeployStagingTest {
   @Test(expected = OperationCanceledException.class)
   public void testStage_cancelled() {
     when(monitor.isCanceled()).thenReturn(true);
-    new DeployStaging().stage(mock(IPath.class), stagingDirectory, cloudSdk, monitor);
+    DeployStaging.stageStandard(mock(IPath.class), stagingDirectory, cloudSdk, monitor);
   }
 
   @Test
@@ -94,7 +94,7 @@ public class DeployStagingTest {
     createConfigFile("queue.xml", queueXml);
 
     IPath explodedWarDirectory = project.getFolder("WebContent").getRawLocation();
-    new DeployStaging().stage(explodedWarDirectory, stagingDirectory, cloudSdk, monitor);
+    DeployStaging.stageStandard(explodedWarDirectory, stagingDirectory, cloudSdk, monitor);
 
     IPath stagingGenerated = stagingDirectory.append("WEB-INF/appengine-generated");
     assertTrue(stagingGenerated.append("cron.yaml").toFile().exists());

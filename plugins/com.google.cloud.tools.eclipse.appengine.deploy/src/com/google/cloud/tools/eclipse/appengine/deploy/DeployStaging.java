@@ -16,17 +16,18 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy;
 
+import com.google.cloud.tools.appengine.api.deploy.DefaultStageFlexibleConfiguration;
+import com.google.cloud.tools.appengine.api.deploy.DefaultStageStandardConfiguration;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineFlexibleStaging;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineStandardStaging;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
 
-import com.google.cloud.tools.appengine.api.deploy.DefaultStageStandardConfiguration;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineStandardStaging;
-
 /**
- * Calls the staging operation on an App Engine Standard project using the {@link CloudSdk}.
+ * Calls the staging operation on an App Engine project.
  */
 public class DeployStaging {
 
@@ -35,8 +36,8 @@ public class DeployStaging {
    * @param stagingDirectory where the result of the staging operation will be written
    * @param cloudSdk executes the staging operation
    */
-  public void stage(IPath explodedWarDirectory, IPath stagingDirectory, CloudSdk cloudSdk,
-      IProgressMonitor monitor) {
+  public static void stageStandard(IPath explodedWarDirectory, IPath stagingDirectory,
+      CloudSdk cloudSdk, IProgressMonitor monitor) {
     if (monitor.isCanceled()) {
       throw new OperationCanceledException();
     }
@@ -52,6 +53,31 @@ public class DeployStaging {
 
     CloudSdkAppEngineStandardStaging staging = new CloudSdkAppEngineStandardStaging(cloudSdk);
     staging.stageStandard(stagingConfig);
+
+    progress.worked(1);
+  }
+
+  /**
+   * @param appEngineDirectory directory containing {@code app.yaml}
+   * @param deployArtifact project to be deploy (such as WAR or JAR)
+   * @param stagingDirectory where the result of the staging operation will be written
+   */
+  public static void stageFlexible(IPath appEngineDirectory, IPath deployArtifact,
+      IPath stagingDirectory, IProgressMonitor monitor) {
+    if (monitor.isCanceled()) {
+      throw new OperationCanceledException();
+    }
+
+    SubMonitor progress = SubMonitor.convert(monitor, 1);
+    progress.setTaskName(Messages.getString("task.name.stage.project")); //$NON-NLS-1$
+
+    DefaultStageFlexibleConfiguration stagingConfig = new DefaultStageFlexibleConfiguration();
+    stagingConfig.setAppEngineDirectory(appEngineDirectory.toFile());
+    stagingConfig.setArtifact(deployArtifact.toFile());
+    stagingConfig.setStagingDirectory(stagingDirectory.toFile());
+
+    CloudSdkAppEngineFlexibleStaging staging = new CloudSdkAppEngineFlexibleStaging();
+    staging.stageFlexible(stagingConfig);
 
     progress.worked(1);
   }
