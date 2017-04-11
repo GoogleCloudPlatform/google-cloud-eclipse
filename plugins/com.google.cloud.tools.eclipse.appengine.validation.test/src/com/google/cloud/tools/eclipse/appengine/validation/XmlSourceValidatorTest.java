@@ -42,6 +42,7 @@ import org.eclipse.wst.validation.internal.core.ValidationException;
 import org.eclipse.wst.validation.internal.provisional.core.IMessage;
 import org.junit.ClassRule;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 public class XmlSourceValidatorTest {
 
@@ -125,7 +126,8 @@ public class XmlSourceValidatorTest {
     XmlSourceValidator validator = new XmlSourceValidator();
     validator.setHelper(new WebXmlValidator());
     String xml = "<web-app xmlns='http://xmlns.jcp.org/xml/ns/javaee' version='3.1'></web-app>";
-    validator.validate(reporter, null, xml.getBytes(StandardCharsets.UTF_8));
+    IFile file = Mockito.mock(IFile.class);
+    validator.validate(reporter, file, xml.getBytes(StandardCharsets.UTF_8));
     assertEquals(1, reporter.getMessages().size());
   }
 

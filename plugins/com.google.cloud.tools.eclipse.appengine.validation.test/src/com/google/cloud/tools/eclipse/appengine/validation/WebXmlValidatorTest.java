@@ -23,7 +23,9 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.eclipse.core.resources.IResource;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -42,7 +44,8 @@ public class WebXmlValidatorTest {
     element.setUserData("location", new DocumentLocation(1, 1), null);
     document.appendChild(element);
     
-    ArrayList<BannedElement> blacklist = validator.checkForElements(null, document);
+    IResource resource = Mockito.mock(IResource.class);
+    ArrayList<BannedElement> blacklist = validator.checkForElements(resource, document);
     
     assertEquals(1, blacklist.size());
     String markerId = "com.google.cloud.tools.eclipse.appengine.validation.servletMarker";
@@ -60,7 +63,8 @@ public class WebXmlValidatorTest {
     element.setUserData("location", new DocumentLocation(1, 1), null);
     document.appendChild(element);
     
-    ArrayList<BannedElement> blacklist = validator.checkForElements(null, document);
+    IResource resource = Mockito.mock(IResource.class);
+    ArrayList<BannedElement> blacklist = validator.checkForElements(resource, document);
     
     assertEquals(0, blacklist.size());
   }
@@ -95,7 +99,8 @@ public class WebXmlValidatorTest {
     
     document.appendChild(webApp);
     
-    ArrayList<BannedElement> blacklist = validator.checkForElements(null, document);
+    IResource resource = Mockito.mock(IResource.class);
+    ArrayList<BannedElement> blacklist = validator.checkForElements(resource, document);
     assertEquals(1, blacklist.size());
   }
  

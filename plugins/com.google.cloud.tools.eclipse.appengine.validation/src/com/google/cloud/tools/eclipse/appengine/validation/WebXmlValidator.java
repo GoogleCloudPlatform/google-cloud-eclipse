@@ -28,6 +28,8 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -39,6 +41,9 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.wst.common.componentcore.ComponentCore;
+import org.eclipse.wst.common.componentcore.resources.IVirtualComponent;
+import org.eclipse.wst.common.componentcore.resources.IVirtualFolder;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -65,6 +70,7 @@ public class WebXmlValidator implements XmlValidationHelper {
     validateJavaServlet();
     validateServletClass();
     validateServletMapping();
+    validateJsp();
     return blacklist;
   }
   
@@ -141,6 +147,30 @@ public class WebXmlValidator implements XmlValidationHelper {
       }
     } catch (XPathExpressionException ex) {
       throw new RuntimeException("Invalid XPath expression");
+    }
+  }
+  
+  /**
+   * Verifies that every <jsp-file> element exists in the project.
+   */
+  private void validateJsp() {
+    IProject project = resource.getProject();
+    IVirtualComponent component = ComponentCore.createComponent(project);
+    if (component != null && component.exists()) {
+      IVirtualFolder root = component.getRootFolder();
+      if (root.exists()) {
+        NodeList jspList = document.getElementsByTagName("jsp-file");
+        for (int i = 0; i < jspList.getLength(); i++) {
+          Node jspNode = jspList.item(i);
+          String jspName = jspNode.getTextContent();
+          IFile file = root.getFile(jspName).getUnderlyingFile();
+          if (!file.exists()) {
+            DocumentLocation location = (DocumentLocation) jspNode.getUserData("location");
+            BannedElement element = new JspFileElement(jspName, location, jspName.length());
+            blacklist.add(element);
+          }
+        }
+      }
     }
   }
   
