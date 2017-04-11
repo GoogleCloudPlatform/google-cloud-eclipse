@@ -37,24 +37,37 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
+import org.eclipse.wst.common.project.facet.core.IFacetedProject;
+import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
+@RunWith(MockitoJUnitRunner.class)
 public class CreateAppEngineFlexWtpProjectTest {
 
   @Rule public TemporaryFolder tempFolder = new TemporaryFolder();
+
+  @Mock private Artifact someArtifact;
+  @Mock private ILibraryRepositoryService repositoryService;
 
   private final IProgressMonitor monitor = new NullProgressMonitor();
   private final AppEngineProjectConfig config = new AppEngineProjectConfig();
   private IProject project;
 
   @Before
-  public void setUp() {
+  public void setUp() throws IOException {
+    someArtifact = mock(Artifact.class);
+    when(someArtifact.getFile()).thenReturn(tempFolder.newFile());
+
     IWorkspace workspace = ResourcesPlugin.getWorkspace();
     project = workspace.getRoot().getProject("testproject" + Math.random());
     config.setProject(project);
@@ -71,10 +84,6 @@ public class CreateAppEngineFlexWtpProjectTest {
     File servletApi31Jar = tempFolder.newFile();
     when(servletApi31.getFile()).thenReturn(servletApi31Jar);
 
-    final Artifact someArtifact = mock(Artifact.class);
-    when(someArtifact.getFile()).thenReturn(tempFolder.newFile());
-
-    ILibraryRepositoryService repositoryService = mock(ILibraryRepositoryService.class);
     when(repositoryService.resolveArtifact(any(LibraryFile.class), any(IProgressMonitor.class)))
         .thenAnswer(new Answer<Artifact>() {
           @Override
@@ -99,4 +108,16 @@ public class CreateAppEngineFlexWtpProjectTest {
     assertTrue(project.getFile("lib/" + servletApi31Jar.getName()).exists());
   }
 
+  @Test
+  public void testDynamicWebModuleFacet31Added() throws InvocationTargetException, CoreException {
+    when(repositoryService.resolveArtifact(any(LibraryFile.class), any(IProgressMonitor.class)))
+        .thenReturn(someArtifact);
+
+    CreateAppEngineWtpProject creator =
+        new CreateAppEngineFlexWtpProject(config, mock(IAdaptable.class), repositoryService);
+    creator.execute(monitor);
+
+    IFacetedProject facetedProject = ProjectFacetsManager.create(project);
+    assertTrue(facetedProject.hasProjectFacet(WebFacetUtils.WEB_31));
+  }
 }
