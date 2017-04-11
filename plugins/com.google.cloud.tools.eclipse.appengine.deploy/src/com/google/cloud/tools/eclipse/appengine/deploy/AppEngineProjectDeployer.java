@@ -43,7 +43,7 @@ public class AppEngineProjectDeployer {
 
   /**
    * @param optionalConfigurationFilesDirectory if not {@code null}, searches optional configuration
-   * files (such as {@code cron.yaml}) in this directory and deploy them together
+   * files (such as {@code cron.yaml}) in this directory and deploys them together
    */
   public void deploy(IPath stagingDirectory, CloudSdk cloudSdk,
                      DefaultDeployConfiguration configuration,
