@@ -47,7 +47,7 @@ public class AppEngineStandardProjectConvertCommandHandler extends AbstractHandl
         throw new NullPointerException("Convert menu enabled for non-project resources");
       }
 
-      // check if Cloud SDK is available, prompts to configure if not
+      // prompt user if Cloud SDK is not configured
       if (CloudSdkPrompter.getCloudSdkLocation(shell) == null) {
         // no further action required: user chose to not configure
         return null;
