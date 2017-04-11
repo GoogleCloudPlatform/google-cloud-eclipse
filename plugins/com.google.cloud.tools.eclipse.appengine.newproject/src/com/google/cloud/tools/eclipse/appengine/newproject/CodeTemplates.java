@@ -136,6 +136,7 @@ public class CodeTemplates {
     Map<String, String> packageMap = new HashMap<>();
     String packageValue = config.getPackageName().isEmpty() ? "" : config.getPackageName() + "."; //$NON-NLS-1$ //$NON-NLS-2$
     packageMap.put("package", packageValue);  //$NON-NLS-1$
+    packageMap.put("version", isStandardProject ? "2.5" : "3.1"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     createChildFile("web.xml", AppEngineTemplateUtility.WEB_XML_TEMPLATE, webinf,  //$NON-NLS-1$
         packageMap, subMonitor.newChild(5));
 
