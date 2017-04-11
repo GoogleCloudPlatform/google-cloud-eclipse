@@ -25,7 +25,7 @@ public class UndefinedServletElementTest {
 
   @Test
   public void testUndefinedServletElement() {
-    DocumentLocation location = new DocumentLocation(3,15);
+    DocumentLocation location = new DocumentLocation(3, 15);
     UndefinedServletElement element = new UndefinedServletElement("servlet", location, 17);
     assertEquals("servlet", element.getServletClassName());
     assertEquals(IMarker.SEVERITY_ERROR, element.getIMarkerSeverity());

@@ -172,7 +172,7 @@
 
   <extension
       id="jspFileMarker"
-      name="%undefined.jsp.file"
+      name="%unresolved.jsp.file"
       point="org.eclipse.core.resources.markers">
     <super type="org.eclipse.jdt.core.problem" />
     <super type="org.eclipse.core.resources.problemmarker" />

@@ -25,7 +25,7 @@ public class JspFileElementTest {
 
   @Test
   public void testJspFileElement() {
-    DocumentLocation location = new DocumentLocation(3,15);
+    DocumentLocation location = new DocumentLocation(3, 15);
     JspFileElement element = new JspFileElement("test.jsp", location, 17);
     assertEquals("test.jsp", element.getJspFileName());
     assertEquals(IMarker.SEVERITY_ERROR, element.getIMarkerSeverity());

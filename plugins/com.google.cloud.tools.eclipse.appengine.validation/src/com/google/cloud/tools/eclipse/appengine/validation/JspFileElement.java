@@ -25,13 +25,13 @@ import org.eclipse.wst.validation.internal.provisional.core.IMessage;
  */
 public class JspFileElement extends BannedElement {
 
-  private static final String MARKERID = 
+  private static final String MARKER_ID = 
       "com.google.cloud.tools.eclipse.appengine.validation.jspFileMarker";
   private final String jspFileName;
   
   public JspFileElement(String jspFileName, DocumentLocation start, int length) {
-    super(Messages.getString("undefined.jsp.file", jspFileName),
-        MARKERID, IMarker.SEVERITY_ERROR, IMessage.HIGH_SEVERITY, start, length, null /* Null IQuickAssistProcessor */);
+    super(Messages.getString("unresolved.jsp.file", jspFileName),
+        MARKER_ID, IMarker.SEVERITY_ERROR, IMessage.HIGH_SEVERITY, start, length, null /* Null IQuickAssistProcessor */);
     this.jspFileName = jspFileName;
   }
   
