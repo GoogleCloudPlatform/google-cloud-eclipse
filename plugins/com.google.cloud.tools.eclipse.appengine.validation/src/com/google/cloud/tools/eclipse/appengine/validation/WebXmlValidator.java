@@ -164,11 +164,28 @@ public class WebXmlValidator implements XmlValidationHelper {
           Node jspNode = jspList.item(i);
           String jspName = jspNode.getTextContent();
           IFile file = root.getFile(jspName).getUnderlyingFile();
-          if (!file.exists()) {
-            DocumentLocation location = (DocumentLocation) jspNode.getUserData("location");
-            BannedElement element = new JspFileElement(jspName, location, jspName.length());
-            blacklist.add(element);
+          // Looks in src/main/webapp
+          if (file.exists()) {
+            continue;
           }
+          file = root.getFile("WEB-INF/" + jspName).getUnderlyingFile();
+          // Looks in src/main/webapp/WEB-INF
+          if (file.exists()) {
+            continue;
+          }
+          file = root.getFile("WEB-INF/classes/" + jspName).getUnderlyingFile();
+          // Looks in src/main/java
+          if (file.exists()) {
+            continue;
+          }
+          file = root.getFile("WEB-INF/lib/" + jspName).getUnderlyingFile();
+          // Looks in src/main/webapp/WEB-INF/lib
+          if (file.exists()) {
+            continue;
+          }
+          DocumentLocation location = (DocumentLocation) jspNode.getUserData("location");
+          BannedElement element = new JspFileElement(jspName, location, jspName.length());
+          blacklist.add(element);
         }
       }
     }
