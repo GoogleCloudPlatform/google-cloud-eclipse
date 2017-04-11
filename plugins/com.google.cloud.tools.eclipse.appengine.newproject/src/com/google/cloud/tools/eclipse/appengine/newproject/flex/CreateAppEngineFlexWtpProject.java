@@ -108,7 +108,7 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
         project, true /* convertIfNecessary */, subMonitor.newChild(50));
     FacetUtil facetUtil = new FacetUtil(facetedProject);
     facetUtil.addJavaFacetToBatch(JavaFacet.VERSION_1_8);
-    facetUtil.addWebFacetToBatch(WebFacetUtils.WEB_30);
+    facetUtil.addWebFacetToBatch(WebFacetUtils.WEB_31);
 
     IProjectFacet appEngineFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexFacet.ID);
     IProjectFacetVersion appEngineFacetVersion =
