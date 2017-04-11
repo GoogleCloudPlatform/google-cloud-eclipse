@@ -56,7 +56,7 @@ public class AppEngineProjectDeployerTest {
   }
 
   @Test
-  public void testComputeDeployables_noConfigFilesAndDoNotIncludeFiles() {
+  public void testComputeDeployables_nullConfigDirectoryPath() {
     List<File> deployables = AppEngineProjectDeployer.computeDeployables(
         stagingDirectory, null /* don't include files */);
     assertEquals(1, deployables.size());
@@ -64,7 +64,7 @@ public class AppEngineProjectDeployerTest {
   }
 
   @Test
-  public void testComputeDeployables_noConfigFilesAndIncludeFiles() {
+  public void testComputeDeployables_noConfigFilesInConfigDirectory() {
     List<File> deployables = AppEngineProjectDeployer.computeDeployables(
         stagingDirectory, optionalConfigurationFilesDirectory);
     assertEquals(1, deployables.size());
@@ -72,7 +72,8 @@ public class AppEngineProjectDeployerTest {
   }
 
   @Test
-  public void testComputeDeployables_configFilesExistAndDoNotIncludeFiles() throws IOException {
+  public void testComputeDeployables_configFilesExistButNullConfigDirectoryPath()
+      throws IOException {
     createFakeConfigFiles();
 
     List<File> deployables = AppEngineProjectDeployer.computeDeployables(
@@ -82,7 +83,7 @@ public class AppEngineProjectDeployerTest {
   }
 
   @Test
-  public void testComputeDeployables_configFilesExistAndIncludeFiles() throws IOException {
+  public void testComputeDeployables_configFilesExist() throws IOException {
     createFakeConfigFiles();
 
     List<File> deployables = AppEngineProjectDeployer.computeDeployables(
