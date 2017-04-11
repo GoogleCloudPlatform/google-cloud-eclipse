@@ -63,6 +63,7 @@ import org.eclipse.core.runtime.SubMonitor;
  * It uses a work directory where it will create separate directories for the exploded WAR and the
  * staging results.
  */
+// TODO: Remove this line
 public class StandardDeployJob extends WorkspaceJob {
 
   private static final String STAGING_DIRECTORY_NAME = "staging";
