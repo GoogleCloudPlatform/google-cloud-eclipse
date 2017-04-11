@@ -41,9 +41,13 @@ public class AppEngineProjectDeployer {
   static final List<String> APP_ENGINE_CONFIG_FILES = Collections.unmodifiableList(Arrays.asList(
       "cron.yaml", "dispatch.yaml", "dos.yaml", "index.yaml", "queue.yaml"));
 
+  /**
+   * @param optionalConfigurationFilesDirectory if not {@code null}, searches optional configuration
+   * files (such as {@code cron.yaml}) in this directory and deploy them together
+   */
   public void deploy(IPath stagingDirectory, CloudSdk cloudSdk,
                      DefaultDeployConfiguration configuration,
-                     boolean includeOptionalConfigurationFiles, IProgressMonitor monitor) {
+                     IPath optionalConfigurationFilesDirectory, IProgressMonitor monitor) {
     if (monitor.isCanceled()) {
       throw new OperationCanceledException();
     }
@@ -52,7 +56,7 @@ public class AppEngineProjectDeployer {
     progress.setTaskName(Messages.getString("task.name.deploy.project")); //$NON-NLS-1$
     try {
       List<File> deployables =
-          computeDeployables(stagingDirectory, includeOptionalConfigurationFiles);
+          computeDeployables(stagingDirectory, optionalConfigurationFilesDirectory);
       configuration.setDeployables(deployables);
       CloudSdkAppEngineDeployment deployment = new CloudSdkAppEngineDeployment(cloudSdk);
       deployment.deploy(configuration);
@@ -63,14 +67,13 @@ public class AppEngineProjectDeployer {
 
   @VisibleForTesting
   static List<File> computeDeployables(
-      IPath stagingDirectory, boolean includeOptionalConfigurationFiles) {
+      IPath stagingDirectory, IPath optionalConfigurationFilesDirectory) {
     List<File> deployables = new ArrayList<>();
     deployables.add(stagingDirectory.append("app.yaml").toFile()); //$NON-NLS-1$
 
-    if (includeOptionalConfigurationFiles) {
+    if (optionalConfigurationFilesDirectory != null) {
       for (String configFile : APP_ENGINE_CONFIG_FILES) {
-        File file = stagingDirectory.append("WEB-INF/appengine-generated") //$NON-NLS-1$
-            .append(configFile).toFile();
+        File file = optionalConfigurationFilesDirectory.append(configFile).toFile();
         if (file.exists()) {
           deployables.add(file);
         }

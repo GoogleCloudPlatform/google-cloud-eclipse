@@ -183,8 +183,15 @@ public class StandardDeployJob extends WorkspaceJob {
       IProgressMonitor monitor) {
     RecordProcessError deployExitListener = new RecordProcessError();
     CloudSdk cloudSdk = getCloudSdk(credentialFile, deployStdoutLineListener, deployExitListener);
+
+    IPath optionalConfigurationFiles = null;
+    if (includeOptionalConfigurationFiles) {
+      optionalConfigurationFiles = stagingDirectory.append(
+          DeployStaging.STANDARD_STAGING_GENERATED_FILES_DIRECTORY);
+    }
+
     new AppEngineProjectDeployer().deploy(stagingDirectory, cloudSdk, deployConfiguration,
-        includeOptionalConfigurationFiles, monitor);
+        optionalConfigurationFiles, monitor);
     return deployExitListener.getExitStatus();
   }
 

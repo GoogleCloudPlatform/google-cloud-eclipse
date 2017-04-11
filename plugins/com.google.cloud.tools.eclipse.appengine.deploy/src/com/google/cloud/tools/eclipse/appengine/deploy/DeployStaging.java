@@ -31,6 +31,9 @@ import org.eclipse.core.runtime.SubMonitor;
  */
 public class DeployStaging {
 
+  public static final String STANDARD_STAGING_GENERATED_FILES_DIRECTORY =
+      "WEB-INF/appengine-generated";
+
   /**
    * @param explodedWarDirectory the input of the staging operation
    * @param stagingDirectory where the result of the staging operation will be written

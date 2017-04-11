@@ -124,7 +124,9 @@ public class DeployStagingTest {
     IPath explodedWarDirectory = project.getFolder("WebContent").getRawLocation();
     DeployStaging.stageStandard(explodedWarDirectory, stagingDirectory, cloudSdk, monitor);
 
-    IPath stagingGenerated = stagingDirectory.append("WEB-INF/appengine-generated");
+    IPath stagingGenerated = stagingDirectory.append(
+        DeployStaging.STANDARD_STAGING_GENERATED_FILES_DIRECTORY);
+    assertTrue(stagingGenerated.toFile().isDirectory());
     assertTrue(stagingGenerated.append("cron.yaml").toFile().exists());
     assertTrue(stagingGenerated.append("index.yaml").toFile().exists());
     assertTrue(stagingGenerated.append("dispatch.yaml").toFile().exists());
