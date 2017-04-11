@@ -33,4 +33,5 @@
    <bundle id="jackson-core-asl" version="1.9.13"/>
    <bundle id="ch.qos.logback.slf4j" version="0.0.0"/>
    <bundle id="org.slf4j.log4j" version="0.0.0"/>
+   <bundle id="org.yaml.snakeyaml" version="1.17.0"/>
 </site>
