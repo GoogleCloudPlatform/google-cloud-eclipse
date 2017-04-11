@@ -24,7 +24,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
@@ -77,7 +76,7 @@ public class AppEngineTemplateUtilityTest {
 
     compareToFile("appengineWebXml.txt");
   }
-  
+
   @Test
   public void testCreateFileContent_appengineWebXmlWithService()
       throws CoreException, IOException {
@@ -88,7 +87,7 @@ public class AppEngineTemplateUtilityTest {
 
     compareToFile("appengineWebXmlWithService.txt");
   }
-  
+
   @Test
   public void testCreateFileContent_appYamlWithService()
       throws CoreException, IOException {
@@ -128,12 +127,23 @@ public class AppEngineTemplateUtilityTest {
   }
 
   @Test
-  public void testCreateFileContent_web() throws CoreException, IOException {
+  public void testCreateFileContent_web25() throws CoreException, IOException {
     dataMap.put("package", "com.example.");
+    dataMap.put("version", "2.5");
     AppEngineTemplateUtility.createFileContent(fileLocation,
         AppEngineTemplateUtility.WEB_XML_TEMPLATE, dataMap);
 
-    compareToFile("web.txt");
+    compareToFile("web25.txt");
+  }
+
+  @Test
+  public void testCreateFileContent_web31() throws CoreException, IOException {
+    dataMap.put("package", "com.example.");
+    dataMap.put("version", "3.1");
+    AppEngineTemplateUtility.createFileContent(fileLocation,
+        AppEngineTemplateUtility.WEB_XML_TEMPLATE, dataMap);
+
+    compareToFile("web31.txt");
   }
 
   private static InputStream getDataFile(String fileName) throws IOException {
@@ -143,7 +153,7 @@ public class AppEngineTemplateUtilityTest {
   }
 
   private void compareToFile(String expected) throws CoreException, IOException {
-    
+
     try (InputStream testFileStream = testFile.getContents(true);
         InputStream expectedFileStream = getDataFile(expected);
         Scanner expectedScanner = new Scanner(expectedFileStream);
