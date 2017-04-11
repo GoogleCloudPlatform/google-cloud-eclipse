@@ -99,8 +99,6 @@ public class CodeTemplatesTest {
     IFile webXml = webinf.getFile("web.xml");
     Element root = buildDocument(webXml).getDocumentElement();
     Assert.assertEquals("web-app", root.getNodeName());
-    // Oracle keeps changing the namespace URI in new versions of Java and JEE.
-    // This is the namespace URI that works in App Engine standard.
     Assert.assertEquals(webXmlNamespace, root.getNamespaceURI());
     Assert.assertEquals(servletVersion, root.getAttribute("version"));
     Element servletClass = (Element) root.getElementsByTagName("servlet-class").item(0);
