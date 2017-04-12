@@ -153,7 +153,7 @@ public class WebXmlValidator implements XmlValidationHelper {
    * Verifies that every <jsp-file> element exists in the project.
    */
   private void validateJsp() {
-    if (!isVersion30OrLater()) {
+    if (isVersion25()) {
       IProject project = resource.getProject();
       IVirtualComponent component = ComponentCore.createComponent(project);
       if (component != null && component.exists()) {
@@ -198,11 +198,10 @@ public class WebXmlValidator implements XmlValidationHelper {
     return false;
   }
   
-  private boolean isVersion30OrLater() {
+  private boolean isVersion25() {
     Node node = document.getFirstChild();
     String versionString = (String) node.getUserData("version");
-    double version = Double.parseDouble(versionString);
-    return version >= 3;
+    return "2.5".equals(versionString);
   }
   
   private static IJavaProject getProject(IResource resource) {
