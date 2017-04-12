@@ -112,27 +112,27 @@ public final class TestProjectCreator extends ExternalResource {
 
   private void createProjectIfNecessary() {
     if (project == null) {
-      createProject("test" + Math.random());
+      try {
+        createProject("test" + Math.random());
+      } catch (CoreException ex) {
+        fail("FATAL: cannot create a test project.");
+      }
     }
   }
 
-  private void createProject(String projectName) {
-    try {
-      IProjectDescription newProjectDescription =
-          ResourcesPlugin.getWorkspace().newProjectDescription(projectName);
-      newProjectDescription.setNatureIds(
-          new String[] {FacetedProjectNature.NATURE_ID});
-      project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-      project.create(newProjectDescription, null);
-      project.open(null);
+  private void createProject(String projectName) throws CoreException {
+    IProjectDescription newProjectDescription =
+        ResourcesPlugin.getWorkspace().newProjectDescription(projectName);
+    newProjectDescription.setNatureIds(
+        new String[] {FacetedProjectNature.NATURE_ID});
+    project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+    project.create(newProjectDescription, null);
+    project.open(null);
 
-      addFacets();
-      addContainerPathToRawClasspath();
-      if (appEngineServiceId != null) {
-        setAppEngineServiceId(appEngineServiceId);
-      }
-    } catch (CoreException ex) {
-      fail("FATAL: cannot create a test project.");
+    addFacets();
+    addContainerPathToRawClasspath();
+    if (appEngineServiceId != null) {
+      setAppEngineServiceId(appEngineServiceId);
     }
   }
 
