@@ -16,7 +16,7 @@
 
 package com.google.cloud.tools.eclipse.util.templates.appengine;
 
-import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -24,47 +24,42 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubMonitor;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 
 public class AppEngineTemplateUtilityTest {
 
-  private SubMonitor monitor = SubMonitor.convert(new NullProgressMonitor());
-  private IProject project;
-  private IFile testFile;
-  private String fileLocation;
-  private Map<String, String> dataMap = new HashMap<>();
+  @Rule public TemporaryFolder tempFolder = new TemporaryFolder();
 
+  private IProgressMonitor monitor = new NullProgressMonitor();
+  private IProject project;
+  private String fileLocation;
+  private final Map<String, String> dataMap = new HashMap<>();
 
   @Before
   public void setUp() throws CoreException {
     IWorkspace workspace = ResourcesPlugin.getWorkspace();
     project = workspace.getRoot().getProject("foo");
-    if (!project.exists()) {
-      project.create(monitor);
-      project.open(monitor);
-    }
-    testFile = project.getFile("bar");
-    if (!testFile.exists()) {
-      testFile.create(new ByteArrayInputStream(new byte[0]), true, monitor);
-    }
-    fileLocation = testFile.getLocation().toString();
+    project.create(monitor);
+    project.open(monitor);
+
+    fileLocation = tempFolder.getRoot().toString() + "/testfile";
   }
 
   @After
   public void cleanUp() throws CoreException {
-    testFile.delete(true, monitor);
     project.delete(true, monitor);
   }
 
@@ -154,7 +149,7 @@ public class AppEngineTemplateUtilityTest {
 
   private void compareToFile(String expected) throws CoreException, IOException {
 
-    try (InputStream testFileStream = testFile.getContents(true);
+    try (InputStream testFileStream = new FileInputStream(fileLocation);
         InputStream expectedFileStream = getDataFile(expected);
         Scanner expectedScanner = new Scanner(expectedFileStream);
         Scanner actualScanner = new Scanner(testFileStream)) {
