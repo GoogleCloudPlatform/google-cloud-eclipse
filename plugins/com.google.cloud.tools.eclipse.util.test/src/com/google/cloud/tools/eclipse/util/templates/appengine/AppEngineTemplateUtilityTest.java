@@ -147,7 +147,7 @@ public class AppEngineTemplateUtilityTest {
     return expectedFileUrl.openStream();
   }
 
-  private void compareToFile(String expected) throws CoreException, IOException {
+  private void compareToFile(String expected) throws IOException {
 
     try (InputStream testFileStream = new FileInputStream(fileLocation);
         InputStream expectedFileStream = getDataFile(expected);
