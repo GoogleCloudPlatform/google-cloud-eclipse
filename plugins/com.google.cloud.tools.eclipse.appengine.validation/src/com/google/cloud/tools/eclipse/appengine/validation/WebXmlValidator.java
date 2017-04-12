@@ -21,7 +21,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
@@ -156,7 +155,15 @@ public class WebXmlValidator implements XmlValidationHelper {
   private void validateJsp() {
     IProject project = resource.getProject();
     IVirtualComponent component = ComponentCore.createComponent(project);
+    // TODO: Search for JSP files in jars if web.xml is version 3.0+.
+    // JSP file META-INF/resources/test.jsp in a jar should be able to be referenced
+    // as test.jsp in web.xml.
     if (component != null && component.exists()) {
+      // For a typical Maven project:
+      // WEB-INF         -> src/main/webapp/WEB-INF
+      //    /            -> src/main/webapp
+      // WEB-INF/classes -> src/main/java
+      // WEB-INF/lib     -> src/main/webapp/WEB-INF/lib
       IVirtualFolder root = component.getRootFolder();
       if (root.exists()) {
         NodeList jspList = document.getElementsByTagName("jsp-file");
@@ -164,22 +171,14 @@ public class WebXmlValidator implements XmlValidationHelper {
           Node jspNode = jspList.item(i);
           String jspName = jspNode.getTextContent();
           IFile file = root.getFile(jspName).getUnderlyingFile();
-          // Looks in src/main/webapp
           if (file.exists()) {
             continue;
           }
           file = root.getFile("WEB-INF/" + jspName).getUnderlyingFile();
-          // Looks in src/main/webapp/WEB-INF
           if (file.exists()) {
             continue;
           }
           file = root.getFile("WEB-INF/classes/" + jspName).getUnderlyingFile();
-          // Looks in src/main/java
-          if (file.exists()) {
-            continue;
-          }
-          file = root.getFile("WEB-INF/lib/" + jspName).getUnderlyingFile();
-          // Looks in src/main/webapp/WEB-INF/lib
           if (file.exists()) {
             continue;
           }

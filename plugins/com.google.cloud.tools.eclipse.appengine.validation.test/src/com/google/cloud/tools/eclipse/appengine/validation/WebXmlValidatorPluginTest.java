@@ -78,8 +78,11 @@ public class WebXmlValidatorPluginTest {
             .getBytes(StandardCharsets.UTF_8)), true, null);
     
     ValidationTestUtils.createFolders(project, new Path("src/main/webapp"));
-    IFile jspFile = project.getFile("WebContent/test.jsp");
-    jspFile.create(null, true, null);
+    IFile jspFileInWebContent = project.getFile("WebContent/InWebContent.jsp");
+    jspFileInWebContent.create(null, true, null);
+    
+    IFile jspFileInJava = project.getFile("src/InJava.jsp");
+    jspFileInJava.create(null, true, null);
   }
   
   @Test
@@ -120,6 +123,11 @@ public class WebXmlValidatorPluginTest {
   
   @Test
   public void testValidateJsp() throws ParserConfigurationException {
+    // For a typical dynamic web project:
+    //     /           -> WebContent
+    // WEB-INF         -> WebContent/WEB-INF
+    // WEB-INF/classes -> src
+    
     DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
     DocumentBuilder documentBuilder = builderFactory.newDocumentBuilder();
     Document document = documentBuilder.newDocument();
@@ -128,14 +136,19 @@ public class WebXmlValidatorPluginTest {
     root.setUserData("location", new DocumentLocation(1, 1), null);
     
     Element element = document.createElement("jsp-file");
-    element.setTextContent("test.jsp");
+    element.setTextContent("InWebContent.jsp");
     element.setUserData("location", new DocumentLocation(2, 1), null);
     root.appendChild(element);
     
     Element element2 = document.createElement("jsp-file");
-    element2.setTextContent("DoesNotExist.jsp");
+    element2.setTextContent("InJava.jsp");
     element2.setUserData("location", new DocumentLocation(3, 1), null);
     root.appendChild(element2);
+    
+    Element element3 = document.createElement("jsp-file");
+    element3.setTextContent("DoesNotExist.jsp");
+    element3.setUserData("location", new DocumentLocation(4, 1), null);
+    root.appendChild(element3);
     document.appendChild(root);
     
     WebXmlValidator validator = new WebXmlValidator();
