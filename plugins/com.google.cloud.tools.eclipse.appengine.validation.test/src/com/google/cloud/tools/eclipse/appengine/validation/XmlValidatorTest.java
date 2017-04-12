@@ -19,13 +19,11 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-
-import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
-import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -56,7 +54,7 @@ public class XmlValidatorTest {
   @ClassRule public static TestProjectCreator appEngineStandardProjectCreator =
       new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7,
           WebFacetUtils.WEB_25, APPENGINE_STANDARD_FACET_VERSION_1);
-  
+
   @ClassRule public static TestProjectCreator dynamicWebProjectCreator =
       new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
 
@@ -65,9 +63,9 @@ public class XmlValidatorTest {
     IProject project = dynamicWebProjectCreator.getProject();
     resource = project.getFile("WebContent/WEB-INF/web.xml");
   }
-  
+
   @Test
-  public void testValidate_appEngineStandard() throws CoreException {
+  public void testValidate_appEngineStandard() {
     IProject project = appEngineStandardProjectCreator.getProject();
     IFile file = project.getFile("src/main/webapp/WEB-INF/web.xml");
     ValidationFramework framework = ValidationFramework.getDefault();
@@ -80,9 +78,9 @@ public class XmlValidatorTest {
     }
     fail("webXmlValidator isn't applied to web.xml");
   }
-  
+
   @Test
-  public void testValidate_dynamicWebProject() throws CoreException {
+  public void testValidate_dynamicWebProject() {
     ValidationFramework framework = ValidationFramework.getDefault();
     Validator[] validators = framework.getValidatorsFor(resource);
     for (Validator validator : validators) {
@@ -92,27 +90,27 @@ public class XmlValidatorTest {
       }
     }
   }
-  
+
   @Test
   public void testValidate_badXml() throws IOException, CoreException {
     IProject project = dynamicWebProjectCreator.getProject();
     IFile file = project.getFile("src/test");
     byte[] bytes = BAD_XML.getBytes(StandardCharsets.UTF_8);
     file.create(new ByteArrayInputStream(bytes), true, null);
-    
+
     XmlValidator validator = new XmlValidator();
     validator.setHelper(new AppEngineWebXmlValidator());
-    
+
     // This method should not apply any markers for malformed XML
     validator.validate(file, bytes);
     IMarker[] emptyMarkers = file.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
     assertEquals(0, emptyMarkers.length);
-    
+
     // This method should apply markers for malformed XML
     validator.xsdValidation(file);
     IMarker[] markers = file.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
     assertEquals(1, markers.length);
-    
+
     String resultMessage = (String) markers[0].getAttribute(IMarker.MESSAGE);
     assertEquals("XML document structures must start and end within the same entity.",
         resultMessage);
@@ -142,7 +140,7 @@ public class XmlValidatorTest {
     assertEquals("line 1", markers[0].getAttribute(IMarker.LOCATION));
     resource.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
   }
-  
+
   @Test
   public void testXsdValidation() throws CoreException {
     String xml = "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>"
@@ -159,7 +157,7 @@ public class XmlValidatorTest {
     IMarker[] markers = file.findMarkers(problemMarker, true, IResource.DEPTH_ZERO);
     assertEquals(1, markers.length);
   }
-  
+
   @Test
   public void testCreateMarker() throws CoreException {
     String message = "Project ID should be specified at deploy time.";

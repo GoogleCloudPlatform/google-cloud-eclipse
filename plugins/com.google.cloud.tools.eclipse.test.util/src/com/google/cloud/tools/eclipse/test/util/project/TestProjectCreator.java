@@ -83,46 +83,56 @@ public final class TestProjectCreator extends ExternalResource {
   }
 
   @Override
-  protected void before() throws Throwable {
-    createProject("test" + Math.random());
-  }
-
-  @Override
   protected void after() {
-    // Wait for any jobs to complete as WTP validation runs without the workspace protection lock
-    ProjectUtils.waitForProjects(project);
-    try {
-      project.delete(true, null);
-    } catch (CoreException e) {
-      fail("Could not delete project");
+    if (project != null) {
+      // Wait for any jobs to complete as WTP validation runs without the workspace protection lock
+      ProjectUtils.waitForProjects(project);
+      try {
+        project.delete(true, null);
+      } catch (CoreException ex) {
+        fail("Could not delete project");
+      }
     }
   }
 
   public IModule getModule() {
+    createProjectIfNecessary();
     return ServerUtil.getModule(project);
   }
 
   public IJavaProject getJavaProject() {
+    createProjectIfNecessary();
     return javaProject;
   }
 
   public IProject getProject() {
+    createProjectIfNecessary();
     return project;
   }
 
-  private void createProject(String projectName) throws CoreException, JavaModelException {
-    IProjectDescription newProjectDescription =
-        ResourcesPlugin.getWorkspace().newProjectDescription(projectName);
-    newProjectDescription.setNatureIds(
-        new String[] {FacetedProjectNature.NATURE_ID});
-    project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-    project.create(newProjectDescription, null);
-    project.open(null);
+  private void createProjectIfNecessary() {
+    if (project == null) {
+      createProject("test" + Math.random());
+    }
+  }
 
-    addFacets();
-    addContainerPathToRawClasspath();
-    if (appEngineServiceId != null) {
-      setAppEngineServiceId(appEngineServiceId);
+  private void createProject(String projectName) {
+    try {
+      IProjectDescription newProjectDescription =
+          ResourcesPlugin.getWorkspace().newProjectDescription(projectName);
+      newProjectDescription.setNatureIds(
+          new String[] {FacetedProjectNature.NATURE_ID});
+      project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+      project.create(newProjectDescription, null);
+      project.open(null);
+
+      addFacets();
+      addContainerPathToRawClasspath();
+      if (appEngineServiceId != null) {
+        setAppEngineServiceId(appEngineServiceId);
+      }
+    } catch (CoreException ex) {
+      fail("FATAL: cannot create a test project.");
     }
   }
 
