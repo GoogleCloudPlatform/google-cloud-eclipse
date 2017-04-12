@@ -184,14 +184,14 @@ public class StandardDeployJob extends WorkspaceJob {
     RecordProcessError deployExitListener = new RecordProcessError();
     CloudSdk cloudSdk = getCloudSdk(credentialFile, deployStdoutLineListener, deployExitListener);
 
-    IPath optionalConfigurationFiles = null;
+    IPath optionalConfigurationFilesDirectory = null;
     if (includeOptionalConfigurationFiles) {
-      optionalConfigurationFiles = stagingDirectory.append(
+      optionalConfigurationFilesDirectory = stagingDirectory.append(
           DeployStaging.STANDARD_STAGING_GENERATED_FILES_DIRECTORY);
     }
 
     new AppEngineProjectDeployer().deploy(stagingDirectory, cloudSdk, deployConfiguration,
-        optionalConfigurationFiles, monitor);
+        optionalConfigurationFilesDirectory, monitor);
     return deployExitListener.getExitStatus();
   }
 
