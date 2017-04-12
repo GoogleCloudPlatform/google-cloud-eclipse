@@ -145,7 +145,6 @@ public class CodeTemplates {
       packageMap.put("namespace", "http://xmlns.jcp.org/xml/ns/javaee"); //$NON-NLS-1$ //$NON-NLS-2$
       packageMap.put("schemaUrl", "http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"); //$NON-NLS-1$ //$NON-NLS-2$
     }
-    http://java.sun.com/xml/ns/javaee
     createChildFile("web.xml", AppEngineTemplateUtility.WEB_XML_TEMPLATE, webinf,  //$NON-NLS-1$
         packageMap, subMonitor.newChild(5));
 
