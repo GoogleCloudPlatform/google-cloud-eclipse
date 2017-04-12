@@ -91,10 +91,15 @@ public class WebXmlValidatorPluginTest {
     DocumentBuilder documentBuilder = builderFactory.newDocumentBuilder();
     Document document = documentBuilder.newDocument();
     
+    Element root = document.createElement("web-app");
+    root.setUserData("version", "2.5", null);
+    root.setUserData("location", new DocumentLocation(1, 1), null);
+    
     Element element = document.createElement("servlet-class");
     element.setTextContent("DoesNotExist");
-    element.setUserData("location", new DocumentLocation(1, 1), null);
-    document.appendChild(element);
+    element.setUserData("location", new DocumentLocation(2, 1), null);
+    root.appendChild(element);
+    document.appendChild(root);
     
     WebXmlValidator validator = new WebXmlValidator();
     ArrayList<BannedElement> blacklist = validator.checkForElements(resource, document);
@@ -110,10 +115,15 @@ public class WebXmlValidatorPluginTest {
     DocumentBuilder documentBuilder = builderFactory.newDocumentBuilder();
     Document document = documentBuilder.newDocument();
     
+    Element root = document.createElement("web-app");
+    root.setUserData("version", "2.5", null);
+    root.setUserData("location", new DocumentLocation(1, 1), null);
+    
     Element element = document.createElement("servlet-class");
     element.setTextContent("ServletClass");
-    element.setUserData("location", new DocumentLocation(1, 1), null);
-    document.appendChild(element);
+    element.setUserData("location", new DocumentLocation(2, 1), null);
+    root.appendChild(element);
+    document.appendChild(root);
     
     WebXmlValidator validator = new WebXmlValidator();
     ArrayList<BannedElement> blacklist = validator.checkForElements(resource, document);
@@ -132,8 +142,9 @@ public class WebXmlValidatorPluginTest {
     DocumentBuilder documentBuilder = builderFactory.newDocumentBuilder();
     Document document = documentBuilder.newDocument();
     
-    Element root = document.createElement("root");
+    Element root = document.createElement("web-app");
     root.setUserData("location", new DocumentLocation(1, 1), null);
+    root.setUserData("version", "2.5", null);
     
     Element element = document.createElement("jsp-file");
     element.setTextContent("InWebContent.jsp");

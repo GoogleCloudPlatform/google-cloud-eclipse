@@ -153,22 +153,21 @@ public class WebXmlValidator implements XmlValidationHelper {
    * Verifies that every <jsp-file> element exists in the project.
    */
   private void validateJsp() {
-    IProject project = resource.getProject();
-    IVirtualComponent component = ComponentCore.createComponent(project);
-    // TODO: Search for JSP files in jars if web.xml is version 3.0+.
-    // JSP file META-INF/resources/test.jsp in a jar should be able to be referenced
-    // as test.jsp in web.xml.
-    if (component != null && component.exists()) {
-      IVirtualFolder root = component.getRootFolder();
-      if (root.exists()) {
-        NodeList jspList = document.getElementsByTagName("jsp-file");
-        for (int i = 0; i < jspList.getLength(); i++) {
-          Node jspNode = jspList.item(i);
-          String jspName = jspNode.getTextContent();
-          if (!resolveJsp(root, jspName)) {
-            DocumentLocation location = (DocumentLocation) jspNode.getUserData("location");
-            BannedElement element = new JspFileElement(jspName, location, jspName.length());
-            blacklist.add(element);
+    if (!isVersion30OrLater()) {
+      IProject project = resource.getProject();
+      IVirtualComponent component = ComponentCore.createComponent(project);
+      if (component != null && component.exists()) {
+        IVirtualFolder root = component.getRootFolder();
+        if (root.exists()) {
+          NodeList jspList = document.getElementsByTagName("jsp-file");
+          for (int i = 0; i < jspList.getLength(); i++) {
+            Node jspNode = jspList.item(i);
+            String jspName = jspNode.getTextContent();
+            if (!resolveJsp(root, jspName)) {
+              DocumentLocation location = (DocumentLocation) jspNode.getUserData("location");
+              BannedElement element = new JspFileElement(jspName, location, jspName.length());
+              blacklist.add(element);
+            }
           }
         }
       }
@@ -193,7 +192,17 @@ public class WebXmlValidator implements XmlValidationHelper {
     if (file.exists()) {
       return true;
     }
+    // TODO: Search for JSP files in jars if web.xml is version 3.0+.
+    // JSP file META-INF/resources/test.jsp in a jar should be able to be referenced
+    // as test.jsp in web.xml.
     return false;
+  }
+  
+  private boolean isVersion30OrLater() {
+    Node node = document.getFirstChild();
+    String versionString = (String) node.getUserData("version");
+    double version = Double.parseDouble(versionString);
+    return version >= 3;
   }
   
   private static IJavaProject getProject(IResource resource) {
