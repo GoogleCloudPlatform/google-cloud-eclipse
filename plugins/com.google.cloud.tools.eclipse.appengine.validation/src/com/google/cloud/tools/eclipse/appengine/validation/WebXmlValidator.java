@@ -159,35 +159,41 @@ public class WebXmlValidator implements XmlValidationHelper {
     // JSP file META-INF/resources/test.jsp in a jar should be able to be referenced
     // as test.jsp in web.xml.
     if (component != null && component.exists()) {
-      // For a typical Maven project:
-      // WEB-INF         -> src/main/webapp/WEB-INF
-      //    /            -> src/main/webapp
-      // WEB-INF/classes -> src/main/java
-      // WEB-INF/lib     -> src/main/webapp/WEB-INF/lib
       IVirtualFolder root = component.getRootFolder();
       if (root.exists()) {
         NodeList jspList = document.getElementsByTagName("jsp-file");
         for (int i = 0; i < jspList.getLength(); i++) {
           Node jspNode = jspList.item(i);
           String jspName = jspNode.getTextContent();
-          IFile file = root.getFile(jspName).getUnderlyingFile();
-          if (file.exists()) {
-            continue;
+          if (!resolveJsp(root, jspName)) {
+            DocumentLocation location = (DocumentLocation) jspNode.getUserData("location");
+            BannedElement element = new JspFileElement(jspName, location, jspName.length());
+            blacklist.add(element);
           }
-          file = root.getFile("WEB-INF/" + jspName).getUnderlyingFile();
-          if (file.exists()) {
-            continue;
-          }
-          file = root.getFile("WEB-INF/classes/" + jspName).getUnderlyingFile();
-          if (file.exists()) {
-            continue;
-          }
-          DocumentLocation location = (DocumentLocation) jspNode.getUserData("location");
-          BannedElement element = new JspFileElement(jspName, location, jspName.length());
-          blacklist.add(element);
         }
       }
     }
+  }
+  
+  private static boolean resolveJsp(IVirtualFolder root, String fileName) {
+    // For a typical Maven project:
+    // WEB-INF         -> src/main/webapp/WEB-INF
+    //    /            -> src/main/webapp
+    // WEB-INF/classes -> src/main/java
+    // WEB-INF/lib     -> src/main/webapp/WEB-INF/lib
+    IFile file = root.getFile(fileName).getUnderlyingFile();
+    if (file.exists()) {
+      return true;
+    }
+    file = root.getFile("WEB-INF/" + fileName).getUnderlyingFile();
+    if (file.exists()) {
+      return true;
+    }
+    file = root.getFile("WEB-INF/classes/" + fileName).getUnderlyingFile();
+    if (file.exists()) {
+      return true;
+    }
+    return false;
   }
   
   private static IJavaProject getProject(IResource resource) {
