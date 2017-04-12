@@ -62,7 +62,6 @@ public class CodeTemplatesTest {
 
   @After
   public void cleanUp() throws CoreException {
-    parent.delete(true, monitor);
     project.delete(true, monitor);
   }
 
@@ -71,7 +70,8 @@ public class CodeTemplatesTest {
       throws CoreException, ParserConfigurationException, SAXException, IOException {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
     IFile mostImportant = CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
-    validateNonConfigFiles(mostImportant, "http://java.sun.com/xml/ns/javaee", "2.5");
+    validateNonConfigFiles(mostImportant, "http://java.sun.com/xml/ns/javaee",
+        "http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd", "2.5");
     validateAppEngineWebXml();
   }
 
@@ -80,12 +80,13 @@ public class CodeTemplatesTest {
       throws CoreException, ParserConfigurationException, SAXException, IOException {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
     IFile mostImportant = CodeTemplates.materializeAppEngineFlexFiles(project, config, monitor);
-    validateNonConfigFiles(mostImportant, "http://xmlns.jcp.org/xml/ns/javaee", "3.1");
+    validateNonConfigFiles(mostImportant, "http://xmlns.jcp.org/xml/ns/javaee",
+        "http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd", "3.1");
     validateAppYaml();
   }
 
   private void validateNonConfigFiles(IFile mostImportant,
-      String webXmlNamespace, String servletVersion)
+      String webXmlNamespace, String webXmlSchemaUrl, String servletVersion)
       throws ParserConfigurationException, SAXException, IOException, CoreException {
     IFolder src = project.getFolder("src");
     IFolder main = src.getFolder("main");
@@ -100,6 +101,8 @@ public class CodeTemplatesTest {
     Element root = buildDocument(webXml).getDocumentElement();
     Assert.assertEquals("web-app", root.getNodeName());
     Assert.assertEquals(webXmlNamespace, root.getNamespaceURI());
+    Assert.assertEquals(webXmlNamespace + " " + webXmlSchemaUrl,
+        root.getAttribute("xsi:schemaLocation"));
     Assert.assertEquals(servletVersion, root.getAttribute("version"));
     Element servletClass = (Element) root.getElementsByTagName("servlet-class").item(0);
     Assert.assertEquals("HelloAppEngine", servletClass.getTextContent());

@@ -125,6 +125,8 @@ public class AppEngineTemplateUtilityTest {
   public void testCreateFileContent_web25() throws CoreException, IOException {
     dataMap.put("package", "com.example.");
     dataMap.put("version", "2.5");
+    dataMap.put("namespace", "http://java.sun.com/xml/ns/javaee");
+    dataMap.put("schemaUrl", "http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd");
     AppEngineTemplateUtility.createFileContent(fileLocation,
         AppEngineTemplateUtility.WEB_XML_TEMPLATE, dataMap);
 
@@ -135,6 +137,8 @@ public class AppEngineTemplateUtilityTest {
   public void testCreateFileContent_web31() throws CoreException, IOException {
     dataMap.put("package", "com.example.");
     dataMap.put("version", "3.1");
+    dataMap.put("namespace", "http://xmlns.jcp.org/xml/ns/javaee");
+    dataMap.put("schemaUrl", "http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd");
     AppEngineTemplateUtility.createFileContent(fileLocation,
         AppEngineTemplateUtility.WEB_XML_TEMPLATE, dataMap);
 

@@ -136,7 +136,16 @@ public class CodeTemplates {
     Map<String, String> packageMap = new HashMap<>();
     String packageValue = config.getPackageName().isEmpty() ? "" : config.getPackageName() + "."; //$NON-NLS-1$ //$NON-NLS-2$
     packageMap.put("package", packageValue);  //$NON-NLS-1$
-    packageMap.put("version", isStandardProject ? "2.5" : "3.1"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+    if (isStandardProject) {
+      packageMap.put("version", "2.5"); //$NON-NLS-1$ //$NON-NLS-2$
+      packageMap.put("namespace", "http://java.sun.com/xml/ns/javaee"); //$NON-NLS-1$ //$NON-NLS-2$
+      packageMap.put("schemaUrl", "http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"); //$NON-NLS-1$ //$NON-NLS-2$
+    } else {
+      packageMap.put("version", "3.1"); //$NON-NLS-1$ //$NON-NLS-2$
+      packageMap.put("namespace", "http://xmlns.jcp.org/xml/ns/javaee"); //$NON-NLS-1$ //$NON-NLS-2$
+      packageMap.put("schemaUrl", "http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"); //$NON-NLS-1$ //$NON-NLS-2$
+    }
+    http://java.sun.com/xml/ns/javaee
     createChildFile("web.xml", AppEngineTemplateUtility.WEB_XML_TEMPLATE, webinf,  //$NON-NLS-1$
         packageMap, subMonitor.newChild(5));
 
