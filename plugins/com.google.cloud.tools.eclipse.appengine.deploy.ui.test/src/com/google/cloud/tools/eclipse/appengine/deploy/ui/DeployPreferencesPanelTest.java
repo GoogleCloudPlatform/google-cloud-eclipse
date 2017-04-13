@@ -30,7 +30,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.cloud.tools.eclipse.appengine.deploy.standard.DeployPreferences;
+import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferences;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.CommonDeployPreferencesPanel.ProjectSelectionValidator;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;

@@ -16,7 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
-import com.google.cloud.tools.eclipse.appengine.deploy.standard.DeployPreferences;
+import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferences;
 import org.eclipse.core.resources.IProject;
 import org.osgi.service.prefs.BackingStoreException;
 

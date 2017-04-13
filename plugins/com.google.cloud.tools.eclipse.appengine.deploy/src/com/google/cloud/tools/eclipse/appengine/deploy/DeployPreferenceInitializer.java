@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.deploy.standard;
+package com.google.cloud.tools.eclipse.appengine.deploy;
 
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.core.runtime.preferences.DefaultScope;

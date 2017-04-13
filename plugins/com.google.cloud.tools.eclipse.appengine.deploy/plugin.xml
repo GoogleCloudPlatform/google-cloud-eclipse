@@ -3,6 +3,6 @@
 <plugin>
   <extension point="org.eclipse.equinox.preferences.preferences">
     <scope name="bundle_defaults" class="org.eclipse.core.runtime.preferences.BundleDefaultsScope"/>
-    <initializer class="com.google.cloud.tools.eclipse.appengine.deploy.standard.DeployPreferenceInitializer"/>
+    <initializer class="com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferenceInitializer"/>
   </extension>
 </plugin>
