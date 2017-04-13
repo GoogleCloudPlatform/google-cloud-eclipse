@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Google Inc.
+ * Copyright 2016 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,35 +17,27 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
 import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
 
-class BlankDeployPreferencesPanel extends AbstractDeployPreferencesPanel {
+abstract class AbstractDeployPreferencesPanel extends Composite {
 
-  BlankDeployPreferencesPanel(Composite parent) {
-    super(parent, SWT.NONE);
-    new Label(this, SWT.WRAP).setText(Messages.getString("no.facet.message"));
-    GridLayoutFactory.fillDefaults().generateLayout(this);
+  AbstractDeployPreferencesPanel(Composite parent, int style) {
+    super(parent, style);
   }
+
+  abstract DataBindingContext getDataBindingContext();
+
+  abstract void resetToDefaults();
+
+  abstract boolean savePreferences();
 
   @Override
-  DataBindingContext getDataBindingContext() {
-    return new DataBindingContext();
+  public void dispose() {
+    if (getDataBindingContext() != null) {
+      getDataBindingContext().dispose();
+    }
+    super.dispose();
   }
 
-  @Override
-  void resetToDefaults() {
-  }
-
-  @Override
-  boolean savePreferences() {
-    return true;
-  }
-
-  @Override
-  String getHelpContextId() {
-    return null;
-  }
+  abstract String getHelpContextId();
 }

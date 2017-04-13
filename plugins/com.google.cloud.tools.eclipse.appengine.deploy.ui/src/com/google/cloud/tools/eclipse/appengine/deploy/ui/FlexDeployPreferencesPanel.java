@@ -36,7 +36,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.osgi.service.prefs.BackingStoreException;
 
-public class FlexDeployPreferencesPanel extends DeployPreferencesPanel {
+public class FlexDeployPreferencesPanel extends AbstractDeployPreferencesPanel {
   private static final int LINKED_CHILD_INDENT = 10;
 
   private static Logger logger = Logger.getLogger(FlexDeployPreferencesPanel.class.getName());

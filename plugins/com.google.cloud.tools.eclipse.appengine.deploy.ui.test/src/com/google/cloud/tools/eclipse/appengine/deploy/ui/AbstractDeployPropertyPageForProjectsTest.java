@@ -37,7 +37,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public abstract class AbstractDeployPropertyPageForProjectsTest<P extends DeployPreferencesPanel> {
+public abstract class AbstractDeployPropertyPageForProjectsTest<P extends AbstractDeployPreferencesPanel> {
 
   @Rule
   public ShellTestResource shellTestResource = new ShellTestResource();

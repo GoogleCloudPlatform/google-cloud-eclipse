@@ -58,7 +58,7 @@ public class DeployPropertyPage extends PropertyPage {
 
   private IFacetedProject facetedProject = null;
   private FlexDeployPreferencesPanel flexPreferencesPanel;
-  private StandardDeployPreferencesPanel standardPreferencesPanel;
+  private DeployPreferencesPanel standardPreferencesPanel;
   private BlankDeployPreferencesPanel blankPreferencesPanel;
   private StackLayout stackLayout;
   private PreferencePageSupport databindingSupport;
@@ -127,8 +127,8 @@ public class DeployPropertyPage extends PropertyPage {
     super.performDefaults();
   }
 
-  private DeployPreferencesPanel getActivePanel() {
-    return (DeployPreferencesPanel) stackLayout.topControl;
+  private AbstractDeployPreferencesPanel getActivePanel() {
+    return (AbstractDeployPreferencesPanel) stackLayout.topControl;
   }
 
   @Override
@@ -161,7 +161,7 @@ public class DeployPropertyPage extends PropertyPage {
     container.layout();
   }
 
-  private void showPanel(DeployPreferencesPanel deployPreferencesPanel) {
+  private void showPanel(AbstractDeployPreferencesPanel deployPreferencesPanel) {
     stackLayout.topControl = deployPreferencesPanel;
     databindingSupport =
         PreferencePageSupport.create(this, deployPreferencesPanel.getDataBindingContext());
@@ -177,7 +177,7 @@ public class DeployPropertyPage extends PropertyPage {
 
   private void createStandardPanelIfNeeded() {
     if (standardPreferencesPanel == null) {
-      standardPreferencesPanel = new StandardDeployPreferencesPanel(
+      standardPreferencesPanel = new DeployPreferencesPanel(
           container, facetedProject.getProject(), loginService, getLayoutChangedHandler(),
           false /* requireValues */, new ProjectRepository(googleApiFactory));
     }
