@@ -29,8 +29,8 @@ import org.junit.Test;
 public class StandardDeployPreferencesTest {
 
   @Rule public final TestProjectCreator projectCreator = new TestProjectCreator();
-  private final StandardDeployPreferences defaultPreferences =
-      StandardDeployPreferences.getDefaultPreferences();
+  private final DeployPreferences defaultPreferences =
+      DeployPreferences.getDefaultPreferences();
 
   @Test
   public void testDefaultProjectId() {
@@ -40,7 +40,7 @@ public class StandardDeployPreferencesTest {
   @Test
   public void testSetProjectId() {
     IProject project = projectCreator.getProject();
-    StandardDeployPreferences preferences = new StandardDeployPreferences(project);
+    DeployPreferences preferences = new DeployPreferences(project);
     assertThat(preferences.getProjectId(), isEmptyString());
     preferences.setProjectId("someproject32");
     assertEquals("someproject32", preferences.getProjectId());

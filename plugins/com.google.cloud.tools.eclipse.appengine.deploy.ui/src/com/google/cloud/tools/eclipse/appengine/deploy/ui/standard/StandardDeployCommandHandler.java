@@ -20,8 +20,8 @@ import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.appengine.api.deploy.DefaultDeployConfiguration;
 import com.google.cloud.tools.eclipse.appengine.deploy.CleanupOldDeploysJob;
 import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployJob;
-import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployPreferences;
-import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployPreferencesConverter;
+import com.google.cloud.tools.eclipse.appengine.deploy.standard.DeployPreferences;
+import com.google.cloud.tools.eclipse.appengine.deploy.standard.DeployPreferencesConverter;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployConsole;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPreferencesDialog;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
@@ -123,7 +123,7 @@ public class StandardDeployCommandHandler extends AbstractHandler {
     MessageConsoleStream outputStream = messageConsole.newMessageStream();
 
     boolean includeOptionalConfigurationFiles =
-        new StandardDeployPreferences(project).isIncludeOptionalConfigurationFiles();
+        new DeployPreferences(project).isIncludeOptionalConfigurationFiles();
 
     StandardDeployJob deploy =
         new StandardDeployJob(project, credential, workDirectory,
@@ -162,11 +162,11 @@ public class StandardDeployCommandHandler extends AbstractHandler {
 
   private static DefaultDeployConfiguration getDeployConfiguration(IProject project)
                                                                         throws ExecutionException {
-    StandardDeployPreferences deployPreferences = new StandardDeployPreferences(project);
+    DeployPreferences deployPreferences = new DeployPreferences(project);
     if (deployPreferences.getProjectId() == null || deployPreferences.getProjectId().isEmpty()) {
       throw new ExecutionException(Messages.getString("error.projectId.missing"));
     }
-    return new StandardDeployPreferencesConverter(deployPreferences).toDeployConfiguration();
+    return new DeployPreferencesConverter(deployPreferences).toDeployConfiguration();
   }
 
   private static IPath createWorkDirectory() throws IOException {

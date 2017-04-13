@@ -112,7 +112,7 @@ public class CommonDeployPreferencesPanel extends AbstractDeployPreferencesPanel
   private final Image refreshIcon = SharedImages.REFRESH_IMAGE_DESCRIPTOR.createImage(getDisplay());
 
   @VisibleForTesting
-  DeployPreferencesModel model;
+  final DeployPreferencesModel model;
   private ObservablesManager observables;
   private DataBindingContext bindingContext;
 
@@ -130,6 +130,7 @@ public class CommonDeployPreferencesPanel extends AbstractDeployPreferencesPanel
     this.layoutChangedHandler = Preconditions.checkNotNull(layoutChangedHandler);
     this.requireValues = requireValues;
     this.projectRepository = projectRepository;
+    model = new DeployPreferencesModel(project);
 
     FormColors colors = new FormColors(getDisplay());
     colors.setBackground(null);
@@ -151,8 +152,6 @@ public class CommonDeployPreferencesPanel extends AbstractDeployPreferencesPanel
     Dialog.applyDialogFont(this);
 
     GridLayoutFactory.swtDefaults().numColumns(2).applyTo(this);
-
-    loadPreferences(project);
 
     setupDataBinding();
   }
@@ -316,10 +315,6 @@ public class CommonDeployPreferencesPanel extends AbstractDeployPreferencesPanel
                                                  exception.getLocalizedMessage()));
       return false;
     }
-  }
-
-  private void loadPreferences(IProject project) {
-    model = new DeployPreferencesModel(project);
   }
 
   public Credential getSelectedCredential() {

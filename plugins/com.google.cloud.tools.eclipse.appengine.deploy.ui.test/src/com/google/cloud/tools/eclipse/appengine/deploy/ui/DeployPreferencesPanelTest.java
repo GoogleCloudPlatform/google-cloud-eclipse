@@ -30,7 +30,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployPreferences;
+import com.google.cloud.tools.eclipse.appengine.deploy.standard.DeployPreferences;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.CommonDeployPreferencesPanel.ProjectSelectionValidator;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
@@ -183,7 +183,7 @@ public class DeployPreferencesPanelTest {
   public void testProjectSavedInPreferencesSelected()
       throws ProjectRepositoryException, InterruptedException, BackingStoreException {
     IEclipsePreferences node =
-        new ProjectScope(project).getNode(StandardDeployPreferences.PREFERENCE_STORE_QUALIFIER);
+        new ProjectScope(project).getNode(DeployPreferences.PREFERENCE_STORE_QUALIFIER);
     try {
       node.put("project.id", "projectId1");
       node.put("account.email", EMAIL_1);
