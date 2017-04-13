@@ -58,7 +58,7 @@ public class DeployPropertyPage extends PropertyPage {
 
   private IFacetedProject facetedProject = null;
   private FlexDeployPreferencesPanel flexPreferencesPanel;
-  private DeployPreferencesPanel standardPreferencesPanel;
+  private CommonDeployPreferencesPanel standardPreferencesPanel;
   private BlankDeployPreferencesPanel blankPreferencesPanel;
   private StackLayout stackLayout;
   private PreferencePageSupport databindingSupport;
@@ -177,7 +177,7 @@ public class DeployPropertyPage extends PropertyPage {
 
   private void createStandardPanelIfNeeded() {
     if (standardPreferencesPanel == null) {
-      standardPreferencesPanel = new DeployPreferencesPanel(
+      standardPreferencesPanel = new CommonDeployPreferencesPanel(
           container, facetedProject.getProject(), loginService, getLayoutChangedHandler(),
           false /* requireValues */, new ProjectRepository(googleApiFactory));
     }

@@ -52,7 +52,7 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
   // seems like an Eclipse/JFace bug
   private final Image titleImage = AppEngineImages.appEngine(64).createImage();
 
-  private DeployPreferencesPanel content;
+  private CommonDeployPreferencesPanel content;
   private IProject project;
   private IGoogleLoginService loginService;
   private IGoogleApiFactory googleApiFactory;
@@ -91,7 +91,7 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
     Composite dialogArea = (Composite) super.createDialogArea(parent);
 
     Composite container = new Composite(dialogArea, SWT.NONE);
-    content = new DeployPreferencesPanel(container, project, loginService,
+    content = new CommonDeployPreferencesPanel(container, project, loginService,
         getLayoutChangedHandler(), true /* requireValues */,
         new ProjectRepository(googleApiFactory));
     GridDataFactory.fillDefaults().grab(true, false).applyTo(content);

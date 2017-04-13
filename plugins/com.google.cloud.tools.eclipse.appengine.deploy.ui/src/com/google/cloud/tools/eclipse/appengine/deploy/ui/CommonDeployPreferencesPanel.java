@@ -83,14 +83,15 @@ import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.osgi.service.prefs.BackingStoreException;
 
-public class DeployPreferencesPanel extends AbstractDeployPreferencesPanel {
+public class CommonDeployPreferencesPanel extends AbstractDeployPreferencesPanel {
 
   private static final String APPENGINE_VERSIONS_URL =
       "https://console.cloud.google.com/appengine/versions";
   private static final String CREATE_GCP_PROJECT_WITH_GAE_URL =
       "https://console.cloud.google.com/projectselector/appengine/create?lang=java";
 
-  private static final Logger logger = Logger.getLogger(DeployPreferencesPanel.class.getName());
+  private static final Logger logger =
+      Logger.getLogger(CommonDeployPreferencesPanel.class.getName());
 
   private AccountSelector accountSelector;
 
@@ -120,7 +121,7 @@ public class DeployPreferencesPanel extends AbstractDeployPreferencesPanel {
   private final ProjectRepository projectRepository;
   private final FormToolkit formToolkit;
 
-  public DeployPreferencesPanel(Composite parent, IProject project,
+  public CommonDeployPreferencesPanel(Composite parent, IProject project,
       IGoogleLoginService loginService, Runnable layoutChangedHandler, boolean requireValues,
       ProjectRepository projectRepository) {
     super(parent, SWT.NONE);
