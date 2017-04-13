@@ -81,7 +81,7 @@ public class WebXmlValidatorPluginTest {
     IFile jspFileInWebContent = project.getFile("WebContent/InWebContent.jsp");
     jspFileInWebContent.create(null, true, null);
     
-    IFile jspFileInJava = project.getFile("src/InJava.jsp");
+    IFile jspFileInJava = project.getFile("src/InSrc.jsp");
     jspFileInJava.create(null, true, null);
   }
   
@@ -152,7 +152,7 @@ public class WebXmlValidatorPluginTest {
     root.appendChild(element);
     
     Element element2 = document.createElement("jsp-file");
-    element2.setTextContent("InJava.jsp");
+    element2.setTextContent("InSrc.jsp");
     element2.setUserData("location", new DocumentLocation(3, 1), null);
     root.appendChild(element2);
     
