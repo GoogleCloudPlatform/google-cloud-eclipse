@@ -44,7 +44,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -286,27 +285,11 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
           MessageFormat.format("server port: {0,number,#}",
               ifNull(ours.getPort(), LocalAppEngineServerBehaviour.DEFAULT_SERVER_PORT))));
     }
-    if (equalPorts(ours.getAdminPort(), theirs.getAdminPort(),
-        LocalAppEngineServerBehaviour.DEFAULT_ADMIN_PORT)) {
-      status.add(StatusUtil.error(clazz,
-          MessageFormat.format("admin port: {0,number,#}",
-              ifNull(ours.getAdminPort(), LocalAppEngineServerBehaviour.DEFAULT_ADMIN_PORT))));
-    }
     if (equalPorts(ours.getApiPort(), theirs.getApiPort(), 0)) {
       // ours.getAdminPort() will never be null with a 0 default
       Preconditions.checkNotNull(ours.getApiPort());
       status.add(StatusUtil.error(clazz,
           MessageFormat.format("API port: {0,number,#}", ours.getAdminPort())));
-    }
-
-    // Check the storage paths:
-    // TODO: include the APP_ID as it is used to generate the default storage path
-    // XXX: does it matter if storage_path is same if all other paths are explicitly specified
-    // (e.g., the {blob,data,*search*,logs} paths)
-    if (Objects.equals(ours.getStoragePath(), theirs.getStoragePath())) {
-      String path =
-          ours.getStoragePath() == null ? "<default location>" : ours.getStoragePath().toString();
-      status.add(StatusUtil.error(clazz, "storage path: " + path));
     }
 
     return status;

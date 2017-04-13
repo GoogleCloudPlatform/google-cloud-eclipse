@@ -33,8 +33,8 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubMonitor;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -46,27 +46,22 @@ import org.xml.sax.SAXException;
 
 public class CodeTemplatesTest {
 
-  private SubMonitor monitor = SubMonitor.convert(new NullProgressMonitor());
+  private IProgressMonitor monitor = new NullProgressMonitor();
   private IFolder parent;
   private IProject project;
-  
+
   @Before
   public void setUp() throws CoreException {
     IWorkspace workspace = ResourcesPlugin.getWorkspace();
     project = workspace.getRoot().getProject("foobar");
-    if (!project.exists()) {
-      project.create(monitor);
-      project.open(monitor);
-    }
+    project.create(monitor);
+    project.open(monitor);
     parent = project.getFolder("testfolder");
-    if (!parent.exists()) {
-      parent.create(true, true, monitor);
-    }
+    parent.create(true, true, monitor);
   }
-  
+
   @After
   public void cleanUp() throws CoreException {
-    parent.delete(true, monitor);
     project.delete(true, monitor);
   }
 
@@ -75,7 +70,8 @@ public class CodeTemplatesTest {
       throws CoreException, ParserConfigurationException, SAXException, IOException {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
     IFile mostImportant = CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
-    validateNonConfigFiles(mostImportant);
+    validateNonConfigFiles(mostImportant, "http://java.sun.com/xml/ns/javaee",
+        "http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd", "2.5");
     validateAppEngineWebXml();
   }
 
@@ -84,11 +80,13 @@ public class CodeTemplatesTest {
       throws CoreException, ParserConfigurationException, SAXException, IOException {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
     IFile mostImportant = CodeTemplates.materializeAppEngineFlexFiles(project, config, monitor);
-    validateNonConfigFiles(mostImportant);
+    validateNonConfigFiles(mostImportant, "http://xmlns.jcp.org/xml/ns/javaee",
+        "http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd", "3.1");
     validateAppYaml();
   }
 
-  private void validateNonConfigFiles(IFile mostImportant)
+  private void validateNonConfigFiles(IFile mostImportant,
+      String webXmlNamespace, String webXmlSchemaUrl, String servletVersion)
       throws ParserConfigurationException, SAXException, IOException, CoreException {
     IFolder src = project.getFolder("src");
     IFolder main = src.getFolder("main");
@@ -96,19 +94,19 @@ public class CodeTemplatesTest {
     IFile servlet = java.getFile("HelloAppEngine.java");
     Assert.assertTrue(servlet.exists());
     Assert.assertEquals(servlet, mostImportant);
-    
+
     IFolder webapp = main.getFolder("webapp");
     IFolder webinf = webapp.getFolder("WEB-INF");
     IFile webXml = webinf.getFile("web.xml");
     Element root = buildDocument(webXml).getDocumentElement();
     Assert.assertEquals("web-app", root.getNodeName());
-    // Oracle keeps changing the namespace URI in new versions of Java and JEE.
-    // This is the namespace URI that works in App Engine standard.
-    Assert.assertEquals("http://java.sun.com/xml/ns/javaee", root.getNamespaceURI());
-    Assert.assertEquals("2.5", root.getAttribute("version"));
+    Assert.assertEquals(webXmlNamespace, root.getNamespaceURI());
+    Assert.assertEquals(webXmlNamespace + " " + webXmlSchemaUrl,
+        root.getAttribute("xsi:schemaLocation"));
+    Assert.assertEquals(servletVersion, root.getAttribute("version"));
     Element servletClass = (Element) root.getElementsByTagName("servlet-class").item(0);
     Assert.assertEquals("HelloAppEngine", servletClass.getTextContent());
-    
+
     IFile htmlFile = webapp.getFile("index.html");
     Element html = buildDocument(htmlFile).getDocumentElement();
     Assert.assertEquals("html", html.getNodeName());
@@ -164,7 +162,7 @@ public class CodeTemplatesTest {
     Document doc = builder.parse(appengineWebXml.getContents());
     return doc;
   }
-  
+
   @Test
   public void testCreateChildFolder() throws CoreException {
     IFolder child = CodeTemplates.createChildFolder("testchild", parent, monitor);
@@ -176,8 +174,8 @@ public class CodeTemplatesTest {
   public void testCreateChildFile() throws CoreException, IOException {
     Map<String, String> values = new HashMap<>();
     values.put("package", "com.google.foo.bar");
-    
-    IFile child = CodeTemplates.createChildFile("HelloAppEngine.java", 
+
+    IFile child = CodeTemplates.createChildFile("HelloAppEngine.java",
         AppEngineTemplateUtility.HELLO_APPENGINE_TEMPLATE, parent, values, monitor);
     Assert.assertTrue(child.exists());
     Assert.assertEquals("HelloAppEngine.java", child.getName());

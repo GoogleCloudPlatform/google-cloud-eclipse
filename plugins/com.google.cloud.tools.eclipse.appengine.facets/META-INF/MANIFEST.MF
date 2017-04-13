@@ -18,6 +18,7 @@ Require-Bundle: com.google.cloud.tools.appengine;bundle-version="0.2.6",
  org.eclipse.swt
 Import-Package: com.google.cloud.tools.eclipse.appengine.compat,
  com.google.cloud.tools.eclipse.appengine.deploy.flex,
+ com.google.cloud.tools.eclipse.sdk.ui.preferences,
  com.google.cloud.tools.eclipse.ui.util,
  com.google.cloud.tools.eclipse.util,
  com.google.cloud.tools.eclipse.util.io,

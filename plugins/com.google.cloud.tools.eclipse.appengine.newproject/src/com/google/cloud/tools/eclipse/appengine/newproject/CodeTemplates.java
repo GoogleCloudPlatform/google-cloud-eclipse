@@ -136,6 +136,15 @@ public class CodeTemplates {
     Map<String, String> packageMap = new HashMap<>();
     String packageValue = config.getPackageName().isEmpty() ? "" : config.getPackageName() + "."; //$NON-NLS-1$ //$NON-NLS-2$
     packageMap.put("package", packageValue);  //$NON-NLS-1$
+    if (isStandardProject) {
+      packageMap.put("version", "2.5"); //$NON-NLS-1$ //$NON-NLS-2$
+      packageMap.put("namespace", "http://java.sun.com/xml/ns/javaee"); //$NON-NLS-1$ //$NON-NLS-2$
+      packageMap.put("schemaUrl", "http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"); //$NON-NLS-1$ //$NON-NLS-2$
+    } else {
+      packageMap.put("version", "3.1"); //$NON-NLS-1$ //$NON-NLS-2$
+      packageMap.put("namespace", "http://xmlns.jcp.org/xml/ns/javaee"); //$NON-NLS-1$ //$NON-NLS-2$
+      packageMap.put("schemaUrl", "http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"); //$NON-NLS-1$ //$NON-NLS-2$
+    }
     createChildFile("web.xml", AppEngineTemplateUtility.WEB_XML_TEMPLATE, webinf,  //$NON-NLS-1$
         packageMap, subMonitor.newChild(5));
 
@@ -162,7 +171,7 @@ public class CodeTemplates {
   }
 
   @VisibleForTesting
-  static IFolder createChildFolder(String name, IFolder parent, SubMonitor monitor)
+  static IFolder createChildFolder(String name, IFolder parent, IProgressMonitor monitor)
       throws CoreException {
     monitor.subTask("Creating folder " + name);
 
@@ -177,7 +186,7 @@ public class CodeTemplates {
 
   @VisibleForTesting
   static IFile createChildFile(String name, String template, IContainer parent,
-      Map<String, String> values, SubMonitor monitor) throws CoreException {
+      Map<String, String> values, IProgressMonitor monitor) throws CoreException {
 
     monitor.subTask("Creating file " + name);
 
@@ -192,7 +201,7 @@ public class CodeTemplates {
   }
 
   @VisibleForTesting
-  static void copyChildFile(String name, IContainer parent, SubMonitor monitor)
+  static void copyChildFile(String name, IContainer parent, IProgressMonitor monitor)
       throws CoreException {
     monitor.subTask("Copying file " + name);
 

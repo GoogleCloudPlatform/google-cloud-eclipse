@@ -25,7 +25,9 @@ import com.google.cloud.tools.appengine.cloudsdk.process.ProcessStartListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.StringBuilderProcessOutputLineListener;
 import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineDeployOutput;
 import com.google.cloud.tools.eclipse.appengine.deploy.AppEngineProjectDeployer;
+import com.google.cloud.tools.eclipse.appengine.deploy.DeployStaging;
 import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
+import com.google.cloud.tools.eclipse.appengine.deploy.WarPublisher;
 import com.google.cloud.tools.eclipse.login.CredentialHelper;
 import com.google.cloud.tools.eclipse.sdk.CollectingLineListener;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
@@ -167,8 +169,8 @@ public class StandardDeployJob extends WorkspaceJob {
     try {
       getJobManager().beginRule(project, progress);
       WarPublisher.publishExploded(project, explodedWarDirectory, progress.newChild(40));
-      new StandardProjectStaging().stage(explodedWarDirectory, stagingDirectory,
-          cloudSdk, progress.newChild(60));
+      DeployStaging.stageStandard(explodedWarDirectory, stagingDirectory, cloudSdk,
+          progress.newChild(60));
       return stagingExitListener.getExitStatus();
     } catch (CoreException | IllegalArgumentException | OperationCanceledException ex) {
       return StatusUtil.error(this, Messages.getString("deploy.job.staging.failed"), ex);
@@ -181,8 +183,15 @@ public class StandardDeployJob extends WorkspaceJob {
       IProgressMonitor monitor) {
     RecordProcessError deployExitListener = new RecordProcessError();
     CloudSdk cloudSdk = getCloudSdk(credentialFile, deployStdoutLineListener, deployExitListener);
+
+    IPath optionalConfigurationFilesDirectory = null;
+    if (includeOptionalConfigurationFiles) {
+      optionalConfigurationFilesDirectory = stagingDirectory.append(
+          DeployStaging.STANDARD_STAGING_GENERATED_FILES_DIRECTORY);
+    }
+
     new AppEngineProjectDeployer().deploy(stagingDirectory, cloudSdk, deployConfiguration,
-        includeOptionalConfigurationFiles, monitor);
+        optionalConfigurationFilesDirectory, monitor);
     return deployExitListener.getExitStatus();
   }
 

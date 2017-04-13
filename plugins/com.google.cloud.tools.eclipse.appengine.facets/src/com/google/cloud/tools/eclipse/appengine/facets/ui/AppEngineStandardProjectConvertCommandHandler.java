@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.facets.ui;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.Messages;
 import com.google.cloud.tools.eclipse.appengine.facets.convert.AppEngineStandardProjectConvertJob;
+import com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPrompter;
 import com.google.cloud.tools.eclipse.ui.util.ProjectFromSelectionHelper;
 import com.google.common.annotations.VisibleForTesting;
 import org.eclipse.core.commands.AbstractHandler;
@@ -26,6 +27,7 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
@@ -38,10 +40,17 @@ public class AppEngineStandardProjectConvertCommandHandler extends AbstractHandl
 
   @Override
   public Object execute(ExecutionEvent event) throws ExecutionException {
+    Shell shell = HandlerUtil.getActiveShellChecked(event);
     try {
       IProject project = ProjectFromSelectionHelper.getProject(event);
       if (project == null) {
         throw new NullPointerException("Convert menu enabled for non-project resources");
+      }
+
+      // prompt user if Cloud SDK is not configured
+      if (CloudSdkPrompter.getCloudSdkLocation(shell) == null) {
+        // no further action required: user chose to not configure
+        return null;
       }
 
       IFacetedProject facetedProject = ProjectFacetsManager.create(project,
@@ -50,14 +59,14 @@ public class AppEngineStandardProjectConvertCommandHandler extends AbstractHandl
         throw new IllegalStateException("Convert menu enabled for App Engine projects");
       }
 
-      Shell shell = HandlerUtil.getActiveShell(event);
       if (checkFacetCompatibility(facetedProject, new MessageDialogWrapper(shell))) {
         new AppEngineStandardProjectConvertJob(facetedProject).schedule();
       }
-      return null;  // Must return null per method Javadoc.
     } catch (CoreException ex) {
-      throw new ExecutionException("Failed to convert to a faceted project", ex);
+      ErrorDialog.openError(shell, "Conversion Failed", "Failed to convert to a faceted project",
+          ex.getStatus());
     }
+    return null; // Must return null per method Javadoc.
   }
 
   @VisibleForTesting
