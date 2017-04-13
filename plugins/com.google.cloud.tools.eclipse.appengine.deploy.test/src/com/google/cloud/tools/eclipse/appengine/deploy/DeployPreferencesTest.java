@@ -26,11 +26,10 @@ import org.eclipse.core.resources.IProject;
 import org.junit.Rule;
 import org.junit.Test;
 
-public class StandardDeployPreferencesTest {
+public class DeployPreferencesTest {
 
   @Rule public final TestProjectCreator projectCreator = new TestProjectCreator();
-  private final DeployPreferences defaultPreferences =
-      DeployPreferences.getDefaultPreferences();
+  private final DeployPreferences defaultPreferences = DeployPreferences.getDefaultPreferences();
 
   @Test
   public void testDefaultProjectId() {
