@@ -90,8 +90,8 @@ public class CommonDeployPreferencesPanel extends AbstractDeployPreferencesPanel
   private static final String CREATE_GCP_PROJECT_WITH_GAE_URL =
       "https://console.cloud.google.com/projectselector/appengine/create?lang=java";
 
-  private static final Logger logger =
-      Logger.getLogger(CommonDeployPreferencesPanel.class.getName());
+  private static final Logger logger = Logger.getLogger(
+      CommonDeployPreferencesPanel.class.getName());
 
   private AccountSelector accountSelector;
 
@@ -118,6 +118,7 @@ public class CommonDeployPreferencesPanel extends AbstractDeployPreferencesPanel
 
   private final Runnable layoutChangedHandler;
   private final boolean requireValues;
+
   private final ProjectRepository projectRepository;
   private final FormToolkit formToolkit;
 
