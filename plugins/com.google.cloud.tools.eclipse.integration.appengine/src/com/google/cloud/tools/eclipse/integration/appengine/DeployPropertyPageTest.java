@@ -42,8 +42,7 @@ public class DeployPropertyPageTest extends BaseProjectTest {
     project = SwtBotAppEngineActions.createNativeWebAppProject(bot, projectName, null, null);
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);
     assertNotNull("Native App Engine projects should be faceted", facetedProject);
-    assertTrue(
-        FacetedProjectHelper.projectHasFacet(facetedProject, AppEngineStandardFacet.ID));
+    assertTrue(FacetedProjectHelper.projectHasFacet(facetedProject, AppEngineStandardFacet.ID));
 
     SwtBotProjectActions.openProjectProperties(bot, projectName);
     bot.tree().expandNode("Google Cloud Platform").select("App Engine Deployment");
