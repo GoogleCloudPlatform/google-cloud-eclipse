@@ -163,7 +163,7 @@ public class DeployCommandHandler extends AbstractHandler {
     if (deployPreferences.getProjectId() == null || deployPreferences.getProjectId().isEmpty()) {
       throw new ExecutionException(Messages.getString("error.projectId.missing"));
     }
-    return new DeployPreferencesConverter(deployPreferences).toDeployConfiguration();
+    return DeployPreferencesConverter.toDeployConfiguration(deployPreferences);
   }
 
   private static IPath createWorkDirectory() throws IOException {

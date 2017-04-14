@@ -216,7 +216,8 @@ public class StandardDeployJob extends WorkspaceJob {
       String rawDeployOutput = deployStdoutLineListener.toString();
       AppEngineDeployOutput structuredOutput = AppEngineDeployOutput.parse(rawDeployOutput);
 
-      String appLocation = getDeployedAppUrl(structuredOutput);
+      boolean promoted = deployConfiguration.getPromote();
+      String appLocation = getDeployedAppUrl(promoted, structuredOutput);
       String project = deployConfiguration.getProject();
       String browserTitle = Messages.getString("browser.launch.title", project);
       WorkbenchUtil.openInBrowserInUiThread(appLocation, null, browserTitle, browserTitle);
@@ -243,8 +244,7 @@ public class StandardDeployJob extends WorkspaceJob {
   }
 
   @VisibleForTesting
-  public String getDeployedAppUrl(AppEngineDeployOutput deployOutput) {
-    boolean promoting = deployConfiguration.getPromote();
+  public static String getDeployedAppUrl(boolean promoted, AppEngineDeployOutput deployOutput) {
     String version = deployOutput.getVersion();
     String service = deployOutput.getService();
     String projectId = deployOutput.getProject();
@@ -257,11 +257,11 @@ public class StandardDeployJob extends WorkspaceJob {
       projectId = projectId.substring(colon + 1);
     }
 
-    if (promoting && usingDefaultService) {
+    if (promoted && usingDefaultService) {
       return "https://" + projectId + domain;
-    } else if (promoting && !usingDefaultService) {
+    } else if (promoted && !usingDefaultService) {
       return "https://" + service +  "-dot-"+  projectId + domain;
-    } else if (!promoting && usingDefaultService) {
+    } else if (!promoted && usingDefaultService) {
       return "https://" + version + "-dot-" + projectId + domain;
     } else {
       return "https://" + version + "-dot-" + service +  "-dot-"+  projectId + domain;

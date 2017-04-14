@@ -23,16 +23,19 @@ import static org.mockito.Mockito.mock;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.util.Arrays;
 import java.util.Comparator;
-
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 public class CleanupOldDeploysJobTest {
+
+  @Rule public TemporaryFolder tempFolder = new TemporaryFolder();
 
   @Test
   public void testRun_withNoDirectories() throws IOException {
@@ -55,15 +58,13 @@ public class CleanupOldDeploysJobTest {
   }
 
   private void testRun(int directoryCount, String[] expectedDirectoriesToKeep) throws IOException {
-    Path tempDirectory = Files.createTempDirectory("cleanupolddeploysjobtest");
-    tempDirectory.toFile().deleteOnExit();
-    createTestDirectories(tempDirectory, directoryCount);
+    createTestDirectories(directoryCount);
 
-    IPath tempDirectoryPath = new org.eclipse.core.runtime.Path(tempDirectory.toAbsolutePath().toString());
-    CleanupOldDeploysJob job = new CleanupOldDeploysJob(tempDirectoryPath);
+    IPath tempFolderPath = new Path(tempFolder.getRoot().toString());
+    CleanupOldDeploysJob job = new CleanupOldDeploysJob(tempFolderPath);
     job.run(mock(IProgressMonitor.class));
 
-    File[] directoriesKept = tempDirectoryPath.toFile().listFiles();
+    File[] directoriesKept = tempFolder.getRoot().listFiles();
     Arrays.sort(directoriesKept, new Comparator<File>() {
 
       @Override
@@ -77,13 +78,13 @@ public class CleanupOldDeploysJobTest {
     }
   }
 
-  private void createTestDirectories(Path tempDirectory, int count) throws IOException {
+  private void createTestDirectories(int count) throws IOException {
     long now = System.currentTimeMillis();
     // most recent directory will be "1", oldest is "<count>"
     for (int i = count; i > 0; --i) {
-      Path path = tempDirectory.resolve(Integer.toString(i));
-      Files.createDirectories(path);
-      Files.setLastModifiedTime(path, FileTime.fromMillis(now - i * 1000L)); // to ensure correct ordering
+      File newFolder = tempFolder.newFolder(Integer.toString(i));
+      Files.setLastModifiedTime(
+          newFolder.toPath(), FileTime.fromMillis(now - i * 1000L)); // to ensure correct ordering
     }
   }
 

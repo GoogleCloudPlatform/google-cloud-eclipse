@@ -21,13 +21,7 @@ import com.google.common.base.Strings;
 
 public class DeployPreferencesConverter {
 
-  private DeployPreferences preferences;
-
-  public DeployPreferencesConverter(DeployPreferences preferences) {
-    this.preferences = preferences;
-  }
-
-  public DefaultDeployConfiguration toDeployConfiguration() {
+  public static DefaultDeployConfiguration toDeployConfiguration(DeployPreferences preferences) {
     DefaultDeployConfiguration configuration = new DefaultDeployConfiguration();
 
     configuration.setProject(preferences.getProjectId());

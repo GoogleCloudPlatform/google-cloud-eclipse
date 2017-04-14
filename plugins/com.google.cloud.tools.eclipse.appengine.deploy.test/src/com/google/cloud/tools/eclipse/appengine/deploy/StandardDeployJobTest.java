@@ -16,74 +16,60 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy;
 
-import com.google.cloud.tools.appengine.api.deploy.DefaultDeployConfiguration;
 import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployJob;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class StandardDeployJobTest {
-  
+
   @Test
   public void testGetDeployedAppUrl_internal() {
-    StandardDeployJob standardDeployJob = createStandardDeployJob(true);
     AppEngineDeployOutput deployOutput =
         createDeployOutput("google.com:notable-torch", "version", "default");
 
     Assert.assertEquals("https://notable-torch.googleplex.com",
-        standardDeployJob.getDeployedAppUrl(deployOutput));
+        StandardDeployJob.getDeployedAppUrl(true /* promoted */, deployOutput));
   }
-  
+
   @Test
   public void testGetDeployedAppUrl_withPartition() {
-    StandardDeployJob standardDeployJob = createStandardDeployJob(true);
     AppEngineDeployOutput deployOutput =
         createDeployOutput("s~google.com:notable-torch", "version", "default");
 
     Assert.assertEquals("https://notable-torch.googleplex.com",
-        standardDeployJob.getDeployedAppUrl(deployOutput));
+        StandardDeployJob.getDeployedAppUrl(true /* promoted */, deployOutput));
   }
 
   @Test
   public void testGetDeployedAppUrl_promoteWithDefaultService() {
-    StandardDeployJob standardDeployJob = createStandardDeployJob(true);
     AppEngineDeployOutput deployOutput = createDeployOutput("testProject", "version", "default");
 
     Assert.assertEquals("https://testProject.appspot.com",
-        standardDeployJob.getDeployedAppUrl(deployOutput));
+        StandardDeployJob.getDeployedAppUrl(true /* promoted */, deployOutput));
   }
 
   @Test
   public void testGetDeployedAppUrl_promoteWithNonDefaultService() {
-    StandardDeployJob standardDeployJob = createStandardDeployJob(true);
     AppEngineDeployOutput deployOutput = createDeployOutput("testProject", "version", "service");
 
     Assert.assertEquals("https://service-dot-testProject.appspot.com",
-        standardDeployJob.getDeployedAppUrl(deployOutput));
+        StandardDeployJob.getDeployedAppUrl(true /* promoted */, deployOutput));
   }
 
   @Test
   public void testGetDeployedAppUrl_noPromoteWithDefaultService() {
-    StandardDeployJob standardDeployJob = createStandardDeployJob(false);
     AppEngineDeployOutput deployOutput = createDeployOutput("testProject", "version", "default");
 
     Assert.assertEquals("https://version-dot-testProject.appspot.com",
-        standardDeployJob.getDeployedAppUrl(deployOutput));
+        StandardDeployJob.getDeployedAppUrl(false /* promoted */, deployOutput));
   }
 
   @Test
   public void testGetDeployedAppUrl_noPromoteWithNonDefaultService() {
-    StandardDeployJob standardDeployJob = createStandardDeployJob(false);
     AppEngineDeployOutput deployOutput = createDeployOutput("testProject", "version", "service");
 
     Assert.assertEquals("https://version-dot-service-dot-testProject.appspot.com",
-        standardDeployJob.getDeployedAppUrl(deployOutput));
-  }
-
-  private static StandardDeployJob createStandardDeployJob(boolean setPromote) {
-    DefaultDeployConfiguration config = new DefaultDeployConfiguration();
-    config.setPromote(setPromote);
-    config.setProject("testProject");
-    return new StandardDeployJob(null, null, null, null, null, config, false);
+        StandardDeployJob.getDeployedAppUrl(false /* promoted */, deployOutput));
   }
 
   private static AppEngineDeployOutput createDeployOutput(String project, String version,

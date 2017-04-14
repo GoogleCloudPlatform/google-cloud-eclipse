@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.googleapis.internal;
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -31,6 +32,7 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.services.appengine.v1.Appengine.Apps;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects;
+import com.google.api.services.storage.Storage;
 import com.google.cloud.tools.eclipse.googleapis.GoogleApiException;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.common.cache.LoadingCache;
@@ -67,6 +69,12 @@ public class GoogleApiFactoryTest {
     googleApiFactory.setTransportCache(transportCache);
   }
 
+  @Test
+  public void testNewStorageApi_Url() throws GoogleApiException {
+    Storage storage = googleApiFactory.newStorageApi(mock(Credential.class));
+    assertEquals("https://www.googleapis.com/", storage.getRootUrl());
+  }
+  
   @Test
   public void testNewAppsApi_userAgentIsSet() throws IOException, GoogleApiException {
     Apps api = googleApiFactory.newAppsApi(mock(Credential.class));
