@@ -62,6 +62,9 @@ public class DeployPropertyPage extends PropertyPage {
   private PreferencePageSupport databindingSupport;
   private Composite container;
 
+  public DeployPropertyPage() {  // 0-arg required for injection
+  }
+
   @VisibleForTesting
   DeployPropertyPage(IGoogleLoginService loginService, IGoogleApiFactory googleApiFactory) {
     this.loginService = loginService;
