@@ -26,6 +26,9 @@
 
     <adt.repoUrl>http://dl-ssl.google.com/android/eclipse/</adt.repoUrl>
     <adt.featureIUs>com.android.ide.eclipse.adt.feature.feature.group</adt.featureIUs>
+
+    <!-- required for eclipserun which is a bit awkward -->
+    <toolchain.java.runtime>JavaSE-1.8</toolchain.java.runtime>
   </properties>
 
   <dependencies>
@@ -72,6 +75,7 @@
             -repository ${eclipse.repoUrl},${gcp.repoUrl},${adt.repoUrl}
             -installIUs ${installIUs}
           </appArgLine>
+          <executionEnvironment>${toolchain.java.runtime}</executionEnvironment>
           <repositories>
             <repository>
               <id>eclipse</id>

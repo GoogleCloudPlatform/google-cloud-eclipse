@@ -71,18 +71,19 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.forms.FormColors;
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
+import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.osgi.service.prefs.BackingStoreException;
 
-public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
+public class CommonDeployPreferencesPanel extends DeployPreferencesPanel {
 
   private static final String APPENGINE_VERSIONS_URL =
       "https://console.cloud.google.com/appengine/versions";
@@ -90,7 +91,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
       "https://console.cloud.google.com/projectselector/appengine/create?lang=java";
 
   private static final Logger logger = Logger.getLogger(
-      StandardDeployPreferencesPanel.class.getName());
+      CommonDeployPreferencesPanel.class.getName());
 
   private AccountSelector accountSelector;
 
@@ -108,32 +109,33 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
   private ExpandableComposite expandableComposite;
 
-  private Image refreshIcon;
+  private final Image refreshIcon = SharedImages.REFRESH_IMAGE_DESCRIPTOR.createImage(getDisplay());
 
   @VisibleForTesting
-  DeployPreferencesModel model;
+  final DeployPreferencesModel model;
   private ObservablesManager observables;
   private DataBindingContext bindingContext;
 
-  private Runnable layoutChangedHandler;
-  private boolean requireValues = true;
+  private final Runnable layoutChangedHandler;
+  private final boolean requireValues;
 
-  private ProjectRepository projectRepository;
+  private final ProjectRepository projectRepository;
+  private final FormToolkit formToolkit;
 
-  public StandardDeployPreferencesPanel(Composite parent, IProject project,
+  public CommonDeployPreferencesPanel(Composite parent, IProject project,
       IGoogleLoginService loginService, Runnable layoutChangedHandler, boolean requireValues,
       ProjectRepository projectRepository) {
     super(parent, SWT.NONE);
 
-    this.layoutChangedHandler = layoutChangedHandler;
+    this.layoutChangedHandler = Preconditions.checkNotNull(layoutChangedHandler);
     this.requireValues = requireValues;
-
-    GridLayout gridLayout = new GridLayout();
-    gridLayout.numColumns = 2;
-
     this.projectRepository = projectRepository;
+    model = new DeployPreferencesModel(project);
 
-    refreshIcon = SharedImages.REFRESH_IMAGE_DESCRIPTOR.createImage(getDisplay());
+    FormColors colors = new FormColors(getDisplay());
+    colors.setBackground(null);
+    colors.setForeground(null);
+    formToolkit = new FormToolkit(colors);
 
     createCredentialSection(loginService);
 
@@ -149,9 +151,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
     Dialog.applyDialogFont(this);
 
-    setLayout(gridLayout);
-
-    loadPreferences(project);
+    GridLayoutFactory.swtDefaults().numColumns(2).applyTo(this);
 
     setupDataBinding();
   }
@@ -317,10 +317,6 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     }
   }
 
-  private void loadPreferences(IProject project) {
-    model = new DeployPreferencesModel(project);
-  }
-
   public Credential getSelectedCredential() {
     return accountSelector.getSelectedCredential();
   }
@@ -439,7 +435,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     expandableComposite.addExpansionListener(new ExpansionAdapter() {
       @Override
       public void expansionStateChanged(ExpansionEvent event) {
-        handleExpansionStateChanged();
+        layoutChangedHandler.run();
       }
     });
   }
@@ -453,7 +449,7 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
     gridData.horizontalSpan = 2;
     expandableComposite.setLayoutData(gridData);
 
-    getFormToolkit().adapt(expandableComposite, true, true);
+    formToolkit.adapt(expandableComposite, true, true);
   }
 
   private Composite createBucketSection(Composite parent) {
@@ -648,22 +644,11 @@ public class StandardDeployPreferencesPanel extends DeployPreferencesPanel {
 
   @Override
   public void dispose() {
-    if (bindingContext != null) {
-      bindingContext.dispose();
-    }
-    if (observables != null) {
-      observables.dispose();
-    }
-    if (refreshIcon != null) {
-      refreshIcon.dispose();
-    }
+    formToolkit.dispose();
+    bindingContext.dispose();
+    observables.dispose();
+    refreshIcon.dispose();
     super.dispose();
-  }
-
-  private void handleExpansionStateChanged() {
-    if (layoutChangedHandler != null) {
-      layoutChangedHandler.run();
-    }
   }
 
   @Override

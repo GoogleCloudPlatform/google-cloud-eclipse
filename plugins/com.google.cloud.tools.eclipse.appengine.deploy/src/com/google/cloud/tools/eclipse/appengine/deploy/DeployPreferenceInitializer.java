@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.deploy.standard;
+package com.google.cloud.tools.eclipse.appengine.deploy;
 
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.core.runtime.preferences.DefaultScope;
@@ -37,15 +37,14 @@ public class DeployPreferenceInitializer extends AbstractPreferenceInitializer {
   public void initializeDefaultPreferences() {
     IEclipsePreferences preferences =
         DefaultScope.INSTANCE.getNode(PREFERENCE_STORE_DEFAULTS_QUALIFIER);
-    preferences.put(StandardDeployPreferences.PREF_ACCOUNT_EMAIL, DEFAULT_ACCOUNT_EMAIL);
-    preferences.put(StandardDeployPreferences.PREF_PROJECT_ID, DEFAULT_PROJECT_ID);
-    preferences.put(StandardDeployPreferences.PREF_CUSTOM_VERSION, DEFAULT_CUSTOM_VERSION);
-    preferences.putBoolean(StandardDeployPreferences.PREF_ENABLE_AUTO_PROMOTE,
-        DEFAULT_ENABLE_AUTO_PROMOTE);
-    preferences.putBoolean(StandardDeployPreferences.PREF_INCLUDE_OPTIONAL_CONFIGURATION_FILES,
+    preferences.put(DeployPreferences.PREF_ACCOUNT_EMAIL, DEFAULT_ACCOUNT_EMAIL);
+    preferences.put(DeployPreferences.PREF_PROJECT_ID, DEFAULT_PROJECT_ID);
+    preferences.put(DeployPreferences.PREF_CUSTOM_VERSION, DEFAULT_CUSTOM_VERSION);
+    preferences.putBoolean(DeployPreferences.PREF_ENABLE_AUTO_PROMOTE, DEFAULT_ENABLE_AUTO_PROMOTE);
+    preferences.putBoolean(DeployPreferences.PREF_INCLUDE_OPTIONAL_CONFIGURATION_FILES,
         DEFAULT_INCLUDE_OPTIONAL_CONFIGURATION_FILES);
-    preferences.put(StandardDeployPreferences.PREF_CUSTOM_BUCKET, DEFAULT_CUSTOM_BUCKET);
-    preferences.putBoolean(StandardDeployPreferences.PREF_STOP_PREVIOUS_VERSION,
+    preferences.put(DeployPreferences.PREF_CUSTOM_BUCKET, DEFAULT_CUSTOM_BUCKET);
+    preferences.putBoolean(DeployPreferences.PREF_STOP_PREVIOUS_VERSION,
         DEFAULT_STOP_PREVIOUS_VERSION);
   }
 

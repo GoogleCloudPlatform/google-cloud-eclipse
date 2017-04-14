@@ -16,13 +16,13 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
-import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployPreferences;
+import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferences;
 import org.eclipse.core.resources.IProject;
 import org.osgi.service.prefs.BackingStoreException;
 
 public class DeployPreferencesModel {
 
-  private StandardDeployPreferences preferences;
+  private DeployPreferences preferences;
 
   private String accountEmail;
   private String projectId;
@@ -33,11 +33,11 @@ public class DeployPreferencesModel {
   private String bucket;
 
   public DeployPreferencesModel(IProject project) {
-    preferences = new StandardDeployPreferences(project);
+    preferences = new DeployPreferences(project);
     applyPreferences(preferences);
   }
 
-  private void applyPreferences(StandardDeployPreferences preferences) {
+  private void applyPreferences(DeployPreferences preferences) {
     setAccountEmail(preferences.getAccountEmail());
     setProjectId(preferences.getProjectId());
     setVersion(preferences.getVersion());
@@ -48,7 +48,7 @@ public class DeployPreferencesModel {
   }
 
   void resetToDefaults() {
-    applyPreferences(StandardDeployPreferences.getDefaultPreferences());
+    applyPreferences(DeployPreferences.getDefaultPreferences());
   }
 
   public void savePreferences() throws BackingStoreException {

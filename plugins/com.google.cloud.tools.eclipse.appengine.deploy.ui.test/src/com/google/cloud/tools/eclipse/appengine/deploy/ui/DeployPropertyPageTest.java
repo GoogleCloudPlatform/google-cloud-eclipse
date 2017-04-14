@@ -37,7 +37,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public abstract class AbstractDeployPropertyPageForProjectsTest<P extends DeployPreferencesPanel> {
+public abstract class DeployPropertyPageTest<P extends DeployPreferencesPanel> {
 
   @Rule
   public ShellTestResource shellTestResource = new ShellTestResource();
@@ -48,11 +48,9 @@ public abstract class AbstractDeployPropertyPageForProjectsTest<P extends Deploy
 
   @Test
   public void testCorrectPanelIsShownForFacetedProject() throws CoreException {
-    DeployPropertyPage page = new DeployPropertyPage();
+    DeployPropertyPage page = new DeployPropertyPage(loginService, googleApiFactory);
     Shell parent = shellTestResource.getShell();
     page.setElement(getProject());
-    page.setLoginService(loginService);
-    page.setGoogleApiFactory(googleApiFactory);
     page.createControl(parent);
     page.setVisible(true);
     Composite preferencePageComposite = (Composite) parent.getChildren()[0];

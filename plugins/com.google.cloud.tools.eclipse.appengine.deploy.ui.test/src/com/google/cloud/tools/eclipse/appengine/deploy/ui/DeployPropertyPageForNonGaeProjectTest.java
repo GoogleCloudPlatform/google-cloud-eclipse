@@ -23,7 +23,7 @@ import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.junit.Rule;
 
 public class DeployPropertyPageForNonGaeProjectTest
-    extends AbstractDeployPropertyPageForProjectsTest<BlankDeployPreferencesPanel> {
+    extends DeployPropertyPageTest<BlankDeployPreferencesPanel> {
 
   @Rule
   public TestProjectCreator nonGaeProjectCreator = new TestProjectCreator().withFacetVersions(

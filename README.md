@@ -6,7 +6,7 @@ This project provides an Eclipse plugin for building, debugging, and deploying G
 
 [End user documentation and installation instructions can be found on cloud.google.com.](https://cloud.google.com/eclipse/docs/)
 
-_TL;DR_: `mvn -Dtycho.toolchains=SYSTEM package` should
+_TL;DR_: `mvn package` should
 generate a p2-accessible repository in `gcp-repo/target/repository`.
 
 # Development
@@ -57,14 +57,20 @@ You can explicitly set the `eclipse.target` property to
 $ mvn -Declipse.target=neon package
 ```
 
-### Configuring Maven/Tycho Toolchains
+### Configuring Maven/Tycho Toolchains for CI Builds
+
+_Note: this section is only relevant for configuring CI builds_
 
 We use Tycho's support for Maven Toolchains to ensure that Java 8
 features do not creep into the code.  This support is enabled by
 compiling with the [`useJDK=BREE`](https://eclipse.org/tycho/sitedocs/tycho-compiler-plugin/compile-mojo.html)
 setting that ensures bundles are compiled with a JDK that matches
-the bundle's `Bundle-RequiredExecutionEnvironment`.  This setting
-requires configuring [Maven's toolchains](https://maven.apache.org/guides/mini/guide-using-toolchains.html)
+the bundle's `Bundle-RequiredExecutionEnvironment`, but configuring
+`tycho-surefire` to run the tests using the configured toolchain
+(the default for
+[`useJDK=SYSTEM`](https://eclipse.org/tycho/sitedocs/tycho-surefire/tycho-surefire-plugin/test-mojo.html#useJDK)).
+These settings
+require configuring [Maven's toolchains](https://maven.apache.org/guides/mini/guide-using-toolchains.html)
 to point to appropriate JRE installations.  Tycho further requires
 that a toolchain defines an `id` for the specified _Execution
 Environment_ identifier.  For example, a `~/.m2/toolchains.xml` to
@@ -94,9 +100,6 @@ and the OpenJDK, those directories are actually found in the `jre/`
 directory.  Compilation errors such as `java.lang.String` not found
 and `java.lang.Exception` not found
 indicate a misconfigured _jdkHome_.
-
-You can disable the use of toolchains by setting the `tycho.toolchains`
-property to `SYSTEM`.
 
 ### Adding a new bundle/fragment
 

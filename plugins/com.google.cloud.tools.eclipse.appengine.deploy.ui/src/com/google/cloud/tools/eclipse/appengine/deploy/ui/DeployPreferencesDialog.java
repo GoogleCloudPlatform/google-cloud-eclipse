@@ -50,12 +50,11 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
 
   // if the image is smaller (e.g. 32x32, it will break the layout of the TitleAreaDialog)
   // seems like an Eclipse/JFace bug
-  private Image titleImage = AppEngineImages.appEngine(64).createImage();
+  private final Image titleImage = AppEngineImages.appEngine(64).createImage();
 
-  private StandardDeployPreferencesPanel content;
+  private CommonDeployPreferencesPanel content;
   private IProject project;
   private IGoogleLoginService loginService;
-
   private IGoogleApiFactory googleApiFactory;
 
   public DeployPreferencesDialog(Shell parentShell, IProject project,
@@ -77,10 +76,7 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
 
     getShell().setText(Messages.getString("deploy.preferences.dialog.title"));
     setTitle(Messages.getString("deploy.preferences.dialog.title.withProject", project.getName()));
-
-    if (titleImage != null) {
-      setTitleImage(titleImage);
-    }
+    setTitleImage(titleImage);
 
     getButton(IDialogConstants.OK_ID).setText(Messages.getString("deploy"));
 
@@ -95,7 +91,7 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
     Composite dialogArea = (Composite) super.createDialogArea(parent);
 
     Composite container = new Composite(dialogArea, SWT.NONE);
-    content = new StandardDeployPreferencesPanel(container, project, loginService,
+    content = new CommonDeployPreferencesPanel(container, project, loginService,
         getLayoutChangedHandler(), true /* requireValues */,
         new ProjectRepository(googleApiFactory));
     GridDataFactory.fillDefaults().grab(true, false).applyTo(content);

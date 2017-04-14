@@ -26,7 +26,7 @@ import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.junit.Rule;
 
 public class DeployPropertyPageForFlexProjectTest
-    extends AbstractDeployPropertyPageForProjectsTest<FlexDeployPreferencesPanel> {
+    extends DeployPropertyPageTest<FlexDeployPreferencesPanel> {
 
   // TODO: remove "Required-Bundle: com.google.cloud.tools.eclipse.appengine.flex" from
   // "MANIFEST.MF" once the flex facet is fully available.

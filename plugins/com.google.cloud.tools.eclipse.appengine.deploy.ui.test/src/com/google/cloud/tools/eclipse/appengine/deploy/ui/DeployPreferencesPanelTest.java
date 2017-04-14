@@ -30,8 +30,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployPreferences;
-import com.google.cloud.tools.eclipse.appengine.deploy.ui.StandardDeployPreferencesPanel.ProjectSelectionValidator;
+import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferences;
+import com.google.cloud.tools.eclipse.appengine.deploy.ui.CommonDeployPreferencesPanel.ProjectSelectionValidator;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelectorObservableValue;
@@ -67,13 +67,13 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.osgi.service.prefs.BackingStoreException;
 
 @RunWith(MockitoJUnitRunner.class)
-public class StandardDeployPreferencesPanelTest {
+public class DeployPreferencesPanelTest {
 
   private static final String EMAIL_2 = "some-email-2@example.com";
   private static final String EMAIL_1 = "some-email-1@example.com";
 
   private Composite parent;
-  private StandardDeployPreferencesPanel deployPanel;
+  private CommonDeployPreferencesPanel deployPanel;
   @Mock private IProject project;
   @Mock private IGoogleLoginService loginService;
   @Mock private Runnable layoutChangedHandler;
@@ -183,7 +183,7 @@ public class StandardDeployPreferencesPanelTest {
   public void testProjectSavedInPreferencesSelected()
       throws ProjectRepositoryException, InterruptedException, BackingStoreException {
     IEclipsePreferences node =
-        new ProjectScope(project).getNode(StandardDeployPreferences.PREFERENCE_STORE_QUALIFIER);
+        new ProjectScope(project).getNode(DeployPreferences.PREFERENCE_STORE_QUALIFIER);
     try {
       node.put("project.id", "projectId1");
       node.put("account.email", EMAIL_1);
@@ -330,9 +330,9 @@ public class StandardDeployPreferencesPanelTest {
     }
   }
 
-  private StandardDeployPreferencesPanel createPanel(boolean requireValues) {
-    return new StandardDeployPreferencesPanel(parent, project, loginService, layoutChangedHandler,
-                                              requireValues, projectRepository);
+  private CommonDeployPreferencesPanel createPanel(boolean requireValues) {
+    return new CommonDeployPreferencesPanel(parent, project, loginService, layoutChangedHandler,
+        requireValues, projectRepository);
   }
 
   private IStatus getProjectSelectionValidator() {

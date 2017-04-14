@@ -25,6 +25,7 @@ import com.google.cloud.tools.eclipse.dataflow.ui.util.ButtonFactory;
 import com.google.common.base.Strings;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusEvent;
@@ -47,6 +48,8 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
+
 import java.io.File;
 import java.net.URI;
 import java.util.Map;
@@ -78,9 +81,17 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     this.targetCreator = targetCreator;
     setTitle(Messages.getString("CREATE_DATAFLOW_PROJECT"));
     setDescription(Messages.getString("WIZARD_DESCRIPTION"));
+    setImageDescriptor(getDataflowIcon());
     setPageComplete(false);
   }
 
+  private static ImageDescriptor getDataflowIcon() {
+    String imageFilePath = "icons/Dataflow_64.png";
+    return AbstractUIPlugin.imageDescriptorFromPlugin(
+        "com.google.cloud.tools.eclipse.dataflow.ui", imageFilePath);
+  }
+
+  
   private void addLabel(Composite formComposite, String labelText) {
     Label label = new Label(formComposite, SWT.NULL);
     label.setText(labelText);

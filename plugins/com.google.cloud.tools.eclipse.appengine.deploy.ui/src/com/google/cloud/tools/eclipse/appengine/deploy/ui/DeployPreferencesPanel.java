@@ -17,29 +17,12 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
 import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.forms.FormColors;
-import org.eclipse.ui.forms.widgets.FormToolkit;
 
 abstract class DeployPreferencesPanel extends Composite {
-  private FormToolkit formToolkit;
 
   DeployPreferencesPanel(Composite parent, int style) {
     super(parent, style);
-
-    initializeFormToolkit();
-
-    addDisposeListener(new DisposeListener() {
-      @Override
-      public void widgetDisposed(DisposeEvent e) {
-        onDispose();
-        if (formToolkit != null) {
-          formToolkit.dispose();
-        }
-      }
-    });
   }
 
   abstract DataBindingContext getDataBindingContext();
@@ -48,21 +31,12 @@ abstract class DeployPreferencesPanel extends Composite {
 
   abstract boolean savePreferences();
 
-  protected FormToolkit getFormToolkit() {
-    return formToolkit;
-  }
-
-  private void initializeFormToolkit() {
-    FormColors colors = new FormColors(getDisplay());
-    colors.setBackground(null);
-    colors.setForeground(null);
-    formToolkit = new FormToolkit(colors);
-  }
-
-  protected void onDispose() {
+  @Override
+  public void dispose() {
     if (getDataBindingContext() != null) {
       getDataBindingContext().dispose();
     }
+    super.dispose();
   }
 
   abstract String getHelpContextId();

@@ -73,8 +73,9 @@
           class="com.google.cloud.tools.eclipse.dataflow.ui.wizard.NewDataflowProjectWizard"
           icon="icons/Dataflow_128.png"
           id="com.google.cloud.tools.eclipse.dataflow.ui.wizard.NewDataflowProjectWizard"
-          name="Cloud Dataflow Java Project"
+          name="%dataflowWizardName"
           project="true">
+      <description>%dataflowWizardDescription</description>
     </wizard>
   </extension>
 
