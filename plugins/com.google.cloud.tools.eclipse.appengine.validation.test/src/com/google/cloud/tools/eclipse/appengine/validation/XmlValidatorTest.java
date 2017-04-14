@@ -155,7 +155,12 @@ public class XmlValidatorTest {
     validator.xsdValidation(file);
     String problemMarker = "org.eclipse.core.resources.problemmarker";
     IMarker[] markers = file.findMarkers(problemMarker, true, IResource.DEPTH_ZERO);
-    assertEquals(1, markers.length);
+    StringBuilder builder = new StringBuilder();
+    for (IMarker marker : markers) {
+      builder.append(marker.getAttribute(IMarker.MESSAGE) + "\n");
+    }
+    String message = String.format("Expected 1 marker, got %d markers with messages: %s", markers.length, builder.toString());
+    assertEquals(message, 1, markers.length);
   }
 
   @Test
