@@ -26,7 +26,7 @@ import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.junit.Rule;
 
 public class DeployPropertyPageForStandardProjectTest
-    extends AbstractDeployPropertyPageTest<CommonDeployPreferencesPanel> {
+    extends DeployPropertyPageTest<CommonDeployPreferencesPanel> {
 
   protected static final IProjectFacetVersion APP_ENGINE_STANDARD_FACET_1 =
       ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID).getVersion("1");

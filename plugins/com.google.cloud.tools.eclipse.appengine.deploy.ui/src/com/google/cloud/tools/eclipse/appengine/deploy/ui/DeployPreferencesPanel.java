@@ -19,9 +19,9 @@ package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.swt.widgets.Composite;
 
-abstract class AbstractDeployPreferencesPanel extends Composite {
+abstract class DeployPreferencesPanel extends Composite {
 
-  AbstractDeployPreferencesPanel(Composite parent, int style) {
+  DeployPreferencesPanel(Composite parent, int style) {
     super(parent, style);
   }
 

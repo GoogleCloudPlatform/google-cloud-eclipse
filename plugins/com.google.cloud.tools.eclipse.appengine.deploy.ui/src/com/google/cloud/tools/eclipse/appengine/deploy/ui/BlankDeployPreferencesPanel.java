@@ -22,7 +22,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
-class BlankDeployPreferencesPanel extends AbstractDeployPreferencesPanel {
+class BlankDeployPreferencesPanel extends DeployPreferencesPanel {
 
   BlankDeployPreferencesPanel(Composite parent) {
     super(parent, SWT.NONE);

@@ -131,8 +131,8 @@ public class DeployPropertyPage extends PropertyPage {
     super.performDefaults();
   }
 
-  private AbstractDeployPreferencesPanel getActivePanel() {
-    return (AbstractDeployPreferencesPanel) stackLayout.topControl;
+  private DeployPreferencesPanel getActivePanel() {
+    return (DeployPreferencesPanel) stackLayout.topControl;
   }
 
   @Override
@@ -165,7 +165,7 @@ public class DeployPropertyPage extends PropertyPage {
     container.layout();
   }
 
-  private void showPanel(AbstractDeployPreferencesPanel deployPreferencesPanel) {
+  private void showPanel(DeployPreferencesPanel deployPreferencesPanel) {
     stackLayout.topControl = deployPreferencesPanel;
     databindingSupport =
         PreferencePageSupport.create(this, deployPreferencesPanel.getDataBindingContext());
