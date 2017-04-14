@@ -37,7 +37,7 @@ import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.validation.ValidationFramework;
 import org.eclipse.wst.validation.Validator;
 import org.junit.Before;
-import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
 
 public class XmlValidatorTest {
@@ -51,11 +51,11 @@ public class XmlValidatorTest {
       ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID).getVersion("1");
   private IFile resource;
 
-  @ClassRule public static TestProjectCreator appEngineStandardProjectCreator =
+  @Rule public TestProjectCreator appEngineStandardProjectCreator =
       new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7,
           WebFacetUtils.WEB_25, APPENGINE_STANDARD_FACET_VERSION_1);
 
-  @ClassRule public static TestProjectCreator dynamicWebProjectCreator =
+  @Rule public TestProjectCreator dynamicWebProjectCreator =
       new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
 
   @Before
