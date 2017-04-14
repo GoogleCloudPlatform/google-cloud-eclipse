@@ -503,12 +503,15 @@
     -->
     <profile>
        <!-- 
-          We can only use tycho-compiler-plugin's `useJDK=BREE` mode
-          (which builds a bundle against a JDK that matches its
-          Bundle-RequiredExecutionEnvironment) when we're building
-          against Mars as Eclipse 4.6/Neon requires Java 8.
+          We can only use tycho-compiler-plugin's `useJDK=BREE`
+          mode when we're building with our minimum supported Java
+          runtime environment (currently JavaSE-1.7).  `BREE` mode
+          builds each bundle against a JDK that matches its
+          Bundle-RequiredExecutionEnvironment, but results in
+          compile-time resolving errors on Eclipse 4.6/Neon
+          and later which require Java 8.
       -->
-      <id>build-with-java-runtime-</id>
+      <id>building-with-minimum-java-runtime-</id>
       <activation>
         <property><name>toolchain.java.runtime</name><value>JavaSE-1.7</value></property>
       </activation>
@@ -518,13 +521,13 @@
     </profile>
     <profile>
       <!--
-          We use tycho-surefire-plugin's (default) `useJDK=SYSTEM`
+          We use tycho-surefire-plugin's default `useJDK=SYSTEM`
           mode to run tests using the configured Maven toolchain.  So
           specifying toolchain.java.runtime=JavaSE-1.7 will lead to test
           failures should we attempt to load bundles with BREE=JavaSE-1.8
           or that contains Java 8 code.  Same applies with Java 9.
       -->
-      <id>test-with-java-runtime</id>
+      <id>testing-with-java-runtime</id>
       <activation>
         <property><name>toolchain.java.runtime</name></property>
       </activation>

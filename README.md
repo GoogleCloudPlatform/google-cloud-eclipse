@@ -57,7 +57,7 @@ You can explicitly set the `eclipse.target` property to
 $ mvn -Declipse.target=neon package
 ```
 
-### Configuring Maven/Tycho Toolchains
+### Configuring Maven/Tycho Toolchains for CI Builds
 
 _Note: this section is only relevant for configuring CI builds_
 
