@@ -258,13 +258,9 @@
    </extension>
 
    <extension point="org.eclipse.ui.propertyPages">
-     <page id="com.google"
-         name="Google"
-         class="com.google.cloud.tools.eclipse.dataflow.ui.preferences.GoogleLandingPage">
-     </page>
      <page id="com.google.cloud.tools.eclipse.dataflow.ui.defaultRunOptionsProperties"
          name="Cloud Dataflow"
-         category="com.google"
+         category="com.google.cloud.tools.eclipse"
          class="com.google.cloud.tools.eclipse.dataflow.ui.preferences.DefaultRunOptionsPage">
        <enabledWhen>
          <adapt type="org.eclipse.core.resources.IProject">
