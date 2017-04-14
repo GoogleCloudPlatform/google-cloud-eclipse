@@ -20,9 +20,7 @@ import com.google.cloud.tools.eclipse.util.io.DeleteAllVisitor;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -35,12 +33,11 @@ import org.eclipse.core.runtime.jobs.Job;
 
 public class CleanupOldDeploysJob extends Job {
 
-  private static String NAME = Messages.getString("cleanup.deploy.job.name"); //$NON-NLS-1$
-  private static int RECENT_DIRECTORIES_TO_KEEP = 2;
-  private IPath parentTempDir;
+  private static final int RECENT_DIRECTORIES_TO_KEEP = 2;
+  private final IPath parentTempDir;
 
   public CleanupOldDeploysJob(IPath parentTempDir) {
-    super(NAME);
+    super(Messages.getString("cleanup.deploy.job.name")); //$NON-NLS-1$
     this.parentTempDir = parentTempDir;
   }
 
@@ -56,11 +53,9 @@ public class CleanupOldDeploysJob extends Job {
   }
 
   private List<File> collectDirectories() throws IOException {
-    DirectoryStream<Path> newDirectoryStream =
-        Files.newDirectoryStream(parentTempDir.toFile().toPath());
     List<File> directories = new ArrayList<>();
-    for (Path path : newDirectoryStream) {
-      File file = path.toFile();
+    File[] files = parentTempDir.toFile().listFiles();
+    for (File file : files) {
       if (file.isDirectory()) {
         directories.add(file);
       }
