@@ -97,8 +97,8 @@
   </modules>
 
   <properties>
-    <tycho.version>0.24.0</tycho.version>
-    <tycho-extras.version>0.24.0</tycho-extras.version>
+    <tycho.version>1.0.0</tycho.version>
+    <tycho-extras.version>1.0.0</tycho-extras.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <eclipse.target>mars</eclipse.target>
 
@@ -113,11 +113,11 @@
     <jacoco.agentArgLine/>
 
     <!--
-      `SYSTEM` means use the default JDK (necessary for Travis).
-      `BREE` means find a configured JDK using Maven Toolchains matching
+      `SYSTEM` means build using the default JDK.
+      `BREE` means find an appropriate JDK using Maven Toolchains matching
       the Bundle-RequiredExecutionEnvironment. See `README.md` for details.
     -->
-    <tycho.toolchains>BREE</tycho.toolchains>
+    <tycho.toolchains>SYSTEM</tycho.toolchains>
 
      <!-- OS-specific JVM flags, empty for the default case but redefined below -->
      <os-jvm-flags/>
@@ -265,17 +265,6 @@
           </jgit.ignore>
         </configuration>
       </plugin>
-      <plugin>
-        <groupId>org.eclipse.tycho</groupId>
-        <artifactId>tycho-p2-plugin</artifactId>
-        <configuration>
-          <baselineRepositories>
-            <repository>
-              <url>${project.url}</url>
-            </repository>
-          </baselineRepositories>
-        </configuration>
-      </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -359,6 +348,12 @@
             <forkedProcessTimeoutInSeconds>600</forkedProcessTimeoutInSeconds>
             <argLine>${jacoco.agentArgLine} -Dorg.eclipse.swtbot.search.timeout=${org.eclipse.swtbot.search.timeout} -Xms40m -Xmx1G -XX:MaxPermSize=512m -Djava.awt.headless=true ${os-jvm-flags}</argLine>
           </configuration>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-toolchains-plugin</artifactId>
+          <version>1.1</version>
         </plugin>
 
         <plugin>
@@ -502,12 +497,68 @@
       </modules>
     </profile>
 
+    <!--
+      The following profiles work to prevent Java 8'isms (or Java 9!)
+      using Maven and Tycho's support for toolchains.
+    -->
+    <profile>
+       <!-- 
+          We can only use tycho-compiler-plugin's `useJDK=BREE`
+          mode when we're building with our minimum supported Java
+          runtime environment (currently JavaSE-1.7).  `BREE` mode
+          builds each bundle against a JDK that matches its
+          Bundle-RequiredExecutionEnvironment, but results in
+          compile-time resolving errors on Eclipse 4.6/Neon
+          and later which require Java 8.
+      -->
+      <id>building-with-minimum-java-runtime-</id>
+      <activation>
+        <property><name>toolchain.java.runtime</name><value>JavaSE-1.7</value></property>
+      </activation>
+      <properties>
+         <tycho.toolchains>BREE</tycho.toolchains>
+      </properties>
+    </profile>
+    <profile>
+      <!--
+          We use tycho-surefire-plugin's default `useJDK=SYSTEM`
+          mode to run tests using the configured Maven toolchain.  So
+          specifying toolchain.java.runtime=JavaSE-1.7 will lead to test
+          failures should we attempt to load bundles with BREE=JavaSE-1.8
+          or that contains Java 8 code.  Same applies with Java 9.
+      -->
+      <id>testing-with-java-runtime</id>
+      <activation>
+        <property><name>toolchain.java.runtime</name></property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-toolchains-plugin</artifactId>
+            <executions>
+              <execution>
+                <phase>validate</phase>
+                <goals>
+                  <goal>toolchain</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <toolchains>
+                <jdk>
+                  <id>${toolchain.java.runtime}</id>
+                </jdk>
+              </toolchains>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
 
     <profile>
       <id>travis</id>
       <properties>
-        <!-- We configure Travis to use jdk7 -->
-        <tycho.toolchains>SYSTEM</tycho.toolchains>
         <!-- Ensure we don't resolve previous versions of our artifacts -->
         <tycho.localArtifacts>ignore</tycho.localArtifacts>
         <jgit.dirtyWorkingTree>error</jgit.dirtyWorkingTree>
