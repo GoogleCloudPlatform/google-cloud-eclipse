@@ -70,7 +70,7 @@ public class GoogleApiFactoryTest {
   }
 
   @Test
-  public void testNewStorageApi_Url() throws IOException, GoogleApiException {
+  public void testNewStorageApi_Url() throws GoogleApiException {
     Storage storage = googleApiFactory.newStorageApi(mock(Credential.class));
     assertEquals("https://www.googleapis.com/", storage.getRootUrl());
   }
