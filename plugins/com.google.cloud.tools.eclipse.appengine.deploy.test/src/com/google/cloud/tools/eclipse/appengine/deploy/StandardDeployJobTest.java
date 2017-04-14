@@ -22,7 +22,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class StandardDeployJobTest {
-  
+
   @Test
   public void testGetDeployedAppUrl_internal() {
     StandardDeployJob standardDeployJob = createStandardDeployJob(true);
@@ -32,7 +32,7 @@ public class StandardDeployJobTest {
     Assert.assertEquals("https://notable-torch.googleplex.com",
         standardDeployJob.getDeployedAppUrl(deployOutput));
   }
-  
+
   @Test
   public void testGetDeployedAppUrl_withPartition() {
     StandardDeployJob standardDeployJob = createStandardDeployJob(true);
@@ -90,18 +90,18 @@ public class StandardDeployJobTest {
       String service) {
     String jsonOutput =
         "{\n" +
-            "  \"configs\": [],\n" +
-            "  \"versions\": [\n" +
-            "    {\n" +
-            "      \"id\": \"" + version + "\",\n" +
-            "      \"last_deployed_time\": null,\n" +
-            "      \"project\": \"" + project + "\",\n" +
-            "      \"service\": \"" + service + "\",\n" +
-            "      \"traffic_split\": null,\n" +
-            "      \"version\": null\n" +
-            "    }\n" +
-            "  ]\n" +
-            "}\n";
+        "  \"configs\": [],\n" +
+        "  \"versions\": [\n" +
+        "    {\n" +
+        "      \"id\": \"" + version + "\",\n" +
+        "      \"last_deployed_time\": null,\n" +
+        "      \"project\": \"" + project + "\",\n" +
+        "      \"service\": \"" + service + "\",\n" +
+        "      \"traffic_split\": null,\n" +
+        "      \"version\": null\n" +
+        "    }\n" +
+        "  ]\n" +
+        "}\n";
     return AppEngineDeployOutput.parse(jsonOutput);
   }
 }
