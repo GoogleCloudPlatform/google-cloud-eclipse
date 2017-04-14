@@ -47,7 +47,6 @@ Import-Package: com.google.cloud.tools.eclipse.util,
  javax.servlet.http,
  org.codehaus.jackson,
  org.eclipse.core.net.proxy,
- org.eclipse.osgi.storage,
  org.mortbay.jetty,
  org.mortbay.jetty.handler,
  org.osgi.service.component.annotations;version="1.2.0"
