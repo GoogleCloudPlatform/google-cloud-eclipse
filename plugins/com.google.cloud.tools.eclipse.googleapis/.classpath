@@ -6,6 +6,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/google-api-client-1.22.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-http-client-1.22.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-http-client-jackson-1.22.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-http-client-jackson2-1.22.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-api-services-appengine-v1-rev9-1.21.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-api-services-cloudresourcemanager-v1-rev355-1.22.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-api-services-oauth2-v2-rev114-1.22.0.jar"/>
