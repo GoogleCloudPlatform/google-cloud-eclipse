@@ -25,7 +25,7 @@
 
   <extension point="org.eclipse.ui.handlers">
     <handler
-      class="com.google.cloud.tools.eclipse.appengine.deploy.ui.standard.StandardDeployCommandHandler"
+      class="com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployCommandHandler"
       commandId="com.google.cloud.tools.eclipse.appengine.deploy">
       <enabledWhen>
         <and>

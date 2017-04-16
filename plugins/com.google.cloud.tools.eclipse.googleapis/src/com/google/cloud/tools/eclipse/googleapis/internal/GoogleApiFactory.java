@@ -43,7 +43,7 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 
 /**
- * Class to obtain various Google cloud Platform related APIs.
+ * Class to obtain various Google Cloud Platform related APIs.
  */
 @Component
 public class GoogleApiFactory implements IGoogleApiFactory {

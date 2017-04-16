@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.deploy.ui.standard;
+package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.appengine.api.deploy.DefaultDeployConfiguration;
@@ -22,9 +22,6 @@ import com.google.cloud.tools.eclipse.appengine.deploy.CleanupOldDeploysJob;
 import com.google.cloud.tools.eclipse.appengine.deploy.DeployJob;
 import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferences;
 import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferencesConverter;
-import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployConsole;
-import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPreferencesDialog;
-import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListener;
@@ -65,7 +62,7 @@ import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
  * It copies the project's exploded WAR to a staging directory and then executes
  * the staging and deploy operations provided by the App Engine Plugins Core Library.
  */
-public class StandardDeployCommandHandler extends AbstractHandler {
+public class DeployCommandHandler extends AbstractHandler {
 
   @Override
   public Object execute(ExecutionEvent event) throws ExecutionException {
