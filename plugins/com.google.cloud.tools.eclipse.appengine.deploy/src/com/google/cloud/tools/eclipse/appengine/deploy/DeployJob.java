@@ -91,7 +91,7 @@ public class DeployJob extends WorkspaceJob {
    *     log messages)
    * @param deployConfiguration configuration passed to {@link CloudSdk} that describes what and
    *     how to deploy
-   * @param includeOptionalConfigurationFiles if true, deploys optional XML configurations files
+   * @param includeOptionalConfigurationFiles if true, deploys optional XML configuration files
    *     (e.g., {@code queue.yaml}) together
    */
   public DeployJob(IProject project, Credential credential, IPath workDirectory,
