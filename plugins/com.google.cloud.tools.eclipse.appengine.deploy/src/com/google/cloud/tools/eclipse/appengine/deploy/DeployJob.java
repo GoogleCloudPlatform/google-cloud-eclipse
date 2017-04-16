@@ -251,7 +251,7 @@ public class DeployJob extends WorkspaceJob {
   }
 
   @VisibleForTesting
-  public static String getDeployedAppUrl(boolean promoted, AppEngineDeployOutput deployOutput) {
+  static String getDeployedAppUrl(boolean promoted, AppEngineDeployOutput deployOutput) {
     String version = deployOutput.getVersion();
     String service = deployOutput.getService();
     String projectId = deployOutput.getProject();
