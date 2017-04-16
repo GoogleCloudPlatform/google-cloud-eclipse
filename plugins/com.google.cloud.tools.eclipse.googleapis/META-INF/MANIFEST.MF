@@ -47,6 +47,7 @@ Export-Package: com.google.api.client.auth.oauth2;version="1.22.0",
  com.google.cloud.tools.login;version="0.1.1"
 Import-Package: com.google.cloud.tools.eclipse.util,
  javax.servlet.http,
+ com.fasterxml.jackson.core,
  org.codehaus.jackson,
  org.eclipse.core.net.proxy,
  org.mortbay.jetty,

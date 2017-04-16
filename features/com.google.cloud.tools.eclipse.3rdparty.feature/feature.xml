@@ -44,6 +44,13 @@
          download-size="0"
          install-size="0"
          version="1.9.13"
+         unpack="false"/>    
+         
+   <plugin
+         id="Jackson-core"
+         download-size="0"
+         install-size="0"
+         version="2.8.6"
          unpack="false"/>
 
    <plugin
