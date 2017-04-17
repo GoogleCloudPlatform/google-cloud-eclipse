@@ -16,10 +16,8 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.flex;
 
-import com.google.api.client.auth.oauth2.Credential;
-import com.google.cloud.tools.appengine.api.deploy.DefaultDeployConfiguration;
-import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
-import com.google.cloud.tools.eclipse.appengine.deploy.DeployJob;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.eclipse.appengine.deploy.DeployEnvironmentDelegate;
 import com.google.cloud.tools.eclipse.appengine.deploy.DeployStaging;
 import com.google.cloud.tools.eclipse.appengine.deploy.WarPublisher;
 import org.eclipse.core.resources.IProject;
@@ -30,22 +28,17 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 
-public class FlexDeployJob extends DeployJob {
+class FlexDeployEnvironmentDelegate implements DeployEnvironmentDelegate {
 
   private final IPath appEngineDirectory;
 
-  public FlexDeployJob(IProject project, Credential credential, IPath workDirectory,
-      ProcessOutputLineListener stagingStdoutLineListener,
-      ProcessOutputLineListener stderrLineListener, DefaultDeployConfiguration deployConfiguration,
-      boolean includeOptionalConfigurationFiles, IPath appEngineDirectory) {
-    super(project, credential, workDirectory, stagingStdoutLineListener, stderrLineListener,
-        deployConfiguration, includeOptionalConfigurationFiles);
+  FlexDeployEnvironmentDelegate(IPath appEngineDirectory) {
     this.appEngineDirectory = appEngineDirectory;
   }
 
   @Override
-  protected IStatus stage(IProject project, IPath stagingDirectory, IPath safeWorkDirectory,
-      IProgressMonitor monitor) throws CoreException {
+  public IStatus stage(IProject project, IPath stagingDirectory, IPath safeWorkDirectory,
+      CloudSdk cloudSdk, IProgressMonitor monitor) throws CoreException {
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
 
     stagingDirectory.toFile().mkdirs();
@@ -58,7 +51,8 @@ public class FlexDeployJob extends DeployJob {
   }
 
   @Override
-  protected IPath getOptionalConfigurationFilesDirectory() {
+  public IPath getOptionalConfigurationFilesDirectory() {
     return appEngineDirectory;
   }
+
 }
