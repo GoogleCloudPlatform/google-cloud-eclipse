@@ -110,7 +110,6 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   private PipelineOptionsHierarchy hierarchy;
 
   private IWorkspaceRoot workspaceRoot;
-  private Job job;
 
   public PipelineArgumentsTab() {
     this(
@@ -298,10 +297,15 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     try {
       launchConfiguration = PipelineLaunchConfiguration.fromLaunchConfiguration(configuration);
 
-      MajorVersion majorVersion = dependencyManager.getProjectMajorVersion(getProject());
-      if (majorVersion == null) {
-        majorVersion = MajorVersion.ONE;
+      IProject project = getProject();
+      MajorVersion majorVersion = MajorVersion.ONE;
+      if (project != null) {
+         majorVersion = dependencyManager.getProjectMajorVersion(project);
+         if (majorVersion == null) {
+            majorVersion = MajorVersion.ONE;
+         }
       }
+      
       updateRunnerButtons(majorVersion);
       updateHierarchy(majorVersion);
 
@@ -377,7 +381,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
   private IProject getProject() {
     String eclipseProjectName = launchConfiguration.getEclipseProjectName();
-    if (eclipseProjectName != null) {
+    if (eclipseProjectName != null && !eclipseProjectName.isEmpty()) {
       return workspaceRoot.getProject(eclipseProjectName);
     }
     return null;
