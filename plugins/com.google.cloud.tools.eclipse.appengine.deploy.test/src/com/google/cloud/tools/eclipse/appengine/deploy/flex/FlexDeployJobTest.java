@@ -18,11 +18,8 @@ package com.google.cloud.tools.eclipse.appengine.deploy.flex;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 
-import com.google.api.client.auth.oauth2.Credential;
-import com.google.cloud.tools.appengine.api.deploy.DefaultDeployConfiguration;
-import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
+import com.google.cloud.tools.eclipse.appengine.deploy.DeployEnvironmentDelegate;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.io.ByteArrayInputStream;
@@ -68,8 +65,9 @@ public class FlexDeployJobTest {
 
   @Test
   public void testStage() throws CoreException {
-    FlexDeployJob job = newFlexDeployJob();
-    job.stage(project, stagingDirectory, safeWorkDirectory, new NullProgressMonitor());
+    DeployEnvironmentDelegate delegate = new FlexDeployEnvironmentDelegate(appEngineDirectory);
+    delegate.stage(project, stagingDirectory, safeWorkDirectory, null /* cloudSdk */,
+        new NullProgressMonitor());
 
     assertTrue(stagingDirectory.append("app-to-deploy.war").toFile().exists());
     assertTrue(stagingDirectory.append("app.yaml").toFile().exists());
@@ -77,15 +75,12 @@ public class FlexDeployJobTest {
 
   @Test
   public void testGetOptionalConfigurationFilesDirectory() throws CoreException {
-    FlexDeployJob job = newFlexDeployJob();
-    job.stage(project, stagingDirectory, safeWorkDirectory, new NullProgressMonitor());
+    DeployEnvironmentDelegate delegate = new FlexDeployEnvironmentDelegate(appEngineDirectory);
+    delegate.stage(project, stagingDirectory, safeWorkDirectory, null /* cloudSdk */,
+        new NullProgressMonitor());
+    delegate.stage(project, stagingDirectory, safeWorkDirectory, null /* cloudSdk */,
+        new NullProgressMonitor());
 
-    assertEquals(appEngineDirectory, job.getOptionalConfigurationFilesDirectory());
-  }
-
-  private FlexDeployJob newFlexDeployJob() {
-    return new FlexDeployJob(mock(IProject.class), mock(Credential.class), mock(IPath.class),
-        mock(ProcessOutputLineListener.class), mock(ProcessOutputLineListener.class),
-        mock(DefaultDeployConfiguration.class), false, appEngineDirectory);
+    assertEquals(appEngineDirectory, delegate.getOptionalConfigurationFilesDirectory());
   }
 }

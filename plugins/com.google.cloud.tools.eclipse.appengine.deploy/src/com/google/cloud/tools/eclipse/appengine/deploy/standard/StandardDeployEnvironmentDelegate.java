@@ -28,7 +28,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 
-class StandardDeployEnvironmentDelegate implements DeployEnvironmentDelegate {
+public class StandardDeployEnvironmentDelegate implements DeployEnvironmentDelegate {
 
   private IPath optionalConfigurationFilesDirectory;
 

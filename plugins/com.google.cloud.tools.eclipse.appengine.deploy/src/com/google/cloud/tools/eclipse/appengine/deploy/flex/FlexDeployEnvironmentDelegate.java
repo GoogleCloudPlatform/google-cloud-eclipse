@@ -28,7 +28,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 
-class FlexDeployEnvironmentDelegate implements DeployEnvironmentDelegate {
+public class FlexDeployEnvironmentDelegate implements DeployEnvironmentDelegate {
 
   private final IPath appEngineDirectory;
 

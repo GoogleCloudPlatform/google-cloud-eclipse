@@ -22,7 +22,7 @@ import com.google.cloud.tools.eclipse.appengine.deploy.CleanupOldDeploysJob;
 import com.google.cloud.tools.eclipse.appengine.deploy.DeployJob;
 import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferences;
 import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferencesConverter;
-import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployJob;
+import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployEnvironmentDelegate;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListener;
@@ -120,10 +120,11 @@ public class DeployCommandHandler extends AbstractHandler {
     boolean includeOptionalConfigurationFiles =
         deployPreferences.isIncludeOptionalConfigurationFiles();
 
-    DeployJob deploy = new StandardDeployJob(project, credential, workDirectory,
+    DeployJob deploy = new DeployJob(project, credential, workDirectory,
         new MessageConsoleWriterOutputLineListener(outputStream),
         new MessageConsoleWriterOutputLineListener(outputStream),
-        deployConfiguration, includeOptionalConfigurationFiles);
+        deployConfiguration, includeOptionalConfigurationFiles,
+        new StandardDeployEnvironmentDelegate());
     messageConsole.setJob(deploy);
     deploy.addJobChangeListener(new JobChangeAdapter() {
 

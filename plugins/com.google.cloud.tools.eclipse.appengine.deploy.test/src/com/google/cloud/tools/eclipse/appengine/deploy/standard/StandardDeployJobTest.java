@@ -18,11 +18,9 @@ package com.google.cloud.tools.eclipse.appengine.deploy.standard;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 
-import com.google.api.client.auth.oauth2.Credential;
-import com.google.cloud.tools.appengine.api.deploy.DefaultDeployConfiguration;
-import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.eclipse.appengine.deploy.DeployEnvironmentDelegate;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.io.IOException;
@@ -46,6 +44,8 @@ public class StandardDeployJobTest {
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator().withFacetVersions(
       JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, APPENGINE_STANDARD_FACET_VERSION_1);
 
+  private final CloudSdk cloudSdk = new CloudSdk.Builder().build();
+
   private IProject project;
   private IPath safeWorkDirectory;
   private IPath stagingDirectory;
@@ -59,8 +59,9 @@ public class StandardDeployJobTest {
 
   @Test
   public void testStage() throws CoreException {
-    StandardDeployJob job = newStandardDeployJob();
-    job.stage(project, stagingDirectory, safeWorkDirectory, new NullProgressMonitor());
+    DeployEnvironmentDelegate delegate = new StandardDeployEnvironmentDelegate();
+    delegate.stage(project, stagingDirectory, safeWorkDirectory, cloudSdk,
+        new NullProgressMonitor());
 
     assertTrue(stagingDirectory.append("WEB-INF").toFile().exists());
     assertTrue(stagingDirectory.append("WEB-INF/appengine-generated").toFile().exists());
@@ -70,16 +71,12 @@ public class StandardDeployJobTest {
 
   @Test
   public void testGetOptionalConfigurationFilesDirectory() throws CoreException {
-    StandardDeployJob job = newStandardDeployJob();
-    job.stage(project, stagingDirectory, safeWorkDirectory, new NullProgressMonitor());
+    DeployEnvironmentDelegate delegate = new StandardDeployEnvironmentDelegate();
+    delegate.stage(project, stagingDirectory, safeWorkDirectory, cloudSdk,
+        new NullProgressMonitor());
 
     assertEquals(stagingDirectory.append("WEB-INF/appengine-generated"),
-        job.getOptionalConfigurationFilesDirectory());
+        delegate.getOptionalConfigurationFilesDirectory());
   }
 
-  private StandardDeployJob newStandardDeployJob() {
-    return new StandardDeployJob(mock(IProject.class), mock(Credential.class), mock(IPath.class),
-        mock(ProcessOutputLineListener.class), mock(ProcessOutputLineListener.class),
-        mock(DefaultDeployConfiguration.class), false);
-  }
 }
