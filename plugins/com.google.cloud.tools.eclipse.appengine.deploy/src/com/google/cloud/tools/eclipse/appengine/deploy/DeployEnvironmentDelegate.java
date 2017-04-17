@@ -24,8 +24,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
 /**
- * Delegate that handles deploy behaviors that differ based on if the App Engine environment is
- * standard or flexible.
+ * Delegate that takes care of App Engine environment-specific deploy behaviors for {@link
+ * DeployJob}.
  */
 public interface DeployEnvironmentDelegate {
 
