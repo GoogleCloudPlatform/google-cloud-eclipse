@@ -49,7 +49,7 @@ public interface StagingDelegate {
    * <staging-directory>/WEB-INF/appengine-generated}). For App Engine flexible, this is usually the
    * directory where {@code app.yaml} is located, which may or may not be inside project source.
    *
-   * Must be called after {@link #stage} (for standard deploy).
+   * Must be called after successful {@link #stage} (for standard deploy).
    */
   IPath getOptionalConfigurationFilesDirectory();
 
