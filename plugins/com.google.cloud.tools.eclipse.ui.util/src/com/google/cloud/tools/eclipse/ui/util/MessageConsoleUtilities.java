@@ -95,15 +95,11 @@ public class MessageConsoleUtilities {
     return console;
   }
 
-  public static <C extends MessageConsole> C createConsole(String name, ConsoleFactory<C> factory,
-      boolean showConsole) {
+  public static <C extends MessageConsole> C createConsole(String name, ConsoleFactory<C> factory) {
     ConsolePlugin plugin = ConsolePlugin.getDefault();
     IConsoleManager manager = plugin.getConsoleManager();
     C console = factory.createConsole(name);
     manager.addConsoles(new IConsole[]{console});
-    if (showConsole) {
-      manager.showConsoleView(console);
-    }
     return console;
   }
 
