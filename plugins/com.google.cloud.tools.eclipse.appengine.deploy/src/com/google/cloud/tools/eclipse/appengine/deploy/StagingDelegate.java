@@ -25,17 +25,17 @@ import org.eclipse.core.runtime.IStatus;
 
 /**
  * Delegate that takes care of App Engine environment-specific deploy behaviors for {@link
- * DeployJob}.
+ * DeployJob}, mostly staging for {@code gcloud app deploy}.
  */
-public interface DeployEnvironmentDelegate {
+public interface StagingDelegate {
 
   /**
    * @param project Eclipse project to be deployed
-   * @param stagingDirectory directory where implementing methods should place necessary files for
-   *     deployment, where {@link DeployJob} will execute {@code gcloud app deploy}
-   * @param safeWorkDirectory directory path that implementing methods may create safely to use as
-   *     a temporary work directory during staging
-   * @param cloudSdk {@link CloudSdk} that implementing methods may utilize
+   * @param stagingDirectory directory where files ready for {@code gcloud app deploy} execution
+   *     will be placed
+   * @param safeWorkDirectory directory path that may be created safely to use as a temporary work
+   *     directory during staging
+   * @param cloudSdk {@link CloudSdk} that may be utilized for staging
    */
   IStatus stage(IProject project, IPath stagingDirectory,
       IPath safeWorkDirectory, CloudSdk cloudSdk, IProgressMonitor monitor) throws CoreException;

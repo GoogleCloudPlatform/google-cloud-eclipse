@@ -17,7 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.standard;
 
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-import com.google.cloud.tools.eclipse.appengine.deploy.DeployEnvironmentDelegate;
+import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
 import com.google.cloud.tools.eclipse.appengine.deploy.DeployStaging;
 import com.google.cloud.tools.eclipse.appengine.deploy.WarPublisher;
 import org.eclipse.core.resources.IProject;
@@ -28,7 +28,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 
-public class StandardDeployEnvironmentDelegate implements DeployEnvironmentDelegate {
+public class StandardStagingDelegate implements StagingDelegate {
 
   private IPath optionalConfigurationFilesDirectory;
 
