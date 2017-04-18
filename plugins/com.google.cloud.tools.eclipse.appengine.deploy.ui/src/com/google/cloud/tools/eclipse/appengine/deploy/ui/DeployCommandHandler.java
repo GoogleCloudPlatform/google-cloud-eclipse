@@ -50,6 +50,8 @@ import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
+import org.eclipse.ui.console.ConsolePlugin;
+import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
@@ -112,7 +114,9 @@ public class DeployCommandHandler extends AbstractHandler {
     DeployPreferences deployPreferences = new DeployPreferences(project);
     DeployConsole messageConsole =
         MessageConsoleUtilities.createConsole(getConsoleName(deployPreferences.getProjectId()),
-                                              new DeployConsole.Factory(), true /* showConsole */);
+                                              new DeployConsole.Factory());
+    IConsoleManager consoleManager = ConsolePlugin.getDefault().getConsoleManager();
+    consoleManager.showConsoleView(messageConsole);
 
     IPath workDirectory = createWorkDirectory();
     MessageConsoleStream outputStream = messageConsole.newMessageStream();
