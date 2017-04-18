@@ -252,4 +252,12 @@ public class FacetUtil {
     return webInfFolders;
   }
 
+  /**
+   * Check the the Dynamic Web Project facet version is compatible with the <tt>version</tt>.
+   */
+  public static boolean checkDeploymentDescriptorCompatibility(IProject project, String version) {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
 }

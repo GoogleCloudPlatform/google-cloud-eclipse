@@ -17,11 +17,13 @@
 package com.google.cloud.tools.eclipse.appengine.facets;
 
 import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -62,6 +64,53 @@ public class AppEngineStandardFacet {
   public static boolean hasFacet(IFacetedProject project) {
     return FacetedProjectHelper.projectHasFacet(project, ID);
   }
+
+  /**
+   * Return the App Engine standard facet for the given project, or {@code null} if none.
+   */
+  public static IProjectFacetVersion getProjectFacetVersion(IProject project) {
+    try {
+      IFacetedProject facetedProject = ProjectFacetsManager.create(project);
+      if (facetedProject == null) {
+        return null;
+      }
+      IProjectFacet projectFacet = ProjectFacetsManager.getProjectFacet(ID);
+      return facetedProject.getProjectFacetVersion(projectFacet);
+    } catch (CoreException ex) {
+      return null;
+    }
+  }
+
+  /**
+   * Check that the given Servlet API version string (expected to be from the
+   * <tt>&lt;web-app version="xxx"&gt;</tt> attribute), is compatible with this project's App Engine
+   * settings.
+   * 
+   * @return {@code true} if supported or {@code false} otherwise
+   */
+  public static boolean checkServletApiSupport(IProject project, String servletApiVersion) {
+    IProjectFacetVersion appEngineFacetVersion = getProjectFacetVersion(project);
+    if (appEngineFacetVersion == null) {
+      return false;
+    }
+    return checkServletApiSupport(appEngineFacetVersion, servletApiVersion);
+  }
+
+  @VisibleForTesting
+  static boolean checkServletApiSupport(IProjectFacetVersion appEngineFacetVersion,
+      String servletApiVersion) {
+    // Assumes that App Engine Standard facet constraints are properly set up, so look up
+    // corresponding jst.web version and check for conflicts
+    IProjectFacetVersion dynamicWebFacetVersion = null;
+    try {
+      dynamicWebFacetVersion = WebFacetUtils.WEB_FACET.getVersion(servletApiVersion);
+    } catch (IllegalArgumentException ex) {
+      // ignore: invalid version specified (e.g., "2.6")
+    }
+    return dynamicWebFacetVersion != null
+        && !appEngineFacetVersion.conflictsWith(dynamicWebFacetVersion);
+  }
+
 
   /**
    * Returns true if {@code facetRuntime} is an App Engine Standard runtime and false otherwise.
