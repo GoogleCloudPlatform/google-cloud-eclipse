@@ -16,10 +16,10 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.ui.flexible;
 
-import com.google.cloud.tools.eclipse.appengine.deploy.DeployEnvironmentDelegate;
 import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferences;
-import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexDeployEnvironmentDelegate;
+import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
 import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexDeployPreferences;
+import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexStagingDelegate;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployCommandHandler;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPreferencesDialog;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
@@ -39,13 +39,12 @@ public class FlexDeployCommandHandler extends DeployCommandHandler {
   }
 
   @Override
-  protected DeployEnvironmentDelegate getDeployEnvironmentDelegate(IProject project,
-      DeployPreferences preferences) {
+  protected StagingDelegate getStagingDelegate(IProject project, DeployPreferences preferences) {
     // TODO(chanseok): appEngineDirectory should come from "preferences".
     // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1823
     String appEngineDirectory = FlexDeployPreferences.DEFAULT.getAppEngineDirectory();
     IPath appEngineDirectoryPath = project.getFolder(appEngineDirectory).getLocation();
-    return new FlexDeployEnvironmentDelegate(appEngineDirectoryPath);
+    return new FlexStagingDelegate(appEngineDirectoryPath);
   }
 
 }

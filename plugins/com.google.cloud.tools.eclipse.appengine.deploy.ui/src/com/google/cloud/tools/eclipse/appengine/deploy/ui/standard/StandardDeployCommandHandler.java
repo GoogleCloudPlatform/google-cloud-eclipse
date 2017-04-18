@@ -16,9 +16,9 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.ui.standard;
 
-import com.google.cloud.tools.eclipse.appengine.deploy.DeployEnvironmentDelegate;
 import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferences;
-import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployEnvironmentDelegate;
+import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
+import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardStagingDelegate;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployCommandHandler;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPreferencesDialog;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
@@ -37,9 +37,8 @@ public class StandardDeployCommandHandler extends DeployCommandHandler {
   }
 
   @Override
-  protected DeployEnvironmentDelegate getDeployEnvironmentDelegate(
-      IProject project, DeployPreferences preferences) {
-    return new StandardDeployEnvironmentDelegate();
+  protected StagingDelegate getStagingDelegate(IProject project, DeployPreferences preferences) {
+    return new StandardStagingDelegate();
   }
 
 }
