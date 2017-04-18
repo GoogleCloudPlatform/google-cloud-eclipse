@@ -171,7 +171,6 @@ public class DeployJob extends WorkspaceJob {
   private IStatus stageProject(Path credentialFile,
       IPath stagingDirectory, IProgressMonitor monitor) {
     SubMonitor progress = SubMonitor.convert(monitor, 100);
-
     RecordProcessError stagingExitListener = new RecordProcessError();
     CloudSdk cloudSdk = getCloudSdk(credentialFile, stagingStdoutLineListener, stagingExitListener);
 
