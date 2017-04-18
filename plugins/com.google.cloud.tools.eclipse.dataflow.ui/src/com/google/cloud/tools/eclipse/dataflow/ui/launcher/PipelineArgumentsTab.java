@@ -110,7 +110,6 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   private PipelineOptionsHierarchy hierarchy;
 
   private IWorkspaceRoot workspaceRoot;
-  private Job job;
 
   public PipelineArgumentsTab() {
     this(
