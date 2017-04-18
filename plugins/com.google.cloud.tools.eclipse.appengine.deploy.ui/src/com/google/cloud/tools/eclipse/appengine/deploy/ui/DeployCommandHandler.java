@@ -87,8 +87,8 @@ public abstract class DeployCommandHandler extends AbstractHandler {
 
       IGoogleLoginService loginService = ServiceUtils.getService(event, IGoogleLoginService.class);
       IGoogleApiFactory googleApiFactory = ServiceUtils.getService(event, IGoogleApiFactory.class);
-      DeployPreferencesDialog dialog = newDeployPreferencesDialog(HandlerUtil.getActiveShell(event),
-          project, loginService, googleApiFactory);
+      DeployPreferencesDialog dialog = newDeployPreferencesDialog(
+          HandlerUtil.getActiveShell(event), project, loginService, googleApiFactory);
       if (dialog.open() == Window.OK) {
         launchDeployJob(project, dialog.getCredential());
       }
