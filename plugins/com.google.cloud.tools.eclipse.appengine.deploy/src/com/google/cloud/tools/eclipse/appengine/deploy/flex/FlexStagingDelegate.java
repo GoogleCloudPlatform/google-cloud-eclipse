@@ -18,7 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.deploy.flex;
 
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
-import com.google.cloud.tools.eclipse.appengine.deploy.DeployStaging;
+import com.google.cloud.tools.eclipse.appengine.deploy.CloudSdkStagingHelper;
 import com.google.cloud.tools.eclipse.appengine.deploy.WarPublisher;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -44,7 +44,7 @@ public class FlexStagingDelegate implements StagingDelegate {
     stagingDirectory.toFile().mkdirs();
     IPath war = safeWorkDirectory.append("app-to-deploy.war");
     WarPublisher.publishWar(project, war, subMonitor.newChild(40));
-    DeployStaging.stageFlexible(appEngineDirectory, war, stagingDirectory,
+    CloudSdkStagingHelper.stageFlexible(appEngineDirectory, war, stagingDirectory,
         subMonitor.newChild(60));
 
     return Status.OK_STATUS;

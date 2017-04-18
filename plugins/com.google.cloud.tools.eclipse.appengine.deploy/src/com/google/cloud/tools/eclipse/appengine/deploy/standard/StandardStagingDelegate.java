@@ -18,7 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.deploy.standard;
 
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
-import com.google.cloud.tools.eclipse.appengine.deploy.DeployStaging;
+import com.google.cloud.tools.eclipse.appengine.deploy.CloudSdkStagingHelper;
 import com.google.cloud.tools.eclipse.appengine.deploy.WarPublisher;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -38,11 +38,11 @@ public class StandardStagingDelegate implements StagingDelegate {
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
 
     WarPublisher.publishExploded(project, safeWorkDirectory, subMonitor.newChild(40));
-    DeployStaging.stageStandard(safeWorkDirectory, stagingDirectory, cloudSdk,
+    CloudSdkStagingHelper.stageStandard(safeWorkDirectory, stagingDirectory, cloudSdk,
         subMonitor.newChild(60));
 
     optionalConfigurationFilesDirectory =
-        stagingDirectory.append(DeployStaging.STANDARD_STAGING_GENERATED_FILES_DIRECTORY);
+        stagingDirectory.append(CloudSdkStagingHelper.STANDARD_STAGING_GENERATED_FILES_DIRECTORY);
     return Status.OK_STATUS;
   }
 
