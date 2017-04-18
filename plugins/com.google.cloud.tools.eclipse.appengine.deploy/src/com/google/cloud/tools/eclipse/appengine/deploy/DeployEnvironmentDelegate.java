@@ -31,11 +31,11 @@ public interface DeployEnvironmentDelegate {
 
   /**
    * @param project Eclipse project to be deployed
-   * @param stagingDirectory directory where implementors methods should place necessary files for
-   *     deployment, where this job will execute {@code gcloud app deploy}
-   * @param safeWorkDirectory directory path that implementors methods may create safely to use as
+   * @param stagingDirectory directory where implementing methods should place necessary files for
+   *     deployment, where {@link DeployJob} will execute {@code gcloud app deploy}
+   * @param safeWorkDirectory directory path that implementing methods may create safely to use as
    *     a temporary work directory during staging
-   * @param cloudSdk {@link CloudSdk} that implementors may utilize
+   * @param cloudSdk {@link CloudSdk} that implementing methods may utilize
    */
   IStatus stage(IProject project, IPath stagingDirectory,
       IPath safeWorkDirectory, CloudSdk cloudSdk, IProgressMonitor monitor) throws CoreException;
