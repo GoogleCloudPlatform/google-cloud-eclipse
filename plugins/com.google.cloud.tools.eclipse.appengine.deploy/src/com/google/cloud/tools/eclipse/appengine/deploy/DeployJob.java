@@ -73,7 +73,7 @@ public class DeployJob extends WorkspaceJob {
   private final IProject project;
   private final Credential credential;
   private final IPath workDirectory;
-  protected final ProcessOutputLineListener stagingStdoutLineListener;
+  private final ProcessOutputLineListener stagingStdoutLineListener;
   private final ProcessOutputLineListener deployStdoutLineListener;
   private final ProcessOutputLineListener stderrLineListener;
   private final DefaultDeployConfiguration deployConfiguration;
@@ -205,9 +205,6 @@ public class DeployJob extends WorkspaceJob {
     return deployExitListener.getExitStatus();
   }
 
-  /**
-   * @param credentialFile can be {@code null} when not needed (e.g., for staging)
-   */
   private CloudSdk getCloudSdk(Path credentialFile,
       ProcessOutputLineListener stdoutLineListener, ProcessExitListener processExitListener) {
     CloudSdk cloudSdk = new CloudSdk.Builder()
