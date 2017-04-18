@@ -160,6 +160,12 @@
       <version>1.9.13</version>
     </dependency>
     <dependency>
+      <!-- bundle: com.fasterxml.jackson.core.jackson-core -->
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>2.8.6</version>
+    </dependency>
+    <dependency>
       <!-- bundle: org.mortbay.jetty.server -->
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty</artifactId>

@@ -16,7 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
-import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployJob;
+import com.google.cloud.tools.eclipse.appengine.deploy.DeployJob;
 import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities.ConsoleFactory;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
@@ -29,19 +29,19 @@ public class DeployConsole extends MessageConsole {
 
   private static final String TYPE = "com.google.cloud.tools.eclipse.appengine.deploy.consoleType";
 
-  private StandardDeployJob job;
+  private DeployJob job;
 
   private DeployConsole(String name) {
     super(name, null);
     setType(TYPE);
   }
 
-  StandardDeployJob getJob() {
+  DeployJob getJob() {
     return job;
   }
 
-  public void setJob(StandardDeployJob newJob) {
-    StandardDeployJob oldJob = job;
+  public void setJob(DeployJob newJob) {
+    DeployJob oldJob = job;
     job = newJob;
     firePropertyChange(this, PROPERTY_JOB, oldJob, newJob);
     job.addJobChangeListener(new JobChangeAdapter() {

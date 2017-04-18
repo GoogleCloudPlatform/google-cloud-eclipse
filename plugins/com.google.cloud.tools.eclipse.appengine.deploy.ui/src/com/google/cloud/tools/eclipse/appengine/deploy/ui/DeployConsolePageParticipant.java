@@ -32,8 +32,7 @@ import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleConstants;
 import org.eclipse.ui.console.IConsolePageParticipant;
 import org.eclipse.ui.part.IPageBookViewPage;
-
-import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployJob;
+import com.google.cloud.tools.eclipse.appengine.deploy.DeployJob;
 import com.google.common.base.Preconditions;
 
 public class DeployConsolePageParticipant implements IConsolePageParticipant {
@@ -77,7 +76,7 @@ public class DeployConsolePageParticipant implements IConsolePageParticipant {
   }
 
   private void addJobChangeListener() {
-    StandardDeployJob job = console.getJob();
+    DeployJob job = console.getJob();
     if (job != null) {
       job.addJobChangeListener(new JobChangeAdapter() {
         @Override
@@ -89,7 +88,7 @@ public class DeployConsolePageParticipant implements IConsolePageParticipant {
   }
 
   private void update() {
-    StandardDeployJob job = console.getJob();
+    DeployJob job = console.getJob();
     if (job != null) {
       if (terminateAction != null) {
         terminateAction.setEnabled(job.getState() != Job.NONE);
@@ -119,7 +118,7 @@ public class DeployConsolePageParticipant implements IConsolePageParticipant {
     Action terminate = new Action(Messages.getString("action.stop")) {
       @Override
       public void run() {
-        StandardDeployJob job = console.getJob();
+        DeployJob job = console.getJob();
         if (job != null) {
           job.cancel();
           update();
