@@ -42,9 +42,9 @@ public class FlexDeployCommandHandler extends DeployCommandHandler {
   protected DeployEnvironmentDelegate getDeployEnvironmentDelegate(IProject project,
       DeployPreferences preferences) {
     // TODO(chanseok): appEngineDirectory should come from "preferences".
-    //
+    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1823
     String appEngineDirectory = FlexDeployPreferences.DEFAULT.getAppEngineDirectory();
-    IPath appEngineDirectoryPath = project.getFolder("src/main/appengine").getLocation();
+    IPath appEngineDirectoryPath = project.getFolder(appEngineDirectory).getLocation();
     return new FlexDeployEnvironmentDelegate(appEngineDirectoryPath);
   }
 
