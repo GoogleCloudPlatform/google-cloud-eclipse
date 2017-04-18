@@ -75,18 +75,18 @@ public class DeployJobTest {
       String service) {
     String jsonOutput =
         "{\n" +
-            "  \"configs\": [],\n" +
-            "  \"versions\": [\n" +
-            "    {\n" +
-            "      \"id\": \"" + version + "\",\n" +
-            "      \"last_deployed_time\": null,\n" +
-            "      \"project\": \"" + project + "\",\n" +
-            "      \"service\": \"" + service + "\",\n" +
-            "      \"traffic_split\": null,\n" +
-            "      \"version\": null\n" +
-            "    }\n" +
-            "  ]\n" +
-            "}\n";
+        "  \"configs\": [],\n" +
+        "  \"versions\": [\n" +
+        "    {\n" +
+        "      \"id\": \"" + version + "\",\n" +
+        "      \"last_deployed_time\": null,\n" +
+        "      \"project\": \"" + project + "\",\n" +
+        "      \"service\": \"" + service + "\",\n" +
+        "      \"traffic_split\": null,\n" +
+        "      \"version\": null\n" +
+        "    }\n" +
+        "  ]\n" +
+        "}\n";
     return AppEngineDeployOutput.parse(jsonOutput);
   }
 }
