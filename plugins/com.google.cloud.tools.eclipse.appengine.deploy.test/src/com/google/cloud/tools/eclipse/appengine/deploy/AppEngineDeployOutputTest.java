@@ -80,13 +80,15 @@ public class AppEngineDeployOutputTest {
     Assert.fail("Should throw exception when parsing deploy output with multiple version entries");
   }
 
-  @Test(expected = JsonParseException.class)
+  @Test
   public void testDeployOutputJsonParsingOldFormat() {
     String jsonOutput =
         "{\n" +
         "  \"default\": \"https://springboot-maven-project.appspot.com\"\n" +
         "}\n";
 
+    thrown.expect(JsonParseException.class);
+    thrown.expectMessage("Cannot get app version: unexpected gcloud JSON output format");
     AppEngineDeployOutput.parse(jsonOutput);
     Assert.fail("Should throw exception when parsing deploy output in old format");
   }
