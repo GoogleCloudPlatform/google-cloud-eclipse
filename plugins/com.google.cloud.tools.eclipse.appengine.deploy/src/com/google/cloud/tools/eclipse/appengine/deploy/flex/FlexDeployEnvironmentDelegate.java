@@ -32,7 +32,7 @@ public class FlexDeployEnvironmentDelegate implements DeployEnvironmentDelegate 
 
   private final IPath appEngineDirectory;
 
-  FlexDeployEnvironmentDelegate(IPath appEngineDirectory) {
+  public FlexDeployEnvironmentDelegate(IPath appEngineDirectory) {
     this.appEngineDirectory = appEngineDirectory;
   }
 
