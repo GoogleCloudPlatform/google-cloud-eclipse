@@ -29,7 +29,7 @@ import org.eclipse.core.runtime.SubMonitor;
 /**
  * Calls the staging operation on an App Engine project.
  */
-public class DeployStaging {
+public class CloudSdkStagingHelper {
 
   public static final String STANDARD_STAGING_GENERATED_FILES_DIRECTORY =
       "WEB-INF/appengine-generated";

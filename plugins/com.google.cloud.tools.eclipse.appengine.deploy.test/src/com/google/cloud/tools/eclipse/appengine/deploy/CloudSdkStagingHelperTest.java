@@ -49,7 +49,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DeployStagingTest {
+public class CloudSdkStagingHelperTest {
 
   private static final String APP_YAML = "runtime: java\nenv: flex";
 
@@ -86,13 +86,13 @@ public class DeployStagingTest {
   @Test(expected = OperationCanceledException.class)
   public void testStage_cancelled() {
     when(monitor.isCanceled()).thenReturn(true);
-    DeployStaging.stageStandard(mock(IPath.class), stagingDirectory, cloudSdk, monitor);
+    CloudSdkStagingHelper.stageStandard(mock(IPath.class), stagingDirectory, cloudSdk, monitor);
   }
 
   @Test
   public void testStageStandard() {
     IPath explodedWarDirectory = project.getFolder("WebContent").getLocation();
-    DeployStaging.stageStandard(explodedWarDirectory, stagingDirectory, cloudSdk, monitor);
+    CloudSdkStagingHelper.stageStandard(explodedWarDirectory, stagingDirectory, cloudSdk, monitor);
 
     assertTrue(stagingDirectory.append("WEB-INF/web.xml").toFile().exists());
     assertTrue(stagingDirectory.append("META-INF/MANIFEST.MF").toFile().exists());
@@ -106,7 +106,7 @@ public class DeployStagingTest {
 
     IPath deployArtifact = createFile("my-app.war", "fake WAR").getLocation();
 
-    DeployStaging.stageFlexible(
+    CloudSdkStagingHelper.stageFlexible(
         appEngineDirectory.getLocation(), deployArtifact, stagingDirectory, monitor);
 
     assertTrue(stagingDirectory.append("app.yaml").toFile().exists());
@@ -122,10 +122,10 @@ public class DeployStagingTest {
     createConfigFile("queue.xml", QUEUE_XML);
 
     IPath explodedWarDirectory = project.getFolder("WebContent").getRawLocation();
-    DeployStaging.stageStandard(explodedWarDirectory, stagingDirectory, cloudSdk, monitor);
+    CloudSdkStagingHelper.stageStandard(explodedWarDirectory, stagingDirectory, cloudSdk, monitor);
 
     IPath stagingGenerated = stagingDirectory.append(
-        DeployStaging.STANDARD_STAGING_GENERATED_FILES_DIRECTORY);
+        CloudSdkStagingHelper.STANDARD_STAGING_GENERATED_FILES_DIRECTORY);
     assertTrue(stagingGenerated.toFile().isDirectory());
     assertTrue(stagingGenerated.append("cron.yaml").toFile().exists());
     assertTrue(stagingGenerated.append("index.yaml").toFile().exists());

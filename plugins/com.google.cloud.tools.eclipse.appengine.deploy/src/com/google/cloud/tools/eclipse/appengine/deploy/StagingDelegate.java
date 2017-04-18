@@ -25,21 +25,32 @@ import org.eclipse.core.runtime.IStatus;
 
 /**
  * Delegate that takes care of App Engine environment-specific deploy behaviors for {@link
- * DeployJob}.
+ * DeployJob}, mostly staging for {@code gcloud app deploy}.
  */
-public interface DeployEnvironmentDelegate {
+public interface StagingDelegate {
 
   /**
    * @param project Eclipse project to be deployed
-   * @param stagingDirectory directory where implementing methods should place necessary files for
-   *     deployment, where {@link DeployJob} will execute {@code gcloud app deploy}
-   * @param safeWorkDirectory directory path that implementing methods may create safely to use as
-   *     a temporary work directory during staging
-   * @param cloudSdk {@link CloudSdk} that implementing methods may utilize
+   * @param stagingDirectory directory where files ready for {@code gcloud app deploy} execution
+   *     will be placed
+   * @param safeWorkDirectory directory path that may be created safely to use as a temporary work
+   *     directory during staging
+   * @param cloudSdk {@link CloudSdk} that may be utilized for staging
    */
   IStatus stage(IProject project, IPath stagingDirectory,
       IPath safeWorkDirectory, CloudSdk cloudSdk, IProgressMonitor monitor) throws CoreException;
 
+  /**
+   * Returns a directory where optional YAML configurations files (such as {@code cron.yaml}) reside
+   * that may be deployed together.
+   *
+   * Conventionally, for App Engine standard, this directory is found inside the staging directory
+   * ({@code appcfg.sh} converts XML configuration files to YAML and puts them under {@code
+   * <staging-directory>/WEB-INF/appengine-generated}). For App Engine flexible, this is usually the
+   * directory where {@code app.yaml} is located, which may or may not be inside project source.
+   *
+   * Must be called after successful {@link #stage} (for standard deploy).
+   */
   IPath getOptionalConfigurationFilesDirectory();
 
 }

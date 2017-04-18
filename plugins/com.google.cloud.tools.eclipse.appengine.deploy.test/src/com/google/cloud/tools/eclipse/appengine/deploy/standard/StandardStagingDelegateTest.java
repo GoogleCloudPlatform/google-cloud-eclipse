@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.deploy.flex;
+package com.google.cloud.tools.eclipse.appengine.deploy.standard;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import com.google.cloud.tools.eclipse.appengine.deploy.DeployEnvironmentDelegate;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -36,9 +36,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-public class FlexDeployJobTest {
-
-  private static final String APP_YAML = "runtime: java\nenv: flex";
+public class StandardStagingDelegateTest {
 
   private static final IProjectFacetVersion APPENGINE_STANDARD_FACET_VERSION_1 =
       ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID).getVersion("1");
@@ -46,41 +44,39 @@ public class FlexDeployJobTest {
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator().withFacetVersions(
       JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, APPENGINE_STANDARD_FACET_VERSION_1);
 
+  private final CloudSdk cloudSdk = new CloudSdk.Builder().build();
+
   private IProject project;
   private IPath safeWorkDirectory;
   private IPath stagingDirectory;
-  private IPath appEngineDirectory;
 
   @Before
-  public void setUp() throws CoreException {
+  public void setUp() throws IOException {
     project = projectCreator.getProject();
     safeWorkDirectory = project.getFolder("safe-work-directory").getLocation();
     stagingDirectory = project.getFolder("staging-result").getLocation();
-    appEngineDirectory = project.getFolder("src/main/appengine").getLocation();
-    project.getFolder("src/main").create(true, true, null);
-    project.getFolder("src/main/appengine").create(true, true, null);
-    project.getFile("src/main/appengine/app.yaml").create(
-        new ByteArrayInputStream(APP_YAML.getBytes(StandardCharsets.UTF_8)), true, null);
   }
 
   @Test
   public void testStage() throws CoreException {
-    DeployEnvironmentDelegate delegate = new FlexDeployEnvironmentDelegate(appEngineDirectory);
-    delegate.stage(project, stagingDirectory, safeWorkDirectory, null /* cloudSdk */,
+    StagingDelegate delegate = new StandardStagingDelegate();
+    delegate.stage(project, stagingDirectory, safeWorkDirectory, cloudSdk,
         new NullProgressMonitor());
 
-    assertTrue(stagingDirectory.append("app-to-deploy.war").toFile().exists());
+    assertTrue(stagingDirectory.append("WEB-INF").toFile().exists());
+    assertTrue(stagingDirectory.append("WEB-INF/appengine-generated").toFile().exists());
+    assertTrue(stagingDirectory.append("META-INF").toFile().exists());
     assertTrue(stagingDirectory.append("app.yaml").toFile().exists());
   }
 
   @Test
   public void testGetOptionalConfigurationFilesDirectory() throws CoreException {
-    DeployEnvironmentDelegate delegate = new FlexDeployEnvironmentDelegate(appEngineDirectory);
-    delegate.stage(project, stagingDirectory, safeWorkDirectory, null /* cloudSdk */,
-        new NullProgressMonitor());
-    delegate.stage(project, stagingDirectory, safeWorkDirectory, null /* cloudSdk */,
+    StagingDelegate delegate = new StandardStagingDelegate();
+    delegate.stage(project, stagingDirectory, safeWorkDirectory, cloudSdk,
         new NullProgressMonitor());
 
-    assertEquals(appEngineDirectory, delegate.getOptionalConfigurationFilesDirectory());
+    assertEquals(stagingDirectory.append("WEB-INF/appengine-generated"),
+        delegate.getOptionalConfigurationFilesDirectory());
   }
+
 }

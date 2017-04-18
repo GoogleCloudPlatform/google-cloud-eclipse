@@ -79,7 +79,7 @@ public class DeployJob extends WorkspaceJob {
   private final DefaultDeployConfiguration deployConfiguration;
   private final boolean includeOptionalConfigurationFiles;
   private final CollectingLineListener errorCollectingLineListener;
-  private final DeployEnvironmentDelegate environmentDelegate;
+  private final StagingDelegate stager;
 
   /**
    * @param workDirectory temporary work directory the job can safely use (e.g., for creating and
@@ -100,7 +100,7 @@ public class DeployJob extends WorkspaceJob {
       ProcessOutputLineListener stderrLineListener,
       DefaultDeployConfiguration deployConfiguration,
       boolean includeOptionalConfigurationFiles,
-      DeployEnvironmentDelegate environmentDelegate) {
+      StagingDelegate stager) {
     super(Messages.getString("deploy.job.name")); //$NON-NLS-1$
     this.project = project;
     this.credential = credential;
@@ -109,7 +109,7 @@ public class DeployJob extends WorkspaceJob {
     this.stderrLineListener = stderrLineListener;
     this.deployConfiguration = deployConfiguration;
     this.includeOptionalConfigurationFiles = includeOptionalConfigurationFiles;
-    this.environmentDelegate = environmentDelegate;
+    this.stager = stager;
     deployStdoutLineListener = new StringBuilderProcessOutputLineListener();
     errorCollectingLineListener =
         new CollectingLineListener(new Predicate<String>() {
@@ -170,14 +170,15 @@ public class DeployJob extends WorkspaceJob {
 
   private IStatus stageProject(Path credentialFile,
       IPath stagingDirectory, IProgressMonitor monitor) {
+    SubMonitor progress = SubMonitor.convert(monitor, 100);
     RecordProcessError stagingExitListener = new RecordProcessError();
     CloudSdk cloudSdk = getCloudSdk(credentialFile, stagingStdoutLineListener, stagingExitListener);
 
     try {
-      getJobManager().beginRule(project, null /* not worth a monitor */);
+      getJobManager().beginRule(project, progress.newChild(1));
       IPath safeWorkDirectory = workDirectory.append(SAFE_STAGING_WORK_DIRECTORY_NAME);
-      IStatus status = environmentDelegate.stage(
-          project, stagingDirectory, safeWorkDirectory, cloudSdk, monitor);
+      IStatus status = stager.stage(
+          project, stagingDirectory, safeWorkDirectory, cloudSdk, progress.newChild(99));
       if (stagingExitListener.getExitStatus() != Status.OK_STATUS) {
         return stagingExitListener.getExitStatus();
       }
@@ -196,8 +197,7 @@ public class DeployJob extends WorkspaceJob {
 
     IPath optionalConfigurationFilesDirectory = null;
     if (includeOptionalConfigurationFiles) {
-      optionalConfigurationFilesDirectory =
-          environmentDelegate.getOptionalConfigurationFilesDirectory();
+      optionalConfigurationFilesDirectory = stager.getOptionalConfigurationFilesDirectory();
     }
 
     new AppEngineProjectDeployer().deploy(stagingDirectory, cloudSdk, deployConfiguration,

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.deploy.flex;
+package com.google.cloud.tools.eclipse.appengine.deploy.standard;
 
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-import com.google.cloud.tools.eclipse.appengine.deploy.DeployEnvironmentDelegate;
-import com.google.cloud.tools.eclipse.appengine.deploy.DeployStaging;
+import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
+import com.google.cloud.tools.eclipse.appengine.deploy.CloudSdkStagingHelper;
 import com.google.cloud.tools.eclipse.appengine.deploy.WarPublisher;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -28,31 +28,27 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 
-public class FlexDeployEnvironmentDelegate implements DeployEnvironmentDelegate {
+public class StandardStagingDelegate implements StagingDelegate {
 
-  private final IPath appEngineDirectory;
-
-  public FlexDeployEnvironmentDelegate(IPath appEngineDirectory) {
-    this.appEngineDirectory = appEngineDirectory;
-  }
+  private IPath optionalConfigurationFilesDirectory;
 
   @Override
   public IStatus stage(IProject project, IPath stagingDirectory, IPath safeWorkDirectory,
       CloudSdk cloudSdk, IProgressMonitor monitor) throws CoreException {
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
 
-    stagingDirectory.toFile().mkdirs();
-    IPath war = safeWorkDirectory.append("app-to-deploy.war");
-    WarPublisher.publishWar(project, war, subMonitor.newChild(40));
-    DeployStaging.stageFlexible(appEngineDirectory, war, stagingDirectory,
+    WarPublisher.publishExploded(project, safeWorkDirectory, subMonitor.newChild(40));
+    CloudSdkStagingHelper.stageStandard(safeWorkDirectory, stagingDirectory, cloudSdk,
         subMonitor.newChild(60));
 
+    optionalConfigurationFilesDirectory =
+        stagingDirectory.append(CloudSdkStagingHelper.STANDARD_STAGING_GENERATED_FILES_DIRECTORY);
     return Status.OK_STATUS;
   }
 
   @Override
   public IPath getOptionalConfigurationFilesDirectory() {
-    return appEngineDirectory;
+    return optionalConfigurationFilesDirectory;
   }
 
 }

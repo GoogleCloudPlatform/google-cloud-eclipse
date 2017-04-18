@@ -19,10 +19,10 @@ package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.appengine.api.deploy.DefaultDeployConfiguration;
 import com.google.cloud.tools.eclipse.appengine.deploy.CleanupOldDeploysJob;
-import com.google.cloud.tools.eclipse.appengine.deploy.DeployEnvironmentDelegate;
 import com.google.cloud.tools.eclipse.appengine.deploy.DeployJob;
 import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferences;
 import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferencesConverter;
+import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListener;
@@ -126,13 +126,12 @@ public abstract class DeployCommandHandler extends AbstractHandler {
     DefaultDeployConfiguration deployConfiguration = toDeployConfiguration(deployPreferences);
     boolean includeOptionalConfigurationFiles =
         deployPreferences.isIncludeOptionalConfigurationFiles();
-    DeployEnvironmentDelegate environmentDelegate = getDeployEnvironmentDelegate(
-        project, deployPreferences);
+    StagingDelegate stagingDelegate = getStagingDelegate(project, deployPreferences);
 
     DeployJob deploy = new DeployJob(project, credential, workDirectory,
         new MessageConsoleWriterOutputLineListener(outputStream),
         new MessageConsoleWriterOutputLineListener(outputStream),
-        deployConfiguration, includeOptionalConfigurationFiles, environmentDelegate);
+        deployConfiguration, includeOptionalConfigurationFiles, stagingDelegate);
     messageConsole.setJob(deploy);
     deploy.addJobChangeListener(new JobChangeAdapter() {
 
@@ -148,7 +147,7 @@ public abstract class DeployCommandHandler extends AbstractHandler {
     deploy.schedule();
   }
 
-  protected abstract DeployEnvironmentDelegate getDeployEnvironmentDelegate(
+  protected abstract StagingDelegate getStagingDelegate(
       IProject project, DeployPreferences preferences);
 
   private static String getConsoleName(String projectId) {
