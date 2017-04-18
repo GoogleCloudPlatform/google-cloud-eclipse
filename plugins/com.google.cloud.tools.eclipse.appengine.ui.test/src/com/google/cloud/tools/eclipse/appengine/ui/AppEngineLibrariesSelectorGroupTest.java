@@ -53,31 +53,31 @@ public class AppEngineLibrariesSelectorGroupTest {
 
   @Before
   public void setUp() throws Exception {
-        shell = shellTestResource.getShell();
-        shell.setLayout(new FillLayout());
-        librariesSelector = new LibrarySelectorGroup(
-            shell, CloudLibraries.APP_ENGINE_GROUP);
-        shell.open();
-        appengineButton = getButton("appengine-api");
-        endpointsButton = getButton("appengine-endpoints");
-        objectifyButton = getButton("objectify");
+    shell = shellTestResource.getShell();
+    shell.setLayout(new FillLayout());
+    librariesSelector = new LibrarySelectorGroup(shell, CloudLibraries.APP_ENGINE_GROUP);
+    shell.open();
+    appengineButton = getButton("appengine-api");
+    endpointsButton = getButton("appengine-endpoints");
+    objectifyButton = getButton("objectify");
   }
 
   @Test
   public void testButtonOrder() {
-        Control groupAsControl = shell.getChildren()[0];
-        assertThat(groupAsControl, instanceOf(Group.class));
-        Control[] buttonsAsControls = ((Group) groupAsControl).getChildren();
-        String[] expectedLibraryOrder = new String[]{ "appengine-api", "appengine-endpoints", "objectify" };
-        for (int i = 0; i < buttonsAsControls.length; i++) {
-          Control control = buttonsAsControls[i];
-          assertThat(control, instanceOf(Button.class));
-          Button button = (Button) control;
-          assertNotNull(button.getData());
-          assertThat(button.getData(), instanceOf(Library.class));
-          Library library = (Library) button.getData();
-          assertThat(library.getId(), is(expectedLibraryOrder[i]));
-        }
+    Control groupAsControl = shell.getChildren()[0];
+    assertThat(groupAsControl, instanceOf(Group.class));
+    Control[] buttonsAsControls = ((Group) groupAsControl).getChildren();
+    String[] expectedLibraryOrder =
+        new String[] {"appengine-api", "appengine-endpoints", "objectify"};
+    for (int i = 0; i < buttonsAsControls.length; i++) {
+      Control control = buttonsAsControls[i];
+      assertThat(control, instanceOf(Button.class));
+      Button button = (Button) control;
+      assertNotNull(button.getData());
+      assertThat(button.getData(), instanceOf(Library.class));
+      Library library = (Library) button.getData();
+      assertThat(library.getId(), is(expectedLibraryOrder[i]));
+    }
   }
 
   @Test
@@ -89,132 +89,132 @@ public class AppEngineLibrariesSelectorGroupTest {
 
   @Test
   public void testInitiallyNoLibrariesSelected() {
-        assertTrue(getSelectedLibrariesSorted().isEmpty());
+    assertTrue(getSelectedLibrariesSorted().isEmpty());
   }
 
   @Test
   public void testSelectAppEngineApi() {
-        appengineButton.click();
-        List<Library> selectedLibraries = getSelectedLibrariesSorted();
-        assertNotNull(selectedLibraries);
-        assertThat(selectedLibraries.size(), is(1));
-        assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
+    appengineButton.click();
+    List<Library> selectedLibraries = getSelectedLibrariesSorted();
+    assertNotNull(selectedLibraries);
+    assertThat(selectedLibraries.size(), is(1));
+    assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
   }
 
   @Test
   public void testSelectEndpointsSelectsAppEngineApiAsWell() {
-        endpointsButton.click();
-        List<Library> selectedLibraries = getSelectedLibrariesSorted();
-        assertNotNull(selectedLibraries);
-        assertThat(selectedLibraries.size(), is(2));
-        assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
-        assertThat(selectedLibraries.get(1).getId(), is("appengine-endpoints"));
+    endpointsButton.click();
+    List<Library> selectedLibraries = getSelectedLibrariesSorted();
+    assertNotNull(selectedLibraries);
+    assertThat(selectedLibraries.size(), is(2));
+    assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
+    assertThat(selectedLibraries.get(1).getId(), is("appengine-endpoints"));
   }
 
   @Test
   public void testSelectObjectifySelectsAppEngineApiAsWell() {
-        objectifyButton.click();
-        List<Library> selectedLibraries = getSelectedLibrariesSorted();
-        assertNotNull(selectedLibraries);
-        assertThat(selectedLibraries.size(), is(2));
-        assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
-        assertThat(selectedLibraries.get(1).getId(), is("objectify"));
+    objectifyButton.click();
+    List<Library> selectedLibraries = getSelectedLibrariesSorted();
+    assertNotNull(selectedLibraries);
+    assertThat(selectedLibraries.size(), is(2));
+    assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
+    assertThat(selectedLibraries.get(1).getId(), is("objectify"));
   }
 
   @Test
   public void testSelectObjectifyAndEndpointsSelectsAppEngineApiAsWell() {
-        objectifyButton.click();
-        endpointsButton.click();
-        List<Library> selectedLibraries = getSelectedLibrariesSorted();
-        assertNotNull(selectedLibraries);
-        assertThat(selectedLibraries.size(), is(3));
-        assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
-        assertThat(selectedLibraries.get(1).getId(), is("appengine-endpoints"));
-        assertThat(selectedLibraries.get(2).getId(), is("objectify"));
+    objectifyButton.click();
+    endpointsButton.click();
+    List<Library> selectedLibraries = getSelectedLibrariesSorted();
+    assertNotNull(selectedLibraries);
+    assertThat(selectedLibraries.size(), is(3));
+    assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
+    assertThat(selectedLibraries.get(1).getId(), is("appengine-endpoints"));
+    assertThat(selectedLibraries.get(2).getId(), is("objectify"));
   }
 
   @Test
   public void testSelectObjectifyAndEndpointsThenUnselectObjectifyShouldKeepAppEngineApiSelected() {
-        objectifyButton.click();
-        endpointsButton.click();
-        objectifyButton.click();
-        List<Library> selectedLibraries = getSelectedLibrariesSorted();
-        assertNotNull(selectedLibraries);
-        assertThat(selectedLibraries.size(), is(2));
-        assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
-        assertThat(selectedLibraries.get(1).getId(), is("appengine-endpoints"));
+    objectifyButton.click();
+    endpointsButton.click();
+    objectifyButton.click();
+    List<Library> selectedLibraries = getSelectedLibrariesSorted();
+    assertNotNull(selectedLibraries);
+    assertThat(selectedLibraries.size(), is(2));
+    assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
+    assertThat(selectedLibraries.get(1).getId(), is("appengine-endpoints"));
   }
 
   @Test
   public void testSelectObjectifyAndEndpointsThenUnselectEndpointsShouldKeepAppEngineApiSelected() {
-        endpointsButton.click();
-        objectifyButton.click();
-        endpointsButton.click();
-        List<Library> selectedLibraries = getSelectedLibrariesSorted();
-        assertNotNull(selectedLibraries);
-        assertThat(selectedLibraries.size(), is(2));
-        assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
-        assertThat(selectedLibraries.get(1).getId(), is("objectify"));
+    endpointsButton.click();
+    objectifyButton.click();
+    endpointsButton.click();
+    List<Library> selectedLibraries = getSelectedLibrariesSorted();
+    assertNotNull(selectedLibraries);
+    assertThat(selectedLibraries.size(), is(2));
+    assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
+    assertThat(selectedLibraries.get(1).getId(), is("objectify"));
   }
 
   @Test
   public void testSelectObjectifyAndEndpointsThenUnselectBothShouldMakeAppEngineApiUnSelected() {
-        objectifyButton.click();
-        endpointsButton.click();
-        objectifyButton.click();
-        endpointsButton.click();
-        List<Library> selectedLibraries = getSelectedLibrariesSorted();
-        assertNotNull(selectedLibraries);
-        assertTrue(selectedLibraries.isEmpty());
+    objectifyButton.click();
+    endpointsButton.click();
+    objectifyButton.click();
+    endpointsButton.click();
+    List<Library> selectedLibraries = getSelectedLibrariesSorted();
+    assertNotNull(selectedLibraries);
+    assertTrue(selectedLibraries.isEmpty());
   }
 
   @Test
   public void testSelectAppEngineApiThenEndpointsThenUnselectEndpointsShouldKeepAppEngineSelected() {
-        appengineButton.click();
-        endpointsButton.click();
-        endpointsButton.click();
-        List<Library> selectedLibraries = getSelectedLibrariesSorted();
-        assertNotNull(selectedLibraries);
-        assertThat(selectedLibraries.size(), is(1));
-        assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
+    appengineButton.click();
+    endpointsButton.click();
+    endpointsButton.click();
+    List<Library> selectedLibraries = getSelectedLibrariesSorted();
+    assertNotNull(selectedLibraries);
+    assertThat(selectedLibraries.size(), is(1));
+    assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
   }
 
   @Test
   public void testSelectAppEngineApiThenObjectifyThenUnselectObjectifyShouldKeepAppEngineSelected() {
-        appengineButton.click();
-        objectifyButton.click();
-        objectifyButton.click();
-        List<Library> selectedLibraries = getSelectedLibrariesSorted();
-        assertNotNull(selectedLibraries);
-        assertThat(selectedLibraries.size(), is(1));
-        assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
+    appengineButton.click();
+    objectifyButton.click();
+    objectifyButton.click();
+    List<Library> selectedLibraries = getSelectedLibrariesSorted();
+    assertNotNull(selectedLibraries);
+    assertThat(selectedLibraries.size(), is(1));
+    assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
   }
 
   // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/954
   @Test
   public void testSelectAndUnselectAppEngineApiThenSelectEndpointsShouldKeepAppEngineSelected() {
-        appengineButton.click();
-        appengineButton.click();
-        endpointsButton.click();
-        List<Library> selectedLibraries = getSelectedLibrariesSorted();
-        assertNotNull(selectedLibraries);
-        assertThat(selectedLibraries.size(), is(2));
-        assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
-        assertThat(selectedLibraries.get(1).getId(), is("appengine-endpoints"));
+    appengineButton.click();
+    appengineButton.click();
+    endpointsButton.click();
+    List<Library> selectedLibraries = getSelectedLibrariesSorted();
+    assertNotNull(selectedLibraries);
+    assertThat(selectedLibraries.size(), is(2));
+    assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
+    assertThat(selectedLibraries.get(1).getId(), is("appengine-endpoints"));
   }
 
   // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1254
   @Test
   public void testSelectAppEngineApiThenSelectObjectifyShouldDisableAppEngine() {
-        appengineButton.click();
-        objectifyButton.click();
-        List<Library> selectedLibraries = getSelectedLibrariesSorted();
-        assertNotNull(selectedLibraries);
-        assertThat(selectedLibraries.size(), is(2));
-        assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
-        assertThat(selectedLibraries.get(1).getId(), is("objectify"));
-        assertFalse(appengineButton.isEnabled());
-        assertTrue(objectifyButton.isEnabled());
+    appengineButton.click();
+    objectifyButton.click();
+    List<Library> selectedLibraries = getSelectedLibrariesSorted();
+    assertNotNull(selectedLibraries);
+    assertThat(selectedLibraries.size(), is(2));
+    assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
+    assertThat(selectedLibraries.get(1).getId(), is("objectify"));
+    assertFalse(appengineButton.isEnabled());
+    assertTrue(objectifyButton.isEnabled());
   }
 
   private SWTBotCheckBox getButton(String libraryId) {
