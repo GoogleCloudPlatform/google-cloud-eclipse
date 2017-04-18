@@ -18,9 +18,14 @@ package com.google.cloud.tools.eclipse.appengine.deploy;
 
 import com.google.gson.JsonParseException;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class AppEngineDeployOutputTest {
+
+  @Rule public ExpectedException thrown = ExpectedException.none();
+
   @Test
   public void testDeployOutputJsonParsingOneVersion() {
     String jsonOutput =
@@ -44,7 +49,7 @@ public class AppEngineDeployOutputTest {
     Assert.assertEquals("default", deployOutput.getService());
   }
 
-  @Test(expected = JsonParseException.class)
+  @Test
   public void testDeployOutputJsonParsingTwoVersions() {
     String jsonOutput =
         "{\n" +
@@ -69,6 +74,8 @@ public class AppEngineDeployOutputTest {
         "  ]\n" +
         "}\n";
 
+    thrown.expect(JsonParseException.class);
+    thrown.expectMessage("Cannot get app version: unexpected gcloud JSON output format");
     AppEngineDeployOutput.parse(jsonOutput);
     Assert.fail("Should throw exception when parsing deploy output with multiple version entries");
   }
