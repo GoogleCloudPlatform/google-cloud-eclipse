@@ -19,10 +19,10 @@ package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.appengine.api.deploy.DefaultDeployConfiguration;
 import com.google.cloud.tools.eclipse.appengine.deploy.CleanupOldDeploysJob;
+import com.google.cloud.tools.eclipse.appengine.deploy.DeployEnvironmentDelegate;
 import com.google.cloud.tools.eclipse.appengine.deploy.DeployJob;
 import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferences;
 import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferencesConverter;
-import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployEnvironmentDelegate;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListener;
@@ -50,6 +50,7 @@ import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.MessageConsoleStream;
@@ -58,12 +59,12 @@ import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
 /**
- * Command handler to deploy a web application project to App Engine Standard.
+ * Command handler to deploy a web application project to App Engine.
  * <p>
- * It copies the project's exploded WAR to a staging directory and then executes
+ * It copies the project's WAR or exploded WAR to a staging directory and then executes
  * the staging and deploy operations provided by the App Engine Plugins Core Library.
  */
-public class DeployCommandHandler extends AbstractHandler {
+public abstract class DeployCommandHandler extends AbstractHandler {
 
   @Override
   public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -86,9 +87,8 @@ public class DeployCommandHandler extends AbstractHandler {
 
       IGoogleLoginService loginService = ServiceUtils.getService(event, IGoogleLoginService.class);
       IGoogleApiFactory googleApiFactory = ServiceUtils.getService(event, IGoogleApiFactory.class);
-      DeployPreferencesDialog dialog =
-          new DeployPreferencesDialog(HandlerUtil.getActiveShell(event), project, loginService,
-                                      googleApiFactory);
+      DeployPreferencesDialog dialog = newDeployPreferencesDialog(HandlerUtil.getActiveShell(event),
+          project, loginService, googleApiFactory);
       if (dialog.open() == Window.OK) {
         launchDeployJob(project, dialog.getCredential());
       }
@@ -100,13 +100,16 @@ public class DeployCommandHandler extends AbstractHandler {
     }
   }
 
+  protected abstract DeployPreferencesDialog newDeployPreferencesDialog(Shell shell,
+      IProject project, IGoogleLoginService loginService, IGoogleApiFactory googleApiFactory);
+
   private static boolean checkProjectErrors(IProject project) throws CoreException {
     int severity = project.findMaxProblemSeverity(
         IMarker.PROBLEM, true /* includeSubtypes */, IResource.DEPTH_INFINITE);
     return severity != IMarker.SEVERITY_ERROR;
   }
 
-  private static void launchDeployJob(IProject project, Credential credential)
+  private void launchDeployJob(IProject project, Credential credential)
                                                             throws IOException, ExecutionException {
     AnalyticsPingManager.getInstance().sendPing(
         AnalyticsEvents.APP_ENGINE_DEPLOY, AnalyticsEvents.APP_ENGINE_DEPLOY_STANDARD, null);
@@ -123,12 +126,13 @@ public class DeployCommandHandler extends AbstractHandler {
     DefaultDeployConfiguration deployConfiguration = toDeployConfiguration(deployPreferences);
     boolean includeOptionalConfigurationFiles =
         deployPreferences.isIncludeOptionalConfigurationFiles();
+    DeployEnvironmentDelegate environmentDelegate = getDeployEnvironmentDelegate(
+        project, deployPreferences);
 
     DeployJob deploy = new DeployJob(project, credential, workDirectory,
         new MessageConsoleWriterOutputLineListener(outputStream),
         new MessageConsoleWriterOutputLineListener(outputStream),
-        deployConfiguration, includeOptionalConfigurationFiles,
-        new StandardDeployEnvironmentDelegate());
+        deployConfiguration, includeOptionalConfigurationFiles, environmentDelegate);
     messageConsole.setJob(deploy);
     deploy.addJobChangeListener(new JobChangeAdapter() {
 
@@ -143,6 +147,9 @@ public class DeployCommandHandler extends AbstractHandler {
     });
     deploy.schedule();
   }
+
+  protected abstract DeployEnvironmentDelegate getDeployEnvironmentDelegate(
+      IProject project, DeployPreferences preferences);
 
   private static String getConsoleName(String projectId) {
     Date now = new Date();

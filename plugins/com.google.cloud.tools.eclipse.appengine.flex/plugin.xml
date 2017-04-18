@@ -117,7 +117,7 @@
 
   <extension point="org.eclipse.ui.handlers">
     <handler
-      class="com.google.cloud.tools.eclipse.appengine.flex.deploy.FlexDeployCommandHandler"
+      class="com.google.cloud.tools.eclipse.appengine.deploy.ui.flexible.FlexDeployCommandHandler"
       commandId="com.google.cloud.tools.eclipse.appengine.flex.deploy">
       <enabledWhen>
         <and>

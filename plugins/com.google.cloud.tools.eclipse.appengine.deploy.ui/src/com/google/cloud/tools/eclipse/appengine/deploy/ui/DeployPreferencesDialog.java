@@ -53,11 +53,12 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
   private final Image titleImage = AppEngineImages.appEngine(64).createImage();
 
   private CommonDeployPreferencesPanel content;
-  private IProject project;
-  private IGoogleLoginService loginService;
-  private IGoogleApiFactory googleApiFactory;
+  private final String title;
+  private final IProject project;
+  private final IGoogleLoginService loginService;
+  private final IGoogleApiFactory googleApiFactory;
 
-  public DeployPreferencesDialog(Shell parentShell, IProject project,
+  public DeployPreferencesDialog(Shell parentShell, String title, IProject project,
                                  IGoogleLoginService loginService,
                                  IGoogleApiFactory googleApiFactory) {
     super(parentShell);
@@ -65,6 +66,7 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
     Preconditions.checkNotNull(project, "project is null");
     Preconditions.checkNotNull(loginService, "loginService is null");
     Preconditions.checkNotNull(googleApiFactory, "googleApiFactory is null");
+    this.title = title;
     this.project = project;
     this.loginService = loginService;
     this.googleApiFactory = googleApiFactory;
@@ -74,7 +76,7 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
   protected Control createContents(Composite parent) {
     Control contents = super.createContents(parent);
 
-    getShell().setText(Messages.getString("deploy.preferences.dialog.title"));
+    getShell().setText(title);
     setTitle(Messages.getString("deploy.preferences.dialog.title.withProject", project.getName()));
     setTitleImage(titleImage);
 
