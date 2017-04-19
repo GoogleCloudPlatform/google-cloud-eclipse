@@ -64,11 +64,13 @@ public class ProjectSelector extends Composite {
                                                            "id" })); //$NON-NLS-1$
     tableViewer.setComparator(new ViewerComparator());
 
-    statusLink = new Link(this, SWT.NONE);
+    Composite linkComposite = new Composite(this, SWT.NONE);
+    statusLink = new Link(linkComposite, SWT.WRAP);
     statusLink.addSelectionListener(
         new OpenUriSelectionListener(new ErrorDialogErrorHandler(getShell())));
     statusLink.setText("");
-    GridDataFactory.fillDefaults().span(2, 1).applyTo(statusLink);
+    GridDataFactory.fillDefaults().span(2, 1).applyTo(linkComposite);
+    GridLayoutFactory.fillDefaults().generateLayout(linkComposite);
   }
 
   private void createColumns(TableColumnLayout tableColumnLayout) {
