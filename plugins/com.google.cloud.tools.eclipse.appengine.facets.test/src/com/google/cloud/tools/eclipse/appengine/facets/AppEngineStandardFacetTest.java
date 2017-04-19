@@ -95,10 +95,9 @@ public class AppEngineStandardFacetTest {
     assertEquals(APPENGINE_STANDARD_FACET, facetVersion);
   }
 
-  @Test
+  @Test(expected = NullPointerException.class)
   public void testCheckServletApiSupport_noFacet() {
-    assertFalse(
-        AppEngineStandardFacet.checkServletApiSupport(baseProjectCreator.getProject(), "2.5"));
+    AppEngineStandardFacet.checkServletApiSupport(baseProjectCreator.getProject(), "2.5");
   }
 
   @Test

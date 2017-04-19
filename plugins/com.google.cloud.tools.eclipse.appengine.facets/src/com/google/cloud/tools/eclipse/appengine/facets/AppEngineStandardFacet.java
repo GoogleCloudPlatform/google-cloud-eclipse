@@ -87,12 +87,11 @@ public class AppEngineStandardFacet {
    * settings.
    * 
    * @return {@code true} if supported or {@code false} otherwise
+   * @throws NullPointerException if the project does not have an App Engine Standard facet
    */
   public static boolean checkServletApiSupport(IProject project, String servletApiVersion) {
     IProjectFacetVersion appEngineFacetVersion = getProjectFacetVersion(project);
-    if (appEngineFacetVersion == null) {
-      return false;
-    }
+    Preconditions.checkNotNull(appEngineFacetVersion, "Missing App Engine Standard facet");
     return checkServletApiSupport(appEngineFacetVersion, servletApiVersion);
   }
 
