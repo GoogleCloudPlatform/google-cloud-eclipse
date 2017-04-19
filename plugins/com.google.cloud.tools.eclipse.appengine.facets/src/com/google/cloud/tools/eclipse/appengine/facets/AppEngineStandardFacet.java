@@ -99,16 +99,17 @@ public class AppEngineStandardFacet {
   @VisibleForTesting
   static boolean checkServletApiSupport(IProjectFacetVersion appEngineFacetVersion,
       String servletApiVersion) {
-    // Assumes that App Engine Standard facet constraints are properly set up, so look up
+    // Assume that App Engine Standard facet constraints are properly set up, so look up
     // corresponding jst.web version and check for conflicts
-    IProjectFacetVersion dynamicWebFacetVersion = null;
     try {
-      dynamicWebFacetVersion = WebFacetUtils.WEB_FACET.getVersion(servletApiVersion);
+      IProjectFacetVersion dynamicWebFacetVersion =
+          WebFacetUtils.WEB_FACET.getVersion(servletApiVersion);
+      return dynamicWebFacetVersion != null
+          && !appEngineFacetVersion.conflictsWith(dynamicWebFacetVersion);
     } catch (IllegalArgumentException ex) {
       // ignore: invalid version specified (e.g., "2.6")
+      return false;
     }
-    return dynamicWebFacetVersion != null
-        && !appEngineFacetVersion.conflictsWith(dynamicWebFacetVersion);
   }
 
 

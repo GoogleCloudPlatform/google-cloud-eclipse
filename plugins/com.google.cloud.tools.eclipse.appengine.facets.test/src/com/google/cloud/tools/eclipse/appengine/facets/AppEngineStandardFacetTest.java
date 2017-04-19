@@ -96,8 +96,20 @@ public class AppEngineStandardFacetTest {
   }
 
   @Test
-  public void testCheckServletApiSupport_blankVersion() {
-    assertFalse(AppEngineStandardFacet.checkServletApiSupport(APPENGINE_STANDARD_FACET, ""));
+  public void testCheckServletApiSupport_noFacet() {
+    assertFalse(
+        AppEngineStandardFacet.checkServletApiSupport(baseProjectCreator.getProject(), "2.5"));
+  }
+
+  @Test
+  public void testCheckServletApiSupport_withFacet() {
+    assertTrue(
+        AppEngineStandardFacet.checkServletApiSupport(appEngineProjectCreator.getProject(), "2.5"));
+  }
+
+  @Test
+  public void testCheckServletApiSupport_nullVersion() {
+    assertFalse(AppEngineStandardFacet.checkServletApiSupport(APPENGINE_STANDARD_FACET, null));
   }
 
   @Test
@@ -112,6 +124,6 @@ public class AppEngineStandardFacetTest {
 
   @Test
   public void testCheckServletApiSupport_earlierVersion() {
-    assertTrue(AppEngineStandardFacet.checkServletApiSupport(APPENGINE_STANDARD_FACET, "2.4"));
+    assertFalse(AppEngineStandardFacet.checkServletApiSupport(APPENGINE_STANDARD_FACET, "2.4"));
   }
 }

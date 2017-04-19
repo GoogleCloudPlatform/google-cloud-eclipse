@@ -66,7 +66,7 @@ public class WebXmlValidator implements XmlValidationHelper {
     this.document = document;
     this.resource = resource;
     this.blacklist = new ArrayList<>();
-    validateJavaServletVersion();
+    validateServletVersion();
     validateServletClass();
     validateServletMapping();
     validateJsp();
@@ -74,9 +74,9 @@ public class WebXmlValidator implements XmlValidationHelper {
   }
   
   /**
-   * Validates that web.xml uses Java Servlet 2.5 deployment descriptor.
+   * Validates that web.xml specifies a compatible deployment descriptor version.
    */
-  private void validateJavaServletVersion() {
+  private void validateServletVersion() {
     NodeList webAppList = document.getElementsByTagName("web-app");
     for (int i = 0; i < webAppList.getLength(); i++) {
       Element webApp = (Element) webAppList.item(i);
