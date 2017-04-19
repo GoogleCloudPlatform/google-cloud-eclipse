@@ -4,9 +4,11 @@ import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPreferencesDialo
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
+import com.google.cloud.tools.eclipse.ui.util.FontUtil;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.ErrorDialogErrorHandler;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.layout.LayoutConstants;
 import org.eclipse.swt.SWT;
@@ -28,11 +30,13 @@ public class FlexDeployPreferencesDialog extends DeployPreferencesDialog {
     Composite dialogArea = (Composite) super.createDialogArea(parent);
 
     Composite container = new Composite(dialogArea, SWT.NONE);
-    Link flexPricing = new Link(container, SWT.NONE);
+    Link flexPricing = new Link(container, SWT.WRAP);
+    flexPricing.setText(Messages.getString("deploy.preferences.dialog.flex.pricing")); //$NON-NLS-1$
     flexPricing.addSelectionListener(
         new OpenUriSelectionListener(new ErrorDialogErrorHandler(getShell())));
-    flexPricing.setText(Messages.getString("deploy.preferences.dialog.flex.pricing")); //$NON-NLS-1$
+    FontUtil.convertFontToItalic(flexPricing);
 
+    GridDataFactory.fillDefaults().grab(true, true).applyTo(container);
     Point margins = LayoutConstants.getMargins();
     GridLayoutFactory.fillDefaults()
         .extendedMargins(margins.x, margins.x, 0 /* no upper margin */, margins.y)
