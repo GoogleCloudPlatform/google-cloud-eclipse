@@ -25,8 +25,14 @@ public class MessagesTest {
   public void testSpecifyVersionTooltip() {
     Assert.assertEquals(
         "If checked, stops the previously running version when "
-        + "deploying a new version that receives all traffic.", 
+        + "deploying a new version that receives all traffic.",
         Messages.getString("tooltip.stop.previous.version"));
   }
 
+  @Test
+  public void testFlexPricingLabel() {
+    Assert.assertEquals("There is no free quota for App Engine flexible environment deployments. "
+        + "Please visit <a href=\"https://cloud.google.com/appengine/pricing\">GCP Pricing</a> for "
+        + "pricing information.", Messages.getString("deploy.preferences.dialog.flex.pricing"));
+  }
 }
