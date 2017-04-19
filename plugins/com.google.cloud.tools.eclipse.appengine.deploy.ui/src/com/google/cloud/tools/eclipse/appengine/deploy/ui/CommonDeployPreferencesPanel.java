@@ -341,7 +341,8 @@ public class CommonDeployPreferencesPanel extends DeployPreferencesPanel {
     GridDataFactory.swtDefaults().align(SWT.BEGINNING, SWT.BEGINNING).span(1, 2)
         .applyTo(projectIdLabel);
 
-    Link createNewProject = new Link(this, SWT.NONE);
+    Composite linkComposite = new Composite(this, SWT.NONE);
+    Link createNewProject = new Link(linkComposite, SWT.WRAP);
     createNewProject.setText(Messages.getString("projectselector.createproject",
                                                 CREATE_GCP_PROJECT_WITH_GAE_URL));
     createNewProject.setToolTipText(Messages.getString("projectselector.createproject.tooltip"));
@@ -357,7 +358,8 @@ public class CommonDeployPreferencesPanel extends DeployPreferencesPanel {
             }
           }
         }, new ErrorDialogErrorHandler(getShell())));
-    GridDataFactory.swtDefaults().applyTo(createNewProject);
+    GridDataFactory.fillDefaults().applyTo(linkComposite);
+    GridLayoutFactory.fillDefaults().generateLayout(linkComposite);
 
     Composite projectSelectorComposite = new Composite(this, SWT.NONE);
     GridLayoutFactory.fillDefaults().numColumns(2).spacing(0, 0).applyTo(projectSelectorComposite);
