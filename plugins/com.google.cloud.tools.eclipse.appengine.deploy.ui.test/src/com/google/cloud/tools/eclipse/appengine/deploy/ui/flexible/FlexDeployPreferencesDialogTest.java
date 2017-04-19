@@ -56,7 +56,7 @@ public class FlexDeployPreferencesDialogTest {
         + "pricing\">GCP Pricing</a> for pricing information."));
   }
 
-  public static boolean hasLinkWithText(Composite composite, String text) {
+  private static boolean hasLinkWithText(Composite composite, String text) {
     for (Control control : composite.getChildren()) {
       if (control instanceof Link) {
         if (((Link) control).getText().equals(text)) {
