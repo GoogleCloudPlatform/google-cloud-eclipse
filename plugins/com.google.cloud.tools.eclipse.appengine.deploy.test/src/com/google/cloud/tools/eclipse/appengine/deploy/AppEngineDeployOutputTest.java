@@ -18,28 +18,30 @@ package com.google.cloud.tools.eclipse.appengine.deploy;
 
 import com.google.gson.JsonParseException;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
-/**
- * Unit tests for {@link AppEngineDeployOutput}
- */
 public class AppEngineDeployOutputTest {
+
+  @Rule public ExpectedException thrown = ExpectedException.none();
+
   @Test
   public void testDeployOutputJsonParsingOneVersion() {
     String jsonOutput =
         "{\n" +
-            "  \"configs\": [],\n" +
-            "  \"versions\": [\n" +
-            "    {\n" +
-            "      \"id\": \"20160429t112518\",\n" +
-            "      \"last_deployed_time\": null,\n" +
-            "      \"project\": \"some-project\",\n" +
-            "      \"service\": \"default\",\n" +
-            "      \"traffic_split\": null,\n" +
-            "      \"version\": null\n" +
-            "    }\n" +
-            "  ]\n" +
-            "}\n";
+        "  \"configs\": [],\n" +
+        "  \"versions\": [\n" +
+        "    {\n" +
+        "      \"id\": \"20160429t112518\",\n" +
+        "      \"last_deployed_time\": null,\n" +
+        "      \"project\": \"some-project\",\n" +
+        "      \"service\": \"default\",\n" +
+        "      \"traffic_split\": null,\n" +
+        "      \"version\": null\n" +
+        "    }\n" +
+        "  ]\n" +
+        "}\n";
 
     AppEngineDeployOutput deployOutput =
         AppEngineDeployOutput.parse(jsonOutput);
@@ -51,47 +53,43 @@ public class AppEngineDeployOutputTest {
   public void testDeployOutputJsonParsingTwoVersions() {
     String jsonOutput =
         "{\n" +
-            "  \"configs\": [],\n" +
-            "  \"versions\": [\n" +
-            "    {\n" +
-            "      \"id\": \"20160429t112518\",\n" +
-            "      \"last_deployed_time\": null,\n" +
-            "      \"project\": \"some-project\",\n" +
-            "      \"service\": \"default\",\n" +
-            "      \"traffic_split\": null,\n" +
-            "      \"version\": null\n" +
-            "    },\n" +
-            "    {\n" +
-            "      \"id\": \"20160429t112518\",\n" +
-            "      \"last_deployed_time\": null,\n" +
-            "      \"project\": \"some-project\",\n" +
-            "      \"service\": \"default\",\n" +
-            "      \"traffic_split\": null,\n" +
-            "      \"version\": null\n" +
-            "    }\n" +
-            "  ]\n" +
-            "}\n";
+        "  \"configs\": [],\n" +
+        "  \"versions\": [\n" +
+        "    {\n" +
+        "      \"id\": \"20160429t112518\",\n" +
+        "      \"last_deployed_time\": null,\n" +
+        "      \"project\": \"some-project\",\n" +
+        "      \"service\": \"default\",\n" +
+        "      \"traffic_split\": null,\n" +
+        "      \"version\": null\n" +
+        "    },\n" +
+        "    {\n" +
+        "      \"id\": \"20160429t112518\",\n" +
+        "      \"last_deployed_time\": null,\n" +
+        "      \"project\": \"some-project\",\n" +
+        "      \"service\": \"default\",\n" +
+        "      \"traffic_split\": null,\n" +
+        "      \"version\": null\n" +
+        "    }\n" +
+        "  ]\n" +
+        "}\n";
 
-    try {
-      AppEngineDeployOutput.parse(jsonOutput);
-      Assert.fail("Failure to throw exception when parsing deploy output with more that one version entry");
-    } catch (JsonParseException e) {
-      // Success! Should throw a JsonParseException.
-    }
+    thrown.expect(JsonParseException.class);
+    thrown.expectMessage("Cannot get app version: unexpected gcloud JSON output format");
+    AppEngineDeployOutput.parse(jsonOutput);
+    Assert.fail("Should throw exception when parsing deploy output with multiple version entries");
   }
 
   @Test
   public void testDeployOutputJsonParsingOldFormat() {
     String jsonOutput =
         "{\n" +
-            "  \"default\": \"https://springboot-maven-project.appspot.com\"\n" +
-            "}\n";
+        "  \"default\": \"https://springboot-maven-project.appspot.com\"\n" +
+        "}\n";
 
-    try {
-      AppEngineDeployOutput.parse(jsonOutput);
-      Assert.fail("Failure to throw exception when parsing deploy output in old format");
-    } catch (JsonParseException e) {
-      // Success! Should throw a JsonParseException.
-    }
+    thrown.expect(JsonParseException.class);
+    thrown.expectMessage("Cannot get app version: unexpected gcloud JSON output format");
+    AppEngineDeployOutput.parse(jsonOutput);
+    Assert.fail("Should throw exception when parsing deploy output in old format");
   }
 }

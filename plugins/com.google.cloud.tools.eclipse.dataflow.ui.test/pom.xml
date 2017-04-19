@@ -29,4 +29,19 @@
 
   <artifactId>com.google.cloud.tools.eclipse.dataflow.ui.test</artifactId>
   <packaging>eclipse-test-plugin</packaging>
+  
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-surefire-plugin</artifactId>
+        <configuration>
+          <useUIHarness>true</useUIHarness>
+          <useUIThread>false</useUIThread>
+          <product>org.eclipse.platform.ide</product>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  
 </project>
