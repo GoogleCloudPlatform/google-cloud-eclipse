@@ -37,7 +37,7 @@ public class FlexDeployCommandHandler extends DeployCommandHandler {
     String title = Messages.getString("deploy.preferences.dialog.title.flexible");
     // TODO(chanseok): should extend the base deploy dialog to add a path input field for app.yaml
     // directory: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1823
-    return new DeployPreferencesDialog(shell, title, project, loginService, googleApiFactory);
+    return new FlexDeployPreferencesDialog(shell, title, project, loginService, googleApiFactory);
   }
 
   @Override
