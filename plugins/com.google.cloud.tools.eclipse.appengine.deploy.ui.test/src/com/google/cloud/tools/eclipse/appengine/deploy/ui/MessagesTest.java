@@ -28,11 +28,4 @@ public class MessagesTest {
         + "deploying a new version that receives all traffic.",
         Messages.getString("tooltip.stop.previous.version"));
   }
-
-  @Test
-  public void testFlexPricingLabel() {
-    Assert.assertEquals("There is no free quota for App Engine flexible environment deployments. "
-        + "Please visit <a href=\"https://cloud.google.com/appengine/pricing\">GCP Pricing</a> for "
-        + "pricing information.", Messages.getString("deploy.preferences.dialog.flex.pricing"));
-  }
 }
