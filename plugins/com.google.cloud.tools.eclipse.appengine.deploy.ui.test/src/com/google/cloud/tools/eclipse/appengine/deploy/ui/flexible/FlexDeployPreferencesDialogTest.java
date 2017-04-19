@@ -51,9 +51,9 @@ public class FlexDeployPreferencesDialogTest {
     dialog.open();
     Composite dialogArea = (Composite) dialog.createDialogArea(shellResource.getShell());
 
-    assertTrue(hasLinkWithText(dialogArea, "There is no free quota for App Engine flexible "
-        + "environment deployments. Please visit <a href=\"https://cloud.google.com/appengine/"
-        + "pricing\">GCP Pricing</a> for pricing information."));
+    assertTrue(hasLinkWithText(dialogArea, "There is no free quota for the App Engine flexible "
+        + "environment. Visit <a href=\"https://cloud.google.com/appengine/pricing\">GCP Pricing"
+        + "</a> for pricing information."));
   }
 
   private static boolean hasLinkWithText(Composite composite, String text) {
