@@ -62,7 +62,7 @@
         name="Google Cloud Platform"
         class="com.google.cloud.tools.eclipse.properties.GooglePropertyPage">
       <enabledWhen>
-        <instanceof value="org.eclipse.core.resources.IProject" />
+        <adapt type="org.eclipse.core.resources.IProject" />
       </enabledWhen>
     </page>
   </extension>
@@ -74,7 +74,7 @@
         category="com.google.cloud.tools.eclipse"
         class="com.google.cloud.tools.eclipse.util.service.ServiceContextFactory:com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPropertyPage">
       <enabledWhen>
-        <instanceof value="org.eclipse.core.resources.IProject" />
+        <adapt type="org.eclipse.core.resources.IProject" />
       </enabledWhen>
     </page>
   </extension>
