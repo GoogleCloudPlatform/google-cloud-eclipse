@@ -39,6 +39,7 @@ import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.layout.LayoutConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Button;
@@ -101,10 +102,7 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
     // we pull in Dialog's content margins which are zeroed out by TitleAreaDialog
     GridDataFactory.fillDefaults().grab(true, true).applyTo(container);
     GridLayoutFactory.fillDefaults()
-        .margins(convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN),
-            convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN))
-        .spacing(convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING),
-            convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING))
+        .margins(LayoutConstants.getMargins().x, LayoutConstants.getMargins().y)
         .generateLayout(container);
 
     TitleAreaDialogSupport.create(this, content.getDataBindingContext())
