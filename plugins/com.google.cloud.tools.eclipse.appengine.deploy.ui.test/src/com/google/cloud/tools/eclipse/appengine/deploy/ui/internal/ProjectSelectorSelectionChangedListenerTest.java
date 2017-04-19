@@ -55,9 +55,9 @@ public class ProjectSelectorSelectionChangedListenerTest {
       "https://console.cloud.google.com/appengine/create?lang=java&project=projectId"
       + "&authuser=user%40example.com";
   static final String EXPECTED_MESSAGE_WHEN_NO_APPLICATION =
-      "This project does not have an App Engine application which is\n"
+      "This project does not have an App Engine application which is "
           + "required for deployment. <a href=\"" + EXPECTED_LINK + "\">Create an App Engine "
-          + "application in the\nCloud Console</a>.";
+          + "application in the Cloud Console</a>.";
   static final String EXPECTED_MESSAGE_WHEN_EXCEPTION =
       "An error occurred while retrieving App Engine application:\ntestException";
 
