@@ -106,7 +106,7 @@ public class AnalyticsPingManager {
 
   public static synchronized AnalyticsPingManager getInstance() {
     if (instance == null) {
-      IEclipsePreferences preferences = AnalyticsPreferences.getPreferences();
+      IEclipsePreferences preferences = AnalyticsPreferences.getPreferenceNode();
       String clientId = getAnonymizedClientId(preferences);
       Display display = PlatformUI.getWorkbench().getDisplay();
 

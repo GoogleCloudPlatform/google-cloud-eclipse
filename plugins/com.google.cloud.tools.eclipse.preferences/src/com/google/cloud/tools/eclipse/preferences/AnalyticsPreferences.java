@@ -34,7 +34,7 @@ public class AnalyticsPreferences {
 
   static final boolean ANALYTICS_OPT_IN_DEFAULT = false;
 
-  public static IEclipsePreferences getPreferences() {
+  public static IEclipsePreferences getPreferenceNode() {
     return ConfigurationScope.INSTANCE.getNode(AnalyticsPreferences.PREFERENCE_PATH);
   }
 }

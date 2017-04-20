@@ -38,7 +38,7 @@ public class PluginXmlTest extends BasePluginXmlTest {
     assertEquals("configuration://com.google.cloud.tools.eclipse.usagetracker", preferencePath);
     assertEquals("configuration://" + AnalyticsPreferences.PREFERENCE_PATH, preferencePath);
     assertEquals("/configuration/com.google.cloud.tools.eclipse.usagetracker",
-        AnalyticsPreferences.getPreferences().absolutePath());
+        AnalyticsPreferences.getPreferenceNode().absolutePath());
   }
 
 }
