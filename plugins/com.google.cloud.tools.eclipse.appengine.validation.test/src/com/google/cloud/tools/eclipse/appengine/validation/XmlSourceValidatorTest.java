@@ -19,14 +19,13 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
+import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
-
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -127,6 +126,7 @@ public class XmlSourceValidatorTest {
     validator.setHelper(new WebXmlValidator());
     String xml = "<web-app xmlns='http://xmlns.jcp.org/xml/ns/javaee' version='3.1'></web-app>";
     IFile file = Mockito.mock(IFile.class);
+    when(file.getProject()).thenReturn(appEngineStandardProject.getProject());
     validator.validate(reporter, file, xml.getBytes(StandardCharsets.UTF_8));
     assertEquals(1, reporter.getMessages().size());
   }

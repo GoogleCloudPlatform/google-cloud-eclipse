@@ -17,13 +17,18 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 import static org.junit.Assert.assertEquals;
-import java.util.ArrayList;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
+import java.util.ArrayList;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
 import org.eclipse.core.resources.IResource;
+import org.eclipse.jst.common.project.facet.core.JavaFacet;
+import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
+import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.w3c.dom.Document;
@@ -31,6 +36,11 @@ import org.w3c.dom.Element;
 
 public class WebXmlValidatorTest {
  
+  @Rule
+  public TestProjectCreator projectCreator = new TestProjectCreator()
+      .withFacetVersions(WebFacetUtils.WEB_25, JavaFacet.VERSION_1_7, ProjectFacetsManager
+          .getProjectFacet(AppEngineStandardFacet.ID).getVersion(AppEngineStandardFacet.VERSION));
+
   private final WebXmlValidator validator = new WebXmlValidator();
   
   @Test
@@ -45,6 +55,7 @@ public class WebXmlValidatorTest {
     document.appendChild(element);
     
     IResource resource = Mockito.mock(IResource.class);
+    Mockito.when(resource.getProject()).thenReturn(projectCreator.getProject());
     ArrayList<BannedElement> blacklist = validator.checkForElements(resource, document);
     
     assertEquals(1, blacklist.size());
@@ -64,6 +75,7 @@ public class WebXmlValidatorTest {
     document.appendChild(element);
     
     IResource resource = Mockito.mock(IResource.class);
+    Mockito.when(resource.getProject()).thenReturn(projectCreator.getProject());
     ArrayList<BannedElement> blacklist = validator.checkForElements(resource, document);
     
     assertEquals(0, blacklist.size());
@@ -100,6 +112,7 @@ public class WebXmlValidatorTest {
     document.appendChild(webApp);
     
     IResource resource = Mockito.mock(IResource.class);
+    Mockito.when(resource.getProject()).thenReturn(projectCreator.getProject());
     ArrayList<BannedElement> blacklist = validator.checkForElements(resource, document);
     assertEquals(1, blacklist.size());
   }
