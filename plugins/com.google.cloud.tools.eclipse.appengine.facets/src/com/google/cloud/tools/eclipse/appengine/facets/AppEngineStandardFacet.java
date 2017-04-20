@@ -46,11 +46,10 @@ public class AppEngineStandardFacet {
   private static final Logger logger = Logger.getLogger(AppEngineStandardFacet.class.getName());
 
   public static final String ID = "com.google.cloud.tools.eclipse.appengine.facets.standard";
-
   public static final String VERSION = "1";
 
   public static final IProjectFacet FACET = ProjectFacetsManager.getProjectFacet(ID);
-  public static final IProjectFacetVersion FACET_VERSION = FACET.getDefaultVersion();
+  public static final IProjectFacetVersion FACET_VERSION = FACET.getVersion(VERSION);
 
   static final String DEFAULT_RUNTIME_ID =
       "com.google.cloud.tools.eclipse.appengine.standard.runtime";
@@ -65,6 +64,7 @@ public class AppEngineStandardFacet {
    * @return true if project has the App Engine Standard facet and false otherwise
    */
   public static boolean hasFacet(IFacetedProject project) {
+    Preconditions.checkNotNull(project);
     return project.hasProjectFacet(FACET);
   }
 
