@@ -16,9 +16,29 @@
 
 package com.google.cloud.tools.eclipse.preferences;
 
+import static org.junit.Assert.assertEquals;
+
 import com.google.cloud.tools.eclipse.test.util.BasePluginXmlTest;
+import org.junit.Test;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 public class PluginXmlTest extends BasePluginXmlTest {
 
+  @Test
+  public void testAnalyticsPreferencePath() {
+    NodeList areas = getDocument().getElementsByTagName("area");
+    assertEquals(1, areas.getLength());
+
+    Element element = ((Element) areas.item(0));
+    String clazz = element.getAttribute("class");
+    String preferencePath = element.getAttribute("preferences");
+
+    assertEquals("com.google.cloud.tools.eclipse.preferences.AnalyticsOptInArea", clazz);
+    assertEquals("configuration://com.google.cloud.tools.eclipse.usagetracker", preferencePath);
+    assertEquals("configuration://" + AnalyticsPreferences.PREFERENCE_PATH, preferencePath);
+    assertEquals("/configuration/com.google.cloud.tools.eclipse.usagetracker",
+        AnalyticsPreferences.getPreferences().absolutePath());
+  }
 
 }

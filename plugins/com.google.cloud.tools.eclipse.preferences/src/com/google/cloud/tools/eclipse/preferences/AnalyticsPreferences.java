@@ -16,12 +16,25 @@
 
 package com.google.cloud.tools.eclipse.preferences;
 
+import com.google.common.annotations.VisibleForTesting;
+import org.eclipse.core.runtime.preferences.ConfigurationScope;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+
 /**
  * Constants for preference keys associated with analytics reporting.
  */
 public class AnalyticsPreferences {
+  @VisibleForTesting
+  static final String PREFERENCE_PATH = "com.google.cloud.tools.eclipse.usagetracker";
+
   // See AnalyticsPingManager for the details of these fields.
   public static final String ANALYTICS_OPT_IN = "ANALYTICS_OPT_IN";
   public static final String ANALYTICS_OPT_IN_REGISTERED = "ANALYTICS_OPT_IN_REGISTERED";
   public static final String ANALYTICS_CLIENT_ID = "ANALYTICS_CLIENT_ID";
+
+  static final boolean ANALYTICS_OPT_IN_DEFAULT = false;
+
+  public static IEclipsePreferences getPreferences() {
+    return ConfigurationScope.INSTANCE.getNode(AnalyticsPreferences.PREFERENCE_PATH);
+  }
 }

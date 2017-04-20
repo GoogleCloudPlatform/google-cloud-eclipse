@@ -87,8 +87,7 @@ public class AnalyticsOptInArea extends PreferenceArea {
 
   @Override
   public void loadDefault() {
-    optInStatusEditor.setSelection(
-        getPreferenceStore().getDefaultBoolean(AnalyticsPreferences.ANALYTICS_OPT_IN));
+    optInStatusEditor.setSelection(AnalyticsPreferences.ANALYTICS_OPT_IN_DEFAULT);
   }
 
   @Override
