@@ -16,7 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.facets;
 
-import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
+import com.google.common.base.Preconditions;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
@@ -29,6 +29,9 @@ public class AppEngineFlexFacet {
   public static final String ID = "com.google.cloud.tools.eclipse.appengine.facets.flex";
   public static final String VERSION = "1";
 
+  public static final IProjectFacet FACET = ProjectFacetsManager.getProjectFacet(ID);
+  public static final IProjectFacetVersion FACET_VERSION = FACET.getVersion(VERSION);
+
   /**
    * Returns true if project has the App Engine Flex facet and false otherwise.
    *
@@ -36,7 +39,8 @@ public class AppEngineFlexFacet {
    * @return true if project has the App Engine Flex facet and false otherwise
    */
   public static boolean hasFacet(IFacetedProject project) {
-    return FacetedProjectHelper.projectHasFacet(project, ID);
+    Preconditions.checkNotNull(project);
+    return project.hasProjectFacet(FACET);
   }
 
   /**
@@ -50,8 +54,7 @@ public class AppEngineFlexFacet {
    */
   public static void installAppEngineFacet(IFacetedProject facetedProject,
       boolean installDependentFacets, IProgressMonitor monitor) throws CoreException {
-    IProjectFacet appEngineFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexFacet.ID);
-    if (facetedProject.hasProjectFacet(appEngineFacet)) {
+    if (facetedProject.hasProjectFacet(FACET)) {
       return;
     }
 
@@ -60,9 +63,7 @@ public class AppEngineFlexFacet {
       facetUtil.addJavaFacetToBatch(JavaFacet.VERSION_1_8);
     }
 
-    IProjectFacetVersion appEngineFacetVersion =
-        appEngineFacet.getVersion(AppEngineFlexFacet.VERSION);
-    facetUtil.addFacetToBatch(appEngineFacetVersion, null /* config */);
+    facetUtil.addFacetToBatch(FACET_VERSION, null /* config */);
     facetUtil.install(monitor);
   }
 }

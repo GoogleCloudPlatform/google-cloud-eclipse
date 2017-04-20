@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.facets;
 
-import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
@@ -49,6 +48,10 @@ public class AppEngineStandardFacet {
   public static final String ID = "com.google.cloud.tools.eclipse.appengine.facets.standard";
 
   public static final String VERSION = "1";
+
+  public static final IProjectFacet FACET = ProjectFacetsManager.getProjectFacet(ID);
+  public static final IProjectFacetVersion FACET_VERSION = FACET.getDefaultVersion();
+
   static final String DEFAULT_RUNTIME_ID =
       "com.google.cloud.tools.eclipse.appengine.standard.runtime";
   static final String DEFAULT_RUNTIME_NAME = "App Engine Standard";
@@ -62,7 +65,7 @@ public class AppEngineStandardFacet {
    * @return true if project has the App Engine Standard facet and false otherwise
    */
   public static boolean hasFacet(IFacetedProject project) {
-    return FacetedProjectHelper.projectHasFacet(project, ID);
+    return project.hasProjectFacet(FACET);
   }
 
   /**
@@ -74,8 +77,7 @@ public class AppEngineStandardFacet {
       if (facetedProject == null) {
         return null;
       }
-      IProjectFacet projectFacet = ProjectFacetsManager.getProjectFacet(ID);
-      return facetedProject.getProjectFacetVersion(projectFacet);
+      return facetedProject.getProjectFacetVersion(FACET);
     } catch (CoreException ex) {
       return null;
     }
@@ -165,14 +167,11 @@ public class AppEngineStandardFacet {
       boolean installDependentFacets, IProgressMonitor monitor) throws CoreException {
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
 
-    IProjectFacet appEngineFacet = ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID);
-    IProjectFacetVersion appEngineFacetVersion =
-        appEngineFacet.getVersion(AppEngineStandardFacet.VERSION);
-    if (facetedProject.hasProjectFacet(appEngineFacet)) {
+    if (facetedProject.hasProjectFacet(FACET)) {
       return;
     }
     FacetUtil facetUtil = new FacetUtil(facetedProject);
-    facetUtil.addFacetToBatch(appEngineFacetVersion, null /* config */);
+    facetUtil.addFacetToBatch(FACET_VERSION, null /* config */);
 
     // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1155
     // Instead of calling "IFacetedProject.installProjectFacet()" multiple times, we install facets
