@@ -17,22 +17,21 @@
 package com.google.cloud.tools.eclipse.preferences;
 
 import com.google.cloud.tools.eclipse.preferences.areas.PreferenceArea;
-import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
+import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener;
+import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.ErrorDialogErrorHandler;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Link;
-import org.eclipse.ui.PlatformUI;
 
 public class AnalyticsOptInArea extends PreferenceArea {
 
-  private Button optInStatusEditor;
+  private Button optInButton;
 
   /**
    * Create the area contents. Not intended to be called outside of the preference area framework.
@@ -42,9 +41,9 @@ public class AnalyticsOptInArea extends PreferenceArea {
   @Override
   public Control createContents(Composite container) {
     // Opt-in checkbox with a label
-    optInStatusEditor = new Button(container, SWT.CHECK);
-    optInStatusEditor.setText(Messages.getString("ANALYTICS_OPT_IN_TEXT"));
-    optInStatusEditor.addSelectionListener(new SelectionListener() {
+    optInButton = new Button(container, SWT.CHECK);
+    optInButton.setText(Messages.getString("ANALYTICS_OPT_IN_TEXT"));
+    optInButton.addSelectionListener(new SelectionListener() {
       @Override
       public void widgetSelected(SelectionEvent event) {
         boolean value = ((Button) event.widget).getSelection();
@@ -59,16 +58,11 @@ public class AnalyticsOptInArea extends PreferenceArea {
     });
 
     // The privacy policy disclaimer with a clickable link
-    Link privacyPolicyDisclaimer = new Link(container, SWT.NONE);
-    privacyPolicyDisclaimer.setText(Messages.getString("ANALYTICS_DISCLAIMER"));
-    privacyPolicyDisclaimer.setFont(optInStatusEditor.getFont());
-    privacyPolicyDisclaimer.addSelectionListener(new SelectionAdapter() {
-      @Override
-      public void widgetSelected(SelectionEvent event) {
-        // Open a privacy policy web page when the link is clicked.
-        WorkbenchUtil.openInBrowser(PlatformUI.getWorkbench(), Messages.getString("GOOGLE_PRIVACY_POLICY_URL"));
-      }
-    });
+    Link privacyDisclaimer = new Link(container, SWT.NONE);
+    privacyDisclaimer.setText(Messages.getString("ANALYTICS_DISCLAIMER"));
+    privacyDisclaimer.setFont(optInButton.getFont());
+    privacyDisclaimer.addSelectionListener(
+        new OpenUriSelectionListener(new ErrorDialogErrorHandler(container.getShell())));
 
     load();
     return container;
@@ -81,19 +75,19 @@ public class AnalyticsOptInArea extends PreferenceArea {
 
   @Override
   public void load() {
-    optInStatusEditor
+    optInButton
         .setSelection(getPreferenceStore().getBoolean(AnalyticsPreferences.ANALYTICS_OPT_IN));
   }
 
   @Override
   public void loadDefault() {
-    optInStatusEditor.setSelection(
+    optInButton.setSelection(
         getPreferenceStore().getDefaultBoolean(AnalyticsPreferences.ANALYTICS_OPT_IN));
   }
 
   @Override
   public void performApply() {
     getPreferenceStore().setValue(AnalyticsPreferences.ANALYTICS_OPT_IN,
-        optInStatusEditor.getSelection());
+        optInButton.getSelection());
   }
 }

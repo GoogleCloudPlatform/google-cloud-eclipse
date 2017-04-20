@@ -71,7 +71,7 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
     instructions.addSelectionListener(new SelectionAdapter() {
       @Override
       public void widgetSelected(SelectionEvent event) {
-        openUrl(event.text);
+        WorkbenchUtil.openInBrowser(PlatformUI.getWorkbench(), event.text);
       }
     });
 
@@ -119,10 +119,6 @@ public class CloudSdkPreferenceArea extends PreferenceArea {
    */
   public void setStringValue(String value) {
     sdkLocation.setStringValue(value);
-  }
-
-  protected void openUrl(String urlText) {
-    WorkbenchUtil.openInBrowser(PlatformUI.getWorkbench(), urlText);
   }
 
   private static Path getDefaultSdkLocation() {
