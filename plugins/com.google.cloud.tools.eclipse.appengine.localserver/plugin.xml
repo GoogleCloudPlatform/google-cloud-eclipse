@@ -67,10 +67,6 @@
                id="com.google.cloud.tools.eclipse.appengine.standard.runtime"
                version="1"></runtime-component>
          <facet
-               id="com.google.cloud.tools.eclipse.appengine.facets.standard"
-               version="1">
-         </facet>
-         <facet
                id="jst.web"
                version="2.5">
          </facet>
