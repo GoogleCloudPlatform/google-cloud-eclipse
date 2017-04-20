@@ -24,14 +24,12 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPreferenceArea;
+import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import java.io.File;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -42,19 +40,14 @@ import org.mockito.runners.MockitoJUnitRunner;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class CloudSdkPreferenceAreaTest {
-  
+
+  @Rule public ShellTestResource shellResource = new ShellTestResource();
+
   @Mock
   private IPreferenceStore preferences;
 
   private CloudSdkPreferenceArea area;
   private Shell shell;
-
-  @After
-  public void tearDown() {
-    if (shell != null && !shell.isDisposed()) {
-      shell.dispose();
-    }
-  }
 
   @Test
   public void testNonExistentPath() {
@@ -84,25 +77,22 @@ public class CloudSdkPreferenceAreaTest {
     show();
     area.setStringValue(root.getAbsolutePath());
     assertEquals(IStatus.WARNING, area.getStatus().getSeverity());
-    
+
     area.setStringValue("");
     assertEquals(IStatus.OK, area.getStatus().getSeverity());
   }
 
   private void show() {
-    shell = new Shell(Display.getCurrent(), SWT.NONE);
-    shell.setLayout(new FillLayout());
-
+    shell = shellResource.getShell();
     area = new CloudSdkPreferenceArea();
     area.createContents(shell);
     area.setPreferenceStore(preferences);
 
-    shell.open();
     runEvents();
   }
 
   private void runEvents() {
-    while (shell != null && !shell.isDisposed() && shell.getDisplay().readAndDispatch()) {
+    while (!shell.isDisposed() && shell.getDisplay().readAndDispatch()) {
       /* spin */
     }
   }
