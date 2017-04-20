@@ -19,6 +19,8 @@ package com.google.cloud.tools.eclipse.usagetracker;
 import com.google.common.annotations.VisibleForTesting;
 import org.eclipse.core.runtime.preferences.ConfigurationScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 /**
  * Constants for preference keys associated with analytics reporting.
@@ -34,7 +36,11 @@ public class AnalyticsPreferences {
 
   static final boolean ANALYTICS_OPT_IN_DEFAULT = false;
 
-  public static IEclipsePreferences getPreferenceNode() {
-    return ConfigurationScope.INSTANCE.getNode(AnalyticsPreferences.PREFERENCE_PATH);
+  static IPreferenceStore getPreferenceStore() {
+    return new ScopedPreferenceStore(ConfigurationScope.INSTANCE, PREFERENCE_PATH);
+  }
+
+  static IEclipsePreferences getPreferenceNode() {
+    return ConfigurationScope.INSTANCE.getNode(PREFERENCE_PATH);
   }
 }
