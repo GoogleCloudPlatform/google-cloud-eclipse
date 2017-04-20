@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.usagetracker;
 
-import com.google.cloud.tools.eclipse.preferences.AnalyticsPreferences;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;

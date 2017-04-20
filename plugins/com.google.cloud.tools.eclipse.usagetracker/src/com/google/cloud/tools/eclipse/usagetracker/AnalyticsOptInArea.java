@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.preferences;
+package com.google.cloud.tools.eclipse.usagetracker;
 
 import com.google.cloud.tools.eclipse.preferences.areas.PreferenceArea;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener;

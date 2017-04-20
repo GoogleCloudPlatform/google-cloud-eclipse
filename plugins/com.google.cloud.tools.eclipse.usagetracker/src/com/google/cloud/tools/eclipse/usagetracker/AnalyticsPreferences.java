@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.preferences;
+package com.google.cloud.tools.eclipse.usagetracker;
 
 import com.google.common.annotations.VisibleForTesting;
 import org.eclipse.core.runtime.preferences.ConfigurationScope;

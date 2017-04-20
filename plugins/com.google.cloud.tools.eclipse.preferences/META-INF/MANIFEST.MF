@@ -10,20 +10,7 @@ Export-Package: com.google.cloud.tools.eclipse.preferences,
  com.google.cloud.tools.eclipse.preferences.areas
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
-Import-Package: com.google.cloud.tools.eclipse.ui.util,
- com.google.cloud.tools.eclipse.ui.util.event,
- com.google.common.annotations;version="[20.0.0,21.0.0)",
- org.eclipse.core.commands.common,
- org.eclipse.core.runtime;version="3.5.0",
+Require-Bundle: org.eclipse.ui
+Import-Package: org.eclipse.core.runtime;version="3.5.0",
  org.eclipse.core.runtime.preferences,
- org.eclipse.jface.dialogs,
- org.eclipse.jface.layout,
- org.eclipse.jface.preference,
- org.eclipse.jface.util,
- org.eclipse.swt,
- org.eclipse.swt.events,
- org.eclipse.swt.layout,
- org.eclipse.swt.widgets,
- org.eclipse.ui,
- org.eclipse.ui.preferences,
  org.osgi.service.prefs

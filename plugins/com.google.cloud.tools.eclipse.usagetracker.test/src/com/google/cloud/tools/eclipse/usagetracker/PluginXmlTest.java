@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.preferences;
+package com.google.cloud.tools.eclipse.usagetracker;
 
 import static org.junit.Assert.assertEquals;
 
@@ -34,7 +34,7 @@ public class PluginXmlTest extends BasePluginXmlTest {
     String clazz = element.getAttribute("class");
     String preferencePath = element.getAttribute("preferences");
 
-    assertEquals("com.google.cloud.tools.eclipse.preferences.AnalyticsOptInArea", clazz);
+    assertEquals("com.google.cloud.tools.eclipse.usagetracker.AnalyticsOptInArea", clazz);
     assertEquals("configuration://com.google.cloud.tools.eclipse.usagetracker", preferencePath);
     assertEquals("configuration://" + AnalyticsPreferences.PREFERENCE_PATH, preferencePath);
     assertEquals("/configuration/com.google.cloud.tools.eclipse.usagetracker",
