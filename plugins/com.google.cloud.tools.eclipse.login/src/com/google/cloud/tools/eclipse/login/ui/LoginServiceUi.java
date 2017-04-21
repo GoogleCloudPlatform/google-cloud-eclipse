@@ -278,5 +278,5 @@ public class LoginServiceUi implements UiFacade {
     public void stop() throws IOException {
       receiver.stop();
     }
-  };
+  }
 }

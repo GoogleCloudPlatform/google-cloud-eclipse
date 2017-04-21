@@ -58,7 +58,7 @@ public class CredentialHelperTest {
     private String client_secret;
     private String refresh_token;
     private String type;
-  };
+  }
 
   private Credential createCredential(String accessToken, String refreshToken) {
     GoogleCredential credential = new GoogleCredential.Builder()

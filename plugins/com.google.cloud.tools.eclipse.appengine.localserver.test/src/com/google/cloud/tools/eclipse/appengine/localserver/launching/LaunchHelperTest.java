@@ -26,7 +26,6 @@ import com.google.cloud.tools.eclipse.appengine.localserver.ui.ServerTracker;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.util.Collection;
 import java.util.Collections;
-import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.SubMonitor;
@@ -135,7 +134,7 @@ public class LaunchHelperTest {
   }
 
   @Test(expected = CoreException.class)
-  public void failsWithClashingServiceIds() throws ExecutionException, CoreException {
+  public void failsWithClashingServiceIds() throws CoreException {
     appEngineStandardProject1.setAppEngineServiceId("other");
     IModule module1 = appEngineStandardProject1.getModule();
     appEngineStandardProject2.setAppEngineServiceId("other");

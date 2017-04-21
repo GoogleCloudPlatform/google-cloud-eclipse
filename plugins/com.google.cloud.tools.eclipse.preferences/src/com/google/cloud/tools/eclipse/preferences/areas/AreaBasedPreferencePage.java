@@ -141,8 +141,8 @@ public class AreaBasedPreferencePage extends PreferencePage
   /**
    * 0-argument constructor required by the Eclipse Extension Registry. Not intended for normal use.
    * 
-   * @see AreaBasedPreferencePage(String)
-   * @noreference use {@link AreaBasedPreferencePage(String)} instead
+   * @see #AreaBasedPreferencePage(String)
+   * @noreference use {@link #AreaBasedPreferencePage(String)} instead
    */
   public AreaBasedPreferencePage() {}
 

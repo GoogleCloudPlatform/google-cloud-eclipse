@@ -52,7 +52,7 @@ class NonSystemJobSuspender {
   private static final NonSystemJobScheduleListener jobScheduleListener =
       new NonSystemJobScheduleListener();
 
-  /** Once called, it is imperative to call {@link resume()} later. */
+  /** Once called, it is imperative to call {@link #resume()} later. */
   public static void suspendFutureJobs() {
     synchronized (suspendedJobs) {
       Preconditions.checkState(!suspended.getAndSet(true), "Already suspended.");

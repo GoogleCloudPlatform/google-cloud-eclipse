@@ -64,10 +64,10 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
   // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/953
   @Override
   public IClasspathEntry[] resolveClasspathContainer(IRuntime runtime) {
-    return doResolveClasspathContainer(runtime);
+    return doResolveClasspathContainer();
   }
 
-  private IClasspathEntry[] doResolveClasspathContainer(IRuntime runtime) {
+  private IClasspathEntry[] doResolveClasspathContainer() {
     try {
         IClasspathEntry[] servletApiEntries =
             resolverService.resolveLibraryAttachSourcesSync("servlet-api");

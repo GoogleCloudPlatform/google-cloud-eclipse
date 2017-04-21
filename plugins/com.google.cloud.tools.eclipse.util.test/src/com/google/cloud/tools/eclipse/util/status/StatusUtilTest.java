@@ -61,6 +61,7 @@ public class StatusUtilTest {
 
   @Test
   public void testError_withClassAsObject() {
+    @SuppressWarnings("cast")
     IStatus error = StatusUtil.error((Object) new DeleteAllVisitor().getClass(), "test error msg");
     verifyStatus(error);
   }
@@ -68,6 +69,7 @@ public class StatusUtilTest {
   @Test
   public void testError_withClassAsObjectAndException() {
     Throwable exception = new Exception();
+    @SuppressWarnings("cast")
     IStatus error =
         StatusUtil.error((Object) new DeleteAllVisitor().getClass(), "test error msg", exception);
     verifyStatus(error);

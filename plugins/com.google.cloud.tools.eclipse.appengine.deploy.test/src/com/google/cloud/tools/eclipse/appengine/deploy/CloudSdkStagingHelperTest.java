@@ -25,7 +25,6 @@ import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import org.eclipse.core.resources.IFile;
@@ -78,7 +77,7 @@ public class CloudSdkStagingHelperTest {
   private IProject project;
 
   @Before
-  public void setUp() throws IOException {
+  public void setUp() {
     project = projectCreator.getProject();
     stagingDirectory = new Path(tempFolder.getRoot().toString());
   }

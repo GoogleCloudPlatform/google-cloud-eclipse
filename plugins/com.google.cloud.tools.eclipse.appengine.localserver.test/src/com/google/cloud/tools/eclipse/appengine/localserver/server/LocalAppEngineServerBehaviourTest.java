@@ -66,7 +66,7 @@ public class LocalAppEngineServerBehaviourTest {
   }
 
   @Test
-  public void testCheckPort_portInUse() throws CoreException {
+  public void testCheckPort_portInUse() {
     try {
       LocalAppEngineServerBehaviour.checkPort(null, 1, alwaysTrue);
       fail("Should throw CoreException");
@@ -77,7 +77,7 @@ public class LocalAppEngineServerBehaviourTest {
   }
 
   @Test
-  public void testCheckPort_portOutOfBounds_negative() throws CoreException {
+  public void testCheckPort_portOutOfBounds_negative() {
     try {
       LocalAppEngineServerBehaviour.checkPort(null, -1, portProber);
       fail("Should throw CoreException");
@@ -88,7 +88,7 @@ public class LocalAppEngineServerBehaviourTest {
   }
 
   @Test
-  public void testCheckPort_portOutOfBounds_positive() throws CoreException {
+  public void testCheckPort_portOutOfBounds_positive() {
     try {
       LocalAppEngineServerBehaviour.checkPort(null, 65536, portProber);
       fail("Should throw CoreException");
@@ -139,7 +139,7 @@ public class LocalAppEngineServerBehaviourTest {
   };
   
   @Test
-  public void testExtractServerPortFromOutput_devappserver1() throws CoreException {
+  public void testExtractServerPortFromOutput_devappserver1() {
     setUpServerPort(0);
     simulateOutputParsing(devappserver1Output);
     assertEquals(7979, serverBehavior.getServerPort());
@@ -147,43 +147,42 @@ public class LocalAppEngineServerBehaviourTest {
   }
 
   @Test
-  public void testExtractServerPortFromOutput_firstModuleIsDefault() throws CoreException {
+  public void testExtractServerPortFromOutput_firstModuleIsDefault() {
     setUpServerPort(0);
     simulateOutputParsing(devappserver2OutputWithDefaultModule1);
     assertEquals(55948, serverBehavior.getServerPort());
   }
 
   @Test
-  public void testExtractServerPortFromOutput_secondModuleIsDefault() throws CoreException {
+  public void testExtractServerPortFromOutput_secondModuleIsDefault() {
     setUpServerPort(0);
     simulateOutputParsing(devappserver2OutputWithDefaultModule2);
     assertEquals(8081, serverBehavior.getServerPort());
   }
 
   @Test
-  public void testExtractServerPortFromOutput_noDefaultModule() throws CoreException {
+  public void testExtractServerPortFromOutput_noDefaultModule() {
     setUpServerPort(0);
     simulateOutputParsing(serverOutputWithNoDefaultModule);
     assertEquals(8181, serverBehavior.getServerPort());
   }
 
   @Test
-  public void testExtractServerPortFromOutput_defaultModuleDoesNotOverrideUserSpecifiedPort()
-      throws CoreException {
+  public void testExtractServerPortFromOutput_defaultModuleDoesNotOverrideUserSpecifiedPort() {
     setUpServerPort(12345);
     simulateOutputParsing(devappserver2OutputWithDefaultModule1);
     assertEquals(12345, serverBehavior.getServerPort());
   }
 
   @Test
-  public void testExtractModuleUrlFromOutput_firstModuleIsDefault() throws CoreException {
+  public void testExtractModuleUrlFromOutput_firstModuleIsDefault() {
     simulateOutputParsing(devappserver2OutputWithDefaultModule1);
     assertEquals("http://localhost:55948", serverBehavior.getServiceUrl("default"));
     assertEquals("http://localhost:8081", serverBehavior.getServiceUrl("second"));
   }
 
   @Test
-  public void testExtractModuleUrlFromOutput_noDefaultModule() throws CoreException {
+  public void testExtractModuleUrlFromOutput_noDefaultModule() {
     simulateOutputParsing(serverOutputWithNoDefaultModule);
     assertNull(serverBehavior.getServiceUrl("default"));
     assertEquals("http://localhost:8181", serverBehavior.getServiceUrl("first"));
@@ -192,7 +191,7 @@ public class LocalAppEngineServerBehaviourTest {
   }
 
   @Test
-  public void testExtractAdminPortFromOutput() throws CoreException {
+  public void testExtractAdminPortFromOutput() {
     setUpServerPort(9080);
     setUpAdminPort(0);
     simulateOutputParsing(devappserver2OutputWithDefaultModule1);
