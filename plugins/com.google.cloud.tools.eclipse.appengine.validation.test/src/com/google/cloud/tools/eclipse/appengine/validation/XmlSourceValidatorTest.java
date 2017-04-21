@@ -112,7 +112,7 @@ public class XmlSourceValidatorTest {
   }
   
   @Test
-  public void testValidate_noBannedElements() throws CoreException, IOException {
+  public void testValidate_noBannedElements() throws IOException {
     XmlSourceValidator validator = new XmlSourceValidator();
     validator.setHelper(new AppEngineWebXmlValidator());
     byte[] xml = "<test></test>".getBytes(StandardCharsets.UTF_8);
@@ -121,7 +121,7 @@ public class XmlSourceValidatorTest {
   }
   
   @Test
-  public void testValidate() throws CoreException, IOException {
+  public void testValidate() throws IOException {
     XmlSourceValidator validator = new XmlSourceValidator();
     validator.setHelper(new WebXmlValidator());
     String xml = "<web-app xmlns='http://xmlns.jcp.org/xml/ns/javaee' version='3.1'></web-app>";
@@ -146,7 +146,7 @@ public class XmlSourceValidatorTest {
   }
 
   @Test
-  public void testCreateMessage() throws CoreException {
+  public void testCreateMessage() {
     XmlSourceValidator validator = new XmlSourceValidator();
     validator.setHelper(new AppEngineWebXmlValidator());
     BannedElement element =
