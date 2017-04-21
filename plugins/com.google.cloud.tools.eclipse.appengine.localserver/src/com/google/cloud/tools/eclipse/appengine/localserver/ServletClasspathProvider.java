@@ -49,7 +49,7 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
     if (project != null && MavenUtils.hasMavenNature(project)) { // Maven handles its own classpath
       return null;
     } else {
-      return doResolveClasspathContainer(runtime);
+      return doResolveClasspathContainer();
     }
   }
 
