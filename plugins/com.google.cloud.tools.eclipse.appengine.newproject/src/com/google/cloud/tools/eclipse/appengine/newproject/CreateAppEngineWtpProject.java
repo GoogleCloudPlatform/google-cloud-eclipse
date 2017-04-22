@@ -20,7 +20,6 @@ import com.google.cloud.tools.eclipse.appengine.libraries.BuildPath;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.Arrays;
-
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;

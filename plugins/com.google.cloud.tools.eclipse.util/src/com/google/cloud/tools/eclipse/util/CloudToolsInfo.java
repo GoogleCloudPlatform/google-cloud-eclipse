@@ -39,6 +39,8 @@ public class CloudToolsInfo {
   // Don't change the value; this name is used as an originating "application" of usage metrics.
   public static final String METRICS_NAME = "gcloud-eclipse-tools";
 
+  public static final String EXCEPTION_REPORT_PRODUCT_ID = "CT4E";
+
   public static final String USER_AGENT = METRICS_NAME + "/" + getToolsVersion();
 
   /** Return the version of associated Cloud Tools for Eclipse feature, or 0.0.0 if unknown. */

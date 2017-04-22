@@ -2,10 +2,14 @@ Manifest-Version: 1.0
 Bundle-ClassPath: .
 Bundle-ManifestVersion: 2
 Bundle-Name: Tests for Cloud Tools for Eclipse Error Reporting
-Bundle-SymbolicName: com.google.cloud.tools.eclipse.aeri.test
+Bundle-SymbolicName: com.google.cloud.tools.eclipse.aeri.test;singleton:=true
 Bundle-Version: 0.1.0.qualifier
 Bundle-Vendor: Google Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Fragment-Host: com.google.cloud.tools.eclipse.aeri
 Require-Bundle: org.junit;bundle-version="4.12.0"
-Import-Package: org.mockito;provider=google;version="1.10.19"
+Import-Package: com.google.cloud.tools.eclipse.test.util.http,
+ org.eclipse.emf.common.util,
+ org.eclipse.epp.logging.aeri.core,
+ org.mockito;provider=google;version="1.10.19",
+ org.mockito.stubbing;provider=google;version="1.10.19"
