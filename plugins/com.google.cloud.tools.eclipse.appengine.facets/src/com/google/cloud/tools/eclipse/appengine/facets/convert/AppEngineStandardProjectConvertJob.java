@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.facets.convert;
 
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.eclipse.appengine.compat.GpeMigrator;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.Messages;
@@ -53,6 +54,8 @@ public class AppEngineStandardProjectConvertJob extends Job {
     } catch (CoreException ex) {
       String project = facetedProject.getProject().getName();
       return StatusUtil.error(this, Messages.getString("project.conversion.error", project), ex);
+    } catch (CloudSdkNotFoundException ex) {
+      return StatusUtil.error(this, Messages.getString("cloud.sdk.missing"), ex);      
     }
   }
 }
