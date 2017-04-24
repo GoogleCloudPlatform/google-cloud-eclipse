@@ -90,7 +90,6 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     return AbstractUIPlugin.imageDescriptorFromPlugin(
         "com.google.cloud.tools.eclipse.dataflow.ui", imageFilePath);
   }
-
   
   private void addLabel(Composite formComposite, String labelText) {
     Label label = new Label(formComposite, SWT.NULL);
@@ -204,6 +203,11 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     advancedComposite.layout();
     formComposite.layout();
     parent.layout();
+  }
+
+  @Override
+  public boolean canFlipToNextPage() {
+    return false;
   }
 
   private void validateAndSetError() {
