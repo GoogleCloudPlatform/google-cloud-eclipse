@@ -38,7 +38,8 @@ public class CloudSdkPrompter {
 
   /**
    * Return the Cloud SDK. If it cannot be found, prompt the user to specify its location. Like
-   * {@linkplain CloudSdk.Builder#build()} the caller is responsible for validating the SDK location
+   * {@linkplain com.google.cloud.tools.appengine.cloudsdk.CloudSdk.Builder#build()} 
+   * the caller is responsible for validating the SDK location
    * (if desired).
    * <p>
    * <b>Must be called from the SWT UI Thread.</b>
@@ -53,7 +54,8 @@ public class CloudSdkPrompter {
 
   /**
    * Return the Cloud SDK. If it cannot be found, prompt the user to specify its location. Like
-   * {@linkplain CloudSdk.Builder#build()} the caller is responsible for validating the SDK location
+   * {@linkplain com.google.cloud.tools.appengine.cloudsdk.CloudSdk.Builder#build()} 
+   * the caller is responsible for validating the SDK location
    * (if desired).
    * 
    * <p>
@@ -83,8 +85,8 @@ public class CloudSdkPrompter {
 
   /**
    * Return the Cloud SDK location. If it cannot be found, prompt the user to specify its location.
-   * Like {@linkplain CloudSdk.Builder#build()} the caller is responsible for validating the SDK
-   * location (if desired).
+   * Like {@linkplain com.google.cloud.tools.appengine.cloudsdk.CloudSdk.Builder#build()} 
+   * the caller is responsible for validating the SDK location (if desired).
    * <p>
    * <b>Must be called from the SWT UI Thread.</b>
    * </p>
@@ -98,8 +100,8 @@ public class CloudSdkPrompter {
 
   /**
    * Return the Cloud SDK location. If it cannot be found, prompt the user to specify its location.
-   * Like {@linkplain CloudSdk.Builder#build()} the caller is responsible for validating the SDK
-   * location (if desired).
+   * Like {@linkplain com.google.cloud.tools.appengine.cloudsdk.CloudSdk.Builder#build()} the caller
+   * is responsible for validating the SDK location (if desired).
    * <p>
    * <b>Must be called from the SWT UI Thread.</b>
    * </p>
