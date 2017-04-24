@@ -115,7 +115,7 @@ public class AppEngineStandardProjectConvertCommandHandlerTest {
 
   @Test
   public void testCheckFacetCompatibility_java1_8FacetIsIncompatible() throws CoreException {
-    Assume.assumeTrue("AppEngine Standard Java 8 runtime support is present",
+    Assume.assumeTrue("AppEngine Standard Java 8 runtime support is not present",
         AppEngineStandardFacet.FACET_VERSION.conflictsWith(JavaFacet.VERSION_1_8));
     facetedProject.installProjectFacet(JavaFacet.VERSION_1_8, null, null);
     assertTrue(facetedProject.hasProjectFacet(JavaFacet.VERSION_1_8));
@@ -136,7 +136,7 @@ public class AppEngineStandardProjectConvertCommandHandlerTest {
 
   @Test
   public void testCheckFacetCompatibility_web3_0FacetIsIncompatible() throws CoreException {
-    Assume.assumeTrue("AppEngine Standard Java 8 runtime support is present",
+    Assume.assumeTrue("AppEngine Standard Java 8 runtime support is not present",
         AppEngineStandardFacet.FACET_VERSION.conflictsWith(WebFacetUtils.WEB_30));
     facetedProject.installProjectFacet(JavaFacet.VERSION_1_7, null, null);
     facetedProject.installProjectFacet(WebFacetUtils.WEB_30, null, null);
