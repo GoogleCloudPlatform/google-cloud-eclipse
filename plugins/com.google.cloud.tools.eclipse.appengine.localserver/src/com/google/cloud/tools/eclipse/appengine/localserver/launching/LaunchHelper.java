@@ -88,7 +88,7 @@ public class LaunchHelper {
    * Look for servers that may match.
    * 
    * @param modules the web modules to search for
-   * @param narrow if true, look for exact module match
+   * @param exact if true, look for exact module match
    * @return an existing server
    */
   @VisibleForTesting

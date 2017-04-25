@@ -78,7 +78,7 @@ public class ModifyDataflowNatureHandler extends AbstractHandler {
       Object selectionElement = selectionIter.next();
       if (selectionElement instanceof IAdaptable) {
         IAdaptable adaptable = (IAdaptable) selectionElement;
-        IProject project = (IProject) adaptable.getAdapter(IProject.class);
+        IProject project = adaptable.getAdapter(IProject.class);
         try {
           if (enable) {
             DataflowJavaProjectNature

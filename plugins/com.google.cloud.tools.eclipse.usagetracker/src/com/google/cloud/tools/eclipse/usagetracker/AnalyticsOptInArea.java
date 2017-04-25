@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.preferences;
+package com.google.cloud.tools.eclipse.usagetracker;
 
 import com.google.cloud.tools.eclipse.preferences.areas.PreferenceArea;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener;
@@ -42,7 +42,7 @@ public class AnalyticsOptInArea extends PreferenceArea {
   public Control createContents(Composite container) {
     // Opt-in checkbox with a label
     optInButton = new Button(container, SWT.CHECK);
-    optInButton.setText(Messages.getString("ANALYTICS_OPT_IN_TEXT"));
+    optInButton.setText(Messages.getString("PREFERENCE_PAGE_OPT_IN_LABEL"));
     optInButton.addSelectionListener(new SelectionListener() {
       @Override
       public void widgetSelected(SelectionEvent event) {
@@ -59,7 +59,7 @@ public class AnalyticsOptInArea extends PreferenceArea {
 
     // The privacy policy disclaimer with a clickable link
     Link privacyDisclaimer = new Link(container, SWT.NONE);
-    privacyDisclaimer.setText(Messages.getString("ANALYTICS_DISCLAIMER"));
+    privacyDisclaimer.setText(Messages.getString("PREFERENCE_PAGE_PRIVACY_DISCLAIMER"));
     privacyDisclaimer.setFont(optInButton.getFont());
     privacyDisclaimer.addSelectionListener(
         new OpenUriSelectionListener(new ErrorDialogErrorHandler(container.getShell())));

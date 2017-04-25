@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Google Inc.
+ * Copyright 2017 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.preferences;
+package com.google.cloud.tools.eclipse.usagetracker;
 
-/**
- * Constants for preference keys associated with analytics reporting.
- */
-public class AnalyticsPreferences {
-  // See AnalyticsPingManager for the details of these fields.
-  public static final String ANALYTICS_OPT_IN = "ANALYTICS_OPT_IN";
-  public static final String ANALYTICS_OPT_IN_REGISTERED = "ANALYTICS_OPT_IN_REGISTERED";
-  public static final String ANALYTICS_CLIENT_ID = "ANALYTICS_CLIENT_ID";
+import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
+import org.eclipse.jface.preference.IPreferenceStore;
+
+public class PreferenceInitializer extends AbstractPreferenceInitializer {
+
+  @Override
+  public void initializeDefaultPreferences() {
+    IPreferenceStore store = AnalyticsPreferences.getPreferenceStore();
+    store.setDefault(AnalyticsPreferences.ANALYTICS_OPT_IN,
+        AnalyticsPreferences.ANALYTICS_OPT_IN_DEFAULT);
+  }
+
 }

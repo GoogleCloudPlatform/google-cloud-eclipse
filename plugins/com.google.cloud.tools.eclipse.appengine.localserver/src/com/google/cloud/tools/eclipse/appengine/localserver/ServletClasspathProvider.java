@@ -41,7 +41,7 @@ import org.eclipse.wst.server.core.IRuntime;
 public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
 
   /**
-   * 
+   * The default Servlet API supported by App Engine for Java.
    */
   private static final IProjectFacetVersion DEFAULT_DYNAMIC_WEB_VERSION = WebFacetUtils.WEB_25;
 
@@ -49,9 +49,6 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
   
   @Inject
   private ILibraryClasspathContainerResolverService resolverService;
-
-  public ServletClasspathProvider() {
-  }
 
   @Override
   public IClasspathEntry[] resolveClasspathContainer(IProject project, IRuntime runtime) {
@@ -65,9 +62,9 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
       IFacetedProject facetedProject = ProjectFacetsManager.create(project);
       webFacetVersion = facetedProject.getInstalledVersion(WebFacetUtils.WEB_FACET);
     } catch (CoreException ex) {
-      logger.log(Level.FINE, "Unable to obtain faceted project", ex);
+      logger.log(Level.WARNING, "Unable to obtain jst.web facet version", ex);
     }
-    return doResolveClasspathContainer(runtime, webFacetVersion);
+    return doResolveClasspathContainer(webFacetVersion);
   }
 
   // TODO this method is called often as the result of user initiated UI actions, e.g. when the user
@@ -81,11 +78,10 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
   // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/953
   @Override
   public IClasspathEntry[] resolveClasspathContainer(IRuntime runtime) {
-    return doResolveClasspathContainer(runtime, DEFAULT_DYNAMIC_WEB_VERSION);
+    return doResolveClasspathContainer(DEFAULT_DYNAMIC_WEB_VERSION);
   }
 
-  private IClasspathEntry[] doResolveClasspathContainer(IRuntime runtime,
-      IProjectFacetVersion dynamicWebVersion) {
+  private IClasspathEntry[] doResolveClasspathContainer(IProjectFacetVersion dynamicWebVersion) {
 
     String servletApiId;
     String jspApiId;
@@ -102,7 +98,6 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
       IClasspathEntry[] apiEntries =
           resolverService.resolveLibraryAttachSourcesSync(servletApiId);
       IClasspathEntry[] jspApiEntries = resolverService.resolveLibraryAttachSourcesSync(jspApiId);
-
       IClasspathEntry[] allEntries = new IClasspathEntry[apiEntries.length + jspApiEntries.length];
       System.arraycopy(apiEntries, 0, allEntries, 0, apiEntries.length);
       System.arraycopy(jspApiEntries, 0, allEntries, apiEntries.length, jspApiEntries.length);

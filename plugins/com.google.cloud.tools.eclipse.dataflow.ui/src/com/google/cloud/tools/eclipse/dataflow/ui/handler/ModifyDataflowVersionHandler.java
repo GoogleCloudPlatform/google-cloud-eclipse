@@ -101,7 +101,7 @@ public class ModifyDataflowVersionHandler extends AbstractHandler {
       Object selected = selectionIter.next();
       if (selected instanceof IAdaptable) {
         IAdaptable adaptable = (IAdaptable) selected;
-        IResource selectedResource = (IResource) adaptable.getAdapter(IResource.class);
+        IResource selectedResource = adaptable.getAdapter(IResource.class);
         if (selectedResource.getProject() != null) {
           return selectedResource.getProject();
         }

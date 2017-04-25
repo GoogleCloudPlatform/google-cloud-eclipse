@@ -631,7 +631,7 @@ public class CommonDeployPreferencesPanel extends DeployPreferencesPanel {
       }
       return super.getTargets();
     }
-  };
+  }
 
   @Override
   DataBindingContext getDataBindingContext() {

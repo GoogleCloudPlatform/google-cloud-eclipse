@@ -106,5 +106,5 @@ public class NonSystemJobSuspenderTest {
       }
       return Status.OK_STATUS;
     }
-  };
+  }
 }

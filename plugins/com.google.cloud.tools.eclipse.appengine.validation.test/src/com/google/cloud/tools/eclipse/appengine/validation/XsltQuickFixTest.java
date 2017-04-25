@@ -28,7 +28,6 @@ import java.io.IOException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -83,7 +82,7 @@ public class XsltQuickFixTest {
 
   @Test
   public void testRun_removeApplicationElement() throws IOException, ParserConfigurationException,
-      SAXException, TransformerException, CoreException {
+      SAXException, CoreException {
     IFile file = project.getFile("testdata.xml");
     file.create(ValidationTestUtils.stringToInputStream(APPLICATION_XML), IFile.FORCE, null);
 
@@ -103,7 +102,7 @@ public class XsltQuickFixTest {
 
   @Test
   public void testRun_removeVersionElement() throws IOException, ParserConfigurationException,
-      SAXException, TransformerException, CoreException {
+      SAXException, CoreException {
     file.create(ValidationTestUtils.stringToInputStream(
         VERSION_XML), IFile.FORCE, null);
     IMarker marker = Mockito.mock(IMarker.class);
@@ -124,8 +123,7 @@ public class XsltQuickFixTest {
   }
 
   @Test
-  public void testRun_existingEditor()
-      throws CoreException, ParserConfigurationException, SAXException, IOException {
+  public void testRun_existingEditor() throws CoreException {
 
     IFile file = project.getFile("testdata.xml");
     file.create(ValidationTestUtils.stringToInputStream(APPLICATION_XML), IFile.FORCE, null);

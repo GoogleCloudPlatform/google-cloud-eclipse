@@ -22,7 +22,6 @@ import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
-import com.google.cloud.tools.eclipse.preferences.AnalyticsPreferences;
 import com.google.cloud.tools.eclipse.test.util.http.TestHttpServer;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager.PingEvent;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;

@@ -52,7 +52,7 @@ public class DataflowPropertyTester extends PropertyTester {
   private boolean testProjectIsNotDataflowProject(Object receiver) {
     if (receiver instanceof IAdaptable) {
       IAdaptable adaptable = (IAdaptable) receiver;
-      IProject project = (IProject) adaptable.getAdapter(IProject.class);
+      IProject project = adaptable.getAdapter(IProject.class);
       return !isProjectDataflowProject(project);
     }
     return false;
@@ -61,7 +61,7 @@ public class DataflowPropertyTester extends PropertyTester {
   private boolean testIsDataflowProject(Object receiver) {
     if (receiver instanceof IAdaptable) {
       IAdaptable adaptable = (IAdaptable) receiver;
-      IProject project = (IProject) adaptable.getAdapter(IProject.class);
+      IProject project = adaptable.getAdapter(IProject.class);
       return isProjectDataflowProject(project);
     }
     return false;
@@ -70,7 +70,7 @@ public class DataflowPropertyTester extends PropertyTester {
   private boolean testIsInDataflowProject(Object receiver) {
     if (receiver instanceof IAdaptable) {
       IAdaptable adaptable = (IAdaptable) receiver;
-      IResource resource = (IResource) adaptable.getAdapter(IResource.class);
+      IResource resource = adaptable.getAdapter(IResource.class);
       if (resource != null) {
         IProject project = resource.getProject();
         return isProjectDataflowProject(project);

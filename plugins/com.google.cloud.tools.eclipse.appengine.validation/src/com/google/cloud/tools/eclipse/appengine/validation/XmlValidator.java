@@ -96,7 +96,7 @@ public class XmlValidator
         Map<BannedElement, Integer> bannedElementOffsetMap =
             ValidationUtils.getOffsetMap(bytes, blacklist, encoding);
         for (Map.Entry<BannedElement, Integer> entry : bannedElementOffsetMap.entrySet()) {
-          createMarker(resource, entry.getKey(), entry.getValue());
+          createMarker(resource, entry.getKey());
         }
       }
     } catch (SAXException ex) {
@@ -104,7 +104,7 @@ public class XmlValidator
     }
   }
   
-  void xsdValidation(IResource resource) throws CoreException {
+  void xsdValidation(IResource resource) {
     String xsd = helper.getXsd();
     if (xsd != null) {
       URL xsdPath = AppEngineWebXmlValidator.class.getResource(xsd);
@@ -158,7 +158,7 @@ public class XmlValidator
   /**
    * Creates a marker from a given {@link BannedElement}
    */
-  static void createMarker(IResource resource, BannedElement element, int elementOffset)
+  static void createMarker(IResource resource, BannedElement element)
       throws CoreException {
     IMarker marker = resource.createMarker(element.getMarkerId());
     marker.setAttribute(IMarker.SEVERITY, element.getIMarkerSeverity());

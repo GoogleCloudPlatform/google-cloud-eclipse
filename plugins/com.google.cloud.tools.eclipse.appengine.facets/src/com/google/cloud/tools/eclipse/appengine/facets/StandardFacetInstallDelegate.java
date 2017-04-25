@@ -121,7 +121,7 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
         NonSystemJobSuspender.resume();
       }
     }
-  };
+  }
 
   /**
    * Creates an appengine-web.xml file in the WEB-INF folder if it doesn't exist.

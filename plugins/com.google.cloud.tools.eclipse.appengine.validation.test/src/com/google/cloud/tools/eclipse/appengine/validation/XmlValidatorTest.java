@@ -59,7 +59,7 @@ public class XmlValidatorTest {
       new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
 
   @Before
-  public void setUp() throws CoreException {
+  public void setUp() {
     IProject project = dynamicWebProjectCreator.getProject();
     resource = project.getFile("WebContent/WEB-INF/web.xml");
   }
@@ -159,7 +159,8 @@ public class XmlValidatorTest {
     for (IMarker marker : markers) {
       builder.append(marker.getAttribute(IMarker.MESSAGE) + "\n");
     }
-    String message = String.format("Expected 1 marker, got %d markers with messages: %s", markers.length, builder.toString());
+    String message = String.format("Expected 1 marker, got %d markers with messages: %s",
+        markers.length, builder.toString());
     assertEquals(message, 1, markers.length);
   }
 
@@ -167,7 +168,7 @@ public class XmlValidatorTest {
   public void testCreateMarker() throws CoreException {
     String message = "Project ID should be specified at deploy time.";
     BannedElement element = new BannedElement(message);
-    XmlValidator.createMarker(resource, element, 0);
+    XmlValidator.createMarker(resource, element);
     IMarker[] markers = resource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
     assertEquals(message, markers[0].getAttribute(IMarker.MESSAGE));
     resource.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);

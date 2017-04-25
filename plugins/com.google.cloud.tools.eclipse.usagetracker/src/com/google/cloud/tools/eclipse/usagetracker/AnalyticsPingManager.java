@@ -16,8 +16,6 @@
 
 package com.google.cloud.tools.eclipse.usagetracker;
 
-import com.google.cloud.tools.eclipse.preferences.Activator;
-import com.google.cloud.tools.eclipse.preferences.AnalyticsPreferences;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -36,7 +34,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.core.runtime.preferences.ConfigurationScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -50,8 +47,6 @@ import org.osgi.service.prefs.BackingStoreException;
 public class AnalyticsPingManager {
 
   private static final Logger logger = Logger.getLogger(AnalyticsPingManager.class.getName());
-
-  private static final String PREFERENCES_PLUGIN_ID = Activator.PLUGIN_ID;
 
   private static final String ANALYTICS_COLLECTION_URL = "https://ssl.google-analytics.com/collect";
 
@@ -110,7 +105,7 @@ public class AnalyticsPingManager {
 
   public static synchronized AnalyticsPingManager getInstance() {
     if (instance == null) {
-      IEclipsePreferences preferences = ConfigurationScope.INSTANCE.getNode(PREFERENCES_PLUGIN_ID);
+      IEclipsePreferences preferences = AnalyticsPreferences.getPreferenceNode();
       String clientId = getAnonymizedClientId(preferences);
       Display display = PlatformUI.getWorkbench().getDisplay();
 

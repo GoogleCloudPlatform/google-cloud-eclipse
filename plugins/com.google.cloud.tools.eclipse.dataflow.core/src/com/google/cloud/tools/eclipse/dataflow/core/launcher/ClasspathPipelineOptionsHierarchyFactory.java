@@ -44,7 +44,7 @@ public class ClasspathPipelineOptionsHierarchyFactory implements PipelineOptions
   public PipelineOptionsHierarchy forProject(
       IProject project, MajorVersion version, IProgressMonitor monitor)
       throws PipelineOptionsRetrievalException {
-    IJavaElement javaProject = (IJavaElement) project.getAdapter(IJavaElement.class);
+    IJavaElement javaProject = project.getAdapter(IJavaElement.class);
     checkNotNull(
         javaProject,
         "%s cannot be created for a non-java project: %s",
