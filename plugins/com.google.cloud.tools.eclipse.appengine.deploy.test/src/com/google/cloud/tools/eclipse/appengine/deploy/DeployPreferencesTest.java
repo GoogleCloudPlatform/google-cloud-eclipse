@@ -25,18 +25,30 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ProjectScope;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.osgi.service.prefs.BackingStoreException;
 
 public class DeployPreferencesTest {
 
   private DeployPreferences preferences;
+  private IEclipsePreferences preferenceStore;
 
   @Before
   public void setUp() {
     IProject project = mock(IProject.class);
     when(project.getName()).thenReturn("");
     preferences = new DeployPreferences(project);
+    preferenceStore =
+        new ProjectScope(project).getNode("com.google.cloud.tools.eclipse.appengine.deploy");
+  }
+
+  @After
+  public void tearDown() throws BackingStoreException {
+    preferenceStore.removeNode();
   }
 
   @Test
@@ -146,13 +158,7 @@ public class DeployPreferencesTest {
 
   @Test
   public void testResetToDefault() {
-    preferences.setProjectId("someproject32");
-    preferences.setAccountEmail("someemail72");
-    preferences.setVersion("someversion97");
-    preferences.setAutoPromote(false);
-    preferences.setBucket("somebucket45");
-    preferences.setStopPreviousVersion(false);
-    preferences.setIncludeOptionalConfigurationFiles(false);
+    setAllFieldsWithExamples();
     preferences.resetToDefaults();
 
     assertThat(preferences.getProjectId(), isEmptyString());
@@ -162,5 +168,49 @@ public class DeployPreferencesTest {
     assertThat(preferences.getBucket(), isEmptyString());
     assertTrue(preferences.isStopPreviousVersion());
     assertTrue(preferences.isIncludeOptionalConfigurationFiles());
+  }
+
+  @Test
+  public void testDoesNotPersistWithoutSave() {
+    verifyEmptyPreferenceStore();
+    setAllFieldsWithExamples();
+    verifyEmptyPreferenceStore();
+  }
+
+  @Test
+  public void testSave() throws BackingStoreException {
+    verifyEmptyPreferenceStore();
+    setAllFieldsWithExamples();
+    preferences.save();
+
+    assertThat(preferenceStore.get(DeployPreferences.PREF_PROJECT_ID, ""), is("someproject32"));
+    assertThat(preferenceStore.get(DeployPreferences.PREF_ACCOUNT_EMAIL, ""), is("someemail72"));
+    assertThat(preferenceStore.get(DeployPreferences.PREF_CUSTOM_VERSION, ""), is("someversion97"));
+    assertFalse(preferenceStore.getBoolean(DeployPreferences.PREF_ENABLE_AUTO_PROMOTE, true));
+    assertThat(preferenceStore.get(DeployPreferences.PREF_CUSTOM_BUCKET, ""), is("somebucket45"));
+    assertFalse(preferenceStore.getBoolean(DeployPreferences.PREF_STOP_PREVIOUS_VERSION, true));
+    assertFalse(preferenceStore.getBoolean(
+        DeployPreferences.PREF_INCLUDE_OPTIONAL_CONFIGURATION_FILES, true));
+  }
+
+  private void setAllFieldsWithExamples() {
+    preferences.setProjectId("someproject32");
+    preferences.setAccountEmail("someemail72");
+    preferences.setVersion("someversion97");
+    preferences.setAutoPromote(false);
+    preferences.setBucket("somebucket45");
+    preferences.setStopPreviousVersion(false);
+    preferences.setIncludeOptionalConfigurationFiles(false);
+  }
+
+  private void verifyEmptyPreferenceStore() {
+    assertThat(preferenceStore.get(DeployPreferences.PREF_PROJECT_ID, ""), isEmptyString());
+    assertThat(preferenceStore.get(DeployPreferences.PREF_ACCOUNT_EMAIL, ""), isEmptyString());
+    assertThat(preferenceStore.get(DeployPreferences.PREF_CUSTOM_VERSION, ""), isEmptyString());
+    assertTrue(preferenceStore.getBoolean(DeployPreferences.PREF_ENABLE_AUTO_PROMOTE, true));
+    assertThat(preferenceStore.get(DeployPreferences.PREF_CUSTOM_BUCKET, ""), isEmptyString());
+    assertTrue(preferenceStore.getBoolean(DeployPreferences.PREF_STOP_PREVIOUS_VERSION, true));
+    assertTrue(preferenceStore.getBoolean(
+        DeployPreferences.PREF_INCLUDE_OPTIONAL_CONFIGURATION_FILES, true));
   }
 }
