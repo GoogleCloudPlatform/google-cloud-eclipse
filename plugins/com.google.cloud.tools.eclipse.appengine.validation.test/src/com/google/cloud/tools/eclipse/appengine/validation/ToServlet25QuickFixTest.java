@@ -23,7 +23,6 @@ import java.io.InputStream;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -53,7 +52,7 @@ public class ToServlet25QuickFixTest {
   
   @Test
   public void testConvertServlet_jcpNamespace() throws IOException, ParserConfigurationException,
-      SAXException, TransformerException, CoreException {
+      SAXException, CoreException {
     String webXml = "<web-app xmlns=\"http://xmlns.jcp.org/xml/ns/javaee\" version='3.1'>"
         + "<foo></foo></web-app>";
     Document transformed = transform(webXml);
@@ -67,7 +66,7 @@ public class ToServlet25QuickFixTest {
   
   @Test
   public void testConvertServlet_sunNamespace() throws IOException, ParserConfigurationException,
-      SAXException, TransformerException, CoreException {
+      SAXException, CoreException {
     String webXml = "<web-app xmlns=\"http://java.sun.com/xml/ns/javaee\" version='3.0'>"
         + "<foo></foo></web-app>";
     Document transformed = transform(webXml);

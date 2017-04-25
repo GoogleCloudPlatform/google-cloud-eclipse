@@ -23,7 +23,6 @@ import static org.junit.Assert.assertTrue;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
-import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
@@ -71,7 +70,7 @@ public class NewNativeAppEngineStandardProjectTest extends BaseProjectTest {
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);
     assertNotNull("Native App Engine projects should be faceted", facetedProject);
     assertTrue("Project does not have standard facet",
-        FacetedProjectHelper.projectHasFacet(facetedProject, AppEngineStandardFacet.ID));
+        AppEngineStandardFacet.hasFacet(facetedProject));
 
     for (String projectFile : projectFiles) {
       Path projectFilePath = new Path(projectFile);

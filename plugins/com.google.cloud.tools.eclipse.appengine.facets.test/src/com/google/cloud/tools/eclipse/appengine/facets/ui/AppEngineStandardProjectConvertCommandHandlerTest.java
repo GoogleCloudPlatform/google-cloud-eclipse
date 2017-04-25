@@ -75,7 +75,7 @@ public class AppEngineStandardProjectConvertCommandHandlerTest {
   }
 
   @Test
-  public void testCheckFacetCompatibility_noFacetsInstalled() throws CoreException {
+  public void testCheckFacetCompatibility_noFacetsInstalled() {
     assertFalse(facetedProject.hasProjectFacet(JavaFacet.FACET));
     assertFalse(facetedProject.hasProjectFacet(WebFacetUtils.WEB_FACET));
 

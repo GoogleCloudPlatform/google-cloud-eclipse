@@ -162,7 +162,7 @@ public final class SwtBotProjectActions {
    * Choose either the Package Explorer View or the Project Explorer view. Some perspectives have
    * the Package Explorer View open by default, whereas others use the Project Explorer View.
    * 
-   * @throws WidgetNoFoundException if an explorer is not found
+   * @throws WidgetNotFoundException if an explorer is not found
    */
   public static SWTBotView getExplorer(final SWTWorkbenchBot bot) {
     for (SWTBotView view : bot.views()) {
@@ -217,7 +217,7 @@ public final class SwtBotProjectActions {
    *
    * @param projectName the name of the project to select
    * @return the selected tree item
-   * @throws WidgetNoFoundException if the 'Package Explorer' or 'Project Explorer' view cannot be
+   * @throws WidgetNotFoundException if the 'Package Explorer' or 'Project Explorer' view cannot be
    *         found or if the specified project cannot be found.
    */
   public static SWTBotTreeItem selectProject(final SWTWorkbenchBot bot, String projectName) {

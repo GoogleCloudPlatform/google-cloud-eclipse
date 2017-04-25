@@ -632,7 +632,7 @@ public abstract class BaseDeployPreferencesPanel extends DeployPreferencesPanel 
       }
       return super.getTargets();
     }
-  };
+  }
 
   @Override
   DataBindingContext getDataBindingContext() {

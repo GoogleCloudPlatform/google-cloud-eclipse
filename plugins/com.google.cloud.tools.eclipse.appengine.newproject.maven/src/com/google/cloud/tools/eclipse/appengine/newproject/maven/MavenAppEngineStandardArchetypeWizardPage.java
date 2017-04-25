@@ -120,5 +120,5 @@ public class MavenAppEngineStandardArchetypeWizardPage extends WizardPage {
       this.displayName = displayName;
       this.description = description;
     }
-  };
+  }
 }

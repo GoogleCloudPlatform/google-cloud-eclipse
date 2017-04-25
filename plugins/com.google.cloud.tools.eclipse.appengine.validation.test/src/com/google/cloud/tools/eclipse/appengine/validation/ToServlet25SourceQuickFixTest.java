@@ -20,9 +20,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.io.IOException;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -39,7 +36,6 @@ import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.junit.Rule;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
@@ -58,8 +54,7 @@ public class ToServlet25SourceQuickFixTest {
           APPENGINE_STANDARD_FACET_VERSION_1);
   
   @Test
-  public void testConvertServlet() throws IOException, ParserConfigurationException,
-      SAXException, TransformerException, CoreException {
+  public void testConvertServlet() throws CoreException {
     IProject project = appEngineStandardProject.getProject();
     IFile file = project.getFile("web.xml");
     String webXml = "<web-app xmlns=\"http://xmlns.jcp.org/xml/ns/javaee\" version='3.1'/>";

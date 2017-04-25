@@ -20,8 +20,6 @@ import com.google.cloud.tools.eclipse.appengine.compat.GpeMigrator;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.Messages;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -31,9 +29,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 
 public class AppEngineStandardProjectConvertJob extends Job {
-
-  private static final Logger logger =
-      Logger.getLogger(AppEngineStandardProjectConvertJob.class.getName());
 
   private final IFacetedProject facetedProject;
 
@@ -48,14 +43,7 @@ public class AppEngineStandardProjectConvertJob extends Job {
 
     // Updating project before installing App Engine facet to avoid
     // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1155.
-    try {
-      GpeMigrator.removeObsoleteGpeRemnants(facetedProject, subMonitor.newChild(20));
-    } catch (CoreException ex) {
-      // Failed to remove GPE remnants; live with it.
-      subMonitor.setWorkRemaining(20);
-      subMonitor.worked(20);
-      logger.log(Level.WARNING, "Error while removing GPE remnants", ex);
-    }
+    GpeMigrator.removeObsoleteGpeRemnants(facetedProject, subMonitor.newChild(20));
 
     try {
       AppEngineStandardFacet.installAppEngineFacet(facetedProject,

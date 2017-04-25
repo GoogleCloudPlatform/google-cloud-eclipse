@@ -71,7 +71,7 @@ public class DataflowVersionTester extends PropertyTester {
       return null;
     }
     IAdaptable adaptable = (IAdaptable) receiver;
-    IResource resource = (IResource) adaptable.getAdapter(IResource.class);
+    IResource resource = adaptable.getAdapter(IResource.class);
     if (resource != null) {
       return resource.getProject();
     }

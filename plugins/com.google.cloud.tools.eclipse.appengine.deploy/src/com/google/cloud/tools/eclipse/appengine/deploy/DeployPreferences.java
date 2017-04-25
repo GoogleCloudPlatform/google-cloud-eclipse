@@ -60,8 +60,8 @@ public class DeployPreferences {
   }
 
   @VisibleForTesting
-  DeployPreferences(IEclipsePreferences preferences) {
-    preferenceStore = preferences;
+  DeployPreferences(IEclipsePreferences preferenceStore) {
+    this.preferenceStore = preferenceStore;
 
     accountEmail = preferenceStore.get(PREF_ACCOUNT_EMAIL, DEFAULT_ACCOUNT_EMAIL);
     projectId = preferenceStore.get(PREF_PROJECT_ID, DEFAULT_PROJECT_ID);

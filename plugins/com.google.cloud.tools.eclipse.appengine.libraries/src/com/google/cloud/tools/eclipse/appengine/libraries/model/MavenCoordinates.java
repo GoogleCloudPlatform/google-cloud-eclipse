@@ -36,9 +36,6 @@ public class MavenCoordinates {
   private String classifier;
 
   /**
-   * @param repository the URI or the identifier of the repository used to download the artifact
-   *        from. It is treated as an URI if it starts with <code>&lt;protocol&gt;://</code>. Cannot
-   *        be <code>null</code>.
    * @param groupId the Maven group ID, cannot be <code>null</code>
    * @param artifactId the Maven artifact ID, cannot be <code>null</code>
    */
