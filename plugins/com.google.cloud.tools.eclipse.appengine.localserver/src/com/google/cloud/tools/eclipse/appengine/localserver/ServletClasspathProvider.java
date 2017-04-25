@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.localserver;
 import com.google.cloud.tools.eclipse.appengine.libraries.ILibraryClasspathContainerResolverService;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
+import com.google.common.collect.ObjectArrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Inject;
@@ -98,10 +99,7 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
       IClasspathEntry[] apiEntries =
           resolverService.resolveLibraryAttachSourcesSync(servletApiId);
       IClasspathEntry[] jspApiEntries = resolverService.resolveLibraryAttachSourcesSync(jspApiId);
-      IClasspathEntry[] allEntries = new IClasspathEntry[apiEntries.length + jspApiEntries.length];
-      System.arraycopy(apiEntries, 0, allEntries, 0, apiEntries.length);
-      System.arraycopy(jspApiEntries, 0, allEntries, apiEntries.length, jspApiEntries.length);
-      return allEntries;
+      return ObjectArrays.concat(apiEntries, jspApiEntries, IClasspathEntry.class);
     } catch (CoreException ex) {
       logger.log(Level.WARNING, "Failed to initialize libraries", ex);
     }
