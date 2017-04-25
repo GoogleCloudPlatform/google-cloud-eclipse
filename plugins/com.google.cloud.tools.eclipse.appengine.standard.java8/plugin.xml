@@ -111,31 +111,6 @@
      </listener>
   </extension>
   <extension
-        point="org.eclipse.wst.common.project.facet.core.presets">
-     <static-preset
-           id="com.google.cloud.tools.eclipse.appengine.standard.java8.preset">
-        <label>
-           App Engine standard environment for Java 8
-        </label>
-        <description>
-           App Engine standard environment with Java 8 support
-        </description>
-        <facet
-              id="com.google.cloud.tools.eclipse.appengine.facets.standard"
-              version="1">
-        </facet>
-        <facet
-              id="java"
-              version="1.8">
-        </facet>
-        <facet
-              id="jst.web"
-              version="3.1">
-        </facet>
-     </static-preset>
-  </extension>
-  
-  <extension
         id="appengineWeb"
         name="App Engine Standard Java 8"
         point="org.eclipse.core.resources.builders">
