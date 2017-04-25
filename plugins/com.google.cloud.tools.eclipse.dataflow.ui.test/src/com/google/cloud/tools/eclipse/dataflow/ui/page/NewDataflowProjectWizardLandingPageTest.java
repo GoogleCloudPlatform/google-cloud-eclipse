@@ -27,12 +27,6 @@ public class NewDataflowProjectWizardLandingPageTest {
   public void testComplete() {
     Assert.assertFalse(page.isPageComplete());
   }
-  
-  @Test
-  public void testCanFlipToNextPage() {
-    page.setPageComplete(true);
-    Assert.assertFalse(page.canFlipToNextPage());
-  }
 
   @Test
   public void testImage() {
