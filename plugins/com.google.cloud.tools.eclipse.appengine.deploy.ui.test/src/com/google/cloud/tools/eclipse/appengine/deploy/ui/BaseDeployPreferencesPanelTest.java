@@ -326,7 +326,7 @@ public class BaseDeployPreferencesPanelTest {
 
   private BaseDeployPreferencesPanel createPanel(boolean requireValues) {
     return new BaseDeployPreferencesPanel(parent, project, loginService, layoutChangedHandler,
-        requireValues, projectRepository) {
+        requireValues, projectRepository, new DeployPreferences(project)) {
           @Override
           protected String getHelpContextId() {
             return null;

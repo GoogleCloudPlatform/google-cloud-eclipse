@@ -125,13 +125,13 @@ public abstract class BaseDeployPreferencesPanel extends DeployPreferencesPanel 
 
   public BaseDeployPreferencesPanel(Composite parent, IProject project,
       IGoogleLoginService loginService, Runnable layoutChangedHandler, boolean requireValues,
-      ProjectRepository projectRepository) {
+      ProjectRepository projectRepository, DeployPreferences model) {
     super(parent, SWT.NONE);
 
     this.layoutChangedHandler = Preconditions.checkNotNull(layoutChangedHandler);
     this.requireValues = requireValues;
     this.projectRepository = projectRepository;
-    model = new DeployPreferences(project);
+    this.model = model;
 
     FormColors colors = new FormColors(getDisplay());
     colors.setBackground(null);

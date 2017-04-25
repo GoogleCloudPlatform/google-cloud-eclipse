@@ -16,40 +16,43 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.flex;
 
-import com.google.common.annotations.VisibleForTesting;
+import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferences;
+import com.google.common.base.Strings;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ProjectScope;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.osgi.service.prefs.BackingStoreException;
 
-public class FlexDeployPreferences {
-  public static final String PREFERENCE_STORE_QUALIFIER = "com.google.cloud.tools.eclipse.appengine.deploy.flex";
+public class FlexDeployPreferences extends DeployPreferences {
 
   static final String PREF_APP_ENGINE_DIRECTORY = "appengine.config.folder";
 
   public static final String DEFAULT_APP_ENGINE_DIRECTORY = "src/main/appengine";
 
-  private final IEclipsePreferences preferenceStore;
+  private String appEngineDirectory;
 
   public FlexDeployPreferences(IProject project) {
-    this(new ProjectScope(project).getNode(PREFERENCE_STORE_QUALIFIER));
+    super(project);
+    appEngineDirectory =
+        preferenceStore.get(PREF_APP_ENGINE_DIRECTORY, DEFAULT_APP_ENGINE_DIRECTORY);
   }
 
-  @VisibleForTesting
-  FlexDeployPreferences(IEclipsePreferences preferences) {
-    preferenceStore = preferences;
+  @Override
+  public void resetToDefaults() {
+    appEngineDirectory = DEFAULT_APP_ENGINE_DIRECTORY;
+    super.resetToDefaults();
   }
 
+  @Override
   public void save() throws BackingStoreException {
-    preferenceStore.flush();
+    preferenceStore.put(PREF_APP_ENGINE_DIRECTORY, appEngineDirectory);
+    super.save();
   }
 
   public String getAppEngineDirectory() {
-    return preferenceStore.get(PREF_APP_ENGINE_DIRECTORY, DEFAULT_APP_ENGINE_DIRECTORY);
+    return appEngineDirectory;
   }
 
   public void setAppEngineDirectory(String appEngineDirectory) {
-    preferenceStore.put(PREF_APP_ENGINE_DIRECTORY, appEngineDirectory);
+    this.appEngineDirectory = Strings.nullToEmpty(appEngineDirectory);
   }
 
 }
