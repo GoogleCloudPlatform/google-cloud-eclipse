@@ -16,14 +16,72 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.flex;
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ProjectScope;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
+import org.osgi.service.prefs.BackingStoreException;
 
 public class FlexDeployPreferencesTest {
 
+  private FlexDeployPreferences preferences;
+  private IEclipsePreferences preferenceStore;
+
+  @Before
+  public void setUp() {
+    IProject project = mock(IProject.class);
+    when(project.getName()).thenReturn("");
+    preferences = new FlexDeployPreferences(project);
+    preferenceStore =
+        new ProjectScope(project).getNode("com.google.cloud.tools.eclipse.appengine.deploy");
+  }
+
+  @After
+  public void tearDown() throws BackingStoreException {
+    preferenceStore.removeNode();
+  }
+
   @Test
-  public void test() {
-    fail();
+  public void testDefaultAppEngineDirectory() {
+    assertEquals("src/main/appengine", FlexDeployPreferences.DEFAULT_APP_ENGINE_DIRECTORY);
+    assertEquals(preferences.getAppEngineDirectory(), "src/main/appengine");
+  }
+
+  @Test
+  public void testAppEngineDirectory() {
+    assertEquals(preferences.getAppEngineDirectory(), "src/main/appengine");
+    preferences.setAppEngineDirectory("another/directory");
+    assertEquals("another/directory", preferences.getAppEngineDirectory());
+    preferences.setAppEngineDirectory(null);
+    assertEquals("", preferences.getProjectId());
+  }
+
+  @Test
+  public void testResetToDefault() {
+    preferences.setAppEngineDirectory("another/directory");
+    preferences.resetToDefaults();
+    assertEquals("src/main/appengine", preferences.getAppEngineDirectory());
+  }
+
+  @Test
+  public void testDoesNotPersistWithoutSave() {
+    assertEquals("", preferenceStore.get(FlexDeployPreferences.PREF_APP_ENGINE_DIRECTORY, ""));
+    preferences.setAppEngineDirectory("another/directory");
+    assertEquals("", preferenceStore.get(FlexDeployPreferences.PREF_APP_ENGINE_DIRECTORY, ""));
+  }
+
+  @Test
+  public void testSave() throws BackingStoreException {
+    assertEquals("", preferenceStore.get(FlexDeployPreferences.PREF_APP_ENGINE_DIRECTORY, ""));
+    preferences.setAppEngineDirectory("another/directory");
+    preferences.save();
+    assertEquals("another/directory",
+        preferenceStore.get(FlexDeployPreferences.PREF_APP_ENGINE_DIRECTORY, ""));
   }
 }
