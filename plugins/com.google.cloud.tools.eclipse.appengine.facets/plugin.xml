@@ -25,7 +25,7 @@
       <group
             id="com.google.cloud.tools.eclipse.appengine.facets.standard.constraints.servlet">
          <label>
-            supported servlet APIs
+            supported Dynamic Web Module APIs
          </label>
          <include
                facet="jst.web"
@@ -35,7 +35,7 @@
       <group
             id="com.google.cloud.tools.eclipse.appengine.facets.standard.constraints.jre">
          <label>
-            supported JREs
+            supported Java Runtimes
          </label>
          <include
                facet="java"
