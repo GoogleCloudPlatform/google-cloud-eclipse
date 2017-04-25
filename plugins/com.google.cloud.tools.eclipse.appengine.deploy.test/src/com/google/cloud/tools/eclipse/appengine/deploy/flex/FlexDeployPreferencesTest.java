@@ -54,7 +54,7 @@ public class FlexDeployPreferencesTest {
   }
 
   @Test
-  public void testAppEngineDirectory() {
+  public void testSetAppEngineDirectory() {
     assertEquals(preferences.getAppEngineDirectory(), "src/main/appengine");
     preferences.setAppEngineDirectory("another/directory");
     assertEquals("another/directory", preferences.getAppEngineDirectory());
