@@ -19,8 +19,8 @@ import org.eclipse.wst.common.project.facet.core.events.IFacetedProjectListener;
 import org.eclipse.wst.common.project.facet.core.events.IProjectFacetActionEvent;
 
 /**
- * Handle project facet changes such as adding or removing the App Engine Standard facet, or Java
- * facet, and installing the {@code appengine-web.xml} builder.
+ * Handle facet install and uninstalls, version changes, and generally anything else, and add/remove
+ * the our {@code appengine-web.xml} builder and its {@code <runtime>java8</runtime>} element.
  */
 public class FacetChangeListener implements IFacetedProjectListener {
   private static final Logger logger = Logger.getLogger(FacetChangeListener.class.getName());
@@ -51,7 +51,8 @@ public class FacetChangeListener implements IFacetedProjectListener {
   }
 
   /**
-   * @param project
+   * Add our {@code appengine-web.xml} builder that monitors for changes to the {@code <runtime>}
+   * element.
    */
   private void addAppEngineWebBuilder(IProject project) {
     try {
@@ -78,7 +79,8 @@ public class FacetChangeListener implements IFacetedProjectListener {
   }
 
   /**
-   * @param project
+   * Add our {@code appengine-web.xml} builder that monitors for changes to the {@code <runtime>}
+   * element.
    */
   private void removeAppEngineWebBuilder(IProject project) {
     try {
