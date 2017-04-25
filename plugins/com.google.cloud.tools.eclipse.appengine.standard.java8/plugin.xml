@@ -33,37 +33,20 @@
 
    <extension
          point="org.eclipse.wst.common.project.facet.core.runtimes">
-      <runtime-component-version
-            type="com.google.cloud.tools.eclipse.appengine.standard.runtime"
-            version="8">
-      </runtime-component-version>
       <supported>
          <runtime-component
                id="com.google.cloud.tools.eclipse.appengine.standard.runtime"
-               version="8"></runtime-component>
-         <facet
-               id="com.google.cloud.tools.eclipse.appengine.facets.standard"
-               version="1">
-         </facet>
+               version="1"></runtime-component>
          <facet
                id="jst.web"
-               version="[2.5,3.1]">
+               version="[2.5-3.1]">
          </facet>
          <facet
                id="java"
-               version="[1.7,1.8]">
+               version="1.8">
          </facet>
       </supported>
 	</extension>
-    <extension
-         point="org.eclipse.jst.server.core.runtimeFacetMappings">
-      <runtimeFacetMapping
-            id="com.google.cloud.tools.eclipse.appengineJava8RuntimeFacetMapping"
-            runtimeTypeId="com.google.cloud.tools.eclipse.appengine.standard.runtime"
-            runtime-component="com.google.cloud.tools.eclipse.appengine.standard.runtime"
-            version="8">
-      </runtimeFacetMapping>
-   </extension>
    
   <extension point="com.google.cloud.tools.eclipse.appengine.libraries"
              id="com.google.cloud.tools.eclipse.appengine.standard.java8.apis">   
