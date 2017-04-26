@@ -1,7 +1,6 @@
 cd github/google-cloud-eclipse
 
-wget http://download.eclipse.org/cbi/updates/license/compositeContent.jar
-
+set CLOUDSDK_CORE_DISABLE_USAGE_REPORTING=true
 wget https://dl.google.com/dl/cloudsdk/channels/rapid/GoogleCloudSDKInstaller.exe
 start /WAIT GoogleCloudSDKInstaller.exe /S /noreporting /nostartmenu /nodesktop /logtofile /D=T:\google
 call t:\google\google-cloud-sdk\bin\gcloud.cmd components copy-bundled-python>>python_path.txt && SET /p CLOUDSDK_PYTHON=<python_path.txt && DEL python_path.txt
@@ -12,7 +11,6 @@ set GOOGLE_CLOUD_SDK_HOME=t:\google\google-cloud-sdk
 wget http://www-us.apache.org/dist/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.zip
 unzip apache-maven-3.3.9-bin.zip
 
-apache-maven-3.3.9/bin/mvn --fail-at-end -Ptravis verify
-REM curl -s https://codecov.io/bash | bash
+apache-maven-3.3.9/bin/mvn --fail-at-end -Ptravis -Declipse.target=oxygen verify
 
 exit /b %ERRORLEVEL%
