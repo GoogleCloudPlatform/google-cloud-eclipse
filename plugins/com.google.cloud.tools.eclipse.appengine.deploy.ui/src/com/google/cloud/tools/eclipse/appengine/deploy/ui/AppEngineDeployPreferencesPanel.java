@@ -106,8 +106,6 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
 
   private Button stopPreviousVersionButton;
 
-  private Button includeOptionalConfigurationFilesButton;
-
   private Text bucket;
 
   private ExpandableComposite expandableComposite;
@@ -145,16 +143,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     setupAccountEmailDataBinding();
     setupProjectSelectorDataBinding();
 
-    createProjectVersionSection();
-    setupTextFieldDataBinding(version, "version", new ProjectVersionValidator());
-
-    createPromoteSection();
-    setupMasterDependantDataBinding(autoPromoteButton, "autoPromote",
-        stopPreviousVersionButton, "stopPreviousVersion");
-
-    createOptionalConfigurationFilesSection();
-    setupCheckBoxDataBinding(
-        includeOptionalConfigurationFilesButton, "includeOptionalConfigurationFiles");
+    createCenterArea();
 
     createAdvancedSection();
     setupTextFieldDataBinding(bucket, "bucket", new BucketNameValidator());
@@ -163,6 +152,15 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
 
     Dialog.applyDialogFont(this);
     GridLayoutFactory.swtDefaults().numColumns(2).applyTo(this);
+  }
+
+  protected void createCenterArea() {
+    createProjectVersionSection();
+    setupTextFieldDataBinding(version, "version", new ProjectVersionValidator());
+
+    createPromoteSection();
+    setupMasterDependantDataBinding(autoPromoteButton, "autoPromote",
+        stopPreviousVersionButton, "stopPreviousVersion");
   }
 
   private void setupAccountEmailDataBinding() {
@@ -401,13 +399,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
         Messages.getString("tooltip.stop.previous.version"));
   }
 
-  private void createOptionalConfigurationFilesSection() {
-    includeOptionalConfigurationFilesButton = createCheckBox(
-        Messages.getString("deploy.config.files"),
-        Messages.getString("tooltip.deploy.config.files"));
-  }
-
-  private Button createCheckBox(String text, String tooltip) {
+  protected Button createCheckBox(String text, String tooltip) {
     Button checkBox = new Button(this, SWT.CHECK);
     checkBox.setText(text);
     checkBox.setToolTipText(tooltip);
