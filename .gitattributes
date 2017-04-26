@@ -1,0 +1,7 @@
+*.java -crlf
+*.xml -crlf
+*.properties -crlf
+*.prefs -crlf
+*.MF -crlf
+*.md -crlf
+*.properties -crlf
