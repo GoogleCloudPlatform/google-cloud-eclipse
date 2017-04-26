@@ -235,8 +235,10 @@ public class RunOptionsDefaultsComponent {
               if (result.getStagingLocation().equals(stagingLocationInput.getText())
                   && result.isAccessible()) {
                 messageTarget.setInfo("Found staging location " + stagingLocation);
+                createButton.setEnabled(false);
               } else {
                 messageTarget.setError(String.format("Couldn't fetch bucket %s", stagingLocation));
+                createButton.setEnabled(true);
               }
             } catch (InterruptedException | ExecutionException e) {
               messageTarget.setError(String.format("Couldn't fetch bucket %s", stagingLocation));
