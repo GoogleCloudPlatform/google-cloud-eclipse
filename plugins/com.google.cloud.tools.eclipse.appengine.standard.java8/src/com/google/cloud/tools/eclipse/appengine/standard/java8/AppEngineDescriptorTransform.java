@@ -26,7 +26,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 
 /**
- *
+ * Utility class for adding and removing the {@code <runtime>java8</runtime>} to/from an
+ * {@code appengine-web.xml}.
  */
 public class AppEngineDescriptorTransform {
   private static final Logger logger =
