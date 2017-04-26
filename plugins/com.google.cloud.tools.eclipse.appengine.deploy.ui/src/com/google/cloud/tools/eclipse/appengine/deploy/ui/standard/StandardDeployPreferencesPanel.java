@@ -17,13 +17,13 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.ui.standard;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferences;
-import com.google.cloud.tools.eclipse.appengine.deploy.ui.BaseDeployPreferencesPanel;
+import com.google.cloud.tools.eclipse.appengine.deploy.ui.AppEngineDeployPreferencesPanel;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.swt.widgets.Composite;
 
-public class StandardDeployPreferencesPanel extends BaseDeployPreferencesPanel {
+public class StandardDeployPreferencesPanel extends AppEngineDeployPreferencesPanel {
 
   public StandardDeployPreferencesPanel(Composite parent, IProject project,
       IGoogleLoginService loginService, Runnable layoutChangedHandler, boolean requireValues,

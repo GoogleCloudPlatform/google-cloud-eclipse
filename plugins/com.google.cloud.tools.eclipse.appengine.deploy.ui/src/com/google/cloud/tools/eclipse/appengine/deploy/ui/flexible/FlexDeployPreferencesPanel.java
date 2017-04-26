@@ -17,13 +17,13 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.ui.flexible;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexDeployPreferences;
-import com.google.cloud.tools.eclipse.appengine.deploy.ui.BaseDeployPreferencesPanel;
+import com.google.cloud.tools.eclipse.appengine.deploy.ui.AppEngineDeployPreferencesPanel;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.swt.widgets.Composite;
 
-public class FlexDeployPreferencesPanel extends BaseDeployPreferencesPanel {
+public class FlexDeployPreferencesPanel extends AppEngineDeployPreferencesPanel {
 
   public FlexDeployPreferencesPanel(Composite parent, IProject project,
       IGoogleLoginService loginService, Runnable layoutChangedHandler, boolean requireValues,

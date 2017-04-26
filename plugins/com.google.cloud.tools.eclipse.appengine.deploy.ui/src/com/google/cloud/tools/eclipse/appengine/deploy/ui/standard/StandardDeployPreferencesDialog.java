@@ -16,7 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.ui.standard;
 
-import com.google.cloud.tools.eclipse.appengine.deploy.ui.BaseDeployPreferencesPanel;
+import com.google.cloud.tools.eclipse.appengine.deploy.ui.AppEngineDeployPreferencesPanel;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPreferencesDialog;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
@@ -33,7 +33,7 @@ class StandardDeployPreferencesDialog extends DeployPreferencesDialog {
   }
 
   @Override
-  protected BaseDeployPreferencesPanel newBaseDeployPreferencesPanel(Composite container,
+  protected AppEngineDeployPreferencesPanel createDeployPreferencesPanel(Composite container,
       IProject project, IGoogleLoginService loginService, Runnable layoutChangedHandler,
       boolean requireValues, ProjectRepository projectRepository) {
     return new StandardDeployPreferencesPanel(container, project, loginService,

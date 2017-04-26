@@ -31,7 +31,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferences;
-import com.google.cloud.tools.eclipse.appengine.deploy.ui.BaseDeployPreferencesPanel.ProjectSelectionValidator;
+import com.google.cloud.tools.eclipse.appengine.deploy.ui.AppEngineDeployPreferencesPanel.ProjectSelectionValidator;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelectorObservableValue;
@@ -67,13 +67,13 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.osgi.service.prefs.BackingStoreException;
 
 @RunWith(MockitoJUnitRunner.class)
-public class BaseDeployPreferencesPanelTest {
+public class AppEngineDeployPreferencesPanelTest {
 
   private static final String EMAIL_2 = "some-email-2@example.com";
   private static final String EMAIL_1 = "some-email-1@example.com";
 
   private Composite parent;
-  private BaseDeployPreferencesPanel deployPanel;
+  private AppEngineDeployPreferencesPanel deployPanel;
   @Mock private IProject project;
   @Mock private IGoogleLoginService loginService;
   @Mock private Runnable layoutChangedHandler;
@@ -324,8 +324,8 @@ public class BaseDeployPreferencesPanelTest {
     }
   }
 
-  private BaseDeployPreferencesPanel createPanel(boolean requireValues) {
-    return new BaseDeployPreferencesPanel(parent, project, loginService, layoutChangedHandler,
+  private AppEngineDeployPreferencesPanel createPanel(boolean requireValues) {
+    return new AppEngineDeployPreferencesPanel(parent, project, loginService, layoutChangedHandler,
         requireValues, projectRepository, new DeployPreferences(project)) {
           @Override
           protected String getHelpContextId() {
