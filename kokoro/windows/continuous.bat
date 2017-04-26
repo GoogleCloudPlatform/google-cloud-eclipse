@@ -1,5 +1,7 @@
 cd github/google-cloud-eclipse
 
+wget http://download.eclipse.org/cbi/updates/license/compositeContent.jar
+
 wget https://dl.google.com/dl/cloudsdk/channels/rapid/GoogleCloudSDKInstaller.exe
 start /WAIT GoogleCloudSDKInstaller.exe /S /noreporting /nostartmenu /nodesktop /logtofile /D=T:\google
 call t:\google\google-cloud-sdk\bin\gcloud.cmd components copy-bundled-python>>python_path.txt && SET /p CLOUDSDK_PYTHON=<python_path.txt && DEL python_path.txt
