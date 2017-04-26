@@ -8,7 +8,7 @@
      Google user account with permissions to deploy the project.
 
      &lt;b>Project&lt;/b>
-     The Google Cloud Platform project that is the deployment target. If you want to create a new project, follow the link to open the Cloud Console.
+     The Google Cloud Platform project that is the deployment target. To create a new project, open the Cloud Console.
 
      &lt;b>Version&lt;/b>
      The version of the app that will be created or replaced by this deployment. If you do not specify a version, one will be generated for you.
@@ -31,7 +31,7 @@
      Google user account with permissions to deploy the project.
 
      &lt;b>Project&lt;/b>
-     The Google Cloud Platform project that is the deployment target. If you want to create a new project, follow the link to open the Cloud Console.
+     The Google Cloud Platform project that is the deployment target. To create a new project, open the Cloud Console.
 
      &lt;b>Version&lt;/b>
      The version of the app that will be created or replaced by this deployment. If you do not specify a version, one will be generated for you.
