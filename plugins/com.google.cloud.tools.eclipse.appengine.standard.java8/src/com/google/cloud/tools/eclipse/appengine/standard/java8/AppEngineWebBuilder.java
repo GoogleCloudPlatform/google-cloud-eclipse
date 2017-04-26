@@ -79,11 +79,13 @@ public class AppEngineWebBuilder extends IncrementalProjectBuilder {
   private void checkRuntimeElement(IFacetedProject project, IFile appEngineWebDescriptor,
       IProgressMonitor monitor) {
     try (InputStream input = appEngineWebDescriptor.getContents()) {
-      boolean isJava8 = AppEngineDescriptor.parse(input).isJava8();
-      if (project.hasProjectFacet(JavaFacet.VERSION_1_8) != isJava8) {
+      boolean hasJava8Runtime = AppEngineDescriptor.parse(input).isJava8();
+      boolean hasJava8Facet = project.hasProjectFacet(JavaFacet.VERSION_1_8);
+      // if not the same, then we update the facet to match the appengine-web.xml
+      if (hasJava8Facet != hasJava8Runtime) {
         Set<Action> updates = new HashSet<Action>();
         // Can upgrade jst.web to 3.1, but cannot downgrade from 3.1
-        if (isJava8) {
+        if (hasJava8Runtime) {
           updates.add(new Action(Action.Type.VERSION_CHANGE, JavaFacet.VERSION_1_8, null));
           updates.add(new Action(Action.Type.VERSION_CHANGE, WebFacetUtils.WEB_31, null));
         } else {

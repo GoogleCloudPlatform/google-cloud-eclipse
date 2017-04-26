@@ -96,7 +96,7 @@ public class FacetChangeListener implements IFacetedProjectListener {
   }
 
   /**
-   * Add our {@code appengine-web.xml} builder that monitors for changes to the {@code <runtime>}
+   * Remove our {@code appengine-web.xml} builder that monitors for changes to the {@code <runtime>}
    * element.
    */
   private void removeAppEngineWebBuilder(IProject project) {
@@ -122,7 +122,6 @@ public class FacetChangeListener implements IFacetedProjectListener {
 
   /**
    * Find the <code>appengine-web.xml</code> file.
-   * 
    * @return the file or {@code null} if not found
    */
   private IFile findDescriptor(IFacetedProject project) {
