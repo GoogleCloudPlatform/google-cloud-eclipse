@@ -1,49 +1,52 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE contexts [
+  <!ENTITY account "&lt;b>Account:&lt;/b> Google user account with permissions to deploy the project.">
+
+  <!ENTITY project "&lt;b>Project:&lt;/b> The Google Cloud Platform project that is the deployment target. To create a new project, open the Cloud Console.">
+
+  <!ENTITY version "&lt;b>Version:&lt;/b> The version of the app that will be created or replaced by this deployment. If you do not specify a version, one will be generated for you.">
+
+  <!ENTITY auto-promote "&lt;b>Promote the deployed version to receive all traffic:&lt;/b> All traffic will be directed to this version once the deployment finishes.">
+
+  <!ENTITY stop-previous-version "&lt;b>Stop previous version:&lt;/b> Stop the previously running version when deploying a new version that receives all traffic.">
+
+  <!ENTITY staging-bucket "&lt;b>Staging bucket:&lt;/b> The Google Cloud Storage bucket used to stage files associated with the deployment. If this argument is not specified, the application's default code bucket is used.">
+]>
 <contexts>
   <context id="DeployAppEngineStandardProjectContext" title="App Engine Deployment - Standard Environment">
     <!-- Eclipse requires escaped pseudo-HTML here -->
     <description>Properties used when deploying the project to the App Engine standard environment.
 
-     &lt;b>Account&lt;/b>
-     Google user account with permissions to deploy the project.
+    &account;
 
-     &lt;b>Project&lt;/b>
-     The Google Cloud Platform project that is the deployment target. To create a new project, open the Cloud Console.
+    &project;
 
-     &lt;b>Version&lt;/b>
-     The version of the app that will be created or replaced by this deployment. If you do not specify a version, one will be generated for you.
+    &version;
 
-     &lt;b>Promote the deployed version to receive all traffic&lt;/b>
-     All traffic will be directed to this version once the deployment finishes.
+    &auto-promote;
 
-     &lt;b>Stop previous version&lt;/b>
-     Stop the previously running version when deploying a new version that receives all traffic.
+    &stop-previous-version;
 
-     &lt;b>Staging bucket&lt;/b>
-     The Google Cloud Storage bucket used to stage files associated with the deployment. If this argument is not specified, the application's default code bucket is used.
+    &staging-bucket;
+
     </description>
   </context>
   <context id="DeployAppEngineFlexProjectContext" title="App Engine Deployment - Flexible Environment">
     <!-- Eclipse requires escaped pseudo-HTML here -->
     <description>Properties used when deploying the project to the App Engine flexible environment.
 
-     &lt;b>Account&lt;/b>
-     Google user account with permissions to deploy the project.
+    &account;
 
-     &lt;b>Project&lt;/b>
-     The Google Cloud Platform project that is the deployment target. To create a new project, open the Cloud Console.
+    &project;
 
-     &lt;b>Version&lt;/b>
-     The version of the app that will be created or replaced by this deployment. If you do not specify a version, one will be generated for you.
+    &version;
 
-     &lt;b>Promote the deployed version to receive all traffic&lt;/b>
-     All traffic will be directed to this version once the deployment finishes.
+    &auto-promote;
 
-     &lt;b>Stop previous version&lt;/b>
-     Stop the previously running version when deploying a new version that receives all traffic.
+    &stop-previous-version;
 
-     &lt;b>Staging bucket&lt;/b>
-     The Google Cloud Storage bucket used to stage files associated with the deployment. If this argument is not specified, the application's default code bucket is used.
+    &staging-bucket;
+
     </description>
   </context>
 </contexts>
