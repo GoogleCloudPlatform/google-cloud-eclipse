@@ -113,9 +113,9 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
   private final Image refreshIcon = SharedImages.REFRESH_IMAGE_DESCRIPTOR.createImage(getDisplay());
 
   @VisibleForTesting
-  final DeployPreferences model;
+  protected final DeployPreferences model;
   private final ObservablesManager observables = new ObservablesManager();
-  private final DataBindingContext bindingContext = new DataBindingContext();
+  protected final DataBindingContext bindingContext = new DataBindingContext();
 
   private final Runnable layoutChangedHandler;
   private final boolean requireValues;
@@ -313,7 +313,6 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
   }
 
   private void createCredentialSection(IGoogleLoginService loginService) {
-
     Label accountLabel = new Label(this, SWT.LEAD);
     accountLabel.setText(Messages.getString("deploy.preferences.dialog.label.selectAccount"));
     accountLabel.setToolTipText(Messages.getString("tooltip.account"));
