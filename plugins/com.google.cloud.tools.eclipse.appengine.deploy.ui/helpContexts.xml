@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE contexts [
+  <!-- Eclipse requires escaped pseudo-HTML here -->
   <!ENTITY account "&lt;b>Account:&lt;/b> Google user account with permissions to deploy the project.">
 
   <!ENTITY project "&lt;b>Project:&lt;/b> The Google Cloud Platform project that is the deployment target. To create a new project, open the Cloud Console.">
@@ -14,7 +15,6 @@
 ]>
 <contexts>
   <context id="DeployAppEngineStandardProjectContext" title="App Engine Deployment - Standard Environment">
-    <!-- Eclipse requires escaped pseudo-HTML here -->
     <description>Properties used when deploying the project to the App Engine standard environment.
 
     &account;
@@ -32,7 +32,6 @@
     </description>
   </context>
   <context id="DeployAppEngineFlexProjectContext" title="App Engine Deployment - Flexible Environment">
-    <!-- Eclipse requires escaped pseudo-HTML here -->
     <description>Properties used when deploying the project to the App Engine flexible environment.
 
     &account;
