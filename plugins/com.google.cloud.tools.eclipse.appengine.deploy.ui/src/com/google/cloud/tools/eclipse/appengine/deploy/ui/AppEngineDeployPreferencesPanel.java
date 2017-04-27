@@ -112,6 +112,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
 
   private final Image refreshIcon = SharedImages.REFRESH_IMAGE_DESCRIPTOR.createImage(getDisplay());
 
+  protected final IProject project;
   @VisibleForTesting
   protected final DeployPreferences model;
   private final ObservablesManager observables = new ObservablesManager();
@@ -128,6 +129,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
       ProjectRepository projectRepository, DeployPreferences model) {
     super(parent, SWT.NONE);
 
+    this.project = project;
     this.layoutChangedHandler = Preconditions.checkNotNull(layoutChangedHandler);
     this.requireValues = requireValues;
     this.projectRepository = projectRepository;

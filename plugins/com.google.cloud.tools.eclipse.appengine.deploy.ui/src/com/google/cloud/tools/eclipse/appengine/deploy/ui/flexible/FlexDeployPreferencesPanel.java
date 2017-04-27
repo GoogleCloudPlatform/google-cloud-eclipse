@@ -24,6 +24,8 @@ import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import org.eclipse.core.databinding.beans.PojoProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -74,10 +76,16 @@ public class FlexDeployPreferencesPanel extends AppEngineDeployPreferencesPanel 
       @Override
       public void widgetSelected(SelectionEvent event) {
         DirectoryDialog dialog = new DirectoryDialog(getShell());
-        dialog.setFilterPath(directoryField.getText().trim());
+        IPath path = new Path(directoryField.getText().trim());
+        if (path.isAbsolute()) {
+          dialog.setFilterPath(path.toString());
+        } else {
+          dialog.setFilterPath(project.getLocation() + "/" + path.toString());
+        }
         String result = dialog.open();
         if (result != null) {
-          directoryField.setText(result);
+          IPath maybeProjectRelative = new Path(result).makeRelativeTo(project.getLocation());
+          directoryField.setText(maybeProjectRelative.toString());
         }
       }
     });
@@ -87,9 +95,45 @@ public class FlexDeployPreferencesPanel extends AppEngineDeployPreferencesPanel 
     secondColumn.setLayoutData(fillGridData);
     directoryField.setLayoutData(fillGridData);
 
-    ISWTObservableValue buttonValue = WidgetProperties.text().observe(directoryField);
+    ISWTObservableValue fieldValue = WidgetProperties.text().observe(directoryField);
     IObservableValue modelValue = PojoProperties.value("appEngineDirectory").observe(model);
-    bindingContext.bindValue(buttonValue, modelValue);
+    bindingContext.bindValue(fieldValue, modelValue);
+
+    /*
+    UpdateValueStrategy modelToField = new UpdateValueStrategy().setConverter(
+        new Converter(String.class, String.class) {
+          @Override
+          public Object convert(Object fromObject) {
+            String modelValue = (String) fromObject;
+            if (Strings.isNullOrEmpty(modelValue)) {
+              return project.getLocation() + "/src/main/appengine";
+            } else {
+              return modelValue;
+            }
+          }
+        });
+    bindingContext.bindValue(fieldValue, modelValue, new UpdateValueStrategy(), modelToField);
+    */
+
+/*
+    UpdateValueStrategy fieldToModel = new UpdateValueStrategy().setConverter(
+        new Converter(String.class, String.class) {
+          @Override
+          public Object convert(Object fromObject) {
+            IPath path = new Path((String) fromObject);
+            if (path.isAbsolute()) {
+              IPath relativePath = PathUtil.relativizePath(path, project.getLocation());
+              System.out.println("user input: " + path);
+              System.out.println("project: " + project.getLocation());
+              System.out.println("relativized: " + relativePath);
+              return relativePath.toString();
+            } else {
+              return path.toString();
+            }
+          }
+        });
+    bindingContext.bindValue(fieldValue, modelValue, fieldToModel, new UpdateValueStrategy());
+*/
   }
 
   @Override
