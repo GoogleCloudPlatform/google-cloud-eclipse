@@ -90,7 +90,7 @@ public final class TestProjectCreator extends ExternalResource {
       try {
         project.delete(true, null);
       } catch (CoreException ex) {
-        fail("Could not delete project: " + ex.getMessage());
+        throw new AssertionError("Could not delete project", ex);
       }
     }
   }
@@ -115,7 +115,7 @@ public final class TestProjectCreator extends ExternalResource {
       try {
         createProject("test" + Math.random());
       } catch (CoreException ex) {
-        fail("FATAL: cannot create a test project: " + ex.getMessage());
+        throw new AssertionError("Could not delete project", ex);
       }
     }
   }
