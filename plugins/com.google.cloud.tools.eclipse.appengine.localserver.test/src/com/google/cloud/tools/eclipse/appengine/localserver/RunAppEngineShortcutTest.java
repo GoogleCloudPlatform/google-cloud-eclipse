@@ -39,20 +39,16 @@ import org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
-import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.hamcrest.Matcher;
 import org.junit.Rule;
 import org.junit.Test;
 
 public class RunAppEngineShortcutTest {
 
-  private static final IProjectFacetVersion APP_ENGINE_STANDARD_FACET_1 =
-      ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID).getVersion("1");
-
   @Rule public TestProjectCreator javaProjectCreator = new TestProjectCreator();
   @Rule public TestProjectCreator appEngineProjectCreator = new TestProjectCreator()
-      .withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, APP_ENGINE_STANDARD_FACET_1);
+      .withFacetVersions(
+          JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineStandardFacet.FACET_VERSION);
 
   @Test
   public void testRunAppEngine_enabledForAppEngineProject() {

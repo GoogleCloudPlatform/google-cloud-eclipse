@@ -110,6 +110,12 @@ public final class TestProjectCreator extends ExternalResource {
     return project;
   }
 
+  public IFacetedProject getFacetedProject() throws CoreException {
+    IFacetedProject facetedProject = ProjectFacetsManager.create(getProject());
+    return facetedProject;
+  }
+
+
   private void createProjectIfNecessary() {
     if (project == null) {
       try {

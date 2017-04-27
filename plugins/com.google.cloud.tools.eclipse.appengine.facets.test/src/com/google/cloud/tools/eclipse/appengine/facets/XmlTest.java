@@ -16,14 +16,13 @@
 
 package com.google.cloud.tools.eclipse.appengine.facets;
 
+import com.google.cloud.tools.eclipse.test.util.BasePluginXmlTest;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.junit.Assert;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-
-import com.google.cloud.tools.eclipse.test.util.BasePluginXmlTest;
 
 public class XmlTest extends BasePluginXmlTest {
   
@@ -38,7 +37,9 @@ public class XmlTest extends BasePluginXmlTest {
     for (int i = 0; i < elements.getLength(); i++) {
       Element element = (Element) elements.item(i);
       String facet = element.getAttribute("facet");
-      Assert.assertTrue(ProjectFacetsManager.isProjectFacetDefined(facet));
+      Assert.assertTrue(facet.isEmpty() || ProjectFacetsManager.isProjectFacetDefined(facet));
+      String group = element.getAttribute("group");
+      Assert.assertTrue(group.isEmpty() || ProjectFacetsManager.isGroupDefined(group));
     }
   }
 }

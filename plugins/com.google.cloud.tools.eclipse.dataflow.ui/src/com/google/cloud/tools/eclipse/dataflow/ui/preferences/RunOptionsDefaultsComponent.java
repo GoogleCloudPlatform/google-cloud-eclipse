@@ -37,6 +37,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -58,6 +59,7 @@ import java.util.concurrent.Future;
  * Collects default run options for Dataflow Pipelines and provides means to create and modify them.
  */
 public class RunOptionsDefaultsComponent {
+
   private static final int PROJECT_INPUT_SPENT_COLUMNS = 1;
   private static final int STAGING_LOCATION_SPENT_COLUMNS = 2;
 
@@ -90,6 +92,7 @@ public class RunOptionsDefaultsComponent {
     Label comboLabel = new Label(target, SWT.NULL);
     stagingLocationInput = new Combo(target, SWT.DROP_DOWN);
     createButton = ButtonFactory.newPushButton(target, "&Create");
+    createButton.setEnabled(false);
 
     // Initialize the Default Project, which is used to populate the Staging Location field
     String project = preferences.getDefaultProject();
@@ -118,7 +121,6 @@ public class RunOptionsDefaultsComponent {
     stagingLocationInput.setLayoutData(new GridData(
         SWT.FILL, SWT.CENTER, true, false, columns - STAGING_LOCATION_SPENT_COLUMNS, 1));
 
-
     GetProjectStagingLocationsListener getProjectStagingLocationsListener =
         new GetProjectStagingLocationsListener();
     projectInput.addFocusListener(getProjectStagingLocationsListener);
@@ -133,6 +135,8 @@ public class RunOptionsDefaultsComponent {
     });
     createButton.addSelectionListener(new CreateStagingLocationListener());
 
+    stagingLocationInput.addModifyListener(new EnableCreateButton());
+    
     updateStagingLocations(project);
     messageTarget.setInfo("Set Pipeline Run Option Defaults");
   }
@@ -231,8 +235,10 @@ public class RunOptionsDefaultsComponent {
               if (result.getStagingLocation().equals(stagingLocationInput.getText())
                   && result.isAccessible()) {
                 messageTarget.setInfo("Found staging location " + stagingLocation);
+                createButton.setEnabled(false);
               } else {
                 messageTarget.setError(String.format("Couldn't fetch bucket %s", stagingLocation));
+                createButton.setEnabled(true);
               }
             } catch (InterruptedException | ExecutionException e) {
               messageTarget.setError(String.format("Couldn't fetch bucket %s", stagingLocation));
@@ -308,5 +314,15 @@ public class RunOptionsDefaultsComponent {
       completionListener.setContents(stagingLocations);
       stagingLocationInput.setSelection(new Point(startSelection, endSelection));
     }
+  }
+  
+  private class EnableCreateButton implements ModifyListener {
+
+    @Override
+    public void modifyText(ModifyEvent event) {
+      boolean enabled = !stagingLocationInput.getText().trim().isEmpty();
+      createButton.setEnabled(enabled);
+    }
+
   }
 }

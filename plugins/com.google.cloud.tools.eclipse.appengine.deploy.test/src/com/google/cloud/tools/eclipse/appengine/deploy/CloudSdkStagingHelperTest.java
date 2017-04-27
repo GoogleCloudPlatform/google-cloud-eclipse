@@ -37,8 +37,6 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
-import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
-import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -59,15 +57,12 @@ public class CloudSdkStagingHelperTest {
   private static final String DOS_XML = "<blacklistentries/>";
   private static final String QUEUE_XML = "<queue-entries/>";
 
-  private static final IProjectFacetVersion APP_ENGINE_STANDARD_FACET_1 =
-      ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID).getVersion("1");
-
   @Rule
   public TemporaryFolder tempFolder = new TemporaryFolder();
 
   @Rule
   public TestProjectCreator projectCreator = new TestProjectCreator().withFacetVersions(
-      JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, APP_ENGINE_STANDARD_FACET_1);
+      JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineStandardFacet.FACET_VERSION);
 
   @Mock private IProgressMonitor monitor;
 

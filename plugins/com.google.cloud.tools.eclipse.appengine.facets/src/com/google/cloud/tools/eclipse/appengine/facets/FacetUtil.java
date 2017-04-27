@@ -78,7 +78,8 @@ public class FacetUtil {
     Preconditions.checkArgument(JavaFacet.FACET.getId().equals(javaFacet.getProjectFacet().getId()),
         javaFacet.toString() + " is not a Java facet");
 
-    if (facetedProject.hasProjectFacet(javaFacet)) {
+    if (facetedProject.hasProjectFacet(JavaFacet.FACET)
+        && javaFacet.compareTo(facetedProject.getProjectFacetVersion(JavaFacet.FACET)) <= 0) {
       return this;
     }
 
@@ -113,7 +114,8 @@ public class FacetUtil {
     Preconditions.checkArgument(WebFacetUtils.WEB_FACET.getId().equals(webFacet.getProjectFacet().getId()),
         webFacet.toString() + " is not a Web facet");
 
-    if (facetedProject.hasProjectFacet(webFacet)) {
+    if (facetedProject.hasProjectFacet(WebFacetUtils.WEB_FACET) && webFacet
+        .compareTo(facetedProject.getProjectFacetVersion(WebFacetUtils.WEB_FACET)) <= 0) {
       return this;
     }
 

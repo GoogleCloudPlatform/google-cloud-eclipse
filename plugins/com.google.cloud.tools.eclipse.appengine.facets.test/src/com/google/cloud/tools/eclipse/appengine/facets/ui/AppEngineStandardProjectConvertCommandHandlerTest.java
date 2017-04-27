@@ -22,6 +22,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.ui.AppEngineStandardProjectConvertCommandHandler.MessageDialogWrapper;
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
@@ -36,6 +37,7 @@ import org.eclipse.wst.common.componentcore.internal.builder.IDependencyGraph;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.junit.After;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -113,6 +115,8 @@ public class AppEngineStandardProjectConvertCommandHandlerTest {
 
   @Test
   public void testCheckFacetCompatibility_java1_8FacetIsIncompatible() throws CoreException {
+    Assume.assumeTrue("AppEngine Standard Java 8 runtime support is not present",
+        AppEngineStandardFacet.FACET_VERSION.conflictsWith(JavaFacet.VERSION_1_8));
     facetedProject.installProjectFacet(JavaFacet.VERSION_1_8, null, null);
     assertTrue(facetedProject.hasProjectFacet(JavaFacet.VERSION_1_8));
 
@@ -132,6 +136,8 @@ public class AppEngineStandardProjectConvertCommandHandlerTest {
 
   @Test
   public void testCheckFacetCompatibility_web3_0FacetIsIncompatible() throws CoreException {
+    Assume.assumeTrue("AppEngine Standard Java 8 runtime support is not present",
+        AppEngineStandardFacet.FACET_VERSION.conflictsWith(WebFacetUtils.WEB_30));
     facetedProject.installProjectFacet(JavaFacet.VERSION_1_7, null, null);
     facetedProject.installProjectFacet(WebFacetUtils.WEB_30, null, null);
     assertTrue(facetedProject.hasProjectFacet(WebFacetUtils.WEB_30));

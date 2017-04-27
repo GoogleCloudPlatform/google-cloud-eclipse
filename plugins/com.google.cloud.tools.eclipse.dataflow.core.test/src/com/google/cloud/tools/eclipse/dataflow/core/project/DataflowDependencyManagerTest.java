@@ -25,6 +25,9 @@ import static org.mockito.Mockito.when;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedSet;
+import java.io.InputStream;
+import java.util.Collections;
+import java.util.Map;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
@@ -43,9 +46,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import java.io.InputStream;
-import java.util.Collections;
-import java.util.Map;
 
 /**
  * Tests for {@link DataflowArtifactRetriever}.
@@ -193,6 +193,13 @@ public class DataflowDependencyManagerTest {
   }
 
   @Test
+  public void hasTrackedDependencyNoModel() {
+    when(projectRegistry.getProject(project)).thenReturn(null);
+
+    assertFalse(manager.hasTrackedDataflowDependency(project));
+  }
+
+  @Test
   public void hasTrackedDependencyNoDependency() {
     when(model.getDependencies()).thenReturn(ImmutableList.<Dependency>of());
 
@@ -213,6 +220,13 @@ public class DataflowDependencyManagerTest {
         .thenReturn(ImmutableList.<Dependency>of(trackedDataflowDependency()));
 
     assertTrue(manager.hasTrackedDataflowDependency(project));
+  }
+
+  @Test
+  public void hasPinnedDependencyNoModel() {
+    when(projectRegistry.getProject(project)).thenReturn(null);
+
+    assertFalse(manager.hasPinnedDataflowDependency(project));
   }
 
   @Test

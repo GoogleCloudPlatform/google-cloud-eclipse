@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.wst.server.core.runtimeModuleType">
+      <runtimeModuleType
+            id="com.google.cloud.tools.eclipse.appengine.standard.runtime.additions.java8"
+            runtimeTypes="com.google.cloud.tools.eclipse.appengine.standard.runtime">
+         <moduleType
+               types="jst.web"
+               versions="3.0,3.1">
+         </moduleType>
+      </runtimeModuleType>
+   </extension>
+
+   <extension
+         point="org.eclipse.wst.common.project.facet.core.groups">
+      <members
+            group="com.google.cloud.tools.eclipse.appengine.facets.standard.constraints.servlet">
+         <include
+               facet="jst.web"
+               versions="[2.5-3.1]">
+         </include>
+      </members>
+      <members
+            group="com.google.cloud.tools.eclipse.appengine.facets.standard.constraints.jre">
+         <include
+               facet="java"
+               versions="1.8">
+         </include>
+      </members>
+   </extension>
+
+   <extension
+         point="org.eclipse.wst.common.project.facet.core.runtimes">
+      <supported>
+         <runtime-component
+               id="com.google.cloud.tools.eclipse.appengine.standard.runtime"
+               version="1"></runtime-component>
+         <facet
+               id="jst.web"
+               version="[2.5-3.1]">
+         </facet>
+         <facet
+               id="java"
+               version="1.8">
+         </facet>
+      </supported>
+	</extension>
+   
+  <extension point="com.google.cloud.tools.eclipse.appengine.libraries"
+             id="com.google.cloud.tools.eclipse.appengine.standard.java8.apis">   
+    <library
+          id="servlet-api-3.1"
+          name="Servlet API 3.1"
+          group="servlet"
+          siteUri="http://www.oracle.com/technetwork/java/javaee/servlet/index.html"
+          export="false"
+          recommendation="required">
+    
+      <libraryFile>
+        <mavenCoordinates
+              groupId="javax.servlet"
+              artifactId="javax.servlet-api"
+              version="3.1.0" />
+      </libraryFile>
+    </library>
+    <library
+          id="jsp-api-2.3"
+          group="servlet"
+          name="Java Server Pages API 2.3"
+          siteUri="http://www.oracle.com/technetwork/java/javaee/jsp/index.html"
+          export="false"
+          recommendation="optional" >
+      <libraryFile>
+        <mavenCoordinates
+              groupId="javax.servlet.jsp"
+              artifactId="javax.servlet.jsp-api"
+              version="2.3.0" />
+      </libraryFile>
+      <libraryFile>
+        <mavenCoordinates
+              groupId="javax.servlet"
+              artifactId="jstl"
+              version="1.2" />
+      </libraryFile>
+    </library>
+  </extension>
+  <extension
+        point="org.eclipse.wst.common.project.facet.core.listeners">
+     <listener
+           class="com.google.cloud.tools.eclipse.appengine.standard.java8.FacetChangeListener"
+           eventTypes="AVAILABLE_FACETS_CHANGED,POST_INSTALL,POST_VERSION_CHANGE,POST_UNINSTALL">
+     </listener>
+  </extension>
+  <extension
+        id="appengineWeb"
+        name="App Engine Standard Java 8"
+        point="org.eclipse.core.resources.builders">
+     <builder
+           callOnEmptyDelta="false">
+        <run
+              class="com.google.cloud.tools.eclipse.appengine.standard.java8.AppEngineWebBuilder">
+        </run>
+     </builder>
+  </extension>
+</plugin>

@@ -34,6 +34,7 @@ import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
+import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
 public class AppEngineStandardProjectConvertCommandHandler extends AbstractHandler {
@@ -72,29 +73,30 @@ public class AppEngineStandardProjectConvertCommandHandler extends AbstractHandl
   @VisibleForTesting
   boolean checkFacetCompatibility(IFacetedProject facetedProject,
       MessageDialogWrapper dialogWrapper) {
-    if (facetedProject.hasProjectFacet(JavaFacet.FACET)) {
-      if (!facetedProject.hasProjectFacet(JavaFacet.VERSION_1_7)) {
-        String required = JavaFacet.VERSION_1_7.getVersionString();
+    IProjectFacetVersion javaFacetVersion = facetedProject.getProjectFacetVersion(JavaFacet.FACET);
+    if (javaFacetVersion != null) {
+      if (AppEngineStandardFacet.FACET_VERSION.conflictsWith(javaFacetVersion)) {
         String installed = facetedProject.getInstalledVersion(JavaFacet.FACET).getVersionString();
 
         dialogWrapper.openInformation(
             Messages.getString("java.facet.incompatible.title"),
             Messages.getString("java.facet.incompatible.message",
-                               facetedProject.getProject().getName(), required, installed));
+                facetedProject.getProject().getName(), installed));
         return false;
       }
     }
 
-    if (facetedProject.hasProjectFacet(WebFacetUtils.WEB_FACET)) {
-      if (!facetedProject.hasProjectFacet(WebFacetUtils.WEB_25)) {
-        String required = WebFacetUtils.WEB_25.getVersionString();
+    IProjectFacetVersion webFacetVersion =
+        facetedProject.getProjectFacetVersion(WebFacetUtils.WEB_FACET);
+    if (webFacetVersion != null) {
+      if (AppEngineStandardFacet.FACET_VERSION.conflictsWith(webFacetVersion)) {
         String installed =
             facetedProject.getInstalledVersion(WebFacetUtils.WEB_FACET).getVersionString();
 
         dialogWrapper.openInformation(
             Messages.getString("web.facet.incompatible.title"),
             Messages.getString("web.facet.incompatible.message",
-                               facetedProject.getProject().getName(), required, installed));
+                facetedProject.getProject().getName(), installed));
         return false;
       }
     }
