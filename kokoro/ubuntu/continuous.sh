@@ -1,5 +1,10 @@
 #!/bin/bash
 
+#
+# This is just an initial version based on the Travis build script, the build
+# needs UI, which haven't been tested, just copied over from .travis.yml
+#
+
 # Fail on any error.
 set -e
 # Display commands being run.
