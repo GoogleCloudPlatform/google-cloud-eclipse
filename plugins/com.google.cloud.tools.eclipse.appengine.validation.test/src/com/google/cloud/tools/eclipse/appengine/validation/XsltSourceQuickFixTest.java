@@ -36,8 +36,6 @@ import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
-import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -51,13 +49,10 @@ public class XsltSourceQuickFixTest {
       + "<application>"
       + "</application>"
       + "</appengine-web-app>";
-  private static final IProjectFacetVersion APPENGINE_STANDARD_FACET_VERSION_1 =
-      ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID).getVersion("1");
 
   @Rule
-  public TestProjectCreator appEngineStandardProject =
-      new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25,
-          APPENGINE_STANDARD_FACET_VERSION_1);
+  public TestProjectCreator appEngineStandardProject = new TestProjectCreator().withFacetVersions(
+      JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineStandardFacet.FACET_VERSION);
 
   @Test
   public void testApply() throws CoreException {
