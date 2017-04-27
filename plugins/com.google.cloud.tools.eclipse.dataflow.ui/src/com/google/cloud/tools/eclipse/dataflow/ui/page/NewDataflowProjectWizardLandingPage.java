@@ -90,14 +90,13 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     return AbstractUIPlugin.imageDescriptorFromPlugin(
         "com.google.cloud.tools.eclipse.dataflow.ui", imageFilePath);
   }
-
   
-  private void addLabel(Composite formComposite, String labelText) {
+  private static void addLabel(Composite formComposite, String labelText) {
     Label label = new Label(formComposite, SWT.NULL);
     label.setText(labelText);
   }
 
-  private Text addLabeledText(Composite formComposite, String labelText) {
+  private static Text addLabeledText(Composite formComposite, String labelText) {
     addLabel(formComposite, labelText);
 
     Text widget = new Text(formComposite, SWT.SINGLE | SWT.BORDER);
@@ -105,7 +104,7 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     return widget;
   }
 
-  private Button addCheckbox(Composite formComposite, String labelText, boolean initialValue) {
+  private static Button addCheckbox(Composite formComposite, String labelText, boolean initialValue) {
     Button checkbox = new Button(formComposite, SWT.CHECK);
     checkbox.setText(labelText);
     checkbox.setLayoutData(gridSpan(SWT.NULL, 3));
@@ -114,7 +113,7 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     return checkbox;
   }
 
-  private Combo addCombo(Composite formComposite, String labelText, boolean readOnly) {
+  private static Combo addCombo(Composite formComposite, String labelText, boolean readOnly) {
     addLabel(formComposite, labelText);
 
     Combo combo = new Combo(formComposite,
@@ -123,7 +122,7 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     return combo;
   }
 
-  private GridData gridSpan(int style, int span) {
+  private static GridData gridSpan(int style, int span) {
     GridData gridData = new GridData(style);
     gridData.horizontalSpan = span;
     return gridData;
@@ -181,7 +180,6 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     advancedComposite.setLayoutData(gridSpan(GridData.FILL_HORIZONTAL, 3));
 
     final Composite advancedContent = new Composite(advancedComposite, SWT.NULL);
-    advancedContent.setLayout(new GridLayout(3, false));
     advancedContent.setLayoutData(gridSpan(GridData.FILL_HORIZONTAL, 1));
     advancedComposite.setClient(advancedContent);
 

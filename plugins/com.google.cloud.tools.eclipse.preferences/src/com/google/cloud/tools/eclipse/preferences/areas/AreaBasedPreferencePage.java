@@ -49,7 +49,7 @@ import java.util.logging.Logger;
 /**
  * A host preference page that hosts multiple <em>preference areas</em>. These
  * {@link PreferenceArea} are like embedded preference pages, like more complex JFace
- * {@link org.eclipse.jface.preference.FieldEditor FieldEditor.
+ * {@link org.eclipse.jface.preference.FieldEditor}.
  */
 public class AreaBasedPreferencePage extends PreferencePage
     implements IWorkbenchPreferencePage, IExecutableExtension {

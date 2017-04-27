@@ -50,7 +50,6 @@ public abstract class BasePublishOperation extends PublishOperation {
   /**
    * Construct the operation object to publish the specified module to the specified server.
    * 
-   * @param server server to which the module will be published
    * @param kind kind of publish
    * @param module module to publish
    * @param deltaKind kind of change

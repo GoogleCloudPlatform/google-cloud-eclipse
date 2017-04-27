@@ -35,7 +35,7 @@ public class ProjectVersionValidator implements IValidator {
   private static final List<String> RESERVED_VALUES = Arrays.asList("default", "latest");
 
   /**
-   * @param value the prospective version string
+   * @param input the prospective version string
    * @return OK status if valid, or an ERROR status with a description why invalid
    */
   @Override

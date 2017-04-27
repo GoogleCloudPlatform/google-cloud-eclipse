@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferences;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.internal.ProjectSelectorSelectionChangedListener;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
@@ -112,7 +113,7 @@ public class CommonDeployPreferencesPanel extends DeployPreferencesPanel {
   private final Image refreshIcon = SharedImages.REFRESH_IMAGE_DESCRIPTOR.createImage(getDisplay());
 
   @VisibleForTesting
-  final DeployPreferencesModel model;
+  final DeployPreferences model;
   private ObservablesManager observables;
   private DataBindingContext bindingContext;
 
@@ -130,7 +131,7 @@ public class CommonDeployPreferencesPanel extends DeployPreferencesPanel {
     this.layoutChangedHandler = Preconditions.checkNotNull(layoutChangedHandler);
     this.requireValues = requireValues;
     this.projectRepository = projectRepository;
-    model = new DeployPreferencesModel(project);
+    model = new DeployPreferences(project);
 
     FormColors colors = new FormColors(getDisplay());
     colors.setBackground(null);
@@ -305,7 +306,7 @@ public class CommonDeployPreferencesPanel extends DeployPreferencesPanel {
   @Override
   boolean savePreferences() {
     try {
-      model.savePreferences();
+      model.save();
       return true;
     } catch (BackingStoreException exception) {
       logger.log(Level.SEVERE, "Could not save deploy preferences", exception);
