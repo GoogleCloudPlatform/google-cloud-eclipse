@@ -50,7 +50,6 @@ import org.eclipse.core.databinding.beans.PojoProperties;
 import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.Observables;
 import org.eclipse.core.databinding.observable.list.IObservableList;
-import org.eclipse.core.databinding.observable.value.ComputedValue;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.WritableValue;
 import org.eclipse.core.databinding.validation.MultiValidator;
@@ -101,8 +100,6 @@ public class CommonDeployPreferencesPanel extends DeployPreferencesPanel {
   private Text version;
 
   private Button autoPromoteButton;
-
-  private Button stopPreviousVersionButton;
 
   private Button includeOptionalConfigurationFilesButton;
 
@@ -237,51 +234,9 @@ public class CommonDeployPreferencesPanel extends DeployPreferencesPanel {
   private void setupAutoPromoteDataBinding(DataBindingContext context) {
     ISWTObservableValue promoteButton =
         WidgetProperties.selection().observe(autoPromoteButton);
-    final ISWTObservableValue stopPreviousVersion =
-        WidgetProperties.selection().observe(stopPreviousVersionButton);
-    final ISWTObservableValue stopPreviousVersionEnablement =
-        WidgetProperties.enabled().observe(stopPreviousVersionButton);
-
-    context.bindValue(stopPreviousVersionEnablement, promoteButton);
 
     IObservableValue promoteModel = PojoProperties.value("autoPromote").observe(model);
-    IObservableValue stopPreviousVersionModel =
-        PojoProperties.value("stopPreviousVersion").observe(model);
-
     context.bindValue(promoteButton, promoteModel);
-
-    // Intermediary model necessary for "Restore Defaults" to work.
-    final IObservableValue currentStopPreviousVersionChoice = new WritableValue();
-    context.bindValue(currentStopPreviousVersionChoice, stopPreviousVersionModel);
-
-    // One-way update: button selection <-- latest user choice
-    // Update the button (to match the user choice), if enabled; if not, force unchecking.
-    context.bindValue(stopPreviousVersion, new ComputedValue() {
-      @Override
-      protected Object calculate() {
-        boolean buttonEnabled = (boolean) stopPreviousVersionEnablement.getValue();
-        boolean currentValue = (boolean) currentStopPreviousVersionChoice.getValue();
-        if (!buttonEnabled) {
-          return Boolean.FALSE;  // Force unchecking the stop previous button if it is disabled.
-        }
-        return currentValue;  // Otherwise, check the button according to the latest user choice.
-      }
-    }, new UpdateValueStrategy(UpdateValueStrategy.POLICY_NEVER), null);
-
-    // One-way update: button selection --> latest user choice
-    // Update the user choice (to match the button selection), only when the button is enabled.
-    context.bindValue(new ComputedValue() {
-      @Override
-      protected Object calculate() {
-        boolean buttonEnabled = (boolean) stopPreviousVersionEnablement.getValue();
-        boolean buttonValue = (boolean) stopPreviousVersion.getValue();
-        boolean currentValue = (boolean) currentStopPreviousVersionChoice.getValue();
-        if (buttonEnabled) {
-          return buttonValue;  // Remember the button state as the latest choice if it is enabled.
-        }
-        return currentValue;  // Otherwise, retain the latest (current) user choice.
-      }
-    }, stopPreviousVersionModel, null, new UpdateValueStrategy(UpdateValueStrategy.POLICY_NEVER));
   }
 
   private void setupOptionalConfigurationFilesDataBinding(DataBindingContext context) {
@@ -410,14 +365,6 @@ public class CommonDeployPreferencesPanel extends DeployPreferencesPanel {
     GridData autoPromoteButtonGridData = new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
     autoPromoteButtonGridData.horizontalSpan = 2;
     autoPromoteButton.setLayoutData(autoPromoteButtonGridData);
-
-    stopPreviousVersionButton = new Button(this, SWT.CHECK);
-    stopPreviousVersionButton.setText(Messages.getString("stop.previous.version"));
-    stopPreviousVersionButton.setToolTipText(Messages.getString("tooltip.stop.previous.version"));
-    GridData stopPreviousVersionButtonGridData =
-        new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
-    stopPreviousVersionButtonGridData.horizontalSpan = 2;
-    stopPreviousVersionButton.setLayoutData(stopPreviousVersionButtonGridData);
   }
 
   private void createOptionalConfigurationFilesSection() {
