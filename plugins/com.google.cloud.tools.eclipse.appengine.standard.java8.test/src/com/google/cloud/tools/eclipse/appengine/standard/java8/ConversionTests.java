@@ -17,11 +17,17 @@
 package com.google.cloud.tools.eclipse.appengine.standard.java8;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
+import com.google.cloud.tools.appengine.AppEngineDescriptor;
+import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import com.google.cloud.tools.eclipse.appengine.facets.convert.AppEngineStandardProjectConvertJob;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.io.IOException;
+import java.io.InputStream;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
@@ -45,7 +51,15 @@ public class ConversionTests {
     conversionJob.schedule();
     conversionJob.join();
 
+    // ensure facet versions haven't been downgraded
     assertEquals(JavaFacet.VERSION_1_8, project.getProjectFacetVersion(JavaFacet.FACET));
     assertEquals(WebFacetUtils.WEB_31, project.getProjectFacetVersion(WebFacetUtils.WEB_FACET));
+    // ensure appengine-web.xml has <runtime>java8</runtime>
+    IFile appengineWebXml =
+        WebProjectUtil.findInWebInf(project.getProject(), new Path("appengine-web.xml"));
+    assertTrue(appengineWebXml.exists());
+    try (InputStream input = appengineWebXml.getContents()) {
+      assertTrue(AppEngineDescriptor.parse(input).isJava8());
+    }
   }
 }

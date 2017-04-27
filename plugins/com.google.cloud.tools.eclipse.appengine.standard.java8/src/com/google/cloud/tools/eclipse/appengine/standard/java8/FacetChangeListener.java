@@ -44,26 +44,31 @@ public class FacetChangeListener implements IFacetedProjectListener {
 
   @Override
   public void handleEvent(IFacetedProjectEvent event) {
+    if (event.getType() != Type.POST_INSTALL && event.getType() != Type.POST_UNINSTALL
+        && event.getType() != Type.POST_VERSION_CHANGE) {
+      return;
+    }
+    IProjectFacetActionEvent action = (IProjectFacetActionEvent) event;
+    if (!JavaFacet.FACET.equals(action.getProjectFacet())
+        && !AppEngineStandardFacet.FACET.equals(action.getProjectFacet())) {
+      return;
+    }
+    logger.fine("Facet change: " + action.getProjectFacet());
     IFacetedProject project = event.getProject();
     if (!AppEngineStandardFacet.hasFacet(project)) {
       removeAppEngineWebBuilder(project.getProject());
       return;
     }
     addAppEngineWebBuilder(project.getProject());
-    if (event.getType() == Type.POST_INSTALL || event.getType() == Type.POST_VERSION_CHANGE) {
-      IProjectFacetActionEvent action = (IProjectFacetActionEvent) event;
-      if (JavaFacet.FACET.equals(action.getProjectFacet())) {
-        IFile descriptor = findDescriptor(project);
-        if (descriptor == null) {
-          logger.warning(project + ": cannot find appengine-web.xml");
-          return;
-        }
-        if (project.hasProjectFacet(JavaFacet.VERSION_1_8)) {
-          AppEngineDescriptorTransform.addJava8Runtime(descriptor);
-        } else {
-          AppEngineDescriptorTransform.removeJava8Runtime(descriptor);
-        }
+    IFile descriptor = findDescriptor(project);
+    if (descriptor == null) {
+      logger.warning(project + ": cannot find appengine-web.xml");
+        return;
       }
+    if (project.hasProjectFacet(JavaFacet.VERSION_1_8)) {
+      AppEngineDescriptorTransform.addJava8Runtime(descriptor);
+    } else {
+      AppEngineDescriptorTransform.removeJava8Runtime(descriptor);
     }
   }
 

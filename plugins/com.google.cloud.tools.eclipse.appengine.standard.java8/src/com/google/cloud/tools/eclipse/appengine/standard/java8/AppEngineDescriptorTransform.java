@@ -37,18 +37,20 @@ public class AppEngineDescriptorTransform {
     URL xslTemplate =
         AppEngineDescriptorTransform.class.getResource("/xslt/removeJava8Runtime.xsl");
     try {
+      logger.fine("Removing runtime:java8 from " + descriptor);
       Xslt.transformInPlace(descriptor, xslTemplate);
     } catch (IOException | CoreException | TransformerException ex) {
-      logger.log(Level.SEVERE, "Unable to remove <runtime>java8</runtime> from " + descriptor, ex);
+      logger.log(Level.SEVERE, "Unable to remove runtime:java8 from " + descriptor, ex);
     }
   }
 
   public static void addJava8Runtime(IFile descriptor) {
     URL xslTemplate = AppEngineDescriptorTransform.class.getResource("/xslt/addJava8Runtime.xsl");
     try {
+      logger.fine("Adding runtime:java8 from " + descriptor);
       Xslt.transformInPlace(descriptor, xslTemplate);
     } catch (IOException | CoreException | TransformerException ex) {
-      logger.log(Level.SEVERE, "Unable to add <runtime>java8</runtime> to " + descriptor, ex);
+      logger.log(Level.SEVERE, "Unable to add runtime:java8 to " + descriptor, ex);
     }
   }
 
