@@ -1,22 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE contexts [
+  <!ENTITY service "&lt;b&gt;App Engine Service:&lt;/b&gt; An App Engine application is made up of one or more services. By using multiple services, you can deploy your app as a set of microservices with different performance settings. Each service must have a unique name. Do not reuse names  between services in the same application.">
+
+  <!ENTITY project "&lt;b&gt;Project name:&lt;/b&gt; An Eclipse project name.">
+]>
 <contexts>
   <context id="NewStandardProjectContext" title="Create App Engine Standard Project">
     <description>Create a new Eclipse project that can be deployed to the App Engine standard environment.
 
-&lt;b&gt;Project name:&lt;/b&gt; An Eclipse project name.
+      &project;
 
-&lt;b&gt;Libraries to add to build path:&lt;/b&gt; 
-Adds useful libraries for the App Engine standard environment to your project build path.
+      &service;
+
+&lt;b&gt;Libraries to add to build path:&lt;/b&gt; Adds useful libraries for the App Engine standard environment to your project build path.
     </description>
   </context>
 
   <context id="NewFlexProjectContext" title="Create App Engine Flexible Project">
-     <description>Create a new Eclipse project that can be deployed to the App Engine flexible environment.
+    <description>Create a new Eclipse project that can be deployed to the App Engine flexible environment.
 
-&lt;b&gt;Project name:&lt;/b&gt; An Eclipse project name.
+      &project;
 
-&lt;b&gt;Libraries to add to build path:&lt;/b&gt;
-Adds useful libraries for the App Engine flexible environment to your project build path.
-     </description>
+      &service;
+
+    </description>
   </context>
 </contexts>
