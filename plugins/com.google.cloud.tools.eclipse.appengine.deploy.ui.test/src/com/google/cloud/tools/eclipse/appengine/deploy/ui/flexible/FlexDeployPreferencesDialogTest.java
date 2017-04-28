@@ -24,6 +24,7 @@ import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Link;
@@ -41,6 +42,7 @@ public class FlexDeployPreferencesDialogTest {
   public void setUp() {
     IProject project = mock(IProject.class);
     when(project.getName()).thenReturn("");
+    when(project.getLocation()).thenReturn(new Path("/"));
     dialog = new FlexDeployPreferencesDialog(null, "title", project,
         mock(IGoogleLoginService.class), mock(IGoogleApiFactory.class));
   }
