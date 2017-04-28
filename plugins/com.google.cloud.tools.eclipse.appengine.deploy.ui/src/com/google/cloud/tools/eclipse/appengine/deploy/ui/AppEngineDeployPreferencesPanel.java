@@ -119,7 +119,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
   protected final DataBindingContext bindingContext = new DataBindingContext();
 
   private final Runnable layoutChangedHandler;
-  private final boolean requireValues;
+  protected final boolean requireValues;
 
   private final ProjectRepository projectRepository;
   private final FormToolkit formToolkit;

@@ -23,6 +23,7 @@ import com.google.cloud.tools.eclipse.appengine.deploy.ui.internal.AppEngineDire
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.internal.RelativeDirectoryFieldSetter;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
+import org.eclipse.core.databinding.UpdateValueStrategy;
 import org.eclipse.core.databinding.beans.PojoProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.resources.IProject;
@@ -59,6 +60,7 @@ public class FlexDeployPreferencesPanel extends AppEngineDeployPreferencesPanel 
   }
 
   private void createAppEngineDirectorySection() {
+    // Part 1. create UI widgets
     Label label = new Label(this, SWT.LEAD);
     label.setText(Messages.getString("deploy.preferences.dialog.label.appEngineDirectory"));
     label.setToolTipText(Messages.getString("tooltip.appEngineDirectory"));
@@ -77,45 +79,19 @@ public class FlexDeployPreferencesPanel extends AppEngineDeployPreferencesPanel 
     secondColumn.setLayoutData(fillGridData);
     directoryField.setLayoutData(fillGridData);
 
-    ISWTObservableValue fieldValue = WidgetProperties.text().observe(directoryField);
+    // Part 2. set up data binding
+    ISWTObservableValue fieldValue = WidgetProperties.text(SWT.Modify).observe(directoryField);
     IObservableValue modelValue = PojoProperties.value("appEngineDirectory").observe(model);
-    bindingContext.bindValue(fieldValue, modelValue, new AppEngineDirectoryValidator());
 
-    /*
-    UpdateValueStrategy modelToField = new UpdateValueStrategy().setConverter(
-        new Converter(String.class, String.class) {
-          @Override
-          public Object convert(Object fromObject) {
-            String modelValue = (String) fromObject;
-            if (Strings.isNullOrEmpty(modelValue)) {
-              return project.getLocation() + "/src/main/appengine";
-            } else {
-              return modelValue;
-            }
-          }
-        });
-    bindingContext.bindValue(fieldValue, modelValue, new UpdateValueStrategy(), modelToField);
-    */
-
-/*
-    UpdateValueStrategy fieldToModel = new UpdateValueStrategy().setConverter(
-        new Converter(String.class, String.class) {
-          @Override
-          public Object convert(Object fromObject) {
-            IPath path = new Path((String) fromObject);
-            if (path.isAbsolute()) {
-              IPath relativePath = PathUtil.relativizePath(path, project.getLocation());
-              System.out.println("user input: " + path);
-              System.out.println("project: " + project.getLocation());
-              System.out.println("relativized: " + relativePath);
-              return relativePath.toString();
-            } else {
-              return path.toString();
-            }
-          }
-        });
-    bindingContext.bindValue(fieldValue, modelValue, fieldToModel, new UpdateValueStrategy());
-*/
+    if (!requireValues) {
+      bindingContext.bindValue(fieldValue, modelValue);
+    } else {
+      UpdateValueStrategy updateStrategy = new UpdateValueStrategy()
+          .setAfterGetValidator(new AppEngineDirectoryValidator(project.getLocation()));
+      bindingContext.bindValue(fieldValue, modelValue, updateStrategy, updateStrategy);
+      // Force setting the path field even if validation fails.
+      directoryField.setText((String) modelValue.getValue());
+    }
   }
 
   @Override
