@@ -153,7 +153,6 @@ public class FlexDeployPreferencesPanelTest {
       IObservableValue value = ((ValidationStatusProvider) provider).getValidationStatus();
       IStatus status = (IStatus) value.getValue();
       if (!status.isOK()) {
-        System.out.println(status.getMessage());
         return true;
       }
     }
