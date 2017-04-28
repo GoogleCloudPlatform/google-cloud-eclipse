@@ -19,23 +19,19 @@ package com.google.cloud.tools.eclipse.appengine.deploy.ui.flexible;
 import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexDeployPreferences;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.AppEngineDeployPreferencesPanel;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
+import com.google.cloud.tools.eclipse.appengine.deploy.ui.internal.RelativeDirectoryFieldSetter;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import org.eclipse.core.databinding.beans.PojoProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
@@ -72,23 +68,8 @@ public class FlexDeployPreferencesPanel extends AppEngineDeployPreferencesPanel 
 
     Button browse = new Button(secondColumn, SWT.PUSH);
     browse.setText(Messages.getString("deploy.preferences.dialog.browser.dir"));
-    browse.addSelectionListener(new SelectionAdapter() {
-      @Override
-      public void widgetSelected(SelectionEvent event) {
-        DirectoryDialog dialog = new DirectoryDialog(getShell());
-        IPath path = new Path(directoryField.getText().trim());
-        if (path.isAbsolute()) {
-          dialog.setFilterPath(path.toString());
-        } else {
-          dialog.setFilterPath(project.getLocation() + "/" + path.toString());
-        }
-        String result = dialog.open();
-        if (result != null) {
-          IPath maybeProjectRelative = new Path(result).makeRelativeTo(project.getLocation());
-          directoryField.setText(maybeProjectRelative.toString());
-        }
-      }
-    });
+    browse.addSelectionListener(
+        new RelativeDirectoryFieldSetter(directoryField, project.getLocation()));
 
     GridLayoutFactory.fillDefaults().numColumns(2).applyTo(secondColumn);
     GridData fillGridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
