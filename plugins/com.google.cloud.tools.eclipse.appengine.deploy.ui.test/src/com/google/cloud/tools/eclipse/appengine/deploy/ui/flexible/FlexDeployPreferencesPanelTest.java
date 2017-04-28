@@ -40,6 +40,7 @@ import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.ValidationStatusProvider;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
@@ -119,8 +120,21 @@ public class FlexDeployPreferencesPanelTest {
   @Test
   public void testAppEngineDirectoryValidation_noRequireValues() throws InterruptedException {
     FlexDeployPreferencesPanel panel = createPanel(false /* requireValues */);
+
     Text directoryField = findAppEngineDirectoryField(panel);
     directoryField.setText("no/app/yaml");
+    assertFalse(hasValidationError(panel));
+  }
+
+  @Test
+  public void testAppEngineDirectoryValidation_absoluatePathWorks() throws InterruptedException {
+    FlexDeployPreferencesPanel panel = createPanel(false /* requireValues */);
+    Text directoryField = findAppEngineDirectoryField(panel);
+
+    IPath absoluatePath = project.getLocation().append("src/main/appengine");
+    assertTrue(absoluatePath.isAbsolute());
+
+    directoryField.setText(absoluatePath.toString());
     assertFalse(hasValidationError(panel));
   }
 
