@@ -454,7 +454,8 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     return bucketComposite;
   }
 
-  private Job latestGcpProjectQueryJob;  // Must be updated/accessed in the UI context.
+  @VisibleForTesting
+  public Job latestGcpProjectQueryJob;  // Must be updated/accessed in the UI context.
 
   private Predicate<Job> isLatestQueryJob = new Predicate<Job>() {
     @Override
@@ -462,11 +463,6 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
       return job == latestGcpProjectQueryJob;
     }
   };
-
-  @VisibleForTesting
-  Job getLatestGcpProjectQueryJob() {
-    return latestGcpProjectQueryJob;
-  }
 
   private void refreshProjectsForSelectedCredential() {
     projectSelector.setProjects(Collections.<GcpProject>emptyList());
@@ -480,7 +476,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     }
   }
 
-  public final class RefreshProjectOnAccountSelection implements Runnable {
+  private final class RefreshProjectOnAccountSelection implements Runnable {
 
     private final Button refreshProjectsButton;
 
@@ -615,8 +611,9 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     }
   }
 
+  @VisibleForTesting
   @Override
-  DataBindingContext getDataBindingContext() {
+  public DataBindingContext getDataBindingContext() {
     return bindingContext;
   }
 
