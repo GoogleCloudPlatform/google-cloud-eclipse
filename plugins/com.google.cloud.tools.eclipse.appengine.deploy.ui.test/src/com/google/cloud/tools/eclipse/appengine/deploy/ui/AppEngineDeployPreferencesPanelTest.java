@@ -31,7 +31,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferences;
-import com.google.cloud.tools.eclipse.appengine.deploy.ui.CommonDeployPreferencesPanel.ProjectSelectionValidator;
+import com.google.cloud.tools.eclipse.appengine.deploy.ui.AppEngineDeployPreferencesPanel.ProjectSelectionValidator;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelectorObservableValue;
@@ -67,13 +67,13 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.osgi.service.prefs.BackingStoreException;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DeployPreferencesPanelTest {
+public class AppEngineDeployPreferencesPanelTest {
 
   private static final String EMAIL_2 = "some-email-2@example.com";
   private static final String EMAIL_1 = "some-email-1@example.com";
 
   private Composite parent;
-  private CommonDeployPreferencesPanel deployPanel;
+  private AppEngineDeployPreferencesPanel deployPanel;
   @Mock private IProject project;
   @Mock private IGoogleLoginService loginService;
   @Mock private Runnable layoutChangedHandler;
@@ -239,12 +239,6 @@ public class DeployPreferencesPanelTest {
   }
 
   @Test
-  public void testGetHelpContextId() throws Exception {
-    assertThat(createPanel(false).getHelpContextId(),
-        is("com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployAppEngineStandardProjectContext"));
-  }
-
-  @Test
   public void testRefreshProjectsForSelectedCredential()
       throws ProjectRepositoryException, InterruptedException {
     when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1, account2)));
@@ -330,9 +324,13 @@ public class DeployPreferencesPanelTest {
     }
   }
 
-  private CommonDeployPreferencesPanel createPanel(boolean requireValues) {
-    return new CommonDeployPreferencesPanel(parent, project, loginService, layoutChangedHandler,
-        requireValues, projectRepository);
+  private AppEngineDeployPreferencesPanel createPanel(boolean requireValues) {
+    return new AppEngineDeployPreferencesPanel(parent, project, loginService, layoutChangedHandler,
+        requireValues, projectRepository, new DeployPreferences(project)) {
+          @Override
+          protected String getHelpContextId() {
+            return null;
+          }};
   }
 
   private IStatus getProjectSelectionValidator() {

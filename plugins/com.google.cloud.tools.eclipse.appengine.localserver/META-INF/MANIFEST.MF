@@ -55,4 +55,5 @@ Import-Package: com.google.cloud.tools.eclipse.appengine.facets,
  org.eclipse.e4.core.di,
  org.eclipse.jdt.core,
  org.eclipse.jdt.debug.ui.launchConfigurations,
+ org.eclipse.jst.j2ee.web.project.facet,
  org.eclipse.swt

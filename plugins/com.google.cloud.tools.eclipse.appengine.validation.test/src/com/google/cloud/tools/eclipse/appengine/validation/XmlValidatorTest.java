@@ -32,8 +32,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
-import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
-import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.validation.ValidationFramework;
 import org.eclipse.wst.validation.Validator;
 import org.junit.Before;
@@ -47,13 +45,11 @@ public class XmlValidatorTest {
   private static final String BAD_XML = "<";
   private static final String APPLICATION_MARKER =
       "com.google.cloud.tools.eclipse.appengine.validation.appEngineBlacklistMarker";
-  private static final IProjectFacetVersion APPENGINE_STANDARD_FACET_VERSION_1 =
-      ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID).getVersion("1");
   private IFile resource;
 
   @Rule public TestProjectCreator appEngineStandardProjectCreator =
-      new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7,
-          WebFacetUtils.WEB_25, APPENGINE_STANDARD_FACET_VERSION_1);
+      new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25,
+          AppEngineStandardFacet.FACET_VERSION);
 
   @Rule public TestProjectCreator dynamicWebProjectCreator =
       new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);

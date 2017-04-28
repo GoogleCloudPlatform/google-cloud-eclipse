@@ -126,7 +126,7 @@ public abstract class DeployCommandHandler extends AbstractHandler {
     DefaultDeployConfiguration deployConfiguration = toDeployConfiguration(deployPreferences);
     boolean includeOptionalConfigurationFiles =
         deployPreferences.isIncludeOptionalConfigurationFiles();
-    StagingDelegate stagingDelegate = getStagingDelegate(project, deployPreferences);
+    StagingDelegate stagingDelegate = getStagingDelegate(project);
 
     DeployJob deploy = new DeployJob(project, credential, workDirectory,
         new MessageConsoleWriterOutputLineListener(outputStream),
@@ -147,8 +147,7 @@ public abstract class DeployCommandHandler extends AbstractHandler {
     deploy.schedule();
   }
 
-  protected abstract StagingDelegate getStagingDelegate(
-      IProject project, DeployPreferences preferences);
+  protected abstract StagingDelegate getStagingDelegate(IProject project);
 
   private static String getConsoleName(String projectId) {
     Date now = new Date();

@@ -27,7 +27,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
-import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -35,14 +34,13 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class WebXmlValidatorTest {
- 
+
   @Rule
-  public TestProjectCreator projectCreator = new TestProjectCreator()
-      .withFacetVersions(WebFacetUtils.WEB_25, JavaFacet.VERSION_1_7, ProjectFacetsManager
-          .getProjectFacet(AppEngineStandardFacet.ID).getVersion(AppEngineStandardFacet.VERSION));
+  public TestProjectCreator projectCreator = new TestProjectCreator().withFacetVersions(
+      WebFacetUtils.WEB_25, JavaFacet.VERSION_1_7, AppEngineStandardFacet.FACET_VERSION);
 
   private final WebXmlValidator validator = new WebXmlValidator();
-  
+
   @Test
   public void testValidateJavaServlet() throws ParserConfigurationException {
     DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
@@ -53,68 +51,68 @@ public class WebXmlValidatorTest {
     element.setUserData("version", "3.1", null);
     element.setUserData("location", new DocumentLocation(1, 1), null);
     document.appendChild(element);
-    
+
     IResource resource = Mockito.mock(IResource.class);
     Mockito.when(resource.getProject()).thenReturn(projectCreator.getProject());
     ArrayList<BannedElement> blacklist = validator.checkForElements(resource, document);
-    
+
     assertEquals(1, blacklist.size());
     String markerId = "com.google.cloud.tools.eclipse.appengine.validation.servletMarker";
     assertEquals(markerId, blacklist.get(0).getMarkerId());
   }
-  
+
   @Test
   public void testCheckForElements_noElements() throws ParserConfigurationException {
     DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
     DocumentBuilder documentBuilder = builderFactory.newDocumentBuilder();
     Document document = documentBuilder.newDocument();
-    
+
     Element element = document.createElementNS("http://java.sun.com/xml/ns/javaee", "web-app");
     element.setUserData("version", "2.5", null);
     element.setUserData("location", new DocumentLocation(1, 1), null);
     document.appendChild(element);
-    
+
     IResource resource = Mockito.mock(IResource.class);
     Mockito.when(resource.getProject()).thenReturn(projectCreator.getProject());
     ArrayList<BannedElement> blacklist = validator.checkForElements(resource, document);
-    
+
     assertEquals(0, blacklist.size());
   }
-  
+
   @Test
   public void testValidateServletMapping() throws ParserConfigurationException {
     DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
     DocumentBuilder documentBuilder = builderFactory.newDocumentBuilder();
     Document document = documentBuilder.newDocument();
-    
+
     Element webApp = document.createElementNS("http://java.sun.com/xml/ns/javaee", "web-app");
     webApp.setUserData("version", "2.5", null);
     webApp.setUserData("location", new DocumentLocation(1, 1), null);
-    
+
     Element servlet = document.createElementNS("http://java.sun.com/xml/ns/javaee", "servlet");
     servlet.setUserData("location", new DocumentLocation(2, 1), null);
-    
+
     Element servletName = document.createElementNS("http://java.sun.com/xml/ns/javaee", "servlet-name");
     servletName.setTextContent("ServletName");
     servletName.setUserData("location", new DocumentLocation(3, 1), null);
     servlet.appendChild(servletName);
     webApp.appendChild(servlet);
-    
+
     Element servletMapping = document.createElementNS("http://java.sun.com/xml/ns/javaee", "servlet-mapping");
     servletMapping.setUserData("location", new DocumentLocation(4, 1), null);
-    
+
     Element servletMappingName = document.createElementNS("http://java.sun.com/xml/ns/javaee", "servlet-name");
     servletMappingName.setTextContent("NotServletName");
     servletMappingName.setUserData("location", new DocumentLocation(2, 1), null);
     servletMapping.appendChild(servletMappingName);
     webApp.appendChild(servletMapping);
-    
+
     document.appendChild(webApp);
-    
+
     IResource resource = Mockito.mock(IResource.class);
     Mockito.when(resource.getProject()).thenReturn(projectCreator.getProject());
     ArrayList<BannedElement> blacklist = validator.checkForElements(resource, document);
     assertEquals(1, blacklist.size());
   }
- 
+
 }

@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.ui.flexible;
 
-import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferences;
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
 import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexDeployPreferences;
 import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexStagingDelegate;
@@ -41,10 +40,8 @@ public class FlexDeployCommandHandler extends DeployCommandHandler {
   }
 
   @Override
-  protected StagingDelegate getStagingDelegate(IProject project, DeployPreferences preferences) {
-    // TODO(chanseok): appEngineDirectory should come from "preferences".
-    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1823
-    String appEngineDirectory = FlexDeployPreferences.DEFAULT.getAppEngineDirectory();
+  protected StagingDelegate getStagingDelegate(IProject project) {
+    String appEngineDirectory = new FlexDeployPreferences(project).getAppEngineDirectory();
     IPath appEngineDirectoryPath = project.getFolder(appEngineDirectory).getLocation();
     return new FlexStagingDelegate(appEngineDirectoryPath);
   }

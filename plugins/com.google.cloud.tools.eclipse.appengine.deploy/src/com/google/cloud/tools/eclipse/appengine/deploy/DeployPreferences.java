@@ -45,7 +45,7 @@ public class DeployPreferences {
   public static final String DEFAULT_CUSTOM_BUCKET = "";
   public static final boolean DEFAULT_STOP_PREVIOUS_VERSION = true;
 
-  private final IEclipsePreferences preferenceStore;
+  protected final IEclipsePreferences preferenceStore;
 
   private String accountEmail;
   private String projectId;
@@ -60,17 +60,17 @@ public class DeployPreferences {
   }
 
   @VisibleForTesting
-  DeployPreferences(IEclipsePreferences preferences) {
-    preferenceStore = preferences;
+  DeployPreferences(IEclipsePreferences preferenceStore) {
+    this.preferenceStore = preferenceStore;
 
-    accountEmail = preferences.get(PREF_ACCOUNT_EMAIL, DEFAULT_ACCOUNT_EMAIL);
-    projectId = preferences.get(PREF_PROJECT_ID, DEFAULT_PROJECT_ID);
-    version = preferences.get(PREF_CUSTOM_VERSION, DEFAULT_CUSTOM_VERSION);
-    autoPromote = preferences.getBoolean(PREF_ENABLE_AUTO_PROMOTE, DEFAULT_ENABLE_AUTO_PROMOTE);
-    includeOptionalConfigurationFiles = preferences.getBoolean(
+    accountEmail = preferenceStore.get(PREF_ACCOUNT_EMAIL, DEFAULT_ACCOUNT_EMAIL);
+    projectId = preferenceStore.get(PREF_PROJECT_ID, DEFAULT_PROJECT_ID);
+    version = preferenceStore.get(PREF_CUSTOM_VERSION, DEFAULT_CUSTOM_VERSION);
+    autoPromote = preferenceStore.getBoolean(PREF_ENABLE_AUTO_PROMOTE, DEFAULT_ENABLE_AUTO_PROMOTE);
+    includeOptionalConfigurationFiles = preferenceStore.getBoolean(
         PREF_INCLUDE_OPTIONAL_CONFIGURATION_FILES, DEFAULT_INCLUDE_OPTIONAL_CONFIGURATION_FILES);
-    bucket = preferences.get(PREF_CUSTOM_BUCKET, DEFAULT_CUSTOM_BUCKET);
-    stopPreviousVersion = preferences.getBoolean(
+    bucket = preferenceStore.get(PREF_CUSTOM_BUCKET, DEFAULT_CUSTOM_BUCKET);
+    stopPreviousVersion = preferenceStore.getBoolean(
         PREF_STOP_PREVIOUS_VERSION, DEFAULT_STOP_PREVIOUS_VERSION);
   }
 

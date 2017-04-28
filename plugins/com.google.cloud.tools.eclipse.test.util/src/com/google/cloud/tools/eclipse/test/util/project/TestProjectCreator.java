@@ -90,7 +90,7 @@ public final class TestProjectCreator extends ExternalResource {
       try {
         project.delete(true, null);
       } catch (CoreException ex) {
-        fail("Could not delete project");
+        throw new AssertionError("Could not delete project", ex);
       }
     }
   }
@@ -110,12 +110,18 @@ public final class TestProjectCreator extends ExternalResource {
     return project;
   }
 
+  public IFacetedProject getFacetedProject() throws CoreException {
+    IFacetedProject facetedProject = ProjectFacetsManager.create(getProject());
+    return facetedProject;
+  }
+
+
   private void createProjectIfNecessary() {
     if (project == null) {
       try {
         createProject("test" + Math.random());
       } catch (CoreException ex) {
-        fail("FATAL: cannot create a test project.");
+        throw new AssertionError("Could not delete project", ex);
       }
     }
   }

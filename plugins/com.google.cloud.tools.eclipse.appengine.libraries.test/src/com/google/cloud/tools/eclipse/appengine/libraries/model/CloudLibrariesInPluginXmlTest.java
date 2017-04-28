@@ -37,8 +37,8 @@ public class CloudLibrariesInPluginXmlTest {
   private static final String APP_ENGINE_API_LIBRARY_ID = "appengine-api";
   private static final String CLOUD_ENDPOINTS_LIBRARY_ID = "appengine-endpoints";
   private static final String OBJECTIFY_LIBRARY_ID = "objectify";
-  private static final String SERVLET_API_LIBRARY_ID = "servlet-api";
-  private static final String JSP_API_LIBRARY_ID = "jsp-api";
+  private static final String SERVLET_API_LIBRARY_ID = "servlet-api-2.5";
+  private static final String JSP_API_LIBRARY_ID = "jsp-api-2.1";
 
   @Test
   public void testLibrarySize() {

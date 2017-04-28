@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.ui.standard;
 
-import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferences;
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
 import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardStagingDelegate;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployCommandHandler;
@@ -33,11 +32,12 @@ public class StandardDeployCommandHandler extends DeployCommandHandler {
   protected DeployPreferencesDialog newDeployPreferencesDialog(Shell shell, IProject project,
       IGoogleLoginService loginService, IGoogleApiFactory googleApiFactory) {
     String title = Messages.getString("deploy.preferences.dialog.title.standard");
-    return new DeployPreferencesDialog(shell, title, project, loginService, googleApiFactory);
+    return new StandardDeployPreferencesDialog(
+        shell, title, project, loginService, googleApiFactory);
   }
 
   @Override
-  protected StagingDelegate getStagingDelegate(IProject project, DeployPreferences preferences) {
+  protected StagingDelegate getStagingDelegate(IProject project) {
     return new StandardStagingDelegate();
   }
 

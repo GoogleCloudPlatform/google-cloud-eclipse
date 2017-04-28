@@ -19,13 +19,18 @@ package com.google.cloud.tools.eclipse.appengine.localserver;
 import com.google.cloud.tools.eclipse.appengine.libraries.ILibraryClasspathContainerResolverService;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
+import com.google.common.collect.ObjectArrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Inject;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.jst.server.core.RuntimeClasspathProviderDelegate;
+import org.eclipse.wst.common.project.facet.core.IFacetedProject;
+import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
+import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.server.core.IRuntime;
 
 /**
@@ -36,21 +41,31 @@ import org.eclipse.wst.server.core.IRuntime;
  */
 public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
 
+  /**
+   * The default Servlet API supported by App Engine for Java.
+   */
+  private static final IProjectFacetVersion DEFAULT_DYNAMIC_WEB_VERSION = WebFacetUtils.WEB_25;
+
   private static final Logger logger = Logger.getLogger(ServletClasspathProvider.class.getName());
   
   @Inject
   private ILibraryClasspathContainerResolverService resolverService;
 
-  public ServletClasspathProvider() {
-  }
-
   @Override
   public IClasspathEntry[] resolveClasspathContainer(IProject project, IRuntime runtime) {
     if (project != null && MavenUtils.hasMavenNature(project)) { // Maven handles its own classpath
       return null;
-    } else {
-      return doResolveClasspathContainer();
     }
+
+    // Runtime is expected to provide Servlet and JSP APIs
+    IProjectFacetVersion webFacetVersion = DEFAULT_DYNAMIC_WEB_VERSION;
+    try {
+      IFacetedProject facetedProject = ProjectFacetsManager.create(project);
+      webFacetVersion = facetedProject.getInstalledVersion(WebFacetUtils.WEB_FACET);
+    } catch (CoreException ex) {
+      logger.log(Level.WARNING, "Unable to obtain jst.web facet version", ex);
+    }
+    return doResolveClasspathContainer(webFacetVersion);
   }
 
   // TODO this method is called often as the result of user initiated UI actions, e.g. when the user
@@ -64,23 +79,27 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
   // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/953
   @Override
   public IClasspathEntry[] resolveClasspathContainer(IRuntime runtime) {
-    return doResolveClasspathContainer();
+    return doResolveClasspathContainer(DEFAULT_DYNAMIC_WEB_VERSION);
   }
 
-  private IClasspathEntry[] doResolveClasspathContainer() {
+  private IClasspathEntry[] doResolveClasspathContainer(IProjectFacetVersion dynamicWebVersion) {
+
+    String servletApiId;
+    String jspApiId;
+    if (WebFacetUtils.WEB_31.equals(dynamicWebVersion)
+        || WebFacetUtils.WEB_30.equals(dynamicWebVersion)) {
+      servletApiId = "servlet-api-3.1";
+      jspApiId = "jsp-api-2.3";
+    } else {
+      servletApiId = "servlet-api-2.5";
+      jspApiId = "jsp-api-2.1";
+    }
+
     try {
-        IClasspathEntry[] servletApiEntries =
-            resolverService.resolveLibraryAttachSourcesSync("servlet-api");
-        IClasspathEntry[] jspApiEntries =
-            resolverService.resolveLibraryAttachSourcesSync("jsp-api");
-        
-        IClasspathEntry[] allEntries =
-            new IClasspathEntry[servletApiEntries.length + jspApiEntries.length];
-        System.arraycopy(servletApiEntries, 0, allEntries, 0, servletApiEntries.length);
-        System.arraycopy(jspApiEntries, 0, 
-                         allEntries, servletApiEntries.length,
-                         jspApiEntries.length);
-        return allEntries;
+      IClasspathEntry[] apiEntries =
+          resolverService.resolveLibraryAttachSourcesSync(servletApiId);
+      IClasspathEntry[] jspApiEntries = resolverService.resolveLibraryAttachSourcesSync(jspApiId);
+      return ObjectArrays.concat(apiEntries, jspApiEntries, IClasspathEntry.class);
     } catch (CoreException ex) {
       logger.log(Level.WARNING, "Failed to initialize libraries", ex);
     }

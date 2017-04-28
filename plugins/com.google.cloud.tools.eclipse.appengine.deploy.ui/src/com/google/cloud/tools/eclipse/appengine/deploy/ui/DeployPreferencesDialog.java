@@ -47,13 +47,13 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
-public class DeployPreferencesDialog extends TitleAreaDialog {
+public abstract class DeployPreferencesDialog extends TitleAreaDialog {
 
   // if the image is smaller (e.g. 32x32, it will break the layout of the TitleAreaDialog)
   // seems like an Eclipse/JFace bug
   private final Image titleImage = AppEngineImages.appEngine(64).createImage();
 
-  private CommonDeployPreferencesPanel content;
+  private AppEngineDeployPreferencesPanel content;
   private final String title;
   private final IProject project;
   private final IGoogleLoginService loginService;
@@ -94,7 +94,7 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
     Composite dialogArea = (Composite) super.createDialogArea(parent);
 
     Composite container = new Composite(dialogArea, SWT.NONE);
-    content = new CommonDeployPreferencesPanel(container, project, loginService,
+    content = createDeployPreferencesPanel(container, project, loginService,
         getLayoutChangedHandler(), true /* requireValues */,
         new ProjectRepository(googleApiFactory));
     GridDataFactory.fillDefaults().grab(true, false).applyTo(content);
@@ -116,6 +116,10 @@ public class DeployPreferencesDialog extends TitleAreaDialog {
         });
     return dialogArea;
   }
+
+  protected abstract AppEngineDeployPreferencesPanel createDeployPreferencesPanel(
+      Composite container, IProject project, IGoogleLoginService loginService,
+      Runnable layoutChangedHandler, boolean requireValues, ProjectRepository projectRepository);
 
   private Runnable getLayoutChangedHandler() {
     return new Runnable() {

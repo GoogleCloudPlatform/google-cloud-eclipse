@@ -53,6 +53,7 @@ import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.value.ComputedValue;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.observable.value.WritableValue;
+import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.MultiValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.resources.IProject;
@@ -74,6 +75,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
@@ -84,7 +86,7 @@ import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.osgi.service.prefs.BackingStoreException;
 
-public class CommonDeployPreferencesPanel extends DeployPreferencesPanel {
+public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesPanel {
 
   private static final String APPENGINE_VERSIONS_URL =
       "https://console.cloud.google.com/appengine/versions";
@@ -92,7 +94,7 @@ public class CommonDeployPreferencesPanel extends DeployPreferencesPanel {
       "https://console.cloud.google.com/projectselector/appengine/create?lang=java";
 
   private static final Logger logger = Logger.getLogger(
-      CommonDeployPreferencesPanel.class.getName());
+      AppEngineDeployPreferencesPanel.class.getName());
 
   private AccountSelector accountSelector;
 
@@ -104,8 +106,6 @@ public class CommonDeployPreferencesPanel extends DeployPreferencesPanel {
 
   private Button stopPreviousVersionButton;
 
-  private Button includeOptionalConfigurationFilesButton;
-
   private Text bucket;
 
   private ExpandableComposite expandableComposite;
@@ -114,8 +114,8 @@ public class CommonDeployPreferencesPanel extends DeployPreferencesPanel {
 
   @VisibleForTesting
   final DeployPreferences model;
-  private ObservablesManager observables;
-  private DataBindingContext bindingContext;
+  private final ObservablesManager observables = new ObservablesManager();
+  private final DataBindingContext bindingContext = new DataBindingContext();
 
   private final Runnable layoutChangedHandler;
   private final boolean requireValues;
@@ -123,15 +123,15 @@ public class CommonDeployPreferencesPanel extends DeployPreferencesPanel {
   private final ProjectRepository projectRepository;
   private final FormToolkit formToolkit;
 
-  public CommonDeployPreferencesPanel(Composite parent, IProject project,
+  public AppEngineDeployPreferencesPanel(Composite parent, IProject project,
       IGoogleLoginService loginService, Runnable layoutChangedHandler, boolean requireValues,
-      ProjectRepository projectRepository) {
+      ProjectRepository projectRepository, DeployPreferences model) {
     super(parent, SWT.NONE);
 
     this.layoutChangedHandler = Preconditions.checkNotNull(layoutChangedHandler);
     this.requireValues = requireValues;
     this.projectRepository = projectRepository;
-    model = new DeployPreferences(project);
+    this.model = model;
 
     FormColors colors = new FormColors(getDisplay());
     colors.setBackground(null);
@@ -139,39 +139,31 @@ public class CommonDeployPreferencesPanel extends DeployPreferencesPanel {
     formToolkit = new FormToolkit(colors);
 
     createCredentialSection(loginService);
-
     createProjectIdSection();
+    setupAccountEmailDataBinding();
+    setupProjectSelectorDataBinding();
 
-    createProjectVersionSection();
-
-    createPromoteSection();
-
-    createOptionalConfigurationFilesSection();
+    createCenterArea();
 
     createAdvancedSection();
+    setupTextFieldDataBinding(bucket, "bucket", new BucketNameValidator());
+
+    observables.addObservablesFromContext(bindingContext, true, true);
 
     Dialog.applyDialogFont(this);
-
     GridLayoutFactory.swtDefaults().numColumns(2).applyTo(this);
-
-    setupDataBinding();
   }
 
-  private void setupDataBinding() {
-    bindingContext = new DataBindingContext();
+  protected void createCenterArea() {
+    createProjectVersionSection();
+    setupTextFieldDataBinding(version, "version", new ProjectVersionValidator());
 
-    setupAccountEmailDataBinding(bindingContext);
-    setupProjectSelectorDataBinding(bindingContext);
-    setupProjectVersionDataBinding(bindingContext);
-    setupAutoPromoteDataBinding(bindingContext);
-    setupOptionalConfigurationFilesDataBinding(bindingContext);
-    setupBucketDataBinding(bindingContext);
-
-    observables = new ObservablesManager();
-    observables.addObservablesFromContext(bindingContext, true, true);
+    createPromoteSection();
+    setupMasterDependantDataBinding(autoPromoteButton, "autoPromote",
+        stopPreviousVersionButton, "stopPreviousVersion");
   }
 
-  private void setupAccountEmailDataBinding(DataBindingContext context) {
+  private void setupAccountEmailDataBinding() {
     AccountSelectorObservableValue accountSelectorObservableValue =
         new AccountSelectorObservableValue(accountSelector);
     UpdateValueStrategy modelToTarget =
@@ -191,7 +183,7 @@ public class CommonDeployPreferencesPanel extends DeployPreferencesPanel {
 
     final IObservableValue accountEmailModel = PojoProperties.value("accountEmail").observe(model);
 
-    Binding binding = context.bindValue(accountSelectorObservableValue, accountEmailModel,
+    Binding binding = bindingContext.bindValue(accountSelectorObservableValue, accountEmailModel,
         new UpdateValueStrategy(), modelToTarget);
     /*
      * Trigger an explicit target -> model update for the auto-select-single-account case. When the
@@ -200,16 +192,16 @@ public class CommonDeployPreferencesPanel extends DeployPreferencesPanel {
      * model.
      */
     binding.updateTargetToModel();
-    context.addValidationStatusProvider(new AccountSelectorValidator(requireValues, accountSelector,
-        accountSelectorObservableValue));
+    bindingContext.addValidationStatusProvider(new AccountSelectorValidator(
+        requireValues, accountSelector, accountSelectorObservableValue));
   }
 
-  private void setupProjectSelectorDataBinding(DataBindingContext context) {
+  private void setupProjectSelectorDataBinding() {
     IViewerObservableValue projectInput =
         ViewerProperties.input().observe(projectSelector.getViewer());
     IViewerObservableValue projectSelection =
         ViewerProperties.singleSelection().observe(projectSelector.getViewer());
-    context.addValidationStatusProvider(
+    bindingContext.addValidationStatusProvider(
         new ProjectSelectionValidator(projectInput, projectSelection, requireValues));
 
     IViewerObservableValue projectList =
@@ -221,47 +213,58 @@ public class CommonDeployPreferencesPanel extends DeployPreferencesPanel {
     UpdateValueStrategy projectIdToGcpProject =
         new UpdateValueStrategy().setConverter(new ProjectIdToGcpProjectConverter());
 
-    context.bindValue(projectList, projectIdModel, gcpProjectToProjectId, projectIdToGcpProject);
+    bindingContext.bindValue(projectList, projectIdModel,
+        gcpProjectToProjectId, projectIdToGcpProject);
   }
 
-  private void setupProjectVersionDataBinding(DataBindingContext context) {
-    ISWTObservableValue versionField = WidgetProperties.text(SWT.Modify).observe(version);
+  private void setupTextFieldDataBinding(Control control, String modelPropertyName,
+      IValidator setAfterGetValidator) {
+    ISWTObservableValue controlValue = WidgetProperties.text(SWT.Modify).observe(control);
+    IObservableValue modelValue = PojoProperties.value(modelPropertyName).observe(model);
 
-    IObservableValue versionModel = PojoProperties.value("version").observe(model);
-
-    context.bindValue(versionField, versionModel,
-        new UpdateValueStrategy().setAfterGetValidator(new ProjectVersionValidator()),
-        new UpdateValueStrategy().setAfterGetValidator(new ProjectVersionValidator()));
+    bindingContext.bindValue(controlValue, modelValue,
+        new UpdateValueStrategy().setAfterGetValidator(setAfterGetValidator),
+        new UpdateValueStrategy().setAfterGetValidator(setAfterGetValidator));
   }
 
-  private void setupAutoPromoteDataBinding(DataBindingContext context) {
-    ISWTObservableValue promoteButton =
-        WidgetProperties.selection().observe(autoPromoteButton);
-    final ISWTObservableValue stopPreviousVersion =
-        WidgetProperties.selection().observe(stopPreviousVersionButton);
-    final ISWTObservableValue stopPreviousVersionEnablement =
-        WidgetProperties.enabled().observe(stopPreviousVersionButton);
+  /**
+   * <ul>
+   *   <li> Binds {@code master} to the property with the name {@code masterModelPropertyName}
+   *       in the {@link #model}.
+   *   <li> Binds {@code dependant} to the property with the name {@code dependantModelPropertyName}
+   *       in the {#link model}.
+   *   <li> Binds {@code master} and {@code dependant} in a way that {@code dependant} is disabled
+   *       and unchecked when {@code master} is unchecked. When {@code master} is checked back,
+   *       {@code dependant} restores its previous check state.
+   * <ul>
+   */
+  private void setupMasterDependantDataBinding(Control master, String masterModelPropertyName,
+      Control dependant, String dependantModelPropertyName) {
 
-    context.bindValue(stopPreviousVersionEnablement, promoteButton);
+    ISWTObservableValue masterValue = WidgetProperties.selection().observe(master);
+    final ISWTObservableValue dependantValue = WidgetProperties.selection().observe(dependant);
+    final ISWTObservableValue dependantEnablement = WidgetProperties.enabled().observe(dependant);
 
-    IObservableValue promoteModel = PojoProperties.value("autoPromote").observe(model);
-    IObservableValue stopPreviousVersionModel =
-        PojoProperties.value("stopPreviousVersion").observe(model);
+    IObservableValue masterModel = PojoProperties.value(masterModelPropertyName).observe(model);
+    IObservableValue dependantModel =
+        PojoProperties.value(dependantModelPropertyName).observe(model);
 
-    context.bindValue(promoteButton, promoteModel);
+    bindingContext.bindValue(dependantEnablement, masterValue);
+
+    bindingContext.bindValue(masterValue, masterModel);
 
     // Intermediary model necessary for "Restore Defaults" to work.
-    final IObservableValue currentStopPreviousVersionChoice = new WritableValue();
-    context.bindValue(currentStopPreviousVersionChoice, stopPreviousVersionModel);
+    final IObservableValue currentDependantChoice = new WritableValue();
+    bindingContext.bindValue(currentDependantChoice, dependantModel);
 
     // One-way update: button selection <-- latest user choice
     // Update the button (to match the user choice), if enabled; if not, force unchecking.
-    context.bindValue(stopPreviousVersion, new ComputedValue() {
+    bindingContext.bindValue(dependantValue, new ComputedValue() {
       @Override
       protected Object calculate() {
-        boolean buttonEnabled = (boolean) stopPreviousVersionEnablement.getValue();
-        boolean currentValue = (boolean) currentStopPreviousVersionChoice.getValue();
-        if (!buttonEnabled) {
+        boolean controlEnabled = (boolean) dependantEnablement.getValue();
+        boolean currentValue = (boolean) currentDependantChoice.getValue();
+        if (!controlEnabled) {
           return Boolean.FALSE;  // Force unchecking the stop previous button if it is disabled.
         }
         return currentValue;  // Otherwise, check the button according to the latest user choice.
@@ -270,37 +273,24 @@ public class CommonDeployPreferencesPanel extends DeployPreferencesPanel {
 
     // One-way update: button selection --> latest user choice
     // Update the user choice (to match the button selection), only when the button is enabled.
-    context.bindValue(new ComputedValue() {
+    bindingContext.bindValue(new ComputedValue() {
       @Override
       protected Object calculate() {
-        boolean buttonEnabled = (boolean) stopPreviousVersionEnablement.getValue();
-        boolean buttonValue = (boolean) stopPreviousVersion.getValue();
-        boolean currentValue = (boolean) currentStopPreviousVersionChoice.getValue();
-        if (buttonEnabled) {
-          return buttonValue;  // Remember the button state as the latest choice if it is enabled.
+        boolean controlEnabled = (boolean) dependantEnablement.getValue();
+        boolean controlValue = (boolean) dependantValue.getValue();
+        boolean currentValue = (boolean) currentDependantChoice.getValue();
+        if (controlEnabled) {
+          return controlValue;  // Remember the button state as the latest choice if it is enabled.
         }
         return currentValue;  // Otherwise, retain the latest (current) user choice.
       }
-    }, stopPreviousVersionModel, null, new UpdateValueStrategy(UpdateValueStrategy.POLICY_NEVER));
+    }, dependantModel, null, new UpdateValueStrategy(UpdateValueStrategy.POLICY_NEVER));
   }
 
-  private void setupOptionalConfigurationFilesDataBinding(DataBindingContext context) {
-    ISWTObservableValue buttonValue =
-        WidgetProperties.selection().observe(includeOptionalConfigurationFilesButton);
-    IObservableValue modelValue =
-        PojoProperties.value("includeOptionalConfigurationFiles").observe(model);
-
-    context.bindValue(buttonValue, modelValue);
-  }
-
-  private void setupBucketDataBinding(DataBindingContext context) {
-    ISWTObservableValue bucketField = WidgetProperties.text(SWT.Modify).observe(bucket);
-
-    IObservableValue bucketModel = PojoProperties.value("bucket").observe(model);
-
-    context.bindValue(bucketField, bucketModel,
-        new UpdateValueStrategy().setAfterGetValidator(new BucketNameValidator()),
-        new UpdateValueStrategy().setAfterGetValidator(new BucketNameValidator()));
+  protected void setupCheckBoxDataBinding(Button button, String modelPropertyName) {
+    ISWTObservableValue buttonValue = WidgetProperties.selection().observe(button);
+    IObservableValue modelValue = PojoProperties.value(modelPropertyName).observe(model);
+    bindingContext.bindValue(buttonValue, modelValue);
   }
 
   @Override
@@ -402,32 +392,22 @@ public class CommonDeployPreferencesPanel extends DeployPreferencesPanel {
   }
 
   private void createPromoteSection() {
-    autoPromoteButton = new Button(this, SWT.CHECK);
-    autoPromoteButton.setText(Messages.getString("auto.promote"));
-    String manualPromoteMessage = Messages.getString(
-        "tooltip.manual.promote.link", APPENGINE_VERSIONS_URL);
-    autoPromoteButton.setToolTipText(manualPromoteMessage);
-    GridData autoPromoteButtonGridData = new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
-    autoPromoteButtonGridData.horizontalSpan = 2;
-    autoPromoteButton.setLayoutData(autoPromoteButtonGridData);
-
-    stopPreviousVersionButton = new Button(this, SWT.CHECK);
-    stopPreviousVersionButton.setText(Messages.getString("stop.previous.version"));
-    stopPreviousVersionButton.setToolTipText(Messages.getString("tooltip.stop.previous.version"));
-    GridData stopPreviousVersionButtonGridData =
-        new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
-    stopPreviousVersionButtonGridData.horizontalSpan = 2;
-    stopPreviousVersionButton.setLayoutData(stopPreviousVersionButtonGridData);
+    autoPromoteButton = createCheckBox(Messages.getString("auto.promote"),
+        Messages.getString("tooltip.manual.promote.link", APPENGINE_VERSIONS_URL));
+    stopPreviousVersionButton = createCheckBox(
+        Messages.getString("stop.previous.version"),
+        Messages.getString("tooltip.stop.previous.version"));
   }
 
-  private void createOptionalConfigurationFilesSection() {
-    includeOptionalConfigurationFilesButton = new Button(this, SWT.CHECK);
-    includeOptionalConfigurationFilesButton.setText(Messages.getString("deploy.config.files"));
-    includeOptionalConfigurationFilesButton.setToolTipText(
-        Messages.getString("tooltip.deploy.config.files"));
+  protected Button createCheckBox(String text, String tooltip) {
+    Button checkBox = new Button(this, SWT.CHECK);
+    checkBox.setText(text);
+    checkBox.setToolTipText(tooltip);
+
     GridData gridData = new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
     gridData.horizontalSpan = 2;
-    includeOptionalConfigurationFilesButton.setLayoutData(gridData);
+    checkBox.setLayoutData(gridData);
+    return checkBox;
   }
 
   private void createAdvancedSection() {
@@ -659,10 +639,5 @@ public class CommonDeployPreferencesPanel extends DeployPreferencesPanel {
     super.setFont(font);
     expandableComposite.setFont(font);
     FontUtil.convertFontToBold(expandableComposite);
-  }
-
-  @Override
-  String getHelpContextId() {
-    return "com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployAppEngineStandardProjectContext"; //$NON-NLS-1$
   }
 }

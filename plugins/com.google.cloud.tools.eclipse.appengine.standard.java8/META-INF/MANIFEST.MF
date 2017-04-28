@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Java 8 development support for App Engine standard
+Bundle-SymbolicName: com.google.cloud.tools.eclipse.appengine.standard.java8;singleton:=true
+Bundle-Version: 0.1.0.qualifier
+Bundle-Vendor: Google, Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Require-Bundle: com.google.cloud.tools.eclipse.appengine.localserver;bundle-version="0.1.0",
+ org.eclipse.wst.common.project.facet.core,
+ org.eclipse.core.resources,
+ org.eclipse.core.runtime
+Import-Package: com.google.cloud.tools.appengine;version="0.2.11",
+ com.google.cloud.tools.eclipse.appengine.facets,
+ com.google.cloud.tools.eclipse.util,
+ com.google.common.io;version="[20.0.0,21.0.0)",
+ org.eclipse.core.resources,
+ org.eclipse.jst.common.project.facet.core,
+ org.eclipse.jst.j2ee.web.project.facet

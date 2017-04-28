@@ -77,7 +77,10 @@ public class FacetUtilTest {
 
   @Test
   public void testAddJavaFacetToBatch_facetExitsInProject() {
+    when(mockFacetedProject.hasProjectFacet(JavaFacet.FACET)).thenReturn(true);
     when(mockFacetedProject.hasProjectFacet(JavaFacet.VERSION_1_7)).thenReturn(true);
+    when(mockFacetedProject.getProjectFacetVersion(JavaFacet.FACET))
+        .thenReturn(JavaFacet.VERSION_1_7);
 
     FacetUtil facetUtil = new FacetUtil(mockFacetedProject).addJavaFacetToBatch(JavaFacet.VERSION_1_7);
     Assert.assertEquals(0, facetUtil.facetInstallSet.size());
@@ -106,7 +109,10 @@ public class FacetUtilTest {
 
   @Test
   public void testAddWebFacetToBatch_facetExitsInProject() {
+    when(mockFacetedProject.hasProjectFacet(WebFacetUtils.WEB_FACET)).thenReturn(true);
     when(mockFacetedProject.hasProjectFacet(WebFacetUtils.WEB_25)).thenReturn(true);
+    when(mockFacetedProject.getProjectFacetVersion(WebFacetUtils.WEB_FACET))
+        .thenReturn(WebFacetUtils.WEB_25);
 
     FacetUtil facetUtil = new FacetUtil(mockFacetedProject).addWebFacetToBatch(WebFacetUtils.WEB_25);
     Assert.assertEquals(0, facetUtil.facetInstallSet.size());

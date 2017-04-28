@@ -45,7 +45,7 @@ class BlankDeployPreferencesPanel extends DeployPreferencesPanel {
   }
 
   @Override
-  String getHelpContextId() {
+  protected String getHelpContextId() {
     return null;
   }
 }

@@ -16,10 +16,12 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.ui.flexible;
 
+import com.google.cloud.tools.eclipse.appengine.deploy.ui.AppEngineDeployPreferencesPanel;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPreferencesDialog;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
+import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import com.google.cloud.tools.eclipse.ui.util.FontUtil;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.ErrorDialogErrorHandler;
@@ -34,9 +36,9 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 
-public class FlexDeployPreferencesDialog extends DeployPreferencesDialog {
+class FlexDeployPreferencesDialog extends DeployPreferencesDialog {
 
-  public FlexDeployPreferencesDialog(Shell parentShell, String title, IProject project,
+  FlexDeployPreferencesDialog(Shell parentShell, String title, IProject project,
       IGoogleLoginService loginService, IGoogleApiFactory googleApiFactory) {
     super(parentShell, title, project, loginService, googleApiFactory);
   }
@@ -59,5 +61,13 @@ public class FlexDeployPreferencesDialog extends DeployPreferencesDialog {
         .generateLayout(container);
 
     return dialogArea;
+  }
+
+  @Override
+  protected AppEngineDeployPreferencesPanel createDeployPreferencesPanel(Composite container,
+      IProject project, IGoogleLoginService loginService, Runnable layoutChangedHandler,
+      boolean requireValues, ProjectRepository projectRepository) {
+    return new FlexDeployPreferencesPanel(container, project, loginService, layoutChangedHandler,
+        requireValues, projectRepository);
   }
 }

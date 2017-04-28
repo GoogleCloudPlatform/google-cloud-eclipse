@@ -266,8 +266,9 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
 
   @Test
   public void testGenerateRunConfiguration_withVMArgs() throws CoreException {
+    // DebugPlugin.parseArguments() only supports double-quotes on Windows
     when(launchConfiguration.getAttribute(eq(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS),
-        anyString())).thenReturn("a b 'c d'");
+        anyString())).thenReturn("a b \"c d\"");
 
     DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
         .generateServerRunConfiguration(launchConfiguration, server);

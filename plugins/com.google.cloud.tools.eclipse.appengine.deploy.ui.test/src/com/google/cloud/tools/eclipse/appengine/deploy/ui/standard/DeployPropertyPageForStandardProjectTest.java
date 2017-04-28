@@ -14,26 +14,23 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.deploy.ui;
+package com.google.cloud.tools.eclipse.appengine.deploy.ui.standard;
 
+import com.google.cloud.tools.eclipse.appengine.deploy.ui.AppEngineDeployPreferencesPanel;
+import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPropertyPageTest;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
-import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
-import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.junit.Rule;
 
 public class DeployPropertyPageForStandardProjectTest
-    extends DeployPropertyPageTest<CommonDeployPreferencesPanel> {
-
-  protected static final IProjectFacetVersion APP_ENGINE_STANDARD_FACET_1 =
-      ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID).getVersion("1");
+    extends DeployPropertyPageTest<AppEngineDeployPreferencesPanel> {
 
   @Rule
   public TestProjectCreator standardProjectCreator = new TestProjectCreator().withFacetVersions(
-      JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, APP_ENGINE_STANDARD_FACET_1);
+      JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineStandardFacet.FACET_VERSION);
 
   @Override
   protected IProject getProject() {
@@ -41,7 +38,7 @@ public class DeployPropertyPageForStandardProjectTest
   }
 
   @Override
-  protected Class<CommonDeployPreferencesPanel> getPanelClass() {
-    return CommonDeployPreferencesPanel.class;
+  protected Class<AppEngineDeployPreferencesPanel> getPanelClass() {
+    return AppEngineDeployPreferencesPanel.class;
   }
 }

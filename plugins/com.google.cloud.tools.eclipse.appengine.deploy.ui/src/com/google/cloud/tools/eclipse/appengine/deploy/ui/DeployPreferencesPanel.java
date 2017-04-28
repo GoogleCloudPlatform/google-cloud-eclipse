@@ -19,7 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.swt.widgets.Composite;
 
-abstract class DeployPreferencesPanel extends Composite {
+public abstract class DeployPreferencesPanel extends Composite {
 
   DeployPreferencesPanel(Composite parent, int style) {
     super(parent, style);
@@ -39,5 +39,5 @@ abstract class DeployPreferencesPanel extends Composite {
     super.dispose();
   }
 
-  abstract String getHelpContextId();
+  protected abstract String getHelpContextId();
 }
