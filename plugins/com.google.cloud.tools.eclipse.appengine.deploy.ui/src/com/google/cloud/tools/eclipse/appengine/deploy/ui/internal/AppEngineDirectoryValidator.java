@@ -17,24 +17,35 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.ui.internal;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
-import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Preconditions;
 import java.io.File;
 import org.eclipse.core.databinding.validation.IValidator;
+import org.eclipse.core.databinding.validation.ValidationStatus;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 
 public class AppEngineDirectoryValidator implements IValidator {
+
+  private final IPath basePath;
+
+  public AppEngineDirectoryValidator(IPath basePath) {
+    Preconditions.checkArgument(basePath.isAbsolute());
+    this.basePath = basePath;
+  }
 
   @Override
   public IStatus validate(Object value) {
     Preconditions.checkArgument(value instanceof String);
-    String directory = (String) value;
+    File directory = new File((String) value);
+    if (!directory.isAbsolute()) {
+      directory = new File(basePath + "/" + directory);
+    }
+
     if (new File(directory + "/app.yaml").exists()) {
-      return Status.OK_STATUS;
+      return ValidationStatus.ok();
     } else {
-      return StatusUtil.error(this, Messages.getString("", directory));
+      return ValidationStatus.error(
+          Messages.getString("error.invalid.app.engine.directory", directory));
     }
   }
-
 }
