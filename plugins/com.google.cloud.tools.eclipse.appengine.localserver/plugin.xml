@@ -8,15 +8,23 @@
             description="%runtimeTypeDescription"
             id="com.google.cloud.tools.eclipse.appengine.standard.runtime"
             name="%apptoolsRuntimeTypeName"
+            supportsManualCreation="false"
             vendor="%runtimeTypeVendor"
             version="1">
+         <!-- J2EE Web Modules -->
          <moduleType
                types="jst.web"
                versions="2.5">
          </moduleType>
+         <!-- Static Web Projects -->
          <moduleType
-               types="java"
-               versions="1.7">
+               types="wst.web"
+               versions="*">
+         </moduleType>
+         <!-- Simple Web Projects -->
+         <moduleType
+               types="web.static"
+               versions="*">
          </moduleType>
       </runtimeType>
    </extension>
