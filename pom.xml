@@ -58,6 +58,8 @@
     <module>plugins/com.google.cloud.tools.eclipse.appengine.validation.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.ui</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.ui.test</module>
+    <module>plugins/com.google.cloud.tools.eclipse.appengine.standard.java8</module>
+    <module>plugins/com.google.cloud.tools.eclipse.appengine.standard.java8.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.bugreport</module>
     <module>plugins/com.google.cloud.tools.eclipse.bugreport.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.googleapis</module>
