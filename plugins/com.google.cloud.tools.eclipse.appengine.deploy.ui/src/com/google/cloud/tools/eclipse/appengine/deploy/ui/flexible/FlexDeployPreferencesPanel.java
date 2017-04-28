@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.deploy.ui.flexible;
 import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexDeployPreferences;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.AppEngineDeployPreferencesPanel;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
+import com.google.cloud.tools.eclipse.appengine.deploy.ui.internal.AppEngineDirectoryValidator;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.internal.RelativeDirectoryFieldSetter;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
@@ -78,7 +79,7 @@ public class FlexDeployPreferencesPanel extends AppEngineDeployPreferencesPanel 
 
     ISWTObservableValue fieldValue = WidgetProperties.text().observe(directoryField);
     IObservableValue modelValue = PojoProperties.value("appEngineDirectory").observe(model);
-    bindingContext.bindValue(fieldValue, modelValue);
+    bindingContext.bindValue(fieldValue, modelValue, new AppEngineDirectoryValidator());
 
     /*
     UpdateValueStrategy modelToField = new UpdateValueStrategy().setConverter(
