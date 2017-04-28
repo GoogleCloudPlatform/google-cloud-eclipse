@@ -46,22 +46,22 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 
 /**
- * Executes a job that deploys a project to App Engine Standard.
+ * Executes a job that deploys a project to App Engine standard or flexible environment.
  * <p>
  * Deploy steps:
  * <ol>
- *  <li>export exploded WAR</li>
+ *  <li>prepare deploy artifact (WAR or exploded WAR)</li>
  *  <li>stage project for deploy</li>
  *  <li>deploy staged project</li>
  *  <li>launch the deployed app in browser</li>
  * </ol>
- * It uses a work directory where it will create separate directories for the exploded WAR and the
- * staging results.
+ * It uses a work directory where it will create, e.g., a JSON user credential file, a WAR, a
+ * directory to put exploded WAR contents, a directory to put staging results, etc.
  */
 public class DeployJob extends WorkspaceJob {
 
   private static final String STAGING_DIRECTORY_NAME = "staging";
-  private static final String EXPLODED_WAR_DIRECTORY_NAME = "exploded-war";
+  private static final String SAFE_STAGING_WORK_DIRECTORY_NAME = "staging-work";
   private static final String CREDENTIAL_FILENAME = "gcloud-credentials.json";
   private static final String ERROR_MESSAGE_PREFIX = "ERROR:";
   private static final String DEFAULT_SERVICE = "default";
@@ -79,6 +79,7 @@ public class DeployJob extends WorkspaceJob {
   private final DefaultDeployConfiguration deployConfiguration;
   private final boolean includeOptionalConfigurationFiles;
   private final CollectingLineListener errorCollectingLineListener;
+  private final StagingDelegate stager;
 
   /**
    * @param workDirectory temporary work directory the job can safely use (e.g., for creating and
@@ -98,8 +99,9 @@ public class DeployJob extends WorkspaceJob {
       ProcessOutputLineListener stagingStdoutLineListener,
       ProcessOutputLineListener stderrLineListener,
       DefaultDeployConfiguration deployConfiguration,
-      boolean includeOptionalConfigurationFiles) {
-    super(Messages.getString("deploy.standard.runnable.name")); //$NON-NLS-1$
+      boolean includeOptionalConfigurationFiles,
+      StagingDelegate stager) {
+    super(Messages.getString("deploy.job.name")); //$NON-NLS-1$
     this.project = project;
     this.credential = credential;
     this.workDirectory = workDirectory;
@@ -107,6 +109,7 @@ public class DeployJob extends WorkspaceJob {
     this.stderrLineListener = stderrLineListener;
     this.deployConfiguration = deployConfiguration;
     this.includeOptionalConfigurationFiles = includeOptionalConfigurationFiles;
+    this.stager = stager;
     deployStdoutLineListener = new StringBuilderProcessOutputLineListener();
     errorCollectingLineListener =
         new CollectingLineListener(new Predicate<String>() {
@@ -123,7 +126,6 @@ public class DeployJob extends WorkspaceJob {
     SubMonitor progress = SubMonitor.convert(monitor, 100);
 
     try {
-      IPath explodedWarDirectory = workDirectory.append(EXPLODED_WAR_DIRECTORY_NAME);
       IPath stagingDirectory = workDirectory.append(STAGING_DIRECTORY_NAME);
       Path credentialFile = workDirectory.append(CREDENTIAL_FILENAME).toFile().toPath();
 
@@ -132,8 +134,7 @@ public class DeployJob extends WorkspaceJob {
         return saveStatus;
       }
 
-      IStatus stagingStatus = stageProject(
-          credentialFile, explodedWarDirectory, stagingDirectory, progress.newChild(30));
+      IStatus stagingStatus = stageProject(credentialFile, stagingDirectory, progress.newChild(30));
       if (stagingStatus != Status.OK_STATUS) {
         return stagingStatus;
       }
@@ -168,17 +169,20 @@ public class DeployJob extends WorkspaceJob {
   }
 
   private IStatus stageProject(Path credentialFile,
-      IPath explodedWarDirectory, IPath stagingDirectory, IProgressMonitor monitor) {
+      IPath stagingDirectory, IProgressMonitor monitor) {
     SubMonitor progress = SubMonitor.convert(monitor, 100);
     RecordProcessError stagingExitListener = new RecordProcessError();
     CloudSdk cloudSdk = getCloudSdk(credentialFile, stagingStdoutLineListener, stagingExitListener);
 
     try {
-      getJobManager().beginRule(project, progress);
-      WarPublisher.publishExploded(project, explodedWarDirectory, progress.newChild(40));
-      DeployStaging.stageStandard(explodedWarDirectory, stagingDirectory, cloudSdk,
-          progress.newChild(60));
-      return stagingExitListener.getExitStatus();
+      getJobManager().beginRule(project, progress.newChild(1));
+      IPath safeWorkDirectory = workDirectory.append(SAFE_STAGING_WORK_DIRECTORY_NAME);
+      IStatus status = stager.stage(
+          project, stagingDirectory, safeWorkDirectory, cloudSdk, progress.newChild(99));
+      if (stagingExitListener.getExitStatus() != Status.OK_STATUS) {
+        return stagingExitListener.getExitStatus();
+      }
+      return status;
     } catch (CoreException | IllegalArgumentException | OperationCanceledException ex) {
       return StatusUtil.error(this, Messages.getString("deploy.job.staging.failed"), ex);
     } finally {
@@ -193,8 +197,7 @@ public class DeployJob extends WorkspaceJob {
 
     IPath optionalConfigurationFilesDirectory = null;
     if (includeOptionalConfigurationFiles) {
-      optionalConfigurationFilesDirectory = stagingDirectory.append(
-          DeployStaging.STANDARD_STAGING_GENERATED_FILES_DIRECTORY);
+      optionalConfigurationFilesDirectory = stager.getOptionalConfigurationFilesDirectory();
     }
 
     new AppEngineProjectDeployer().deploy(stagingDirectory, cloudSdk, deployConfiguration,
@@ -283,7 +286,8 @@ public class DeployJob extends WorkspaceJob {
   }
 
   private class RecordProcessError implements ProcessExitListener {
-    private IStatus status;
+    // Defaults to OK in case CloudSdk was not used at all (e.g., in flex staging)
+    private IStatus status = Status.OK_STATUS;
 
     @Override
     public void onExit(int exitCode) {

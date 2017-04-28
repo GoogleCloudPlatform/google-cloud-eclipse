@@ -34,8 +34,14 @@ public class AppEngineFlexFacetTest {
 
   @Test
   public void testFlexFacetExists() {
+    Assert.assertEquals("com.google.cloud.tools.eclipse.appengine.facets.flex",
+        AppEngineFlexFacet.ID);
+    Assert.assertEquals("1", AppEngineFlexFacet.VERSION);
     Assert.assertTrue(
-        ProjectFacetsManager.isProjectFacetDefined("com.google.cloud.tools.eclipse.appengine.facets.flex"));
+        ProjectFacetsManager.isProjectFacetDefined(AppEngineFlexFacet.ID));
+    Assert.assertEquals(AppEngineFlexFacet.ID, AppEngineFlexFacet.FACET.getId());
+    Assert.assertEquals(AppEngineFlexFacet.VERSION,
+        AppEngineFlexFacet.FACET_VERSION.getVersionString());
   }
 
   @Test

@@ -245,7 +245,7 @@ public class LocalAppEngineServerDelegate extends ServerDelegate implements IURL
   public URL getModuleRootURL(IModule module) {
     // use getAdapter() to avoid unnecessarily loading the class (e.g., not started yet)
     LocalAppEngineServerBehaviour serverBehaviour =
-        (LocalAppEngineServerBehaviour) getServer().getAdapter(LocalAppEngineServerBehaviour.class);
+        getServer().getAdapter(LocalAppEngineServerBehaviour.class);
     if (serverBehaviour == null) {
       return null;
     }

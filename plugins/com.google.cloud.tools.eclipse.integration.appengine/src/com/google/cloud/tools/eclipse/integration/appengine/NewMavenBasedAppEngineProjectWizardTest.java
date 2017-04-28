@@ -24,7 +24,6 @@ import static org.junit.Assert.assertTrue;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
-import com.google.cloud.tools.eclipse.util.FacetedProjectHelper;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
 
 import org.eclipse.core.resources.IProject;
@@ -105,7 +104,7 @@ public class NewMavenBasedAppEngineProjectWizardTest extends BaseProjectTest {
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);
     assertNotNull("m2e-wtp should create a faceted project", facetedProject);
     assertTrue("Project does not have standard facet",
-        FacetedProjectHelper.projectHasFacet(facetedProject, AppEngineStandardFacet.ID));
+        AppEngineStandardFacet.hasFacet(facetedProject));
 
     for (String projectFile : projectFiles) {
       Path projectFilePath = new Path(projectFile);

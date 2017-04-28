@@ -35,11 +35,12 @@ import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
 public class OpenUriSelectionListener implements SelectionListener {
 
-  private ErrorHandler errorHandler;
-  private IWorkbenchBrowserSupport browserSupport;
-  private QueryParameterProvider queryParameterProvider;
+  private final ErrorHandler errorHandler;
+  private final IWorkbenchBrowserSupport browserSupport;
+  private final QueryParameterProvider queryParameterProvider;
 
-  public OpenUriSelectionListener(QueryParameterProvider queryParameterProvider, ErrorHandler errorHandler) {
+  public OpenUriSelectionListener(QueryParameterProvider queryParameterProvider,
+      ErrorHandler errorHandler) {
     this(queryParameterProvider, errorHandler, PlatformUI.getWorkbench().getBrowserSupport());
   }
 
@@ -123,7 +124,7 @@ public class OpenUriSelectionListener implements SelectionListener {
     public void handle(Exception ex, URI uri) {
       String message = Messages.getString("openurllistener.error.message");
       if (uri != null) {
-        message += uri.toString();
+        message += ": " + uri.toString();
       }
       ErrorDialog.openError(shell,
                             Messages.getString("openurllistener.error.title"),

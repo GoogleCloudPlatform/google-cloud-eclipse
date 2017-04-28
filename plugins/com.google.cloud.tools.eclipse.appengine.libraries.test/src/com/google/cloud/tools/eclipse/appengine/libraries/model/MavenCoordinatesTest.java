@@ -64,7 +64,7 @@ public class MavenCoordinatesTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void testSetEmptyRepository() {
-    new MavenCoordinates("a", "b").setRepository("");;
+    new MavenCoordinates("a", "b").setRepository("");
   }
 
   @Test

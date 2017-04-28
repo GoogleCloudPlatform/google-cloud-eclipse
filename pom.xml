@@ -58,6 +58,8 @@
     <module>plugins/com.google.cloud.tools.eclipse.appengine.validation.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.ui</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.ui.test</module>
+    <module>plugins/com.google.cloud.tools.eclipse.appengine.standard.java8</module>
+    <module>plugins/com.google.cloud.tools.eclipse.appengine.standard.java8.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.bugreport</module>
     <module>plugins/com.google.cloud.tools.eclipse.bugreport.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.googleapis</module>
@@ -158,6 +160,12 @@
       <groupId>org.codehaus.jackson</groupId>
       <artifactId>jackson-core-asl</artifactId>
       <version>1.9.13</version>
+    </dependency>
+    <dependency>
+      <!-- bundle: com.fasterxml.jackson.core.jackson-core -->
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>2.8.6</version>
     </dependency>
     <dependency>
       <!-- bundle: org.mortbay.jetty.server -->

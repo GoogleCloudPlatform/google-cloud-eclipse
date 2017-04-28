@@ -32,7 +32,6 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
-import org.eclipse.wst.common.project.facet.core.IProjectFacet;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.junit.Assert;
@@ -78,7 +77,10 @@ public class FacetUtilTest {
 
   @Test
   public void testAddJavaFacetToBatch_facetExitsInProject() {
+    when(mockFacetedProject.hasProjectFacet(JavaFacet.FACET)).thenReturn(true);
     when(mockFacetedProject.hasProjectFacet(JavaFacet.VERSION_1_7)).thenReturn(true);
+    when(mockFacetedProject.getProjectFacetVersion(JavaFacet.FACET))
+        .thenReturn(JavaFacet.VERSION_1_7);
 
     FacetUtil facetUtil = new FacetUtil(mockFacetedProject).addJavaFacetToBatch(JavaFacet.VERSION_1_7);
     Assert.assertEquals(0, facetUtil.facetInstallSet.size());
@@ -107,7 +109,10 @@ public class FacetUtilTest {
 
   @Test
   public void testAddWebFacetToBatch_facetExitsInProject() {
+    when(mockFacetedProject.hasProjectFacet(WebFacetUtils.WEB_FACET)).thenReturn(true);
     when(mockFacetedProject.hasProjectFacet(WebFacetUtils.WEB_25)).thenReturn(true);
+    when(mockFacetedProject.getProjectFacetVersion(WebFacetUtils.WEB_FACET))
+        .thenReturn(WebFacetUtils.WEB_25);
 
     FacetUtil facetUtil = new FacetUtil(mockFacetedProject).addWebFacetToBatch(WebFacetUtils.WEB_25);
     Assert.assertEquals(0, facetUtil.facetInstallSet.size());
@@ -125,23 +130,19 @@ public class FacetUtilTest {
 
   @Test
   public void testAddFacetToBatch_facetDoesNotExistInProject() {
-    IProjectFacet appEngineFacet = ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID);
-    IProjectFacetVersion appEngineFacetVersion =
-        appEngineFacet.getVersion(AppEngineStandardFacet.VERSION);
-    FacetUtil facetUtil = new FacetUtil(mockFacetedProject).addFacetToBatch(appEngineFacetVersion, null);
+    FacetUtil facetUtil = new FacetUtil(mockFacetedProject)
+        .addFacetToBatch(AppEngineStandardFacet.FACET_VERSION, null);
 
     Assert.assertEquals(1, facetUtil.facetInstallSet.size());
-    Assert.assertEquals(appEngineFacetVersion,
+    Assert.assertEquals(AppEngineStandardFacet.FACET_VERSION,
         facetUtil.facetInstallSet.iterator().next().getProjectFacetVersion());
   }
 
   @Test
   public void testAddFacetToBatch_facetExistsInProject() {
-    IProjectFacet appEngineFacet = ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID);
-    IProjectFacetVersion appEngineFacetVersion =
-        appEngineFacet.getVersion(AppEngineStandardFacet.VERSION);
-    when(mockFacetedProject.hasProjectFacet(appEngineFacetVersion)).thenReturn(true);
-    FacetUtil facetUtil = new FacetUtil(mockFacetedProject).addFacetToBatch(appEngineFacetVersion, null);
+    when(mockFacetedProject.hasProjectFacet(AppEngineStandardFacet.FACET_VERSION)).thenReturn(true);
+    FacetUtil facetUtil = new FacetUtil(mockFacetedProject)
+        .addFacetToBatch(AppEngineStandardFacet.FACET_VERSION, null);
 
     Assert.assertEquals(0, facetUtil.facetInstallSet.size());
   }

@@ -52,7 +52,7 @@ public class CleanupOldDeploysJob extends Job {
     }
   }
 
-  private List<File> collectDirectories() throws IOException {
+  private List<File> collectDirectories() {
     List<File> directories = new ArrayList<>();
     File[] files = parentTempDir.toFile().listFiles();
     for (File file : files) {

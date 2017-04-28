@@ -58,7 +58,7 @@ public class ValidationUtilsTest {
   private ArrayList<BannedElement> blacklist = new ArrayList<>(Arrays.asList(element));
   
   @Test
-  public void testGetOffsetMap_unixXml() throws IOException {
+  public void testGetOffsetMap_unixXml() {
     byte[] bytes = UNIX_XML_WITH_PROJECT_ID.getBytes(StandardCharsets.UTF_8);
     Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, blacklist, "UTF-8");
     assertEquals(1, map.size());
@@ -67,7 +67,7 @@ public class ValidationUtilsTest {
   }
   
   @Test
-  public void testGetOffsetMap_macXml() throws IOException {
+  public void testGetOffsetMap_macXml() {
     byte[] bytes = MAC_XML_WITH_PROJECT_ID.getBytes(StandardCharsets.ISO_8859_1);
     Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, blacklist, "ISO_8859_1");
     assertEquals(1, map.size());
@@ -85,7 +85,7 @@ public class ValidationUtilsTest {
   }
 
   @Test
-  public void testGetOffsetMap_mixedXml() throws IOException {
+  public void testGetOffsetMap_mixedXml() {
     blacklist.clear();
     byte[] bytes = MIXED_XML_WITH_PROJECT_ID.getBytes(StandardCharsets.UTF_8);
     DocumentLocation start = new DocumentLocation(3, 13);
@@ -105,7 +105,7 @@ public class ValidationUtilsTest {
   }
   
   @Test
-  public void testGetOffsetMap_lineWithWhitespace() throws IOException {
+  public void testGetOffsetMap_lineWithWhitespace() {
     byte[] bytes = XML_WITH_PROJECT_ID_WHITESPACE.getBytes(StandardCharsets.UTF_8);
     Map<BannedElement, Integer> map = ValidationUtils.getOffsetMap(bytes, blacklist, "UTF-8");
     assertEquals(1, map.size());
@@ -114,7 +114,7 @@ public class ValidationUtilsTest {
   }
   
   @Test
-  public void testGetOffsetMap_orderedElements() throws IOException {
+  public void testGetOffsetMap_orderedElements() {
     
     DocumentLocation applicationLocation = new DocumentLocation(2, 14);
     DocumentLocation versionLocation = new DocumentLocation(1, 10);

@@ -24,7 +24,6 @@ import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -47,7 +46,7 @@ public abstract class DeployPropertyPageTest<P extends DeployPreferencesPanel> {
   private IGoogleApiFactory googleApiFactory;
 
   @Test
-  public void testCorrectPanelIsShownForFacetedProject() throws CoreException {
+  public void testCorrectPanelIsShownForFacetedProject() {
     DeployPropertyPage page = new DeployPropertyPage(loginService, googleApiFactory);
     Shell parent = shellTestResource.getShell();
     page.setElement(getProject());

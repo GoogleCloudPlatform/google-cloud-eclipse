@@ -63,7 +63,7 @@ public final class OpenDropDownMenuHandler extends AbstractHandler {
   @Override
   public Object execute(ExecutionEvent event) throws ExecutionException {
     ToolItem toolItem = findToolItem(event);
-    String menuId = getMenuId(event, toolItem);
+    String menuId = getMenuId(toolItem);
     IMenuService menuService = ServiceUtils.getService(event, IMenuService.class);
     openDropDownMenu(menuId, toolItem, menuService);
     return null;
@@ -92,7 +92,7 @@ public final class OpenDropDownMenuHandler extends AbstractHandler {
    * Retrieve the menu id to show from the contribution item's ID (following the documented approach
    * for DROP_DOWN items).
    */
-  private static String getMenuId(ExecutionEvent event, ToolItem toolItem)
+  private static String getMenuId(ToolItem toolItem)
       throws ExecutionException {
     if (toolItem.getData() instanceof ContributionItem) {
       ContributionItem data = (ContributionItem) toolItem.getData();

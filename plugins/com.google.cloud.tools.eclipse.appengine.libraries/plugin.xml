@@ -65,7 +65,7 @@
     </library>
 
     <library
-          id="servlet-api"
+          id="servlet-api-2.5"
           name="Servlet API 2.5"
           group="servlet"
           siteUri="http://www.oracle.com/technetwork/java/javaee/servlet/index.html"
@@ -74,14 +74,14 @@
       <libraryFile
             javadocUri="https://docs.oracle.com/cd/E17802_01/products/products/servlet/2.5/docs/servlet-2_5-mr2/">
         <mavenCoordinates
-              artifactId="servlet-api"
               groupId="javax.servlet"
+              artifactId="servlet-api"
               version="2.5" />
       </libraryFile>
     </library>
 
     <library
-          id="jsp-api"
+          id="jsp-api-2.1"
           group="servlet"
           name="Java Server Pages API 2.1"
           siteUri="http://www.oracle.com/technetwork/java/javaee/jsp/index.html"
@@ -90,12 +90,15 @@
       <libraryFile
             javadocUri="http://docs.oracle.com/cd/E17802_01/products/products/jsp/2.1/docs/jsp-2_1-pfd2/">
         <mavenCoordinates
-              artifactId="jsp-api"
               groupId="javax.servlet.jsp"
+              artifactId="jsp-api"
               version="2.1" />
       </libraryFile>
       <libraryFile javadocUri="https://tomcat.apache.org/taglibs/standard/apidocs/">
-        <mavenCoordinates artifactId="jstl" groupId="javax.servlet" version="1.2" />
+        <mavenCoordinates
+              groupId="javax.servlet"
+              artifactId="jstl"
+              version="1.2" />
       </libraryFile>
     </library>
     

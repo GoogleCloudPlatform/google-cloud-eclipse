@@ -169,7 +169,7 @@ public class LaunchPipelineShortcut implements ILaunchShortcut2 {
     if (resource == null) {
       return null;
     }
-    IJavaElement javaElement = (IJavaElement) resource.getAdapter(IJavaElement.class);
+    IJavaElement javaElement = resource.getAdapter(IJavaElement.class);
     if (javaElement != null && javaElement.exists() && javaElement instanceof ICompilationUnit) {
       ICompilationUnit compilationUnit = (ICompilationUnit) javaElement;
       IType javaType = compilationUnit.findPrimaryType();
@@ -190,7 +190,7 @@ public class LaunchPipelineShortcut implements ILaunchShortcut2 {
       Object element = structuredSelection.getFirstElement();
       if (element instanceof IAdaptable) {
         IAdaptable adaptable = (IAdaptable) element;
-        return (IResource) adaptable.getAdapter(IResource.class);
+        return adaptable.getAdapter(IResource.class);
       }
     }
     return null;
@@ -198,7 +198,7 @@ public class LaunchPipelineShortcut implements ILaunchShortcut2 {
 
   @Override
   public IResource getLaunchableResource(IEditorPart editorPart) {
-    return (IResource) editorPart.getEditorInput().getAdapter(IResource.class);
+    return editorPart.getEditorInput().getAdapter(IResource.class);
   }
 
   private ILaunchManager getLaunchManager() {

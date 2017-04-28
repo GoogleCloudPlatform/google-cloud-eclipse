@@ -20,6 +20,7 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
 import com.google.cloud.tools.eclipse.appengine.ui.LibrarySelectorGroup;
+import com.google.cloud.tools.project.ServiceNameValidator;
 import java.io.File;
 import java.util.Collection;
 import java.util.HashSet;
@@ -111,7 +112,7 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
     Label serviceNameLabel = new Label(parent, SWT.LEAD);
     serviceNameLabel.setText(Messages.getString("app.engine.service"));
     serviceNameField = new Text(parent, SWT.BORDER);
-    serviceNameField.setMessage("default");  //$NON-NLS-1$
+    serviceNameField.setMessage("default"); //$NON-NLS-1$
     serviceNameField.addModifyListener(pageValidator);
 
     GridDataFactory.fillDefaults().grab(true, false).applyTo(serviceNameField);
@@ -134,7 +135,16 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
     IStatus packageStatus = JavaPackageValidator.validate(packageName);
     if (!packageStatus.isOK()) {
       String message = Messages.getString("illegal.package.name",  //$NON-NLS-1$
-          packageStatus.getMessage());
+          packageName, packageStatus.getMessage());
+      setErrorMessage(message);
+      return false;
+    }
+
+    String serviceName = serviceNameField.getText();
+    boolean serviceNameValid =
+        serviceName.isEmpty() || ServiceNameValidator.validate(serviceName);
+    if (!serviceNameValid) {
+      String message = Messages.getString("illegal.service.name", serviceName); //$NON-NLS-1$
       setErrorMessage(message);
       return false;
     }

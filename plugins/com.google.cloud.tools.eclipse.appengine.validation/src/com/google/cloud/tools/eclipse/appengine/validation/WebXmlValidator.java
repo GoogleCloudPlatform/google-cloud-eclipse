@@ -16,6 +16,9 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -26,7 +29,6 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -47,8 +49,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Strings;
 
 /**
  * Validator for web.xml.
@@ -66,7 +66,7 @@ public class WebXmlValidator implements XmlValidationHelper {
     this.document = document;
     this.resource = resource;
     this.blacklist = new ArrayList<>();
-    validateJavaServlet();
+    validateServletVersion();
     validateServletClass();
     validateServletMapping();
     validateJsp();
@@ -74,9 +74,9 @@ public class WebXmlValidator implements XmlValidationHelper {
   }
   
   /**
-   * Validates that web.xml uses Java Servlet 2.5 deployment descriptor.
+   * Validates that web.xml specifies a compatible deployment descriptor version.
    */
-  private void validateJavaServlet() {
+  private void validateServletVersion() {
     NodeList webAppList = document.getElementsByTagName("web-app");
     for (int i = 0; i < webAppList.getLength(); i++) {
       Element webApp = (Element) webAppList.item(i);
@@ -84,7 +84,8 @@ public class WebXmlValidator implements XmlValidationHelper {
       String version = (String) webApp.getUserData("version");
       if ("http://xmlns.jcp.org/xml/ns/javaee".equals(namespace)
           || "http://java.sun.com/xml/ns/javaee".equals(namespace)) {
-        if (!"2.5".equals(version)) {
+        // Check that web.xml version is compatible with our supported Dynamic Web Project versions
+        if (!AppEngineStandardFacet.checkServletApiSupport(resource.getProject(), version)) {
           DocumentLocation location = (DocumentLocation) webApp.getUserData("location");
           BannedElement element = new JavaServletElement(location, 0);
           blacklist.add(element);

@@ -60,21 +60,6 @@ public class StatusUtilTest {
   }
 
   @Test
-  public void testError_withClassAsObject() {
-    IStatus error = StatusUtil.error((Object) new DeleteAllVisitor().getClass(), "test error msg");
-    verifyStatus(error);
-  }
-
-  @Test
-  public void testError_withClassAsObjectAndException() {
-    Throwable exception = new Exception();
-    IStatus error =
-        StatusUtil.error((Object) new DeleteAllVisitor().getClass(), "test error msg", exception);
-    verifyStatus(error);
-    assertThat(error.getException(), is(sameInstance(exception)));
-  }
-
-  @Test
   public void testErrorMessage_Exception() {
     RuntimeException ex = new RuntimeException("testing");
     IStatus status = StatusUtil.setErrorStatus(this, "Failed to create project", ex);

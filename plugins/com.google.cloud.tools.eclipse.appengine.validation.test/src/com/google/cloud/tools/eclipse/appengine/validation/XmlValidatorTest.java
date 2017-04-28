@@ -32,8 +32,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
-import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
-import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.validation.ValidationFramework;
 import org.eclipse.wst.validation.Validator;
 import org.junit.Before;
@@ -47,19 +45,17 @@ public class XmlValidatorTest {
   private static final String BAD_XML = "<";
   private static final String APPLICATION_MARKER =
       "com.google.cloud.tools.eclipse.appengine.validation.appEngineBlacklistMarker";
-  private static final IProjectFacetVersion APPENGINE_STANDARD_FACET_VERSION_1 =
-      ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID).getVersion("1");
   private IFile resource;
 
   @Rule public TestProjectCreator appEngineStandardProjectCreator =
-      new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7,
-          WebFacetUtils.WEB_25, APPENGINE_STANDARD_FACET_VERSION_1);
+      new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25,
+          AppEngineStandardFacet.FACET_VERSION);
 
   @Rule public TestProjectCreator dynamicWebProjectCreator =
       new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
 
   @Before
-  public void setUp() throws CoreException {
+  public void setUp() {
     IProject project = dynamicWebProjectCreator.getProject();
     resource = project.getFile("WebContent/WEB-INF/web.xml");
   }
@@ -159,7 +155,8 @@ public class XmlValidatorTest {
     for (IMarker marker : markers) {
       builder.append(marker.getAttribute(IMarker.MESSAGE) + "\n");
     }
-    String message = String.format("Expected 1 marker, got %d markers with messages: %s", markers.length, builder.toString());
+    String message = String.format("Expected 1 marker, got %d markers with messages: %s",
+        markers.length, builder.toString());
     assertEquals(message, 1, markers.length);
   }
 
@@ -167,7 +164,7 @@ public class XmlValidatorTest {
   public void testCreateMarker() throws CoreException {
     String message = "Project ID should be specified at deploy time.";
     BannedElement element = new BannedElement(message);
-    XmlValidator.createMarker(resource, element, 0);
+    XmlValidator.createMarker(resource, element);
     IMarker[] markers = resource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
     assertEquals(message, markers[0].getAttribute(IMarker.MESSAGE));
     resource.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);

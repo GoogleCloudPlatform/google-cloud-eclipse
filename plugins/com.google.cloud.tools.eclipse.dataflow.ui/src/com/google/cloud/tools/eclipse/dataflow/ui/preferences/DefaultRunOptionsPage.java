@@ -89,7 +89,7 @@ public class DefaultRunOptionsPage
 
   @Override
   public void setElement(IAdaptable element) {
-    this.selectedProject = (IProject) element.getAdapter(IProject.class);
+    this.selectedProject = element.getAdapter(IProject.class);
     if (selectedProject == null) {
       throw new IllegalArgumentException(
           "Provided element " + element + " isn't adaptable to a project.");

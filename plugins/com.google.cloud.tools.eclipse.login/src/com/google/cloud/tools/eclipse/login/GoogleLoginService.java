@@ -93,7 +93,7 @@ public class GoogleLoginService implements IGoogleLoginService {
 
   /**
    * 0-arg constructor is necessary for OSGi Declarative Services. Initialization will be done
-   * by {@link activate()}.
+   * by {@link #activate()}.
    */
   public GoogleLoginService() {}
 

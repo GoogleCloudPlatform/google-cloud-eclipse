@@ -16,6 +16,8 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
+import com.google.cloud.tools.eclipse.appengine.deploy.ui.flexible.FlexDeployPreferencesPanel;
+import com.google.cloud.tools.eclipse.appengine.deploy.ui.standard.StandardDeployPreferencesPanel;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
@@ -56,7 +58,7 @@ public class DeployPropertyPage extends PropertyPage {
 
   private IFacetedProject facetedProject = null;
   private FlexDeployPreferencesPanel flexPreferencesPanel;
-  private CommonDeployPreferencesPanel standardPreferencesPanel;
+  private StandardDeployPreferencesPanel standardPreferencesPanel;
   private BlankDeployPreferencesPanel blankPreferencesPanel;
   private StackLayout stackLayout;
   private PreferencePageSupport databindingSupport;
@@ -184,7 +186,7 @@ public class DeployPropertyPage extends PropertyPage {
 
   private void createStandardPanelIfNeeded() {
     if (standardPreferencesPanel == null) {
-      standardPreferencesPanel = new CommonDeployPreferencesPanel(
+      standardPreferencesPanel = new StandardDeployPreferencesPanel(
           container, facetedProject.getProject(), loginService, getLayoutChangedHandler(),
           false /* requireValues */, new ProjectRepository(googleApiFactory));
     }
@@ -192,7 +194,9 @@ public class DeployPropertyPage extends PropertyPage {
 
   private void createFlexPanelIfNeeded() {
     if (flexPreferencesPanel == null) {
-      flexPreferencesPanel = new FlexDeployPreferencesPanel(container, facetedProject.getProject());
+      flexPreferencesPanel = new FlexDeployPreferencesPanel(
+          container, facetedProject.getProject(), loginService, getLayoutChangedHandler(),
+          false /* requireValues */, new ProjectRepository(googleApiFactory));
     }
   }
 }

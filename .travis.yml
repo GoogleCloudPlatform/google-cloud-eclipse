@@ -7,7 +7,7 @@ install:
   # use mvn ≥ 3.3.9 to ensure faulty test exit states fail the build (#1276)
   - mvn -B -N io.takari:maven:wrapper -Dmaven=3.5.0
   # download and install Cloud SDK (may be cached)
-  - build/install-cloudsdk.sh 150.0.0 $HOME
+  - build/install-cloudsdk.sh 151.0.1 $HOME
 # Tycho ≥ 0.26 requires Java 8
 jdk: oraclejdk8
 env:

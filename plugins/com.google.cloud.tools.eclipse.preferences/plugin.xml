@@ -13,20 +13,5 @@
             class="com.google.cloud.tools.eclipse.preferences.areas.AreaBasedPreferencePage">
       </page>
    </extension>
-   <extension
-         point="org.eclipse.core.runtime.preferences">
-      <initializer
-            class="com.google.cloud.tools.eclipse.preferences.PreferenceInitializer">
-      </initializer>
-   </extension>
-   <extension
-         point="com.google.cloud.tools.eclipse.preferences.areas">
-      <area
-            host="com.google.cloud.tools.eclipse.preferences.main"
-            title="%analytics.optin.area.title"
-            class="com.google.cloud.tools.eclipse.preferences.AnalyticsOptInArea"
-            preferences="configuration://com.google.cloud.tools.eclipse.preferences">
-      </area>
-   </extension>
 
 </plugin>

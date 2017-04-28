@@ -53,8 +53,7 @@ public class ValidationTestUtils {
     IWorkbenchPage activePage = activeWorkbenchWindow.getActivePage();
     IEditorPart editorPart = ResourceUtil.findEditor(activePage, file);
     
-    ITextOperationTarget target =
-        (ITextOperationTarget) editorPart.getAdapter(ITextOperationTarget.class);
+    ITextOperationTarget target = editorPart.getAdapter(ITextOperationTarget.class);
     if (target instanceof ITextViewer) {
       return (ITextViewer) target;
     }

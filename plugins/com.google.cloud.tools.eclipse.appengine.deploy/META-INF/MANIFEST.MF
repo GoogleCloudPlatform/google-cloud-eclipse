@@ -23,7 +23,8 @@ Require-Bundle: com.google.cloud.tools.appengine,
  org.eclipse.wst.common.project.facet.core,
  org.eclipse.wst.server.core
 Export-Package: com.google.cloud.tools.eclipse.appengine.deploy,
- com.google.cloud.tools.eclipse.appengine.deploy.flex
+ com.google.cloud.tools.eclipse.appengine.deploy.flex,
+ com.google.cloud.tools.eclipse.appengine.deploy.standard
 Import-Package: com.google.api.client.auth.oauth2;version="[1.22.0,1.23.0)",
  com.google.cloud.tools.eclipse.login,
  com.google.cloud.tools.eclipse.sdk,

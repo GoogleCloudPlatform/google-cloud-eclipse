@@ -32,8 +32,8 @@ import org.eclipse.core.runtime.SubMonitor;
 
 /**
  * Deploys a staged App Engine project. The project must be staged first (e.g. using {@link
- * DeployStaging}). This class will take the staged project and deploy it to App Engine using
- * {@link CloudSdk}.
+ * CloudSdkStagingHelper}). This class will take the staged project and deploy it to App Engine
+ * using {@link CloudSdk}.
  */
 public class AppEngineProjectDeployer {
 
