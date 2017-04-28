@@ -8,7 +8,7 @@
     <version>0.1.0-SNAPSHOT</version>
     <relativePath>../../</relativePath>
   </parent>
-  <artifactId>com.google.cloud.tools.eclipse.welcome.test</artifactId>
+  <artifactId>com.google.cloud.tools.eclipse.appengine.standard.java8.test</artifactId>
   <version>0.1.0-SNAPSHOT</version>
   <packaging>eclipse-test-plugin</packaging>
 

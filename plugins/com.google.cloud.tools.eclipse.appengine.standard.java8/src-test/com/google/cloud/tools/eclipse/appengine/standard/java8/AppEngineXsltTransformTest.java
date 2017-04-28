@@ -40,7 +40,7 @@ import org.xml.sax.SAXException;
 /**
  * Test the appengine-web.xml XSLT transforms
  */
-public class AppEngineXsltTransformTests {
+public class AppEngineXsltTransformTest {
 
   @Test
   public void testAddBare() {
@@ -130,7 +130,7 @@ public class AppEngineXsltTransformTests {
 
   private Document transform(String templateFile, String inputValue) {
     try {
-      URL xslPath = AppEngineXsltTransformTests.class.getResource(templateFile);
+      URL xslPath = AppEngineXsltTransformTest.class.getResource(templateFile);
       if (xslPath == null) {
         File xslFile = new File("." + templateFile);
         assertTrue(xslFile.exists());
