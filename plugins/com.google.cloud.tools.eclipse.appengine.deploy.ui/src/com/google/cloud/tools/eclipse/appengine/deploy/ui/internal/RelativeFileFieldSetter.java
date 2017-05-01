@@ -56,12 +56,16 @@ public class RelativeFileFieldSetter extends SelectionAdapter {
 
   @Override
   public void widgetSelected(SelectionEvent event) {
-    IPath path = new Path(fileField.getText().trim());
-    if (path.isAbsolute()) {
-      dialog.setFilterPath(path.toString());
-    } else {
-      dialog.setFilterPath(basePath + "/" + path.toString());
+    IPath filterPath = new Path(fileField.getText().trim());
+    if (!filterPath.isAbsolute()) {
+      filterPath = basePath.append(filterPath);
     }
+    while (!filterPath.isRoot() && !filterPath.toFile().isDirectory()) {
+      filterPath = filterPath.removeLastSegments(1);
+    }
+    dialog.setFilterPath(filterPath.toString());
+    dialog.setFilterExtensions(new String[]{ "*.yaml" });
+
     String result = dialog.open();
     if (result != null) {
       IPath maybeProjectRelative = new Path(result).makeRelativeTo(basePath);
