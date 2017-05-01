@@ -81,7 +81,7 @@ public class CloudSdkStagingHelperTest {
 
   @After
   public void tearDown() throws CoreException {
-    project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+    project.refreshLocal(IResource.DEPTH_INFINITE, null);
   }
 
   @Test(expected = OperationCanceledException.class)
