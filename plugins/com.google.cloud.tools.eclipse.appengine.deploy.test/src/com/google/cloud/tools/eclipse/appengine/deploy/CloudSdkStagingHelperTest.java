@@ -30,6 +30,7 @@ import java.nio.charset.StandardCharsets;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -37,6 +38,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -75,6 +77,11 @@ public class CloudSdkStagingHelperTest {
   public void setUp() {
     project = projectCreator.getProject();
     stagingDirectory = new Path(tempFolder.getRoot().toString());
+  }
+
+  @After
+  public void tearDown() throws CoreException {
+    project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
   }
 
   @Test(expected = OperationCanceledException.class)
