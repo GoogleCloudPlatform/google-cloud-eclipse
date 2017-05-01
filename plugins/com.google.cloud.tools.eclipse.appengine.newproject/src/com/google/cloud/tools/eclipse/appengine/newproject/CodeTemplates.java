@@ -108,11 +108,9 @@ public class CodeTemplates {
     createChildFile("HelloAppEngineTest.java", //$NON-NLS-1$
         AppEngineTemplateUtility.HELLO_APPENGINE_TEST_TEMPLATE, testPackageFolder,
         templateValues, subMonitor.newChild(5));
-    String mockHttpServletResponseTemplate = isStandardProject
-        ? AppEngineTemplateUtility.MOCK_HTTPSERVLETRESPONSE_TEMPLATE
-        : AppEngineTemplateUtility.MOCK_HTTPSERVLET31RESPONSE_TEMPLATE;
     createChildFile("MockHttpServletResponse.java", //$NON-NLS-1$
-        mockHttpServletResponseTemplate, testPackageFolder, templateValues, subMonitor.newChild(5));
+        AppEngineTemplateUtility.MOCK_HTTPSERVLETRESPONSE_TEMPLATE,
+        testPackageFolder, templateValues, subMonitor.newChild(5));
 
     IFolder webapp = createChildFolder("webapp", main, subMonitor.newChild(5)); //$NON-NLS-1$
     IFolder webinf = createChildFolder("WEB-INF", webapp, subMonitor.newChild(5)); //$NON-NLS-1$
@@ -134,7 +132,10 @@ public class CodeTemplates {
     }
 
     Map<String, String> packageMap = new HashMap<>();
-    String packageValue = config.getPackageName().isEmpty() ? "" : config.getPackageName() + "."; //$NON-NLS-1$ //$NON-NLS-2$
+    String packageValue =
+        config.getPackageName().isEmpty()
+            ? ""  //$NON-NLS-1$ 
+            : config.getPackageName() + "."; //$NON-NLS-1$
     packageMap.put("package", packageValue);  //$NON-NLS-1$
     if (isStandardProject) {
       packageMap.put("version", "2.5"); //$NON-NLS-1$ //$NON-NLS-2$
