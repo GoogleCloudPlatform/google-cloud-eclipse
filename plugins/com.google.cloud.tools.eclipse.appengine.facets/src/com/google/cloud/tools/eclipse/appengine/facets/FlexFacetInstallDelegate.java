@@ -20,7 +20,6 @@ import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexDeployPreference
 import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 import com.google.cloud.tools.eclipse.util.templates.appengine.AppEngineTemplateUtility;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.util.Collections;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -47,16 +46,16 @@ public class FlexFacetInstallDelegate extends AppEngineFacetInstallDelegate {
 
     FlexDeployPreferences flexDeployPreferences = new FlexDeployPreferences(project);
     String appYamlPath = flexDeployPreferences.getAppYamlPath();
-    if (new File(appYamlPath).exists()) {
+    IFile appYaml = project.getFile(appYamlPath);
+    if (appYaml.exists()) {
       return;
     }
 
-    IContainer appYamlParentFolder = project.getFolder(appYamlPath).getParent();
+    IContainer appYamlParentFolder = appYaml.getParent();
     if (!appYamlParentFolder.exists()) {
       ResourceUtils.createFolders(appYamlParentFolder, subMonitor.newChild(5));
     }
 
-    IFile appYaml = project.getFile(appYamlPath);
     appYaml.create(new ByteArrayInputStream(new byte[0]), true, subMonitor.newChild(10));
     String configFileLocation = appYaml.getLocation().toString();
     AppEngineTemplateUtility.createFileContent(
