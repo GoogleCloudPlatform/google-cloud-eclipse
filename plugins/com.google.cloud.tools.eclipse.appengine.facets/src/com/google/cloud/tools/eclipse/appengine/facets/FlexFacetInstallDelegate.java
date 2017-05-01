@@ -20,10 +20,10 @@ import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexDeployPreference
 import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 import com.google.cloud.tools.eclipse.util.templates.appengine.AppEngineTemplateUtility;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.util.Collections;
-
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -42,29 +42,28 @@ public class FlexFacetInstallDelegate extends AppEngineFacetInstallDelegate {
   }
 
   // TODO: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1640
-  // TODO: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1642
   private void createConfigFiles(IProject project, IProgressMonitor monitor) throws CoreException {
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
 
     FlexDeployPreferences flexDeployPreferences = new FlexDeployPreferences(project);
-    String appYamlParentPath = flexDeployPreferences.getAppYamlPath();
-    IFolder appYamlParentFolder = project.getFolder(appYamlParentPath);
-    IFile appYaml = appYamlParentFolder.getFile("app.yaml");
-    if (appYaml.exists()) {
+    String appYamlPath = flexDeployPreferences.getAppYamlPath();
+    if (new File(appYamlPath).exists()) {
       return;
     }
-    
+
+    IContainer appYamlParentFolder = project.getFolder(appYamlPath).getParent();
     if (!appYamlParentFolder.exists()) {
       ResourceUtils.createFolders(appYamlParentFolder, subMonitor.newChild(5));
     }
 
+    IFile appYaml = project.getFile(appYamlPath);
     appYaml.create(new ByteArrayInputStream(new byte[0]), true, subMonitor.newChild(10));
     String configFileLocation = appYaml.getLocation().toString();
     AppEngineTemplateUtility.createFileContent(
         configFileLocation, AppEngineTemplateUtility.APP_YAML_TEMPLATE,
         Collections.<String, String>emptyMap());
     subMonitor.worked(55);
-    
+
     appYaml.refreshLocal(IResource.DEPTH_ZERO, subMonitor.newChild(30));
   }
 }
