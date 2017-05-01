@@ -183,6 +183,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
   public String getHeader(String name) {
     return null;
   }
+
   public Collection<String> getHeaders(String name) {
     return null;
   }
