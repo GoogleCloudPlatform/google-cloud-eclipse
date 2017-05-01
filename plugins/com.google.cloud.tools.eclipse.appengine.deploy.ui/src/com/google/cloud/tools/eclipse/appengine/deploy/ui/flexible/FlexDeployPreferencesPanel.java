@@ -19,8 +19,8 @@ package com.google.cloud.tools.eclipse.appengine.deploy.ui.flexible;
 import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexDeployPreferences;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.AppEngineDeployPreferencesPanel;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
-import com.google.cloud.tools.eclipse.appengine.deploy.ui.internal.AppEngineDirectoryValidator;
-import com.google.cloud.tools.eclipse.appengine.deploy.ui.internal.RelativeDirectoryFieldSetter;
+import com.google.cloud.tools.eclipse.appengine.deploy.ui.internal.AppYamlPathValidator;
+import com.google.cloud.tools.eclipse.appengine.deploy.ui.internal.RelativeFileFieldSetter;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import org.eclipse.core.databinding.UpdateValueStrategy;
@@ -48,7 +48,7 @@ public class FlexDeployPreferencesPanel extends AppEngineDeployPreferencesPanel 
 
   @Override
   protected void createCenterArea() {
-    createAppEngineDirectorySection();
+    createAppYamlSection();
 
     super.createCenterArea();
 
@@ -59,38 +59,37 @@ public class FlexDeployPreferencesPanel extends AppEngineDeployPreferencesPanel 
         includeOptionalConfigurationFilesButton, "includeOptionalConfigurationFiles");
   }
 
-  private void createAppEngineDirectorySection() {
+  private void createAppYamlSection() {
     // Part 1. create UI widgets
     Label label = new Label(this, SWT.LEAD);
-    label.setText(Messages.getString("deploy.preferences.dialog.label.appEngineDirectory"));
-    label.setToolTipText(Messages.getString("tooltip.appEngineDirectory"));
+    label.setText(Messages.getString("deploy.preferences.dialog.label.app.yaml"));
+    label.setToolTipText(Messages.getString("tooltip.app.yaml"));
 
     Composite secondColumn = new Composite(this, SWT.NONE);
-    final Text directoryField = new Text(secondColumn, SWT.SINGLE | SWT.BORDER);
-    directoryField.setToolTipText(Messages.getString("tooltip.appEngineDirectory"));
+    final Text appYamlField = new Text(secondColumn, SWT.SINGLE | SWT.BORDER);
+    appYamlField.setToolTipText(Messages.getString("tooltip.app.yaml"));
 
     Button browse = new Button(secondColumn, SWT.PUSH);
     browse.setText(Messages.getString("deploy.preferences.dialog.browser.dir"));
-    browse.addSelectionListener(
-        new RelativeDirectoryFieldSetter(directoryField, project.getLocation()));
+    browse.addSelectionListener(new RelativeFileFieldSetter(appYamlField, project.getLocation()));
 
     GridLayoutFactory.fillDefaults().numColumns(2).applyTo(secondColumn);
     GridData fillGridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
     secondColumn.setLayoutData(fillGridData);
-    directoryField.setLayoutData(fillGridData);
+    appYamlField.setLayoutData(fillGridData);
 
     // Part 2. set up data binding
-    ISWTObservableValue fieldValue = WidgetProperties.text(SWT.Modify).observe(directoryField);
-    IObservableValue modelValue = PojoProperties.value("appEngineDirectory").observe(model);
+    ISWTObservableValue fieldValue = WidgetProperties.text(SWT.Modify).observe(appYamlField);
+    IObservableValue modelValue = PojoProperties.value("appYamlPath").observe(model);
 
     if (!requireValues) {
       bindingContext.bindValue(fieldValue, modelValue);
     } else {
       UpdateValueStrategy updateStrategy = new UpdateValueStrategy()
-          .setAfterGetValidator(new AppEngineDirectoryValidator(project.getLocation()));
+          .setAfterGetValidator(new AppYamlPathValidator(project.getLocation()));
       bindingContext.bindValue(fieldValue, modelValue, updateStrategy, updateStrategy);
       // Force setting the path field even if validation fails.
-      directoryField.setText((String) modelValue.getValue());
+      appYamlField.setText((String) modelValue.getValue());
     }
   }
 

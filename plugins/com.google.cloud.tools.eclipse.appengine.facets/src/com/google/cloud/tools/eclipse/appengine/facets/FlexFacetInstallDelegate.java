@@ -47,7 +47,7 @@ public class FlexFacetInstallDelegate extends AppEngineFacetInstallDelegate {
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
 
     FlexDeployPreferences flexDeployPreferences = new FlexDeployPreferences(project);
-    String appYamlParentPath = flexDeployPreferences.getAppEngineDirectory();
+    String appYamlParentPath = flexDeployPreferences.getAppYamlPath();
     IFolder appYamlParentFolder = project.getFolder(appYamlParentPath);
     IFile appYaml = appYamlParentFolder.getFile("app.yaml");
     if (appYaml.exists()) {

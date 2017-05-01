@@ -32,7 +32,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-public class AppEngineDirectoryValidatorTest {
+public class AppYamlPathValidatorTest {
 
   @Rule public TemporaryFolder tempFolder = new TemporaryFolder();
 
@@ -47,25 +47,56 @@ public class AppEngineDirectoryValidatorTest {
   @Test
   public void testContructor_nonAbsoluteBasePath() {
     try {
-      new AppEngineDirectoryValidator(new Path("non/absolute/path"));
+      new AppYamlPathValidator(new Path("non/absolute/base/path"));
       fail();
     } catch (IllegalArgumentException ex) {}
   }
 
   @Test
   public void testValidate_relativePathAndNoAppYaml() {
-    IStatus result = new AppEngineDirectoryValidator(basePath).validate("relative/path");
+    IStatus result = new AppYamlPathValidator(basePath).validate("relative/path/app.yaml");
     assertEquals(IStatus.ERROR, result.getSeverity());
-    assertEquals("app.yaml does not exist in the App Engine directory: "
-        + basePath + "/relative/path", result.getMessage());
+    assertEquals("app.yaml does not exist.", result.getMessage());
   }
 
   @Test
   public void testValidate_absoluatePathAndNoAppYaml() {
-    IStatus result = new AppEngineDirectoryValidator(basePath).validate("/absolute/path");
+    IStatus result = new AppYamlPathValidator(basePath).validate("/absolute/path/app.yaml");
     assertEquals(IStatus.ERROR, result.getSeverity());
-    assertEquals("app.yaml does not exist in the App Engine directory: /absolute/path",
+    assertEquals("app.yaml does not exist.", result.getMessage());
+  }
+
+  @Test
+  public void testValidate_relativePathAndInvalidFileName() {
+    IStatus result = new AppYamlPathValidator(basePath).validate("relative/path/my-app.yaml");
+    assertEquals(IStatus.ERROR, result.getSeverity());
+    assertEquals("File name is not app.yaml: " + basePath + "/relative/path/my-app.yaml",
         result.getMessage());
+  }
+
+  @Test
+  public void testValidate_absolautePathInvalidFileName() {
+    IStatus result = new AppYamlPathValidator(basePath).validate("/absolute/path/my-app.yaml");
+    assertEquals(IStatus.ERROR, result.getSeverity());
+    assertEquals("File name is not app.yaml: /absolute/path/my-app.yaml", result.getMessage());
+  }
+
+  @Test
+  public void testValidate_relativePathNotFile() {
+    createAppYamlAsDirectory(basePath);
+
+    IStatus result = new AppYamlPathValidator(basePath).validate("app.yaml");
+    assertEquals(IStatus.ERROR, result.getSeverity());
+    assertEquals("Not a file: " + basePath + "/app.yaml", result.getMessage());
+  }
+
+  @Test
+  public void testValidate_absolautePathNotFile() {
+    createAppYamlAsDirectory(basePath);
+
+    IStatus result = new AppYamlPathValidator(basePath).validate(basePath + "/app.yaml");
+    assertEquals(IStatus.ERROR, result.getSeverity());
+    assertEquals("Not a file: " + basePath + "/app.yaml", result.getMessage());
   }
 
   @Test
@@ -74,7 +105,7 @@ public class AppEngineDirectoryValidatorTest {
     File appYaml = Files.createFile(Paths.get(basePath + "/some/directory/app.yaml")).toFile();
     assertTrue(appYaml.exists());
 
-    IStatus result = new AppEngineDirectoryValidator(basePath).validate("some/directory");
+    IStatus result = new AppYamlPathValidator(basePath).validate("some/directory/app.yaml");
     assertTrue(result.isOK());
   }
 
@@ -84,7 +115,13 @@ public class AppEngineDirectoryValidatorTest {
     File appYaml = Files.createFile(absolutePath.toPath().resolve("app.yaml")).toFile();
     assertTrue(appYaml.exists());
 
-    IStatus result = new AppEngineDirectoryValidator(basePath).validate(absolutePath.toString());
+    IStatus result = new AppYamlPathValidator(basePath).validate(appYaml.toString());
     assertTrue(result.isOK());
+  }
+
+  private static void createAppYamlAsDirectory(IPath basePath) {
+    File appYamlAsDirectory = basePath.append("app.yaml").toFile();
+    appYamlAsDirectory.mkdir();
+    assertTrue(appYamlAsDirectory.isDirectory());
   }
 }

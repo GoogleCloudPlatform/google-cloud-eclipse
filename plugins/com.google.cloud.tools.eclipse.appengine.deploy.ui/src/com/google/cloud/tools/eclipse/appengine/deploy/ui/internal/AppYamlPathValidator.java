@@ -24,11 +24,11 @@ import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 
-public class AppEngineDirectoryValidator implements IValidator {
+public class AppYamlPathValidator implements IValidator {
 
   private final IPath basePath;
 
-  public AppEngineDirectoryValidator(IPath basePath) {
+  public AppYamlPathValidator(IPath basePath) {
     Preconditions.checkArgument(basePath.isAbsolute());
     this.basePath = basePath;
   }
@@ -36,16 +36,20 @@ public class AppEngineDirectoryValidator implements IValidator {
   @Override
   public IStatus validate(Object value) {
     Preconditions.checkArgument(value instanceof String);
-    File directory = new File((String) value);
-    if (!directory.isAbsolute()) {
-      directory = new File(basePath + "/" + directory);
+    File appYaml = new File((String) value);
+    if (!appYaml.isAbsolute()) {
+      appYaml = new File(basePath + "/" + appYaml);
     }
 
-    if (new File(directory + "/app.yaml").exists()) {
-      return ValidationStatus.ok();
+    // appengine-plugins-core does not yet support other file names.
+    if (!"app.yaml".equals(appYaml.getName())) {
+      return ValidationStatus.error(Messages.getString("error.app.yaml.invalid.name", appYaml));
+    } else if (!appYaml.exists()) {
+      return ValidationStatus.error(Messages.getString("error.app.yaml.non.existing"));
+    } else if (!appYaml.isFile()) {
+      return ValidationStatus.error(Messages.getString("error.app.yaml.not.a.file", appYaml));
     } else {
-      return ValidationStatus.error(
-          Messages.getString("error.invalid.app.engine.directory", directory));
+      return ValidationStatus.ok();
     }
   }
 }

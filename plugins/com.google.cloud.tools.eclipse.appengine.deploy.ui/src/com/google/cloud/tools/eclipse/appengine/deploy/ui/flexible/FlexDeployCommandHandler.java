@@ -24,6 +24,7 @@ import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPreferencesDialo
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.swt.widgets.Shell;
@@ -34,16 +35,18 @@ public class FlexDeployCommandHandler extends DeployCommandHandler {
   protected DeployPreferencesDialog newDeployPreferencesDialog(Shell shell, IProject project,
       IGoogleLoginService loginService, IGoogleApiFactory googleApiFactory) {
     String title = Messages.getString("deploy.preferences.dialog.title.flexible");
-    // TODO(chanseok): should extend the base deploy dialog to add a path input field for app.yaml
-    // directory: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1823
     return new FlexDeployPreferencesDialog(shell, title, project, loginService, googleApiFactory);
   }
 
   @Override
   protected StagingDelegate getStagingDelegate(IProject project) {
-    String appEngineDirectory = new FlexDeployPreferences(project).getAppEngineDirectory();
-    IPath appEngineDirectoryPath = project.getFolder(appEngineDirectory).getLocation();
-    return new FlexStagingDelegate(appEngineDirectoryPath);
+    String appYamlPath = new FlexDeployPreferences(project).getAppYamlPath();
+    IFile appYaml = project.getFile(appYamlPath);
+    if (!appYaml.exists()) {
+      throw new IllegalStateException("Invalid app.yaml path from project preferences.");
+    }
+    IPath appEngineDirectory = appYaml.getParent().getLocation();
+    return new FlexStagingDelegate(appEngineDirectory);
   }
 
 }

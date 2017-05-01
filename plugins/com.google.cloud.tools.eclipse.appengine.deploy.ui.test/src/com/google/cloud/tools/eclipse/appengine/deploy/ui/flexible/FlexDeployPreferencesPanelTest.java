@@ -58,8 +58,8 @@ import org.osgi.service.prefs.BackingStoreException;
 @RunWith(MockitoJUnitRunner.class)
 public class FlexDeployPreferencesPanelTest {
 
-  private static final String DIRECTORY_FIELD_TOOLTIP =
-      "A relative path to the project where app.yaml and optional configuration YAML files exist.";
+  private static final String APP_YAML_FIELD_TOOLTIP =
+      "app.yaml path, either absolute or relative to the project.";
 
   @Mock private IGoogleLoginService loginService;
   @Mock private ProjectRepository projectRepository;
@@ -100,41 +100,42 @@ public class FlexDeployPreferencesPanelTest {
   }
 
   @Test
-  public void testDefaultAppEngineDirectorySet() throws InterruptedException {
+  public void testDefaultAppYamlPathSet() throws InterruptedException {
     FlexDeployPreferencesPanel panel = createPanel(true /* requireValues */);
 
-    Text directoryField = findAppEngineDirectoryField(panel);
-    assertEquals("src/main/appengine", directoryField.getText());
+    Text appYamlField = findAppYamlField(panel);
+    assertEquals("src/main/appengine/app.yaml", appYamlField.getText());
     assertFalse(hasValidationError(panel));
   }
 
   @Test
-  public void testAppEngineDirectoryValidation() throws InterruptedException {
+  public void testAppYamlPathValidation() throws InterruptedException {
     FlexDeployPreferencesPanel panel = createPanel(true /* requireValues */);
 
-    Text directoryField = findAppEngineDirectoryField(panel);
-    directoryField.setText("no/app/yaml");
+    Text appYamlField = findAppYamlField(panel);
+    appYamlField.setText("non/existing/app.yaml");
     assertTrue(hasValidationError(panel));
   }
 
   @Test
-  public void testAppEngineDirectoryValidation_noRequireValues() throws InterruptedException {
+  public void testAppYamlPathValidation_noValidationIfRequireValuesIsFalse()
+      throws InterruptedException {
     FlexDeployPreferencesPanel panel = createPanel(false /* requireValues */);
 
-    Text directoryField = findAppEngineDirectoryField(panel);
-    directoryField.setText("no/app/yaml");
+    Text appYamlField = findAppYamlField(panel);
+    appYamlField.setText("non/existing/app.yaml");
     assertFalse(hasValidationError(panel));
   }
 
   @Test
-  public void testAppEngineDirectoryValidation_absoluatePathWorks() throws InterruptedException {
+  public void testAppYamlPathValidation_absoluatePathWorks() throws InterruptedException {
     FlexDeployPreferencesPanel panel = createPanel(false /* requireValues */);
-    Text directoryField = findAppEngineDirectoryField(panel);
+    Text appYamlField = findAppYamlField(panel);
 
-    IPath absoluatePath = project.getLocation().append("src/main/appengine");
+    IPath absoluatePath = project.getLocation().append("src/main/appengine/app.yaml");
     assertTrue(absoluatePath.isAbsolute());
 
-    directoryField.setText(absoluatePath.toString());
+    appYamlField.setText(absoluatePath.toString());
     assertFalse(hasValidationError(panel));
   }
 
@@ -159,11 +160,11 @@ public class FlexDeployPreferencesPanelTest {
     return false;
   }
 
-  private static Text findAppEngineDirectoryField(Composite panel) {
+  private static Text findAppYamlField(Composite panel) {
     return (Text) findControl(panel, new Predicate<Control>() {
       @Override
       public boolean apply(Control control) {
-        return control instanceof Text && DIRECTORY_FIELD_TOOLTIP.equals(control.getToolTipText());
+        return control instanceof Text && APP_YAML_FIELD_TOOLTIP.equals(control.getToolTipText());
       }
     });
   }

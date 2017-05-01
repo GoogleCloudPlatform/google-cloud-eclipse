@@ -24,6 +24,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.DirectoryDialog;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Text;
 
 /**
@@ -35,20 +36,19 @@ import org.eclipse.swt.widgets.Text;
  *
  * @see #RelativeDirectoryFieldSetter(Text, IPath)
  */
-public class RelativeDirectoryFieldSetter extends SelectionAdapter {
+public class RelativeFileFieldSetter extends SelectionAdapter {
 
-  private final Text directoryField;
+  private final Text fileField;
   private final IPath basePath;
-  private final DirectoryDialog dialog;
+  private final FileDialog dialog;
 
-  public RelativeDirectoryFieldSetter(Text directoryField, IPath basePath) {
-    this(directoryField, basePath, new DirectoryDialog(directoryField.getShell()));
+  public RelativeFileFieldSetter(Text directoryField, IPath basePath) {
+    this(directoryField, basePath, new FileDialog(directoryField.getShell()));
   }
 
   @VisibleForTesting
-  RelativeDirectoryFieldSetter(Text directoryField, IPath basePath,
-      DirectoryDialog directoryDialog) {
-    this.directoryField = directoryField;
+  RelativeFileFieldSetter(Text directoryField, IPath basePath, FileDialog directoryDialog) {
+    this.fileField = directoryField;
     this.basePath = Preconditions.checkNotNull(basePath);
     Preconditions.checkArgument(basePath.isAbsolute());
     dialog = directoryDialog;
@@ -56,7 +56,7 @@ public class RelativeDirectoryFieldSetter extends SelectionAdapter {
 
   @Override
   public void widgetSelected(SelectionEvent event) {
-    IPath path = new Path(directoryField.getText().trim());
+    IPath path = new Path(fileField.getText().trim());
     if (path.isAbsolute()) {
       dialog.setFilterPath(path.toString());
     } else {
@@ -65,7 +65,7 @@ public class RelativeDirectoryFieldSetter extends SelectionAdapter {
     String result = dialog.open();
     if (result != null) {
       IPath maybeProjectRelative = new Path(result).makeRelativeTo(basePath);
-      directoryField.setText(maybeProjectRelative.toString());
+      fileField.setText(maybeProjectRelative.toString());
     }
   }
 }

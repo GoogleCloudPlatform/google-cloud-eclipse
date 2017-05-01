@@ -17,13 +17,14 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.ui.internal;
 
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.widgets.DirectoryDialog;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Text;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,62 +32,62 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class RelativeDirectoryFieldSetterTest {
+public class RelativeFileFieldSetterTest {
 
   @Mock private Text field;
-  @Mock private DirectoryDialog dialog;
+  @Mock private FileDialog dialog;
   @Mock private SelectionEvent event;
 
   @Test
   public void testConstructor_nonAbsoluteBasePath() {
     try {
-      new RelativeDirectoryFieldSetter(field, new Path("non/absolute/path"), dialog);
+      new RelativeFileFieldSetter(field, new Path("non/absolute/base/path"), dialog);
       fail();
     } catch (IllegalArgumentException ex) {}
   }
 
   @Test
-  public void testDirectoryDialogCanceled() {
+  public void testFileDialogCanceled() {
     when(field.getText()).thenReturn("");
     when(dialog.open()).thenReturn(null /* means canceled */);
 
-    new RelativeDirectoryFieldSetter(field, new Path("/base/path"), dialog).widgetSelected(event);
-    verify(field, never()).setText("sub/directory");
+    new RelativeFileFieldSetter(field, new Path("/base/path"), dialog).widgetSelected(event);
+    verify(field, never()).setText(anyString());
   }
 
   @Test
   public void testSetField() {
     when(field.getText()).thenReturn("");
-    when(dialog.open()).thenReturn("/base/path/sub/directory");
+    when(dialog.open()).thenReturn("/base/path/sub/directory/app.yaml");
 
-    new RelativeDirectoryFieldSetter(field, new Path("/base/path"), dialog).widgetSelected(event);
-    verify(field).setText("sub/directory");
+    new RelativeFileFieldSetter(field, new Path("/base/path"), dialog).widgetSelected(event);
+    verify(field).setText("sub/directory/app.yaml");
   }
 
   @Test
   public void testSetField_userSuppliesPathOutsideBase() {
     when(field.getText()).thenReturn("");
-    when(dialog.open()).thenReturn("/path/outside/base");
+    when(dialog.open()).thenReturn("/path/outside/base/app.yaml");
 
-    new RelativeDirectoryFieldSetter(field, new Path("/base/path"), dialog).widgetSelected(event);
-    verify(field).setText("../../path/outside/base");
+    new RelativeFileFieldSetter(field, new Path("/base/path"), dialog).widgetSelected(event);
+    verify(field).setText("../../path/outside/base/app.yaml");
   }
 
   @Test
-  public void testDirectoryDialogFilterSet_relativePathInField() {
-    when(field.getText()).thenReturn("src/main/appengine");
+  public void testFileDialogFilterSet_relativePathInField() {
+    when(field.getText()).thenReturn("src/main/appengine/app.yaml");
     when(dialog.open()).thenReturn(null);
 
-    new RelativeDirectoryFieldSetter(field, new Path("/base/path"), dialog).widgetSelected(event);
-    verify(dialog).setFilterPath("/base/path/src/main/appengine");
+    new RelativeFileFieldSetter(field, new Path("/base/path"), dialog).widgetSelected(event);
+    verify(dialog).setFilterPath("/base/path/src/main/appengine/app.yaml");
   }
 
   @Test
-  public void testDirectoryDialogFilterSet_absoluatePathInField() {
-    when(field.getText()).thenReturn("/usr/local/bin");
+  public void testFileDialogFilterSet_absoluatePathInField() {
+    when(field.getText()).thenReturn("/home/alice/deploy/app.yaml");
     when(dialog.open()).thenReturn(null);
 
-    new RelativeDirectoryFieldSetter(field, new Path("/base/path"), dialog).widgetSelected(event);
-    verify(dialog).setFilterPath("/usr/local/bin");
+    new RelativeFileFieldSetter(field, new Path("/base/path"), dialog).widgetSelected(event);
+    verify(dialog).setFilterPath("/home/alice/deploy/app.yaml");
   }
 }

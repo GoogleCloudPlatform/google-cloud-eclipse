@@ -23,36 +23,35 @@ import org.osgi.service.prefs.BackingStoreException;
 
 public class FlexDeployPreferences extends DeployPreferences {
 
-  static final String PREF_APP_ENGINE_DIRECTORY = "appengine.config.folder";
+  static final String PREF_APP_YAML_PATH = "app.yaml.path";
 
-  public static final String DEFAULT_APP_ENGINE_DIRECTORY = "src/main/appengine";
+  public static final String DEFAULT_APP_YAML_PATH = "src/main/appengine/app.yaml";
 
-  private String appEngineDirectory;
+  private String appYamlPath;
 
   public FlexDeployPreferences(IProject project) {
     super(project);
-    appEngineDirectory =
-        preferenceStore.get(PREF_APP_ENGINE_DIRECTORY, DEFAULT_APP_ENGINE_DIRECTORY);
+    appYamlPath = preferenceStore.get(PREF_APP_YAML_PATH, DEFAULT_APP_YAML_PATH);
   }
 
   @Override
   public void resetToDefaults() {
-    appEngineDirectory = DEFAULT_APP_ENGINE_DIRECTORY;
+    appYamlPath = DEFAULT_APP_YAML_PATH;
     super.resetToDefaults();
   }
 
   @Override
   public void save() throws BackingStoreException {
-    preferenceStore.put(PREF_APP_ENGINE_DIRECTORY, appEngineDirectory);
+    preferenceStore.put(PREF_APP_YAML_PATH, appYamlPath);
     super.save();
   }
 
-  public String getAppEngineDirectory() {
-    return appEngineDirectory;
+  public String getAppYamlPath() {
+    return appYamlPath;
   }
 
-  public void setAppEngineDirectory(String appEngineDirectory) {
-    this.appEngineDirectory = Strings.nullToEmpty(appEngineDirectory);
+  public void setAppYamlPath(String appYamlPath) {
+    this.appYamlPath = Strings.nullToEmpty(appYamlPath);
   }
 
 }
