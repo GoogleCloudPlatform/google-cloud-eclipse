@@ -61,7 +61,8 @@ public class AppYamlPathValidatorTest {
 
   @Test
   public void testValidate_absoluatePathAndNoAppYaml() {
-    IStatus result = new AppYamlPathValidator(basePath).validate("/absolute/path/app.yaml");
+    String absolutePath = basePath + "/sub/directory/app.yaml";
+    IStatus result = new AppYamlPathValidator(basePath).validate(absolutePath);
     assertEquals(IStatus.ERROR, result.getSeverity());
     assertEquals("app.yaml does not exist.", result.getMessage());
   }
@@ -70,15 +71,19 @@ public class AppYamlPathValidatorTest {
   public void testValidate_relativePathAndInvalidFileName() {
     IStatus result = new AppYamlPathValidator(basePath).validate("relative/path/my-app.yaml");
     assertEquals(IStatus.ERROR, result.getSeverity());
-    assertEquals("File name is not app.yaml: " + basePath + "/relative/path/my-app.yaml",
+    assertEquals("File name is not app.yaml: "
+        + new Path(basePath + "/relative/path/my-app.yaml").toOSString(),
         result.getMessage());
   }
 
   @Test
   public void testValidate_absolautePathInvalidFileName() {
-    IStatus result = new AppYamlPathValidator(basePath).validate("/absolute/path/my-app.yaml");
+    String absolutePath = basePath + "/sub/directory/my-app.yaml";
+    IStatus result = new AppYamlPathValidator(basePath).validate(absolutePath);
     assertEquals(IStatus.ERROR, result.getSeverity());
-    assertEquals("File name is not app.yaml: /absolute/path/my-app.yaml", result.getMessage());
+    assertEquals("File name is not app.yaml: "
+        + new Path(basePath + "/sub/directory/my-app.yaml").toOSString(),
+        result.getMessage());
   }
 
   @Test
@@ -87,16 +92,19 @@ public class AppYamlPathValidatorTest {
 
     IStatus result = new AppYamlPathValidator(basePath).validate("app.yaml");
     assertEquals(IStatus.ERROR, result.getSeverity());
-    assertEquals("Not a file: " + basePath + "/app.yaml", result.getMessage());
+    assertEquals("Not a file: " + new Path(basePath + "/app.yaml").toOSString(),
+        result.getMessage());
   }
 
   @Test
   public void testValidate_absolautePathNotFile() {
     createAppYamlAsDirectory(basePath);
 
-    IStatus result = new AppYamlPathValidator(basePath).validate(basePath + "/app.yaml");
+    String absolutePath = basePath + "/app.yaml";
+    IStatus result = new AppYamlPathValidator(basePath).validate(absolutePath);
     assertEquals(IStatus.ERROR, result.getSeverity());
-    assertEquals("Not a file: " + basePath + "/app.yaml", result.getMessage());
+    assertEquals("Not a file: " + new Path(basePath + "/app.yaml").toOSString(),
+        result.getMessage());
   }
 
   @Test
