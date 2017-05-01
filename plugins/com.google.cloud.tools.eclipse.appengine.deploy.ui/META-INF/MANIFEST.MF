@@ -8,7 +8,7 @@ Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
-Require-Bundle: com.google.cloud.tools.appengine;bundle-version="0.2.6",
+Require-Bundle: com.google.cloud.tools.appengine;bundle-version="0.3.2",
  org.eclipse.ui.workbench,
  org.eclipse.core.commands
 Export-Package: com.google.cloud.tools.eclipse.appengine.deploy.ui.flexible
