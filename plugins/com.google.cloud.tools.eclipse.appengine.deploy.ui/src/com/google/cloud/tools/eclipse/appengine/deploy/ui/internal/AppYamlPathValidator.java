@@ -24,6 +24,14 @@ import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 
+/**
+ * Checks if a user-provided {@code app.yaml} path points to an existing {@code app.yaml}.
+ * Validation will fail if the file does not exist, the path is not a file (e.g., a directory),
+ * or the file name is not {@code app.yaml}. If the path to validate is not absolute, a preset
+ * prefix path ({@code basePath}) will be appended prior to checking.
+ *
+ * @see #AppYamlPathValidator(IPath)
+ */
 public class AppYamlPathValidator implements IValidator {
 
   private final IPath basePath;
