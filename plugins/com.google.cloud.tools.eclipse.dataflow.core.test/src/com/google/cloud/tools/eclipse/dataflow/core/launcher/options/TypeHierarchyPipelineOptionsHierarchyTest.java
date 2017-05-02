@@ -33,9 +33,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
@@ -63,9 +61,6 @@ public class TypeHierarchyPipelineOptionsHierarchyTest {
   }
 
   private JavaProjectPipelineOptionsHierarchy pipelineOptionsHierarchy;
-
-  @Rule
-  public ExpectedException thrown = ExpectedException.none();
 
   @Mock
   private IJavaProject project;
