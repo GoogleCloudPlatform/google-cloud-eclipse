@@ -99,6 +99,7 @@ public class AppEngineWebBuilder extends IncrementalProjectBuilder {
     }
   }
 
+  @Override
   protected void clean(IProgressMonitor monitor) throws CoreException {
     // nothing to do
   }

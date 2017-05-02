@@ -18,7 +18,7 @@
         <mavenCoordinates
               artifactId="appengine-api-1.0-sdk"
               groupId="com.google.appengine" 
-              version="1.9.50" />
+              version="1.9.51" />
         <exclusionFilter pattern="com/google/appengine/repackaged/**" />
         <exclusionFilter pattern="com/google/appengine/labs/repackaged/**" />
         <inclusionFilter pattern="com/google/apphosting/api/**" />
@@ -37,7 +37,7 @@
         <mavenCoordinates
               artifactId="appengine-endpoints"
               groupId="com.google.appengine" 
-              version="1.9.50" />
+              version="1.9.51" />
         <exclusionFilter pattern="com/google/appengine/repackaged/**" />
       </libraryFile>
     </library>
@@ -53,7 +53,7 @@
         <mavenCoordinates
               artifactId="objectify"
               groupId="com.googlecode.objectify"
-              version="5.1.15" />
+              version="5.1.17" />
       </libraryFile>
       <libraryFile
             javadocUri="https://google.github.io/guava/releases/20.0/api/docs/">
@@ -196,19 +196,19 @@
         <mavenCoordinates
               artifactId="google-cloud-core"
               groupId="com.google.cloud"
-              version="0.10.0-alpha" />
+              version="1.0.0" />
       </libraryFile>
       <libraryFile>  <!-- todo javadoc if it's published -->
         <mavenCoordinates
               artifactId="google-auth-library-oauth2-http"
               groupId="com.google.auth"
-              version="0.6.0" />
+              version="0.6.1" />
       </libraryFile>
       <libraryFile> <!-- todo javadoc if it's published -->
         <mavenCoordinates
               artifactId="google-auth-library-credentials"
               groupId="com.google.auth"
-              version="0.6.0" />
+              version="0.6.1" />
       </libraryFile>
       <libraryFile javadocUri="http://www.joda.org/joda-time/apidocs/">
         <mavenCoordinates
@@ -248,7 +248,7 @@
         <mavenCoordinates
               artifactId="gax"
               groupId="com.google.api"
-              version="0.4.0" />
+              version="1.0.0" />
       </libraryFile>
     </library>
     
@@ -264,7 +264,7 @@
         <mavenCoordinates
               artifactId="google-cloud-storage"
               groupId="com.google.cloud"
-              version="0.10.0-beta" />
+              version="1.0.0" />
       </libraryFile>
       <libraryFile
             javadocUri="https://developers.google.com/resources/api-libraries/documentation/storage/v1/java/latest/index.html">

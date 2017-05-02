@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.dataflow.core.launcher;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -40,9 +41,7 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.JavaLaunchDelegate;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -58,9 +57,7 @@ import java.util.Set;
  */
 public class DataflowPipelineLaunchDelegateTest {
   private DataflowPipelineLaunchDelegate dataflowDelegate;
-
-  @Rule
-  public ExpectedException thrown = ExpectedException.none();
+  private NullProgressMonitor monitor = new NullProgressMonitor();
 
   @Mock
   private DataflowDependencyManager dependencyManager;
@@ -86,9 +83,8 @@ public class DataflowPipelineLaunchDelegateTest {
   public void setup() throws Exception {
     MockitoAnnotations.initMocks(this);
 
-    when(
-            pipelineOptionsHierarchyFactory.forProject(
-                Mockito.eq(project), Mockito.eq(majorVersion), Mockito.<IProgressMonitor>any()))
+    when(pipelineOptionsHierarchyFactory.forProject(
+            Mockito.eq(project), Mockito.eq(majorVersion), Mockito.<IProgressMonitor>any()))
         .thenReturn(pipelineOptionsHierarchy);
 
     when(dependencyManager.getProjectMajorVersion(project)).thenReturn(MajorVersion.ONE);
@@ -137,16 +133,17 @@ public class DataflowPipelineLaunchDelegateTest {
     when(workspaceRoot.getProject(projectName)).thenReturn(project);
     when(project.exists()).thenReturn(true);
 
-    thrown.expect(IllegalArgumentException.class);
-    thrown.expectMessage("Dataflow Pipeline Configuration is not valid");
-
     String mode = "run";
     ILaunch launch = mock(ILaunch.class);
-    NullProgressMonitor monitor = new NullProgressMonitor();
 
-    dataflowDelegate.launch(configuration, mode, launch, monitor);
+    try {
+      dataflowDelegate.launch(configuration, mode, launch, monitor);
+      fail();
+    } catch (IllegalArgumentException ex) {
+      assertTrue(ex.getMessage().contains("Dataflow Pipeline Configuration is not valid"));
+    }
   }
-
+  
   @Test
   public void testLaunchWithProjectThatDoesNotExistThrowsIllegalArgumentException()
       throws CoreException {
@@ -157,16 +154,16 @@ public class DataflowPipelineLaunchDelegateTest {
     when(workspaceRoot.getProject(projectName)).thenReturn(project);
     when(project.exists()).thenReturn(false);
 
-    thrown.expect(IllegalArgumentException.class);
-    thrown.expectMessage("Project with name");
-    thrown.expectMessage(projectName);
-    thrown.expectMessage("must exist to launch");
-
     String mode = "run";
     ILaunch launch = mock(ILaunch.class);
-    NullProgressMonitor monitor = new NullProgressMonitor();
 
-    dataflowDelegate.launch(configuration, mode, launch, monitor);
+    try {
+      dataflowDelegate.launch(configuration, mode, launch, monitor);
+      fail();
+    } catch (IllegalArgumentException ex) {
+      assertTrue(
+          ex.getMessage().contains("Project with name " + projectName + " must exist to launch."));
+    }
   }
 
   @Test
@@ -219,7 +216,6 @@ public class DataflowPipelineLaunchDelegateTest {
 
     String mode = "run";
     ILaunch launch = mock(ILaunch.class);
-    NullProgressMonitor monitor = new NullProgressMonitor();
 
     dataflowDelegate.launch(configuration, mode, launch, monitor);
 
@@ -292,7 +288,6 @@ public class DataflowPipelineLaunchDelegateTest {
 
     String mode = "run";
     ILaunch launch = mock(ILaunch.class);
-    NullProgressMonitor monitor = new NullProgressMonitor();
 
     dataflowDelegate.launch(configuration, mode, launch, monitor);
 

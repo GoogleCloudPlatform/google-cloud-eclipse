@@ -35,6 +35,7 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
 import org.xml.sax.SAXException;
 
 /**
@@ -54,6 +55,19 @@ public class AppEngineXsltTransformTest {
     Document transformed = transform("/xslt/addJava8Runtime.xsl",
         "<appengine-web-app xmlns=\"http://appengine.google.com/ns/1.0\"><runtime>XXX</runtime></appengine-web-app>");
     assertEquals("java8", getRuntimeValue(transformed));
+  }
+  
+  @Test
+  public void testAddRuntimeAtEnd() {
+    Document transformed = transform("/xslt/addJava8Runtime.xsl",
+        "<appengine-web-app xmlns=\"http://appengine.google.com/ns/1.0\"><threadsafe>true</threadsafe></appengine-web-app>");
+    Element runtime = getRuntimeElement(transformed);
+    assertEquals("java8", runtime.getTextContent());
+    Text previous = (Text) runtime.getPreviousSibling();
+    assertTrue(previous.getNodeValue().trim().isEmpty());
+    Text next = (Text) runtime.getNextSibling();
+    String s = next.getNodeValue();
+    assertEquals("\n", s);
   }
 
   @Test
@@ -151,15 +165,24 @@ public class AppEngineXsltTransformTest {
   }
 
   /** Return the {@code <runtime>} value, or {@code null} if no element found. */
-  private String getRuntimeValue(Document transformed) {
+  private static String getRuntimeValue(Document transformed) {
     Element documentElement = transformed.getDocumentElement();
     NodeList runtimeElements =
         documentElement.getElementsByTagNameNS("http://appengine.google.com/ns/1.0", "runtime");
     if (runtimeElements.getLength() == 0) {
       return null;
     }
-    assertTrue(runtimeElements.getLength() == 1);
-    assertTrue("runtime".equals(runtimeElements.item(0).getLocalName()));
+    assertEquals(1, runtimeElements.getLength());
+    assertEquals("runtime", runtimeElements.item(0).getLocalName());
     return runtimeElements.item(0).getTextContent();
+  }
+  
+  /** Return the {@code <runtime>} element. */
+  private static Element getRuntimeElement(Document transformed) {
+    Element documentElement = transformed.getDocumentElement();
+    NodeList runtimeElements =
+        documentElement.getElementsByTagNameNS("http://appengine.google.com/ns/1.0", "runtime");
+    assertEquals(1, runtimeElements.getLength());
+    return (Element) runtimeElements.item(0);
   }
 }

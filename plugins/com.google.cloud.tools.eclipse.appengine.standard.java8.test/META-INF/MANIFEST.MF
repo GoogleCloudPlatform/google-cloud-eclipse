@@ -6,7 +6,7 @@ Fragment-Host: com.google.cloud.tools.eclipse.appengine.standard.java8
 Bundle-Version: 0.1.0.qualifier
 Bundle-Vendor: Google, Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.google.cloud.tools.appengine;version="0.2.11",
+Import-Package: com.google.cloud.tools.appengine;version="0.3.2",
  com.google.cloud.tools.eclipse.appengine.facets.convert,
  com.google.cloud.tools.eclipse.test.util.project,
  org.eclipse.jst.j2ee.web.project.facet,
