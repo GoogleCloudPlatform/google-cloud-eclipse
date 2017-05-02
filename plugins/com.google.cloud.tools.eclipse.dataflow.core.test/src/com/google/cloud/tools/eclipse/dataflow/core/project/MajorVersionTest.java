@@ -19,8 +19,10 @@ package com.google.cloud.tools.eclipse.dataflow.core.project;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 
@@ -29,9 +31,7 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.Restriction;
 import org.apache.maven.artifact.versioning.VersionRange;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
@@ -42,7 +42,6 @@ import java.util.Arrays;
  */
 @RunWith(Parameterized.class)
 public class MajorVersionTest {
-  @Rule public ExpectedException thrown = ExpectedException.none();
 
   @Parameters
   public static Iterable<? extends Object> majorVersions() {
@@ -73,21 +72,27 @@ public class MajorVersionTest {
   @Test
   public void testTruncatedVersionAtEnd() {
     assumeFalse(majorVersion.getMaxVersion().toString().trim().isEmpty());
-    thrown.expect(IllegalArgumentException.class);
-    thrown.expectMessage("it does not contain");
-    thrown.expectMessage(majorVersion.getMaxVersion().toString());
-    thrown.expectMessage(majorVersion.getVersionRange().toString());
-    majorVersion.getTruncatedVersionRange(majorVersion.getMaxVersion());
+    try {
+      majorVersion.getTruncatedVersionRange(majorVersion.getMaxVersion());
+      fail();
+    } catch (IllegalArgumentException ex) {
+      assertTrue(ex.getMessage().contains("it does not contain"));
+      assertTrue(ex.getMessage().contains(majorVersion.getMaxVersion().toString()));
+      assertTrue(ex.getMessage().contains(majorVersion.getVersionRange().toString()));
+    }
   }
 
   @Test
   public void testTruncatedVersionBeforeBeginning() {
     String version = "0.0.0-alpha";
-    thrown.expect(IllegalArgumentException.class);
-    thrown.expectMessage("it does not contain");
-    thrown.expectMessage(version);
-    thrown.expectMessage(majorVersion.getVersionRange().toString());
-    majorVersion.getTruncatedVersionRange(new DefaultArtifactVersion(version));
+    try {
+      majorVersion.getTruncatedVersionRange(new DefaultArtifactVersion(version));
+      fail();
+    } catch (IllegalArgumentException ex) {
+      assertTrue(ex.getMessage().contains("it does not contain"));
+      assertTrue(ex.getMessage().contains(majorVersion.getMaxVersion().toString()));
+      assertTrue(ex.getMessage().contains(version));
+    }
   }
 
   // This runs three times even though it doesn't use the parameters
@@ -166,8 +171,12 @@ public class MajorVersionTest {
   @Test
   public void testTruncateVersionRangeNotInRange() {
     assumeTrue(!majorVersion.getMaxVersion().toString().isEmpty());
-    thrown.expect(IllegalArgumentException.class);
-    MajorVersion.truncateAtLatest(majorVersion.getMaxVersion(), majorVersion.getVersionRange());
+    try {
+      MajorVersion.truncateAtLatest(majorVersion.getMaxVersion(), majorVersion.getVersionRange());
+      fail();
+    } catch (IllegalArgumentException ex) {
+      assertNotNull(ex.getMessage());
+    }
   }
 
   @Test
