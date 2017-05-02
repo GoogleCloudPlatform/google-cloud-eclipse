@@ -60,7 +60,7 @@ public class AppYamlPathValidatorTest {
   }
 
   @Test
-  public void testValidate_absoluatePathAndNoAppYaml() {
+  public void testValidate_absolutePathAndNoAppYaml() {
     String absolutePath = basePath + "/sub/directory/app.yaml";
     IStatus result = new AppYamlPathValidator(basePath).validate(absolutePath);
     assertEquals(IStatus.ERROR, result.getSeverity());

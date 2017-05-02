@@ -103,7 +103,7 @@ public class RelativeFileFieldSetterTest {
   }
 
   @Test
-  public void testFileDialogFilterSet_absoluatePathInField() {
+  public void testFileDialogFilterSet_absolutePathInField() {
     when(field.getText()).thenReturn(basePath + "/deploy/temp/app.yaml");
     when(dialog.open()).thenReturn(null);
 

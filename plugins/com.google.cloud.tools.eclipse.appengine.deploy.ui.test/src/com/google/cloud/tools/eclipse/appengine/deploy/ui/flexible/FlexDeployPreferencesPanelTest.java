@@ -128,14 +128,14 @@ public class FlexDeployPreferencesPanelTest {
   }
 
   @Test
-  public void testAppYamlPathValidation_absoluatePathWorks() throws InterruptedException {
+  public void testAppYamlPathValidation_absolutePathWorks() throws InterruptedException {
     FlexDeployPreferencesPanel panel = createPanel(false /* requireValues */);
     Text appYamlField = findAppYamlField(panel);
 
-    IPath absoluatePath = project.getLocation().append("src/main/appengine/app.yaml");
-    assertTrue(absoluatePath.isAbsolute());
+    IPath absolutePath = project.getLocation().append("src/main/appengine/app.yaml");
+    assertTrue(absolutePath.isAbsolute());
 
-    appYamlField.setText(absoluatePath.toString());
+    appYamlField.setText(absolutePath.toString());
     assertFalse(hasValidationError(panel));
   }
 
