@@ -120,7 +120,7 @@ public class GcsDataflowProjectClient {
    * Gets whether the current staging location exists and is accessible. If this method returns
    * true, the provided staging location can be used.
    */
-  public boolean locationIsAccessible(String stagingLocation) {
+  boolean locationIsAccessible(String stagingLocation) {
     String bucketName = toGcsBucketName(stagingLocation);
     try {
       gcsClient.buckets().get(bucketName).execute();
