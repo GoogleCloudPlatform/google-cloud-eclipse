@@ -48,13 +48,9 @@ public class VerifyStagingLocationJob extends Job {
 
   @Override
   protected IStatus run(IProgressMonitor monitor) {
-    try {
-      VerifyStagingLocationResult result = new VerifyStagingLocationResult(
-          stagingLocation, client.verifyLocationIsAccessible(stagingLocation));
-      future.set(result);
-    } catch (IOException e) {
-      future.setException(e);
-    }
+    VerifyStagingLocationResult result = new VerifyStagingLocationResult(
+        stagingLocation, client.locationIsAccessible(stagingLocation));
+    future.set(result);
     return Status.OK_STATUS;
   }
 
