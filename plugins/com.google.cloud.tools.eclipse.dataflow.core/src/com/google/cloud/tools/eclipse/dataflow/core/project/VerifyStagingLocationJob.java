@@ -24,8 +24,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
-import java.io.IOException;
-
 /**
  * A job that verifies a Staging Location.
  */
