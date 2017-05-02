@@ -66,7 +66,7 @@ public class FlexDeployPreferencesPanel extends AppEngineDeployPreferencesPanel 
     label.setToolTipText(Messages.getString("tooltip.app.yaml"));
 
     Composite secondColumn = new Composite(this, SWT.NONE);
-    final Text appYamlField = new Text(secondColumn, SWT.SINGLE | SWT.BORDER);
+    Text appYamlField = new Text(secondColumn, SWT.SINGLE | SWT.BORDER);
     appYamlField.setToolTipText(Messages.getString("tooltip.app.yaml"));
 
     Button browse = new Button(secondColumn, SWT.PUSH);
