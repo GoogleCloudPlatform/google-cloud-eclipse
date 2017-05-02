@@ -109,7 +109,7 @@ public class GcsDataflowProjectClient {
     return bucketName;
   }
 
-  public String toGcsLocationUri(String location) {
+  public static String toGcsLocationUri(String location) {
     if (Strings.isNullOrEmpty(location) || location.startsWith(GCS_PREFIX)) {
       return location;
     }
