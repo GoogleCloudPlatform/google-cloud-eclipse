@@ -43,7 +43,7 @@ class LabelImageLoadJob extends Job {
   Image scaled;
 
   LabelImageLoadJob(URL imageUrl, Label label, int width, int height) {
-    super("Google User Profile Picture Fetach Job");
+    super("Google User Profile Picture Fetch Job");
     this.imageUrl = imageUrl;
     this.label = label;
     this.width = width;
@@ -64,7 +64,7 @@ class LabelImageLoadJob extends Job {
       LabelImageLoader.storeInCache(imageUrl.toString(), scaledData);
 
       scaled = new Image(display, scaledData);
-      display.syncExec(new UiRunnable());
+      display.syncExec(new SetImageRunnable());
 
     } finally {
       unscaled.dispose();
@@ -75,7 +75,7 @@ class LabelImageLoadJob extends Job {
     return Status.OK_STATUS;
   }
 
-  private class UiRunnable implements Runnable {
+  private class SetImageRunnable implements Runnable {
 
     @Override
     public void run() {

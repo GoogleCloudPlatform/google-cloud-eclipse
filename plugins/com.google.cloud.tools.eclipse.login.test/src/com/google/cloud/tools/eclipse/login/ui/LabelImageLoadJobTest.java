@@ -68,9 +68,7 @@ public class LabelImageLoadJobTest {
 
     URL url = new URL(server.getAddress() + "sample.gif");
     loadJob = new LabelImageLoadJob(url, label, 10, 10);
-    loadJob.schedule();
-    loadJob.join();
-
+    runAndWaitJob();
     assertNotNull(LabelImageLoader.cache.get(url.toString()));
   }
 
@@ -78,9 +76,7 @@ public class LabelImageLoadJobTest {
   public void testRun_imageLoaded() throws MalformedURLException, InterruptedException {
     URL url = new URL(server.getAddress() + "sample.gif");
     loadJob = new LabelImageLoadJob(url, label, 10, 10);
-    loadJob.schedule();
-    loadJob.join();
-
+    runAndWaitJob();
     assertNotNull(label.getImage());
   }
 
@@ -88,23 +84,27 @@ public class LabelImageLoadJobTest {
   public void testRun_imageResized() throws MalformedURLException, InterruptedException {
     URL url = new URL(server.getAddress() + "sample.gif");
     loadJob = new LabelImageLoadJob(url, label, 234, 56);
-    loadJob.schedule();
-    loadJob.join();
 
+    runAndWaitJob();
     assertEquals(234, label.getImage().getBounds().width);
     assertEquals(56, label.getImage().getBounds().height);
   }
 
   @Test
-  public void testRun_noErrorIfLabelAlreadyDisposed()
+  public void testRun_noErrorIfLabelIsAlreadyDisposed()
       throws MalformedURLException, InterruptedException {
     URL url = new URL(server.getAddress() + "sample.gif");
     loadJob = new LabelImageLoadJob(url, label, 234, 56);
 
     label.dispose();
-    loadJob.schedule();
-    loadJob.join();
-
+    runAndWaitJob();
     assertTrue(loadJob.scaled.isDisposed());
+  }
+
+  private void runAndWaitJob() throws InterruptedException {
+    loadJob.schedule();
+    while (!loadJob.join(100, null)) {  // spin and dispatch UI events
+      shellResource.getDisplay().readAndDispatch();
+    }
   }
 }

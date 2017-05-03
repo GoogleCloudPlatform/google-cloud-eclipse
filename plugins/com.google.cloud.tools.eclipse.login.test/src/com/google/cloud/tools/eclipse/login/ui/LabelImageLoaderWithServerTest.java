@@ -61,7 +61,7 @@ public class LabelImageLoaderWithServerTest {
   public void testLoadImage_loadImageAsync() throws MalformedURLException, InterruptedException {
     imageLoader.loadImage(server.getAddress() + "sample.gif", label, 1, 1);
     assertNotNull(imageLoader.loadJob);
-    imageLoader.loadJob.join();
+    waitJob();
 
     assertNotNull(label.getImage());
   }
@@ -69,9 +69,15 @@ public class LabelImageLoaderWithServerTest {
   @Test
   public void testLoadImage_imageResized() throws MalformedURLException, InterruptedException {
     imageLoader.loadImage(server.getAddress() + "sample.gif", label, 123, 987);
-    imageLoader.loadJob.join();
+    waitJob();
 
     assertEquals(123, label.getImage().getBounds().width);
     assertEquals(987, label.getImage().getBounds().height);
+  }
+
+  private void waitJob() throws InterruptedException {
+    while (!imageLoader.loadJob.join(100, null)) {  // spin to dispatch UI events
+      shellResource.getDisplay().readAndDispatch();
+    }
   }
 }
