@@ -10,12 +10,14 @@ call t:\google\google-cloud-sdk\bin\gcloud.cmd components update --quiet
 call t:\google\google-cloud-sdk\bin\gcloud.cmd components install app-engine-java --quiet
 set GOOGLE_CLOUD_SDK_HOME=t:\google\google-cloud-sdk
 
+echo "========================================================================="
+echo "PATH:"
+echo %PATH%
+echo "========================================================================="
+
 wget -nv http://www-us.apache.org/dist/maven/maven-3/3.5.0/binaries/apache-maven-3.5.0-bin.zip
 unzip -q apache-maven-3.5.0-bin.zip
 
 apache-maven-3.5.0/bin/mvn -B --fail-at-end -Ptravis -Declipse.target=oxygen verify
-
-echo "PATH:"
-echo %PATH%
 
 exit /b %ERRORLEVEL%
