@@ -113,8 +113,8 @@ public class AppEngineDeployPreferencesPanelTest {
     when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1)));
     initializeProjectRepository();
     deployPanel = createPanel(true /* requireValues */);
-    assertNotNull(deployPanel.getLatestGcpProjectQueryJob());
-    deployPanel.getLatestGcpProjectQueryJob().join();
+    assertNotNull(deployPanel.latestGcpProjectQueryJob);
+    deployPanel.latestGcpProjectQueryJob.join();
 
     Table projectTable = getProjectSelector().getViewer().getTable();
     assertThat(projectTable.getItemCount(), is(2));
@@ -190,7 +190,7 @@ public class AppEngineDeployPreferencesPanelTest {
       initializeProjectRepository();
       when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1, account2)));
       deployPanel = createPanel(true /* requireValues */);
-      deployPanel.getLatestGcpProjectQueryJob().join();
+      deployPanel.latestGcpProjectQueryJob.join();
 
       ProjectSelector projectSelector = getProjectSelector();
       IStructuredSelection selection = projectSelector.getViewer().getStructuredSelection();
@@ -234,7 +234,7 @@ public class AppEngineDeployPreferencesPanelTest {
     initializeProjectRepository();
     deployPanel = createPanel(false /* requireValues */);
     selectAccount(account1);
-    deployPanel.getLatestGcpProjectQueryJob().join();
+    deployPanel.latestGcpProjectQueryJob.join();
     assertThat(getProjectSelectionValidator().getSeverity(), is(IStatus.OK));
   }
 
@@ -246,12 +246,12 @@ public class AppEngineDeployPreferencesPanelTest {
 
     deployPanel = createPanel(false /* requireValues */);
     Table projectTable = getProjectSelector().getViewer().getTable();
-    assertNull(deployPanel.getLatestGcpProjectQueryJob());
+    assertNull(deployPanel.latestGcpProjectQueryJob);
     assertThat(projectTable.getItemCount(), is(0));
 
     selectAccount(account1);
-    assertNotNull(deployPanel.getLatestGcpProjectQueryJob());
-    deployPanel.getLatestGcpProjectQueryJob().join();
+    assertNotNull(deployPanel.latestGcpProjectQueryJob);
+    deployPanel.latestGcpProjectQueryJob.join();
     assertThat(projectTable.getItemCount(), is(2));
     assertThat(((GcpProject) projectTable.getItem(0).getData()).getId(), is("projectId1"));
     assertThat(((GcpProject) projectTable.getItem(1).getData()).getId(), is("projectId2"));
@@ -265,17 +265,17 @@ public class AppEngineDeployPreferencesPanelTest {
 
     deployPanel = createPanel(false /* requireValues */);
     Table projectTable = getProjectSelector().getViewer().getTable();
-    assertNull(deployPanel.getLatestGcpProjectQueryJob());
+    assertNull(deployPanel.latestGcpProjectQueryJob);
     assertThat(projectTable.getItemCount(), is(0));
 
     selectAccount(account1);
-    Job jobForAccount1 = deployPanel.getLatestGcpProjectQueryJob();
+    Job jobForAccount1 = deployPanel.latestGcpProjectQueryJob;
     jobForAccount1.join();
     assertThat(projectTable.getItemCount(), is(2));
 
     selectAccount(account2);
-    assertNotEquals(jobForAccount1, deployPanel.getLatestGcpProjectQueryJob());
-    deployPanel.getLatestGcpProjectQueryJob().join();
+    assertNotEquals(jobForAccount1, deployPanel.latestGcpProjectQueryJob);
+    deployPanel.latestGcpProjectQueryJob.join();
     assertThat(projectTable.getItemCount(), is(1));
     assertThat(((GcpProject) projectTable.getItem(0).getData()).getId(), is("projectId2"));
   }
@@ -289,7 +289,7 @@ public class AppEngineDeployPreferencesPanelTest {
 
     deployPanel = createPanel(false /* requireValues */);
     selectAccount(account1);
-    deployPanel.getLatestGcpProjectQueryJob().join();
+    deployPanel.latestGcpProjectQueryJob.join();
 
     Table projectTable = getProjectSelector().getViewer().getTable();
     assertThat(projectTable.getItemCount(), is(2));
@@ -297,7 +297,7 @@ public class AppEngineDeployPreferencesPanelTest {
     assertThat(projectTable.getSelectionCount(), is(1));
 
     selectAccount(account2);
-    deployPanel.getLatestGcpProjectQueryJob().join();
+    deployPanel.latestGcpProjectQueryJob.join();
 
     assertThat(projectTable.getItemCount(), is(1));
     assertThat(projectTable.getSelectionCount(), is(0));

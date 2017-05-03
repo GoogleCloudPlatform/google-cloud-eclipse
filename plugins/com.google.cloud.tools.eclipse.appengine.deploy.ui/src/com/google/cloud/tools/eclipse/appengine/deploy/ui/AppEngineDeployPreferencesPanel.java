@@ -112,13 +112,13 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
 
   private final Image refreshIcon = SharedImages.REFRESH_IMAGE_DESCRIPTOR.createImage(getDisplay());
 
-  @VisibleForTesting
-  final DeployPreferences model;
+  protected final IProject project;
+  protected final DeployPreferences model;
   private final ObservablesManager observables = new ObservablesManager();
-  private final DataBindingContext bindingContext = new DataBindingContext();
+  protected final DataBindingContext bindingContext = new DataBindingContext();
 
   private final Runnable layoutChangedHandler;
-  private final boolean requireValues;
+  protected final boolean requireValues;
 
   private final ProjectRepository projectRepository;
   private final FormToolkit formToolkit;
@@ -128,6 +128,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
       ProjectRepository projectRepository, DeployPreferences model) {
     super(parent, SWT.NONE);
 
+    this.project = project;
     this.layoutChangedHandler = Preconditions.checkNotNull(layoutChangedHandler);
     this.requireValues = requireValues;
     this.projectRepository = projectRepository;
@@ -313,7 +314,6 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
   }
 
   private void createCredentialSection(IGoogleLoginService loginService) {
-
     Label accountLabel = new Label(this, SWT.LEAD);
     accountLabel.setText(Messages.getString("deploy.preferences.dialog.label.selectAccount"));
     accountLabel.setToolTipText(Messages.getString("tooltip.account"));
@@ -453,7 +453,8 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     return bucketComposite;
   }
 
-  private Job latestGcpProjectQueryJob;  // Must be updated/accessed in the UI context.
+  @VisibleForTesting
+  public Job latestGcpProjectQueryJob;  // Must be updated/accessed in the UI context.
 
   private Predicate<Job> isLatestQueryJob = new Predicate<Job>() {
     @Override
@@ -461,11 +462,6 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
       return job == latestGcpProjectQueryJob;
     }
   };
-
-  @VisibleForTesting
-  Job getLatestGcpProjectQueryJob() {
-    return latestGcpProjectQueryJob;
-  }
 
   private void refreshProjectsForSelectedCredential() {
     projectSelector.setProjects(Collections.<GcpProject>emptyList());
@@ -479,7 +475,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     }
   }
 
-  public final class RefreshProjectOnAccountSelection implements Runnable {
+  private final class RefreshProjectOnAccountSelection implements Runnable {
 
     private final Button refreshProjectsButton;
 
@@ -614,8 +610,9 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     }
   }
 
+  @VisibleForTesting
   @Override
-  DataBindingContext getDataBindingContext() {
+  public DataBindingContext getDataBindingContext() {
     return bindingContext;
   }
 

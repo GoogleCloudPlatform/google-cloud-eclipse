@@ -19,11 +19,23 @@ package com.google.cloud.tools.eclipse.appengine.deploy.ui.flexible;
 import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexDeployPreferences;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.AppEngineDeployPreferencesPanel;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
+import com.google.cloud.tools.eclipse.appengine.deploy.ui.internal.AppYamlPathValidator;
+import com.google.cloud.tools.eclipse.appengine.deploy.ui.internal.RelativeFileFieldSetter;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
+import org.eclipse.core.databinding.UpdateValueStrategy;
+import org.eclipse.core.databinding.beans.PojoProperties;
+import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.jface.databinding.swt.ISWTObservableValue;
+import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 
 public class FlexDeployPreferencesPanel extends AppEngineDeployPreferencesPanel {
 
@@ -36,6 +48,8 @@ public class FlexDeployPreferencesPanel extends AppEngineDeployPreferencesPanel 
 
   @Override
   protected void createCenterArea() {
+    createAppYamlSection();
+
     super.createCenterArea();
 
     Button includeOptionalConfigurationFilesButton = createCheckBox(
@@ -43,6 +57,40 @@ public class FlexDeployPreferencesPanel extends AppEngineDeployPreferencesPanel 
         Messages.getString("tooltip.deploy.config.files.flexible"));
     setupCheckBoxDataBinding(
         includeOptionalConfigurationFilesButton, "includeOptionalConfigurationFiles");
+  }
+
+  private void createAppYamlSection() {
+    // Part 1. create UI widgets
+    Label label = new Label(this, SWT.LEAD);
+    label.setText(Messages.getString("deploy.preferences.dialog.label.app.yaml"));
+    label.setToolTipText(Messages.getString("tooltip.app.yaml"));
+
+    Composite secondColumn = new Composite(this, SWT.NONE);
+    Text appYamlField = new Text(secondColumn, SWT.SINGLE | SWT.BORDER);
+    appYamlField.setToolTipText(Messages.getString("tooltip.app.yaml"));
+
+    Button browse = new Button(secondColumn, SWT.PUSH);
+    browse.setText(Messages.getString("deploy.preferences.dialog.browse"));
+    browse.addSelectionListener(new RelativeFileFieldSetter(appYamlField, project.getLocation()));
+
+    GridLayoutFactory.fillDefaults().numColumns(2).applyTo(secondColumn);
+    GridData fillGridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
+    secondColumn.setLayoutData(fillGridData);
+    appYamlField.setLayoutData(fillGridData);
+
+    // Part 2. set up data binding
+    ISWTObservableValue fieldValue = WidgetProperties.text(SWT.Modify).observe(appYamlField);
+    IObservableValue modelValue = PojoProperties.value("appYamlPath").observe(model);
+
+    if (!requireValues) {
+      bindingContext.bindValue(fieldValue, modelValue);
+    } else {
+      UpdateValueStrategy updateStrategy = new UpdateValueStrategy()
+          .setAfterGetValidator(new AppYamlPathValidator(project.getLocation()));
+      bindingContext.bindValue(fieldValue, modelValue, updateStrategy, updateStrategy);
+      // Force setting the path field even if validation fails.
+      appYamlField.setText((String) modelValue.getValue());
+    }
   }
 
   @Override

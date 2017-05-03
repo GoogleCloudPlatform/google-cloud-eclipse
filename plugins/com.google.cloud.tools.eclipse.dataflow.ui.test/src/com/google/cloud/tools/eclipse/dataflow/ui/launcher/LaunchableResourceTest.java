@@ -18,6 +18,8 @@ package com.google.cloud.tools.eclipse.dataflow.ui.launcher;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
 import org.eclipse.core.resources.IProject;
@@ -25,9 +27,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mock;
@@ -48,9 +48,7 @@ public class LaunchableResourceTest {
   @Mock
   private IProject project;
   private String projectName = "my_test_project";
-  
-  @Rule public ExpectedException thrown = ExpectedException.none();
-  
+    
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
@@ -79,17 +77,23 @@ public class LaunchableResourceTest {
   
   @Test
   public void testMethodUnspecifiedWithPrimaryType() {
-    thrown.expect(NullPointerException.class);
-    thrown.expectMessage("mainMethod is null");
-    thrown.expectMessage("primaryType is not null");
-    new LaunchableResource(resource, null, primaryType);
+    try {
+      new LaunchableResource(resource, null, primaryType);
+      fail();
+    } catch (NullPointerException ex) {
+      assertTrue(ex.getMessage().contains("mainMethod is null"));
+      assertTrue(ex.getMessage().contains("primaryType is not null"));
+    }
   }
   
   @Test
   public void testMethodSpecifiedWithoutPrimaryType() {
-    thrown.expect(NullPointerException.class);
-    thrown.expectMessage("mainMethod is not null");
-    thrown.expectMessage("primaryType is null");
-    new LaunchableResource(resource, mainMethod, null);    
+   try {
+      new LaunchableResource(resource, mainMethod, null); 
+      fail();
+    } catch (NullPointerException ex) {
+      assertTrue(ex.getMessage().contains("mainMethod is not null"));
+      assertTrue(ex.getMessage().contains("primaryType is null"));
+    }      
   }
 }

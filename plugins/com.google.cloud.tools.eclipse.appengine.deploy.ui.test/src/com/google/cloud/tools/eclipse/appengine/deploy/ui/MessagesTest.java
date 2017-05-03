@@ -22,10 +22,15 @@ import org.junit.Test;
 public class MessagesTest {
 
   @Test
+  public void testCloudSdkNotConfigured() {
+    Assert.assertEquals("Deploy failed.", Messages.getString("deploy.failed.error.message"));
+  }
+
+  @Test
   public void testSpecifyVersionTooltip() {
     Assert.assertEquals(
         "If checked, stops the previously running version when "
-        + "deploying a new version that receives all traffic.", 
+        + "deploying a new version that receives all traffic.",
         Messages.getString("tooltip.stop.previous.version"));
   }
 

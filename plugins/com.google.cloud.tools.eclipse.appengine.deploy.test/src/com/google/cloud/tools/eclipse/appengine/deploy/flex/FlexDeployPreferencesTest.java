@@ -48,40 +48,40 @@ public class FlexDeployPreferencesTest {
   }
 
   @Test
-  public void testDefaultAppEngineDirectory() {
-    assertEquals("src/main/appengine", FlexDeployPreferences.DEFAULT_APP_ENGINE_DIRECTORY);
-    assertEquals(preferences.getAppEngineDirectory(), "src/main/appengine");
+  public void testDefaultAppYamlPath() {
+    assertEquals("src/main/appengine/app.yaml", FlexDeployPreferences.DEFAULT_APP_YAML_PATH);
+    assertEquals(preferences.getAppYamlPath(), "src/main/appengine/app.yaml");
   }
 
   @Test
-  public void testSetAppEngineDirectory() {
-    assertEquals(preferences.getAppEngineDirectory(), "src/main/appengine");
-    preferences.setAppEngineDirectory("another/directory");
-    assertEquals("another/directory", preferences.getAppEngineDirectory());
-    preferences.setAppEngineDirectory(null);
+  public void testSetAppYamlPath() {
+    assertEquals(preferences.getAppYamlPath(), "src/main/appengine/app.yaml");
+    preferences.setAppYamlPath("another/directory/app.yaml");
+    assertEquals("another/directory/app.yaml", preferences.getAppYamlPath());
+    preferences.setAppYamlPath(null);
     assertEquals("", preferences.getProjectId());
   }
 
   @Test
   public void testResetToDefault() {
-    preferences.setAppEngineDirectory("another/directory");
+    preferences.setAppYamlPath("another/directory/app.yaml");
     preferences.resetToDefaults();
-    assertEquals("src/main/appengine", preferences.getAppEngineDirectory());
+    assertEquals("src/main/appengine/app.yaml", preferences.getAppYamlPath());
   }
 
   @Test
   public void testDoesNotPersistWithoutSave() {
-    assertEquals("", preferenceStore.get(FlexDeployPreferences.PREF_APP_ENGINE_DIRECTORY, ""));
-    preferences.setAppEngineDirectory("another/directory");
-    assertEquals("", preferenceStore.get(FlexDeployPreferences.PREF_APP_ENGINE_DIRECTORY, ""));
+    assertEquals("", preferenceStore.get(FlexDeployPreferences.PREF_APP_YAML_PATH, ""));
+    preferences.setAppYamlPath("another/directory/app.yaml");
+    assertEquals("", preferenceStore.get(FlexDeployPreferences.PREF_APP_YAML_PATH, ""));
   }
 
   @Test
   public void testSave() throws BackingStoreException {
-    assertEquals("", preferenceStore.get(FlexDeployPreferences.PREF_APP_ENGINE_DIRECTORY, ""));
-    preferences.setAppEngineDirectory("another/directory");
+    assertEquals("", preferenceStore.get(FlexDeployPreferences.PREF_APP_YAML_PATH, ""));
+    preferences.setAppYamlPath("another/directory/app.yaml");
     preferences.save();
-    assertEquals("another/directory",
-        preferenceStore.get(FlexDeployPreferences.PREF_APP_ENGINE_DIRECTORY, ""));
+    assertEquals("another/directory/app.yaml",
+        preferenceStore.get(FlexDeployPreferences.PREF_APP_YAML_PATH, ""));
   }
 }
