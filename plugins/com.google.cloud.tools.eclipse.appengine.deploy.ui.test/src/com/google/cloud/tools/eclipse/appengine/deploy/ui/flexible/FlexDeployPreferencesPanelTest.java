@@ -31,6 +31,7 @@ import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepositoryException;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
+import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import com.google.cloud.tools.login.Account;
 import com.google.common.base.Predicate;
@@ -161,7 +162,7 @@ public class FlexDeployPreferencesPanelTest {
   }
 
   private static Text findAppYamlField(Composite panel) {
-    return (Text) findControl(panel, new Predicate<Control>() {
+    return (Text) CompositeUtil.findControl(panel, new Predicate<Control>() {
       @Override
       public boolean apply(Control control) {
         return control instanceof Text && APP_YAML_FIELD_TOOLTIP.equals(control.getToolTipText());
@@ -170,25 +171,6 @@ public class FlexDeployPreferencesPanelTest {
   }
 
   private static AccountSelector findAccountSelector(Composite panel) {
-    return (AccountSelector) findControl(panel, new Predicate<Control>() {
-      @Override
-      public boolean apply(Control control) {
-        return control instanceof AccountSelector;
-      }
-    });
-  }
-
-  private static Control findControl(Composite composite, Predicate<Control> predicate) {
-    for (Control control : composite.getChildren()) {
-      if (predicate.apply(control)) {
-        return control;
-      } else if (control instanceof Composite) {
-        Control result = findControl((Composite) control, predicate);
-        if (result != null) {
-          return result;
-        }
-      }
-    }
-    return null;
+    return CompositeUtil.findControl(panel, AccountSelector.class);
   }
 }
