@@ -24,8 +24,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
-import java.io.IOException;
-
 /**
  * A job that verifies a Staging Location.
  */
@@ -48,13 +46,9 @@ public class VerifyStagingLocationJob extends Job {
 
   @Override
   protected IStatus run(IProgressMonitor monitor) {
-    try {
-      VerifyStagingLocationResult result = new VerifyStagingLocationResult(
-          stagingLocation, client.verifyLocationIsAccessible(stagingLocation));
-      future.set(result);
-    } catch (IOException e) {
-      future.setException(e);
-    }
+    VerifyStagingLocationResult result = new VerifyStagingLocationResult(
+        stagingLocation, client.locationIsAccessible(stagingLocation));
+    future.set(result);
     return Status.OK_STATUS;
   }
 
