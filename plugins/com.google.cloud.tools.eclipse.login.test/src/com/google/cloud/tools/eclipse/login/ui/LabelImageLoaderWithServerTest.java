@@ -38,7 +38,6 @@ public class LabelImageLoaderWithServerTest {
       "sample.gif", LabelImageLoaderTest.someImageBytes);
 
   private final LabelImageLoader imageLoader = new LabelImageLoader();
-
   private Label label;
 
   @Before

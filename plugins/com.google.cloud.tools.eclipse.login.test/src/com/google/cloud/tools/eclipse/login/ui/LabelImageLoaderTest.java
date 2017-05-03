@@ -38,14 +38,12 @@ public class LabelImageLoaderTest {
 
   static final byte[] someImageBytes = { 71, 73, 70, 56, 57, 97, 1, 0, 1, 0, 0, 0, 0, 33,
       (byte) 249, 4, 1, 0, 0, 0, 0, 44, 0, 0, 0, 0, 1, 0, 1, 0, 0, 2 };
-
   static final ImageData someImageData = new ImageData(
       1, 1, 1, new PaletteData(new RGB[] { new RGB(0, 0, 0) }));
 
   @Rule public ShellTestResource shellResource = new ShellTestResource();
 
   private final LabelImageLoader imageLoader = new LabelImageLoader();
-
   private Label label;
 
   @Before
