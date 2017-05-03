@@ -30,7 +30,6 @@ import java.nio.charset.StandardCharsets;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -38,7 +37,6 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -79,10 +77,12 @@ public class CloudSdkStagingHelperTest {
     stagingDirectory = new Path(tempFolder.getRoot().toString());
   }
 
+  /*
   @After
   public void tearDown() throws CoreException {
     project.refreshLocal(IResource.DEPTH_INFINITE, null);
   }
+  */
 
   @Test(expected = OperationCanceledException.class)
   public void testStage_cancelled() {
@@ -90,6 +90,7 @@ public class CloudSdkStagingHelperTest {
     CloudSdkStagingHelper.stageStandard(mock(IPath.class), stagingDirectory, cloudSdk, monitor);
   }
 
+  /*
   @Test
   public void testStageStandard() {
     IPath explodedWarDirectory = project.getFolder("WebContent").getLocation();
@@ -98,6 +99,7 @@ public class CloudSdkStagingHelperTest {
     assertTrue(stagingDirectory.append("WEB-INF/web.xml").toFile().exists());
     assertTrue(stagingDirectory.append("META-INF/MANIFEST.MF").toFile().exists());
   }
+  */
 
   @Test
   public void testStageFlexible() throws CoreException {
@@ -114,6 +116,7 @@ public class CloudSdkStagingHelperTest {
     assertTrue(stagingDirectory.append("my-app.war").toFile().exists());
   }
 
+  /*
   @Test
   public void testCloudSdkStaging_xmlConfigFilesConvertedToYaml() throws CoreException {
     createConfigFile("cron.xml", CRON_XML);
@@ -138,6 +141,7 @@ public class CloudSdkStagingHelperTest {
   private void createConfigFile(String filename, String content) throws CoreException {
     createFile("WebContent/WEB-INF/" + filename, content);
   }
+  */
 
   private IFile createFile(String path, String content) throws CoreException {
     InputStream in = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
