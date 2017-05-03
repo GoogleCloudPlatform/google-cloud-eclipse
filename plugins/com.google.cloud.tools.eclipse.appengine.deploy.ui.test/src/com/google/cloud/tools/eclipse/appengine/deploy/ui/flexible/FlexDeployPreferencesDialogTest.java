@@ -16,7 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.ui.flexible;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -59,16 +59,15 @@ public class FlexDeployPreferencesDialogTest {
     dialog.open();
     Composite dialogArea = (Composite) dialog.createDialogArea(shellResource.getShell());
 
-    assertTrue(hasGcpPricingLink(dialogArea));
+    assertNotNull(findGcpPricingLink(dialogArea));
   }
 
-  private static boolean hasGcpPricingLink(Composite dialogArea) {
-    Control link = CompositeUtil.findControl(dialogArea, new Predicate<Control>() {
+  private static Control findGcpPricingLink(Composite dialogArea) {
+    return CompositeUtil.findControl(dialogArea, new Predicate<Control>() {
       @Override
       public boolean apply(Control control) {
         return control instanceof Link && GCP_PRICING_MESSAGE.equals(((Link) control).getText());
       }
     });
-    return link != null;
   }
 }
