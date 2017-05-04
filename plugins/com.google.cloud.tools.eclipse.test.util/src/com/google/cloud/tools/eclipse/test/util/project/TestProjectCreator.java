@@ -17,7 +17,6 @@
 package com.google.cloud.tools.eclipse.test.util.project;
 
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import com.google.cloud.tools.eclipse.appengine.facets.FacetUtil;
 import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
@@ -121,7 +120,7 @@ public final class TestProjectCreator extends ExternalResource {
       try {
         createProject("test" + Math.random());
       } catch (CoreException ex) {
-        throw new AssertionError("Could not delete project", ex);
+        throw new AssertionError("Could not create project", ex);
       }
     }
   }
