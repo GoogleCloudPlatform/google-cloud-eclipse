@@ -20,10 +20,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
-import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexFacet;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -36,10 +34,8 @@ import org.junit.Test;
 
 public class FlexStagingDelegateTest {
 
-  private static final String APP_YAML = "runtime: java\nenv: flex";
-
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator().withFacetVersions(
-      JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineStandardFacet.FACET_VERSION);
+      JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineFlexFacet.FACET_VERSION);
 
   private IProject project;
   private IPath safeWorkDirectory;
@@ -47,15 +43,11 @@ public class FlexStagingDelegateTest {
   private IPath appEngineDirectory;
 
   @Before
-  public void setUp() throws CoreException {
+  public void setUp() {
     project = projectCreator.getProject();
     safeWorkDirectory = project.getFolder("safe-work-directory").getLocation();
     stagingDirectory = project.getFolder("staging-result").getLocation();
     appEngineDirectory = project.getFolder("src/main/appengine").getLocation();
-    project.getFolder("src/main").create(true, true, null);
-    project.getFolder("src/main/appengine").create(true, true, null);
-    project.getFile("src/main/appengine/app.yaml").create(
-        new ByteArrayInputStream(APP_YAML.getBytes(StandardCharsets.UTF_8)), true, null);
   }
 
   @Test
@@ -71,8 +63,6 @@ public class FlexStagingDelegateTest {
   @Test
   public void testGetOptionalConfigurationFilesDirectory() throws CoreException {
     StagingDelegate delegate = new FlexStagingDelegate(appEngineDirectory);
-    delegate.stage(project, stagingDirectory, safeWorkDirectory, null /* cloudSdk */,
-        new NullProgressMonitor());
     delegate.stage(project, stagingDirectory, safeWorkDirectory, null /* cloudSdk */,
         new NullProgressMonitor());
 
