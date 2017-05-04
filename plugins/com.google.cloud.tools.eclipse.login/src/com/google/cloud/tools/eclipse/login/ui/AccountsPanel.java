@@ -116,7 +116,7 @@ public class AccountsPanel extends PopupDialog {
         try {
           imageLoader.loadImage(account.getAvatarUrl(), avatar, avatarHeight, avatarHeight);
         } catch (MalformedURLException ex) {
-          logger.log(Level.WARNING, "malformed avatar image url", ex);
+          logger.log(Level.WARNING, "malformed avatar image URL", ex);
         }
       }
     }

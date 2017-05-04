@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import java.net.MalformedURLException;
@@ -62,14 +63,45 @@ public class LabelImageLoaderTest {
     LabelImageLoader.cache.clear();
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testLoadImage_nullImageUrl() throws MalformedURLException {
-    imageLoader.loadImage(null, label, 1, 1);
+    try {
+      imageLoader.loadImage(null, label, 1, 1);
+      fail();
+    } catch (NullPointerException ex) {}
   }
 
-  @Test(expected = MalformedURLException.class)
-  public void testLoadImage_malformedImageUrl() throws MalformedURLException {
-    imageLoader.loadImage("marlformed", label, 1, 1);
+  @Test
+  public void testLoadImage_malformedImageUrl() {
+    try {
+      imageLoader.loadImage("marlformed", label, 1, 1);
+    } catch (MalformedURLException ex) {}
+  }
+
+  @Test
+  public void testConstructor_nonPositiveWidth() throws MalformedURLException {
+    try {
+      imageLoader.loadImage("http://example.com", label, 0 /* zero width */, 10);
+      fail();
+    } catch (IllegalArgumentException ex) {}
+
+    try {
+      imageLoader.loadImage("http://example.com", label, -1 /* negative width */, 10);
+      fail();
+    } catch (IllegalArgumentException ex) {}
+  }
+
+  @Test
+  public void testConstructor_nonPositiveHeight() throws MalformedURLException {
+    try {
+      imageLoader.loadImage("http://example.com", label, 10, 0 /* zero height */);
+      fail();
+    } catch (IllegalArgumentException ex) {}
+
+    try {
+      imageLoader.loadImage("http://example.com", label, 10, -1 /* negative height */);
+      fail();
+    } catch (IllegalArgumentException ex) {}
   }
 
   @Test

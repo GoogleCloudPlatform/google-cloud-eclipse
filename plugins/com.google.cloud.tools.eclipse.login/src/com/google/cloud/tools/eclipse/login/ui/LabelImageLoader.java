@@ -37,7 +37,7 @@ public class LabelImageLoader {
   Job loadJob;
 
   /**
-   * Loads an image to {@link Label}. The images will be fetched from {@code imageUrl}
+   * Loads an image to a {@link Label}. The image will be fetched from {@code imageUrl}
    * asynchronously if not previously cached.
    *
    * Must be called in the UI context.
@@ -45,6 +45,8 @@ public class LabelImageLoader {
   void loadImage(String imageUrl, Label label, int width, int height)
       throws MalformedURLException {
     Preconditions.checkNotNull(imageUrl);
+    Preconditions.checkArgument(width > 0);
+    Preconditions.checkArgument(height > 0);
 
     ImageData imageData = cache.get(imageUrl);
     if (imageData != null) {

@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.login.ui;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import java.net.URL;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -44,6 +45,9 @@ class LabelImageLoadJob extends Job {
 
   LabelImageLoadJob(URL imageUrl, Label label, int width, int height) {
     super("Google User Profile Picture Fetch Job");
+    Preconditions.checkNotNull(imageUrl);
+    Preconditions.checkArgument(width > 0);
+    Preconditions.checkArgument(height > 0);
     this.imageUrl = imageUrl;
     this.label = label;
     this.width = width;
