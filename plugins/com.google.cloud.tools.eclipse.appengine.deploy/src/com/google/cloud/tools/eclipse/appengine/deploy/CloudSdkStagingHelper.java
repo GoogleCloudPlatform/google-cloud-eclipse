@@ -80,7 +80,7 @@ public class CloudSdkStagingHelper {
     stagingConfig.setStagingDirectory(stagingDirectory.toFile());
 
     CloudSdkAppEngineFlexibleStaging staging = new CloudSdkAppEngineFlexibleStaging();
-    //staging.stageFlexible(stagingConfig);
+    staging.stageFlexible(stagingConfig);
 
     progress.worked(1);
   }
