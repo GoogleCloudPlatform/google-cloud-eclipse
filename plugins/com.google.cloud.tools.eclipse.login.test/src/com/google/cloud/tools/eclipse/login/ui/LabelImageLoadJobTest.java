@@ -91,7 +91,7 @@ public class LabelImageLoadJobTest {
   }
 
   @Test
-  public void testRun_imageDisposedByDisposedListener() throws InterruptedException {
+  public void testRun_imageDisposedByDisposeListener() throws InterruptedException {
     loadJob = new LabelImageLoadJob(url, label, 10, 10);
     runAndWaitJob();
     Image image = label.getImage();
