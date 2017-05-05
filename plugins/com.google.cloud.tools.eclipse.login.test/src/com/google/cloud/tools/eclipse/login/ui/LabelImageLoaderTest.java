@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.login.ui;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -126,8 +127,7 @@ public class LabelImageLoaderTest {
     assertTrue(LabelImageLoader.cache.isEmpty());
     LabelImageLoader.storeInCache("http://example.com", someImageData);
     assertEquals(1, LabelImageLoader.cache.size());
-    assertTrue("cached image is a different instance",
-        someImageData == LabelImageLoader.cache.get("http://example.com"));
+    assertSame(someImageData, LabelImageLoader.cache.get("http://example.com"));
   }
 
   @Test
