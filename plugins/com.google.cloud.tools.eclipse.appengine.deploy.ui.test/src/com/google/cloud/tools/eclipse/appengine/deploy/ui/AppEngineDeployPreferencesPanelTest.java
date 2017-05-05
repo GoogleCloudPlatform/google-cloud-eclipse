@@ -39,12 +39,12 @@ import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepositoryException;
 import com.google.cloud.tools.eclipse.projectselector.ProjectSelector;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
+import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import com.google.cloud.tools.login.Account;
-import java.util.ArrayDeque;
+import com.google.common.base.Predicate;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Queue;
 import org.eclipse.core.databinding.ValidationStatusProvider;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
@@ -74,6 +74,8 @@ public class AppEngineDeployPreferencesPanelTest {
 
   private Composite parent;
   private AppEngineDeployPreferencesPanel deployPanel;
+  private HashSet<Account> oneAccountSet;
+  private HashSet<Account> twoAccountSet;
   @Mock private IProject project;
   @Mock private IGoogleLoginService loginService;
   @Mock private Runnable layoutChangedHandler;
@@ -91,11 +93,13 @@ public class AppEngineDeployPreferencesPanelTest {
     when(account2.getEmail()).thenReturn(EMAIL_2);
     when(account1.getOAuth2Credential()).thenReturn(credential);
     when(account2.getOAuth2Credential()).thenReturn(mock(Credential.class));
+    oneAccountSet = new HashSet<>(Arrays.asList(account1));
+    twoAccountSet = new HashSet<>(Arrays.asList(account1, account2));
   }
 
   @Test
   public void testAutoSelectSingleAccount() {
-    when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1)));
+    when(loginService.getAccounts()).thenReturn(oneAccountSet);
     deployPanel = createPanel(true /* requireValues */);
     assertThat(deployPanel.getSelectedCredential(), is(credential));
 
@@ -110,7 +114,7 @@ public class AppEngineDeployPreferencesPanelTest {
   @Test
   public void testAutoSelectSingleAccount_loadGcpProjects()
       throws ProjectRepositoryException, InterruptedException {
-    when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1)));
+    when(loginService.getAccounts()).thenReturn(oneAccountSet);
     initializeProjectRepository();
     deployPanel = createPanel(true /* requireValues */);
     assertNotNull(deployPanel.latestGcpProjectQueryJob);
@@ -130,7 +134,7 @@ public class AppEngineDeployPreferencesPanelTest {
   @Test
   public void testValidationMessageWhenSignedIn() {
     // Return two accounts because the account selector will auto-select if there exists only one.
-    when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1, account2)));
+    when(loginService.getAccounts()).thenReturn(twoAccountSet);
 
     deployPanel = createPanel(true /* requireValues */);
     IStatus status = getAccountSelectorValidationStatus();
@@ -142,8 +146,7 @@ public class AppEngineDeployPreferencesPanelTest {
   public void testUncheckStopPreviousVersionButtonWhenDisabled() {
     deployPanel = createPanel(true /* requireValues */);
 
-    Button promoteButton =
-        getButtonWithText("Promote the deployed version to receive all traffic");
+    Button promoteButton = getButtonWithText("Promote the deployed version to receive all traffic");
     Button stopButton = getButtonWithText("Stop previous version");
     SWTBotCheckBox promote = new SWTBotCheckBox(promoteButton);
     SWTBotCheckBox stop = new SWTBotCheckBox(stopButton);
@@ -188,7 +191,7 @@ public class AppEngineDeployPreferencesPanelTest {
       node.put("project.id", "projectId1");
       node.put("account.email", EMAIL_1);
       initializeProjectRepository();
-      when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1, account2)));
+      when(loginService.getAccounts()).thenReturn(twoAccountSet);
       deployPanel = createPanel(true /* requireValues */);
       deployPanel.latestGcpProjectQueryJob.join();
 
@@ -202,17 +205,7 @@ public class AppEngineDeployPreferencesPanelTest {
   }
 
   private ProjectSelector getProjectSelector() {
-    Queue<Control> children = new ArrayDeque<>(Arrays.asList(deployPanel.getChildren()));
-    while (!children.isEmpty()) {
-      Control control = children.poll();
-      if (control instanceof ProjectSelector) {
-        return (ProjectSelector) control;
-      } else if (control instanceof Composite) {
-        children.addAll(Arrays.asList(((Composite) control).getChildren()));
-      }
-    }
-    fail("Did not find ProjectSelector widget");
-    return null;
+    return CompositeUtil.findControl(deployPanel, ProjectSelector.class);
   }
 
   @Test
@@ -230,7 +223,7 @@ public class AppEngineDeployPreferencesPanelTest {
   @Test
   public void testProjectsExistThenNoProjectNotFoundError()
       throws ProjectRepositoryException, InterruptedException {
-    when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1)));
+    when(loginService.getAccounts()).thenReturn(oneAccountSet);
     initializeProjectRepository();
     deployPanel = createPanel(false /* requireValues */);
     selectAccount(account1);
@@ -241,7 +234,7 @@ public class AppEngineDeployPreferencesPanelTest {
   @Test
   public void testRefreshProjectsForSelectedCredential()
       throws ProjectRepositoryException, InterruptedException {
-    when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1, account2)));
+    when(loginService.getAccounts()).thenReturn(twoAccountSet);
     initializeProjectRepository();
 
     deployPanel = createPanel(false /* requireValues */);
@@ -260,7 +253,7 @@ public class AppEngineDeployPreferencesPanelTest {
   @Test
   public void testRefreshProjectsForSelectedCredential_switchAccounts()
       throws ProjectRepositoryException, InterruptedException {
-    when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1, account2)));
+    when(loginService.getAccounts()).thenReturn(twoAccountSet);
     initializeProjectRepository();
 
     deployPanel = createPanel(false /* requireValues */);
@@ -284,7 +277,7 @@ public class AppEngineDeployPreferencesPanelTest {
   @Test
   public void testNoProjectSelectedWhenSwitchingAccounts()
       throws ProjectRepositoryException, InterruptedException {
-    when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account1, account2)));
+    when(loginService.getAccounts()).thenReturn(twoAccountSet);
     initializeProjectRepository();
 
     deployPanel = createPanel(false /* requireValues */);
@@ -303,25 +296,18 @@ public class AppEngineDeployPreferencesPanelTest {
     assertThat(projectTable.getSelectionCount(), is(0));
   }
 
-  private Button getButtonWithText(String text) {
-    for (Control control : deployPanel.getChildren()) {
-      if (control instanceof Button) {
-        Button button = (Button) control;
-        if (button.getText().equals(text)) {
-          return button;
-        }
+  private Button getButtonWithText(final String text) {
+    return (Button) CompositeUtil.findControl(deployPanel, new Predicate<Control>() {
+      @Override
+      public boolean apply(Control control) {
+        return control instanceof Button && ((Button) control).getText().equals(text);
       }
-    }
-    return null;
+    });
   }
 
   private void selectAccount(Account account) {
-    for (Control control : deployPanel.getChildren()) {
-      if (control instanceof AccountSelector) {
-        AccountSelector accountSelector = (AccountSelector) control;
-        accountSelector.selectAccount(account.getEmail());
-      }
-    }
+    AccountSelector selector = CompositeUtil.findControl(deployPanel, AccountSelector.class);
+    selector.selectAccount(account.getEmail());
   }
 
   private AppEngineDeployPreferencesPanel createPanel(boolean requireValues) {

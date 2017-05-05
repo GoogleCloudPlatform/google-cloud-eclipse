@@ -16,13 +16,15 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.ui.flexible;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
+import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
+import com.google.common.base.Predicate;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.widgets.Composite;
@@ -33,6 +35,10 @@ import org.junit.Rule;
 import org.junit.Test;
 
 public class FlexDeployPreferencesDialogTest {
+
+  private static final String GCP_PRICING_MESSAGE = "There is no free quota for the App Engine "
+      + "flexible environment. Visit <a href=\"https://cloud.google.com/appengine/pricing\">"
+      + "GCP Pricing</a> for pricing information.";
 
   @Rule public ShellTestResource shellResource = new ShellTestResource();
 
@@ -53,23 +59,15 @@ public class FlexDeployPreferencesDialogTest {
     dialog.open();
     Composite dialogArea = (Composite) dialog.createDialogArea(shellResource.getShell());
 
-    assertTrue(hasLinkWithText(dialogArea, "There is no free quota for the App Engine flexible "
-        + "environment. Visit <a href=\"https://cloud.google.com/appengine/pricing\">GCP Pricing"
-        + "</a> for pricing information."));
+    assertNotNull(findGcpPricingLink(dialogArea));
   }
 
-  private static boolean hasLinkWithText(Composite composite, String text) {
-    for (Control control : composite.getChildren()) {
-      if (control instanceof Link) {
-        if (((Link) control).getText().equals(text)) {
-          return true;
-        }
-      } else if (control instanceof Composite) {
-        if (hasLinkWithText((Composite) control, text)) {
-          return true;
-        }
+  private static Control findGcpPricingLink(Composite dialogArea) {
+    return CompositeUtil.findControl(dialogArea, new Predicate<Control>() {
+      @Override
+      public boolean apply(Control control) {
+        return control instanceof Link && GCP_PRICING_MESSAGE.equals(((Link) control).getText());
       }
-    }
-    return false;
+    });
   }
 }

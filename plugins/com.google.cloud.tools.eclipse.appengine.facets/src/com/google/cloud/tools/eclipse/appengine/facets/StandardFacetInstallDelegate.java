@@ -19,7 +19,6 @@ package com.google.cloud.tools.eclipse.appengine.facets;
 import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 import com.google.cloud.tools.eclipse.util.templates.appengine.AppEngineTemplateUtility;
 import com.google.common.annotations.VisibleForTesting;
-
 import java.io.ByteArrayInputStream;
 import java.util.Collections;
 import org.eclipse.core.resources.IFile;
@@ -28,7 +27,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
@@ -129,7 +127,7 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
   @VisibleForTesting
   void createConfigFiles(IProject project, IProgressMonitor monitor)
       throws CoreException {
-    SubMonitor progress = SubMonitor.convert(monitor, 9);
+    SubMonitor progress = SubMonitor.convert(monitor, 10);
 
     // The virtual component model is very flexible, but we assume that
     // the WEB-INF/appengine-web.xml isn't a virtual file remapped elsewhere
@@ -138,7 +136,7 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
     if (webInfDir == null) {
       webInfDir =
           project.getFolder(WebProjectUtil.DEFAULT_WEB_PATH).getFolder(WebProjectUtil.WEB_INF);
-      ResourceUtils.createFolders(webInfDir, new NullProgressMonitor());
+      ResourceUtils.createFolders(webInfDir, progress.newChild(3));
     }
     
     progress.worked(1);
@@ -154,6 +152,7 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
     AppEngineTemplateUtility.createFileContent(
         configFileLocation, AppEngineTemplateUtility.APPENGINE_WEB_XML_TEMPLATE,
         Collections.<String, String>emptyMap());
-    progress.worked(6);
+    progress.worked(4);
+    appEngineWebXml.refreshLocal(IFile.DEPTH_ZERO, progress.newChild(1));
   }
 }
