@@ -41,10 +41,12 @@ public class LabelImageLoadJobTest {
 
   private LabelImageLoadJob loadJob;
   private Label label;
+  private URL url;
 
   @Before
-  public void setUp() {
+  public void setUp() throws MalformedURLException {
     label = new Label(shellResource.getShell(), SWT.NONE);
+    url = new URL(server.getAddress() + "sample.gif");
   }
 
   @After
@@ -55,39 +57,47 @@ public class LabelImageLoadJobTest {
       Image image = label.getImage();
       label.dispose();
       if (image != null) {
-        assertTrue(image.isDisposed());
+        assertTrue("FIX BUG: DisposeListener didn't run?", image.isDisposed());
       }
     }
+    assertTrue("FIX BUG: DisposeListener didn't run?", loadJob.scaled.isDisposed());
 
     LabelImageLoader.cache.clear();
   }
 
   @Test
-  public void testRun_imageStoredInCache() throws MalformedURLException, InterruptedException {
+  public void testRun_imageStoredInCache() throws InterruptedException {
     assertTrue(LabelImageLoader.cache.isEmpty());
 
-    URL url = new URL(server.getAddress() + "sample.gif");
     loadJob = new LabelImageLoadJob(url, label, 10, 10);
     runAndWaitJob();
     assertNotNull(LabelImageLoader.cache.get(url.toString()));
   }
 
   @Test
-  public void testRun_imageLoaded() throws MalformedURLException, InterruptedException {
-    URL url = new URL(server.getAddress() + "sample.gif");
+  public void testRun_imageLoaded() throws InterruptedException {
     loadJob = new LabelImageLoadJob(url, label, 10, 10);
     runAndWaitJob();
     assertNotNull(label.getImage());
   }
 
   @Test
-  public void testRun_imageResized() throws MalformedURLException, InterruptedException {
-    URL url = new URL(server.getAddress() + "sample.gif");
+  public void testRun_imageResized() throws InterruptedException {
     loadJob = new LabelImageLoadJob(url, label, 234, 56);
 
     runAndWaitJob();
     assertEquals(234, label.getImage().getBounds().width);
     assertEquals(56, label.getImage().getBounds().height);
+  }
+
+  @Test
+  public void testRun_imageDisposedByDisposedListener() throws InterruptedException {
+    loadJob = new LabelImageLoadJob(url, label, 10, 10);
+    runAndWaitJob();
+    Image image = label.getImage();
+    label.dispose();
+    assertTrue(image.isDisposed());
+    assertTrue(loadJob.scaled.isDisposed());
   }
 
   @Test

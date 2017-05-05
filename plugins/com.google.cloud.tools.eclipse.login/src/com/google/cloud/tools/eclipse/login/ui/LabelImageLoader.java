@@ -45,8 +45,8 @@ public class LabelImageLoader {
   void loadImage(String imageUrl, Label label, int width, int height)
       throws MalformedURLException {
     Preconditions.checkNotNull(imageUrl);
-    Preconditions.checkArgument(width > 0);
-    Preconditions.checkArgument(height > 0);
+    Preconditions.checkArgument(width > 0, "width not positive");
+    Preconditions.checkArgument(height > 0, "height not positive");
 
     ImageData imageData = cache.get(imageUrl);
     if (imageData != null) {

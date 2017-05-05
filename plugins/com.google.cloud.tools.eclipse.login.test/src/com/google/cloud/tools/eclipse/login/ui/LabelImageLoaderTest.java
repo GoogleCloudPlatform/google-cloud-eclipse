@@ -57,7 +57,7 @@ public class LabelImageLoaderTest {
     Image image = label.getImage();
     label.dispose();
     if (image != null) {
-      assertTrue(image.isDisposed());
+      assertTrue("FIX BUG: DisposeListener didn't run?", image.isDisposed());
     }
 
     LabelImageLoader.cache.clear();
@@ -74,34 +74,51 @@ public class LabelImageLoaderTest {
   @Test
   public void testLoadImage_malformedImageUrl() {
     try {
-      imageLoader.loadImage("marlformed", label, 1, 1);
-    } catch (MalformedURLException ex) {}
+      imageLoader.loadImage("malformed", label, 1, 1);
+      fail();
+    } catch (MalformedURLException ex) {
+      assertNotNull(ex.getMessage());
+    }
   }
 
   @Test
-  public void testConstructor_nonPositiveWidth() throws MalformedURLException {
+  public void testConstructor_zeroWidth() throws MalformedURLException {
     try {
-      imageLoader.loadImage("http://example.com", label, 0 /* zero width */, 10);
+      imageLoader.loadImage("http://example.com", label, 0 /* zero */, 10);
       fail();
-    } catch (IllegalArgumentException ex) {}
-
-    try {
-      imageLoader.loadImage("http://example.com", label, -1 /* negative width */, 10);
-      fail();
-    } catch (IllegalArgumentException ex) {}
+    } catch (IllegalArgumentException ex) {
+      assertNotNull(ex.getMessage());
+    }
   }
 
   @Test
-  public void testConstructor_nonPositiveHeight() throws MalformedURLException {
+  public void testConstructor_negativeWidth() throws MalformedURLException {
     try {
-      imageLoader.loadImage("http://example.com", label, 10, 0 /* zero height */);
+      imageLoader.loadImage("http://example.com", label, -1 /* negative */, 10);
       fail();
-    } catch (IllegalArgumentException ex) {}
+    } catch (IllegalArgumentException ex) {
+      assertNotNull(ex.getMessage());
+    }
+  }
 
+  @Test
+  public void testConstructor_zeroHeight() throws MalformedURLException {
     try {
-      imageLoader.loadImage("http://example.com", label, 10, -1 /* negative height */);
+      imageLoader.loadImage("http://example.com", label, 10, 0 /* zero */);
       fail();
-    } catch (IllegalArgumentException ex) {}
+    } catch (IllegalArgumentException ex) {
+      assertNotNull(ex.getMessage());
+    }
+  }
+
+  @Test
+  public void testConstructor_negativeHeight() throws MalformedURLException {
+    try {
+      imageLoader.loadImage("http://example.com", label, 10, -1 /* negative */);
+      fail();
+    } catch (IllegalArgumentException ex) {
+      assertNotNull(ex.getMessage());
+    }
   }
 
   @Test
@@ -109,7 +126,8 @@ public class LabelImageLoaderTest {
     assertTrue(LabelImageLoader.cache.isEmpty());
     LabelImageLoader.storeInCache("http://example.com", someImageData);
     assertEquals(1, LabelImageLoader.cache.size());
-    assertTrue(someImageData == LabelImageLoader.cache.get("http://example.com"));
+    assertTrue("cached image is a different instance",
+        someImageData == LabelImageLoader.cache.get("http://example.com"));
   }
 
   @Test
