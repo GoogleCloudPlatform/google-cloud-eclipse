@@ -323,7 +323,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
   }
 
   /**
-   * Check that we won't overwrite an existing location. Expects a valid Maven Artifact ID.
+   * Check that we won't overwrite an existing location. Expects a valid Maven artifact ID.
    */
   private boolean validateGeneratedProjectLocation() {
     String artifactId = getArtifactId();
@@ -353,7 +353,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
       setErrorMessage(Messages.getString("ILLEGAL_ARTIFACT_ID", artifactId)); //$NON-NLS-1$
       return false;
     } else if (ResourcesPlugin.getWorkspace().getRoot().getProject(artifactId).exists()) {
-      setErrorMessage(artifactId + " project already exists in this workspace"); //$NON-NLS-1$
+      setErrorMessage(Messages.getString("PROJECT_ALREADY_EXISTS", artifactId)); //$NON-NLS-1$
       return false;
     }
     String version = getVersion();
