@@ -34,6 +34,7 @@ import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.junit.Rule;
 import org.junit.Test;
+import org.xml.sax.SAXException;
 
 /**
  * Test that our <em>Convert to App Engine Standard Project</em> doesn't downgrade Java or jst.web
@@ -45,7 +46,8 @@ public class ConversionTests {
       new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_8, WebFacetUtils.WEB_31);
 
   @Test
-  public void testChangeToAndFrom_1_8() throws CoreException, IOException, InterruptedException {
+  public void testChangeToAndFrom_1_8()
+      throws CoreException, IOException, InterruptedException, SAXException {
     IFacetedProject project = testProject.getFacetedProject();
     Job conversionJob = new AppEngineStandardProjectConvertJob(project);
     conversionJob.schedule();

@@ -37,6 +37,7 @@ import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject.Action;
 import org.junit.Rule;
 import org.junit.Test;
+import org.xml.sax.SAXException;
 
 /**
  * Test changing the Java Facet to/from Java 8 results in {@code <runtime>} changes in the
@@ -47,9 +48,9 @@ public class JavaFacetChangeTests {
   public TestProjectCreator testProject = new TestProjectCreator()
       .withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_31,
           AppEngineStandardFacet.FACET_VERSION);
-  
+
   @Test
-  public void testChangeToAndFrom_1_8() throws CoreException, IOException {
+  public void testChangeToAndFrom_1_8() throws CoreException, IOException, SAXException {
     IFacetedProject project = testProject.getFacetedProject();
     IFile descriptorFile =
         WebProjectUtil.findInWebInf(project.getProject(), new Path("appengine-web.xml"));
@@ -64,7 +65,7 @@ public class JavaFacetChangeTests {
     actions.add(new Action(Action.Type.VERSION_CHANGE, JavaFacet.VERSION_1_8, null));
     project.modify(actions, null);
     ProjectUtils.waitForProjects(project.getProject());
-    
+
     try (InputStream is = descriptorFile.getContents()) {
       AppEngineDescriptor descriptor = AppEngineDescriptor.parse(is);
       assertTrue(descriptor.isJava8());
