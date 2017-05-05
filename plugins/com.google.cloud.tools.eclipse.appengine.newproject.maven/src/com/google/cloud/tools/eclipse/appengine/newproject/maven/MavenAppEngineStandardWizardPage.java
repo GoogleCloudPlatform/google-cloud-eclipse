@@ -352,6 +352,9 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     } else if (!MavenCoordinatesValidator.validateArtifactId(artifactId)) {
       setErrorMessage(Messages.getString("ILLEGAL_ARTIFACT_ID", artifactId)); //$NON-NLS-1$
       return false;
+    } else if (ResourcesPlugin.getWorkspace().getRoot().getProject(artifactId).exists()) {
+      setErrorMessage(artifactId + " project already exists in this workspace"); //$NON-NLS-1$
+      return false;
     }
     String version = getVersion();
     if (version.isEmpty()) {
