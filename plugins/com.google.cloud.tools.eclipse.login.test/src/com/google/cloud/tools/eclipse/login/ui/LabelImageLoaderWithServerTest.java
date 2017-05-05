@@ -50,7 +50,7 @@ public class LabelImageLoaderWithServerTest {
     Image image = label.getImage();
     label.dispose();
     if (image != null) {
-      assertTrue(image.isDisposed());
+      assertTrue("FIX BUG: DisposeListener didn't run?", image.isDisposed());
     }
 
     LabelImageLoader.cache.clear();
