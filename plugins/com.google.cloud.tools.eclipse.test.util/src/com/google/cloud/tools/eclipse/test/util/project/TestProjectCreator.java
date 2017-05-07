@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.test.util.project;
 
 import static org.junit.Assert.assertTrue;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.FacetUtil;
 import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import com.google.common.base.Preconditions;
@@ -162,8 +163,10 @@ public final class TestProjectCreator extends ExternalResource {
     }
     facetUtil.install(null);
 
-    // App Engine runtime is added via a Job, so wait.
-    ProjectUtils.waitForProjects(getProject());
+    if (facetedProject.hasProjectFacet(AppEngineStandardFacet.FACET)) {
+      // App Engine runtime is added via a Job, so wait.
+      ProjectUtils.waitForProjects(getProject());
+    }
 
     if (facetedProject.hasProjectFacet(JavaFacet.FACET)) {
       javaProject = JavaCore.create(project);
@@ -173,16 +176,12 @@ public final class TestProjectCreator extends ExternalResource {
 
   public void setAppEngineServiceId(String serviceId) throws CoreException {
     IFolder webinf = WebProjectUtil.getWebInfDirectory(getProject());
-    IFile descriptorFile = webinf.getFile("appengine-web.xml");
-    assertTrue("Project should have AppEngine Standard facet", descriptorFile.exists());
-    StringBuilder newAppEngineWebDescriptor = new StringBuilder();
-    newAppEngineWebDescriptor
-        .append("<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>\n");
-    newAppEngineWebDescriptor.append("<service>").append(serviceId).append("</service>\n");
-    newAppEngineWebDescriptor.append("</appengine-web-app>\n");
-    InputStream contents = new ByteArrayInputStream(
-        newAppEngineWebDescriptor.toString().getBytes(StandardCharsets.UTF_8));
-    descriptorFile.setContents(contents, IFile.FORCE, null);
+    IFile appEngineWebXml = webinf.getFile("appengine-web.xml");
+    assertTrue("Project should have AppEngine Standard facet", appEngineWebXml.exists());
+    String contents = "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>\n"
+        + "<service>" + serviceId + "</service>\n</appengine-web-app>\n";
+    InputStream in = new ByteArrayInputStream(contents.getBytes(StandardCharsets.UTF_8));
+    appEngineWebXml.setContents(in, IFile.FORCE, null);
   }
 
 }
