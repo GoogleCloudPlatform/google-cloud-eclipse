@@ -20,6 +20,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
+import com.google.cloud.tools.appengine.cloudsdk.process.ProcessExitListener;
+import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
@@ -29,6 +31,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -38,8 +41,13 @@ public class StandardStagingDelegateTest {
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator().withFacetVersions(
       JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineStandardFacet.FACET_VERSION);
 
-  private final CloudSdk cloudSdk = new CloudSdk.Builder().build();
+  private final CloudSdk cloudSdk = new CloudSdk.Builder()
+      .addStdOutLineListener(new OutputListener())
+      .addStdErrLineListener(new OutputListener())
+      .exitListener(new ExitListener())
+      .build();
 
+  private int cloudSdkExitCode = -1;
   private IProject project;
   private IPath safeWorkDirectory;
   private IPath stagingDirectory;
@@ -49,6 +57,11 @@ public class StandardStagingDelegateTest {
     project = projectCreator.getProject();
     safeWorkDirectory = project.getFolder("safe-work-directory").getLocation();
     stagingDirectory = project.getFolder("staging-result").getLocation();
+  }
+
+  @After
+  public void tearDown() {
+    assertEquals(0, cloudSdkExitCode);
   }
 
   @Test
@@ -73,4 +86,17 @@ public class StandardStagingDelegateTest {
         delegate.getOptionalConfigurationFilesDirectory());
   }
 
+  private static class OutputListener implements ProcessOutputLineListener {
+    @Override
+    public void onOutputLine(String line) {
+      System.out.println("    [Cloud SDK] " + line);
+    }
+  }
+
+  private class ExitListener implements ProcessExitListener {
+    @Override
+    public void onExit(int exitCode) {
+      cloudSdkExitCode = exitCode;
+    }
+  }
 }
