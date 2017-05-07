@@ -54,7 +54,9 @@ public class ModuleUtils {
         if (serviceId != null) {
           return serviceId;
         }
-      } catch (CoreException | IOException | SAXException ex) {
+      } catch (SAXException ex) {
+        // Parsing failed due to malformed XML; return "default".
+      } catch (CoreException | IOException ex) {
         logger.log(Level.WARNING, "Unable to read " + descriptorFile.getFullPath(), ex);
       }
     }

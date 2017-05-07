@@ -49,7 +49,7 @@ public class ModuleUtilsTest {
     Logger logger = Logger.getLogger(ModuleUtils.class.getName());
     logger.setLevel(Level.OFF);
   }
-  
+
   @Before
   public void setUpMocks() {
     IProject project = Mockito.mock(IProject.class);
@@ -67,34 +67,40 @@ public class ModuleUtilsTest {
   public void testGetServiceId_null() {
     ModuleUtils.getServiceId(null);
   }
-  
+
   @Test
   public void testGetServiceId_noWebInf() {
     Mockito.when(webinf.exists()).thenReturn(false);
     Assert.assertEquals("default", ModuleUtils.getServiceId(module));
   }
-  
+
   @Test
   public void testGetServiceId_default() throws CoreException {
     Mockito.when(descriptorFile.getContents()).thenThrow(new CoreException(Status.CANCEL_STATUS));
     Assert.assertEquals("default", ModuleUtils.getServiceId(module));
   }
-  
+
   @Test
   public void testGetServiceId() throws CoreException {
     mockAppEngineWebXml("appengine-web.xml");
     Assert.assertEquals("myServiceId", ModuleUtils.getServiceId(module));
   }
- 
+
   @Test
   public void testGetServiceId_module() throws CoreException {
     mockAppEngineWebXml("appengine-web_module.xml");
     Assert.assertEquals("myServiceId", ModuleUtils.getServiceId(module));
   }
-  
+
   @Test
   public void testGetServiceId_notPresent() throws CoreException {
     mockAppEngineWebXml("appengine-web_noservice.xml");
+    Assert.assertEquals("default", ModuleUtils.getServiceId(module));
+  }
+
+  @Test
+  public void testGetServiceId_malformedXml() throws CoreException {
+    mockAppEngineWebXml("appengine-web_malformed.xml");
     Assert.assertEquals("default", ModuleUtils.getServiceId(module));
   }
 
