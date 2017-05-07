@@ -21,6 +21,7 @@ import static org.junit.Assert.fail;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
+import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -29,7 +30,6 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.wst.validation.ValidationFramework;
@@ -145,7 +145,7 @@ public class XmlValidatorTest {
     XmlValidator validator = new XmlValidator();
     validator.setHelper(new AppEngineWebXmlValidator());
     IProject project = appEngineStandardProjectCreator.getProject();
-    ValidationTestUtils.createFolders(project, new Path("src/main/webapp/WEB-INF"));
+    ResourceUtils.createFolders(project.getFolder("src/main/webapp/WEB-INF"), null);
     IFile file = project.getFile("src/main/webapp/WEB-INF/appengine-web.xml");
     file.create(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)), true, null);
     validator.xsdValidation(file);

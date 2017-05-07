@@ -22,6 +22,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
+import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -32,10 +33,10 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -51,30 +52,30 @@ public class WebXmlValidatorPluginTest {
 
   @Before
   public void setUp() throws CoreException {
-    // Project's default source folder is the main project folder.
     IProject project = projectCreator.getProject();
     javaProject = projectCreator.getJavaProject();
 
     resource = project.getFile("WebContent/WEB-INF/web.xml");
 
-    ValidationTestUtils.createFolders(project, new Path("src/main/java"));
-    IFile servletClass = project.getFile("src/main/java/ServletClass.java");
-    servletClass.create(
-        new ByteArrayInputStream("public class ServletClass {}".getBytes(StandardCharsets.UTF_8)),
-        true, null);
+    createFile(project, "src/main/java", "ServletClass.java", "public class ServletClass {}");
+    createFile(project, "src/com/example", "ServletClassInPackage.java",
+        "package com.example; public class ServletClassInPackage {}");
+    createFile(project, "WebContent", "InWebContent.jsp", "");
+    createFile(project, "src", "InSrc.jsp", "");
+  }
 
-    ValidationTestUtils.createFolders(project, new Path("src/com/example"));
-    IFile servletClassInPackage = project.getFile("src/com/example/ServletClassInPackage.java");
-    servletClassInPackage.create(
-        new ByteArrayInputStream("package com.example; public class ServletClassInPackage {}"
-            .getBytes(StandardCharsets.UTF_8)), true, null);
+  @After
+  public void tearDown() throws CoreException {
+    // Delete to avoid https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1916
+    javaProject.getProject().getFile("WebContent/InWebContent.jsp").delete(true, null);
+    javaProject.getProject().getFile("src/InSrc.jsp").delete(true, null);
+  }
 
-    ValidationTestUtils.createFolders(project, new Path("src/main/webapp"));
-    IFile jspFileInWebContent = project.getFile("WebContent/InWebContent.jsp");
-    jspFileInWebContent.create(null, true, null);
-
-    IFile jspFileInJava = project.getFile("src/InSrc.jsp");
-    jspFileInJava.create(null, true, null);
+  private static void createFile(IProject project, String folder, String filename,
+      String contents) throws CoreException {
+    ResourceUtils.createFolders(project.getFolder(folder), null);
+    IFile file = project.getFile(folder + "/" + filename);
+    file.create(new ByteArrayInputStream(contents.getBytes(StandardCharsets.UTF_8)), true, null);
   }
 
   @Test
@@ -120,7 +121,7 @@ public class WebXmlValidatorPluginTest {
     WebXmlValidator validator = new WebXmlValidator();
     ArrayList<BannedElement> blacklist = validator.checkForElements(resource, document);
 
-    assertEquals(0, blacklist.size());
+    assertTrue(blacklist.isEmpty());
   }
 
   @Test
