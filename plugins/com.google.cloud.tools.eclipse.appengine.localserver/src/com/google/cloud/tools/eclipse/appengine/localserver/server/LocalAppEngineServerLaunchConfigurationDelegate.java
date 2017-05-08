@@ -84,7 +84,9 @@ import org.eclipse.wst.server.core.ServerUtil;
 public class LocalAppEngineServerLaunchConfigurationDelegate
     extends AbstractJavaLaunchConfigurationDelegate {
 
-  private final static Logger logger =
+  private static final boolean DEVAPPSERVER2 = false;
+  
+  private static final Logger logger =
       Logger.getLogger(LocalAppEngineServerLaunchConfigurationDelegate.class.getName());
 
   public static final String[] SUPPORTED_LAUNCH_MODES =
@@ -162,40 +164,41 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     if (server.getHost() != null) {
       devServerRunConfiguration.setHost(server.getHost());
     }
-
-    // TODO: make this a configurable option in the launch config?
-    // default to 1 instance to simplify debugging
-    devServerRunConfiguration.setMaxModuleInstances(1);
-
-    // don't restart server when on-disk changes detected
-    devServerRunConfiguration.setAutomaticRestart(false);
-
+    
     int serverPort = getPortAttribute(LocalAppEngineServerBehaviour.SERVER_PORT_ATTRIBUTE_NAME,
         LocalAppEngineServerBehaviour.DEFAULT_SERVER_PORT, configuration, server);
     if (serverPort >= 0) {
       devServerRunConfiguration.setPort(serverPort);
     }
 
-    String adminHost = getAttribute(LocalAppEngineServerBehaviour.ADMIN_HOST_ATTRIBUTE_NAME,
-        LocalAppEngineServerBehaviour.DEFAULT_ADMIN_HOST, configuration, server);
-    if (!Strings.isNullOrEmpty(adminHost)) {
-      devServerRunConfiguration.setAdminHost(adminHost);
-    }
+    if (DEVAPPSERVER2) {
+      // default to 1 instance to simplify debugging
+      devServerRunConfiguration.setMaxModuleInstances(1);
 
-    int adminPort = getPortAttribute(LocalAppEngineServerBehaviour.ADMIN_PORT_ATTRIBUTE_NAME,
-        -1, configuration, server);
-    if (adminPort >= 0) {
-      devServerRunConfiguration.setAdminPort(adminPort);
-    } else {
-      // adminPort = -1 perform failover if default port is busy
-      devServerRunConfiguration.setAdminPort(LocalAppEngineServerBehaviour.DEFAULT_ADMIN_PORT);
-      // adminHost == null is ok as that resolves to null == INADDR_ANY
-      InetAddress addr = resolveAddress(devServerRunConfiguration.getAdminHost());
-      if (org.eclipse.wst.server.core.util.SocketUtil.isPortInUse(addr,
-          devServerRunConfiguration.getAdminPort())) {
-        logger.log(Level.INFO, "default admin port " + devServerRunConfiguration.getAdminPort()
-            + " in use. Picking an unused port.");
-        devServerRunConfiguration.setAdminPort(0);
+      // don't restart server when on-disk changes detected
+      devServerRunConfiguration.setAutomaticRestart(false);
+      
+      String adminHost = getAttribute(LocalAppEngineServerBehaviour.ADMIN_HOST_ATTRIBUTE_NAME,
+          LocalAppEngineServerBehaviour.DEFAULT_ADMIN_HOST, configuration, server);
+      if (!Strings.isNullOrEmpty(adminHost)) {
+        devServerRunConfiguration.setAdminHost(adminHost);
+      }
+  
+      int adminPort = getPortAttribute(LocalAppEngineServerBehaviour.ADMIN_PORT_ATTRIBUTE_NAME,
+          -1, configuration, server);
+      if (adminPort >= 0) {
+        devServerRunConfiguration.setAdminPort(adminPort);
+      } else {
+        // adminPort = -1 perform failover if default port is busy
+        devServerRunConfiguration.setAdminPort(LocalAppEngineServerBehaviour.DEFAULT_ADMIN_PORT);
+        // adminHost == null is ok as that resolves to null == INADDR_ANY
+        InetAddress addr = resolveAddress(devServerRunConfiguration.getAdminHost());
+        if (org.eclipse.wst.server.core.util.SocketUtil.isPortInUse(addr,
+            devServerRunConfiguration.getAdminPort())) {
+          logger.log(Level.INFO, "default admin port " + devServerRunConfiguration.getAdminPort()
+              + " in use. Picking an unused port.");
+          devServerRunConfiguration.setAdminPort(0);
+        }
       }
     }
 
