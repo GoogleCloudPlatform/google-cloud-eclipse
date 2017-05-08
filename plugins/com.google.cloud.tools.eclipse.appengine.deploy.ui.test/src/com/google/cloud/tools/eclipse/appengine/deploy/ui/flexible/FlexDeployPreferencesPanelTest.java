@@ -18,27 +18,18 @@ package com.google.cloud.tools.eclipse.appengine.deploy.ui.flexible;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-import com.google.api.client.auth.oauth2.Credential;
-import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferences;
+import com.google.cloud.tools.eclipse.appengine.deploy.ui.internal.AppYamlPathValidator;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexFacet;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
-import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
-import com.google.cloud.tools.eclipse.projectselector.ProjectRepositoryException;
-import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
-import com.google.cloud.tools.login.Account;
 import com.google.common.base.Predicate;
-import java.util.Arrays;
-import java.util.HashSet;
 import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.databinding.ValidationStatusProvider;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
@@ -54,7 +45,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.osgi.service.prefs.BackingStoreException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FlexDeployPreferencesPanelTest {
@@ -73,26 +63,12 @@ public class FlexDeployPreferencesPanelTest {
   private IProject project;
 
   @Before
-  public void setUp() throws ProjectRepositoryException, BackingStoreException {
-    Credential credential = mock(Credential.class);
-    Account account = mock(Account.class);
-    when(account.getEmail()).thenReturn("user@example.com");
-    when(account.getOAuth2Credential()).thenReturn(credential);
-    when(loginService.getAccounts()).thenReturn(new HashSet<>(Arrays.asList(account)));
-
-    GcpProject gcpProject = new GcpProject("name", "gcp-project-id");
-    when(projectRepository.getProjects(credential)).thenReturn(Arrays.asList(gcpProject));
-    when(projectRepository.getProject(credential, "gcp-project-id")).thenReturn(gcpProject);
-
-    // Make the panel auto-select a project to suppress the project validation error.
+  public void setUp() {
     project = projectCreator.getProject();
-    DeployPreferences preferences = new DeployPreferences(project);
-    preferences.setProjectId("gcp-project-id");
-    preferences.save();
   }
 
   @Test
-  public void testGetHelpContextId() throws InterruptedException {
+  public void testGetHelpContextId() {
     FlexDeployPreferencesPanel panel = createPanel(true /* requireValues */);
 
     assertEquals(
@@ -101,64 +77,58 @@ public class FlexDeployPreferencesPanelTest {
   }
 
   @Test
-  public void testDefaultAppYamlPathSet() throws InterruptedException {
+  public void testDefaultAppYamlPathSet() {
     FlexDeployPreferencesPanel panel = createPanel(true /* requireValues */);
 
     Text appYamlField = findAppYamlField(panel);
     assertEquals("src/main/appengine/app.yaml", appYamlField.getText());
-    assertFalse(hasValidationError(panel));
+    assertTrue(getAppYamlPathValidationStatus(panel).isOK());
   }
 
   @Test
-  public void testAppYamlPathValidation() throws InterruptedException {
+  public void testAppYamlPathValidation_nonExistingAppYaml() {
     FlexDeployPreferencesPanel panel = createPanel(true /* requireValues */);
 
     Text appYamlField = findAppYamlField(panel);
     appYamlField.setText("non/existing/app.yaml");
-    assertTrue(hasValidationError(panel));
+    assertFalse(getAppYamlPathValidationStatus(panel).isOK());
   }
 
   @Test
-  public void testAppYamlPathValidation_noValidationIfRequireValuesIsFalse()
-      throws InterruptedException {
+  public void testAppYamlPathValidation_noValidationIfRequireValuesIsFalse() {
     FlexDeployPreferencesPanel panel = createPanel(false /* requireValues */);
 
     Text appYamlField = findAppYamlField(panel);
     appYamlField.setText("non/existing/app.yaml");
-    assertFalse(hasValidationError(panel));
+    assertNull(getAppYamlPathValidationStatus(panel));
   }
 
   @Test
-  public void testAppYamlPathValidation_absolutePathWorks() throws InterruptedException {
-    FlexDeployPreferencesPanel panel = createPanel(false /* requireValues */);
+  public void testAppYamlPathValidation_absolutePathWorks() {
+    FlexDeployPreferencesPanel panel = createPanel(true /* requireValues */);
     Text appYamlField = findAppYamlField(panel);
 
     IPath absolutePath = project.getLocation().append("src/main/appengine/app.yaml");
     assertTrue(absolutePath.isAbsolute());
 
     appYamlField.setText(absolutePath.toString());
-    assertFalse(hasValidationError(panel));
+    assertTrue(getAppYamlPathValidationStatus(panel).isOK());
   }
 
-  private FlexDeployPreferencesPanel createPanel(boolean requireValues)
-      throws InterruptedException {
-    FlexDeployPreferencesPanel panel = new FlexDeployPreferencesPanel(shellResource.getShell(),
+  private FlexDeployPreferencesPanel createPanel(boolean requireValues) {
+    return new FlexDeployPreferencesPanel(shellResource.getShell(),
         project, loginService, layoutHandler, requireValues, projectRepository);
-    findAccountSelector(panel).selectAccount("user@example.com");
-    panel.latestGcpProjectQueryJob.join();
-    return panel;
   }
 
-  private static boolean hasValidationError(FlexDeployPreferencesPanel panel) {
+  private static IStatus getAppYamlPathValidationStatus(FlexDeployPreferencesPanel panel) {
     DataBindingContext context = panel.getDataBindingContext();
     for (Object provider : context.getValidationStatusProviders()) {
-      IObservableValue value = ((ValidationStatusProvider) provider).getValidationStatus();
-      IStatus status = (IStatus) value.getValue();
-      if (!status.isOK()) {
-        return true;
+      if (provider instanceof AppYamlPathValidator) {
+        IObservableValue value = ((AppYamlPathValidator) provider).getValidationStatus();
+        return (IStatus) value.getValue();
       }
     }
-    return false;
+    return null;
   }
 
   private static Text findAppYamlField(Composite panel) {
@@ -168,9 +138,5 @@ public class FlexDeployPreferencesPanelTest {
         return control instanceof Text && APP_YAML_FIELD_TOOLTIP.equals(control.getToolTipText());
       }
     });
-  }
-
-  private static AccountSelector findAccountSelector(Composite panel) {
-    return CompositeUtil.findControl(panel, AccountSelector.class);
   }
 }
