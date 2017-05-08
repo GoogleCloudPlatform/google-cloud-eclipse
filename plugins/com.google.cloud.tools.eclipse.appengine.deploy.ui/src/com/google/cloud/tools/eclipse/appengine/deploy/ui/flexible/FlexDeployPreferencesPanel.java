@@ -81,10 +81,8 @@ public class FlexDeployPreferencesPanel extends AppEngineDeployPreferencesPanel 
     ISWTObservableValue fieldValue = WidgetProperties.text(SWT.Modify).observe(appYamlField);
     IObservableValue modelValue = PojoProperties.value("appYamlPath").observe(model);
 
-    if (!requireValues) {
-      bindingContext.bindValue(fieldValue, modelValue);
-    } else {
-      bindingContext.bindValue(fieldValue, modelValue);
+    bindingContext.bindValue(fieldValue, modelValue);
+    if (requireValues) {
       bindingContext.addValidationStatusProvider(
           new AppYamlPathValidator(project.getLocation(), fieldValue));
     }
