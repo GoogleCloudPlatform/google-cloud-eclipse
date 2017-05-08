@@ -73,6 +73,7 @@ import org.eclipse.debug.core.model.IThread;
 import org.eclipse.jdt.launching.AbstractJavaLaunchConfigurationDelegate;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IVMConnector;
+import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.SocketUtil;
 import org.eclipse.wst.server.core.IModule;
@@ -125,7 +126,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
   @VisibleForTesting
   void checkConflictingLaunches(ILaunchConfigurationType launchConfigType,
       DefaultRunConfiguration runConfig, ILaunch[] launches) throws CoreException {
-
+    
     for (ILaunch launch : launches) {
       if (launch.isTerminated()
           || launch.getLaunchConfiguration() == null
@@ -335,7 +336,11 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
     LocalAppEngineServerBehaviour serverBehaviour = (LocalAppEngineServerBehaviour) server
         .loadAdapter(LocalAppEngineServerBehaviour.class, null);
-
+    
+    IVMInstall vmInstall = getVMInstall(configuration);
+    String javaHome = vmInstall.getInstallLocation().getAbsolutePath();
+    serverBehaviour.setJavaHome(javaHome);
+    
     setDefaultSourceLocator(launch, configuration);
 
     List<File> runnables = new ArrayList<>();
