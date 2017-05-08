@@ -37,6 +37,7 @@ import com.google.common.net.InetAddresses;
 import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -336,11 +337,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
     LocalAppEngineServerBehaviour serverBehaviour = (LocalAppEngineServerBehaviour) server
         .loadAdapter(LocalAppEngineServerBehaviour.class, null);
-    
-    IVMInstall vmInstall = getVMInstall(configuration);
-    String javaHome = vmInstall.getInstallLocation().getAbsolutePath();
-    serverBehaviour.setJavaHome(javaHome);
-    
+   
     setDefaultSourceLocator(launch, configuration);
 
     List<File> runnables = new ArrayList<>();
@@ -372,7 +369,10 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
         int debugPort = getDebugPort();
         setupDebugTarget(devServerRunConfiguration, launch, debugPort, monitor);
       }
-      serverBehaviour.startDevServer(devServerRunConfiguration, console.newMessageStream());
+      IVMInstall vmInstall = getVMInstall(configuration);
+      String javaHome = vmInstall.getInstallLocation().getAbsolutePath();
+      serverBehaviour.startDevServer(devServerRunConfiguration, Paths.get(javaHome),
+          console.newMessageStream());
     } catch (CoreException ex) {
       launch.terminate();
       throw ex;

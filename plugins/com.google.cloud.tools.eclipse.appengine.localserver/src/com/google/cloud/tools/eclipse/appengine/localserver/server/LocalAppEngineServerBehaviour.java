@@ -34,7 +34,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.net.InetAddress;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -113,7 +112,6 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
   
   @VisibleForTesting
   Map<String, String> moduleToUrlMap = new LinkedHashMap<>();
-  private String javaHome = System.getProperty("java.home");
 
   public LocalAppEngineServerBehaviour () {
     localAppEngineStartListener = new LocalAppEngineStartListener();
@@ -288,7 +286,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
    * @param console the stream (Eclipse console) to send development server process output to
    */
   void startDevServer(DefaultRunConfiguration devServerRunConfiguration,
-      MessageConsoleStream console)
+      Path javaHomePath, MessageConsoleStream console)
       throws CoreException {
     
     PortChecker portInUse = new PortChecker() {
@@ -322,7 +320,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     setServerState(IServer.STATE_STARTING);
 
     // Create dev app server instance
-    initializeDevServer(console);
+    initializeDevServer(console, javaHomePath);
 
     // Run server
     try {
@@ -337,14 +335,11 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     return value != null ? value : defaultValue;
   }
 
-  private void initializeDevServer(MessageConsoleStream console) {
+  private void initializeDevServer(MessageConsoleStream console, Path javaHomePath) {
     MessageConsoleWriterOutputLineListener outputListener =
         new MessageConsoleWriterOutputLineListener(console);
 
     // dev_appserver output goes to stderr
-    
-    Path javaHomePath = Paths.get(javaHome);
-    
     cloudSdk = new CloudSdk.Builder()
         .javaHome(javaHomePath)
         .addStdOutLineListener(outputListener)
@@ -465,9 +460,5 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
   public String getServiceUrl(String serviceId) {
     Preconditions.checkNotNull(serviceId);
     return moduleToUrlMap.get(serviceId);
-  }
-
-  void setJavaHome(String javaHome) {
-    this.javaHome = javaHome;
   }
 }
