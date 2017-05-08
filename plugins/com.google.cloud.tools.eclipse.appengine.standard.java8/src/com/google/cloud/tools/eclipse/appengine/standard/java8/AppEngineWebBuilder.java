@@ -38,6 +38,7 @@ import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject.Action;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
+import org.xml.sax.SAXException;
 
 /**
  * Builder to monitor user changes relating to the {@code <runtime>java8</runtime>} element in
@@ -83,7 +84,7 @@ public class AppEngineWebBuilder extends IncrementalProjectBuilder {
       boolean hasJava8Facet = project.hasProjectFacet(JavaFacet.VERSION_1_8);
       // if not the same, then we update the facet to match the appengine-web.xml
       if (hasJava8Facet != hasJava8Runtime) {
-        Set<Action> updates = new HashSet<Action>();
+        Set<Action> updates = new HashSet<>();
         // Can upgrade jst.web to 3.1, but cannot downgrade from 3.1
         if (hasJava8Runtime) {
           updates.add(new Action(Action.Type.VERSION_CHANGE, JavaFacet.VERSION_1_8, null));
@@ -94,6 +95,8 @@ public class AppEngineWebBuilder extends IncrementalProjectBuilder {
         logger.fine(getProject() + ": changing facets: " + updates);
         project.modify(updates, monitor);
       }
+    } catch (SAXException ex) {
+      // Parsing failed due to malformed XML; just don't check the value now.
     } catch (CoreException | IOException ex) {
       logger.log(Level.SEVERE, getProject() + ": error updating facets", ex);
     }
