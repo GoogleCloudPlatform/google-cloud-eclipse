@@ -71,6 +71,8 @@ import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IMemoryBlock;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.IThread;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.AbstractJavaLaunchConfigurationDelegate;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IVMConnector;
@@ -369,7 +371,10 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
         int debugPort = getDebugPort();
         setupDebugTarget(devServerRunConfiguration, launch, debugPort, monitor);
       }
-      IVMInstall vmInstall = getVMInstall(configuration);
+      
+      IJavaProject javaProject = JavaCore.create(modules[0].getProject());
+      IVMInstall vmInstall = JavaRuntime.getVMInstall(javaProject);
+      
       String javaHome = vmInstall.getInstallLocation().getAbsolutePath();
       serverBehaviour.startDevServer(devServerRunConfiguration, Paths.get(javaHome),
           console.newMessageStream());
