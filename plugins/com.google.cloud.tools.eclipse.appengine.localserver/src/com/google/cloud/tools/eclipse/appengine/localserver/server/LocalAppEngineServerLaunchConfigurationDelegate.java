@@ -84,7 +84,7 @@ import org.eclipse.wst.server.core.ServerUtil;
 public class LocalAppEngineServerLaunchConfigurationDelegate
     extends AbstractJavaLaunchConfigurationDelegate {
 
-  private static final boolean DEVAPPSERVER2 = false;
+  private static final boolean DEV_APPSERVER2 = false;
   
   private static final Logger logger =
       Logger.getLogger(LocalAppEngineServerLaunchConfigurationDelegate.class.getName());
@@ -171,7 +171,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       devServerRunConfiguration.setPort(serverPort);
     }
 
-    if (DEVAPPSERVER2) {
+    if (DEV_APPSERVER2) {
       // default to 1 instance to simplify debugging
       devServerRunConfiguration.setMaxModuleInstances(1);
 
