@@ -395,7 +395,8 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     if (pageLocation == null) {
       return;
     }
-    WorkbenchUtil.openInBrowserInUiThread(pageLocation, server.getId(), server.getName(), server.getName());
+    WorkbenchUtil.openInBrowserInUiThread(pageLocation, server.getId(), server.getName(),
+        server.getName());
   }
 
   private void setupDebugTarget(DefaultRunConfiguration devServerRunConfiguration, ILaunch launch,
