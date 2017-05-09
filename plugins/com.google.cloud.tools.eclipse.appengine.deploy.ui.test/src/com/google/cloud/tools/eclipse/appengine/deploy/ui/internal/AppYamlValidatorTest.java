@@ -40,7 +40,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AppYamlPathValidatorTest {
+public class AppYamlValidatorTest {
 
   @Rule public TemporaryFolder tempFolder = new TemporaryFolder();
 
