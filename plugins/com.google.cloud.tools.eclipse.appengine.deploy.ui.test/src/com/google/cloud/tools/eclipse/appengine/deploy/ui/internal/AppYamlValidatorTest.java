@@ -23,10 +23,8 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
@@ -209,10 +207,8 @@ public class AppYamlValidatorTest {
 
   private static File createAppYamlFile(String parent, String contents) throws IOException {
     new File(parent).mkdirs();
-    try (OutputStream out = Files.newOutputStream(Paths.get(parent + "/app.yaml"))) {
-      out.write(contents.getBytes(StandardCharsets.UTF_8));
-    }
     File appYaml = new File(parent + "/app.yaml");
+    Files.write(appYaml.toPath(), contents.getBytes(StandardCharsets.UTF_8));
     assertTrue(appYaml.exists());
     return appYaml;
   }
