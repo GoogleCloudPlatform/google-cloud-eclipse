@@ -21,7 +21,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import com.google.cloud.tools.eclipse.appengine.deploy.ui.internal.AppYamlPathValidator;
+import com.google.cloud.tools.eclipse.appengine.deploy.ui.internal.AppYamlValidator;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexFacet;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
@@ -123,8 +123,8 @@ public class FlexDeployPreferencesPanelTest {
   private static IStatus getAppYamlPathValidationStatus(FlexDeployPreferencesPanel panel) {
     DataBindingContext context = panel.getDataBindingContext();
     for (Object provider : context.getValidationStatusProviders()) {
-      if (provider instanceof AppYamlPathValidator) {
-        IObservableValue value = ((AppYamlPathValidator) provider).getValidationStatus();
+      if (provider instanceof AppYamlValidator) {
+        IObservableValue value = ((AppYamlValidator) provider).getValidationStatus();
         return (IStatus) value.getValue();
       }
     }

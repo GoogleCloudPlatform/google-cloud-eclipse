@@ -17,27 +17,36 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.ui.internal;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
+import com.google.cloud.tools.project.AppYaml;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.io.File;
+import java.io.IOException;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
+import org.yaml.snakeyaml.parser.ParserException;
+import org.yaml.snakeyaml.scanner.ScannerException;
 
 /**
- * Checks if a user-provided {@code app.yaml} path points to an existing {@code app.yaml}.
+ * Checks a {@code app.yaml} path and the specified runtime in it.
+ *
+ * 1. Checks if a user-provided {@code app.yaml} path points to an existing {@code app.yaml}.
  * Validation will fail if the file does not exist, the path is not a file (e.g., a directory),
  * or the file name is not {@code app.yaml}. If the path to validate is not absolute, a preset
  * prefix path ({@code basePath}) will be appended prior to checking.
  *
- * @see #AppYamlPathValidator(IPath)
+ * 2. Checks if the runtime specified in {@code app.yaml} is supported.
+ *
+ * @see #AppYamlPathValidator
  */
-public class AppYamlPathValidator extends FixedMultiValidator {
+public class AppYamlValidator extends FixedMultiValidator {
 
   private final IPath basePath;
   private final IObservableValue appYamlPath;
 
-  public AppYamlPathValidator(IPath basePath, IObservableValue appYamlPath) {
+  public AppYamlValidator(IPath basePath, IObservableValue appYamlPath) {
     Preconditions.checkArgument(basePath.isAbsolute(), "basePath is not absolute.");
     Preconditions.checkArgument(String.class.equals(appYamlPath.getValueType()));
     this.basePath = basePath;
@@ -59,6 +68,26 @@ public class AppYamlPathValidator extends FixedMultiValidator {
     } else if (!appYaml.isFile()) {
       return ValidationStatus.error(Messages.getString("error.app.yaml.not.a.file", appYaml));
     } else {
+      return validateRuntime(appYaml);
+    }
+  }
+
+  @VisibleForTesting
+  static IStatus validateRuntime(File appYamlFile) {
+    try {
+      AppYaml appYaml = new AppYaml(appYamlFile.toPath());
+      String runtime = appYaml.getRuntime();
+
+      if ("custom".equals(runtime)) {
+        return ValidationStatus.error(Messages.getString("error.app.yaml.custom.runtime"));
+      } else if (!"java".equals(runtime)) {
+        return ValidationStatus.error(Messages.getString("error.app.yaml.not.java.runtime"));
+      } else {
+        return ValidationStatus.ok();
+      }
+    } catch (ScannerException | ParserException ex) {
+      return ValidationStatus.error(Messages.getString("error.app.yaml.malformed"));
+    } catch (IOException ex) {
       return ValidationStatus.ok();
     }
   }
