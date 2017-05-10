@@ -171,7 +171,7 @@ public class AppYamlValidatorTest {
     File appYaml = createAppYamlFile(tempFolder.getRoot().toString(), "env: flex");
     IStatus result = AppYamlValidator.validateRuntime(appYaml);
     assertEquals(IStatus.ERROR, result.getSeverity());
-    assertEquals("Runtime specified in app.yaml is not \"java\".", result.getMessage());
+    assertEquals("Runtime specified in app.yaml is not \"java\": null", result.getMessage());
   }
 
   @Test
@@ -179,7 +179,7 @@ public class AppYamlValidatorTest {
     File appYaml = createAppYamlFile(tempFolder.getRoot().toString(), "runtime:");
     IStatus result = AppYamlValidator.validateRuntime(appYaml);
     assertEquals(IStatus.ERROR, result.getSeverity());
-    assertEquals("Runtime specified in app.yaml is not \"java\".", result.getMessage());
+    assertEquals("Runtime specified in app.yaml is not \"java\": null", result.getMessage());
   }
 
   @Test
@@ -187,7 +187,7 @@ public class AppYamlValidatorTest {
     File appYaml = createAppYamlFile(tempFolder.getRoot().toString(), "runtime: python");
     IStatus result = AppYamlValidator.validateRuntime(appYaml);
     assertEquals(IStatus.ERROR, result.getSeverity());
-    assertEquals("Runtime specified in app.yaml is not \"java\".", result.getMessage());
+    assertEquals("Runtime specified in app.yaml is not \"java\": python", result.getMessage());
   }
 
   @Test
@@ -195,8 +195,16 @@ public class AppYamlValidatorTest {
     File appYaml = createAppYamlFile(tempFolder.getRoot().toString(), "runtime: custom");
     IStatus result = AppYamlValidator.validateRuntime(appYaml);
     assertEquals(IStatus.ERROR, result.getSeverity());
-    assertEquals("\"runtime: custom\" specified in app.yaml is not yet supported by "
-        + "Cloud Tools for Eclipse.", result.getMessage());
+    assertEquals("\"runtime: custom\" is not yet supported by Cloud Tools for Eclipse.",
+        result.getMessage());
+  }
+
+  @Test
+  public void testValidateRuntime_ioException() {
+    File nonExisting = new File("/non/existing/file");
+    IStatus result = AppYamlValidator.validateRuntime(nonExisting);
+    assertEquals(IStatus.ERROR, result.getSeverity());
+    assertTrue(result.getMessage().startsWith("Cannot read app.yaml:"));
   }
 
   private static void createAppYamlAsDirectory(IPath parent) {

@@ -30,7 +30,7 @@ import org.yaml.snakeyaml.parser.ParserException;
 import org.yaml.snakeyaml.scanner.ScannerException;
 
 /**
- * Checks a {@code app.yaml} path and the specified runtime in it.
+ * Checks an {@code app.yaml} path and the specified runtime in it.
  *
  * 1. Checks if a user-provided {@code app.yaml} path points to an existing {@code app.yaml}.
  * Validation will fail if the file does not exist, the path is not a file (e.g., a directory),
@@ -81,14 +81,16 @@ public class AppYamlValidator extends FixedMultiValidator {
       if ("custom".equals(runtime)) {
         return ValidationStatus.error(Messages.getString("error.app.yaml.custom.runtime"));
       } else if (!"java".equals(runtime)) {
-        return ValidationStatus.error(Messages.getString("error.app.yaml.not.java.runtime"));
+        return ValidationStatus.error(
+            Messages.getString("error.app.yaml.not.java.runtime", runtime));
       } else {
         return ValidationStatus.ok();
       }
     } catch (ScannerException | ParserException ex) {
       return ValidationStatus.error(Messages.getString("error.app.yaml.malformed"));
     } catch (IOException ex) {
-      return ValidationStatus.ok();
+      return ValidationStatus.error(
+          Messages.getString("error.app.yaml.cannot.read", ex.getLocalizedMessage()));
     }
   }
 }
