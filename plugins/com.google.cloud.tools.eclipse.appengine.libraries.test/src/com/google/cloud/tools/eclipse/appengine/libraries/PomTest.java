@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
