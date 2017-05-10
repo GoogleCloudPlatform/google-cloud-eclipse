@@ -171,7 +171,7 @@ public class AppYamlValidatorTest {
     File appYaml = createAppYamlFile(tempFolder.getRoot().toString(), "env: flex");
     IStatus result = AppYamlValidator.validateRuntime(appYaml);
     assertEquals(IStatus.ERROR, result.getSeverity());
-    assertEquals("Runtime specified in app.yaml is not \"java\": null", result.getMessage());
+    assertEquals("\"runtime: null\" in app.yaml is not \"java\".", result.getMessage());
   }
 
   @Test
@@ -179,7 +179,7 @@ public class AppYamlValidatorTest {
     File appYaml = createAppYamlFile(tempFolder.getRoot().toString(), "runtime:");
     IStatus result = AppYamlValidator.validateRuntime(appYaml);
     assertEquals(IStatus.ERROR, result.getSeverity());
-    assertEquals("Runtime specified in app.yaml is not \"java\": null", result.getMessage());
+    assertEquals("\"runtime: null\" in app.yaml is not \"java\".", result.getMessage());
   }
 
   @Test
@@ -187,7 +187,7 @@ public class AppYamlValidatorTest {
     File appYaml = createAppYamlFile(tempFolder.getRoot().toString(), "runtime: python");
     IStatus result = AppYamlValidator.validateRuntime(appYaml);
     assertEquals(IStatus.ERROR, result.getSeverity());
-    assertEquals("Runtime specified in app.yaml is not \"java\": python", result.getMessage());
+    assertEquals("\"runtime: python\" in app.yaml is not \"java\".", result.getMessage());
   }
 
   @Test
