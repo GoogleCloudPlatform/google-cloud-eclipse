@@ -28,14 +28,12 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javax.xml.XMLConstants;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
@@ -58,7 +56,7 @@ public class XmlValidator
     extends AbstractValidator implements IExecutableExtension {
 
   private static final Logger logger = Logger.getLogger(XmlValidator.class.getName());
-  private static final SchemaFactory FACTORY = 
+  private static final SchemaFactory FACTORY =
       SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
   private XmlValidationHelper helper;
 
@@ -68,13 +66,11 @@ public class XmlValidator
   @Override
   public ValidationResult validate(ValidationEvent event, ValidationState state,
       IProgressMonitor monitor) {
-    try {
-      IFile file = (IFile) event.getResource();
-      try (InputStream in = file.getContents()) {
+    IFile file = (IFile) event.getResource();
+    try (InputStream in = file.getContents()) {
         byte[] bytes = ByteStreams.toByteArray(in);
         validate(file, bytes);
         xsdValidation(event.getResource());
-      }
     } catch (IOException | CoreException ex) {
       logger.log(Level.SEVERE, ex.getMessage());
     }
@@ -82,11 +78,10 @@ public class XmlValidator
   }
 
   /**
-   * Clears all problem markers from the resource, then adds a marker to 
-   * the resource for every {@link BannedElement} found in the file. 
+   * Clears all problem markers from the resource, then adds a marker to
+   * the resource for every {@link BannedElement} found in the file.
    */
-  void validate(IFile resource, byte[] bytes)
-      throws CoreException, IOException {
+  void validate(IFile resource, byte[] bytes) throws CoreException, IOException {
     try {
       deleteMarkers(resource);
       Document document = PositionalXmlScanner.parse(bytes);
@@ -103,7 +98,7 @@ public class XmlValidator
       // Do nothing, handled in XmlValidator#xsdValidation
     }
   }
-  
+
   void xsdValidation(IResource resource) {
     String xsd = helper.getXsd();
     if (xsd != null) {
@@ -122,9 +117,9 @@ public class XmlValidator
       }
     }
   }
-  
+
   /**
-   * Creates an instance of the helper {@link XmlValidationHelper} and sets its 
+   * Creates an instance of the helper {@link XmlValidationHelper} and sets its
    * own helper to this instance.
    */
   @Override
@@ -137,15 +132,15 @@ public class XmlValidator
       String className = (String) data;
       Class<?> clazz = Class.forName(className);
       Constructor<?> constructor = clazz.getConstructor();
-      XmlValidationHelper helper = (XmlValidationHelper) constructor.newInstance(new Object[] {});
-      this.setHelper(helper);
-    } catch (ClassNotFoundException | NoSuchMethodException | SecurityException 
+      XmlValidationHelper helper = (XmlValidationHelper) constructor.newInstance();
+      setHelper(helper);
+    } catch (ClassNotFoundException | NoSuchMethodException | SecurityException
         | InstantiationException | IllegalAccessException | IllegalArgumentException
         | InvocationTargetException ex) {
       logger.log(Level.SEVERE, ex.getMessage());
     }
   }
-  
+
   @VisibleForTesting
   void setHelper(XmlValidationHelper helper) {
     this.helper = helper;

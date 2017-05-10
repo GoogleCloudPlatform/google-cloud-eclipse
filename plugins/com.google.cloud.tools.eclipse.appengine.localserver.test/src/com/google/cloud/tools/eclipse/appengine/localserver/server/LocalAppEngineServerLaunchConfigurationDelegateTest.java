@@ -186,8 +186,6 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
         .generateServerRunConfiguration(launchConfiguration, server);
     assertNull(config.getHost());
     assertEquals((Integer) LocalAppEngineServerBehaviour.DEFAULT_SERVER_PORT, config.getPort());
-    assertEquals(LocalAppEngineServerBehaviour.DEFAULT_ADMIN_HOST, config.getAdminHost());
-    assertEquals((Integer) LocalAppEngineServerBehaviour.DEFAULT_ADMIN_PORT, config.getAdminPort());
     assertNull(config.getApiPort());
     assertNull(config.getJvmFlags());
     verify(server, atLeastOnce()).getHost();
@@ -235,9 +233,8 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
     DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
         .generateServerRunConfiguration(launchConfiguration, server);
 
-    assertNotNull(config.getAdminPort());
-    assertEquals(9999, (int) config.getAdminPort());
-    verify(launchConfiguration)
+    assertNull(config.getAdminPort());
+    verify(launchConfiguration, never())
         .getAttribute(eq(LocalAppEngineServerBehaviour.ADMIN_PORT_ATTRIBUTE_NAME), anyInt());
     verify(server, never()).getAttribute(anyString(), anyInt());
   }
@@ -259,8 +256,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
       DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
           .generateServerRunConfiguration(launchConfiguration, server);
 
-      assertNotNull(config.getAdminPort());
-      assertEquals(LocalAppEngineServerBehaviour.DEFAULT_ADMIN_PORT, (int) config.getAdminPort());
+      assertNull(config.getAdminPort());
     }
   }
 

@@ -19,7 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.deploy.ui.internal;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
 import com.google.common.base.Preconditions;
 import java.io.File;
-import org.eclipse.core.databinding.validation.IValidator;
+import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
@@ -32,19 +32,21 @@ import org.eclipse.core.runtime.IStatus;
  *
  * @see #AppYamlPathValidator(IPath)
  */
-public class AppYamlPathValidator implements IValidator {
+public class AppYamlPathValidator extends FixedMultiValidator {
 
   private final IPath basePath;
+  private final IObservableValue appYamlPath;
 
-  public AppYamlPathValidator(IPath basePath) {
-    Preconditions.checkArgument(basePath.isAbsolute());
+  public AppYamlPathValidator(IPath basePath, IObservableValue appYamlPath) {
+    Preconditions.checkArgument(basePath.isAbsolute(), "basePath is not absolute.");
+    Preconditions.checkArgument(String.class.equals(appYamlPath.getValueType()));
     this.basePath = basePath;
+    this.appYamlPath = appYamlPath;
   }
 
   @Override
-  public IStatus validate(Object value) {
-    Preconditions.checkArgument(value instanceof String);
-    File appYaml = new File((String) value);
+  protected IStatus validate() {
+    File appYaml = new File((String) appYamlPath.getValue());
     if (!appYaml.isAbsolute()) {
       appYaml = new File(basePath + "/" + appYaml);
     }

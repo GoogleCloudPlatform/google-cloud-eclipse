@@ -16,6 +16,8 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
+import com.google.cloud.tools.eclipse.appengine.deploy.DeployJob;
+import com.google.common.base.Preconditions;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
@@ -32,8 +34,6 @@ import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleConstants;
 import org.eclipse.ui.console.IConsolePageParticipant;
 import org.eclipse.ui.part.IPageBookViewPage;
-import com.google.cloud.tools.eclipse.appengine.deploy.DeployJob;
-import com.google.common.base.Preconditions;
 
 public class DeployConsolePageParticipant implements IConsolePageParticipant {
 
@@ -52,7 +52,7 @@ public class DeployConsolePageParticipant implements IConsolePageParticipant {
       @Override
       public void propertyChange(PropertyChangeEvent event) {
         if (event.getProperty().equals(DeployConsole.PROPERTY_JOB)) {
-          // keep the order of adding a listener and then calling update() to ensure update 
+          // keep the order of adding a listener and then calling update() to ensure update
           // is called regardless of when the job finishes
           addJobChangeListener();
           update();
@@ -132,7 +132,7 @@ public class DeployConsolePageParticipant implements IConsolePageParticipant {
     return terminate;
   }
 
-  private ImageDescriptor getSharedImage(String image) {
+  private static ImageDescriptor getSharedImage(String image) {
     return PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(image);
   }
 
