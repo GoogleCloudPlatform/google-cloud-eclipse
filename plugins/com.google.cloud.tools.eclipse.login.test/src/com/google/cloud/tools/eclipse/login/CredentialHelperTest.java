@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import org.junit.Rule;
 import org.junit.Test;
@@ -43,7 +44,8 @@ public class CredentialHelperTest {
     Path jsonFile = tempFolder.getRoot().toPath().resolve("credential-for-gcloud.json");
     CredentialHelper.toJsonFile(credential, jsonFile);
 
-    try (InputStream in = new FileInputStream(jsonFile.toFile());
+    try (InputStream in = Files.newInputStream(jsonFile);
+        // todo needs character set
         Reader reader = new InputStreamReader(in)) {
       CredentialType credentialType = new Gson().fromJson(reader, CredentialType.class);
       assertEquals(Constants.getOAuthClientId(), credentialType.client_id);

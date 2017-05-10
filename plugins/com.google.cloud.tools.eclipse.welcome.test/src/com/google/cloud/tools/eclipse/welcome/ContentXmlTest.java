@@ -18,9 +18,10 @@ package com.google.cloud.tools.eclipse.welcome;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -36,8 +37,8 @@ public class ContentXmlTest {
     factory.setNamespaceAware(true);
     DocumentBuilder builder = factory.newDocumentBuilder();
 
-    try (InputStream contentXml = new FileInputStream(
-        "../com.google.cloud.tools.eclipse.welcome/intro/cloud-tools-for-eclipse.xml")) {
+    try (InputStream contentXml = Files.newInputStream(Paths.get(
+        "../com.google.cloud.tools.eclipse.welcome/intro/cloud-tools-for-eclipse.xml"))) {
       Document document = builder.parse(contentXml);
       assertEquals(4, document.getElementsByTagName("extensionContent").getLength());
     }

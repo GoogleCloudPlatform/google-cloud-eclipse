@@ -28,6 +28,8 @@ import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -137,11 +139,11 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
             libraryFile, subMonitor.newChild(ticks));
         artifactFile = artifact.getFile();
         IFile destFile = libFolder.getFile(artifactFile.getName());
-        destFile.create(new FileInputStream(artifactFile), true, subMonitor.newChild(30));
+        destFile.create(Files.newInputStream(artifactFile.toPath()), true, subMonitor.newChild(30));
       } catch (CoreException ex) {
         logger.log(Level.WARNING, "Error downloading " + //$NON-NLS-1$
             libraryFile.getMavenCoordinates().toString() + " from maven", ex); //$NON-NLS-1$
-      } catch (FileNotFoundException ex) {
+      } catch (IOException ex) {
         logger.log(Level.WARNING, "Error copying over " + artifactFile.toString() + " to " + //$NON-NLS-1$ //$NON-NLS-2$
             libFolder.getFullPath().toPortableString(), ex);
       }

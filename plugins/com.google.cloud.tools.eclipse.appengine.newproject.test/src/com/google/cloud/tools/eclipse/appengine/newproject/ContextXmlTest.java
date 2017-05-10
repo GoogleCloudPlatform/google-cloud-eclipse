@@ -18,9 +18,10 @@ package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -36,8 +37,8 @@ public class ContextXmlTest {
     factory.setNamespaceAware(true);
     DocumentBuilder builder = factory.newDocumentBuilder();
 
-    try (InputStream contentXml = new FileInputStream(
-        "../com.google.cloud.tools.eclipse.appengine.newproject/helpContexts.xml")) {
+    try (InputStream contentXml = Files.newInputStream(Paths.get(
+        "../com.google.cloud.tools.eclipse.appengine.newproject/helpContexts.xml"))) {
       Document document = builder.parse(contentXml);
       assertEquals(2, document.getElementsByTagName("context").getLength());
     }

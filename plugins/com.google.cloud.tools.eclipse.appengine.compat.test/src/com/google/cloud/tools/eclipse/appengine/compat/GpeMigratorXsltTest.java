@@ -24,6 +24,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -74,8 +76,8 @@ public class GpeMigratorXsltTest {
   public void testWtpMetadataStylesheet_removesGpeRuntimeAndFacets()
       throws IOException, ParserConfigurationException, SAXException, TransformerException {
     try (InputStream xmlStream = stringToInputStream(WTP_METADATA_XML);
-        InputStream stylesheetStream = new FileInputStream(
-            "../com.google.cloud.tools.eclipse.appengine.compat/xslt/wtpMetadata.xsl")) {
+        InputStream stylesheetStream = Files.newInputStream(
+            Paths.get("../com.google.cloud.tools.eclipse.appengine.compat/xslt/wtpMetadata.xsl"))) {
 
       DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 

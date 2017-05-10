@@ -21,6 +21,8 @@ import static org.junit.Assert.assertNotNull;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import javax.xml.parsers.DocumentBuilder;
@@ -62,7 +64,7 @@ public class PluginXmlDocument extends ExternalResource {
     String hostBundleName = getHostBundleName();
     assertNotNull(hostBundleName);
     String pluginXmlLocation = "../" + hostBundleName + "/plugin.xml";
-    return new FileInputStream(pluginXmlLocation);
+    return Files.newInputStream(Paths.get(pluginXmlLocation));
   }
 
   /**

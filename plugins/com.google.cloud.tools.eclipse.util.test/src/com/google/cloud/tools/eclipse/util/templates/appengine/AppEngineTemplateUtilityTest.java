@@ -16,10 +16,11 @@
 
 package com.google.cloud.tools.eclipse.util.templates.appengine;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -153,7 +154,7 @@ public class AppEngineTemplateUtilityTest {
 
   private void compareToFile(String expected) throws IOException {
 
-    try (InputStream testFileStream = new FileInputStream(fileLocation);
+    try (InputStream testFileStream = Files.newInputStream(Paths.get((fileLocation)));
         InputStream expectedFileStream = getDataFile(expected);
         Scanner expectedScanner = new Scanner(expectedFileStream);
         Scanner actualScanner = new Scanner(testFileStream)) {
