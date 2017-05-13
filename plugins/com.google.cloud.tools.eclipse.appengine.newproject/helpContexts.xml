@@ -12,7 +12,7 @@
 
       &service;
 
-&lt;b&gt;Libraries to add to build path:&lt;/b&gt; Adds useful libraries for the App Engine standard environment to your project build path.
+      &lt;b&gt;Libraries to add to build path:&lt;/b&gt; Adds useful libraries for the App Engine standard environment to your project build path.
     </description>
   </context>
 
