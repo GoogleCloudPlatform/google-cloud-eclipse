@@ -23,7 +23,6 @@ import com.google.common.annotations.VisibleForTesting;
 import java.net.MalformedURLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.PopupDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -150,20 +149,8 @@ public class AccountsPanel extends PopupDialog {
   private class LogOutOnClick extends SelectionAdapter {
     @Override
     public void widgetSelected(SelectionEvent event) {
-      // todo localize
-      String[] dialogButtonLabels = {"Sign Out", "Don't Sign Out"};
-      MessageDialog logoutDialog = new MessageDialog(
-          getShell(),
-          Messages.getString("LOGOUT_CONFIRM_DIALOG_TITLE"),
-          null /* dialogTitleImage */,
-          Messages.getString("LOGOUT_CONFIRM_DIALOG_MESSAGE"),
-          MessageDialog.QUESTION,
-          dialogButtonLabels, 0);
-      boolean shouldLogout = logoutDialog.open() == 0;
-      if (shouldLogout) {
-        close();
-        loginService.logOutAll();
-      }
+      close();
+      loginService.logOutAll();
     }
   }
 }

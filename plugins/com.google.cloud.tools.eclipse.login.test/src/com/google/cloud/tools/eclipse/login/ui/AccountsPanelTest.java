@@ -85,7 +85,7 @@ public class AccountsPanelTest {
     List<String> buttonTexts = collectButtonTexts((Composite) control);
     assertEquals(2, buttonTexts.size());
     assertTrue(buttonTexts.contains("Add Account..."));
-    assertTrue(buttonTexts.contains("Sign Out..."));
+    assertTrue(buttonTexts.contains("Sign Out of All Accounts"));
   }
 
   @Test
