@@ -38,8 +38,6 @@ import org.yaml.snakeyaml.scanner.ScannerException;
  * prefix path ({@code basePath}) will be appended prior to checking.
  *
  * 2. Checks if the runtime specified in {@code app.yaml} is supported.
- *
- * @see #AppYamlPathValidator
  */
 public class AppYamlValidator extends FixedMultiValidator {
 

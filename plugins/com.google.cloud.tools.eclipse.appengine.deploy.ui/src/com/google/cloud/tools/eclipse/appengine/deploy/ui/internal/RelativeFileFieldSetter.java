@@ -33,8 +33,6 @@ import org.eclipse.swt.widgets.Text;
  * chosen directory. The path retrieved from and set to the field is relative to a given base path.
  * For example, if the base path is {@code /usr/local} and a user chose {@code /usr/local/lib/cups},
  * the text field will be set to {@code lib/cups}.
- *
- * @see #RelativeDirectoryFieldSetter(Text, IPath)
  */
 public class RelativeFileFieldSetter extends SelectionAdapter {
 
