@@ -66,8 +66,6 @@ public class GoogleLoginService implements IGoogleLoginService {
   private Set<Account> accounts = new HashSet<>();
   private GoogleLoginState loginState;
 
-  private LoginServiceUi loginServiceUi;
-
   /**
    * Called by OSGi Declarative Services Runtime when the {@link GoogleLoginService} is activated
    * as an OSGi service.
@@ -82,11 +80,12 @@ public class GoogleLoginService implements IGoogleLoginService {
       }
     };
 
-    loginServiceUi = new LoginServiceUi(workbench, shellProvider, workbench.getDisplay());
+    LoginServiceUi uiFacade = new LoginServiceUi(workbench, shellProvider, workbench.getDisplay());
+    OAuthDataStore dataStore =
+        new JavaPreferenceOAuthDataStore(PREFERENCE_PATH_OAUTH_DATA_STORE, logger);
     loginState = new GoogleLoginState(
         Constants.getOAuthClientId(), Constants.getOAuthClientSecret(), OAUTH_SCOPES,
-        new JavaPreferenceOAuthDataStore(PREFERENCE_PATH_OAUTH_DATA_STORE, logger),
-        loginServiceUi, logger);
+        dataStore, uiFacade, logger);
     loginState.setApplicationName(CloudToolsInfo.USER_AGENT);
     accounts = loginState.listAccounts();
   }
@@ -100,14 +99,11 @@ public class GoogleLoginService implements IGoogleLoginService {
   @VisibleForTesting
   GoogleLoginService(OAuthDataStore dataStore, LoginServiceUi uiFacade, LoggerFacade loggerFacade) {
     this(new GoogleLoginState(Constants.getOAuthClientId(), Constants.getOAuthClientSecret(),
-                              OAUTH_SCOPES, dataStore, uiFacade, loggerFacade),
-         dataStore, uiFacade, loggerFacade);
+                              OAUTH_SCOPES, dataStore, uiFacade, loggerFacade));
   }
 
   @VisibleForTesting
-  GoogleLoginService(GoogleLoginState loginState,
-      OAuthDataStore dataStore, LoginServiceUi uiFacade, LoggerFacade loggerFacade) {
-    loginServiceUi = uiFacade;
+  GoogleLoginService(GoogleLoginState loginState) {
     this.loginState = loginState;
     loginState.setApplicationName(CloudToolsInfo.USER_AGENT);
     accounts = loginState.listAccounts();
@@ -145,7 +141,7 @@ public class GoogleLoginService implements IGoogleLoginService {
   @Override
   public Set<Account> getAccounts() {
     synchronized (loginState) {
-      return new HashSet<Account>(accounts);
+      return new HashSet<>(accounts);
     }
   }
 

@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.compat;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
+import com.google.cloud.tools.eclipse.util.Xslt;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,8 +35,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
-import com.google.cloud.tools.eclipse.util.Xslt;
 
 public class GpeMigratorXsltTest {
 
@@ -60,14 +59,11 @@ public class GpeMigratorXsltTest {
   public void testApplyXslt()
       throws IOException, ParserConfigurationException, SAXException, TransformerException {
     try (InputStream xmlStream = stringToInputStream(WTP_METADATA_XML);
-        InputStream stylesheetStream = stringToInputStream(STYLESHEET)) {
-
+        InputStream stylesheetStream = stringToInputStream(STYLESHEET);
+        InputStream inputStream = Xslt.applyXslt(xmlStream, stylesheetStream)) {
       DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-
-      try (InputStream inputStream = Xslt.applyXslt(xmlStream, stylesheetStream)) {
-        Document transformed = builder.parse(inputStream);
-        assertEquals(0, transformed.getDocumentElement().getChildNodes().getLength());
-      }
+      Document transformed = builder.parse(inputStream);
+      assertEquals(0, transformed.getDocumentElement().getChildNodes().getLength());
     }
   }
 
@@ -76,18 +72,15 @@ public class GpeMigratorXsltTest {
       throws IOException, ParserConfigurationException, SAXException, TransformerException {
     try (InputStream xmlStream = stringToInputStream(WTP_METADATA_XML);
         InputStream stylesheetStream = Files.newInputStream(
-            Paths.get("../com.google.cloud.tools.eclipse.appengine.compat/xslt/wtpMetadata.xsl"))) {
-
+            Paths.get("../com.google.cloud.tools.eclipse.appengine.compat/xslt/wtpMetadata.xsl"));
+        InputStream inputStream = Xslt.applyXslt(xmlStream, stylesheetStream)) {
       DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+      Document transformed = builder.parse(inputStream);
 
-      try (InputStream inputStream = Xslt.applyXslt(xmlStream, stylesheetStream)) {
-        Document transformed = builder.parse(inputStream);
-
-        assertArrayEquals(new String[]{"App Engine Standard Runtime"},
-            getAttributesByTagNameAndAttributeName(transformed, "runtime", "name"));
-        assertArrayEquals(new String[]{"java", "jst.web"},
-            getAttributesByTagNameAndAttributeName(transformed, "installed", "facet"));
-      }
+      assertArrayEquals(new String[]{"App Engine Standard Runtime"},
+          getAttributesByTagNameAndAttributeName(transformed, "runtime", "name"));
+      assertArrayEquals(new String[]{"java", "jst.web"},
+          getAttributesByTagNameAndAttributeName(transformed, "installed", "facet"));
     }
   }
 
