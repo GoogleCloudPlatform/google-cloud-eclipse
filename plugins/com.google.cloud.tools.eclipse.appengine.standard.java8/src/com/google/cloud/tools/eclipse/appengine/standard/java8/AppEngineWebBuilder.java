@@ -34,7 +34,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
-import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject.Action;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
@@ -88,7 +87,6 @@ public class AppEngineWebBuilder extends IncrementalProjectBuilder {
         // Can upgrade jst.web to 3.1, but cannot downgrade from 3.1
         if (hasJava8Runtime) {
           updates.add(new Action(Action.Type.VERSION_CHANGE, JavaFacet.VERSION_1_8, null));
-          updates.add(new Action(Action.Type.VERSION_CHANGE, WebFacetUtils.WEB_31, null));
         } else {
           updates.add(new Action(Action.Type.VERSION_CHANGE, JavaFacet.VERSION_1_7, null));
         }
