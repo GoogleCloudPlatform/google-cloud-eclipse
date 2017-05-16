@@ -64,7 +64,7 @@ public class GpeMigratorXsltTest {
       = DocumentBuilderFactory.newInstance();
 
   @BeforeClass
-  public void setUp() {
+  public static void setUp() {
     documentBuilderFactory.setNamespaceAware(true);
   }
 
