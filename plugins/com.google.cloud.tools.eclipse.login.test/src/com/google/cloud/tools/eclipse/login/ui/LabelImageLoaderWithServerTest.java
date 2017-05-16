@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.login.ui;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -58,20 +57,11 @@ public class LabelImageLoaderWithServerTest {
 
   @Test
   public void testLoadImage_loadImageAsync() throws MalformedURLException, InterruptedException {
-    imageLoader.loadImage(server.getAddress() + "sample.gif", label, 1, 1);
+    imageLoader.loadImage(server.getAddress() + "sample.gif", label);
     assertNotNull(imageLoader.loadJob);
     waitJob();
 
     assertNotNull(label.getImage());
-  }
-
-  @Test
-  public void testLoadImage_imageResized() throws MalformedURLException, InterruptedException {
-    imageLoader.loadImage(server.getAddress() + "sample.gif", label, 123, 987);
-    waitJob();
-
-    assertEquals(123, label.getImage().getBounds().width);
-    assertEquals(987, label.getImage().getBounds().height);
   }
 
   private void waitJob() throws InterruptedException {

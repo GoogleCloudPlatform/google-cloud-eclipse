@@ -98,11 +98,11 @@ public class AccountsPanel extends PopupDialog {
       Label separator = new Label(accountArea, SWT.HORIZONTAL | SWT.SEPARATOR);
       separator.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 
-      // <Avatar length & height> = 3 * <email label height>
+      // <Avatar size> = 3 * <email label height>
       Point emailSize = email.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-      int avatarHeight = emailSize.y * 3;
+      int avatarSize = emailSize.y * 3;
 
-      GridDataFactory.swtDefaults().hint(avatarHeight, avatarHeight).applyTo(avatar);
+      GridDataFactory.swtDefaults().hint(avatarSize, avatarSize).applyTo(avatar);
       GridLayoutFactory.fillDefaults().numColumns(2).applyTo(accountRow);
       GridLayoutFactory.fillDefaults().generateLayout(secondColumn);
 
@@ -113,7 +113,7 @@ public class AccountsPanel extends PopupDialog {
 
       if (account.getAvatarUrl() != null) {
         try {
-          imageLoader.loadImage(account.getAvatarUrl(), avatar, avatarHeight, avatarHeight);
+          imageLoader.loadImage(account.getAvatarUrl() + "?sz=" + avatarSize, avatar);
         } catch (MalformedURLException ex) {
           logger.log(Level.WARNING, "malformed avatar image URL", ex);
         }

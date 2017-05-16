@@ -26,7 +26,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDisposer;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 
@@ -34,46 +33,35 @@ class LabelImageLoadJob extends Job {
 
   private final URL imageUrl;
   private final Label label;
-  private final int width;
-  private final int height;
   private final Display display;
 
   private boolean disposerAttached = false;
 
   @VisibleForTesting
-  Image scaled;
+  Image image;
 
-  LabelImageLoadJob(URL imageUrl, Label label, int width, int height) {
+  LabelImageLoadJob(URL imageUrl, Label label) {
     super("Google User Profile Picture Fetch Job");
     Preconditions.checkNotNull(imageUrl);
-    Preconditions.checkArgument(width > 0);
-    Preconditions.checkArgument(height > 0);
     this.imageUrl = imageUrl;
     this.label = label;
-    this.width = width;
-    this.height = height;
     display = label.getDisplay();
   }
 
   @Override
   protected IStatus run(IProgressMonitor monitor) {
     ImageDescriptor descriptor = ImageDescriptor.createFromURL(imageUrl);
-    Image unscaled = descriptor.createImage();
-    if (unscaled == null) {  // extreme cases; return normally.
+    image = descriptor.createImage();
+    if (image == null) {  // extreme cases; return normally.
       return Status.OK_STATUS;
     }
 
     try {
-      ImageData scaledData = unscaled.getImageData().scaledTo(width, height);
-      LabelImageLoader.storeInCache(imageUrl.toString(), scaledData);
-
-      scaled = new Image(display, scaledData);
+      LabelImageLoader.storeInCache(imageUrl.toString(), image.getImageData());
       display.syncExec(new SetImageRunnable());
-
     } finally {
-      unscaled.dispose();
-      if (scaled != null && !disposerAttached) {
-        scaled.dispose();
+      if (!disposerAttached) {
+        image.dispose();
       }
     }
     return Status.OK_STATUS;
@@ -84,9 +72,9 @@ class LabelImageLoadJob extends Job {
     @Override
     public void run() {
       if (!label.isDisposed()) {
-        label.addDisposeListener(new ImageDisposer(scaled));
+        label.addDisposeListener(new ImageDisposer(image));
         disposerAttached = true;
-        label.setImage(scaled);
+        label.setImage(image);
       }
     }
   }

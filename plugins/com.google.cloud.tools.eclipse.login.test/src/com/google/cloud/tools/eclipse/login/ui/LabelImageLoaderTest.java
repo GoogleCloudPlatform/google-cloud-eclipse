@@ -67,7 +67,7 @@ public class LabelImageLoaderTest {
   @Test
   public void testLoadImage_nullImageUrl() throws MalformedURLException {
     try {
-      imageLoader.loadImage(null, label, 1, 1);
+      imageLoader.loadImage(null, label);
       fail();
     } catch (NullPointerException ex) {}
   }
@@ -75,49 +75,9 @@ public class LabelImageLoaderTest {
   @Test
   public void testLoadImage_malformedImageUrl() {
     try {
-      imageLoader.loadImage("malformed", label, 1, 1);
+      imageLoader.loadImage("malformed", label);
       fail();
     } catch (MalformedURLException ex) {
-      assertNotNull(ex.getMessage());
-    }
-  }
-
-  @Test
-  public void testConstructor_zeroWidth() throws MalformedURLException {
-    try {
-      imageLoader.loadImage("http://example.com", label, 0 /* zero */, 10);
-      fail();
-    } catch (IllegalArgumentException ex) {
-      assertNotNull(ex.getMessage());
-    }
-  }
-
-  @Test
-  public void testConstructor_negativeWidth() throws MalformedURLException {
-    try {
-      imageLoader.loadImage("http://example.com", label, -1 /* negative */, 10);
-      fail();
-    } catch (IllegalArgumentException ex) {
-      assertNotNull(ex.getMessage());
-    }
-  }
-
-  @Test
-  public void testConstructor_zeroHeight() throws MalformedURLException {
-    try {
-      imageLoader.loadImage("http://example.com", label, 10, 0 /* zero */);
-      fail();
-    } catch (IllegalArgumentException ex) {
-      assertNotNull(ex.getMessage());
-    }
-  }
-
-  @Test
-  public void testConstructor_negativeHeight() throws MalformedURLException {
-    try {
-      imageLoader.loadImage("http://example.com", label, 10, -1 /* negative */);
-      fail();
-    } catch (IllegalArgumentException ex) {
       assertNotNull(ex.getMessage());
     }
   }
@@ -134,7 +94,7 @@ public class LabelImageLoaderTest {
   public void testLoadImage_notAsyncIfCached() throws MalformedURLException {
     LabelImageLoader.storeInCache("http://example.com", someImageData);
 
-    imageLoader.loadImage("http://example.com", label, 1, 1);
+    imageLoader.loadImage("http://example.com", label);
     assertNull(imageLoader.loadJob);
     assertNotNull(label.getImage());
   }

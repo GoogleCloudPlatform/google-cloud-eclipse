@@ -60,7 +60,7 @@ public class LabelImageLoadJobTest {
         assertTrue("FIX BUG: DisposeListener didn't run?", image.isDisposed());
       }
     }
-    assertTrue("FIX BUG: DisposeListener didn't run?", loadJob.scaled.isDisposed());
+    assertTrue("FIX BUG: DisposeListener didn't run?", loadJob.image.isDisposed());
 
     LabelImageLoader.cache.clear();
   }
@@ -69,46 +69,37 @@ public class LabelImageLoadJobTest {
   public void testRun_imageStoredInCache() throws InterruptedException {
     assertTrue(LabelImageLoader.cache.isEmpty());
 
-    loadJob = new LabelImageLoadJob(url, label, 10, 10);
+    loadJob = new LabelImageLoadJob(url, label);
     runAndWaitJob();
     assertNotNull(LabelImageLoader.cache.get(url.toString()));
   }
 
   @Test
   public void testRun_imageLoaded() throws InterruptedException {
-    loadJob = new LabelImageLoadJob(url, label, 10, 10);
+    loadJob = new LabelImageLoadJob(url, label);
     runAndWaitJob();
     assertNotNull(label.getImage());
   }
 
   @Test
-  public void testRun_imageResized() throws InterruptedException {
-    loadJob = new LabelImageLoadJob(url, label, 234, 56);
-
-    runAndWaitJob();
-    assertEquals(234, label.getImage().getBounds().width);
-    assertEquals(56, label.getImage().getBounds().height);
-  }
-
-  @Test
   public void testRun_imageDisposedByDisposeListener() throws InterruptedException {
-    loadJob = new LabelImageLoadJob(url, label, 10, 10);
+    loadJob = new LabelImageLoadJob(url, label);
     runAndWaitJob();
     Image image = label.getImage();
     label.dispose();
     assertTrue(image.isDisposed());
-    assertTrue(loadJob.scaled.isDisposed());
+    assertTrue(loadJob.image.isDisposed());
   }
 
   @Test
   public void testRun_noErrorIfLabelIsAlreadyDisposed()
       throws MalformedURLException, InterruptedException {
     URL url = new URL(server.getAddress() + "sample.gif");
-    loadJob = new LabelImageLoadJob(url, label, 234, 56);
+    loadJob = new LabelImageLoadJob(url, label);
 
     label.dispose();
     runAndWaitJob();
-    assertTrue(loadJob.scaled.isDisposed());
+    assertTrue(loadJob.image.isDisposed());
   }
 
   private void runAndWaitJob() throws InterruptedException {

@@ -42,11 +42,8 @@ public class LabelImageLoader {
    *
    * Must be called in the UI context.
    */
-  void loadImage(String imageUrl, Label label, int width, int height)
-      throws MalformedURLException {
+  void loadImage(String imageUrl, Label label) throws MalformedURLException {
     Preconditions.checkNotNull(imageUrl);
-    Preconditions.checkArgument(width > 0, "width not positive");
-    Preconditions.checkArgument(height > 0, "height not positive");
 
     ImageData imageData = cache.get(imageUrl);
     if (imageData != null) {
@@ -54,7 +51,7 @@ public class LabelImageLoader {
       label.addDisposeListener(new ImageDisposer(image));
       label.setImage(image);
     } else {
-      loadJob = new LabelImageLoadJob(new URL(imageUrl), label, width, height);
+      loadJob = new LabelImageLoadJob(new URL(imageUrl), label);
       loadJob.schedule();
     }
   }
