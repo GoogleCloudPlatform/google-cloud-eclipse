@@ -59,13 +59,20 @@ public class GpeMigratorXsltTest {
   private static final Path wtpMetadataXslPath =
       Paths.get("../com.google.cloud.tools.eclipse.appengine.compat/xslt/wtpMetadata.xsl");
 
+  private static DocumentBuilderFactory documentBuilderFactory;
+  static {
+    documentBuilderFactory = DocumentBuilderFactory.newInstance();
+    documentBuilderFactory.setNamespaceAware(true);
+  }
+
   @Test
   public void testApplyXslt()
       throws IOException, ParserConfigurationException, SAXException, TransformerException {
     try (InputStream xmlStream = stringToInputStream(WTP_METADATA_XML);
         InputStream stylesheetStream = stringToInputStream(STYLESHEET);
         InputStream inputStream = Xslt.applyXslt(xmlStream, stylesheetStream)) {
-      Document transformed = parseXml(inputStream);
+      DocumentBuilder builder = documentBuilderFactory.newDocumentBuilder();
+      Document transformed = builder.parse(inputStream);
       assertEquals(0, transformed.getDocumentElement().getChildNodes().getLength());
     }
   }
@@ -76,21 +83,14 @@ public class GpeMigratorXsltTest {
     try (InputStream xmlStream = stringToInputStream(WTP_METADATA_XML);
         InputStream stylesheetStream = Files.newInputStream(wtpMetadataXslPath);
         InputStream inputStream = Xslt.applyXslt(xmlStream, stylesheetStream)) {
-      Document transformed = parseXml(inputStream);
+      DocumentBuilder builder = documentBuilderFactory.newDocumentBuilder();
+      Document transformed = builder.parse(inputStream);
 
       assertArrayEquals(new String[]{"App Engine Standard Runtime"},
           getAttributesByTagNameAndAttributeName(transformed, "runtime", "name"));
       assertArrayEquals(new String[]{"java", "jst.web"},
           getAttributesByTagNameAndAttributeName(transformed, "installed", "facet"));
     }
-  }
-
-  private static Document parseXml(InputStream xml)
-      throws ParserConfigurationException, SAXException, IOException {
-    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-    factory.setNamespaceAware(true);
-    DocumentBuilder builder = factory.newDocumentBuilder();
-    return builder.parse(xml);
   }
 
   private static InputStream stringToInputStream(String string) {
