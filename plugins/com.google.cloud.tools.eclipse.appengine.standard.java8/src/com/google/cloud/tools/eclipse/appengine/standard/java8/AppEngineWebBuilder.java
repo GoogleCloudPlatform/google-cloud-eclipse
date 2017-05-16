@@ -19,6 +19,8 @@ package com.google.cloud.tools.eclipse.appengine.standard.java8;
 import com.google.cloud.tools.appengine.AppEngineDescriptor;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
+import com.google.cloud.tools.eclipse.util.MavenUtils;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
@@ -86,7 +88,9 @@ public class AppEngineWebBuilder extends IncrementalProjectBuilder {
         Set<Action> updates = new HashSet<>();
         if (hasJava8Runtime) {
           updates.add(new Action(Action.Type.VERSION_CHANGE, JavaFacet.VERSION_1_8, null));
-        } else {
+        } else if (!MavenUtils.hasMavenNature(project.getProject())) {
+          // see https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1941
+          // still not totally clear why this works for standard projects and not maven
           updates.add(new Action(Action.Type.VERSION_CHANGE, JavaFacet.VERSION_1_7, null));
         }
         logger.fine(getProject() + ": changing facets: " + updates);
