@@ -31,6 +31,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -59,9 +60,11 @@ public class GpeMigratorXsltTest {
   private static final Path wtpMetadataXslPath =
       Paths.get("../com.google.cloud.tools.eclipse.appengine.compat/xslt/wtpMetadata.xsl");
 
-  private static DocumentBuilderFactory documentBuilderFactory;
-  static {
-    documentBuilderFactory = DocumentBuilderFactory.newInstance();
+  private static DocumentBuilderFactory documentBuilderFactory
+      = DocumentBuilderFactory.newInstance();
+
+  @BeforeClass
+  public void setUp() {
     documentBuilderFactory.setNamespaceAware(true);
   }
 
