@@ -95,7 +95,6 @@ public class AppEngineWebBuilderTest {
     AppEngineDescriptorTransform.removeJava8Runtime(appEngineWebDescriptor);
     ProjectUtils.waitForProjects(testProject.getProject());
     assertTrue(testProject.getFacetedProject().hasProjectFacet(JavaFacet.VERSION_1_7));
-    // can't downgrade from jst.web 3.1
     assertTrue(testProject.getFacetedProject().hasProjectFacet(WebFacetUtils.WEB_25));
   }
 
