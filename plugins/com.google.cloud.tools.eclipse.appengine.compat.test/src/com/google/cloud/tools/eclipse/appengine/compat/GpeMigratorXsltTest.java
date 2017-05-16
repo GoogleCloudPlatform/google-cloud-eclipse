@@ -60,7 +60,7 @@ public class GpeMigratorXsltTest {
   private static final Path wtpMetadataXslPath =
       Paths.get("../com.google.cloud.tools.eclipse.appengine.compat/xslt/wtpMetadata.xsl");
 
-  private static DocumentBuilderFactory documentBuilderFactory
+  private static final DocumentBuilderFactory documentBuilderFactory
       = DocumentBuilderFactory.newInstance();
 
   @BeforeClass
