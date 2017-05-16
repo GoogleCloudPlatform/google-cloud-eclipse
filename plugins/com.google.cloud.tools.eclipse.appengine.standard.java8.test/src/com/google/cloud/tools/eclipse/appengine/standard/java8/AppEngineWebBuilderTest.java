@@ -90,13 +90,13 @@ public class AppEngineWebBuilderTest {
     AppEngineDescriptorTransform.addJava8Runtime(appEngineWebDescriptor);
     ProjectUtils.waitForProjects(testProject.getProject());
     assertTrue(testProject.getFacetedProject().hasProjectFacet(JavaFacet.VERSION_1_8));
-    assertTrue(testProject.getFacetedProject().hasProjectFacet(WebFacetUtils.WEB_31));
+    assertTrue(testProject.getFacetedProject().hasProjectFacet(WebFacetUtils.WEB_25));
 
     AppEngineDescriptorTransform.removeJava8Runtime(appEngineWebDescriptor);
     ProjectUtils.waitForProjects(testProject.getProject());
     assertTrue(testProject.getFacetedProject().hasProjectFacet(JavaFacet.VERSION_1_7));
     // can't downgrade from jst.web 3.1
-    assertTrue(testProject.getFacetedProject().hasProjectFacet(WebFacetUtils.WEB_31));
+    assertTrue(testProject.getFacetedProject().hasProjectFacet(WebFacetUtils.WEB_25));
   }
 
   private void assertProjectMissingBuilder() throws CoreException {
