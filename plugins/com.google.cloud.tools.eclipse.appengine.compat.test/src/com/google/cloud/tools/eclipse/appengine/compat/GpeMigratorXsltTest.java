@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -55,14 +56,16 @@ public class GpeMigratorXsltTest {
       + "  </xsl:template>"
       + "</xsl:stylesheet>";
 
+  private static final Path wtpMetadataXslPath =
+      Paths.get("../com.google.cloud.tools.eclipse.appengine.compat/xslt/wtpMetadata.xsl");
+
   @Test
   public void testApplyXslt()
       throws IOException, ParserConfigurationException, SAXException, TransformerException {
     try (InputStream xmlStream = stringToInputStream(WTP_METADATA_XML);
         InputStream stylesheetStream = stringToInputStream(STYLESHEET);
         InputStream inputStream = Xslt.applyXslt(xmlStream, stylesheetStream)) {
-      DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-      Document transformed = builder.parse(inputStream);
+      Document transformed = parseXml(inputStream);
       assertEquals(0, transformed.getDocumentElement().getChildNodes().getLength());
     }
   }
@@ -71,17 +74,23 @@ public class GpeMigratorXsltTest {
   public void testWtpMetadataStylesheet_removesGpeRuntimeAndFacets()
       throws IOException, ParserConfigurationException, SAXException, TransformerException {
     try (InputStream xmlStream = stringToInputStream(WTP_METADATA_XML);
-        InputStream stylesheetStream = Files.newInputStream(
-            Paths.get("../com.google.cloud.tools.eclipse.appengine.compat/xslt/wtpMetadata.xsl"));
+        InputStream stylesheetStream = Files.newInputStream(wtpMetadataXslPath);
         InputStream inputStream = Xslt.applyXslt(xmlStream, stylesheetStream)) {
-      DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-      Document transformed = builder.parse(inputStream);
+      Document transformed = parseXml(inputStream);
 
       assertArrayEquals(new String[]{"App Engine Standard Runtime"},
           getAttributesByTagNameAndAttributeName(transformed, "runtime", "name"));
       assertArrayEquals(new String[]{"java", "jst.web"},
           getAttributesByTagNameAndAttributeName(transformed, "installed", "facet"));
     }
+  }
+
+  private static Document parseXml(InputStream xml)
+      throws ParserConfigurationException, SAXException, IOException {
+    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+    factory.setNamespaceAware(true);
+    DocumentBuilder builder = factory.newDocumentBuilder();
+    return builder.parse(xml);
   }
 
   private static InputStream stringToInputStream(String string) {
