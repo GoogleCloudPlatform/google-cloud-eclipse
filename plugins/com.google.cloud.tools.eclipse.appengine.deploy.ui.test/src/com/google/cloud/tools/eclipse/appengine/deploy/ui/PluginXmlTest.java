@@ -20,6 +20,7 @@ import static org.hamcrest.CoreMatchers.either;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.BasePluginXmlTest;
 import org.junit.Assert;
@@ -35,11 +36,11 @@ public class PluginXmlTest extends BasePluginXmlTest {
     NodeList pages = getDocument().getElementsByTagName("page");
     Assert.assertEquals(2, pages.getLength());
     NodeList enabledWhen = getDocument().getElementsByTagName("enabledWhen");
-    Assert.assertEquals(3, enabledWhen.getLength());
+    Assert.assertEquals(4, enabledWhen.getLength());
     NodeList tests = getDocument().getElementsByTagName("test");
-    Assert.assertEquals(3, tests.getLength());
+    Assert.assertEquals(4, tests.getLength());
     NodeList adapts = getDocument().getElementsByTagName("adapt");
-    Assert.assertEquals(3, adapts.getLength());
+    Assert.assertEquals(4, adapts.getLength());
 
     for (int i = 0; i < enabledWhen.getLength(); i++) {
       Element element = (Element) enabledWhen.item(i);
@@ -47,14 +48,20 @@ public class PluginXmlTest extends BasePluginXmlTest {
       assertThat(parent.getNodeName(), either(is("page")).or(is("handler")));
     }
 
-    Element adapt = (Element) adapts.item(2);
-    Assert.assertEquals("org.eclipse.core.resources.IProject", adapt.getAttribute("type"));
+    Element standardAdapt = (Element) adapts.item(0);
+    verifyAdapt(standardAdapt, AppEngineStandardFacet.ID);
+    Element flexAdapt = (Element) adapts.item(1);
+    verifyAdapt(flexAdapt, AppEngineFlexFacet.ID);
+  }
 
-    NodeList adaptTestNodes = adapt.getElementsByTagName("test");
+  private void verifyAdapt(Element standardAdapt, String attributeValue) {
+    Assert.assertEquals("org.eclipse.core.resources.IProject", standardAdapt.getAttribute("type"));
+
+    NodeList adaptTestNodes = standardAdapt.getElementsByTagName("test");
     Assert.assertEquals(1, adaptTestNodes.getLength());
     Element adaptTestEntry1 = (Element) adaptTestNodes.item(0);
     String adaptTestProperty = "org.eclipse.wst.common.project.facet.core.projectFacet";
     Assert.assertEquals(adaptTestProperty, adaptTestEntry1.getAttribute("property"));
-    Assert.assertEquals(AppEngineStandardFacet.ID, adaptTestEntry1.getAttribute("value"));
+    Assert.assertEquals(attributeValue, adaptTestEntry1.getAttribute("value"));
   }
 }
