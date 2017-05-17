@@ -54,10 +54,10 @@ public class PluginXmlTest extends BasePluginXmlTest {
     verifyAdapt(flexAdapt, AppEngineFlexFacet.ID);
   }
 
-  private void verifyAdapt(Element standardAdapt, String attributeValue) {
-    Assert.assertEquals("org.eclipse.core.resources.IProject", standardAdapt.getAttribute("type"));
+  private void verifyAdapt(Element adapt, String attributeValue) {
+    Assert.assertEquals("org.eclipse.core.resources.IProject", adapt.getAttribute("type"));
 
-    NodeList adaptTestNodes = standardAdapt.getElementsByTagName("test");
+    NodeList adaptTestNodes = adapt.getElementsByTagName("test");
     Assert.assertEquals(1, adaptTestNodes.getLength());
     Element adaptTestEntry1 = (Element) adaptTestNodes.item(0);
     String adaptTestProperty = "org.eclipse.wst.common.project.facet.core.projectFacet";
