@@ -3,6 +3,7 @@
 </#if>import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Collection;
 import java.util.Locale;
 
 import javax.servlet.ServletOutputStream;
@@ -170,5 +171,24 @@ public class MockHttpServletResponse implements HttpServletResponse {
   @Override
   public void setStatus(int arg0, String arg1) {
   }
+  
+  // Servlet API 3.0 and 3.1 methods
+  public void setContentLengthLong(long length) {  
+  }
 
+  public int getStatus() {
+    return 0;
+  }
+  
+  public String getHeader(String name) {
+    return null;
+  }
+
+  public Collection<String> getHeaders(String name) {
+    return null;
+  }
+  
+  public Collection<String> getHeaderNames() {
+    return null;
+  }
 }

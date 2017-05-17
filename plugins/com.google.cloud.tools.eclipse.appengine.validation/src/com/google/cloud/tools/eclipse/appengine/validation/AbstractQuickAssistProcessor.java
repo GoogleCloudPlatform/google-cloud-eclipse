@@ -21,6 +21,8 @@ import org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext;
 import org.eclipse.jface.text.quickassist.IQuickAssistProcessor;
 import org.eclipse.jface.text.source.Annotation;
 
+import com.google.common.base.Preconditions;
+
 /**
  * Provides quick assists for source editor.
  */
@@ -29,16 +31,14 @@ public abstract class AbstractQuickAssistProcessor implements IQuickAssistProces
   private ICompletionProposal fix;
   
   AbstractQuickAssistProcessor(XsltSourceQuickFix fix) {
+    Preconditions.checkNotNull(fix);
     this.fix = fix;
   }
 
   @Override
   public ICompletionProposal[] computeQuickAssistProposals(
       IQuickAssistInvocationContext invocationContext) {
-    if (fix != null) {
-      return new ICompletionProposal[] {fix};
-    }
-    return null;
+    return new ICompletionProposal[] {fix};
   }
   
   @Override

@@ -16,9 +16,9 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -65,8 +65,7 @@ public class PomTest {
   public void setUp() throws SAXException, IOException, CoreException {
     IProject project = projectCreator.getProject();
     pomFile = project.getFile("pom.xml");
-    InputStream in = new FileInputStream(
-       Paths.get("testdata/testpom.xml").toAbsolutePath().toFile());
+    InputStream in = Files.newInputStream(Paths.get("testdata/testpom.xml").toAbsolutePath());
     pomFile.create(in, IFile.FORCE, null);
    
     pom = Pom.parse(pomFile);

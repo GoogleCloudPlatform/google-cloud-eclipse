@@ -39,7 +39,7 @@ public class HttpUtilWithServerTest {
     testParameters.put("dp", "/virtual/some-event-type/some-event-name");
     testParameters.put("exception_info", LONG_PARAMETER);
     testParameters.put("product", "CT4E");
-  };
+  }
 
   @Test
   public void testSendPostMultipart() throws IOException {

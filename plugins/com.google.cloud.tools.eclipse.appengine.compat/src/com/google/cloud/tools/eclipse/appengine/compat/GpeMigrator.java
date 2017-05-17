@@ -64,7 +64,7 @@ public class GpeMigrator {
    * error during operation is logged but ignored.
    */
   public static void removeObsoleteGpeRemnants(
-      final IFacetedProject facetedProject, IProgressMonitor monitor) throws CoreException {
+      final IFacetedProject facetedProject, IProgressMonitor monitor) {
     SubMonitor subMonitor = SubMonitor.convert(monitor, 40);
     IProject project = facetedProject.getProject();
 

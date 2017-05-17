@@ -16,33 +16,34 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
+import com.google.cloud.tools.eclipse.appengine.deploy.DeployJob;
+import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities.ConsoleFactory;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.MessageConsole;
 
-import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardDeployJob;
-import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities.ConsoleFactory;
-
 public class DeployConsole extends MessageConsole {
 
-  public static final String PROPERTY_JOB = DeployConsole.class.getName() + ".job";
+  static final String PROPERTY_JOB = DeployConsole.class.getName() + ".job";
 
   private static final String TYPE = "com.google.cloud.tools.eclipse.appengine.deploy.consoleType";
 
-  private StandardDeployJob job;
+  private DeployJob job;
 
-  public DeployConsole(String name) {
+  private DeployConsole(String name) {
     super(name, null);
     setType(TYPE);
   }
 
-  public StandardDeployJob getJob() {
+  DeployJob getJob() {
     return job;
   }
 
-  public void setJob(StandardDeployJob deployJob) {
-    firePropertyChange(this, PROPERTY_JOB, job, this.job = deployJob);
+  public void setJob(DeployJob newJob) {
+    DeployJob oldJob = job;
+    job = newJob;
+    firePropertyChange(this, PROPERTY_JOB, oldJob, newJob);
     job.addJobChangeListener(new JobChangeAdapter() {
       @Override
       public void done(IJobChangeEvent event) {

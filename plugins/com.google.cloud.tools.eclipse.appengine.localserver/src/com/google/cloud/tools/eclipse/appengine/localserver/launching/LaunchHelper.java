@@ -88,7 +88,7 @@ public class LaunchHelper {
    * Look for servers that may match.
    * 
    * @param modules the web modules to search for
-   * @param narrow if true, look for exact module match
+   * @param exact if true, look for exact module match
    * @return an existing server
    */
   @VisibleForTesting
@@ -107,7 +107,9 @@ public class LaunchHelper {
     // Could prioritize servers that have *exactly* these modules,
     // or that have the smallest overlap
     for (IServer server : ServerCore.getServers()) {
-      if (!LocalAppEngineServerDelegate.SERVER_TYPE_ID.equals(server.getServerType().getId())) {
+      // obsolete or unavailable server definitions have serverType == null
+      if (server.getServerType() == null
+          || !LocalAppEngineServerDelegate.SERVER_TYPE_ID.equals(server.getServerType().getId())) {
         continue;
       }
       Set<IModule> serverModules = ImmutableSet.copyOf(server.getModules());

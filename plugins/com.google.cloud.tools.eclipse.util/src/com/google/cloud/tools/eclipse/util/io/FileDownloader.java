@@ -21,7 +21,6 @@ import com.google.common.base.Preconditions;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -86,8 +85,8 @@ public class FileDownloader {
     connection.setReadTimeout(DEFAULT_READ_TIMEOUT_MS);
     connection.setRequestProperty("User-Agent", CloudToolsInfo.USER_AGENT);
     try (InputStream inputStream = new BufferedInputStream(connection.getInputStream());
-         OutputStream outputStream =
-             new BufferedOutputStream(new FileOutputStream(downloadedFile))) {
+         OutputStream outputStream = 
+             new BufferedOutputStream(Files.newOutputStream(downloadedFile.toPath()))) {
       byte[] buffer = new byte[4096];
       int read = 0;
       while ((read = inputStream.read(buffer)) != -1) {

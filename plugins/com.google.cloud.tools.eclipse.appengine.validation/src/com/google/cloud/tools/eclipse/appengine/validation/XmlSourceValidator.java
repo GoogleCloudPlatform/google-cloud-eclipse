@@ -68,6 +68,7 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
   /**
    * Validates a given {@link IDocument} if the project has the App Engine Standard facet.
    */
+  @Override
   public void validate(IValidationContext helper, IReporter reporter) throws ValidationException {
     IProject project = getProject(helper);
     try {
@@ -87,7 +88,7 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
    * Adds an {@link IMessage} to the XML file for every 
    * {@link BannedElement} found in the file.
    */
-  void validate(IReporter reporter, IFile source, byte[] bytes) throws CoreException, IOException {
+  void validate(IReporter reporter, IFile source, byte[] bytes) throws IOException {
     try {
       Document document = PositionalXmlScanner.parse(bytes);
       if (document != null) {
@@ -136,8 +137,7 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
   /**
    * Creates a message from a given {@link BannedElement}.
    */
-  void createMessage(IReporter reporter, BannedElement element, int elementOffset)
-      throws CoreException {
+  void createMessage(IReporter reporter, BannedElement element, int elementOffset) {
     IMessage message = new LocalizedMessage(element.getIMessageSeverity(), element.getMessage());
     message.setTargetObject(this);
     message.setMarkerId(element.getMarkerId());

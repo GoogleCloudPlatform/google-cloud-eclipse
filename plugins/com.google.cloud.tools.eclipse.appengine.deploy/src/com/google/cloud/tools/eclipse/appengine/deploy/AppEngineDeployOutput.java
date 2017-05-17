@@ -30,12 +30,12 @@ public class AppEngineDeployOutput {
   private static class Version {
     String id;
     String service;
+    String project;
   }
 
   private List<Version> versions;
 
   private AppEngineDeployOutput() {
-
   }
 
   /**
@@ -43,6 +43,13 @@ public class AppEngineDeployOutput {
    */
   public String getVersion() {
     return versions.get(0).id;
+  }
+
+  /**
+   * @return GCP project ID, can be null
+   */
+  public String getProject() {
+    return versions.get(0).project;
   }
 
   /**

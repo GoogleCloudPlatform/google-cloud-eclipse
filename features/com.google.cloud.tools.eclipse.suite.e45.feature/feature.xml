@@ -2,7 +2,7 @@
 <feature
       id="com.google.cloud.tools.eclipse.suite.e45.feature"
       label="Google Cloud Platform for Eclipse 4.5 and later"
-      version="1.0.2.qualifier"
+      version="1.1.0.qualifier"
       provider-name="Google, Inc."
       plugin="com.google.cloud.tools.eclipse.appengine.ui"
       license-feature="com.google.licenses.apache_v2">
@@ -116,6 +116,13 @@
 
    <plugin
          id="com.google.cloud.tools.eclipse.appengine.newproject.maven"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.google.cloud.tools.eclipse.appengine.standard.java8"
          download-size="0"
          install-size="0"
          version="0.0.0"

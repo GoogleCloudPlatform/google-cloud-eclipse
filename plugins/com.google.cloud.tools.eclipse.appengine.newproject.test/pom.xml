@@ -85,6 +85,13 @@
                 <id>org.eclipse.jdt</id>
                 <versionRange>0.0.0</versionRange>
               </requirement>
+              <!-- TODO: remove this once the flex facet is fully available.
+                   https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1826 -->
+              <requirement>
+                <type>eclipse-plugin</type>
+                <id>com.google.cloud.tools.eclipse.appengine.flex</id>
+                <versionRange>0.0.0</versionRange>
+              </requirement>
             </extraRequirements>
           </dependency-resolution>
         </configuration>

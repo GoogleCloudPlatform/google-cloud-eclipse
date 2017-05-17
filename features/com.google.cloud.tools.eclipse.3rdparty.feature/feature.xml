@@ -44,6 +44,13 @@
          download-size="0"
          install-size="0"
          version="1.9.13"
+         unpack="false"/>    
+         
+   <plugin
+         id="com.fasterxml.jackson.core.jackson-core"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
@@ -59,12 +66,19 @@
          install-size="0"
          version="6.1.26"
          unpack="false"/>
-         
+
    <plugin
          id="org.freemarker.freemarker"
          download-size="0"
          install-size="0"
          version="2.3.25.stable-incubating"
-         unpack="false"/>       
+         unpack="false"/>
+
+   <plugin
+         id="org.yaml.snakeyaml"
+         download-size="0"
+         install-size="0"
+         version="1.17.0"
+         unpack="false"/>
 
 </feature>

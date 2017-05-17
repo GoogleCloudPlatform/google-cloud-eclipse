@@ -23,12 +23,18 @@ import org.junit.Test;
 public class MessagesTest {
 
   @Test
-  public void testUrlOpenErrorDialgTitle() {
+  public void testUrlOpenErrorDialogTitle() {
     assertEquals("Error", Messages.getString("openurllistener.error.title"));
   }
 
   @Test
-  public void testUrlOpenErrorDialgMessage() {
+  public void testUrlOpenErrorDialogMessage() {
     assertEquals("Could not open URL", Messages.getString("openurllistener.error.message"));
+  }
+  
+  @Test
+  public void testInvalidUrlErrorMessage() {
+    assertEquals("Invalid URL: http://www.example.com", 
+        Messages.getString("invalid.url", "http://www.example.com"));
   }
 }

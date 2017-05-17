@@ -180,13 +180,12 @@ public class LoginServiceUi implements UiFacade {
 
   /**
    * Schedule and run a job that calls {@link LocalServerReceiver#waitForCode}. The reason for
-   * creating another job inside the job of {@link showProgressDialogAndWaitForCode} is that we
+   * creating another job inside the job of {@link #showProgressDialogAndWaitForCode} is that we
    * cannot have a 100%-guarantee that {@link LocalServerReceiver#waitForCode} will eventually
-   * return. (If {@link stopCodeWaitingJob} fails to stop {@link LocalServerReceiver#waitForCode}
+   * return. (If {@link #stopCodeWaitingJob} fails to stop {@link LocalServerReceiver#waitForCode}
    * gracefully, users will be stuck and the IDE has to be killed forcibly.)
    *
-   * However, under normal circumstances, {@link stopCodeWaitingJob} will succeed to terminate
-   * this sub-job.
+   * However, under normal circumstances, {@link #stopCodeWaitingJob} will terminate this sub-job.
    *
    * @return scheduled job
    */
@@ -220,7 +219,7 @@ public class LoginServiceUi implements UiFacade {
   }
 
   /**
-   * Stops the background task of {@link showProgressDialogAndWaitForCode} by sending a login
+   * Stops the background task of {@link #showProgressDialogAndWaitForCode} by sending a login
    * error (as an HTTP request) to the local server. {@link LocalServerReceiver#waitForCode} will
    * subsequently throw an {@link IOException}.
    */
@@ -278,5 +277,5 @@ public class LoginServiceUi implements UiFacade {
     public void stop() throws IOException {
       receiver.stop();
     }
-  };
+  }
 }

@@ -8,10 +8,9 @@ Bundle-Vendor: Google Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: com.google.cloud.tools.eclipse.preferences,
  com.google.cloud.tools.eclipse.preferences.areas
-Bundle-Activator: com.google.cloud.tools.eclipse.preferences.Activator
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
-Require-Bundle: org.eclipse.ui,
- org.eclipse.core.runtime
-Import-Package: com.google.cloud.tools.eclipse.ui.util,
- org.eclipse.core.resources
+Require-Bundle: org.eclipse.ui
+Import-Package: org.eclipse.core.runtime;version="3.5.0",
+ org.eclipse.core.runtime.preferences,
+ org.osgi.service.prefs

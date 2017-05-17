@@ -111,7 +111,7 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
 
     ProjectImportConfiguration importConfiguration = new ProjectImportConfiguration();
     String packageName = this.packageName == null || this.packageName.isEmpty()
-        ? groupId : this.packageName;
+        ? null : this.packageName;
 
     // Workaround deadlock bug described in Eclipse bug (https://bugs.eclipse.org/511793).
     try {

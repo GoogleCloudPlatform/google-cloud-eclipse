@@ -16,22 +16,22 @@
 
 package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
+import com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerBehaviour;
 import org.junit.Assert;
 import org.junit.Test;
-
-import com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerBehaviour;
 
 public class LocalAppEngineConsoleTest {
   @Test
   public void testGetServerBehaviourDelegate_noDelegate() {
-    LocalAppEngineConsole console = new LocalAppEngineConsole("test", null);
+    LocalAppEngineConsole console = new LocalAppEngineConsole.Factory(null).createConsole("test");
     Assert.assertNull(console.getServerBehaviourDelegate());
   }
-  
+
   @Test
   public void testGetServerBehaviourDelegate_withDelegate() {
     LocalAppEngineServerBehaviour delegate = new LocalAppEngineServerBehaviour();
-    LocalAppEngineConsole console = new LocalAppEngineConsole("test", delegate);
+    LocalAppEngineConsole console =
+        new LocalAppEngineConsole.Factory(delegate).createConsole("test");
     Assert.assertEquals(delegate, console.getServerBehaviourDelegate());
   }
 }

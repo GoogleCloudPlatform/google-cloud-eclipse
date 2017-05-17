@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Google Inc.
+ * Copyright 2017 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,89 +16,72 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.flex;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.text.IsEmptyString.isEmptyString;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.verify;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.osgi.service.prefs.BackingStoreException;
 
-@RunWith(MockitoJUnitRunner.class)
 public class FlexDeployPreferencesTest {
-  @Mock private IEclipsePreferences mockEclipsePreferences;
 
-  @Test
-  public void testDefaultAppEngineDirectory() {
-    assertThat(FlexDeployPreferences.DEFAULT.getAppEngineDirectory(),
-        is(FlexDeployPreferenceInitializer.DEFAULT_APP_ENGINE_DIRECTORY));
+  private FlexDeployPreferences preferences;
+  private IEclipsePreferences preferenceStore;
+
+  @Before
+  public void setUp() {
+    IProject project = mock(IProject.class);
+    when(project.getName()).thenReturn("");
+    preferences = new FlexDeployPreferences(project);
+    preferenceStore =
+        new ProjectScope(project).getNode("com.google.cloud.tools.eclipse.appengine.deploy");
+  }
+
+  @After
+  public void tearDown() throws BackingStoreException {
+    preferenceStore.removeNode();
   }
 
   @Test
-  public void testDefaultDockerDirectory() {
-    assertThat(FlexDeployPreferences.DEFAULT.getDockerDirectory(), isEmptyString());
+  public void testDefaultAppYamlPath() {
+    assertEquals("src/main/appengine/app.yaml", FlexDeployPreferences.DEFAULT_APP_YAML_PATH);
+    assertEquals(preferences.getAppYamlPath(), "src/main/appengine/app.yaml");
   }
 
   @Test
-  public void testDefaultUseDeploymentPreferences() {
-    assertFalse(FlexDeployPreferences.DEFAULT.getUseDeploymentPreferences());
+  public void testSetAppYamlPath() {
+    assertEquals(preferences.getAppYamlPath(), "src/main/appengine/app.yaml");
+    preferences.setAppYamlPath("another/directory/app.yaml");
+    assertEquals("another/directory/app.yaml", preferences.getAppYamlPath());
+    preferences.setAppYamlPath(null);
+    assertEquals("", preferences.getProjectId());
   }
 
   @Test
-  public void testGetAppEngineDirectory() {
-    when(mockEclipsePreferences.get(
-        eq(FlexDeployPreferences.PREF_APP_ENGINE_DIRECTORY), anyString()))
-            .thenReturn("configFolder");
-    FlexDeployPreferences flexDeployPreferences = new FlexDeployPreferences(mockEclipsePreferences);
-    assertThat(flexDeployPreferences.getAppEngineDirectory(), is("configFolder"));
+  public void testResetToDefault() {
+    preferences.setAppYamlPath("another/directory/app.yaml");
+    preferences.resetToDefaults();
+    assertEquals("src/main/appengine/app.yaml", preferences.getAppYamlPath());
   }
 
   @Test
-  public void testSetAppEngineDirectory() {
-    FlexDeployPreferences flexDeployPreferences = new FlexDeployPreferences(mockEclipsePreferences);
-    flexDeployPreferences.setAppEngineDirectory("configFolder");
-    verify(mockEclipsePreferences)
-        .put(FlexDeployPreferences.PREF_APP_ENGINE_DIRECTORY, "configFolder");
+  public void testDoesNotPersistWithoutSave() {
+    assertEquals("", preferenceStore.get(FlexDeployPreferences.PREF_APP_YAML_PATH, ""));
+    preferences.setAppYamlPath("another/directory/app.yaml");
+    assertEquals("", preferenceStore.get(FlexDeployPreferences.PREF_APP_YAML_PATH, ""));
   }
 
   @Test
-  public void testGetDockerDirectory() {
-    when(mockEclipsePreferences.get(eq(FlexDeployPreferences.PREF_DOCKER_DIRECTORY), anyString()))
-        .thenReturn("DockerDirectory");
-    FlexDeployPreferences flexDeployPreferences = new FlexDeployPreferences(mockEclipsePreferences);
-    assertThat(flexDeployPreferences.getDockerDirectory(), is("DockerDirectory"));
-  }
-
-  @Test
-  public void testSetDockerDirectory() {
-    FlexDeployPreferences flexDeployPreferences = new FlexDeployPreferences(mockEclipsePreferences);
-    flexDeployPreferences.setDockerDirectory("DockerDirectory");
-    verify(mockEclipsePreferences)
-        .put(FlexDeployPreferences.PREF_DOCKER_DIRECTORY, "DockerDirectory");
-  }
-
-  @Test
-  public void testGetUseDeploymentPreferences() {
-    when(mockEclipsePreferences.getBoolean(
-        eq(FlexDeployPreferences.PREF_USE_DEPLOYMENT_PREFERENCES), anyBoolean()))
-            .thenReturn(false);
-    FlexDeployPreferences flexDeployPreferences = new FlexDeployPreferences(mockEclipsePreferences);
-    assertFalse(flexDeployPreferences.getUseDeploymentPreferences());
-  }
-
-  @Test
-  public void testSetUseDeploymentPreferences() {
-    FlexDeployPreferences flexDeployPreferences = new FlexDeployPreferences(mockEclipsePreferences);
-    flexDeployPreferences.setUseDeploymentPreferences(true);
-    verify(mockEclipsePreferences)
-        .putBoolean(FlexDeployPreferences.PREF_USE_DEPLOYMENT_PREFERENCES, true);
+  public void testSave() throws BackingStoreException {
+    assertEquals("", preferenceStore.get(FlexDeployPreferences.PREF_APP_YAML_PATH, ""));
+    preferences.setAppYamlPath("another/directory/app.yaml");
+    preferences.save();
+    assertEquals("another/directory/app.yaml",
+        preferenceStore.get(FlexDeployPreferences.PREF_APP_YAML_PATH, ""));
   }
 }

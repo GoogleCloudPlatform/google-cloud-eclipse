@@ -26,7 +26,7 @@ import java.nio.file.Path;
 
 /**
  * Utility class to generate a mock Google Cloud SDK installation that passes
- * {@link com.google.cloud.tools.appengine.cloudsdk.CloudSdk#validate()}.
+ * {@link com.google.cloud.tools.appengine.cloudsdk.CloudSdk#validateCloudSdk()}.
  */
 public class MockSdkGenerator {
   /**

@@ -169,7 +169,16 @@
     <super type="org.eclipse.core.resources.textmarker" />
     <persistent value="true" />
   </extension>
- 
+
+  <extension
+      id="jspFileMarker"
+      name="%unresolved.jsp.file"
+      point="org.eclipse.core.resources.markers">
+    <super type="org.eclipse.jdt.core.problem" />
+    <super type="org.eclipse.core.resources.problemmarker" />
+    <super type="org.eclipse.core.resources.textmarker" />
+    <persistent value="true" />
+  </extension> 
  
   <extension
       point="org.eclipse.ui.ide.markerResolution">
@@ -223,6 +232,14 @@
         base-type="org.eclipse.core.runtime.xml"      
     	file-names="appengine-web.xml">
     </content-type>
-  </extension> 
+  </extension>
+  
+  <extension point="org.eclipse.wst.xml.core.catalogContributions">
+  	<catalogContribution>
+  	  <uri
+  	      name="http://appengine.google.com/ns/1.0"
+  	      uri="xsd/appengine-web.xsd"/>
+  	</catalogContribution>
+  </extension>
 
 </plugin>

@@ -64,7 +64,7 @@ public class AppEngineApplicationQueryJobTest {
   private Job queryJob;
 
   @Before
-  public void setUp() throws ProjectRepositoryException {
+  public void setUp() {
     assertNotNull(Display.getCurrent());
     when(projectSelector.getDisplay()).thenReturn(Display.getCurrent());
 

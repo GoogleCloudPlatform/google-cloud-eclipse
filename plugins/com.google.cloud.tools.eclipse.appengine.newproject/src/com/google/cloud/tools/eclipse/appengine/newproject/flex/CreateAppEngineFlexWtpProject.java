@@ -26,14 +26,12 @@ import com.google.cloud.tools.eclipse.appengine.newproject.CodeTemplates;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.maven.artifact.Artifact;
@@ -62,12 +60,13 @@ import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
   private static final Logger logger =
       Logger.getLogger(CreateAppEngineFlexWtpProject.class.getName());
-  private static final Map<String, String> PROJECT_DEPENDENCIES;
+
+  private static final List<MavenCoordinates> PROJECT_DEPENDENCIES;
 
   static {
-    Map<String, String> projectDependencies = new HashMap<>();
-    projectDependencies.put("javax.servlet", "servlet-api");
-    PROJECT_DEPENDENCIES = Collections.unmodifiableMap(projectDependencies);
+    MavenCoordinates servletApi = new MavenCoordinates("javax.servlet", "javax.servlet-api"); //$NON-NLS-1$ //$NON-NLS-2$
+    servletApi.setVersion("3.1.0"); //$NON-NLS-1$
+    PROJECT_DEPENDENCIES = Collections.singletonList(servletApi);
   }
 
   private ILibraryRepositoryService repositoryService;
@@ -109,7 +108,7 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
         project, true /* convertIfNecessary */, subMonitor.newChild(50));
     FacetUtil facetUtil = new FacetUtil(facetedProject);
     facetUtil.addJavaFacetToBatch(JavaFacet.VERSION_1_8);
-    facetUtil.addWebFacetToBatch(WebFacetUtils.WEB_30);
+    facetUtil.addWebFacetToBatch(WebFacetUtils.WEB_31);
 
     IProjectFacet appEngineFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexFacet.ID);
     IProjectFacetVersion appEngineFacetVersion =
@@ -123,28 +122,27 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
 
     // Create a lib folder
-    IFolder libFolder = project.getFolder("lib");
+    IFolder libFolder = project.getFolder("lib"); //$NON-NLS-1$
     if (!libFolder.exists()) {
       libFolder.create(true, true, subMonitor.newChild(10));
     }
 
     // Download the dependencies from maven
     int ticks = 50 / PROJECT_DEPENDENCIES.size();
-    for (Map.Entry<String, String> dependency : PROJECT_DEPENDENCIES.entrySet()) {
-      LibraryFile libraryFile = new LibraryFile(new MavenCoordinates(dependency.getKey(),
-          dependency.getValue()));
+    for (MavenCoordinates dependency : PROJECT_DEPENDENCIES) {
+      LibraryFile libraryFile = new LibraryFile(dependency);
       File artifactFile = null;
       try {
         Artifact artifact = repositoryService.resolveArtifact(
             libraryFile, subMonitor.newChild(ticks));
         artifactFile = artifact.getFile();
         IFile destFile = libFolder.getFile(artifactFile.getName());
-        destFile.create(new FileInputStream(artifactFile), true, subMonitor.newChild(30));
+        destFile.create(Files.newInputStream(artifactFile.toPath()), true, subMonitor.newChild(30));
       } catch (CoreException ex) {
-        logger.log(Level.WARNING, "Error downloading " +
-            libraryFile.getMavenCoordinates().toString() + " from maven", ex);
-      } catch (FileNotFoundException ex) {
-        logger.log(Level.WARNING, "Error copying over " + artifactFile.toString() + " to " +
+        logger.log(Level.WARNING, "Error downloading " + //$NON-NLS-1$
+            libraryFile.getMavenCoordinates().toString() + " from maven", ex); //$NON-NLS-1$
+      } catch (IOException ex) {
+        logger.log(Level.WARNING, "Error copying over " + artifactFile.toString() + " to " + //$NON-NLS-1$ //$NON-NLS-2$
             libFolder.getFullPath().toPortableString(), ex);
       }
     }

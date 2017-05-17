@@ -92,7 +92,7 @@ public class SourceAttacherJob extends Job {
       logger.log(Level.FINE, Messages.getString("ContainerClassUnexpected",
           container.getClass().getName(), LibraryClasspathContainer.class.getName()));
       return null;
-    };
+    }
 
     LibraryClasspathContainer libraryClasspathContainer = (LibraryClasspathContainer) container;
     IPath sourceArtifactPath = sourceArtifactPathProvider.call();

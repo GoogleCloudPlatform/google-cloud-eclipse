@@ -19,7 +19,6 @@ package com.google.cloud.tools.eclipse.dataflow.core.project;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.model.Bucket;
 import com.google.api.services.storage.model.Buckets;
-import com.google.cloud.tools.eclipse.dataflow.core.DataflowCorePlugin;
 import com.google.cloud.tools.eclipse.dataflow.core.util.CouldNotCreateCredentialsException;
 import com.google.cloud.tools.eclipse.dataflow.core.util.Transport;
 import com.google.common.annotations.VisibleForTesting;
@@ -72,40 +71,36 @@ public class GcsDataflowProjectClient {
   public StagingLocationVerificationResult createStagingLocation(
       String projectName, String stagingLocation, IProgressMonitor progressMonitor) {
     SubMonitor monitor = SubMonitor.convert(progressMonitor, 2);
-    monitor.newChild(1);
     String bucketName = toGcsBucketName(stagingLocation);
-    try {
-      if (verifyLocationIsAccessible(stagingLocation)) {
-        return new StagingLocationVerificationResult(
-            String.format("Bucket %s exists", bucketName), true);
-      }
-    } catch (IOException e) {
-      DataflowCorePlugin.logInfo(
-          "IOException when attempting to access Bucket %s", stagingLocation);
-      // Continue.
+    if (locationIsAccessible(stagingLocation)) { // bucket already exists
+      return new StagingLocationVerificationResult(
+          String.format("Bucket %s exists", bucketName), true);
     }
+    monitor.worked(1);
+    
+    // else create the bucket
     try {
-      monitor.newChild(1);
       Bucket newBucket = new Bucket();
       newBucket.setName(bucketName);
       gcsClient.buckets().insert(projectName, newBucket).execute();
     } catch (IOException e) {
       return new StagingLocationVerificationResult(e.getMessage(), false);
     } finally {
+      monitor.worked(1);
       monitor.done();
     }
     return new StagingLocationVerificationResult(
         String.format("Bucket %s created", bucketName), true);
   }
 
-  private String toGcsBucketName(String stagingLocation) {
-    final String gcsLocation;
+  private static String toGcsBucketName(String stagingLocation) {
+    String gcsLocation;
     if (stagingLocation.startsWith(GCS_PREFIX)) {
       gcsLocation = stagingLocation.substring(GCS_PREFIX.length());
     } else {
       gcsLocation = stagingLocation;
     }
-    final String bucketName;
+    String bucketName;
     if (gcsLocation.indexOf('/') < 0) {
       bucketName = gcsLocation;
     } else {
@@ -114,7 +109,7 @@ public class GcsDataflowProjectClient {
     return bucketName;
   }
 
-  public String toGcsLocationUri(String location) {
+  public static String toGcsLocationUri(String location) {
     if (Strings.isNullOrEmpty(location) || location.startsWith(GCS_PREFIX)) {
       return location;
     }
@@ -124,12 +119,15 @@ public class GcsDataflowProjectClient {
   /**
    * Gets whether the current staging location exists and is accessible. If this method returns
    * true, the provided staging location can be used.
-   * @throws IOException
    */
-  public boolean verifyLocationIsAccessible(String stagingLocation) throws IOException {
+  boolean locationIsAccessible(String stagingLocation) {
     String bucketName = toGcsBucketName(stagingLocation);
-    gcsClient.buckets().get(bucketName).execute();
-    return true;
+    try {
+      gcsClient.buckets().get(bucketName).execute();
+      return true;
+    } catch (IOException ex) {
+      return false;
+    }
   }
 
   /**

@@ -68,17 +68,14 @@
   </extension>
 
   <extension point="org.eclipse.ui.newWizards">
-    <category
-        name="Google Cloud Platform"
-        id="com.google.cloud">
-    </category>
     <wizard
-          category="com.google.cloud"
+          category="com.google.cloud.tools.eclipse.wizards"
           class="com.google.cloud.tools.eclipse.dataflow.ui.wizard.NewDataflowProjectWizard"
           icon="icons/Dataflow_128.png"
           id="com.google.cloud.tools.eclipse.dataflow.ui.wizard.NewDataflowProjectWizard"
-          name="Cloud Dataflow Java Project"
+          name="%dataflowWizardName"
           project="true">
+      <description>%dataflowWizardDescription</description>
     </wizard>
   </extension>
 
@@ -253,25 +250,17 @@
    </extension>
 
    <extension point="org.eclipse.ui.preferencePages">
-     <page id="com.google"
-         name="Google"
-         class="com.google.cloud.tools.eclipse.dataflow.ui.preferences.GoogleLandingPage">
-     </page>
      <page id="com.google.cloud.tools.eclipse.dataflow.ui.defaultRunOptions"
          name="Cloud Dataflow"
-         category="com.google"
+         category="com.google.cloud.tools.eclipse.preferences.main"
          class="com.google.cloud.tools.eclipse.dataflow.ui.preferences.DefaultRunOptionsPage">
      </page>
    </extension>
 
    <extension point="org.eclipse.ui.propertyPages">
-     <page id="com.google"
-         name="Google"
-         class="com.google.cloud.tools.eclipse.dataflow.ui.preferences.GoogleLandingPage">
-     </page>
      <page id="com.google.cloud.tools.eclipse.dataflow.ui.defaultRunOptionsProperties"
          name="Cloud Dataflow"
-         category="com.google"
+         category="com.google.cloud.tools.eclipse"
          class="com.google.cloud.tools.eclipse.dataflow.ui.preferences.DefaultRunOptionsPage">
        <enabledWhen>
          <adapt type="org.eclipse.core.resources.IProject">

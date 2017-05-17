@@ -8,6 +8,7 @@ Bundle-Vendor: %providerName
 Bundle-ClassPath: .
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
+Bundle-Localization: plugin
 Export-Package: com.google.cloud.tools.eclipse.dataflow.ui.page,
  com.google.cloud.tools.eclipse.dataflow.ui.wizard
 Import-Package: com.google.cloud.tools.eclipse.dataflow.core.launcher,
@@ -15,7 +16,9 @@ Import-Package: com.google.cloud.tools.eclipse.dataflow.core.launcher,
  com.google.cloud.tools.eclipse.dataflow.core.natures,
  com.google.cloud.tools.eclipse.dataflow.core.preferences,
  com.google.cloud.tools.eclipse.dataflow.core.project,
+ com.google.cloud.tools.eclipse.dataflow.core.proxy,
  com.google.cloud.tools.eclipse.dataflow.core.util,
+ com.google.common.annotations;version="15.0.0",
  org.eclipse.core.commands,
  org.eclipse.core.commands.common,
  org.eclipse.core.resources,

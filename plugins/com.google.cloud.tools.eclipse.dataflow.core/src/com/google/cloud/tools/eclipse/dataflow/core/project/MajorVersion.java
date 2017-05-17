@@ -63,6 +63,7 @@ public enum MajorVersion {
       return false;
     }
 
+    @Override
     public MajorVersion getStableVersion() {
       return TWO;
     }

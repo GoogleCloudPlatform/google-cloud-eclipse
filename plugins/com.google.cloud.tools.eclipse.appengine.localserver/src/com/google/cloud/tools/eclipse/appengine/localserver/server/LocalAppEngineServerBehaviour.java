@@ -21,7 +21,7 @@ import com.google.cloud.tools.appengine.api.devserver.AppEngineDevServer;
 import com.google.cloud.tools.appengine.api.devserver.DefaultRunConfiguration;
 import com.google.cloud.tools.appengine.api.devserver.DefaultStopConfiguration;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineDevServer;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineDevServer1;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessExitListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessStartListener;
@@ -33,6 +33,7 @@ import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.net.InetAddress;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -129,7 +130,11 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     if (devServer != null && (!force || serverState != IServer.STATE_STOPPING)) {
       setServerState(IServer.STATE_STOPPING);
       DefaultStopConfiguration stopConfig = new DefaultStopConfiguration();
-      stopConfig.setAdminPort(adminPort);
+      if (isDevAppServer1()) {
+        stopConfig.setAdminPort(serverPort);        
+      } else {
+        stopConfig.setAdminPort(adminPort);
+      }
       try {
         devServer.stop(stopConfig);
       } catch (AppEngineException ex) {
@@ -279,10 +284,9 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
    * Starts the development server.
    *
    * @param console the stream (Eclipse console) to send development server process output to
-   * @param arguments JVM arguments to pass to the dev server
    */
   void startDevServer(DefaultRunConfiguration devServerRunConfiguration,
-      MessageConsoleStream console)
+      Path javaHomePath, MessageConsoleStream console)
       throws CoreException {
     
     PortChecker portInUse = new PortChecker() {
@@ -316,7 +320,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     setServerState(IServer.STATE_STARTING);
 
     // Create dev app server instance
-    initializeDevServer(console);
+    initializeDevServer(console, javaHomePath);
 
     // Run server
     try {
@@ -331,12 +335,13 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     return value != null ? value : defaultValue;
   }
 
-  private void initializeDevServer(MessageConsoleStream console) {
+  private void initializeDevServer(MessageConsoleStream console, Path javaHomePath) {
     MessageConsoleWriterOutputLineListener outputListener =
         new MessageConsoleWriterOutputLineListener(console);
 
     // dev_appserver output goes to stderr
     cloudSdk = new CloudSdk.Builder()
+        .javaHome(javaHomePath)
         .addStdOutLineListener(outputListener)
         .addStdErrLineListener(outputListener)
         .addStdErrLineListener(serverOutputListener)
@@ -345,14 +350,21 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
         .async(true)
         .build();
 
-    devServer = new CloudSdkAppEngineDevServer(cloudSdk);
+    devServer = new CloudSdkAppEngineDevServer1(cloudSdk);
     moduleToUrlMap.clear();
+  }
+  
+  /**
+   * @return true if and only if we're using devappserver1
+   */
+  private boolean isDevAppServer1() {
+    return devServer instanceof CloudSdkAppEngineDevServer1;
   }
 
   /**
    * A {@link ProcessExitListener} for the App Engine server.
    */
-  public class LocalAppEngineExitListener implements ProcessExitListener {
+  private class LocalAppEngineExitListener implements ProcessExitListener {
     @Override
     public void onExit(int exitCode) {
       logger.log(Level.FINE, "Process exit: code=" + exitCode); //$NON-NLS-1$
@@ -365,7 +377,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
   /**
    * A {@link ProcessStartListener} for the App Engine server.
    */
-  public class LocalAppEngineStartListener implements ProcessStartListener {
+  private class LocalAppEngineStartListener implements ProcessStartListener {
     @Override
     public void onStart(Process process) {
       logger.log(Level.FINE, "New Process: " + process); //$NON-NLS-1$
@@ -374,19 +386,27 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
   }
 
   /**
-   * An output listener that monitors for well-known key dev_appserver output and affects server
+   * An output listener that monitors for well-known key dev_appserver output and effects server
    * state changes.
    */
   public class DevAppServerOutputListener implements ProcessOutputLineListener {
-    // DevAppServer outputs the following for module-started and admin line (on one line):
+    // DevAppServer2 outputs the following for module-started and admin line (on one line):
     // <<HEADER>> Starting module "default" running at: http://localhost:8080
     // <<HEADER>> Starting admin server at: http://localhost:8000
     // where <<HEADER>> = INFO 2017-01-31 21:00:40,700 dispatcher.py:197]
-    private Pattern moduleStartedPattern = Pattern.compile(
+    
+    // devappserver2 patterns
+    private final Pattern moduleStartedPattern = Pattern.compile(
         "INFO .*Starting module \"(?<service>[^\"]+)\" running at: (?<url>http://.+:(?<port>[0-9]+))$");
-    private Pattern adminStartedPattern =
+    private final Pattern adminStartedPattern =
         Pattern.compile("INFO .*Starting admin server at: (?<url>http://.+:(?<port>[0-9]+))$");
 
+    // devappserver1 patterns
+    private final Pattern moduleRunningPattern = Pattern.compile(
+        "INFO: Module instance (?<service>[\\w\\d\\-]+) is running at (?<url>http://.+:(?<port>[0-9]+)/)$");
+    private final Pattern adminRunningPattern =
+        Pattern.compile("INFO: The admin console is running at (?<url>http://.+:(?<port>[0-9]+))/_ah/admin$");
+      
     private int serverPortCandidate = 0;
 
     @Override
@@ -404,20 +424,24 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
       } else if (line.contains("Error: A fatal exception has occurred. Program will exit")) { //$NON-NLS-1$
         // terminate the Python process
         stop(false);
-      } else if ((matcher = moduleStartedPattern.matcher(line)).matches()) {
+      } else if ((matcher = moduleStartedPattern.matcher(line)).matches()
+          || (matcher = moduleRunningPattern.matcher(line)).matches()) {
         String serviceId = matcher.group("service");
-        moduleToUrlMap.put(serviceId, matcher.group("url"));
-        int port = parseInt(matcher.group("port"), 0);
+        String url = matcher.group("url");
+        moduleToUrlMap.put(serviceId, url);
+        String portString = matcher.group("port");
+        int port = parseInt(portString, 0);
         if (port > 0 && (serverPortCandidate == 0 || "default".equals(serviceId))) { // $NON-NLS-1$
           serverPortCandidate = port;
         }
-      } else if ((matcher = adminStartedPattern.matcher(line)).matches()) {
+      } else if ((matcher = adminStartedPattern.matcher(line)).matches()
+          || (matcher = adminRunningPattern.matcher(line)).matches()) {
         int port = parseInt(matcher.group("port"), 0);
-        if (port > 0 && adminPort == 0) {
+        if (port > 0 && adminPort <= 0) {
           adminPort = port;
         }
         // Admin comes after other modules, so no more module URLs
-        if (serverPort == 0) {
+        if (serverPort <= 0) {
           serverPort = serverPortCandidate;
         }
       }

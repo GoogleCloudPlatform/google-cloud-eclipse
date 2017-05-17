@@ -1,15 +1,22 @@
 sudo: false
 language: java
 before_install:
-  # change reference from now-defunct maven repository
-  # (https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1406)
+  # change reference from now-defunct maven repository (#1406)
   - sed -i.bak -e 's|https://nexus.codehaus.org/snapshots/|https://oss.sonatype.org/content/repositories/codehaus-snapshots/|g' ~/.m2/settings.xml
 install: 
-  # use 3.3.9 to ensure faulty test exit states fail the build (#1276)
-  - mvn -N io.takari:maven:wrapper -Dmaven=3.3.9
+  # use mvn ≥ 3.3.9 to ensure faulty test exit states fail the build (#1276)
+  - mvn -B -N io.takari:maven:wrapper -Dmaven=3.5.0
   # download and install Cloud SDK (may be cached)
-  - build/install-cloudsdk.sh 147.0.0 $HOME
+  - build/install-cloudsdk.sh 151.0.1 $HOME
+# Tycho ≥ 0.26 requires Java 8
+jdk: oraclejdk8
 env:
+  matrix:
+    # ECLIPSE_TARGET is the targeted platform: mars is the default target
+    # JAVA_RUNTIME specifies the execution runtime for tests; must match an <id> in .travis-toolchains.xml
+    - JAVA_RUNTIME=JavaSE-1.7
+    - JAVA_RUNTIME=JavaSE-1.8 ECLIPSE_TARGET=neon
+    - JAVA_RUNTIME=JavaSE-1.8 ECLIPSE_TARGET=oxygen MAVEN_FLAGS=-Pjacoco
   global:
     - PATH=$PWD/google-cloud-sdk/bin:$PATH
     - CLOUDSDK_CORE_DISABLE_USAGE_REPORTING=true
@@ -19,15 +26,10 @@ before_script:
   - sleep 3 # give xvfb some time to start
   - metacity --sm-disable --replace &
   - sleep 3 # give metacity some time to start
-# mars is the default target
-matrix:
-  include:
-  - jdk: openjdk7
-  - jdk: oraclejdk8
-    env: ECLIPSE_TARGET=neon
-  - jdk: oraclejdk8
-    env: ECLIPSE_TARGET=oxygen MAVEN_FLAGS=-Pjacoco
-script: ./mvnw -Ptravis --fail-at-end verify ${ECLIPSE_TARGET:+-Declipse.target=${ECLIPSE_TARGET}} ${MAVEN_FLAGS}
+script: ./mvnw -B -Ptravis --fail-at-end verify ${MAVEN_FLAGS}
+     ${ECLIPSE_TARGET:+-Declipse.target=${ECLIPSE_TARGET}}
+     --toolchains=.travis-toolchains.xml
+     -Dtoolchain.java.runtime=${JAVA_RUNTIME}
 addons:
   apt:
     packages:

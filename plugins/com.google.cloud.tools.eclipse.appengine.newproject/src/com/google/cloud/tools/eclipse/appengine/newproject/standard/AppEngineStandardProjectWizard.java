@@ -68,17 +68,18 @@ public class AppEngineStandardProjectWizard extends AppEngineProjectWizard {
                                            dependencyValidator.result);
       }
     } catch (InvocationTargetException ex) {
-      status = StatusUtil.setErrorStatus(this, Messages.getString("project.creation.failed"), ex.getCause());
+      status = StatusUtil.setErrorStatus(this, Messages.getString("project.creation.failed"),
+          ex.getCause());
     } catch (InterruptedException e) {
       status = Status.CANCEL_STATUS;
     }
     return status;
   }
-  
-  
+
+
   private class DependencyValidator implements IRunnableWithProgress {
 
-    private IStatus result = null;
+    private IStatus result;
 
     @Override
     public void run(IProgressMonitor monitor)
@@ -87,10 +88,9 @@ public class AppEngineStandardProjectWizard extends AppEngineProjectWizard {
     }
   }
 
-
   @Override
-  public CreateAppEngineWtpProject getAppEngineProjectCreationOperation(AppEngineProjectConfig config,
-      IAdaptable uiInfoAdapter) {
+  public CreateAppEngineWtpProject getAppEngineProjectCreationOperation(
+      AppEngineProjectConfig config, IAdaptable uiInfoAdapter) {
     return new CreateAppEngineStandardWtpProject(config, uiInfoAdapter);
   }
 

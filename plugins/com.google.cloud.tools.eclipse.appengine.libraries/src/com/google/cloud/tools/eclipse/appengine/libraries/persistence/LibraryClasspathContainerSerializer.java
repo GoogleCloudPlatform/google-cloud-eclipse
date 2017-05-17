@@ -23,13 +23,11 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.logging.Logger;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -81,8 +79,7 @@ public class LibraryClasspathContainerSerializer {
       logger.warning("Container state file cannot be created, save failed");
       return;
     }
-    try (OutputStreamWriter out =
-        new OutputStreamWriter(new FileOutputStream(stateFile), StandardCharsets.UTF_8)) {
+    try (Writer out = Files.newBufferedWriter(stateFile.toPath(), StandardCharsets.UTF_8)) {
       SerializableLibraryClasspathContainer serializableContainer =
           new SerializableLibraryClasspathContainer(container,
               binaryArtifactBaseLocationProvider.getBaseLocation(),
@@ -98,7 +95,7 @@ public class LibraryClasspathContainerSerializer {
       return null;
     }
     try (Reader reader =
-        new InputStreamReader(new FileInputStream(stateFile), StandardCharsets.UTF_8)) {
+        Files.newBufferedReader(stateFile.toPath(), StandardCharsets.UTF_8)) {
       SerializableLibraryClasspathContainer fromJson =
           gson.fromJson(reader, SerializableLibraryClasspathContainer.class);
       if (fromJson == null) {

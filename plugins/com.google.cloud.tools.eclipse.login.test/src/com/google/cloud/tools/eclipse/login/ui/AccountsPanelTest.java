@@ -50,6 +50,7 @@ public class AccountsPanelTest {
   @Mock private Account account1;
   @Mock private Account account2;
   @Mock private Account account3;
+  @Mock private LabelImageLoader imageLoader;
 
   @Before
   public void setUp() {
@@ -66,7 +67,7 @@ public class AccountsPanelTest {
   public void testLogOutButton_notLoggedIn() {
     setUpLoginService();
 
-    AccountsPanel panel = new AccountsPanel(null, loginService);
+    AccountsPanel panel = new AccountsPanel(null, loginService, imageLoader);
     Control control = panel.createDialogArea(shell);
 
     List<String> buttonTexts = collectButtonTexts((Composite) control);
@@ -78,20 +79,20 @@ public class AccountsPanelTest {
   public void testLogOutButton_loggedIn() {
     setUpLoginService(Arrays.asList(account1));
 
-    AccountsPanel panel = new AccountsPanel(null, loginService);
+    AccountsPanel panel = new AccountsPanel(null, loginService, imageLoader);
     Control control = panel.createDialogArea(shell);
 
     List<String> buttonTexts = collectButtonTexts((Composite) control);
     assertEquals(2, buttonTexts.size());
     assertTrue(buttonTexts.contains("Add Account..."));
-    assertTrue(buttonTexts.contains("Sign Out..."));
+    assertTrue(buttonTexts.contains("Sign Out of All Accounts"));
   }
 
   @Test
   public void testAccountsArea_zeroAccounts() {
     setUpLoginService();
 
-    AccountsPanel panel = new AccountsPanel(null, loginService);
+    AccountsPanel panel = new AccountsPanel(null, loginService, imageLoader);
     Control control = panel.createDialogArea(shell);
 
     NamesEmails namesEmails = collectNamesEmails(control);
@@ -102,7 +103,7 @@ public class AccountsPanelTest {
   public void testAccountsArea_oneAccount() {
     setUpLoginService(Arrays.asList(account1));
 
-    AccountsPanel panel = new AccountsPanel(null, loginService);
+    AccountsPanel panel = new AccountsPanel(null, loginService, imageLoader);
     Control control = panel.createDialogArea(shell);
 
     NamesEmails namesEmails = collectNamesEmails(control);
@@ -115,7 +116,7 @@ public class AccountsPanelTest {
   public void testAccountsArea_accountWithNullName() {
     setUpLoginService(Arrays.asList(account2));
 
-    AccountsPanel panel = new AccountsPanel(null, loginService);
+    AccountsPanel panel = new AccountsPanel(null, loginService, imageLoader);
     Control control = panel.createDialogArea(shell);
 
     NamesEmails namesEmails = collectNamesEmails(control);
@@ -128,7 +129,7 @@ public class AccountsPanelTest {
   public void testAccountsArea_threeAccounts() {
     setUpLoginService(Arrays.asList(account1, account2, account3));
 
-    AccountsPanel panel = new AccountsPanel(null, loginService);
+    AccountsPanel panel = new AccountsPanel(null, loginService, imageLoader);
     Control control = panel.createDialogArea(shell);
 
     NamesEmails namesEmails = collectNamesEmails(control);
@@ -170,11 +171,15 @@ public class AccountsPanelTest {
   private static NamesEmails collectNamesEmails(Control dialogArea) {
     NamesEmails namesEmails = new NamesEmails();
 
-    Control controls[] = ((Composite) dialogArea).getChildren();
-    for (int i = 0; i + 3 < controls.length; i += 3) {
-      namesEmails.names.add(((Label) controls[i]).getText());
-      namesEmails.emails.add(((Label) controls[i+1]).getText());
-      assertEquals(SWT.SEPARATOR, ((Label) controls[i+2]).getStyle() & SWT.SEPARATOR);
+    Control[] controls = ((Composite) dialogArea).getChildren();
+    for (int i = 0; i + 2 < controls.length; i += 2) {
+      Composite accountRow = (Composite) controls[i];
+      Composite secondColumn = (Composite) accountRow.getChildren()[1];
+      Control[] labels = secondColumn.getChildren();
+      namesEmails.names.add(((Label) labels[0]).getText());
+      namesEmails.emails.add(((Label) labels[1]).getText());
+
+      assertEquals(SWT.SEPARATOR, ((Label) controls[i+1]).getStyle() & SWT.SEPARATOR);
     }
     return namesEmails;
   }

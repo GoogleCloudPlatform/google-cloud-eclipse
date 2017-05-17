@@ -20,6 +20,10 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
+import java.util.Map;
+import java.util.NavigableMap;
+import java.util.NavigableSet;
+import java.util.TreeMap;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
@@ -34,10 +38,6 @@ import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.IMaven;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.IMavenProjectRegistry;
-import java.util.Map;
-import java.util.NavigableMap;
-import java.util.NavigableSet;
-import java.util.TreeMap;
 
 /**
  * {@link DataflowDependencyManager} provides {@code Dependency} instances for Dataflow and the
@@ -92,6 +92,9 @@ public class DataflowDependencyManager {
    */
   public boolean hasPinnedDataflowDependency(IProject project) {
     Model model = getModelFromProject(project);
+    if (model == null) {
+      return false;
+    }
     Dependency dependency = getDataflowDependencyFromModel(model);
     if (dependency == null
         || Artifact.LATEST_VERSION.equals(dependency.getVersion())

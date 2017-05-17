@@ -39,7 +39,7 @@ public class PluginXmlTest extends BasePluginXmlTest {
     NodeList tests = getDocument().getElementsByTagName("test");
     Assert.assertEquals(3, tests.getLength());
     NodeList adapts = getDocument().getElementsByTagName("adapt");
-    Assert.assertEquals(1, adapts.getLength());
+    Assert.assertEquals(3, adapts.getLength());
 
     for (int i = 0; i < enabledWhen.getLength(); i++) {
       Element element = (Element) enabledWhen.item(i);
@@ -47,7 +47,7 @@ public class PluginXmlTest extends BasePluginXmlTest {
       assertThat(parent.getNodeName(), either(is("page")).or(is("handler")));
     }
 
-    Element adapt = (Element) adapts.item(0);
+    Element adapt = (Element) adapts.item(2);
     Assert.assertEquals("org.eclipse.core.resources.IProject", adapt.getAttribute("type"));
 
     NodeList adaptTestNodes = adapt.getElementsByTagName("test");
