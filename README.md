@@ -39,7 +39,7 @@ Maven for building Eclipse bundles and features.
    https://github.com/GoogleCloudPlatform/google-cloud-eclipse.git`.
 
 
-##Configuring Maven/Tycho Builds
+## Configuring Maven/Tycho Builds
 
 The plugin is built using Maven/Tycho and targeted to Java 7.
 
