@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde?>
 <!-- generated with https://github.com/mbarbero/fr.obeo.releng.targetplatform -->
-<target name="GCP for Eclipse Mars" sequenceNumber="1488904396">
+<target name="GCP for Eclipse Mars" sequenceNumber="1492180482">
   <locations>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
       <unit id="org.eclipse.license.feature.group" version="1.0.1.v20140414-1359"/>
@@ -35,6 +35,7 @@
       <unit id="org.eclipse.jst.common.fproj.enablement.jdt.sdk.feature.group" version="3.6.3.v201501141810"/>
       <unit id="org.eclipse.wst.common.fproj.sdk.feature.group" version="3.7.0.v201505072140"/>
       <unit id="org.eclipse.wst.web_sdk.feature.feature.group" version="3.7.1.v201602111638"/>
+      <unit id="org.eclipse.jst.enterprise_sdk.feature.feature.group" version="3.7.0.v201602161345"/>
       <unit id="org.eclipse.wst.server_adapters.sdk.feature.feature.group" version="3.2.500.v201508271522"/>
       <repository location="http://download.eclipse.org/webtools/repository/mars/"/>
     </location>

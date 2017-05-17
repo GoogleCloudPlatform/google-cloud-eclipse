@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde?>
 <!-- generated with https://github.com/mbarbero/fr.obeo.releng.targetplatform -->
-<target name="GCP for Eclipse Neon" sequenceNumber="1485456840">
+<target name="GCP for Eclipse Neon" sequenceNumber="1492180496">
   <locations>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
       <unit id="org.eclipse.license.feature.group" version="1.0.1.v20140414-1359"/>
       <repository location="http://download.eclipse.org/cbi/updates/license"/>
     </location>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
-      <unit id="org.eclipse.sdk.feature.group" version="4.6.2.v20161124-1529"/>
-      <unit id="org.eclipse.jdt.feature.group" version="3.12.2.v20161124-1400"/>
+      <unit id="org.eclipse.sdk.feature.group" version="4.6.3.v20170301-0400"/>
+      <unit id="org.eclipse.jdt.feature.group" version="3.12.3.v20170301-0400"/>
       <unit id="org.eclipse.m2e.feature.feature.group" version="1.7.0.20160603-1933"/>
       <unit id="org.eclipse.m2e.sdk.feature.feature.group" version="1.7.0.20160603-1933"/>
       <unit id="org.eclipse.m2e.wtp.feature.feature.group" version="1.3.1.20160831-1005"/>
       <unit id="org.eclipse.m2e.wtp.sdk.feature.feature.group" version="1.3.1.20160831-1005"/>
       <unit id="org.eclipse.mylyn.commons.feature.group" version="3.21.0.v20160707-1856"/>
-      <unit id="org.eclipse.jpt.jpa.feature.feature.group" version="3.5.0.v201603181811"/>
+      <unit id="org.eclipse.jpt.jpa.feature.feature.group" version="3.5.0.v201607131827"/>
       <unit id="org.eclipse.datatools.sdk.feature.feature.group" version="1.13.0.201603142002"/>
       <unit id="org.eclipse.swtbot.eclipse.feature.group" version="2.5.0.201609021837"/>
-      <unit id="org.eclipse.epp.logging.aeri.feature.feature.group" version="2.0.3.v20161205-0933"/>
-      <unit id="org.eclipse.epp.logging.aeri.feature.source.feature.group" version="2.0.3.v20161205-0933"/>
+      <unit id="org.eclipse.epp.logging.aeri.feature.feature.group" version="2.0.4.v20170307-1435"/>
+      <unit id="org.eclipse.epp.logging.aeri.feature.source.feature.group" version="2.0.4.v20170307-1435"/>
       <unit id="org.eclipse.jetty.http" version="9.3.9.v20160517"/>
       <unit id="org.eclipse.jetty.servlet" version="9.3.9.v20160517"/>
       <unit id="org.eclipse.jetty.server" version="9.3.9.v20160517"/>
@@ -32,6 +32,7 @@
       <unit id="org.eclipse.jst.common.fproj.enablement.jdt.sdk.feature.group" version="3.8.0.v201603091933"/>
       <unit id="org.eclipse.wst.common.fproj.sdk.feature.group" version="3.7.0.v201505072140"/>
       <unit id="org.eclipse.wst.web_sdk.feature.feature.group" version="3.8.0.v201606030549"/>
+      <unit id="org.eclipse.jst.enterprise_sdk.feature.feature.group" version="3.8.0.v201605251556"/>
       <unit id="org.eclipse.wst.server_adapters.sdk.feature.feature.group" version="3.2.600.v201606081655"/>
       <repository location="http://download.eclipse.org/webtools/downloads/drops/R3.8.0/R-3.8.0-20160608130753/repository"/>
     </location>

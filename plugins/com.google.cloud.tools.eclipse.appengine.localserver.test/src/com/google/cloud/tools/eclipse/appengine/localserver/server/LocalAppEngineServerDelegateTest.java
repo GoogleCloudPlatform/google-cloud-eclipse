@@ -33,8 +33,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.jst.server.core.IWebModule;
-import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
-import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IModuleType;
 import org.eclipse.wst.server.core.IRuntime;
@@ -57,8 +55,6 @@ public class LocalAppEngineServerDelegateTest {
   public ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
 
   private LocalAppEngineServerDelegate delegate = new LocalAppEngineServerDelegate();
-  private static final IProjectFacetVersion APPENGINE_STANDARD_FACET_VERSION_1 =
-      ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID).getVersion("1");
 
   @Mock private IModule module1;
   @Mock private IWebModule webModule1;
@@ -70,7 +66,7 @@ public class LocalAppEngineServerDelegateTest {
   @Rule
   public TestProjectCreator appEngineStandardProject =
       new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25,
-          APPENGINE_STANDARD_FACET_VERSION_1);
+          AppEngineStandardFacet.FACET_VERSION);
 
   @Test
   public void testCanModifyModules() throws CoreException {

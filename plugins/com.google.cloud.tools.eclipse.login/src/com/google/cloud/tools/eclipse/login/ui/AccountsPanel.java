@@ -20,7 +20,9 @@ import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.login.Messages;
 import com.google.cloud.tools.login.Account;
 import com.google.common.annotations.VisibleForTesting;
-import org.eclipse.jface.dialogs.MessageDialog;
+import java.net.MalformedURLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.eclipse.jface.dialogs.PopupDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -28,6 +30,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -41,9 +44,17 @@ import org.eclipse.swt.widgets.Shell;
  */
 public class AccountsPanel extends PopupDialog {
 
+  private static final Logger logger = Logger.getLogger(AccountsPanel.class.getName());
+
   private final IGoogleLoginService loginService;
+  private final LabelImageLoader imageLoader;
 
   public AccountsPanel(Shell parent, IGoogleLoginService loginService) {
+    this(parent, loginService, new LabelImageLoader());
+  }
+
+  @VisibleForTesting
+  AccountsPanel(Shell parent, IGoogleLoginService loginService, LabelImageLoader imageLoader) {
     super(parent, SWT.MODELESS,
         true /* takeFocusOnOpen */,
         false /* persistSize */,
@@ -52,7 +63,9 @@ public class AccountsPanel extends PopupDialog {
         false /* showPersistActions */,
         null /* no title area */, null /* no info text area */);
     this.loginService = loginService;
+    this.imageLoader = imageLoader;
   }
+
 
   @Override
   protected Color getBackground() {
@@ -75,18 +88,36 @@ public class AccountsPanel extends PopupDialog {
   }
 
   @VisibleForTesting
-  void createAccountsPane(Composite container) {
+  void createAccountsPane(Composite accountArea) {
     for (Account account : loginService.getAccounts()) {
-      Label name = new Label(container, SWT.LEAD);
+      Composite accountRow = new Composite(accountArea, SWT.NONE);
+      Label avatar = new Label(accountRow, SWT.NONE);
+      Composite secondColumn = new Composite(accountRow, SWT.NONE);
+      Label name = new Label(secondColumn, SWT.LEAD);
+      Label email = new Label(secondColumn, SWT.LEAD);
+      Label separator = new Label(accountArea, SWT.HORIZONTAL | SWT.SEPARATOR);
+      separator.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
+
+      // <Avatar size> = 3 * <email label height>
+      Point emailSize = email.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+      int avatarSize = emailSize.y * 3;
+
+      GridDataFactory.swtDefaults().hint(avatarSize, avatarSize).applyTo(avatar);
+      GridLayoutFactory.fillDefaults().numColumns(2).applyTo(accountRow);
+      GridLayoutFactory.fillDefaults().generateLayout(secondColumn);
+
       if (account.getName() != null) {
         name.setText(account.getName());
       }
-
-      Label email = new Label(container, SWT.LEAD);
       email.setText(account.getEmail());  // email is never null.
 
-      Label separator = new Label(container, SWT.HORIZONTAL | SWT.SEPARATOR);
-      separator.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
+      if (account.getAvatarUrl() != null) {
+        try {
+          imageLoader.loadImage(account.getAvatarUrl() + "?sz=" + avatarSize, avatar);
+        } catch (MalformedURLException ex) {
+          logger.log(Level.WARNING, "malformed avatar image URL", ex);
+        }
+      }
     }
   }
 
@@ -118,20 +149,8 @@ public class AccountsPanel extends PopupDialog {
   private class LogOutOnClick extends SelectionAdapter {
     @Override
     public void widgetSelected(SelectionEvent event) {
-      // todo localize
-      String[] dialogButtonLabels = {"Sign Out", "Don't Sign Out"};
-      MessageDialog logoutDialog = new MessageDialog(
-          getShell(),
-          Messages.getString("LOGOUT_CONFIRM_DIALOG_TITLE"),
-          null /* dialogTitleImage */,
-          Messages.getString("LOGOUT_CONFIRM_DIALOG_MESSAGE"),
-          MessageDialog.QUESTION,
-          dialogButtonLabels, 0);
-      boolean shouldLogout = logoutDialog.open() == 0;
-      if (shouldLogout) {
-        close();
-        loginService.logOutAll();
-      }
+      close();
+      loginService.logOutAll();
     }
   }
 }

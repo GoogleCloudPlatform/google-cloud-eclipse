@@ -37,8 +37,8 @@ public class CloudLibrariesInPluginXmlTest {
   private static final String APP_ENGINE_API_LIBRARY_ID = "appengine-api";
   private static final String CLOUD_ENDPOINTS_LIBRARY_ID = "appengine-endpoints";
   private static final String OBJECTIFY_LIBRARY_ID = "objectify";
-  private static final String SERVLET_API_LIBRARY_ID = "servlet-api";
-  private static final String JSP_API_LIBRARY_ID = "jsp-api";
+  private static final String SERVLET_API_LIBRARY_ID = "servlet-api-2.5";
+  private static final String JSP_API_LIBRARY_ID = "jsp-api-2.1";
 
   @Test
   public void testLibrarySize() {
@@ -71,7 +71,7 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(mavenCoordinates.getRepository(), is("central"));
     assertThat(mavenCoordinates.getGroupId(), is("com.google.appengine"));
     assertThat(mavenCoordinates.getArtifactId(), is("appengine-api-1.0-sdk"));
-    assertThat(mavenCoordinates.getVersion(), is("1.9.50"));
+    assertThat(mavenCoordinates.getVersion(), is("1.9.51"));
     assertThat(mavenCoordinates.getType(), is("jar"));
     assertNull(mavenCoordinates.getClassifier());
 
@@ -113,7 +113,7 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(mavenCoordinates.getRepository(), is("central"));
     assertThat(mavenCoordinates.getGroupId(), is("com.google.appengine"));
     assertThat(mavenCoordinates.getArtifactId(), is("appengine-endpoints"));
-    assertThat(mavenCoordinates.getVersion(), is("1.9.50"));
+    assertThat(mavenCoordinates.getVersion(), is("1.9.51"));
     assertThat(mavenCoordinates.getType(), is("jar"));
     assertNull(mavenCoordinates.getClassifier());
     assertThat(libraryFile.getJavadocUri(),
@@ -148,7 +148,7 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(objectifyMavenCoordinates.getRepository(), is("central"));
     assertThat(objectifyMavenCoordinates.getGroupId(), is("com.googlecode.objectify"));
     assertThat(objectifyMavenCoordinates.getArtifactId(), is("objectify"));
-    assertThat(objectifyMavenCoordinates.getVersion(), is("5.1.15"));
+    assertThat(objectifyMavenCoordinates.getVersion(), is("5.1.17"));
     assertThat(objectifyMavenCoordinates.getType(), is("jar"));
     assertNull(objectifyMavenCoordinates.getClassifier());
 

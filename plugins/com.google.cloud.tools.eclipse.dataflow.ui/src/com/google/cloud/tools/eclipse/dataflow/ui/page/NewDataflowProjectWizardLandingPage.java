@@ -25,6 +25,7 @@ import com.google.cloud.tools.eclipse.dataflow.ui.util.ButtonFactory;
 import com.google.common.base.Strings;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusEvent;
@@ -47,6 +48,8 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
+
 import java.io.File;
 import java.net.URI;
 import java.util.Map;
@@ -76,17 +79,24 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     super("newDataflowProjectWizardLandingPage");
     this.dependencyManager = DataflowDependencyManager.create();
     this.targetCreator = targetCreator;
-    setTitle("Create a Cloud Dataflow Project");
-    setDescription("This wizard creates a new Google Cloud Dataflow project.");
+    setTitle(Messages.getString("CREATE_DATAFLOW_PROJECT"));
+    setDescription(Messages.getString("WIZARD_DESCRIPTION"));
+    setImageDescriptor(getDataflowIcon());
     setPageComplete(false);
   }
 
-  private void addLabel(Composite formComposite, String labelText) {
+  private static ImageDescriptor getDataflowIcon() {
+    String imageFilePath = "icons/Dataflow_64.png";
+    return AbstractUIPlugin.imageDescriptorFromPlugin(
+        "com.google.cloud.tools.eclipse.dataflow.ui", imageFilePath);
+  }
+  
+  private static void addLabel(Composite formComposite, String labelText) {
     Label label = new Label(formComposite, SWT.NULL);
     label.setText(labelText);
   }
 
-  private Text addLabeledText(Composite formComposite, String labelText) {
+  private static Text addLabeledText(Composite formComposite, String labelText) {
     addLabel(formComposite, labelText);
 
     Text widget = new Text(formComposite, SWT.SINGLE | SWT.BORDER);
@@ -94,7 +104,7 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     return widget;
   }
 
-  private Button addCheckbox(Composite formComposite, String labelText, boolean initialValue) {
+  private static Button addCheckbox(Composite formComposite, String labelText, boolean initialValue) {
     Button checkbox = new Button(formComposite, SWT.CHECK);
     checkbox.setText(labelText);
     checkbox.setLayoutData(gridSpan(SWT.NULL, 3));
@@ -103,7 +113,7 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     return checkbox;
   }
 
-  private Combo addCombo(Composite formComposite, String labelText, boolean readOnly) {
+  private static Combo addCombo(Composite formComposite, String labelText, boolean readOnly) {
     addLabel(formComposite, labelText);
 
     Combo combo = new Combo(formComposite,
@@ -112,7 +122,7 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     return combo;
   }
 
-  private GridData gridSpan(int style, int span) {
+  private static GridData gridSpan(int style, int span) {
     GridData gridData = new GridData(style);
     gridData.horizontalSpan = span;
     return gridData;
@@ -126,11 +136,9 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
 
     groupIdInput = addLabeledText(formComposite, "&Group ID:");
     groupIdInput.setMessage(EXAMPLE_GROUP_ID);
-    groupIdInput.setToolTipText(
-        "The Maven Group ID. Should be an alphanumeric path separated by periods.");
+    groupIdInput.setToolTipText(Messages.getString("GROUP_ID_TOOLTIP"));
     artifactIdInput = addLabeledText(formComposite, "&Artifact ID:");
-    artifactIdInput.setToolTipText(
-        "The Maven Artifact ID. Should be an alphanumeric name separated by dashes.");
+    artifactIdInput.setToolTipText(Messages.getString("ARTIFACT_ID_TOOLTIP"));
 
     templateDropdown = addCombo(formComposite, "Project &Template:", true);
     for (Template template : Template.values()) {
@@ -142,7 +150,7 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     updateAvailableVersions();
 
     packageInput = addLabeledText(formComposite, "&Package:");
-    packageInput.setToolTipText("If unset this will be the same as the Group ID.");
+    packageInput.setToolTipText(Messages.getString("UNSET_PACKAGE_TOOLTIP"));
     packageInput.setMessage(EXAMPLE_GROUP_ID);
 
     // Add a labeled text and button for the default location.
@@ -159,8 +167,7 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     locationInput.setText(defaultLocation);
     locationInput.setEnabled(false);
     locationInput.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-    locationInput.setToolTipText(
-        "The location where the project will be created. Must be an existing local directory.");
+    locationInput.setToolTipText(Messages.getString("LOCATION_TOOLTIP"));
 
     locationBrowse = ButtonFactory.newPushButton(locationGroup, "&Browse");
     locationBrowse.setEnabled(false);
@@ -173,7 +180,6 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     advancedComposite.setLayoutData(gridSpan(GridData.FILL_HORIZONTAL, 3));
 
     final Composite advancedContent = new Composite(advancedComposite, SWT.NULL);
-    advancedContent.setLayout(new GridLayout(3, false));
     advancedContent.setLayoutData(gridSpan(GridData.FILL_HORIZONTAL, 1));
     advancedComposite.setClient(advancedContent);
 
@@ -426,7 +432,7 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
       @Override
       public void widgetSelected(SelectionEvent event) {
         DirectoryDialog dialog = new DirectoryDialog(shell);
-        dialog.setMessage("Select project location");
+        dialog.setMessage(Messages.getString("SELECT_PROJECT_LOCATION"));
         String result = dialog.open();
         if (!Strings.isNullOrEmpty(result)) {
           locationInput.setText(result);

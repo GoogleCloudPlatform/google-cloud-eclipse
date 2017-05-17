@@ -7,13 +7,8 @@ Bundle-Version: 0.1.0.qualifier
 Bundle-Vendor: Google Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Localization: plugin
-Require-Bundle: org.eclipse.wst.common.project.facet.core
-Import-Package: com.google.cloud.tools.eclipse.appengine.facets,
- com.google.cloud.tools.eclipse.appengine.newproject,
+Import-Package: com.google.cloud.tools.eclipse.appengine.deploy.ui.flexible,
+ com.google.cloud.tools.eclipse.appengine.facets,
  com.google.cloud.tools.eclipse.appengine.newproject.flex,
  com.google.cloud.tools.eclipse.util.service,
- org.eclipse.core.commands,
- org.eclipse.core.expressions,
- org.eclipse.core.resources,
- org.eclipse.core.runtime;version="3.5.0",
- org.eclipse.ui
+ org.eclipse.core.resources

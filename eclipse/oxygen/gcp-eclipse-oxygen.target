@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde?>
 <!-- generated with https://github.com/mbarbero/fr.obeo.releng.targetplatform -->
-<target name="GCP for Eclipse Oxygen" sequenceNumber="1488904345">
+<target name="GCP for Eclipse Oxygen" sequenceNumber="1492180496">
   <locations>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
       <unit id="org.eclipse.license.feature.group" version="1.0.1.v20140414-1359"/>
@@ -32,6 +32,7 @@
       <unit id="org.eclipse.jst.common.fproj.enablement.jdt.sdk.feature.group" version="3.8.0.v201603091933"/>
       <unit id="org.eclipse.wst.common.fproj.sdk.feature.group" version="3.7.0.v201505072140"/>
       <unit id="org.eclipse.wst.web_sdk.feature.feature.group" version="3.9.0.v201701262152"/>
+      <unit id="org.eclipse.jst.enterprise_sdk.feature.feature.group" version="3.8.0.v201701262152"/>
       <unit id="org.eclipse.wst.server_adapters.sdk.feature.feature.group" version="3.2.600.v201606081655"/>
       <repository location="http://download.eclipse.org/webtools/downloads/drops/R3.9.0/S-3.9.0M5-20170201000249/repository"/>
     </location>

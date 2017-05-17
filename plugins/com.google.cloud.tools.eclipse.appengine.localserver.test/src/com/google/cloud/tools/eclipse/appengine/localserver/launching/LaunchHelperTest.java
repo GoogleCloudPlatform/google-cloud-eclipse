@@ -26,7 +26,6 @@ import com.google.cloud.tools.eclipse.appengine.localserver.ui.ServerTracker;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.util.Collection;
 import java.util.Collections;
-import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.SubMonitor;
@@ -34,8 +33,6 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
-import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
-import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
 import org.junit.Before;
@@ -49,8 +46,6 @@ import org.mockito.runners.MockitoJUnitRunner;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class LaunchHelperTest {
-  private static final IProjectFacetVersion APPENGINE_STANDARD_FACET_VERSION_1 =
-      ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID).getVersion("1");
 
   @Rule
   public ServerTracker tracker = new ServerTracker();
@@ -60,10 +55,10 @@ public class LaunchHelperTest {
 
   @Rule
   public TestProjectCreator appEngineStandardProject1 = new TestProjectCreator().withFacetVersions(
-      JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, APPENGINE_STANDARD_FACET_VERSION_1);
+      JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineStandardFacet.FACET_VERSION);
   @Rule
   public TestProjectCreator appEngineStandardProject2 = new TestProjectCreator().withFacetVersions(
-      JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, APPENGINE_STANDARD_FACET_VERSION_1);
+      JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineStandardFacet.FACET_VERSION);
 
 
   @Before
@@ -135,7 +130,7 @@ public class LaunchHelperTest {
   }
 
   @Test(expected = CoreException.class)
-  public void failsWithClashingServiceIds() throws ExecutionException, CoreException {
+  public void failsWithClashingServiceIds() throws CoreException {
     appEngineStandardProject1.setAppEngineServiceId("other");
     IModule module1 = appEngineStandardProject1.getModule();
     appEngineStandardProject2.setAppEngineServiceId("other");

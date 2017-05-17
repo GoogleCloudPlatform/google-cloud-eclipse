@@ -323,7 +323,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
   }
 
   /**
-   * Check that we won't overwrite an existing location. Expects a valid Maven Artifact ID.
+   * Check that we won't overwrite an existing location. Expects a valid Maven artifact ID.
    */
   private boolean validateGeneratedProjectLocation() {
     String artifactId = getArtifactId();
@@ -352,6 +352,9 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     } else if (!MavenCoordinatesValidator.validateArtifactId(artifactId)) {
       setErrorMessage(Messages.getString("ILLEGAL_ARTIFACT_ID", artifactId)); //$NON-NLS-1$
       return false;
+    } else if (ResourcesPlugin.getWorkspace().getRoot().getProject(artifactId).exists()) {
+      setErrorMessage(Messages.getString("PROJECT_ALREADY_EXISTS", artifactId)); //$NON-NLS-1$
+      return false;
     }
     String version = getVersion();
     if (version.isEmpty()) {
@@ -366,6 +369,12 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
 
   private boolean validateAppEngineProjectDetails() {
     String packageName = getPackageName();
+    if (packageName.isEmpty()) {
+      String message = Messages.getString("EMPTY_PACKAGE_NAME"); //$NON-NLS-1$
+      setErrorMessage(message);
+      return false;
+    }
+    
     IStatus status = JavaPackageValidator.validate(packageName);
     if (!status.isOK()) {
       String details = status.getMessage() == null ? packageName : status.getMessage();

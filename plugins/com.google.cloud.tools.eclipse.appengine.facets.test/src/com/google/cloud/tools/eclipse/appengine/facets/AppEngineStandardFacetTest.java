@@ -16,10 +16,16 @@
 
 package com.google.cloud.tools.eclipse.appengine.facets;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
-import org.eclipse.wst.common.project.facet.core.IProjectFacet;
+import org.eclipse.jst.common.project.facet.core.JavaFacet;
+import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
+import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.server.core.IRuntimeType;
 import org.junit.Assert;
@@ -34,12 +40,23 @@ public class AppEngineStandardFacetTest {
   @Mock private org.eclipse.wst.server.core.IRuntime serverRuntime;
   @Mock private IRuntimeType runtimeType;
 
-  @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
+  @Rule
+  public TestProjectCreator baseProjectCreator = new TestProjectCreator();
+
+  @Rule
+  public TestProjectCreator appEngineProjectCreator =
+      new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25,
+          AppEngineStandardFacet.FACET_VERSION);
 
   @Test
   public void testStandardFacetExists() {
-    Assert.assertTrue(ProjectFacetsManager
-        .isProjectFacetDefined("com.google.cloud.tools.eclipse.appengine.facets.standard"));
+    Assert.assertEquals("com.google.cloud.tools.eclipse.appengine.facets.standard",
+        AppEngineStandardFacet.ID);
+    Assert.assertEquals("1", AppEngineStandardFacet.VERSION);
+    Assert.assertTrue(ProjectFacetsManager.isProjectFacetDefined(AppEngineStandardFacet.ID));
+    Assert.assertEquals(AppEngineStandardFacet.ID, AppEngineStandardFacet.FACET.getId());
+    Assert.assertEquals(AppEngineStandardFacet.VERSION,
+        AppEngineStandardFacet.FACET_VERSION.getVersionString());
   }
 
   @Test
@@ -60,8 +77,62 @@ public class AppEngineStandardFacetTest {
 
   @Test
   public void testFacetLabel() {
-    IProjectFacet projectFacet = ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID);
+    Assert.assertEquals("App Engine Java Standard Environment",
+        AppEngineStandardFacet.FACET.getLabel());
+  }
 
-    Assert.assertEquals("App Engine Java Standard Environment", projectFacet.getLabel());
+  @Test
+  public void testGetProjectFacetVersion_noFacet() {
+    IProjectFacetVersion facetVersion =
+        AppEngineStandardFacet.getProjectFacetVersion(baseProjectCreator.getProject());
+    assertNull(facetVersion);
+  }
+
+  @Test
+  public void testGetProjectFacetVersion_withFacet() {
+    IProjectFacetVersion facetVersion =
+        AppEngineStandardFacet.getProjectFacetVersion(appEngineProjectCreator.getProject());
+    assertEquals(AppEngineStandardFacet.FACET_VERSION, facetVersion);
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void testCheckServletApiSupport_noFacet() {
+    AppEngineStandardFacet.checkServletApiSupport(baseProjectCreator.getProject(), "2.5");
+  }
+
+  @Test
+  public void testCheckServletApiSupport_withFacet() {
+    assertTrue(
+        AppEngineStandardFacet.checkServletApiSupport(appEngineProjectCreator.getProject(), "2.5"));
+  }
+
+  @Test
+  public void testCheckServletApiSupport_nullVersion() {
+    assertFalse(
+        AppEngineStandardFacet.checkServletApiSupport(AppEngineStandardFacet.FACET_VERSION, null));
+  }
+
+  @Test
+  public void testCheckServletApiSupport_blankVersion() {
+    assertFalse(
+        AppEngineStandardFacet.checkServletApiSupport(AppEngineStandardFacet.FACET_VERSION, ""));
+  }
+
+  @Test
+  public void testCheckServletApiSupport_invalidVersion() {
+    assertFalse(
+        AppEngineStandardFacet.checkServletApiSupport(AppEngineStandardFacet.FACET_VERSION, "2.6"));
+  }
+
+  @Test
+  public void testCheckServletApiSupport_sameVersion() {
+    assertTrue(
+        AppEngineStandardFacet.checkServletApiSupport(AppEngineStandardFacet.FACET_VERSION, "2.5"));
+  }
+
+  @Test
+  public void testCheckServletApiSupport_earlierVersion() {
+    assertFalse(
+        AppEngineStandardFacet.checkServletApiSupport(AppEngineStandardFacet.FACET_VERSION, "2.4"));
   }
 }

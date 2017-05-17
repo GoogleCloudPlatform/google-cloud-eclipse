@@ -21,11 +21,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
+
 import com.google.cloud.tools.appengine.api.devserver.DefaultRunConfiguration;
 import com.google.cloud.tools.appengine.api.devserver.RunConfiguration;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.MultiStatus;    
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
@@ -41,10 +43,8 @@ public class RunConfigConflictTest {
     assertFalse(status.isOK());
     assertThat(status, Matchers.instanceOf(MultiStatus.class));
     IStatus[] children = ((MultiStatus) status).getChildren();
-    assertEquals(3, children.length);
-    assertEquals("server port: 8080", children[0].getMessage());
-    assertEquals("admin port: 8000", children[1].getMessage());
-    assertEquals("storage path: <default location>", children[2].getMessage());
+    assertEquals(1, children.length);
+    assertTrue(children[0].getMessage().startsWith("server port: "));
   }
 
   @Test
@@ -52,7 +52,7 @@ public class RunConfigConflictTest {
     DefaultRunConfiguration config1 = new DefaultRunConfiguration();
     config1.setPort(0); // random allocation
     config1.setAdminPort(0); // random allocation
-    config1.setStoragePath("/foo/bar");
+    config1.setStoragePath(new File("/foo/bar"));
     DefaultRunConfiguration config2 = new DefaultRunConfiguration();
     IStatus status = LocalAppEngineServerLaunchConfigurationDelegate.checkConflicts(config1,
         config2, StatusUtil.multi(RunConfigConflictTest.class, "Conflict"));

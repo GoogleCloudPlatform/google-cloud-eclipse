@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.facets.ui;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.Messages;
 import com.google.cloud.tools.eclipse.appengine.facets.convert.AppEngineStandardProjectConvertJob;
+import com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPrompter;
 import com.google.cloud.tools.eclipse.ui.util.ProjectFromSelectionHelper;
 import com.google.common.annotations.VisibleForTesting;
 import org.eclipse.core.commands.AbstractHandler;
@@ -26,22 +27,31 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
+import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
 public class AppEngineStandardProjectConvertCommandHandler extends AbstractHandler {
 
   @Override
   public Object execute(ExecutionEvent event) throws ExecutionException {
+    Shell shell = HandlerUtil.getActiveShellChecked(event);
     try {
       IProject project = ProjectFromSelectionHelper.getProject(event);
       if (project == null) {
         throw new NullPointerException("Convert menu enabled for non-project resources");
+      }
+
+      // prompt user if Cloud SDK is not configured
+      if (CloudSdkPrompter.getCloudSdkLocation(shell) == null) {
+        // no further action required: user chose to not configure
+        return null;
       }
 
       IFacetedProject facetedProject = ProjectFacetsManager.create(project,
@@ -50,42 +60,43 @@ public class AppEngineStandardProjectConvertCommandHandler extends AbstractHandl
         throw new IllegalStateException("Convert menu enabled for App Engine projects");
       }
 
-      Shell shell = HandlerUtil.getActiveShell(event);
       if (checkFacetCompatibility(facetedProject, new MessageDialogWrapper(shell))) {
         new AppEngineStandardProjectConvertJob(facetedProject).schedule();
       }
-      return null;  // Must return null per method Javadoc.
     } catch (CoreException ex) {
-      throw new ExecutionException("Failed to convert to a faceted project", ex);
+      ErrorDialog.openError(shell, "Conversion Failed", "Failed to convert to a faceted project",
+          ex.getStatus());
     }
+    return null; // Must return null per method Javadoc.
   }
 
   @VisibleForTesting
   boolean checkFacetCompatibility(IFacetedProject facetedProject,
       MessageDialogWrapper dialogWrapper) {
-    if (facetedProject.hasProjectFacet(JavaFacet.FACET)) {
-      if (!facetedProject.hasProjectFacet(JavaFacet.VERSION_1_7)) {
-        String required = JavaFacet.VERSION_1_7.getVersionString();
+    IProjectFacetVersion javaFacetVersion = facetedProject.getProjectFacetVersion(JavaFacet.FACET);
+    if (javaFacetVersion != null) {
+      if (AppEngineStandardFacet.FACET_VERSION.conflictsWith(javaFacetVersion)) {
         String installed = facetedProject.getInstalledVersion(JavaFacet.FACET).getVersionString();
 
         dialogWrapper.openInformation(
             Messages.getString("java.facet.incompatible.title"),
             Messages.getString("java.facet.incompatible.message",
-                               facetedProject.getProject().getName(), required, installed));
+                facetedProject.getProject().getName(), installed));
         return false;
       }
     }
 
-    if (facetedProject.hasProjectFacet(WebFacetUtils.WEB_FACET)) {
-      if (!facetedProject.hasProjectFacet(WebFacetUtils.WEB_25)) {
-        String required = WebFacetUtils.WEB_25.getVersionString();
+    IProjectFacetVersion webFacetVersion =
+        facetedProject.getProjectFacetVersion(WebFacetUtils.WEB_FACET);
+    if (webFacetVersion != null) {
+      if (AppEngineStandardFacet.FACET_VERSION.conflictsWith(webFacetVersion)) {
         String installed =
             facetedProject.getInstalledVersion(WebFacetUtils.WEB_FACET).getVersionString();
 
         dialogWrapper.openInformation(
             Messages.getString("web.facet.incompatible.title"),
             Messages.getString("web.facet.incompatible.message",
-                               facetedProject.getProject().getName(), required, installed));
+                facetedProject.getProject().getName(), installed));
         return false;
       }
     }

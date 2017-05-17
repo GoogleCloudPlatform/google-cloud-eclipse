@@ -21,9 +21,8 @@ import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 import com.google.cloud.tools.eclipse.util.templates.appengine.AppEngineTemplateUtility;
 import java.io.ByteArrayInputStream;
 import java.util.Collections;
-
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -42,18 +41,17 @@ public class FlexFacetInstallDelegate extends AppEngineFacetInstallDelegate {
   }
 
   // TODO: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1640
-  // TODO: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1642
   private void createConfigFiles(IProject project, IProgressMonitor monitor) throws CoreException {
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
 
     FlexDeployPreferences flexDeployPreferences = new FlexDeployPreferences(project);
-    String appYamlParentPath = flexDeployPreferences.getAppEngineDirectory();
-    IFolder appYamlParentFolder = project.getFolder(appYamlParentPath);
-    IFile appYaml = appYamlParentFolder.getFile("app.yaml");
+    String appYamlPath = flexDeployPreferences.getAppYamlPath();
+    IFile appYaml = project.getFile(appYamlPath);
     if (appYaml.exists()) {
       return;
     }
-    
+
+    IContainer appYamlParentFolder = appYaml.getParent();
     if (!appYamlParentFolder.exists()) {
       ResourceUtils.createFolders(appYamlParentFolder, subMonitor.newChild(5));
     }
@@ -64,7 +62,7 @@ public class FlexFacetInstallDelegate extends AppEngineFacetInstallDelegate {
         configFileLocation, AppEngineTemplateUtility.APP_YAML_TEMPLATE,
         Collections.<String, String>emptyMap());
     subMonitor.worked(55);
-    
+
     appYaml.refreshLocal(IResource.DEPTH_ZERO, subMonitor.newChild(30));
   }
 }

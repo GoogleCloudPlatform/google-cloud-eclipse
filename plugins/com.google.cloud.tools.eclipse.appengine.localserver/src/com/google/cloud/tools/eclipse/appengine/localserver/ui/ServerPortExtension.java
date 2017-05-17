@@ -89,7 +89,7 @@ public class ServerPortExtension extends ServerCreationWizardPageExtension {
           + event.text + portText.getText().substring(event.end);
       event.doit = updatePortAndTriggerDecoration(newText);
     }
-  };
+  }
 
   private boolean updatePortAndTriggerDecoration(String newPortString) {
     if (newPortString.isEmpty()) {

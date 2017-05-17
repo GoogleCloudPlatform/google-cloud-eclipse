@@ -17,10 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
-
 import javax.xml.namespace.NamespaceContext;
 
 import com.google.common.base.Preconditions;
@@ -40,8 +37,7 @@ class MavenContext implements NamespaceContext {
   @Override
   public Iterator<String> getPrefixes(String namespaceUri) {
     Preconditions.checkNotNull(namespaceUri);
-    Set<String> set = new HashSet<>(Arrays.asList("prefix"));
-    return set.iterator();
+    return Arrays.asList("prefix").iterator();
   }
 
 }

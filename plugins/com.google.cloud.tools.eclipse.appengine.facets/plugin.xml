@@ -10,12 +10,35 @@
     <project-facet-version facet="com.google.cloud.tools.eclipse.appengine.facets.standard" version="1">
        <constraint>
           <and>
-            <requires facet="jst.web" version="2.5"/>
-            <requires facet="java" version="1.7"/>
+             <requires
+                   group="com.google.cloud.tools.eclipse.appengine.facets.standard.constraints.servlet">
+             </requires>
+             <requires
+                   group="com.google.cloud.tools.eclipse.appengine.facets.standard.constraints.jre">
+             </requires>
           </and>
         </constraint>
     </project-facet-version>
   </extension>
+   <extension
+         point="org.eclipse.wst.common.project.facet.core.groups">
+      <group
+            id="com.google.cloud.tools.eclipse.appengine.facets.standard.constraints.servlet">
+         <label>supported Dynamic Web Module APIs</label>
+         <include
+               facet="jst.web"
+               versions="2.5">
+         </include>
+      </group>
+      <group
+            id="com.google.cloud.tools.eclipse.appengine.facets.standard.constraints.jre">
+         <label>supported Java Runtimes</label>
+         <include
+               facet="java"
+               versions="1.7">
+         </include>
+      </group>
+   </extension>
   
   <extension point="org.eclipse.wst.common.project.facet.core.facets">
     <action

@@ -16,6 +16,8 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
+import com.google.cloud.tools.eclipse.appengine.deploy.ui.flexible.FlexDeployPreferencesPanel;
+import com.google.cloud.tools.eclipse.appengine.deploy.ui.standard.StandardDeployPreferencesPanel;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
@@ -33,8 +35,6 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.StackLayout;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.PlatformUI;
@@ -64,6 +64,15 @@ public class DeployPropertyPage extends PropertyPage {
   private PreferencePageSupport databindingSupport;
   private Composite container;
 
+  public DeployPropertyPage() {  // 0-arg required for injection
+  }
+
+  @VisibleForTesting
+  DeployPropertyPage(IGoogleLoginService loginService, IGoogleApiFactory googleApiFactory) {
+    this.loginService = loginService;
+    this.googleApiFactory = googleApiFactory;
+  }
+
   @Override
   protected Control createContents(Composite parent) {
     container = new Composite(parent, SWT.NONE);
@@ -81,15 +90,15 @@ public class DeployPropertyPage extends PropertyPage {
 
     GridDataFactory.fillDefaults().grab(true, true).applyTo(container);
 
-    getControl().addDisposeListener(new DisposeListener() {
-      @Override
-      public void widgetDisposed(DisposeEvent e) {
-        if (databindingSupport != null) {
-          databindingSupport.dispose();
-        }
-      }
-    });
     return container;
+  }
+
+  @Override
+  public void dispose() {
+    if (databindingSupport != null) {
+      databindingSupport.dispose();
+    }
+    super.dispose();
   }
 
   private Runnable getLayoutChangedHandler() {
@@ -149,8 +158,8 @@ public class DeployPropertyPage extends PropertyPage {
     if (facetedProject != null && AppEngineStandardFacet.hasFacet(facetedProject)) {
       createStandardPanelIfNeeded();
       showPanel(standardPreferencesPanel);
-    } else if (facetedProject != null 
-        && ProjectFacetsManager.isProjectFacetDefined(AppEngineFlexFacet.ID) 
+    } else if (facetedProject != null
+        && ProjectFacetsManager.isProjectFacetDefined(AppEngineFlexFacet.ID)
         && AppEngineFlexFacet.hasFacet(facetedProject)) {
       createFlexPanelIfNeeded();
       showPanel(flexPreferencesPanel);
@@ -185,23 +194,9 @@ public class DeployPropertyPage extends PropertyPage {
 
   private void createFlexPanelIfNeeded() {
     if (flexPreferencesPanel == null) {
-      flexPreferencesPanel = new FlexDeployPreferencesPanel(container, facetedProject.getProject());
+      flexPreferencesPanel = new FlexDeployPreferencesPanel(
+          container, facetedProject.getProject(), loginService, getLayoutChangedHandler(),
+          false /* requireValues */, new ProjectRepository(googleApiFactory));
     }
-  }
-
-  /**
-   * Used only in tests.
-   */
-  @VisibleForTesting
-  void setLoginService(IGoogleLoginService loginService) {
-    this.loginService = loginService;
-  }
-
-  /**
-   * Used only in tests.
-   */
-  @VisibleForTesting
-  void setGoogleApiFactory(IGoogleApiFactory googleApiFactory) {
-    this.googleApiFactory = googleApiFactory;
   }
 }

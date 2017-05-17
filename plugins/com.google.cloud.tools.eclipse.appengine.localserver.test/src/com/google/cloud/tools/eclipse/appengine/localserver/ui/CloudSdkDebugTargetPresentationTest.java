@@ -62,7 +62,7 @@ public class CloudSdkDebugTargetPresentationTest {
   }
 
   @Test
-  public void testImage() throws DebugException {
+  public void testImage() {
     assertNotNull(presentation.getImage(debugTarget));
   }
 }

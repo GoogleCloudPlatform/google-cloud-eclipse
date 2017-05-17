@@ -17,7 +17,6 @@
 package com.google.cloud.tools.eclipse.test.util.project;
 
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import com.google.cloud.tools.eclipse.appengine.facets.FacetUtil;
 import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
@@ -83,34 +82,50 @@ public final class TestProjectCreator extends ExternalResource {
   }
 
   @Override
-  protected void before() throws Throwable {
-    createProject("test" + Math.random());
-  }
-
-  @Override
   protected void after() {
-    // Wait for any jobs to complete as WTP validation runs without the workspace protection lock
-    ProjectUtils.waitForProjects(project);
-    try {
-      project.delete(true, null);
-    } catch (CoreException e) {
-      fail("Could not delete project");
+    if (project != null) {
+      // Wait for any jobs to complete as WTP validation runs without the workspace protection lock
+      ProjectUtils.waitForProjects(project);
+      try {
+        project.delete(true, null);
+      } catch (CoreException ex) {
+        throw new AssertionError("Could not delete project", ex);
+      }
     }
   }
 
   public IModule getModule() {
+    createProjectIfNecessary();
     return ServerUtil.getModule(project);
   }
 
   public IJavaProject getJavaProject() {
+    createProjectIfNecessary();
     return javaProject;
   }
 
   public IProject getProject() {
+    createProjectIfNecessary();
     return project;
   }
 
-  private void createProject(String projectName) throws CoreException, JavaModelException {
+  public IFacetedProject getFacetedProject() throws CoreException {
+    IFacetedProject facetedProject = ProjectFacetsManager.create(getProject());
+    return facetedProject;
+  }
+
+
+  private void createProjectIfNecessary() {
+    if (project == null) {
+      try {
+        createProject("test" + Math.random());
+      } catch (CoreException ex) {
+        throw new AssertionError("Could not create project", ex);
+      }
+    }
+  }
+
+  private void createProject(String projectName) throws CoreException {
     IProjectDescription newProjectDescription =
         ResourcesPlugin.getWorkspace().newProjectDescription(projectName);
     newProjectDescription.setNatureIds(

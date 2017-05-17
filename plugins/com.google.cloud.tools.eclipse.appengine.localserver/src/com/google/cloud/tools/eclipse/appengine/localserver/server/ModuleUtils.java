@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
+import org.xml.sax.SAXException;
 
 /**
  * A set of utility methods for dealing with WTP {@link IModule}s.
@@ -40,7 +41,7 @@ public class ModuleUtils {
   /**
    * Retrieve the &lt;service&gt; or &lt;module&gt; identifier from <tt>appengine-web.xml</tt>.
    * If an identifier is not found, return "default".
-   * 
+   *
    * @return the identifier, defaulting to "default" if not found
    */
   public static String getServiceId(IModule module) {
@@ -53,11 +54,13 @@ public class ModuleUtils {
         if (serviceId != null) {
           return serviceId;
         }
+      } catch (SAXException ex) {
+        // Parsing failed due to malformed XML; return "default".
       } catch (CoreException | IOException ex) {
         logger.log(Level.WARNING, "Unable to read " + descriptorFile.getFullPath(), ex);
       }
     }
-    
+
     return "default";
   }
 

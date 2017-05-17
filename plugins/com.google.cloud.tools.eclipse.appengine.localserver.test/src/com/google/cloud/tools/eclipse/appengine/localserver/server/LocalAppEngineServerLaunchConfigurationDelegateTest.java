@@ -186,8 +186,6 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
         .generateServerRunConfiguration(launchConfiguration, server);
     assertNull(config.getHost());
     assertEquals((Integer) LocalAppEngineServerBehaviour.DEFAULT_SERVER_PORT, config.getPort());
-    assertEquals(LocalAppEngineServerBehaviour.DEFAULT_ADMIN_HOST, config.getAdminHost());
-    assertEquals((Integer) LocalAppEngineServerBehaviour.DEFAULT_ADMIN_PORT, config.getAdminPort());
     assertNull(config.getApiPort());
     assertNull(config.getJvmFlags());
     verify(server, atLeastOnce()).getHost();
@@ -235,9 +233,8 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
     DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
         .generateServerRunConfiguration(launchConfiguration, server);
 
-    assertNotNull(config.getAdminPort());
-    assertEquals(9999, (int) config.getAdminPort());
-    verify(launchConfiguration)
+    assertNull(config.getAdminPort());
+    verify(launchConfiguration, never())
         .getAttribute(eq(LocalAppEngineServerBehaviour.ADMIN_PORT_ATTRIBUTE_NAME), anyInt());
     verify(server, never()).getAttribute(anyString(), anyInt());
   }
@@ -255,19 +252,19 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
         .thenAnswer(AdditionalAnswers.returnsSecondArg());
 
     // dev_appserver waits on localhost by default
-    try (ServerSocket socket = new ServerSocket(8000, 100, InetAddress.getLoopbackAddress())) {
+    try (ServerSocket socket = new ServerSocket(8080, 100, InetAddress.getLoopbackAddress())) {
       DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
           .generateServerRunConfiguration(launchConfiguration, server);
 
-      assertNotNull(config.getAdminPort());
-      assertEquals(0, (int) config.getAdminPort());
+      assertNull(config.getAdminPort());
     }
   }
 
   @Test
   public void testGenerateRunConfiguration_withVMArgs() throws CoreException {
+    // DebugPlugin.parseArguments() only supports double-quotes on Windows
     when(launchConfiguration.getAttribute(eq(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS),
-        anyString())).thenReturn("a b 'c d'");
+        anyString())).thenReturn("a b \"c d\"");
 
     DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
         .generateServerRunConfiguration(launchConfiguration, server);

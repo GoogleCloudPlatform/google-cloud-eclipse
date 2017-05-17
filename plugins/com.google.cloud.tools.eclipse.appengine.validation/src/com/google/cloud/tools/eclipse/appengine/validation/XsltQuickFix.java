@@ -92,7 +92,7 @@ public class XsltQuickFix implements IMarkerResolution {
       IWorkbenchPage activePage = activeWorkbenchWindow.getActivePage();
       IEditorPart editorPart = ResourceUtil.findEditor(activePage, file);
       if (editorPart != null) {
-        IDocument document = (IDocument) editorPart.getAdapter(IDocument.class);
+        IDocument document = editorPart.getAdapter(IDocument.class);
         return document;
       }
       return null;

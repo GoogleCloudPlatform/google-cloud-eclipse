@@ -88,7 +88,7 @@ public class LocalAppEnginePublishOperationTest {
    * Verify that multi-web-module works.
    */
   @Test
-  public void testPublishingSubmodules() throws IOException, CoreException {
+  public void testPublishingSubmodules() throws CoreException {
     IServerType serverType =
         ServerCore.findServerType("com.google.cloud.tools.eclipse.appengine.standard.server");
     IServerWorkingCopy serverWorkingCopy =

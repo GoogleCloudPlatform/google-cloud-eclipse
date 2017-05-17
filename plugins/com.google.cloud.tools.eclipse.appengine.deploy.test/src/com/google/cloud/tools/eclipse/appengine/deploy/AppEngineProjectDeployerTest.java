@@ -34,11 +34,15 @@ public class AppEngineProjectDeployerTest {
   @Rule public TemporaryFolder tempFolder = new TemporaryFolder();
 
   private IPath stagingDirectory;
+  private IPath optionalConfigurationFilesDirectory;
 
   @Before
   public void setUp() throws IOException {
     stagingDirectory = new Path(tempFolder.getRoot().toString());
     tempFolder.newFile("app.yaml");
+
+    optionalConfigurationFilesDirectory = stagingDirectory.append("WEB-INF/appengine-generated");
+    tempFolder.newFolder("WEB-INF", "appengine-generated");
   }
 
   @Test
@@ -52,37 +56,38 @@ public class AppEngineProjectDeployerTest {
   }
 
   @Test
-  public void testComputeDeployables_noConfigFilesAndDoNotIncludeFiles() {
+  public void testComputeDeployables_nullConfigDirectoryPath() {
     List<File> deployables = AppEngineProjectDeployer.computeDeployables(
-        stagingDirectory, false /* don't include files */);
+        stagingDirectory, null /* don't include files */);
     assertEquals(1, deployables.size());
     assertEquals(stagingDirectory.append("app.yaml").toFile(), deployables.get(0));
   }
 
   @Test
-  public void testComputeDeployables_noConfigFilesAndIncludeFiles() {
+  public void testComputeDeployables_noConfigFilesInConfigDirectory() {
     List<File> deployables = AppEngineProjectDeployer.computeDeployables(
-        stagingDirectory, true /* include files */);
+        stagingDirectory, optionalConfigurationFilesDirectory);
     assertEquals(1, deployables.size());
     assertEquals(stagingDirectory.append("app.yaml").toFile(), deployables.get(0));
   }
 
   @Test
-  public void testComputeDeployables_configFilesExistAndIncludeFiles() throws IOException {
+  public void testComputeDeployables_configFilesExistButNullConfigDirectoryPath()
+      throws IOException {
     createFakeConfigFiles();
 
     List<File> deployables = AppEngineProjectDeployer.computeDeployables(
-        stagingDirectory, false /* don't include files */);
+        stagingDirectory, null /* don't include files */);
     assertEquals(1, deployables.size());
     assertEquals(stagingDirectory.append("app.yaml").toFile(), deployables.get(0));
   }
 
   @Test
-  public void testComputeDeployables_configFilesExistAndDoNotIncludeFiles() throws IOException {
+  public void testComputeDeployables_configFilesExist() throws IOException {
     createFakeConfigFiles();
 
     List<File> deployables = AppEngineProjectDeployer.computeDeployables(
-        stagingDirectory, true/* include files */);
+        stagingDirectory, optionalConfigurationFilesDirectory);
     assertEquals(6, deployables.size());
     assertTrue(deployables.contains(stagingDirectory.append("app.yaml").toFile()));
     assertTrue(deployables.contains(stagingDirectory.append(
@@ -98,7 +103,6 @@ public class AppEngineProjectDeployerTest {
   }
 
   private void createFakeConfigFiles() throws IOException {
-    tempFolder.newFolder("WEB-INF", "appengine-generated");
     tempFolder.newFile("WEB-INF/appengine-generated/cron.yaml");
     tempFolder.newFile("WEB-INF/appengine-generated/index.yaml");
     tempFolder.newFile("WEB-INF/appengine-generated/dispatch.yaml");

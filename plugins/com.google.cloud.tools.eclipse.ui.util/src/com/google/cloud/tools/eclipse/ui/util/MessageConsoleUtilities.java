@@ -77,7 +77,7 @@ public class MessageConsoleUtilities {
     }
     return messageConsole;
   }
-  
+
   public static <C extends MessageConsole> C findOrCreateConsole(String name, ConsoleFactory<C> factory) {
     ConsolePlugin plugin = ConsolePlugin.getDefault();
     IConsoleManager manager = plugin.getConsoleManager();

@@ -6,6 +6,7 @@ Bundle-SymbolicName: com.google.cloud.tools.eclipse.usagetracker;singleton:=true
 Bundle-Version: 0.1.0.qualifier
 Bundle-Vendor: Google Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-Localization: plugin
 Export-Package: com.google.cloud.tools.eclipse.usagetracker
 Require-Bundle: org.eclipse.core.runtime;bundle-version="3.11.1",
  org.eclipse.jface,
@@ -13,6 +14,8 @@ Require-Bundle: org.eclipse.core.runtime;bundle-version="3.11.1",
 Import-Package: com.google.api.client.http;version="[1.22.0,1.23.0)",
  com.google.api.client.http.javanet;version="[1.22.0,1.23.0)",
  com.google.cloud.tools.eclipse.preferences,
+ com.google.cloud.tools.eclipse.preferences.areas,
+ com.google.cloud.tools.eclipse.ui.util.event,
  com.google.cloud.tools.eclipse.util,
  com.google.common.annotations;version="[20.0.0,21.0.0)",
  com.google.common.base;version="[20.0.0,21.0.0)",

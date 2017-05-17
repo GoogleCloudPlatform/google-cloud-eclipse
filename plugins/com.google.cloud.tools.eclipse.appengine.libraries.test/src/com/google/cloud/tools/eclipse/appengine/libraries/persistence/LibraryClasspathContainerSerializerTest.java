@@ -228,6 +228,7 @@ public class LibraryClasspathContainerSerializerTest {
         return null;
       }
 
+      @Deprecated
       @Override
       public IClasspathEntry getResolvedEntry() {
         return null;

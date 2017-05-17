@@ -21,6 +21,8 @@ import static org.junit.Assert.assertNotNull;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Properties;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
@@ -58,7 +60,7 @@ public class EclipseProperties extends ExternalResource {
   private InputStream readProperties() throws IOException {
     String bundlePath = getHostBundlePath();
     String propertiesLocation = bundlePath + "/" + filename;
-    return new FileInputStream(propertiesLocation);
+    return Files.newInputStream(Paths.get(propertiesLocation));
   }
 
   static String getHostBundlePath() throws IOException {

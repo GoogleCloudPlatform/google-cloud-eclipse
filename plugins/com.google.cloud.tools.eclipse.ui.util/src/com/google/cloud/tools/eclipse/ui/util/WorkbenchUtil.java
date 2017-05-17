@@ -107,7 +107,7 @@ public class WorkbenchUtil {
       logger.log(Level.WARNING, "Cannot launch a browser", ex);
       Program.launch(urlPath);
     } catch (MalformedURLException ex) {
-      return StatusUtil.error(WorkbenchUtil.class, Messages.getString("invalid.url"), ex);
+      return StatusUtil.error(WorkbenchUtil.class, Messages.getString("invalid.url", urlPath), ex);
     }
     return Status.OK_STATUS;
   }

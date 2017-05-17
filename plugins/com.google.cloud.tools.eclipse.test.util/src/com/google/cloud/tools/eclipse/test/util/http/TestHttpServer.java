@@ -56,13 +56,17 @@ public class TestHttpServer extends ExternalResource {
   private final Map<String, String> requestHeaders = new HashMap<>();
 
   private final String expectedPath;
-  private final String responseContent;
+  private final byte[] responseBytes;
 
   // Examples: new TestHttpServer("folder/sample.txt", "arbitrary file content");
   //           new TestHttpServer("", "<html><body>root</body></html>");
   public TestHttpServer(String expectedPath, String responseContent) {
+    this(expectedPath, responseContent.getBytes(StandardCharsets.UTF_8));
+  }
+
+  public TestHttpServer(String expectedPath, byte[] responseBytes) {
     this.expectedPath = expectedPath;
-    this.responseContent = responseContent;
+    this.responseBytes = responseBytes;
   }
 
   @Override
@@ -151,8 +155,7 @@ public class TestHttpServer extends ExternalResource {
         }
 
         baseRequest.setHandled(true);
-        byte[] bytes = responseContent.getBytes(StandardCharsets.UTF_8);
-        response.getOutputStream().write(bytes);
+        response.getOutputStream().write(responseBytes);
         response.setStatus(HttpServletResponse.SC_OK);
       }
     }

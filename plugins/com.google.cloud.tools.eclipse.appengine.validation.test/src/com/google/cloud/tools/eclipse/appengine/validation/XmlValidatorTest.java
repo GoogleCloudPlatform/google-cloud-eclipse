@@ -19,12 +19,12 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
-
+import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -32,15 +32,11 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
-import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
-import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.validation.ValidationFramework;
 import org.eclipse.wst.validation.Validator;
 import org.junit.Before;
-import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 
 public class XmlValidatorTest {
 
@@ -49,25 +45,23 @@ public class XmlValidatorTest {
   private static final String BAD_XML = "<";
   private static final String APPLICATION_MARKER =
       "com.google.cloud.tools.eclipse.appengine.validation.appEngineBlacklistMarker";
-  private static final IProjectFacetVersion APPENGINE_STANDARD_FACET_VERSION_1 =
-      ProjectFacetsManager.getProjectFacet(AppEngineStandardFacet.ID).getVersion("1");
   private IFile resource;
 
-  @ClassRule public static TestProjectCreator appEngineStandardProjectCreator =
-      new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7,
-          WebFacetUtils.WEB_25, APPENGINE_STANDARD_FACET_VERSION_1);
-  
-  @ClassRule public static TestProjectCreator dynamicWebProjectCreator =
+  @Rule public TestProjectCreator appEngineStandardProjectCreator =
+      new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25,
+          AppEngineStandardFacet.FACET_VERSION);
+
+  @Rule public TestProjectCreator dynamicWebProjectCreator =
       new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
 
   @Before
-  public void setUp() throws CoreException {
+  public void setUp() {
     IProject project = dynamicWebProjectCreator.getProject();
     resource = project.getFile("WebContent/WEB-INF/web.xml");
   }
-  
+
   @Test
-  public void testValidate_appEngineStandard() throws CoreException {
+  public void testValidate_appEngineStandard() {
     IProject project = appEngineStandardProjectCreator.getProject();
     IFile file = project.getFile("src/main/webapp/WEB-INF/web.xml");
     ValidationFramework framework = ValidationFramework.getDefault();
@@ -80,9 +74,9 @@ public class XmlValidatorTest {
     }
     fail("webXmlValidator isn't applied to web.xml");
   }
-  
+
   @Test
-  public void testValidate_dynamicWebProject() throws CoreException {
+  public void testValidate_dynamicWebProject() {
     ValidationFramework framework = ValidationFramework.getDefault();
     Validator[] validators = framework.getValidatorsFor(resource);
     for (Validator validator : validators) {
@@ -92,14 +86,27 @@ public class XmlValidatorTest {
       }
     }
   }
-  
+
   @Test
   public void testValidate_badXml() throws IOException, CoreException {
+    IProject project = dynamicWebProjectCreator.getProject();
+    IFile file = project.getFile("src/test");
     byte[] bytes = BAD_XML.getBytes(StandardCharsets.UTF_8);
+    file.create(new ByteArrayInputStream(bytes), true, null);
+
     XmlValidator validator = new XmlValidator();
-    validator.validate(resource, bytes);
     validator.setHelper(new AppEngineWebXmlValidator());
-    IMarker[] markers = resource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
+
+    // This method should not apply any markers for malformed XML
+    validator.validate(file, bytes);
+    IMarker[] emptyMarkers = file.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
+    assertEquals(0, emptyMarkers.length);
+
+    // This method should apply markers for malformed XML
+    validator.xsdValidation(file);
+    IMarker[] markers = file.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
+    assertEquals(1, markers.length);
+
     String resultMessage = (String) markers[0].getAttribute(IMarker.MESSAGE);
     assertEquals("XML document structures must start and end within the same entity.",
         resultMessage);
@@ -129,25 +136,36 @@ public class XmlValidatorTest {
     assertEquals("line 1", markers[0].getAttribute(IMarker.LOCATION));
     resource.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
   }
-  
+
+  @Test
+  public void testXsdValidation() throws CoreException {
+    String xml = "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>"
+        + "<foo></foo>"
+        + "</appengine-web-app>";
+    XmlValidator validator = new XmlValidator();
+    validator.setHelper(new AppEngineWebXmlValidator());
+    IProject project = appEngineStandardProjectCreator.getProject();
+    ResourceUtils.createFolders(project.getFolder("src/main/webapp/WEB-INF"), null);
+    IFile file = project.getFile("src/main/webapp/WEB-INF/appengine-web.xml");
+    file.create(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)), true, null);
+    validator.xsdValidation(file);
+    String problemMarker = "org.eclipse.core.resources.problemmarker";
+    IMarker[] markers = file.findMarkers(problemMarker, true, IResource.DEPTH_ZERO);
+    StringBuilder builder = new StringBuilder();
+    for (IMarker marker : markers) {
+      builder.append(marker.getAttribute(IMarker.MESSAGE) + "\n");
+    }
+    String message = String.format("Expected 1 marker, got %d markers with messages: %s",
+        markers.length, builder.toString());
+    assertEquals(message, 1, markers.length);
+  }
+
   @Test
   public void testCreateMarker() throws CoreException {
     String message = "Project ID should be specified at deploy time.";
     BannedElement element = new BannedElement(message);
-    XmlValidator.createMarker(resource, element, 0);
+    XmlValidator.createMarker(resource, element);
     IMarker[] markers = resource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
-    assertEquals(message, markers[0].getAttribute(IMarker.MESSAGE));
-    resource.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
-  }
-
-  @Test
-  public void testCreateSAXErrorMessage() throws CoreException {
-    String message = "Project ID should be specified at deploy time.";
-    SAXParseException spe = new SAXParseException("", "", "", 1, 1);
-    SAXException ex = new SAXException(message, spe);
-    XmlValidator.createSaxErrorMessage(resource, ex);
-    IMarker[] markers = resource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
-    assertEquals(1, markers.length);
     assertEquals(message, markers[0].getAttribute(IMarker.MESSAGE));
     resource.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
   }

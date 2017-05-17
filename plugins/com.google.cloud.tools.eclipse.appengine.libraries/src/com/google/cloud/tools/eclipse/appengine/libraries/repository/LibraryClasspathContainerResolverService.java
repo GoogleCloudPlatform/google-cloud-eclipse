@@ -141,7 +141,7 @@ public class LibraryClasspathContainerResolverService
 
   private IStatus checkAppEngineStandardJava7(IProgressMonitor monitor) {
     try {
-      for (String libraryId : new String[]{ "servlet-api", "jsp-api"}) {
+      for (String libraryId : new String[] {"servlet-api-2.5", "jsp-api-2.1"}) {
         Library library = CloudLibraries.getLibrary(libraryId);
         for (LibraryFile libraryFile : library.getLibraryFiles()) {
           if (monitor.isCanceled()) {

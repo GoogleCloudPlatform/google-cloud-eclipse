@@ -27,5 +27,6 @@ Import-Package: com.google.api.client.auth.oauth2;version="[1.22.0,1.23.0)",
  org.eclipse.core.databinding.observable,
  org.eclipse.core.databinding.observable.value,
  org.eclipse.core.expressions,
+ org.eclipse.jdt.internal.ui.viewsupport,
  org.eclipse.jface.databinding.swt,
  org.osgi.service.component

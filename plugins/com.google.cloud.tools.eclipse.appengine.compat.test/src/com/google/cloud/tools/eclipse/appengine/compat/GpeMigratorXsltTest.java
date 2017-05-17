@@ -19,22 +19,24 @@ package com.google.cloud.tools.eclipse.appengine.compat;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
+import com.google.cloud.tools.eclipse.util.Xslt;
 import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
-import com.google.cloud.tools.eclipse.util.Xslt;
 
 public class GpeMigratorXsltTest {
 
@@ -55,18 +57,26 @@ public class GpeMigratorXsltTest {
       + "  </xsl:template>"
       + "</xsl:stylesheet>";
 
+  private static final Path wtpMetadataXslPath =
+      Paths.get("../com.google.cloud.tools.eclipse.appengine.compat/xslt/wtpMetadata.xsl");
+
+  private static final DocumentBuilderFactory documentBuilderFactory
+      = DocumentBuilderFactory.newInstance();
+
+  @BeforeClass
+  public static void setUp() {
+    documentBuilderFactory.setNamespaceAware(true);
+  }
+
   @Test
   public void testApplyXslt()
       throws IOException, ParserConfigurationException, SAXException, TransformerException {
     try (InputStream xmlStream = stringToInputStream(WTP_METADATA_XML);
-        InputStream stylesheetStream = stringToInputStream(STYLESHEET)) {
-
-      DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-
-      try (InputStream inputStream = Xslt.applyXslt(xmlStream, stylesheetStream)) {
-        Document transformed = builder.parse(inputStream);
-        assertEquals(0, transformed.getDocumentElement().getChildNodes().getLength());
-      }
+        InputStream stylesheetStream = stringToInputStream(STYLESHEET);
+        InputStream inputStream = Xslt.applyXslt(xmlStream, stylesheetStream)) {
+      DocumentBuilder builder = documentBuilderFactory.newDocumentBuilder();
+      Document transformed = builder.parse(inputStream);
+      assertEquals(0, transformed.getDocumentElement().getChildNodes().getLength());
     }
   }
 
@@ -74,19 +84,15 @@ public class GpeMigratorXsltTest {
   public void testWtpMetadataStylesheet_removesGpeRuntimeAndFacets()
       throws IOException, ParserConfigurationException, SAXException, TransformerException {
     try (InputStream xmlStream = stringToInputStream(WTP_METADATA_XML);
-        InputStream stylesheetStream = new FileInputStream(
-            "../com.google.cloud.tools.eclipse.appengine.compat/xslt/wtpMetadata.xsl")) {
+        InputStream stylesheetStream = Files.newInputStream(wtpMetadataXslPath);
+        InputStream inputStream = Xslt.applyXslt(xmlStream, stylesheetStream)) {
+      DocumentBuilder builder = documentBuilderFactory.newDocumentBuilder();
+      Document transformed = builder.parse(inputStream);
 
-      DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-
-      try (InputStream inputStream = Xslt.applyXslt(xmlStream, stylesheetStream)) {
-        Document transformed = builder.parse(inputStream);
-
-        assertArrayEquals(new String[]{"App Engine Standard Runtime"},
-            getAttributesByTagNameAndAttributeName(transformed, "runtime", "name"));
-        assertArrayEquals(new String[]{"java", "jst.web"},
-            getAttributesByTagNameAndAttributeName(transformed, "installed", "facet"));
-      }
+      assertArrayEquals(new String[]{"App Engine Standard Runtime"},
+          getAttributesByTagNameAndAttributeName(transformed, "runtime", "name"));
+      assertArrayEquals(new String[]{"java", "jst.web"},
+          getAttributesByTagNameAndAttributeName(transformed, "installed", "facet"));
     }
   }
 

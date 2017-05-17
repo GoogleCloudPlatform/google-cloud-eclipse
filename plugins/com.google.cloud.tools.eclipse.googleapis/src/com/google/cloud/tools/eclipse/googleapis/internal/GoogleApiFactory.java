@@ -24,6 +24,7 @@ import com.google.api.services.appengine.v1.Appengine;
 import com.google.api.services.appengine.v1.Appengine.Apps;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects;
+import com.google.api.services.storage.Storage;
 import com.google.cloud.tools.eclipse.googleapis.GoogleApiException;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
@@ -42,7 +43,7 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 
 /**
- * Class to obtain various Google cloud Platform related APIs.
+ * Class to obtain various Google Cloud Platform related APIs.
  */
 @Component
 public class GoogleApiFactory implements IGoogleApiFactory {
@@ -85,11 +86,27 @@ public class GoogleApiFactory implements IGoogleApiFactory {
       HttpTransport transport = transportCache.get(GoogleApiUrl.CLOUDRESOURCE_MANAGER_API);
       Preconditions.checkNotNull(transport, "transport is null");
       Preconditions.checkNotNull(jsonFactory, "jsonFactory is null");
-
+      
       CloudResourceManager resourceManager =
           new CloudResourceManager.Builder(transport, jsonFactory, credential)
               .setApplicationName(CloudToolsInfo.USER_AGENT).build();
       return resourceManager.projects();
+    } catch (ExecutionException ex) {
+      throw new GoogleApiException(ex);
+    }
+  }
+  
+  @Override
+  public Storage newStorageApi(Credential credential) throws GoogleApiException {
+    try {
+      Preconditions.checkNotNull(transportCache, "transportCache is null");
+      HttpTransport transport = transportCache.get(GoogleApiUrl.CLOUD_STORAGE_API);
+      Preconditions.checkNotNull(transport, "transport is null");
+      Preconditions.checkNotNull(jsonFactory, "jsonFactory is null");
+
+      Storage.Builder builder = new Storage.Builder(transport, jsonFactory, credential);
+      Storage storage = builder.build();
+      return storage;
     } catch (ExecutionException ex) {
       throw new GoogleApiException(ex);
     }

@@ -11,6 +11,7 @@ Require-Bundle: org.junit;bundle-version="4.12.0"
 Import-Package: com.google.cloud.tools.eclipse.test.util,
  com.google.cloud.tools.eclipse.test.util.project,
  com.google.cloud.tools.eclipse.ui.util,
+ com.google.cloud.tools.eclipse.util.io,
  org.eclipse.core.runtime.jobs,
  org.eclipse.jst.common.project.facet.core,
  org.eclipse.jst.j2ee.web.project.facet,
