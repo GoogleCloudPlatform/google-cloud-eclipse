@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.test.util.ui;
 import com.google.common.base.Predicate;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 
 public class CompositeUtil {
 
@@ -44,5 +45,37 @@ public class CompositeUtil {
       }
     }
     return null;
+  }
+
+  /**
+   * Finds a {@link Control} of type {@code type} associated with (i.e., coming right after) a
+   * {@link Label} with a text {@code label}.
+   */
+  @SuppressWarnings("unchecked")
+  public static <T> T findControlAfterLabel(Composite composite, Class<T> type, String label) {
+    return (T) CompositeUtil.findControl(composite, new IsControlWithLabel<T>(type, label));
+  }
+
+  private static class IsControlWithLabel<T> implements Predicate<Control> {
+
+    private final String label;
+    private final Class<T> type;
+    private boolean justSawMatchingLabel;
+
+    private IsControlWithLabel(Class<T> type, String label) {
+      this.type = type;
+      this.label = label;
+    }
+
+    @Override
+    public boolean apply(Control control) {
+      if (justSawMatchingLabel) {
+        return type.isInstance(control);
+      } else {
+        justSawMatchingLabel = control instanceof Label
+          && (((Label) control).getText()).equals(label);
+        return false;
+      }
+    }
   }
 }

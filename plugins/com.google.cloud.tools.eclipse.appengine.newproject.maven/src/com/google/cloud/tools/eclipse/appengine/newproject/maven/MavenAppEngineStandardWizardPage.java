@@ -63,13 +63,13 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
 
   private String defaultVersion = "0.1.0-SNAPSHOT"; //$NON-NLS-1$
 
-  @VisibleForTesting Button useDefaults;
-  @VisibleForTesting Text locationField;
+  private Button useDefaults;
+  private Text locationField;
   private Button locationBrowseButton;
-  @VisibleForTesting Text groupIdField;
+  private Text groupIdField;
   private Text artifactIdField;
   private Text versionField;
-  @VisibleForTesting Text javaPackageField;
+  private Text javaPackageField;
   private LibrarySelectorGroup appEngineLibrariesSelectorGroup;
 
   private boolean canFlipPage;
