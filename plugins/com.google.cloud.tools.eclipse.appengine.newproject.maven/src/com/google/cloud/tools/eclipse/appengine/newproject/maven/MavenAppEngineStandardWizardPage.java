@@ -61,16 +61,13 @@ import org.eclipse.ui.PlatformUI;
  */
 public class MavenAppEngineStandardWizardPage extends WizardPage {
 
-  private String defaultVersion = "0.1.0-SNAPSHOT"; //$NON-NLS-1$
-
   @VisibleForTesting Button useDefaults;
   @VisibleForTesting Text locationField;
   private Button locationBrowseButton;
-  @VisibleForTesting Text groupIdField;
-  private Text artifactIdField;
-  private Text versionField;
   @VisibleForTesting Text javaPackageField;
   private LibrarySelectorGroup appEngineLibrariesSelectorGroup;
+
+  private final MavenProjectWizardSupport mavenSupport = new MavenProjectWizardSupport(this);
 
   private boolean canFlipPage;
 
@@ -114,7 +111,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
 
     ModifyListener pageValidator = new PageValidator();
     createLocationArea(container, pageValidator);
-    createMavenCoordinatesArea(container, pageValidator);
+    createMavenCoordinateArea(container, pageValidator);
     createAppEngineProjectDetailsArea(container, pageValidator);
     appEngineLibrariesSelectorGroup =
         new LibrarySelectorGroup(container, CloudLibraries.APP_ENGINE_GROUP);
@@ -181,36 +178,10 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
   }
 
   /** Create UI for specifying desired Maven Coordinates */
-  private void createMavenCoordinatesArea(Composite container, ModifyListener pageValidator) {
-    Group mavenCoordinatesGroup = new Group(container, SWT.NONE);
-    mavenCoordinatesGroup.setText(Messages.getString("MAVEN_PROJECT_COORDINATES")); //$NON-NLS-1$
-    GridDataFactory.defaultsFor(mavenCoordinatesGroup).span(2, 1).applyTo(mavenCoordinatesGroup);
-    GridLayoutFactory.swtDefaults().numColumns(2).applyTo(mavenCoordinatesGroup);
-
-    Label groupIdLabel = new Label(mavenCoordinatesGroup, SWT.LEAD);
-    groupIdLabel.setText(Messages.getString("GROUP_ID")); //$NON-NLS-1$
-    groupIdField = new Text(mavenCoordinatesGroup, SWT.BORDER);
-    groupIdField.setToolTipText(Messages.getString("GROUP_ID_TOOLTIP")); //$NON-NLS-1$
-
-    GridDataFactory.defaultsFor(groupIdField).align(SWT.FILL, SWT.CENTER).applyTo(groupIdField);
-    groupIdField.addModifyListener(pageValidator);
-    groupIdField.addModifyListener(new AutoPackageNameSetterOnGroupIdChange());
-
-    Label artifactIdLabel = new Label(mavenCoordinatesGroup, SWT.LEAD);
-    artifactIdLabel.setText(Messages.getString("ARTIFACT_ID")); //$NON-NLS-1$
-    artifactIdField = new Text(mavenCoordinatesGroup, SWT.BORDER);
-    artifactIdField.setToolTipText(Messages.getString("ARTIFACT_ID_TOOLTIP")); //$NON-NLS-1$
-
-    GridDataFactory.defaultsFor(artifactIdField).align(SWT.FILL, SWT.CENTER)
-        .applyTo(artifactIdField);
-    artifactIdField.addModifyListener(pageValidator);
-
-    Label versionLabel = new Label(mavenCoordinatesGroup, SWT.LEAD);
-    versionLabel.setText(Messages.getString("ARTIFACT_VERSION")); //$NON-NLS-1$
-    versionField = new Text(mavenCoordinatesGroup, SWT.BORDER);
-    versionField.setText(defaultVersion);
-    GridDataFactory.defaultsFor(versionField).align(SWT.FILL, SWT.CENTER).applyTo(versionField);
-    versionField.addModifyListener(pageValidator);
+  private void createMavenCoordinateArea(Composite container, ModifyListener pageValidator) {
+    mavenSupport.createMavenCoordinateArea(container, false /* no dynamic enabling */);
+    mavenSupport.addModifyListener(pageValidator);
+    mavenSupport.addGroupIdModifyListener(new AutoPackageNameSetterOnGroupIdChange());
   }
 
   /** Create UI for specifying App Engine project details */
@@ -337,34 +308,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
   }
 
   private boolean validateMavenSettings() {
-    String groupId = getGroupId();
-    if (groupId.isEmpty()) {
-      setMessage(Messages.getString("PROVIDE_GROUP_ID"), INFORMATION); //$NON-NLS-1$
-      return false;
-    } else if (!MavenCoordinatesValidator.validateGroupId(groupId)) {
-      setErrorMessage(Messages.getString("ILLEGAL_GROUP_ID", groupId)); //$NON-NLS-1$
-      return false;
-    }
-    String artifactId = getArtifactId();
-    if (artifactId.isEmpty()) {
-      setMessage(Messages.getString("PROVIDE_ARTIFACT_ID"), INFORMATION); //$NON-NLS-1$
-      return false;
-    } else if (!MavenCoordinatesValidator.validateArtifactId(artifactId)) {
-      setErrorMessage(Messages.getString("ILLEGAL_ARTIFACT_ID", artifactId)); //$NON-NLS-1$
-      return false;
-    } else if (ResourcesPlugin.getWorkspace().getRoot().getProject(artifactId).exists()) {
-      setErrorMessage(Messages.getString("PROJECT_ALREADY_EXISTS", artifactId)); //$NON-NLS-1$
-      return false;
-    }
-    String version = getVersion();
-    if (version.isEmpty()) {
-      setMessage(Messages.getString("PROVIDE_VERSION"), INFORMATION); //$NON-NLS-1$
-      return false;
-    } else if (!MavenCoordinatesValidator.validateVersion(version)) {
-      setErrorMessage(Messages.getString("ILLEGAL_VERSION") + version); //$NON-NLS-1$
-      return false;
-    }
-    return true;
+    return mavenSupport.validateMavenSettings();
   }
 
   private boolean validateAppEngineProjectDetails() {
@@ -374,7 +318,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
       setErrorMessage(message);
       return false;
     }
-    
+
     IStatus status = JavaPackageValidator.validate(packageName);
     if (!status.isOK()) {
       String details = status.getMessage() == null ? packageName : status.getMessage();
@@ -388,17 +332,17 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
 
   /** Return the Maven group for the project */
   public String getGroupId() {
-    return groupIdField.getText().trim();
+    return mavenSupport.getGroupId();
   }
 
   /** Return the Maven artifact for the project */
   public String getArtifactId() {
-    return artifactIdField.getText().trim();
+    return mavenSupport.getArtifactId();
   }
 
   /** Return the Maven version for the project */
   public String getVersion() {
-    return versionField.getText().trim();
+    return mavenSupport.getVersion();
   }
 
   /**
@@ -436,8 +380,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
 
     @Override
     public void modifyText(ModifyEvent event) {
-      // getGroupId() trims whitespace, so we do the same to sync with the dialog validation error.
-      String groupId = groupIdField.getText().trim();
+      String groupId = getGroupId();
 
       if (MavenCoordinatesValidator.validateGroupId(groupId)) {
         String newSuggestion = suggestPackageName(groupId);

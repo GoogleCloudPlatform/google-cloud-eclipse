@@ -118,6 +118,19 @@ public class AppEngineFlexWizardPage extends AppEngineWizardPage {
   }
 
   @Override
+  public boolean validatePage() {
+    if (!super.validatePage()) {
+      return false;
+    }
+
+    if (!asMavenProject.getSelection()) {
+      return true;
+    } else {
+      return true;
+    }
+  }
+
+  @Override
   public BuildTool getBuildTool() {
     if (asMavenProject.getSelection()) {
       return BuildTool.MAVEN;
