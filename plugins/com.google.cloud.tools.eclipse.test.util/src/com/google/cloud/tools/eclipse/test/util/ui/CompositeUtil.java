@@ -53,27 +53,26 @@ public class CompositeUtil {
    */
   @SuppressWarnings("unchecked")
   public static <T> T findControlAfterLabel(Composite composite, Class<T> type, String label) {
-    return (T) CompositeUtil.findControl(composite, new IsControlWithLabel<T>(type, label));
+    return (T) CompositeUtil.findControl(composite, new AfterLabel<T>(type, label));
   }
 
-  private static class IsControlWithLabel<T> implements Predicate<Control> {
+  private static class AfterLabel<T> implements Predicate<Control> {
 
     private final String label;
     private final Class<T> type;
-    private boolean justSawMatchingLabel;
+    private boolean justSawLabel;
 
-    private IsControlWithLabel(Class<T> type, String label) {
+    private AfterLabel(Class<T> type, String label) {
       this.type = type;
       this.label = label;
     }
 
     @Override
     public boolean apply(Control control) {
-      if (justSawMatchingLabel) {
+      if (justSawLabel) {
         return type.isInstance(control);
       } else {
-        justSawMatchingLabel = control instanceof Label
-          && (((Label) control).getText()).equals(label);
+        justSawLabel = control instanceof Label && (((Label) control).getText()).equals(label);
         return false;
       }
     }
