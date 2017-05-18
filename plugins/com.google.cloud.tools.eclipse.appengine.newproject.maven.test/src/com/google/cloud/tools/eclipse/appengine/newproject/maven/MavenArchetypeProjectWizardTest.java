@@ -23,11 +23,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
-import org.eclipse.core.databinding.observable.Realm;
-import org.eclipse.jface.databinding.swt.DisplayRealm;
 import org.eclipse.jface.wizard.IWizardContainer;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -36,13 +32,10 @@ import org.junit.Test;
 public class MavenArchetypeProjectWizardTest {
 
   private MavenArchetypeProjectWizard wizard;
-  private Shell shell;
   @Rule public ShellTestResource shellTestResource = new ShellTestResource();
 
   @Before
   public void setUp() {
-    shell = shellTestResource.getShell();
-
     wizard = new MavenArchetypeProjectWizard();
     wizard.addPages();
   }
@@ -107,67 +100,57 @@ public class MavenArchetypeProjectWizardTest {
 
   @Test
   public void testAutoPackageNameSetterOnGroupIdChange_whitespaceInGroupId() {
-    Realm.runWithDefault(DisplayRealm.getRealm(Display.getDefault()), new Runnable() {
-      @Override
-      public void run() {
-        wizard.setContainer(mock(IWizardContainer.class));
-        wizard.createPageControls(shell);
-        MavenAppEngineStandardWizardPage page =
-            (MavenAppEngineStandardWizardPage) wizard.getPage("basicNewProjectPage");
+    wizard.setContainer(mock(IWizardContainer.class));
+    wizard.createPageControls(shellTestResource.getShell());
+    MavenAppEngineStandardWizardPage page =
+        (MavenAppEngineStandardWizardPage) wizard.getPage("basicNewProjectPage");
 
-        page.groupIdField.setText(" ");  // setText() triggers VerifyEvent.
-        assertEquals("", page.javaPackageField.getText());
+    page.groupIdField.setText(" ");  // setText() triggers VerifyEvent.
+    assertEquals("", page.javaPackageField.getText());
 
-        page.groupIdField.setText(" a");
-        assertEquals("a", page.javaPackageField.getText());
+    page.groupIdField.setText(" a");
+    assertEquals("a", page.javaPackageField.getText());
 
-        page.groupIdField.setText(" a ");
-        assertEquals("a", page.javaPackageField.getText());
+    page.groupIdField.setText(" a ");
+    assertEquals("a", page.javaPackageField.getText());
 
-        page.groupIdField.setText(" a b");
-        assertEquals("a", page.javaPackageField.getText());
+    page.groupIdField.setText(" a b");
+    assertEquals("a", page.javaPackageField.getText());
 
-        page.groupIdField.setText(" a ");
-        assertEquals("a", page.javaPackageField.getText());
+    page.groupIdField.setText(" a ");
+    assertEquals("a", page.javaPackageField.getText());
 
-        page.groupIdField.setText(" a");
-        assertEquals("a", page.javaPackageField.getText());
+    page.groupIdField.setText(" a");
+    assertEquals("a", page.javaPackageField.getText());
 
-        page.groupIdField.setText(" ac");
-        assertEquals("ac", page.javaPackageField.getText());
-      }
-    });
+    page.groupIdField.setText(" ac");
+    assertEquals("ac", page.javaPackageField.getText());
   }
 
   @Test
   public void testAutoPackageNameSetterOnGroupIdChange_disbledOnUserChange() {
-    Realm.runWithDefault(DisplayRealm.getRealm(Display.getDefault()), new Runnable() {
-      @Override
-      public void run() {
-        wizard.setContainer(mock(IWizardContainer.class));
-        wizard.createPageControls(shell);
-        MavenAppEngineStandardWizardPage page =
-            (MavenAppEngineStandardWizardPage) wizard.getPage("basicNewProjectPage");
-        assertTrue(page.autoGeneratePackageName);
+    wizard.setContainer(mock(IWizardContainer.class));
+    wizard.createPageControls(shellTestResource.getShell());
+    MavenAppEngineStandardWizardPage page =
+        (MavenAppEngineStandardWizardPage) wizard.getPage("basicNewProjectPage");
+    assertTrue(page.autoGeneratePackageName);
 
-        page.groupIdField.setText("abc");
-        assertEquals("abc", page.javaPackageField.getText());
-        assertTrue(page.autoGeneratePackageName);
+    page.groupIdField.setText("abc");
+    assertEquals("abc", page.javaPackageField.getText());
+    assertTrue(page.autoGeneratePackageName);
 
-        page.javaPackageField.setText("def");
-        assertFalse(page.autoGeneratePackageName);
+    page.javaPackageField.setText("def");
+    assertFalse(page.autoGeneratePackageName);
 
-        // javaPackageField should no longer auto-gen
-        page.groupIdField.setText("xyz");
-        assertEquals("def", page.javaPackageField.getText());
+    // javaPackageField should no longer auto-gen
+    page.groupIdField.setText("xyz");
+    assertEquals("def", page.javaPackageField.getText());
 
-        // we shouldn't auto-gen even if the user clears the contents
-        page.javaPackageField.setText("");
-        assertFalse(page.autoGeneratePackageName);
-        page.groupIdField.setText("abc");
-        assertEquals("", page.javaPackageField.getText());
-      }
-    });
+    // we shouldn't auto-gen even if the user clears the contents
+    page.javaPackageField.setText("");
+    assertFalse(page.autoGeneratePackageName);
+    page.groupIdField.setText("abc");
+    assertEquals("", page.javaPackageField.getText());
   }
 
 }
