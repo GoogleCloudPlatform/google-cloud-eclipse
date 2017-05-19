@@ -180,7 +180,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     });
   }
 
-  /** Create UI for specifying desired Maven Coordinate */
+  /** Create UI for specifying desired Maven coordinate */
   private void createMavenCoordinateArea(Composite container, ModifyListener pageValidator) {
     Group mavenCoordinateGroup = new Group(container, SWT.NONE);
     mavenCoordinateGroup.setText(Messages.getString("MAVEN_PROJECT_COORDINATE")); //$NON-NLS-1$
