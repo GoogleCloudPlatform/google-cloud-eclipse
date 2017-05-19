@@ -179,7 +179,12 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
 
   /** Create UI for specifying desired Maven Coordinate */
   private void createMavenCoordinateArea(Composite container, ModifyListener pageValidator) {
-    mavenSupport.createMavenCoordinateArea(container, false /* no dynamic enabling */);
+    Composite composite = new Composite(container, SWT.NONE);
+    // assumed that container has a two-column GridLayout
+    GridDataFactory.fillDefaults().span(2, 1).grab(true,  false).applyTo(composite);
+    GridLayoutFactory.fillDefaults().applyTo(composite);
+
+    mavenSupport.createMavenCoordinateArea(composite, false /* no dynamic enabling */);
     mavenSupport.addModifyListener(pageValidator);
     mavenSupport.addGroupIdModifyListener(new AutoPackageNameSetterOnGroupIdChange());
   }

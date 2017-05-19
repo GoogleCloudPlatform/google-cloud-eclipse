@@ -22,8 +22,8 @@ public class MavenProjectWizardSupport {
 
   private final WizardPage wizardPage;
 
-  private Button asMavenProject;
-  private Group mavenCoordinateGroup;
+  private Button asMavenProjectButton;
+  private Group coordinateGroup;
   private Text groupIdField;
   private Text artifactIdField;
   private Text versionField;
@@ -37,43 +37,43 @@ public class MavenProjectWizardSupport {
 
   /**
    * @param dynamicEnabling if {@code true}, creates a master check box that enables or disables
-   *     the Maven coordinate area; otherwise, statically shows the area
+   *     the Maven coordinate area; otherwise, always enables the area
    */
   public void createMavenCoordinateArea(Composite container, boolean dynamicEnabling) {
     if (dynamicEnabling) {
-      asMavenProject = new Button(container, SWT.CHECK);
-      asMavenProject.setText(Messages.getString("CREATE_AS_MAVEN_PROJECT")); //$NON-NLS-1$
-      asMavenProject.addSelectionListener(new SelectionAdapter() {
+      asMavenProjectButton = new Button(container, SWT.CHECK);
+      asMavenProjectButton.setText(Messages.getString("CREATE_AS_MAVEN_PROJECT")); //$NON-NLS-1$
+      asMavenProjectButton.addSelectionListener(new SelectionAdapter() {
         @Override
         public void widgetSelected(SelectionEvent event) {
-          updateMavenSectionEnabled();
+          updateEnablement();
         }
       });
     }
 
-    mavenCoordinateGroup = new Group(container, SWT.NONE);
-    mavenCoordinateGroup.setText(Messages.getString("MAVEN_PROJECT_COORDINATE")); //$NON-NLS-1$
+    coordinateGroup = new Group(container, SWT.NONE);
+    coordinateGroup.setText(Messages.getString("MAVEN_PROJECT_COORDINATE")); //$NON-NLS-1$
 
-    groupIdLabel = new Label(mavenCoordinateGroup, SWT.LEAD);
+    groupIdLabel = new Label(coordinateGroup, SWT.LEAD);
     groupIdLabel.setText(Messages.getString("GROUP_ID")); //$NON-NLS-1$
-    groupIdField = new Text(mavenCoordinateGroup, SWT.BORDER);
+    groupIdField = new Text(coordinateGroup, SWT.BORDER);
     groupIdField.setToolTipText(Messages.getString("GROUP_ID_TOOLTIP")); //$NON-NLS-1$
 
-    artifactIdLabel = new Label(mavenCoordinateGroup, SWT.LEAD);
+    artifactIdLabel = new Label(coordinateGroup, SWT.LEAD);
     artifactIdLabel.setText(Messages.getString("ARTIFACT_ID")); //$NON-NLS-1$
-    artifactIdField = new Text(mavenCoordinateGroup, SWT.BORDER);
+    artifactIdField = new Text(coordinateGroup, SWT.BORDER);
     artifactIdField.setToolTipText(Messages.getString("ARTIFACT_ID_TOOLTIP")); //$NON-NLS-1$
 
-    versionLabel = new Label(mavenCoordinateGroup, SWT.LEAD);
+    versionLabel = new Label(coordinateGroup, SWT.LEAD);
     versionLabel.setText(Messages.getString("ARTIFACT_VERSION")); //$NON-NLS-1$
-    versionField = new Text(mavenCoordinateGroup, SWT.BORDER);
+    versionField = new Text(coordinateGroup, SWT.BORDER);
     versionField.setText(DEFAULT_VERSION);
 
-    updateMavenSectionEnabled();
+    updateEnablement();
 
-    GridLayoutFactory.swtDefaults().numColumns(2).applyTo(mavenCoordinateGroup);
-    GridDataFactory.swtDefaults().span(2, 1).applyTo(mavenCoordinateGroup);
-    GridDataFactory horizontalFill = GridDataFactory.swtDefaults().align(SWT.FILL, SWT.CENTER);
+    GridLayoutFactory.swtDefaults().numColumns(2).applyTo(coordinateGroup);
+    GridDataFactory horizontalFill = GridDataFactory.fillDefaults().grab(true, false);
+    horizontalFill.applyTo(coordinateGroup);
     horizontalFill.applyTo(groupIdField);
     horizontalFill.applyTo(artifactIdField);
     horizontalFill.applyTo(versionField);
@@ -101,10 +101,10 @@ public class MavenProjectWizardSupport {
     groupIdField.addModifyListener(listener);
   }
 
-  private void updateMavenSectionEnabled() {
-    if (asMavenProject != null) {
-      boolean checked = asMavenProject.getSelection();
-      mavenCoordinateGroup.setEnabled(checked);
+  private void updateEnablement() {
+    if (asMavenProjectButton != null) {
+      boolean checked = asMavenProjectButton.getSelection();
+      coordinateGroup.setEnabled(checked);
       groupIdLabel.setEnabled(checked);
       groupIdField.setEnabled(checked);
       artifactIdLabel.setEnabled(checked);
@@ -115,38 +115,38 @@ public class MavenProjectWizardSupport {
   }
 
   /**
-   * Convenience method that validates a Maven coordinate and sets information or error messages on
-   * a {@link WizardPage} accordingly.
+   * Convenience method that validates a Maven coordinate and sets an information or error message
+   * on a {@link WizardPage} if applicable.
    *
-   * @return {@code true} if there was a validation problem; {@code false} otherwise
+   * @return {@code true} if there was a validation problem and a message was set; {@code false}
+   *     otherwise
    */
   public boolean validateMavenSettings() {
-    String errorMessage = null;
-    String infoMessage = null;
+    String message = null;
 
     if (getGroupId().isEmpty()) {
-      infoMessage = Messages.getString("PROVIDE_GROUP_ID"); //$NON-NLS-1$
+      message = Messages.getString("PROVIDE_GROUP_ID"); //$NON-NLS-1$
+      wizardPage.setMessage(message, IMessageProvider.INFORMATION);
     } else if (getArtifactId().isEmpty()) {
-      infoMessage = Messages.getString("PROVIDE_ARTIFACT_ID"); //$NON-NLS-1$
+      message = Messages.getString("PROVIDE_ARTIFACT_ID"); //$NON-NLS-1$
+      wizardPage.setMessage(message, IMessageProvider.INFORMATION);
     } else if (getVersion().isEmpty()) {
-      infoMessage = Messages.getString("PROVIDE_VERSION"); //$NON-NLS-1$
+      message = Messages.getString("PROVIDE_VERSION"); //$NON-NLS-1$
+      wizardPage.setMessage(message, IMessageProvider.INFORMATION);
     } else if (!MavenCoordinatesValidator.validateGroupId(getGroupId())) {
-      errorMessage = Messages.getString("ILLEGAL_GROUP_ID", groupIdField.getText()); //$NON-NLS-1$
+      message = Messages.getString("ILLEGAL_GROUP_ID", groupIdField.getText()); //$NON-NLS-1$
+      wizardPage.setErrorMessage(message);
     } else if (!MavenCoordinatesValidator.validateArtifactId(getArtifactId())) {
-      errorMessage = Messages.getString("ILLEGAL_ARTIFACT_ID", getArtifactId());
+      message = Messages.getString("ILLEGAL_ARTIFACT_ID", getArtifactId()); //$NON-NLS-1$
+      wizardPage.setErrorMessage(message);
     } else if (!MavenCoordinatesValidator.validateVersion(getVersion())) {
-      errorMessage = Messages.getString("ILLEGAL_VERSION", getVersion()); //$NON-NLS-1$
+      message = Messages.getString("ILLEGAL_VERSION", getVersion()); //$NON-NLS-1$
+      wizardPage.setErrorMessage(message);
     } else if (ResourcesPlugin.getWorkspace().getRoot().getProject(getArtifactId()).exists()) {
-      errorMessage = Messages.getString("PROJECT_ALREADY_EXISTS", getArtifactId()); //$NON-NLS-1$
+      message = Messages.getString("PROJECT_ALREADY_EXISTS", getArtifactId()); //$NON-NLS-1$
+      wizardPage.setErrorMessage(message);
     }
-
-    if (errorMessage != null) {
-      wizardPage.setErrorMessage(errorMessage);
-    } else if (infoMessage != null) {
-      wizardPage.setMessage(infoMessage, IMessageProvider.INFORMATION);
-    }
-
-    return errorMessage == null && infoMessage == null;
+    return message == null;
   }
 
 }
