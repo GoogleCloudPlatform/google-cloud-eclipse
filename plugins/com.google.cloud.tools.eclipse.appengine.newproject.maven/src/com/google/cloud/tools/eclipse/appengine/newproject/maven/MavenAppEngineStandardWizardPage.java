@@ -19,7 +19,6 @@ package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.newproject.JavaPackageValidator;
-import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
 import com.google.cloud.tools.eclipse.appengine.ui.LibrarySelectorGroup;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
