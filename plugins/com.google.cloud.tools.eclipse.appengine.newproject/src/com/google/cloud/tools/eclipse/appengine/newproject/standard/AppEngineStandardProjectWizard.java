@@ -58,22 +58,27 @@ public class AppEngineStandardProjectWizard extends AppEngineProjectWizard {
 
   @Override
   public IStatus validateDependencies(boolean fork, boolean cancelable) {
-    IStatus status = Status.OK_STATUS;
     try {
       DependencyValidator dependencyValidator = new DependencyValidator();
       getContainer().run(fork, cancelable, dependencyValidator);
-      if (!dependencyValidator.result.isOK()) {
-        status = StatusUtil.setErrorStatus(this,
-                                           Messages.getString("project.creation.failed"),
-                                           dependencyValidator.result);
+      if (dependencyValidator.result.isOK()) {
+        return Status.OK_STATUS;
+      } else {
+        return StatusUtil.setErrorStatus(this, Messages.getString("project.creation.failed"),
+            dependencyValidator.result);
       }
     } catch (InvocationTargetException ex) {
-      status = StatusUtil.setErrorStatus(this, Messages.getString("project.creation.failed"),
+      return StatusUtil.setErrorStatus(this, Messages.getString("project.creation.failed"),
           ex.getCause());
-    } catch (InterruptedException e) {
-      status = Status.CANCEL_STATUS;
+    } catch (InterruptedException ex) {
+      return Status.CANCEL_STATUS;
     }
-    return status;
+  }
+
+  @Override
+  public CreateAppEngineWtpProject getAppEngineProjectCreationOperation(
+      AppEngineProjectConfig config, IAdaptable uiInfoAdapter) {
+    return new CreateAppEngineStandardWtpProject(config, uiInfoAdapter);
   }
 
 
@@ -86,12 +91,6 @@ public class AppEngineStandardProjectWizard extends AppEngineProjectWizard {
         throws InvocationTargetException, InterruptedException {
       result = resolverService.checkRuntimeAvailability(AppEngineRuntime.STANDARD_JAVA_7, monitor);
     }
-  }
-
-  @Override
-  public CreateAppEngineWtpProject getAppEngineProjectCreationOperation(
-      AppEngineProjectConfig config, IAdaptable uiInfoAdapter) {
-    return new CreateAppEngineStandardWtpProject(config, uiInfoAdapter);
   }
 
 }
