@@ -177,7 +177,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     });
   }
 
-  /** Create UI for specifying desired Maven Coordinates */
+  /** Create UI for specifying desired Maven Coordinate */
   private void createMavenCoordinateArea(Composite container, ModifyListener pageValidator) {
     mavenSupport.createMavenCoordinateArea(container, false /* no dynamic enabling */);
     mavenSupport.addModifyListener(pageValidator);
