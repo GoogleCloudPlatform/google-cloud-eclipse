@@ -61,10 +61,10 @@ import org.eclipse.ui.PlatformUI;
  */
 public class MavenAppEngineStandardWizardPage extends WizardPage {
 
-  @VisibleForTesting Button useDefaults;
-  @VisibleForTesting Text locationField;
+  private Button useDefaults;
+  private Text locationField;
   private Button locationBrowseButton;
-  @VisibleForTesting Text javaPackageField;
+  private Text javaPackageField;
   private LibrarySelectorGroup appEngineLibrariesSelectorGroup;
 
   private final MavenProjectWizardSupport mavenSupport = new MavenProjectWizardSupport(this);

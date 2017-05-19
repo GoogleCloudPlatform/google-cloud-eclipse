@@ -22,8 +22,12 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
+import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import org.eclipse.jface.wizard.IWizardContainer;
+import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Text;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -105,26 +109,29 @@ public class MavenArchetypeProjectWizardTest {
     MavenAppEngineStandardWizardPage page =
         (MavenAppEngineStandardWizardPage) wizard.getPage("basicNewProjectPage");
 
-    page.groupIdField.setText(" ");  // setText() triggers VerifyEvent.
-    assertEquals("", page.javaPackageField.getText());
+    Text groupIdField = getFieldWithLabel(page, "Group ID:");
+    Text javaPackageField = getFieldWithLabel(page, "Java package:");
 
-    page.groupIdField.setText(" a");
-    assertEquals("a", page.javaPackageField.getText());
+    groupIdField.setText(" ");  // setText() triggers VerifyEvent.
+    assertEquals("", javaPackageField.getText());
 
-    page.groupIdField.setText(" a ");
-    assertEquals("a", page.javaPackageField.getText());
+    groupIdField.setText(" a");
+    assertEquals("a", javaPackageField.getText());
 
-    page.groupIdField.setText(" a b");
-    assertEquals("a", page.javaPackageField.getText());
+    groupIdField.setText(" a ");
+    assertEquals("a", javaPackageField.getText());
 
-    page.groupIdField.setText(" a ");
-    assertEquals("a", page.javaPackageField.getText());
+    groupIdField.setText(" a b");
+    assertEquals("a", javaPackageField.getText());
 
-    page.groupIdField.setText(" a");
-    assertEquals("a", page.javaPackageField.getText());
+    groupIdField.setText(" a ");
+    assertEquals("a", javaPackageField.getText());
 
-    page.groupIdField.setText(" ac");
-    assertEquals("ac", page.javaPackageField.getText());
+    groupIdField.setText(" a");
+    assertEquals("a", javaPackageField.getText());
+
+    groupIdField.setText(" ac");
+    assertEquals("ac", javaPackageField.getText());
   }
 
   @Test
@@ -135,22 +142,29 @@ public class MavenArchetypeProjectWizardTest {
         (MavenAppEngineStandardWizardPage) wizard.getPage("basicNewProjectPage");
     assertTrue(page.autoGeneratePackageName);
 
-    page.groupIdField.setText("abc");
-    assertEquals("abc", page.javaPackageField.getText());
+    Text groupIdField = getFieldWithLabel(page, "Group ID:");
+    Text javaPackageField = getFieldWithLabel(page, "Java package:");
+
+    groupIdField.setText("abc");
+    assertEquals("abc", javaPackageField.getText());
     assertTrue(page.autoGeneratePackageName);
 
-    page.javaPackageField.setText("def");
+    javaPackageField.setText("def");
     assertFalse(page.autoGeneratePackageName);
 
     // javaPackageField should no longer auto-gen
-    page.groupIdField.setText("xyz");
-    assertEquals("def", page.javaPackageField.getText());
+    groupIdField.setText("xyz");
+    assertEquals("def", javaPackageField.getText());
 
     // we shouldn't auto-gen even if the user clears the contents
-    page.javaPackageField.setText("");
+    javaPackageField.setText("");
     assertFalse(page.autoGeneratePackageName);
-    page.groupIdField.setText("abc");
-    assertEquals("", page.javaPackageField.getText());
+    groupIdField.setText("abc");
+    assertEquals("", javaPackageField.getText());
+  }
+
+  private static Text getFieldWithLabel(WizardPage page, String label) {
+    return CompositeUtil.findControlAfterLabel((Composite) page.getControl(), Text.class, label);
   }
 
 }
