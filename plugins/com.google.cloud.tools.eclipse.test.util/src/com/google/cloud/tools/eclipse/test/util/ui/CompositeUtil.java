@@ -48,8 +48,8 @@ public class CompositeUtil {
   }
 
   /**
-   * Finds a {@link Control} of type {@code type} associated with (i.e., coming right after) a
-   * {@link Label} with a text {@code label}.
+   * Finds a {@link Control} of type {@code type} that comes after a {@link Label} with a text
+   * {@code label}.
    */
   @SuppressWarnings("unchecked")
   public static <T> T findControlAfterLabel(Composite composite, Class<T> type, String label) {
@@ -60,7 +60,7 @@ public class CompositeUtil {
 
     private final String label;
     private final Class<T> type;
-    private boolean justSawLabel;
+    private boolean labelSeen;
 
     private AfterLabel(Class<T> type, String label) {
       this.type = type;
@@ -69,10 +69,10 @@ public class CompositeUtil {
 
     @Override
     public boolean apply(Control control) {
-      if (justSawLabel) {
+      if (labelSeen) {
         return type.isInstance(control);
       } else {
-        justSawLabel = control instanceof Label && (((Label) control).getText()).equals(label);
+        labelSeen = control instanceof Label && (((Label) control).getText()).equals(label);
         return false;
       }
     }
