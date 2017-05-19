@@ -318,6 +318,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
       return false;
     } else if (ResourcesPlugin.getWorkspace().getRoot().getProject(getArtifactId()).exists()) {
       setErrorMessage(Messages.getString("PROJECT_ALREADY_EXISTS", getArtifactId())); //$NON-NLS-1$
+      return false;
     }
     return true;
   }

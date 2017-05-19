@@ -29,7 +29,6 @@ import org.eclipse.core.resources.IProject;
  * Collects all data needed to create and configure an App Engine Eclipse Project.
  */
 public class AppEngineProjectConfig {
-
   private File cloudSdkLocation = null;
   private URI eclipseProjectLocationUri = null;
   private String packageName = "";
@@ -44,7 +43,7 @@ public class AppEngineProjectConfig {
   public void setCloudSdkLocation(File cloudSdkLocation) {
     this.cloudSdkLocation = cloudSdkLocation;
   }
-
+  
   public void setPackageName(String name) {
     this.packageName = name;
   }
@@ -83,8 +82,9 @@ public class AppEngineProjectConfig {
   public String getServiceName() {
     return serviceName;
   }
-
+  
   public void setServiceName(String serviceName) {
     this.serviceName = serviceName;
   }
+
 }
