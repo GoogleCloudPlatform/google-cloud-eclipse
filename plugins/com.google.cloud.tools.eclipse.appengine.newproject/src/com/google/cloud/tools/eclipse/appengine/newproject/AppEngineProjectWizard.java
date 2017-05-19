@@ -92,7 +92,6 @@ public abstract class AppEngineProjectWizard extends Wizard implements INewWizar
     config.setServiceName(page.getServiceName());
     config.setPackageName(page.getPackageName());
     config.setProject(page.getProjectHandle());
-    config.setBuildTool(page.getBuildTool());
     if (!page.useDefaults()) {
       config.setEclipseProjectLocationUri(page.getLocationURI());
     }

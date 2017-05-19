@@ -41,7 +41,6 @@ public class AppEngineTemplateUtility {
   public static final String HELLO_APPENGINE_TEST_TEMPLATE = "HelloAppEngineTest.java.ftl";
   public static final String MOCK_HTTPSERVLETRESPONSE_TEMPLATE = "MockHttpServletResponse.java.ftl";
   public static final String APP_YAML_TEMPLATE = "app.yaml.ftl";
-  public static final String POM_XML_TEMPLATE = "pom.xml.ftl";
 
   private static Configuration configuration;
 

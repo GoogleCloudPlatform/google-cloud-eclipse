@@ -1,7 +1,6 @@
 package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -141,9 +140,6 @@ public class MavenCoordinateDialogPageUi {
       dialogPage.setErrorMessage(message);
     } else if (!MavenCoordinatesValidator.validateVersion(getVersion())) {
       message = Messages.getString("ILLEGAL_VERSION", getVersion()); //$NON-NLS-1$
-      dialogPage.setErrorMessage(message);
-    } else if (ResourcesPlugin.getWorkspace().getRoot().getProject(getArtifactId()).exists()) {
-      message = Messages.getString("PROJECT_ALREADY_EXISTS", getArtifactId()); //$NON-NLS-1$
       dialogPage.setErrorMessage(message);
     }
     return message == null;

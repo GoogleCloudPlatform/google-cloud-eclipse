@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.newproject.JavaPackageValidator;
+import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
 import com.google.cloud.tools.eclipse.appengine.ui.LibrarySelectorGroup;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
@@ -313,7 +314,12 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
   }
 
   private boolean validateMavenSettings() {
-    return mavenSupport.validateMavenSettings();
+    if (!mavenSupport.validateMavenSettings()) {
+      return false;
+    } else if (ResourcesPlugin.getWorkspace().getRoot().getProject(getArtifactId()).exists()) {
+      setErrorMessage(Messages.getString("PROJECT_ALREADY_EXISTS", getArtifactId())); //$NON-NLS-1$
+    }
+    return true;
   }
 
   private boolean validateAppEngineProjectDetails() {

@@ -30,15 +30,12 @@ import org.eclipse.core.resources.IProject;
  */
 public class AppEngineProjectConfig {
 
-  public static enum BuildTool { NONE, MAVEN }
-
   private File cloudSdkLocation = null;
   private URI eclipseProjectLocationUri = null;
   private String packageName = "";
   private IProject project;
   private List<Library> appEngineLibraries = Collections.emptyList();
   private String serviceName;
-  private BuildTool buildTool = BuildTool.NONE;
 
   public File getCloudSdkLocation() {
     return cloudSdkLocation;
@@ -89,13 +86,5 @@ public class AppEngineProjectConfig {
 
   public void setServiceName(String serviceName) {
     this.serviceName = serviceName;
-  }
-
-  public void setBuildTool(BuildTool buildTool) {
-    this.buildTool = buildTool;
-  }
-
-  public BuildTool getBuildTool() {
-    return buildTool;
   }
 }

@@ -75,16 +75,13 @@ public class CodeTemplates {
   private static IFile materialize(IProject project, AppEngineProjectConfig config,
       boolean isStandardProject, IProgressMonitor monitor) throws CoreException {
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
-    subMonitor.setTaskName("Generating code"); //$NON-NLS-1$
+    subMonitor.setTaskName("Generating code");
     boolean force = true;
     boolean local = true;
     IFolder src = project.getFolder("src");  //$NON-NLS-1$
     if (!src.exists()) {
       src.create(force, local, subMonitor.newChild(5));
     }
-
-    createChildFile("pom.xml", AppEngineTemplateUtility.POM_XML_TEMPLATE, project, //$NON-NLS-1$
-        Collections.<String, String>emptyMap(), subMonitor.newChild(5));
 
     IFolder main = createChildFolder("main", src, subMonitor.newChild(5)); //$NON-NLS-1$
     IFolder java = createChildFolder("java", main, subMonitor.newChild(5)); //$NON-NLS-1$
@@ -137,7 +134,7 @@ public class CodeTemplates {
     Map<String, String> packageMap = new HashMap<>();
     String packageValue =
         config.getPackageName().isEmpty()
-            ? ""  //$NON-NLS-1$
+            ? ""  //$NON-NLS-1$ 
             : config.getPackageName() + "."; //$NON-NLS-1$
     packageMap.put("package", packageValue);  //$NON-NLS-1$
     if (isStandardProject) {
@@ -177,7 +174,7 @@ public class CodeTemplates {
   @VisibleForTesting
   static IFolder createChildFolder(String name, IFolder parent, IProgressMonitor monitor)
       throws CoreException {
-    monitor.subTask("Creating folder " + name); //$NON-NLS-1$
+    monitor.subTask("Creating folder " + name);
 
     boolean force = true;
     boolean local = true;
@@ -192,7 +189,7 @@ public class CodeTemplates {
   static IFile createChildFile(String name, String template, IContainer parent,
       Map<String, String> values, IProgressMonitor monitor) throws CoreException {
 
-    monitor.subTask("Creating file " + name); //$NON-NLS-1$
+    monitor.subTask("Creating file " + name);
 
     IFile child = parent.getFile(new Path(name));
     if (!child.exists()) {
@@ -207,7 +204,7 @@ public class CodeTemplates {
   @VisibleForTesting
   static void copyChildFile(String name, IContainer parent, IProgressMonitor monitor)
       throws CoreException {
-    monitor.subTask("Copying file " + name); //$NON-NLS-1$
+    monitor.subTask("Copying file " + name);
 
     IFile child = parent.getFile(new Path(name));
     if (!child.exists()) {
