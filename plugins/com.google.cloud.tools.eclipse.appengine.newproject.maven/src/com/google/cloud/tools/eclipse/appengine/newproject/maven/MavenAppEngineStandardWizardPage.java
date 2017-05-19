@@ -177,7 +177,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     });
   }
 
-  /** Create UI for specifying desired Maven Coordinate */
+  /** Create UI for specifying desired Maven coordinate */
   private void createMavenCoordinateArea(Composite container, ModifyListener pageValidator) {
     Composite composite = new Composite(container, SWT.NONE);
     // assumed that container has a two-column GridLayout
