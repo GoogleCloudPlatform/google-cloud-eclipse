@@ -84,7 +84,7 @@ public class AppEngineStandardProjectWizard extends AppEngineProjectWizard {
 
   private class DependencyValidator implements IRunnableWithProgress {
 
-    private IStatus result = null;
+    private IStatus result;
 
     @Override
     public void run(IProgressMonitor monitor)
