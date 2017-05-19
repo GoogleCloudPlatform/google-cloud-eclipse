@@ -2,10 +2,10 @@ package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -16,11 +16,11 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-public class MavenProjectWizardSupport {
+public class MavenCoordinateDialogPageUi {
 
   private static final String DEFAULT_VERSION = "0.1.0-SNAPSHOT"; //$NON-NLS-1$
 
-  private final WizardPage wizardPage;
+  private final DialogPage dialogPage;
 
   private Button asMavenProjectButton;
   private Group coordinateGroup;
@@ -31,8 +31,8 @@ public class MavenProjectWizardSupport {
   private Label artifactIdLabel;
   private Label versionLabel;
 
-  public MavenProjectWizardSupport(WizardPage wizardPage) {
-    this.wizardPage = wizardPage;
+  public MavenCoordinateDialogPageUi(DialogPage dialogPage) {
+    this.dialogPage = dialogPage;
   }
 
   /**
@@ -116,7 +116,7 @@ public class MavenProjectWizardSupport {
 
   /**
    * Convenience method that validates a Maven coordinate and sets an information or error message
-   * on a {@link WizardPage} if applicable.
+   * on a {@link DialogPage} if applicable.
    *
    * @return {@code true} if there was a validation problem and a message was set; {@code false}
    *     otherwise
@@ -126,25 +126,25 @@ public class MavenProjectWizardSupport {
 
     if (getGroupId().isEmpty()) {
       message = Messages.getString("PROVIDE_GROUP_ID"); //$NON-NLS-1$
-      wizardPage.setMessage(message, IMessageProvider.INFORMATION);
+      dialogPage.setMessage(message, IMessageProvider.INFORMATION);
     } else if (getArtifactId().isEmpty()) {
       message = Messages.getString("PROVIDE_ARTIFACT_ID"); //$NON-NLS-1$
-      wizardPage.setMessage(message, IMessageProvider.INFORMATION);
+      dialogPage.setMessage(message, IMessageProvider.INFORMATION);
     } else if (getVersion().isEmpty()) {
       message = Messages.getString("PROVIDE_VERSION"); //$NON-NLS-1$
-      wizardPage.setMessage(message, IMessageProvider.INFORMATION);
+      dialogPage.setMessage(message, IMessageProvider.INFORMATION);
     } else if (!MavenCoordinatesValidator.validateGroupId(getGroupId())) {
       message = Messages.getString("ILLEGAL_GROUP_ID", groupIdField.getText()); //$NON-NLS-1$
-      wizardPage.setErrorMessage(message);
+      dialogPage.setErrorMessage(message);
     } else if (!MavenCoordinatesValidator.validateArtifactId(getArtifactId())) {
       message = Messages.getString("ILLEGAL_ARTIFACT_ID", getArtifactId()); //$NON-NLS-1$
-      wizardPage.setErrorMessage(message);
+      dialogPage.setErrorMessage(message);
     } else if (!MavenCoordinatesValidator.validateVersion(getVersion())) {
       message = Messages.getString("ILLEGAL_VERSION", getVersion()); //$NON-NLS-1$
-      wizardPage.setErrorMessage(message);
+      dialogPage.setErrorMessage(message);
     } else if (ResourcesPlugin.getWorkspace().getRoot().getProject(getArtifactId()).exists()) {
       message = Messages.getString("PROJECT_ALREADY_EXISTS", getArtifactId()); //$NON-NLS-1$
-      wizardPage.setErrorMessage(message);
+      dialogPage.setErrorMessage(message);
     }
     return message == null;
   }

@@ -67,7 +67,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
   private Text javaPackageField;
   private LibrarySelectorGroup appEngineLibrariesSelectorGroup;
 
-  private final MavenProjectWizardSupport mavenSupport = new MavenProjectWizardSupport(this);
+  private final MavenCoordinateDialogPageUi mavenSupport = new MavenCoordinateDialogPageUi(this);
 
   private boolean canFlipPage;
 
