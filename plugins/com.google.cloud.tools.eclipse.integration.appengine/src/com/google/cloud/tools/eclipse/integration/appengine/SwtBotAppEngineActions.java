@@ -71,8 +71,8 @@ public class SwtBotAppEngineActions {
     try {
       SwtBotTestingUtilities.clickButtonAndWaitForWindowClose(bot, bot.button("Finish"));
     } catch (TimeoutException ex) {
-      System.out.println("FATAL: timed out while waiting for the wizard to close. Cannot recover. "
-          + "This may havoc all subsequent integration tests: "
+      System.err.println("FATAL: timed out while waiting for the wizard to close. Cannot recover. "
+          + "This may interfere with subsequent integration tests: "
           + "https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1925.");
     }
     SwtBotTimeoutManager.resetTimeout();
@@ -116,8 +116,8 @@ public class SwtBotAppEngineActions {
     try {
       SwtBotTestingUtilities.clickButtonAndWaitForWindowClose(bot, bot.button("Finish"));
     } catch (TimeoutException ex) {
-      System.out.println("FATAL: timed out while waiting for the wizard to close. Cannot recover. "
-          + "This may havoc all subsequent integration tests: "
+      System.err.println("FATAL: timed out while waiting for the wizard to close. Cannot recover. "
+          + "This may interfere with subsequent integration tests: "
           + "https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1925.");
     }
     SwtBotTimeoutManager.resetTimeout();
