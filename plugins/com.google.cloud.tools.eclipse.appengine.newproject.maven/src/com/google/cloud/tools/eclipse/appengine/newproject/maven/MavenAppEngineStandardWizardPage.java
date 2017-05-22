@@ -114,7 +114,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
 
     ModifyListener pageValidator = new PageValidator();
     createLocationArea(container, pageValidator);
-    createMavenCoordinateArea(container, pageValidator);
+    createMavenCoordinatesArea(container, pageValidator);
     createAppEngineProjectDetailsArea(container, pageValidator);
     appEngineLibrariesSelectorGroup =
         new LibrarySelectorGroup(container, CloudLibraries.APP_ENGINE_GROUP);
@@ -180,34 +180,34 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     });
   }
 
-  /** Create UI for specifying desired Maven coordinate */
-  private void createMavenCoordinateArea(Composite container, ModifyListener pageValidator) {
-    Group mavenCoordinateGroup = new Group(container, SWT.NONE);
-    mavenCoordinateGroup.setText(Messages.getString("MAVEN_PROJECT_COORDINATE")); //$NON-NLS-1$
-    GridDataFactory.defaultsFor(mavenCoordinateGroup).span(2, 1).applyTo(mavenCoordinateGroup);
-    GridLayoutFactory.swtDefaults().numColumns(2).applyTo(mavenCoordinateGroup);
+  /** Create UI for specifying desired Maven Coordinates */
+  private void createMavenCoordinatesArea(Composite container, ModifyListener pageValidator) {
+    Group mavenCoordinatesGroup = new Group(container, SWT.NONE);
+    mavenCoordinatesGroup.setText(Messages.getString("MAVEN_PROJECT_COORDINATES")); //$NON-NLS-1$
+    GridDataFactory.defaultsFor(mavenCoordinatesGroup).span(2, 1).applyTo(mavenCoordinatesGroup);
+    GridLayoutFactory.swtDefaults().numColumns(2).applyTo(mavenCoordinatesGroup);
 
-    Label groupIdLabel = new Label(mavenCoordinateGroup, SWT.LEAD);
+    Label groupIdLabel = new Label(mavenCoordinatesGroup, SWT.LEAD);
     groupIdLabel.setText(Messages.getString("GROUP_ID")); //$NON-NLS-1$
-    groupIdField = new Text(mavenCoordinateGroup, SWT.BORDER);
+    groupIdField = new Text(mavenCoordinatesGroup, SWT.BORDER);
     groupIdField.setToolTipText(Messages.getString("GROUP_ID_TOOLTIP")); //$NON-NLS-1$
 
     GridDataFactory.defaultsFor(groupIdField).align(SWT.FILL, SWT.CENTER).applyTo(groupIdField);
     groupIdField.addModifyListener(pageValidator);
     groupIdField.addModifyListener(new AutoPackageNameSetterOnGroupIdChange());
 
-    Label artifactIdLabel = new Label(mavenCoordinateGroup, SWT.LEAD);
+    Label artifactIdLabel = new Label(mavenCoordinatesGroup, SWT.LEAD);
     artifactIdLabel.setText(Messages.getString("ARTIFACT_ID")); //$NON-NLS-1$
-    artifactIdField = new Text(mavenCoordinateGroup, SWT.BORDER);
+    artifactIdField = new Text(mavenCoordinatesGroup, SWT.BORDER);
     artifactIdField.setToolTipText(Messages.getString("ARTIFACT_ID_TOOLTIP")); //$NON-NLS-1$
 
     GridDataFactory.defaultsFor(artifactIdField).align(SWT.FILL, SWT.CENTER)
         .applyTo(artifactIdField);
     artifactIdField.addModifyListener(pageValidator);
 
-    Label versionLabel = new Label(mavenCoordinateGroup, SWT.LEAD);
+    Label versionLabel = new Label(mavenCoordinatesGroup, SWT.LEAD);
     versionLabel.setText(Messages.getString("ARTIFACT_VERSION")); //$NON-NLS-1$
-    versionField = new Text(mavenCoordinateGroup, SWT.BORDER);
+    versionField = new Text(mavenCoordinatesGroup, SWT.BORDER);
     versionField.setText(defaultVersion);
     GridDataFactory.defaultsFor(versionField).align(SWT.FILL, SWT.CENTER).applyTo(versionField);
     versionField.addModifyListener(pageValidator);
