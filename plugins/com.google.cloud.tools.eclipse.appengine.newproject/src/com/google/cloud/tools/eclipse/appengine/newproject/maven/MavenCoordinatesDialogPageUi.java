@@ -137,7 +137,8 @@ public class MavenCoordinatesDialogPageUi {
    *     relevant message was set; {@code true} otherwise
    */
   public boolean validateMavenSettings() {
-    if (asMavenProjectButton == null) {
+    boolean uiDisabled = asMavenProjectButton != null && !asMavenProjectButton.getSelection();
+    if (uiDisabled) {
       return true;
     }
 

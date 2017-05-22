@@ -18,13 +18,14 @@ package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.verify;
 
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import org.eclipse.jface.dialogs.DialogPage;
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -44,43 +45,43 @@ public class MavenCoordinatesDialogPageUiTest {
 
   private Shell shell;
   private MavenCoordinatesDialogPageUi mavenCoordinateUi;
-  private Text groupIdField;
-  private Text artifactIdField;
-  private Text versionIdField;
 
   @Before
   public void setUp() {
     shell = shellResource.getShell();
     mavenCoordinateUi = new MavenCoordinatesDialogPageUi(dialogPage);
-
-    groupIdField = CompositeUtil.findControlAfterLabel(shell, Text.class, "Group ID:");
-    artifactIdField = CompositeUtil.findControlAfterLabel(shell, Text.class, "Artifact ID:");
-    versionIdField = CompositeUtil.findControlAfterLabel(shell, Text.class, "Version:");
-    assertNotNull(groupIdField);
-    assertNotNull(artifactIdField);
-    assertNotNull(versionIdField);
   }
 
   @Test
   public void testUiWithDynamicEnabling() {
     mavenCoordinateUi.createMavenCoordinatesArea(shell, true /* dynamic enabling */);
+
     Button asMavenProject = CompositeUtil.findControl(shell, Button.class);
     assertEquals("Create as Maven project", asMavenProject.getText());
 
     assertFalse(asMavenProject.getSelection());
-    assertFalse(groupIdField.getEnabled());
-    assertFalse(artifactIdField.getEnabled());
-    assertFalse(versionIdField.getEnabled());
+    assertFalse(getGroupIdField().getEnabled());
+    assertFalse(getArtifactIdField().getEnabled());
+    assertFalse(getVersionField().getEnabled());
   }
 
   @Test
   public void testUiWithNoDynamicEnabling() {
     mavenCoordinateUi.createMavenCoordinatesArea(shell, false /* no dynamic enabling */);
+
     assertNull(CompositeUtil.findControl(shell, Button.class));
 
-    assertTrue(groupIdField.getEnabled());
-    assertTrue(artifactIdField.getEnabled());
-    assertTrue(versionIdField.getEnabled());
+    assertTrue(getGroupIdField().getEnabled());
+    assertTrue(getArtifactIdField().getEnabled());
+    assertTrue(getVersionField().getEnabled());
+  }
+
+  @Test
+  public void testDefaultFieldValues() {
+    mavenCoordinateUi.createMavenCoordinatesArea(shell, false);
+    assertTrue(getGroupIdField().getText().isEmpty());
+    assertTrue(getArtifactIdField().getText().isEmpty());
+    assertEquals("0.1.0-SNAPSHOT", getVersionField().getText());
   }
 
   @Test
@@ -89,13 +90,81 @@ public class MavenCoordinatesDialogPageUiTest {
     Button asMavenProject = CompositeUtil.findControl(shell, Button.class);
 
     new SWTBotCheckBox(asMavenProject).click();
-    assertTrue(groupIdField.getEnabled());
-    assertTrue(artifactIdField.getEnabled());
-    assertTrue(versionIdField.getEnabled());
+    assertTrue(getGroupIdField().getEnabled());
+    assertTrue(getArtifactIdField().getEnabled());
+    assertTrue(getVersionField().getEnabled());
 
     new SWTBotCheckBox(asMavenProject).click();
-    assertFalse(groupIdField.getEnabled());
-    assertFalse(artifactIdField.getEnabled());
-    assertFalse(versionIdField.getEnabled());
-}
+    assertFalse(getGroupIdField().getEnabled());
+    assertFalse(getArtifactIdField().getEnabled());
+    assertFalse(getVersionField().getEnabled());
+  }
+
+  @Test
+  public void testValidateMavenSettings_emptyGroupId() {
+    mavenCoordinateUi.createMavenCoordinatesArea(shell, false);
+
+    assertFalse(mavenCoordinateUi.validateMavenSettings());
+    verify(dialogPage).setMessage("Provide Maven Group ID.", IMessageProvider.INFORMATION);
+  }
+
+  @Test
+  public void testValidateMavenSettings_emptyArtifactId() {
+    mavenCoordinateUi.createMavenCoordinatesArea(shell, false);
+    getGroupIdField().setText("com.example");
+
+    assertFalse(mavenCoordinateUi.validateMavenSettings());
+    verify(dialogPage).setMessage("Provide Maven Artifact ID.", IMessageProvider.INFORMATION);
+  }
+
+  @Test
+  public void testValidateMavenSettings_emptyVersion() {
+    mavenCoordinateUi.createMavenCoordinatesArea(shell, false);
+    getGroupIdField().setText("com.example");
+    getArtifactIdField().setText("some-artifact-id");
+    getVersionField().setText("");
+
+    assertFalse(mavenCoordinateUi.validateMavenSettings());
+    verify(dialogPage).setMessage("Provide Maven artifact version.", IMessageProvider.INFORMATION);
+  }
+
+  @Test
+  public void testValidateMavenSettings_illegalGroupId() {
+    mavenCoordinateUi.createMavenCoordinatesArea(shell, false);
+    getArtifactIdField().setText("some-artifact-id");
+
+    getGroupIdField().setText("<:#= Illegal ID =#:>");
+    assertFalse(mavenCoordinateUi.validateMavenSettings());
+    verify(dialogPage).setErrorMessage("Illegal Maven Group ID: <:#= Illegal ID =#:>");
+  }
+
+  @Test
+  public void testValidateMavenSettings_illegalArtifactId() {
+    mavenCoordinateUi.createMavenCoordinatesArea(shell, false);
+    getGroupIdField().setText("com.example");
+
+    getArtifactIdField().setText("<:#= Illegal ID =#:>");
+    assertFalse(mavenCoordinateUi.validateMavenSettings());
+    verify(dialogPage).setErrorMessage("Illegal Maven Artifact ID: <:#= Illegal ID =#:>");
+  }
+
+  @Test
+  public void testValidateMavenSettings_noValidationIfUiDisabled() {
+    mavenCoordinateUi.createMavenCoordinatesArea(shell, true /* dynamic enabling */);
+
+    getGroupIdField().setText("<:#= Illegal ID =#:>");
+    assertTrue(mavenCoordinateUi.validateMavenSettings());
+  }
+
+  private Text getGroupIdField() {
+    return CompositeUtil.findControlAfterLabel(shell, Text.class, "Group ID:");
+  }
+
+  private Text getArtifactIdField() {
+    return CompositeUtil.findControlAfterLabel(shell, Text.class, "Artifact ID:");
+  }
+
+  private Text getVersionField() {
+    return CompositeUtil.findControlAfterLabel(shell, Text.class, "Version:");
+  }
 }
