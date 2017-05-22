@@ -54,7 +54,7 @@ public class MavenCoordinateDialogPageUi {
    * @param dynamicEnabling if {@code true}, creates a master check box that enables or disables
    *     the Maven coordinate area; otherwise, always enables the area
    */
-  public void createMavenCoordinateArea(Composite container, boolean dynamicEnabling) {
+  public void createMavenCoordinatesArea(Composite container, boolean dynamicEnabling) {
     if (dynamicEnabling) {
       asMavenProjectButton = new Button(container, SWT.CHECK);
       asMavenProjectButton.setText(Messages.getString("CREATE_AS_MAVEN_PROJECT")); //$NON-NLS-1$

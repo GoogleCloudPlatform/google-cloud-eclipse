@@ -111,7 +111,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
 
     ModifyListener pageValidator = new PageValidator();
     createLocationArea(container, pageValidator);
-    createMavenCoordinateArea(container, pageValidator);
+    createMavenCoordinatesArea(container, pageValidator);
     createAppEngineProjectDetailsArea(container, pageValidator);
     appEngineLibrariesSelectorGroup =
         new LibrarySelectorGroup(container, CloudLibraries.APP_ENGINE_GROUP);
@@ -177,14 +177,14 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     });
   }
 
-  /** Create UI for specifying desired Maven coordinate */
-  private void createMavenCoordinateArea(Composite container, ModifyListener pageValidator) {
+  /** Create UI for specifying desired Maven Coordinates */
+  private void createMavenCoordinatesArea(Composite container, ModifyListener pageValidator) {
     Composite composite = new Composite(container, SWT.NONE);
     // assumed that container has a two-column GridLayout
     GridDataFactory.fillDefaults().span(2, 1).grab(true,  false).applyTo(composite);
     GridLayoutFactory.fillDefaults().applyTo(composite);
 
-    mavenSupport.createMavenCoordinateArea(composite, false /* no dynamic enabling */);
+    mavenSupport.createMavenCoordinatesArea(composite, false /* no dynamic enabling */);
     mavenSupport.addModifyListener(pageValidator);
     mavenSupport.addGroupIdModifyListener(new AutoPackageNameSetterOnGroupIdChange());
   }

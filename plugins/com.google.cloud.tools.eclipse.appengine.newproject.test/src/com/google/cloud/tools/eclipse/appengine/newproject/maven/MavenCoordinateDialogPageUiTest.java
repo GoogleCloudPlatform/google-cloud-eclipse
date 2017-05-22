@@ -50,7 +50,7 @@ public class MavenCoordinateDialogPageUiTest {
 
   @Test
   public void testUi_dynamicEnabling() {
-    mavenCoordinateUi.createMavenCoordinateArea(shell, true /* dynamic enabling */);
+    mavenCoordinateUi.createMavenCoordinatesArea(shell, true /* dynamic enabling */);
     assertNotNull(CompositeUtil.findControlAfterLabel(shell, Text.class, "Group ID:"));
     assertNotNull(CompositeUtil.findControlAfterLabel(shell, Text.class, "Artifact ID:"));
     assertNotNull(CompositeUtil.findControlAfterLabel(shell, Text.class, "Version:"));
@@ -61,7 +61,7 @@ public class MavenCoordinateDialogPageUiTest {
 
   @Test
   public void testUi_noDynamicEnabling() {
-    mavenCoordinateUi.createMavenCoordinateArea(shell, false /* no dynamic enabling */);
+    mavenCoordinateUi.createMavenCoordinatesArea(shell, false /* no dynamic enabling */);
     assertNotNull(CompositeUtil.findControlAfterLabel(shell, Text.class, "Group ID:"));
     assertNotNull(CompositeUtil.findControlAfterLabel(shell, Text.class, "Artifact ID:"));
     assertNotNull(CompositeUtil.findControlAfterLabel(shell, Text.class, "Version:"));
