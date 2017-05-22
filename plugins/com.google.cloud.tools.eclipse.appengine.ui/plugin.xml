@@ -4,15 +4,15 @@
 
   <!-- TODO how can we test that the properties are defined? -->
   <extension point="org.eclipse.ui.keywords">
-    <keyword label="%googleCloudPlatformAcronym" 
+    <keyword label="%googleCloudPlatformAcronym"
              id="com.google.cloud.tools.eclipse.appengine.ui.GCPKeyword"/>
-    <keyword label="%appEngineAcronym" 
+    <keyword label="%appEngineAcronym"
              id="com.google.cloud.tools.eclipse.appengine.ui.GAEKeyword"/>
-    <keyword label="%googleName" 
+    <keyword label="%googleName"
              id="com.google.cloud.tools.eclipse.appengine.ui.GoogleKeyword"/>
-    <keyword label="%appEngineName" 
+    <keyword label="%appEngineName"
              id="com.google.cloud.tools.eclipse.appengine.ui.AppEngineKeyword"/>
-    <keyword label="%appEngineNameWithSpace" 
+    <keyword label="%appEngineNameWithSpace"
              id="com.google.cloud.tools.eclipse.appengine.ui.AppSpaceEngineKeyword"/>
     <keyword label="%appEngineFlexAbbreviation"
              id="com.google.cloud.tools.eclipse.appengine.ui.FlexKeyword"/>
@@ -34,7 +34,7 @@
            </command>
         </toolbar>
      </menuContribution>
-       
+
      <menuContribution
            allPopups="false"
            locationURI="menu:com.google.cloud.tools.eclipse.appengine.actions">
@@ -65,6 +65,14 @@
                  name="com.google.cloud.tools.eclipse.appengine.flexible"
                  visible="true">
            </separator>
+           <command
+                 commandId="org.eclipse.ui.newWizard"
+                 style="push">
+              <parameter
+                    name="newWizardId"
+                    value="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineFlex">
+              </parameter>
+           </command>
         </menu>
         <separator
               name="launch"
@@ -95,7 +103,11 @@
               visible="true">
         </separator>
         <command
-              commandId="com.google.cloud.tools.eclipse.appengine.deploy"
+              commandId="com.google.cloud.tools.eclipse.appengine.standard.deploy"
+              style="push">
+        </command>
+        <command
+              commandId="com.google.cloud.tools.eclipse.appengine.flex.deploy"
               style="push">
         </command>
         <separator
@@ -110,7 +122,7 @@
               name="feedback"
               visible="true">
         </separator>
-     </menuContribution>       
+     </menuContribution>
   </extension>
 
 </plugin>
