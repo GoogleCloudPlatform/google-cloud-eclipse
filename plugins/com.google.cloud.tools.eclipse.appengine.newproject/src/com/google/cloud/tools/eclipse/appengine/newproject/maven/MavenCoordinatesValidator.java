@@ -62,5 +62,4 @@ public class MavenCoordinatesValidator {
   private static IWorkspace getWorkspace() {
     return ResourcesPlugin.getWorkspace();
   }
-
 }
