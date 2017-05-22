@@ -85,7 +85,8 @@ public abstract class AppEngineProjectWizard extends Wizard implements INewWizar
 
     boolean fork = true;
     boolean cancelable = true;
-    if (!validateDependencies(fork, cancelable).isOK()) {
+    IStatus status = validateDependencies(fork, cancelable);
+    if (!status.isOK()) {
       return false;
     }
 
