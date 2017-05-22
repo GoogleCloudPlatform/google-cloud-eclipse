@@ -104,6 +104,13 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
     SwtBotTreeUtilities.waitUntilTreeHasItems(bot, launchTree);
     SWTBotTreeItem[] allItems = launchTree.getAllItems();
     SwtBotTreeUtilities.waitUntilTreeHasText(bot, allItems[0]);
+
+    // Log debug info for https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1897
+    if (!allItems[0].getText().contains("App Engine Standard at localhost")) {
+      for (SWTBotTreeItem treeItem : allItems) {
+        System.out.println("    [GitHub #1897 debug info] " + treeItem);
+      }
+    }
     assertTrue("No App Engine launch found",
         allItems[0].getText().contains("App Engine Standard at localhost"));
 
@@ -149,7 +156,7 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
 
   /**
    * Read the content as a string from the specified URL.
-   * 
+   *
    * @throws IOException if cannot connect or timeout
    */
   private static String getUrlContents(URL url, int timeoutInMilliseconds) throws IOException {
