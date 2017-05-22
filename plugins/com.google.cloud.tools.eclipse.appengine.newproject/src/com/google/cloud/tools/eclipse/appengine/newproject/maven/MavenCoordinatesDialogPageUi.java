@@ -31,7 +31,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-public class MavenCoordinateDialogPageUi {
+public class MavenCoordinatesDialogPageUi {
 
   private static final String DEFAULT_VERSION = "0.1.0-SNAPSHOT"; //$NON-NLS-1$
 
@@ -46,7 +46,7 @@ public class MavenCoordinateDialogPageUi {
   private Label artifactIdLabel;
   private Label versionLabel;
 
-  public MavenCoordinateDialogPageUi(DialogPage dialogPage) {
+  public MavenCoordinatesDialogPageUi(DialogPage dialogPage) {
     this.dialogPage = dialogPage;
   }
 
@@ -67,7 +67,7 @@ public class MavenCoordinateDialogPageUi {
     }
 
     coordinateGroup = new Group(container, SWT.NONE);
-    coordinateGroup.setText(Messages.getString("MAVEN_PROJECT_COORDINATE")); //$NON-NLS-1$
+    coordinateGroup.setText(Messages.getString("MAVEN_PROJECT_COORDINATES")); //$NON-NLS-1$
 
     groupIdLabel = new Label(coordinateGroup, SWT.LEAD);
     groupIdLabel.setText(Messages.getString("GROUP_ID")); //$NON-NLS-1$
@@ -131,14 +131,17 @@ public class MavenCoordinateDialogPageUi {
 
   /**
    * Convenience method that validates a Maven coordinate and sets an information or error message
-   * on a {@link DialogPage} if applicable.
+   * on a {@link DialogPage} if applicable. Does nothing if the UI is disabled.
    *
-   * @return {@code true} if there was a validation problem and a message was set; {@code false}
-   *     otherwise
+   * @return {@code false} if there was a validation problem while the UI is enabled and the
+   *     relevant message was set; {@code true} otherwise
    */
   public boolean validateMavenSettings() {
-    String message = null;
+    if (asMavenProjectButton == null) {
+      return true;
+    }
 
+    String message = null;
     if (getGroupId().isEmpty()) {
       message = Messages.getString("PROVIDE_GROUP_ID"); //$NON-NLS-1$
       dialogPage.setMessage(message, IMessageProvider.INFORMATION);
