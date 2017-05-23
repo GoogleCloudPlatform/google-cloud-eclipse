@@ -65,6 +65,12 @@ public class RunOptionsDefaultsComponentTest {
   }
   
   @Test
+  public void testStagingLocation() {
+    component.setStagingLocationText("foobar");
+    Assert.assertEquals("gs://foobar", component.getStagingLocation());
+  }
+  
+  @Test
   public void testCloudProjectText() {
     Assert.assertEquals("", component.getProject());
     component.setCloudProjectText("foo");
