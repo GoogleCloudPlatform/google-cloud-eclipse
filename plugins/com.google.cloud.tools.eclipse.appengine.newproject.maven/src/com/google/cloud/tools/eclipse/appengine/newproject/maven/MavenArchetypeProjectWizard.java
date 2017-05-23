@@ -30,11 +30,8 @@ import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -51,7 +48,7 @@ public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
     setWindowTitle(Messages.getString("WIZARD_TITLE")); //$NON-NLS-1$
     setNeedsProgressMonitor(true);
   }
-  
+
   @Override
   public void addPages() {
     try {
@@ -72,7 +69,7 @@ public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
           AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_MAVEN));
     }
   }
-  
+
 
   @Override
   public boolean performFinish() {
@@ -106,25 +103,21 @@ public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
       }
     };
 
-    IStatus status = Status.OK_STATUS;
     try {
       boolean fork = true;
       boolean cancelable = true;
       getContainer().run(fork, cancelable, runnable);
-      
+
       // open most important file created by wizard in editor
       IFile file = operation.getMostImportant();
       WorkbenchUtil.openInEditor(workbench, file);
-      
+      return true;
     } catch (InterruptedException ex) {
-      status = Status.CANCEL_STATUS;
+      return false;
     } catch (InvocationTargetException ex) {
-      status = StatusUtil.setErrorStatus(this,
-                                         Messages.getString("PROJECT_CREATION_FAILED"),
-                                         ex.getCause());
+      StatusUtil.setErrorStatus(this, Messages.getString("PROJECT_CREATION_FAILED"), ex.getCause());
+      return false;
     }
-
-    return status.isOK();
   }
 
   @Override

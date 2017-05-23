@@ -2,10 +2,11 @@
 <?eclipse version="3.4"?>
 <plugin>
 
+  <!-- begin App Engine standard -->
   <extension point="org.eclipse.ui.commands">
     <command
       description="%deployStandardCommandDescription"
-      id="com.google.cloud.tools.eclipse.appengine.deploy"
+      id="com.google.cloud.tools.eclipse.appengine.standard.deploy"
       name="%deployStandardCommandName">
     </command>
   </extension>
@@ -15,7 +16,7 @@
       allPopups="false"
       locationURI="popup:org.eclipse.ui.popup.any?after=additions">
       <command
-        commandId="com.google.cloud.tools.eclipse.appengine.deploy"
+        commandId="com.google.cloud.tools.eclipse.appengine.standard.deploy"
         label="%deployStandardMenuLabel"
         style="push">
         <visibleWhen checkEnabled="true" />
@@ -26,17 +27,76 @@
   <extension point="org.eclipse.ui.handlers">
     <handler
       class="com.google.cloud.tools.eclipse.appengine.deploy.ui.standard.StandardDeployCommandHandler"
-      commandId="com.google.cloud.tools.eclipse.appengine.deploy">
+      commandId="com.google.cloud.tools.eclipse.appengine.standard.deploy">
       <enabledWhen>
         <and>
           <count value="1" />
           <iterate>
-            <reference definitionId="com.google.cloud.tools.eclipse.appengine.onlyInGCPProjects" />
+            <reference definitionId="com.google.cloud.tools.eclipse.appengine.onlyInStandardProjects" />
           </iterate>
         </and>
       </enabledWhen>
     </handler>
   </extension>
+
+  <extension point="org.eclipse.core.expressions.definitions">
+    <definition id="com.google.cloud.tools.eclipse.appengine.onlyInStandardProjects">
+      <adapt type="org.eclipse.core.resources.IProject">
+        <test
+            property="org.eclipse.wst.common.project.facet.core.projectFacet"
+            value="com.google.cloud.tools.eclipse.appengine.facets.standard" />
+      </adapt>
+    </definition>
+  </extension>
+  <!-- end App Engine standard -->
+
+  <!-- start App Engine flex -->
+  <extension point="org.eclipse.ui.commands">
+    <command
+      description="%deployFlexCommandDescription"
+      id="com.google.cloud.tools.eclipse.appengine.flex.deploy"
+      name="%deployFlexCommandName">
+    </command>
+  </extension>
+
+  <extension point="org.eclipse.ui.menus">
+    <menuContribution
+      allPopups="false"
+      locationURI="popup:org.eclipse.ui.popup.any?after=additions">
+      <command
+        commandId="com.google.cloud.tools.eclipse.appengine.flex.deploy"
+        label="%deployFlexMenuLabel"
+        style="push">
+        <visibleWhen checkEnabled="true" />
+      </command>
+    </menuContribution>
+  </extension>
+
+  <extension point="org.eclipse.ui.handlers">
+    <handler
+      class="com.google.cloud.tools.eclipse.appengine.deploy.ui.flexible.FlexDeployCommandHandler"
+      commandId="com.google.cloud.tools.eclipse.appengine.flex.deploy">
+      <enabledWhen>
+        <and>
+          <count value="1" />
+          <iterate>
+            <reference definitionId="com.google.cloud.tools.eclipse.appengine.onlyInFlexProjects" />
+          </iterate>
+        </and>
+      </enabledWhen>
+    </handler>
+  </extension>
+
+  <extension point="org.eclipse.core.expressions.definitions">
+    <definition id="com.google.cloud.tools.eclipse.appengine.onlyInFlexProjects">
+      <adapt type="org.eclipse.core.resources.IProject">
+        <test
+            property="org.eclipse.wst.common.project.facet.core.projectFacet"
+            value="com.google.cloud.tools.eclipse.appengine.facets.flex" />
+      </adapt>
+    </definition>
+  </extension>
+  <!-- end App Engine flex -->
 
   <extension
     point="org.eclipse.ui.console.consolePatternMatchListeners">
@@ -77,16 +137,6 @@
         <adapt type="org.eclipse.core.resources.IProject" />
       </enabledWhen>
     </page>
-  </extension>
-
-  <extension point="org.eclipse.core.expressions.definitions">
-    <definition id="com.google.cloud.tools.eclipse.appengine.onlyInGCPProjects">
-      <adapt type="org.eclipse.core.resources.IProject">
-        <test
-            property="org.eclipse.wst.common.project.facet.core.projectFacet"
-            value="com.google.cloud.tools.eclipse.appengine.facets.standard" />
-      </adapt>
-    </definition>
   </extension>
 
   <extension point="org.eclipse.ui.console.consolePageParticipants">

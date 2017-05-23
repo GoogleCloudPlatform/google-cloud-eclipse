@@ -172,34 +172,16 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     locationBrowse = ButtonFactory.newPushButton(locationGroup, "&Browse");
     locationBrowse.setEnabled(false);
 
-    // Advanced options (such as using -SNAPSHOT Archetypes)
-    final ExpandableComposite advancedComposite =
-        new ExpandableComposite(formComposite, SWT.NULL, ExpandableComposite.TWISTIE);
-    advancedComposite.setText("Advanced");
-    advancedComposite.setLayout(new GridLayout(1, false));
-    advancedComposite.setLayoutData(gridSpan(GridData.FILL_HORIZONTAL, 3));
-
-    final Composite advancedContent = new Composite(advancedComposite, SWT.NULL);
-    advancedContent.setLayoutData(gridSpan(GridData.FILL_HORIZONTAL, 1));
-    advancedComposite.setClient(advancedContent);
-
-    projectNameTemplate = addCombo(advancedContent, "Name &template:", false);
+    projectNameTemplate = addCombo(formComposite, "Name &template:", false);
     projectNameTemplate.setToolTipText(
-        "Optional Eclipse project name template. Eg., [groupId]-[artifactId].");
+        "Optional Eclipse project name template such as [groupId]-[artifactId].");
     projectNameTemplate.add("[artifactId]");
     projectNameTemplate.add("[groupId]-[artifactId]");
-
-    advancedComposite.addExpansionListener(new ExpansionAdapter() {
-      @Override
-      public void expansionStateChanged(ExpansionEvent event) {
-        advancedComposite.getShell().pack();
-      }
-    });
+    projectNameTemplate.setLayoutData(gridSpan(GridData.FILL_HORIZONTAL, 1));
 
     // Register all the listeners
     addListeners(defaultLocation);
 
-    advancedComposite.layout();
     formComposite.layout();
     parent.layout();
   }

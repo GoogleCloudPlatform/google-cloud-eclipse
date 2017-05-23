@@ -63,13 +63,13 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
 
   private String defaultVersion = "0.1.0-SNAPSHOT"; //$NON-NLS-1$
 
-  @VisibleForTesting Button useDefaults;
-  @VisibleForTesting Text locationField;
+  private Button useDefaults;
+  private Text locationField;
   private Button locationBrowseButton;
-  @VisibleForTesting Text groupIdField;
+  private Text groupIdField;
   private Text artifactIdField;
   private Text versionField;
-  @VisibleForTesting Text javaPackageField;
+  private Text javaPackageField;
   private LibrarySelectorGroup appEngineLibrariesSelectorGroup;
 
   private boolean canFlipPage;
@@ -374,7 +374,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
       setErrorMessage(message);
       return false;
     }
-    
+
     IStatus status = JavaPackageValidator.validate(packageName);
     if (!status.isOK()) {
       String details = status.getMessage() == null ? packageName : status.getMessage();
@@ -436,8 +436,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
 
     @Override
     public void modifyText(ModifyEvent event) {
-      // getGroupId() trims whitespace, so we do the same to sync with the dialog validation error.
-      String groupId = groupIdField.getText().trim();
+      String groupId = getGroupId();
 
       if (MavenCoordinatesValidator.validateGroupId(groupId)) {
         String newSuggestion = suggestPackageName(groupId);

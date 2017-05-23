@@ -32,7 +32,6 @@ import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
@@ -88,6 +87,7 @@ public abstract class AppEngineProjectWizard extends Wizard implements INewWizar
     boolean cancelable = true;
     IStatus status = validateDependencies(fork, cancelable);
     if (!status.isOK()) {
+      StatusUtil.setErrorStatus(this, status.getMessage(), status);
       return false;
     }
 
@@ -111,14 +111,14 @@ public abstract class AppEngineProjectWizard extends Wizard implements INewWizar
       // open most important file created by wizard in editor
       IFile file = runnable.getMostImportant();
       WorkbenchUtil.openInEditor(workbench, file);
+      return true;
     } catch (InterruptedException ex) {
-      status = Status.CANCEL_STATUS;
+      return false;
     } catch (InvocationTargetException ex) {
       String message = Messages.getString("project.creation.failed"); //$NON-NLS-1$
-      status = StatusUtil.setErrorStatus(this, message, ex.getCause());
+      StatusUtil.setErrorStatus(this, message, ex.getCause());
+      return false;
     }
-
-    return status.isOK();
   }
 
   @Override
