@@ -50,7 +50,7 @@ public class NewDataflowProjectWizardDefaultRunOptionsPage extends WizardPage {
   public void createControl(Composite parent) {
     DataflowPreferences prefs = ProjectOrWorkspaceDataflowPreferences.forWorkspace();
     Composite composite = new Composite(parent, SWT.NULL);
-    final int numColumns = 3;
+    int numColumns = 3;
     composite.setLayout(new GridLayout(numColumns, false));
     runOptionsDefaultsComponent = new RunOptionsDefaultsComponent(
         composite, numColumns, new DialogPageMessageTarget(this), prefs, this);
