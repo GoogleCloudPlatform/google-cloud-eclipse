@@ -38,7 +38,7 @@ public class DeployPropertyPageTest extends BaseProjectTest {
   @Test
   public void testPropertyPageTitle_standardProject() throws CoreException {
     String projectName = "foo";
-    project = SwtBotAppEngineActions.createNativeWebAppProject(bot, this, projectName, null, null);
+    project = SwtBotAppEngineActions.createNativeWebAppProject(bot, projectName, null, null);
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);
     assertNotNull("Native App Engine projects should be faceted", facetedProject);
     assertTrue(AppEngineStandardFacet.hasFacet(facetedProject));

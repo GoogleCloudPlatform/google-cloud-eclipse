@@ -80,7 +80,7 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
 
     assertNoService(new URL("http://localhost:8080/hello"));
 
-    project = SwtBotAppEngineActions.createNativeWebAppProject(bot, this, "testapp", null,
+    project = SwtBotAppEngineActions.createNativeWebAppProject(bot, "testapp", null,
         "app.engine.test");
     assertTrue(project.exists());
 
