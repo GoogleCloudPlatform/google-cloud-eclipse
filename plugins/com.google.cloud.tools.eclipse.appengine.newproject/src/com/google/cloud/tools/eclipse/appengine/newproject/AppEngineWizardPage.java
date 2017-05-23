@@ -66,7 +66,7 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
     Composite container = (Composite) getControl();
     setHelp(container);
 
-    createCustomFields(container, new PageValidator());
+    createCustomFields(container);
 
     // Manage APIs
     // todo we don't need this if; can do with subclasses
@@ -84,8 +84,9 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
     Dialog.applyDialogFont(container);
   }
 
-  private void createCustomFields(Composite container, PageValidator pageValidator) {
+  private void createCustomFields(Composite container) {
     Composite composite = new Composite(container, SWT.NONE);
+    PageValidator pageValidator = new PageValidator();
     createPackageField(composite, pageValidator);
     createServiceField(composite, pageValidator);
 

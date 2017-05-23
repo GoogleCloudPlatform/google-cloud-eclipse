@@ -105,12 +105,12 @@ public class MavenCoordinatesUi {
   }
 
   public void addChangeListener(Listener listener) {
-    if (asMavenProjectButton != null) {
-      asMavenProjectButton.addListener(SWT.Selection, listener);
-    }
     groupIdField.addListener(SWT.Modify, listener);
     artifactIdField.addListener(SWT.Modify, listener);
     versionField.addListener(SWT.Modify, listener);
+    if (asMavenProjectButton != null) {
+      asMavenProjectButton.addListener(SWT.Selection, listener);
+    }
   }
 
   public void addGroupIdModifyListener(ModifyListener listener) {
