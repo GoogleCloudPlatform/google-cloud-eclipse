@@ -7,7 +7,6 @@ Bundle-SymbolicName: com.google.cloud.tools.eclipse.appengine.validation.test
 Bundle-Vendor: Google Inc.
 Bundle-Version: 0.1.0.qualifier
 Fragment-Host: com.google.cloud.tools.eclipse.appengine.validation
-Require-Bundle: org.junit;bundle-version="4.12.0"
 Import-Package: com.google.cloud.tools.eclipse.test.util,
  com.google.cloud.tools.eclipse.test.util.project,
  com.google.cloud.tools.eclipse.ui.util,
@@ -15,5 +14,6 @@ Import-Package: com.google.cloud.tools.eclipse.test.util,
  org.eclipse.core.runtime.jobs,
  org.eclipse.jst.common.project.facet.core,
  org.eclipse.jst.j2ee.web.project.facet,
+ org.junit;version="4.12.0",
  org.mockito;provider=google;version="1.10.19",
  org.mockito.stubbing;provider=google;version="1.10.19"
