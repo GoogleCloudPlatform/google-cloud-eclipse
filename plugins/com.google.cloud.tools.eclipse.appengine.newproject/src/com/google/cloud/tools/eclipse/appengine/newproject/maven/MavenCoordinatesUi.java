@@ -125,8 +125,7 @@ public class MavenCoordinatesUi {
    *     a status describing a validation problem (with a non-OK status)
    */
   public IStatus validateMavenSettings() {
-    boolean uiDisabled = asMavenProjectButton != null && !asMavenProjectButton.getSelection();
-    if (uiDisabled) {
+    if (asMavenProjectButton != null && !asMavenProjectButton.getSelection()) {
       return Status.OK_STATUS;
     }
 
@@ -153,7 +152,7 @@ public class MavenCoordinatesUi {
    * Convenience method to set a validation message on {@link DialogPage} from the result of calling
    * {@link #validateMavenSettings()}.
    *
-   * @return {@code true} if a validation message was set; {@code false} otherwise
+   * @return {@code true} if no validation message was set; {@code false} otherwise
    *
    * @see #validateMavenSettings()
    */
