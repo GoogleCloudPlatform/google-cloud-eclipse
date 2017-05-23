@@ -23,6 +23,7 @@ import org.eclipse.jface.dialogs.DialogPage;
  */
 public class DialogPageMessageTarget implements MessageTarget {
   private final DialogPage target;
+  private boolean isError = false;
 
   public DialogPageMessageTarget(DialogPage target) {
     this.target = target;
@@ -31,16 +32,29 @@ public class DialogPageMessageTarget implements MessageTarget {
   @Override
   public void setInfo(String message) {
     target.setMessage(message, DialogPage.INFORMATION);
+    isError = false;
   }
 
   @Override
   public void setError(String message) {
     target.setMessage(message, DialogPage.ERROR);
+    isError = true;
   }
 
   @Override
   public void clear() {
     target.setMessage(null);
+    isError = false;
+  }
+
+  @Override
+  public boolean hasError() {
+    return isError;
+  }
+
+  @Override
+  public String getMessage() {
+    return target.getMessage();
   }
 }
 

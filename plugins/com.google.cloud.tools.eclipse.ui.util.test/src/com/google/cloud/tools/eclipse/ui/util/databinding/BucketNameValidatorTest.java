@@ -31,79 +31,85 @@ public class BucketNameValidatorTest {
                                            + "12345678901234567890123456789012345678901234567890."
                                            + "12345678901234567890123456789012345678901234567890."
                                            + "123456789012345678";
+  
+  private BucketNameValidator validator = new BucketNameValidator();
 
   @Test
   public void testValidation_nonStringInput() {
-    assertThat(new BucketNameValidator().validate(new Object()).getSeverity(), is(IStatus.ERROR));
+    IStatus status = validator.validate(new Object());
+    assertThat(status.getSeverity(), is(IStatus.ERROR));
+    assertThat(status.getMessage(), is("Invalid bucket name"));
   }
 
   @Test
   public void testValidation_emptyString() {
-    assertThat(new BucketNameValidator().validate("").getSeverity(), is(IStatus.OK));
+    assertThat(validator.validate("").getSeverity(), is(IStatus.OK));
   }
 
   @Test
   public void testValidation_upperCaseLetter() {
-    assertThat(new BucketNameValidator().validate("THISWOULDBEVALIDIFLOWERCASE").getSeverity(), is(IStatus.ERROR));
+    IStatus status = validator.validate("THISWOULDBEVALIDIFLOWERCASE");
+    assertThat(status.getSeverity(), is(IStatus.ERROR));
+    assertThat(status.getMessage(), is("Invalid bucket name: THISWOULDBEVALIDIFLOWERCASE"));
   }
 
   @Test
   public void testValidation_startWithDot() {
-    assertThat(new BucketNameValidator().validate(".bucket").getSeverity(), is(IStatus.ERROR));
+    assertThat(validator.validate(".bucket").getSeverity(), is(IStatus.ERROR));
   }
 
   @Test
   public void testValidation_endWithDot() {
-    assertThat(new BucketNameValidator().validate("bucket.").getSeverity(), is(IStatus.ERROR));
+    assertThat(validator.validate("bucket.").getSeverity(), is(IStatus.ERROR));
   }
 
   @Test
   public void testValidation_startWithHyphen() {
-    assertThat(new BucketNameValidator().validate("-bucket").getSeverity(), is(IStatus.ERROR));
+    assertThat(validator.validate("-bucket").getSeverity(), is(IStatus.ERROR));
   }
 
   @Test
   public void testValidation_endWithHyphen() {
-    assertThat(new BucketNameValidator().validate("bucket-").getSeverity(), is(IStatus.ERROR));
+    assertThat(validator.validate("bucket-").getSeverity(), is(IStatus.ERROR));
   }
 
   @Test
   public void testValidation_startWithUnderscore() {
-    assertThat(new BucketNameValidator().validate("_bucket").getSeverity(), is(IStatus.ERROR));
+    assertThat(validator.validate("_bucket").getSeverity(), is(IStatus.ERROR));
   }
 
   @Test
   public void testValidation_endWithUnderscore() {
-    assertThat(new BucketNameValidator().validate("bucket_").getSeverity(), is(IStatus.ERROR));
+    assertThat(validator.validate("bucket_").getSeverity(), is(IStatus.ERROR));
   }
 
   @Test
   public void testValidation_maxLengthWithoutDot() {
-    assertThat(new BucketNameValidator().validate(LENGTH_63).getSeverity(), is(IStatus.OK));
+    assertThat(validator.validate(LENGTH_63).getSeverity(), is(IStatus.OK));
   }
 
   @Test
   public void testValidation_tooLongNameWithoutDot() {
-    assertThat(new BucketNameValidator().validate(LENGTH_63 + "4").getSeverity(), is(IStatus.ERROR));
+    assertThat(validator.validate(LENGTH_63 + "4").getSeverity(), is(IStatus.ERROR));
   }
 
   @Test
   public void testValidation_validNameWithDot() {
-    assertThat(new BucketNameValidator().validate(LENGTH_64_WITH_DOT).getSeverity(), is(IStatus.OK));
+    assertThat(validator.validate(LENGTH_64_WITH_DOT).getSeverity(), is(IStatus.OK));
   }
 
   @Test
   public void testValidation_tooLongNameWithDot() {
-    assertThat(new BucketNameValidator().validate(LENGTH_222 + "9").getSeverity(), is(IStatus.ERROR));
+    assertThat(validator.validate(LENGTH_222 + "9").getSeverity(), is(IStatus.ERROR));
   }
 
   @Test
   public void testValidation_maxLengthWithDot() {
-    assertThat(new BucketNameValidator().validate(LENGTH_222).getSeverity(), is(IStatus.OK));
+    assertThat(validator.validate(LENGTH_222).getSeverity(), is(IStatus.OK));
   }
 
   @Test
   public void testValidation_emptyComponent() {
-    assertThat(new BucketNameValidator().validate("foo..bar").getSeverity(), is(IStatus.ERROR));
+    assertThat(validator.validate("foo..bar").getSeverity(), is(IStatus.ERROR));
   }
 }

@@ -48,10 +48,8 @@ public class DefaultRunOptionsPage
   protected Control createContents(Composite parent) {
     Composite composite = new Composite(parent, SWT.NULL);
     composite.setLayout(new GridLayout(1, false));
-
     Group group = new Group(composite, SWT.NULL);
     group.setText("Execution Options for Google Cloud Platform");
-
     int numColumns = 3;
     group.setLayout(new GridLayout(numColumns, false));
     group.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
