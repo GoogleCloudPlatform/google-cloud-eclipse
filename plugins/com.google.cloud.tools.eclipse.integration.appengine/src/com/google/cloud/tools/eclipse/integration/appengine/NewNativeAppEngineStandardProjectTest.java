@@ -63,7 +63,7 @@ public class NewNativeAppEngineStandardProjectTest extends BaseProjectTest {
   private void createAndCheck(String projectName, String packageName, String[] projectFiles)
                                                                               throws CoreException {
     assertFalse(projectExists(projectName));
-    project = SwtBotAppEngineActions.createNativeWebAppProject(bot, projectName, null,
+    project = SwtBotAppEngineActions.createNativeWebAppProject(bot, this, projectName, null,
         packageName);
     assertTrue(project.exists());
 

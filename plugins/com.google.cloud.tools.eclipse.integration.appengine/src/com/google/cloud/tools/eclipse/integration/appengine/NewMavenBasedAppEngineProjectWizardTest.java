@@ -93,7 +93,7 @@ public class NewMavenBasedAppEngineProjectWizardTest extends BaseProjectTest {
       throws CoreException, IOException {
     assertFalse(projectExists(artifactId));
 
-    project = SwtBotAppEngineActions.createMavenWebAppProject(bot, location,
+    project = SwtBotAppEngineActions.createMavenWebAppProject(bot, this, location,
         "com.google.groupId", artifactId, packageName, archetypeDescription);
     assertTrue(project.exists());
     if (location != null) {

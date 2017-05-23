@@ -80,7 +80,7 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
 
     assertNoService(new URL("http://localhost:8080/hello"));
 
-    project = SwtBotAppEngineActions.createNativeWebAppProject(bot, "testapp", null,
+    project = SwtBotAppEngineActions.createNativeWebAppProject(bot, this, "testapp", null,
         "app.engine.test");
     assertTrue(project.exists());
 
@@ -149,7 +149,7 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
 
   /**
    * Read the content as a string from the specified URL.
-   * 
+   *
    * @throws IOException if cannot connect or timeout
    */
   private static String getUrlContents(URL url, int timeoutInMilliseconds) throws IOException {

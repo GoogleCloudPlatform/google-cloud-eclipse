@@ -44,8 +44,8 @@ public class SwtBotAppEngineActions {
    * @param javaPackage can be {@code null} or empty
    * @return the project
    */
-  public static IProject createNativeWebAppProject(SWTWorkbenchBot bot, String projectName,
-      String location, String javaPackage) {
+  public static IProject createNativeWebAppProject(SWTWorkbenchBot bot,
+      BaseProjectTest baseProjectTest, String projectName, String location, String javaPackage) {
     bot.menu("File").menu("New").menu("Project...").click();
 
     SWTBotShell shell = bot.shell("New Project");
@@ -71,9 +71,10 @@ public class SwtBotAppEngineActions {
     try {
       SwtBotTestingUtilities.clickButtonAndWaitForWindowClose(bot, bot.button("Finish"));
     } catch (TimeoutException ex) {
-      System.err.println("FATAL: timed out while waiting for the wizard to close. Cannot recover. "
-          + "This may interfere with subsequent integration tests: "
-          + "https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1925.");
+      // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1925
+      System.err.println("FATAL: timed out while waiting for the wizard to close.");
+      baseProjectTest.brutalWorkbenchTearDown = true;
+      throw ex;
     }
     SwtBotTimeoutManager.resetTimeout();
     IProject project = waitUntilProjectExists(bot, getWorkspaceRoot().getProject(projectName));
@@ -82,7 +83,8 @@ public class SwtBotAppEngineActions {
   }
 
   /** Create a new project with the Maven-based Google App Engine Standard Java Project wizard */
-  public static IProject createMavenWebAppProject(SWTWorkbenchBot bot, String location,
+  public static IProject createMavenWebAppProject(SWTWorkbenchBot bot,
+      BaseProjectTest baseProjectTest, String location,
       String groupId, String artifactId, String javaPackage, String archetypeDescription) {
     bot.menu("File").menu("New").menu("Project...").click();
 
@@ -116,9 +118,10 @@ public class SwtBotAppEngineActions {
     try {
       SwtBotTestingUtilities.clickButtonAndWaitForWindowClose(bot, bot.button("Finish"));
     } catch (TimeoutException ex) {
-      System.err.println("FATAL: timed out while waiting for the wizard to close. Cannot recover. "
-          + "This may interfere with subsequent integration tests: "
-          + "https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1925.");
+      // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1925
+      System.err.println("FATAL: timed out while waiting for the wizard to close.");
+      baseProjectTest.brutalWorkbenchTearDown = true;
+      throw ex;
     }
     SwtBotTimeoutManager.resetTimeout();
     IProject project = waitUntilProjectExists(bot, getWorkspaceRoot().getProject(artifactId));

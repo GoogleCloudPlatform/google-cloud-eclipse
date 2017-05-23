@@ -36,6 +36,9 @@ public class BaseProjectTest {
   protected static SWTWorkbenchBot bot;
   protected IProject project;
 
+  // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1925#issuecomment-303463830
+  boolean brutalWorkbenchTearDown = false;
+
   @BeforeClass
   public static void setUp() throws Exception {
     // verify we can find the Google Cloud SDK
@@ -62,7 +65,7 @@ public class BaseProjectTest {
       project = null;
     }
 
-    SwtBotWorkbenchActions.resetWorkbench(bot);
+    SwtBotWorkbenchActions.resetWorkbench(bot, brutalWorkbenchTearDown);
   }
 
   /**
