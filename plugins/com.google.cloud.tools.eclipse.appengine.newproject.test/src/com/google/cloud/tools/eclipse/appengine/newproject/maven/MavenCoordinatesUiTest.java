@@ -38,23 +38,21 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class MavenCoordinatesDialogPageUiTest {
+public class MavenCoordinatesUiTest {
 
   @Rule public ShellTestResource shellResource = new ShellTestResource();
   @Mock private DialogPage dialogPage;
 
   private Shell shell;
-  private MavenCoordinatesDialogPageUi mavenCoordinateUi;
 
   @Before
   public void setUp() {
     shell = shellResource.getShell();
-    mavenCoordinateUi = new MavenCoordinatesDialogPageUi(dialogPage);
   }
 
   @Test
   public void testUiWithDynamicEnabling() {
-    mavenCoordinateUi.createMavenCoordinatesArea(shell, true /* dynamic enabling */);
+    new MavenCoordinatesUi(shell, true /* dynamic enabling */);
 
     Button asMavenProject = CompositeUtil.findControl(shell, Button.class);
     assertEquals("Create as Maven project", asMavenProject.getText());
@@ -67,7 +65,7 @@ public class MavenCoordinatesDialogPageUiTest {
 
   @Test
   public void testUiWithNoDynamicEnabling() {
-    mavenCoordinateUi.createMavenCoordinatesArea(shell, false /* no dynamic enabling */);
+    new MavenCoordinatesUi(shell, false /* no dynamic enabling */);
 
     assertNull(CompositeUtil.findControl(shell, Button.class));
 
@@ -78,7 +76,7 @@ public class MavenCoordinatesDialogPageUiTest {
 
   @Test
   public void testDefaultFieldValues() {
-    mavenCoordinateUi.createMavenCoordinatesArea(shell, false);
+    new MavenCoordinatesUi(shell, false);
     assertTrue(getGroupIdField().getText().isEmpty());
     assertTrue(getArtifactIdField().getText().isEmpty());
     assertEquals("0.1.0-SNAPSHOT", getVersionField().getText());
@@ -86,7 +84,7 @@ public class MavenCoordinatesDialogPageUiTest {
 
   @Test
   public void testDynamicEnabling() {
-    mavenCoordinateUi.createMavenCoordinatesArea(shell, true /* dynamic enabling */);
+    new MavenCoordinatesUi(shell, true /* dynamic enabling */);
     Button asMavenProject = CompositeUtil.findControl(shell, Button.class);
 
     new SWTBotCheckBox(asMavenProject).click();
@@ -102,58 +100,58 @@ public class MavenCoordinatesDialogPageUiTest {
 
   @Test
   public void testValidateMavenSettings_emptyGroupId() {
-    mavenCoordinateUi.createMavenCoordinatesArea(shell, false);
+    MavenCoordinatesUi ui = new MavenCoordinatesUi(shell, false);
 
-    assertFalse(mavenCoordinateUi.validateMavenSettings());
+    assertFalse(ui.setValidationMessage(dialogPage));
     verify(dialogPage).setMessage("Provide Maven Group ID.", IMessageProvider.INFORMATION);
   }
 
   @Test
   public void testValidateMavenSettings_emptyArtifactId() {
-    mavenCoordinateUi.createMavenCoordinatesArea(shell, false);
+    MavenCoordinatesUi ui = new MavenCoordinatesUi(shell, false);
     getGroupIdField().setText("com.example");
 
-    assertFalse(mavenCoordinateUi.validateMavenSettings());
+    assertFalse(ui.setValidationMessage(dialogPage));
     verify(dialogPage).setMessage("Provide Maven Artifact ID.", IMessageProvider.INFORMATION);
   }
 
   @Test
   public void testValidateMavenSettings_emptyVersion() {
-    mavenCoordinateUi.createMavenCoordinatesArea(shell, false);
+    MavenCoordinatesUi ui = new MavenCoordinatesUi(shell, false);
     getGroupIdField().setText("com.example");
     getArtifactIdField().setText("some-artifact-id");
     getVersionField().setText("");
 
-    assertFalse(mavenCoordinateUi.validateMavenSettings());
+    assertFalse(ui.setValidationMessage(dialogPage));
     verify(dialogPage).setMessage("Provide Maven artifact version.", IMessageProvider.INFORMATION);
   }
 
   @Test
   public void testValidateMavenSettings_illegalGroupId() {
-    mavenCoordinateUi.createMavenCoordinatesArea(shell, false);
+    MavenCoordinatesUi ui = new MavenCoordinatesUi(shell, false);
     getArtifactIdField().setText("some-artifact-id");
 
     getGroupIdField().setText("<:#= Illegal ID =#:>");
-    assertFalse(mavenCoordinateUi.validateMavenSettings());
+    assertFalse(ui.setValidationMessage(dialogPage));
     verify(dialogPage).setErrorMessage("Illegal Maven Group ID: <:#= Illegal ID =#:>");
   }
 
   @Test
   public void testValidateMavenSettings_illegalArtifactId() {
-    mavenCoordinateUi.createMavenCoordinatesArea(shell, false);
+    MavenCoordinatesUi ui = new MavenCoordinatesUi(shell, false);
     getGroupIdField().setText("com.example");
 
     getArtifactIdField().setText("<:#= Illegal ID =#:>");
-    assertFalse(mavenCoordinateUi.validateMavenSettings());
+    assertFalse(ui.setValidationMessage(dialogPage));
     verify(dialogPage).setErrorMessage("Illegal Maven Artifact ID: <:#= Illegal ID =#:>");
   }
 
   @Test
   public void testValidateMavenSettings_noValidationIfUiDisabled() {
-    mavenCoordinateUi.createMavenCoordinatesArea(shell, true /* dynamic enabling */);
+    MavenCoordinatesUi ui = new MavenCoordinatesUi(shell, true /* dynamic enabling */);
 
     getGroupIdField().setText("<:#= Illegal ID =#:>");
-    assertTrue(mavenCoordinateUi.validateMavenSettings());
+    assertTrue(ui.setValidationMessage(dialogPage));
   }
 
   private Text getGroupIdField() {

@@ -21,6 +21,7 @@ import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.DialogPage;
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyListener;
@@ -160,12 +161,15 @@ public class MavenCoordinatesUi {
     IStatus status = validateMavenSettings();
     if (status.isOK()) {
       return true;
-    } else if (IStatus.ERROR == status.getSeverity()) {
-      page.setErrorMessage(status.getMessage());
-      return false;
-    } else {
-      page.setMessage(status.getMessage());
-      return false;
     }
+
+    if (IStatus.ERROR == status.getSeverity()) {
+      page.setErrorMessage(status.getMessage());
+    } else if (IStatus.WARNING == status.getSeverity()) {
+      page.setMessage(status.getMessage(), IMessageProvider.WARNING);
+    } else if (IStatus.INFO == status.getSeverity()) {
+      page.setMessage(status.getMessage(), IMessageProvider.INFORMATION);
+    }
+    return false;
   }
 }
