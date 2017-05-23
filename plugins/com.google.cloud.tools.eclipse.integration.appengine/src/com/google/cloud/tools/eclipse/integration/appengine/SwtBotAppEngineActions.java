@@ -75,7 +75,7 @@ public class SwtBotAppEngineActions {
           + "all shells: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1925");
       System.err.println("FATAL: You will see tons of related errors: \"Widget is disposed\", "
           + "\"Failed to execute runnable\", \"IllegalStateException\", etc.");
-      SwtBotWorkbenchActions.closeAllShells(bot, true);
+      SwtBotWorkbenchActions.killAllShells(bot);
       throw ex;
     }
     SwtBotTimeoutManager.resetTimeout();
@@ -123,7 +123,7 @@ public class SwtBotAppEngineActions {
           + "all shells: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1925");
       System.err.println("FATAL: You will see tons of related errors: \"Widget is disposed\", "
           + "\"Failed to execute runnable\", \"IllegalStateException\", etc.");
-      SwtBotWorkbenchActions.closeAllShells(bot, true);
+      SwtBotWorkbenchActions.killAllShells(bot);
       throw ex;
     }
     SwtBotTimeoutManager.resetTimeout();
