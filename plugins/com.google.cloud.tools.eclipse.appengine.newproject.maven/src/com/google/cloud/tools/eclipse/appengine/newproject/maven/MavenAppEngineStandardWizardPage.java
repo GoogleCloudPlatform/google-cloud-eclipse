@@ -103,7 +103,6 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_MAVEN, parent.getShell());
 
     Composite container = new Composite(parent, SWT.NONE);
-    GridLayoutFactory.swtDefaults().numColumns(2).applyTo(container);
     setControl(container);
 
     PlatformUI.getWorkbench().getHelpSystem().setHelp(container,
@@ -122,6 +121,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
       }
     });
 
+    GridLayoutFactory.swtDefaults().generateLayout(container);
     Dialog.applyDialogFont(container);
   }
 
@@ -130,11 +130,8 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
 
     Group locationGroup = new Group(container, SWT.NONE);
     locationGroup.setText(Messages.getString("LOCATION_GROUP_TEXT")); //$NON-NLS-1$
-    GridDataFactory.fillDefaults().span(2, 1).applyTo(locationGroup);
-    GridLayoutFactory.swtDefaults().numColumns(3).applyTo(locationGroup);
 
     useDefaults = new Button(locationGroup, SWT.CHECK | SWT.LEAD);
-    GridDataFactory.defaultsFor(useDefaults).span(3, 1).applyTo(useDefaults);
     useDefaults.setText(Messages.getString("CREATE_PROJECT_IN_WORKSPACE")); //$NON-NLS-1$
     useDefaults.setSelection(true);
 
@@ -143,8 +140,6 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     locationLabel.setToolTipText(Messages.getString("LOCATION_TOOL_TIP")); //$NON-NLS-1$
 
     locationField = new Text(locationGroup, SWT.BORDER);
-    GridDataFactory.swtDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false)
-        .applyTo(locationField);
     locationField.setText(workspaceLocation.toOSString());
     locationField.setData("" /* initially empty for manually entered location */); //$NON-NLS-1$
     locationField.addModifyListener(pageValidator);
@@ -175,16 +170,14 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
         checkFlipToNext();
       }
     });
+
+    GridDataFactory.defaultsFor(useDefaults).span(3, 1).applyTo(useDefaults);
+    GridLayoutFactory.swtDefaults().numColumns(3).generateLayout(locationGroup);
   }
 
   /** Create UI for specifying desired Maven Coordinates */
   private void createMavenCoordinatesArea(Composite container, ModifyListener pageValidator) {
-    Composite composite = new Composite(container, SWT.NONE);
-    // assumed that container has a two-column GridLayout
-    GridDataFactory.fillDefaults().span(2, 1).grab(true,  false).applyTo(composite);
-    GridLayoutFactory.fillDefaults().applyTo(composite);
-
-    mavenSupport.createMavenCoordinatesArea(composite, false /* no dynamic enabling */);
+    mavenSupport.createMavenCoordinatesArea(container, false /* no dynamic enabling */);
     mavenSupport.addModifyListener(pageValidator);
     mavenSupport.addGroupIdModifyListener(new AutoPackageNameSetterOnGroupIdChange());
   }
@@ -193,8 +186,6 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
   private void createAppEngineProjectDetailsArea(Composite container,
       ModifyListener pageValidator) {
     Composite composite = new Composite(container, SWT.NONE);
-    // assumed that container has a two-column GridLayout
-    GridDataFactory.fillDefaults().span(2, 1).grab(true,  false).applyTo(composite);
 
     // Java package name
     Label packageNameLabel = new Label(composite, SWT.LEAD);
@@ -212,8 +203,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
       }
     });
 
-    GridDataFactory.fillDefaults().grab(true, false).applyTo(javaPackageField);
-    GridLayoutFactory.swtDefaults().numColumns(2).applyTo(composite);
+    GridLayoutFactory.swtDefaults().numColumns(2).generateLayout(composite);
   }
 
   private void openLocationDialog() {

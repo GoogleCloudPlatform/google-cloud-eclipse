@@ -19,7 +19,6 @@ package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
 import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.jface.dialogs.IMessageProvider;
-import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyListener;
@@ -86,12 +85,7 @@ public class MavenCoordinatesDialogPageUi {
 
     updateEnablement();
 
-    GridLayoutFactory.swtDefaults().numColumns(2).applyTo(coordinateGroup);
-    GridDataFactory horizontalFill = GridDataFactory.fillDefaults().grab(true, false);
-    horizontalFill.applyTo(coordinateGroup);
-    horizontalFill.applyTo(groupIdField);
-    horizontalFill.applyTo(artifactIdField);
-    horizontalFill.applyTo(versionField);
+    GridLayoutFactory.swtDefaults().numColumns(2).generateLayout(coordinateGroup);
   }
 
   public String getGroupId() {
