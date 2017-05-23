@@ -149,7 +149,7 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
 
   /**
    * Read the content as a string from the specified URL.
-   * 
+   *
    * @throws IOException if cannot connect or timeout
    */
   private static String getUrlContents(URL url, int timeoutInMilliseconds) throws IOException {
