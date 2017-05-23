@@ -41,7 +41,7 @@ import org.eclipse.ui.ide.undo.WorkspaceUndoUtil;
 public abstract class AppEngineProjectWizard extends Wizard implements INewWizard {
 
   private AppEngineWizardPage page = null;
-  private AppEngineProjectConfig config = new AppEngineProjectConfig();
+  protected AppEngineProjectConfig config = new AppEngineProjectConfig();
   private IWorkbench workbench;
 
   public AppEngineProjectWizard() {
@@ -85,7 +85,9 @@ public abstract class AppEngineProjectWizard extends Wizard implements INewWizar
 
     boolean fork = true;
     boolean cancelable = true;
-    if (!validateDependencies(fork, cancelable).isOK()) {
+    IStatus status = validateDependencies(fork, cancelable);
+    if (!status.isOK()) {
+      StatusUtil.setErrorStatus(this, status.getMessage(), status);
       return false;
     }
 

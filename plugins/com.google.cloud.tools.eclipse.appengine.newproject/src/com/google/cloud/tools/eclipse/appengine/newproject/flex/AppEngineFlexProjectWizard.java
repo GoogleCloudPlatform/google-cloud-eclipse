@@ -31,9 +31,12 @@ public class AppEngineFlexProjectWizard extends AppEngineProjectWizard {
   @Inject
   private ILibraryRepositoryService repositoryService;
 
+  private AppEngineFlexWizardPage wizardPage;
+
   @Override
   public AppEngineWizardPage createWizardPage() {
-    return new AppEngineFlexWizardPage();
+    wizardPage = new AppEngineFlexWizardPage();
+    return wizardPage;
   }
 
   @Override
@@ -52,4 +55,12 @@ public class AppEngineFlexProjectWizard extends AppEngineProjectWizard {
     return new CreateAppEngineFlexWtpProject(config, uiInfoAdapter, repositoryService);
   }
 
+  @Override
+  public boolean performFinish() {
+    if (wizardPage.asMavenProject()) {
+      config.setAsMavenProject(wizardPage.getMavenGroupId(), wizardPage.getMavenArtifactId(),
+          wizardPage.getMavenVersion());
+    }
+    return super.performFinish();
+  }
 }

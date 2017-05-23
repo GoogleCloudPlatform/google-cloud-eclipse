@@ -22,10 +22,16 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
+import com.google.common.base.Predicate;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.IWizardContainer;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotCheckBox;
 import org.junit.Before;
 import org.junit.Rule;
@@ -38,8 +44,11 @@ public class MavenAppEngineStandardWizardPageTest {
 
   @Rule public ShellTestResource shellTestResource = new ShellTestResource();
 
-  private MavenAppEngineStandardWizardPage page =
+  private final MavenAppEngineStandardWizardPage page =
       new MavenAppEngineStandardWizardPage(new Path("/default/workspace/location"));
+
+  private Text locationField;
+  private Button useDefaults;
 
   @Before
   public void setUp() {
@@ -47,71 +56,89 @@ public class MavenAppEngineStandardWizardPageTest {
     when(wizard.getContainer()).thenReturn(mock(IWizardContainer.class));
     page.setWizard(wizard);
     page.createControl(shellTestResource.getShell());
+    locationField = findLocationField();
+    useDefaults = findUseDefaultsButton();
   }
 
   @Test
   public void testLocationValues() {
     assertTrue(page.useDefaults());
-    assertTrue(page.useDefaults.getSelection());
-    assertFalse(page.locationField.getEnabled());
-    assertEquals(new Path("/default/workspace/location").toOSString(), page.locationField.getText());
-    assertEquals("", page.locationField.getData());
+    assertTrue(useDefaults.getSelection());
+    assertFalse(locationField.getEnabled());
+    assertEquals(new Path("/default/workspace/location").toOSString(), locationField.getText());
+    assertEquals("", locationField.getData());
 
     assertEquals("/default/workspace/location", page.getLocationPath().toString());
   }
 
   @Test
   public void testLocationValues_uncheckUseDefaults() {
-    new SWTBotCheckBox(page.useDefaults).click();
+    new SWTBotCheckBox(useDefaults).click();
 
     assertFalse(page.useDefaults());
-    assertFalse(page.useDefaults.getSelection());
-    assertTrue(page.locationField.getEnabled());
-    assertTrue(page.locationField.getText().isEmpty());
-    assertEquals("", page.locationField.getData());
+    assertFalse(useDefaults.getSelection());
+    assertTrue(locationField.getEnabled());
+    assertTrue(locationField.getText().isEmpty());
+    assertEquals("", locationField.getData());
 
     assertEquals("", page.getLocationPath().toString());
   }
 
   @Test
   public void testLocationValues_uncheckAndCheckBackUseDefaults() {
-    SWTBotCheckBox checkBox = new SWTBotCheckBox(page.useDefaults);
+    SWTBotCheckBox checkBox = new SWTBotCheckBox(useDefaults);
     checkBox.click();
     checkBox.click();
 
     assertTrue(page.useDefaults());
-    assertTrue(page.useDefaults.getSelection());
-    assertFalse(page.locationField.getEnabled());
-    assertEquals(new Path("/default/workspace/location").toOSString(), page.locationField.getText());
-    assertEquals("", page.locationField.getData());
+    assertTrue(useDefaults.getSelection());
+    assertFalse(locationField.getEnabled());
+    assertEquals(new Path("/default/workspace/location").toOSString(), locationField.getText());
+    assertEquals("", locationField.getData());
 
     assertEquals("/default/workspace/location", page.getLocationPath().toString());
   }
 
   @Test
   public void testLocationValues_uncheckEnterPathAndCheckBackUseDefaults() {
-    SWTBotCheckBox checkBox = new SWTBotCheckBox(page.useDefaults);
+    SWTBotCheckBox checkBox = new SWTBotCheckBox(useDefaults);
     checkBox.click();
-    page.locationField.setText("/manually/entered/path");
+    locationField.setText("/manually/entered/path");
     checkBox.click();
 
-    assertEquals(new Path("/default/workspace/location").toOSString(), page.locationField.getText());
-    assertEquals("/manually/entered/path", page.locationField.getData());
+    assertEquals(new Path("/default/workspace/location").toOSString(), locationField.getText());
+    assertEquals("/manually/entered/path", locationField.getData());
 
     assertEquals("/default/workspace/location", page.getLocationPath().toString());
   }
 
   @Test
   public void testLocationValues_uncheckEnterPathCheckBackAndUncheckUseDefaults() {
-    SWTBotCheckBox checkBox = new SWTBotCheckBox(page.useDefaults);
+    SWTBotCheckBox checkBox = new SWTBotCheckBox(useDefaults);
     checkBox.click();
-    page.locationField.setText("/manually/entered/path");
+    locationField.setText("/manually/entered/path");
     checkBox.click();
     checkBox.click();
 
-    assertEquals("/manually/entered/path", page.locationField.getText());
-    assertEquals("/manually/entered/path", page.locationField.getData());
+    assertEquals("/manually/entered/path", locationField.getText());
+    assertEquals("/manually/entered/path", locationField.getData());
 
     assertEquals("/manually/entered/path", page.getLocationPath().toString());
+  }
+
+  private Text findLocationField() {
+    return CompositeUtil.findControlAfterLabel((Composite) page.getControl(),
+        Text.class, "Location:");
+  }
+
+  private Button findUseDefaultsButton() {
+    return (Button) CompositeUtil.findControl((Composite) page.getControl(),
+        new Predicate<Control>() {
+          @Override
+          public boolean apply(Control control) {
+            return control instanceof Button
+                && "Create project in workspace".equals(((Button) control).getText());
+          }
+        });
   }
 }

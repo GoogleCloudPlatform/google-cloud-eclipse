@@ -26,13 +26,14 @@ import java.util.Collection;
 import java.util.HashSet;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
@@ -65,8 +66,7 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
     Composite container = (Composite) getControl();
     setHelp(container);
 
-    ModifyListener pageValidator = new PageValidator();
-    createCustomFields(container, pageValidator);
+    createCustomFields(container, new PageValidator());
 
     // Manage APIs
     // todo we don't need this if; can do with subclasses
@@ -80,42 +80,34 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
     setErrorMessage(null);
     setMessage(Messages.getString("enter.project.name"));
 
+    GridLayoutFactory.swtDefaults().generateLayout(container);
     Dialog.applyDialogFont(container);
   }
 
-  private void createCustomFields(Composite container, ModifyListener pageValidator) {
+  private void createCustomFields(Composite container, PageValidator pageValidator) {
     Composite composite = new Composite(container, SWT.NONE);
-    GridDataFactory.fillDefaults().applyTo(composite);
-
-    GridLayout layout = new GridLayout();
-    layout.numColumns = 2;
-    composite.setLayout(layout);
-
     createPackageField(composite, pageValidator);
     createServiceField(composite, pageValidator);
+
+    GridLayoutFactory.swtDefaults().numColumns(2).generateLayout(composite);
   }
 
   // Java package name
-  private void createPackageField(Composite parent, ModifyListener pageValidator) {
+  private void createPackageField(Composite parent, PageValidator pageValidator) {
     Label packageNameLabel = new Label(parent, SWT.LEAD);
     packageNameLabel.setText(Messages.getString("java.package")); //$NON-NLS-1$
     javaPackageField = new Text(parent, SWT.BORDER);
-
     javaPackageField.addModifyListener(pageValidator);
-
-    GridDataFactory.fillDefaults().grab(true, false).applyTo(javaPackageField);
   }
 
   // App Engine service name
-  private void createServiceField(Composite parent, ModifyListener pageValidator) {
+  private void createServiceField(Composite parent, PageValidator pageValidator) {
 
     Label serviceNameLabel = new Label(parent, SWT.LEAD);
     serviceNameLabel.setText(Messages.getString("app.engine.service"));
     serviceNameField = new Text(parent, SWT.BORDER);
     serviceNameField.setMessage("default"); //$NON-NLS-1$
     serviceNameField.addModifyListener(pageValidator);
-
-    GridDataFactory.fillDefaults().grab(true, false).applyTo(serviceNameField);
   }
 
   @Override
@@ -160,9 +152,14 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
     return true;
   }
 
-  private final class PageValidator implements ModifyListener {
+  public final class PageValidator implements ModifyListener, Listener {
     @Override
     public void modifyText(ModifyEvent event) {
+      setPageComplete(validatePage());
+    }
+
+    @Override
+    public void handleEvent(Event event) {
       setPageComplete(validatePage());
     }
   }

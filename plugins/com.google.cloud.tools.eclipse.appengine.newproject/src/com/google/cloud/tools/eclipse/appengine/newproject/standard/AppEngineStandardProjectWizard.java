@@ -39,7 +39,7 @@ public class AppEngineStandardProjectWizard extends AppEngineProjectWizard {
   @Inject
   private ILibraryClasspathContainerResolverService resolverService;
 
-  public AppEngineStandardProjectWizard(){
+  public AppEngineStandardProjectWizard() {
     setWindowTitle(Messages.getString("new.app.engine.standard.project"));
   }
 
@@ -84,7 +84,7 @@ public class AppEngineStandardProjectWizard extends AppEngineProjectWizard {
 
   private class DependencyValidator implements IRunnableWithProgress {
 
-    private IStatus result = null;
+    private IStatus result;
 
     @Override
     public void run(IProgressMonitor monitor)
