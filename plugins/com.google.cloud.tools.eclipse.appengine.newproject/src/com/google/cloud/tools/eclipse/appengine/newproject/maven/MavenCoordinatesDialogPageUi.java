@@ -37,7 +37,7 @@ public class MavenCoordinatesDialogPageUi {
   private final DialogPage dialogPage;
 
   private Button asMavenProjectButton;
-  private Group coordinateGroup;
+  private Group coordinatesGroup;
   private Text groupIdField;
   private Text artifactIdField;
   private Text versionField;
@@ -65,27 +65,27 @@ public class MavenCoordinatesDialogPageUi {
       });
     }
 
-    coordinateGroup = new Group(container, SWT.NONE);
-    coordinateGroup.setText(Messages.getString("MAVEN_PROJECT_COORDINATES")); //$NON-NLS-1$
+    coordinatesGroup = new Group(container, SWT.NONE);
+    coordinatesGroup.setText(Messages.getString("MAVEN_PROJECT_COORDINATES")); //$NON-NLS-1$
 
-    groupIdLabel = new Label(coordinateGroup, SWT.LEAD);
+    groupIdLabel = new Label(coordinatesGroup, SWT.LEAD);
     groupIdLabel.setText(Messages.getString("GROUP_ID")); //$NON-NLS-1$
-    groupIdField = new Text(coordinateGroup, SWT.BORDER);
+    groupIdField = new Text(coordinatesGroup, SWT.BORDER);
     groupIdField.setToolTipText(Messages.getString("GROUP_ID_TOOLTIP")); //$NON-NLS-1$
 
-    artifactIdLabel = new Label(coordinateGroup, SWT.LEAD);
+    artifactIdLabel = new Label(coordinatesGroup, SWT.LEAD);
     artifactIdLabel.setText(Messages.getString("ARTIFACT_ID")); //$NON-NLS-1$
-    artifactIdField = new Text(coordinateGroup, SWT.BORDER);
+    artifactIdField = new Text(coordinatesGroup, SWT.BORDER);
     artifactIdField.setToolTipText(Messages.getString("ARTIFACT_ID_TOOLTIP")); //$NON-NLS-1$
 
-    versionLabel = new Label(coordinateGroup, SWT.LEAD);
+    versionLabel = new Label(coordinatesGroup, SWT.LEAD);
     versionLabel.setText(Messages.getString("ARTIFACT_VERSION")); //$NON-NLS-1$
-    versionField = new Text(coordinateGroup, SWT.BORDER);
+    versionField = new Text(coordinatesGroup, SWT.BORDER);
     versionField.setText(DEFAULT_VERSION);
 
     updateEnablement();
 
-    GridLayoutFactory.swtDefaults().numColumns(2).generateLayout(coordinateGroup);
+    GridLayoutFactory.swtDefaults().numColumns(2).generateLayout(coordinatesGroup);
   }
 
   public String getGroupId() {
@@ -113,7 +113,7 @@ public class MavenCoordinatesDialogPageUi {
   private void updateEnablement() {
     if (asMavenProjectButton != null) {
       boolean checked = asMavenProjectButton.getSelection();
-      coordinateGroup.setEnabled(checked);
+      coordinatesGroup.setEnabled(checked);
       groupIdLabel.setEnabled(checked);
       groupIdField.setEnabled(checked);
       artifactIdLabel.setEnabled(checked);
