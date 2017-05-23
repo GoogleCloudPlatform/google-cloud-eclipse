@@ -80,7 +80,9 @@ public class MavenCoordinatesUi {
     versionField = new Text(coordinatesGroup, SWT.BORDER);
     versionField.setText(DEFAULT_VERSION);
 
-    updateEnablement();
+    if (dynamicEnabling) {
+      updateEnablement();
+    }
 
     GridLayoutFactory.swtDefaults().numColumns(2).generateLayout(coordinatesGroup);
   }
@@ -108,16 +110,14 @@ public class MavenCoordinatesUi {
   }
 
   private void updateEnablement() {
-    if (asMavenProjectButton != null) {
-      boolean checked = asMavenProjectButton.getSelection();
-      coordinatesGroup.setEnabled(checked);
-      groupIdLabel.setEnabled(checked);
-      groupIdField.setEnabled(checked);
-      artifactIdLabel.setEnabled(checked);
-      artifactIdField.setEnabled(checked);
-      versionLabel.setEnabled(checked);
-      versionField.setEnabled(checked);
-    }
+    boolean checked = asMavenProjectButton.getSelection();
+    coordinatesGroup.setEnabled(checked);
+    groupIdLabel.setEnabled(checked);
+    groupIdField.setEnabled(checked);
+    artifactIdLabel.setEnabled(checked);
+    artifactIdField.setEnabled(checked);
+    versionLabel.setEnabled(checked);
+    versionField.setEnabled(checked);
   }
 
   /**
