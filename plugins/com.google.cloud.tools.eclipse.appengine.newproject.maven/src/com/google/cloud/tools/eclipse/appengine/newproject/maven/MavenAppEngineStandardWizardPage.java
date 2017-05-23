@@ -66,8 +66,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
   private Button locationBrowseButton;
   private Text javaPackageField;
   private LibrarySelectorGroup appEngineLibrariesSelectorGroup;
-
-  private final MavenCoordinatesDialogPageUi mavenSupport = new MavenCoordinatesDialogPageUi(this);
+  private MavenCoordinatesUi mavenCoordinatesUi;
 
   private boolean canFlipPage;
 
@@ -177,9 +176,9 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
 
   /** Create UI for specifying desired Maven Coordinates */
   private void createMavenCoordinatesArea(Composite container, ModifyListener pageValidator) {
-    mavenSupport.createMavenCoordinatesArea(container, false /* no dynamic enabling */);
-    mavenSupport.addModifyListener(pageValidator);
-    mavenSupport.addGroupIdModifyListener(new AutoPackageNameSetterOnGroupIdChange());
+    mavenCoordinatesUi = new MavenCoordinatesUi(container, false /* no dynamic enabling */);
+    mavenCoordinatesUi.addModifyListener(pageValidator);
+    mavenCoordinatesUi.addGroupIdModifyListener(new AutoPackageNameSetterOnGroupIdChange());
   }
 
   /** Create UI for specifying App Engine project details */
@@ -303,7 +302,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
   }
 
   private boolean validateMavenSettings() {
-    if (!mavenSupport.validateMavenSettings()) {
+    if (!mavenCoordinatesUi.setValidationMessage(this)) {
       return false;
     } else if (ResourcesPlugin.getWorkspace().getRoot().getProject(getArtifactId()).exists()) {
       setErrorMessage(Messages.getString("PROJECT_ALREADY_EXISTS", getArtifactId())); //$NON-NLS-1$
@@ -333,17 +332,17 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
 
   /** Return the Maven group for the project */
   public String getGroupId() {
-    return mavenSupport.getGroupId();
+    return mavenCoordinatesUi.getGroupId();
   }
 
   /** Return the Maven artifact for the project */
   public String getArtifactId() {
-    return mavenSupport.getArtifactId();
+    return mavenCoordinatesUi.getArtifactId();
   }
 
   /** Return the Maven version for the project */
   public String getVersion() {
-    return mavenSupport.getVersion();
+    return mavenCoordinatesUi.getVersion();
   }
 
   /**

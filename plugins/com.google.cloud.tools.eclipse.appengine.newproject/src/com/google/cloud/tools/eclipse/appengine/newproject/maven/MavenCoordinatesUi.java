@@ -17,8 +17,10 @@
 package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.DialogPage;
-import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyListener;
@@ -30,11 +32,9 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-public class MavenCoordinatesDialogPageUi {
+public class MavenCoordinatesUi {
 
   private static final String DEFAULT_VERSION = "0.1.0-SNAPSHOT"; //$NON-NLS-1$
-
-  private final DialogPage dialogPage;
 
   private Button asMavenProjectButton;
   private Group coordinatesGroup;
@@ -45,15 +45,11 @@ public class MavenCoordinatesDialogPageUi {
   private Label artifactIdLabel;
   private Label versionLabel;
 
-  public MavenCoordinatesDialogPageUi(DialogPage dialogPage) {
-    this.dialogPage = dialogPage;
-  }
-
   /**
    * @param dynamicEnabling if {@code true}, creates a master check box that enables or disables
    *     the Maven coordinate area; otherwise, always enables the area
    */
-  public void createMavenCoordinatesArea(Composite container, boolean dynamicEnabling) {
+  public MavenCoordinatesUi(Composite container, boolean dynamicEnabling) {
     if (dynamicEnabling) {
       asMavenProjectButton = new Button(container, SWT.CHECK);
       asMavenProjectButton.setText(Messages.getString("CREATE_AS_MAVEN_PROJECT")); //$NON-NLS-1$
@@ -124,39 +120,52 @@ public class MavenCoordinatesDialogPageUi {
   }
 
   /**
-   * Convenience method that validates a Maven coordinate and sets an information or error message
-   * on a {@link DialogPage} if applicable. Does nothing if the UI is disabled.
-   *
-   * @return {@code false} if there was a validation problem while the UI is enabled and the
-   *     relevant message was set; {@code true} otherwise
+   * @return {@link IStatus#OK} if there was no validation problem or the UI is disabled; otherwise
+   *     a status describing a validation problem (with a non-OK status)
    */
-  public boolean validateMavenSettings() {
+  public IStatus validateMavenSettings() {
     boolean uiDisabled = asMavenProjectButton != null && !asMavenProjectButton.getSelection();
     if (uiDisabled) {
-      return true;
+      return Status.OK_STATUS;
     }
 
-    String message = null;
     if (getGroupId().isEmpty()) {
-      message = Messages.getString("PROVIDE_GROUP_ID"); //$NON-NLS-1$
-      dialogPage.setMessage(message, IMessageProvider.INFORMATION);
+      return StatusUtil.info(this, Messages.getString("PROVIDE_GROUP_ID")); //$NON-NLS-1$
     } else if (getArtifactId().isEmpty()) {
-      message = Messages.getString("PROVIDE_ARTIFACT_ID"); //$NON-NLS-1$
-      dialogPage.setMessage(message, IMessageProvider.INFORMATION);
+      return StatusUtil.info(this, Messages.getString("PROVIDE_ARTIFACT_ID")); //$NON-NLS-1$
     } else if (getVersion().isEmpty()) {
-      message = Messages.getString("PROVIDE_VERSION"); //$NON-NLS-1$
-      dialogPage.setMessage(message, IMessageProvider.INFORMATION);
+      return StatusUtil.info(this, Messages.getString("PROVIDE_VERSION")); //$NON-NLS-1$
     } else if (!MavenCoordinatesValidator.validateGroupId(getGroupId())) {
-      message = Messages.getString("ILLEGAL_GROUP_ID", groupIdField.getText()); //$NON-NLS-1$
-      dialogPage.setErrorMessage(message);
+      return StatusUtil.error(this,
+          Messages.getString("ILLEGAL_GROUP_ID", groupIdField.getText())); //$NON-NLS-1$
     } else if (!MavenCoordinatesValidator.validateArtifactId(getArtifactId())) {
-      message = Messages.getString("ILLEGAL_ARTIFACT_ID", getArtifactId()); //$NON-NLS-1$
-      dialogPage.setErrorMessage(message);
+      return StatusUtil.error(this,
+          Messages.getString("ILLEGAL_ARTIFACT_ID", getArtifactId())); //$NON-NLS-1$
     } else if (!MavenCoordinatesValidator.validateVersion(getVersion())) {
-      message = Messages.getString("ILLEGAL_VERSION", getVersion()); //$NON-NLS-1$
-      dialogPage.setErrorMessage(message);
+      return StatusUtil.error(this,
+          Messages.getString("ILLEGAL_VERSION", getVersion())); //$NON-NLS-1$
     }
-    return message == null;
+    return Status.OK_STATUS;
   }
 
+  /**
+   * Convenience method to set a validation message on {@link DialogPage} from the result of calling
+   * {@link #validateMavenSettings()}.
+   *
+   * @return {@code true} if a validation message was set; {@code false} otherwise
+   *
+   * @see #validateMavenSettings()
+   */
+  public boolean setValidationMessage(DialogPage page) {
+    IStatus status = validateMavenSettings();
+    if (status.isOK()) {
+      return true;
+    } else if (IStatus.ERROR == status.getSeverity()) {
+      page.setErrorMessage(status.getMessage());
+      return false;
+    } else {
+      page.setMessage(status.getMessage());
+      return false;
+    }
+  }
 }
