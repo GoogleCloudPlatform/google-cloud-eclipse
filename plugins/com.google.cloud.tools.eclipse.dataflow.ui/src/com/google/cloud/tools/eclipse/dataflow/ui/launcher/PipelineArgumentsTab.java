@@ -246,17 +246,6 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
         setErrorMessage(null);
         setMessage(null);
       }
-
-      @Override
-      public boolean hasError() {
-        return false;
-      }
-
-      @Override
-      public String getMessage() {
-        // TODO(elharo): Auto-generated method stub
-        return null;
-      }
     };
 
     defaultOptionsComponent =

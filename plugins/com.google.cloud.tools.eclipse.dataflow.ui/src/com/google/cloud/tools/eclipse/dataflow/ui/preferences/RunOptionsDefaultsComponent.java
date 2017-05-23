@@ -45,7 +45,6 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
@@ -72,9 +71,7 @@ public class RunOptionsDefaultsComponent {
 
   private final GcsDataflowProjectClient client;
   private final DisplayExecutor executor;
-
-  public final MessageTarget messageTarget;
-
+  private final MessageTarget messageTarget;
   private final Composite target;
   private final Text projectInput;
   private final Combo stagingLocationInput;
@@ -192,10 +189,6 @@ public class RunOptionsDefaultsComponent {
 
   public void addStagingLocationModifyListener(ModifyListener listener) {
     stagingLocationInput.addModifyListener(listener);
-  }
-
-  public void addStagingLocationVerifyListener(VerifyListener listener) {
-    stagingLocationInput.addVerifyListener(listener);
   }
 
   public void addModifyListener(ModifyListener listener) {
@@ -359,21 +352,16 @@ public class RunOptionsDefaultsComponent {
   
   private boolean bucketNameOk() {
     String bucketName = stagingLocationInput.getText().trim();
-    IStatus status = bucketNameOk(bucketName);
+    if (bucketName.toLowerCase(Locale.US).startsWith("gs://")) {
+      bucketName = bucketName.substring(5);
+    }
+    IStatus status = bucketNameValidator.validate(bucketName);
     if (!status.isOK()) {
       messageTarget.setError(status.getMessage());
       setPageComplete(false);
     }
     boolean enabled = status.isOK() && !bucketName.isEmpty();
     return enabled;
-  }
-  
-  public static IStatus bucketNameOk(String bucketName) {
-    if (bucketName.toLowerCase(Locale.US).startsWith("gs://")) {
-      bucketName = bucketName.substring(5);
-    }
-    IStatus status = bucketNameValidator.validate(bucketName);
-    return status;
   }
   
   private class EnableCreateButton implements ModifyListener {

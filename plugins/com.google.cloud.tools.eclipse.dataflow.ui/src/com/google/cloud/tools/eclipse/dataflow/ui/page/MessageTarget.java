@@ -25,17 +25,7 @@ public interface MessageTarget {
 
   /** Sets the message at an error level. */
   void setError(String message);
-  
-  /** 
-   * @return true if and only if the current message is error level
-   */
-  boolean hasError();
 
   /** Clears the message. */
   void clear();
-
-  /**
-   * @return
-   */
-  String getMessage();
 }
