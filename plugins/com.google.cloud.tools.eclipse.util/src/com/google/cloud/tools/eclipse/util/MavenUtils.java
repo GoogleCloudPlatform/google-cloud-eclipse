@@ -36,10 +36,7 @@ import org.apache.maven.model.Dependency;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.m2e.core.MavenPlugin;
-import org.osgi.framework.FrameworkUtil;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -54,7 +51,7 @@ public class MavenUtils {
 
   private static final String MAVEN_LATEST_VERSION = "LATEST"; //$NON-NLS-1$
   private static final String POM_XML_NAMESPACE_URI = "http://maven.apache.org/POM/4.0.0"; //$NON-NLS-1$
-  
+
   /**
    * Returns {@code true} if the given project has the Maven 2 nature. This
    * checks for the Maven nature used by m2Eclipse 1.0.0.
@@ -137,21 +134,22 @@ public class MavenUtils {
     return artifact;
   }
 
-  public String getProperty(InputStream pomXml, String propertyName) throws CoreException {
-    return getTopLevelValue(parse(pomXml), "properties", propertyName); //$NON-NLS-1$ //$NON-NLS-2$
+  public static String getProperty(InputStream pomXml, String propertyName) throws CoreException {
+    return getTopLevelValue(parse(pomXml), "properties", propertyName); //$NON-NLS-1$
   }
 
-  private Document parse(InputStream pomXml) throws CoreException {
+  private static Document parse(InputStream pomXml) throws CoreException {
     try {
       DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
       documentBuilderFactory.setNamespaceAware(true);
       return documentBuilderFactory.newDocumentBuilder().parse(pomXml);
     } catch (IOException | SAXException | ParserConfigurationException exception) {
-      throw new CoreException(StatusUtil.error(getClass(), "Cannot parse pom.xml", exception));
+      throw new CoreException(
+          StatusUtil.error(MavenUtils.class, "Cannot parse pom.xml", exception));
     }
   }
 
-  private String getTopLevelValue(Document doc, String parentTagName, String childTagName)
+  private static String getTopLevelValue(Document doc, String parentTagName, String childTagName)
       throws CoreException {
     try {
       NodeList parentElements = doc.getElementsByTagNameNS(POM_XML_NAMESPACE_URI, parentTagName);
@@ -169,9 +167,8 @@ public class MavenUtils {
       }
       return null;
     } catch (DOMException exception) {
-      throw new CoreException(
-          new Status(IStatus.ERROR, FrameworkUtil.getBundle(getClass()).getSymbolicName(),
-              "Missing pom.xml element: " + childTagName, exception));
+      throw new CoreException(StatusUtil.error(
+          MavenUtils.class, "Missing pom.xml element: " + childTagName, exception));
     }
   }
 
@@ -198,5 +195,4 @@ public class MavenUtils {
       return false;
     }
   }
-
 }
