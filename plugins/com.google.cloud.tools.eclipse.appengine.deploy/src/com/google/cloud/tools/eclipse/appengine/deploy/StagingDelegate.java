@@ -18,7 +18,6 @@ package com.google.cloud.tools.eclipse.appengine.deploy;
 
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -38,7 +37,7 @@ public interface StagingDelegate {
    * @param cloudSdk {@link CloudSdk} that may be utilized for staging
    */
   IStatus stage(IProject project, IPath stagingDirectory,
-      IPath safeWorkDirectory, CloudSdk cloudSdk, IProgressMonitor monitor) throws CoreException;
+      IPath safeWorkDirectory, CloudSdk cloudSdk, IProgressMonitor monitor);
 
   /**
    * Returns a directory where optional YAML configuration files such as {@code cron.yaml}
