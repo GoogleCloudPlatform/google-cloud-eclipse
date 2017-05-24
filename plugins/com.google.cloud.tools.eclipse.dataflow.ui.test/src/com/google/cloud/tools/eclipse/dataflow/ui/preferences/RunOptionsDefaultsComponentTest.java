@@ -72,7 +72,7 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
-  public void tesGetControl() {
+  public void testGetControl() {
     Assert.assertSame(composite, component.getControl());
   }
 }
