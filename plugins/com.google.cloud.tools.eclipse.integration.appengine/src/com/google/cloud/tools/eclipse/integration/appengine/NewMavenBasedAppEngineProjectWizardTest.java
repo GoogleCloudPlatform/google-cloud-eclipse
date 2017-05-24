@@ -25,7 +25,10 @@ import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
-
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.concurrent.TimeUnit;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
@@ -35,11 +38,6 @@ import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Test creation of a new project with the "Maven-Based Google App Engine Standard Java Project"
@@ -83,7 +81,7 @@ public class NewMavenBasedAppEngineProjectWizardTest extends BaseProjectTest {
   private static String getPomProperty(IProject project, String propertyName)
       throws CoreException, IOException {
     try (InputStream pom = project.getFile("pom.xml").getContents()) {
-      return new MavenUtils().getProperty(pom, propertyName);
+      return MavenUtils.getProperty(pom, propertyName);
     }
   }
 
