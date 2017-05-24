@@ -41,10 +41,10 @@ public interface StagingDelegate {
       IPath safeWorkDirectory, CloudSdk cloudSdk, IProgressMonitor monitor) throws CoreException;
 
   /**
-   * Returns a directory where optional YAML configurations files (such as {@code cron.yaml}) reside
-   * that may be deployed together.
+   * Returns a directory where optional YAML configuration files such as {@code cron.yaml}
+   * that may be deployed together reside.
    *
-   * Conventionally, for App Engine standard, this directory is found inside the staging directory
+   * Conventionally, for App Engine standard, this directory is found inside the staging directory.
    * ({@code appcfg.sh} converts XML configuration files to YAML and puts them under {@code
    * <staging-directory>/WEB-INF/appengine-generated}). For App Engine flexible, this is usually the
    * directory where {@code app.yaml} is located, which may or may not be inside project source.

@@ -16,15 +16,18 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.flex;
 
+import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.eclipse.appengine.deploy.CloudSdkStagingHelper;
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
 import com.google.cloud.tools.eclipse.appengine.deploy.WarPublisher;
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 
@@ -36,6 +39,7 @@ public class FlexStagingDelegate implements StagingDelegate {
     this.appEngineDirectory = appEngineDirectory;
   }
 
+  // todo why is the cloudSdk argument not used here?
   @Override
   public IStatus stage(IProject project, IPath stagingDirectory, IPath safeWorkDirectory,
       CloudSdk cloudSdk, IProgressMonitor monitor) throws CoreException {
@@ -44,10 +48,15 @@ public class FlexStagingDelegate implements StagingDelegate {
     stagingDirectory.toFile().mkdirs();
     IPath war = safeWorkDirectory.append("app-to-deploy.war");
     WarPublisher.publishWar(project, war, subMonitor.newChild(40));
-    CloudSdkStagingHelper.stageFlexible(appEngineDirectory, war, stagingDirectory,
-        subMonitor.newChild(60));
-
-    return Status.OK_STATUS;
+    try {
+      CloudSdkStagingHelper.stageFlexible(appEngineDirectory, war, stagingDirectory,
+          subMonitor.newChild(60));
+      return Status.OK_STATUS;
+    } catch (AppEngineException ex) {
+      return StatusUtil.error(this, "Staging failed", ex);
+    } catch (OperationCanceledException ex) {
+      return Status.CANCEL_STATUS; 
+    }
   }
 
   @Override
