@@ -41,7 +41,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 
@@ -146,6 +145,7 @@ public class DeployJob extends WorkspaceJob {
 
       return openAppInBrowser();
     } finally {
+      // todo should this be progress.done() instead?
       monitor.done();
     }
   }
@@ -183,7 +183,7 @@ public class DeployJob extends WorkspaceJob {
         return stagingExitListener.getExitStatus();
       }
       return status;
-    } catch (CoreException | IllegalArgumentException | OperationCanceledException ex) {
+    } catch (IllegalArgumentException ex) {
       return StatusUtil.error(this, Messages.getString("deploy.job.staging.failed"), ex);
     } finally {
       getJobManager().endRule(project);

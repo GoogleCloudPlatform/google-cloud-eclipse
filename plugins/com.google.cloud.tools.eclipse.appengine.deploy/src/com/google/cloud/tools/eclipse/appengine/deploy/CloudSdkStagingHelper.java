@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy;
 
+import com.google.cloud.tools.appengine.api.AppEngineException;
 import com.google.cloud.tools.appengine.api.deploy.DefaultStageFlexibleConfiguration;
 import com.google.cloud.tools.appengine.api.deploy.DefaultStageStandardConfiguration;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
@@ -64,6 +65,8 @@ public class CloudSdkStagingHelper {
    * @param appEngineDirectory directory containing {@code app.yaml}
    * @param deployArtifact project to be deploy (such as WAR or JAR)
    * @param stagingDirectory where the result of the staging operation will be written
+   * @throws AppEngineException when staging fails
+   * @throws OperationCanceledException when user cancels the operation
    */
   public static void stageFlexible(IPath appEngineDirectory, IPath deployArtifact,
       IPath stagingDirectory, IProgressMonitor monitor) {

@@ -18,7 +18,6 @@ package com.google.cloud.tools.eclipse.appengine.deploy;
 
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -38,13 +37,13 @@ public interface StagingDelegate {
    * @param cloudSdk {@link CloudSdk} that may be utilized for staging
    */
   IStatus stage(IProject project, IPath stagingDirectory,
-      IPath safeWorkDirectory, CloudSdk cloudSdk, IProgressMonitor monitor) throws CoreException;
+      IPath safeWorkDirectory, CloudSdk cloudSdk, IProgressMonitor monitor);
 
   /**
-   * Returns a directory where optional YAML configurations files (such as {@code cron.yaml}) reside
-   * that may be deployed together.
+   * Returns a directory where optional YAML configuration files such as {@code cron.yaml}
+   * that may be deployed together reside.
    *
-   * Conventionally, for App Engine standard, this directory is found inside the staging directory
+   * Conventionally, for App Engine standard, this directory is found inside the staging directory.
    * ({@code appcfg.sh} converts XML configuration files to YAML and puts them under {@code
    * <staging-directory>/WEB-INF/appengine-generated}). For App Engine flexible, this is usually the
    * directory where {@code app.yaml} is located, which may or may not be inside project source.

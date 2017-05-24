@@ -90,8 +90,7 @@ public class DataflowJavaProjectNatureTest {
       throws CoreException {
     when(project.isAccessible()).thenReturn(false);
 
-    thrown
-        .expect(CoreException.class);
+    thrown.expect(CoreException.class);
     thrown.expectMessage("nonexistent or closed project");
     thrown.expectMessage("add the Dataflow nature");
 
