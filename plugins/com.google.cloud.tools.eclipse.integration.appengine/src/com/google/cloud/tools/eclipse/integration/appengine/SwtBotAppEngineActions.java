@@ -27,6 +27,7 @@ import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
+import org.eclipse.swtbot.swt.finder.widgets.TimeoutException;
 
 /**
  * Useful App Engine-related actions for Google Cloud Tools for Eclipse.
@@ -36,7 +37,7 @@ public class SwtBotAppEngineActions {
   /**
    * Create a native App Engine project using the
    * {@code com.google.cloud.tools.eclipse.appengine.newproject.AppEngineStandard} new wizard.
-   * 
+   *
    * @param bot the bot
    * @param projectName the name of the project
    * @param location can be {@code null}
@@ -65,9 +66,18 @@ public class SwtBotAppEngineActions {
       bot.textWithLabel("Java package:").setText(javaPackage);
     }
     // can take a loooong time to resolve jars (e.g. servlet-api.jar) from Maven Central
-    int libraryResolutionTimeout = 60000/* ms */;
+    int libraryResolutionTimeout = 300 * 1000/* ms */;
     SwtBotTimeoutManager.setTimeout(libraryResolutionTimeout);
-    SwtBotTestingUtilities.clickButtonAndWaitForWindowClose(bot, bot.button("Finish"));
+    try {
+      SwtBotTestingUtilities.clickButtonAndWaitForWindowClose(bot, bot.button("Finish"));
+    } catch (TimeoutException ex) {
+      System.err.println("FATAL: timed out while waiting for the wizard to close. Forcibly killing "
+          + "all shells: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1925");
+      System.err.println("FATAL: You will see tons of related errors: \"Widget is disposed\", "
+          + "\"Failed to execute runnable\", \"IllegalStateException\", etc.");
+      SwtBotWorkbenchActions.killAllShells(bot);
+      throw ex;
+    }
     SwtBotTimeoutManager.resetTimeout();
     IProject project = waitUntilProjectExists(bot, getWorkspaceRoot().getProject(projectName));
     SwtBotWorkbenchActions.waitForProjects(bot, project);
@@ -104,9 +114,18 @@ public class SwtBotAppEngineActions {
       bot.list().select(archetypeDescription);
     }
 
-    int mavenCompletionTimeout = 60000/* ms */; // can take a loooong time to fetch archetypes
+    int mavenCompletionTimeout = 300 * 1000/* ms */; // can take a loooong time to fetch archetypes
     SwtBotTimeoutManager.setTimeout(mavenCompletionTimeout);
-    SwtBotTestingUtilities.clickButtonAndWaitForWindowClose(bot, bot.button("Finish"));
+    try {
+      SwtBotTestingUtilities.clickButtonAndWaitForWindowClose(bot, bot.button("Finish"));
+    } catch (TimeoutException ex) {
+      System.err.println("FATAL: timed out while waiting for the wizard to close. Forcibly killing "
+          + "all shells: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1925");
+      System.err.println("FATAL: You will see tons of related errors: \"Widget is disposed\", "
+          + "\"Failed to execute runnable\", \"IllegalStateException\", etc.");
+      SwtBotWorkbenchActions.killAllShells(bot);
+      throw ex;
+    }
     SwtBotTimeoutManager.resetTimeout();
     IProject project = waitUntilProjectExists(bot, getWorkspaceRoot().getProject(artifactId));
     SwtBotWorkbenchActions.waitForProjects(bot, project);
@@ -115,7 +134,7 @@ public class SwtBotAppEngineActions {
 
   /**
    * Spin until the given project actually exists.
-   * 
+   *
    * @return the project
    */
   private static IProject waitUntilProjectExists(SWTBot bot, final IProject project) {

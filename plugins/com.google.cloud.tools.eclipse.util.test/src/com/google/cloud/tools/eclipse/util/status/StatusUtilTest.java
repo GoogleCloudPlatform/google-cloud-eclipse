@@ -21,6 +21,8 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.util.io.DeleteAllVisitor;
 import org.eclipse.core.runtime.IStatus;
@@ -61,16 +63,17 @@ public class StatusUtilTest {
 
   @Test
   public void testErrorMessage_Exception() {
-    RuntimeException ex = new RuntimeException("testing");
-    IStatus status = StatusUtil.setErrorStatus(this, "Failed to create project", ex);
-    Assert.assertEquals("Failed to create project: testing", status.getMessage());
+    RuntimeException ex = mock(RuntimeException.class);
+    when(ex.getMessage()).thenReturn("testing");
+    IStatus status = StatusUtil.setErrorStatus(this, "test message from StatusUtilTest", ex);
+    Assert.assertEquals("test message from StatusUtilTest: testing", status.getMessage());
   }
 
   @Test
   public void testErrorMessage_ExceptionWithoutMessage() {
-    RuntimeException ex = new RuntimeException();
-    IStatus status = StatusUtil.setErrorStatus(this, "Failed to create project", ex);
-    Assert.assertEquals("Failed to create project", status.getMessage());
+    RuntimeException ex = mock(RuntimeException.class);
+    IStatus status = StatusUtil.setErrorStatus(this, "test message from StatusUtilTest", ex);
+    Assert.assertEquals("test message from StatusUtilTest", status.getMessage());
   }
 
   private void verifyStatus(IStatus error) {

@@ -180,11 +180,19 @@ public final class SwtBotWorkbenchActions {
     bot.resetActivePerspective();
   }
 
+  public static void closeAllShells(SWTWorkbenchBot bot) {
+    closeAllShells(bot, false /* forceKill */);
+  }
+
+  public static void killAllShells(SWTWorkbenchBot bot) {
+    closeAllShells(bot, true /* forceKill */);
+  }
+
   /**
    * Reimplementation of {@link SWTWorkbenchBot#closeAllShells()} that does not close the internal
    * Eclipse Workbench limbo shell thus avoiding Eclipse bug 511729.
    */
-  private static void closeAllShells(final SWTWorkbenchBot bot) {
+  private static void closeAllShells(final SWTWorkbenchBot bot, final boolean forceKill) {
     // avoid bot.closeAllShells() due to bug 511729
     UIThreadRunnable.syncExec(bot.getDisplay(), new VoidResult() {
       @Override
@@ -193,7 +201,11 @@ public final class SwtBotWorkbenchActions {
         Shell[] shells = bot.getDisplay().getShells();
         for (Shell shell : shells) {
           if (!isEclipseShell(shell, activeWindow)) {
-            shell.close();
+            if (forceKill) {
+              shell.dispose();
+            } else {
+              shell.close();
+            }
           }
         }
       }
