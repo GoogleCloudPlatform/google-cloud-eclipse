@@ -7,7 +7,6 @@ Bundle-SymbolicName: com.google.cloud.tools.eclipse.appengine.libraries.ui.test;
 Bundle-Vendor: Google Inc.
 Bundle-Version: 0.1.0.qualifier
 Fragment-Host: com.google.cloud.tools.eclipse.appengine.libraries.ui
-Require-Bundle: org.hamcrest;bundle-version="1.1.0"
 Import-Package: com.google.cloud.tools.eclipse.appengine.libraries.ui,
  com.google.cloud.tools.eclipse.test.util,
  org.junit;version="4.12.0",

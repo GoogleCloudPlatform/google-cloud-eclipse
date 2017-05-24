@@ -54,7 +54,7 @@ public class MavenUtils {
 
   private static final String MAVEN_LATEST_VERSION = "LATEST"; //$NON-NLS-1$
   private static final String POM_XML_NAMESPACE_URI = "http://maven.apache.org/POM/4.0.0"; //$NON-NLS-1$
-  
+
   /**
    * Returns {@code true} if the given project has the Maven 2 nature. This
    * checks for the Maven nature used by m2Eclipse 1.0.0.
@@ -138,7 +138,7 @@ public class MavenUtils {
   }
 
   public String getProperty(InputStream pomXml, String propertyName) throws CoreException {
-    return getTopLevelValue(parse(pomXml), "properties", propertyName); //$NON-NLS-1$ //$NON-NLS-2$
+    return getTopLevelValue(parse(pomXml), "properties", propertyName); //$NON-NLS-1$
   }
 
   private Document parse(InputStream pomXml) throws CoreException {
