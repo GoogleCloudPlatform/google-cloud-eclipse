@@ -25,11 +25,11 @@ public class AppEngineFlexProjectWizardTest {
 
   @Test
   public void testWindowTitle() {
-    Assert.assertEquals("New App Engine Flex Project", wizard.getWindowTitle());
+    Assert.assertEquals("New App Engine flexibole environment Project", wizard.getWindowTitle());
   }
 
   @Test
-  public void testValidateDepedencies() {
+  public void testValidateDependencies() {
     Assert.assertTrue(wizard.validateDependencies(true, true).isOK());
   }
   
