@@ -18,40 +18,34 @@ package com.google.cloud.tools.eclipse.dataflow.ui.preferences;
 
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.DataflowPreferences;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.MessageTarget;
+import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RunOptionsDefaultsComponentTest {
   
-  private @Mock DataflowPreferences preferences;
-  private Shell shell;
-  private MessageTarget messageTarget = Mockito.mock(MessageTarget.class);
+  @Rule public ShellTestResource shellResource = new ShellTestResource();
+  
+  @Mock private DataflowPreferences preferences;
+  @Mock private MessageTarget messageTarget;
+
   private RunOptionsDefaultsComponent component;
   private Composite composite;
 
   @Before
   public void setUp() {
-    shell = new Shell(Display.getCurrent());
+    Shell shell = shellResource.getShell();
     composite = new Composite(shell, SWT.NONE);
     component = new RunOptionsDefaultsComponent(composite, 3, messageTarget, preferences);
-  }
-
-  @After
-  public void tearDown() {
-    if (shell != null && !shell.isDisposed()) {
-      shell.dispose();
-    }
   }
 
   @Test

@@ -27,7 +27,6 @@ import com.google.cloud.tools.eclipse.dataflow.core.project.VerifyStagingLocatio
 import com.google.cloud.tools.eclipse.dataflow.core.proxy.ListenableFutureProxy;
 import com.google.cloud.tools.eclipse.dataflow.core.util.CouldNotCreateCredentialsException;
 import com.google.cloud.tools.eclipse.dataflow.ui.DataflowUiPlugin;
-import com.google.cloud.tools.eclipse.dataflow.ui.page.DialogPageMessageTarget;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.MessageTarget;
 import com.google.cloud.tools.eclipse.dataflow.ui.util.ButtonFactory;
 import com.google.cloud.tools.eclipse.dataflow.ui.util.DisplayExecutor;
@@ -82,9 +81,14 @@ public class RunOptionsDefaultsComponent {
   private WizardPage page = null;
 
   public RunOptionsDefaultsComponent(
-      Composite target, int columns, MessageTarget messageTarget, DataflowPreferences preferences) {
+      Composite target,
+      int columns,
+      MessageTarget messageTarget,
+      DataflowPreferences preferences,
+      WizardPage page) {
     checkArgument(columns >= 3, "DefaultRunOptions must be in a Grid with at least 3 columns");
     this.target = target;
+    this.page = page;
     this.messageTarget = messageTarget;
     this.executor = DisplayExecutor.create(target.getDisplay());
     this.client = setupGcsClient();
@@ -145,13 +149,8 @@ public class RunOptionsDefaultsComponent {
   }
 
   public RunOptionsDefaultsComponent(
-      Composite composite,
-      int numColumns,
-      DialogPageMessageTarget dialogPageMessageTarget,
-      DataflowPreferences prefs,
-      WizardPage page) {
-    this(composite, numColumns, dialogPageMessageTarget, prefs);
-    this.page = page;
+      Composite composite, int numColumns, MessageTarget messageTarget, DataflowPreferences prefs) {
+    this(composite, numColumns, messageTarget, prefs, null);
   }
 
   private static GcsDataflowProjectClient setupGcsClient() {
