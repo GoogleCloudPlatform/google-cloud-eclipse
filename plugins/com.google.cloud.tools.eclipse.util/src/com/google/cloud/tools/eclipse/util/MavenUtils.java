@@ -58,14 +58,12 @@ public class MavenUtils {
    */
   public static boolean hasMavenNature(IProject project) {
     try {
-      if (NatureUtils.hasNature(project, MavenUtils.MAVEN2_NATURE_ID)) {
-        return true;
-      }
+      return NatureUtils.hasNature(project, MavenUtils.MAVEN2_NATURE_ID);
     } catch (CoreException coreException) {
       logger.log(Level.SEVERE, "Unable to examine natures on project " + project.getName(),
           coreException);
+      return false;
     }
-    return false;
   }
 
   /**
@@ -73,16 +71,12 @@ public class MavenUtils {
    * <@code>dependency2</@code> are equal. Returns false otherwise.
    */
   public static boolean areDependenciesEqual(Dependency dependency1, Dependency dependency2) {
-    if ((dependency1 == null) || (dependency2 == null)) {
+    if (dependency1 == null || dependency2 == null) {
       return false;
     }
 
-    if (!Objects.equal(dependency1.getGroupId(), dependency2.getGroupId())||
-        !Objects.equal(dependency1.getArtifactId(), dependency2.getArtifactId())) {
-      return false;
-    }
-
-    return true;
+    return Objects.equal(dependency1.getGroupId(), dependency2.getGroupId())
+        && Objects.equal(dependency1.getArtifactId(), dependency2.getArtifactId());
   }
 
   /**
