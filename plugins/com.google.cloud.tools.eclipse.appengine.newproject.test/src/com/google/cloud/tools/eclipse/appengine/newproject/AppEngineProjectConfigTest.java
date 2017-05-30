@@ -17,7 +17,9 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import java.net.URI;
@@ -72,5 +74,14 @@ public class AppEngineProjectConfigTest {
     config.setAppEngineLibraries(Collections.singleton(new Library("app-engine-library")));
     assertThat(config.getAppEngineLibraries().size(), is(1));
     assertThat(config.getAppEngineLibraries().iterator().next().getId(), is("app-engine-library"));
+  }
+
+  @Test
+  public void testSetAsMavenProject() {
+    config.setAsMavenProject("group.foo", "artifact.bar", "baz.version");
+    assertTrue(config.getAsMavenProject());
+    assertEquals("group.foo", config.getMavenGroupId());
+    assertEquals("artifact.bar", config.getMavenArtifactId());
+    assertEquals("baz.version", config.getMavenVersion());
   }
 }
