@@ -34,7 +34,7 @@ public class AppEngineFlexProjectWizard extends AppEngineProjectWizard {
 
   private AppEngineFlexWizardPage wizardPage;
 
-  public AppEngineFlexProjectWizard(){
+  public AppEngineFlexProjectWizard() {
     setWindowTitle(Messages.getString("new.app.engine.flex.project"));
   }
 

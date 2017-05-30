@@ -90,64 +90,64 @@ public class CodeTemplates {
 
     String packageName = config.getPackageName();
 
-    Map<String, String> packageMap = new HashMap<>();
+    Map<String, String> templateValues = new HashMap<>();
     if (packageName != null && !packageName.isEmpty()) {
-      packageMap.put("package", packageName);  //$NON-NLS-1$
+      templateValues.put("package", packageName);  //$NON-NLS-1$
     } else {
-      packageMap.put("package", ""); //$NON-NLS-1$ //$NON-NLS-2$
+      templateValues.put("package", ""); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     IFolder packageFolder = createFoldersForPackage(java, packageName, subMonitor.newChild(5));
     IFile hello = createChildFile("HelloAppEngine.java", //$NON-NLS-1$
         AppEngineTemplateUtility.HELLO_APPENGINE_TEMPLATE,
-        packageFolder, packageMap, subMonitor.newChild(5));
+        packageFolder, templateValues, subMonitor.newChild(5));
 
     // now set up the test directory
     IFolder testPackageFolder =
         createFoldersForPackage(testJava, packageName, subMonitor.newChild(5));
     createChildFile("HelloAppEngineTest.java", //$NON-NLS-1$
         AppEngineTemplateUtility.HELLO_APPENGINE_TEST_TEMPLATE, testPackageFolder,
-        packageMap, subMonitor.newChild(5));
+        templateValues, subMonitor.newChild(5));
     createChildFile("MockHttpServletResponse.java", //$NON-NLS-1$
         AppEngineTemplateUtility.MOCK_HTTPSERVLETRESPONSE_TEMPLATE,
-        testPackageFolder, packageMap, subMonitor.newChild(5));
+        testPackageFolder, templateValues, subMonitor.newChild(5));
 
     IFolder webapp = createChildFolder("webapp", main, subMonitor.newChild(5)); //$NON-NLS-1$
     IFolder webinf = createChildFolder("WEB-INF", webapp, subMonitor.newChild(5)); //$NON-NLS-1$
 
-    Map<String, String> serviceMap = new HashMap<>();
+    Map<String, String> properties = new HashMap<>();
     String service = config.getServiceName();
     if (!Strings.isNullOrEmpty(service)) {
-      serviceMap.put("service", service);  //$NON-NLS-1$
+      properties.put("service", service);  //$NON-NLS-1$
     }
 
     if (isStandardProject) {
       createChildFile("appengine-web.xml",  //$NON-NLS-1$
           AppEngineTemplateUtility.APPENGINE_WEB_XML_TEMPLATE,
-          webinf, serviceMap, subMonitor.newChild(5));
+          webinf, properties, subMonitor.newChild(5));
     } else {
       IFolder appengine = createChildFolder("appengine", main, subMonitor.newChild(5)); //$NON-NLS-1$
       createChildFile("app.yaml", AppEngineTemplateUtility.APP_YAML_TEMPLATE, //$NON-NLS-1$
-          appengine, serviceMap, subMonitor.newChild(5));
+          appengine, properties, subMonitor.newChild(5));
     }
 
-    Map<String, String> templateValues = new HashMap<>();
+    Map<String, String> packageMap = new HashMap<>();
     String packageValue =
         config.getPackageName().isEmpty()
             ? ""  //$NON-NLS-1$
             : config.getPackageName() + "."; //$NON-NLS-1$
-    templateValues.put("package", packageValue);  //$NON-NLS-1$
+    packageMap.put("package", packageValue);  //$NON-NLS-1$
     if (isStandardProject) {
-      templateValues.put("version", "2.5"); //$NON-NLS-1$ //$NON-NLS-2$
-      templateValues.put("namespace", "http://java.sun.com/xml/ns/javaee"); //$NON-NLS-1$ //$NON-NLS-2$
-      templateValues.put("schemaUrl", "http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"); //$NON-NLS-1$ //$NON-NLS-2$
+      packageMap.put("version", "2.5"); //$NON-NLS-1$ //$NON-NLS-2$
+      packageMap.put("namespace", "http://java.sun.com/xml/ns/javaee"); //$NON-NLS-1$ //$NON-NLS-2$
+      packageMap.put("schemaUrl", "http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"); //$NON-NLS-1$ //$NON-NLS-2$
     } else {
-      templateValues.put("version", "3.1"); //$NON-NLS-1$ //$NON-NLS-2$
-      templateValues.put("namespace", "http://xmlns.jcp.org/xml/ns/javaee"); //$NON-NLS-1$ //$NON-NLS-2$
-      templateValues.put("schemaUrl", "http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"); //$NON-NLS-1$ //$NON-NLS-2$
+      packageMap.put("version", "3.1"); //$NON-NLS-1$ //$NON-NLS-2$
+      packageMap.put("namespace", "http://xmlns.jcp.org/xml/ns/javaee"); //$NON-NLS-1$ //$NON-NLS-2$
+      packageMap.put("schemaUrl", "http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"); //$NON-NLS-1$ //$NON-NLS-2$
     }
     createChildFile("web.xml", AppEngineTemplateUtility.WEB_XML_TEMPLATE, webinf,  //$NON-NLS-1$
-        templateValues, subMonitor.newChild(5));
+        packageMap, subMonitor.newChild(5));
 
     createChildFile("index.html", AppEngineTemplateUtility.INDEX_HTML_TEMPLATE, webapp, //$NON-NLS-1$
         Collections.<String, String>emptyMap(), subMonitor.newChild(5));
@@ -156,12 +156,12 @@ public class CodeTemplates {
 
     if (config.getAsMavenProject()) {
       Map<String, String> mavenCoordinates = new HashMap<>();
-      mavenCoordinates.put("projectGroupId", config.getMavenGroupId());
-      mavenCoordinates.put("projectArtifactId", config.getMavenArtifactId());
-      mavenCoordinates.put("projectVersion", config.getMavenVersion());
+      mavenCoordinates.put("projectGroupId", config.getMavenGroupId()); //$NON-NLS-1$
+      mavenCoordinates.put("projectArtifactId", config.getMavenArtifactId()); //$NON-NLS-1$
+      mavenCoordinates.put("projectVersion", config.getMavenVersion()); //$NON-NLS-1$
       if (!isStandardProject) {
-        createChildFile("pom.xml", AppEngineTemplateUtility.POM_XML_FLEX_TEMPLATE, project,
-            mavenCoordinates, subMonitor.newChild(5));
+        createChildFile("pom.xml", AppEngineTemplateUtility.POM_XML_FLEX_TEMPLATE, //$NON-NLS-1$
+            project, mavenCoordinates, subMonitor.newChild(5));
       }
     }
 
