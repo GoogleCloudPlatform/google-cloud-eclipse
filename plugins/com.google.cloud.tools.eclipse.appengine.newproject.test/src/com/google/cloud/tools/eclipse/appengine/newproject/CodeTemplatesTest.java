@@ -88,8 +88,7 @@ public class CodeTemplatesTest {
   }
 
   @Test
-  public void testMaterializeAppEnigneFlexFiles_noPomXml()
-      throws CoreException, ParserConfigurationException, SAXException, IOException {
+  public void testMaterializeAppEnigneFlexFiles_noPomXml() throws CoreException {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
     CodeTemplates.materializeAppEngineFlexFiles(project, config, monitor);
     assertFalse(project.getFile("pom.xml").exists());
