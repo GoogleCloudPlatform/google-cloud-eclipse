@@ -25,6 +25,7 @@ import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
@@ -53,18 +54,17 @@ public class FlexStagingDelegateTest {
   @Test
   public void testStage() throws CoreException {
     StagingDelegate delegate = new FlexStagingDelegate(appEngineDirectory);
-    delegate.stage(project, stagingDirectory, safeWorkDirectory, null /* cloudSdk */,
-        new NullProgressMonitor());
+    IStatus status = delegate.stage(project, stagingDirectory, safeWorkDirectory, 
+        null /* cloudSdk */, new NullProgressMonitor());
 
     assertTrue(stagingDirectory.append("app-to-deploy.war").toFile().exists());
     assertTrue(stagingDirectory.append("app.yaml").toFile().exists());
+    assertTrue(status.isOK());
   }
 
   @Test
-  public void testGetOptionalConfigurationFilesDirectory() throws CoreException {
+  public void testGetOptionalConfigurationFilesDirectory() {
     StagingDelegate delegate = new FlexStagingDelegate(appEngineDirectory);
-    delegate.stage(project, stagingDirectory, safeWorkDirectory, null /* cloudSdk */,
-        new NullProgressMonitor());
 
     assertEquals(appEngineDirectory, delegate.getOptionalConfigurationFilesDirectory());
   }

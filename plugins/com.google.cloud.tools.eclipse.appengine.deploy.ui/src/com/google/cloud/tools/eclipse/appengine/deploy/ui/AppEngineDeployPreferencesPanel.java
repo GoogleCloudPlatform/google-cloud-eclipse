@@ -230,23 +230,23 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
    * <ul>
    *   <li> Binds {@code master} to the property with the name {@code masterModelPropertyName}
    *       in the {@link #model}.
-   *   <li> Binds {@code dependant} to the property with the name {@code dependantModelPropertyName}
+   *   <li> Binds {@code dependent} to the property with the name {@code dependantModelPropertyName}
    *       in the {#link model}.
-   *   <li> Binds {@code master} and {@code dependant} in a way that {@code dependant} is disabled
+   *   <li> Binds {@code master} and {@code dependent} in a way that {@code dependent} is disabled
    *       and unchecked when {@code master} is unchecked. When {@code master} is checked back,
-   *       {@code dependant} restores its previous check state.
+   *       {@code dependent} restores its previous check state.
    * <ul>
    */
   private void setupMasterDependantDataBinding(Control master, String masterModelPropertyName,
-      Control dependant, String dependantModelPropertyName) {
+      Control dependent, String dependentModelPropertyName) {
 
     ISWTObservableValue masterValue = WidgetProperties.selection().observe(master);
-    final ISWTObservableValue dependantValue = WidgetProperties.selection().observe(dependant);
-    final ISWTObservableValue dependantEnablement = WidgetProperties.enabled().observe(dependant);
+    final ISWTObservableValue dependantValue = WidgetProperties.selection().observe(dependent);
+    final ISWTObservableValue dependantEnablement = WidgetProperties.enabled().observe(dependent);
 
     IObservableValue masterModel = PojoProperties.value(masterModelPropertyName).observe(model);
     IObservableValue dependantModel =
-        PojoProperties.value(dependantModelPropertyName).observe(model);
+        PojoProperties.value(dependentModelPropertyName).observe(model);
 
     bindingContext.bindValue(dependantEnablement, masterValue);
 

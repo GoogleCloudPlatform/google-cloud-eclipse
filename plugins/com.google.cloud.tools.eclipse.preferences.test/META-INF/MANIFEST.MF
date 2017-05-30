@@ -8,7 +8,7 @@ Bundle-Vendor: Google Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Fragment-Host: com.google.cloud.tools.eclipse.preferences
-Require-Bundle: org.hamcrest;bundle-version="1.1.0",
- org.junit;bundle-version="4.12.0"
-Import-Package: org.mockito;provider=google;version="1.10.19",
+Import-Package: org.junit;version="4.12.0",
+ org.junit.runner;version="4.12.0",
+ org.mockito;provider=google;version="1.10.19",
  org.mockito.runners;provider=google;version="1.10.19"

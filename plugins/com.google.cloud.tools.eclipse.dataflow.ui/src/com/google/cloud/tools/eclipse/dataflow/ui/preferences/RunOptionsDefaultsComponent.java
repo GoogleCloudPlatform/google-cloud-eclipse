@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.DataflowPreferences;
 import com.google.cloud.tools.eclipse.dataflow.core.project.FetchStagingLocationsJob;
 import com.google.cloud.tools.eclipse.dataflow.core.project.GcsDataflowProjectClient;
+import com.google.cloud.tools.eclipse.dataflow.core.project.GcsDataflowProjectClient.StagingLocationVerificationResult;
 import com.google.cloud.tools.eclipse.dataflow.core.project.VerifyStagingLocationJob;
 import com.google.cloud.tools.eclipse.dataflow.core.project.VerifyStagingLocationJob.VerifyStagingLocationResult;
 import com.google.cloud.tools.eclipse.dataflow.core.proxy.ListenableFutureProxy;
@@ -31,9 +32,11 @@ import com.google.cloud.tools.eclipse.dataflow.ui.util.ButtonFactory;
 import com.google.cloud.tools.eclipse.dataflow.ui.util.DisplayExecutor;
 import com.google.cloud.tools.eclipse.dataflow.ui.util.SelectFirstMatchingPrefixListener;
 import com.google.cloud.tools.eclipse.dataflow.ui.util.SelectFirstMatchingPrefixListener.OnCompleteListener;
+import com.google.cloud.tools.eclipse.ui.util.databinding.BucketNameValidator;
 import com.google.common.base.Strings;
-
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
@@ -50,7 +53,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.statushandlers.StatusManager;
-
+import java.util.Locale;
 import java.util.SortedSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -67,9 +70,7 @@ public class RunOptionsDefaultsComponent {
 
   private final GcsDataflowProjectClient client;
   private final DisplayExecutor executor;
-
   private final MessageTarget messageTarget;
-
   private final Composite target;
   private final Text projectInput;
   private final Combo stagingLocationInput;
@@ -77,11 +78,17 @@ public class RunOptionsDefaultsComponent {
 
   private VerifyStagingLocationJob verifyJob;
   private SelectFirstMatchingPrefixListener completionListener;
+  private WizardPage page = null;
 
   public RunOptionsDefaultsComponent(
-      Composite target, int columns, MessageTarget messageTarget, DataflowPreferences preferences) {
+      Composite target,
+      int columns,
+      MessageTarget messageTarget,
+      DataflowPreferences preferences,
+      WizardPage page) {
     checkArgument(columns >= 3, "DefaultRunOptions must be in a Grid with at least 3 columns");
     this.target = target;
+    this.page = page;
     this.messageTarget = messageTarget;
     this.executor = DisplayExecutor.create(target.getDisplay());
     this.client = setupGcsClient();
@@ -141,6 +148,11 @@ public class RunOptionsDefaultsComponent {
     messageTarget.setInfo("Set Pipeline Run Option Defaults");
   }
 
+  public RunOptionsDefaultsComponent(
+      Composite composite, int numColumns, MessageTarget messageTarget, DataflowPreferences prefs) {
+    this(composite, numColumns, messageTarget, prefs, null);
+  }
+
   private static GcsDataflowProjectClient setupGcsClient() {
     try {
       return GcsDataflowProjectClient.createWithDefaultClient();
@@ -167,7 +179,7 @@ public class RunOptionsDefaultsComponent {
   }
 
   public String getStagingLocation() {
-    return client.toGcsLocationUri(stagingLocationInput.getText());
+    return GcsDataflowProjectClient.toGcsLocationUri(stagingLocationInput.getText());
   }
 
   public void addProjectModifyListener(ModifyListener listener) {
@@ -186,7 +198,6 @@ public class RunOptionsDefaultsComponent {
   public void setEnabled(boolean enabled) {
     projectInput.setEnabled(enabled);
     stagingLocationInput.setEnabled(enabled);
-    createButton.setEnabled(enabled);
   }
 
   /**
@@ -218,10 +229,15 @@ public class RunOptionsDefaultsComponent {
     }
     if (stagingLocation.isEmpty()) {
       // If the staging location is empty, we don't have anything to verify; and we don't have any
-      // interesting messaging
+      // interesting messaging.
       messageTarget.clear();
+      setPageComplete(true);
+      return;
+    } else if (!bucketNameOk()) {
+      setPageComplete(false);
       return;
     }
+    
     verifyJob = VerifyStagingLocationJob.create(client, stagingLocation);
     verifyJob.schedule(VERIFY_LOCATION_DELAY_MS);
     final ListenableFutureProxy<VerifyStagingLocationResult> resultFuture =
@@ -236,12 +252,15 @@ public class RunOptionsDefaultsComponent {
                   && result.isAccessible()) {
                 messageTarget.setInfo("Found staging location " + stagingLocation);
                 createButton.setEnabled(false);
+                setPageComplete(true);
               } else {
                 messageTarget.setError(String.format("Couldn't fetch bucket %s", stagingLocation));
                 createButton.setEnabled(true);
+                setPageComplete(false);
               }
             } catch (InterruptedException | ExecutionException e) {
               messageTarget.setError(String.format("Couldn't fetch bucket %s", stagingLocation));
+              setPageComplete(false);
             }
           }
         },
@@ -259,7 +278,7 @@ public class RunOptionsDefaultsComponent {
       updateStagingLocations(getProject());
     }
   }
-
+  
   /**
    * Create a GCS bucket in the project specified in the project input at the location specified in
    * the staging location input.
@@ -272,8 +291,21 @@ public class RunOptionsDefaultsComponent {
       }
       String projectName = projectInput.getText();
       String stagingLocation = stagingLocationInput.getText();
-      client.createStagingLocation(projectName, stagingLocation, new NullProgressMonitor());
-      messageTarget.setInfo("Created staging location at " + stagingLocation);
+      StagingLocationVerificationResult result = client.createStagingLocation(
+          projectName, stagingLocation, new NullProgressMonitor());
+      if (result.isSuccessful()) {
+        messageTarget.setInfo("Created staging location at " + stagingLocation);
+        setPageComplete(true);
+      } else {
+        messageTarget.setError("Could not create staging location at " + stagingLocation);
+        setPageComplete(false);
+      }
+    }
+  }
+  
+  private void setPageComplete(boolean complete) {
+    if (page != null) {
+      page.setPageComplete(complete);
     }
   }
 
@@ -284,7 +316,7 @@ public class RunOptionsDefaultsComponent {
   private class UpdateStagingLocationComboListener implements Runnable {
     private final Future<SortedSet<String>> stagingLocationsFuture;
 
-    public UpdateStagingLocationComboListener(Future<SortedSet<String>> stagingLocationsFuture) {
+    UpdateStagingLocationComboListener(Future<SortedSet<String>> stagingLocationsFuture) {
       this.stagingLocationsFuture = stagingLocationsFuture;
     }
 
@@ -293,36 +325,52 @@ public class RunOptionsDefaultsComponent {
      */
     @Override
     public void run() {
-      SortedSet<String> stagingLocations;
       try {
-        stagingLocations = stagingLocationsFuture.get();
-      } catch (InterruptedException | ExecutionException e) {
+        SortedSet<String> stagingLocations = stagingLocationsFuture.get();
+        messageTarget.clear();
+        String currentValue = stagingLocationInput.getText();
+        Point currentSelection = stagingLocationInput.getSelection();
+        int startSelection = currentSelection.x;
+        int endSelection = currentSelection.y;
+        stagingLocationInput.removeAll();
+        for (String location : stagingLocations) {
+          stagingLocationInput.add(location);
+        }
+        stagingLocationInput.setText(currentValue);
+        completionListener.setContents(stagingLocations);
+        stagingLocationInput.setSelection(new Point(startSelection, endSelection));
+      } catch (InterruptedException | ExecutionException ex) {
         messageTarget.setError("Could not retrieve buckets for project " + projectInput.getText());
-        DataflowUiPlugin.logError(e, "Exception while retrieving potential staging locations");
-        return;
+        DataflowUiPlugin.logError(ex, "Exception while retrieving potential staging locations");
+        setPageComplete(false);
       }
-      messageTarget.clear();
-      String currentValue = stagingLocationInput.getText();
-      Point currentSelection = stagingLocationInput.getSelection();
-      int startSelection = currentSelection.x;
-      int endSelection = currentSelection.y;
-      stagingLocationInput.removeAll();
-      for (String location : stagingLocations) {
-        stagingLocationInput.add(location);
-      }
-      stagingLocationInput.setText(currentValue);
-      completionListener.setContents(stagingLocations);
-      stagingLocationInput.setSelection(new Point(startSelection, endSelection));
     }
+  }
+  
+  private static final BucketNameValidator bucketNameValidator = new BucketNameValidator();
+  
+  private boolean bucketNameOk() {
+    String bucketName = stagingLocationInput.getText().trim();
+    if (bucketName.toLowerCase(Locale.US).startsWith("gs://")) {
+      bucketName = bucketName.substring(5);
+    }
+    IStatus status = bucketNameValidator.validate(bucketName);
+    if (!status.isOK()) {
+      messageTarget.setError(status.getMessage());
+      setPageComplete(false);
+    }
+    boolean enabled = status.isOK() && !bucketName.isEmpty();
+    return enabled;
   }
   
   private class EnableCreateButton implements ModifyListener {
 
     @Override
     public void modifyText(ModifyEvent event) {
-      boolean enabled = !stagingLocationInput.getText().trim().isEmpty();
+      boolean enabled = bucketNameOk();
       createButton.setEnabled(enabled);
     }
 
   }
+
 }

@@ -133,7 +133,7 @@ public class GcsDataflowProjectClient {
   /**
    * The result of creating or verifying a Staging Location.
    */
-  public class StagingLocationVerificationResult {
+  public static class StagingLocationVerificationResult {
     private final String message;
     private final boolean successful;
 
@@ -152,7 +152,7 @@ public class GcsDataflowProjectClient {
     /**
      * Return whether this attempt to create a staging location was succesful.
      */
-    boolean isSuccessful() {
+    public boolean isSuccessful() {
       return successful;
     }
   }

@@ -39,7 +39,7 @@ public class DialogPageMessageTargetTest {
     page = new DialogPage() {
       @Override
       public void createControl(Composite parent) {
-        throw new IllegalArgumentException();
+        throw new UnsupportedOperationException();
       }
     };
     target = new DialogPageMessageTarget(page);

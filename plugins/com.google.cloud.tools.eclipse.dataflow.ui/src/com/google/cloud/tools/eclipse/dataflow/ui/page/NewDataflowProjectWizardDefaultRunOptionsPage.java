@@ -43,7 +43,6 @@ public class NewDataflowProjectWizardDefaultRunOptionsPage extends WizardPage {
     this.creator = creator;
     setTitle(Messages.getString("SET_RUN_OPTIONS"));
     setDescription(Messages.getString("DATAFLOW_PIPELINE_OPTIONS"));
-    // This page is optional
     setPageComplete(true);
   }
 
@@ -51,10 +50,10 @@ public class NewDataflowProjectWizardDefaultRunOptionsPage extends WizardPage {
   public void createControl(Composite parent) {
     DataflowPreferences prefs = ProjectOrWorkspaceDataflowPreferences.forWorkspace();
     Composite composite = new Composite(parent, SWT.NULL);
-    final int numColumns = 3;
+    int numColumns = 3;
     composite.setLayout(new GridLayout(numColumns, false));
     runOptionsDefaultsComponent = new RunOptionsDefaultsComponent(
-        composite, numColumns, new DialogPageMessageTarget(this), prefs);
+        composite, numColumns, new DialogPageMessageTarget(this), prefs, this);
 
     setControl(runOptionsDefaultsComponent.getControl());
     addListeners();
@@ -63,14 +62,8 @@ public class NewDataflowProjectWizardDefaultRunOptionsPage extends WizardPage {
   private void addListeners() {
     runOptionsDefaultsComponent.addProjectModifyListener(new ModifyListener() {
       @Override
-      public void modifyText(ModifyEvent e) {
+      public void modifyText(ModifyEvent event) {
         creator.setDefaultProject(runOptionsDefaultsComponent.getProject());
-      }
-    });
-    runOptionsDefaultsComponent.addStagingLocationModifyListener(new ModifyListener() {
-      @Override
-      public void modifyText(ModifyEvent e) {
-        creator.setDefaultStagingLocation(runOptionsDefaultsComponent.getStagingLocation());
       }
     });
   }

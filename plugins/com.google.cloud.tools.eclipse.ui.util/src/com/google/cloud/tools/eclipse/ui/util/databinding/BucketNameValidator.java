@@ -35,6 +35,7 @@ import org.eclipse.core.runtime.IStatus;
  * The actual rules that govern the bucket naming are more complex. See the complete list of bucket name requirements
  * for more information: https://cloud.google.com/storage/docs/naming
  */
+// todo logic really belongs in appengine-plugins-core
 public class BucketNameValidator implements IValidator {
   private static final Pattern CLOUD_STORAGE_BUCKET_NAME_PATTERN =
       Pattern.compile("^[a-z0-9][a-z0-9_.-]{1,220}[a-z0-9]$"); //$NON-NLS-1$
@@ -42,7 +43,7 @@ public class BucketNameValidator implements IValidator {
   @Override
   public IStatus validate(Object input) {
     if (!(input instanceof String)) {
-      return ValidationStatus.error(Messages.getString("bucket.name.invalid")); //$NON-NLS-1$
+      return ValidationStatus.error(Messages.getString("bucket.name.not.string")); //$NON-NLS-1$
     }
     String value = (String) input;
     if (value.isEmpty()) {
@@ -50,7 +51,7 @@ public class BucketNameValidator implements IValidator {
     } else if (CLOUD_STORAGE_BUCKET_NAME_PATTERN.matcher(value).matches()) {
       return allComponentsLengthAreValid(value);
     } else {
-      return ValidationStatus.error(Messages.getString("bucket.name.invalid")); //$NON-NLS-1$
+      return ValidationStatus.error(Messages.getString("bucket.name.invalid", value)); //$NON-NLS-1$
     }
   }
 

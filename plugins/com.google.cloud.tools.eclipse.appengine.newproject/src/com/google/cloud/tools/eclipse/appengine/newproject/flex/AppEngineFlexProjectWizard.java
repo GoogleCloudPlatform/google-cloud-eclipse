@@ -21,6 +21,7 @@ import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectConfi
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectWizard;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineWizardPage;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
+import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
 import javax.inject.Inject;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
@@ -32,6 +33,10 @@ public class AppEngineFlexProjectWizard extends AppEngineProjectWizard {
   private ILibraryRepositoryService repositoryService;
 
   private AppEngineFlexWizardPage wizardPage;
+
+  public AppEngineFlexProjectWizard(){
+    setWindowTitle(Messages.getString("new.app.engine.flex.project"));
+  }
 
   @Override
   public AppEngineWizardPage createWizardPage() {
