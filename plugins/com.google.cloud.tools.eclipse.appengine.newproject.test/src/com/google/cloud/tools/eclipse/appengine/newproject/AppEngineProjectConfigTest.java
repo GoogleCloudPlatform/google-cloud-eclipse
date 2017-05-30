@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -66,6 +67,11 @@ public class AppEngineProjectConfigTest {
     config.setAppEngineLibraries(Collections.singleton(new Library("app-engine-library")));
     assertThat(config.getAppEngineLibraries().size(), is(1));
     assertThat(config.getAppEngineLibraries().iterator().next().getId(), is("app-engine-library"));
+  }
+
+  @Test
+  public void testGetAsMavenProject_defaultFalse() {
+    assertFalse(config.getAsMavenProject());
   }
 
   @Test
