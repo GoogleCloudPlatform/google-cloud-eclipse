@@ -25,7 +25,6 @@ import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectConfi
 import com.google.cloud.tools.eclipse.appengine.newproject.CodeTemplates;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
-import com.google.cloud.tools.eclipse.util.MavenUtils;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -95,9 +94,6 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
     IFile mostImportantFile =  CodeTemplates.materializeAppEngineFlexFiles(newProject, config,
         subMonitor.newChild(30));
-    if (config.getAsMavenProject()) {
-      MavenUtils.addMavenNature(newProject);
-    }
     configureFacets(newProject, subMonitor.newChild(20));
     addDependenciesToProject(newProject, subMonitor.newChild(50));
     return mostImportantFile;
