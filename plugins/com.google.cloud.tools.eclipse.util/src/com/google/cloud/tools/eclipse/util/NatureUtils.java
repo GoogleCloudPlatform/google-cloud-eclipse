@@ -26,18 +26,14 @@ import org.eclipse.core.runtime.CoreException;
 public class NatureUtils {
 
   /**
-   * Returns {@code true} if the project is accessible and has the
-   * specified nature ID.
-   *
-   * @return {@code true} if the project is accessible and has the
-   *         specified nature ID
+   * Returns {@code true} if the project is accessible and has the specified nature ID.
    */
   public static boolean hasNature(IProject project, String natureId) throws CoreException {
     return project.isAccessible() && project.hasNature(natureId);
   }
 
   /**
-   * Removes nature identified by {@code natureId}. If the {@code project} does not have the
+   * Removes a nature identified by {@code natureId}. If the {@code project} does not have the
    * nature, this method does nothing.
    */
   public static void removeNature(IProject project, String natureId) throws CoreException {
@@ -46,6 +42,20 @@ public class NatureUtils {
       IProjectDescription description = project.getDescription();
       List<String> natures = new ArrayList<>(Arrays.asList(description.getNatureIds()));
       natures.remove(natureId);
+      description.setNatureIds(natures.toArray(new String[0]));
+      project.setDescription(description, null /* monitor */);
+    }
+  }
+
+  /**
+   * Adds a nature identified by {@code natureId}. If the {@code project} already has the nature,
+   * this method does nothing.
+   */
+  public static void addNature(IProject project, String natureId) throws CoreException {
+    if (!project.hasNature(natureId)) {
+      IProjectDescription description = project.getDescription();
+      List<String> natures = new ArrayList<>(Arrays.asList(description.getNatureIds()));
+      natures.add(natureId);
       description.setNatureIds(natures.toArray(new String[0]));
       project.setDescription(description, null /* monitor */);
     }
