@@ -16,17 +16,20 @@
 
 package com.google.cloud.tools.eclipse.util;
 
+import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.maven.model.Dependency;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 public class MavenUtilsTest {
+  @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
+
   @Test
   public void testMavenNature_mavenProject() throws CoreException {
     IProject project = Mockito.mock(IProject.class);
@@ -42,6 +45,15 @@ public class MavenUtilsTest {
     Mockito.when(project.isAccessible()).thenReturn(true);
 
     Assert.assertFalse(MavenUtils.hasMavenNature(project));
+  }
+
+  @Test
+  public void testAddMavenNature() throws CoreException {
+    IProject project = projectCreator.getProject();
+    Assert.assertFalse(MavenUtils.hasMavenNature(project));
+
+    MavenUtils.addMavenNature(project);
+    Assert.assertTrue(MavenUtils.hasMavenNature(project));
   }
 
   @Test
@@ -85,7 +97,7 @@ public class MavenUtilsTest {
     Dependency dependency1 = new Dependency();
     dependency1.setGroupId("groupId");
     dependency1.setArtifactId("artifactId");
-    List<Dependency> dependencies = new ArrayList<Dependency>();
+    List<Dependency> dependencies = new ArrayList<>();
     dependencies.add(dependency1);
 
     Dependency dependency2 = new Dependency();
@@ -97,8 +109,8 @@ public class MavenUtilsTest {
 
   @Test
   public void testDoesListContainDependency_nonExistingDependency() {
-    List<Dependency> dependencies1 = new ArrayList<Dependency>();
-    List<Dependency> dependencies2 = new ArrayList<Dependency>();
+    List<Dependency> dependencies1 = new ArrayList<>();
+    List<Dependency> dependencies2 = new ArrayList<>();
     Dependency dependency1 = new Dependency();
     Dependency dependency2 = new Dependency();
     dependency2.setGroupId("groupId2");

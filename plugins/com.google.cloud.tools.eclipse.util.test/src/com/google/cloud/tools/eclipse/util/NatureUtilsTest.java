@@ -17,11 +17,14 @@
 package com.google.cloud.tools.eclipse.util;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.JavaCore;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -32,9 +35,15 @@ public class NatureUtilsTest {
       "org.eclipse.wst.common.project.facet.core.nature";
   @Rule public final TestProjectCreator projectCreator = new TestProjectCreator();
 
+  private IProject project;
+
+  @Before
+  public void setUp() {
+    project = projectCreator.getProject();
+  }
+
   @Test
   public void testRemoveNature() throws CoreException {
-    IProject project = projectCreator.getProject();
     // By default, project has faceted project nature.
     assertArrayEquals(new String[] {FACETED_NATURE_ID}, project.getDescription().getNatureIds());
 
@@ -44,8 +53,14 @@ public class NatureUtilsTest {
 
   @Test
   public void testRemoveNature_nonExistingNature() throws CoreException {
-    IProject project = projectCreator.getProject();
     NatureUtils.removeNature(project, JavaCore.NATURE_ID);
     assertArrayEquals(new String[] {FACETED_NATURE_ID}, project.getDescription().getNatureIds());
+  }
+
+  @Test
+  public void testAddNature() throws CoreException {
+    assertFalse(NatureUtils.hasNature(project, JavaCore.NATURE_ID));
+    NatureUtils.addNature(project, JavaCore.NATURE_ID);
+    assertTrue(NatureUtils.hasNature(project, JavaCore.NATURE_ID));
   }
 }
