@@ -16,6 +16,8 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
+import static org.junit.Assert.assertFalse;
+
 import com.google.cloud.tools.eclipse.util.templates.appengine.AppEngineTemplateUtility;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -85,6 +87,23 @@ public class CodeTemplatesTest {
     validateAppYaml();
   }
 
+  @Test
+  public void testMaterializeAppEnigneFlexFiles_noPomXml()
+      throws CoreException, ParserConfigurationException, SAXException, IOException {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    CodeTemplates.materializeAppEngineFlexFiles(project, config, monitor);
+    assertFalse(project.getFile("pom.xml").exists());
+  }
+
+  @Test
+  public void testMaterializeAppEnigneFlexFiles_pomXmlIfEnablingMaven()
+      throws CoreException, ParserConfigurationException, SAXException, IOException {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    config.setAsMavenProject("my.project.group.id", "my-project-artifact-id", "98.76.54");
+    CodeTemplates.materializeAppEngineFlexFiles(project, config, monitor);
+    validatePomXml();
+  }
+
   private void validateNonConfigFiles(IFile mostImportant,
       String webXmlNamespace, String webXmlSchemaUrl, String servletVersion)
       throws ParserConfigurationException, SAXException, IOException, CoreException {
@@ -148,6 +167,24 @@ public class CodeTemplatesTest {
       Assert.assertEquals("runtime: java", reader.readLine());
       Assert.assertEquals("env: flex", reader.readLine());
     }
+  }
+
+  private void validatePomXml()
+      throws ParserConfigurationException, SAXException, IOException, CoreException {
+    IFile pomXml = project.getFile("pom.xml");
+    Element root = buildDocument(pomXml).getDocumentElement();
+    Assert.assertEquals("project", root.getNodeName());
+    Assert.assertEquals("http://maven.apache.org/POM/4.0.0", root.getNamespaceURI());
+    Assert.assertEquals(
+        "http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd",
+        root.getAttribute("xsi:schemaLocation"));
+
+    Element groupId = (Element) root.getElementsByTagName("groupId").item(0);
+    Assert.assertEquals("my.project.group.id", groupId.getTextContent());
+    Element artifactId = (Element) root.getElementsByTagName("artifactId").item(0);
+    Assert.assertEquals("my-project-artifact-id", artifactId.getTextContent());
+    Element version = (Element) root.getElementsByTagName("version").item(0);
+    Assert.assertEquals("98.76.54", version.getTextContent());
   }
 
   private Document buildDocument(IFile appengineWebXml)
