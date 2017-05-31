@@ -43,7 +43,7 @@ public interface ILibraryRepositoryService {
    * @param libraryFile the artifact whose source artifact needs to be resolved
    * @param versionHint the actual version to be resolved in case <code>libraryFile</code>'s version
    *     is set to latest
-   * @return a path of the resolved source artifact
+   * @return a path of the resolved source artifact; may return {@code null} if resolution fails
    */
   IPath resolveSourceArtifact(LibraryFile libraryFile, String versionHint, IProgressMonitor monitor)
       throws CoreException;

@@ -40,8 +40,8 @@ import org.osgi.framework.FrameworkUtil;
  */
 public class MavenHelper {
 
-  public Artifact resolveArtifact(MavenCoordinates mavenCoordinates,
-                                  IProgressMonitor monitor) throws CoreException {
+  public static Artifact resolveArtifact(MavenCoordinates mavenCoordinates,
+      IProgressMonitor monitor) throws CoreException {
     List<ArtifactRepository> repository = getRepository(mavenCoordinates);
     return MavenUtils.resolveArtifact(monitor,
                                       mavenCoordinates.getGroupId(),
@@ -52,7 +52,7 @@ public class MavenHelper {
                                       repository);
   }
 
-  private List<ArtifactRepository> getRepository(MavenCoordinates mavenCoordinates)
+  private static List<ArtifactRepository> getRepository(MavenCoordinates mavenCoordinates)
                                                                               throws CoreException {
     if (MavenCoordinates.MAVEN_CENTRAL_REPO.equals(mavenCoordinates.getRepository())) {
       // M2Eclipse will use the Maven Central repo in case null is used
@@ -62,19 +62,17 @@ public class MavenHelper {
     }
   }
 
-  private ArtifactRepository getCustomRepository(String repository) throws CoreException {
+  private static ArtifactRepository getCustomRepository(String repository) throws CoreException {
     try {
       URI repoUri = new URI(repository);
       if (!repoUri.isAbsolute()) {
-        throw new CoreException(StatusUtil.error(this, Messages.getString("RepositoryUriNotAbsolute",
-                                                                          repository)));
+        throw new CoreException(StatusUtil.error(MavenHelper.class,
+            Messages.getString("RepositoryUriNotAbsolute", repository)));
       }
       return MavenUtils.createRepository(repoUri.getHost(), repoUri.toString());
     } catch (URISyntaxException exception) {
-      throw new CoreException(StatusUtil.error(this,
-                                               Messages.getString("RepositoryUriInvalid",
-                                                                  repository),
-                                               exception));
+      throw new CoreException(StatusUtil.error(MavenHelper.class,
+          Messages.getString("RepositoryUriInvalid", repository), exception));
     }
   }
 
@@ -87,7 +85,7 @@ public class MavenHelper {
    * <p>
    * The <code>&lt;bundle_state_location&gt;</code> is determined by using the bundle containing
    * {@link MavenHelper}.
-   * 
+   *
    * @return the location of the download folder, may not exist
    */
   public static IPath bundleStateBasedMavenFolder(MavenCoordinates mavenCoordinates) {
@@ -103,7 +101,7 @@ public class MavenHelper {
     return new Path(downloadedSources.getAbsolutePath());
   }
 
-  public boolean isArtifactLocallyAvailable(MavenCoordinates mavenCoordinates) {
+  public static boolean isArtifactLocallyAvailable(MavenCoordinates mavenCoordinates) {
     return MavenUtils.isArtifactAvailableLocally(mavenCoordinates.getGroupId(),
                                                  mavenCoordinates.getArtifactId(),
                                                  mavenCoordinates.getVersion(),

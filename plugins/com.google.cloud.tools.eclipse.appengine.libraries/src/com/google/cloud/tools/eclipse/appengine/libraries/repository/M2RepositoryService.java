@@ -19,12 +19,10 @@ package com.google.cloud.tools.eclipse.appengine.libraries.repository;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
 import com.google.cloud.tools.eclipse.util.io.FileDownloader;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 import org.apache.maven.artifact.Artifact;
 import org.eclipse.core.runtime.CoreException;
@@ -39,19 +37,17 @@ import org.osgi.service.component.annotations.Component;
  * artifacts and store them in the local Maven repository pointed to by M2Eclipse's M2_REPO
  * variable.
  * <p>
- * In case <code>libraryfile.getSourceUri()</code> is null, M2Eclipse resolves the source
+ * In case <code>libraryFile.getSourceUri()</code> is null, M2Eclipse resolves the source
  * artifact by using the "sources" classifier with the binary artifact's {@link MavenCoordinates}.
  */
 @Component
 public class M2RepositoryService implements ILibraryRepositoryService {
 
-  private MavenHelper mavenHelper;
-
   @Override
   public Artifact resolveArtifact(LibraryFile libraryFile, IProgressMonitor monitor)
                                                                               throws CoreException {
     MavenCoordinates mavenCoordinates = libraryFile.getMavenCoordinates();
-    return mavenHelper.resolveArtifact(mavenCoordinates, monitor);
+    return MavenHelper.resolveArtifact(mavenCoordinates, monitor);
   }
 
   @Override
@@ -65,24 +61,15 @@ public class M2RepositoryService implements ILibraryRepositoryService {
     }
     sourceCoordinates.setClassifier("sources");
     if (libraryFile.getSourceUri() == null) {
-      File artifactFile = mavenHelper.resolveArtifact(sourceCoordinates, monitor).getFile();
+      File artifactFile = MavenHelper.resolveArtifact(sourceCoordinates, monitor).getFile();
       return new Path(artifactFile.getAbsolutePath());
     } else {
-      return getDownloadedSourceLocation(sourceCoordinates,
-                                         getSourceUrlFromUri(libraryFile.getSourceUri()), monitor);
-    }
-  }
-
-  private static URL getSourceUrlFromUri(URI sourceUri) {
-    try {
-      if (sourceUri == null) {
+      try {
+        URL sourceUrl = libraryFile.getSourceUri().toURL();
+        return getDownloadedSourceLocation(sourceCoordinates, sourceUrl, monitor);
+      } catch (MalformedURLException | IllegalArgumentException ex) {
         return null;
-      } else {
-        return sourceUri.toURL();
       }
-    } catch (MalformedURLException | IllegalArgumentException e) {
-      // should not cause error in the resolution process, we'll disregard it
-      return null;
     }
   }
 
@@ -91,23 +78,14 @@ public class M2RepositoryService implements ILibraryRepositoryService {
     try {
       IPath downloadFolder = MavenHelper.bundleStateBasedMavenFolder(mavenCoordinates);
       return new FileDownloader(downloadFolder).download(sourceUrl, monitor);
-    } catch (IOException e) {
+    } catch (IOException ex) {
       // source file failed to download; this is not an error
       return null;
     }
   }
 
   @Activate
-  protected void activate() {
-    mavenHelper = new MavenHelper();
-  }
-
-  /*
-   * To make sure that mavenHelper is not null in production the activate() method must be called.
-   */
-  @VisibleForTesting
-  void setMavenHelper(MavenHelper mavenHelper) {
-    this.mavenHelper = mavenHelper;
+  protected void activate() {  // Necessary to instantiate the class.
   }
 
   /**
@@ -117,9 +95,9 @@ public class M2RepositoryService implements ILibraryRepositoryService {
   @Override
   public void makeArtifactAvailable(LibraryFile libraryFile, IProgressMonitor monitor)
       throws CoreException {
-    if (mavenHelper.isArtifactLocallyAvailable(libraryFile.getMavenCoordinates())) {
+    if (MavenHelper.isArtifactLocallyAvailable(libraryFile.getMavenCoordinates())) {
       return;
     }
-    mavenHelper.resolveArtifact(libraryFile.getMavenCoordinates(), monitor);
+    MavenHelper.resolveArtifact(libraryFile.getMavenCoordinates(), monitor);
   }
 }

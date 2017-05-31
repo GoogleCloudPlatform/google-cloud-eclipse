@@ -31,9 +31,9 @@ import org.junit.Test;
 public class MavenCoordinatesHelperTest {
 
   private MavenCoordinates mavenCoordinates;
-  
+
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     mavenCoordinates = new MavenCoordinates("groupId", "artifactId");
     mavenCoordinates.setRepository("testRepo");
     mavenCoordinates.setType("war");
@@ -82,8 +82,8 @@ public class MavenCoordinatesHelperTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void testCreateMavenCoordinates_artifactIdMissing() {
-    IClasspathAttribute[] attributes = 
-        new IClasspathAttribute[] { 
+    IClasspathAttribute[] attributes =
+        new IClasspathAttribute[] {
             createAttribute("com.google.cloud.tools.eclipse.appengine.libraries.groupid", "groupId")
     };
     MavenCoordinatesHelper.createMavenCoordinates(attributes);
@@ -91,8 +91,8 @@ public class MavenCoordinatesHelperTest {
 
   @Test
   public void testCreateMavenCoordinates_withGroupAndArtifactId() {
-    IClasspathAttribute[] attributes = 
-        new IClasspathAttribute[] { 
+    IClasspathAttribute[] attributes =
+        new IClasspathAttribute[] {
           createAttribute("com.google.cloud.tools.eclipse.appengine.libraries.groupid", "groupId"),
           createAttribute("com.google.cloud.tools.eclipse.appengine.libraries.artifactId", "artifactId")
     };
@@ -134,8 +134,8 @@ public class MavenCoordinatesHelperTest {
   }
 
   protected IClasspathAttribute[] addToDefaultAttributes(String name, String value) {
-    IClasspathAttribute[] attributes = 
-        new IClasspathAttribute[] { 
+    IClasspathAttribute[] attributes =
+        new IClasspathAttribute[] {
           createAttribute("com.google.cloud.tools.eclipse.appengine.libraries.groupid", "groupId"),
           createAttribute("com.google.cloud.tools.eclipse.appengine.libraries.artifactId", "artifactId"),
           createAttribute(name, value)
@@ -168,5 +168,5 @@ public class MavenCoordinatesHelperTest {
     fail(MessageFormat.format("Attribute {0} was not found", attributeName));
   }
 
-  
+
 }

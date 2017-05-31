@@ -190,14 +190,13 @@ public class LibraryClasspathContainerResolverService
                                                                   throws CoreException {
     Artifact artifact = repositoryService.resolveArtifact(libraryFile, monitor);
     IPath libraryPath = new Path(artifact.getFile().getAbsolutePath());
-    IPath sourceAttachmentPath = null;
     Job job = createSourceAttacherJob(javaProject, containerPath, libraryFile,
                                       monitor, artifact, libraryPath);
     sourceAttacherJobs.add(job);
     IClasspathEntry newLibraryEntry =
         JavaCore.newLibraryEntry(libraryPath,
-                                 sourceAttachmentPath,
-                                 null /*  sourceAttachmentRootPath */,
+                                 null /* sourceAttachmentPath */,
+                                 null /* sourceAttachmentRootPath */,
                                  getAccessRules(libraryFile.getFilters()),
                                  getClasspathAttributes(libraryFile, artifact),
                                  true /* isExported */);
