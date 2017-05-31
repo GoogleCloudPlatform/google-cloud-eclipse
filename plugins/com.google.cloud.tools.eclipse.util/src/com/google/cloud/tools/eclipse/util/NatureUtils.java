@@ -48,7 +48,7 @@ public class NatureUtils {
   }
 
   /**
-   * Adds a nature identified by {@code natureId}. If the {@code project} already has the nature,
+   * Adds the nature identified by {@code natureId}. If the {@code project} already has the nature,
    * this method does nothing.
    */
   public static void addNature(IProject project, String natureId) throws CoreException {
