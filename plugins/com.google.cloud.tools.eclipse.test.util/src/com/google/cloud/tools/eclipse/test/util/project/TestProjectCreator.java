@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.test.util.project;
 
 import static org.junit.Assert.assertTrue;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.FacetUtil;
 import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import com.google.common.base.Preconditions;
@@ -40,6 +41,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
+import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
@@ -84,9 +86,11 @@ public final class TestProjectCreator extends ExternalResource {
   @Override
   protected void after() {
     if (project != null) {
-      // Wait for any jobs to complete as WTP validation runs without the workspace protection lock
-      ProjectUtils.waitForProjects(project);
       try {
+        if (getFacetedProject().hasProjectFacet(WebFacetUtils.WEB_FACET)) {
+          // Wait for the WTP validation job as it runs without the workspace protection lock
+          ProjectUtils.waitForProjects(project);
+        }
         project.delete(true, null);
       } catch (CoreException ex) {
         throw new AssertionError("Could not delete project", ex);
@@ -154,6 +158,10 @@ public final class TestProjectCreator extends ExternalResource {
   }
 
   private void addFacets() throws CoreException {
+    if (projectFacetVersions.isEmpty()) {
+      return;
+    }
+
     IFacetedProject facetedProject = ProjectFacetsManager.create(getProject());
 
     FacetUtil facetUtil = new FacetUtil(facetedProject);
@@ -162,8 +170,10 @@ public final class TestProjectCreator extends ExternalResource {
     }
     facetUtil.install(null);
 
-    // App Engine runtime is added via a Job, so wait.
-    ProjectUtils.waitForProjects(getProject());
+    if (facetedProject.hasProjectFacet(AppEngineStandardFacet.FACET)) {
+      // App Engine runtime is added via a Job, so wait.
+      ProjectUtils.waitForProjects(getProject());
+    }
 
     if (facetedProject.hasProjectFacet(JavaFacet.FACET)) {
       javaProject = JavaCore.create(project);
@@ -173,16 +183,12 @@ public final class TestProjectCreator extends ExternalResource {
 
   public void setAppEngineServiceId(String serviceId) throws CoreException {
     IFolder webinf = WebProjectUtil.getWebInfDirectory(getProject());
-    IFile descriptorFile = webinf.getFile("appengine-web.xml");
-    assertTrue("Project should have AppEngine Standard facet", descriptorFile.exists());
-    StringBuilder newAppEngineWebDescriptor = new StringBuilder();
-    newAppEngineWebDescriptor
-        .append("<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>\n");
-    newAppEngineWebDescriptor.append("<service>").append(serviceId).append("</service>\n");
-    newAppEngineWebDescriptor.append("</appengine-web-app>\n");
-    InputStream contents = new ByteArrayInputStream(
-        newAppEngineWebDescriptor.toString().getBytes(StandardCharsets.UTF_8));
-    descriptorFile.setContents(contents, IFile.FORCE, null);
+    IFile appEngineWebXml = webinf.getFile("appengine-web.xml");
+    assertTrue("Project should have AppEngine Standard facet", appEngineWebXml.exists());
+    String contents = "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'>\n"
+        + "<service>" + serviceId + "</service>\n</appengine-web-app>\n";
+    InputStream in = new ByteArrayInputStream(contents.getBytes(StandardCharsets.UTF_8));
+    appEngineWebXml.setContents(in, IFile.FORCE, null);
   }
 
 }
