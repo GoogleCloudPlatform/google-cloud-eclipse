@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import static org.junit.Assert.assertFalse;
 
+import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.util.templates.appengine.AppEngineTemplateUtility;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -32,14 +33,12 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -48,23 +47,17 @@ import org.xml.sax.SAXException;
 
 public class CodeTemplatesTest {
 
+  @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
+
   private IProgressMonitor monitor = new NullProgressMonitor();
   private IFolder parent;
   private IProject project;
 
   @Before
   public void setUp() throws CoreException {
-    IWorkspace workspace = ResourcesPlugin.getWorkspace();
-    project = workspace.getRoot().getProject("foobar");
-    project.create(monitor);
-    project.open(monitor);
+    project = projectCreator.getProject();
     parent = project.getFolder("testfolder");
     parent.create(true, true, monitor);
-  }
-
-  @After
-  public void cleanUp() throws CoreException {
-    project.delete(true, monitor);
   }
 
   @Test
