@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.net.URI;
 import java.util.ArrayList;
@@ -66,7 +67,8 @@ public class LibraryFile {
     return sourceUri;
   }
 
-  void setSourceUri(URI sourceUri) {
+  @VisibleForTesting
+  public void setSourceUri(URI sourceUri) {
     this.sourceUri = sourceUri;
   }
 
