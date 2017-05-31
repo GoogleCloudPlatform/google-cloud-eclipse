@@ -26,7 +26,7 @@ import org.eclipse.core.runtime.CoreException;
 public class NatureUtils {
 
   /**
-   * @return {@code true} if the project is accessible and has the specified nature ID.
+   * @return {@code true} if the project is accessible and has the specified nature ID
    */
   public static boolean hasNature(IProject project, String natureId) throws CoreException {
     return project.isAccessible() && project.hasNature(natureId);
