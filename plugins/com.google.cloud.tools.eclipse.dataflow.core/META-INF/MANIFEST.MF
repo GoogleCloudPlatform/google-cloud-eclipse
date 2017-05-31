@@ -14,7 +14,7 @@ Export-Package: com.google.cloud.tools.eclipse.dataflow.core,
  com.google.cloud.tools.eclipse.dataflow.core.natures,
  com.google.cloud.tools.eclipse.dataflow.core.preferences,
  com.google.cloud.tools.eclipse.dataflow.core.project,
- com.google.cloud.tools.eclipse.dataflow.core.proxy,
+ com.google.cloud.tools.eclipse.dataflow.core.proxy;x-friends:="com.google.cloud.tools.eclipse.dataflow.ui",
  com.google.cloud.tools.eclipse.dataflow.core.util;x-friends:="com.google.cloud.tools.eclipse.dataflow.ui"
 Import-Package: org.eclipse.core.expressions,
  org.eclipse.core.filesystem,
