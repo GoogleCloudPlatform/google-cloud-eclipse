@@ -26,14 +26,14 @@ import org.eclipse.core.runtime.CoreException;
 public class NatureUtils {
 
   /**
-   * Returns {@code true} if the project is accessible and has the specified nature ID.
+   * @return {@code true} if the project is accessible and has the specified nature ID.
    */
   public static boolean hasNature(IProject project, String natureId) throws CoreException {
     return project.isAccessible() && project.hasNature(natureId);
   }
 
   /**
-   * Removes a nature identified by {@code natureId}. If the {@code project} does not have the
+   * Removes the nature identified by {@code natureId}. If the {@code project} does not have the
    * nature, this method does nothing.
    */
   public static void removeNature(IProject project, String natureId) throws CoreException {
