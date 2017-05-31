@@ -159,10 +159,8 @@ public class CodeTemplates {
       mavenCoordinates.put("projectGroupId", config.getMavenGroupId()); //$NON-NLS-1$
       mavenCoordinates.put("projectArtifactId", config.getMavenArtifactId()); //$NON-NLS-1$
       mavenCoordinates.put("projectVersion", config.getMavenVersion()); //$NON-NLS-1$
-      if (!isStandardProject) {
-        createChildFile("pom.xml", AppEngineTemplateUtility.POM_XML_FLEX_TEMPLATE, //$NON-NLS-1$
-            project, mavenCoordinates, subMonitor.newChild(5));
-      }
+      createChildFile("pom.xml", AppEngineTemplateUtility.POM_XML_FLEX_TEMPLATE, //$NON-NLS-1$
+          project, mavenCoordinates, subMonitor.newChild(5));
     }
 
     return hello;

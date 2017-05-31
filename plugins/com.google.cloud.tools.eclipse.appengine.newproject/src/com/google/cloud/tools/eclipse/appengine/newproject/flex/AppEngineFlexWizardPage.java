@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.newproject.flex;
 
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineWizardPage;
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
+import com.google.cloud.tools.eclipse.appengine.newproject.PageValidator;
 import com.google.cloud.tools.eclipse.appengine.newproject.maven.MavenCoordinatesUi;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.widgets.Composite;
@@ -40,7 +41,7 @@ public class AppEngineFlexWizardPage extends AppEngineWizardPage {
 
     Composite composite = (Composite) getControl();
     mavenCoordinatesUi = new MavenCoordinatesUi(composite, true /* dynamic enabling */);
-    mavenCoordinatesUi.addChangeListener(new PageValidator());
+    mavenCoordinatesUi.addChangeListener(new PageValidator(this));
     GridLayoutFactory.swtDefaults().generateLayout(composite);
   }
 

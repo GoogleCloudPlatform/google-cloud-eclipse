@@ -28,12 +28,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
@@ -86,7 +82,7 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
 
   private void createCustomFields(Composite container) {
     Composite composite = new Composite(container, SWT.NONE);
-    PageValidator pageValidator = new PageValidator();
+    PageValidator pageValidator = new PageValidator(this);
     createPackageField(composite, pageValidator);
     createServiceField(composite, pageValidator);
 
@@ -151,18 +147,6 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
     }
 
     return true;
-  }
-
-  public final class PageValidator implements ModifyListener, Listener {
-    @Override
-    public void modifyText(ModifyEvent event) {
-      setPageComplete(validatePage());
-    }
-
-    @Override
-    public void handleEvent(Event event) {
-      setPageComplete(validatePage());
-    }
   }
 
   public String getPackageName() {
