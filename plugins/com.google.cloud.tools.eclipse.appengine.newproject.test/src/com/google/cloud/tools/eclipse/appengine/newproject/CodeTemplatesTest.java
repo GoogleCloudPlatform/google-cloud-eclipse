@@ -210,7 +210,7 @@ public class CodeTemplatesTest {
     Assert.assertEquals("HelloAppEngine.java", child.getName());
     try (InputStream in = child.getContents(true);
         BufferedReader reader = new BufferedReader(
-            new InputStreamReader(in, StandardCharsets.UTF_8.name()))) {
+            new InputStreamReader(in, StandardCharsets.UTF_8))) {
       Assert.assertEquals("package com.google.foo.bar;", reader.readLine());
       Assert.assertEquals("", reader.readLine());
     }
