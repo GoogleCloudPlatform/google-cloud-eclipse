@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 
 public class MavenCoordinatesUi {
@@ -87,6 +88,10 @@ public class MavenCoordinatesUi {
     GridLayoutFactory.swtDefaults().numColumns(2).generateLayout(coordinatesGroup);
   }
 
+  public boolean uiEnabled() {
+    return asMavenProjectButton == null || asMavenProjectButton.getSelection();
+  }
+
   public String getGroupId() {
     return groupIdField.getText().trim();
   }
@@ -99,10 +104,13 @@ public class MavenCoordinatesUi {
     return versionField.getText().trim();
   }
 
-  public void addModifyListener(ModifyListener listener) {
-    groupIdField.addModifyListener(listener);
-    artifactIdField.addModifyListener(listener);
-    versionField.addModifyListener(listener);
+  public void addChangeListener(Listener listener) {
+    groupIdField.addListener(SWT.Modify, listener);
+    artifactIdField.addListener(SWT.Modify, listener);
+    versionField.addListener(SWT.Modify, listener);
+    if (asMavenProjectButton != null) {
+      asMavenProjectButton.addListener(SWT.Selection, listener);
+    }
   }
 
   public void addGroupIdModifyListener(ModifyListener listener) {
@@ -125,7 +133,7 @@ public class MavenCoordinatesUi {
    *     a status describing a validation problem (with a non-OK status)
    */
   public IStatus validateMavenSettings() {
-    if (asMavenProjectButton != null && !asMavenProjectButton.getSelection()) {
+    if (!uiEnabled()) {
       return Status.OK_STATUS;
     }
 

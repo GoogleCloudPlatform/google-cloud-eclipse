@@ -134,7 +134,7 @@ public class CodeTemplates {
     Map<String, String> packageMap = new HashMap<>();
     String packageValue =
         config.getPackageName().isEmpty()
-            ? ""  //$NON-NLS-1$ 
+            ? ""  //$NON-NLS-1$
             : config.getPackageName() + "."; //$NON-NLS-1$
     packageMap.put("package", packageValue);  //$NON-NLS-1$
     if (isStandardProject) {
@@ -153,6 +153,15 @@ public class CodeTemplates {
         Collections.<String, String>emptyMap(), subMonitor.newChild(5));
 
     copyChildFile("favicon.ico", webapp, subMonitor.newChild(5)); //$NON-NLS-1$
+
+    if (config.getUseMaven()) {
+      Map<String, String> mavenCoordinates = new HashMap<>();
+      mavenCoordinates.put("projectGroupId", config.getMavenGroupId()); //$NON-NLS-1$
+      mavenCoordinates.put("projectArtifactId", config.getMavenArtifactId()); //$NON-NLS-1$
+      mavenCoordinates.put("projectVersion", config.getMavenVersion()); //$NON-NLS-1$
+      createChildFile("pom.xml", AppEngineTemplateUtility.POM_XML_FLEX_TEMPLATE, //$NON-NLS-1$
+          project, mavenCoordinates, subMonitor.newChild(5));
+    }
 
     return hello;
   }

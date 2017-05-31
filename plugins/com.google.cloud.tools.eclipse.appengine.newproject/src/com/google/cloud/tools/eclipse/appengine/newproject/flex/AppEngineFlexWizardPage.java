@@ -18,15 +18,39 @@ package com.google.cloud.tools.eclipse.appengine.newproject.flex;
 
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineWizardPage;
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
+import com.google.cloud.tools.eclipse.appengine.newproject.PageValidator;
+import com.google.cloud.tools.eclipse.appengine.newproject.maven.MavenCoordinatesUi;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 
 public class AppEngineFlexWizardPage extends AppEngineWizardPage {
+
+  private MavenCoordinatesUi mavenCoordinatesUi;
+
   public AppEngineFlexWizardPage() {
     super(false);
     setTitle(Messages.getString("app.engine.flex.project")); //$NON-NLS-1$
     setDescription(Messages.getString("create.app.engine.flex.project")); //$NON-NLS-1$
+  }
+
+  @Override
+  public void createControl(Composite parent) {
+    super.createControl(parent);
+
+    Composite composite = (Composite) getControl();
+    mavenCoordinatesUi = new MavenCoordinatesUi(composite, true /* dynamic enabling */);
+    mavenCoordinatesUi.addChangeListener(new PageValidator(this));
+    GridLayoutFactory.swtDefaults().generateLayout(composite);
+  }
+
+  @Override
+  public boolean validatePage() {
+    if (!super.validatePage()) {
+      return false;
+    }
+    return mavenCoordinatesUi.setValidationMessage(this);
   }
 
   @Override
@@ -38,6 +62,22 @@ public class AppEngineFlexWizardPage extends AppEngineWizardPage {
   public void setHelp(Composite container) {
     PlatformUI.getWorkbench().getHelpSystem().setHelp(container,
         "com.google.cloud.tools.eclipse.appengine.newproject.NewFlexProjectContext"); //$NON-NLS-1$
+  }
+
+  public boolean asMavenProject() {
+    return mavenCoordinatesUi.uiEnabled();
+  }
+
+  public String getMavenGroupId() {
+    return mavenCoordinatesUi.getGroupId();
+  }
+
+  public String getMavenArtifactId() {
+    return mavenCoordinatesUi.getArtifactId();
+  }
+
+  public String getMavenVersion() {
+    return mavenCoordinatesUi.getVersion();
   }
 
 }

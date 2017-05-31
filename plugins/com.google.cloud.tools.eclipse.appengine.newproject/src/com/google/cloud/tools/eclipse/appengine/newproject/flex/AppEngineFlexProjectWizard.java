@@ -22,7 +22,6 @@ import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectWizar
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineWizardPage;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
-
 import javax.inject.Inject;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
@@ -33,13 +32,16 @@ public class AppEngineFlexProjectWizard extends AppEngineProjectWizard {
   @Inject
   private ILibraryRepositoryService repositoryService;
 
-  public AppEngineFlexProjectWizard(){
+  private AppEngineFlexWizardPage wizardPage;
+
+  public AppEngineFlexProjectWizard() {
     setWindowTitle(Messages.getString("new.app.engine.flex.project"));
-  }  
-  
+  }
+
   @Override
   public AppEngineWizardPage createWizardPage() {
-    return new AppEngineFlexWizardPage();
+    wizardPage = new AppEngineFlexWizardPage();
+    return wizardPage;
   }
 
   @Override
@@ -58,4 +60,12 @@ public class AppEngineFlexProjectWizard extends AppEngineProjectWizard {
     return new CreateAppEngineFlexWtpProject(config, uiInfoAdapter, repositoryService);
   }
 
+  @Override
+  public boolean performFinish() {
+    if (wizardPage.asMavenProject()) {
+      config.setUseMaven(wizardPage.getMavenGroupId(), wizardPage.getMavenArtifactId(),
+          wizardPage.getMavenVersion());
+    }
+    return super.performFinish();
+  }
 }

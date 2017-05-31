@@ -50,8 +50,10 @@ import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 
@@ -107,7 +109,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     PlatformUI.getWorkbench().getHelpSystem().setHelp(container,
         "com.google.cloud.tools.eclipse.appengine.newproject.maven.NewMavenProjectContext"); //$NON-NLS-1$
 
-    ModifyListener pageValidator = new PageValidator();
+    PageValidator pageValidator = new PageValidator();
     createLocationArea(container, pageValidator);
     createMavenCoordinatesArea(container, pageValidator);
     createAppEngineProjectDetailsArea(container, pageValidator);
@@ -125,7 +127,7 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
   }
 
   /** Create UI for specifying the generated location area */
-  private void createLocationArea(Composite container, ModifyListener pageValidator) {
+  private void createLocationArea(Composite container, PageValidator pageValidator) {
 
     Group locationGroup = new Group(container, SWT.NONE);
     locationGroup.setText(Messages.getString("LOCATION_GROUP_TEXT")); //$NON-NLS-1$
@@ -175,15 +177,14 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
   }
 
   /** Create UI for specifying desired Maven Coordinates */
-  private void createMavenCoordinatesArea(Composite container, ModifyListener pageValidator) {
+  private void createMavenCoordinatesArea(Composite container, PageValidator pageValidator) {
     mavenCoordinatesUi = new MavenCoordinatesUi(container, false /* no dynamic enabling */);
-    mavenCoordinatesUi.addModifyListener(pageValidator);
+    mavenCoordinatesUi.addChangeListener(pageValidator);
     mavenCoordinatesUi.addGroupIdModifyListener(new AutoPackageNameSetterOnGroupIdChange());
   }
 
   /** Create UI for specifying App Engine project details */
-  private void createAppEngineProjectDetailsArea(Composite container,
-      ModifyListener pageValidator) {
+  private void createAppEngineProjectDetailsArea(Composite container, PageValidator pageValidator) {
     Composite composite = new Composite(container, SWT.NONE);
 
     // Java package name
@@ -365,9 +366,14 @@ public class MavenAppEngineStandardWizardPage extends WizardPage {
     return new Path(locationField.getText());
   }
 
-  private final class PageValidator implements ModifyListener {
+  private final class PageValidator implements ModifyListener, Listener {
     @Override
     public void modifyText(ModifyEvent event) {
+      checkFlipToNext();
+    }
+
+    @Override
+    public void handleEvent(Event event) {
       checkFlipToNext();
     }
   }

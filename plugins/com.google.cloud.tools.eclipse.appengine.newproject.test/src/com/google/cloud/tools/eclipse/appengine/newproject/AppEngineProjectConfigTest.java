@@ -17,17 +17,18 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -36,16 +37,10 @@ public class AppEngineProjectConfigTest {
   private AppEngineProjectConfig config = new AppEngineProjectConfig();
 
   @Test
-  public void testProject() throws CoreException {
-    try {
-      IWorkspace workspace = ResourcesPlugin.getWorkspace();
-      IProject project = workspace.getRoot().getProject("foobar");
-      project.create(null);
-      config.setProject(project);
-      Assert.assertTrue(project.getLocationURI().getPath().endsWith("foobar"));
-    } finally {
-      config.getProject().delete(true, new NullProgressMonitor());
-    }
+  public void testProject() {
+    IProject project = mock(IProject.class);
+    config.setProject(project);
+    assertSame(project, config.getProject());
   }
 
   @Test
@@ -72,5 +67,19 @@ public class AppEngineProjectConfigTest {
     config.setAppEngineLibraries(Collections.singleton(new Library("app-engine-library")));
     assertThat(config.getAppEngineLibraries().size(), is(1));
     assertThat(config.getAppEngineLibraries().iterator().next().getId(), is("app-engine-library"));
+  }
+
+  @Test
+  public void testGetUseMaven_defaultFalse() {
+    assertFalse(config.getUseMaven());
+  }
+
+  @Test
+  public void testSetUseMaven() {
+    config.setUseMaven("group.foo", "artifact.bar", "version.baz");
+    assertTrue(config.getUseMaven());
+    assertEquals("group.foo", config.getMavenGroupId());
+    assertEquals("artifact.bar", config.getMavenArtifactId());
+    assertEquals("version.baz", config.getMavenVersion());
   }
 }

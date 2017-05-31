@@ -36,6 +36,11 @@ public class AppEngineProjectConfig {
   private List<Library> appEngineLibraries = Collections.emptyList();
   private String serviceName;
 
+  private boolean useMaven;
+  private String mavenGroupId;
+  private String mavenArtifactId;
+  private String mavenVersion;
+
   public File getCloudSdkLocation() {
     return cloudSdkLocation;
   }
@@ -43,7 +48,7 @@ public class AppEngineProjectConfig {
   public void setCloudSdkLocation(File cloudSdkLocation) {
     this.cloudSdkLocation = cloudSdkLocation;
   }
-  
+
   public void setPackageName(String name) {
     this.packageName = name;
   }
@@ -82,9 +87,31 @@ public class AppEngineProjectConfig {
   public String getServiceName() {
     return serviceName;
   }
-  
+
   public void setServiceName(String serviceName) {
     this.serviceName = serviceName;
   }
 
+  public void setUseMaven(String mavenGroupId, String mavenArtifactId, String mavenVersion) {
+    this.useMaven = true;
+    this.mavenGroupId = mavenGroupId;
+    this.mavenArtifactId = mavenArtifactId;
+    this.mavenVersion = mavenVersion;
+  }
+
+  public boolean getUseMaven() {
+    return useMaven;
+  }
+
+  public String getMavenGroupId() {
+    return mavenGroupId;
+  }
+
+  public String getMavenArtifactId() {
+    return mavenArtifactId;
+  }
+
+  public String getMavenVersion() {
+    return mavenVersion;
+  }
 }

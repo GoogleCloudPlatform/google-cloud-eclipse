@@ -39,7 +39,7 @@ public class AppEngineStandardProjectWizard extends AppEngineProjectWizard {
   @Inject
   private ILibraryClasspathContainerResolverService resolverService;
 
-  public AppEngineStandardProjectWizard(){
+  public AppEngineStandardProjectWizard() {
     setWindowTitle(Messages.getString("new.app.engine.standard.project"));
   }
 
