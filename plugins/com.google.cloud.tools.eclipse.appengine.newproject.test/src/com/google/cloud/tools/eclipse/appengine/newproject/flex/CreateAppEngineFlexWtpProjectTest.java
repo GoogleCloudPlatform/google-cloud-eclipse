@@ -26,6 +26,7 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectConfig;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
+import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -75,6 +76,8 @@ public class CreateAppEngineFlexWtpProjectTest {
 
   @After
   public void tearDown() throws CoreException {
+    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1945
+    ProjectUtils.waitForProjects(project);
     project.delete(true, monitor);
   }
 
