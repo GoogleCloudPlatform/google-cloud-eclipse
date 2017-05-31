@@ -36,7 +36,7 @@ public class AppEngineProjectConfig {
   private List<Library> appEngineLibraries = Collections.emptyList();
   private String serviceName;
 
-  private boolean asMavenProject;
+  private boolean useMaven;
   private String mavenGroupId;
   private String mavenArtifactId;
   private String mavenVersion;
@@ -92,15 +92,15 @@ public class AppEngineProjectConfig {
     this.serviceName = serviceName;
   }
 
-  public void setAsMavenProject(String mavenGroupId, String mavenArtifactId, String mavenVersion) {
-    this.asMavenProject = true;
+  public void setUseMaven(String mavenGroupId, String mavenArtifactId, String mavenVersion) {
+    this.useMaven = true;
     this.mavenGroupId = mavenGroupId;
     this.mavenArtifactId = mavenArtifactId;
     this.mavenVersion = mavenVersion;
   }
 
-  public boolean getAsMavenProject() {
-    return asMavenProject;
+  public boolean getUseMaven() {
+    return useMaven;
   }
 
   public String getMavenGroupId() {

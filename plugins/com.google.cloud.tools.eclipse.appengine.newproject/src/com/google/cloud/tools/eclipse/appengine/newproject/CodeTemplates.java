@@ -154,7 +154,7 @@ public class CodeTemplates {
 
     copyChildFile("favicon.ico", webapp, subMonitor.newChild(5)); //$NON-NLS-1$
 
-    if (config.getAsMavenProject()) {
+    if (config.getUseMaven()) {
       Map<String, String> mavenCoordinates = new HashMap<>();
       mavenCoordinates.put("projectGroupId", config.getMavenGroupId()); //$NON-NLS-1$
       mavenCoordinates.put("projectArtifactId", config.getMavenArtifactId()); //$NON-NLS-1$

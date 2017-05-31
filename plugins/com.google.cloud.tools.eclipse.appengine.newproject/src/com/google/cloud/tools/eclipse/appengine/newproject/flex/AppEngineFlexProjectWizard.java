@@ -63,7 +63,7 @@ public class AppEngineFlexProjectWizard extends AppEngineProjectWizard {
   @Override
   public boolean performFinish() {
     if (wizardPage.asMavenProject()) {
-      config.setAsMavenProject(wizardPage.getMavenGroupId(), wizardPage.getMavenArtifactId(),
+      config.setUseMaven(wizardPage.getMavenGroupId(), wizardPage.getMavenArtifactId(),
           wizardPage.getMavenVersion());
     }
     return super.performFinish();

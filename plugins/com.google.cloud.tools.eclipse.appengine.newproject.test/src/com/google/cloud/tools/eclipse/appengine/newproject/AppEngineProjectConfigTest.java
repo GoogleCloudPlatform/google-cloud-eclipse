@@ -70,16 +70,16 @@ public class AppEngineProjectConfigTest {
   }
 
   @Test
-  public void testGetAsMavenProject_defaultFalse() {
-    assertFalse(config.getAsMavenProject());
+  public void testGetUseMaven_defaultFalse() {
+    assertFalse(config.getUseMaven());
   }
 
   @Test
-  public void testSetAsMavenProject() {
-    config.setAsMavenProject("group.foo", "artifact.bar", "baz.version");
-    assertTrue(config.getAsMavenProject());
+  public void testSetUseMaven() {
+    config.setUseMaven("group.foo", "artifact.bar", "version.baz");
+    assertTrue(config.getUseMaven());
     assertEquals("group.foo", config.getMavenGroupId());
     assertEquals("artifact.bar", config.getMavenArtifactId());
-    assertEquals("baz.version", config.getMavenVersion());
+    assertEquals("version.baz", config.getMavenVersion());
   }
 }

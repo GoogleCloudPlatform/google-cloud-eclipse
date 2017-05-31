@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import static org.junit.Assert.assertFalse;
 
+import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.util.templates.appengine.AppEngineTemplateUtility;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -32,14 +33,12 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -48,23 +47,17 @@ import org.xml.sax.SAXException;
 
 public class CodeTemplatesTest {
 
+  @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
+
   private IProgressMonitor monitor = new NullProgressMonitor();
   private IFolder parent;
   private IProject project;
 
   @Before
   public void setUp() throws CoreException {
-    IWorkspace workspace = ResourcesPlugin.getWorkspace();
-    project = workspace.getRoot().getProject("foobar");
-    project.create(monitor);
-    project.open(monitor);
+    project = projectCreator.getProject();
     parent = project.getFolder("testfolder");
     parent.create(true, true, monitor);
-  }
-
-  @After
-  public void cleanUp() throws CoreException {
-    project.delete(true, monitor);
   }
 
   @Test
@@ -88,17 +81,17 @@ public class CodeTemplatesTest {
   }
 
   @Test
-  public void testMaterializeAppEnigneFlexFiles_noPomXml() throws CoreException {
+  public void testMaterializeAppEngineFlexFiles_noPomXml() throws CoreException {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
     CodeTemplates.materializeAppEngineFlexFiles(project, config, monitor);
     assertFalse(project.getFile("pom.xml").exists());
   }
 
   @Test
-  public void testMaterializeAppEnigneFlexFiles_pomXmlIfEnablingMaven()
+  public void testMaterializeAppEngineFlexFiles_pomXmlIfEnablingMaven()
       throws CoreException, ParserConfigurationException, SAXException, IOException {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
-    config.setAsMavenProject("my.project.group.id", "my-project-artifact-id", "98.76.54");
+    config.setUseMaven("my.project.group.id", "my-project-artifact-id", "98.76.54");
     CodeTemplates.materializeAppEngineFlexFiles(project, config, monitor);
     validatePomXml();
   }
@@ -148,7 +141,7 @@ public class CodeTemplatesTest {
     String threadsafe = threadsafeElements.item(0).getTextContent();
     Assert.assertEquals("true", threadsafe);
     NodeList sessionsEnabledElements
-    = doc.getDocumentElement().getElementsByTagName("sessions-enabled");
+        = doc.getDocumentElement().getElementsByTagName("sessions-enabled");
     Assert.assertEquals("Must have exactly one sessions-enabled",
         1, sessionsEnabledElements.getLength());
     String sessionsEnabled = sessionsEnabledElements.item(0).getTextContent();
@@ -186,7 +179,7 @@ public class CodeTemplatesTest {
     Assert.assertEquals("98.76.54", version.getTextContent());
   }
 
-  private Document buildDocument(IFile appengineWebXml)
+  private Document buildDocument(IFile xml)
       throws ParserConfigurationException, SAXException, IOException, CoreException {
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     factory.setNamespaceAware(true);
@@ -195,7 +188,7 @@ public class CodeTemplatesTest {
     factory.setAttribute("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false);
     factory.setAttribute("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
     DocumentBuilder builder = factory.newDocumentBuilder();
-    Document doc = builder.parse(appengineWebXml.getContents());
+    Document doc = builder.parse(xml.getContents());
     return doc;
   }
 
@@ -215,9 +208,9 @@ public class CodeTemplatesTest {
         AppEngineTemplateUtility.HELLO_APPENGINE_TEMPLATE, parent, values, monitor);
     Assert.assertTrue(child.exists());
     Assert.assertEquals("HelloAppEngine.java", child.getName());
-    InputStream in = child.getContents(true);
-    try (BufferedReader reader = new BufferedReader(
-        new InputStreamReader(in, StandardCharsets.UTF_8.name()))) {
+    try (InputStream in = child.getContents(true);
+        BufferedReader reader = new BufferedReader(
+            new InputStreamReader(in, StandardCharsets.UTF_8.name()))) {
       Assert.assertEquals("package com.google.foo.bar;", reader.readLine());
       Assert.assertEquals("", reader.readLine());
     }
