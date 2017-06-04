@@ -49,8 +49,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
-import org.eclipse.m2e.core.MavenPlugin;
-import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IProjectFacet;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
@@ -93,19 +91,12 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
   @Override
   public IFile createAndConfigureProjectContent(IProject newProject, AppEngineProjectConfig config,
       IProgressMonitor monitor) throws CoreException {
-    SubMonitor subMonitor = SubMonitor.convert(monitor, 121);
+    SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
     IFile mostImportantFile =  CodeTemplates.materializeAppEngineFlexFiles(newProject, config,
         subMonitor.newChild(30));
     configureFacets(newProject, subMonitor.newChild(20));
 
-    if (config.getUseMaven()) {
-      ResolverConfiguration resolverConfiguration = new ResolverConfiguration();
-      MavenPlugin.getProjectConfigurationManager().enableMavenNature(newProject,
-          resolverConfiguration, subMonitor.newChild(20));
-      // M2E will cleverly set "target/<artifact ID>-<version>/WEB-INF/classes" as a new Java output
-      // folder; delete the default old folder.
-      newProject.getFolder("build").delete(true /* force */, subMonitor.newChild(1));
-    } else {
+    if (!config.getUseMaven()) {
       addDependenciesToProject(newProject, subMonitor.newChild(50));
     }
 
