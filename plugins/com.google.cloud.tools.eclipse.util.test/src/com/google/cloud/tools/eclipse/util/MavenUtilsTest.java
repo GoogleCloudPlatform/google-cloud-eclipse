@@ -48,15 +48,6 @@ public class MavenUtilsTest {
   }
 
   @Test
-  public void testAddMavenNature() throws CoreException {
-    IProject project = projectCreator.getProject();
-    Assert.assertFalse(MavenUtils.hasMavenNature(project));
-
-    MavenUtils.addMavenNature(project);
-    Assert.assertTrue(MavenUtils.hasMavenNature(project));
-  }
-
-  @Test
   public void testAreDependenciesEqual_nullDependencies() {
     Assert.assertFalse(MavenUtils.areDependenciesEqual(null, null));
     Assert.assertFalse(MavenUtils.areDependenciesEqual(new Dependency(), null));

@@ -20,7 +20,6 @@ import com.google.cloud.tools.eclipse.appengine.libraries.BuildPath;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.Arrays;
-
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -50,7 +49,8 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
   private final IAdaptable uiInfoAdapter;
   private IFile mostImportant = null;
 
-  public abstract void addAppEngineFacet(IProject newProject, IProgressMonitor monitor) throws CoreException;
+  public abstract void addAppEngineFacet(IProject newProject, IProgressMonitor monitor)
+      throws CoreException;
 
   /**
    * Returns a user visible name for the resource operation that generates the files
@@ -61,8 +61,8 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
   /**
    * Returns the most important file created that the IDE will open in the editor.
    */
-  public abstract IFile createAndConfigureProjectContent(IProject newProject, AppEngineProjectConfig config,
-      IProgressMonitor monitor) throws CoreException;
+  public abstract IFile createAndConfigureProjectContent(IProject newProject,
+      AppEngineProjectConfig config, IProgressMonitor monitor) throws CoreException;
 
   /**
    * @return the file in the project that should be opened in an editor when the wizard finishes;
@@ -93,7 +93,7 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
 
     String operationLabel = getDescription();
     SubMonitor subMonitor = SubMonitor.convert(monitor, operationLabel, 100);
-    CreateProjectOperation operation = new CreateProjectOperation(description, operationLabel); 
+    CreateProjectOperation operation = new CreateProjectOperation(description, operationLabel);
     try {
       operation.execute(subMonitor.newChild(10), uiInfoAdapter);
       mostImportant = createAndConfigureProjectContent(newProject, config, subMonitor.newChild(80));
