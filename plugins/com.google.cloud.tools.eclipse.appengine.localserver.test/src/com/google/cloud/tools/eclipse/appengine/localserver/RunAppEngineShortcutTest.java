@@ -45,7 +45,7 @@ import org.junit.Test;
 
 public class RunAppEngineShortcutTest {
 
-  @Rule public TestProjectCreator javaProjectCreator = new TestProjectCreator();
+  @Rule public TestProjectCreator emptyProjectCreator = new TestProjectCreator();
   @Rule public TestProjectCreator appEngineProjectCreator = new TestProjectCreator()
       .withFacetVersions(
           JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineStandardFacet.FACET_VERSION);
@@ -58,13 +58,15 @@ public class RunAppEngineShortcutTest {
 
   @Test
   public void testRunAppEngine_hiddenForPlainProject() {
-    IProject project = javaProjectCreator.getProject();
+    IProject project = emptyProjectCreator.getProject();
     assertFalse(appEngineMenuExists(project));
   }
 
   // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1556
   @Test
   public void testRunAppEngine_hiddenEvenIfAppEngineProjectFileIsOpen() throws CoreException {
+    IProject emptyProject = emptyProjectCreator.getProject();
+
     // Create an empty file in the App Engine project, and open it in an editor.
     IProject appEngineProject = appEngineProjectCreator.getProject();
     IFile file = appEngineProject.getFile("textfile.txt");
@@ -73,8 +75,7 @@ public class RunAppEngineShortcutTest {
     IWorkbench workbench = PlatformUI.getWorkbench();
     assertNotNull(WorkbenchUtil.openInEditor(workbench, file));
 
-    IProject javaProject = javaProjectCreator.getProject();
-    assertFalse(appEngineMenuExists(javaProject));
+    assertFalse(appEngineMenuExists(emptyProject));
   }
 
   // We need regex matching, since the actual menu name is "<number> App Engine".
