@@ -28,11 +28,13 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectConfig;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
+import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.concurrent.TimeUnit;
 import org.apache.maven.artifact.Artifact;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
@@ -61,6 +63,8 @@ import org.mockito.stubbing.Answer;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CreateAppEngineFlexWtpProjectTest {
+
+  @Rule public ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
 
   @Rule public TemporaryFolder tempFolder = new TemporaryFolder();
 
@@ -150,6 +154,7 @@ public class CreateAppEngineFlexWtpProjectTest {
     CreateAppEngineWtpProject creator =
         new CreateAppEngineFlexWtpProject(config, mock(IAdaptable.class), repositoryService);
     creator.execute(monitor);
+    ProjectUtils.waitForProjects(project);
 
     assertTrue(project.hasNature(MavenUtils.MAVEN2_NATURE_ID));
     assertFalse(project.getFolder("build").exists());
