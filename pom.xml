@@ -119,11 +119,15 @@
     -->
     <tycho.toolchains>SYSTEM</tycho.toolchains>
 
-     <!-- OS-specific JVM flags, empty for the default case but redefined below -->
-     <os-jvm-flags/>
-     <org.eclipse.swtbot.search.timeout>30000</org.eclipse.swtbot.search.timeout>
+    <!-- OS-specific JVM flags, empty for the default case but redefined below -->
+    <os-jvm-flags/>
+    <org.eclipse.swtbot.search.timeout>30000</org.eclipse.swtbot.search.timeout>
 
-     <jgit.dirtyWorkingTree>warning</jgit.dirtyWorkingTree>
+    <jgit.dirtyWorkingTree>warning</jgit.dirtyWorkingTree>
+
+    <!-- set compiler version for in-place unit tests; see README.md -->
+    <maven.compiler.source>1.7</maven.compiler.source>
+    <maven.compiler.target>1.7</maven.compiler.target>
   </properties>
 
   <!--
@@ -190,6 +194,26 @@
       <version>1.17</version>
     </dependency>
   </dependencies>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.12</version>
+      </dependency>
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-core</artifactId>
+        <version>1.10.19</version>
+      </dependency>
+      <dependency>
+        <groupId>org.objenesis</groupId>
+        <artifactId>objenesis</artifactId>
+        <version>2.2</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <build>
     <plugins>
@@ -373,11 +397,68 @@
           <artifactId>jacoco-maven-plugin</artifactId>
           <version>0.7.8</version>
         </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>2.5.1</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.12.4</version>
+        </plugin>
       </plugins>
     </pluginManagement>
   </build>
 
   <profiles>
+    <!--
+      Configure maven-compiler-plugin and maven-surefire-plugin to support
+      in-place unit tests within bundles.  Assumes tests are in src-tests.
+    -->
+    <profile>
+      <id>bundle-with-unit-test</id>
+      <activation>
+        <file><exists>src-test</exists></file>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>bundle-unit-test-compile</id>
+                <phase>test-compile</phase>
+                <goals>
+                  <goal>testCompile</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>bundle-unit-test</id>
+                <phase>test</phase>
+                <configuration>
+                  <includes>
+                    <include>**/*Test.java</include>
+                  </includes>
+                </configuration>
+                <goals>
+                  <goal>test</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
     <profile>
       <id>macosx-jvm-flags</id>
       <activation>

@@ -57,54 +57,14 @@ You can explicitly set the `eclipse.target` property to
 $ mvn -Declipse.target=neon package
 ```
 
-### Configuring Maven/Tycho Toolchains for CI Builds
 
-_Note: this section is only relevant for configuring CI builds_
+## Adding a new bundle/fragment
 
-We use Tycho's support for Maven Toolchains to ensure that Java 8
-features do not creep into the code.  This support is enabled by
-compiling with the [`useJDK=BREE`](https://eclipse.org/tycho/sitedocs/tycho-compiler-plugin/compile-mojo.html)
-setting that ensures bundles are compiled with a JDK that matches
-the bundle's `Bundle-RequiredExecutionEnvironment`, but configuring
-`tycho-surefire` to run the tests using the configured toolchain
-(the default for
-[`useJDK=SYSTEM`](https://eclipse.org/tycho/sitedocs/tycho-surefire/tycho-surefire-plugin/test-mojo.html#useJDK)).
-These settings
-require configuring [Maven's toolchains](https://maven.apache.org/guides/mini/guide-using-toolchains.html)
-to point to appropriate JRE installations.  Tycho further requires
-that a toolchain defines an `id` for the specified _Execution
-Environment_ identifier.  For example, a `~/.m2/toolchains.xml` to
-configure Maven for a Java 7 toolchain on a Mac might be:
+We normally put production code into a bundle and tests into a separate
+fragment that is hosted by that bundle.  Both are placed under the
+`plugins/` directory.  The tests are executed within an OSGi container
+and are run with the minimal set of dependencies required.
 
-```
-<?xml version="1.0"?>
-<toolchains>
-  <toolchain>
-    <type>jdk</type>
-    <provides>
-      <id>JavaSE-1.7</id> <!-- the Execution Environment -->
-      <version>1.7</version>
-      <vendor>oracle</vendor>
-    </provides>
-    <configuration>
-      <jdkHome>/Library/Java/JavaVirtualMachines/jdk1.7.0_79.jdk/Contents/Home/jre</jdkHome>
-    </configuration>
-  </toolchain>
-</toolchains>
-```
-
-Note that _jdkHome_ above specifies the `jre/` directory: Tycho sets
-the default boot classpath to _jdkHome_`/lib/*`, _jdkHome_`/lib/ext/*`,
-and _jdkHome_`/lib/endorsed/*`.  For many JDKs, including Oracle's JDK
-and the OpenJDK, those directories are actually found in the `jre/`
-directory.  Compilation errors such as `java.lang.String` not found
-and `java.lang.Exception` not found
-indicate a misconfigured _jdkHome_.
-
-### Adding a new bundle/fragment
-
-We normally put production code into a bundle and tests as a fragment hosted
-by that bundle, put under the `plugins/` directory. 
 For now we have been committing both the `pom.xml` and Eclipse's
 `.project`, `.classpath`, and `.settings/` files.
 
@@ -112,6 +72,33 @@ Our CI process is configured to run our tests with JaCoCo, which requires
 some additional configuration to add new bundles and fragments
 in `build/jacoco/`.
 
+We've recently started experimenting with including unit tests inline
+with our bundles, like ordinary Maven projects.  Unlike Tycho Surefire tests,
+these tests are executed outside of an OSGi container.  These tests cannot
+access the Eclipse Core Resources, like the workspace, nor the Eclipse UI.
+Setup requires a few steps:
+
+  - The unit tests should be placed under `src-test`.
+  - Add the following to the bundle's `pom.xml`:
+       ```
+       <build>
+       <testSourceDirectory>src-test</testSourceDirectory>
+       </build>
+       <dependencies>
+         ... any dependencies, like junit:junit ...
+       </dependencies>
+       ```
+  - Add the following line to your `build.properties` to bring in JUnit,
+    Mockito, Hamcrest, and any other requirements, within Eclipse:
+       ```
+       additional.bundles = com.google.cloud.tools.eclipse.test.dependencies
+       ```
+    Do not add `src-test` to the `build.properties` as it prevents Maven
+    from using these classes as tests (as of Tycho 1.0, it seems).
+  - From the project properties, select _Java Build Path_ and add a new
+    source folder for `src-test`, and whose output is placed in `target/test-classes`.
+      - note that these settings will be thrown away with M2Eclipse's
+       _Update Projects_ or PDE's _Update Classpath_ commands.
 
 ## Import into Eclipse
 
@@ -330,3 +317,48 @@ the version should be specified as `"0.0.0"` to indicate that the
 current version found should be used.  Unlike the `.tpd` file,
 the identifiers are not p2 identifiers, and so features do not
 require the `.feature.group` suffix.
+
+
+# Configuring Maven/Tycho Toolchains for CI Builds
+
+_Note: this section is only relevant for configuring CI builds_
+
+We use Tycho's support for Maven Toolchains to ensure that Java 8
+features do not creep into the code.  This support is enabled by
+compiling with the [`useJDK=BREE`](https://eclipse.org/tycho/sitedocs/tycho-compiler-plugin/compile-mojo.html)
+setting that ensures bundles are compiled with a JDK that matches
+the bundle's `Bundle-RequiredExecutionEnvironment`, but configuring
+`tycho-surefire` to run the tests using the configured toolchain
+(the default for
+[`useJDK=SYSTEM`](https://eclipse.org/tycho/sitedocs/tycho-surefire/tycho-surefire-plugin/test-mojo.html#useJDK)).
+These settings
+require configuring [Maven's toolchains](https://maven.apache.org/guides/mini/guide-using-toolchains.html)
+to point to appropriate JRE installations.  Tycho further requires
+that a toolchain defines an `id` for the specified _Execution
+Environment_ identifier.  For example, a `~/.m2/toolchains.xml` to
+configure Maven for a Java 7 toolchain on a Mac might be:
+
+```
+<?xml version="1.0"?>
+<toolchains>
+  <toolchain>
+    <type>jdk</type>
+    <provides>
+      <id>JavaSE-1.7</id> <!-- the Execution Environment -->
+      <version>1.7</version>
+      <vendor>oracle</vendor>
+    </provides>
+    <configuration>
+      <jdkHome>/Library/Java/JavaVirtualMachines/jdk1.7.0_79.jdk/Contents/Home/jre</jdkHome>
+    </configuration>
+  </toolchain>
+</toolchains>
+```
+
+Note that _jdkHome_ above specifies the `jre/` directory: Tycho sets
+the default boot classpath to _jdkHome_`/lib/*`, _jdkHome_`/lib/ext/*`,
+and _jdkHome_`/lib/endorsed/*`.  For many JDKs, including Oracle's JDK
+and the OpenJDK, those directories are actually found in the `jre/`
+directory.  Compilation errors such as `java.lang.String` not found
+and `java.lang.Exception` not found
+indicate a misconfigured _jdkHome_.
