@@ -109,6 +109,8 @@ public abstract class AppEngineProjectWizard extends Wizard implements INewWizar
         getAppEngineProjectCreationOperation(config, uiInfoAdapter);
 
     try {
+      boolean fork = true;
+      boolean cancelable = true;
       getContainer().run(fork, cancelable, runnable);
 
       // open most important file created by wizard in editor

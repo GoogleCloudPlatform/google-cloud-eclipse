@@ -37,10 +37,7 @@ public class AnalyticsEvents {
 
   // Metadata values
 
-  // Native Standard wizard
-  public static final String APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE = "native";
-  // Maven-based Standard wizard
-  public static final String APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_MAVEN = "maven";
-  // Flex wizard
+  public static final String APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_STANDARD_NATIVE = "native";
+  public static final String APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_STANDARD_MAVEN = "maven";
   public static final String APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_FLEX = "flex";
 }
