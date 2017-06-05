@@ -50,7 +50,7 @@ public abstract class AppEngineProjectWizard extends Wizard implements INewWizar
 
   public abstract AppEngineWizardPage createWizardPage();
 
-  public abstract IStatus validateDependencies(boolean fork, boolean cancelable);
+  public abstract IStatus validateDependencies();
 
   public abstract CreateAppEngineWtpProject getAppEngineProjectCreationOperation(
       AppEngineProjectConfig config, IAdaptable uiInfoAdapter);
@@ -78,9 +78,7 @@ public abstract class AppEngineProjectWizard extends Wizard implements INewWizar
       return true;
     }
 
-    boolean fork = true;
-    boolean cancelable = true;
-    IStatus status = validateDependencies(fork, cancelable);
+    IStatus status = validateDependencies();
     if (!status.isOK()) {
       StatusUtil.setErrorStatus(this, status.getMessage(), status);
       return false;

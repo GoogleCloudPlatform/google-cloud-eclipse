@@ -48,14 +48,16 @@ public class AppEngineStandardProjectWizard extends AppEngineProjectWizard {
     AnalyticsPingManager.getInstance().sendPing(
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD,
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
-        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE);
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE, getShell());
 
     return new AppEngineStandardWizardPage();
   }
 
   @Override
-  public IStatus validateDependencies(boolean fork, boolean cancelable) {
+  public IStatus validateDependencies() {
     try {
+      boolean fork = true;
+      boolean cancelable = true;
       DependencyValidator dependencyValidator = new DependencyValidator();
       getContainer().run(fork, cancelable, dependencyValidator);
       if (dependencyValidator.result.isOK()) {

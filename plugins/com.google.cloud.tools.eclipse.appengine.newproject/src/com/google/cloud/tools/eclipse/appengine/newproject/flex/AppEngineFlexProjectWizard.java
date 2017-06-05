@@ -42,13 +42,13 @@ public class AppEngineFlexProjectWizard extends AppEngineProjectWizard {
     AnalyticsPingManager.getInstance().sendPing(
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD,
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
-        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_FLEX);
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_FLEX, getShell());
 
     return new AppEngineFlexWizardPage();
   }
 
   @Override
-  public IStatus validateDependencies(boolean fork, boolean cancelable) {
+  public IStatus validateDependencies() {
     return Status.OK_STATUS;
   }
 
