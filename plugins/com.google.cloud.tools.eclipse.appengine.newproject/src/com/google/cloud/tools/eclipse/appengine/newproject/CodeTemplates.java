@@ -19,7 +19,6 @@ package com.google.cloud.tools.eclipse.appengine.newproject;
 import com.google.cloud.tools.eclipse.util.templates.appengine.AppEngineTemplateUtility;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
-import java.io.ByteArrayInputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -197,14 +196,11 @@ public class CodeTemplates {
   @VisibleForTesting
   static IFile createChildFile(String name, String template, IContainer parent,
       Map<String, String> values, IProgressMonitor monitor) throws CoreException {
-
     monitor.subTask("Creating file " + name);
 
     IFile child = parent.getFile(new Path(name));
     if (!child.exists()) {
-      child.create(new ByteArrayInputStream(new byte[0]), true /* force */, monitor);
-      AppEngineTemplateUtility.createFileContent(
-          child.getLocation().toString(), template, values);
+      AppEngineTemplateUtility.createFileContent(child.getLocation().toString(), template, values);
       child.refreshLocal(IResource.DEPTH_ZERO, monitor);
     }
     return child;

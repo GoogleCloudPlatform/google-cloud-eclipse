@@ -16,6 +16,8 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject.flex;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -26,10 +28,13 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectConfig;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
+import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
+import com.google.cloud.tools.eclipse.util.MavenUtils;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.concurrent.TimeUnit;
 import org.apache.maven.artifact.Artifact;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
@@ -38,6 +43,10 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
@@ -55,9 +64,10 @@ import org.mockito.stubbing.Answer;
 @RunWith(MockitoJUnitRunner.class)
 public class CreateAppEngineFlexWtpProjectTest {
 
+  @Rule public ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
+
   @Rule public TemporaryFolder tempFolder = new TemporaryFolder();
 
-  @Mock private Artifact someArtifact;
   @Mock private ILibraryRepositoryService repositoryService;
 
   private final IProgressMonitor monitor = new NullProgressMonitor();
@@ -65,26 +75,20 @@ public class CreateAppEngineFlexWtpProjectTest {
   private IProject project;
 
   @Before
-  public void setUp() throws IOException {
-    someArtifact = mock(Artifact.class);
-    when(someArtifact.getFile()).thenReturn(tempFolder.newFile());
+  public void setUp() throws IOException, CoreException {
+    mockRepositoryService();
 
     IWorkspace workspace = ResourcesPlugin.getWorkspace();
     project = workspace.getRoot().getProject("testproject" + Math.random());
     config.setProject(project);
   }
 
-  @After
-  public void tearDown() throws CoreException {
-    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1945
-    ProjectUtils.waitForProjects(project);
-    project.delete(true, monitor);
-  }
+  private void mockRepositoryService() throws IOException, CoreException {
+    final Artifact someArtifact = mock(Artifact.class);
+    when(someArtifact.getFile()).thenReturn(tempFolder.newFile());
 
-  @Test
-  public void testServletApi31Added() throws InvocationTargetException, CoreException, IOException {
     final Artifact servletApi31 = mock(Artifact.class);
-    File servletApi31Jar = tempFolder.newFile();
+    File servletApi31Jar = tempFolder.newFile("fake-servlet-api-3.1.jar");
     when(servletApi31.getFile()).thenReturn(servletApi31Jar);
 
     when(repositoryService.resolveArtifact(any(LibraryFile.class), any(IProgressMonitor.class)))
@@ -103,24 +107,63 @@ public class CreateAppEngineFlexWtpProjectTest {
             }
           }
         });
+  }
 
+  @After
+  public void tearDown() throws CoreException {
+    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1945
+    ProjectUtils.waitForProjects(project);
+    project.delete(true, monitor);
+  }
+
+  @Test
+  public void testServletApi31Added() throws InvocationTargetException, CoreException {
     CreateAppEngineWtpProject creator =
         new CreateAppEngineFlexWtpProject(config, mock(IAdaptable.class), repositoryService);
     creator.execute(monitor);
 
-    assertTrue(project.getFile("lib/" + servletApi31Jar.getName()).exists());
+    assertTrue(project.getFile("lib/fake-servlet-api-3.1.jar").exists());
   }
 
   @Test
   public void testDynamicWebModuleFacet31Added() throws InvocationTargetException, CoreException {
-    when(repositoryService.resolveArtifact(any(LibraryFile.class), any(IProgressMonitor.class)))
-        .thenReturn(someArtifact);
-
     CreateAppEngineWtpProject creator =
         new CreateAppEngineFlexWtpProject(config, mock(IAdaptable.class), repositoryService);
     creator.execute(monitor);
 
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);
     assertTrue(facetedProject.hasProjectFacet(WebFacetUtils.WEB_31));
+  }
+
+  @Test
+  public void testNoMavenNatureByDefault() throws InvocationTargetException, CoreException {
+    assertFalse(config.getUseMaven());
+    CreateAppEngineWtpProject creator =
+        new CreateAppEngineFlexWtpProject(config, mock(IAdaptable.class), repositoryService);
+    creator.execute(monitor);
+
+    assertFalse(project.hasNature(MavenUtils.MAVEN2_NATURE_ID));
+    assertTrue(project.getFolder("build").exists());
+    assertOutputDirectory("build/classes");
+  }
+
+  @Test
+  public void testMavenNatureEnabled() throws InvocationTargetException, CoreException {
+    config.setUseMaven("my.group.id", "my-artifact-id", "12.34.56");
+
+    CreateAppEngineWtpProject creator =
+        new CreateAppEngineFlexWtpProject(config, mock(IAdaptable.class), repositoryService);
+    creator.execute(monitor);
+    ProjectUtils.waitForProjects(project);
+
+    assertTrue(project.hasNature(MavenUtils.MAVEN2_NATURE_ID));
+    assertFalse(project.getFolder("build").exists());
+    assertOutputDirectory("target/my-artifact-id-12.34.56/WEB-INF/classes");
+  }
+
+  private void assertOutputDirectory(String expected) throws JavaModelException {
+    assertTrue(project.getFolder(expected).exists());
+    IJavaProject javaProject = JavaCore.create(project);
+    assertEquals(new Path(expected), javaProject.getOutputLocation().removeFirstSegments(1));
   }
 }

@@ -95,7 +95,9 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
     IFile mostImportantFile =  CodeTemplates.materializeAppEngineFlexFiles(newProject, config,
         subMonitor.newChild(30));
     configureFacets(newProject, subMonitor.newChild(20));
-    addDependenciesToProject(newProject, subMonitor.newChild(50));
+    if (!config.getUseMaven()) {
+      addDependenciesToProject(newProject, subMonitor.newChild(50));
+    }
     return mostImportantFile;
   }
 

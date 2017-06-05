@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
+import com.google.common.base.Strings;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.HashSet;
@@ -110,8 +111,7 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
         Boolean.toString(appEngineLibraryIds.contains("appengine-api"))); //$NON-NLS-1$
 
     ProjectImportConfiguration importConfiguration = new ProjectImportConfiguration();
-    String packageName = this.packageName == null || this.packageName.isEmpty()
-        ? null : this.packageName;
+    String packageName = Strings.emptyToNull(this.packageName);
 
     // Workaround deadlock bug described in Eclipse bug (https://bugs.eclipse.org/511793).
     try {

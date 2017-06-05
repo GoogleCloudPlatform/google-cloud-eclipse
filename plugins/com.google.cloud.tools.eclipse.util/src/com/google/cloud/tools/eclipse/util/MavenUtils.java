@@ -67,13 +67,6 @@ public class MavenUtils {
   }
 
   /**
-   * Adds an M2Eclipse Maven nature.
-   */
-  public static void addMavenNature(IProject project) throws CoreException {
-    NatureUtils.addNature(project, MAVEN2_NATURE_ID);
-  }
-
-  /**
    * Returns true if the group IDs and artifact IDs of <code>dependency1</code> and
    * <@code>dependency2</@code> are equal. Returns false otherwise.
    */

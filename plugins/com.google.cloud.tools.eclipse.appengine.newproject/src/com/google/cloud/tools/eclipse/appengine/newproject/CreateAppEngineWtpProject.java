@@ -41,6 +41,8 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.core.ClasspathEntry;
 import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.jst.j2ee.classpathdep.UpdateClasspathAttributeUtil;
+import org.eclipse.m2e.core.MavenPlugin;
+import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.ide.undo.CreateProjectOperation;
 
@@ -53,7 +55,8 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
   private final IAdaptable uiInfoAdapter;
   private IFile mostImportant = null;
 
-  public abstract void addAppEngineFacet(IProject newProject, IProgressMonitor monitor) throws CoreException;
+  public abstract void addAppEngineFacet(IProject newProject, IProgressMonitor monitor)
+      throws CoreException;
 
   /**
    * Returns a user visible name for the resource operation that generates the files
@@ -64,8 +67,8 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
   /**
    * Returns the most important file created that the IDE will open in the editor.
    */
-  public abstract IFile createAndConfigureProjectContent(IProject newProject, AppEngineProjectConfig config,
-      IProgressMonitor monitor) throws CoreException;
+  public abstract IFile createAndConfigureProjectContent(IProject newProject,
+      AppEngineProjectConfig config, IProgressMonitor monitor) throws CoreException;
 
   /**
    * @return the file in the project that should be opened in an editor when the wizard finishes;
@@ -104,6 +107,10 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
       throw new InvocationTargetException(ex);
     }
 
+    if (config.getUseMaven()) {
+      enableMavenNature(newProject, subMonitor.newChild(2));
+    }
+
     addAppEngineFacet(newProject, subMonitor.newChild(4));
 
     BuildPath.addLibraries(newProject, config.getAppEngineLibraries(), subMonitor.newChild(2));
@@ -137,6 +144,18 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
 
     // 2. Remove "src/test/java" from the Web Deployment Assembly sources.
     WebProjectUtil.removeWebDeploymentAssemblyEntry(newProject, new Path("src/test/java"));
+  }
+
+  private void enableMavenNature(IProject newProject, IProgressMonitor monitor)
+      throws CoreException {
+    SubMonitor subMonitor = SubMonitor.convert(monitor, 22);
+
+    ResolverConfiguration resolverConfiguration = new ResolverConfiguration();
+    MavenPlugin.getProjectConfigurationManager().enableMavenNature(newProject,
+        resolverConfiguration, subMonitor.newChild(20));
+    // M2E will cleverly set "target/<artifact ID>-<version>/WEB-INF/classes" as a new Java output
+    // folder; delete the default old folder.
+    newProject.getFolder("build").delete(true /* force */, subMonitor.newChild(2));
   }
 
   private static void addJunit4ToClasspath(IProject newProject, IProgressMonitor monitor)
