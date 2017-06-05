@@ -23,7 +23,6 @@ import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexFacet;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -52,7 +51,7 @@ public class FlexStagingDelegateTest {
   }
 
   @Test
-  public void testStage() throws CoreException {
+  public void testStage() {
     StagingDelegate delegate = new FlexStagingDelegate(appEngineDirectory);
     IStatus status = delegate.stage(project, stagingDirectory, safeWorkDirectory, 
         null /* cloudSdk */, new NullProgressMonitor());
