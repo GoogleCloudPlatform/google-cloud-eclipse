@@ -18,9 +18,10 @@ package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import com.google.cloud.tools.eclipse.appengine.libraries.BuildPath;
+import com.google.common.collect.Lists;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
-import java.util.Arrays;
+import java.util.List;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -168,10 +169,9 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
         new IAccessRule[0],
         new IClasspathAttribute[] {nonDependencyAttribute},
         false);
-    IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
-    IClasspathEntry[] newRawClasspath = Arrays.copyOf(rawClasspath, rawClasspath.length + 1);
-    newRawClasspath[newRawClasspath.length - 1] = junit4Container;
-    javaProject.setRawClasspath(newRawClasspath, monitor);
+    List<IClasspathEntry> rawClasspath = Lists.newArrayList(javaProject.getRawClasspath());
+    rawClasspath.add(junit4Container);
+    javaProject.setRawClasspath(rawClasspath.toArray(new IClasspathEntry[0]), monitor);
   }
 
 }
