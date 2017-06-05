@@ -18,10 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.newproject.standard;
 
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineWizardPage;
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
-import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
-import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 
 public class AppEngineStandardWizardPage extends AppEngineWizardPage {
@@ -29,14 +26,6 @@ public class AppEngineStandardWizardPage extends AppEngineWizardPage {
     super(true);
     setTitle(Messages.getString("app.engine.standard.project")); //$NON-NLS-1$
     setDescription(Messages.getString("create.app.engine.standard.project")); //$NON-NLS-1$
-  }
-
-  @Override
-  public void sendAnalyticsPing(Shell parentShell) {
-    AnalyticsPingManager.getInstance().sendPing(
-        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD,
-        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
-        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE, parentShell);
   }
 
   @Override

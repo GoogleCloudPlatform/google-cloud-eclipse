@@ -23,8 +23,6 @@ import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectWizar
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineWizardPage;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
-import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
-import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import java.lang.reflect.InvocationTargetException;
 import javax.inject.Inject;
@@ -46,14 +44,6 @@ public class AppEngineStandardProjectWizard extends AppEngineProjectWizard {
   @Override
   public AppEngineWizardPage createWizardPage() {
     return new AppEngineStandardWizardPage();
-  }
-
-  @Override
-  public void sendAnalyticsPing() {
-    AnalyticsPingManager.getInstance().sendPing(
-        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_COMPLETE,
-        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
-        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE);
   }
 
   @Override

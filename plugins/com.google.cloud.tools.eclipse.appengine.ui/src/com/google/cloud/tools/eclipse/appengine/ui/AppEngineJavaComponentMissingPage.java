@@ -22,12 +22,11 @@ package com.google.cloud.tools.eclipse.appengine.ui;
  */
 public class AppEngineJavaComponentMissingPage extends MissingComponentPage {
 
-  public AppEngineJavaComponentMissingPage(String wizardType) {
+  public AppEngineJavaComponentMissingPage() {
       super("appEngineJavaComponentMissingPage",  //$NON-NLS-1$
-          wizardType, 
-          Messages.getString("appengine.java.component.missing"), 
+          Messages.getString("appengine.java.component.missing"),
           Messages.getString("appengine.java.component.not.installed"),
           Messages.getString("fix.appengine.java.component"));
   }
-  
+
 }

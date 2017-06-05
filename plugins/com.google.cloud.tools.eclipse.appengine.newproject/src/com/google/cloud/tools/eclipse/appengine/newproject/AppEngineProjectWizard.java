@@ -20,12 +20,14 @@ import com.google.cloud.tools.appengine.cloudsdk.AppEngineJavaComponentsNotInsta
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkOutOfDateException;
+import com.google.cloud.tools.eclipse.appengine.newproject.flex.AppEngineFlexWizardPage;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineJavaComponentMissingPage;
 import com.google.cloud.tools.eclipse.appengine.ui.CloudSdkMissingPage;
 import com.google.cloud.tools.eclipse.appengine.ui.CloudSdkOutOfDatePage;
 import com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPrompter;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -50,8 +52,6 @@ public abstract class AppEngineProjectWizard extends Wizard implements INewWizar
 
   public abstract AppEngineWizardPage createWizardPage();
 
-  public abstract void sendAnalyticsPing();
-
   public abstract IStatus validateDependencies(boolean fork, boolean cancelable);
 
   public abstract CreateAppEngineWtpProject getAppEngineProjectCreationOperation(
@@ -59,6 +59,9 @@ public abstract class AppEngineProjectWizard extends Wizard implements INewWizar
 
   @Override
   public void addPages() {
+    AnalyticsPingManager.getInstance().sendPing(
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD, null, null, getShell());
+
     try {
       CloudSdk sdk = new CloudSdk.Builder().build();
       sdk.validateCloudSdk();
@@ -66,19 +69,16 @@ public abstract class AppEngineProjectWizard extends Wizard implements INewWizar
       page = createWizardPage();
       addPage(page);
     } catch (CloudSdkNotFoundException ex) {
-      addPage(new CloudSdkMissingPage(AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE));
+      addPage(new CloudSdkMissingPage());
     } catch (CloudSdkOutOfDateException ex) {
-      addPage(new CloudSdkOutOfDatePage(AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE));
+      addPage(new CloudSdkOutOfDatePage());
     } catch (AppEngineJavaComponentsNotInstalledException ex) {
-      addPage(new AppEngineJavaComponentMissingPage(
-          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE));
+      addPage(new AppEngineJavaComponentMissingPage());
     }
   }
 
   @Override
   public boolean performFinish() {
-    sendAnalyticsPing();
-
     if (page == null) {
       return true;
     }
@@ -100,6 +100,16 @@ public abstract class AppEngineProjectWizard extends Wizard implements INewWizar
 
     config.setAppEngineLibraries(page.getSelectedLibraries());
 
+    // TODO: we won't need this "instanceof" check once we implement a unified wizard:
+    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1326
+    if (page instanceof AppEngineFlexWizardPage) {
+      AppEngineFlexWizardPage flexPage = (AppEngineFlexWizardPage) page;
+      if (flexPage.asMavenProject()) {
+        config.setUseMaven(flexPage.getMavenGroupId(), flexPage.getMavenArtifactId(),
+            flexPage.getMavenVersion());
+      }
+    }
+
     // todo set up
     IAdaptable uiInfoAdapter = WorkspaceUndoUtil.getUIInfoAdapter(getShell());
     CreateAppEngineWtpProject runnable =
@@ -111,6 +121,7 @@ public abstract class AppEngineProjectWizard extends Wizard implements INewWizar
       // open most important file created by wizard in editor
       IFile file = runnable.getMostImportant();
       WorkbenchUtil.openInEditor(workbench, file);
+      sendWizardCompleteAnalyticsPing();
       return true;
     } catch (InterruptedException ex) {
       return false;
@@ -133,4 +144,19 @@ public abstract class AppEngineProjectWizard extends Wizard implements INewWizar
     }
   }
 
+  private void sendWizardCompleteAnalyticsPing() {
+    String buildSystem = AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE;
+    // TODO: we won't need this "instanceof" check once we implement a unified wizard:
+    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1326
+    if (page instanceof AppEngineFlexWizardPage) {
+      AppEngineFlexWizardPage flexPage = (AppEngineFlexWizardPage) page;
+      if (flexPage.asMavenProject()) {
+          buildSystem = AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_MAVEN;
+      }
+    }
+
+    AnalyticsPingManager.getInstance().sendPing(
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_COMPLETE,
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE, buildSystem);
+  }
 }

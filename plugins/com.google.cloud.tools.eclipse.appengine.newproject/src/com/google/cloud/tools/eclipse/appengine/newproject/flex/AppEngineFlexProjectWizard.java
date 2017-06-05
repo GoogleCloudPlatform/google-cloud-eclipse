@@ -27,11 +27,12 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
-// TODO: update functions
 public class AppEngineFlexProjectWizard extends AppEngineProjectWizard {
   @Inject
   private ILibraryRepositoryService repositoryService;
 
+  // TODO: remove and use "page" in the super class instead when we fix
+  // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1326
   private AppEngineFlexWizardPage wizardPage;
 
   public AppEngineFlexProjectWizard() {
@@ -45,11 +46,6 @@ public class AppEngineFlexProjectWizard extends AppEngineProjectWizard {
   }
 
   @Override
-  public void sendAnalyticsPing() {
-    // TODO: send anayltics
-  }
-
-  @Override
   public IStatus validateDependencies(boolean fork, boolean cancelable) {
     return Status.OK_STATUS;
   }
@@ -60,12 +56,4 @@ public class AppEngineFlexProjectWizard extends AppEngineProjectWizard {
     return new CreateAppEngineFlexWtpProject(config, uiInfoAdapter, repositoryService);
   }
 
-  @Override
-  public boolean performFinish() {
-    if (wizardPage.asMavenProject()) {
-      config.setUseMaven(wizardPage.getMavenGroupId(), wizardPage.getMavenArtifactId(),
-          wizardPage.getMavenVersion());
-    }
-    return super.performFinish();
-  }
 }

@@ -22,11 +22,12 @@ import com.google.cloud.tools.eclipse.appengine.newproject.PageValidator;
 import com.google.cloud.tools.eclipse.appengine.newproject.maven.MavenCoordinatesUi;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 
 public class AppEngineFlexWizardPage extends AppEngineWizardPage {
 
+  // TODO: push this down to the super class when we implement a unified wizard:
+  // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1326
   private MavenCoordinatesUi mavenCoordinatesUi;
 
   public AppEngineFlexWizardPage() {
@@ -54,16 +55,13 @@ public class AppEngineFlexWizardPage extends AppEngineWizardPage {
   }
 
   @Override
-  public void sendAnalyticsPing(Shell shell) {
-    // TODO: send analytics ping
-  }
-
-  @Override
   public void setHelp(Composite container) {
     PlatformUI.getWorkbench().getHelpSystem().setHelp(container,
         "com.google.cloud.tools.eclipse.appengine.newproject.NewFlexProjectContext"); //$NON-NLS-1$
   }
 
+  // TODO: push these methods down to the super class when we implement a unified wizard:
+  // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1326
   public boolean asMavenProject() {
     return mavenCoordinatesUi.uiEnabled();
   }

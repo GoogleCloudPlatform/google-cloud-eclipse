@@ -23,12 +23,12 @@ import org.junit.Test;
 public class CloudSdkMissingPageTest {
 
   private CloudSdkMissingPage page;
-  
+
   @Before
   public void setUp() {
-    page = new CloudSdkMissingPage("");
+    page = new CloudSdkMissingPage();
   }
-  
+
   @Test
   public void testTitle() {
     Assert.assertEquals("Cloud SDK missing", page.getTitle());
