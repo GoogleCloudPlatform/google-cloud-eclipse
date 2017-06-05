@@ -30,9 +30,9 @@ public class AppEngineFlexProjectWizardTest {
 
   @Test
   public void testValidateDependencies() {
-    Assert.assertTrue(wizard.validateDependencies(true, true).isOK());
+    Assert.assertTrue(wizard.validateDependencies().isOK());
   }
-  
+
   @Test
   public void testAddPages() {
     wizard.addPages();
@@ -40,5 +40,5 @@ public class AppEngineFlexProjectWizardTest {
     Assert.assertEquals(1, wizard.getPageCount());
     Assert.assertNotNull(wizard.getPage("basicNewProjectPage"));
   }
-  
+
 }
