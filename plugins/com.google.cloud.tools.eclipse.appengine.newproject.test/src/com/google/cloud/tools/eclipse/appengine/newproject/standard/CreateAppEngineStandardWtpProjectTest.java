@@ -28,6 +28,7 @@ import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpPro
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.core.resources.IProject;
@@ -35,11 +36,17 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.wst.common.componentcore.ComponentCore;
+import org.eclipse.wst.common.componentcore.resources.IVirtualComponent;
+import org.eclipse.wst.common.componentcore.resources.IVirtualFolder;
+import org.eclipse.wst.common.componentcore.resources.IVirtualResource;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.common.project.facet.core.runtime.IRuntime;
@@ -154,6 +161,53 @@ public class CreateAppEngineStandardWtpProjectTest {
       }
     }
     fail("Classpath container " + APP_ENGINE_API + " was not added to the build path");
+  }
+
+  @Test
+  public void testJavaTestSourceOutput() throws InvocationTargetException, CoreException {
+    CreateAppEngineWtpProject creator = new CreateAppEngineStandardWtpProject(config, adaptable);
+    creator.execute(monitor);
+
+    ProjectUtils.waitForProjects(project); // App Engine runtime is added via a Job, so wait.
+    verifyOutputPathForJavaTestSource();
+  }
+
+  private void verifyOutputPathForJavaTestSource() throws JavaModelException {
+    IJavaProject javaProject = JavaCore.create(project);
+    for (IClasspathEntry entry : javaProject.getRawClasspath()) {
+      if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE
+          && containsSegment(entry.getPath(), "test")) {
+        assertNotNull(entry.getOutputLocation());
+        assertEquals("test-classes", entry.getOutputLocation().lastSegment());
+        return;
+      }
+    }
+    fail();
+  }
+
+  private boolean containsSegment(IPath path, String segment) {
+    return Arrays.asList(path.segments()).contains(segment);
+  }
+
+  @Test
+  public void testNoTestClassesInDeploymentAssembly()
+      throws InvocationTargetException, CoreException {
+    CreateAppEngineWtpProject creator = new CreateAppEngineStandardWtpProject(config, adaptable);
+    creator.execute(monitor);
+
+    ProjectUtils.waitForProjects(project); // App Engine runtime is added via a Job, so wait.
+    verify();
+  }
+
+  private void verify() throws CoreException {
+    IVirtualComponent component = ComponentCore.createComponent(project);
+    assertTrue(component.exists());
+    IVirtualFolder rootFolder = component.getRootFolder();
+    rootFolder.getResources(aResourceType)
+    System.out.println(rootFolder.members());
+    for (IVirtualResource res : rootFolder.members()) {
+      System.out.println(res);
+    }
   }
 
   @Test
