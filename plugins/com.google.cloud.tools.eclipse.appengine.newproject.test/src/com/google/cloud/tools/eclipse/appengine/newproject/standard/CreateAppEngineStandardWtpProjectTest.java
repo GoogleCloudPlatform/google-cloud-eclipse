@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.newproject.standard;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -30,6 +31,7 @@ import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
@@ -38,15 +40,15 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.wst.common.componentcore.ComponentCore;
-import org.eclipse.wst.common.componentcore.resources.IVirtualComponent;
-import org.eclipse.wst.common.componentcore.resources.IVirtualFolder;
-import org.eclipse.wst.common.componentcore.resources.IVirtualResource;
+import org.eclipse.wst.common.componentcore.internal.ComponentResource;
+import org.eclipse.wst.common.componentcore.internal.StructureEdit;
+import org.eclipse.wst.common.componentcore.internal.WorkbenchComponent;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.common.project.facet.core.runtime.IRuntime;
@@ -169,10 +171,10 @@ public class CreateAppEngineStandardWtpProjectTest {
     creator.execute(monitor);
 
     ProjectUtils.waitForProjects(project); // App Engine runtime is added via a Job, so wait.
-    verifyOutputPathForJavaTestSource();
+    assertCorrectOutputPathForJavaTestSource();
   }
 
-  private void verifyOutputPathForJavaTestSource() throws JavaModelException {
+  private void assertCorrectOutputPathForJavaTestSource() throws JavaModelException {
     IJavaProject javaProject = JavaCore.create(project);
     for (IClasspathEntry entry : javaProject.getRawClasspath()) {
       if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE
@@ -196,18 +198,25 @@ public class CreateAppEngineStandardWtpProjectTest {
     creator.execute(monitor);
 
     ProjectUtils.waitForProjects(project); // App Engine runtime is added via a Job, so wait.
-    verify();
+    assertNoTestClassesInDeploymentAssembly();
   }
 
-  private void verify() throws CoreException {
-    IVirtualComponent component = ComponentCore.createComponent(project);
-    assertTrue(component.exists());
-    IVirtualFolder rootFolder = component.getRootFolder();
-    rootFolder.getResources(aResourceType)
-    System.out.println(rootFolder.members());
-    for (IVirtualResource res : rootFolder.members()) {
-      System.out.println(res);
+  private void assertNoTestClassesInDeploymentAssembly() throws CoreException {
+    StructureEdit core = StructureEdit.getStructureEditForRead(project);
+    WorkbenchComponent component = core.getComponent();
+    assertNotNull(component);
+
+    boolean seenMainSourcePath = false;
+    List<ComponentResource> resources = component.getResources();
+    for (ComponentResource resource : resources) {
+      assertFalse(containsSegment(resource.getSourcePath(), "test"));
+
+      if (resource.getSourcePath().equals(new Path("/src/main/java"))
+          && resource.getRuntimePath().equals(new Path("/WEB-INF/classes"))) {
+        seenMainSourcePath = true;
+      }
     }
+    assertTrue(seenMainSourcePath);
   }
 
   @Test
