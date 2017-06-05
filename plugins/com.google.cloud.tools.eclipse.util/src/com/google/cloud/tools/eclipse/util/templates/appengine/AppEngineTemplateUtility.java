@@ -23,13 +23,15 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 import org.eclipse.core.runtime.CoreException;
 
@@ -55,9 +57,9 @@ public class AppEngineTemplateUtility {
     if (configuration == null) {
       configuration = createConfiguration();
     }
-    File outputFile = new File(outputFileLocation);
+    Path outputFile = Paths.get(outputFileLocation);
     try (Writer writer =
-        new OutputStreamWriter(new FileOutputStream(outputFile), StandardCharsets.UTF_8)) {
+        new OutputStreamWriter(Files.newOutputStream(outputFile), StandardCharsets.UTF_8)) {
       Template template = configuration.getTemplate(templateName);
       template.process(dataMap, writer);
     } catch (IOException | TemplateException ex) {
@@ -73,7 +75,7 @@ public class AppEngineTemplateUtility {
     try (
         InputStream inputStream = AppEngineTemplateUtility.class
             .getResourceAsStream("/templates/appengine/" + sourceName);
-        FileOutputStream outputStream = new FileOutputStream(new File(outputFileLocation))) {
+        OutputStream outputStream = Files.newOutputStream(Paths.get(outputFileLocation))) {
       ByteStreams.copy(inputStream, outputStream);
     } catch (IOException ex) {
       throw new CoreException(StatusUtil.error(AppEngineTemplateUtility.class, ex.getMessage()));

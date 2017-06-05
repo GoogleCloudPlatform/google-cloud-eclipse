@@ -18,7 +18,6 @@ package com.google.cloud.tools.eclipse.test.util;
 
 import static org.junit.Assert.assertNotNull;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -83,15 +82,17 @@ public class EclipseProperties extends ExternalResource {
    * <p>
    * The working directory is assumed to be the root of the fragment bundle (i.e.
    * <code>META-INF/MANIFEST.MF</code> is a valid path to the manifest file of the fragment.
-   * 
+   *
    * @return the value of <code>Fragment-Host</code> attribute or <code>null</code> if the attribute
    *         is not present
    * @throws IOException if the manifest file is not found or an error occurs while reading it
    */
-  private static String getHostBundleName() throws IOException {
+  static String getHostBundleName() throws IOException {
     String manifestPath = "META-INF/MANIFEST.MF";
-    Manifest manifest = new Manifest(new FileInputStream(manifestPath));
-    Attributes attributes = manifest.getMainAttributes();
-    return attributes.getValue("Fragment-Host");
+    try (InputStream in = Files.newInputStream(Paths.get(manifestPath))) {
+      Manifest manifest = new Manifest(in);
+      Attributes attributes = manifest.getMainAttributes();
+      return attributes.getValue("Fragment-Host");
+    }
   }
 }
