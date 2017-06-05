@@ -52,7 +52,9 @@ public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
   @Override
   public void addPages() {
     AnalyticsPingManager.getInstance().sendPing(
-        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD, null, null, getShell());
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD,
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_MAVEN, getShell());
 
     try {
       CloudSdk sdk = new CloudSdk.Builder().build();

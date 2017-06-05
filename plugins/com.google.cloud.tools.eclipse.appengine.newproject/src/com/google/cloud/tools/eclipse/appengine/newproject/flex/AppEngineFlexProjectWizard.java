@@ -22,6 +22,8 @@ import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectWizar
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineWizardPage;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import javax.inject.Inject;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
@@ -31,18 +33,18 @@ public class AppEngineFlexProjectWizard extends AppEngineProjectWizard {
   @Inject
   private ILibraryRepositoryService repositoryService;
 
-  // TODO: remove and use "page" in the super class instead when we fix
-  // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1326
-  private AppEngineFlexWizardPage wizardPage;
-
   public AppEngineFlexProjectWizard() {
     setWindowTitle(Messages.getString("new.app.engine.flex.project"));
   }
 
   @Override
   public AppEngineWizardPage createWizardPage() {
-    wizardPage = new AppEngineFlexWizardPage();
-    return wizardPage;
+    AnalyticsPingManager.getInstance().sendPing(
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD,
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_FLEX);
+
+    return new AppEngineFlexWizardPage();
   }
 
   @Override
@@ -56,4 +58,16 @@ public class AppEngineFlexProjectWizard extends AppEngineProjectWizard {
     return new CreateAppEngineFlexWtpProject(config, uiInfoAdapter, repositoryService);
   }
 
+  @Override
+  public boolean performFinish() {
+    boolean accepted = super.performFinish();
+
+    if (accepted && page != null) {  // null page if Cloud SDK validation fails.
+      AnalyticsPingManager.getInstance().sendPing(
+          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_COMPLETE,
+          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
+          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_FLEX);
+    }
+    return accepted;
+  }
 }

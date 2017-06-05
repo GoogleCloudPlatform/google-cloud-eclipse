@@ -23,6 +23,8 @@ import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectWizar
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineWizardPage;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import java.lang.reflect.InvocationTargetException;
 import javax.inject.Inject;
@@ -43,6 +45,11 @@ public class AppEngineStandardProjectWizard extends AppEngineProjectWizard {
 
   @Override
   public AppEngineWizardPage createWizardPage() {
+    AnalyticsPingManager.getInstance().sendPing(
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD,
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE);
+
     return new AppEngineStandardWizardPage();
   }
 
@@ -69,6 +76,19 @@ public class AppEngineStandardProjectWizard extends AppEngineProjectWizard {
   public CreateAppEngineWtpProject getAppEngineProjectCreationOperation(
       AppEngineProjectConfig config, IAdaptable uiInfoAdapter) {
     return new CreateAppEngineStandardWtpProject(config, uiInfoAdapter);
+  }
+
+  @Override
+  public boolean performFinish() {
+    boolean accepted = super.performFinish();
+
+    if (accepted && page != null) {  // null page if Cloud SDK validation fails.
+      AnalyticsPingManager.getInstance().sendPing(
+          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_COMPLETE,
+          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
+          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_NATIVE);
+    }
+    return accepted;
   }
 
 
