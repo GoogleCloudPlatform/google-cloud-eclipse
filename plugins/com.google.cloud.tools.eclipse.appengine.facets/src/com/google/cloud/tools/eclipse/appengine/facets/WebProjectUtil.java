@@ -22,7 +22,10 @@ import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -42,7 +45,7 @@ public class WebProjectUtil {
   /**
    * Return the project's <code>WEB-INF</code> directory. There is no guarantee that the contents
    * are actually published.
-   * 
+   *
    * @return the <code>IFolder</code> or null if not present
    */
   public static IFolder getWebInfDirectory(IProject project) {
@@ -64,9 +67,19 @@ public class WebProjectUtil {
     }
   }
 
+  public static void removeWebDeploymentAssemblyEntry(IProject project, Path path)
+      throws CoreException {
+    IVirtualComponent component = ComponentCore.createComponent(project);
+    if (component != null && component.exists()) {
+      IVirtualFolder rootFolder = component.getRootFolder();
+      // Removes an entry in ".settings/org.eclipse.wst.common.component".
+      rootFolder.removeLink(path, IVirtualFolder.FORCE, new NullProgressMonitor());
+    }
+  }
+
   /**
    * Attempt to resolve the given file within the project's <code>WEB-INF</code>.
-   * 
+   *
    * @return the file location or {@code null} if not found
    */
   public static IFile findInWebInf(IProject project, IPath filePath) {

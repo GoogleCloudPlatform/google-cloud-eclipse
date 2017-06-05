@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.newproject.standard;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -28,18 +29,26 @@ import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpPro
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.wst.common.componentcore.internal.ComponentResource;
+import org.eclipse.wst.common.componentcore.internal.StructureEdit;
+import org.eclipse.wst.common.componentcore.internal.WorkbenchComponent;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.common.project.facet.core.runtime.IRuntime;
@@ -154,6 +163,60 @@ public class CreateAppEngineStandardWtpProjectTest {
       }
     }
     fail("Classpath container " + APP_ENGINE_API + " was not added to the build path");
+  }
+
+  @Test
+  public void testJavaTestSourceOutput() throws InvocationTargetException, CoreException {
+    CreateAppEngineWtpProject creator = new CreateAppEngineStandardWtpProject(config, adaptable);
+    creator.execute(monitor);
+
+    ProjectUtils.waitForProjects(project); // App Engine runtime is added via a Job, so wait.
+    assertCorrectOutputPathForJavaTestSource();
+  }
+
+  private void assertCorrectOutputPathForJavaTestSource() throws JavaModelException {
+    IJavaProject javaProject = JavaCore.create(project);
+    for (IClasspathEntry entry : javaProject.getRawClasspath()) {
+      if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE
+          && containsSegment(entry.getPath(), "test")) {
+        assertNotNull(entry.getOutputLocation());
+        assertEquals("test-classes", entry.getOutputLocation().lastSegment());
+        return;
+      }
+    }
+    fail();
+  }
+
+  private boolean containsSegment(IPath path, String segment) {
+    return Arrays.asList(path.segments()).contains(segment);
+  }
+
+  @Test
+  public void testNoTestClassesInDeploymentAssembly()
+      throws InvocationTargetException, CoreException {
+    CreateAppEngineWtpProject creator = new CreateAppEngineStandardWtpProject(config, adaptable);
+    creator.execute(monitor);
+
+    ProjectUtils.waitForProjects(project); // App Engine runtime is added via a Job, so wait.
+    assertNoTestClassesInDeploymentAssembly();
+  }
+
+  private void assertNoTestClassesInDeploymentAssembly() throws CoreException {
+    StructureEdit core = StructureEdit.getStructureEditForRead(project);
+    WorkbenchComponent component = core.getComponent();
+    assertNotNull(component);
+
+    boolean seenMainSourcePath = false;
+    List<ComponentResource> resources = component.getResources();
+    for (ComponentResource resource : resources) {
+      assertFalse(containsSegment(resource.getSourcePath(), "test"));
+
+      if (resource.getSourcePath().equals(new Path("/src/main/java"))
+          && resource.getRuntimePath().equals(new Path("/WEB-INF/classes"))) {
+        seenMainSourcePath = true;
+      }
+    }
+    assertTrue(seenMainSourcePath);
   }
 
   @Test

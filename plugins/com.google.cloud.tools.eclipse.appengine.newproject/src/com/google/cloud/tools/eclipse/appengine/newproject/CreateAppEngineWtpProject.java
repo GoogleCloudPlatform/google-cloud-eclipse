@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
+import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import com.google.cloud.tools.eclipse.appengine.libraries.BuildPath;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
@@ -28,13 +29,16 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.internal.core.ClasspathEntry;
 import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.jst.j2ee.classpathdep.UpdateClasspathAttributeUtil;
 import org.eclipse.m2e.core.MavenPlugin;
@@ -111,7 +115,35 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
 
     BuildPath.addLibraries(newProject, config.getAppEngineLibraries(), subMonitor.newChild(2));
 
-    addJunit4ToClasspath(subMonitor.newChild(2), newProject);
+    addJunit4ToClasspath(newProject, subMonitor.newChild(2));
+
+    fixTestSourceDirectorySettings(newProject, subMonitor.newChild(2));
+  }
+
+  private void fixTestSourceDirectorySettings(IProject newProject, IProgressMonitor monitor)
+      throws CoreException {
+    // 1. Fix the output folder of "src/test/java".
+    IPath testSourcePath = newProject.getFolder("src/test/java").getFullPath();
+
+    IJavaProject javaProject = JavaCore.create(newProject);
+    IClasspathEntry[] entries = javaProject.getRawClasspath();
+    for (int i = 0; i < entries.length; i++) {
+      IClasspathEntry entry = entries[i];
+      if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE
+          && entry.getPath().equals(testSourcePath)
+          && entry.getOutputLocation() == null) {  // Default output location?
+        IPath oldOutputPath = javaProject.getOutputLocation();
+        IPath newOutputPath = oldOutputPath.removeLastSegments(1).append("test-classes");
+
+        entries[i] = JavaCore.newSourceEntry(testSourcePath, ClasspathEntry.INCLUDE_ALL,
+            ClasspathEntry.EXCLUDE_NONE, newOutputPath);
+        javaProject.setRawClasspath(entries, monitor);
+        break;
+      }
+    }
+
+    // 2. Remove "src/test/java" from the Web Deployment Assembly sources.
+    WebProjectUtil.removeWebDeploymentAssemblyEntry(newProject, new Path("src/test/java"));
   }
 
   private void enableMavenNature(IProject newProject, IProgressMonitor monitor)
@@ -126,7 +158,7 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
     newProject.getFolder("build").delete(true /* force */, subMonitor.newChild(2));
   }
 
-  private static void addJunit4ToClasspath(IProgressMonitor monitor, IProject newProject)
+  private static void addJunit4ToClasspath(IProject newProject, IProgressMonitor monitor)
       throws CoreException {
     IJavaProject javaProject = JavaCore.create(newProject);
     IClasspathAttribute nonDependencyAttribute =
