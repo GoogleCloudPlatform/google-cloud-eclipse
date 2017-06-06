@@ -61,8 +61,7 @@ public class AppEngineFlexProjectWizard extends AppEngineProjectWizard {
   @Override
   public boolean performFinish() {
     boolean accepted = super.performFinish();
-
-    if (accepted && page != null) {  // null page if Cloud SDK validation fails.
+    if (accepted) {
       AnalyticsPingManager.getInstance().sendPing(
           AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_COMPLETE,
           AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,

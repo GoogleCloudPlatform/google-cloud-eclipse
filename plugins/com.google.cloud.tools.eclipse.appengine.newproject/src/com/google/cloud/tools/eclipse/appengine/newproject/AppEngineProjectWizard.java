@@ -27,6 +27,7 @@ import com.google.cloud.tools.eclipse.appengine.ui.CloudSdkOutOfDatePage;
 import com.google.cloud.tools.eclipse.sdk.ui.preferences.CloudSdkPrompter;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
+import com.google.common.base.Preconditions;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.resources.IFile;
@@ -40,7 +41,7 @@ import org.eclipse.ui.ide.undo.WorkspaceUndoUtil;
 
 public abstract class AppEngineProjectWizard extends Wizard implements INewWizard {
 
-  protected AppEngineWizardPage page = null;
+  private AppEngineWizardPage page = null;
   protected final AppEngineProjectConfig config = new AppEngineProjectConfig();
   private IWorkbench workbench;
 
@@ -74,9 +75,7 @@ public abstract class AppEngineProjectWizard extends Wizard implements INewWizar
 
   @Override
   public boolean performFinish() {
-    if (page == null) {
-      return true;
-    }
+    Preconditions.checkState(page != null);
 
     IStatus status = validateDependencies();
     if (!status.isOK()) {
