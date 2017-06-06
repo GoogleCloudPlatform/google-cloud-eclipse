@@ -21,7 +21,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineFlexibleStaging;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
@@ -101,20 +100,11 @@ public class CloudSdkStagingHelperTest {
 
     IPath deployArtifact = createFile("my-app.war", "fake WAR").getLocation();
 
-    try {
-      CloudSdkStagingHelper.stageFlexible(
-          appEngineDirectory.getLocation(), deployArtifact, stagingDirectory, monitor);
-    } catch (NoClassDefFoundError err) {
-      System.err.println(err.getCause());
-    }
+    CloudSdkStagingHelper.stageFlexible(
+        appEngineDirectory.getLocation(), deployArtifact, stagingDirectory, monitor);
 
     assertTrue(stagingDirectory.append("app.yaml").toFile().exists());
     assertTrue(stagingDirectory.append("my-app.war").toFile().exists());
-  }
-  
-  @Test
-  public void testTest() {
-    CloudSdkAppEngineFlexibleStaging staging = new CloudSdkAppEngineFlexibleStaging();
   }
 
   @Test
