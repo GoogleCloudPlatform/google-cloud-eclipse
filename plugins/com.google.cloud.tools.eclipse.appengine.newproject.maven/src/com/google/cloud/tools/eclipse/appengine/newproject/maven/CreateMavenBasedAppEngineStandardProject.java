@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
@@ -62,8 +63,10 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
   private Archetype archetype;
   private HashSet<String> appEngineLibraryIds = new HashSet<>();
 
-  private List<IProject> archetypeProjects;
   private IFile mostImportant;
+
+  @VisibleForTesting
+  List<IProject> archetypeProjects;
 
   /**
    * @return the file in the project that should be opened in an editor when the wizard finishes;
@@ -71,10 +74,6 @@ public class CreateMavenBasedAppEngineStandardProject extends WorkspaceModifyOpe
    */
   IFile getMostImportant() {
     return mostImportant;
-  }
-
-  List<IProject> getArchetypeProjects() {
-    return archetypeProjects;
   }
 
   @Override

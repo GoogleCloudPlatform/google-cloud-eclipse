@@ -24,6 +24,7 @@ import static org.mockito.Mockito.mock;
 
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
+import org.apache.maven.archetype.catalog.Archetype;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.widgets.Composite;
@@ -82,8 +83,18 @@ public class MavenArchetypeProjectWizardTest {
   @Test
   public void testArchetypeDefaultSelection() {
     Assert.assertEquals("appengine-standard-archetype",
-        MavenAppEngineStandardArchetypeWizardPage.PRESET_ARCHETYPES.get(0)
-            .archetype.getArtifactId());
+        MavenAppEngineStandardArchetypeWizardPage.getPresetArchetype(0).getArtifactId());
+  }
+
+  @Test
+  public void testPresetArchetypes() {
+    Archetype helloWorld = MavenAppEngineStandardArchetypeWizardPage.getPresetArchetype(0);
+    Assert.assertEquals("appengine-standard-archetype", helloWorld.getArtifactId());
+    Assert.assertEquals("0.4.0", helloWorld.getVersion());
+
+    Archetype guestbook = MavenAppEngineStandardArchetypeWizardPage.getPresetArchetype(1);
+    Assert.assertEquals("guestbook-archetype", guestbook.getArtifactId());
+    Assert.assertEquals("3.1.0-1.9.42", guestbook.getVersion());
   }
 
   @Test

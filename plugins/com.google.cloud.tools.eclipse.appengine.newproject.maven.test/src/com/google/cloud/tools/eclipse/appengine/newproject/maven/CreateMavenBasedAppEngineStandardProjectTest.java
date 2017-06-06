@@ -16,11 +16,11 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 
+import static org.junit.Assert.assertTrue;
+
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
-import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.TimeUnit;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.m2e.core.project.IProjectConfigurationManager;
@@ -51,8 +51,7 @@ public class CreateMavenBasedAppEngineStandardProjectTest {
     operation.projectConfigurationManager = manager;
 
     operation.execute(monitor);
-    // App Engine runtime is added via a Job, so wait.
-    ProjectUtils.waitForProjects(operation.getArchetypeProjects().toArray(new IProject[0]));
+    assertTrue(operation.archetypeProjects.isEmpty());
   }
 
 }
