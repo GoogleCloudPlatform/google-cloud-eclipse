@@ -117,13 +117,13 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
 
     if (config.getUseMaven()) {
       enableMavenNature(newProject, subMonitor.newChild(2));
+    } else {
+      addJunit4ToClasspath(newProject, subMonitor.newChild(2));
     }
 
     addAppEngineFacet(newProject, subMonitor.newChild(4));
 
     BuildPath.addLibraries(newProject, config.getAppEngineLibraries(), subMonitor.newChild(2));
-
-    addJunit4ToClasspath(newProject, subMonitor.newChild(2));
 
     fixTestSourceDirectorySettings(newProject, subMonitor.newChild(2));
   }

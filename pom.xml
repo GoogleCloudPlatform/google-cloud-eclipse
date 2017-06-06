@@ -52,8 +52,6 @@
     <module>plugins/com.google.cloud.tools.eclipse.appengine.newproject.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.standard.java8</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.standard.java8.test</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.newproject.maven</module>
-    <module>plugins/com.google.cloud.tools.eclipse.appengine.newproject.maven.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.validation</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.validation.test</module>
     <module>plugins/com.google.cloud.tools.eclipse.appengine.ui</module>

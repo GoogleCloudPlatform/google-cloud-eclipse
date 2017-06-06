@@ -20,7 +20,6 @@ import com.google.cloud.tools.appengine.cloudsdk.AppEngineJavaComponentsNotInsta
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkNotFoundException;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkOutOfDateException;
-import com.google.cloud.tools.eclipse.appengine.newproject.flex.AppEngineFlexWizardPage;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineJavaComponentMissingPage;
 import com.google.cloud.tools.eclipse.appengine.ui.CloudSdkMissingPage;
 import com.google.cloud.tools.eclipse.appengine.ui.CloudSdkOutOfDatePage;
@@ -92,14 +91,8 @@ public abstract class AppEngineProjectWizard extends Wizard implements INewWizar
 
     config.setAppEngineLibraries(page.getSelectedLibraries());
 
-    // TODO: we won't need this "instanceof" check once we implement a unified wizard:
-    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1326
-    if (page instanceof AppEngineFlexWizardPage) {
-      AppEngineFlexWizardPage flexPage = (AppEngineFlexWizardPage) page;
-      if (flexPage.asMavenProject()) {
-        config.setUseMaven(flexPage.getMavenGroupId(), flexPage.getMavenArtifactId(),
-            flexPage.getMavenVersion());
-      }
+    if (page.asMavenProject()) {
+      config.setUseMaven(page.getMavenGroupId(), page.getMavenArtifactId(), page.getMavenVersion());
     }
 
     // todo set up

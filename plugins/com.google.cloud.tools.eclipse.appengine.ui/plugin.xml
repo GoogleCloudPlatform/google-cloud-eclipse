@@ -58,18 +58,6 @@
                  style="push">
               <parameter
                     name="newWizardId"
-                    value="com.google.cloud.tools.eclipse.appengine.newproject.MavenAppEngineStandard">
-              </parameter>
-           </command>
-           <separator
-                 name="com.google.cloud.tools.eclipse.appengine.flexible"
-                 visible="true">
-           </separator>
-           <command
-                 commandId="org.eclipse.ui.newWizard"
-                 style="push">
-              <parameter
-                    name="newWizardId"
                     value="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineFlex">
               </parameter>
            </command>

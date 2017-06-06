@@ -18,7 +18,6 @@ package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 
@@ -51,8 +50,8 @@ public class MavenCoordinatesUiTest {
   }
 
   @Test
-  public void testUiWithDynamicEnabling() {
-    new MavenCoordinatesUi(shell, true /* dynamic enabling */);
+  public void testUi() {
+    new MavenCoordinatesUi(shell);
 
     Button asMavenProject = CompositeUtil.findControl(shell, Button.class);
     assertEquals("Create as Maven project", asMavenProject.getText());
@@ -64,19 +63,8 @@ public class MavenCoordinatesUiTest {
   }
 
   @Test
-  public void testUiWithNoDynamicEnabling() {
-    new MavenCoordinatesUi(shell, false /* no dynamic enabling */);
-
-    assertNull(CompositeUtil.findControl(shell, Button.class));
-
-    assertTrue(getGroupIdField().getEnabled());
-    assertTrue(getArtifactIdField().getEnabled());
-    assertTrue(getVersionField().getEnabled());
-  }
-
-  @Test
   public void testDefaultFieldValues() {
-    new MavenCoordinatesUi(shell, false);
+    new MavenCoordinatesUi(shell);
     assertTrue(getGroupIdField().getText().isEmpty());
     assertTrue(getArtifactIdField().getText().isEmpty());
     assertEquals("0.1.0-SNAPSHOT", getVersionField().getText());
@@ -84,7 +72,7 @@ public class MavenCoordinatesUiTest {
 
   @Test
   public void testDynamicEnabling() {
-    new MavenCoordinatesUi(shell, true /* dynamic enabling */);
+    new MavenCoordinatesUi(shell);
     Button asMavenProject = CompositeUtil.findControl(shell, Button.class);
 
     new SWTBotCheckBox(asMavenProject).click();
@@ -100,7 +88,8 @@ public class MavenCoordinatesUiTest {
 
   @Test
   public void testValidateMavenSettings_emptyGroupId() {
-    MavenCoordinatesUi ui = new MavenCoordinatesUi(shell, false);
+    MavenCoordinatesUi ui = new MavenCoordinatesUi(shell);
+    enableUi();
 
     assertFalse(ui.setValidationMessage(dialogPage));
     verify(dialogPage).setMessage("Provide Maven Group ID.", IMessageProvider.INFORMATION);
@@ -108,7 +97,8 @@ public class MavenCoordinatesUiTest {
 
   @Test
   public void testValidateMavenSettings_emptyArtifactId() {
-    MavenCoordinatesUi ui = new MavenCoordinatesUi(shell, false);
+    MavenCoordinatesUi ui = new MavenCoordinatesUi(shell);
+    enableUi();
     getGroupIdField().setText("com.example");
 
     assertFalse(ui.setValidationMessage(dialogPage));
@@ -117,7 +107,8 @@ public class MavenCoordinatesUiTest {
 
   @Test
   public void testValidateMavenSettings_emptyVersion() {
-    MavenCoordinatesUi ui = new MavenCoordinatesUi(shell, false);
+    MavenCoordinatesUi ui = new MavenCoordinatesUi(shell);
+    enableUi();
     getGroupIdField().setText("com.example");
     getArtifactIdField().setText("some-artifact-id");
     getVersionField().setText("");
@@ -128,7 +119,9 @@ public class MavenCoordinatesUiTest {
 
   @Test
   public void testValidateMavenSettings_illegalGroupId() {
-    MavenCoordinatesUi ui = new MavenCoordinatesUi(shell, false);
+    MavenCoordinatesUi ui = new MavenCoordinatesUi(shell);
+    enableUi();
+
     getArtifactIdField().setText("some-artifact-id");
 
     getGroupIdField().setText("<:#= Illegal ID =#:>");
@@ -138,7 +131,8 @@ public class MavenCoordinatesUiTest {
 
   @Test
   public void testValidateMavenSettings_illegalArtifactId() {
-    MavenCoordinatesUi ui = new MavenCoordinatesUi(shell, false);
+    MavenCoordinatesUi ui = new MavenCoordinatesUi(shell);
+    enableUi();
     getGroupIdField().setText("com.example");
 
     getArtifactIdField().setText("<:#= Illegal ID =#:>");
@@ -148,10 +142,15 @@ public class MavenCoordinatesUiTest {
 
   @Test
   public void testValidateMavenSettings_noValidationIfUiDisabled() {
-    MavenCoordinatesUi ui = new MavenCoordinatesUi(shell, true /* dynamic enabling */);
+    MavenCoordinatesUi ui = new MavenCoordinatesUi(shell);
 
     getGroupIdField().setText("<:#= Illegal ID =#:>");
     assertTrue(ui.setValidationMessage(dialogPage));
+  }
+
+  private void enableUi() {
+    Button asMavenProject = CompositeUtil.findControl(shell, Button.class);
+    new SWTBotCheckBox(asMavenProject).click();
   }
 
   private Text getGroupIdField() {
