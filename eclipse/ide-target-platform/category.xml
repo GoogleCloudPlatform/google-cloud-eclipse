@@ -34,5 +34,5 @@
    <bundle id="com.fasterxml.jackson.core.jackson-core" version="0.0.0"/>
    <bundle id="ch.qos.logback.slf4j" version="0.0.0"/>
    <bundle id="org.slf4j.log4j" version="0.0.0"/>
-   <bundle id="org.yaml.snakeyaml" version="1.17.0"/>
+   <bundle id="org.yaml.snakeyaml" version="1.17"/>
 </site>
