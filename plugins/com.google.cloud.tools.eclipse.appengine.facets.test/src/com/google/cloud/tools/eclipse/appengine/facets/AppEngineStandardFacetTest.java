@@ -44,8 +44,8 @@ public class AppEngineStandardFacetTest {
   public TestProjectCreator baseProjectCreator = new TestProjectCreator();
 
   @Rule
-  public TestProjectCreator appEngineProjectCreator = new TestProjectCreator()
-      .withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25,
+  public TestProjectCreator appEngineProjectCreator =
+      new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25,
           AppEngineStandardFacet.FACET_VERSION);
 
   @Test
