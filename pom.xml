@@ -386,7 +386,10 @@
            </configuration>
           </plugin>
 
-          <!-- ensure we don't have buggy commons-collections nor Java-8 Guava -->
+          <!--
+            Ensure we don't have buggy commons-collections nor Java-8 Guava.
+            Must be done here as Oxygen has moved to Guava 21.
+          -->
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-enforcer-plugin</artifactId>
