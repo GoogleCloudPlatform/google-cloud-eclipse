@@ -14,7 +14,7 @@ requires.1.range=[1.0.0,1.2.0]
 requires.1.greedy=true
 
 units.1.id=com.google.cloud.tools.eclipse.category
-units.1.version=1.1.0
+units.1.version=1.2.0
 units.1.properties.1.name=org.eclipse.equinox.p2.type.category
 units.1.properties.1.value=true
 units.1.properties.2.name=org.eclipse.equinox.p2.name
