@@ -23,8 +23,17 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
+import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.server.core.IRuntimeType;
@@ -44,9 +53,12 @@ public class AppEngineStandardFacetTest {
   public TestProjectCreator baseProjectCreator = new TestProjectCreator();
 
   @Rule
-  public TestProjectCreator appEngineProjectCreator =
-      new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25,
-          AppEngineStandardFacet.FACET_VERSION);
+  public TestProjectCreator javaProjectCreator = new TestProjectCreator().withFacetVersions(
+      JavaFacet.VERSION_1_7);
+
+  @Rule
+  public TestProjectCreator appEngineProjectCreator = new TestProjectCreator().withFacetVersions(
+      JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineStandardFacet.FACET_VERSION);
 
   @Test
   public void testStandardFacetExists() {
@@ -57,6 +69,35 @@ public class AppEngineStandardFacetTest {
     Assert.assertEquals(AppEngineStandardFacet.ID, AppEngineStandardFacet.FACET.getId());
     Assert.assertEquals(AppEngineStandardFacet.VERSION,
         AppEngineStandardFacet.FACET_VERSION.getVersionString());
+  }
+
+  @Test
+  public void testInstallAppEngineFacet_hasWtpClasspathContainers() throws CoreException {
+    IProject project = javaProjectCreator.getProject();
+    assertFalse(hasWtpClasspathContainers(project));
+
+    IFacetedProject facetedProject = javaProjectCreator.getFacetedProject();
+    AppEngineStandardFacet.installAppEngineFacet(facetedProject, true /* installDependentFacets */,
+        new NullProgressMonitor());
+
+    assertTrue(hasWtpClasspathContainers(project));
+  }
+
+  private static boolean hasWtpClasspathContainers(IProject project) throws JavaModelException {
+    boolean seenWebContainer = false;
+    boolean seenModuleContainer = false;
+    IJavaProject javaProject = JavaCore.create(project);
+    for (IClasspathEntry entry : javaProject.getRawClasspath()) {
+      if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+        if (entry.getPath().equals(new Path("org.eclipse.jst.j2ee.internal.web.container"))) {
+          seenWebContainer = true;
+        }
+        if (entry.getPath().equals(new Path("org.eclipse.jst.j2ee.internal.module.container"))) {
+          seenModuleContainer = true;
+        }
+      }
+    }
+    return seenWebContainer && seenModuleContainer;
   }
 
   @Test

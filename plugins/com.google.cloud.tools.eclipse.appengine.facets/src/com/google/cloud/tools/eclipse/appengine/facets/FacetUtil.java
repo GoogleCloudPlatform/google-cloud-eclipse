@@ -132,7 +132,7 @@ public class FacetUtil {
     IDataModel webModel = DataModelFactory.createDataModel(new WebFacetInstallDataModelProvider());
     webModel.setBooleanProperty(IJ2EEModuleFacetInstallDataModelProperties.ADD_TO_EAR, false);
     webModel.setBooleanProperty(IJ2EEFacetInstallDataModelProperties.GENERATE_DD, true);
-    webModel.setBooleanProperty(IWebFacetInstallDataModelProperties.INSTALL_WEB_LIBRARY, false);
+    webModel.setBooleanProperty(IWebFacetInstallDataModelProperties.INSTALL_WEB_LIBRARY, true);
     webModel.setStringProperty(IWebFacetInstallDataModelProperties.CONFIG_FOLDER, webAppDirectory);
     facetInstallSet.add(new IFacetedProject.Action(
         IFacetedProject.Action.Type.INSTALL, webFacet, webModel));
