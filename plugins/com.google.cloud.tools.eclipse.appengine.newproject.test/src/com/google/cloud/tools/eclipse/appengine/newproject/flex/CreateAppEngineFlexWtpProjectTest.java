@@ -44,9 +44,11 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
@@ -165,5 +167,33 @@ public class CreateAppEngineFlexWtpProjectTest {
     assertTrue(project.getFolder(expected).exists());
     IJavaProject javaProject = JavaCore.create(project);
     assertEquals(new Path(expected), javaProject.getOutputLocation().removeFirstSegments(1));
+  }
+
+  @Test
+  public void testJUnit4ClasspathIfNotUsingMaven() throws InvocationTargetException, CoreException {
+    CreateAppEngineWtpProject creator =
+        new CreateAppEngineFlexWtpProject(config, mock(IAdaptable.class), repositoryService);
+    creator.execute(monitor);
+    assertTrue(hasJUnit4Classpath(project));
+  }
+
+  @Test
+  public void testNoJUnit4ClasspathIfUsingMaven() throws InvocationTargetException, CoreException {
+    config.setUseMaven("my.group.id", "my-artifact-id", "12.34.56");
+
+    CreateAppEngineWtpProject creator =
+        new CreateAppEngineFlexWtpProject(config, mock(IAdaptable.class), repositoryService);
+    creator.execute(monitor);
+    assertFalse(hasJUnit4Classpath(project));
+  }
+
+  private static boolean hasJUnit4Classpath(IProject project) throws JavaModelException {
+    IJavaProject javaProject = JavaCore.create(project);
+    for (IClasspathEntry entry : javaProject.getRawClasspath()) {
+      if (entry.getPath().equals(JUnitCore.JUNIT4_CONTAINER_PATH)) {
+        return true;
+      }
+    }
+    return false;
   }
 }
