@@ -19,7 +19,6 @@ package com.google.cloud.tools.eclipse.appengine.validation;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
-
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -27,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -58,13 +56,13 @@ import org.xml.sax.SAXException;
  * Contains the logic for source validation and message creation.
  */
 public class XmlSourceValidator implements ISourceValidator, IValidator, IExecutableExtension {
-  
+
   private static final Logger logger = Logger.getLogger(
       XmlSourceValidator.class.getName());
-  
+
   private IDocument document;
   private XmlValidationHelper helper;
-  
+
   /**
    * Validates a given {@link IDocument} if the project has the App Engine Standard facet.
    */
@@ -77,15 +75,15 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
         String encoding = getDocumentEncoding(document);
         byte[] bytes = document.get().getBytes(encoding);
         IFile source = getFile(helper);
-        this.validate(reporter, source, bytes);
+        validate(reporter, source, bytes);
       }
     } catch (IOException | CoreException ex) {
       logger.log(Level.SEVERE, ex.getMessage());
     }
   }
-  
+
   /**
-   * Adds an {@link IMessage} to the XML file for every 
+   * Adds an {@link IMessage} to the XML file for every
    * {@link BannedElement} found in the file.
    */
   void validate(IReporter reporter, IFile source, byte[] bytes) throws IOException {
@@ -105,9 +103,9 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
       // Default Eclipse parser flags syntax errors
     }
   }
-  
+
   /**
-   * Creates an instance of the helper {@link XmlValidationHelper} and sets its 
+   * Creates an instance of the helper {@link XmlValidationHelper} and sets its
    * own helper to this instance.
    */
   @Override
@@ -122,13 +120,13 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
       Constructor<?> constructor = clazz.getConstructor();
       XmlValidationHelper helper = (XmlValidationHelper) constructor.newInstance(new Object[] {});
       this.setHelper(helper);
-    } catch (ClassNotFoundException | NoSuchMethodException | SecurityException 
+    } catch (ClassNotFoundException | NoSuchMethodException | SecurityException
         | InstantiationException | IllegalAccessException | IllegalArgumentException
         | InvocationTargetException ex) {
       logger.log(Level.SEVERE, ex.getMessage());
     }
   }
-  
+
   @VisibleForTesting
   void setHelper(XmlValidationHelper helper) {
     this.helper = helper;
@@ -147,7 +145,7 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
     message.setAttribute(IQuickAssistProcessor.class.getName(), element.getQuickAssistProcessor());
     reporter.addMessage(this, message);
   }
-  
+
   /**
    * Returns the underlying IProject from a given IValidationContext or
    * null if the IValidationContext does not return any files that need
@@ -160,7 +158,7 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
     }
     return null;
   }
-  
+
   /**
    * Returns the IFile for a given URI or null if the file does
    * not exist in the workspace.
@@ -173,8 +171,8 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
     }
     return null;
   }
-  
-  
+
+
   static IFile getFile(String filePath) {
     IPath path = new Path(filePath);
     if (path.segmentCount() > 1) {
@@ -185,8 +183,8 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
       }
     }
     return null;
-  } 
-  
+  }
+
   static String getDocumentEncoding(IDocument document) {
     EncodingMemento encodingMemento = ((BasicStructuredDocument) document).getEncodingMemento();
     return encodingMemento.getDetectedCharsetName();
@@ -195,12 +193,12 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
   @Override
   public void cleanup(IReporter reporter) {
   }
-  
+
   @Override
   public void connect(IDocument document) {
     this.document = document;
   }
-  
+
   @Override
   public void disconnect(IDocument document) {
     this.document = null;
@@ -209,5 +207,5 @@ public class XmlSourceValidator implements ISourceValidator, IValidator, IExecut
   @Override
   public void validate(IRegion dirtyRegion, IValidationContext helper, IReporter reporter) {
   }
-  
+
 }
