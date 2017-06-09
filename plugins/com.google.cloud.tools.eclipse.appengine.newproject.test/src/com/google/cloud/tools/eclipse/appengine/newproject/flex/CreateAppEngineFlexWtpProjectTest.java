@@ -44,9 +44,12 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.IClasspathAttribute;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jst.j2ee.classpathdep.IClasspathDependencyConstants;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
@@ -123,6 +126,38 @@ public class CreateAppEngineFlexWtpProjectTest {
     creator.execute(monitor);
 
     assertTrue(project.getFile("lib/fake-servlet-api-3.1.jar").exists());
+  }
+
+  @Test
+  public void testNonDependencyAttributeOnJarsInLib()
+      throws InvocationTargetException, CoreException {
+    CreateAppEngineWtpProject creator =
+        new CreateAppEngineFlexWtpProject(config, mock(IAdaptable.class), repositoryService);
+    creator.execute(monitor);
+
+    File lib = project.getFolder("lib").getLocation().toFile();
+    for (File jar : lib.listFiles()) {
+      assertTrue(hasNonDependencyAttribute(jar));
+    }
+  }
+
+  private boolean hasNonDependencyAttribute(File jar) throws JavaModelException {
+    IJavaProject javaProject = JavaCore.create(project);
+    for (IClasspathEntry entry : javaProject.getRawClasspath()) {
+      if (entry.getPath().toFile().equals(jar)) {
+        for (IClasspathAttribute attribute : entry.getExtraAttributes()) {
+          if (isNonDependencyAttribute(attribute)) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+  private static boolean isNonDependencyAttribute(IClasspathAttribute attribute) {
+    return IClasspathDependencyConstants.CLASSPATH_COMPONENT_NON_DEPENDENCY
+        .equals(attribute.getName());
   }
 
   @Test
