@@ -76,8 +76,7 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
    * Returns the most important file created that the IDE will open in the editor.
    */
   public abstract IFile createAndConfigureProjectContent(IProject newProject,
-      AppEngineProjectConfig config, IProgressMonitor monitor)
-      throws CoreException, ExecutionException;
+      AppEngineProjectConfig config, IProgressMonitor monitor) throws CoreException;
 
   /**
    * @return the file in the project that should be opened in an editor when the wizard finishes;
