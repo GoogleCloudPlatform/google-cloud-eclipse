@@ -16,15 +16,11 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
-import org.xml.sax.helpers.DefaultHandler;
-
 import com.google.common.annotations.VisibleForTesting;
-
 import java.util.Stack;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -33,12 +29,13 @@ import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.ext.Locator2;
+import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * Builds a DOM tree that maintains element line and column numbers.
  */
 class PositionalXmlHandler extends DefaultHandler {
-  
+
     private Document document;
     private StringBuilder textBuffer = new StringBuilder();
     private Locator2 locator;
@@ -49,20 +46,20 @@ class PositionalXmlHandler extends DefaultHandler {
       try {
         DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder = builderFactory.newDocumentBuilder();
-        document = documentBuilder.newDocument();  
+        document = documentBuilder.newDocument();
       } catch (ParserConfigurationException ex) {
         throw new RuntimeException("Cannot create document", ex);
       }
     }
-    
+
     @Override
     public void setDocumentLocator(Locator locator) {
       this.locator = (Locator2) locator;
     }
-      
+
     @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes)
-        throws SAXException {               
+        throws SAXException {
       addText();
       Element element = document.createElementNS(uri, qName);
       for (int i = 0; i < attributes.getLength(); i++) {
@@ -73,7 +70,7 @@ class PositionalXmlHandler extends DefaultHandler {
       element.setUserData("location", location, null);
       elementStack.push(element);
     }
-      
+
     @Override
     public void endElement(String uri, String localName, String qName){
       addText();
@@ -83,15 +80,15 @@ class PositionalXmlHandler extends DefaultHandler {
         document.appendChild(closedElement);
       } else {
         Element parentElement = elementStack.peek();
-        parentElement.appendChild(closedElement);                   
+        parentElement.appendChild(closedElement);
       }
     }
-      
+
     @Override
     public void characters (char ch[], int start, int length) throws SAXException {
       textBuffer.append(ch, start, length);
     }
-    
+
     /**
      *  Returns the text inside the current tag
      */
@@ -104,22 +101,22 @@ class PositionalXmlHandler extends DefaultHandler {
         textBuffer = new StringBuilder();
       }
     }
-    
+
     Document getDocument() {
       return document;
     }
-    
+
     @VisibleForTesting
     Stack<Element> getElementStack() {
       return elementStack;
     }
-    
+
     @Override
     public void error(SAXParseException ex) throws SAXException {
       //nests ex to conserve exception line number
       throw new SAXException(ex.getMessage(), ex);
     }
-    
+
     @Override
     public void fatalError(SAXParseException ex) throws SAXException {
       throw new SAXException(ex.getMessage(), ex);
@@ -128,5 +125,5 @@ class PositionalXmlHandler extends DefaultHandler {
     @Override
     public void warning(SAXParseException exception) throws SAXException { //do nothing
     }
-    
+
 }
