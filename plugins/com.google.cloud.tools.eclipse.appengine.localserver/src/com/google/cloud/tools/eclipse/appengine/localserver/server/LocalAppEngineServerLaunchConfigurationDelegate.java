@@ -25,6 +25,7 @@ import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
 import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import com.google.cloud.tools.eclipse.appengine.localserver.PreferencesInitializer;
 import com.google.cloud.tools.eclipse.appengine.localserver.ui.LocalAppEngineConsole;
+import com.google.cloud.tools.eclipse.appengine.localserver.ui.StaleResourcesStatusHandler;
 import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
@@ -57,6 +58,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
@@ -65,6 +67,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.ILaunchesListener2;
+import org.eclipse.debug.core.IStatusHandler;
 import org.eclipse.debug.core.model.DebugElement;
 import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.debug.core.model.IDebugTarget;
@@ -82,8 +85,10 @@ import org.eclipse.jdt.launching.SocketUtil;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerListener;
+import org.eclipse.wst.server.core.ServerCore;
 import org.eclipse.wst.server.core.ServerEvent;
 import org.eclipse.wst.server.core.ServerUtil;
+import org.eclipse.wst.server.core.internal.Server;
 
 public class LocalAppEngineServerLaunchConfigurationDelegate
     extends AbstractJavaLaunchConfigurationDelegate {
@@ -126,6 +131,45 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     ILaunch[] launches = getLaunchManager().getLaunches();
     checkConflictingLaunches(configuration.getType(), runConfig, launches);
     return super.getLaunch(configuration, mode);
+  }
+
+  @Override
+  public boolean finalLaunchCheck(ILaunchConfiguration configuration, String mode,
+      IProgressMonitor monitor) throws CoreException {
+    if (!super.finalLaunchCheck(configuration, mode, monitor)) {
+      return false;
+    }
+
+    // If we're auto-publishing before launch, check if there may be stale
+    // resources not yet published. See
+    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1832
+    if (ServerCore.isAutoPublishing()) {
+      IServer server = ServerUtil.getServer(configuration);
+      if (server.shouldPublish() || hasPendingChangesToPublish()) {
+        IStatusHandler prompter = DebugPlugin.getDefault().getStatusHandler(promptStatus);
+        if (prompter != null) {
+          Object continueLaunch = prompter
+              .handleStatus(StaleResourcesStatusHandler.CONTINUE_LAUNCH_REQUEST, configuration);
+          return (Boolean) continueLaunch;
+        }
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Check if there are pending changes to be published: this is a nasty condition that can occur if
+   * the user saves changes as part of launching the server.
+   */
+  private boolean hasPendingChangesToPublish() {
+    Job[] serverJobs = Job.getJobManager().find(ServerUtil.SERVER_JOB_FAMILY);
+    for (Job job : serverJobs) {
+      // Must check type of job as we may be running in a Server.StartJob
+      if (job instanceof Server.ResourceChangeJob) {
+        return true;
+      }
+    }
+    return false;
   }
 
   @VisibleForTesting

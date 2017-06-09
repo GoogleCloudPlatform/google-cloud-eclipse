@@ -322,4 +322,13 @@
             id="com.google.cloud.tools.eclipse.appengine.localserver.cloudSdkDebugTarget">
       </debugModelPresentation>
    </extension>
+   <extension
+         point="org.eclipse.debug.core.statusHandlers">
+      <statusHandler
+            class="com.google.cloud.tools.eclipse.appengine.localserver.ui.StaleResourcesStatusHandler"
+            code="255"
+            id="com.google.cloud.tools.eclipse.appengine.localserver.statusHandlers.staleResources"
+            plugin="com.google.cloud.tools.eclipse.appengine.localserver">
+      </statusHandler>
+   </extension>
 </plugin>
