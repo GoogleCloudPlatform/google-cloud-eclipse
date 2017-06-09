@@ -25,16 +25,17 @@ import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectConfi
 import com.google.cloud.tools.eclipse.appengine.newproject.CodeTemplates;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
+import com.google.common.collect.Lists;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.maven.artifact.Artifact;
+import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -48,6 +49,7 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
+import org.eclipse.jst.j2ee.classpathdep.UpdateClasspathAttributeUtil;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IProjectFacet;
@@ -90,7 +92,7 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
 
   @Override
   public IFile createAndConfigureProjectContent(IProject newProject, AppEngineProjectConfig config,
-      IProgressMonitor monitor) throws CoreException {
+      IProgressMonitor monitor) throws CoreException, ExecutionException {
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
     IFile mostImportantFile =  CodeTemplates.materializeAppEngineFlexFiles(newProject, config,
         subMonitor.newChild(30));
@@ -120,7 +122,7 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
   }
 
   private void addDependenciesToProject(IProject project, IProgressMonitor monitor)
-      throws CoreException {
+      throws CoreException, ExecutionException {
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
 
     // Create a lib folder
@@ -154,21 +156,24 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
   }
 
   private void addDependenciesToClasspath(IProject project, String libraryPath,
-      IProgressMonitor monitor)  throws CoreException {
-    IJavaProject javaProject = JavaCore.create(project);
-    IClasspathEntry[] entries = javaProject.getRawClasspath();
+      IProgressMonitor monitor)  throws CoreException, ExecutionException {
     List<IClasspathEntry> newEntries = new ArrayList<>();
-    newEntries.addAll(Arrays.asList(entries));
 
     // Add all the jars under lib folder to the classpath
     File libFolder = new File(libraryPath);
-
-    for(File file : libFolder.listFiles()) {
+    for (File file : libFolder.listFiles()) {
       IPath path = Path.fromOSString(file.toPath().toString());
       newEntries.add(JavaCore.newLibraryEntry(path, null, null));
     }
 
-    javaProject.setRawClasspath(newEntries.toArray(new IClasspathEntry[0]), monitor);
+    IJavaProject javaProject = JavaCore.create(project);
+    List<IClasspathEntry> allEntries = Lists.newArrayList(javaProject.getRawClasspath());
+    allEntries.addAll(newEntries);
+    javaProject.setRawClasspath(allEntries.toArray(new IClasspathEntry[0]), monitor);
+
+    for (IClasspathEntry entry : newEntries) {
+      UpdateClasspathAttributeUtil.addNonDependencyAttribute(monitor, project.getName(), entry);
+    }
   }
 
 }
