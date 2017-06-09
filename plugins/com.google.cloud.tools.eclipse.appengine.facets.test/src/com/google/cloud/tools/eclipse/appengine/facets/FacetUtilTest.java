@@ -16,24 +16,29 @@
 
 package com.google.cloud.tools.eclipse.appengine.facets;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
+import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
-import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
-import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -48,6 +53,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class FacetUtilTest {
   @Mock private IFacetedProject mockFacetedProject;
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator();
+  @Rule public TestProjectCreator javaProjectCreator = new TestProjectCreator().withFacetVersions(
+      JavaFacet.VERSION_1_7);
 
   @Test (expected = NullPointerException.class)
   public void testConstructor_nullFacetedProject() {
@@ -71,7 +78,7 @@ public class FacetUtilTest {
 
     FacetUtil facetUtil = new FacetUtil(mockFacetedProject).addJavaFacetToBatch(JavaFacet.VERSION_1_7);
     Assert.assertEquals(1, facetUtil.facetInstallSet.size());
-    Assert.assertEquals(JavaFacet.VERSION_1_7, 
+    Assert.assertEquals(JavaFacet.VERSION_1_7,
         facetUtil.facetInstallSet.iterator().next().getProjectFacetVersion());
   }
 
@@ -103,7 +110,7 @@ public class FacetUtilTest {
 
     FacetUtil facetUtil = new FacetUtil(mockFacetedProject).addWebFacetToBatch(WebFacetUtils.WEB_25);
     Assert.assertEquals(1, facetUtil.facetInstallSet.size());
-    Assert.assertEquals(WebFacetUtils.WEB_25, 
+    Assert.assertEquals(WebFacetUtils.WEB_25,
         facetUtil.facetInstallSet.iterator().next().getProjectFacetVersion());
   }
 
@@ -149,7 +156,7 @@ public class FacetUtilTest {
 
   @Test
   public void testInstall() throws CoreException {
-    IFacetedProject facetedProject = ProjectFacetsManager.create(projectCreator.getProject());
+    IFacetedProject facetedProject = projectCreator.getFacetedProject();
     new FacetUtil(facetedProject).addJavaFacetToBatch(JavaFacet.VERSION_1_7).install(null);
 
     Set<IProjectFacetVersion> facets = facetedProject.getProjectFacets();
@@ -159,16 +166,41 @@ public class FacetUtilTest {
   }
 
   @Test
+  public void testInstallWebFacet_hasWtpClasspathContainers() throws CoreException {
+    IFacetedProject facetedProject = javaProjectCreator.getFacetedProject();
+    assertFalse(hasWtpClasspathContainers(facetedProject.getProject()));
+
+    new FacetUtil(facetedProject).addWebFacetToBatch(WebFacetUtils.WEB_25).install(null);
+    assertTrue(hasWtpClasspathContainers(facetedProject.getProject()));
+  }
+
+  private static boolean hasWtpClasspathContainers(IProject project) throws JavaModelException {
+    boolean seenWebContainer = false;
+    boolean seenModuleContainer = false;
+    IJavaProject javaProject = JavaCore.create(project);
+    for (IClasspathEntry entry : javaProject.getRawClasspath()) {
+      if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+        if (entry.getPath().equals(new Path("org.eclipse.jst.j2ee.internal.web.container"))) {
+          seenWebContainer = true;
+        }
+        if (entry.getPath().equals(new Path("org.eclipse.jst.j2ee.internal.module.container"))) {
+          seenModuleContainer = true;
+        }
+      }
+    }
+    return seenWebContainer && seenModuleContainer;
+  }
+
+  @Test
   public void testFindAllWebInfFolders_noWebInfFolders() {
-    List<IFolder> webInfFolders =
-        FacetUtil.findAllWebInfFolders(projectCreator.getProject());
+    List<IFolder> webInfFolders = FacetUtil.findAllWebInfFolders(projectCreator.getProject());
     Assert.assertTrue(webInfFolders.isEmpty());
   }
 
   @Test
   public void testFindAllWebInfFolders() throws CoreException {
     IProject project = projectCreator.getProject();
-    createPath(project, new Path("src/my-webapp/WEB-INF"));
+    ResourceUtils.createFolders(project.getFolder("src/my-webapp/WEB-INF"), null);
 
     List<IFolder> webInfFolders =
         FacetUtil.findAllWebInfFolders(project);
@@ -179,10 +211,10 @@ public class FacetUtilTest {
   @Test
   public void testFindAllWebInfFolders_multipleFolders() throws CoreException {
     IProject project = projectCreator.getProject();
-    createPath(project, new Path("webapps/first-webapp/WEB-INF"));
-    createPath(project, new Path("webapps/second-webapp/WEB-INF"));
-    createPath(project, new Path("third-webapp/WEB-INF"));
-    createPath(project, new Path("WEB-INF"));
+    ResourceUtils.createFolders(project.getFolder("webapps/first-webapp/WEB-INF"), null);
+    ResourceUtils.createFolders(project.getFolder("webapps/second-webapp/WEB-INF"), null);
+    ResourceUtils.createFolders(project.getFolder("third-webapp/WEB-INF"), null);
+    ResourceUtils.createFolders(project.getFolder("WEB-INF"), null);
 
     List<IFolder> webInfFolders = FacetUtil.findAllWebInfFolders(project);
     Assert.assertEquals(4, webInfFolders.size());
@@ -200,18 +232,19 @@ public class FacetUtilTest {
 
   @Test
   public void testFindMainWebAppDirectory() throws CoreException {
-    createPath(projectCreator.getProject(), new Path("webapps/first-webapp/WEB-INF"));
-    IPath mainWebApp = FacetUtil.findMainWebAppDirectory(projectCreator.getProject());
+    IProject project = projectCreator.getProject();
+    ResourceUtils.createFolders(project.getFolder("webapps/first-webapp/WEB-INF"), null);
+    IPath mainWebApp = FacetUtil.findMainWebAppDirectory(project);
     Assert.assertEquals(new Path("webapps/first-webapp"), mainWebApp);
   }
 
   @Test
   public void testFindMainWebAppDirectory_returnsFolderWithWebXml() throws CoreException {
     IProject project = projectCreator.getProject();
-    createPath(project, new Path("webapps/first-webapp/WEB-INF"));
+    ResourceUtils.createFolders(project.getFolder("webapps/first-webapp/WEB-INF"), null);
     createEmptyFile(project, new Path("webapps/second-webapp/WEB-INF/web.xml"));
-    createPath(project, new Path("third-webapp/WEB-INF"));
-    createPath(project, new Path("WEB-INF"));
+    ResourceUtils.createFolders(project.getFolder("third-webapp/WEB-INF"), null);
+    ResourceUtils.createFolders(project.getFolder("WEB-INF"), null);
 
     IPath mainWebApp = FacetUtil.findMainWebAppDirectory(project);
     Assert.assertEquals(new Path("webapps/second-webapp"), mainWebApp);
@@ -222,31 +255,17 @@ public class FacetUtilTest {
     IProject project = projectCreator.getProject();
     createEmptyFile(project, new Path("webapps/first-webapp/WEB-INF/web.xml"));
     createEmptyFile(project, new Path("webapps/second-webapp/WEB-INF/web.xml"));
-    createPath(project, new Path("WEB-INF"));
+    ResourceUtils.createFolders(project.getFolder("WEB-INF"), null);
 
     IPath mainWebApp = FacetUtil.findMainWebAppDirectory(project);
     Assert.assertEquals(new Path("webapps/first-webapp"), mainWebApp);
   }
 
   private static void createEmptyFile(IProject project, IPath relativePath) throws CoreException {
-    createPath(project, relativePath.removeLastSegments(1));
+    ResourceUtils.createFolders(project.getFolder(relativePath.removeLastSegments(1)), null);
 
     InputStream emptyStream = new ByteArrayInputStream(new byte[0]);
     project.getFile(relativePath).create(emptyStream, false /* force */, null /* monitor */);
     Assert.assertTrue(project.getFile(relativePath).exists());
-  }
-
-  // TODO: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1573
-  private static void createPath(IContainer parent, IPath relativePath) throws CoreException {
-    if (!relativePath.isEmpty()) {
-      String firstSegment = relativePath.segment(0);
-      IFolder child = parent.getFolder(new Path(firstSegment));
-      if (!child.exists()) {
-        child.create(false /* force */, true /* local */, null /* monitor */);
-      }
-      Assert.assertTrue(child.exists());
-
-      createPath(child, relativePath.removeFirstSegments(1));
-    }
   }
 }

@@ -27,6 +27,7 @@ import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -108,12 +109,16 @@ public class GpeMigratorTest {
     assertTrue(containsLibrary(javaProject, "com.google.appengine.eclipse.wtp.GAE_WTP_CONTAINER"));
     assertTrue(containsLibrary(javaProject, "org.eclipse.jst.server.core.container/"
         + "com.google.appengine.server.runtimeTarget/Google App Engine"));
+    assertTrue(containsLibrary(javaProject,
+        "com.google.gdt.eclipse.managedapis.MANAGED_API_CONTAINER/compute-v1r150lv1.21.0"));
 
     GpeMigrator.removeGpeClasspathEntries(gpeProject);
     assertFalse(containsLibrary(javaProject, "com.google.appengine.eclipse.core.GAE_CONTAINER"));
     assertFalse(containsLibrary(javaProject, "com.google.appengine.eclipse.wtp.GAE_WTP_CONTAINER"));
     assertFalse(containsLibrary(javaProject, "org.eclipse.jst.server.core.container/"
         + "com.google.appengine.server.runtimeTarget/Google App Engine"));
+    assertFalse(containsLibrary(javaProject,
+        "com.google.gdt.eclipse.managedapis.MANAGED_API_CONTAINER/compute-v1r150lv1.21.0"));
   }
 
   private static boolean containsFacet(IFacetedProject facetedProject, String facetId) {
@@ -128,8 +133,7 @@ public class GpeMigratorTest {
   private static boolean containsLibrary(IJavaProject javaProject, String libraryPath)
       throws JavaModelException {
     for (IClasspathEntry entry : javaProject.getRawClasspath()) {
-      String path = entry.getPath().toString();  // note: '/' is a path separator.
-      if (path.equals(libraryPath)) {
+      if (entry.getPath().equals(new Path(libraryPath))) {
         return true;
       }
     }

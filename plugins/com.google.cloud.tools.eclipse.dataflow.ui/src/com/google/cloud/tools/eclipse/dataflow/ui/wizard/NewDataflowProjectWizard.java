@@ -39,6 +39,9 @@ public class NewDataflowProjectWizard extends Wizard implements INewWizard {
 
   @Override
   public boolean performFinish() {
+    creator.setDefaultProject(defaultRunOptionsPage.getProjectId());
+    creator.setDefaultStagingLocation(defaultRunOptionsPage.getStagingLocation());
+    
     if (!creator.isValid()) {
       String message =
           "Tried to finish the New Dataflow Project Wizard "
@@ -62,7 +65,7 @@ public class NewDataflowProjectWizard extends Wizard implements INewWizard {
     landingPage = new NewDataflowProjectWizardLandingPage(creator);
     addPage(landingPage);
 
-    defaultRunOptionsPage = new NewDataflowProjectWizardDefaultRunOptionsPage(creator);
+    defaultRunOptionsPage = new NewDataflowProjectWizardDefaultRunOptionsPage();
     addPage(defaultRunOptionsPage);
   }
 

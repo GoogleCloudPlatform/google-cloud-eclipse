@@ -269,41 +269,6 @@
           </jgit.ignore>
         </configuration>
       </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-enforcer-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals><goal>enforce</goal></goals>
-            <configuration>
-              <rules>
-                <bannedDependencies>
-                  <excludes>
-                    <exclude>commons-collections:commons-collections:[3.2.1]</exclude>
-                  </excludes>
-                </bannedDependencies>
-                <bannedDependencies>
-                  <!--
-                    Ensure our bundles only use Guava 20.0.0.
-                    Tycho identifies p2-resolved bundles are of form:
-                    p2.eclipse-plugin:com.google.guava:jar:20.0.0:system
-                  -->
-                  <searchTransitive>false</searchTransitive>
-                  <excludes>
-                    <exclude>com.google.guava:guava</exclude>
-                    <exclude>*:com.google.guava</exclude>
-                  </excludes>
-                  <includes>
-                    <include>com.google.guava:guava:[20,21)</include>
-                    <include>*:com.google.guava:[20,21)</include>
-                  </includes>
-                </bannedDependencies>
-              </rules>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
 
     <pluginManagement>
@@ -417,6 +382,45 @@
               </artifact>
             </target>
            </configuration>
+          </plugin>
+
+          <!--
+            Ensure we don't have buggy commons-collections nor Java-8 Guava.
+            Must be done here as Oxygen has moved to Guava 21.
+          -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <executions>
+              <execution>
+                <goals><goal>enforce</goal></goals>
+                <configuration>
+                  <rules>
+                    <bannedDependencies>
+                      <excludes>
+                        <exclude>commons-collections:commons-collections:[3.2.1]</exclude>
+                      </excludes>
+                    </bannedDependencies>
+                    <bannedDependencies>
+                      <!--
+                        Ensure our bundles only use Guava 20.0.0.
+                        Tycho identifies p2-resolved bundles are of form:
+                        p2.eclipse-plugin:com.google.guava:jar:20.0.0:system
+                      -->
+                      <searchTransitive>false</searchTransitive>
+                      <excludes>
+                        <exclude>com.google.guava:guava</exclude>
+                        <exclude>*:com.google.guava</exclude>
+                      </excludes>
+                      <includes>
+                        <include>com.google.guava:guava:[20,21)</include>
+                        <include>*:com.google.guava:[20,21)</include>
+                      </includes>
+                    </bannedDependencies>
+                  </rules>
+                </configuration>
+              </execution>
+            </executions>
           </plugin>
         </plugins>
       </build>
