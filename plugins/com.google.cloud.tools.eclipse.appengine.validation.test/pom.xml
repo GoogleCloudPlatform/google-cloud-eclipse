@@ -44,6 +44,11 @@
                 <id>org.eclipse.jst.web_ui.feature</id>
                 <versionRange>0.0.0</versionRange>
               </requirement>
+              <requirement>
+                <type>eclipse-plugin</type>
+                <id>com.google.cloud.tools.eclipse.appengine.standard.java8</id>
+                <versionRange>0.0.0</versionRange>
+              </requirement>
             </extraRequirements>
           </dependency-resolution>
         </configuration>

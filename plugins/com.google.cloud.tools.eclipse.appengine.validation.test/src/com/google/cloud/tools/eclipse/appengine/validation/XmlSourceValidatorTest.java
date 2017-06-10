@@ -38,6 +38,7 @@ import org.eclipse.wst.sse.ui.internal.reconcile.validator.IncrementalReporter;
 import org.eclipse.wst.validation.internal.core.ValidationException;
 import org.eclipse.wst.validation.internal.provisional.core.IMessage;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -117,6 +118,9 @@ public class XmlSourceValidatorTest {
     assertTrue(reporter.getMessages().isEmpty());
   }
 
+  // Ignore? See https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2049 and
+  // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2044
+  @Ignore
   @Test
   public void testValidate() throws IOException {
     XmlSourceValidator validator = new XmlSourceValidator();
