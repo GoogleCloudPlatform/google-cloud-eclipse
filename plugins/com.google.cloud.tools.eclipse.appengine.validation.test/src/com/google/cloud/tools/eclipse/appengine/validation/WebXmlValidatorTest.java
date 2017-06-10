@@ -27,6 +27,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -41,6 +42,9 @@ public class WebXmlValidatorTest {
 
   private final WebXmlValidator validator = new WebXmlValidator();
 
+  // Ignore? See https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2049 and
+  // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2044
+  @Ignore
   @Test
   public void testValidateJavaServlet() throws ParserConfigurationException {
     DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
