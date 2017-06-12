@@ -82,7 +82,6 @@ abstract public class CreateAppEngineWtpProjectTest {
   public void testFaviconAdded() throws InvocationTargetException, CoreException {
     CreateAppEngineWtpProject creator = newCreateAppEngineWtpProject();
     creator.execute(monitor);
-    ProjectUtils.waitForProjects(project); // App Engine runtime is added via a Job, so wait.
     assertTrue("favicon.ico not found", project.getFile("src/main/webapp/favicon.ico").exists());
   }
 
@@ -91,7 +90,6 @@ abstract public class CreateAppEngineWtpProjectTest {
     CreateAppEngineWtpProject creator = newCreateAppEngineWtpProject();
     creator.execute(monitor);
 
-    ProjectUtils.waitForProjects(project); // App Engine runtime is added via a Job, so wait.
     assertEquals("HelloAppEngine.java", creator.getMostImportant().getName());
   }
 
@@ -100,7 +98,6 @@ abstract public class CreateAppEngineWtpProjectTest {
     CreateAppEngineWtpProject creator = newCreateAppEngineWtpProject();
     creator.execute(monitor);
 
-    ProjectUtils.waitForProjects(project); // App Engine runtime is added via a Job, so wait.
     assertJunitAndHamcrestAreOnClasspath();
   }
 
@@ -125,7 +122,6 @@ abstract public class CreateAppEngineWtpProjectTest {
     CreateAppEngineWtpProject creator = newCreateAppEngineWtpProject();
     creator.execute(monitor);
 
-    ProjectUtils.waitForProjects(project); // App Engine runtime is added via a Job, so wait.
     assertCorrectOutputPathForJavaTestSource();
   }
 
@@ -152,7 +148,6 @@ abstract public class CreateAppEngineWtpProjectTest {
     CreateAppEngineWtpProject creator = newCreateAppEngineWtpProject();
     creator.execute(monitor);
 
-    ProjectUtils.waitForProjects(project); // App Engine runtime is added via a Job, so wait.
     assertNoTestClassesInDeploymentAssembly();
   }
 

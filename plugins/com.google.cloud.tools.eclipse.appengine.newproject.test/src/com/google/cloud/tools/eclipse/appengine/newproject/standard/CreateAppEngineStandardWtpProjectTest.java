@@ -70,7 +70,6 @@ public class CreateAppEngineStandardWtpProjectTest extends CreateAppEngineWtpPro
     CreateAppEngineWtpProject creator = newCreateAppEngineWtpProject();
     creator.execute(monitor);
 
-    ProjectUtils.waitForProjects(project); // App Engine runtime is added via a Job, so wait.
     assertAppEngineContainerOnClasspath(library);
   }
 
