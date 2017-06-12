@@ -76,7 +76,7 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
 
     createCustomFields(container);
 
-    mavenCoordinatesUi = new MavenCoordinatesUi(container);
+    mavenCoordinatesUi = new MavenCoordinatesUi(container, false /* no dynamic enabling */);
     mavenCoordinatesUi.addChangeListener(new PageValidator(this));
     mavenCoordinatesUi.addGroupIdModifyListener(new AutoPackageNameSetterOnGroupIdChange());
 

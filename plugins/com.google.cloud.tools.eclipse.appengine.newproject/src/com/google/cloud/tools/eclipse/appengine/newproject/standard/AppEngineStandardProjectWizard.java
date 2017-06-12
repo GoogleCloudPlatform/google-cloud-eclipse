@@ -48,7 +48,7 @@ public class AppEngineStandardProjectWizard extends AppEngineProjectWizard {
     AnalyticsPingManager.getInstance().sendPing(
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD,
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
-        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_STANDARD, getShell());
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_STANDARD_NATIVE, getShell());
 
     return new AppEngineStandardWizardPage();
   }
@@ -87,7 +87,7 @@ public class AppEngineStandardProjectWizard extends AppEngineProjectWizard {
       AnalyticsPingManager.getInstance().sendPing(
           AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_COMPLETE,
           AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
-          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_STANDARD);
+          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_STANDARD_NATIVE);
     }
     return accepted;
   }

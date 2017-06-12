@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 
@@ -43,16 +44,16 @@ public class MavenCoordinatesUiTest {
   @Mock private DialogPage dialogPage;
 
   private Shell shell;
-  private MavenCoordinatesUi ui;
 
   @Before
   public void setUp() {
     shell = shellResource.getShell();
-    ui = new MavenCoordinatesUi(shell);
   }
 
   @Test
-  public void testUi() {
+  public void testUiWithDynamicEnabling() {
+    new MavenCoordinatesUi(shell, true /* dynamic enabling */);
+
     Button asMavenProject = CompositeUtil.findControl(shell, Button.class);
     assertEquals("Create as Maven project", asMavenProject.getText());
 
@@ -63,7 +64,19 @@ public class MavenCoordinatesUiTest {
   }
 
   @Test
+  public void testUiWithNoDynamicEnabling() {
+    new MavenCoordinatesUi(shell, false /* no dynamic enabling */);
+
+    assertNull(CompositeUtil.findControl(shell, Button.class));
+
+    assertTrue(getGroupIdField().getEnabled());
+    assertTrue(getArtifactIdField().getEnabled());
+    assertTrue(getVersionField().getEnabled());
+  }
+
+  @Test
   public void testDefaultFieldValues() {
+    new MavenCoordinatesUi(shell, false);
     assertTrue(getGroupIdField().getText().isEmpty());
     assertTrue(getArtifactIdField().getText().isEmpty());
     assertEquals("0.1.0-SNAPSHOT", getVersionField().getText());
@@ -71,6 +84,7 @@ public class MavenCoordinatesUiTest {
 
   @Test
   public void testDynamicEnabling() {
+    new MavenCoordinatesUi(shell, true /* dynamic enabling */);
     Button asMavenProject = CompositeUtil.findControl(shell, Button.class);
 
     new SWTBotCheckBox(asMavenProject).click();
@@ -86,7 +100,7 @@ public class MavenCoordinatesUiTest {
 
   @Test
   public void testValidateMavenSettings_emptyGroupId() {
-    enableUi();
+    MavenCoordinatesUi ui = new MavenCoordinatesUi(shell, false);
 
     assertFalse(ui.setValidationMessage(dialogPage));
     verify(dialogPage).setMessage("Provide Maven Group ID.", IMessageProvider.INFORMATION);
@@ -94,7 +108,7 @@ public class MavenCoordinatesUiTest {
 
   @Test
   public void testValidateMavenSettings_emptyArtifactId() {
-    enableUi();
+    MavenCoordinatesUi ui = new MavenCoordinatesUi(shell, false);
     getGroupIdField().setText("com.example");
 
     assertFalse(ui.setValidationMessage(dialogPage));
@@ -103,7 +117,7 @@ public class MavenCoordinatesUiTest {
 
   @Test
   public void testValidateMavenSettings_emptyVersion() {
-    enableUi();
+    MavenCoordinatesUi ui = new MavenCoordinatesUi(shell, false);
     getGroupIdField().setText("com.example");
     getArtifactIdField().setText("some-artifact-id");
     getVersionField().setText("");
@@ -114,8 +128,7 @@ public class MavenCoordinatesUiTest {
 
   @Test
   public void testValidateMavenSettings_illegalGroupId() {
-    enableUi();
-
+    MavenCoordinatesUi ui = new MavenCoordinatesUi(shell, false);
     getArtifactIdField().setText("some-artifact-id");
 
     getGroupIdField().setText("<:#= Illegal ID =#:>");
@@ -125,7 +138,7 @@ public class MavenCoordinatesUiTest {
 
   @Test
   public void testValidateMavenSettings_illegalArtifactId() {
-    enableUi();
+    MavenCoordinatesUi ui = new MavenCoordinatesUi(shell, false);
     getGroupIdField().setText("com.example");
 
     getArtifactIdField().setText("<:#= Illegal ID =#:>");
@@ -135,13 +148,10 @@ public class MavenCoordinatesUiTest {
 
   @Test
   public void testValidateMavenSettings_noValidationIfUiDisabled() {
+    MavenCoordinatesUi ui = new MavenCoordinatesUi(shell, true /* dynamic enabling */);
+
     getGroupIdField().setText("<:#= Illegal ID =#:>");
     assertTrue(ui.setValidationMessage(dialogPage));
-  }
-
-  private void enableUi() {
-    Button asMavenProject = CompositeUtil.findControl(shell, Button.class);
-    new SWTBotCheckBox(asMavenProject).click();
   }
 
   private Text getGroupIdField() {
