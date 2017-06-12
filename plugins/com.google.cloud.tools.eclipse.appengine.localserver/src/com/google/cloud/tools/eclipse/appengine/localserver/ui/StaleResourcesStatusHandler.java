@@ -32,12 +32,18 @@ import org.eclipse.swt.widgets.Shell;
  * launch should continue when possibly stale resources have been found.
  */
 public class StaleResourcesStatusHandler implements IStatusHandler {
-  /** The error code indicating that there may be stale resources. */
-  static final int STALE_RESOURCES_CODE = 255;
+  /**
+   * The error code indicating that there may be stale resources. Used with the plugin ID to
+   * uniquely identify this prompter.
+   */
+  static final int CONFIRM_LAUNCH_CODE = 255;
 
-  /** The status object to pass into the debug prompter */
+  /**
+   * A specially crafted status message that is pass into the Debug Prompter class to obtain our
+   * confirmation prompter.
+   */
   public static final IStatus CONTINUE_LAUNCH_REQUEST = new Status(IStatus.INFO,
-      "com.google.cloud.tools.eclipse.appengine.localserver", STALE_RESOURCES_CODE, "", null);
+      "com.google.cloud.tools.eclipse.appengine.localserver", CONFIRM_LAUNCH_CODE, "", null);
 
   @Override
   public Object handleStatus(IStatus status, Object source) throws CoreException {

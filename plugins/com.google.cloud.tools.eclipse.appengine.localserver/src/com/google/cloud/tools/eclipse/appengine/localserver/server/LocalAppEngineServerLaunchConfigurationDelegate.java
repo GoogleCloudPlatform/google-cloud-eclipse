@@ -51,6 +51,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.resources.IMarkerDelta;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -58,6 +59,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugException;
@@ -88,7 +90,6 @@ import org.eclipse.wst.server.core.IServerListener;
 import org.eclipse.wst.server.core.ServerCore;
 import org.eclipse.wst.server.core.ServerEvent;
 import org.eclipse.wst.server.core.ServerUtil;
-import org.eclipse.wst.server.core.internal.Server;
 
 public class LocalAppEngineServerLaunchConfigurationDelegate
     extends AbstractJavaLaunchConfigurationDelegate {
@@ -136,21 +137,38 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
   @Override
   public boolean finalLaunchCheck(ILaunchConfiguration configuration, String mode,
       IProgressMonitor monitor) throws CoreException {
-    if (!super.finalLaunchCheck(configuration, mode, monitor)) {
+    SubMonitor progress = SubMonitor.convert(monitor, 40);
+    if (!super.finalLaunchCheck(configuration, mode, progress.newChild(20))) {
       return false;
     }
 
     // If we're auto-publishing before launch, check if there may be stale
     // resources not yet published. See
     // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1832
-    if (ServerCore.isAutoPublishing()) {
+    if (ServerCore.isAutoPublishing() && ResourcesPlugin.getWorkspace().isAutoBuilding()) {
+      // Must wait for any current autobuild to complete so resource changes are triggered
+      // and WTP will kick off ResourceChangeJobs. Note that there may be builds
+      // pending that are unrelated to our resource changes, so simply checking
+      // <code>JobManager.find(FAMILY_AUTO_BUILD).length > 0</code> produces too many
+      // false positives.
+      try {
+        Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, progress.newChild(20));
+      } catch (InterruptedException ex) {
+        /* ignore */
+      }
       IServer server = ServerUtil.getServer(configuration);
       if (server.shouldPublish() || hasPendingChangesToPublish()) {
         IStatusHandler prompter = DebugPlugin.getDefault().getStatusHandler(promptStatus);
         if (prompter != null) {
           Object continueLaunch = prompter
               .handleStatus(StaleResourcesStatusHandler.CONTINUE_LAUNCH_REQUEST, configuration);
-          return (Boolean) continueLaunch;
+          if (!(Boolean) continueLaunch) {
+            // cancel the launch so Server.StartJob won't raise an error dialog, since the
+            // server won't have been started
+            monitor.setCanceled(true);
+            return false;
+          }
+          return true;
         }
       }
     }
@@ -163,9 +181,12 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
    */
   private boolean hasPendingChangesToPublish() {
     Job[] serverJobs = Job.getJobManager().find(ServerUtil.SERVER_JOB_FAMILY);
+    Job currentJob = Job.getJobManager().currentJob();
     for (Job job : serverJobs) {
-      // Must check type of job as we may be running in a Server.StartJob
-      if (job instanceof Server.ResourceChangeJob) {
+      // Launching from Server#start() means this will be running within a
+      // Server.StartJob. All other jobs should be ResourceChangeJob or
+      // PublishJob, both of which indicate unpublished changes.
+      if (job != currentJob) {
         return true;
       }
     }

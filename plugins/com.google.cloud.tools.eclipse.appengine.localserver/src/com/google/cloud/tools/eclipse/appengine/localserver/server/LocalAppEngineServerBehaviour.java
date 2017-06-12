@@ -199,6 +199,21 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     setModulePublishState(module, state);
   }
 
+  @Override
+  protected void publishFinish(IProgressMonitor monitor) throws CoreException {
+    boolean allpublished = true;
+    IServer server = getServer();
+    IModule[] modules = server.getModules();
+    for (int i = 0; i < modules.length; i++) {
+      if (server.getModulePublishState(new IModule[] {modules[i]}) != IServer.PUBLISH_STATE_NONE) {
+        allpublished = false;
+      }
+    }
+    if (allpublished) {
+      setServerPublishState(IServer.PUBLISH_STATE_NONE);
+    }
+  }
+
   private static IStatus newErrorStatus(String message) {
     return new Status(IStatus.ERROR, Activator.PLUGIN_ID, message);
   }
