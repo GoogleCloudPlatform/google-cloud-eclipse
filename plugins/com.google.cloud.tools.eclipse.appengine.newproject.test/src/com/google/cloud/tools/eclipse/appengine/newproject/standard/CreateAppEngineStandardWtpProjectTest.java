@@ -55,6 +55,7 @@ import org.eclipse.wst.common.project.facet.core.runtime.IRuntime;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -191,6 +192,7 @@ public class CreateAppEngineStandardWtpProjectTest {
     return Arrays.asList(path.segments()).contains(segment);
   }
 
+  @Ignore  // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1997#issuecomment-307857618
   @Test
   public void testNoTestClassesInDeploymentAssembly()
       throws InvocationTargetException, CoreException {
@@ -201,22 +203,20 @@ public class CreateAppEngineStandardWtpProjectTest {
     assertNoTestClassesInDeploymentAssembly();
   }
 
-  private void assertNoTestClassesInDeploymentAssembly() throws CoreException {
+  private void assertNoTestClassesInDeploymentAssembly() {
     StructureEdit core = StructureEdit.getStructureEditForRead(project);
-    WorkbenchComponent component = core.getComponent();
-    assertNotNull(component);
+    try {
+      WorkbenchComponent component = core.getComponent();
+      assertNotNull(component);
 
-    boolean seenMainSourcePath = false;
-    List<ComponentResource> resources = component.getResources();
-    for (ComponentResource resource : resources) {
-      assertFalse(containsSegment(resource.getSourcePath(), "test"));
-
-      if (resource.getSourcePath().equals(new Path("/src/main/java"))
-          && resource.getRuntimePath().equals(new Path("/WEB-INF/classes"))) {
-        seenMainSourcePath = true;
+      List<ComponentResource> resources = component.getResources();
+      for (ComponentResource resource : resources) {
+        assertFalse(containsSegment(resource.getSourcePath(), "test"));
       }
+      assertEquals(1, component.findResourcesBySourcePath(new Path("/src/main/java"), 0).length);
+    } finally {
+      core.dispose();
     }
-    assertTrue(seenMainSourcePath);
   }
 
   @Test
