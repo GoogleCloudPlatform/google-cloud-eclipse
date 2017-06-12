@@ -78,7 +78,7 @@ public class NewMavenBasedAppEngineProjectWizardTest extends BaseProjectTest {
 
   /** Create a project with the given parameters. */
   private void createAndCheck(String artifactId, String location, String packageName,
-      String[] projectFiles) throws CoreException, IOException {
+      String[] projectFiles) throws CoreException {
     assertFalse(projectExists(artifactId));
 
     project = SwtBotAppEngineActions.createMavenWebAppProject(bot, artifactId, location,
