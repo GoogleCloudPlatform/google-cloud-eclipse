@@ -78,6 +78,7 @@ public class XsltSourceQuickFixTest {
     IDocument document = viewer.getDocument();
     String contents = document.get();
     assertFalse(contents.contains("application"));
+    assertFalse(contents.contains("?><appengine"));
 
     // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1527
     editorPart.doSave(new NullProgressMonitor());
