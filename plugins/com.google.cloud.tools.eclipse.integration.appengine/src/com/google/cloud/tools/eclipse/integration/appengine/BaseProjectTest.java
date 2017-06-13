@@ -19,7 +19,6 @@ package com.google.cloud.tools.eclipse.integration.appengine;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotProjectActions;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotWorkbenchActions;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
@@ -52,6 +51,9 @@ public class BaseProjectTest {
   @After
   public void tearDown() {
     if (project != null) {
+      // close editors, so no property changes are dispatched on delete
+      bot.closeAllEditors();
+
       // ensure there are no jobs
       SwtBotWorkbenchActions.waitForProjects(bot, project);
       try {
