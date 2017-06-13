@@ -146,7 +146,6 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
         entries[i] = JavaCore.newSourceEntry(testSourcePath, ClasspathEntry.INCLUDE_ALL,
             ClasspathEntry.EXCLUDE_NONE, newOutputPath);
         javaProject.setRawClasspath(entries, monitor);
-        javaProject.save(monitor, true /* force */);
         break;
       }
     }
@@ -190,7 +189,6 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
         new IAccessRule[0],
         new IClasspathAttribute[] {nonDependencyAttribute},
         false);
-
     ClasspathUtil.addClasspathEntry(newProject, junit4Container, monitor);
   }
 

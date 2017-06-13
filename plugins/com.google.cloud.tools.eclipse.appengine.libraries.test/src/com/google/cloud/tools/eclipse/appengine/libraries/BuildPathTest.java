@@ -82,7 +82,6 @@ public class BuildPathTest {
 
     IClasspathEntry[] result = BuildPath.addLibraries(project, libraries, monitor);
     Assert.assertEquals(0, result.length);
-
     Assert.assertEquals(initialClasspathSize + 1, project.getRawClasspath().length);
   }
 
@@ -100,7 +99,6 @@ public class BuildPathTest {
     Assert.assertEquals(1, result.length);
     Assert.assertTrue(result[0].getPath().toString()
         .endsWith("com.google.cloud.tools.eclipse.appengine.libraries/library2"));
-
     Assert.assertEquals(initialClasspathSize + 2, project.getRawClasspath().length);
   }
 
