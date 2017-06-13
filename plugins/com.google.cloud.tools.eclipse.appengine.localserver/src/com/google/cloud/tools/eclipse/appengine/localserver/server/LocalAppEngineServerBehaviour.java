@@ -201,15 +201,15 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
 
   @Override
   protected void publishFinish(IProgressMonitor monitor) throws CoreException {
-    boolean allpublished = true;
+    boolean allPublished = true;
     IServer server = getServer();
     IModule[] modules = server.getModules();
-    for (int i = 0; i < modules.length; i++) {
-      if (server.getModulePublishState(new IModule[] {modules[i]}) != IServer.PUBLISH_STATE_NONE) {
-        allpublished = false;
+    for (IModule module : modules) {
+      if (server.getModulePublishState(new IModule[] {module}) != IServer.PUBLISH_STATE_NONE) {
+        allPublished = false;
       }
     }
-    if (allpublished) {
+    if (allPublished) {
       setServerPublishState(IServer.PUBLISH_STATE_NONE);
     }
   }
