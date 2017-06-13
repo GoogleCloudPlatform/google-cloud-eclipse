@@ -31,8 +31,20 @@ public class BugReportCommandHandler extends AbstractHandler {
   private static final String BUG_REPORT_URL =
       "https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/new";
 
+  //@formatter:off
+  // should be kept up to date with .github/ISSUE_TEMPLATE.md
   private static final String BODY_TEMPLATE =
-      "- Cloud Tools for Eclipse Version: {0}\n- OS: {1} {2}\n- Java Version: {3}\n\n";
+      "- Cloud Tools for Eclipse Version: {0}\n"
+      + "- OS: {1} {2}\n- Java Version: {3}\n"
+      + "\n"
+      + "**What did you do?**\n"
+      + "\n"
+      + "**What did you expect to see?**\n"
+      + "\n"
+      + "**What did you see instead?**\n"
+      + "\n"
+      + "(Screenshots are helpful)";
+  //@formatter:on
 
   @Override
   public Object execute(ExecutionEvent event) throws ExecutionException {
