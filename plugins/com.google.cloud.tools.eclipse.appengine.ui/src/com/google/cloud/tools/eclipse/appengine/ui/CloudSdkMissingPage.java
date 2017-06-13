@@ -22,9 +22,8 @@ package com.google.cloud.tools.eclipse.appengine.ui;
  */
 public class CloudSdkMissingPage extends MissingComponentPage {
 
-  public CloudSdkMissingPage(String wizardType) {
+  public CloudSdkMissingPage() {
     super("cloudSdkMissingComponentPage",  //$NON-NLS-1$
-        wizardType,
         Messages.getString("cloud.sdk.missing"),
         Messages.getString("cloud.sdk.not.installed"),
         Messages.getString("fix.cloud.sdk.location"));

@@ -26,7 +26,7 @@ public class NewDataflowProjectWizardDefaultRunOptionsPageTest {
   
   @Before
   public void setUp() {
-    page = new NewDataflowProjectWizardDefaultRunOptionsPage(null);
+    page = new NewDataflowProjectWizardDefaultRunOptionsPage();
   }
   
   @Test

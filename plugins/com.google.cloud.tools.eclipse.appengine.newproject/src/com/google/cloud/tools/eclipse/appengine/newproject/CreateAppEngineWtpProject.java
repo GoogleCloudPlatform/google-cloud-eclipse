@@ -22,6 +22,8 @@ import com.google.common.collect.Lists;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -32,8 +34,10 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -46,11 +50,15 @@ import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.project.ResolverConfiguration;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.ide.undo.CreateProjectOperation;
+import org.eclipse.wst.common.componentcore.internal.builder.DependencyGraphImpl;
+import org.eclipse.wst.common.componentcore.internal.builder.IDependencyGraph;
 
 /**
 * Utility to make a new Eclipse App Engine project in the workspace.
 */
 public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation {
+
+  private static final Logger logger = Logger.getLogger(CreateAppEngineWtpProject.class.getName());
 
   private final AppEngineProjectConfig config;
   private final IAdaptable uiInfoAdapter;
@@ -108,15 +116,15 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
       throw new InvocationTargetException(ex);
     }
 
-    if (config.getUseMaven()) {
-      enableMavenNature(newProject, subMonitor.newChild(2));
-    }
-
     addAppEngineFacet(newProject, subMonitor.newChild(4));
 
-    BuildPath.addLibraries(newProject, config.getAppEngineLibraries(), subMonitor.newChild(2));
+    if (config.getUseMaven()) {
+      enableMavenNature(newProject, subMonitor.newChild(2));
+    } else {
+      addJunit4ToClasspath(newProject, subMonitor.newChild(2));
+    }
 
-    addJunit4ToClasspath(newProject, subMonitor.newChild(2));
+    BuildPath.addLibraries(newProject, config.getAppEngineLibraries(), subMonitor.newChild(2));
 
     fixTestSourceDirectorySettings(newProject, subMonitor.newChild(2));
   }
@@ -149,11 +157,25 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
 
   private void enableMavenNature(IProject newProject, IProgressMonitor monitor)
       throws CoreException {
-    SubMonitor subMonitor = SubMonitor.convert(monitor, 22);
+    SubMonitor subMonitor = SubMonitor.convert(monitor, 30);
 
-    ResolverConfiguration resolverConfiguration = new ResolverConfiguration();
-    MavenPlugin.getProjectConfigurationManager().enableMavenNature(newProject,
-        resolverConfiguration, subMonitor.newChild(20));
+    // Workaround deadlock bug described in Eclipse bug (https://bugs.eclipse.org/511793).
+    try {
+      IDependencyGraph.INSTANCE.preUpdate();
+      try {
+        Job.getJobManager().join(DependencyGraphImpl.GRAPH_UPDATE_JOB_FAMILY,
+            subMonitor.newChild(8));
+      } catch (OperationCanceledException | InterruptedException ex) {
+        logger.log(Level.WARNING, "Exception waiting for WTP Graph Update job", ex);
+      }
+
+      ResolverConfiguration resolverConfiguration = new ResolverConfiguration();
+      MavenPlugin.getProjectConfigurationManager().enableMavenNature(newProject,
+          resolverConfiguration, subMonitor.newChild(20));
+    } finally {
+      IDependencyGraph.INSTANCE.postUpdate();
+    }
+
     // M2E will cleverly set "target/<artifact ID>-<version>/WEB-INF/classes" as a new Java output
     // folder; delete the default old folder.
     newProject.getFolder("build").delete(true /* force */, subMonitor.newChild(2));

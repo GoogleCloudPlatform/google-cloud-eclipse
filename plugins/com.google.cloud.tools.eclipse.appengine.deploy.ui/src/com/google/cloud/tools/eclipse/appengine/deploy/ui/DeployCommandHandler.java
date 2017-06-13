@@ -43,14 +43,19 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.MessageConsoleStream;
@@ -78,6 +83,14 @@ public abstract class DeployCommandHandler extends AbstractHandler {
         throw new NullPointerException("Deploy menu enabled for non-faceted projects");
       }
 
+      if (PlatformUI.isWorkbenchRunning()) {
+        if (!PlatformUI.getWorkbench().saveAllEditors(true)) {
+          return null;
+        }
+        if (getWorkspace(event).isAutoBuilding()) {
+          Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
+        }
+      }
       if (!checkProjectErrors(project)) {
         MessageDialog.openInformation(HandlerUtil.getActiveShell(event),
                                       Messages.getString("build.error.dialog.title"),
@@ -94,10 +107,17 @@ public abstract class DeployCommandHandler extends AbstractHandler {
       }
       // return value must be null, reserved for future use
       return null;
-    } catch (CoreException | IOException exception) {
+    } catch (CoreException | IOException | InterruptedException exception) {
       throw new ExecutionException(
           Messages.getString("deploy.failed.error.message"), exception); //$NON-NLS-1$
+    } catch (OperationCanceledException ex) {
+      /* ignore */
+      return null;
     }
+  }
+
+  private IWorkspace getWorkspace(ExecutionEvent event) {
+    return ServiceUtils.getService(event, IWorkspace.class);
   }
 
   protected abstract DeployPreferencesDialog newDeployPreferencesDialog(Shell shell,

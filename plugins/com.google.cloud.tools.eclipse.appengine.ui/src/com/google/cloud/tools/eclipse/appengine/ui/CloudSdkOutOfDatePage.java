@@ -22,9 +22,8 @@ package com.google.cloud.tools.eclipse.appengine.ui;
  */
 public class CloudSdkOutOfDatePage extends MissingComponentPage {
 
-  public CloudSdkOutOfDatePage(String wizardType) {
+  public CloudSdkOutOfDatePage() {
     super("cloudSdkOutOfDatePage", //$NON-NLS-1$
-        wizardType,
         Messages.getString("cloud.sdk.out.of.date"),
         Messages.getString("cloud.sdk.out.of.date"),
         Messages.getString("fix.cloud.sdk.version"));

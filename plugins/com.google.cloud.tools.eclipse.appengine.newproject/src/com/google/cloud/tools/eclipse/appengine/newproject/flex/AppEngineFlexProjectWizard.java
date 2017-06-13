@@ -22,17 +22,16 @@ import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectWizar
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineWizardPage;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
+import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import javax.inject.Inject;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
-// TODO: update functions
 public class AppEngineFlexProjectWizard extends AppEngineProjectWizard {
   @Inject
   private ILibraryRepositoryService repositoryService;
-
-  private AppEngineFlexWizardPage wizardPage;
 
   public AppEngineFlexProjectWizard() {
     setWindowTitle(Messages.getString("new.app.engine.flex.project"));
@@ -40,17 +39,16 @@ public class AppEngineFlexProjectWizard extends AppEngineProjectWizard {
 
   @Override
   public AppEngineWizardPage createWizardPage() {
-    wizardPage = new AppEngineFlexWizardPage();
-    return wizardPage;
+    AnalyticsPingManager.getInstance().sendPing(
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD,
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_FLEX, getShell());
+
+    return new AppEngineFlexWizardPage();
   }
 
   @Override
-  public void sendAnalyticsPing() {
-    // TODO: send anayltics
-  }
-
-  @Override
-  public IStatus validateDependencies(boolean fork, boolean cancelable) {
+  public IStatus validateDependencies() {
     return Status.OK_STATUS;
   }
 
@@ -62,10 +60,13 @@ public class AppEngineFlexProjectWizard extends AppEngineProjectWizard {
 
   @Override
   public boolean performFinish() {
-    if (wizardPage.asMavenProject()) {
-      config.setUseMaven(wizardPage.getMavenGroupId(), wizardPage.getMavenArtifactId(),
-          wizardPage.getMavenVersion());
+    boolean accepted = super.performFinish();
+    if (accepted) {
+      AnalyticsPingManager.getInstance().sendPing(
+          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_COMPLETE,
+          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
+          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_FLEX);
     }
-    return super.performFinish();
+    return accepted;
   }
 }

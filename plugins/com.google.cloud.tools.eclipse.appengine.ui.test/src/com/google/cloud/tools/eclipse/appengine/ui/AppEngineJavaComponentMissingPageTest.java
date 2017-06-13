@@ -23,17 +23,17 @@ import org.junit.Test;
 public class AppEngineJavaComponentMissingPageTest {
 
   private AppEngineJavaComponentMissingPage page;
-  
+
   @Before
   public void setUp() {
-    page = new AppEngineJavaComponentMissingPage("");
+    page = new AppEngineJavaComponentMissingPage();
   }
-  
+
   @Test
   public void testTitle() {
     Assert.assertEquals("App Engine Java Component is missing", page.getTitle());
   }
-  
+
   @Test
   public void testDescription() {
     Assert.assertEquals("The Cloud SDK App Engine Java component is not installed",

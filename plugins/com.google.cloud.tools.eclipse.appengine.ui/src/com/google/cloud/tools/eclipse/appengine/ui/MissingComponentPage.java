@@ -24,8 +24,6 @@ import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
-import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
-import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 
 /**
  * Wizard page that displays a message that something needed in the environment is
@@ -33,33 +31,24 @@ import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
  */
 public class MissingComponentPage extends WizardPage {
 
-  private String wizardType;
   private String message;
 
   /**
    * @param pageName internal identifier
-   * @param wizardType should be constant from AnalyticsEvents
    * @param title dialog title
    * @param errorMessage short error message
    * @param message detailed message and instructions. Text between single quotes is made bold.
    */
-  public MissingComponentPage(String pageName, String wizardType, String title,
+  public MissingComponentPage(String pageName, String title,
       String errorMessage, String message) {
     super(pageName);
     setTitle(title);
     setErrorMessage(errorMessage);
-    this.wizardType = wizardType;
     this.message = message;
   }
 
   @Override
   public void createControl(Composite parent) {
-    AnalyticsPingManager.getInstance().sendPing(
-        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD,
-        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
-        wizardType,
-        parent.getShell());
-
     Composite container = new Composite(parent, SWT.NONE);
     GridLayoutFactory.swtDefaults().numColumns(1).applyTo(container);
 
@@ -86,5 +75,5 @@ public class MissingComponentPage extends WizardPage {
     setPageComplete(false);
     Dialog.applyDialogFont(container);
   }
-  
+
 }

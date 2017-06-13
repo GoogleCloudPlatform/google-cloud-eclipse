@@ -43,10 +43,12 @@ public class MavenAppEngineStandardArchetypeWizardPage extends WizardPage {
       Collections.unmodifiableList(Arrays.asList(
           new ArchetypeTuple("com.google.appengine.archetypes", //$NON-NLS-1$
               "appengine-standard-archetype", //$NON-NLS-1$
+              "0.4.0", //$NON-NLS-1$
               Messages.getString("APPENGINE_STANDARD_ARCHETYPE_DISPLAY_NAME"), //$NON-NLS-1$
               Messages.getString("APPENGINE_STANDARD_ARCHETYPE_DESCRIPTION")), //$NON-NLS-1$
           new ArchetypeTuple("com.google.appengine.archetypes", //$NON-NLS-1$
               "guestbook-archetype", //$NON-NLS-1$
+              "3.1.0-1.9.42", //$NON-NLS-1$
               Messages.getString("APPENGINE_GUESTBOOK_ARCHETYPE_DISPLAY_NAME"), //$NON-NLS-1$
               Messages.getString("APPENGINE_GUESTBOOK_ARCHETYPE_DESCRIPTION")  //$NON-NLS-1$
            )));
@@ -98,7 +100,12 @@ public class MavenAppEngineStandardArchetypeWizardPage extends WizardPage {
   }
 
   public Archetype getArchetype() {
-    return PRESET_ARCHETYPES.get(archetypeList.getSelectionIndex()).archetype;
+    return getPresetArchetype(archetypeList.getSelectionIndex());
+  }
+
+  @VisibleForTesting
+  static Archetype getPresetArchetype(int index) {
+    return PRESET_ARCHETYPES.get(index).archetype;
   }
 
   @Override
@@ -106,17 +113,16 @@ public class MavenAppEngineStandardArchetypeWizardPage extends WizardPage {
     return isCurrentPage();
   }
 
-  @VisibleForTesting
-  static class ArchetypeTuple {
-    Archetype archetype;
-    String displayName;
-    String description;
+  private static class ArchetypeTuple {
+    private final Archetype archetype = new Archetype();
+    private final String displayName;
+    private final String description;
 
-    ArchetypeTuple(String groupId, String artifactId, String displayName, String description) {
-      archetype = new Archetype();
+    ArchetypeTuple(String groupId, String artifactId, String version,
+        String displayName, String description) {
       archetype.setGroupId(groupId);
       archetype.setArtifactId(artifactId);
-      archetype.setVersion("LATEST"); //$NON-NLS-1$
+      archetype.setVersion(version);
       this.displayName = displayName;
       this.description = description;
     }

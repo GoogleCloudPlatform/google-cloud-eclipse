@@ -51,6 +51,11 @@ public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
 
   @Override
   public void addPages() {
+    AnalyticsPingManager.getInstance().sendPing(
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD,
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
+        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_STANDARD_MAVEN, getShell());
+
     try {
       CloudSdk sdk = new CloudSdk.Builder().build();
       sdk.validateCloudSdk();
@@ -60,24 +65,16 @@ public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
       addPage(page);
       addPage(archetypePage);
     } catch (CloudSdkNotFoundException ex) {
-      addPage(new CloudSdkMissingPage(AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_MAVEN));
+      addPage(new CloudSdkMissingPage());
     } catch (CloudSdkOutOfDateException ex) {
-      addPage(new CloudSdkOutOfDatePage(
-          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_MAVEN));
+      addPage(new CloudSdkOutOfDatePage());
     } catch (AppEngineJavaComponentsNotInstalledException ex) {
-      addPage(new AppEngineJavaComponentMissingPage(
-          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_MAVEN));
+      addPage(new AppEngineJavaComponentMissingPage());
     }
   }
 
-
   @Override
   public boolean performFinish() {
-    AnalyticsPingManager.getInstance().sendPing(
-        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_COMPLETE,
-        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
-        AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_MAVEN);
-
     if (cloudSdkLocation == null) {
       cloudSdkLocation = CloudSdkPrompter.getCloudSdkLocation(getShell());
       if (cloudSdkLocation == null) {
@@ -111,6 +108,12 @@ public class MavenArchetypeProjectWizard extends Wizard implements INewWizard {
       // open most important file created by wizard in editor
       IFile file = operation.getMostImportant();
       WorkbenchUtil.openInEditor(workbench, file);
+
+      AnalyticsPingManager.getInstance().sendPing(
+          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_COMPLETE,
+          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
+          AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE_STANDARD_MAVEN);
+
       return true;
     } catch (InterruptedException ex) {
       return false;

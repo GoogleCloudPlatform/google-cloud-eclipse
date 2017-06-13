@@ -78,7 +78,7 @@
          id="org.yaml.snakeyaml"
          download-size="0"
          install-size="0"
-         version="1.17.0"
+         version="1.17"
          unpack="false"/>
 
 </feature>

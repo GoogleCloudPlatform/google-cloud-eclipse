@@ -18,9 +18,13 @@ package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
+import com.google.cloud.tools.eclipse.appengine.newproject.maven.MavenCoordinatesUi;
+import com.google.cloud.tools.eclipse.appengine.newproject.maven.MavenCoordinatesValidator;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
 import com.google.cloud.tools.eclipse.appengine.ui.LibrarySelectorGroup;
 import com.google.cloud.tools.project.ServiceNameValidator;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.CharMatcher;
 import java.io.File;
 import java.util.Collection;
 import java.util.HashSet;
@@ -28,9 +32,12 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 
@@ -42,7 +49,15 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
   private Text javaPackageField;
   private LibrarySelectorGroup appEngineLibrariesSelectorGroup;
   private Text serviceNameField;
+  private MavenCoordinatesUi mavenCoordinatesUi;
   private final boolean showLibrariesSelectorGroup;
+
+  /** True if we should auto-generate the javaPackageField from the provided groupId */
+  @VisibleForTesting
+  boolean autoGeneratePackageName = true;
+
+  /** True if we're programmatically setting javaPackageField with an auto-generated value */
+  private boolean javaPackageProgrammaticUpdate = false;
 
   public AppEngineWizardPage(boolean showLibrariesSelectorGroup) {
     super("basicNewProjectPage"); //$NON-NLS-1$
@@ -50,19 +65,20 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
     this.showLibrariesSelectorGroup = showLibrariesSelectorGroup;
   }
 
-  public abstract void sendAnalyticsPing(Shell parentShell);
-
   public abstract void setHelp(Composite container);
 
   @Override
   public void createControl(Composite parent) {
     super.createControl(parent);
-    sendAnalyticsPing(parent.getShell());
 
     Composite container = (Composite) getControl();
     setHelp(container);
 
     createCustomFields(container);
+
+    mavenCoordinatesUi = new MavenCoordinatesUi(container, true /* dynamic enabling */);
+    mavenCoordinatesUi.addChangeListener(new PageValidator(this));
+    mavenCoordinatesUi.addGroupIdModifyListener(new AutoPackageNameSetterOnGroupIdChange());
 
     // Manage APIs
     // todo we don't need this if; can do with subclasses
@@ -95,11 +111,19 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
     packageNameLabel.setText(Messages.getString("java.package")); //$NON-NLS-1$
     javaPackageField = new Text(parent, SWT.BORDER);
     javaPackageField.addModifyListener(pageValidator);
+    javaPackageField.addVerifyListener(new VerifyListener() {
+      @Override
+      public void verifyText(VerifyEvent event) {
+        // if the user ever changes the package name field, then we never auto-generate again.
+        if (!javaPackageProgrammaticUpdate) {
+          autoGeneratePackageName = false;
+        }
+      }
+    });
   }
 
   // App Engine service name
   private void createServiceField(Composite parent, PageValidator pageValidator) {
-
     Label serviceNameLabel = new Label(parent, SWT.LEAD);
     serviceNameLabel.setText(Messages.getString("app.engine.service"));
     serviceNameField = new Text(parent, SWT.BORDER);
@@ -146,11 +170,27 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
       return false;
     }
 
-    return true;
+    return mavenCoordinatesUi.setValidationMessage(this);
   }
 
   public String getPackageName() {
     return javaPackageField.getText();
+  }
+
+  public boolean asMavenProject() {
+    return mavenCoordinatesUi.uiEnabled();
+  }
+
+  public String getMavenGroupId() {
+    return mavenCoordinatesUi.getGroupId();
+  }
+
+  public String getMavenArtifactId() {
+    return mavenCoordinatesUi.getArtifactId();
+  }
+
+  public String getMavenVersion() {
+    return mavenCoordinatesUi.getVersion();
   }
 
   public Collection<Library> getSelectedLibraries() {
@@ -171,5 +211,50 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
 
   public String getServiceName() {
     return serviceNameField.getText();
+  }
+
+  private void updatePackageField(String newSuggestion) {
+    if (autoGeneratePackageName) {
+      javaPackageProgrammaticUpdate = true;
+      javaPackageField.setText(newSuggestion);
+      javaPackageProgrammaticUpdate = false;
+    }
+  }
+
+  /**
+   * Auto-fills {@link #javaPackageField} from the Group ID if the user has not explicitly chosen a
+   * package name.
+   */
+  private final class AutoPackageNameSetterOnGroupIdChange implements ModifyListener {
+    @Override
+    public void modifyText(ModifyEvent event) {
+      String groupId = mavenCoordinatesUi.getGroupId();
+
+      if (MavenCoordinatesValidator.validateGroupId(groupId)) {
+        String newSuggestion = suggestPackageName(groupId);
+        updatePackageField(newSuggestion);
+      } else if (groupId.isEmpty()) {
+        updatePackageField(""); //$NON-NLS-1$
+      }
+    }
+  }
+
+  /**
+   * Helper function returning a suggested package name based on {@code groupId}.
+   * It does basic string filtering/manipulation, which does not completely eliminate
+   * naming issues. However, users will be alerted of any errors in naming by
+   * {@link #validatePage}.
+   */
+  @VisibleForTesting
+  static String suggestPackageName(String groupId) {
+    if (JavaPackageValidator.validate(groupId).isOK()) {
+      return groupId;
+    }
+
+    // 1) Remove leading and trailing dots.
+    // 2) Keep only word characters ([a-zA-Z_0-9]) and dots (escaping inside [] not necessary).
+    // 3) Replace consecutive dots with a single dot.
+    return CharMatcher.is('.').trimFrom(groupId)
+        .replaceAll("[^\\w.]", "").replaceAll("\\.+",  "."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
   }
 }
