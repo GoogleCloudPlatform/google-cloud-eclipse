@@ -18,10 +18,9 @@ package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import com.google.cloud.tools.eclipse.appengine.libraries.BuildPath;
-import com.google.common.collect.Lists;
+import com.google.cloud.tools.eclipse.util.ClasspathUtil;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.commands.ExecutionException;
@@ -147,6 +146,7 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
         entries[i] = JavaCore.newSourceEntry(testSourcePath, ClasspathEntry.INCLUDE_ALL,
             ClasspathEntry.EXCLUDE_NONE, newOutputPath);
         javaProject.setRawClasspath(entries, monitor);
+        javaProject.save(monitor, true /* force */);
         break;
       }
     }
@@ -183,7 +183,6 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
 
   private static void addJunit4ToClasspath(IProject newProject, IProgressMonitor monitor)
       throws CoreException {
-    IJavaProject javaProject = JavaCore.create(newProject);
     IClasspathAttribute nonDependencyAttribute =
         UpdateClasspathAttributeUtil.createNonDependencyAttribute();
     IClasspathEntry junit4Container = JavaCore.newContainerEntry(
@@ -191,9 +190,8 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
         new IAccessRule[0],
         new IClasspathAttribute[] {nonDependencyAttribute},
         false);
-    List<IClasspathEntry> rawClasspath = Lists.newArrayList(javaProject.getRawClasspath());
-    rawClasspath.add(junit4Container);
-    javaProject.setRawClasspath(rawClasspath.toArray(new IClasspathEntry[0]), monitor);
+
+    ClasspathUtil.addClasspathEntry(newProject, junit4Container, monitor);
   }
 
 }

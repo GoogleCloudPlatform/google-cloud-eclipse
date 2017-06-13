@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
+import com.google.cloud.tools.eclipse.util.ClasspathUtil;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -97,6 +98,7 @@ public class BuildPath {
         libraries.size() + 1); // + 1 because we pass the submonitor along below
 
     List<IClasspathEntry> rawClasspath = Lists.newArrayList(javaProject.getRawClasspath());
+
     List<IClasspathEntry> newEntries = new ArrayList<>();
     for (Library library : libraries) {
       IClasspathEntry libraryContainer = makeClasspathEntry(library);
@@ -107,8 +109,7 @@ public class BuildPath {
     }
 
     if (addToClasspath) {
-      rawClasspath.addAll(newEntries);
-      javaProject.setRawClasspath(rawClasspath.toArray(new IClasspathEntry[0]), subMonitor);
+      ClasspathUtil.addClasspathEntries(javaProject.getProject(), newEntries, subMonitor);
       runContainerResolverJob(javaProject);
     }
 

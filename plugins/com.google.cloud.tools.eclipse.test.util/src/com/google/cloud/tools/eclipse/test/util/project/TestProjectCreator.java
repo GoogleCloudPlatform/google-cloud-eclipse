@@ -21,6 +21,7 @@ import static org.junit.Assert.assertTrue;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.FacetUtil;
 import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
+import com.google.cloud.tools.eclipse.util.ClasspathUtil;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.io.ByteArrayInputStream;
@@ -148,12 +149,8 @@ public final class TestProjectCreator extends ExternalResource {
   private void addContainerPathToRawClasspath() throws JavaModelException {
     if (!Strings.isNullOrEmpty(containerPath)) {
       Preconditions.checkNotNull(javaProject);
-      IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
-      IClasspathEntry[] newRawClasspath = new IClasspathEntry[rawClasspath.length + 1];
-      System.arraycopy(rawClasspath, 0, newRawClasspath, 0, rawClasspath.length);
-      newRawClasspath[newRawClasspath.length - 1] =
-          JavaCore.newContainerEntry(new Path(containerPath));
-      javaProject.setRawClasspath(newRawClasspath, null);
+      IClasspathEntry container = JavaCore.newContainerEntry(new Path(containerPath));
+      ClasspathUtil.addClasspathEntry(project, container, null);
     }
   }
 

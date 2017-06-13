@@ -25,10 +25,11 @@ import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectConfi
 import com.google.cloud.tools.eclipse.appengine.newproject.CodeTemplates;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
-import com.google.common.collect.Lists;
+import com.google.cloud.tools.eclipse.util.ClasspathUtil;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
@@ -46,7 +47,6 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.classpathdep.UpdateClasspathAttributeUtil;
@@ -157,9 +157,7 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
 
   private void addDependenciesToClasspath(IProject project, String libraryPath,
       IProgressMonitor monitor)  throws CoreException {
-    IJavaProject javaProject = JavaCore.create(project);
-    IClasspathEntry[] entries = javaProject.getRawClasspath();
-    List<IClasspathEntry> newEntries = Lists.newArrayList(entries);
+    List<IClasspathEntry> newEntries = new ArrayList<>();
 
     IClasspathAttribute[] nonDependencyAttribute =
         new IClasspathAttribute[] {UpdateClasspathAttributeUtil.createNonDependencyAttribute()};
@@ -172,7 +170,7 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
           nonDependencyAttribute, false /* isExported */));
     }
 
-    javaProject.setRawClasspath(newEntries.toArray(new IClasspathEntry[0]), monitor);
+    ClasspathUtil.addClasspathEntries(project, newEntries, monitor);
   }
 
 }
