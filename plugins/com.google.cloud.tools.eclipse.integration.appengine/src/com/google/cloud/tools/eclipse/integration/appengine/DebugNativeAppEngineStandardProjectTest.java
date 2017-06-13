@@ -101,6 +101,10 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
 
     SWTBotTree launchTree =
         new SWTBotTree(bot.widget(widgetOfType(Tree.class), debugView.getWidget()));
+
+    // avoid any stray processes that may be lying around
+    launchTree.contextMenu("Remove All Terminated").click();
+
     SwtBotTreeUtilities.waitUntilTreeHasItems(bot, launchTree);
     SWTBotTreeItem[] allItems = launchTree.getAllItems();
     SwtBotTreeUtilities.waitUntilTreeHasText(bot, allItems[0]);
