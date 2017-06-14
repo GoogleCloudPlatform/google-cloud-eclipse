@@ -16,11 +16,15 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
+import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
+import com.google.cloud.tools.eclipse.util.ClasspathUtil;
+import com.google.cloud.tools.eclipse.util.MavenUtils;
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -43,17 +47,11 @@ import org.eclipse.jst.j2ee.classpathdep.UpdateClasspathAttributeUtil;
 import org.osgi.framework.FrameworkUtil;
 import org.xml.sax.SAXException;
 
-import com.google.cloud.tools.eclipse.appengine.libraries.LibraryClasspathContainerResolverJob;
-import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
-import com.google.cloud.tools.eclipse.util.MavenUtils;
-import com.google.cloud.tools.eclipse.util.status.StatusUtil;
-import com.google.common.annotations.VisibleForTesting;
-
 public class BuildPath {
 
   public static void addLibraries(IProject project, List<Library> libraries,
       IProgressMonitor monitor) throws CoreException {
-    
+
     if (libraries.isEmpty()) {
       return;
     }
@@ -69,9 +67,9 @@ public class BuildPath {
       IProgressMonitor monitor) throws CoreException {
     // see m2e-core/org.eclipse.m2e.core.ui/src/org/eclipse/m2e/core/ui/internal/actions/AddDependencyAction.java
     // m2e-core/org.eclipse.m2e.core.ui/src/org/eclipse/m2e/core/ui/internal/editing/AddDependencyOperation.java
-    
+
     IFile pomFile = project.getFile("pom.xml");
-    
+
     try {
       Pom pom = Pom.parse(pomFile);
       pom.addDependencies(libraries);
@@ -82,13 +80,13 @@ public class BuildPath {
   }
 
   /**
-   * @return the entries added to the classpath. 
+   * @return the entries added to the classpath.
    *     Does not include entries previously present in classpath.
    */
   public static IClasspathEntry[] addLibraries(
       IJavaProject javaProject, List<Library> libraries, IProgressMonitor monitor)
           throws JavaModelException, CoreException {
-    
+
     return prepareLibraries(javaProject, libraries, monitor, true);
   }
 
@@ -99,28 +97,25 @@ public class BuildPath {
         Messages.getString("adding.app.engine.libraries"), //$NON-NLS-1$
         libraries.size() + 1); // + 1 because we pass the submonitor along below
 
-    IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
-    
-    List<IClasspathEntry> newRawClasspath = new ArrayList<>(rawClasspath.length + libraries.size());
-    newRawClasspath.addAll(Arrays.asList(rawClasspath));
+    List<IClasspathEntry> rawClasspath = Lists.newArrayList(javaProject.getRawClasspath());
+
     List<IClasspathEntry> newEntries = new ArrayList<>();
     for (Library library : libraries) {
       IClasspathEntry libraryContainer = makeClasspathEntry(library);
-      if (!newRawClasspath.contains(libraryContainer)) {
+      if (!rawClasspath.contains(libraryContainer)) {
         newEntries.add(libraryContainer);
-        newRawClasspath.add(libraryContainer);
       }
       subMonitor.worked(1);
     }
-    
+
     if (addToClasspath) {
-      javaProject.setRawClasspath(newRawClasspath.toArray(new IClasspathEntry[0]), subMonitor);
+      ClasspathUtil.addClasspathEntries(javaProject.getProject(), newEntries, subMonitor);
       runContainerResolverJob(javaProject);
     }
-    
+
     return newEntries.toArray(new IClasspathEntry[0]);
   }
-  
+
   /**
    * @return the entries to be added to the classpath. Does not add them to the classpath.
    */
@@ -139,14 +134,14 @@ public class BuildPath {
     } else {
       classpathAttributes[0] = UpdateClasspathAttributeUtil.createNonDependencyAttribute();
     }
- 
+
     IClasspathEntry libraryContainer = JavaCore.newContainerEntry(library.getContainerPath(),
                                                                   new IAccessRule[0],
                                                                   classpathAttributes,
                                                                   false);
     return libraryContainer;
   }
-  
+
   private static void runContainerResolverJob(IJavaProject javaProject) {
     IEclipseContext context = EclipseContextFactory.getServiceContext(
         FrameworkUtil.getBundle(BuildPath.class).getBundleContext());

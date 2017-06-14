@@ -16,119 +16,46 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject.standard;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
-import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectConfig;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
-import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
+import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProjectTest;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.wst.common.componentcore.internal.ComponentResource;
-import org.eclipse.wst.common.componentcore.internal.StructureEdit;
-import org.eclipse.wst.common.componentcore.internal.WorkbenchComponent;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.common.project.facet.core.runtime.IRuntime;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 
-@RunWith(MockitoJUnitRunner.class)
-public class CreateAppEngineStandardWtpProjectTest {
+public class CreateAppEngineStandardWtpProjectTest extends CreateAppEngineWtpProjectTest {
 
   private static final String APP_ENGINE_API = "appengine-api";
 
-  @Rule
-  public ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
-
-  @Mock private IAdaptable adaptable;
-
-  private NullProgressMonitor monitor = new NullProgressMonitor();
-  private AppEngineProjectConfig config = new AppEngineProjectConfig();
-  private IProject project;
-
-  @Before
-  public void setUp() {
-    IWorkspace workspace = ResourcesPlugin.getWorkspace();
-    project = workspace.getRoot().getProject("testproject" + Math.random());
-    config.setProject(project);
-  }
-
-  @After
-  public void cleanUp() throws CoreException {
-    project.delete(true, monitor);
+  @Override
+  protected CreateAppEngineWtpProject newCreateAppEngineWtpProject() {
+    return new CreateAppEngineStandardWtpProject(config, mock(IAdaptable.class));
   }
 
   @Test
   public void testConstructor() {
-    new CreateAppEngineStandardWtpProject(config, adaptable);
-  }
-
-  @Test
-  public void testUnitTestCreated() throws InvocationTargetException, CoreException {
-    CreateAppEngineWtpProject creator = new CreateAppEngineStandardWtpProject(config, adaptable);
-    creator.execute(monitor);
-
-    ProjectUtils.waitForProjects(project); // App Engine runtime is added via a Job, so wait.
-    assertJunitAndHamcrestAreOnClasspath();
-  }
-
-  private void assertJunitAndHamcrestAreOnClasspath() throws CoreException {
-    assertTrue(project.hasNature(JavaCore.NATURE_ID));
-    IJavaProject javaProject = JavaCore.create(project);
-    IType junit = javaProject.findType("org.junit.Assert");
-
-    // Is findType doing what we think it's doing?
-    // Locally where it passes it finds JUnit in
-    // class Assert [in Assert.class [in org.junit [in /Users/elharo/workspace/.metadata/.plugins/org.eclipse.pde.core/.bundle_pool/plugins/org.junit_4.12.0.v201504281640/junit.jar]]]
-
-    assertNotNull("Did not find junit", junit);
-    assertTrue(junit.exists());
-    IType hamcrest = javaProject.findType("org.hamcrest.CoreMatchers");
-    assertNotNull("Did not find hamcrest", hamcrest);
-    assertTrue(hamcrest.exists());
-  }
-
-  @Test
-  public void testMostImportantFile() throws InvocationTargetException, CoreException {
-    CreateAppEngineWtpProject creator = new CreateAppEngineStandardWtpProject(config, adaptable);
-    creator.execute(monitor);
-
-    ProjectUtils.waitForProjects(project); // App Engine runtime is added via a Job, so wait.
-    assertEquals("HelloAppEngine.java", creator.getMostImportant().getName());
+    newCreateAppEngineWtpProject();
   }
 
   @Test
   public void testAppEngineRuntimeAdded() throws InvocationTargetException, CoreException {
-    new CreateAppEngineStandardWtpProject(config, adaptable).execute(monitor);
+    CreateAppEngineWtpProject creator = newCreateAppEngineWtpProject();
+    creator.execute(monitor);
 
     ProjectUtils.waitForProjects(project); // App Engine runtime is added via a Job, so wait.
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);
@@ -137,20 +64,12 @@ public class CreateAppEngineStandardWtpProjectTest {
   }
 
   @Test
-  public void testFaviconAdded() throws InvocationTargetException, CoreException {
-    new CreateAppEngineStandardWtpProject(config, adaptable).execute(monitor);
-    ProjectUtils.waitForProjects(project); // App Engine runtime is added via a Job, so wait.
-    assertTrue("favicon.ico not found", project.getFile("src/main/webapp/favicon.ico").exists());
-  }
-
-  @Test
   public void testAppEngineLibrariesAdded() throws InvocationTargetException, CoreException {
     Library library = new Library(APP_ENGINE_API);
     config.setAppEngineLibraries(Collections.singletonList(library));
-    CreateAppEngineWtpProject creator = new CreateAppEngineStandardWtpProject(config, adaptable);
+    CreateAppEngineWtpProject creator = newCreateAppEngineWtpProject();
     creator.execute(monitor);
 
-    ProjectUtils.waitForProjects(project); // App Engine runtime is added via a Job, so wait.
     assertAppEngineContainerOnClasspath(library);
   }
 
@@ -166,67 +85,12 @@ public class CreateAppEngineStandardWtpProjectTest {
   }
 
   @Test
-  public void testJavaTestSourceOutput() throws InvocationTargetException, CoreException {
-    CreateAppEngineWtpProject creator = new CreateAppEngineStandardWtpProject(config, adaptable);
-    creator.execute(monitor);
-
-    ProjectUtils.waitForProjects(project); // App Engine runtime is added via a Job, so wait.
-    assertCorrectOutputPathForJavaTestSource();
-  }
-
-  private void assertCorrectOutputPathForJavaTestSource() throws JavaModelException {
-    IJavaProject javaProject = JavaCore.create(project);
-    for (IClasspathEntry entry : javaProject.getRawClasspath()) {
-      if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE
-          && containsSegment(entry.getPath(), "test")) {
-        assertNotNull(entry.getOutputLocation());
-        assertEquals("test-classes", entry.getOutputLocation().lastSegment());
-        return;
-      }
-    }
-    fail();
-  }
-
-  private boolean containsSegment(IPath path, String segment) {
-    return Arrays.asList(path.segments()).contains(segment);
-  }
-
-  @Test
-  public void testNoTestClassesInDeploymentAssembly()
-      throws InvocationTargetException, CoreException {
-    CreateAppEngineWtpProject creator = new CreateAppEngineStandardWtpProject(config, adaptable);
-    creator.execute(monitor);
-
-    ProjectUtils.waitForProjects(project); // App Engine runtime is added via a Job, so wait.
-    assertNoTestClassesInDeploymentAssembly();
-  }
-
-  private void assertNoTestClassesInDeploymentAssembly() throws CoreException {
-    StructureEdit core = StructureEdit.getStructureEditForRead(project);
-    WorkbenchComponent component = core.getComponent();
-    assertNotNull(component);
-
-    boolean seenMainSourcePath = false;
-    List<ComponentResource> resources = component.getResources();
-    for (ComponentResource resource : resources) {
-      assertFalse(containsSegment(resource.getSourcePath(), "test"));
-
-      if (resource.getSourcePath().equals(new Path("/src/main/java"))
-          && resource.getRuntimePath().equals(new Path("/WEB-INF/classes"))) {
-        seenMainSourcePath = true;
-      }
-    }
-    assertTrue(seenMainSourcePath);
-  }
-
-  @Test
   public void testNullConfig() {
     try {
-      new CreateAppEngineStandardWtpProject(null, adaptable);
+      new CreateAppEngineStandardWtpProject(null, mock(IAdaptable.class));
       Assert.fail("allowed null config");
     } catch (NullPointerException ex) {
       // success
     }
   }
-
 }

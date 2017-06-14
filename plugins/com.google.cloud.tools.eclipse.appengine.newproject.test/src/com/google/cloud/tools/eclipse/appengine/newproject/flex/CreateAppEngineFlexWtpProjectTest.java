@@ -16,8 +16,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject.flex;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -26,35 +24,24 @@ import static org.mockito.Mockito.when;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.LibraryFile;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.MavenCoordinates;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
-import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectConfig;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
-import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
-import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
-import com.google.cloud.tools.eclipse.util.MavenUtils;
+import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProjectTest;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.concurrent.TimeUnit;
 import org.apache.maven.artifact.Artifact;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.jst.j2ee.classpathdep.IClasspathDependencyConstants;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -66,25 +53,17 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 @RunWith(MockitoJUnitRunner.class)
-public class CreateAppEngineFlexWtpProjectTest {
-
-  @Rule public ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
+public class CreateAppEngineFlexWtpProjectTest extends CreateAppEngineWtpProjectTest {
 
   @Rule public TemporaryFolder tempFolder = new TemporaryFolder();
 
   @Mock private ILibraryRepositoryService repositoryService;
 
-  private final IProgressMonitor monitor = new NullProgressMonitor();
-  private final AppEngineProjectConfig config = new AppEngineProjectConfig();
-  private IProject project;
-
+  @Override
   @Before
-  public void setUp() throws IOException, CoreException {
+  public void setUp() throws Exception {
+    super.setUp();
     mockRepositoryService();
-
-    IWorkspace workspace = ResourcesPlugin.getWorkspace();
-    project = workspace.getRoot().getProject("testproject" + Math.random());
-    config.setProject(project);
   }
 
   private void mockRepositoryService() throws IOException, CoreException {
@@ -113,17 +92,14 @@ public class CreateAppEngineFlexWtpProjectTest {
         });
   }
 
-  @After
-  public void tearDown() throws CoreException {
-    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1945
-    ProjectUtils.waitForProjects(project);
-    project.delete(true, monitor);
+  @Override
+  protected CreateAppEngineWtpProject newCreateAppEngineWtpProject() {
+    return new CreateAppEngineFlexWtpProject(config, mock(IAdaptable.class), repositoryService);
   }
 
   @Test
   public void testServletApi31Added() throws InvocationTargetException, CoreException {
-    CreateAppEngineWtpProject creator =
-        new CreateAppEngineFlexWtpProject(config, mock(IAdaptable.class), repositoryService);
+    CreateAppEngineWtpProject creator = newCreateAppEngineWtpProject();
     creator.execute(monitor);
 
     assertTrue(project.getFile("lib/fake-servlet-api-3.1.jar").exists());
@@ -163,71 +139,11 @@ public class CreateAppEngineFlexWtpProjectTest {
 
   @Test
   public void testDynamicWebModuleFacet31Added() throws InvocationTargetException, CoreException {
-    CreateAppEngineWtpProject creator =
-        new CreateAppEngineFlexWtpProject(config, mock(IAdaptable.class), repositoryService);
+    CreateAppEngineWtpProject creator = newCreateAppEngineWtpProject();
     creator.execute(monitor);
 
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);
     assertTrue(facetedProject.hasProjectFacet(WebFacetUtils.WEB_31));
   }
 
-  @Test
-  public void testNoMavenNatureByDefault() throws InvocationTargetException, CoreException {
-    assertFalse(config.getUseMaven());
-    CreateAppEngineWtpProject creator =
-        new CreateAppEngineFlexWtpProject(config, mock(IAdaptable.class), repositoryService);
-    creator.execute(monitor);
-
-    assertFalse(project.hasNature(MavenUtils.MAVEN2_NATURE_ID));
-    assertTrue(project.getFolder("build").exists());
-    assertOutputDirectory("build/classes");
-  }
-
-  @Test
-  public void testMavenNatureEnabled() throws InvocationTargetException, CoreException {
-    config.setUseMaven("my.group.id", "my-artifact-id", "12.34.56");
-
-    CreateAppEngineWtpProject creator =
-        new CreateAppEngineFlexWtpProject(config, mock(IAdaptable.class), repositoryService);
-    creator.execute(monitor);
-    ProjectUtils.waitForProjects(project);
-
-    assertTrue(project.hasNature(MavenUtils.MAVEN2_NATURE_ID));
-    assertFalse(project.getFolder("build").exists());
-    assertOutputDirectory("target/my-artifact-id-12.34.56/WEB-INF/classes");
-  }
-
-  private void assertOutputDirectory(String expected) throws JavaModelException {
-    assertTrue(project.getFolder(expected).exists());
-    IJavaProject javaProject = JavaCore.create(project);
-    assertEquals(new Path(expected), javaProject.getOutputLocation().removeFirstSegments(1));
-  }
-
-  @Test
-  public void testJUnit4ClasspathIfNotUsingMaven() throws InvocationTargetException, CoreException {
-    CreateAppEngineWtpProject creator =
-        new CreateAppEngineFlexWtpProject(config, mock(IAdaptable.class), repositoryService);
-    creator.execute(monitor);
-    assertTrue(hasJUnit4Classpath(project));
-  }
-
-  @Test
-  public void testNoJUnit4ClasspathIfUsingMaven() throws InvocationTargetException, CoreException {
-    config.setUseMaven("my.group.id", "my-artifact-id", "12.34.56");
-
-    CreateAppEngineWtpProject creator =
-        new CreateAppEngineFlexWtpProject(config, mock(IAdaptable.class), repositoryService);
-    creator.execute(monitor);
-    assertFalse(hasJUnit4Classpath(project));
-  }
-
-  private static boolean hasJUnit4Classpath(IProject project) throws JavaModelException {
-    IJavaProject javaProject = JavaCore.create(project);
-    for (IClasspathEntry entry : javaProject.getRawClasspath()) {
-      if (entry.getPath().equals(JUnitCore.JUNIT4_CONTAINER_PATH)) {
-        return true;
-      }
-    }
-    return false;
-  }
 }

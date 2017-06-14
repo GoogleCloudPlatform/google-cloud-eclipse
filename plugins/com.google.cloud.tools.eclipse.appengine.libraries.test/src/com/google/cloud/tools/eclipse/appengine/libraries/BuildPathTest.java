@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
+import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.core.resources.IProject;
@@ -25,80 +26,80 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 public class BuildPathTest {
 
+  @Rule public TestProjectCreator projectCreator = new TestProjectCreator()
+      .withFacetVersions(JavaFacet.VERSION_1_7);
+
   private final List<Library> libraries = new ArrayList<>();
-  private final IJavaProject project = Mockito.mock(IJavaProject.class);
+  private final IProgressMonitor monitor = new NullProgressMonitor();
+  private IJavaProject project;
+  private int initialClasspathSize;
+
+  @Before
+  public void setUp() throws JavaModelException {
+    project = projectCreator.getJavaProject();
+    initialClasspathSize = project.getRawClasspath().length;
+  }
 
   @Test
   public void testAddLibraries_emptyList() throws CoreException {
     IProject project = null;
-    BuildPath.addLibraries(project, libraries, new NullProgressMonitor());
+    BuildPath.addLibraries(project, libraries, monitor);
   }
 
   @Test
   public void testAddLibraries() throws CoreException {
-    IClasspathEntry[] rawClasspath = new IClasspathEntry[0];
-    Mockito.when(project.getRawClasspath()).thenReturn(rawClasspath);
-
     Library library = new Library("libraryId");
     libraries.add(library);
-    IClasspathEntry[] result =
-        BuildPath.addLibraries(project, libraries, new NullProgressMonitor());
+    IClasspathEntry[] result = BuildPath.addLibraries(project, libraries, monitor);
     Assert.assertEquals(1, result.length);
-
-    Mockito.verify(project)
-        .setRawClasspath(Mockito.any(IClasspathEntry[].class), Mockito.any(IProgressMonitor.class));
+    Assert.assertEquals(initialClasspathSize + 1, project.getRawClasspath().length);
   }
 
   @Test
   public void testListAdditionalLibraries() throws CoreException {
-    IClasspathEntry[] rawClasspath = new IClasspathEntry[0];
-    Mockito.when(project.getRawClasspath()).thenReturn(rawClasspath);
-
     Library library = new Library("libraryId");
     libraries.add(library);
-    IClasspathEntry[] result =
-        BuildPath.listAdditionalLibraries(project, libraries, new NullProgressMonitor());
+    IClasspathEntry[] result = BuildPath.listAdditionalLibraries(project, libraries, monitor);
     Assert.assertEquals(1, result.length);
-
-    Mockito.verify(project, Mockito.never())
-        .setRawClasspath(Mockito.any(IClasspathEntry[].class), Mockito.any(IProgressMonitor.class));
+    Assert.assertEquals(initialClasspathSize, project.getRawClasspath().length);
   }
 
   @Test
   public void testAddLibraries_noDuplicates() throws CoreException {
     Library library = new Library("libraryId");
-    IClasspathEntry entry = BuildPath.makeClasspathEntry(library);
-    IClasspathEntry[] rawClasspath = {entry};
-    Mockito.when(project.getRawClasspath()).thenReturn(rawClasspath);
-
     libraries.add(library);
-    IClasspathEntry[] result =
-        BuildPath.addLibraries(project, libraries, new NullProgressMonitor());
+    IClasspathEntry[] setup = BuildPath.addLibraries(project, libraries, monitor);
+    Assert.assertEquals(1, setup.length);
+
+    IClasspathEntry[] result = BuildPath.addLibraries(project, libraries, monitor);
     Assert.assertEquals(0, result.length);
+    Assert.assertEquals(initialClasspathSize + 1, project.getRawClasspath().length);
   }
 
   @Test
   public void testAddLibraries_withDuplicates() throws CoreException {
     Library library1 = new Library("library1");
-    Library library2 = new Library("library2");
-    IClasspathEntry entry = BuildPath.makeClasspathEntry(library1);
-
-    IClasspathEntry[] rawClasspath = {entry};
-    Mockito.when(project.getRawClasspath()).thenReturn(rawClasspath);
-
     libraries.add(library1);
+    IClasspathEntry[] setup = BuildPath.addLibraries(project, libraries, monitor);
+    Assert.assertEquals(1, setup.length);
+
+    Library library2 = new Library("library2");
     libraries.add(library2);
-    IClasspathEntry[] result =
-        BuildPath.addLibraries(project, libraries, new NullProgressMonitor());
+    IClasspathEntry[] result = BuildPath.addLibraries(project, libraries, monitor);
+
     Assert.assertEquals(1, result.length);
     Assert.assertTrue(result[0].getPath().toString()
         .endsWith("com.google.cloud.tools.eclipse.appengine.libraries/library2"));
+    Assert.assertEquals(initialClasspathSize + 2, project.getRawClasspath().length);
   }
 
 }

@@ -70,14 +70,14 @@ public class BaseProjectTest {
   /**
    * Returns the named project; it may not yet exist.
    */
-  protected IProject findProject(String projectName) {
+  protected static IProject findProject(String projectName) {
     return ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
   }
 
   /**
    * Return true if a project with the given name exists.
    */
-  protected boolean projectExists(String projectName) {
+  protected static boolean projectExists(String projectName) {
     IProject project = findProject(projectName);
     return project.exists();
   }
