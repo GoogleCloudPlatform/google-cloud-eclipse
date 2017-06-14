@@ -71,6 +71,27 @@ public class AppEngineFlexFacetTest {
   }
 
   @Test
+  public void testInstallConstraints_okWithJava7Servlet25() {
+    IConstraint constraint = AppEngineFlexFacet.FACET_VERSION.getConstraint();
+    IStatus result = constraint.check(Arrays.asList(JavaFacet.VERSION_1_8, WebFacetUtils.WEB_25));
+    Assert.assertTrue(result.isOK());
+  }
+
+  @Test
+  public void testInstallConstraints_okWithJava7Servlet30() {
+    IConstraint constraint = AppEngineFlexFacet.FACET_VERSION.getConstraint();
+    IStatus result = constraint.check(Arrays.asList(JavaFacet.VERSION_1_8, WebFacetUtils.WEB_30));
+    Assert.assertTrue(result.isOK());
+  }
+
+  @Test
+  public void testInstallConstraints_okWithJava7Servlet31() {
+    IConstraint constraint = AppEngineFlexFacet.FACET_VERSION.getConstraint();
+    IStatus result = constraint.check(Arrays.asList(JavaFacet.VERSION_1_8, WebFacetUtils.WEB_31));
+    Assert.assertTrue(result.isOK());
+  }
+
+  @Test
   public void testInstallConstraints_okWithJava8Servlet25() {
     IConstraint constraint = AppEngineFlexFacet.FACET_VERSION.getConstraint();
     IStatus result = constraint.check(Arrays.asList(JavaFacet.VERSION_1_8, WebFacetUtils.WEB_25));
@@ -106,14 +127,7 @@ public class AppEngineFlexFacetTest {
   }
 
   @Test
-  public void testInstallConstraints_notOkWithJava7Servlet31() {
-    IConstraint constraint = AppEngineFlexFacet.FACET_VERSION.getConstraint();
-    IStatus result = constraint.check(Arrays.asList(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_31));
-    Assert.assertFalse(result.isOK());
-  }
-
-  @Test
-  public void testInstallConstraints_notOkWithJava8Servlet24() {
+  public void testInstallConstraints_notOkWithServlet24() {
     IConstraint constraint = AppEngineFlexFacet.FACET_VERSION.getConstraint();
     IStatus result = constraint.check(Arrays.asList(JavaFacet.VERSION_1_8, WebFacetUtils.WEB_24));
     Assert.assertFalse(result.isOK());
