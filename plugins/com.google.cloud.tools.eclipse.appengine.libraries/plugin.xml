@@ -283,7 +283,7 @@
           siteUri="https://cloud.google.com/appengine/docs/admin-api/" >
       <libraryDependency id="googlecloudcore" />
       <libraryFile
-            javadocUri="https://googlecloudplatform.github.io/google-cloud-java/0.10.0/apidocs/">    
+            javadocUri="https://developers.google.com/resources/api-libraries/documentation/appengine/v1/java/latest/">    
         <mavenCoordinates
               artifactId="google-api-services-appengine"
               groupId="com.google.apis"
