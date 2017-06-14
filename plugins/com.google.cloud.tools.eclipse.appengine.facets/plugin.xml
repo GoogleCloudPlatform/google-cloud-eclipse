@@ -113,14 +113,32 @@
   <!-- begin App Engine flex facet -->
   <extension point="org.eclipse.wst.common.project.facet.core.facets">
     <project-facet id="com.google.cloud.tools.eclipse.appengine.facets.flex">
-       <label>%flexFacetName</label>
-       <description>%flexFacetDescription</description>
+      <label>%flexFacetName</label>
+      <description>%flexFacetDescription</description>
     </project-facet>
     <project-facet-version facet="com.google.cloud.tools.eclipse.appengine.facets.flex" version="1">
-       <constraint>
+      <constraint>
+        <and>
           <conflicts facet="com.google.cloud.tools.eclipse.appengine.facets.standard"/>
-        </constraint>
+          <requires group="com.google.cloud.tools.eclipse.appengine.facets.flex.constraints.servlet"/>
+          <requires group="com.google.cloud.tools.eclipse.appengine.facets.flex.constraints.jre"/>
+        </and>
+      </constraint>
     </project-facet-version>
+  </extension>
+  <extension point="org.eclipse.wst.common.project.facet.core.groups">
+    <group id="com.google.cloud.tools.eclipse.appengine.facets.flex.constraints.servlet">
+      <label>supported Dynamic Web Module APIs</label>
+      <include facet="jst.web"
+               versions="2.5,3.0,3.1">
+      </include>
+    </group>
+    <group id="com.google.cloud.tools.eclipse.appengine.facets.flex.constraints.jre">
+      <label>supported Java Runtimes</label>
+      <include facet="java"
+               versions="1.8">
+      </include>
+    </group>
   </extension>
 
   <extension point="org.eclipse.wst.common.project.facet.core.facets">
