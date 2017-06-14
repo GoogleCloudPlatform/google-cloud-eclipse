@@ -35,12 +35,14 @@ public class BugReportCommandHandlerTest {
     assertEquals("github.com", url.getHost());
     assertEquals("/GoogleCloudPlatform/google-cloud-eclipse/issues/new", url.getPath());
 
-    Pattern pattern = Pattern.compile("body="
+    // check that values are properly filled in
+    Pattern pattern =
+        Pattern.compile("body=.*"
         + "-\\+Cloud\\+Tools\\+for\\+Eclipse\\+Version%3A\\+(.*)%0A"
         + "-\\+OS%3A\\+(.*)%0A"
-        + "-\\+Java\\+Version%3A\\+(.*)%0A%0A");
+        + "-\\+Java\\+version%3A\\+(.*)%0A%0A");
     Matcher matcher = pattern.matcher(url.getQuery());
-    assertTrue(matcher.matches());
+    assertTrue(matcher.find());
     String toolVersion = matcher.group(1);
     String os = matcher.group(2);
     String javaVersion = matcher.group(3);
