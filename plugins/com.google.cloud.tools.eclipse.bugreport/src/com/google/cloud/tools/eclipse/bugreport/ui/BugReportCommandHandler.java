@@ -35,7 +35,7 @@ public class BugReportCommandHandler extends AbstractHandler {
   // should be kept up to date with .github/ISSUE_TEMPLATE.md
   private static final String BODY_TEMPLATE =
       "(please ensure you are running the latest version of CT4E with _Help > Check for Updates_)\n"
-      + "- Cloud Tools for Eclipse Version: {0}\n"
+      + "- Cloud Tools for Eclipse version: {0}\n"
       + "- OS: {1} {2}\n"
       + "- Java version: {3}\n"
       + "\n"

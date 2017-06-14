@@ -39,7 +39,7 @@ public class BugReportCommandHandlerTest {
     // check that values are properly filled in
     Pattern pattern = Pattern.compile("body="
         + "%28please\\+ensure\\+you\\+are\\+running\\+the\\+latest\\+version\\+of\\+CT4E\\+with\\+_Help\\+%3E\\+Check\\+for\\+Updates_%29%0A"
-        + "-\\+Cloud\\+Tools\\+for\\+Eclipse\\+Version%3A\\+(.*)%0A"
+        + "-\\+Cloud\\+Tools\\+for\\+Eclipse\\+version%3A\\+(.*)%0A"
         + "-\\+OS%3A\\+(.*)%0A"
         + "-\\+Java\\+version%3A\\+(.*)%0A%0A"
         + "\\*\\*What\\+did\\+you\\+do%3F\\*\\*%0A%0A" 
