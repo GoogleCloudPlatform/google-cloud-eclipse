@@ -10,4 +10,4 @@
 
 **What did you see instead?**
 
-(Screenshots are helpful)
+(screenshots are helpful)
