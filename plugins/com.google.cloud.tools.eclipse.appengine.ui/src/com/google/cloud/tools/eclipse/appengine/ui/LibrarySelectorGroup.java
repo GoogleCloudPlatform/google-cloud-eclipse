@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.eclipse.core.runtime.ListenerList;
-import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -62,7 +61,7 @@ public class LibrarySelectorGroup implements ISelectionProvider {
     Collection<Library> availableLibraries = CloudLibraries.getLibraries(groupName);
     Preconditions.checkNotNull(parentContainer, "parentContainer is null");
     Preconditions.checkNotNull(availableLibraries, "availableLibraries is null");
-    
+
     this.availableLibraries = new LinkedHashMap<>();
     for (Library library : availableLibraries) {
       this.availableLibraries.put(library.getId(), library);
@@ -73,7 +72,6 @@ public class LibrarySelectorGroup implements ISelectionProvider {
   private void createContents(Composite parentContainer) {
     Group apiGroup = new Group(parentContainer, SWT.NONE);
     apiGroup.setText(Messages.getString("appengine.libraries.group"));
-    GridDataFactory.fillDefaults().span(2, 1).applyTo(apiGroup);
 
     for (Library library : availableLibraries.values()) {
       Button libraryButton = new Button(apiGroup, SWT.CHECK);
@@ -85,7 +83,7 @@ public class LibrarySelectorGroup implements ISelectionProvider {
       libraryButton.addSelectionListener(new ManualSelectionTracker());
       libraryButtons.put(library, libraryButton);
     }
-    GridLayoutFactory.fillDefaults().applyTo(apiGroup);
+    GridLayoutFactory.swtDefaults().generateLayout(apiGroup);
   }
 
   /**

@@ -34,7 +34,7 @@ import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.server.core.IRuntime;
 
 /**
- * Supply Java standard classes, specifically servlet-api.jar and jsp-api.jar,
+ * Supply Java servlet container classes, specifically servlet-api.jar and jsp-api.jar,
  * to non-Maven projects.
  * <p>
  * The jars are resolved using {@link ILibraryRepositoryService}.
@@ -47,7 +47,7 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
   private static final IProjectFacetVersion DEFAULT_DYNAMIC_WEB_VERSION = WebFacetUtils.WEB_25;
 
   private static final Logger logger = Logger.getLogger(ServletClasspathProvider.class.getName());
-  
+
   @Inject
   private ILibraryClasspathContainerResolverService resolverService;
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde?>
 <!-- generated with https://github.com/mbarbero/fr.obeo.releng.targetplatform -->
-<target name="GCP for Eclipse Mars" sequenceNumber="1492180482">
+<target name="GCP for Eclipse Mars" sequenceNumber="1497382992">
   <locations>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
       <unit id="org.eclipse.license.feature.group" version="1.0.1.v20140414-1359"/>
@@ -23,11 +23,6 @@
       <unit id="org.eclipse.jetty.server" version="9.2.13.v20150730"/>
       <unit id="org.eclipse.jetty.util" version="9.2.13.v20150730"/>
       <repository location="http://download.eclipse.org/releases/mars/"/>
-    </location>
-    <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
-      <unit id="org.eclipse.epp.logging.aeri.feature.feature.group" version="2.0.4.v20170307-1435"/>
-      <unit id="org.eclipse.epp.logging.aeri.feature.source.feature.group" version="2.0.4.v20170307-1435"/>
-      <repository location="http://download.eclipse.org/technology/epp/logging/stable/"/>
     </location>
     <location includeMode="planner" includeAllPlatforms="false" includeSource="true" includeConfigurePhase="false" type="InstallableUnit">
       <unit id="org.eclipse.jst.web_sdk.feature.feature.group" version="3.7.1.v201512021921"/>

@@ -71,6 +71,22 @@ public class CodeTemplatesTest {
   }
 
   @Test
+  public void testMaterializeAppEngineStandardFiles_noPomXml() throws CoreException {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
+    assertFalse(project.getFile("pom.xml").exists());
+  }
+
+  @Test
+  public void testMaterializeAppEngineStandardFiles_pomXmlIfEnablingMaven()
+      throws CoreException, ParserConfigurationException, SAXException, IOException {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    config.setUseMaven("my.project.group.id", "my-project-artifact-id", "98.76.54");
+    CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
+    validatePomXml();
+  }
+
+  @Test
   public void testMaterializeAppEngineFlexFiles()
       throws CoreException, ParserConfigurationException, SAXException, IOException {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
