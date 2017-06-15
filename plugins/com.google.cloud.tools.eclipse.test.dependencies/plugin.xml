@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <!--
+    Commonly-referenced XSD included to help deflake our tests,
+    as XML validation may attempt to download the schemas 
+    -->
+   <extension
+         point="org.eclipse.wst.xml.core.catalogContributions">
+      <catalogContribution>
+         <uri
+               name="http://java.sun.com/xml/ns/javaee/javaee_5.xsd"
+               uri="xsd/javaee_5.xsd">
+         </uri>
+         <uri
+               name="http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+               uri="xsd/web-app_3_1.xsd">
+         </uri>
+         <uri
+               name="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+               uri="xsd/web-app_2_5.xsd">
+         </uri>
+         <uri
+               name="http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+               uri="xsd/web-app_3_0.xsd">
+         </uri>
+      </catalogContribution>
+   </extension>
+
+</plugin>
