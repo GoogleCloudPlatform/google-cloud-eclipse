@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.test.util.project;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import com.google.cloud.tools.eclipse.test.util.reflection.ReflectionUtil;
 import com.google.common.base.Joiner;
 import com.google.common.base.Stopwatch;
 import java.io.File;
@@ -31,8 +32,11 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import org.eclipse.core.resources.IMarker;
@@ -47,6 +51,7 @@ import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
@@ -166,6 +171,29 @@ public class ProjectUtils {
     sb.append(problem.getAttribute(IMarker.LINE_NUMBER, -1));
     sb.append(": ");
     sb.append(problem.getAttribute(IMarker.MESSAGE, ""));
+
+    // Made up from
+    // org.eclipse.wst.xml.ui.internal.validation.core.errorinfo.ReferencedFileErrorsHandler
+    try {
+      // ValidationMessage.ERROR_MESSAGE_MAP_QUALIFIED_NAME);
+      Map<?, ?> map = (Map<?, ?>) problem.getResource().getSessionProperty(
+          new QualifiedName("org.eclipse.wst.xml.validation", "errorMessageMap"));
+      if (map != null) {
+        String groupName = (String) problem.getAttribute("groupName"); //$NON-NLS-1$
+        Pattern pattern = Pattern.compile("referencedFileError\\((.*)\\)");
+        Matcher match = pattern.matcher(groupName);
+        if (match.find()) {
+          String uri = match.group(1);
+          Object message = map.get(uri); // should be ValidationMessage
+          if (message != null) {
+            List<?> messages = ReflectionUtil.invoke(message, "getNestedMessages", List.class);
+            Joiner.on("; ").appendTo(sb, messages);
+          }
+        }
+      }
+    } catch (Exception ex) {
+      /* ignore */
+    }
     return sb.toString();
   }
 
