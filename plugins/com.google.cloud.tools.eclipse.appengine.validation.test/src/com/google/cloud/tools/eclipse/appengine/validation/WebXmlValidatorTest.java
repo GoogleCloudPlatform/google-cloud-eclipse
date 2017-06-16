@@ -27,7 +27,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
-import org.junit.Ignore;
+import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -42,11 +42,14 @@ public class WebXmlValidatorTest {
 
   private final WebXmlValidator validator = new WebXmlValidator();
 
-  // Ignore? See https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2049 and
-  // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2044
-  @Ignore
+  // TODO: remove "Assume": https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2049
+  // and https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2044
   @Test
   public void testValidateJavaServlet() throws ParserConfigurationException {
+    Assume.assumeTrue("Cannot be run with Java 8 support",
+        AppEngineStandardFacet.FACET_VERSION.conflictsWith(JavaFacet.VERSION_1_8)
+        && AppEngineStandardFacet.FACET_VERSION.conflictsWith(WebFacetUtils.WEB_31));
+
     DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
     DocumentBuilder documentBuilder = builderFactory.newDocumentBuilder();
     Document document = documentBuilder.newDocument();
