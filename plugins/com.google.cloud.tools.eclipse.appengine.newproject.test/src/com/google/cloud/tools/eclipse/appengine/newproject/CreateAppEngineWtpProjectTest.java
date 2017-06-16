@@ -97,6 +97,7 @@ abstract public class CreateAppEngineWtpProjectTest {
   public void testUnitTestCreated() throws InvocationTargetException, CoreException {
     CreateAppEngineWtpProject creator = newCreateAppEngineWtpProject();
     creator.execute(monitor);
+    ProjectUtils.waitForProjects(project);
 
     assertJunitAndHamcrestAreOnClasspath();
   }
