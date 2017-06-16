@@ -42,7 +42,8 @@
             runtime="true"
             runtimeTypeId="com.google.cloud.tools.eclipse.appengine.standard.runtime"
             startBeforePublish="false"
-            supportsRemoteHosts="true">
+            supportsRemoteHosts="true"
+            synchronousStart="true">
       </serverType>
    </extension>
 
@@ -321,5 +322,14 @@
             class="com.google.cloud.tools.eclipse.appengine.localserver.ui.CloudSdkDebugTargetPresentation"
             id="com.google.cloud.tools.eclipse.appengine.localserver.cloudSdkDebugTarget">
       </debugModelPresentation>
+   </extension>
+   <extension
+         point="org.eclipse.debug.core.statusHandlers">
+      <statusHandler
+            class="com.google.cloud.tools.eclipse.appengine.localserver.ui.StaleResourcesStatusHandler"
+            code="255"
+            id="com.google.cloud.tools.eclipse.appengine.localserver.statusHandlers.staleResources"
+            plugin="com.google.cloud.tools.eclipse.appengine.localserver">
+      </statusHandler>
    </extension>
 </plugin>

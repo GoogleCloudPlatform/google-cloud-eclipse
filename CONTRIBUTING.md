@@ -2,6 +2,16 @@
 
 Pull requests are welcome.
 
+## Filing Issues
+
+When filing an issue, please ensure you are running the latest version of CT4E, and
+answer these questions:
+
+  1. What version of Eclipse are you using?
+  2. What version of Java are you using?
+  3. What did you do?
+  4. What did you expect to see?
+  5. What did you see instead?
 
 ## Contributor License Agreements
 

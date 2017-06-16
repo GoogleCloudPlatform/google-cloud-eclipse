@@ -22,6 +22,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.PlatformUI;
 
 public class AppEngineStandardWizardPage extends AppEngineWizardPage {
+
   public AppEngineStandardWizardPage() {
     super(true);
     setTitle(Messages.getString("app.engine.standard.project")); //$NON-NLS-1$

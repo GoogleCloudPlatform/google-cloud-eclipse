@@ -39,6 +39,7 @@ public class SourceAttacherJobTest {
 
   private SourceAttacherJob attacherJob;
 
+  @SuppressWarnings("unchecked")
   @Before
   public void setUp() {
     IPath path = mock(IPath.class);
@@ -47,6 +48,7 @@ public class SourceAttacherJobTest {
     attacherJob = new SourceAttacherJob(javaProject, path, path, mock(Callable.class));
   }
 
+  @SuppressWarnings("unchecked")
   @Test
   public void testAttachSource_normalExecutionOnLibraryClasspathContainer() throws Exception {
     LibraryClasspathContainer validContainer = mock(LibraryClasspathContainer.class);

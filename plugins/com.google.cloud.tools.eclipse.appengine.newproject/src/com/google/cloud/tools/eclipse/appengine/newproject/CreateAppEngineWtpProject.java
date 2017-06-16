@@ -18,9 +18,9 @@ package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import com.google.cloud.tools.eclipse.appengine.libraries.BuildPath;
+import com.google.cloud.tools.eclipse.util.ClasspathUtil;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
-import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.commands.ExecutionException;
@@ -115,15 +115,15 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
       throw new InvocationTargetException(ex);
     }
 
-    if (config.getUseMaven()) {
-      enableMavenNature(newProject, subMonitor.newChild(2));
-    }
-
     addAppEngineFacet(newProject, subMonitor.newChild(4));
 
-    BuildPath.addLibraries(newProject, config.getAppEngineLibraries(), subMonitor.newChild(2));
+    if (config.getUseMaven()) {
+      enableMavenNature(newProject, subMonitor.newChild(2));
+    } else {
+      addJunit4ToClasspath(newProject, subMonitor.newChild(2));
+    }
 
-    addJunit4ToClasspath(newProject, subMonitor.newChild(2));
+    BuildPath.addLibraries(newProject, config.getAppEngineLibraries(), subMonitor.newChild(2));
 
     fixTestSourceDirectorySettings(newProject, subMonitor.newChild(2));
   }
@@ -182,7 +182,6 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
 
   private static void addJunit4ToClasspath(IProject newProject, IProgressMonitor monitor)
       throws CoreException {
-    IJavaProject javaProject = JavaCore.create(newProject);
     IClasspathAttribute nonDependencyAttribute =
         UpdateClasspathAttributeUtil.createNonDependencyAttribute();
     IClasspathEntry junit4Container = JavaCore.newContainerEntry(
@@ -190,10 +189,7 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
         new IAccessRule[0],
         new IClasspathAttribute[] {nonDependencyAttribute},
         false);
-    IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
-    IClasspathEntry[] newRawClasspath = Arrays.copyOf(rawClasspath, rawClasspath.length + 1);
-    newRawClasspath[newRawClasspath.length - 1] = junit4Container;
-    javaProject.setRawClasspath(newRawClasspath, monitor);
+    ClasspathUtil.addClasspathEntry(newProject, junit4Container, monitor);
   }
 
 }
