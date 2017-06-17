@@ -16,6 +16,8 @@
 
 package com.google.cloud.tools.eclipse.test.util;
 
+import com.google.common.base.Function;
+import com.google.common.base.Functions;
 import org.junit.Assert;
 
 /**
@@ -23,18 +25,23 @@ import org.junit.Assert;
  */
 public class ArrayAssertions {
   public static <T> void assertIsEmpty(T[] arr) {
-    assertIsEmpty(null, arr, 120);
+    assertIsEmpty(null, arr, Functions.toStringFunction(), 120);
   }
 
   public static <T> void assertIsEmpty(String message, T[] arr) {
-    assertIsEmpty(message, arr, 120);
+    assertIsEmpty(message, arr, Functions.toStringFunction(), 120);
+  }
+
+  public static <T> void assertIsEmpty(T[] arr, Function<T, String> printer) {
+    assertIsEmpty(null, arr, printer, 120);
   }
 
   /**
    * Assert that {@code arr} is empty; if not, fail with a message showing as many elements will fit
    * until the total message size exceeds {@code maxLength}.
    */
-  public static <T> void assertIsEmpty(String message, T[] arr, int maxLength) {
+  public static <T> void assertIsEmpty(String message, T[] arr, Function<T, String> printer,
+      int maxLength) {
     if (arr == null) {
       Assert.fail("array is null");
     } else if (arr.length != 0) {
@@ -42,10 +49,10 @@ public class ArrayAssertions {
       if (message != null) {
         sb.append(message).append(": ");
       }
-      sb.append('[').append(arr[0]);
+      sb.append('[').append(printer.apply(arr[0]));
       for (int i = 1; i < arr.length && sb.length() < maxLength; i++) {
         sb.append(',');
-        sb.append(arr[i]);
+        sb.append(printer.apply(arr[i]));
       }
       sb.append(']');
       Assert.fail(sb.toString());

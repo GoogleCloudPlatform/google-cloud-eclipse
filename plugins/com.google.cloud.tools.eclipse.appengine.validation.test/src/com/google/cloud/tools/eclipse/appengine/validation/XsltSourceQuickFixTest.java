@@ -25,7 +25,9 @@ import com.google.cloud.tools.eclipse.test.util.ArrayAssertions;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
+import com.google.common.base.Function;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -59,7 +61,7 @@ public class XsltSourceQuickFixTest {
   public void testApply() throws CoreException {
 
     IProject project = appEngineStandardProject.getProject();
-    IFile file = project.getFile("appengine-web.xml");
+    final IFile file = project.getFile("appengine-web.xml");
     file.create(ValidationTestUtils.stringToInputStream(APPLICATION_XML), IFile.FORCE, null);
 
     IWorkbench workbench = PlatformUI.getWorkbench();
@@ -86,7 +88,13 @@ public class XsltSourceQuickFixTest {
 
     ProjectUtils.waitForProjects(project);
 
-    ArrayAssertions.assertIsEmpty(file.findMarkers(BLACKLIST_MARKER, true, IResource.DEPTH_ZERO));
+    IMarker[] markers = file.findMarkers(BLACKLIST_MARKER, true, IResource.DEPTH_ZERO);
+    ArrayAssertions.assertIsEmpty(markers, new Function<IMarker, String>() {
+      @Override
+      public String apply(IMarker marker) {
+        return ProjectUtils.formatProblem(marker);
+      }
+    });
   }
 
 }
