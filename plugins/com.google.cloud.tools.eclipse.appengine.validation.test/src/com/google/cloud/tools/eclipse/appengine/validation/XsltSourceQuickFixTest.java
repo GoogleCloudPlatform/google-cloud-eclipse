@@ -61,7 +61,7 @@ public class XsltSourceQuickFixTest {
   public void testApply() throws CoreException {
 
     IProject project = appEngineStandardProject.getProject();
-    final IFile file = project.getFile("appengine-web.xml");
+    IFile file = project.getFile("appengine-web.xml");
     file.create(ValidationTestUtils.stringToInputStream(APPLICATION_XML), IFile.FORCE, null);
 
     IWorkbench workbench = PlatformUI.getWorkbench();
