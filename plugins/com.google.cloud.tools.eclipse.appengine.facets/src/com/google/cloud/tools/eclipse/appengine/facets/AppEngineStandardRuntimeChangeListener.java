@@ -59,15 +59,13 @@ public class AppEngineStandardRuntimeChangeListener implements IFacetedProjectLi
 
     @Override
     protected IStatus run(IProgressMonitor monitor) {
-      IStatus installStatus = Status.OK_STATUS;
-
       try {
         AppEngineStandardFacet.installAppEngineFacet(facetedProject,
             false /* installDependentFacets */, monitor);
-        return installStatus;
+        return Status.OK_STATUS;
       } catch (CoreException ex1) {
         // Displays missing constraints that prevented facet installation
-        installStatus = ex1.getStatus();
+        IStatus installStatus = ex1.getStatus();
 
         // Remove App Engine as primary runtime
         try {
