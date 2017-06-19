@@ -104,8 +104,8 @@ public class XmlValidatorTest {
     IProject project = dynamicWebProjectCreator.getProject();
     IFile file = project.getFile("src/bad.xml");
     file.create(new ByteArrayInputStream(badXml), true, null);
+    ProjectUtils.waitForProjects(project);  // Wait until Eclipse puts an error marker.
 
-    ProjectUtils.waitForProjects(project);
     IMarker[] markers = file.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
     assertEquals(1, markers.length);
 
@@ -146,7 +146,7 @@ public class XmlValidatorTest {
     IFile file = project.getFile("WebContent/WEB-INF/appengine-web.xml");
     file.setContents(
         new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)), true, false, null);
-    ProjectUtils.waitForProjects(project);
+    ProjectUtils.waitForProjects(project);   // Wait until Eclipse puts an error marker.
 
     String problemMarker = "org.eclipse.core.resources.problemmarker";
     IMarker[] markers = file.findMarkers(problemMarker, true, IResource.DEPTH_ZERO);

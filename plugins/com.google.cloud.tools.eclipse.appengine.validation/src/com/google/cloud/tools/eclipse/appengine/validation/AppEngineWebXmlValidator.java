@@ -30,8 +30,7 @@ public class AppEngineWebXmlValidator implements XmlValidationHelper {
   @Override
   public ArrayList<BannedElement> checkForElements(IResource resource, Document document) {
     ArrayList<BannedElement> blacklist = new ArrayList<>();
-    ArrayList<String> blacklistedElements =
-        AppEngineWebBlacklist.getBlacklistElements();
+    ArrayList<String> blacklistedElements = AppEngineWebBlacklist.getBlacklistElements();
     for (String elementName : blacklistedElements) {
       NodeList nodeList = document.getElementsByTagName(elementName);
       for (int i = 0; i < nodeList.getLength(); i++) {
@@ -40,8 +39,7 @@ public class AppEngineWebXmlValidator implements XmlValidationHelper {
         AppEngineBlacklistElement element = new AppEngineBlacklistElement(
             elementName,
             userData,
-            node.getTextContent().length()
-            );
+            node.getTextContent().length());
         blacklist.add(element);
       }
     }
