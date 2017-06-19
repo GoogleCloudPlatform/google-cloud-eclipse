@@ -17,8 +17,8 @@
 package com.google.cloud.tools.eclipse.appengine.validation;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
@@ -66,29 +66,27 @@ public class XmlValidatorTest {
   @Test
   public void testValidate_appEngineStandard() {
     IProject project = appEngineStandardProjectCreator.getProject();
-    IFile file = project.getFile("src/main/webapp/WEB-INF/web.xml");
-    ValidationFramework framework = ValidationFramework.getDefault();
-    Validator[] validators = framework.getValidatorsFor(file);
-    for (Validator validator : validators) {
-      if ("com.google.cloud.tools.eclipse.appengine.validation.webXmlValidator"
-          .equals(validator.getId())) {
-        return;
-      }
-    }
-    fail("webXmlValidator isn't applied to web.xml");
+    assertTrue("webXmlValidator should be applied to web.xml", webXmlValidatorApplied(project));
   }
 
   @Test
   public void testValidate_dynamicWebProject() {
+    IProject project = dynamicWebProjectCreator.getProject();
+    assertFalse("webXmlValidator should not be applied in jst.web project",
+        webXmlValidatorApplied(project));
+  }
+
+  private static boolean webXmlValidatorApplied(IProject project) {
+    IFile webXml = project.getFile("web.xml");
     ValidationFramework framework = ValidationFramework.getDefault();
-    IFile webXml = dynamicWebProjectCreator.getProject().getFile("WebContent/WEB-INF/web.xml");
     Validator[] validators = framework.getValidatorsFor(webXml);
     for (Validator validator : validators) {
       if ("com.google.cloud.tools.eclipse.appengine.validation.webXmlValidator"
           .equals(validator.getId())) {
-        fail("webXmlValidator should not be applied in jst.web project");
+        return true;
       }
     }
+    return false;
   }
 
   @Test
