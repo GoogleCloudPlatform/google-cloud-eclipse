@@ -90,7 +90,7 @@ public class AppEngineStandardRuntimeChangeListener implements IFacetedProjectLi
       return;
     }
 
-    // Add the App Engine facet if the project doesn't have it.
+    // Check if the App Engine facet has been installed in the project, and add the facet if not.
     IFacetedProject facetedProject = runtimeChangeEvent.getProject();
     if (!AppEngineStandardFacet.hasFacet(facetedProject)) {
       Job addFacetJob = new InstallAppEngineFacetJob(facetedProject, newRuntime);
