@@ -52,12 +52,13 @@ public class NewMavenBasedAppEngineProjectWizardTest extends BaseProjectTest {
   public void testHelloWorld() throws Exception {
     String[] projectFiles =
         {"src/main/webapp/WEB-INF/appengine-web.xml", "src/main/webapp/WEB-INF/web.xml", "pom.xml"};
-    createAndCheck("appWithPackageProject", null, "com.example.baz", "Hello World template",
-        projectFiles);
+    createAndCheck("appWithPackageProject", null, "com.example.baz", projectFiles);
+    assertEquals("1.7", getPomProperty(project, "maven.compiler.source"));
+    assertEquals("1.7", getPomProperty(project, "maven.compiler.target"));
   }
 
   @Test
-  public void testHelloWorldInTemp() throws Exception {
+  public void testHelloWorld_nonDefaultLocation() throws Exception {
     File location = File.createTempFile("maven", "dir");
     assertTrue("Unable to remove temp file", location.delete());
     assertTrue("Unable to turn temp location -> dir", location.mkdir());
@@ -65,17 +66,7 @@ public class NewMavenBasedAppEngineProjectWizardTest extends BaseProjectTest {
     String[] projectFiles =
         {"src/main/webapp/WEB-INF/appengine-web.xml", "src/main/webapp/WEB-INF/web.xml", "pom.xml"};
     createAndCheck("appWithPackageProjectInTemp", location.getAbsolutePath(), "com.example.foo",
-        "Hello World template", projectFiles);
-  }
-
-  @Test
-  public void testGuestbookExample() throws Exception {
-    String[] projectFiles = {"src/main/webapp/guestbook.jsp",
-        "src/main/webapp/WEB-INF/appengine-web.xml", "src/main/webapp/WEB-INF/web.xml", "pom.xml"};
-    createAndCheck("guestbookExampleProject", null, "com.example.bar", "Guestbook example",
         projectFiles);
-    // no projectId then archetypes use artifactID
-    assertEquals("guestbookExampleProject", getPomProperty(project, "app.id"));
   }
 
   private static String getPomProperty(IProject project, String propertyName)
@@ -86,17 +77,15 @@ public class NewMavenBasedAppEngineProjectWizardTest extends BaseProjectTest {
   }
 
   /** Create a project with the given parameters. */
-  private void createAndCheck(String artifactId, String location,
-      String packageName, String archetypeDescription, String[] projectFiles)
-      throws CoreException, IOException {
+  private void createAndCheck(String artifactId, String location, String packageName,
+      String[] projectFiles) throws CoreException {
     assertFalse(projectExists(artifactId));
 
-    project = SwtBotAppEngineActions.createMavenWebAppProject(bot, location,
-        "com.google.groupId", artifactId, packageName, archetypeDescription);
+    project = SwtBotAppEngineActions.createMavenWebAppProject(bot, artifactId, location,
+        packageName, "com.google.groupId", artifactId);
     assertTrue(project.exists());
     if (location != null) {
-      assertEquals(new File(location).getCanonicalPath(),
-          project.getLocation().toFile().getParentFile().getCanonicalPath());
+      assertEquals(new File(location).toPath(), project.getLocation().toFile().toPath());
     }
 
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);

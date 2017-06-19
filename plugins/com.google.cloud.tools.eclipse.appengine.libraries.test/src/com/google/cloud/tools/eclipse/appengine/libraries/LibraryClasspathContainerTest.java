@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
 import java.util.Arrays;
@@ -44,24 +45,40 @@ public class LibraryClasspathContainerTest {
                                                        mockClasspathEntry);
   }
 
-  @Test(expected = NullPointerException.class)
   public void testConstructor_nullPath() {
-    new LibraryClasspathContainer(null, "description", mockClasspathEntry);
+    try {
+      new LibraryClasspathContainer(null, "description", mockClasspathEntry);
+      fail("Expected NullPointerException");
+    } catch (NullPointerException ex) {
+      assertNotNull(ex.getMessage());
+    }
   }
 
-  @Test(expected = NullPointerException.class)
   public void testConstructor_nullDescription() {
-    new LibraryClasspathContainer(new Path("container/path"), null, mockClasspathEntry);
+    try {
+      new LibraryClasspathContainer(new Path("container/path"), null, mockClasspathEntry);
+      fail("Expected NullPointerException");
+    } catch (NullPointerException ex) {
+      assertNotNull(ex.getMessage());
+    }
   }
 
-  @Test(expected = IllegalArgumentException.class)
   public void testConstructor_emptyDescription() {
-    new LibraryClasspathContainer(new Path("container/path"), "", mockClasspathEntry);
+    try {
+      new LibraryClasspathContainer(new Path("container/path"), "", mockClasspathEntry);
+      fail("Expected NullPointerException");
+    } catch (NullPointerException ex) {
+      assertNotNull(ex.getMessage());
+    }
   }
 
-  @Test(expected = NullPointerException.class)
   public void testConstructor_nullClasspathEntries() {
-    new LibraryClasspathContainer(new Path("container/path"), "description", null);
+    try {
+      new LibraryClasspathContainer(new Path("container/path"), "description", null);
+      fail("Expected NullPointerException");
+    } catch (NullPointerException ex) {
+      assertNotNull(ex.getMessage());
+    }
   }
 
   @Test

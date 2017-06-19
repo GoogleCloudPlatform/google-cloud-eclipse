@@ -37,7 +37,7 @@ import org.eclipse.wst.sse.ui.internal.reconcile.validator.IncrementalHelper;
 import org.eclipse.wst.sse.ui.internal.reconcile.validator.IncrementalReporter;
 import org.eclipse.wst.validation.internal.core.ValidationException;
 import org.eclipse.wst.validation.internal.provisional.core.IMessage;
-import org.junit.Ignore;
+import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -108,11 +108,14 @@ public class XmlSourceValidatorTest {
     assertTrue(reporter.getMessages().isEmpty());
   }
 
-  // Ignore? See https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2049 and
-  // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2044
-  @Ignore
+  // TODO: remove "Assume": https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2049
+  // and https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2044
   @Test
   public void testValidate() throws IOException {
+    Assume.assumeTrue("Cannot be run with Java 8 support",
+        AppEngineStandardFacet.FACET_VERSION.conflictsWith(JavaFacet.VERSION_1_8)
+        && AppEngineStandardFacet.FACET_VERSION.conflictsWith(WebFacetUtils.WEB_31));
+
     XmlSourceValidator validator = new XmlSourceValidator();
     validator.setHelper(new WebXmlValidator());
     String xml = "<web-app xmlns='http://xmlns.jcp.org/xml/ns/javaee' version='3.1'></web-app>";

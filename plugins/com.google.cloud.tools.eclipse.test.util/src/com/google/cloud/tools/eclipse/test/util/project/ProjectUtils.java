@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.test.util.project;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import com.google.cloud.tools.eclipse.test.util.reflection.ReflectionUtil;
 import com.google.common.base.Joiner;
 import com.google.common.base.Stopwatch;
 import java.io.File;
@@ -31,6 +32,8 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
@@ -47,6 +50,7 @@ import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
@@ -166,7 +170,56 @@ public class ProjectUtils {
     sb.append(problem.getAttribute(IMarker.LINE_NUMBER, -1));
     sb.append(": ");
     sb.append(problem.getAttribute(IMarker.MESSAGE, ""));
+
+    // Derived from
+    // org.eclipse.wst.xml.ui.internal.validation.core.errorinfo.ReferencedFileErrorsHandler
+    // ValidationMessage.ERROR_MESSAGE_MAP_QUALIFIED_NAME
+    QualifiedName errorMessageMapName =
+        new QualifiedName("org.eclipse.wst.xml.validation", "errorMessageMap");
+    // map is list of file-URI -> ValidationMessage objects
+    try {
+      Map<?, ?> map = (Map<?, ?>) problem.getResource().getSessionProperty(errorMessageMapName);
+      if (map != null) {
+        for (Entry<?, ?> entry : map.entrySet()) {
+          // show == false as the top message object is in the marker message
+          appendValidationMessage(sb, entry.getValue(), 0, /* show */ false);
+        }
+      }
+    } catch (CoreException ex) {
+      /* ignore: not a validation problem */
+    }
     return sb.toString();
+  }
+
+  /**
+   * Format a validation message error
+   */
+  private static void appendValidationMessage(StringBuilder sb, Object message, int indent,
+      boolean show) {
+    if (message == null || !message.getClass().getName().endsWith("ValidationMessage")) {
+      return;
+    }
+    try {
+      if (show) {
+        String uri = ReflectionUtil.getField(message, "uri", String.class);
+        String text = ReflectionUtil.getField(message, "message", String.class);
+        int lineNumber = ReflectionUtil.getField(message, "lineNumber", Integer.class);
+        int columnNumber = ReflectionUtil.getField(message, "columnNumber", Integer.class);
+        sb.append("\n");
+        for (int i = 0; i < indent; i++) {
+          sb.append("  ");
+        }
+        sb.append(uri).append("[").append(lineNumber).append(":").append(columnNumber).append("]: ")
+            .append(text);
+      }
+      // getNestedMessages() is never null
+      List<?> nested = ReflectionUtil.invoke(message, "getNestedMessages", List.class);
+      for (Object subMessage : nested) {
+        appendValidationMessage(sb, subMessage, indent + 1, true);
+      }
+    } catch (Exception ex) {
+      /* ignore: this is just a helper */
+    }
   }
 
   public static void waitForProjects(Collection<IProject> projects) {

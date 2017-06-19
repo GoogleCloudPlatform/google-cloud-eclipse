@@ -20,6 +20,7 @@ import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.widget
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -27,7 +28,12 @@ import com.google.cloud.tools.eclipse.swtbot.SwtBotProjectActions;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotTestingUtilities;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotTreeUtilities;
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
-
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.TimeUnit;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Tree;
@@ -38,17 +44,11 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotStyledText;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotToolbarButton;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTree;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
+import org.hamcrest.Matchers;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.osgi.service.prefs.Preferences;
-
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
-import java.nio.charset.StandardCharsets;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Create a native App Engine Standard project, launch in debug mode, verify working, and then
@@ -101,16 +101,21 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
 
     SWTBotTree launchTree =
         new SWTBotTree(bot.widget(widgetOfType(Tree.class), debugView.getWidget()));
+
+    // avoid any stray processes that may be lying around
+    launchTree.contextMenu("Remove All Terminated").click();
+
     SwtBotTreeUtilities.waitUntilTreeHasItems(bot, launchTree);
     SWTBotTreeItem[] allItems = launchTree.getAllItems();
     SwtBotTreeUtilities.waitUntilTreeHasText(bot, allItems[0]);
-    assertTrue("No App Engine launch found",
-        allItems[0].getText().contains("App Engine Standard at localhost"));
+    assertThat("No App Engine launch found", allItems[0].getText(),
+        Matchers.containsString("App Engine Standard at localhost"));
 
     SWTBotView consoleView = bot.viewById("org.eclipse.ui.console.ConsoleView"); // IConsoleConstants.ID_CONSOLE_VIEW
     consoleView.show();
-    assertTrue("App Engine console not active", consoleView.getViewReference()
-        .getContentDescription().contains("App Engine Standard at localhost"));
+    assertThat("App Engine console not active",
+        consoleView.getViewReference().getContentDescription(),
+        Matchers.containsString("App Engine Standard at localhost"));
     final SWTBotStyledText consoleContents =
         new SWTBotStyledText(bot.widget(widgetOfType(StyledText.class), consoleView.getWidget()));
     SwtBotTestingUtilities.waitUntilStyledTextContains(bot,
