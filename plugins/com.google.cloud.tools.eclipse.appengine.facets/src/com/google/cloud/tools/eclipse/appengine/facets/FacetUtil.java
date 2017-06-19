@@ -111,7 +111,8 @@ public class FacetUtil {
    */
   public FacetUtil addWebFacetToBatch(IProjectFacetVersion webFacet) {
     Preconditions.checkNotNull(webFacet, "webFacet is null");
-    Preconditions.checkArgument(WebFacetUtils.WEB_FACET.getId().equals(webFacet.getProjectFacet().getId()),
+    Preconditions.checkArgument(
+        WebFacetUtils.WEB_FACET.getId().equals(webFacet.getProjectFacet().getId()),
         webFacet.toString() + " is not a Web facet");
 
     if (facetedProject.hasProjectFacet(WebFacetUtils.WEB_FACET) && webFacet

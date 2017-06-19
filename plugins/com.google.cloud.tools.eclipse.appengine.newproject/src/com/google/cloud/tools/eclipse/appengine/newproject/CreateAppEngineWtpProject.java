@@ -128,7 +128,7 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
     fixTestSourceDirectorySettings(newProject, subMonitor.newChild(2));
   }
 
-  private void fixTestSourceDirectorySettings(IProject newProject, IProgressMonitor monitor)
+  private static void fixTestSourceDirectorySettings(IProject newProject, IProgressMonitor monitor)
       throws CoreException {
     // 1. Fix the output folder of "src/test/java".
     IPath testSourcePath = newProject.getFolder("src/test/java").getFullPath();
@@ -154,7 +154,7 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
     WebProjectUtil.removeWebDeploymentAssemblyEntry(newProject, new Path("src/test/java"));
   }
 
-  private void enableMavenNature(IProject newProject, IProgressMonitor monitor)
+  private static void enableMavenNature(IProject newProject, IProgressMonitor monitor)
       throws CoreException {
     SubMonitor subMonitor = SubMonitor.convert(monitor, 30);
 

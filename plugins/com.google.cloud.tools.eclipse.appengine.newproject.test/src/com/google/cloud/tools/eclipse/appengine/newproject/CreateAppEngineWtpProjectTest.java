@@ -27,7 +27,6 @@ import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
@@ -43,7 +42,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.junit.JUnitCore;
-import org.eclipse.wst.common.componentcore.internal.ComponentResource;
 import org.eclipse.wst.common.componentcore.internal.StructureEdit;
 import org.eclipse.wst.common.componentcore.internal.WorkbenchComponent;
 import org.junit.After;
@@ -152,22 +150,15 @@ abstract public class CreateAppEngineWtpProjectTest {
     assertNoTestClassesInDeploymentAssembly();
   }
 
-  private void assertNoTestClassesInDeploymentAssembly() throws CoreException {
+  private void assertNoTestClassesInDeploymentAssembly() {
     StructureEdit core = StructureEdit.getStructureEditForRead(project);
-    WorkbenchComponent component = core.getComponent();
-    assertNotNull(component);
-
-    boolean seenMainSourcePath = false;
-    List<ComponentResource> resources = component.getResources();
-    for (ComponentResource resource : resources) {
-      assertFalse(containsSegment(resource.getSourcePath(), "test"));
-
-      if (resource.getSourcePath().equals(new Path("/src/main/java"))
-          && resource.getRuntimePath().equals(new Path("/WEB-INF/classes"))) {
-        seenMainSourcePath = true;
-      }
+    try {
+      WorkbenchComponent component = core.getComponent();
+      assertEquals(0, component.findResourcesBySourcePath(new Path("/src/test/java"), 0).length);
+      assertEquals(1, component.findResourcesBySourcePath(new Path("/src/main/java"), 0).length);
+    } finally {
+      core.dispose();
     }
-    assertTrue(seenMainSourcePath);
   }
 
   @Test
