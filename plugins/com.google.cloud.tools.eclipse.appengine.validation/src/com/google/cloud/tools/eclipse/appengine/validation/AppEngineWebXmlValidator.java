@@ -26,11 +26,11 @@ import org.w3c.dom.NodeList;
  * Validator for appengine-web.xml
  */
 public class AppEngineWebXmlValidator implements XmlValidationHelper {
-  
+
   @Override
   public ArrayList<BannedElement> checkForElements(IResource resource, Document document) {
     ArrayList<BannedElement> blacklist = new ArrayList<>();
-    ArrayList<String> blacklistedElements = 
+    ArrayList<String> blacklistedElements =
         AppEngineWebBlacklist.getBlacklistElements();
     for (String elementName : blacklistedElements) {
       NodeList nodeList = document.getElementsByTagName(elementName);
@@ -41,15 +41,10 @@ public class AppEngineWebXmlValidator implements XmlValidationHelper {
             elementName,
             userData,
             node.getTextContent().length()
-            );    
+            );
         blacklist.add(element);
       }
     }
     return blacklist;
-  }
-
-  @Override
-  public String getXsd() {
-    return "/xsd/appengine-web.xsd";
   }
 }
