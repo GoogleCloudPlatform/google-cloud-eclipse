@@ -64,15 +64,12 @@ public class AppEngineStandardRuntimeChangeListener implements IFacetedProjectLi
             false /* installDependentFacets */, monitor);
         return Status.OK_STATUS;
       } catch (CoreException ex1) {
-        // Displays missing constraints that prevented facet installation
-        IStatus installStatus = ex1.getStatus();
-
         // Remove App Engine as primary runtime
         try {
           facetedProject.removeTargetedRuntime(newRuntime, monitor);
-          return installStatus;
+          return ex1.getStatus();  // Displays missing constraints that prevented facet installation
         } catch (CoreException ex2) {
-          return StatusUtil.merge(installStatus, ex2.getStatus());
+          return StatusUtil.merge(ex1.getStatus(), ex2.getStatus());
         }
       }
     }
@@ -87,25 +84,18 @@ public class AppEngineStandardRuntimeChangeListener implements IFacetedProjectLi
       return;
     }
 
-    IPrimaryRuntimeChangedEvent runtimeChangeEvent = (IPrimaryRuntimeChangedEvent)event;
-    final IRuntime newRuntime = runtimeChangeEvent.getNewPrimaryRuntime();
-    if (newRuntime == null) {
+    IPrimaryRuntimeChangedEvent runtimeChangeEvent = (IPrimaryRuntimeChangedEvent) event;
+    IRuntime newRuntime = runtimeChangeEvent.getNewPrimaryRuntime();
+    if (newRuntime == null || !AppEngineStandardFacet.isAppEngineStandardRuntime(newRuntime)) {
       return;
     }
 
-    if (!AppEngineStandardFacet.isAppEngineStandardRuntime(newRuntime)) {
-      return;
+    // Add the App Engine facet if the project doesn't have it.
+    IFacetedProject facetedProject = runtimeChangeEvent.getProject();
+    if (!AppEngineStandardFacet.hasFacet(facetedProject)) {
+      Job addFacetJob = new InstallAppEngineFacetJob(facetedProject, newRuntime);
+      addFacetJob.schedule();
     }
-
-    // Check if the App Engine facet has been installed in the project
-    final IFacetedProject facetedProject = runtimeChangeEvent.getProject();
-    if (AppEngineStandardFacet.hasFacet(facetedProject)) {
-      return;
-    }
-
-    // Add the App Engine facet
-    Job addFacetJob = new InstallAppEngineFacetJob(facetedProject, newRuntime);
-    addFacetJob.schedule();
   }
 
 }
