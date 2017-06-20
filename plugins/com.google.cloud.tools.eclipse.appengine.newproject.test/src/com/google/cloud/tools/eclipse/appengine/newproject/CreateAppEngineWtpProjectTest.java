@@ -200,7 +200,7 @@ abstract public class CreateAppEngineWtpProjectTest {
 
   @Test
   public void testNoJUnit4ClasspathIfUsingMaven() throws InvocationTargetException, CoreException {
-    config.setUseMaven("my.group.id", "my-artifact-id", "12.34.56");
+    config.setUseMaven("my.group.id", "my-other-artifact-id", "12.34.56");
 
     CreateAppEngineWtpProject creator = newCreateAppEngineWtpProject();
     creator.execute(monitor);
