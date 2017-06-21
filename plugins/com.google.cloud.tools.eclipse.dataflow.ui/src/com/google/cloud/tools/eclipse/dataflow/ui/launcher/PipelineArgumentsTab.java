@@ -36,6 +36,7 @@ import com.google.cloud.tools.eclipse.dataflow.ui.page.component.TextAndButtonCo
 import com.google.cloud.tools.eclipse.dataflow.ui.page.component.TextAndButtonSelectionListener;
 import com.google.cloud.tools.eclipse.dataflow.ui.util.DisplayExecutor;
 import com.google.common.base.Joiner;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.SettableFuture;
@@ -439,6 +440,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     if (!validationFailures.getMissingGroups().isEmpty()) {
       Map.Entry<String, Set<PipelineOptionsProperty>> missingGroupEntry =
           Iterables.getFirst(validationFailures.getMissingGroups().entrySet(), null);
+      Preconditions.checkNotNull(missingGroupEntry); // should be impossible
       StringBuilder errorBuilder = new StringBuilder("Missing value for group ");
       errorBuilder.append(missingGroupEntry.getKey());
       errorBuilder.append(". Properties satisfying group requirement are ");
@@ -458,6 +460,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     if (!validationFailures.getMissingProperties().isEmpty()) {
       PipelineOptionsProperty missingProperty =
           Iterables.getFirst(validationFailures.getMissingProperties(), null);
+      Preconditions.checkNotNull(missingProperty); // should be impossible
       setErrorMessage("Missing required property " + missingProperty.getName());
       return false;
     }
