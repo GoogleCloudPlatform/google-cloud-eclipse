@@ -62,7 +62,7 @@ public class AppEngineFlexFacet {
     }
 
     if (installDependentFacets) {
-      FacetUtil.installJavaFacet(facetedProject, JavaFacet.VERSION_1_7, subMonitor.newChild(1));
+      FacetUtil.installJavaFacet(facetedProject, JavaFacet.VERSION_1_8, subMonitor.newChild(1));
     }
     facetedProject.installProjectFacet(FACET_VERSION, null /* config */, subMonitor.newChild(9));
   }
