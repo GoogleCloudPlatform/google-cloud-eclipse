@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.facets;
 
+import com.google.cloud.tools.eclipse.util.ClasspathUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
@@ -98,36 +99,24 @@ public class FacetUtil {
       sourcePaths.add(new Path("src/main/java"));
     }
 
-    if (project.getFolder("src/test/java").exists()) {
-      sourcePaths.add(new Path("src/test/java"));
-    }
-
     javaConfig.setSourceFolders(sourcePaths);
     facetedProject.installProjectFacet(javaFacet, javaConfig, subMonitor.newChild(9));
 
-    fixTestSourceOutputFolder(facetedProject.getProject(), subMonitor.newChild(1));
+    IFolder testSource = project.getFolder("src/test/java");
+    if (testSource.exists()) {
+      addTestSourceClasspath(facetedProject.getProject(), testSource, subMonitor.newChild(1));
+    }
   }
 
-  private static void fixTestSourceOutputFolder(IProject project, IProgressMonitor monitor)
-      throws JavaModelException {
-    IPath testSourcePath = project.getFolder("src/test/java").getFullPath();
-
+  private static void addTestSourceClasspath(IProject project, IFolder testSource,
+      IProgressMonitor monitor) throws JavaModelException {
     IJavaProject javaProject = JavaCore.create(project);
-    IClasspathEntry[] entries = javaProject.getRawClasspath();
-    for (int i = 0; i < entries.length; i++) {
-      IClasspathEntry entry = entries[i];
-      if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE
-          && entry.getPath().equals(testSourcePath)
-          && entry.getOutputLocation() == null) {  // Default output location?
-        IPath oldOutputPath = javaProject.getOutputLocation();
-        IPath newOutputPath = oldOutputPath.removeLastSegments(1).append("test-classes");
+    IPath defaultOutputPath = javaProject.getOutputLocation();
+    IPath testOutputPath = defaultOutputPath.removeLastSegments(1).append("test-classes");
 
-        entries[i] = JavaCore.newSourceEntry(testSourcePath, ClasspathEntry.INCLUDE_ALL,
-            ClasspathEntry.EXCLUDE_NONE, newOutputPath);
-        javaProject.setRawClasspath(entries, monitor);
-        break;
-      }
-    }
+    IClasspathEntry testSourceEntry = JavaCore.newSourceEntry(testSource.getFullPath(),
+        ClasspathEntry.INCLUDE_ALL, ClasspathEntry.EXCLUDE_NONE, testOutputPath);
+    ClasspathUtil.addClasspathEntry(project, testSourceEntry, monitor);
   }
 
   /**
