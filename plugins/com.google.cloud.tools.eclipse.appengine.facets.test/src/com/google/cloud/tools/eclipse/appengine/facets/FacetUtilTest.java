@@ -65,9 +65,14 @@ public class FacetUtilTest {
 
   private final IProgressMonitor monitor = new NullProgressMonitor();
 
-  @Test (expected = NullPointerException.class)
+  @Test
   public void testConstructor_nullFacetedProject() {
-    new FacetUtil(null);
+    try {
+      new FacetUtil(null);
+      fail();
+    } catch (NullPointerException ex) {
+      assertEquals("facetedProject is null", ex.getMessage());
+    }
   }
 
   @Test
@@ -75,20 +80,25 @@ public class FacetUtilTest {
     new FacetUtil(mockFacetedProject);
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testInstallJavaFacet_nullFacet() throws CoreException {
-    FacetUtil.installJavaFacet(mockFacetedProject, null, monitor);
+    try {
+      FacetUtil.installJavaFacet(mockFacetedProject, null, monitor);
+      fail();
+    } catch (NullPointerException ex) {
+      assertEquals("javaFacet is null", ex.getMessage());
+    }
   }
 
   @Test
-  public void testInstallJavaFacet_facetDoesNotExitsInProject() throws CoreException {
+  public void testInstallJavaFacet_facetDoesNotExistsInProject() throws CoreException {
     IFacetedProject facetedProject = projectCreator.getFacetedProject();
     FacetUtil.installJavaFacet(facetedProject, JavaFacet.VERSION_1_7, monitor);
     Assert.assertTrue(facetedProject.hasProjectFacet(JavaFacet.VERSION_1_7));
   }
 
   @Test
-  public void testInstallJavaFacet_facetExitsInProject() throws CoreException {
+  public void testInstallJavaFacet_facetExistsInProject() throws CoreException {
     when(mockFacetedProject.hasProjectFacet(JavaFacet.FACET)).thenReturn(true);
     when(mockFacetedProject.hasProjectFacet(JavaFacet.VERSION_1_7)).thenReturn(true);
     when(mockFacetedProject.getProjectFacetVersion(JavaFacet.FACET))
@@ -99,9 +109,14 @@ public class FacetUtilTest {
         any(IProjectFacetVersion.class), any(Object.class), any(IProgressMonitor.class));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testInstallJavaFacet_nonJavaFacet() throws CoreException {
-    FacetUtil.installJavaFacet(mockFacetedProject, WebFacetUtils.WEB_25, monitor);
+    try {
+      FacetUtil.installJavaFacet(mockFacetedProject, WebFacetUtils.WEB_25, monitor);
+      fail();
+    } catch (IllegalArgumentException ex) {
+      assertTrue(ex.getMessage().contains(" is not a Java facet"));
+    }
   }
 
   @Test
@@ -122,13 +137,18 @@ public class FacetUtilTest {
     fail();
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testAddWebFacetToBatch_nullFacet() {
-    new FacetUtil(mockFacetedProject).addWebFacetToBatch(null);
+    try {
+      new FacetUtil(mockFacetedProject).addWebFacetToBatch(null);
+      fail();
+    } catch (NullPointerException ex) {
+      assertEquals("webFacet is null", ex.getMessage());
+    }
   }
 
   @Test
-  public void testAddWebFacetToBatch_facetDoesNotExitsInProject() {
+  public void testAddWebFacetToBatch_facetDoesNotExistsInProject() {
     when(mockFacetedProject.hasProjectFacet(WebFacetUtils.WEB_25)).thenReturn(false);
     when(mockFacetedProject.getProject()).thenReturn(projectCreator.getProject());
 
@@ -139,7 +159,7 @@ public class FacetUtilTest {
   }
 
   @Test
-  public void testAddWebFacetToBatch_facetExitsInProject() {
+  public void testAddWebFacetToBatch_facetExistsInProject() {
     when(mockFacetedProject.hasProjectFacet(WebFacetUtils.WEB_FACET)).thenReturn(true);
     when(mockFacetedProject.hasProjectFacet(WebFacetUtils.WEB_25)).thenReturn(true);
     when(mockFacetedProject.getProjectFacetVersion(WebFacetUtils.WEB_FACET))
@@ -149,14 +169,24 @@ public class FacetUtilTest {
     Assert.assertEquals(0, facetUtil.facetInstallSet.size());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testAddWebFacetToBatch_nonWebFacet() {
-    new FacetUtil(mockFacetedProject).addWebFacetToBatch(JavaFacet.VERSION_1_7);
+    try {
+      new FacetUtil(mockFacetedProject).addWebFacetToBatch(JavaFacet.VERSION_1_7);
+      fail();
+    } catch (IllegalArgumentException ex) {
+      assertTrue(ex.getMessage().contains(" is not a Web facet"));
+    }
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testAddFacetToBatch_nullFacet() {
-    new FacetUtil(mockFacetedProject).addFacetToBatch(null, null);
+    try {
+      new FacetUtil(mockFacetedProject).addFacetToBatch(null, null);
+      fail();
+    } catch (NullPointerException ex) {
+      assertEquals("facet is null", ex.getMessage());
+    }
   }
 
   @Test

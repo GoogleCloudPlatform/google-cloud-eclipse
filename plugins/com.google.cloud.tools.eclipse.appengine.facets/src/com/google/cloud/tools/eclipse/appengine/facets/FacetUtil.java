@@ -68,7 +68,7 @@ public class FacetUtil {
   Set<IFacetedProject.Action> facetInstallSet = new HashSet<>();
 
   public FacetUtil(IFacetedProject facetedProject) {
-    Preconditions.checkNotNull(facetedProject);
+    Preconditions.checkNotNull(facetedProject, "facetedProject is null");
     this.facetedProject = facetedProject;
   }
 
