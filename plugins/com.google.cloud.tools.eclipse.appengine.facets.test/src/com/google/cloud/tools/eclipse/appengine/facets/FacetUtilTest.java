@@ -21,7 +21,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -83,12 +82,9 @@ public class FacetUtilTest {
 
   @Test
   public void testInstallJavaFacet_facetDoesNotExitsInProject() throws CoreException {
-    when(mockFacetedProject.hasProjectFacet(JavaFacet.VERSION_1_7)).thenReturn(false);
-    when(mockFacetedProject.getProject()).thenReturn(projectCreator.getProject());
-
-    FacetUtil.installJavaFacet(mockFacetedProject, JavaFacet.VERSION_1_7, monitor);
-    verify(mockFacetedProject).installProjectFacet(
-        eq(JavaFacet.VERSION_1_7), any(Object.class), eq(monitor));
+    IFacetedProject facetedProject = projectCreator.getFacetedProject();
+    FacetUtil.installJavaFacet(facetedProject, JavaFacet.VERSION_1_7, monitor);
+    Assert.assertTrue(facetedProject.hasProjectFacet(JavaFacet.VERSION_1_7));
   }
 
   @Test
@@ -100,7 +96,7 @@ public class FacetUtilTest {
 
     FacetUtil.installJavaFacet(mockFacetedProject, JavaFacet.VERSION_1_7, monitor);
     verify(mockFacetedProject, never()).installProjectFacet(
-        eq(JavaFacet.VERSION_1_7), any(Object.class), eq(monitor));
+        any(IProjectFacetVersion.class), any(Object.class), any(IProgressMonitor.class));
   }
 
   @Test(expected = IllegalArgumentException.class)
