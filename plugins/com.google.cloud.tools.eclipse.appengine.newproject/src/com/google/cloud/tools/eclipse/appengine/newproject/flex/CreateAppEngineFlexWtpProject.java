@@ -108,17 +108,20 @@ public class CreateAppEngineFlexWtpProject extends CreateAppEngineWtpProject {
    */
   private void configureFacets(IProject project, IProgressMonitor monitor) throws CoreException {
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
+
     IFacetedProject facetedProject = ProjectFacetsManager.create(
         project, true /* convertIfNecessary */, subMonitor.newChild(50));
+    // We don't install the Java facet and the Web facet together in a batch:
+    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1997#issuecomment-309914517
+    FacetUtil.installJavaFacet(facetedProject, JavaFacet.VERSION_1_8, subMonitor.newChild(10));
     FacetUtil facetUtil = new FacetUtil(facetedProject);
-    facetUtil.addJavaFacetToBatch(JavaFacet.VERSION_1_8);
     facetUtil.addWebFacetToBatch(WebFacetUtils.WEB_31);
 
     IProjectFacet appEngineFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexFacet.ID);
     IProjectFacetVersion appEngineFacetVersion =
         appEngineFacet.getVersion(AppEngineFlexFacet.VERSION);
     facetUtil.addFacetToBatch(appEngineFacetVersion, null /* config */);
-    facetUtil.install(subMonitor.newChild(50));
+    facetUtil.install(subMonitor.newChild(40));
   }
 
   private void addDependenciesToProject(IProject project, IProgressMonitor monitor)

@@ -67,20 +67,20 @@ public class FacetUtil {
   }
 
   /**
-   * Configures and adds an install action for {@code javaFacet} to the list of actions performed
-   * when {@link FacetUtil#install(IProgressMonitor)} is called, if {@code javaFacet} does not
-   * already exist in the configured project.
+   * Configures and installs {@code javaFacet}, if the project does not have an equal or higher
+   * facet version.
    *
    * @param javaFacet the java Facet to be installed
    */
-  public FacetUtil addJavaFacetToBatch(IProjectFacetVersion javaFacet) {
+  public static void installJavaFacet(IFacetedProject facetedProject,
+      IProjectFacetVersion javaFacet, IProgressMonitor monitor) throws CoreException {
     Preconditions.checkNotNull(javaFacet, "javaFacet is null");
     Preconditions.checkArgument(JavaFacet.FACET.getId().equals(javaFacet.getProjectFacet().getId()),
         javaFacet.toString() + " is not a Java facet");
 
     if (facetedProject.hasProjectFacet(JavaFacet.FACET)
         && javaFacet.compareTo(facetedProject.getProjectFacetVersion(JavaFacet.FACET)) <= 0) {
-      return this;
+      return;
     }
 
     JavaFacetInstallConfig javaConfig = new JavaFacetInstallConfig();
@@ -97,9 +97,7 @@ public class FacetUtil {
     }
 
     javaConfig.setSourceFolders(sourcePaths);
-    facetInstallSet.add(new IFacetedProject.Action(
-        IFacetedProject.Action.Type.INSTALL, javaFacet, javaConfig));
-    return this;
+    facetedProject.installProjectFacet(javaFacet, javaConfig, monitor);
   }
 
   /**
