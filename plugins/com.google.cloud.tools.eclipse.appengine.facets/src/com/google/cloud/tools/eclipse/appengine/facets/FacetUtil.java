@@ -36,6 +36,11 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.core.ClasspathEntry;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.common.project.facet.core.JavaFacetInstallConfig;
 import org.eclipse.jst.j2ee.project.facet.IJ2EEFacetInstallDataModelProperties;
@@ -77,6 +82,7 @@ public class FacetUtil {
     Preconditions.checkNotNull(javaFacet, "javaFacet is null");
     Preconditions.checkArgument(JavaFacet.FACET.getId().equals(javaFacet.getProjectFacet().getId()),
         javaFacet.toString() + " is not a Java facet");
+    SubMonitor subMonitor = SubMonitor.convert(monitor, 10);
 
     if (facetedProject.hasProjectFacet(JavaFacet.FACET)
         && javaFacet.compareTo(facetedProject.getProjectFacetVersion(JavaFacet.FACET)) <= 0) {
@@ -97,7 +103,31 @@ public class FacetUtil {
     }
 
     javaConfig.setSourceFolders(sourcePaths);
-    facetedProject.installProjectFacet(javaFacet, javaConfig, monitor);
+    facetedProject.installProjectFacet(javaFacet, javaConfig, subMonitor.newChild(9));
+
+    fixTestSourceOutputFolder(facetedProject.getProject(), subMonitor.newChild(1));
+  }
+
+  private static void fixTestSourceOutputFolder(IProject project, IProgressMonitor monitor)
+      throws JavaModelException {
+    IPath testSourcePath = project.getFolder("src/test/java").getFullPath();
+
+    IJavaProject javaProject = JavaCore.create(project);
+    IClasspathEntry[] entries = javaProject.getRawClasspath();
+    for (int i = 0; i < entries.length; i++) {
+      IClasspathEntry entry = entries[i];
+      if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE
+          && entry.getPath().equals(testSourcePath)
+          && entry.getOutputLocation() == null) {  // Default output location?
+        IPath oldOutputPath = javaProject.getOutputLocation();
+        IPath newOutputPath = oldOutputPath.removeLastSegments(1).append("test-classes");
+
+        entries[i] = JavaCore.newSourceEntry(testSourcePath, ClasspathEntry.INCLUDE_ALL,
+            ClasspathEntry.EXCLUDE_NONE, newOutputPath);
+        javaProject.setRawClasspath(entries, monitor);
+        break;
+      }
+    }
   }
 
   /**

@@ -16,8 +16,10 @@
 
 package com.google.cloud.tools.eclipse.appengine.facets;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
@@ -104,6 +106,24 @@ public class FacetUtilTest {
   @Test(expected = IllegalArgumentException.class)
   public void testInstallJavaFacet_nonJavaFacet() throws CoreException {
     FacetUtil.installJavaFacet(mockFacetedProject, WebFacetUtils.WEB_25, monitor);
+  }
+
+  @Test
+  public void testInstallJavaFacet_correctTestSourceOutputFolder() throws CoreException {
+    IProject project = projectCreator.getProject();
+    ResourceUtils.createFolders(project.getFolder("src/test/java"), monitor);
+    FacetUtil.installJavaFacet(projectCreator.getFacetedProject(), JavaFacet.VERSION_1_7, monitor);
+
+    IJavaProject javaProject = JavaCore.create(project);
+    for (IClasspathEntry entry : javaProject.getRawClasspath()) {
+      if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+        assertEquals(new Path("src/test/java"), entry.getPath().removeFirstSegments(1));
+        assertEquals(new Path("build/test-classes"),
+            entry.getOutputLocation().removeFirstSegments(1));
+        return;
+      }
+    }
+    fail();
   }
 
   @Test(expected = NullPointerException.class)
