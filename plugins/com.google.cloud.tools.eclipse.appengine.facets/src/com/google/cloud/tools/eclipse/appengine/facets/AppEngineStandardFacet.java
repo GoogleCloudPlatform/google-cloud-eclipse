@@ -170,7 +170,6 @@ public class AppEngineStandardFacet {
       return;
     }
     FacetUtil facetUtil = new FacetUtil(facetedProject);
-    facetUtil.addFacetToBatch(FACET_VERSION, null /* config */);
 
     // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1155
     // Instead of calling "IFacetedProject.installProjectFacet()" multiple times, we install facets
@@ -180,10 +179,13 @@ public class AppEngineStandardFacet {
     // scheduling the second ConvertJob (triggered by installing the JSDT facet.)
 
     if (installDependentFacets) {
-      facetUtil.addJavaFacetToBatch(JavaFacet.VERSION_1_7);
+      // We don't install the Java facet and the Web facet together in a batch:
+      // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1997#issuecomment-309914517
+      FacetUtil.installJavaFacet(facetedProject, JavaFacet.VERSION_1_7, subMonitor.newChild(10));
       facetUtil.addWebFacetToBatch(WebFacetUtils.WEB_25);
     }
 
+    facetUtil.addFacetToBatch(FACET_VERSION, null /* config */);
     facetUtil.install(subMonitor.newChild(90));
   }
 

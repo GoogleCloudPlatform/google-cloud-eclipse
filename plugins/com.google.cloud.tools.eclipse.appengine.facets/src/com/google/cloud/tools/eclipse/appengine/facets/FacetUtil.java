@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.facets;
 
+import com.google.cloud.tools.eclipse.util.ClasspathUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
@@ -36,6 +37,11 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.core.ClasspathEntry;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.common.project.facet.core.JavaFacetInstallConfig;
 import org.eclipse.jst.j2ee.project.facet.IJ2EEFacetInstallDataModelProperties;
@@ -62,25 +68,26 @@ public class FacetUtil {
   Set<IFacetedProject.Action> facetInstallSet = new HashSet<>();
 
   public FacetUtil(IFacetedProject facetedProject) {
-    Preconditions.checkNotNull(facetedProject);
+    Preconditions.checkNotNull(facetedProject, "facetedProject is null");
     this.facetedProject = facetedProject;
   }
 
   /**
-   * Configures and adds an install action for {@code javaFacet} to the list of actions performed
-   * when {@link FacetUtil#install(IProgressMonitor)} is called, if {@code javaFacet} does not
-   * already exist in the configured project.
+   * Configures and installs {@code javaFacet}, if the project does not have an equal or higher
+   * facet version.
    *
    * @param javaFacet the java Facet to be installed
    */
-  public FacetUtil addJavaFacetToBatch(IProjectFacetVersion javaFacet) {
+  public static void installJavaFacet(IFacetedProject facetedProject,
+      IProjectFacetVersion javaFacet, IProgressMonitor monitor) throws CoreException {
     Preconditions.checkNotNull(javaFacet, "javaFacet is null");
     Preconditions.checkArgument(JavaFacet.FACET.getId().equals(javaFacet.getProjectFacet().getId()),
         javaFacet.toString() + " is not a Java facet");
+    SubMonitor subMonitor = SubMonitor.convert(monitor, 10);
 
     if (facetedProject.hasProjectFacet(JavaFacet.FACET)
         && javaFacet.compareTo(facetedProject.getProjectFacetVersion(JavaFacet.FACET)) <= 0) {
-      return this;
+      return;
     }
 
     JavaFacetInstallConfig javaConfig = new JavaFacetInstallConfig();
@@ -92,14 +99,24 @@ public class FacetUtil {
       sourcePaths.add(new Path("src/main/java"));
     }
 
-    if (project.getFolder("src/test/java").exists()) {
-      sourcePaths.add(new Path("src/test/java"));
-    }
-
     javaConfig.setSourceFolders(sourcePaths);
-    facetInstallSet.add(new IFacetedProject.Action(
-        IFacetedProject.Action.Type.INSTALL, javaFacet, javaConfig));
-    return this;
+    facetedProject.installProjectFacet(javaFacet, javaConfig, subMonitor.newChild(9));
+
+    IFolder testSource = project.getFolder("src/test/java");
+    if (testSource.exists()) {
+      addTestSourceClasspath(facetedProject.getProject(), testSource, subMonitor.newChild(1));
+    }
+  }
+
+  private static void addTestSourceClasspath(IProject project, IFolder testSource,
+      IProgressMonitor monitor) throws JavaModelException {
+    IJavaProject javaProject = JavaCore.create(project);
+    IPath defaultOutputPath = javaProject.getOutputLocation();
+    IPath testOutputPath = defaultOutputPath.removeLastSegments(1).append("test-classes");
+
+    IClasspathEntry testSourceEntry = JavaCore.newSourceEntry(testSource.getFullPath(),
+        ClasspathEntry.INCLUDE_ALL, ClasspathEntry.EXCLUDE_NONE, testOutputPath);
+    ClasspathUtil.addClasspathEntry(project, testSourceEntry, monitor);
   }
 
   /**

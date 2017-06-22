@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.facets;
 import com.google.common.base.Preconditions;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IProjectFacet;
@@ -54,16 +55,15 @@ public class AppEngineFlexFacet {
    */
   public static void installAppEngineFacet(IFacetedProject facetedProject,
       boolean installDependentFacets, IProgressMonitor monitor) throws CoreException {
+    SubMonitor subMonitor = SubMonitor.convert(monitor, 10);
+
     if (facetedProject.hasProjectFacet(FACET)) {
       return;
     }
 
-    FacetUtil facetUtil = new FacetUtil(facetedProject);
     if (installDependentFacets) {
-      facetUtil.addJavaFacetToBatch(JavaFacet.VERSION_1_8);
+      FacetUtil.installJavaFacet(facetedProject, JavaFacet.VERSION_1_8, subMonitor.newChild(1));
     }
-
-    facetUtil.addFacetToBatch(FACET_VERSION, null /* config */);
-    facetUtil.install(monitor);
+    facetedProject.installProjectFacet(FACET_VERSION, null /* config */, subMonitor.newChild(9));
   }
 }
