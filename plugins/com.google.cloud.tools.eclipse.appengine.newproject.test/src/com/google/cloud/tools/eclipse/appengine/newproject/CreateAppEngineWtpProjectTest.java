@@ -35,6 +35,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -140,14 +141,12 @@ abstract public class CreateAppEngineWtpProjectTest {
   }
 
   @Test
-  public void testNoTestClassesInDeploymentAssembly()
-      throws InvocationTargetException, CoreException, InterruptedException {
+  public void testNoTestClassesInDeploymentAssembly() throws InvocationTargetException,
+      CoreException, OperationCanceledException, InterruptedException {
     CreateAppEngineWtpProject creator = newCreateAppEngineWtpProject();
     creator.execute(monitor);
+    creator.deployAssemblyEntryRemoveJob.join(180000 /* 3 minutes */, monitor);
 
-    while (!creator.deployAssemblyEntryRemoveJob.jobCompleted) {
-      Thread.sleep(50);
-    }
     assertFalse(DeployAssemblyEntryRemoveJobTest.hasSourcePathInDeploymentAssembly(project,
         new Path("src/test/java")));
     assertTrue(DeployAssemblyEntryRemoveJobTest.hasSourcePathInDeploymentAssembly(project,

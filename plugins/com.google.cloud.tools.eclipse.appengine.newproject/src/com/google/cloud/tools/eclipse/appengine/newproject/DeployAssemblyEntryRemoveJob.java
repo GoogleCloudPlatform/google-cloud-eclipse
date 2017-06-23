@@ -17,7 +17,6 @@
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
-import com.google.common.annotations.VisibleForTesting;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -42,10 +41,6 @@ class DeployAssemblyEntryRemoveJob extends Job {
   private final IProject project;
   private final IPath sourcePath;
 
-  // Cannot use "join()", as "NonSystemJobSuspender" makes it return immediately without running it.
-  @VisibleForTesting
-  boolean jobCompleted;
-
   public DeployAssemblyEntryRemoveJob(IProject project, IPath sourcePath) {
     super(Messages.getString("deploy.assembly.test.source.remove.job")); //$NON-NLS-1$
     this.project = project;
@@ -55,8 +50,8 @@ class DeployAssemblyEntryRemoveJob extends Job {
   @Override
   protected IStatus run(IProgressMonitor monitor) {
     try {
-      Job.getJobManager().join(
-          J2EEElementChangedListener.PROJECT_COMPONENT_UPDATE_JOB_FAMILY, monitor);
+      // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1997#issuecomment-310707483
+      getJobManager().join(J2EEElementChangedListener.PROJECT_COMPONENT_UPDATE_JOB_FAMILY, monitor);
 
       IVirtualComponent component = ComponentCore.createComponent(project);
       if (component != null && component.exists()) {
@@ -69,8 +64,6 @@ class DeployAssemblyEntryRemoveJob extends Job {
       return Status.CANCEL_STATUS;
     } catch (CoreException ex) {
       return StatusUtil.error(this, "failed to modify deploy assembly", ex);
-    } finally {
-      jobCompleted = true;
     }
   }
 
