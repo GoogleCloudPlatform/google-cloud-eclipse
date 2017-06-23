@@ -147,9 +147,9 @@ abstract public class CreateAppEngineWtpProjectTest {
     creator.execute(monitor);
     creator.deployAssemblyEntryRemoveJob.join(180000 /* 3 minutes */, monitor);
 
-    assertFalse(DeployAssemblyEntryRemoveJobTest.hasSourcePathInDeploymentAssembly(project,
+    assertFalse(DeployAssemblyEntryRemoveJobTest.hasSourcePathInDeployAssembly(project,
         new Path("src/test/java")));
-    assertTrue(DeployAssemblyEntryRemoveJobTest.hasSourcePathInDeploymentAssembly(project,
+    assertTrue(DeployAssemblyEntryRemoveJobTest.hasSourcePathInDeployAssembly(project,
         new Path("src/main/java")));
   }
 

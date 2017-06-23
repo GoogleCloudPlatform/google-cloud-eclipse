@@ -42,15 +42,15 @@ public class DeployAssemblyEntryRemoveJobTest {
   public void testRun_entryRemoved() throws OperationCanceledException, InterruptedException {
     IProject project = projectCreator.getProject();
     ProjectUtils.waitForProjects(project);
-    assertTrue(hasSourcePathInDeploymentAssembly(project, new Path("src")));
+    assertTrue(hasSourcePathInDeployAssembly(project, new Path("src")));
 
     Job job = new DeployAssemblyEntryRemoveJob(project, new Path("src"));
     job.schedule();
     job.join();
-    assertFalse(hasSourcePathInDeploymentAssembly(project, new Path("src")));
+    assertFalse(hasSourcePathInDeployAssembly(project, new Path("src")));
   }
 
-  static boolean hasSourcePathInDeploymentAssembly(IProject project, IPath sourcePath) {
+  static boolean hasSourcePathInDeployAssembly(IProject project, IPath sourcePath) {
     StructureEdit core = StructureEdit.getStructureEditForRead(project);
     try {
       WorkbenchComponent component = core.getComponent();
