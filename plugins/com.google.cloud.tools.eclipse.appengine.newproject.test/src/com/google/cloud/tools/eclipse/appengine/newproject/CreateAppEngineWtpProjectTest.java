@@ -150,7 +150,7 @@ abstract public class CreateAppEngineWtpProjectTest {
     assertNoTestClassesInDeploymentAssembly();
   }
 
-  private void assertNoTestClassesInDeploymentAssembly() {
+  void assertNoTestClassesInDeploymentAssembly() {
     StructureEdit core = StructureEdit.getStructureEditForRead(project);
     try {
       WorkbenchComponent component = core.getComponent();

@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
-import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import com.google.cloud.tools.eclipse.appengine.libraries.BuildPath;
 import com.google.cloud.tools.eclipse.util.ClasspathUtil;
 import java.lang.reflect.InvocationTargetException;
@@ -151,7 +150,7 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
     }
 
     // 2. Remove "src/test/java" from the Web Deployment Assembly sources.
-    WebProjectUtil.removeWebDeploymentAssemblyEntry(newProject, new Path("src/test/java"));
+    new DeployAssemblyEntryRemoveJob(newProject, new Path("src/test/java")).schedule();
   }
 
   private static void enableMavenNature(IProject newProject, IProgressMonitor monitor)
