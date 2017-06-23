@@ -157,7 +157,6 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
     deployAssemblyEntryRemoveJob =
         new DeployAssemblyEntryRemoveJob(newProject, new Path("src/test/java"));
     deployAssemblyEntryRemoveJob.schedule();
-    System.out.println(">>> scheduled the entry remove job.");
   }
 
   private static void enableMavenNature(IProject newProject, IProgressMonitor monitor)
