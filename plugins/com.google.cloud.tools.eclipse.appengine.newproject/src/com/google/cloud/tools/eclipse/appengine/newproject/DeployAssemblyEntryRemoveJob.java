@@ -41,7 +41,7 @@ class DeployAssemblyEntryRemoveJob extends Job {
   private final IProject project;
   private final IPath sourcePath;
 
-  public DeployAssemblyEntryRemoveJob(IProject project, IPath sourcePath) {
+  DeployAssemblyEntryRemoveJob(IProject project, IPath sourcePath) {
     super(Messages.getString("deploy.assembly.test.source.remove.job")); //$NON-NLS-1$
     this.project = project;
     this.sourcePath = sourcePath;
