@@ -64,7 +64,7 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
   private IFile mostImportant = null;
 
   @VisibleForTesting
-  DeployAssemblyEntryRemoveJob deployAssemblyEntryRemoveJob;
+  Job deployAssemblyEntryRemoveJob;
 
   public abstract void addAppEngineFacet(IProject newProject, IProgressMonitor monitor)
       throws CoreException;
