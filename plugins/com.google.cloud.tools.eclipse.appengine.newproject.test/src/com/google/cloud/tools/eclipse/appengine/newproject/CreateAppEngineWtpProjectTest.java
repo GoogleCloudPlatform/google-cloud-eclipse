@@ -42,8 +42,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.junit.JUnitCore;
-import org.eclipse.wst.common.componentcore.internal.StructureEdit;
-import org.eclipse.wst.common.componentcore.internal.WorkbenchComponent;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -143,22 +141,17 @@ abstract public class CreateAppEngineWtpProjectTest {
 
   @Test
   public void testNoTestClassesInDeploymentAssembly()
-      throws InvocationTargetException, CoreException {
+      throws InvocationTargetException, CoreException, InterruptedException {
     CreateAppEngineWtpProject creator = newCreateAppEngineWtpProject();
     creator.execute(monitor);
 
-    assertNoTestClassesInDeploymentAssembly();
-  }
-
-  void assertNoTestClassesInDeploymentAssembly() {
-    StructureEdit core = StructureEdit.getStructureEditForRead(project);
-    try {
-      WorkbenchComponent component = core.getComponent();
-      assertEquals(0, component.findResourcesBySourcePath(new Path("/src/test/java"), 0).length);
-      assertEquals(1, component.findResourcesBySourcePath(new Path("/src/main/java"), 0).length);
-    } finally {
-      core.dispose();
+    while (!creator.deployAssemblyEntryRemoveJob.jobCompleted) {
+      Thread.sleep(50);
     }
+    assertFalse(DeployAssemblyEntryRemoveJobTest.hasSourcePathInDeploymentAssembly(project,
+        new Path("src/test/java")));
+    assertTrue(DeployAssemblyEntryRemoveJobTest.hasSourcePathInDeploymentAssembly(project,
+        new Path("src/main/java")));
   }
 
   @Test

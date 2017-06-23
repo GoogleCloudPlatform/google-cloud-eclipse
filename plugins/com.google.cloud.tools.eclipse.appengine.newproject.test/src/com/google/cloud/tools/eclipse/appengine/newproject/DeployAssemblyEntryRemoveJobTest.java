@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.newproject;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
@@ -26,7 +27,6 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
-import org.eclipse.jst.j2ee.refactor.listeners.J2EEElementChangedListener;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.wst.common.componentcore.internal.StructureEdit;
 import org.eclipse.wst.common.componentcore.internal.WorkbenchComponent;
@@ -41,19 +41,13 @@ public class DeployAssemblyEntryRemoveJobTest {
   @Test
   public void testRun_entryRemoved() throws OperationCanceledException, InterruptedException {
     IProject project = projectCreator.getProject();
-    waitForWtpComponentUpdateJobs();
+    ProjectUtils.waitForProjects(project);
     assertTrue(hasSourcePathInDeploymentAssembly(project, new Path("src")));
 
     Job job = new DeployAssemblyEntryRemoveJob(project, new Path("src"));
     job.schedule();
     job.join();
     assertFalse(hasSourcePathInDeploymentAssembly(project, new Path("src")));
-  }
-
-  private static void waitForWtpComponentUpdateJobs()
-      throws OperationCanceledException, InterruptedException {
-    Job.getJobManager().join(
-        J2EEElementChangedListener.PROJECT_COMPONENT_UPDATE_JOB_FAMILY, null /* monitor */);
   }
 
   static boolean hasSourcePathInDeploymentAssembly(IProject project, IPath sourcePath) {

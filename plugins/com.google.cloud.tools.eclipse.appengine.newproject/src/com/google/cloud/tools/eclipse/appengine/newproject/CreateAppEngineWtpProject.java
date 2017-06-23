@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.BuildPath;
 import com.google.cloud.tools.eclipse.util.ClasspathUtil;
+import com.google.common.annotations.VisibleForTesting;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.logging.Level;
@@ -61,6 +62,9 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
   private final AppEngineProjectConfig config;
   private final IAdaptable uiInfoAdapter;
   private IFile mostImportant = null;
+
+  @VisibleForTesting
+  DeployAssemblyEntryRemoveJob deployAssemblyEntryRemoveJob;
 
   public abstract void addAppEngineFacet(IProject newProject, IProgressMonitor monitor)
       throws CoreException;
@@ -127,7 +131,7 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
     fixTestSourceDirectorySettings(newProject, subMonitor.newChild(2));
   }
 
-  private static void fixTestSourceDirectorySettings(IProject newProject, IProgressMonitor monitor)
+  private void fixTestSourceDirectorySettings(IProject newProject, IProgressMonitor monitor)
       throws CoreException {
     // 1. Fix the output folder of "src/test/java".
     IPath testSourcePath = newProject.getFolder("src/test/java").getFullPath();
@@ -150,7 +154,10 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
     }
 
     // 2. Remove "src/test/java" from the Web Deployment Assembly sources.
-    new DeployAssemblyEntryRemoveJob(newProject, new Path("src/test/java")).schedule();
+    deployAssemblyEntryRemoveJob =
+        new DeployAssemblyEntryRemoveJob(newProject, new Path("src/test/java"));
+    deployAssemblyEntryRemoveJob.schedule();
+    System.out.println(">>> scheduled the entry remove job.");
   }
 
   private static void enableMavenNature(IProject newProject, IProgressMonitor monitor)

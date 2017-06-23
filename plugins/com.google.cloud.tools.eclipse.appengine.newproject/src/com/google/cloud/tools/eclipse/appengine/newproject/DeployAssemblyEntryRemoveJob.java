@@ -16,17 +16,21 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
-import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
+import com.google.common.annotations.VisibleForTesting;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jst.j2ee.refactor.listeners.J2EEElementChangedListener;
+import org.eclipse.wst.common.componentcore.ComponentCore;
+import org.eclipse.wst.common.componentcore.resources.IVirtualComponent;
+import org.eclipse.wst.common.componentcore.resources.IVirtualFolder;
 
 /**
  * Removes entries from WTP's deployment assembly whose source path matches a given path.
@@ -37,6 +41,10 @@ class DeployAssemblyEntryRemoveJob extends Job {
 
   private final IProject project;
   private final IPath sourcePath;
+
+  // Cannot use "join()", as "NonSystemJobSuspender" makes it return immediately without running it.
+  @VisibleForTesting
+  boolean jobCompleted;
 
   public DeployAssemblyEntryRemoveJob(IProject project, IPath sourcePath) {
     super(Messages.getString("deploy.assembly.test.source.remove.job")); //$NON-NLS-1$
@@ -49,12 +57,20 @@ class DeployAssemblyEntryRemoveJob extends Job {
     try {
       Job.getJobManager().join(
           J2EEElementChangedListener.PROJECT_COMPONENT_UPDATE_JOB_FAMILY, monitor);
-      WebProjectUtil.removeWebDeploymentAssemblyEntry(project, sourcePath);
+
+      IVirtualComponent component = ComponentCore.createComponent(project);
+      if (component != null && component.exists()) {
+        IVirtualFolder rootFolder = component.getRootFolder();
+        // Removes an entry in ".settings/org.eclipse.wst.common.component".
+        rootFolder.removeLink(sourcePath, IVirtualFolder.FORCE, new NullProgressMonitor());
+      }
       return Status.OK_STATUS;
     } catch (OperationCanceledException | InterruptedException ex) {
       return Status.CANCEL_STATUS;
     } catch (CoreException ex) {
       return StatusUtil.error(this, "failed to modify deploy assembly", ex);
+    } finally {
+      jobCompleted = true;
     }
   }
 
