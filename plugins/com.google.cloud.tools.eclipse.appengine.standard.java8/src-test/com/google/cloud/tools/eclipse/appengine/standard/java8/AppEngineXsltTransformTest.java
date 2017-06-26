@@ -51,12 +51,12 @@ public class AppEngineXsltTransformTest {
   }
 
   @Test
-  public void testAddExistingRuntime() throws IOException, TransformerException {
+  public void testAddExistingRuntime() {
     Document transformed = transform("/xslt/addJava8Runtime.xsl",
         "<appengine-web-app xmlns=\"http://appengine.google.com/ns/1.0\"><runtime>XXX</runtime></appengine-web-app>");
     assertEquals("java8", getRuntimeValue(transformed));
   }
-  
+
   @Test
   public void testAddRuntimeAtEnd() {
     Document transformed = transform("/xslt/addJava8Runtime.xsl",
@@ -71,7 +71,7 @@ public class AppEngineXsltTransformTest {
   }
 
   @Test
-  public void testAddPreservesOrder() throws IOException, TransformerException {
+  public void testAddPreservesOrder() {
     Document transformed = transform("/xslt/addJava8Runtime.xsl",
         "<appengine-web-app xmlns=\"http://appengine.google.com/ns/1.0\">"
             + "<threadsafe>true</threadsafe><runtime>XXX</runtime>"
@@ -89,7 +89,7 @@ public class AppEngineXsltTransformTest {
   }
 
   @Test
-  public void testAddExistingJava8Runtime() throws IOException, TransformerException {
+  public void testAddExistingJava8Runtime() {
     Document transformed = transform("/xslt/addJava8Runtime.xsl",
         "<appengine-web-app xmlns=\"http://appengine.google.com/ns/1.0\">"
             + "<runtime>java8</runtime></appengine-web-app>");
@@ -97,21 +97,21 @@ public class AppEngineXsltTransformTest {
   }
 
   @Test
-  public void testdAddBareNoDefaultNS() throws IOException, TransformerException {
+  public void testdAddBareNoDefaultNS() {
     Document transformed = transform("/xslt/addJava8Runtime.xsl",
         "<ae:appengine-web-app xmlns:ae=\"http://appengine.google.com/ns/1.0\"/>");
     assertEquals("java8", getRuntimeValue(transformed));
   }
 
   @Test
-  public void testRemoveBare() throws IOException, TransformerException {
+  public void testRemoveBare() {
     Document transformed = transform("/xslt/removeJava8Runtime.xsl",
         "<appengine-web-app xmlns=\"http://appengine.google.com/ns/1.0\"/>");
     assertNull(getRuntimeValue(transformed));
   }
 
   @Test
-  public void testRemovePreservesNonJava8Runtime() throws IOException, TransformerException {
+  public void testRemovePreservesNonJava8Runtime() {
     Document transformed = transform("/xslt/removeJava8Runtime.xsl",
         "<appengine-web-app xmlns=\"http://appengine.google.com/ns/1.0\">"
             + "<runtime>XXX</runtime></appengine-web-app>");
@@ -119,7 +119,7 @@ public class AppEngineXsltTransformTest {
   }
 
   @Test
-  public void testRemovePreservesOrder() throws IOException, TransformerException {
+  public void testRemovePreservesOrder() {
     Document transformed = transform("/xslt/removeJava8Runtime.xsl",
         "<appengine-web-app xmlns=\"http://appengine.google.com/ns/1.0\">"
             + "<threadsafe>true</threadsafe>" + "<runtime>java8</runtime>"
@@ -135,7 +135,7 @@ public class AppEngineXsltTransformTest {
   }
 
   @Test
-  public void testRemoveExistingJava8Runtime() throws IOException, TransformerException {
+  public void testRemoveExistingJava8Runtime() {
     Document transformed = transform("/xslt/removeJava8Runtime.xsl",
         "<appengine-web-app xmlns=\"http://appengine.google.com/ns/1.0\">"
             + "<runtime>java8</runtime></appengine-web-app>");
@@ -176,7 +176,7 @@ public class AppEngineXsltTransformTest {
     assertEquals("runtime", runtimeElements.item(0).getLocalName());
     return runtimeElements.item(0).getTextContent();
   }
-  
+
   /** Return the {@code <runtime>} element. */
   private static Element getRuntimeElement(Document transformed) {
     Element documentElement = transformed.getDocumentElement();
