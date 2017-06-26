@@ -38,7 +38,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.ResourceUtil;
 
 /**
- * Applies Xslt quick fix.
+ * Applies XSLT quick fix.
  */
 public class XsltQuickFix implements IMarkerResolution {
 

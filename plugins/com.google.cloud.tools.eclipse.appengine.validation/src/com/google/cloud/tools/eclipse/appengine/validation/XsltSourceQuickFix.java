@@ -35,7 +35,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
 /**
- * Xslt quick fix available in source editor.
+ * XSLT quick fix available in source editor.
  */
 public class XsltSourceQuickFix implements ICompletionProposal, ICompletionProposalExtension2 {
 

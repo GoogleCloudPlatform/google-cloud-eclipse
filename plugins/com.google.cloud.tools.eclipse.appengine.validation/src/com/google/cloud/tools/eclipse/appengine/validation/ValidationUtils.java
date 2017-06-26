@@ -22,7 +22,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -62,9 +61,8 @@ public class ValidationUtils {
   }
 
   static String convertStreamToString(InputStream stream, String charset) throws IOException {
-    try (Reader reader = new InputStreamReader(stream, charset)) {
-      return CharStreams.toString(reader);
-    }
+    String result = CharStreams.toString(new InputStreamReader(stream, charset));
+    return result;
   }
 
 }

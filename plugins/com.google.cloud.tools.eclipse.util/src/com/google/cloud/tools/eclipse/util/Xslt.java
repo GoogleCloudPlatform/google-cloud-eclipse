@@ -62,7 +62,7 @@ public class Xslt {
     return applyXslt(new StreamSource(document), stylesheet);
   }
 
-  public static InputStream applyXslt(StreamSource document, InputStream stylesheet)
+  private static InputStream applyXslt(StreamSource document, InputStream stylesheet)
       throws IOException, TransformerException {
     try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
       Transformer transformer = factory.newTransformer(new StreamSource(stylesheet));
