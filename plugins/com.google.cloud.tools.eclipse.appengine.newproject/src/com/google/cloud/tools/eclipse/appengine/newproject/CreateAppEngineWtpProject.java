@@ -118,17 +118,44 @@ public abstract class CreateAppEngineWtpProject extends WorkspaceModifyOperation
       throw new InvocationTargetException(ex);
     }
 
-    addAppEngineFacet(newProject, subMonitor.newChild(4));
+    // Although we're only affecting the project, FacetProjectManager#create()
+    // acquires the workspace lock.
+    // java.lang.IllegalArgumentException: Attempted to beginRule: R/, does not match outer scope
+    // rule: P/testproject0.05186039713980417
+    // at org.eclipse.core.runtime.Assert.isLegal(Assert.java:63)
+    // at org.eclipse.core.internal.jobs.ThreadJob.illegalPush(ThreadJob.java:134)
+    // at org.eclipse.core.internal.jobs.ThreadJob.push(ThreadJob.java:333)
+    // at org.eclipse.core.internal.jobs.ImplicitJobs.begin(ImplicitJobs.java:63)
+    // at org.eclipse.core.internal.jobs.JobManager.beginRule(JobManager.java:307)
+    // at org.eclipse.core.internal.resources.WorkManager.checkIn(WorkManager.java:120)
+    // at org.eclipse.core.internal.resources.Workspace.prepareOperation(Workspace.java:2189)
+    // at org.eclipse.core.internal.resources.Project.setDescription(Project.java:1229)
+    // at org.eclipse.core.internal.resources.Project.setDescription(Project.java:1281)
+    // at
+    // org.eclipse.wst.common.project.facet.core.internal.FacetedProjectFrameworkImpl.create(FacetedProjectFrameworkImpl.java:721)
+    // at
+    // org.eclipse.wst.common.project.facet.core.ProjectFacetsManager.create(ProjectFacetsManager.java:375)
+    // at
+    // com.google.cloud.tools.eclipse.appengine.newproject.standard.CreateAppEngineStandardWtpProject.addAppEngineFacet(CreateAppEngineStandardWtpProject.java:48)
+    // at
+    // com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject.execute(CreateAppEngineWtpProject.java:126)
 
-    if (config.getUseMaven()) {
-      enableMavenNature(newProject, subMonitor.newChild(2));
-    } else {
-      addJunit4ToClasspath(newProject, subMonitor.newChild(2));
+    Job.getJobManager().beginRule(newProject.getWorkspace().getRoot(), subMonitor.newChild(1));
+    try {
+      addAppEngineFacet(newProject, subMonitor.newChild(4));
+
+      if (config.getUseMaven()) {
+        enableMavenNature(newProject, subMonitor.newChild(2));
+      } else {
+        addJunit4ToClasspath(newProject, subMonitor.newChild(2));
+      }
+
+      BuildPath.addLibraries(newProject, config.getAppEngineLibraries(), subMonitor.newChild(2));
+
+      fixTestSourceDirectorySettings(newProject, subMonitor.newChild(2));
+    } finally {
+      Job.getJobManager().endRule(newProject);
     }
-
-    BuildPath.addLibraries(newProject, config.getAppEngineLibraries(), subMonitor.newChild(2));
-
-    fixTestSourceDirectorySettings(newProject, subMonitor.newChild(2));
   }
 
   private void fixTestSourceDirectorySettings(IProject newProject, IProgressMonitor monitor)
