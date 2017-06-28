@@ -46,7 +46,6 @@ public class AppEngineStandardRuntimeChangeListener implements IFacetedProjectLi
           facetedProject.getProject().getName())); // $NON-NLS$
       this.facetedProject = facetedProject;
       this.newRuntime = newRuntime;
-      setRule(facetedProject.getProject());
     }
 
     /**

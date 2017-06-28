@@ -75,7 +75,6 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
       super(Messages.getString("appengine.install.runtime.to.project", // $NON-NLS$
           facetedProject.getProject().getName()));
       this.facetedProject = facetedProject;
-      setRule(facetedProject.getProject());
     }
 
     /**

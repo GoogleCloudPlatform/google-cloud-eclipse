@@ -25,10 +25,12 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
@@ -169,67 +171,86 @@ public class AppEngineStandardFacet {
   public static void installAppEngineFacet(IFacetedProject facetedProject,
       boolean installDependentFacets, IProgressMonitor monitor) throws CoreException {
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
+    ISchedulingRule rule = getSchedulingRule(facetedProject);
+    Job.getJobManager().beginRule(rule, subMonitor.newChild(1));
 
-    if (facetedProject.hasProjectFacet(FACET)) {
-      return;
-    }
-
-    String projectName = facetedProject.getProject().getName();
-    IFacetedProjectWorkingCopy workingCopy = facetedProject.createWorkingCopy();
-    workingCopy.detect(subMonitor.newChild(20));
-
-    logger.info(projectName + ": detector changes: " + workingCopy.getProjectFacetActions());
     try {
-      workingCopy.commitChanges(subMonitor.newChild(20));
-    } catch (CoreException ex) {
-      logger.log(Level.WARNING, projectName + ": unable to commit changes", ex);
-    }
-
-    if (facetedProject.hasProjectFacet(FACET)) {
-      // success!
-      return;
-    }
-
-    // We have a conflict between the current facet versions and the AES facet
-    // Need to figure out: what AES version do we install? How do we upgrade or downgrade?
-
-    // we continue to update workingCopy to use FacetUtil.getHighestSatisfyingVersion()
-    FacetUtil facetUtil = new FacetUtil(facetedProject);
-    // See if the default AppEngine Standard facet is ok
-    if (!FacetUtil.conflictsWith(workingCopy, FACET.getDefaultVersion())) {
-      facetUtil.addFacetToBatch(FACET.getDefaultVersion(), null);
-      workingCopy.addProjectFacet(FACET.getDefaultVersion());
-    } else {
-      IProjectFacetVersion highestVersion = FacetUtil.getHighestSatisfyingVersion(workingCopy, FACET);
-      if (highestVersion == null) {
-        throw new CoreException(StatusUtil.error(AppEngineStandardFacet.class,
-            "No compatible AppEngine Standard facet found"));
+      if (facetedProject.hasProjectFacet(FACET)) {
+        return;
       }
-      facetUtil.addFacetToBatch(highestVersion, /* config */ null);
-      workingCopy.addProjectFacet(highestVersion);
-    }
 
-    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1155
-    // Instead of calling "IFacetedProject.installProjectFacet()" multiple times, we install facets
-    // in a batch using "IFacetedProject.modify()" so that we hold the lock until we finish
-    // installing all the facets. This ensures that the first ConvertJob starts installing the JSDT
-    // facet only after the batch is complete, which in turn prevents the first ConvertJob from
-    // scheduling the second ConvertJob (triggered by installing the JSDT facet.)
-    // FIXME: why aren't we using IFacetProjectWorkingCopy?
-    if (installDependentFacets) {
-      if (!workingCopy.hasProjectFacet(JavaFacet.FACET)) {
-        IProjectFacetVersion javaFacet =
-            FacetUtil.getHighestSatisfyingVersion(workingCopy, JavaFacet.FACET);
-        facetUtil.addJavaFacetToBatch(javaFacet);
-      }
-      if (!workingCopy.hasProjectFacet(WebFacetUtils.WEB_FACET)) {
-        IProjectFacetVersion webFacet =
-            FacetUtil.getHighestSatisfyingVersion(workingCopy, WebFacetUtils.WEB_FACET);
-        facetUtil.addWebFacetToBatch(webFacet);
-      }
-    }
+      String projectName = facetedProject.getProject().getName();
+      logger.fine(projectName + ": current facets: " + facetedProject.getProjectFacets());
+      IFacetedProjectWorkingCopy workingCopy = facetedProject.createWorkingCopy();
+      workingCopy.detect(subMonitor.newChild(20));
 
-    facetUtil.install(subMonitor.newChild(90));
+      logger.fine(projectName + ": detector changes: " + workingCopy.getProjectFacetActions());
+      try {
+        workingCopy.commitChanges(subMonitor.newChild(20));
+      } catch (CoreException ex) {
+        logger.log(Level.WARNING, projectName + ": unable to commit changes", ex);
+      }
+
+      if (facetedProject.hasProjectFacet(FACET)) {
+        // success!
+        return;
+      }
+
+      // We have a conflict between the current facet versions and the AES facet
+      // Need to figure out: what AES version do we install? How do we upgrade or downgrade?
+
+      // we continue to update workingCopy to use FacetUtil.getHighestSatisfyingVersion()
+      FacetUtil facetUtil = new FacetUtil(facetedProject);
+      // See if the default AppEngine Standard facet is ok
+      if (!FacetUtil.conflictsWith(workingCopy, FACET.getDefaultVersion())) {
+        facetUtil.addFacetToBatch(FACET.getDefaultVersion(), null);
+        workingCopy.addProjectFacet(FACET.getDefaultVersion());
+      } else {
+        IProjectFacetVersion highestVersion =
+            FacetUtil.getHighestSatisfyingVersion(workingCopy, FACET);
+        if (highestVersion == null) {
+          throw new CoreException(StatusUtil.error(AppEngineStandardFacet.class,
+              "No compatible AppEngine Standard facet found"));
+        }
+        facetUtil.addFacetToBatch(highestVersion, /* config */ null);
+        workingCopy.addProjectFacet(highestVersion);
+      }
+
+      // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1155
+      // Instead of calling "IFacetedProject.installProjectFacet()" multiple times, we install
+      // facets
+      // in a batch using "IFacetedProject.modify()" so that we hold the lock until we finish
+      // installing all the facets. This ensures that the first ConvertJob starts installing the
+      // JSDT
+      // facet only after the batch is complete, which in turn prevents the first ConvertJob from
+      // scheduling the second ConvertJob (triggered by installing the JSDT facet.)
+      // FIXME: why aren't we using IFacetProjectWorkingCopy?
+      if (installDependentFacets) {
+        if (!workingCopy.hasProjectFacet(JavaFacet.FACET)) {
+          IProjectFacetVersion javaFacet =
+              FacetUtil.getHighestSatisfyingVersion(workingCopy, JavaFacet.FACET);
+          facetUtil.addJavaFacetToBatch(javaFacet);
+        }
+        if (!workingCopy.hasProjectFacet(WebFacetUtils.WEB_FACET)) {
+          IProjectFacetVersion webFacet =
+              FacetUtil.getHighestSatisfyingVersion(workingCopy, WebFacetUtils.WEB_FACET);
+          facetUtil.addWebFacetToBatch(webFacet);
+        }
+      }
+
+      facetUtil.install(subMonitor.newChild(90));
+    } finally {
+      Job.getJobManager().endRule(rule);
+    }
+  }
+
+  /**
+   * Return the scheduling rule for modifying the given project.
+   */
+  private static ISchedulingRule getSchedulingRule(IFacetedProjectBase facetedProject) {
+    IProject project = facetedProject.getProject();
+    IWorkspace workspace = project.getWorkspace();
+    return workspace.getRoot();
   }
 
   /**
@@ -245,66 +266,73 @@ public class AppEngineStandardFacet {
   public static void installAllAppEngineRuntimes(IFacetedProjectBase project,
       IProgressMonitor monitor)
       throws CoreException {
-    // If the project already has an App Engine runtime instance
-    // do not add any other App Engine runtime instances to the list of targeted runtimes
-    for (IRuntime existingTargetedRuntime : project.getTargetedRuntimes()) {
-      if (AppEngineStandardFacet.isAppEngineStandardRuntime(existingTargetedRuntime)) {
-        return;
-      }
-    }
-
     SubMonitor progress = SubMonitor.convert(monitor, 100);
-
-    // Workaround deadlock bug described in Eclipse bug (https://bugs.eclipse.org/511793).
-    // There are graph update jobs triggered by the completion of the CreateProjectOperation
-    // above (from resource notifications) and from other resource changes from modifying the
-    // project facets. So we force the dependency graph to defer updates.
+    ISchedulingRule rule = getSchedulingRule(project);
+    Job.getJobManager().beginRule(rule, progress.newChild(1));
     try {
-      IDependencyGraph.INSTANCE.preUpdate();
-      try {
-        Job.getJobManager().join(DependencyGraphImpl.GRAPH_UPDATE_JOB_FAMILY,
-            progress.newChild(10));
-      } catch (OperationCanceledException | InterruptedException ex) {
-        logger.log(Level.WARNING, "Exception waiting for WTP Graph Update job", ex);
+      // If the project already has an App Engine runtime instance
+      // do not add any other App Engine runtime instances to the list of targeted runtimes
+      for (IRuntime existingTargetedRuntime : project.getTargetedRuntimes()) {
+        if (AppEngineStandardFacet.isAppEngineStandardRuntime(existingTargetedRuntime)) {
+          return;
+        }
       }
 
-      org.eclipse.wst.server.core.IRuntime[] appEngineRuntimes = getAppEngineRuntimes();
-      if (appEngineRuntimes.length > 0) {
-        IRuntime appEngineFacetRuntime = null;
-        progress.setWorkRemaining(appEngineRuntimes.length);
-        for (org.eclipse.wst.server.core.IRuntime appEngineRuntime : appEngineRuntimes) {
-          appEngineFacetRuntime = org.eclipse.jst.server.core.FacetUtil.getRuntime(appEngineRuntime);
+
+      // Workaround deadlock bug described in Eclipse bug (https://bugs.eclipse.org/511793).
+      // There are graph update jobs triggered by the completion of the CreateProjectOperation
+      // above (from resource notifications) and from other resource changes from modifying the
+      // project facets. So we force the dependency graph to defer updates.
+      try {
+        IDependencyGraph.INSTANCE.preUpdate();
+        try {
+          Job.getJobManager().join(DependencyGraphImpl.GRAPH_UPDATE_JOB_FAMILY,
+              progress.newChild(10));
+        } catch (OperationCanceledException | InterruptedException ex) {
+          logger.log(Level.WARNING, "Exception waiting for WTP Graph Update job", ex);
+        }
+
+        org.eclipse.wst.server.core.IRuntime[] appEngineRuntimes = getAppEngineRuntimes();
+        if (appEngineRuntimes.length > 0) {
+          IRuntime appEngineFacetRuntime = null;
+          progress.setWorkRemaining(appEngineRuntimes.length);
+          for (org.eclipse.wst.server.core.IRuntime appEngineRuntime : appEngineRuntimes) {
+            appEngineFacetRuntime =
+                org.eclipse.jst.server.core.FacetUtil.getRuntime(appEngineRuntime);
+            if (project instanceof IFacetedProject) {
+              ((IFacetedProject) project).addTargetedRuntime(appEngineFacetRuntime,
+                  progress.newChild(1));
+            } else {
+              ((IFacetedProjectWorkingCopy) project).addTargetedRuntime(appEngineFacetRuntime);
+            }
+          }
           if (project instanceof IFacetedProject) {
-            ((IFacetedProject) project).addTargetedRuntime(appEngineFacetRuntime,
+            ((IFacetedProject) project).setPrimaryRuntime(appEngineFacetRuntime,
                 progress.newChild(1));
           } else {
+            ((IFacetedProjectWorkingCopy) project).setPrimaryRuntime(appEngineFacetRuntime);
+          }
+        } else { // Create a new App Engine runtime
+          IRuntime appEngineFacetRuntime = createAppEngineFacetRuntime(progress.newChild(10));
+          if (appEngineFacetRuntime == null) {
+            throw new NullPointerException("Could not locate App Engine facet runtime");
+          }
+
+          if (project instanceof IFacetedProject) {
+            ((IFacetedProject) project).addTargetedRuntime(appEngineFacetRuntime,
+                progress.newChild(10));
+            ((IFacetedProject) project).setPrimaryRuntime(appEngineFacetRuntime,
+                progress.newChild(10));
+          } else {
             ((IFacetedProjectWorkingCopy) project).addTargetedRuntime(appEngineFacetRuntime);
+            ((IFacetedProjectWorkingCopy) project).setPrimaryRuntime(appEngineFacetRuntime);
           }
         }
-        if (project instanceof IFacetedProject) {
-          ((IFacetedProject) project).setPrimaryRuntime(appEngineFacetRuntime,
-              progress.newChild(1));
-        } else {
-          ((IFacetedProjectWorkingCopy) project).setPrimaryRuntime(appEngineFacetRuntime);
-        }
-      } else { // Create a new App Engine runtime
-        IRuntime appEngineFacetRuntime = createAppEngineFacetRuntime(progress.newChild(10));
-        if (appEngineFacetRuntime == null) {
-          throw new NullPointerException("Could not locate App Engine facet runtime");
-        }
-
-        if (project instanceof IFacetedProject) {
-          ((IFacetedProject) project).addTargetedRuntime(appEngineFacetRuntime,
-              progress.newChild(10));
-          ((IFacetedProject) project).setPrimaryRuntime(appEngineFacetRuntime,
-              progress.newChild(10));
-        } else {
-          ((IFacetedProjectWorkingCopy) project).addTargetedRuntime(appEngineFacetRuntime);
-          ((IFacetedProjectWorkingCopy) project).setPrimaryRuntime(appEngineFacetRuntime);
-        }
+      } finally {
+        IDependencyGraph.INSTANCE.postUpdate();
       }
     } finally {
-      IDependencyGraph.INSTANCE.postUpdate();
+      Job.getJobManager().endRule(rule);
     }
   }
 
