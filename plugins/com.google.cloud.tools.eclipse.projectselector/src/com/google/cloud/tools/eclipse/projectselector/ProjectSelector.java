@@ -54,7 +54,7 @@ public class ProjectSelector extends Composite {
     tableComposite.setLayout(tableColumnLayout);
     GridDataFactory.fillDefaults().grab(true, true).applyTo(tableComposite);
 
-    tableViewer = new TableViewer(tableComposite, SWT.SINGLE | SWT.BORDER);
+    tableViewer = new TableViewer(tableComposite, SWT.SINGLE | SWT.BORDER | SWT.FULL_SELECTION);
     createColumns(tableColumnLayout);
     tableViewer.getTable().setHeaderVisible(true);
     input = WritableList.withElementType(GcpProject.class);
