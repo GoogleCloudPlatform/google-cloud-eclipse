@@ -75,6 +75,9 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
   }
 
   protected void install() {
+    // reset the interrupted state in case it was leaked (http://bugs.eclipse.org/505920)
+    Thread.interrupted();
+
     // Surefire doesn't output anything until the test is complete,
     // so it's hard to tell what test we're associated with
     System.out.println("[Watchdog] > " + description);
