@@ -15,8 +15,8 @@ location "http://download.eclipse.org/cbi/updates/license" {
     org.eclipse.license.feature.group
 }
 
-// 201705191000 = Oxygen RC2
-location "http://download.eclipse.org/releases/oxygen/201705191000/" {
+// 201706281000 = Oxygen.0
+location "http://download.eclipse.org/releases/oxygen/201706281000/" {
 	org.eclipse.sdk.feature.group
 	org.eclipse.jdt.feature.group
 	org.eclipse.m2e.feature.feature.group
@@ -38,7 +38,7 @@ location "http://download.eclipse.org/releases/oxygen/201705191000/" {
 }
 
 // WTP SDKs aren't exposed through the main release links
-location "http://download.eclipse.org/webtools/downloads/drops/R3.9.0/S-3.9.0RC3-20170606120625/repository" {
+location "http://download.eclipse.org/webtools/downloads/drops/R3.9.0/R-3.9.0-20170613094504/repository" {
     org.eclipse.jst.web_sdk.feature.feature.group
     org.eclipse.jst.server_sdk.feature.feature.group
     org.eclipse.jst.common.fproj.enablement.jdt.sdk.feature.group
