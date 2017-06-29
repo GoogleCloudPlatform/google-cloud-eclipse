@@ -176,32 +176,43 @@ public class AppEngineStandardFacet {
 
     try {
       if (facetedProject.hasProjectFacet(FACET)) {
+        // nothing to do, move along
         return;
       }
 
+      /*
+       * So the project does not have the App Engine Standard facet. We first try our AES JRE7 and
+       * JRE8 detectors: these detectors look for appengine-web.xml and either add or change the
+       * required facets to correspond to the AES runtime in the appengine-web.xml. The JRE7
+       * detector may downgrade the Java and Dynamic Web Project facets (if set).
+       * 
+       * If no appengine-web.xml is detected, then there should be no changes to the IFPWC, unless
+       * there are other detectors that make a contribution.
+       */
       String projectName = facetedProject.getProject().getName();
       logger.fine(projectName + ": current facets: " + facetedProject.getProjectFacets());
       IFacetedProjectWorkingCopy workingCopy = facetedProject.createWorkingCopy();
       workingCopy.detect(subMonitor.newChild(20));
 
       logger.fine(projectName + ": detector changes: " + workingCopy.getProjectFacetActions());
-      try {
-        workingCopy.commitChanges(subMonitor.newChild(20));
-      } catch (CoreException ex) {
-        logger.log(Level.WARNING, projectName + ": unable to commit changes", ex);
-      }
+
+      // If there is a conflict, send the CoreException up
+      // If successful, workingCopy will mirror the IFacetedProject.
+      // The only known potential for conflict was downgrading DWP from 3.x -> 2.5 for
+      // AES JRE7 which we've side-stepped by allowing this version change.
+      workingCopy.commitChanges(subMonitor.newChild(20));
 
       if (facetedProject.hasProjectFacet(FACET)) {
         // success!
         return;
       }
 
-      // We have a conflict between the current facet versions and the AES facet
-      // Need to figure out: what AES version do we install? How do we upgrade or downgrade?
+      // So we must have a project with no appengine-web.xml.
+      // Need to figure out: what AES version do we install?
 
       // we continue to update workingCopy to use FacetUtil.getHighestSatisfyingVersion()
       FacetUtil facetUtil = new FacetUtil(facetedProject);
-      // See if the default AppEngine Standard facet is ok
+      // See if the default AppEngine Standard facet is ok with the project's current settings
       if (!FacetUtil.conflictsWith(workingCopy, FACET.getDefaultVersion())) {
         facetUtil.addFacetToBatch(FACET.getDefaultVersion(), null);
         workingCopy.addProjectFacet(FACET.getDefaultVersion());
@@ -216,15 +227,17 @@ public class AppEngineStandardFacet {
         workingCopy.addProjectFacet(highestVersion);
       }
 
-      // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1155
-      // Instead of calling "IFacetedProject.installProjectFacet()" multiple times, we install
-      // facets
-      // in a batch using "IFacetedProject.modify()" so that we hold the lock until we finish
-      // installing all the facets. This ensures that the first ConvertJob starts installing the
-      // JSDT
-      // facet only after the batch is complete, which in turn prevents the first ConvertJob from
-      // scheduling the second ConvertJob (triggered by installing the JSDT facet.)
-      // FIXME: why aren't we using IFacetProjectWorkingCopy?
+      /*
+       * https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1155
+       * 
+       * Instead of calling "IFacetedProject.installProjectFacet()" multiple times, we install
+       * facets in a batch using "IFacetedProject.modify()" so that we hold the lock until we finish
+       * installing all the facets. This ensures that the first ConvertJob starts installing the
+       * JSDT facet only after the batch is complete, which in turn prevents the first ConvertJob
+       * from scheduling the second ConvertJob (triggered by installing the JSDT facet.)
+       * 
+       * FIXME: investigate using IFacetProjectWorkingCopy instead
+       */
       if (installDependentFacets) {
         if (!workingCopy.hasProjectFacet(JavaFacet.FACET)) {
           IProjectFacetVersion javaFacet =
@@ -250,6 +263,8 @@ public class AppEngineStandardFacet {
   private static ISchedulingRule getSchedulingRule(IFacetedProjectBase facetedProject) {
     IProject project = facetedProject.getProject();
     IWorkspace workspace = project.getWorkspace();
+    // ideally we'd use `workspace.getRuleFactory().modifyRule(project)`
+    // except IFacetedProject performs modifications under the workspace lock
     return workspace.getRoot();
   }
 
