@@ -106,10 +106,7 @@ public class AppEngineWebBuilder extends IncrementalProjectBuilder {
   }
 
   /**
-   * @param project
-   * @param isMaven
-   * @param monitor
-   * @throws CoreException
+   * Apply version changes to downgrade to AES with JRE7, Java 1.7, and DWP 2.5.
    */
   private void setupForJava7Runtime(IFacetedProject project, boolean isMaven,
       IProgressMonitor monitor) throws CoreException {
@@ -125,10 +122,7 @@ public class AppEngineWebBuilder extends IncrementalProjectBuilder {
   }
 
   /**
-   * @param project
-   * @param isMaven
-   * @param monitor
-   * @throws CoreException
+   * Apply version changes to downgrade to AES with JRE8, Java 1.8, and DWP 3.1.
    */
   private void setupForJava8Runtime(IFacetedProject project, boolean isMaven,
       IProgressMonitor monitor) throws CoreException {
@@ -137,6 +131,7 @@ public class AppEngineWebBuilder extends IncrementalProjectBuilder {
         AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8, null));
     if (!isMaven) {
       updates.add(new Action(Action.Type.VERSION_CHANGE, JavaFacet.VERSION_1_8, null));
+      updates.add(new Action(Action.Type.VERSION_CHANGE, WebFacetUtils.WEB_31, null));
     }
     logger.fine(getProject() + ": changing facets: " + updates);
     project.modify(updates, monitor);

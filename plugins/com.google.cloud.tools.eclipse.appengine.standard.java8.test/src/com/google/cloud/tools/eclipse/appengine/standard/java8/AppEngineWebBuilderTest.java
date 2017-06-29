@@ -50,7 +50,7 @@ public class AppEngineWebBuilderTest {
     assertProjectMissingBuilder();
   }
 
-  /** Project adding App Engine Standard facet should have builder. */
+  /** Project adding App Engine Standard facet should have our builder. */
   @Test
   public void testAddedBuilder() throws CoreException {
     testProject.withFacetVersions(AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8,
@@ -59,9 +59,9 @@ public class AppEngineWebBuilderTest {
     assertProjectHasBuilder();
   }
 
-  /** Project adding App Engine Standard facet should have builder. */
+  /** Project removing App Engine Standard facet should not have our builder. */
   @Test
-  public void testRemovedBuilder() throws CoreException {
+  public void testBuilderRemoved() throws CoreException {
     testProject.withFacetVersions(AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8,
         JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25).getFacetedProject();
     assertProjectHasBuilder();
@@ -74,11 +74,11 @@ public class AppEngineWebBuilderTest {
   }
 
   /**
-   * Project adding App Engine Standard facet should have builder, and should upgrade and downgrade
-   * the Java facet appropriately.
+   * Adding <runtime>java8</runtime> to appengine-web.xml should upgrade the Java and Dynamic Web
+   * Project facets to 1.8 and 3.1 respectively.
    */
   @Test
-  public void testAddingJava8Runtime_javaFacet() throws CoreException {
+  public void testAddJava8Runtime() throws CoreException {
     testProject
         .withFacetVersions(AppEngineStandardFacet.JRE7, JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25)
         .getFacetedProject();
@@ -89,28 +89,18 @@ public class AppEngineWebBuilderTest {
     assertTrue("should have appengine-web.xml",
         appEngineWebDescriptor != null && appEngineWebDescriptor.exists());
 
-    assertTrue(testProject.getFacetedProject().hasProjectFacet(JavaFacet.VERSION_1_7));
-    assertTrue(testProject.getFacetedProject().hasProjectFacet(WebFacetUtils.WEB_25));
-
     AppEngineDescriptorTransform.addJava8Runtime(appEngineWebDescriptor);
     ProjectUtils.waitForProjects(testProject.getProject());
 
-    // adding <runtime>java8</runtime> should change java to 1.8
+    // adding <runtime>java8</runtime> should change java to 1.8 and dwp to 3.1
     assertFacetVersions(testProject.getFacetedProject(),
         AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8, JavaFacet.VERSION_1_8,
-        WebFacetUtils.WEB_25);
-
-    AppEngineDescriptorTransform.removeJava8Runtime(appEngineWebDescriptor);
-    ProjectUtils.waitForProjects(testProject.getProject());
-    // removing <runtime>java8</runtime> should change java to 1.7
-    assertFacetVersions(testProject.getFacetedProject(), AppEngineStandardFacet.JRE7,
-        JavaFacet.VERSION_1_7,
-        WebFacetUtils.WEB_25);
+        WebFacetUtils.WEB_31);
   }
 
   /**
-   * Project adding App Engine Standard facet should have builder, and should downgrade the Dynamic
-   * Web Project facet appropriately.
+   * Removing <runtime>java8</runtime> from appengine-web.xml should always downgrade the Java and
+   * Dynamic Web Project facets to 1.7 and 2.5 respectively.
    */
   @Test
   public void testRemovingJava8Runtime() throws CoreException {
@@ -130,30 +120,8 @@ public class AppEngineWebBuilderTest {
   }
 
   /**
-   * Project adding App Engine Standard facet should have builder, and should downgrade the Dynamic
-   * Web Project facet appropriately.
-   */
-  @Test
-  public void testRemovingJava8Runtime_javaFacet() throws CoreException {
-    testProject.withFacetVersions(AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8,
-        JavaFacet.VERSION_1_8, WebFacetUtils.WEB_25).getFacetedProject();
-    assertProjectHasBuilder();
-
-    IFile appEngineWebDescriptor =
-        WebProjectUtil.findInWebInf(testProject.getProject(), new Path("appengine-web.xml"));
-    assertTrue("should have appengine-web.xml",
-        appEngineWebDescriptor != null && appEngineWebDescriptor.exists());
-
-    AppEngineDescriptorTransform.removeJava8Runtime(appEngineWebDescriptor);
-    ProjectUtils.waitForProjects(testProject.getProject());
-    // removing <runtime>java8</runtime> should change java to 1.7"
-    assertFacetVersions(testProject.getFacetedProject(), AppEngineStandardFacet.JRE7,
-        JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
-  }
-
-  /**
-   * Project adding App Engine Standard facet should have builder, and should downgrade the Dynamic
-   * Web Project facet appropriately.
+   * Removing <runtime>java8</runtime> from appengine-web.xml should always downgrade the Java and
+   * Dynamic Web Project facets to 1.7 and 2.5 respectively.
    */
   @Test
   public void testRemovingJava8Runtime_webFacet() throws CoreException {
