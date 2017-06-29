@@ -32,23 +32,23 @@ public class AppEngineStandardProjectConvertJob extends Job {
 
   private final IFacetedProject facetedProject;
 
-  public AppEngineStandardProjectConvertJob(IFacetedProject project) {
+  public AppEngineStandardProjectConvertJob(IFacetedProject facetedProject) {
     super("App Engine Standard Project Conversion Job");
-    this.facetedProject = project;
+    this.facetedProject = facetedProject;
   }
 
   @Override
   protected IStatus run(IProgressMonitor monitor) {
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
 
-    // Updating project before installing App Engine facet to avoid
-    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1155.
-    GpeMigrator.removeObsoleteGpeRemnants(facetedProject, subMonitor.newChild(20));
-
     try {
+      // Updating project before installing App Engine facet to avoid
+      // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1155.
+      GpeMigrator.removeObsoleteGpeRemnants(facetedProject, subMonitor.newChild(20));
+
       AppEngineStandardFacet.installAppEngineFacet(facetedProject,
           true /* install Java and Web facets too (safe even if already installed) */,
-          subMonitor.newChild(40));
+          subMonitor.newChild(80));
       return Status.OK_STATUS;
     } catch (CoreException ex) {
       String project = facetedProject.getProject().getName();

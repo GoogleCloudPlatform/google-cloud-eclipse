@@ -34,7 +34,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-/** Migrates a class GPE project (no facets). */
+/** Migrates a classic GPE project (no facets). */
 public class GpeClassicMigratorTest {
 
   private IProject gpeProject;

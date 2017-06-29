@@ -68,9 +68,10 @@ public class GpeMigrator {
    * during operation is logged but ignored.
    * 
    * @return true if this was a GPE project
+   * @throws CoreException if the project is unusable (e.g., not open, doesn't exist, out of sync)
    */
   public static boolean removeObsoleteGpeRemnants(
-      final IFacetedProject facetedProject, IProgressMonitor monitor) {
+      final IFacetedProject facetedProject, IProgressMonitor monitor) throws CoreException {
     SubMonitor subMonitor = SubMonitor.convert(monitor, 40);
     IProject project = facetedProject.getProject();
     boolean wasGpeProject = false;
@@ -120,19 +121,14 @@ public class GpeMigrator {
   }
 
   @VisibleForTesting
-  static boolean removeGpeNature(IProject project) {
-    try {
-      boolean hadNature = NatureUtils.hasNature(project, GPE_GAE_NATURE_ID);
-      NatureUtils.removeNature(project, GPE_GAE_NATURE_ID);
-      return hadNature;
-    } catch (CoreException ex) {
-      logger.log(Level.WARNING, "Failed to remove GPE nature.", ex);
-      return true;
-    }
+  static boolean removeGpeNature(IProject project) throws CoreException {
+    boolean hadNature = NatureUtils.hasNature(project, GPE_GAE_NATURE_ID);
+    NatureUtils.removeNature(project, GPE_GAE_NATURE_ID);
+    return hadNature;
   }
 
   @VisibleForTesting
-  static boolean removeGpeRuntimeAndFacets(IFacetedProject facetedProject) {
+  static boolean removeGpeRuntimeAndFacets(IFacetedProject facetedProject) throws CoreException {
     // To remove the facets, we will directly modify the WTP facet metadata file (using XSLT):
     // .settings/org.eclipse.wst.common.project.facet.core.xml
     IFile metadataFile = facetedProject.getProject().getFile(FACETS_METADATA_FILE);
@@ -144,7 +140,7 @@ public class GpeMigrator {
     URL xslt = GpeMigrator.class.getResource(WTP_METADATA_XSLT);
     try {
       Xslt.transformInPlace(metadataFile, xslt);
-    } catch (IOException | TransformerException | CoreException ex) {
+    } catch (IOException | TransformerException ex) {
       logger.log(Level.WARNING, "Failed to modify WTP facet metadata.", ex);
     }
     Set<IProjectFacetVersion> changedFacets = facetedProject.getProjectFacets();

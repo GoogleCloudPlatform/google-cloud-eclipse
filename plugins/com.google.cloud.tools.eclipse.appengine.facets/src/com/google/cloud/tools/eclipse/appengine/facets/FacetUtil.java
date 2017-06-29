@@ -131,9 +131,10 @@ public class FacetUtil {
       return this;
     }
 
-    // FIXME: should this try to find web.xml first?
+    // Determine the default location for the WEB-INF, if not already present
     String webAppDirectory = "src/main/webapp";
     if (overlapsWithJavaSourcePaths(facetedProject, Path.fromPortableString(webAppDirectory))) {
+      // e.g., traditional Eclipse layout with just src/
       logger.info("Default webapp directory overlaps source directory; using WebContent");
       webAppDirectory = "WebContent"; // WTP's default
     }

@@ -33,7 +33,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
+import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject.Action;
+import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -93,22 +95,17 @@ public class AppEngineWebBuilderTest {
     AppEngineDescriptorTransform.addJava8Runtime(appEngineWebDescriptor);
     ProjectUtils.waitForProjects(testProject.getProject());
 
-    assertEquals(AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8,
-        testProject.getFacetedProject().getProjectFacetVersion(AppEngineStandardFacet.FACET));
-    assertEquals("adding <runtime>java8</runtime> should change java to 1.8", JavaFacet.VERSION_1_8,
-        testProject.getFacetedProject().getProjectFacetVersion(JavaFacet.FACET));
-    assertEquals(WebFacetUtils.WEB_25,
-        testProject.getFacetedProject().getProjectFacetVersion(WebFacetUtils.WEB_FACET));
+    // adding <runtime>java8</runtime> should change java to 1.8
+    assertFacetVersions(testProject.getFacetedProject(),
+        AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8, JavaFacet.VERSION_1_8,
+        WebFacetUtils.WEB_25);
 
     AppEngineDescriptorTransform.removeJava8Runtime(appEngineWebDescriptor);
     ProjectUtils.waitForProjects(testProject.getProject());
-    assertEquals(AppEngineStandardFacet.JRE7,
-        testProject.getFacetedProject().getProjectFacetVersion(AppEngineStandardFacet.FACET));
-    assertEquals("removing <runtime>java8</runtime> should change java to 1.7",
+    // removing <runtime>java8</runtime> should change java to 1.7
+    assertFacetVersions(testProject.getFacetedProject(), AppEngineStandardFacet.JRE7,
         JavaFacet.VERSION_1_7,
-        testProject.getFacetedProject().getProjectFacetVersion(JavaFacet.FACET));
-    assertEquals(WebFacetUtils.WEB_25,
-        testProject.getFacetedProject().getProjectFacetVersion(WebFacetUtils.WEB_FACET));
+        WebFacetUtils.WEB_25);
   }
 
   /**
@@ -118,7 +115,7 @@ public class AppEngineWebBuilderTest {
   @Test
   public void testRemovingJava8Runtime() throws CoreException {
     testProject.withFacetVersions(AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8,
-        JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25).getFacetedProject();
+        JavaFacet.VERSION_1_8, WebFacetUtils.WEB_31).getFacetedProject();
     assertProjectHasBuilder();
 
     IFile appEngineWebDescriptor =
@@ -128,12 +125,8 @@ public class AppEngineWebBuilderTest {
 
     AppEngineDescriptorTransform.removeJava8Runtime(appEngineWebDescriptor);
     ProjectUtils.waitForProjects(testProject.getProject());
-    assertEquals(AppEngineStandardFacet.JRE7,
-        testProject.getFacetedProject().getProjectFacetVersion(AppEngineStandardFacet.FACET));
-    assertEquals(JavaFacet.VERSION_1_7,
-        testProject.getFacetedProject().getProjectFacetVersion(JavaFacet.FACET));
-    assertEquals(WebFacetUtils.WEB_25,
-        testProject.getFacetedProject().getProjectFacetVersion(WebFacetUtils.WEB_FACET));
+    assertFacetVersions(testProject.getFacetedProject(), AppEngineStandardFacet.JRE7,
+        JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
   }
 
   /**
@@ -153,13 +146,9 @@ public class AppEngineWebBuilderTest {
 
     AppEngineDescriptorTransform.removeJava8Runtime(appEngineWebDescriptor);
     ProjectUtils.waitForProjects(testProject.getProject());
-    assertEquals(AppEngineStandardFacet.JRE7,
-        testProject.getFacetedProject().getProjectFacetVersion(AppEngineStandardFacet.FACET));
-    assertEquals("removing <runtime>java8</runtime> should change java to 1.7",
-        JavaFacet.VERSION_1_7,
-        testProject.getFacetedProject().getProjectFacetVersion(JavaFacet.FACET));
-    assertEquals(WebFacetUtils.WEB_25,
-        testProject.getFacetedProject().getProjectFacetVersion(WebFacetUtils.WEB_FACET));
+    // removing <runtime>java8</runtime> should change java to 1.7"
+    assertFacetVersions(testProject.getFacetedProject(), AppEngineStandardFacet.JRE7,
+        JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
   }
 
   /**
@@ -179,14 +168,10 @@ public class AppEngineWebBuilderTest {
 
     AppEngineDescriptorTransform.removeJava8Runtime(appEngineWebDescriptor);
     ProjectUtils.waitForProjects(testProject.getProject());
-    assertEquals(AppEngineStandardFacet.JRE7,
-        testProject.getFacetedProject().getProjectFacetVersion(AppEngineStandardFacet.FACET));
-    assertEquals("removing <runtime>java8</runtime> should change java to 1.7",
-        JavaFacet.VERSION_1_7,
-        testProject.getFacetedProject().getProjectFacetVersion(JavaFacet.FACET));
-    assertEquals("removing <runtime>java8</runtime> should change jst.web to 2.5",
-        WebFacetUtils.WEB_25,
-        testProject.getFacetedProject().getProjectFacetVersion(WebFacetUtils.WEB_FACET));
+    // removing <runtime>java8</runtime> should change java to 1.7
+    // removing <runtime>java8</runtime> should change jst.web to 2.5
+    assertFacetVersions(testProject.getFacetedProject(), AppEngineStandardFacet.JRE7,
+        JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
   }
 
   private void assertProjectMissingBuilder() throws CoreException {
@@ -207,4 +192,11 @@ public class AppEngineWebBuilderTest {
     }
     fail("missing AppEngineWebBuilder");
   }
+
+  private void assertFacetVersions(IFacetedProject project, IProjectFacetVersion... versions) {
+    for (IProjectFacetVersion version : versions) {
+      assertEquals(version, project.getProjectFacetVersion(version.getProjectFacet()));
+    }
+  }
+
 }

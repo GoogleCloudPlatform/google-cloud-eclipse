@@ -40,7 +40,7 @@ public class WebProjectUtil {
   public static final String DEFAULT_WEB_PATH = "src/main/webapp";
 
   /** All possible top-level locations for WEB_INF */
-  private static final List<String> DEFAULT_WEB_PATHS =
+  private static final ImmutableList<String> DEFAULT_WEB_PATHS =
       ImmutableList.of(DEFAULT_WEB_PATH, "WebContent", "war", "web");
 
   static final String WEB_INF = "WEB-INF";

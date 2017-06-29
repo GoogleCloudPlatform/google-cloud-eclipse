@@ -21,7 +21,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import com.google.cloud.tools.appengine.AppEngineDescriptor;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
@@ -45,7 +44,6 @@ import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
-import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -59,11 +57,6 @@ public class ConversionTests {
   public TestProjectCreator projectCreator = new TestProjectCreator();
 
   private String originalAppEngineWebContent;
-
-  @After
-  public void tearDown() {
-
-  }
 
   @Test
   public void bare_Java7_Web25()
@@ -375,12 +368,11 @@ public class ConversionTests {
     IFolder webInf = project.getProject().getFolder("WebContent/WEB-INF");
     ResourceUtils.createFolders(webInf, null);
     IFile appEngineWeb = webInf.getFile("appengine-web.xml");
-    appEngineWeb.create(new ByteArrayInputStream(
-        "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'></appengine-web-app>"
-            .getBytes(StandardCharsets.UTF_8)),
+    originalAppEngineWebContent =
+        "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'></appengine-web-app>";
+    appEngineWeb.create(
+        new ByteArrayInputStream(originalAppEngineWebContent.getBytes(StandardCharsets.UTF_8)),
         true, null);
-    originalAppEngineWebContent = CharStreams
-        .toString(new InputStreamReader(appEngineWeb.getContents(), StandardCharsets.UTF_8));
   }
 
   private void createAppEngineWebWithJava8Runtime(IFacetedProject project)
@@ -388,14 +380,11 @@ public class ConversionTests {
     IFolder webInf = project.getProject().getFolder("WebContent/WEB-INF");
     ResourceUtils.createFolders(webInf, null);
     IFile appengineWebXml = webInf.getFile("appengine-web.xml");
-    appengineWebXml.create(new ByteArrayInputStream(
-        "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'><runtime>java8</runtime></appengine-web-app>"
-            .getBytes(StandardCharsets.UTF_8)),
+    originalAppEngineWebContent =
+        "<appengine-web-app xmlns='http://appengine.google.com/ns/1.0'><runtime>java8</runtime></appengine-web-app>";
+    appengineWebXml.create(
+        new ByteArrayInputStream(originalAppEngineWebContent.getBytes(StandardCharsets.UTF_8)),
         true, null);
-    try (InputStream contents = appengineWebXml.getContents()) {
-      originalAppEngineWebContent =
-          CharStreams.toString(new InputStreamReader(contents, StandardCharsets.UTF_8));
-    }
   }
 
   /** Verify that appengine-web.xml has <runtime>java8</runtime>. */
@@ -446,8 +435,6 @@ public class ConversionTests {
   }
 
   private void assertIsOk(String message, IStatus status) {
-    if (!status.isOK()) {
-      fail(message + ": " + status);
-    }
+    assertTrue(message + ": " + status, status.isOK());
   }
 }

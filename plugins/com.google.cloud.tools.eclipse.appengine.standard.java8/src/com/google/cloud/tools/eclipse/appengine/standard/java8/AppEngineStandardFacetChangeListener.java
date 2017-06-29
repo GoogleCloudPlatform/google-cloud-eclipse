@@ -84,11 +84,12 @@ public class AppEngineStandardFacetChangeListener implements IFacetedProjectList
         }
       }
     } catch (SAXException | IOException | CoreException ex) {
-
+      logger.log(Level.SEVERE,
+          project + ": unable to update <runtime> element in " + descriptor, ex);
     }
   }
 
-  private boolean isJava8(IFile descriptor) throws IOException, CoreException, SAXException {
+  private static boolean isJava8(IFile descriptor) throws IOException, CoreException, SAXException {
     try (InputStream input = descriptor.getContents()) {
       return AppEngineDescriptor.parse(input).isJava8();
     }
