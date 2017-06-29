@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.dataflow.core.launcher.options;
 
 import com.google.cloud.tools.eclipse.dataflow.core.DataflowCorePlugin;
 import com.google.cloud.tools.eclipse.dataflow.core.project.MajorVersion;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableSet;
@@ -126,7 +127,7 @@ public class JavaProjectPipelineOptionsHierarchy implements PipelineOptionsHiera
   public NavigableMap<PipelineOptionsType, Set<PipelineOptionsProperty>> getOptionsHierarchy(
       String... typeNames) {
     NavigableMap<PipelineOptionsType, Set<PipelineOptionsProperty>> result =
-        new TreeMap<>(new PipelineOptionsTypeWeightOrdering());
+        new TreeMap<>(new PipelineOptionsTypeWeightOrdering().nullsFirst());
     Queue<PipelineOptionsType> optionsTypesToAdd = new ArrayDeque<>();
     for (String typeName : typeNames) {
       if (!Strings.isNullOrEmpty(typeName)) {
@@ -228,6 +229,8 @@ public class JavaProjectPipelineOptionsHierarchy implements PipelineOptionsHiera
   private static class PipelineOptionsTypeWeightOrdering extends Ordering<PipelineOptionsType> {
     @Override
     public int compare(PipelineOptionsType o1, PipelineOptionsType o2) {
+      Preconditions.checkNotNull(o1, "use with nullsFirst() or nullsLast()");
+      Preconditions.checkNotNull(o2, "use with nullsFirst() or nullsLast()");
       return ComparisonChain.start()
           .compare(o1.getWeight(), o2.getWeight())
           .compare(o1.getName(), o2.getName())
