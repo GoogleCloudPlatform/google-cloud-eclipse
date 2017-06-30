@@ -17,7 +17,9 @@
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
@@ -229,6 +231,18 @@ public class LibraryClasspathContainerInitializerTest {
       }
     }
     fail("classpath entry not found");
+  }
+
+  @Test
+  public void testComparisonIDUnique() throws IOException, CoreException {
+    LibraryClasspathContainerInitializer containerInitializer =
+        new LibraryClasspathContainerInitializer();
+    assertEquals("comparisonID should be equal for same paths",
+        containerInitializer.getComparisonID(new Path(TEST_CONTAINER_PATH + "/1"), null),
+        containerInitializer.getComparisonID(new Path(TEST_CONTAINER_PATH + "/1"), null));
+    assertNotEquals("comparisonID should not be equal for different paths",
+        containerInitializer.getComparisonID(new Path(TEST_CONTAINER_PATH + "/1"), null),
+        containerInitializer.getComparisonID(new Path(TEST_CONTAINER_PATH + "/2"), null));
   }
 
   private IStatus verifyContainerResolvedFromScratch() {
