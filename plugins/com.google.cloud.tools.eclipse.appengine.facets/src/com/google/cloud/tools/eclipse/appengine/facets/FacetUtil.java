@@ -162,6 +162,8 @@ public class FacetUtil {
    */
   public static IDataModel createWebFacetDataModel(String webAppFolder) {
     IDataModel webModel = DataModelFactory.createDataModel(new WebFacetInstallDataModelProvider());
+    webModel.setBooleanProperty(IJ2EEModuleFacetInstallDataModelProperties.INSTALL_EAR_LIBRARY,
+        false);
     webModel.setBooleanProperty(IJ2EEModuleFacetInstallDataModelProperties.ADD_TO_EAR, false);
     webModel.setBooleanProperty(IJ2EEFacetInstallDataModelProperties.GENERATE_DD, true);
     webModel.setStringProperty(IWebFacetInstallDataModelProperties.CONFIG_FOLDER, webAppFolder);
