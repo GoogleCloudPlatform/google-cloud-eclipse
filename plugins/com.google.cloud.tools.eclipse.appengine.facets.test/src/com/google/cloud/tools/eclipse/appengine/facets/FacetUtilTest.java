@@ -178,19 +178,15 @@ public class FacetUtilTest {
 
   private static boolean hasWtpClasspathContainers(IProject project) throws JavaModelException {
     boolean seenWebContainer = false;
-    boolean seenModuleContainer = false;
     IJavaProject javaProject = JavaCore.create(project);
     for (IClasspathEntry entry : javaProject.getRawClasspath()) {
       if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
         if (entry.getPath().equals(new Path("org.eclipse.jst.j2ee.internal.web.container"))) {
           seenWebContainer = true;
         }
-        if (entry.getPath().equals(new Path("org.eclipse.jst.j2ee.internal.module.container"))) {
-          seenModuleContainer = true;
-        }
       }
     }
-    return seenWebContainer && seenModuleContainer;
+    return seenWebContainer;
   }
 
   @Test
