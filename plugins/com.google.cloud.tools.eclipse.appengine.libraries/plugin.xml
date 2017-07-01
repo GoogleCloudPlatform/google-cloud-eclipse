@@ -256,7 +256,7 @@
               artifactId="gax"
               groupId="com.google.api"
               version="1.4.1" />
-      </libraryFile>
+     </libraryFile>
      <libraryFile>
         <mavenCoordinates
               artifactId="api-common"
