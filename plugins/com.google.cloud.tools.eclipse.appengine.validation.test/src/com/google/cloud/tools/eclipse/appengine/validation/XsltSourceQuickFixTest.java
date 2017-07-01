@@ -26,6 +26,11 @@ import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import com.google.common.base.Function;
+import com.google.common.io.CharStreams;
+import com.google.common.io.Files;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -58,7 +63,7 @@ public class XsltSourceQuickFixTest {
       JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineStandardFacet.FACET_VERSION);
 
   @Test
-  public void testApply() throws CoreException {
+  public void testApply() throws CoreException, IOException {
 
     IProject project = appEngineStandardProject.getProject();
     IFile file = project.getFile("appengine-web.xml");
@@ -85,6 +90,12 @@ public class XsltSourceQuickFixTest {
 
     // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1527
     editorPart.doSave(new NullProgressMonitor());
+
+    String diskContent =
+        Files.asCharSource(file.getLocation().toFile(), StandardCharsets.UTF_8).read();
+    String internalContent =
+        CharStreams.toString(new InputStreamReader(file.getContents(), StandardCharsets.UTF_8));
+    assertEquals(diskContent, internalContent);
 
     ProjectUtils.waitForProjects(project);
 
