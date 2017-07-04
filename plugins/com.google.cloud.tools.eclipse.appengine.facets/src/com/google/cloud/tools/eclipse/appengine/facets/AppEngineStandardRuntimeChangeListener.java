@@ -94,8 +94,7 @@ public class AppEngineStandardRuntimeChangeListener implements IFacetedProjectLi
     IFacetedProject facetedProject = runtimeChangeEvent.getProject();
     if (!AppEngineStandardFacet.hasFacet(facetedProject)) {
       Job addFacetJob = new InstallAppEngineFacetJob(facetedProject, newRuntime);
-      // wait 200ms just in case the AES facet is in process of being added
-      addFacetJob.schedule(200);
+      addFacetJob.schedule();
     }
   }
 

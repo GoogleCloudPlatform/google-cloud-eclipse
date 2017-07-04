@@ -20,17 +20,20 @@ import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.core.runtime.jobs.ILock;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
@@ -60,6 +63,32 @@ public class AppEngineStandardFacet {
   static final String DEFAULT_RUNTIME_ID =
       "com.google.cloud.tools.eclipse.appengine.standard.runtime";
   static final String DEFAULT_RUNTIME_NAME = "App Engine Standard";
+
+  /**
+   * Locks for managing simultaneous installation of App Engine Standard facets and runtimes. Use a
+   * CacheBuilder as it synchronizes simultaneous requests for the same project.
+   */
+  private final static LoadingCache<IProject, ILock> installationLocks =
+      CacheBuilder.newBuilder().weakValues().build(new CacheLoader<IProject, ILock>() {
+        @Override
+        public ILock load(IProject project) throws Exception {
+          return Job.getJobManager().newLock();
+        }
+      });
+
+  /**
+   * Obtain the project lock.
+   */
+  private static ILock acquireLock(IProject project) throws CoreException {
+    try {
+      ILock lock = installationLocks.get(project);
+      lock.acquire();
+      return lock;
+    } catch (ExecutionException ex) {
+      throw new CoreException(
+          StatusUtil.error(AppEngineStandardFacet.class, "Unable to acquire project lock", ex));
+    }
+  }
 
 
   /**
@@ -168,13 +197,12 @@ public class AppEngineStandardFacet {
    * @param monitor the progress monitor
    * @throws CoreException if anything goes wrong during install
    */
-  public static void installAppEngineFacet(IFacetedProject facetedProject,
-      boolean installDependentFacets, IProgressMonitor monitor) throws CoreException {
-    SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
-    ISchedulingRule rule = getSchedulingRule(facetedProject);
-    Job.getJobManager().beginRule(rule, subMonitor.newChild(1));
-
+  public static void installAppEngineFacet(final IFacetedProject facetedProject,
+      final boolean installDependentFacets, final IProgressMonitor monitor) throws CoreException {
+    ILock lock = acquireLock(facetedProject.getProject());
     try {
+      SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
+
       if (facetedProject.hasProjectFacet(FACET)) {
         // nothing to do, move along
         return;
@@ -253,19 +281,8 @@ public class AppEngineStandardFacet {
 
       facetUtil.install(subMonitor.newChild(90));
     } finally {
-      Job.getJobManager().endRule(rule);
+      lock.release();
     }
-  }
-
-  /**
-   * Return the scheduling rule for modifying the given project.
-   */
-  private static ISchedulingRule getSchedulingRule(IFacetedProjectBase facetedProject) {
-    IProject project = facetedProject.getProject();
-    IWorkspace workspace = project.getWorkspace();
-    // ideally we'd use `workspace.getRuleFactory().modifyRule(project)`
-    // except IFacetedProject performs modifications under the workspace lock
-    return workspace.getRoot();
   }
 
   /**
@@ -279,12 +296,10 @@ public class AppEngineStandardFacet {
    *     this runtime; if failed for any other reason
    */
   public static void installAllAppEngineRuntimes(IFacetedProjectBase project,
-      IProgressMonitor monitor)
-      throws CoreException {
-    SubMonitor progress = SubMonitor.convert(monitor, 100);
-    ISchedulingRule rule = getSchedulingRule(project);
-    Job.getJobManager().beginRule(rule, progress.newChild(1));
+      IProgressMonitor monitor) throws CoreException {
+    ILock lock = acquireLock(project.getProject());
     try {
+      SubMonitor progress = SubMonitor.convert(monitor, 100);
       // If the project already has an App Engine runtime instance
       // do not add any other App Engine runtime instances to the list of targeted runtimes
       for (IRuntime existingTargetedRuntime : project.getTargetedRuntimes()) {
@@ -343,11 +358,13 @@ public class AppEngineStandardFacet {
             ((IFacetedProjectWorkingCopy) project).setPrimaryRuntime(appEngineFacetRuntime);
           }
         }
+      } catch (CoreException ex) {
+        logger.log(Level.SEVERE, "Exception occurred when installing App Engine Runtime", ex);
       } finally {
         IDependencyGraph.INSTANCE.postUpdate();
       }
     } finally {
-      Job.getJobManager().endRule(rule);
+      lock.release();
     }
   }
 
