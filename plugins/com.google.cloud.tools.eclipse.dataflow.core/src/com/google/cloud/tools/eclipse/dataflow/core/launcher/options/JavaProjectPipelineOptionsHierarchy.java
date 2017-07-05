@@ -127,7 +127,7 @@ public class JavaProjectPipelineOptionsHierarchy implements PipelineOptionsHiera
   public NavigableMap<PipelineOptionsType, Set<PipelineOptionsProperty>> getOptionsHierarchy(
       String... typeNames) {
     NavigableMap<PipelineOptionsType, Set<PipelineOptionsProperty>> result =
-        new TreeMap<>(new PipelineOptionsTypeWeightOrdering().nullsFirst());
+        new TreeMap<>(new PipelineOptionsTypeWeightOrdering());
     Queue<PipelineOptionsType> optionsTypesToAdd = new ArrayDeque<>();
     for (String typeName : typeNames) {
       if (!Strings.isNullOrEmpty(typeName)) {
