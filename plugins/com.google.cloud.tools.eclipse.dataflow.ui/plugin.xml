@@ -175,6 +175,7 @@
   <extension point="org.eclipse.debug.ui.launchShortcuts">
     <shortcut
           class="com.google.cloud.tools.eclipse.dataflow.ui.launcher.LaunchPipelineShortcut"
+          icon="icons/Dataflow_16.png"
           id="com.google.cloud.tools.eclipse.dataflow.ui.launcher.launchPipelineShortcut"
           label="Dataflow Pipeline"
           modes="run,debug">
