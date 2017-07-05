@@ -65,10 +65,12 @@ public class FacetChangeListener implements IFacetedProjectListener {
       logger.warning(project + ": cannot find appengine-web.xml");
         return;
       }
-    if (project.hasProjectFacet(JavaFacet.VERSION_1_8)) {
-      AppEngineDescriptorTransform.addJava8Runtime(descriptor);
-    } else {
-      AppEngineDescriptorTransform.removeJava8Runtime(descriptor);
+    if (event.getType() == Type.POST_VERSION_CHANGE) {
+      if (project.hasProjectFacet(JavaFacet.VERSION_1_8)) {
+        AppEngineDescriptorTransform.addJava8Runtime(descriptor);
+      } else {
+        AppEngineDescriptorTransform.removeJava8Runtime(descriptor);
+      }
     }
   }
 
