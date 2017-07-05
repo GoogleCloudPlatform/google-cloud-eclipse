@@ -333,10 +333,9 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     PipelineRunner runner = launchConfiguration.getRunner();
     Button runnerButton = runnerButtons.get(runner);
     if (runnerButton == null) {
-      runnerButtons
-          .get(PipelineLaunchConfiguration.defaultRunner(majorVersion))
-          .setSelection(true);
-    } else {
+      runnerButton = runnerButtons.get(PipelineLaunchConfiguration.defaultRunner(majorVersion));
+    }
+    if (runnerButton != null) {
       runnerButton.setSelection(true);
     }
     runnerGroup.getParent().redraw();
