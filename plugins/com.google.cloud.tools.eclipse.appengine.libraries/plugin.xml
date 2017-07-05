@@ -294,22 +294,6 @@
               version="v1-rev100-1.22.0" />
       </libraryFile>
     </library>
-
-     <library
-          id="appengineadmin"
-          group="clientapis"
-          name="%appengineadmin.name"
-          tooltip="%appengineadmin.tooltip"
-          siteUri="https://cloud.google.com/appengine/docs/admin-api/" >
-      <libraryDependency id="googlecloudcore" />
-      <libraryFile
-            javadocUri="https://developers.google.com/resources/api-libraries/documentation/appengine/v1/java/latest/">    
-        <mavenCoordinates
-              artifactId="google-api-services-appengine"
-              groupId="com.google.apis"
-              version="v1-rev24-1.22.0" />
-      </libraryFile>
-    </library>
   </extension>
 
   <extension point="org.eclipse.jdt.core.classpathContainerInitializer">
