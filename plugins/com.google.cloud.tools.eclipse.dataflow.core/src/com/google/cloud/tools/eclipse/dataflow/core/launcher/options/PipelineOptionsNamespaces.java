@@ -37,6 +37,7 @@ public final class PipelineOptionsNamespaces {
           .put(MajorVersion.QUALIFIED_TWO, BEAM_OPTIONS_BASE + ".")
           .put(MajorVersion.TWO, BEAM_OPTIONS_BASE + ".")
           .put(MajorVersion.THREE_PLUS, BEAM_OPTIONS_BASE + ".")
+          .put(MajorVersion.ALL, BEAM_OPTIONS_BASE + ".")
           .build();
   private static final String VALIDATION_ANNOTATION = "Validation.Required";
   private static final String VALIDATION_REQUIRED_GROUPS = "groups";
