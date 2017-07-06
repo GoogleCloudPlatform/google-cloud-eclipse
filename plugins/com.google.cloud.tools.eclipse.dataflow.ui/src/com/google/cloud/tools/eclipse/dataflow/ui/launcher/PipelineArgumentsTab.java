@@ -36,6 +36,7 @@ import com.google.cloud.tools.eclipse.dataflow.ui.page.component.TextAndButtonCo
 import com.google.cloud.tools.eclipse.dataflow.ui.page.component.TextAndButtonSelectionListener;
 import com.google.cloud.tools.eclipse.dataflow.ui.util.DisplayExecutor;
 import com.google.common.base.Joiner;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.SettableFuture;
@@ -334,9 +335,8 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     if (runnerButton == null) {
       runnerButton = runnerButtons.get(PipelineLaunchConfiguration.defaultRunner(majorVersion));
     }
-    if (runnerButton != null) {
-      runnerButton.setSelection(true);
-    }
+    Preconditions.checkNotNull(runnerButton,
+        "runners for %s should always include the default runner", majorVersion);
     runnerGroup.getParent().redraw();
   }
 
