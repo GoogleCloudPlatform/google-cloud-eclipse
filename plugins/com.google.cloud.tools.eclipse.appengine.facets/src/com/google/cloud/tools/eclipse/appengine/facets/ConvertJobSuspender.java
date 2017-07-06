@@ -21,11 +21,14 @@ import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.eclipse.core.runtime.jobs.Job;
 
 /**
- * Prevents scheduling all future non-system jobs once {@link #suspendFutureJobs} is called, until
- * {@link #resume} is called. Jobs already scheduled are not affected and will run to completion.
+ * Prevents scheduling all future {@link org.eclipse.wst.jsdt.web.core.internal.project.ConvertJob}s
+ * once {@link #suspendConvertJobs} is called, until {@link #resume} is called. Jobs already
+ * scheduled are not affected and will run to completion.
  *
  * The class is for https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1155. The
  * purpose of the class is to prevent the second ConvertJob from running. The second ConvertJob is
@@ -33,7 +36,9 @@ import org.eclipse.core.runtime.jobs.Job;
  *
  * Not recommended to use for other situations, although the workings of the class are general.
  */
-class NonSystemJobSuspender {
+class ConvertJobSuspender {
+
+  private static final Logger logger = Logger.getLogger(ConvertJobSuspender.class.getName());
 
   private static class SuspendedJob {
     private Job job;
@@ -49,11 +54,11 @@ class NonSystemJobSuspender {
 
   private static final List<SuspendedJob> suspendedJobs = new ArrayList<>();
 
-  private static final NonSystemJobScheduleListener jobScheduleListener =
-      new NonSystemJobScheduleListener();
+  private static final ConvertJobScheduleListener jobScheduleListener =
+      new ConvertJobScheduleListener();
 
   /** Once called, it is imperative to call {@link #resume()} later. */
-  public static void suspendFutureJobs() {
+  public static void suspendFutureConvertJobs() {
     synchronized (suspendedJobs) {
       Preconditions.checkState(!suspended.getAndSet(true), "Already suspended.");
       Job.getJobManager().addJobChangeListener(jobScheduleListener);
@@ -83,7 +88,7 @@ class NonSystemJobSuspender {
   }
 
   static void suspendJob(Job job, long scheduleDelay) {
-    if (job.isSystem()) {
+    if (!"Configuring for JavaScript".equals(job.getName())) {
       return;
     }
     synchronized (suspendedJobs) {
@@ -104,8 +109,10 @@ class NonSystemJobSuspender {
           job.schedule(scheduleDelay);
         }
       }
+    } else {
+      logger.log(Level.SEVERE, "job already running: " + job);
     }
   }
 
-  private NonSystemJobSuspender() {}
+  private ConvertJobSuspender() {}
 }

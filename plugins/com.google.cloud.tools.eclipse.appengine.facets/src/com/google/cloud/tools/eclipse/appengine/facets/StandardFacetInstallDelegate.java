@@ -64,7 +64,7 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
     // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1155
     // The first ConvertJob has already been scheduled (which installs JSDT facet), and
     // this is to suspend the second ConvertJob temporarily.
-    NonSystemJobSuspender.suspendFutureJobs();
+    ConvertJobSuspender.suspendFutureConvertJobs();
   }
 
   private static class AppEngineRuntimeInstallJob extends Job {
@@ -86,18 +86,14 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
       return J2EEElementChangedListener.PROJECT_COMPONENT_UPDATE_JOB_FAMILY.equals(family);
     }
 
-    private void waitUntilJsdtIsFixedFacet() {
+    private void waitUntilJsdtIsFixedFacet(IProgressMonitor monitor) throws InterruptedException {
       try {
         IProjectFacet jsdtFacet = ProjectFacetsManager.getProjectFacet(JSDT_FACET_ID);
-        for (int times = 0;
-            times < MAX_JSDT_CHECK_RETRIES && !facetedProject.isFixedProjectFacet(jsdtFacet);
-            times++) {
-          try {
-            // To prevent going into the SLEEPING state, don't use "Job.schedule(100)".
-            Thread.sleep(100 /* ms */);
-          } catch (InterruptedException ex) {
-            // Keep waiting.
+        for (int times = 0; !monitor.isCanceled() && times < MAX_JSDT_CHECK_RETRIES; times++) {
+          if (facetedProject.isFixedProjectFacet(jsdtFacet)) {
+            return;
           }
+          Thread.sleep(100 /* ms */);
         }
       } catch (IllegalArgumentException ex) {
         // JSDT facet itself doesn't exist. (Should not really happen.) Ignore and fall through.
@@ -109,14 +105,20 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
       try {
         // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1155
         // Wait until the first ConvertJob installs the JSDT facet.
-        waitUntilJsdtIsFixedFacet();
+        waitUntilJsdtIsFixedFacet(monitor);
+        if (monitor.isCanceled()) {
+          return Status.CANCEL_STATUS;
+        }
         AppEngineStandardFacet.installAllAppEngineRuntimes(facetedProject, monitor);
         return Status.OK_STATUS;
+
       } catch (CoreException ex) {
         return ex.getStatus();
+      } catch (InterruptedException ex) {
+        return Status.CANCEL_STATUS;
       } finally {
-        // Now resume all the suspended jobs (including the second ConvertJob).
-        NonSystemJobSuspender.resume();
+        // Now resume the second ConvertJob.
+        ConvertJobSuspender.resume();
       }
     }
   }
