@@ -21,7 +21,8 @@ import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 
 /**
  * For private use in {@link ConvertJobSuspender} only. Listens for every job being scheduled
- * and cancels it if it is {@link ConvertJob} while the suspender is active.
+ * and cancels it if it is {@link org.eclipse.wst.jsdt.web.core.internal.project.ConvertJob} while
+ * the suspender is active.
  */
 class ConvertJobScheduleListener extends JobChangeAdapter {
   @Override
