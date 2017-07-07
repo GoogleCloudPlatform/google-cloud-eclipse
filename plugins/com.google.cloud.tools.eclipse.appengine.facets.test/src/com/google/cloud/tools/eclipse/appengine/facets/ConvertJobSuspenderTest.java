@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.facets;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -25,9 +26,12 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.wst.jsdt.web.core.javascript.JsNameManglerUtil;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
 
 public class ConvertJobSuspenderTest {
 
@@ -45,6 +49,14 @@ public class ConvertJobSuspenderTest {
     ConvertJobSuspender.resumeInternal();
     job1.cancel();
     job2.cancel();
+  }
+
+  @Test
+  public void testConvertJobClassName() {
+    String convertJobClass =
+        ConvertJobSuspender.CONVERT_JOB_CLASS_NAME.replace(".", "/") + ".class";
+    Bundle jsdtWebCoreBundle = FrameworkUtil.getBundle(JsNameManglerUtil.class);
+    assertNotNull(jsdtWebCoreBundle.getResource(convertJobClass));
   }
 
   @Test
