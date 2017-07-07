@@ -36,6 +36,8 @@ import org.eclipse.core.runtime.jobs.Job;
  *
  * Not recommended to use for other situations, although the workings of the class are general.
  */
+// TODO(chanseok): not needed after we drop support for Mars and Neon, as Oxygen has fixed the
+// issue. Remove this and related code when that happens.
 class ConvertJobSuspender {
 
   private static final Logger logger = Logger.getLogger(ConvertJobSuspender.class.getName());
@@ -88,7 +90,8 @@ class ConvertJobSuspender {
   }
 
   static void suspendJob(Job job, long scheduleDelay) {
-    if (!"Configuring for JavaScript".equals(job.getName())) {
+    if (!"org.eclipse.wst.jsdt.web.core.internal.project.ConvertJob".equals(
+        job.getClass().getName())) {
       return;
     }
     synchronized (suspendedJobs) {
