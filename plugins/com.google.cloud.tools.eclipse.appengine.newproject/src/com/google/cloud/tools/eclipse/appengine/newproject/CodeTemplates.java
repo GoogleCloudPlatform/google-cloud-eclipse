@@ -16,7 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject;
 
-import com.google.cloud.tools.eclipse.util.templates.appengine.AppEngineTemplateUtility;
+import com.google.cloud.tools.eclipse.util.Templates;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import java.util.Collections;
@@ -98,17 +98,17 @@ public class CodeTemplates {
 
     IFolder packageFolder = createFoldersForPackage(java, packageName, subMonitor.newChild(5));
     IFile hello = createChildFile("HelloAppEngine.java", //$NON-NLS-1$
-        AppEngineTemplateUtility.HELLO_APPENGINE_TEMPLATE,
+        Templates.HELLO_APPENGINE_TEMPLATE,
         packageFolder, templateValues, subMonitor.newChild(5));
 
     // now set up the test directory
     IFolder testPackageFolder =
         createFoldersForPackage(testJava, packageName, subMonitor.newChild(5));
     createChildFile("HelloAppEngineTest.java", //$NON-NLS-1$
-        AppEngineTemplateUtility.HELLO_APPENGINE_TEST_TEMPLATE, testPackageFolder,
+        Templates.HELLO_APPENGINE_TEST_TEMPLATE, testPackageFolder,
         templateValues, subMonitor.newChild(5));
     createChildFile("MockHttpServletResponse.java", //$NON-NLS-1$
-        AppEngineTemplateUtility.MOCK_HTTPSERVLETRESPONSE_TEMPLATE,
+        Templates.MOCK_HTTPSERVLETRESPONSE_TEMPLATE,
         testPackageFolder, templateValues, subMonitor.newChild(5));
 
     IFolder webapp = createChildFolder("webapp", main, subMonitor.newChild(5)); //$NON-NLS-1$
@@ -122,11 +122,11 @@ public class CodeTemplates {
 
     if (isStandardProject) {
       createChildFile("appengine-web.xml",  //$NON-NLS-1$
-          AppEngineTemplateUtility.APPENGINE_WEB_XML_TEMPLATE,
+          Templates.APPENGINE_WEB_XML_TEMPLATE,
           webinf, properties, subMonitor.newChild(5));
     } else {
       IFolder appengine = createChildFolder("appengine", main, subMonitor.newChild(5)); //$NON-NLS-1$
-      createChildFile("app.yaml", AppEngineTemplateUtility.APP_YAML_TEMPLATE, //$NON-NLS-1$
+      createChildFile("app.yaml", Templates.APP_YAML_TEMPLATE, //$NON-NLS-1$
           appengine, properties, subMonitor.newChild(5));
     }
 
@@ -145,10 +145,10 @@ public class CodeTemplates {
       packageMap.put("namespace", "http://xmlns.jcp.org/xml/ns/javaee"); //$NON-NLS-1$ //$NON-NLS-2$
       packageMap.put("schemaUrl", "http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"); //$NON-NLS-1$ //$NON-NLS-2$
     }
-    createChildFile("web.xml", AppEngineTemplateUtility.WEB_XML_TEMPLATE, webinf,  //$NON-NLS-1$
+    createChildFile("web.xml", Templates.WEB_XML_TEMPLATE, webinf,  //$NON-NLS-1$
         packageMap, subMonitor.newChild(5));
 
-    createChildFile("index.html", AppEngineTemplateUtility.INDEX_HTML_TEMPLATE, webapp, //$NON-NLS-1$
+    createChildFile("index.html", Templates.INDEX_HTML_TEMPLATE, webapp, //$NON-NLS-1$
         Collections.<String, String>emptyMap(), subMonitor.newChild(5));
 
     copyChildFile("favicon.ico", webapp, subMonitor.newChild(5)); //$NON-NLS-1$
@@ -159,10 +159,10 @@ public class CodeTemplates {
       mavenCoordinates.put("projectArtifactId", config.getMavenArtifactId()); //$NON-NLS-1$
       mavenCoordinates.put("projectVersion", config.getMavenVersion()); //$NON-NLS-1$
       if (isStandardProject) {
-        createChildFile("pom.xml", AppEngineTemplateUtility.POM_XML_STANDARD_TEMPLATE, //$NON-NLS-1$
+        createChildFile("pom.xml", Templates.POM_XML_STANDARD_TEMPLATE, //$NON-NLS-1$
             project, mavenCoordinates, subMonitor.newChild(5));
       } else {
-        createChildFile("pom.xml", AppEngineTemplateUtility.POM_XML_FLEX_TEMPLATE, //$NON-NLS-1$
+        createChildFile("pom.xml", Templates.POM_XML_FLEX_TEMPLATE, //$NON-NLS-1$
             project, mavenCoordinates, subMonitor.newChild(5));
       }
     }
@@ -205,7 +205,7 @@ public class CodeTemplates {
 
     IFile child = parent.getFile(new Path(name));
     if (!child.exists()) {
-      AppEngineTemplateUtility.createFileContent(child.getLocation().toString(), template, values);
+      Templates.createFileContent(child.getLocation().toString(), template, values);
       child.refreshLocal(IResource.DEPTH_ZERO, monitor);
     }
     return child;
@@ -218,7 +218,7 @@ public class CodeTemplates {
 
     IFile child = parent.getFile(new Path(name));
     if (!child.exists()) {
-      AppEngineTemplateUtility.copyFileContent(child.getLocation().toString(), name);
+      Templates.copyFileContent(child.getLocation().toString(), name);
       child.refreshLocal(IResource.DEPTH_ZERO, monitor);
     }
   }

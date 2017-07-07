@@ -16,8 +16,8 @@
 
 package com.google.cloud.tools.eclipse.appengine.facets;
 
+import com.google.cloud.tools.eclipse.util.Templates;
 import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
-import com.google.cloud.tools.eclipse.util.templates.appengine.AppEngineTemplateUtility;
 import com.google.common.annotations.VisibleForTesting;
 import java.io.ByteArrayInputStream;
 import java.util.Collections;
@@ -149,8 +149,8 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
 
     appEngineWebXml.create(new ByteArrayInputStream(new byte[0]), true, progress.newChild(2));
     String configFileLocation = appEngineWebXml.getLocation().toString();
-    AppEngineTemplateUtility.createFileContent(
-        configFileLocation, AppEngineTemplateUtility.APPENGINE_WEB_XML_TEMPLATE,
+    Templates.createFileContent(
+        configFileLocation, Templates.APPENGINE_WEB_XML_TEMPLATE,
         Collections.<String, String>emptyMap());
     progress.worked(4);
     appEngineWebXml.refreshLocal(IFile.DEPTH_ZERO, progress.newChild(1));

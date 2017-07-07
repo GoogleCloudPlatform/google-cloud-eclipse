@@ -19,7 +19,7 @@ package com.google.cloud.tools.eclipse.appengine.newproject;
 import static org.junit.Assert.assertFalse;
 
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
-import com.google.cloud.tools.eclipse.util.templates.appengine.AppEngineTemplateUtility;
+import com.google.cloud.tools.eclipse.util.Templates;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -221,7 +221,7 @@ public class CodeTemplatesTest {
     values.put("package", "com.google.foo.bar");
 
     IFile child = CodeTemplates.createChildFile("HelloAppEngine.java",
-        AppEngineTemplateUtility.HELLO_APPENGINE_TEMPLATE, parent, values, monitor);
+        Templates.HELLO_APPENGINE_TEMPLATE, parent, values, monitor);
     Assert.assertTrue(child.exists());
     Assert.assertEquals("HelloAppEngine.java", child.getName());
     try (InputStream in = child.getContents(true);

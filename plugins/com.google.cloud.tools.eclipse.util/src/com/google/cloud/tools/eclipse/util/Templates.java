@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.util.templates.appengine;
+package com.google.cloud.tools.eclipse.util;
 
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Preconditions;
@@ -35,7 +35,7 @@ import java.nio.file.Paths;
 import java.util.Map;
 import org.eclipse.core.runtime.CoreException;
 
-public class AppEngineTemplateUtility {
+public class Templates {
   public static final String APPENGINE_WEB_XML_TEMPLATE = "appengine-web.xml.ftl";
   public static final String HELLO_APPENGINE_TEMPLATE = "HelloAppEngine.java.ftl";
   public static final String INDEX_HTML_TEMPLATE = "index.html.ftl";
@@ -64,7 +64,7 @@ public class AppEngineTemplateUtility {
       Template template = configuration.getTemplate(templateName);
       template.process(dataMap, writer);
     } catch (IOException | TemplateException ex) {
-      throw new CoreException(StatusUtil.error(AppEngineTemplateUtility.class, ex.getMessage()));
+      throw new CoreException(StatusUtil.error(Templates.class, ex.getMessage()));
     }
   }
 
@@ -74,22 +74,22 @@ public class AppEngineTemplateUtility {
     Preconditions.checkNotNull(sourceName, "source file name is null");
 
     try (
-        InputStream inputStream = AppEngineTemplateUtility.class
+        InputStream inputStream = Templates.class
             .getResourceAsStream("/templates/appengine/" + sourceName);
         OutputStream outputStream = Files.newOutputStream(Paths.get(outputFileLocation))) {
       ByteStreams.copy(inputStream, outputStream);
     } catch (IOException ex) {
-      throw new CoreException(StatusUtil.error(AppEngineTemplateUtility.class, ex.getMessage()));
+      throw new CoreException(StatusUtil.error(Templates.class, ex.getMessage()));
     }
   }
 
-  private AppEngineTemplateUtility() {
+  private Templates() {
   }
 
   private static Configuration createConfiguration() {
     Configuration configuration = new Configuration(Configuration.VERSION_2_3_25);
     configuration.setClassForTemplateLoading(
-        AppEngineTemplateUtility.class, "/templates/appengine");
+        Templates.class, "/templates/appengine");
     configuration.setDefaultEncoding(StandardCharsets.UTF_8.name());
     configuration.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
     configuration.setLogTemplateExceptions(false);

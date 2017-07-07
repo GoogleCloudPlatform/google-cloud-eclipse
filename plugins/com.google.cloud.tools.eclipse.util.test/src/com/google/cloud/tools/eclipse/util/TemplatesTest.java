@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.util.templates.appengine;
+package com.google.cloud.tools.eclipse.util;
 
+import com.google.cloud.tools.eclipse.util.Templates;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -40,7 +41,7 @@ import org.junit.rules.TemporaryFolder;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 
-public class AppEngineTemplateUtilityTest {
+public class TemplatesTest {
 
   @Rule public TemporaryFolder tempFolder = new TemporaryFolder();
 
@@ -66,8 +67,8 @@ public class AppEngineTemplateUtilityTest {
 
   @Test
   public void testCreateFileContent_appengineWebXml() throws CoreException, IOException {
-    AppEngineTemplateUtility.createFileContent(fileLocation,
-        AppEngineTemplateUtility.APPENGINE_WEB_XML_TEMPLATE,
+    Templates.createFileContent(fileLocation,
+        Templates.APPENGINE_WEB_XML_TEMPLATE,
         dataMap);
 
     compareToFile("appengineWebXml.txt");
@@ -77,8 +78,8 @@ public class AppEngineTemplateUtilityTest {
   public void testCreateFileContent_appengineWebXmlWithService()
       throws CoreException, IOException {
     dataMap.put("service", "foobar");
-    AppEngineTemplateUtility.createFileContent(fileLocation,
-        AppEngineTemplateUtility.APPENGINE_WEB_XML_TEMPLATE,
+    Templates.createFileContent(fileLocation,
+        Templates.APPENGINE_WEB_XML_TEMPLATE,
         dataMap);
 
     compareToFile("appengineWebXmlWithService.txt");
@@ -88,8 +89,8 @@ public class AppEngineTemplateUtilityTest {
   public void testCreateFileContent_appYamlWithService()
       throws CoreException, IOException {
     dataMap.put("service", "foobar");
-    AppEngineTemplateUtility.createFileContent(fileLocation,
-        AppEngineTemplateUtility.APP_YAML_TEMPLATE,
+    Templates.createFileContent(fileLocation,
+        Templates.APP_YAML_TEMPLATE,
         dataMap);
 
     compareToFile("appYamlWithService.txt");
@@ -98,8 +99,8 @@ public class AppEngineTemplateUtilityTest {
   @Test
   public void testCreateFileContent_helloAppEngineWithPackage() throws CoreException, IOException {
     dataMap.put("package", "com.example");
-    AppEngineTemplateUtility.createFileContent(fileLocation,
-        AppEngineTemplateUtility.HELLO_APPENGINE_TEMPLATE, dataMap);
+    Templates.createFileContent(fileLocation,
+        Templates.HELLO_APPENGINE_TEMPLATE, dataMap);
 
     compareToFile("helloAppEngineWithPackage.txt");
   }
@@ -108,16 +109,16 @@ public class AppEngineTemplateUtilityTest {
   public void testCreateFileContent_helloAppEngineWithoutPackage()
       throws CoreException, IOException {
     dataMap.put("package", "");
-    AppEngineTemplateUtility.createFileContent(fileLocation,
-        AppEngineTemplateUtility.HELLO_APPENGINE_TEMPLATE, dataMap);
+    Templates.createFileContent(fileLocation,
+        Templates.HELLO_APPENGINE_TEMPLATE, dataMap);
 
     compareToFile("helloAppEngineWithoutPackage.txt");
   }
 
   @Test
   public void testCreateFileContent_index() throws CoreException, IOException {
-    AppEngineTemplateUtility.createFileContent(fileLocation,
-        AppEngineTemplateUtility.INDEX_HTML_TEMPLATE, Collections.<String, String>emptyMap());
+    Templates.createFileContent(fileLocation,
+        Templates.INDEX_HTML_TEMPLATE, Collections.<String, String>emptyMap());
 
     compareToFile("index.txt");
   }
@@ -128,8 +129,8 @@ public class AppEngineTemplateUtilityTest {
     dataMap.put("version", "2.5");
     dataMap.put("namespace", "http://java.sun.com/xml/ns/javaee");
     dataMap.put("schemaUrl", "http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd");
-    AppEngineTemplateUtility.createFileContent(fileLocation,
-        AppEngineTemplateUtility.WEB_XML_TEMPLATE, dataMap);
+    Templates.createFileContent(fileLocation,
+        Templates.WEB_XML_TEMPLATE, dataMap);
 
     compareToFile("web25.txt");
   }
@@ -140,14 +141,14 @@ public class AppEngineTemplateUtilityTest {
     dataMap.put("version", "3.1");
     dataMap.put("namespace", "http://xmlns.jcp.org/xml/ns/javaee");
     dataMap.put("schemaUrl", "http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd");
-    AppEngineTemplateUtility.createFileContent(fileLocation,
-        AppEngineTemplateUtility.WEB_XML_TEMPLATE, dataMap);
+    Templates.createFileContent(fileLocation,
+        Templates.WEB_XML_TEMPLATE, dataMap);
 
     compareToFile("web31.txt");
   }
 
   private static InputStream getDataFile(String fileName) throws IOException {
-    Bundle bundle = FrameworkUtil.getBundle(AppEngineTemplateUtilityTest.class);
+    Bundle bundle = FrameworkUtil.getBundle(TemplatesTest.class);
     URL expectedFileUrl = bundle.getResource("/testData/templates/appengine/" + fileName);
     return expectedFileUrl.openStream();
   }
