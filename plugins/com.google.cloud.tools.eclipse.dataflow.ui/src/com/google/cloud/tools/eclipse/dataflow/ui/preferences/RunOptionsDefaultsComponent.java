@@ -233,7 +233,7 @@ public class RunOptionsDefaultsComponent {
       return;
     }
 
-    IStatus status = bucketNameOk();
+    IStatus status = bucketNameStatus();
     if (!status.isOK()) {
       messageTarget.setError(status.getMessage());
       return;
@@ -362,7 +362,7 @@ public class RunOptionsDefaultsComponent {
     return bucketName;
   }
 
-  private IStatus bucketNameOk() {
+  private IStatus bucketNameStatus() {
     return bucketNameValidator.validate(trimBucketName());
   }
 
@@ -370,7 +370,7 @@ public class RunOptionsDefaultsComponent {
 
     @Override
     public void modifyText(ModifyEvent event) {
-      boolean enabled = !trimBucketName().isEmpty() && bucketNameOk().isOK();
+      boolean enabled = !trimBucketName().isEmpty() && bucketNameStatus().isOK();
       createButton.setEnabled(enabled);
     }
 
