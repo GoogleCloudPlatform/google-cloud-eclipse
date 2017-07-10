@@ -40,6 +40,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.wst.server.core.IServer;
 import org.junit.Before;
@@ -183,7 +184,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
         .thenAnswer(AdditionalAnswers.returnsSecondArg());
 
     DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
-        .generateServerRunConfiguration(launchConfiguration, server);
+        .generateServerRunConfiguration(launchConfiguration, server, ILaunchManager.RUN_MODE);
     assertNull(config.getHost());
     assertEquals((Integer) LocalAppEngineServerBehaviour.DEFAULT_SERVER_PORT, config.getPort());
     assertNull(config.getApiPort());
@@ -199,7 +200,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
         .thenAnswer(AdditionalAnswers.returnsSecondArg());
     when(server.getHost()).thenReturn("example.com");
     DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
-        .generateServerRunConfiguration(launchConfiguration, server);
+        .generateServerRunConfiguration(launchConfiguration, server, ILaunchManager.RUN_MODE);
     assertEquals("example.com", config.getHost());
     verify(server, atLeastOnce()).getHost();
   }
@@ -213,7 +214,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
             .thenReturn(9999);
 
     DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
-        .generateServerRunConfiguration(launchConfiguration, server);
+        .generateServerRunConfiguration(launchConfiguration, server, ILaunchManager.RUN_MODE);
 
     assertNotNull(config.getPort());
     assertEquals(9999, (int) config.getPort());
@@ -231,7 +232,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
             .thenReturn(9999);
 
     DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
-        .generateServerRunConfiguration(launchConfiguration, server);
+        .generateServerRunConfiguration(launchConfiguration, server, ILaunchManager.RUN_MODE);
 
     assertNull(config.getAdminPort());
     verify(launchConfiguration, never())
@@ -254,7 +255,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
     // dev_appserver waits on localhost by default
     try (ServerSocket socket = new ServerSocket(8080, 100, InetAddress.getLoopbackAddress())) {
       DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
-          .generateServerRunConfiguration(launchConfiguration, server);
+          .generateServerRunConfiguration(launchConfiguration, server, ILaunchManager.RUN_MODE);
 
       assertNull(config.getAdminPort());
     }
@@ -267,7 +268,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
         anyString())).thenReturn("a b \"c d\"");
 
     DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
-        .generateServerRunConfiguration(launchConfiguration, server);
+        .generateServerRunConfiguration(launchConfiguration, server, ILaunchManager.RUN_MODE);
 
     assertNotNull(config.getJvmFlags());
     assertEquals(Arrays.asList("a", "b", "c d"), config.getJvmFlags());
@@ -283,6 +284,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
     when(launch.getLaunchConfiguration()).thenReturn(null);
 
     new LocalAppEngineServerLaunchConfigurationDelegate()
-        .checkConflictingLaunches(null, mock(DefaultRunConfiguration.class), launches);
+        .checkConflictingLaunches(null, ILaunchManager.RUN_MODE,
+            mock(DefaultRunConfiguration.class), launches);
   }
 }

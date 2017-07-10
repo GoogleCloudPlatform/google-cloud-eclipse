@@ -94,7 +94,8 @@ import org.eclipse.wst.server.core.ServerUtil;
 public class LocalAppEngineServerLaunchConfigurationDelegate
     extends AbstractJavaLaunchConfigurationDelegate {
 
-  private static final boolean DEV_APPSERVER2 = false;
+  static final boolean DEV_APPSERVER2 =
+      "2".equals(System.getProperty("com.google.cloud.tools.eclipse.appengine.devappserver", "1"));
   
   private static final Logger logger =
       Logger.getLogger(LocalAppEngineServerLaunchConfigurationDelegate.class.getName());
@@ -128,9 +129,9 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
   @Override
   public ILaunch getLaunch(ILaunchConfiguration configuration, String mode) throws CoreException {
     IServer server = ServerUtil.getServer(configuration);
-    DefaultRunConfiguration runConfig = generateServerRunConfiguration(configuration, server);
+    DefaultRunConfiguration runConfig = generateServerRunConfiguration(configuration, server, mode);
     ILaunch[] launches = getLaunchManager().getLaunches();
-    checkConflictingLaunches(configuration.getType(), runConfig, launches);
+    checkConflictingLaunches(configuration.getType(), mode, runConfig, launches);
     return super.getLaunch(configuration, mode);
   }
 
@@ -194,7 +195,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
   }
 
   @VisibleForTesting
-  void checkConflictingLaunches(ILaunchConfigurationType launchConfigType,
+  void checkConflictingLaunches(ILaunchConfigurationType launchConfigType, String mode,
       DefaultRunConfiguration runConfig, ILaunch[] launches) throws CoreException {
     
     for (ILaunch launch : launches) {
@@ -205,7 +206,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       }
       IServer otherServer = ServerUtil.getServer(launch.getLaunchConfiguration());
       DefaultRunConfiguration otherRunConfig =
-          generateServerRunConfiguration(launch.getLaunchConfiguration(), otherServer);
+          generateServerRunConfiguration(launch.getLaunchConfiguration(), otherServer, mode);
       IStatus conflicts = checkConflicts(runConfig, otherRunConfig,
           new MultiStatus(Activator.PLUGIN_ID, 0,
               MessageFormat.format("Conflicts with running server \"{0}\"", otherServer.getName()),
@@ -223,7 +224,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
    */
   @VisibleForTesting
   DefaultRunConfiguration generateServerRunConfiguration(ILaunchConfiguration configuration,
-      IServer server) throws CoreException {
+      IServer server, String mode) throws CoreException {
 
     DefaultRunConfiguration devServerRunConfiguration = new DefaultRunConfiguration();
     // Iterate through our different configurable parameters
@@ -241,11 +242,13 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     }
 
     if (DEV_APPSERVER2) {
-      // default to 1 instance to simplify debugging
-      devServerRunConfiguration.setMaxModuleInstances(1);
+      if (ILaunchManager.DEBUG_MODE.equals(mode)) {
+        // default to 1 instance to simplify debugging
+        devServerRunConfiguration.setMaxModuleInstances(1);
 
-      // don't restart server when on-disk changes detected
-      devServerRunConfiguration.setAutomaticRestart(false);
+        // don't restart server when on-disk changes detected
+        devServerRunConfiguration.setAutomaticRestart(false);
+      }
       
       String adminHost = getAttribute(LocalAppEngineServerBehaviour.ADMIN_HOST_ATTRIBUTE_NAME,
           LocalAppEngineServerBehaviour.DEFAULT_ADMIN_HOST, configuration, server);
@@ -433,7 +436,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     }
     try {
       DefaultRunConfiguration devServerRunConfiguration =
-          generateServerRunConfiguration(configuration, server);
+          generateServerRunConfiguration(configuration, server, mode);
       devServerRunConfiguration.setServices(runnables);
       if (ILaunchManager.DEBUG_MODE.equals(mode)) {
         int debugPort = getDebugPort();
