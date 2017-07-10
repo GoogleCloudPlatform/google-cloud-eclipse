@@ -17,7 +17,6 @@
 package com.google.cloud.tools.eclipse.util;
 
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
-import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import java.io.File;
 import java.io.IOException;
@@ -32,7 +31,6 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.artifact.handler.DefaultArtifactHandler;
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.model.Dependency;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -64,38 +62,6 @@ public class MavenUtils {
           coreException);
       return false;
     }
-  }
-
-  /**
-   * Returns true if the group IDs and artifact IDs of <code>dependency1</code> and
-   * <@code>dependency2</@code> are equal. Returns false otherwise.
-   */
-  public static boolean areDependenciesEqual(Dependency dependency1, Dependency dependency2) {
-    if (dependency1 == null || dependency2 == null) {
-      return false;
-    }
-
-    return Objects.equal(dependency1.getGroupId(), dependency2.getGroupId())
-        && Objects.equal(dependency1.getArtifactId(), dependency2.getArtifactId());
-  }
-
-  /**
-   * Returns true if a dependency with the same group ID and artifact ID as
-   * <code>targetDependency</code> exists in <code>dependencies</code>. Returns false otherwise.
-   */
-  public static boolean doesListContainDependency(List<Dependency> dependencies,
-      Dependency targetDependency) {
-    if (dependencies == null || targetDependency == null) {
-      return false;
-    }
-
-    for (Dependency dependency : dependencies) {
-      if (areDependenciesEqual(dependency, targetDependency)) {
-        return true;
-      }
-    }
-
-    return false;
   }
 
   /**
