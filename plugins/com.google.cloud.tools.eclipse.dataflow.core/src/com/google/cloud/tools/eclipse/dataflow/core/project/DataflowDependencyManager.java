@@ -74,8 +74,8 @@ public class DataflowDependencyManager {
   }
 
   /**
-   * Retrieves a dependency on the Dataflow Java SDK. If trackUpdates is true, the version is
-   * LATEST. Otherwise, the version is [Current Version, Next Major Version).
+   * Retrieves a dependency on the Dataflow Java SDK or null if there is no version in the range.
+   * The version is [Current Version, Next Major Version).
    */
   public ArtifactVersion getLatestDataflowDependencyInRange(VersionRange currentVersionRange) {
     return artifactRetriever.getLatestSdkVersion(currentVersionRange);
