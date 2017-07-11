@@ -356,12 +356,12 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     GridLayoutFactory.fillDefaults().numColumns(2).spacing(0, 0).applyTo(projectSelectorComposite);
     GridDataFactory.fillDefaults().grab(true, false).applyTo(projectSelectorComposite);
 
-    final Text filterField =
-        new Text(projectSelectorComposite,
-            SWT.BORDER | SWT.SEARCH | SWT.ICON_SEARCH | SWT.ICON_CANCEL);
-    filterField.setMessage("Filter projects");
+    final Text filterField = new Text(projectSelectorComposite,
+        SWT.BORDER | SWT.SEARCH | SWT.ICON_SEARCH | SWT.ICON_CANCEL);
+    filterField.setMessage(Messages.getString("projectselector.filter"));
     GridDataFactory.fillDefaults().applyTo(filterField);
-    new Label(projectSelectorComposite, SWT.NONE);
+
+    new Label(projectSelectorComposite, SWT.NONE); // spacer
 
     projectSelector = new ProjectSelector(projectSelectorComposite);
     GridDataFactory.fillDefaults().grab(true, false).hint(SWT.DEFAULT, 200)
@@ -386,12 +386,10 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
                                                     projectSelector));
     filterField.addModifyListener(new ModifyListener() {
       @Override
-      public void modifyText(ModifyEvent e) {
+      public void modifyText(ModifyEvent event) {
         projectSelector.setFilter(filterField.getText());
       }
     });
-
-
   }
 
   private void createProjectVersionSection() {

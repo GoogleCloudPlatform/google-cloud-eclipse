@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.projectselector;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener;
 import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.ErrorDialogErrorHandler;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
@@ -130,22 +131,38 @@ public class ProjectSelector extends Composite implements ISelectionProvider {
       viewer.resetFilters();
       return;
     }
+    final String[] searchTerms = searchText.split("\\s");
     ViewerFilter filter = new ViewerFilter() {
       @Override
       public boolean select(Viewer viewer, Object parentElement, Object element) {
-        for (IValueProperty prop : projectProperties) {
-          Object value = prop.getValue(element);
-          if (value instanceof String && ((String) value).contains(searchText)) {
-            return true;
-          }
-        }
-        return false;
+        return matches(searchTerms, element, projectProperties);
       }
     };
 
     viewer.setFilters(new ViewerFilter[] {filter});
   }
 
+
+  /**
+   * @return true if the element's properties are matched by the given search terms.
+   */
+  @VisibleForTesting
+  static boolean matches(String[] searchTerms, Object element, IValueProperty[] properties) {
+    for (String searchTerm : searchTerms) {
+      boolean seen = false;
+      for (IValueProperty property : properties) {
+        Object value = property.getValue(element);
+        if (value instanceof String && ((String) value).contains(searchTerm)) {
+          seen = true;
+          break;
+        }
+      }
+      if (!seen) {
+        return false;
+      }
+    }
+    return true;
+  }
 
   @Override
   public void setSelection(ISelection selection) {
