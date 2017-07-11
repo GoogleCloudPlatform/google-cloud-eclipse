@@ -52,11 +52,11 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Table;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotCheckBox;
 import org.junit.Before;
 import org.junit.Rule;
@@ -120,8 +120,7 @@ public class AppEngineDeployPreferencesPanelTest {
     assertNotNull(deployPanel.latestGcpProjectQueryJob);
     deployPanel.latestGcpProjectQueryJob.join();
 
-    Table projectTable = getProjectSelector().getViewer().getTable();
-    assertThat(projectTable.getItemCount(), is(2));
+    assertThat(getProjectSelector().getProjectCount(), is(2));
   }
 
   @Test
@@ -238,16 +237,15 @@ public class AppEngineDeployPreferencesPanelTest {
     initializeProjectRepository();
 
     deployPanel = createPanel(false /* requireValues */);
-    Table projectTable = getProjectSelector().getViewer().getTable();
     assertNull(deployPanel.latestGcpProjectQueryJob);
-    assertThat(projectTable.getItemCount(), is(0));
+    assertThat(getProjectSelector().getProjectCount(), is(0));
 
     selectAccount(account1);
     assertNotNull(deployPanel.latestGcpProjectQueryJob);
     deployPanel.latestGcpProjectQueryJob.join();
-    assertThat(projectTable.getItemCount(), is(2));
-    assertThat(((GcpProject) projectTable.getItem(0).getData()).getId(), is("projectId1"));
-    assertThat(((GcpProject) projectTable.getItem(1).getData()).getId(), is("projectId2"));
+    assertThat(getProjectSelector().getProjectCount(), is(2));
+    assertThat(getProjectSelector().getProjects().get(0).getId(), is("projectId1"));
+    assertThat(getProjectSelector().getProjects().get(1).getId(), is("projectId2"));
   }
 
   @Test
@@ -257,20 +255,19 @@ public class AppEngineDeployPreferencesPanelTest {
     initializeProjectRepository();
 
     deployPanel = createPanel(false /* requireValues */);
-    Table projectTable = getProjectSelector().getViewer().getTable();
     assertNull(deployPanel.latestGcpProjectQueryJob);
-    assertThat(projectTable.getItemCount(), is(0));
+    assertThat(getProjectSelector().getProjectCount(), is(0));
 
     selectAccount(account1);
     Job jobForAccount1 = deployPanel.latestGcpProjectQueryJob;
     jobForAccount1.join();
-    assertThat(projectTable.getItemCount(), is(2));
+    assertThat(getProjectSelector().getProjectCount(), is(2));
 
     selectAccount(account2);
     assertNotEquals(jobForAccount1, deployPanel.latestGcpProjectQueryJob);
     deployPanel.latestGcpProjectQueryJob.join();
-    assertThat(projectTable.getItemCount(), is(1));
-    assertThat(((GcpProject) projectTable.getItem(0).getData()).getId(), is("projectId2"));
+    assertThat(getProjectSelector().getProjectCount(), is(1));
+    assertThat(getProjectSelector().getProjects().get(0).getId(), is("projectId2"));
   }
 
   // "AppEngineApplicationQueryJob" assumes no project gets selected when switching accounts.
@@ -284,16 +281,16 @@ public class AppEngineDeployPreferencesPanelTest {
     selectAccount(account1);
     deployPanel.latestGcpProjectQueryJob.join();
 
-    Table projectTable = getProjectSelector().getViewer().getTable();
-    assertThat(projectTable.getItemCount(), is(2));
-    projectTable.setSelection(0);
-    assertThat(projectTable.getSelectionCount(), is(1));
+    assertThat(getProjectSelector().getProjectCount(), is(2));
+    getProjectSelector()
+        .setSelection(new StructuredSelection(getProjectSelector().getProjects().get(0)));
+    assertThat(getProjectSelector().getSelection().size(), is(1));
 
     selectAccount(account2);
     deployPanel.latestGcpProjectQueryJob.join();
 
-    assertThat(projectTable.getItemCount(), is(1));
-    assertThat(projectTable.getSelectionCount(), is(0));
+    assertThat(getProjectSelector().getProjectCount(), is(1));
+    assertThat(getProjectSelector().getSelection().size(), is(0));
   }
 
   private Button getButtonWithText(final String text) {

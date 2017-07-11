@@ -53,10 +53,10 @@ public class ProjectSelectorTest {
         new ProjectSelector(shellResource.getShell());
     projectSelector.setProjects(getUnsortedProjectList());
 
-    assertThat(((GcpProject) projectSelector.getViewer().getElementAt(0)).getName(), is("a"));
-    assertThat(((GcpProject) projectSelector.getViewer().getElementAt(1)).getName(), is("b"));
-    assertThat(((GcpProject) projectSelector.getViewer().getElementAt(2)).getName(), is("c"));
-    assertThat(((GcpProject) projectSelector.getViewer().getElementAt(3)).getName(), is("d"));
+    assertThat(projectSelector.getProjects().get(0).getName(), is("a"));
+    assertThat(projectSelector.getProjects().get(1).getName(), is("b"));
+    assertThat(projectSelector.getProjects().get(2).getName(), is("c"));
+    assertThat(projectSelector.getProjects().get(3).getName(), is("d"));
   }
 
   @Test

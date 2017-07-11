@@ -34,8 +34,7 @@ import com.google.cloud.tools.eclipse.projectselector.model.AppEngine;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.common.base.Predicate;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Display;
 import org.junit.After;
 import org.junit.Before;
@@ -59,7 +58,8 @@ public class AppEngineApplicationQueryJobTest {
   @Mock private ProjectRepository projectRepository;
   @Mock private ProjectSelector projectSelector;
   @Mock private Predicate<Job> isLatestQueryJob;
-  @Mock private ISelection projectSelection;
+  @Mock
+  private IStructuredSelection projectSelection;
 
   private Job queryJob;
 
@@ -74,9 +74,7 @@ public class AppEngineApplicationQueryJobTest {
     when(projectSelector.isDisposed()).thenReturn(false);
     when(isLatestQueryJob.apply(queryJob)).thenReturn(true);
 
-    TableViewer viewer = mock(TableViewer.class);
-    when(viewer.getSelection()).thenReturn(projectSelection);
-    when(projectSelector.getViewer()).thenReturn(viewer);
+    when(projectSelector.getSelection()).thenReturn(projectSelection);
   }
 
   @After
