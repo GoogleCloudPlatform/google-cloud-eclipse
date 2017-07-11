@@ -66,6 +66,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
@@ -354,6 +356,13 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     GridLayoutFactory.fillDefaults().numColumns(2).spacing(0, 0).applyTo(projectSelectorComposite);
     GridDataFactory.fillDefaults().grab(true, false).applyTo(projectSelectorComposite);
 
+    final Text filterField =
+        new Text(projectSelectorComposite,
+            SWT.BORDER | SWT.SEARCH | SWT.ICON_SEARCH | SWT.ICON_CANCEL);
+    filterField.setMessage("Filter projects");
+    GridDataFactory.fillDefaults().applyTo(filterField);
+    new Label(projectSelectorComposite, SWT.NONE);
+
     projectSelector = new ProjectSelector(projectSelectorComposite);
     GridDataFactory.fillDefaults().grab(true, false).hint(SWT.DEFAULT, 200)
         .applyTo(projectSelector);
@@ -375,6 +384,14 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
         new ProjectSelectorSelectionChangedListener(accountSelector,
                                                     projectRepository,
                                                     projectSelector));
+    filterField.addModifyListener(new ModifyListener() {
+      @Override
+      public void modifyText(ModifyEvent e) {
+        projectSelector.setFilter(filterField.getText());
+      }
+    });
+
+
   }
 
   private void createProjectVersionSection() {

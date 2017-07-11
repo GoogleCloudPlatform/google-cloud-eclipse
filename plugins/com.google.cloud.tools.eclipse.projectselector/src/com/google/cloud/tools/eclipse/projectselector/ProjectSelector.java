@@ -22,8 +22,10 @@ import com.google.cloud.tools.eclipse.ui.util.event.OpenUriSelectionListener.Err
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
+import org.eclipse.core.databinding.beans.IBeanValueProperty;
 import org.eclipse.core.databinding.beans.PojoProperties;
 import org.eclipse.core.databinding.observable.list.WritableList;
+import org.eclipse.core.databinding.property.value.IValueProperty;
 import org.eclipse.jface.databinding.viewers.ViewerSupport;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -35,7 +37,9 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
@@ -46,10 +50,11 @@ public class ProjectSelector extends Composite implements ISelectionProvider {
   private final TableViewer viewer;
   private final WritableList/* <GcpProject> */ input; // Generics supported only in Neon+
   private Link statusLink;
+  private IBeanValueProperty[] projectProperties;
 
   public ProjectSelector(Composite parent) {
     super(parent, SWT.NONE);
-    GridLayoutFactory.fillDefaults().numColumns(2).applyTo(this);
+    GridLayoutFactory.fillDefaults().numColumns(2).spacing(0, 0).applyTo(this);
 
     Composite tableComposite = new Composite(this, SWT.NONE);
     TableColumnLayout tableColumnLayout = new TableColumnLayout();
@@ -61,7 +66,8 @@ public class ProjectSelector extends Composite implements ISelectionProvider {
     viewer.getTable().setLinesVisible(false);
 
     input = WritableList.withElementType(GcpProject.class);
-    ViewerSupport.bind(viewer, input, PojoProperties.values(new String[] {"name", "id"})); //$NON-NLS-1$ //$NON-NLS-2$
+    projectProperties = PojoProperties.values(new String[] {"name", "id"}); //$NON-NLS-1$ //$NON-NLS-2$
+    ViewerSupport.bind(viewer, input, projectProperties);
     viewer.setComparator(new ViewerComparator());
 
     Composite linkComposite = new Composite(this, SWT.NONE);
@@ -90,20 +96,20 @@ public class ProjectSelector extends Composite implements ISelectionProvider {
     return (IStructuredSelection) viewer.getSelection();
   }
 
-  /**
-   * @return the projects shown
-   */
-  @SuppressWarnings("unchecked")
-  public List<GcpProject> getProjects() {
-    return ImmutableList.copyOf(input);
-  }
-
   public int getProjectCount() {
     return input.size();
   }
 
   public TableViewer getViewer() {
     return viewer;
+  }
+
+  /**
+   * @return the projects
+   */
+  @SuppressWarnings("unchecked")
+  public List<GcpProject> getProjects() {
+    return ImmutableList.copyOf(input);
   }
 
   public void setProjects(List<GcpProject> projects) {
@@ -114,6 +120,30 @@ public class ProjectSelector extends Composite implements ISelectionProvider {
       input.addAll(projects);
     }
     viewer.setSelection(selection);
+  }
+
+  /**
+   * Set a search filter on the list. If empty or {@code null}, then removes any existing filters.
+   */
+  public void setFilter(final String searchText) {
+    if (searchText == null || Strings.isNullOrEmpty(searchText)) {
+      viewer.resetFilters();
+      return;
+    }
+    ViewerFilter filter = new ViewerFilter() {
+      @Override
+      public boolean select(Viewer viewer, Object parentElement, Object element) {
+        for (IValueProperty prop : projectProperties) {
+          Object value = prop.getValue(element);
+          if (value instanceof String && ((String) value).contains(searchText)) {
+            return true;
+          }
+        }
+        return false;
+      }
+    };
+
+    viewer.setFilters(new ViewerFilter[] {filter});
   }
 
 
