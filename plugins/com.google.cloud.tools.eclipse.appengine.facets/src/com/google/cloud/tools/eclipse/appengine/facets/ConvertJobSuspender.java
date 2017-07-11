@@ -61,7 +61,7 @@ class ConvertJobSuspender {
   static Predicate<Job> isConvertJob = new Predicate<Job>() {
     @Override
     public boolean apply(Job job) {
-      return CONVERT_JOB_CLASS_NAME.equals(job.getClass().getName());
+      return job != null && CONVERT_JOB_CLASS_NAME.equals(job.getClass().getName());
     }
   };
 
