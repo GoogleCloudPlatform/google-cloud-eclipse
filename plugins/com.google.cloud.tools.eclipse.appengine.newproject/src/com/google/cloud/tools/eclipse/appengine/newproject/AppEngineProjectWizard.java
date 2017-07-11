@@ -58,6 +58,9 @@ public abstract class AppEngineProjectWizard extends Wizard implements INewWizar
   @Override
   public void addPages() {
     try {
+      // Clear interrupted state
+      // (https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2064)
+      Thread.interrupted();
       CloudSdk sdk = new CloudSdk.Builder().build();
       sdk.validateCloudSdk();
       sdk.validateAppEngineJavaComponents();
