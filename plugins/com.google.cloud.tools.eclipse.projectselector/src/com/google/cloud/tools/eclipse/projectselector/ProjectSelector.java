@@ -127,14 +127,14 @@ public class ProjectSelector extends Composite implements ISelectionProvider {
    * Set a search filter on the list. If empty or {@code null}, then removes any existing filters.
    */
   public void setFilter(final String searchText) {
-    if (searchText == null || Strings.isNullOrEmpty(searchText)) {
+    if (Strings.isNullOrEmpty(searchText)) {
       viewer.resetFilters();
       return;
     }
-    final String[] searchTerms = searchText.split("\\s");
     ViewerFilter filter = new ViewerFilter() {
       @Override
       public boolean select(Viewer viewer, Object parentElement, Object element) {
+        String[] searchTerms = searchText.split("\\s");
         return matches(searchTerms, element, projectProperties);
       }
     };
