@@ -16,7 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject.standard;
 
-import com.google.cloud.tools.eclipse.appengine.libraries.ILibraryClasspathContainerResolverService.AppEngineRuntime;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;

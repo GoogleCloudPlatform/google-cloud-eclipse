@@ -36,7 +36,6 @@ import org.eclipse.swt.widgets.Composite;
 import com.google.cloud.tools.eclipse.appengine.libraries.BuildPath;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
-import com.google.cloud.tools.eclipse.appengine.ui.LibrarySelectorGroup;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
 
 public abstract class CloudLibrariesPage extends WizardPage implements IClasspathContainerPage,

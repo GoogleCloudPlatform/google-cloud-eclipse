@@ -17,11 +17,11 @@
 package com.google.cloud.tools.eclipse.appengine.newproject.standard;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.ILibraryClasspathContainerResolverService;
-import com.google.cloud.tools.eclipse.appengine.libraries.ILibraryClasspathContainerResolverService.AppEngineRuntime;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectConfig;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectWizard;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;

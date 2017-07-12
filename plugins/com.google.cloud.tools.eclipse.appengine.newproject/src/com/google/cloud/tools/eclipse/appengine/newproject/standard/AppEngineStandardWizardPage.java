@@ -16,10 +16,9 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject.standard;
 
-import com.google.cloud.tools.eclipse.appengine.libraries.ILibraryClasspathContainerResolverService.AppEngineRuntime;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineWizardPage;
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
-import com.google.cloud.tools.eclipse.appengine.newproject.PageValidator;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import com.google.common.annotations.VisibleForTesting;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -55,7 +54,7 @@ public class AppEngineStandardWizardPage extends AppEngineWizardPage {
 
 
   @Override
-  protected void createRuntimeField(Composite composite, final PageValidator pageValidator) {
+  protected void createRuntimeField(Composite composite) {
     Label runtimeLabel = new Label(composite, SWT.LEAD);
     runtimeLabel.setText(Messages.getString("runtime")); //$NON-NLS-1$
     runtimeField = new ComboViewer(composite, SWT.READ_ONLY);
@@ -71,7 +70,7 @@ public class AppEngineStandardWizardPage extends AppEngineWizardPage {
     runtimeField.addPostSelectionChangedListener(new ISelectionChangedListener() {
       @Override
       public void selectionChanged(SelectionChangedEvent event) {
-        pageValidator.run();
+        revalidate();
       }
     });
   }

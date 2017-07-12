@@ -18,7 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import static org.junit.Assert.assertFalse;
 
-import com.google.cloud.tools.eclipse.appengine.libraries.ILibraryClasspathContainerResolverService.AppEngineRuntime;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.util.Templates;
 import java.io.BufferedReader;

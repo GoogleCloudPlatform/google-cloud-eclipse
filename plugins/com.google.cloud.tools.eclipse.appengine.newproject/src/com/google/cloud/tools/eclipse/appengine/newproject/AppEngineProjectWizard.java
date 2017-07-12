@@ -38,10 +38,10 @@ import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.ide.undo.WorkspaceUndoUtil;
 
-public abstract class AppEngineProjectWizard<T extends AppEngineWizardPage> extends Wizard
+public abstract class AppEngineProjectWizard<WP extends AppEngineWizardPage> extends Wizard
     implements INewWizard {
 
-  protected T page = null;
+  protected WP page = null;
   protected final AppEngineProjectConfig config = new AppEngineProjectConfig();
   private IWorkbench workbench;
 
@@ -49,7 +49,7 @@ public abstract class AppEngineProjectWizard<T extends AppEngineWizardPage> exte
     setNeedsProgressMonitor(true);
   }
 
-  public abstract T createWizardPage();
+  public abstract WP createWizardPage();
 
   public abstract IStatus validateDependencies();
 
