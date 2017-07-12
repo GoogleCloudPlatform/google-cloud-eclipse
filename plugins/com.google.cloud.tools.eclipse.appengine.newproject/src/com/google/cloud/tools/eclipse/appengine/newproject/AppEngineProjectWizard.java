@@ -38,10 +38,9 @@ import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.ide.undo.WorkspaceUndoUtil;
 
-public abstract class AppEngineProjectWizard<WP extends AppEngineWizardPage> extends Wizard
-    implements INewWizard {
+public abstract class AppEngineProjectWizard extends Wizard implements INewWizard {
 
-  protected WP page = null;
+  protected AppEngineWizardPage page = null;
   protected final AppEngineProjectConfig config = new AppEngineProjectConfig();
   private IWorkbench workbench;
 
@@ -49,7 +48,7 @@ public abstract class AppEngineProjectWizard<WP extends AppEngineWizardPage> ext
     setNeedsProgressMonitor(true);
   }
 
-  public abstract WP createWizardPage();
+  public abstract AppEngineWizardPage createWizardPage();
 
   public abstract IStatus validateDependencies();
 
@@ -114,6 +113,7 @@ public abstract class AppEngineProjectWizard<WP extends AppEngineWizardPage> ext
   protected void retrieveConfigurationValues() {
     config.setServiceName(page.getServiceName());
     config.setPackageName(page.getPackageName());
+    config.setRuntimeId(page.getRuntimeId());
     config.setProject(page.getProjectHandle());
     if (!page.useDefaults()) {
       config.setEclipseProjectLocationUri(page.getLocationURI());

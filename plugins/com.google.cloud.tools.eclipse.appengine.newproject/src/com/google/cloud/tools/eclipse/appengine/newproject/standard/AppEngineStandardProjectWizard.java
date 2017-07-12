@@ -34,7 +34,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
 public class AppEngineStandardProjectWizard
-    extends AppEngineProjectWizard<AppEngineStandardWizardPage> {
+    extends AppEngineProjectWizard {
 
   @Inject
   private ILibraryClasspathContainerResolverService resolverService;
@@ -78,13 +78,6 @@ public class AppEngineStandardProjectWizard
   public CreateAppEngineWtpProject getAppEngineProjectCreationOperation(
       AppEngineProjectConfig config, IAdaptable uiInfoAdapter) {
     return new CreateAppEngineStandardWtpProject(config, uiInfoAdapter);
-  }
-
-
-  @Override
-  protected void retrieveConfigurationValues() {
-    super.retrieveConfigurationValues();
-    config.setRuntimeId(page.getRuntime());
   }
 
   @Override

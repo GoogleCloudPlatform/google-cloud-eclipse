@@ -123,6 +123,10 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
     // default: do nothing
   }
 
+  public String getRuntimeId() {
+    return null;
+  }
+
   // Java package name; Composite is laid out with 2 columns.
   private void createPackageField(Composite parent) {
     Label packageNameLabel = new Label(parent, SWT.LEAD);

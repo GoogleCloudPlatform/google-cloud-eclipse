@@ -65,7 +65,7 @@ public class AppEngineStandardWizardPage extends AppEngineWizardPage {
       }
     });
     runtimeField.setContentProvider(ArrayContentProvider.getInstance());
-    runtimeField.setInput(AppEngineRuntime.values());
+    runtimeField.setInput(AppEngineRuntime.STANDARD_RUNTIMES);
     runtimeField.setSelection(new StructuredSelection(DEFAULT_RUNTIME), true);
     runtimeField.addPostSelectionChangedListener(new ISelectionChangedListener() {
       @Override
@@ -75,7 +75,8 @@ public class AppEngineStandardWizardPage extends AppEngineWizardPage {
     });
   }
 
-  public String getRuntime() {
+  @Override
+  public String getRuntimeId() {
     ISelection selection = runtimeField == null ? new StructuredSelection(DEFAULT_RUNTIME)
         : runtimeField.getSelection();
     AppEngineRuntime selected = selection instanceof IStructuredSelection
