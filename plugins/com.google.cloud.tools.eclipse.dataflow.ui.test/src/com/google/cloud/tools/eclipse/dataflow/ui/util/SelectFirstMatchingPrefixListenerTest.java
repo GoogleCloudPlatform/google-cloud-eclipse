@@ -33,14 +33,13 @@ import org.eclipse.swt.widgets.Widget;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.runners.MockitoJUnitRunner;
 
 /**
  * Tests for {@link SelectFirstMatchingPrefixListener}.
  */
-@RunWith(JUnit4.class)
+@RunWith(MockitoJUnitRunner.class)
 public class SelectFirstMatchingPrefixListenerTest {
   @Mock
   private Combo combo;
@@ -50,8 +49,6 @@ public class SelectFirstMatchingPrefixListenerTest {
 
   @Before
   public void setup() {
-    MockitoAnnotations.initMocks(this);
-
     listener = new SelectFirstMatchingPrefixListener(combo);
     listener.setContents(elements);
   }

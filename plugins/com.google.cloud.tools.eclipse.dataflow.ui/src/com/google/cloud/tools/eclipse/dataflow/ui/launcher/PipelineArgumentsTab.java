@@ -170,8 +170,8 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
     pipelineOptionsForm =
         new PipelineOptionsFormComponent(runnerOptionsGroup, ARGUMENTS_SEPARATOR, filterProperties);
-    pipelineOptionsForm.addModifyListener(new UpdateLaunchConfigurationDialogTextChangedListener());
-    pipelineOptionsForm.addExpandListener(new UpdateLaunchConfigurationDialogExpandListener());
+    pipelineOptionsForm.addModifyListener(new UpdateLaunchConfigurationDialogChangedListener());
+    pipelineOptionsForm.addExpandListener(new UpdateLaunchConfigurationDialogChangedListener());
 
     composite.setContent(internalComposite);
     composite.setExpandHorizontal(true);
@@ -253,9 +253,9 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
         new DefaultedPipelineOptionsComponent(composite, layoutData, target, getPreferences());
 
     defaultOptionsComponent.addButtonSelectionListener(
-        new UpdateLaunchConfigurationDialogSelectionListener());
+        new UpdateLaunchConfigurationDialogChangedListener());
     defaultOptionsComponent.addModifyListener(
-        new UpdateLaunchConfigurationDialogTextChangedListener());
+        new UpdateLaunchConfigurationDialogChangedListener());
   }
 
   @Override
@@ -306,7 +306,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
             majorVersion = MajorVersion.ONE;
          }
       }
-      
+
       updateRunnerButtons(majorVersion);
       updateHierarchy(majorVersion);
 
@@ -476,8 +476,8 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   }
 
   /**
-   * When the Runner selectino is changed, update the underlying launch configuration, update the
-   * PipelineOptionsForm to show all available inputs, and rerender the tab.
+   * When the Runner selection is changed, update the underlying launch configuration, update the
+   * PipelineOptionsForm to show all available inputs, and re-render the tab.
    */
   private class UpdateLaunchConfigAndRequiredArgsSelectionListener extends SelectionAdapter {
     private final PipelineRunner runner;
@@ -495,37 +495,28 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   }
 
   /**
-   * When a launch configuration property changes, ensure the validation state is reflected in the
-   * arguments tab.
+   * When the default options button is selected or a launch configuration property changes,
+   * ensure 1) the validation state is reflected in the arguments tab; and 2) the min size of the
+   * {@code ScrolledComposite} is updated to fit the entire form.
    */
-  private class UpdateLaunchConfigurationDialogTextChangedListener implements ModifyListener {
+  private class UpdateLaunchConfigurationDialogChangedListener
+      extends SelectionAdapter implements ModifyListener, IExpansionListener {
     @Override
-    public void modifyText(ModifyEvent e) {
+    public void widgetSelected(SelectionEvent event) {
       updateLaunchConfigurationDialog();
     }
-  }
 
-  /**
-   * When the default options button is selected, ensure the validation state is refelected in the
-   * arguments tab.
-   */
-  private class UpdateLaunchConfigurationDialogSelectionListener extends SelectionAdapter {
     @Override
-    public void widgetSelected(SelectionEvent e) {
+    public void modifyText(ModifyEvent event) {
       updateLaunchConfigurationDialog();
     }
-  }
-
-  /**
-   * Whenever a {@link PipelineOptionsType} header is expanded, ensure the min size of the {@code
-   * ScrolledComposite} is updated to fit the entire form.
-   */
-  private class UpdateLaunchConfigurationDialogExpandListener implements IExpansionListener {
-    @Override
-    public void expansionStateChanging(ExpansionEvent e) {}
 
     @Override
-    public void expansionStateChanged(ExpansionEvent e) {
+    public void expansionStateChanging(ExpansionEvent event) {  // ignored
+    }
+
+    @Override
+    public void expansionStateChanged(ExpansionEvent event) {
       updateLaunchConfigurationDialog();
     }
   }

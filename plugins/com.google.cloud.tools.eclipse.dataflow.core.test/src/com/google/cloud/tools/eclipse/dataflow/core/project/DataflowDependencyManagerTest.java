@@ -43,14 +43,13 @@ import org.eclipse.m2e.core.project.IMavenProjectRegistry;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.runners.MockitoJUnitRunner;
 
 /**
  * Tests for {@link DataflowArtifactRetriever}.
  */
-@RunWith(JUnit4.class)
+@RunWith(MockitoJUnitRunner.class)
 public class DataflowDependencyManagerTest {
   @Mock
   private DataflowArtifactRetriever artifactRetriever;
@@ -67,7 +66,6 @@ public class DataflowDependencyManagerTest {
 
   @Before
   public void setup() throws Exception {
-    MockitoAnnotations.initMocks(this);
     manager = DataflowDependencyManager.create(artifactRetriever, maven, projectRegistry);
 
     when(projectRegistry.getProject(project)).thenReturn(mavenFacade);

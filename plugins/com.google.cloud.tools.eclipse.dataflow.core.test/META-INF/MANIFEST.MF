@@ -19,4 +19,5 @@ Import-Package: com.google.cloud.tools.eclipse.test.util,
  org.junit.runner;version="4.12.0",
  org.junit.runners;version="4.12.0",
  org.mockito;provider=google;version="1.10.19",
+ org.mockito.runners;provider=google;version="1.10.19",
  org.mockito.stubbing;provider=google;version="1.10.19"

@@ -30,14 +30,14 @@ import com.google.cloud.tools.eclipse.dataflow.core.preferences.DataflowPreferen
 import com.google.cloud.tools.eclipse.dataflow.core.project.MajorVersion;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.junit.Test;
 import org.mockito.Mockito;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Tests for {@link PipelineLaunchConfiguration}.
@@ -492,50 +492,12 @@ public class PipelineLaunchConfigurationTest {
   }
 
   private DataflowPreferences absentPrefs() {
-    return new DataflowPreferences() {
-      @Override
-      public String getDefaultStagingLocation() {
-        return null;
-      }
-
-      @Override
-      public String getDefaultGcpTempLocation() {
-        return null;
-      }
-
-      @Override
-      public String getDefaultProject() {
-        return null;
-      }
-
-      @Override
-      public Map<String, String> asDefaultPropertyMap() {
-        return Collections.emptyMap();
-      }
-    };
+    return mapPrefs(Collections.<String, String>emptyMap());
   }
 
-  private DataflowPreferences mapPrefs(final Map<String, String> asMap) {
-    return new DataflowPreferences() {
-      @Override
-      public String getDefaultStagingLocation() {
-        return null;
-      }
-
-      @Override
-      public String getDefaultGcpTempLocation() {
-        return null;
-      }
-
-      @Override
-      public String getDefaultProject() {
-        return null;
-      }
-
-      @Override
-      public Map<String, String> asDefaultPropertyMap() {
-        return asMap;
-      }
-    };
+  private DataflowPreferences mapPrefs(Map<String, String> asMap) {
+    DataflowPreferences preferences = mock(DataflowPreferences.class);
+    when(preferences.asDefaultPropertyMap()).thenReturn(asMap);
+    return preferences;
   }
 }

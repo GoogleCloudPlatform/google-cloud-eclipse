@@ -100,22 +100,16 @@ public class RunOptionsDefaultsComponent {
     createButton = ButtonFactory.newPushButton(target, "&Create");
     createButton.setEnabled(false);
 
+    projectInputLabel.setText("Cloud Platform &Project ID:");
+
     // Initialize the Default Project, which is used to populate the Staging Location field
     String project = preferences.getDefaultProject();
-    if (project == null) {
-      project = "";
-    }
-
-    projectInputLabel.setText("Cloud Platform &Project ID:");
-    projectInput.setText(project);
+    projectInput.setText(Strings.nullToEmpty(project));
 
     comboLabel.setText("Cloud Storage Staging &Location:");
 
     String stagingLocation = preferences.getDefaultStagingLocation();
-    if (stagingLocation == null) {
-      stagingLocation = "";
-    }
-    stagingLocationInput.setText(stagingLocation);
+    stagingLocationInput.setText(Strings.nullToEmpty(stagingLocation));
 
     // Project input occupies a single row
     projectInputLabel.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false, 1, 1));
@@ -181,17 +175,9 @@ public class RunOptionsDefaultsComponent {
     return GcsDataflowProjectClient.toGcsLocationUri(stagingLocationInput.getText());
   }
 
-  public void addProjectModifyListener(ModifyListener listener) {
-    projectInput.addModifyListener(listener);
-  }
-
-  public void addStagingLocationModifyListener(ModifyListener listener) {
-    stagingLocationInput.addModifyListener(listener);
-  }
-
   public void addModifyListener(ModifyListener listener) {
-    addProjectModifyListener(listener);
-    addStagingLocationModifyListener(listener);
+    projectInput.addModifyListener(listener);
+    stagingLocationInput.addModifyListener(listener);
   }
 
   public void setEnabled(boolean enabled) {

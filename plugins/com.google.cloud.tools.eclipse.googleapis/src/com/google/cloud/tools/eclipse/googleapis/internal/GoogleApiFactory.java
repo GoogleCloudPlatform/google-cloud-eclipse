@@ -17,9 +17,9 @@
 package com.google.cloud.tools.eclipse.googleapis.internal;
 
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.googleapis.util.Utils;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson.JacksonFactory;
 import com.google.api.services.appengine.v1.Appengine;
 import com.google.api.services.appengine.v1.Appengine.Apps;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager;
@@ -48,7 +48,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
 
   private IProxyService proxyService;
 
-  private final JsonFactory jsonFactory = new JacksonFactory();
+  private final JsonFactory jsonFactory = Utils.getDefaultJsonFactory();
   private final ProxyFactory proxyFactory;
   private LoadingCache<GoogleApiUrl, HttpTransport> transportCache;
 
