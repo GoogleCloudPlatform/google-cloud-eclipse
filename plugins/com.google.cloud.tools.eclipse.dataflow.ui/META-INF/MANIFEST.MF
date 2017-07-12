@@ -19,7 +19,10 @@ Import-Package: com.google.cloud.tools.eclipse.dataflow.core.launcher,
  com.google.cloud.tools.eclipse.dataflow.core.proxy,
  com.google.cloud.tools.eclipse.dataflow.core.util,
  com.google.cloud.tools.eclipse.ui.util.databinding,
- com.google.common.annotations;version="15.0.0",
+ com.google.common.annotations;version="[20.0.0,21.0.0)",
+ com.google.common.base;version="[20.0.0,21.0.0)",
+ com.google.common.collect;version="[20.0.0,21.0.0)",
+ com.google.common.util.concurrent;version="[20.0.0,21.0.0)",
  org.eclipse.core.commands,
  org.eclipse.core.commands.common,
  org.eclipse.core.resources,
@@ -57,7 +60,5 @@ Import-Package: com.google.cloud.tools.eclipse.dataflow.core.launcher,
  org.eclipse.ui.plugin,
  org.eclipse.ui.statushandlers,
  org.osgi.framework
-Require-Bundle: com.google.cloud.tools.eclipse.googleapis,
- com.google.guava;bundle-version="[20.0.0,21.0.0)",
- org.eclipse.m2e.maven.runtime
+Require-Bundle: org.eclipse.m2e.maven.runtime
 
