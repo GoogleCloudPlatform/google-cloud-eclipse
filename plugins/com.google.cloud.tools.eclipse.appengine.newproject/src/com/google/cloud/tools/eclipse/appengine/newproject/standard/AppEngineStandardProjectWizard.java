@@ -20,7 +20,6 @@ import com.google.cloud.tools.eclipse.appengine.libraries.ILibraryClasspathConta
 import com.google.cloud.tools.eclipse.appengine.libraries.ILibraryClasspathContainerResolverService.AppEngineRuntime;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectConfig;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectWizard;
-import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineWizardPage;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
@@ -34,7 +33,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
-public class AppEngineStandardProjectWizard extends AppEngineProjectWizard {
+public class AppEngineStandardProjectWizard
+    extends AppEngineProjectWizard<AppEngineStandardWizardPage> {
 
   @Inject
   private ILibraryClasspathContainerResolverService resolverService;
@@ -44,7 +44,7 @@ public class AppEngineStandardProjectWizard extends AppEngineProjectWizard {
   }
 
   @Override
-  public AppEngineWizardPage createWizardPage() {
+  public AppEngineStandardWizardPage createWizardPage() {
     AnalyticsPingManager.getInstance().sendPing(
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD,
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,
@@ -78,6 +78,13 @@ public class AppEngineStandardProjectWizard extends AppEngineProjectWizard {
   public CreateAppEngineWtpProject getAppEngineProjectCreationOperation(
       AppEngineProjectConfig config, IAdaptable uiInfoAdapter) {
     return new CreateAppEngineStandardWtpProject(config, uiInfoAdapter);
+  }
+
+
+  @Override
+  protected void retrieveConfigurationValues() {
+    super.retrieveConfigurationValues();
+    config.setRuntimeId(page.getRuntime());
   }
 
   @Override

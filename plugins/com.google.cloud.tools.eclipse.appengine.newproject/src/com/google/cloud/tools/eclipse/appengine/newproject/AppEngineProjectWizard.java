@@ -38,9 +38,10 @@ import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.ide.undo.WorkspaceUndoUtil;
 
-public abstract class AppEngineProjectWizard extends Wizard implements INewWizard {
+public abstract class AppEngineProjectWizard<T extends AppEngineWizardPage> extends Wizard
+    implements INewWizard {
 
-  private AppEngineWizardPage page = null;
+  protected T page = null;
   protected final AppEngineProjectConfig config = new AppEngineProjectConfig();
   private IWorkbench workbench;
 
@@ -48,7 +49,7 @@ public abstract class AppEngineProjectWizard extends Wizard implements INewWizar
     setNeedsProgressMonitor(true);
   }
 
-  public abstract AppEngineWizardPage createWizardPage();
+  public abstract T createWizardPage();
 
   public abstract IStatus validateDependencies();
 
@@ -85,18 +86,7 @@ public abstract class AppEngineProjectWizard extends Wizard implements INewWizar
       return false;
     }
 
-    config.setServiceName(page.getServiceName());
-    config.setPackageName(page.getPackageName());
-    config.setProject(page.getProjectHandle());
-    if (!page.useDefaults()) {
-      config.setEclipseProjectLocationUri(page.getLocationURI());
-    }
-
-    config.setAppEngineLibraries(page.getSelectedLibraries());
-
-    if (page.asMavenProject()) {
-      config.setUseMaven(page.getMavenGroupId(), page.getMavenArtifactId(), page.getMavenVersion());
-    }
+    retrieveConfigurationValues();
 
     // todo set up
     IAdaptable uiInfoAdapter = WorkspaceUndoUtil.getUIInfoAdapter(getShell());
@@ -118,6 +108,21 @@ public abstract class AppEngineProjectWizard extends Wizard implements INewWizar
       String message = Messages.getString("project.creation.failed"); //$NON-NLS-1$
       StatusUtil.setErrorStatus(this, message, ex.getCause());
       return false;
+    }
+  }
+
+  protected void retrieveConfigurationValues() {
+    config.setServiceName(page.getServiceName());
+    config.setPackageName(page.getPackageName());
+    config.setProject(page.getProjectHandle());
+    if (!page.useDefaults()) {
+      config.setEclipseProjectLocationUri(page.getLocationURI());
+    }
+
+    config.setAppEngineLibraries(page.getSelectedLibraries());
+
+    if (page.asMavenProject()) {
+      config.setUseMaven(page.getMavenGroupId(), page.getMavenArtifactId(), page.getMavenVersion());
     }
   }
 

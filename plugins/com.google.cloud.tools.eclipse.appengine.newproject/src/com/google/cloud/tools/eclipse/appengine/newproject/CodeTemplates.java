@@ -119,6 +119,10 @@ public class CodeTemplates {
     if (!Strings.isNullOrEmpty(service)) {
       properties.put("service", service);  //$NON-NLS-1$
     }
+    String runtime = config.getRuntimeId();
+    if (!Strings.isNullOrEmpty(runtime)) {
+      properties.put("runtime", runtime); //$NON-NLS-1$
+    }
 
     if (isStandardProject) {
       createChildFile("appengine-web.xml",  //$NON-NLS-1$

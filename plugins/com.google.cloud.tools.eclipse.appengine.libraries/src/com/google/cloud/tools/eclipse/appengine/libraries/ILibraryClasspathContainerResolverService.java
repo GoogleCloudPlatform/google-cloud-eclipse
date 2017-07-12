@@ -30,8 +30,27 @@ import org.eclipse.jdt.core.IJavaProject;
  */
 public interface ILibraryClasspathContainerResolverService {
 
+  // extract to a standalone enum?
   enum AppEngineRuntime {
-    STANDARD_JAVA_7
+    STANDARD_JAVA_7(Messages.getString("appengine.runtimes.java7"), null), // $NON-NLS-1$
+    STANDARD_JAVA_8(Messages.getString("appengine.runtimes.java8"), "java8"); // $NON-NLS-1$
+                                                                              // $NON-NLS-2$
+
+    private String label;
+    private String id;
+
+    AppEngineRuntime(String label, String id) {
+      this.label = label;
+      this.id = id;
+    }
+
+    public String getLabel() {
+      return label;
+    }
+
+    public String getId() {
+      return id;
+    }
   }
 
   /**

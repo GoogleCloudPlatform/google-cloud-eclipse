@@ -21,7 +21,7 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 
-public class PageValidator implements ModifyListener, Listener {
+public class PageValidator implements ModifyListener, Listener, Runnable {
 
   private final AppEngineWizardPage wizardPage;
 
@@ -31,11 +31,17 @@ public class PageValidator implements ModifyListener, Listener {
 
   @Override
   public void modifyText(ModifyEvent event) {
-    wizardPage.setPageComplete(wizardPage.validatePage());
+    run();
   }
 
   @Override
   public void handleEvent(Event event) {
+    run();
+  }
+
+  @Override
+  public void run() {
     wizardPage.setPageComplete(wizardPage.validatePage());
+
   }
 }

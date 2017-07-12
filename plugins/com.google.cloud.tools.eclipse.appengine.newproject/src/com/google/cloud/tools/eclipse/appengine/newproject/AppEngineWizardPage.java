@@ -46,8 +46,8 @@ import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
  */
 public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
 
-  private Text javaPackageField;
   private LibrarySelectorGroup appEngineLibrariesSelectorGroup;
+  private Text javaPackageField;
   private Text serviceNameField;
   private MavenCoordinatesUi mavenCoordinatesUi;
   private final boolean showLibrariesSelectorGroup;
@@ -99,10 +99,18 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
   private void createCustomFields(Composite container) {
     Composite composite = new Composite(container, SWT.NONE);
     PageValidator pageValidator = new PageValidator(this);
+    createRuntimeField(composite, pageValidator);
     createPackageField(composite, pageValidator);
     createServiceField(composite, pageValidator);
 
     GridLayoutFactory.swtDefaults().numColumns(2).generateLayout(composite);
+  }
+
+  /**
+   * Creates a Runtime section.
+   */
+  protected void createRuntimeField(Composite composite, PageValidator pageValidator) {
+    // default: do nothing
   }
 
   // Java package name

@@ -5,5 +5,7 @@
   <sessions-enabled>false</sessions-enabled>
 <#if service??>  <service>${service}</service>
 </#if>
+<#if runtime??>  <runtime>${runtime}</runtime>
+</#if>
 
 </appengine-web-app>
