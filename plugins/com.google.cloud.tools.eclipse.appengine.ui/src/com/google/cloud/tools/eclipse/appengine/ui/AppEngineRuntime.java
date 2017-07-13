@@ -28,8 +28,8 @@ public enum AppEngineRuntime {
   public static final EnumSet<AppEngineRuntime> STANDARD_RUNTIMES =
       EnumSet.of(STANDARD_JAVA_7, STANDARD_JAVA_8);
 
-  private String label;
-  private String id;
+  private final String label;
+  private final String id;
 
   AppEngineRuntime(String label, String id) {
     this.label = label;

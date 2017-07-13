@@ -18,7 +18,6 @@ package com.google.cloud.tools.eclipse.appengine.libraries.ui;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
-import com.google.cloud.tools.eclipse.appengine.ui.Messages;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -72,7 +71,7 @@ public class LibrarySelectorGroup implements ISelectionProvider {
 
   private void createContents(Composite parentContainer) {
     Group apiGroup = new Group(parentContainer, SWT.NONE);
-    apiGroup.setText(Messages.getString("appengine.libraries.group"));
+    apiGroup.setText(Messages.getString("appengine.libraries.group")); //$NON-NLS-1$
 
     for (Library library : availableLibraries.values()) {
       Button libraryButton = new Button(apiGroup, SWT.CHECK);

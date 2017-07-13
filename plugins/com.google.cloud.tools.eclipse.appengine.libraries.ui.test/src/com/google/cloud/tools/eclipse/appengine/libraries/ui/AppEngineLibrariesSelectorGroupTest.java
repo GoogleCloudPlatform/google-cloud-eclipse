@@ -26,7 +26,6 @@ import static org.junit.Assert.fail;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
-import com.google.cloud.tools.eclipse.appengine.libraries.ui.LibrarySelectorGroup;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import java.util.ArrayList;
 import java.util.Collections;

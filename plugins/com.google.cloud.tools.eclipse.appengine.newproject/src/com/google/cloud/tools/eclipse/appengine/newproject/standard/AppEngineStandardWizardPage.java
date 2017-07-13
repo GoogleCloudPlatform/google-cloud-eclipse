@@ -20,9 +20,9 @@ import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineWizardPage;
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -77,11 +77,13 @@ public class AppEngineStandardWizardPage extends AppEngineWizardPage {
 
   @Override
   public String getRuntimeId() {
-    ISelection selection = runtimeField == null ? new StructuredSelection(DEFAULT_RUNTIME)
-        : runtimeField.getSelection();
-    AppEngineRuntime selected = selection instanceof IStructuredSelection
-        ? (AppEngineRuntime) ((IStructuredSelection) selection).getFirstElement()
-        : DEFAULT_RUNTIME;
+    AppEngineRuntime selected = DEFAULT_RUNTIME;
+    if (runtimeField != null && !runtimeField.getSelection().isEmpty()) {
+      Preconditions.checkState(runtimeField.getSelection() instanceof IStructuredSelection,
+          "ComboViewer should return an IStructuredSelection");
+      IStructuredSelection selection = (IStructuredSelection) runtimeField.getSelection();
+      selected = (AppEngineRuntime) selection.getFirstElement();
+    }
     return selected.getId();
   }
 }
