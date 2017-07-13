@@ -31,7 +31,7 @@ public enum AppEngineRuntime {
   private final String label;
   private final String id;
 
-  AppEngineRuntime(String label, String id) {
+  private AppEngineRuntime(String label, String id) {
     this.label = label;
     this.id = id;
   }
