@@ -52,6 +52,8 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.debug.ui.IDebugUIConstants;
+import org.eclipse.debug.ui.console.ConsoleColorProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
@@ -134,23 +136,28 @@ public abstract class DeployCommandHandler extends AbstractHandler {
     AnalyticsPingManager.getInstance().sendPing(
         AnalyticsEvents.APP_ENGINE_DEPLOY, AnalyticsEvents.APP_ENGINE_DEPLOY_STANDARD, null);
 
+    IPath workDirectory = createWorkDirectory();
     DeployPreferences deployPreferences = new DeployPreferences(project);
+    DefaultDeployConfiguration deployConfiguration = toDeployConfiguration(deployPreferences);
+    boolean includeOptionalConfigurationFiles =
+        deployPreferences.isIncludeOptionalConfigurationFiles();
+
     DeployConsole messageConsole =
         MessageConsoleUtilities.createConsole(getConsoleName(deployPreferences.getProjectId()),
                                               new DeployConsole.Factory());
     IConsoleManager consoleManager = ConsolePlugin.getDefault().getConsoleManager();
     consoleManager.showConsoleView(messageConsole);
-
-    IPath workDirectory = createWorkDirectory();
+    ConsoleColorProvider colorProvider = new ConsoleColorProvider();
     MessageConsoleStream outputStream = messageConsole.newMessageStream();
-    DefaultDeployConfiguration deployConfiguration = toDeployConfiguration(deployPreferences);
-    boolean includeOptionalConfigurationFiles =
-        deployPreferences.isIncludeOptionalConfigurationFiles();
+    MessageConsoleStream errorStream = messageConsole.newMessageStream();
+    outputStream.setColor(colorProvider.getColor(IDebugUIConstants.ID_STANDARD_OUTPUT_STREAM));
+    errorStream.setColor(colorProvider.getColor(IDebugUIConstants.ID_STANDARD_ERROR_STREAM));
+    
     StagingDelegate stagingDelegate = getStagingDelegate(project);
 
     DeployJob deploy = new DeployJob(project, credential, workDirectory,
         new MessageConsoleWriterOutputLineListener(outputStream),
-        new MessageConsoleWriterOutputLineListener(outputStream),
+        new MessageConsoleWriterOutputLineListener(errorStream),
         deployConfiguration, includeOptionalConfigurationFiles, stagingDelegate);
     messageConsole.setJob(deploy);
     deploy.addJobChangeListener(new JobChangeAdapter() {

@@ -76,6 +76,8 @@ import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IMemoryBlock;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.IThread;
+import org.eclipse.debug.ui.IDebugUIConstants;
+import org.eclipse.debug.ui.console.ConsoleColorProvider;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.AbstractJavaLaunchConfigurationDelegate;
@@ -84,6 +86,7 @@ import org.eclipse.jdt.launching.IVMConnector;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.SocketUtil;
+import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerListener;
@@ -416,11 +419,17 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       runnables.add(deployPath.toFile());
     }
 
+    // configure the console for output
+    ConsoleColorProvider colorProvider = new ConsoleColorProvider();
     LocalAppEngineConsole console =
         MessageConsoleUtilities.findOrCreateConsole(configuration.getName(),
             new LocalAppEngineConsole.Factory(serverBehaviour));
     console.clearConsole();
     console.activate();
+    MessageConsoleStream outputStream = console.newMessageStream();
+    MessageConsoleStream errorStream = console.newMessageStream();
+    outputStream.setColor(colorProvider.getColor(IDebugUIConstants.ID_STANDARD_OUTPUT_STREAM));
+    errorStream.setColor(colorProvider.getColor(IDebugUIConstants.ID_STANDARD_ERROR_STREAM));
 
     // A launch must have at least one debug target or process, or it becomes a zombie
     CloudSdkDebugTarget target = new CloudSdkDebugTarget(launch, serverBehaviour);
@@ -445,7 +454,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       
       String javaHome = vmInstall.getInstallLocation().getAbsolutePath();
       serverBehaviour.startDevServer(devServerRunConfiguration, Paths.get(javaHome),
-          console.newMessageStream());
+          outputStream, errorStream);
     } catch (CoreException ex) {
       launch.terminate();
       throw ex;
