@@ -241,13 +241,14 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       devServerRunConfiguration.setPort(serverPort);
     }
 
+
+    // only restart server on on-disk changes detected when in RUN mode
+    devServerRunConfiguration.setAutomaticRestart(ILaunchManager.RUN_MODE.equals(mode));
+
     if (DEV_APPSERVER2) {
       if (ILaunchManager.DEBUG_MODE.equals(mode)) {
         // default to 1 instance to simplify debugging
         devServerRunConfiguration.setMaxModuleInstances(1);
-
-        // don't restart server when on-disk changes detected
-        devServerRunConfiguration.setAutomaticRestart(false);
       }
       
       String adminHost = getAttribute(LocalAppEngineServerBehaviour.ADMIN_HOST_ATTRIBUTE_NAME,

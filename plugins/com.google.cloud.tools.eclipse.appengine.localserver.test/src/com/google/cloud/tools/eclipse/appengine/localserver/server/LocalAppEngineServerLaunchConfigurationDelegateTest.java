@@ -61,7 +61,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
   private LocalAppEngineServerBehaviour serverBehavior;
 
   @Before
-  public void setUp() {
+  public void setUp() throws CoreException {
     when(server.loadAdapter(any(Class.class), any(IProgressMonitor.class)))
         .thenReturn(serverBehavior);
   }
@@ -274,6 +274,23 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
     assertEquals(Arrays.asList("a", "b", "c d"), config.getJvmFlags());
     verify(launchConfiguration)
         .getAttribute(eq(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS), anyString());
+  }
+
+
+  @Test
+  public void testGenerateRunConfiguration_restart_run() throws CoreException {
+    when(launchConfiguration.getAttribute(anyString(), anyString())).thenReturn("");
+    DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
+        .generateServerRunConfiguration(launchConfiguration, server, ILaunchManager.RUN_MODE);
+    assertTrue(config.getAutomaticRestart());
+  }
+
+  @Test
+  public void testGenerateRunConfiguration_restart_debug() throws CoreException {
+    when(launchConfiguration.getAttribute(anyString(), anyString())).thenReturn("");
+    DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
+        .generateServerRunConfiguration(launchConfiguration, server, ILaunchManager.DEBUG_MODE);
+    assertFalse(config.getAutomaticRestart());
   }
 
   // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1609
