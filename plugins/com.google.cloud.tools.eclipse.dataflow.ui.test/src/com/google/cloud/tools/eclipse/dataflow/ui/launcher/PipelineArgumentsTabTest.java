@@ -48,11 +48,9 @@ public class PipelineArgumentsTabTest {
 
   public static class TabTest {
 
-    private PipelineArgumentsTab tab = new PipelineArgumentsTab();
-
     @Test
     public void testGetName() {
-      Assert.assertEquals("Pipeline Arguments", tab.getName());
+      Assert.assertEquals("Pipeline Arguments", new PipelineArgumentsTab().getName());
     }
   }
 
@@ -81,8 +79,6 @@ public class PipelineArgumentsTabTest {
 
     @Rule public ShellTestResource shellResource = new ShellTestResource();
 
-    private PipelineArgumentsTab tab = new PipelineArgumentsTab();
-
     private final Parameter testParameter;
     public RunButtonCheckedTest(Parameter parameter) {
       testParameter = parameter;
@@ -91,6 +87,7 @@ public class PipelineArgumentsTabTest {
     @Test
     public void assertRunnerButtonChecked() {
       Shell shell = shellResource.getShell();
+      PipelineArgumentsTab tab = new PipelineArgumentsTab();
       tab.createControl(shell);
 
       tab.updateRunnerButtons(testParameter.majorVersion);
