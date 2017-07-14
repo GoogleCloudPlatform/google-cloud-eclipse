@@ -43,7 +43,6 @@ import org.junit.runners.Suite;
   PipelineArgumentsTabTest.TabTest.class,
   PipelineArgumentsTabTest.RunButtonCheckedTest.class
 })
-
 public class PipelineArgumentsTabTest {
 
   public static class TabTest {
