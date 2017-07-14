@@ -16,17 +16,15 @@
 
 package com.google.cloud.tools.eclipse.dataflow.core.natures;
 
+import com.google.api.client.util.Preconditions;
 import com.google.cloud.tools.eclipse.dataflow.core.DataflowCorePlugin;
+import com.google.cloud.tools.eclipse.util.NatureUtils;
 import com.google.common.annotations.VisibleForTesting;
-
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Status;
-
-import java.util.Arrays;
 
 /**
  * The runtime nature for a Cloud Dataflow Java Project.
@@ -59,19 +57,12 @@ public class DataflowJavaProjectNature implements IProjectNature {
    */
   public static void addDataflowJavaNatureToProject(IProject project, IProgressMonitor monitor)
       throws CoreException {
-    if (isProjectAccessible(project)) {
+    Preconditions.checkNotNull(project);
+    if (!project.isAccessible()) {
       throw new CoreException(new Status(Status.WARNING, DataflowCorePlugin.PLUGIN_ID,
-          "Can't add the Dataflow nature to nonexistent or closed project " + project.getName()));
+          "Can't add the Dataflow nature to closed project " + project.getName()));
     }
-    if (hasDataflowNature(project)) {
-      return;
-    }
-    IProjectDescription description = project.getDescription();
-    String[] natureIds = description.getNatureIds();
-    String[] newNatureIds = Arrays.copyOf(natureIds, natureIds.length + 1);
-    newNatureIds[natureIds.length] = DATAFLOW_NATURE_ID;
-    description.setNatureIds(newNatureIds);
-    project.setDescription(description, monitor);
+    NatureUtils.addNature(project, DATAFLOW_NATURE_ID, monitor);
   }
 
   /**
@@ -79,17 +70,7 @@ public class DataflowJavaProjectNature implements IProjectNature {
    * IProject#isAccessible()}), and the project description contains the Dataflow Nature ID.
    */
   public static boolean hasDataflowNature(IProject project) throws CoreException {
-    if (isProjectAccessible(project)) {
-      return false;
-    }
-    IProjectDescription description = project.getDescription();
-    String[] natureIds = description.getNatureIds();
-    for (String natureId : natureIds) {
-      if (natureId.equals(DATAFLOW_NATURE_ID)) {
-        return true;
-      }
-    }
-    return false;
+    return project != null && NatureUtils.hasNature(project, DATAFLOW_NATURE_ID);
   }
 
   /**
@@ -97,29 +78,11 @@ public class DataflowJavaProjectNature implements IProjectNature {
    */
   public static void removeDataflowJavaNatureFromProject(IProject project, IProgressMonitor monitor)
       throws CoreException {
-    if (isProjectAccessible(project)){
+    Preconditions.checkNotNull(project);
+    if (!project.isAccessible()) {
       throw new CoreException(new Status(Status.WARNING, DataflowCorePlugin.PLUGIN_ID,
-          "Can't remove the Dataflow nature from nonexistent or closed project "
-          + project.getName()));
+          "Can't remove the Dataflow nature from closed project " + project.getName()));
     }
-    if (!hasDataflowNature(project)) {
-      return;
-    }
-    IProjectDescription description = project.getDescription();
-    String[] natureIds = description.getNatureIds();
-    String[] newNatureIds = new String[natureIds.length - 1];
-    int newI = 0;
-    for (String oldNatureId : natureIds) {
-      if (!oldNatureId.equals(DATAFLOW_NATURE_ID)) {
-        newNatureIds[newI] = oldNatureId;
-        newI++;
-      }
-    }
-    description.setNatureIds(newNatureIds);
-    project.setDescription(description, monitor);
-  }
-
-  private static boolean isProjectAccessible(IProject project) {
-    return project == null || !project.isAccessible();
+    NatureUtils.removeNature(project, DATAFLOW_NATURE_ID, monitor);
   }
 }

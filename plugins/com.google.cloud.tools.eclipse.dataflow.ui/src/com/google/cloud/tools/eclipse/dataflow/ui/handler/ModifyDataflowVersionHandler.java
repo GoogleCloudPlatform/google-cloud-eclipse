@@ -19,23 +19,16 @@ package com.google.cloud.tools.eclipse.dataflow.ui.handler;
 import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowMavenModel;
 import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowMavenModel.DataflowMavenModelFactory;
 import com.google.cloud.tools.eclipse.dataflow.ui.DataflowUiPlugin;
+import com.google.cloud.tools.eclipse.ui.util.ProjectFromSelectionHelper;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
-
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.ui.handlers.HandlerUtil;
-
-import java.util.Iterator;
 
 /**
  * A handler that updates the Dataflow Version of the selected project.
@@ -64,8 +57,12 @@ public class ModifyDataflowVersionHandler extends AbstractHandler {
     if (Strings.isNullOrEmpty(commandId)) {
       return null;
     }
-    ISelection selection = HandlerUtil.getCurrentSelection(event);
-    IProject project = getFirstProjectInSelection(selection);
+    IProject project = ProjectFromSelectionHelper.getFirstProject(event);
+    if (project == null) {
+      throw new ExecutionException(
+          "Exception while modifying Dataflow Maven Dependency: no project selected");
+    }
+
     IProgressMonitor monitor = new NullProgressMonitor();
 
     try {
@@ -87,25 +84,6 @@ public class ModifyDataflowVersionHandler extends AbstractHandler {
       throw new ExecutionException(
           "Exception while modifying Dataflow Maven Dependency for project " + project.getName(),
           e);
-    }
-    return null;
-  }
-
-  private IProject getFirstProjectInSelection(ISelection selection) {
-    if (!(selection instanceof IStructuredSelection)) {
-      // The selection doesn't contain any elements
-      return null;
-    }
-    Iterator<?> selectionIter = ((IStructuredSelection) selection).iterator();
-    while (selectionIter.hasNext()) {
-      Object selected = selectionIter.next();
-      if (selected instanceof IAdaptable) {
-        IAdaptable adaptable = (IAdaptable) selected;
-        IResource selectedResource = adaptable.getAdapter(IResource.class);
-        if (selectedResource.getProject() != null) {
-          return selectedResource.getProject();
-        }
-      }
     }
     return null;
   }

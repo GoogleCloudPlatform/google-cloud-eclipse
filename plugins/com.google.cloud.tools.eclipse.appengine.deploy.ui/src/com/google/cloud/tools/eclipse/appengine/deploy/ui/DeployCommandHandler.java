@@ -76,7 +76,7 @@ public abstract class DeployCommandHandler extends AbstractHandler {
   @Override
   public Object execute(ExecutionEvent event) throws ExecutionException {
     try {
-      IProject project = ProjectFromSelectionHelper.getProject(event);
+      IProject project = ProjectFromSelectionHelper.getFirstProject(event);
       if (project == null) {
         throw new NullPointerException("Deploy menu enabled for non-project resources");
       }
@@ -152,7 +152,7 @@ public abstract class DeployCommandHandler extends AbstractHandler {
     MessageConsoleStream errorStream = messageConsole.newMessageStream();
     outputStream.setColor(colorProvider.getColor(IDebugUIConstants.ID_STANDARD_OUTPUT_STREAM));
     errorStream.setColor(colorProvider.getColor(IDebugUIConstants.ID_STANDARD_ERROR_STREAM));
-    
+
     StagingDelegate stagingDelegate = getStagingDelegate(project);
 
     DeployJob deploy = new DeployJob(project, credential, workDirectory,

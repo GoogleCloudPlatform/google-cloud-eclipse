@@ -66,7 +66,7 @@ public class GpeMigrator {
   /**
    * Removes various GPE-related remnants: classpath entries, nature, runtime, and facets. Any error
    * during operation is logged but ignored.
-   * 
+   *
    * @return true if this was a GPE project
    * @throws CoreException if the project is unusable (e.g., not open, doesn't exist, out of sync)
    */
@@ -123,7 +123,7 @@ public class GpeMigrator {
   @VisibleForTesting
   static boolean removeGpeNature(IProject project) throws CoreException {
     boolean hadNature = NatureUtils.hasNature(project, GPE_GAE_NATURE_ID);
-    NatureUtils.removeNature(project, GPE_GAE_NATURE_ID);
+    NatureUtils.removeNature(project, GPE_GAE_NATURE_ID, null /* monitor */);
     return hadNature;
   }
 

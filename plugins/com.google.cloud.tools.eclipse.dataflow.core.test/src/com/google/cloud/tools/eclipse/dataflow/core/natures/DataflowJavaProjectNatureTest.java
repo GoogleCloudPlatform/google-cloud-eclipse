@@ -28,31 +28,23 @@ import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.runners.MockitoJUnitRunner;
 
 /**
  * Tests for DataflowJavaProjectNature.
  */
-@RunWith(JUnit4.class)
+@RunWith(MockitoJUnitRunner.class)
 public class DataflowJavaProjectNatureTest {
   @Mock
   private IProject project;
   @Mock
   private IProjectDescription description;
 
-  @Rule
-  public ExpectedException thrown = ExpectedException.none();
-
   @Before
   public void setup() throws CoreException {
-    MockitoAnnotations.initMocks(this);
     when(project.isAccessible()).thenReturn(true);
     when(project.getDescription()).thenReturn(description);
   }
@@ -72,31 +64,28 @@ public class DataflowJavaProjectNatureTest {
   @Test
   public void testHasDataflowNatureOnProjectWithoutDataflowNatureReturnsFalse()
       throws CoreException {
-    when(description.getNatureIds()).thenReturn(new String[0]);
-
     assertFalse(DataflowJavaProjectNature.hasDataflowNature(project));
   }
 
   @Test
   public void testHasDataflowNatureOnProjectWithDataflowNatureReturnsTrue() throws CoreException {
-    when(description.getNatureIds()).thenReturn(
-        new String[] {DataflowJavaProjectNature.DATAFLOW_NATURE_ID});
+    when(project.hasNature(DataflowJavaProjectNature.DATAFLOW_NATURE_ID)).thenReturn(true);
 
     assertTrue(DataflowJavaProjectNature.hasDataflowNature(project));
   }
 
   @Test
-  public void testAddDataflowJavaNatureToProjectThatIsNotAccessibleThrowsException()
-      throws CoreException {
+  public void testAddDataflowJavaNatureToProjectThatIsNotAccessibleThrowsException() {
     when(project.isAccessible()).thenReturn(false);
 
-    thrown.expect(CoreException.class);
-    thrown.expectMessage("nonexistent or closed project");
-    thrown.expectMessage("add the Dataflow nature");
-
-    DataflowJavaProjectNature.addDataflowJavaNatureToProject(project, new NullProgressMonitor());
+    try {
+      DataflowJavaProjectNature.addDataflowJavaNatureToProject(project, new NullProgressMonitor());
+    } catch (CoreException ex) {
+      assertEquals("Can't add the Dataflow nature to closed project null", ex.getMessage());
+    }
 
     verify(project).isAccessible();
+    verify(project).getName();
     verifyNoMoreInteractions(project);
   }
 
@@ -107,67 +96,58 @@ public class DataflowJavaProjectNatureTest {
 
     DataflowJavaProjectNature.addDataflowJavaNatureToProject(project, new NullProgressMonitor());
 
-    ArgumentCaptor<String[]> natureCaptor = ArgumentCaptor.forClass(String[].class);
-    verify(description).setNatureIds(natureCaptor.capture());
-    String[] setNatures = natureCaptor.getValue();
-    assertEquals(1, setNatures.length);
-    assertEquals(DataflowJavaProjectNature.DATAFLOW_NATURE_ID, setNatures[0]);
+    verify(description).setNatureIds(new String[] {DataflowJavaProjectNature.DATAFLOW_NATURE_ID});
   }
 
   @Test
   public void testAddDataflowJavaNatureToProjectWithDataflowNatureAlreadyPresentDoesNothing()
       throws CoreException {
-    when(description.getNatureIds()).thenReturn(
-        new String[] {DataflowJavaProjectNature.DATAFLOW_NATURE_ID});
+    when(project.hasNature(DataflowJavaProjectNature.DATAFLOW_NATURE_ID)).thenReturn(true);
 
     DataflowJavaProjectNature.addDataflowJavaNatureToProject(project, new NullProgressMonitor());
 
-    verify(description).getNatureIds();
+    verify(project).isAccessible();
+    verify(project).hasNature(DataflowJavaProjectNature.DATAFLOW_NATURE_ID);
     verifyNoMoreInteractions(description);
   }
 
   @Test
-  public void testRemoveDataflowJavaNatureFromProjectThatIsNotAccessibleThrowsException()
-      throws CoreException {
+  public void testRemoveDataflowJavaNatureFromProjectThatIsNotAccessibleThrowsException() {
     when(project.isAccessible()).thenReturn(false);
 
-    thrown.expect(CoreException.class);
-    thrown.expectMessage("nonexistent or closed project");
-    thrown.expectMessage("remove the Dataflow nature");
-
-    DataflowJavaProjectNature.removeDataflowJavaNatureFromProject(
-        project, new NullProgressMonitor());
+    try {
+      DataflowJavaProjectNature.removeDataflowJavaNatureFromProject(
+          project, new NullProgressMonitor());
+    } catch (CoreException ex) {
+      assertEquals("Can't remove the Dataflow nature from closed project null", ex.getMessage());
+    }
 
     verify(project).isAccessible();
+    verify(project).getName();
     verifyNoMoreInteractions(project);
   }
 
   @Test
   public void testRemoveDataflowJavaNatureFromProjectWithoutDataflowNatureDoesNothing()
       throws CoreException {
-    when(description.getNatureIds()).thenReturn(new String[] {});
-
     DataflowJavaProjectNature.removeDataflowJavaNatureFromProject(
         project, new NullProgressMonitor());
 
-    verify(description).getNatureIds();
+    verify(project).isAccessible();
+    verify(project).hasNature(DataflowJavaProjectNature.DATAFLOW_NATURE_ID);
     verifyNoMoreInteractions(description);
-
   }
 
   @Test
   public void testRemoveDataflowJavaNatureFromProjectWithDataflowNaturePresentRemoves()
       throws CoreException {
+    when(project.hasNature(DataflowJavaProjectNature.DATAFLOW_NATURE_ID)).thenReturn(true);
     when(description.getNatureIds())
         .thenReturn(new String[] {"foo", DataflowJavaProjectNature.DATAFLOW_NATURE_ID});
 
     DataflowJavaProjectNature.removeDataflowJavaNatureFromProject(
         project, new NullProgressMonitor());
 
-    ArgumentCaptor<String[]> natureCaptor = ArgumentCaptor.forClass(String[].class);
-    verify(description).setNatureIds(natureCaptor.capture());
-    String[] setNatures = natureCaptor.getValue();
-    assertEquals(1, setNatures.length);
-    assertEquals("foo", setNatures[0]);
+    verify(description).setNatureIds(new String[] {"foo"});
   }
 }

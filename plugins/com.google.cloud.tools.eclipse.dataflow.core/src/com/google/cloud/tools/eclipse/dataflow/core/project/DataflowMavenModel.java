@@ -16,9 +16,19 @@
 
 package com.google.cloud.tools.eclipse.dataflow.core.project;
 
+import com.google.api.client.util.Preconditions;
 import com.google.cloud.tools.eclipse.dataflow.core.DataflowCorePlugin;
 import com.google.cloud.tools.eclipse.dataflow.core.natures.DataflowJavaProjectNature;
 import com.google.common.annotations.VisibleForTesting;
+import java.io.IOException;
+import java.util.Iterator;
+import javax.xml.XMLConstants;
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.VersionRange;
@@ -36,15 +46,6 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import java.io.IOException;
-import java.util.Iterator;
-import javax.xml.XMLConstants;
-import javax.xml.namespace.NamespaceContext;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 
 /**
  * DataflowMavenModel provides methods to mutate a Maven POM in-place.
@@ -231,6 +232,7 @@ public class DataflowMavenModel {
     }
 
     public DataflowMavenModel fromProject(IProject project) throws CoreException {
+      Preconditions.checkNotNull(project);
       if (!DataflowJavaProjectNature.hasDataflowNature(project)) {
         String errorMessage = String.format(
             "Tried to create the Dataflow dependency of a non-Dataflow project %s",

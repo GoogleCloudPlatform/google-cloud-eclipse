@@ -16,29 +16,25 @@
 
 package com.google.cloud.tools.eclipse.dataflow.ui.handler;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
-import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.core.runtime.CoreException;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import java.util.Arrays;
+import org.mockito.runners.MockitoJUnitRunner;
 
 /**
  * Tests for {@link ModifyDataflowNatureHandler}.
  */
+@RunWith(MockitoJUnitRunner.class)
 public class ModifyDataflowNatureHandlerTest {
   @Mock
   private IProject project;
@@ -46,73 +42,54 @@ public class ModifyDataflowNatureHandlerTest {
   @Mock
   private IProjectDescription projectDescription;
 
-  @Mock
-  private IAdaptable selectedAdaptable;
-
-  @Mock
-  private IStructuredSelection structuredSelection;
-
-  private ModifyDataflowNatureHandler natureHandler;
+  private final ModifyDataflowNatureHandler natureHandler = new ModifyDataflowNatureHandler();
 
   @Before
   public void setup() throws Exception {
-    MockitoAnnotations.initMocks(this);
-    natureHandler = new ModifyDataflowNatureHandler();
-
     when(project.getDescription()).thenReturn(projectDescription);
     when(project.isAccessible()).thenReturn(true);
-
-    when(structuredSelection.iterator()).thenReturn(Arrays.asList(selectedAdaptable).iterator());
-
   }
 
   @Test
-  public void testHandleCommandWithUnknownNatureIdDoesNothing() throws Exception {
-    natureHandler.handleCommand("foo", structuredSelection);
+  public void testHandleCommandWithUnknownNatureIdDoesNothing() {
+    natureHandler.handleCommand("foo", Arrays.asList(project));
+    verifyNoMoreInteractions(projectDescription);
   }
 
   @Test
-  public void testHandleCommandWithAddNatureAddsNatureToSelection() throws Exception {
-    when(selectedAdaptable.getAdapter(IProject.class)).thenReturn(project);
+  public void testHandleCommandWithAddNatureAddsNatureToSelection() {
     when(projectDescription.getNatureIds()).thenReturn(new String[] {});
 
     natureHandler.handleCommand(
-        ModifyDataflowNatureHandler.ADD_NATURE_COMMAND_ID, structuredSelection);
+        ModifyDataflowNatureHandler.ADD_NATURE_COMMAND_ID, Arrays.asList(project));
 
-    ArgumentCaptor<String[]> naturesCaptor = ArgumentCaptor.forClass(String[].class);
-    verify(projectDescription, times(2)).getNatureIds();
-    verify(projectDescription).setNatureIds(naturesCaptor.capture());
-    verifyNoMoreInteractions(projectDescription);
-    String[] setNatures = naturesCaptor.getValue();
-    assertEquals("com.google.cloud.dataflow.DataflowJavaProjectNature", setNatures[0]);
+    verify(projectDescription)
+       .setNatureIds(new String[] {"com.google.cloud.dataflow.DataflowJavaProjectNature"});
   }
 
   @Test
-  public void testHandleCommandWithAddNatureEmptySelectionDoesNothing() throws Exception {
+  public void testHandleCommandWithAddNatureEmptySelectionDoesNothing() {
     natureHandler.handleCommand(
-        ModifyDataflowNatureHandler.ADD_NATURE_COMMAND_ID, mock(ISelection.class));
+        ModifyDataflowNatureHandler.ADD_NATURE_COMMAND_ID, new ArrayList<IProject>());
+    verifyNoMoreInteractions(projectDescription);
   }
 
   @Test
-  public void testHandleCommandWithRemoveNatureRemovesNatureFromSelection() throws Exception {
-    when(selectedAdaptable.getAdapter(IProject.class)).thenReturn(project);
+  public void testHandleCommandWithRemoveNatureRemovesNatureFromSelection() throws CoreException {
+    when(project.hasNature("com.google.cloud.dataflow.DataflowJavaProjectNature")).thenReturn(true);
     when(projectDescription.getNatureIds())
         .thenReturn(new String[] {"com.google.cloud.dataflow.DataflowJavaProjectNature"});
 
     natureHandler.handleCommand(
-        ModifyDataflowNatureHandler.REMOVE_NATURE_COMMAND_ID, structuredSelection);
+        ModifyDataflowNatureHandler.REMOVE_NATURE_COMMAND_ID, Arrays.asList(project));
 
-    ArgumentCaptor<String[]> naturesCaptor = ArgumentCaptor.forClass(String[].class);
-    verify(projectDescription, times(2)).getNatureIds();
-    verify(projectDescription).setNatureIds(naturesCaptor.capture());
-    verifyNoMoreInteractions(projectDescription);
-    String[] setNatures = naturesCaptor.getValue();
-    assertEquals(0, setNatures.length);
+    verify(projectDescription).setNatureIds(new String[0]);
   }
 
   @Test
-  public void testHandeCommandWithRemoveNatureEmptySelectionDoesNothing() throws Exception {
+  public void testHandeCommandWithRemoveNatureEmptySelectionDoesNothing() {
     natureHandler.handleCommand(
-        ModifyDataflowNatureHandler.REMOVE_NATURE_COMMAND_ID, mock(ISelection.class));
+        ModifyDataflowNatureHandler.REMOVE_NATURE_COMMAND_ID, new ArrayList<IProject>());
+    verifyNoMoreInteractions(projectDescription);
   }
 }
