@@ -46,10 +46,13 @@ public class AppEngineStandardProjectConvertJob extends Job {
       // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1155.
       GpeMigrator.removeObsoleteGpeRemnants(facetedProject, subMonitor.newChild(20));
 
-      AppEngineStandardFacet.installAppEngineFacet(facetedProject,
-          true /* install Java and Web facets too (safe even if already installed) */,
-          subMonitor.newChild(80));
-      return Status.OK_STATUS;
+      if (!monitor.isCanceled()) {
+        AppEngineStandardFacet.installAppEngineFacet(facetedProject,
+            true /* install Java and Web facets too (safe even if already installed) */,
+            subMonitor.newChild(80));
+      }
+
+      return monitor.isCanceled() ? Status.CANCEL_STATUS : Status.OK_STATUS;
     } catch (CoreException ex) {
       String project = facetedProject.getProject().getName();
       return StatusUtil.error(this, Messages.getString("project.conversion.error", project), ex);
