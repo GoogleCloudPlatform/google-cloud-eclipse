@@ -25,6 +25,8 @@ import java.io.IOException;
 import java.util.List;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -37,29 +39,31 @@ import org.junit.Test;
 /** Migrates a classic GPE project (no facets). */
 public class GpeClassicMigratorTest {
 
+  private final IProgressMonitor monitor = new NullProgressMonitor();
+
   private IProject gpeProject;
 
   @Before
   public void setUp() throws IOException, CoreException {
     List<IProject> projects = ProjectUtils.importProjects(getClass(),
-        "test-projects/GPE-classic-project.zip", false /* checkBuildErrors */, null);
+        "test-projects/GPE-classic-project.zip", false /* checkBuildErrors */, monitor);
     assertEquals(1, projects.size());
     gpeProject = projects.get(0);
   }
 
   @After
   public void tearDown() throws CoreException {
-    gpeProject.delete(true /* force */,  null);
+    gpeProject.delete(true /* force */,  monitor);
   }
 
   @Test
   public void testRemoveGpeNature() throws CoreException {
     assertTrue(gpeProject.hasNature("com.google.appengine.eclipse.core.gaeNature"));
 
-    assertTrue(GpeMigrator.removeGpeNature(gpeProject));
+    assertTrue(GpeMigrator.removeGpeNature(gpeProject, null));
     assertFalse(gpeProject.hasNature("com.google.appengine.eclipse.core.gaeNature"));
 
-    assertFalse(GpeMigrator.removeGpeNature(gpeProject));
+    assertFalse(GpeMigrator.removeGpeNature(gpeProject, monitor));
   }
 
   @Test
@@ -69,11 +73,11 @@ public class GpeClassicMigratorTest {
     assertTrue(containsLibrary(javaProject, "com.google.appengine.eclipse.core.GAE_CONTAINER"));
     assertTrue(containsLibrary(javaProject, "com.google.gwt.eclipse.core.GWT_CONTAINER"));
 
-    assertTrue(GpeMigrator.removeGpeClasspathEntries(gpeProject));
+    assertTrue(GpeMigrator.removeGpeClasspathEntries(gpeProject, monitor));
     assertFalse(containsLibrary(javaProject, "com.google.appengine.eclipse.core.GAE_CONTAINER"));
     assertFalse(containsLibrary(javaProject, "com.google.gwt.eclipse.core.GWT_CONTAINER"));
 
-    assertFalse(GpeMigrator.removeGpeClasspathEntries(gpeProject));
+    assertFalse(GpeMigrator.removeGpeClasspathEntries(gpeProject, monitor));
   }
 
   private static boolean containsLibrary(IJavaProject javaProject, String libraryPath)

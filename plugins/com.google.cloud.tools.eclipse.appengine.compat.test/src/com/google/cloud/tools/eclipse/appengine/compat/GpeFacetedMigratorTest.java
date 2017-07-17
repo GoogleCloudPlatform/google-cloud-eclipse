@@ -27,6 +27,8 @@ import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -42,29 +44,31 @@ import org.junit.Test;
 /** Migrates a faceted GPE project. */
 public class GpeFacetedMigratorTest {
 
+  private final IProgressMonitor monitor = new NullProgressMonitor();
+
   private IProject gpeProject;
 
   @Before
   public void setUp() throws IOException, CoreException {
     List<IProject> projects = ProjectUtils.importProjects(getClass(),
-        "test-projects/GPE-faceted-project.zip", false /* checkBuildErrors */, null);
+        "test-projects/GPE-faceted-project.zip", false /* checkBuildErrors */, monitor);
     assertEquals(1, projects.size());
     gpeProject = projects.get(0);
   }
 
   @After
   public void tearDown() throws CoreException {
-    gpeProject.delete(true /* force */,  null);
+    gpeProject.delete(true /* force */,  monitor);
   }
 
   @Test
   public void testRemoveGpeNature() throws CoreException {
     assertTrue(gpeProject.hasNature("com.google.appengine.eclipse.core.gaeNature"));
 
-    assertTrue(GpeMigrator.removeGpeNature(gpeProject));
+    assertTrue(GpeMigrator.removeGpeNature(gpeProject, monitor));
     assertFalse(gpeProject.hasNature("com.google.appengine.eclipse.core.gaeNature"));
 
-    assertFalse(GpeMigrator.removeGpeNature(gpeProject));
+    assertFalse(GpeMigrator.removeGpeNature(gpeProject, monitor));
   }
 
   @Test
@@ -101,7 +105,7 @@ public class GpeFacetedMigratorTest {
   public void testRemoveGpeRuntimeAndFacets_metadataFileDoesNotExist() throws CoreException {
     IFile metadataFile =
         gpeProject.getFile(".settings/org.eclipse.wst.common.project.facet.core.xml");
-    metadataFile.delete(true, null);
+    metadataFile.delete(true, monitor);
     assertFalse(metadataFile.exists());
 
     IFacetedProject facetedProject = ProjectFacetsManager.create(gpeProject);
@@ -119,7 +123,7 @@ public class GpeFacetedMigratorTest {
     assertTrue(containsLibrary(javaProject,
         "com.google.gdt.eclipse.managedapis.MANAGED_API_CONTAINER/compute-v1r150lv1.21.0"));
 
-    assertTrue(GpeMigrator.removeGpeClasspathEntries(gpeProject));
+    assertTrue(GpeMigrator.removeGpeClasspathEntries(gpeProject, monitor));
     assertFalse(containsLibrary(javaProject, "com.google.appengine.eclipse.core.GAE_CONTAINER"));
     assertFalse(containsLibrary(javaProject, "com.google.appengine.eclipse.wtp.GAE_WTP_CONTAINER"));
     assertFalse(containsLibrary(javaProject, "org.eclipse.jst.server.core.container/"
@@ -127,7 +131,7 @@ public class GpeFacetedMigratorTest {
     assertFalse(containsLibrary(javaProject,
         "com.google.gdt.eclipse.managedapis.MANAGED_API_CONTAINER/compute-v1r150lv1.21.0"));
 
-    assertFalse(GpeMigrator.removeGpeClasspathEntries(gpeProject));
+    assertFalse(GpeMigrator.removeGpeClasspathEntries(gpeProject, monitor));
   }
 
   private static boolean containsFacet(IFacetedProject facetedProject, String facetId) {
