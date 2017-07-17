@@ -94,8 +94,7 @@ import org.eclipse.wst.server.core.ServerUtil;
 public class LocalAppEngineServerLaunchConfigurationDelegate
     extends AbstractJavaLaunchConfigurationDelegate {
 
-  static final boolean DEV_APPSERVER2 =
-      "2".equals(System.getProperty("com.google.cloud.tools.eclipse.appengine.devappserver", "1"));
+  static final boolean DEV_APPSERVER2 = false;
   
   private static final Logger logger =
       Logger.getLogger(LocalAppEngineServerLaunchConfigurationDelegate.class.getName());
