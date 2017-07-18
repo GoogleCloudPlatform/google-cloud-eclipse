@@ -29,5 +29,5 @@ public class DataflowMavenCoordinates {
   /** Versions which are known to have been released. */
   static final NavigableSet<ArtifactVersion> KNOWN_VERSIONS =
       ImmutableSortedSet.<ArtifactVersion>of(
-          new DefaultArtifactVersion("1.9.0"), new DefaultArtifactVersion("2.0.0-beta1"));
+          new DefaultArtifactVersion("1.9.0"), new DefaultArtifactVersion("2.0.0"));
 }
