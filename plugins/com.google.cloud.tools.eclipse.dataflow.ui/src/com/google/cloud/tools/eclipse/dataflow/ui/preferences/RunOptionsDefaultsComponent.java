@@ -318,6 +318,7 @@ public class RunOptionsDefaultsComponent {
       try {
         SortedSet<String> stagingLocations = stagingLocationsFuture.get();
         messageTarget.clear();
+        // Don't use "removeAll()", as it will clear the text field too.
         stagingLocationInput.remove(0, stagingLocationInput.getItemCount() - 1);
         for (String location : stagingLocations) {
           stagingLocationInput.add(location);
