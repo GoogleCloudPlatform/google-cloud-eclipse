@@ -154,7 +154,7 @@ public class DataflowPipelineLaunchDelegate extends ForwardingLaunchConfiguratio
         PipelineConfigurationAttr.ALL_ARGUMENT_VALUES.toString(), (Map<String, String>) null);
     Preconditions.checkNotNull(configurationArguments);
     Preconditions.checkNotNull(configurationArguments.get("accountEmail"),
-        "account email not set in launch configuration");
+        "account email not set in the launch configuration");
 
     try {
       // Dataflow SDK doesn't yet support reading credentials from an arbitrary JSON, so we use the
@@ -168,9 +168,14 @@ public class DataflowPipelineLaunchDelegate extends ForwardingLaunchConfiguratio
       }
 
       String accountEmail = configurationArguments.get("accountEmail");
+      if (accountEmail.isEmpty()) {
+        String message = "No Google account selected for this launch.";
+        throw new CoreException(new Status(Status.ERROR, DataflowCorePlugin.PLUGIN_ID, message));
+      }
+
       Credential credential = loginService.getCredential(accountEmail);
       if (credential == null) {
-        String message = "The account saved for this lanuch configuration is not logged in.";
+        String message = "The Google account saved for this lanuch is not logged in.";
         throw new CoreException(new Status(Status.ERROR, DataflowCorePlugin.PLUGIN_ID, message));
       }
 

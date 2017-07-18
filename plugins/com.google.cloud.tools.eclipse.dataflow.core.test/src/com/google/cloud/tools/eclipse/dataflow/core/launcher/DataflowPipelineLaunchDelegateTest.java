@@ -134,7 +134,7 @@ public class DataflowPipelineLaunchDelegateTest {
       dataflowDelegate.setLoginCredential(workingCopy);
       fail();
     } catch (NullPointerException ex) {
-      assertEquals("account email not set in launch configuration", ex.getMessage());
+      assertEquals("account email not set in the launch configuration", ex.getMessage());
     }
   }
 
@@ -156,6 +156,21 @@ public class DataflowPipelineLaunchDelegateTest {
   }
 
   @Test
+  public void testSetLoginCredential_noAccountSelected() throws CoreException {
+    Map<String, String> arguments = ImmutableMap.of("accountEmail", "");
+    ILaunchConfigurationWorkingCopy workingCopy =
+        mockILaunchConfigurationWorkingCopy(arguments, new HashMap<String, String>());
+    when(loginService.getCredential("bogus@example.com")).thenReturn(null);  // not logged in
+
+    try {
+      dataflowDelegate.setLoginCredential(workingCopy);
+      fail();
+    } catch (CoreException ex) {
+      assertEquals("No Google account selected for this launch.", ex.getMessage());
+    }
+  }
+
+  @Test
   public void testSetLoginCredential_savedAccountNotLoggedIn() throws CoreException {
     Map<String, String> arguments = ImmutableMap.of("accountEmail", "bogus@example.com");
     ILaunchConfigurationWorkingCopy workingCopy =
@@ -166,8 +181,7 @@ public class DataflowPipelineLaunchDelegateTest {
       dataflowDelegate.setLoginCredential(workingCopy);
       fail();
     } catch (CoreException ex) {
-      assertEquals("The account saved for this lanuch configuration is not logged in.",
-          ex.getMessage());
+      assertEquals("The Google account saved for this lanuch is not logged in.", ex.getMessage());
     }
   }
 
