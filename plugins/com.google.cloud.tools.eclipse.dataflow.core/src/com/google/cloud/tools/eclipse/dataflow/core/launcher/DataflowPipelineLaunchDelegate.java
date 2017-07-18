@@ -153,7 +153,8 @@ public class DataflowPipelineLaunchDelegate extends ForwardingLaunchConfiguratio
     Map<String, String> configurationArguments = workingCopy.getAttribute(
         PipelineConfigurationAttr.ALL_ARGUMENT_VALUES.toString(), (Map<String, String>) null);
     Preconditions.checkNotNull(configurationArguments);
-    Preconditions.checkNotNull(configurationArguments.get("accountEmail"));
+    Preconditions.checkNotNull(configurationArguments.get("accountEmail"),
+        "account email not set in launch configuration");
 
     try {
       // Dataflow SDK doesn't yet support reading credentials from an arbitrary JSON, so we use the
