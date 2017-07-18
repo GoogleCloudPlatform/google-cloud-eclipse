@@ -59,6 +59,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -276,14 +277,34 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     Map<String, String> overallArgValues = new HashMap<>(launchConfiguration.getArgumentValues());
     if (!defaultOptionsComponent.isUseDefaultOptions()) {
       overallArgValues.putAll(defaultOptionsComponent.getValues());
+    } else {
+      DataflowPreferences preferences = getDataflowPreferences(configuration);
+      overallArgValues.putAll(preferences.asDefaultPropertyMap());
     }
-
     overallArgValues.putAll(getNonDefaultOptions());
-    launchConfiguration.setUserOptionsName(userOptionsSelector.getText());
-
     launchConfiguration.setArgumentValues(overallArgValues);
 
+    launchConfiguration.setUserOptionsName(userOptionsSelector.getText());
+
     launchConfiguration.toLaunchConfiguration(configuration);
+  }
+
+  private DataflowPreferences getDataflowPreferences(ILaunchConfiguration configuration) {
+    String projectValue = "";
+    try {
+      configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, "");
+    } catch (CoreException ex) {
+      // I don't think this can really happen.
+      DataflowUiPlugin.logError(ex, "Cannot read project value from launch configuration.");
+    }
+
+    if (!projectValue.isEmpty()) {
+      IProject project = workspaceRoot.getProject(projectValue);
+      if (project.exists()) {
+        return ProjectOrWorkspaceDataflowPreferences.forProject(project);
+      }
+    }
+    return ProjectOrWorkspaceDataflowPreferences.forWorkspace();
   }
 
   @VisibleForTesting
