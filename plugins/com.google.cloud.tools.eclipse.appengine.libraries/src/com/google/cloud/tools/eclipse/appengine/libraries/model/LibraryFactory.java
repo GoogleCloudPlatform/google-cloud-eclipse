@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.Messages;
+import com.google.cloud.tools.eclipse.util.ArtifactRetriever;
 import com.google.common.base.Strings;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -54,6 +55,8 @@ class LibraryFactory {
   private static final String ATTRIBUTE_NAME_CLASSIFIER = "classifier"; //$NON-NLS-1$
   private static final String ATTRIBUTE_NAME_EXPORT = "export"; //$NON-NLS-1$
   private static final String ATTRIBUTE_NAME_RECOMMENDATION = "recommendation"; //$NON-NLS-1$
+  
+  private static final ArtifactRetriever retriever = new ArtifactRetriever();
 
   Library create(IConfigurationElement configurationElement) throws LibraryFactoryException {
     try {
@@ -133,7 +136,14 @@ class LibraryFactory {
     if (!Strings.isNullOrEmpty(repository)) {
       mavenCoordinates.setRepository(repository);
     }
+    
+    // todo need to allow to pin a version such as servlet 2.5
+    // maybe only look up latest version if version isn't specified in file?
     String version = mavenCoordinatesElement.getAttribute(ATTRIBUTE_NAME_VERSION);
+    if (Strings.isNullOrEmpty(version) || "LATEST".equals(version)) {
+      version = retriever.getLatestArtifactVersion(groupId, artifactId).toString(); 
+    } 
+    
     if (!Strings.isNullOrEmpty(version)) {
       mavenCoordinates.setVersion(version);
     }

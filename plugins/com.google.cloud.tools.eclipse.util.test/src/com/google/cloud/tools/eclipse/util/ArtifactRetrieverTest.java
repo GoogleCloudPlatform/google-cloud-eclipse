@@ -30,9 +30,16 @@ public class ArtifactRetrieverTest {
   private ArtifactRetriever retriever = new ArtifactRetriever();
   
   @Test
-  public void testGetGuavaLatest() {
+  public void testGetServletLatest() {
+    ArtifactVersion servlet = retriever.getLatestArtifactVersion("javax.servlet", "servlet-api");
+    Assert.assertEquals(3, servlet.getMajorVersion());
+    Assert.assertEquals("", servlet.getQualifier());
+  }
+  
+  @Test
+  public void testGetGuava() {
     ArtifactVersion guava = retriever.getLatestArtifactVersion("com.google.guava", "guava");
-    Assert.assertTrue(guava.getMajorVersion() > 20);
+    Assert.assertTrue(guava.getMajorVersion() > 3);
     Assert.assertTrue(guava.getMinorVersion() >= 0);
   }
     

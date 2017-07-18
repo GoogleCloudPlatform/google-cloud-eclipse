@@ -222,14 +222,13 @@ public class LibraryClasspathContainerResolverService
   private IClasspathEntry resolveLibraryFileAttachSourceSync(final LibraryFile libraryFile)
       throws CoreException {
 
-    final Artifact artifact =
-        repositoryService.resolveArtifact(libraryFile, new NullProgressMonitor());
+    Artifact artifact = repositoryService.resolveArtifact(libraryFile, new NullProgressMonitor());
     IPath libraryPath = new Path(artifact.getFile().getAbsolutePath());
     IPath sourceAttachmentPath = null;
     sourceAttachmentPath = repositoryService.resolveSourceArtifact(libraryFile,
                                                                    artifact.getVersion(),
                                                                    new NullProgressMonitor());
-    final IClasspathEntry newLibraryEntry =
+    IClasspathEntry newLibraryEntry =
         JavaCore.newLibraryEntry(libraryPath,
                                  sourceAttachmentPath,
                                  null /*  sourceAttachmentRootPath */,

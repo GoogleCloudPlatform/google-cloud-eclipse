@@ -148,6 +148,7 @@ public class ArtifactRetriever {
   /**
    * Returns the latest published artifact version, or null if there is no such version.
    */
+  // can we exclude beta versions?
   public ArtifactVersion getLatestArtifactVersion(String groupId, String artifactId) {
     return getLatestIncrementalVersion(idToKey(groupId, artifactId), null);
   }
