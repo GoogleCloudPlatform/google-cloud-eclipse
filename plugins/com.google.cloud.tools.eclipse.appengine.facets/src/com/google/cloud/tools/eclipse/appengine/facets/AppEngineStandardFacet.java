@@ -24,6 +24,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
@@ -238,23 +239,6 @@ public class AppEngineStandardFacet {
       // So we must have a project with no appengine-web.xml.
       // Need to figure out: what AES version do we install?
 
-      // we continue to update workingCopy to use FacetUtil.getHighestSatisfyingVersion()
-      FacetUtil facetUtil = new FacetUtil(facetedProject);
-      // See if the default AppEngine Standard facet is ok with the project's current settings
-      if (!FacetUtil.conflictsWith(workingCopy, FACET.getDefaultVersion())) {
-        facetUtil.addFacetToBatch(FACET.getDefaultVersion(), null);
-        workingCopy.addProjectFacet(FACET.getDefaultVersion());
-      } else {
-        IProjectFacetVersion highestVersion =
-            FacetUtil.getHighestSatisfyingVersion(workingCopy, FACET);
-        if (highestVersion == null) {
-          throw new CoreException(StatusUtil.error(AppEngineStandardFacet.class,
-              "No compatible AppEngine Standard facet found"));
-        }
-        facetUtil.addFacetToBatch(highestVersion, /* config */ null);
-        workingCopy.addProjectFacet(highestVersion);
-      }
-
       /*
        * https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1155
        * 
@@ -264,18 +248,65 @@ public class AppEngineStandardFacet {
        * JSDT facet only after the batch is complete, which in turn prevents the first ConvertJob
        * from scheduling the second ConvertJob (triggered by installing the JSDT facet.)
        * 
-       * FIXME: investigate using IFacetProjectWorkingCopy instead
+       * we continue to update workingCopy to use FacetUtil.getHighestSatisfyingVersion() FIXME:
+       * investigate using IFacetProjectWorkingCopy instead
        */
-      if (installDependentFacets) {
-        if (!workingCopy.hasProjectFacet(JavaFacet.FACET)) {
-          IProjectFacetVersion javaFacet =
-              FacetUtil.getHighestSatisfyingVersion(workingCopy, JavaFacet.FACET);
-          facetUtil.addJavaFacetToBatch(javaFacet);
+      FacetUtil facetUtil = new FacetUtil(facetedProject);
+      // See if the default AppEngine Standard facet is ok with the project's current settings
+      if (!FacetUtil.conflictsWith(workingCopy, FACET.getDefaultVersion())) {
+        logger.fine(projectName + ": installing default AES facet " + FACET.getDefaultVersion());
+        facetUtil.addFacetToBatch(FACET.getDefaultVersion(), null);
+        workingCopy.addProjectFacet(FACET.getDefaultVersion());
+      } else {
+        // first see if there's a AES version that works with our current constraints
+        IProjectFacetVersion standardFacet =
+            FacetUtil.getHighestSatisfyingVersion(workingCopy, FACET);
+        if (standardFacet == null && installDependentFacets) {
+          // if we're not installing/updating dependent facets, see if there's something
+          // that works without Java and DWP
+          standardFacet = FacetUtil.getHighestSatisfyingVersion(workingCopy, FACET,
+              Arrays.asList(JavaFacet.FACET));
         }
-        if (!workingCopy.hasProjectFacet(WebFacetUtils.WEB_FACET)) {
-          IProjectFacetVersion webFacet =
-              FacetUtil.getHighestSatisfyingVersion(workingCopy, WebFacetUtils.WEB_FACET);
-          facetUtil.addWebFacetToBatch(webFacet);
+        if (standardFacet == null) {
+          throw new CoreException(StatusUtil.error(AppEngineStandardFacet.class,
+              "No compatible AppEngine Standard facet found"));
+        }
+        logger.fine(projectName + ": installing AES facet " + standardFacet);
+        facetUtil.addFacetToBatch(standardFacet, /* config */ null);
+        workingCopy.addProjectFacet(standardFacet);
+
+        if (installDependentFacets) {
+          // check if we need to add/update Java facet
+          if (!workingCopy.hasProjectFacet(JavaFacet.FACET)) {
+            IProjectFacetVersion javaFacet =
+                FacetUtil.getHighestSatisfyingVersion(workingCopy, JavaFacet.FACET);
+            logger.fine(projectName + ": adding Java facet " + javaFacet);
+            facetUtil.addJavaFacetToBatch(javaFacet);
+            workingCopy.addProjectFacet(javaFacet);
+          } else if (standardFacet
+              .conflictsWith(workingCopy.getProjectFacetVersion(JavaFacet.FACET))) {
+            IProjectFacetVersion javaFacet =
+                FacetUtil.getHighestSatisfyingVersion(workingCopy, JavaFacet.FACET);
+            logger.fine(projectName + ": updating Java facet to " + javaFacet);
+            facetUtil.addJavaFacetToBatch(javaFacet);
+            workingCopy.changeProjectFacetVersion(javaFacet);
+          }
+
+          // check if we need to add/update DWP facet
+          if (!workingCopy.hasProjectFacet(WebFacetUtils.WEB_FACET)) {
+            IProjectFacetVersion webFacet =
+                FacetUtil.getHighestSatisfyingVersion(workingCopy, WebFacetUtils.WEB_FACET);
+            logger.fine(projectName + ": adding DWP facet " + webFacet);
+            facetUtil.addWebFacetToBatch(webFacet);
+            workingCopy.addProjectFacet(webFacet);
+          } else if (standardFacet
+              .conflictsWith(workingCopy.getProjectFacetVersion(WebFacetUtils.WEB_FACET))) {
+            IProjectFacetVersion webFacet =
+                FacetUtil.getHighestSatisfyingVersion(workingCopy, WebFacetUtils.WEB_FACET);
+            logger.fine(projectName + ": updating DWP facet to " + webFacet);
+            facetUtil.addWebFacetToBatch(webFacet);
+            workingCopy.changeProjectFacetVersion(webFacet);
+          }
         }
       }
 
@@ -299,6 +330,10 @@ public class AppEngineStandardFacet {
       IProgressMonitor monitor) throws CoreException {
     ILock lock = acquireLock(project.getProject());
     try {
+      if (!project.getProject().isOpen()) {
+        // no sense trying to install into a deleted/closed project
+        return;
+      }
       SubMonitor progress = SubMonitor.convert(monitor, 100);
       // If the project already has an App Engine runtime instance
       // do not add any other App Engine runtime instances to the list of targeted runtimes

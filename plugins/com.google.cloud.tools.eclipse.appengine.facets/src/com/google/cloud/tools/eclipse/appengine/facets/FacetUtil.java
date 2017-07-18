@@ -20,7 +20,9 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -102,14 +104,17 @@ public class FacetUtil {
     Preconditions.checkArgument(JavaFacet.FACET.getId().equals(javaFacet.getProjectFacet().getId()),
         javaFacet.toString() + " is not a Java facet");
 
-    if (facetedProject.hasProjectFacet(JavaFacet.FACET)
-        && javaFacet.compareTo(facetedProject.getProjectFacetVersion(JavaFacet.FACET)) <= 0) {
-      return this;
+    if (facetedProject.hasProjectFacet(JavaFacet.FACET)) {
+      if (javaFacet.compareTo(facetedProject.getProjectFacetVersion(JavaFacet.FACET)) <= 0) {
+        return this;
+      }
+      facetInstallSet.add(
+          new IFacetedProject.Action(IFacetedProject.Action.Type.VERSION_CHANGE, javaFacet, null));
+    } else {
+      JavaFacetInstallConfig javaConfig = createJavaDataModel(facetedProject.getProject());
+      facetInstallSet.add(
+          new IFacetedProject.Action(IFacetedProject.Action.Type.INSTALL, javaFacet, javaConfig));
     }
-
-    JavaFacetInstallConfig javaConfig = createJavaDataModel(facetedProject.getProject());
-    facetInstallSet.add(new IFacetedProject.Action(
-        IFacetedProject.Action.Type.INSTALL, javaFacet, javaConfig));
     return this;
   }
 
@@ -126,26 +131,29 @@ public class FacetUtil {
         WebFacetUtils.WEB_FACET.getId().equals(webFacet.getProjectFacet().getId()),
         webFacet.toString() + " is not a Web facet");
 
-    if (facetedProject.hasProjectFacet(WebFacetUtils.WEB_FACET) && webFacet
-        .compareTo(facetedProject.getProjectFacetVersion(WebFacetUtils.WEB_FACET)) <= 0) {
-      return this;
-    }
+    if (facetedProject.hasProjectFacet(WebFacetUtils.WEB_FACET)) {
+      if (webFacet.compareTo(facetedProject.getProjectFacetVersion(WebFacetUtils.WEB_FACET)) <= 0) {
+        return this;
+      }
+      facetInstallSet.add(
+          new IFacetedProject.Action(IFacetedProject.Action.Type.VERSION_CHANGE, webFacet, null));
+    } else {
+      // Determine the default location for the WEB-INF, if not already present
+      String webAppDirectory = "src/main/webapp";
+      if (overlapsWithJavaSourcePaths(facetedProject, Path.fromPortableString(webAppDirectory))) {
+        // e.g., traditional Eclipse layout with just src/
+        logger.info("Default webapp directory overlaps source directory; using WebContent");
+        webAppDirectory = "WebContent"; // WTP's default
+      }
+      IPath webAppDirectoryFound = findMainWebAppDirectory(facetedProject.getProject());
+      if (webAppDirectoryFound != null) {
+        webAppDirectory = webAppDirectoryFound.toString();
+      }
 
-    // Determine the default location for the WEB-INF, if not already present
-    String webAppDirectory = "src/main/webapp";
-    if (overlapsWithJavaSourcePaths(facetedProject, Path.fromPortableString(webAppDirectory))) {
-      // e.g., traditional Eclipse layout with just src/
-      logger.info("Default webapp directory overlaps source directory; using WebContent");
-      webAppDirectory = "WebContent"; // WTP's default
+      IDataModel webModel = createWebFacetDataModel(webAppDirectory);
+      facetInstallSet
+          .add(new IFacetedProject.Action(IFacetedProject.Action.Type.INSTALL, webFacet, webModel));
     }
-    IPath webAppDirectoryFound = findMainWebAppDirectory(facetedProject.getProject());
-    if (webAppDirectoryFound != null) {
-      webAppDirectory = webAppDirectoryFound.toString();
-    }
-
-    IDataModel webModel = createWebFacetDataModel(webAppDirectory);
-    facetInstallSet
-        .add(new IFacetedProject.Action(IFacetedProject.Action.Type.INSTALL, webFacet, webModel));
     return this;
   }
 
@@ -286,15 +294,22 @@ public class FacetUtil {
     return webInfFolders;
   }
 
+
   /**
    * Return the highest {@link IFacetProjectVersion version of a facet} that is supported with the
-   * other installed {@link IFacetProjectVersion facet versions} on a project. Somewhat like
+   * other installed {@link IFacetProjectVersion facet versions} on a project other than those
+   * specified to be ignored. Somewhat like
    * {@link IFacetedProjectWorkingCopy#getHighestAvailableVersion(IProjectFacet)} when all installed
    * facet versions are treated as fixed.
    */
   public static IProjectFacetVersion getHighestSatisfyingVersion(IFacetedProjectBase facetedProject,
-      IProjectFacet facet) {
-    Set<IProjectFacetVersion> installedFacetVersions = facetedProject.getProjectFacets();
+      IProjectFacet facet, Collection<IProjectFacet> toIgnore) {
+    // ensure we always ignore the facet itself
+    toIgnore = new HashSet<>(toIgnore == null ? Collections.<IProjectFacet>emptySet() : toIgnore);
+    toIgnore.add(facet);
+    Collection<IProjectFacetVersion> installedFacetVersions =
+        filterVersions(facetedProject.getProjectFacets(), toIgnore);
+
     IProjectFacetVersion highestFacetVersion = null;
     for (IProjectFacetVersion facetVersion : facet.getVersions()) {
       if (!conflictsWith(installedFacetVersions, facetVersion)
@@ -307,13 +322,24 @@ public class FacetUtil {
   }
 
   /**
+   * Return the highest {@link IFacetProjectVersion version of a facet} that is supported with the
+   * other installed {@link IFacetProjectVersion facet versions} on a project. Somewhat like
+   * {@link IFacetedProjectWorkingCopy#getHighestAvailableVersion(IProjectFacet)} when all installed
+   * facet versions are treated as fixed.
+   */
+  public static IProjectFacetVersion getHighestSatisfyingVersion(
+      IFacetedProjectWorkingCopy workingCopy, IProjectFacet facet) {
+    return getHighestSatisfyingVersion(workingCopy, facet, null);
+  }
+
+  /**
    * Return {@code true} if the provided facet version conflicts with any of the installed facet
-   * versions.
+   * versions (ignoring the prospect, of course).
    */
   private static boolean conflictsWith(Collection<IProjectFacetVersion> installedFacetVersions,
-      IProjectFacetVersion facetVersion) {
+      IProjectFacetVersion prospect) {
     for (IProjectFacetVersion installed : installedFacetVersions) {
-      if (facetVersion.conflictsWith(installed)) {
+      if (prospect.conflictsWith(installed)) {
         return true;
       }
     }
@@ -329,4 +355,34 @@ public class FacetUtil {
     return conflictsWith(facetedProject.getProjectFacets(), facetVersion);
   }
 
+  /**
+   * Return {@code true} if the provided facet version cannot be installed in the faceted project
+   * due to conflicts with existing installed facet versions, ignoring those in {@code toIgnore}.
+   */
+  public static boolean conflictsWith(IFacetedProjectBase facetedProject,
+      IProjectFacetVersion facetVersion, Collection<IProjectFacet> toIgnore) {
+    Collection<IProjectFacetVersion> projectFacets =
+        filterVersions(facetedProject.getProjectFacets(), toIgnore);
+    return conflictsWith(projectFacets, facetVersion);
+  }
+
+  /** Filter the set of facet versions of those to be ignored. */
+  private static Collection<IProjectFacetVersion> filterVersions(
+      Collection<IProjectFacetVersion> facetVersions,
+      Collection<IProjectFacet> toIgnore) {
+    if (toIgnore == null || toIgnore.isEmpty()) {
+      return facetVersions;
+    }
+    Set<IProjectFacetVersion> filtered = new HashSet<>(facetVersions);
+    for (Iterator<IProjectFacetVersion> iter = filtered.iterator(); iter.hasNext();) {
+      IProjectFacetVersion installedFacetVersion = iter.next();
+      for(IProjectFacet ignoreType : toIgnore) {
+        if (ignoreType.equals(installedFacetVersion.getProjectFacet())) {
+          iter.remove();
+          break;
+        }
+      }
+    }
+    return filtered;
+  }
 }
