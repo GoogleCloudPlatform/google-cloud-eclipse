@@ -399,7 +399,6 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
           IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, "");
       return getProject(projectValue);
     } catch (CoreException ex) {
-      // BTW, I don't think this can really happen.
       DataflowUiPlugin.logError(ex, "Cannot read project value from launch configuration.");
       return null;
     }
