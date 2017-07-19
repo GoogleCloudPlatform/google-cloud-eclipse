@@ -47,7 +47,6 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
@@ -319,17 +318,12 @@ public class RunOptionsDefaultsComponent {
       try {
         SortedSet<String> stagingLocations = stagingLocationsFuture.get();
         messageTarget.clear();
-        String currentValue = stagingLocationInput.getText();
-        Point currentSelection = stagingLocationInput.getSelection();
-        int startSelection = currentSelection.x;
-        int endSelection = currentSelection.y;
-        stagingLocationInput.removeAll();
+        // Don't use "removeAll()", as it will clear the text field too.
+        stagingLocationInput.remove(0, stagingLocationInput.getItemCount() - 1);
         for (String location : stagingLocations) {
           stagingLocationInput.add(location);
         }
-        stagingLocationInput.setText(currentValue);
         completionListener.setContents(stagingLocations);
-        stagingLocationInput.setSelection(new Point(startSelection, endSelection));
       } catch (InterruptedException | ExecutionException ex) {
         messageTarget.setError("Could not retrieve buckets for project " + projectInput.getText());
         DataflowUiPlugin.logError(ex, "Exception while retrieving potential staging locations");

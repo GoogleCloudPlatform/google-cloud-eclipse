@@ -100,6 +100,7 @@ class LibraryFactory {
             libraryFileElement.getChildren(ELEMENT_NAME_MAVEN_COORDINATES));
         LibraryFile libraryFile = new LibraryFile(mavenCoordinates);
         libraryFile.setFilters(getFilters(libraryFileElement.getChildren()));
+        // todo do we really want these next two to be required?
         libraryFile.setSourceUri(
             getUri(libraryFileElement.getAttribute(ATTRIBUTE_NAME_SOURCE_URI)));
         libraryFile.setJavadocUri(
@@ -136,7 +137,7 @@ class LibraryFactory {
     if (!Strings.isNullOrEmpty(repository)) {
       mavenCoordinates.setRepository(repository);
     }
-    
+
     // Only look up latest version if version isn't specified in file.
     String version = mavenCoordinatesElement.getAttribute(ATTRIBUTE_NAME_VERSION);
     if (Strings.isNullOrEmpty(version) || "LATEST".equals(version)) {
