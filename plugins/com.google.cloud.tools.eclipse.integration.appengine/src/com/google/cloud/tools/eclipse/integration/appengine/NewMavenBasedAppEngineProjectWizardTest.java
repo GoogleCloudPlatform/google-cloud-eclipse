@@ -136,5 +136,6 @@ public class NewMavenBasedAppEngineProjectWizardTest extends BaseProjectTest {
       /* NOTREACHED */
     }
     fail("AppEngine Server Runtime classpath container not found");
+    return null;
   }
 }
