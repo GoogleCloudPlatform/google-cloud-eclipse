@@ -372,9 +372,9 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   }
 
   private IProject getProject() {
-   String eclipseProjectName = launchConfiguration.getEclipseProjectName();
-   if (eclipseProjectName != null && !eclipseProjectName.isEmpty()) {
-     return workspaceRoot.getProject(eclipseProjectName);
+    String eclipseProjectName = launchConfiguration.getEclipseProjectName();
+    if (eclipseProjectName != null && !eclipseProjectName.isEmpty()) {
+      return workspaceRoot.getProject(eclipseProjectName);
     }
     return null;
   }
