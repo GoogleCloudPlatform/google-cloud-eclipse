@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.junit.Assert;
 import org.junit.Before;
@@ -27,7 +28,9 @@ public class LibraryFactoryTest {
   private LibraryFactory factory = new LibraryFactory();
   // todo is there a simple way to load this up from XML instead?
   private IConfigurationElement configuration;
-  
+  private IConfigurationElement[] libraryFiles = new IConfigurationElement[1];
+  private IConfigurationElement[] mavenCoordinates = new IConfigurationElement[1];
+
   @Before
   public void setUp() {
     configuration = Mockito.mock(IConfigurationElement.class);
@@ -39,30 +42,39 @@ public class LibraryFactoryTest {
         "https://cloud.google.com/storage/docs/reference/libraries#client-libraries-install-java");
     Mockito.when(configuration.getChildren("libraryDependency"))
         .thenReturn(new IConfigurationElement[0]);
+    
+    libraryFiles[0] = Mockito.mock(IConfigurationElement.class);
+    Mockito.when(libraryFiles[0].getAttribute("mavenCoordinates")).thenReturn("mavenCoordinates");
+    Mockito.when(libraryFiles[0].getChildren()).thenReturn(new IConfigurationElement[0]);
+    mavenCoordinates[0] = Mockito.mock(IConfigurationElement.class);
+    Mockito.when(mavenCoordinates[0].getAttribute("groupId")).thenReturn("com.google.guava");
+    Mockito.when(mavenCoordinates[0].getAttribute("artifactId")).thenReturn("guava");
+    
+    Mockito.when(libraryFiles[0].getChildren("mavenCoordinates")).thenReturn(mavenCoordinates);
+    Mockito.when(libraryFiles[0].getName()).thenReturn("libraryFile");
   }
   
   @Test
   public void testCreate_useLatestVersion() throws LibraryFactoryException {
-    IConfigurationElement[] libraryFiles = new IConfigurationElement[1];
-    IConfigurationElement libraryFile = Mockito.mock(IConfigurationElement.class);
-    libraryFiles[0] = libraryFile;
-    Mockito.when(libraryFile.getAttribute("mavenCoordinates")).thenReturn("mavenCoordinates");
-    Mockito.when(libraryFile.getChildren()).thenReturn(new IConfigurationElement[0]);
-    IConfigurationElement[] mavenCoordinates =  new IConfigurationElement[1];
-    IConfigurationElement mavenCoordinatesElement = Mockito.mock(IConfigurationElement.class);
-    mavenCoordinates[0] = mavenCoordinatesElement;
-    Mockito.when(mavenCoordinatesElement.getAttribute("groupId")).thenReturn("com.google.guava");
-    Mockito.when(mavenCoordinatesElement.getAttribute("artifactId")).thenReturn("guava");
-    
-    Mockito.when(libraryFile.getChildren("mavenCoordinates")).thenReturn(mavenCoordinates);
-    Mockito.when(libraryFile.getName()).thenReturn("libraryFile");
     Mockito.when(configuration.getChildren("libraryFile")).thenReturn(libraryFiles);
     
     Library library = factory.create(configuration);
     String version = library.getLibraryFiles().get(0).getMavenCoordinates().getVersion();
-    Assert.assertEquals("19.0", version);
-    
+    int majorVersion = new DefaultArtifactVersion(version).getMajorVersion();
+    Assert.assertTrue(majorVersion >= 22);
   }
+  
+  @Test
+  public void testCreate_useSpecificVersion() throws LibraryFactoryException {
+    Mockito.when(configuration.getChildren("libraryFile")).thenReturn(libraryFiles);
+    Mockito.when(mavenCoordinates[0].getAttribute("version")).thenReturn("19.0");
+    
+    Library library = factory.create(configuration);
+    String version = library.getLibraryFiles().get(0).getMavenCoordinates().getVersion();
+    int majorVersion = new DefaultArtifactVersion(version).getMajorVersion();
+    Assert.assertEquals(19, majorVersion);
+  }
+  
   
   @Test
   public void testCreate() throws LibraryFactoryException {
