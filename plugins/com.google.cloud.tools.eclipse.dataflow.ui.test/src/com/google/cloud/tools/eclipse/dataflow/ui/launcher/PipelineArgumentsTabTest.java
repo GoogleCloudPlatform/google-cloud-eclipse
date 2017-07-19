@@ -65,8 +65,8 @@ public class PipelineArgumentsTabTest {
     // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2166
     @Test
     public void testPerformApply_checkingUseDefaultsButtonInitalizesWithDefaultValues() {
-      Map<String, String> expectedValues =
-          ImmutableMap.of("accountEmail", "workspace-level@example.com");
+      Map<String, String> expectedValues = ImmutableMap.of(
+          "gcpTempLocation", "gs://workspace-setting", "stagingLocation", "gs://workspace-setting");
       verifyArgumentValues(true /* checkUseDefaultsButton */, expectedValues);
     }
 
@@ -86,7 +86,7 @@ public class PipelineArgumentsTabTest {
       button.setSelection(checkUseDefaultsButton);
 
       WritableDataflowPreferences globalPreferences = WritableDataflowPreferences.global();
-      globalPreferences.setDefaultAccountEmail("workspace-level@example.com");
+      globalPreferences.setDefaultStagingLocation("gs://workspace-setting");
       globalPreferences.save();
 
       ILaunchConfigurationWorkingCopy launchConfiguration =

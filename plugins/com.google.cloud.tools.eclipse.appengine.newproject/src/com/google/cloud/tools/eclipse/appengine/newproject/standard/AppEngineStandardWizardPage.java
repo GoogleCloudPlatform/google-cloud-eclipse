@@ -56,7 +56,7 @@ public class AppEngineStandardWizardPage extends AppEngineWizardPage {
   @Override
   protected void createRuntimeField(Composite composite) {
     Label runtimeLabel = new Label(composite, SWT.LEAD);
-    runtimeLabel.setText(Messages.getString("runtime")); //$NON-NLS-1$
+    runtimeLabel.setText(Messages.getString("app.engine.standard.project.runtimetype")); //$NON-NLS-1$
     runtimeField = new ComboViewer(composite, SWT.READ_ONLY);
     runtimeField.setLabelProvider(new LabelProvider() {
       @Override
