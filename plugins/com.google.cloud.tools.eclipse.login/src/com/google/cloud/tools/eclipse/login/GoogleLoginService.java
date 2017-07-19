@@ -149,7 +149,7 @@ public class GoogleLoginService implements IGoogleLoginService {
 
   @Override
   public Credential getCredential(String email) {
-    Preconditions.checkNotNull(email);
+    Preconditions.checkNotNull(email, "email cannot be null.");
     synchronized (loginState) {
       for (Account account : accounts) {
         if (account.getEmail().equals(email)) {
