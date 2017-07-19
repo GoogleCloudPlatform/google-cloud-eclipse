@@ -135,7 +135,7 @@ public class DataflowPipelineLaunchDelegateTest {
       dataflowDelegate.setLoginCredential(workingCopy, null /* accountEmail */);
       fail();
     } catch (NullPointerException ex) {
-      assertEquals("account email not set in the launch configuration", ex.getMessage());
+      assertEquals("account email missing in launch configuration or preferences", ex.getMessage());
     }
   }
 
@@ -268,7 +268,6 @@ public class DataflowPipelineLaunchDelegateTest {
     globalPreferences.save();
 
     dataflowDelegate.launch(configuration, "run" /* mode */, mock(ILaunch.class), monitor);
-
 
     String jsonCredentialPath = environmentVariables.get("GOOGLE_APPLICATION_CREDENTIALS");
     assertNotNull(jsonCredentialPath);

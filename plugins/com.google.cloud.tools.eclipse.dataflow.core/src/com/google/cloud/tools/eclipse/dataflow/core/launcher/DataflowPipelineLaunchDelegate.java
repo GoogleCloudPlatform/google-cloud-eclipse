@@ -155,7 +155,8 @@ public class DataflowPipelineLaunchDelegate extends ForwardingLaunchConfiguratio
   @VisibleForTesting
   void setLoginCredential(ILaunchConfigurationWorkingCopy workingCopy, String accountEmail)
       throws CoreException {
-    Preconditions.checkNotNull(accountEmail, "account email not set in the launch configuration");
+    Preconditions.checkNotNull(accountEmail,
+        "account email missing in launch configuration or preferences");
 
     try {
       if (accountEmail.isEmpty()) {
@@ -234,7 +235,7 @@ public class DataflowPipelineLaunchDelegate extends ForwardingLaunchConfiguratio
   }
 
   /**
-   * Returns effective argument values of {@link PipelineLaunchConfiguration} that takes into
+   * Returns effective argument values of {@link PipelineLaunchConfiguration} that take into
    * account the project-specific or workspace-wide default values when needed.
    */
   private Map<String, String> getEffectiveArguments(
