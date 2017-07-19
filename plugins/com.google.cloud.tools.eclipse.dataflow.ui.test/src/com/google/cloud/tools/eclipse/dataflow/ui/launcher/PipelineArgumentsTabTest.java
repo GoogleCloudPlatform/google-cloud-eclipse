@@ -19,24 +19,33 @@ package com.google.cloud.tools.eclipse.dataflow.ui.launcher;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.dataflow.core.project.MajorVersion;
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.junit.runners.Suite;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
@@ -45,11 +54,36 @@ import org.junit.runners.Suite;
 })
 public class PipelineArgumentsTabTest {
 
+  @RunWith(MockitoJUnitRunner.class)
   public static class TabTest {
+
+    @Rule public ShellTestResource shellResource = new ShellTestResource();
+
+    @Mock public IWorkspaceRoot workspaceRoot;
+
+    private PipelineArgumentsTab tab;
+
+    @Before
+    public void setUp() {
+      tab = new PipelineArgumentsTab(workspaceRoot);
+    }
 
     @Test
     public void testGetName() {
-      Assert.assertEquals("Pipeline Arguments", new PipelineArgumentsTab().getName());
+      Assert.assertEquals("Pipeline Arguments", tab.getName());
+    }
+
+    @Test
+    public void testInitializeForm_projectNotAccessible() {
+      IProject project = mock(IProject.class);
+      when(workspaceRoot.getProject(anyString())).thenReturn(project);
+      when(project.isAccessible()).thenReturn(false);
+
+      tab.createControl(shellResource.getShell());
+      tab.updateRunnerButtons(MajorVersion.ONE);
+
+      ILaunchConfiguration configuration = mock(ILaunchConfiguration.class);
+      tab.initializeFrom(configuration);
     }
   }
 

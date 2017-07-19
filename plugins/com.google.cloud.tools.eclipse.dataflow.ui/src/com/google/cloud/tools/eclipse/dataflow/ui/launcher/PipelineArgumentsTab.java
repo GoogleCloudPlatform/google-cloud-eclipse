@@ -100,8 +100,9 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
   private PipelineLaunchConfiguration launchConfiguration;
 
-  private final DataflowDependencyManager dependencyManager;
-  private final PipelineOptionsHierarchyFactory pipelineOptionsHierarchyFactory;
+  private final DataflowDependencyManager dependencyManager = DataflowDependencyManager.create();
+  private final PipelineOptionsHierarchyFactory pipelineOptionsHierarchyFactory =
+      new ClasspathPipelineOptionsHierarchyFactory();
 
   /*
    * TODO: By default, this may include all PipelineOptions types, including custom user types that
@@ -111,23 +112,16 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
    */
   private PipelineOptionsHierarchy hierarchy;
 
-  private IWorkspaceRoot workspaceRoot;
+  private final IWorkspaceRoot workspaceRoot;
 
   public PipelineArgumentsTab() {
-    this(
-        DataflowDependencyManager.create(),
-        new ClasspathPipelineOptionsHierarchyFactory(),
-        ResourcesPlugin.getWorkspace().getRoot());
+    this(ResourcesPlugin.getWorkspace().getRoot());
   }
 
-  private PipelineArgumentsTab(
-      DataflowDependencyManager dependencyManager,
-      PipelineOptionsHierarchyFactory retrieverFactory,
-      IWorkspaceRoot workspaceRoot) {
-    this.dependencyManager = dependencyManager;
-    this.pipelineOptionsHierarchyFactory = retrieverFactory;
+  @VisibleForTesting
+  PipelineArgumentsTab(IWorkspaceRoot workspaceRoot) {
     this.workspaceRoot = workspaceRoot;
-    hierarchy = retrieverFactory.global(new NullProgressMonitor());
+    hierarchy = pipelineOptionsHierarchyFactory.global(new NullProgressMonitor());
   }
 
   @Override
@@ -302,7 +296,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
       IProject project = getProject();
       MajorVersion majorVersion = MajorVersion.ONE;
-      if (project != null) {
+      if (project != null /* && project.isAccessible() */) {
          majorVersion = dependencyManager.getProjectMajorVersion(project);
          if (majorVersion == null) {
             majorVersion = MajorVersion.ONE;
