@@ -137,8 +137,7 @@ class LibraryFactory {
       mavenCoordinates.setRepository(repository);
     }
     
-    // todo need to allow to pin a version such as servlet 2.5
-    // maybe only look up latest version if version isn't specified in file?
+    // Only look up latest version if version isn't specified in file.
     String version = mavenCoordinatesElement.getAttribute(ATTRIBUTE_NAME_VERSION);
     if (Strings.isNullOrEmpty(version) || "LATEST".equals(version)) {
       version = retriever.getLatestArtifactVersion(groupId, artifactId).toString(); 
