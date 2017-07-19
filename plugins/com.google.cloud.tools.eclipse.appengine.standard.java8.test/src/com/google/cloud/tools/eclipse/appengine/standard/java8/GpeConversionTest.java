@@ -45,6 +45,7 @@ public class GpeConversionTest {
   @After
   public void tearDown() throws CoreException {
     if (project != null) {
+      ProjectUtils.waitForProjects(project);
       project.delete(true, null);
     }
   }
