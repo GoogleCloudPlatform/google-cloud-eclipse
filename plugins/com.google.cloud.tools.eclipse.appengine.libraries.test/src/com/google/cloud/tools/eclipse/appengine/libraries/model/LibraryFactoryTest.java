@@ -60,7 +60,8 @@ public class LibraryFactoryTest {
     
     Library library = factory.create(configuration);
     String version = library.getLibraryFiles().get(0).getMavenCoordinates().getVersion();
-    int majorVersion = new DefaultArtifactVersion(version).getMajorVersion();
+    DefaultArtifactVersion artifactVersion = new DefaultArtifactVersion(version);
+    int majorVersion = artifactVersion.getMajorVersion();
     Assert.assertTrue(majorVersion >= 22);
   }
   
