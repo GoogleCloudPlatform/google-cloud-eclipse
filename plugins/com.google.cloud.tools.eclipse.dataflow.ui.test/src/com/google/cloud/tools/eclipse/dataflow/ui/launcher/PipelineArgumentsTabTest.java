@@ -20,32 +20,34 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.cloud.tools.eclipse.dataflow.core.launcher.PipelineConfigurationAttr;
 import com.google.cloud.tools.eclipse.dataflow.core.project.MajorVersion;
+import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.junit.runners.Suite;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
@@ -54,36 +56,34 @@ import org.mockito.runners.MockitoJUnitRunner;
 })
 public class PipelineArgumentsTabTest {
 
-  @RunWith(MockitoJUnitRunner.class)
   public static class TabTest {
 
     @Rule public ShellTestResource shellResource = new ShellTestResource();
 
-    @Mock public IWorkspaceRoot workspaceRoot;
-
-    private PipelineArgumentsTab tab;
-
-    @Before
-    public void setUp() {
-      tab = new PipelineArgumentsTab(workspaceRoot);
-    }
-
     @Test
     public void testGetName() {
-      Assert.assertEquals("Pipeline Arguments", tab.getName());
+      Assert.assertEquals("Pipeline Arguments", new PipelineArgumentsTab().getName());
     }
 
+    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2165
     @Test
-    public void testInitializeForm_projectNotAccessible() {
-      IProject project = mock(IProject.class);
-      when(workspaceRoot.getProject(anyString())).thenReturn(project);
-      when(project.isAccessible()).thenReturn(false);
-
-      tab.createControl(shellResource.getShell());
-      tab.updateRunnerButtons(MajorVersion.ONE);
+    public void testInitializeForm_noExceptionForNonAccessibleProject() throws CoreException {
+      IWorkspaceRoot workspaceRoot = mock(IWorkspaceRoot.class);
+      when(workspaceRoot.getProject(anyString())).thenReturn(mock(IProject.class));
 
       ILaunchConfiguration configuration = mock(ILaunchConfiguration.class);
-      tab.initializeFrom(configuration);
+      when(configuration.getAttribute(
+          eq(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME), anyString()))
+          .thenReturn("my-project");
+      when(configuration.getAttribute(
+          eq(PipelineConfigurationAttr.RUNNER_ARGUMENT.toString()), anyString()))
+          .thenReturn("DirectPipelineRunner");
+
+      PipelineArgumentsTab tab = new PipelineArgumentsTab(workspaceRoot);
+      tab.createControl(shellResource.getShell());
+      tab.initializeFrom(configuration);  // Should not throw NPE.
+
+      ProjectUtils.waitForProjects();  // Suppress some non-terminated-job error logs
     }
   }
 

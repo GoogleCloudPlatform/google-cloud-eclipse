@@ -296,7 +296,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
       IProject project = getProject();
       MajorVersion majorVersion = MajorVersion.ONE;
-      if (project != null /* && project.isAccessible() */) {
+      if (project != null && project.isAccessible()) {
          majorVersion = dependencyManager.getProjectMajorVersion(project);
          if (majorVersion == null) {
             majorVersion = MajorVersion.ONE;
