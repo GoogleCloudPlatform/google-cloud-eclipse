@@ -252,15 +252,16 @@ public class AppEngineStandardFacet {
        * investigate using IFacetProjectWorkingCopy instead
        */
       FacetUtil facetUtil = new FacetUtil(facetedProject);
+      IProjectFacetVersion standardFacet;
       // See if the default AppEngine Standard facet is ok with the project's current settings
       if (!FacetUtil.conflictsWith(workingCopy, FACET.getDefaultVersion())) {
-        logger.fine(projectName + ": installing default AES facet " + FACET.getDefaultVersion());
-        facetUtil.addFacetToBatch(FACET.getDefaultVersion(), null);
-        workingCopy.addProjectFacet(FACET.getDefaultVersion());
+        standardFacet = FACET.getDefaultVersion();
+        logger.fine(projectName + ": installing default AES facet " + standardFacet);
+        facetUtil.addFacetToBatch(standardFacet, null);
+        workingCopy.addProjectFacet(standardFacet);
       } else {
         // first see if there's a AES version that works with our current constraints
-        IProjectFacetVersion standardFacet =
-            FacetUtil.getHighestSatisfyingVersion(workingCopy, FACET);
+        standardFacet = FacetUtil.getHighestSatisfyingVersion(workingCopy, FACET);
         if (standardFacet == null && installDependentFacets) {
           // if we're not installing/updating dependent facets, see if there's something
           // that works without Java and DWP
@@ -274,37 +275,36 @@ public class AppEngineStandardFacet {
         logger.fine(projectName + ": installing AES facet " + standardFacet);
         facetUtil.addFacetToBatch(standardFacet, /* config */ null);
         workingCopy.addProjectFacet(standardFacet);
+      }
 
-        if (installDependentFacets) {
-          // check if we need to add/update Java facet
-          if (!workingCopy.hasProjectFacet(JavaFacet.FACET)) {
-            IProjectFacetVersion javaFacet =
-                FacetUtil.getHighestSatisfyingVersion(workingCopy, JavaFacet.FACET);
+      if (installDependentFacets) {
+        // check if we need to add/update Java facet
+        IProjectFacetVersion currentJavaFacet = workingCopy.getProjectFacetVersion(JavaFacet.FACET);
+        if (currentJavaFacet == null || standardFacet.conflictsWith(currentJavaFacet)) {
+          IProjectFacetVersion javaFacet =
+              FacetUtil.getHighestSatisfyingVersion(workingCopy, JavaFacet.FACET);
+          facetUtil.addJavaFacetToBatch(javaFacet);
+          if (currentJavaFacet == null) {
             logger.fine(projectName + ": adding Java facet " + javaFacet);
-            facetUtil.addJavaFacetToBatch(javaFacet);
             workingCopy.addProjectFacet(javaFacet);
-          } else if (standardFacet
-              .conflictsWith(workingCopy.getProjectFacetVersion(JavaFacet.FACET))) {
-            IProjectFacetVersion javaFacet =
-                FacetUtil.getHighestSatisfyingVersion(workingCopy, JavaFacet.FACET);
+          } else {
             logger.fine(projectName + ": updating Java facet to " + javaFacet);
-            facetUtil.addJavaFacetToBatch(javaFacet);
             workingCopy.changeProjectFacetVersion(javaFacet);
           }
+        }
 
-          // check if we need to add/update DWP facet
-          if (!workingCopy.hasProjectFacet(WebFacetUtils.WEB_FACET)) {
-            IProjectFacetVersion webFacet =
-                FacetUtil.getHighestSatisfyingVersion(workingCopy, WebFacetUtils.WEB_FACET);
+        // check if we need to add/update DWP facet
+        IProjectFacetVersion currentWebFacet =
+            workingCopy.getProjectFacetVersion(WebFacetUtils.WEB_FACET);
+        if (currentWebFacet == null || standardFacet.conflictsWith(currentWebFacet)) {
+          IProjectFacetVersion webFacet =
+              FacetUtil.getHighestSatisfyingVersion(workingCopy, WebFacetUtils.WEB_FACET);
+          facetUtil.addWebFacetToBatch(webFacet);
+          if (currentWebFacet == null) {
             logger.fine(projectName + ": adding DWP facet " + webFacet);
-            facetUtil.addWebFacetToBatch(webFacet);
             workingCopy.addProjectFacet(webFacet);
-          } else if (standardFacet
-              .conflictsWith(workingCopy.getProjectFacetVersion(WebFacetUtils.WEB_FACET))) {
-            IProjectFacetVersion webFacet =
-                FacetUtil.getHighestSatisfyingVersion(workingCopy, WebFacetUtils.WEB_FACET);
+          } else {
             logger.fine(projectName + ": updating DWP facet to " + webFacet);
-            facetUtil.addWebFacetToBatch(webFacet);
             workingCopy.changeProjectFacetVersion(webFacet);
           }
         }
