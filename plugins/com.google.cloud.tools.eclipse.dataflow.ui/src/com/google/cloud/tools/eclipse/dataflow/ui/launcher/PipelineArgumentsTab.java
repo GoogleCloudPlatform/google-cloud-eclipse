@@ -112,7 +112,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
    */
   private PipelineOptionsHierarchy hierarchy;
 
-  private IWorkspaceRoot workspaceRoot;
+  private final IWorkspaceRoot workspaceRoot;
 
   public PipelineArgumentsTab() {
     this(
@@ -121,7 +121,8 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
         ResourcesPlugin.getWorkspace().getRoot());
   }
 
-  private PipelineArgumentsTab(
+  @VisibleForTesting
+  PipelineArgumentsTab(
       DataflowDependencyManager dependencyManager,
       PipelineOptionsHierarchyFactory retrieverFactory,
       IWorkspaceRoot workspaceRoot) {
@@ -278,7 +279,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     if (!defaultOptionsComponent.isUseDefaultOptions()) {
       overallArgValues.putAll(defaultOptionsComponent.getValues());
     } else {
-      DataflowPreferences preferences = getDataflowPreferences(configuration);
+      DataflowPreferences preferences = getPreferences(configuration);
       overallArgValues.putAll(preferences.asDefaultPropertyMap());
     }
     overallArgValues.putAll(getNonDefaultOptions());
@@ -287,24 +288,6 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     launchConfiguration.setUserOptionsName(userOptionsSelector.getText());
 
     launchConfiguration.toLaunchConfiguration(configuration);
-  }
-
-  private DataflowPreferences getDataflowPreferences(ILaunchConfiguration configuration) {
-    String projectValue = "";
-    try {
-      configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, "");
-    } catch (CoreException ex) {
-      // I don't think this can really happen.
-      DataflowUiPlugin.logError(ex, "Cannot read project value from launch configuration.");
-    }
-
-    if (!projectValue.isEmpty()) {
-      IProject project = workspaceRoot.getProject(projectValue);
-      if (project.exists()) {
-        return ProjectOrWorkspaceDataflowPreferences.forProject(project);
-      }
-    }
-    return ProjectOrWorkspaceDataflowPreferences.forWorkspace();
   }
 
   @VisibleForTesting
@@ -381,7 +364,14 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   }
 
   private DataflowPreferences getPreferences() {
-    IProject project = getProject();
+    return getPreferences(getProject());
+  }
+
+  private DataflowPreferences getPreferences(ILaunchConfiguration configuration) {
+    return getPreferences(getProject(configuration));
+  }
+
+  private DataflowPreferences getPreferences(IProject project) {
     if (project != null && project.isAccessible()) {
       return ProjectOrWorkspaceDataflowPreferences.forProject(project);
     } else {
@@ -404,10 +394,25 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     return pipelineOptionsHierarchyFactory.global(monitor);
   }
 
+  private IProject getProject(ILaunchConfiguration configuration) {
+    try {
+      String projectValue = configuration.getAttribute(
+          IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, "");
+      return getProject(projectValue);
+    } catch (CoreException ex) {
+      // I don't think this can really happen.
+      DataflowUiPlugin.logError(ex, "Cannot read project value from launch configuration.");
+      return null;
+    }
+  }
+
   private IProject getProject() {
-    String eclipseProjectName = launchConfiguration.getEclipseProjectName();
-    if (eclipseProjectName != null && !eclipseProjectName.isEmpty()) {
-      return workspaceRoot.getProject(eclipseProjectName);
+    return getProject(launchConfiguration.getEclipseProjectName());
+  }
+
+  private IProject getProject(String projectName) {
+   if (projectName != null && !projectName.isEmpty()) {
+     return workspaceRoot.getProject(projectName);
     }
     return null;
   }
