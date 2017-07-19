@@ -8,7 +8,10 @@ Bundle-ClassPath: .
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Fragment-Host: com.google.cloud.tools.eclipse.dataflow.core
-Import-Package: com.google.cloud.tools.eclipse.test.util,
+Import-Package: com.google.api.client.googleapis.auth.oauth2;version="1.22.0",
+ com.google.api.client.http;version="1.22.0",
+ com.google.api.client.json;version="1.22.0",
+ com.google.cloud.tools.eclipse.test.util,
  org.eclipse.core.runtime.content,
  org.eclipse.core.runtime.jobs,
  org.eclipse.core.runtime.preferences,

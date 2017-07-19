@@ -19,7 +19,6 @@ package com.google.cloud.tools.eclipse.dataflow.ui.page;
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.DataflowPreferences;
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.ProjectOrWorkspaceDataflowPreferences;
 import com.google.cloud.tools.eclipse.dataflow.ui.preferences.RunOptionsDefaultsComponent;
-
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
@@ -50,6 +49,10 @@ public class NewDataflowProjectWizardDefaultRunOptionsPage extends WizardPage {
         composite, numColumns, new DialogPageMessageTarget(this), prefs, this);
 
     setControl(runOptionsDefaultsComponent.getControl());
+  }
+
+  public String getAccountEmail() {
+    return runOptionsDefaultsComponent.getAccountEmail();
   }
 
   public String getProjectId() {

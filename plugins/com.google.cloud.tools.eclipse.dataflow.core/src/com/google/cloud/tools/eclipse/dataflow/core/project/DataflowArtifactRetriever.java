@@ -20,7 +20,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.cloud.tools.eclipse.dataflow.core.DataflowCorePlugin;
 import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowProjectCreator.Template;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -59,12 +58,6 @@ import javax.xml.xpath.XPathFactory;
  * versions.
  */
 public class DataflowArtifactRetriever {
-  /**
-   * Versions which are known to have been released.
-   */
-  private static final NavigableSet<ArtifactVersion> KNOWN_VERSIONS =
-      ImmutableSortedSet.<ArtifactVersion>of(
-          new DefaultArtifactVersion("1.9.0"), new DefaultArtifactVersion("2.0.0-beta1"));
 
   private static URL getMetadataUrl(String artifactId) {
     try {
@@ -77,11 +70,6 @@ public class DataflowArtifactRetriever {
           String.format("Could not construct metadata URL for artifact %s", artifactId), e);
     }
   }
-
-  static final String DATAFLOW_GROUP_ID = "com.google.cloud.dataflow";
-
-  @VisibleForTesting
-  static final String DATAFLOW_SDK_ARTIFACT = "google-cloud-dataflow-java-sdk-all";
 
   private final LoadingCache<String, ArtifactVersion> latestVersion =
       CacheBuilder.newBuilder()
@@ -132,7 +120,7 @@ public class DataflowArtifactRetriever {
    * version.
    */
   public ArtifactVersion getLatestSdkVersion(VersionRange versionRange) {
-    return getLatestIncrementalVersion(DATAFLOW_SDK_ARTIFACT, versionRange);
+    return getLatestIncrementalVersion(DataflowMavenCoordinates.GROUP_ID, versionRange);
   }
 
   /**
@@ -171,7 +159,7 @@ public class DataflowArtifactRetriever {
       DataflowCorePlugin.logWarning(
           e, "Could not retrieve available versions for Artifact %s", artifactId);
     }
-    return getLatestInRange(versionRange, KNOWN_VERSIONS);
+    return getLatestInRange(versionRange, DataflowMavenCoordinates.KNOWN_VERSIONS);
   }
 
   private ArtifactVersion getLatestInRange(
