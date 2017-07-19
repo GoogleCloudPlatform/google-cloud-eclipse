@@ -24,6 +24,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -36,6 +37,7 @@ import com.google.api.client.json.JsonFactory;
 import com.google.cloud.tools.eclipse.dataflow.core.launcher.options.PipelineOptionsHierarchy;
 import com.google.cloud.tools.eclipse.dataflow.core.launcher.options.PipelineOptionsProperty;
 import com.google.cloud.tools.eclipse.dataflow.core.launcher.options.PipelineOptionsType;
+import com.google.cloud.tools.eclipse.dataflow.core.preferences.WritableDataflowPreferences;
 import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowDependencyManager;
 import com.google.cloud.tools.eclipse.dataflow.core.project.MajorVersion;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
@@ -127,11 +129,10 @@ public class DataflowPipelineLaunchDelegateTest {
 
   @Test
   public void testSetLoginCredential_assumesAccountEmailIsGiven() throws CoreException {
-    ILaunchConfigurationWorkingCopy workingCopy =
-        mockILaunchConfigurationWorkingCopy(new HashMap<String, String>(), null);
+    ILaunchConfigurationWorkingCopy workingCopy = mockILaunchConfigurationWorkingCopy();
 
     try {
-      dataflowDelegate.setLoginCredential(workingCopy);
+      dataflowDelegate.setLoginCredential(workingCopy, null /* accountEmail */);
       fail();
     } catch (NullPointerException ex) {
       assertEquals("account email not set in the launch configuration", ex.getMessage());
@@ -140,14 +141,13 @@ public class DataflowPipelineLaunchDelegateTest {
 
   @Test
   public void testSetLoginCredential_userSetsCredentialEnvironmentVariable() throws CoreException {
-    Map<String, String> arguments = ImmutableMap.of("accountEmail", "bogus@example.com");
     Map<String, String> environmentVariables = ImmutableMap.of(
         "GOOGLE_APPLICATION_CREDENTIALS", "user-set-path");
     ILaunchConfigurationWorkingCopy workingCopy =
-        mockILaunchConfigurationWorkingCopy(arguments, environmentVariables);
+        mockILaunchConfigurationWorkingCopy(environmentVariables);
 
     try {
-      dataflowDelegate.setLoginCredential(workingCopy);
+      dataflowDelegate.setLoginCredential(workingCopy, "bogus@example.com");
       fail();
     } catch (CoreException ex) {
       assertEquals("You cannot define the environment variable GOOGLE_APPLICATION_CREDENTIALS"
@@ -157,13 +157,11 @@ public class DataflowPipelineLaunchDelegateTest {
 
   @Test
   public void testSetLoginCredential_noAccountSelected() throws CoreException {
-    Map<String, String> arguments = ImmutableMap.of("accountEmail", "");
-    ILaunchConfigurationWorkingCopy workingCopy =
-        mockILaunchConfigurationWorkingCopy(arguments, new HashMap<String, String>());
+    ILaunchConfigurationWorkingCopy workingCopy = mockILaunchConfigurationWorkingCopy();
     when(loginService.getCredential("bogus@example.com")).thenReturn(null);  // not logged in
 
     try {
-      dataflowDelegate.setLoginCredential(workingCopy);
+      dataflowDelegate.setLoginCredential(workingCopy, "" /* accountEmail */);
       fail();
     } catch (CoreException ex) {
       assertEquals("No Google account selected for this launch.", ex.getMessage());
@@ -172,13 +170,11 @@ public class DataflowPipelineLaunchDelegateTest {
 
   @Test
   public void testSetLoginCredential_savedAccountNotLoggedIn() throws CoreException {
-    Map<String, String> arguments = ImmutableMap.of("accountEmail", "bogus@example.com");
-    ILaunchConfigurationWorkingCopy workingCopy =
-        mockILaunchConfigurationWorkingCopy(arguments, new HashMap<String, String>());
+    ILaunchConfigurationWorkingCopy workingCopy = mockILaunchConfigurationWorkingCopy();
     when(loginService.getCredential("bogus@example.com")).thenReturn(null);  // not logged in
 
     try {
-      dataflowDelegate.setLoginCredential(workingCopy);
+      dataflowDelegate.setLoginCredential(workingCopy, "bogus@example.com");
       fail();
     } catch (CoreException ex) {
       assertEquals("The Google account saved for this lanuch is not logged in.", ex.getMessage());
@@ -187,12 +183,11 @@ public class DataflowPipelineLaunchDelegateTest {
 
   @Test
   public void testSetLoginCredential() throws CoreException, IOException {
-    Map<String, String> arguments = ImmutableMap.of("accountEmail", "bogus@example.com");
     Map<String, String> environmentVariables = new HashMap<>();
     ILaunchConfigurationWorkingCopy workingCopy =
-        mockILaunchConfigurationWorkingCopy(arguments, environmentVariables);
+        mockILaunchConfigurationWorkingCopy(environmentVariables);
 
-    dataflowDelegate.setLoginCredential(workingCopy);
+    dataflowDelegate.setLoginCredential(workingCopy, "bogus@example.com");
     String jsonCredentialPath = environmentVariables.get("GOOGLE_APPLICATION_CREDENTIALS");
     assertNotNull(jsonCredentialPath);
     assertThat(jsonCredentialPath, containsString("google-ct4e-"));
@@ -209,7 +204,7 @@ public class DataflowPipelineLaunchDelegateTest {
   public void testLaunchWithLaunchConfigurationWithIncompleteArgsThrowsIllegalArgumentException()
       throws CoreException {
     ILaunchConfiguration configuration = mockILaunchConfiguration();
-    Map<String, String> incompleteRequiredArguments = ImmutableMap.<String, String>of();
+    Map<String, String> incompleteRequiredArguments = ImmutableMap.of();
     when(
         configuration.getAttribute(
             PipelineConfigurationAttr.ALL_ARGUMENT_VALUES.toString(),
@@ -258,15 +253,22 @@ public class DataflowPipelineLaunchDelegateTest {
   @Test
   public void testLaunchWithValidLaunchConfigurationCreatesJsonCredential() throws CoreException {
     ILaunchConfiguration configuration = mockILaunchConfiguration();
+    when(configuration.getAttribute(
+        "com.google.cloud.dataflow.eclipse.ALL_ARGUMENT_VALUES", new HashMap<String, String>()))
+        .thenReturn(ImmutableMap.of("accountEmail", "bogus@example.com"));
 
-    Map<String, String> arguments = ImmutableMap.of("accountEmail", "bogus@example.com");
     Map<String, String> environmentVariables = new HashMap<>();
     ILaunchConfigurationWorkingCopy expectedConfiguration =
-        mockILaunchConfigurationWorkingCopy(arguments, environmentVariables);
+        mockILaunchConfigurationWorkingCopy(environmentVariables);
     when(configuration.copy("dataflow_tmp_config_working_copy-testConfiguration"))
         .thenReturn(expectedConfiguration);
 
+    WritableDataflowPreferences globalPreferences = WritableDataflowPreferences.global();
+    globalPreferences.setDefaultAccountEmail("bogus@example.com");
+    globalPreferences.save();
+
     dataflowDelegate.launch(configuration, "run" /* mode */, mock(ILaunch.class), monitor);
+
 
     String jsonCredentialPath = environmentVariables.get("GOOGLE_APPLICATION_CREDENTIALS");
     assertNotNull(jsonCredentialPath);
@@ -301,8 +303,7 @@ public class DataflowPipelineLaunchDelegateTest {
     String javaArgs = "ExtraJavaArgs";
     when(configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, ""))
         .thenReturn(javaArgs);
-    ILaunchConfigurationWorkingCopy expectedConfiguration =
-        mockILaunchConfigurationWorkingCopy(argumentValues, new HashMap<String, String>());
+    ILaunchConfigurationWorkingCopy expectedConfiguration = mockILaunchConfigurationWorkingCopy();
     when(configuration.copy("dataflow_tmp_config_working_copy-testConfiguration"))
         .thenReturn(expectedConfiguration);
 
@@ -358,8 +359,7 @@ public class DataflowPipelineLaunchDelegateTest {
     String javaArgs = "ExtraJavaArgs";
     when(configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, ""))
         .thenReturn(javaArgs);
-    ILaunchConfigurationWorkingCopy expectedConfiguration =
-        mockILaunchConfigurationWorkingCopy(argumentValues, new HashMap<String, String>());
+    ILaunchConfigurationWorkingCopy expectedConfiguration = mockILaunchConfigurationWorkingCopy();
     when(configuration.copy("dataflow_tmp_config_working_copy-testConfiguration"))
         .thenReturn(expectedConfiguration);
 
@@ -403,7 +403,8 @@ public class DataflowPipelineLaunchDelegateTest {
         .thenReturn(runner.getRunnerName());
 
     String projectName = "Test-project,Name";
-    when(configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, ""))
+    when(configuration.getAttribute(
+        eq(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME), anyString()))
         .thenReturn(projectName);
     when(workspaceRoot.getProject(projectName)).thenReturn(project);
     when(project.exists()).thenReturn(true);
@@ -411,13 +412,14 @@ public class DataflowPipelineLaunchDelegateTest {
     return configuration;
   }
 
+  private static ILaunchConfigurationWorkingCopy mockILaunchConfigurationWorkingCopy()
+      throws CoreException {
+    return mockILaunchConfigurationWorkingCopy(new HashMap<String, String>());
+  }
+
   private static ILaunchConfigurationWorkingCopy mockILaunchConfigurationWorkingCopy(
-      Map<String, String> arguments, Map<String, String> environmentVariables)
-          throws CoreException {
+      Map<String, String> environmentVariables) throws CoreException {
     ILaunchConfigurationWorkingCopy workingCopy = mock(ILaunchConfigurationWorkingCopy.class);
-    when(workingCopy.getAttribute(
-        PipelineConfigurationAttr.ALL_ARGUMENT_VALUES.toString(), (Map<String, String>) null))
-        .thenReturn(arguments);
     when(workingCopy.getAttribute(
         ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, new HashMap<String, String>()))
         .thenReturn(environmentVariables);

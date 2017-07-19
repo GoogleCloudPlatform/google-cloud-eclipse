@@ -19,18 +19,12 @@ package com.google.cloud.tools.eclipse.dataflow.ui.launcher;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
-import com.google.cloud.tools.eclipse.dataflow.core.preferences.WritableDataflowPreferences;
 import com.google.cloud.tools.eclipse.dataflow.core.project.MajorVersion;
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import java.util.Map;
-import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -53,58 +47,9 @@ public class PipelineArgumentsTabTest {
 
   public static class TabTest {
 
-    @Rule public ShellTestResource shellResource = new ShellTestResource();
-
-    private final PipelineArgumentsTab tab = new PipelineArgumentsTab();
-
     @Test
     public void testGetName() {
-      Assert.assertEquals("Pipeline Arguments", tab.getName());
-    }
-
-    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2166
-    @Test
-    public void testPerformApply_checkingUseDefaultsButtonInitalizesWithDefaultValues() {
-      Map<String, String> expectedValues = ImmutableMap.of(
-          "gcpTempLocation", "gs://workspace-setting", "stagingLocation", "gs://workspace-setting");
-      verifyArgumentValues(true /* checkUseDefaultsButton */, expectedValues);
-    }
-
-    @Test
-    public void testPerformApply_uncheckingUseDefaultsButtonInitalizesWithCustomValues() {
-      Map<String, String> expectedValues = ImmutableMap.of(
-          "project", "", "gcpTempLocation", "", "accountEmail", "", "stagingLocation", "");
-      verifyArgumentValues(false /* checkUseDefaultsButton */, expectedValues);
-    }
-
-    private void verifyArgumentValues(
-        boolean checkUseDefaultsButton, Map<String, String> expectedValues) {
-      tab.createControl(shellResource.getShell());
-      tab.updateRunnerButtons(MajorVersion.ONE);
-
-      Button button = getUseDefaultsButton();
-      button.setSelection(checkUseDefaultsButton);
-
-      WritableDataflowPreferences globalPreferences = WritableDataflowPreferences.global();
-      globalPreferences.setDefaultStagingLocation("gs://workspace-setting");
-      globalPreferences.save();
-
-      ILaunchConfigurationWorkingCopy launchConfiguration =
-          mock(ILaunchConfigurationWorkingCopy.class);
-      tab.performApply(launchConfiguration);
-
-      verify(launchConfiguration).setAttribute(
-          "com.google.cloud.dataflow.eclipse.ALL_ARGUMENT_VALUES", expectedValues);
-    }
-
-    private Button getUseDefaultsButton() {
-      return (Button) CompositeUtil.findControl(shellResource.getShell(), new Predicate<Control>() {
-        @Override
-        public boolean apply(Control control) {
-          return control instanceof Button
-              && "Use &default Dataflow options".equals(((Button) control).getText());
-        }
-      });
+      Assert.assertEquals("Pipeline Arguments", new PipelineArgumentsTab().getName());
     }
   }
 

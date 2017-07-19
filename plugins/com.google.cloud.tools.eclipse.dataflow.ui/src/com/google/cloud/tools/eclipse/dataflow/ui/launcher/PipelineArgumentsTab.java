@@ -59,7 +59,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
-import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -101,8 +100,9 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
   private PipelineLaunchConfiguration launchConfiguration;
 
-  private final DataflowDependencyManager dependencyManager;
-  private final PipelineOptionsHierarchyFactory pipelineOptionsHierarchyFactory;
+  private final DataflowDependencyManager dependencyManager = DataflowDependencyManager.create();
+  private final PipelineOptionsHierarchyFactory pipelineOptionsHierarchyFactory =
+      new ClasspathPipelineOptionsHierarchyFactory();
 
   /*
    * TODO: By default, this may include all PipelineOptions types, including custom user types that
@@ -115,21 +115,8 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   private final IWorkspaceRoot workspaceRoot;
 
   public PipelineArgumentsTab() {
-    this(
-        DataflowDependencyManager.create(),
-        new ClasspathPipelineOptionsHierarchyFactory(),
-        ResourcesPlugin.getWorkspace().getRoot());
-  }
-
-  @VisibleForTesting
-  PipelineArgumentsTab(
-      DataflowDependencyManager dependencyManager,
-      PipelineOptionsHierarchyFactory retrieverFactory,
-      IWorkspaceRoot workspaceRoot) {
-    this.dependencyManager = dependencyManager;
-    this.pipelineOptionsHierarchyFactory = retrieverFactory;
-    this.workspaceRoot = workspaceRoot;
-    hierarchy = retrieverFactory.global(new NullProgressMonitor());
+    workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
+    hierarchy = pipelineOptionsHierarchyFactory.global(new NullProgressMonitor());
   }
 
   @Override
@@ -278,9 +265,6 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     Map<String, String> overallArgValues = new HashMap<>(launchConfiguration.getArgumentValues());
     if (!defaultOptionsComponent.isUseDefaultOptions()) {
       overallArgValues.putAll(defaultOptionsComponent.getValues());
-    } else {
-      DataflowPreferences preferences = getPreferences(configuration);
-      overallArgValues.putAll(preferences.asDefaultPropertyMap());
     }
     overallArgValues.putAll(getNonDefaultOptions());
     launchConfiguration.setArgumentValues(overallArgValues);
@@ -364,14 +348,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   }
 
   private DataflowPreferences getPreferences() {
-    return getPreferences(getProject());
-  }
-
-  private DataflowPreferences getPreferences(ILaunchConfiguration configuration) {
-    return getPreferences(getProject(configuration));
-  }
-
-  private DataflowPreferences getPreferences(IProject project) {
+    IProject project = getProject();
     if (project != null && project.isAccessible()) {
       return ProjectOrWorkspaceDataflowPreferences.forProject(project);
     } else {
@@ -394,25 +371,10 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     return pipelineOptionsHierarchyFactory.global(monitor);
   }
 
-  private IProject getProject(ILaunchConfiguration configuration) {
-    try {
-      String projectValue = configuration.getAttribute(
-          IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, "");
-      return getProject(projectValue);
-    } catch (CoreException ex) {
-      // BTW, I don't think this can really happen.
-      DataflowUiPlugin.logError(ex, "Cannot read project value from launch configuration.");
-      return null;
-    }
-  }
-
   private IProject getProject() {
-    return getProject(launchConfiguration.getEclipseProjectName());
-  }
-
-  private IProject getProject(String projectName) {
-   if (projectName != null && !projectName.isEmpty()) {
-     return workspaceRoot.getProject(projectName);
+   String eclipseProjectName = launchConfiguration.getEclipseProjectName();
+   if (eclipseProjectName != null && !eclipseProjectName.isEmpty()) {
+     return workspaceRoot.getProject(eclipseProjectName);
     }
     return null;
   }
