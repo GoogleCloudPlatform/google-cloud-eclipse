@@ -93,7 +93,7 @@ public class DataflowMavenModel {
   @VisibleForTesting
   static final String DATAFLOW_VERSION_XPATH_EXPR = String.format(
       "/pom:project/pom:dependencies/pom:dependency[pom:artifactId='%s']/pom:version",
-      DataflowArtifactRetriever.DATAFLOW_SDK_ARTIFACT);
+      DataflowMavenCoordinates.ARTIFACT_ID);
 
   private static class SetDataflowDependencyVersion implements PomEdit {
     private final VersionRange version;

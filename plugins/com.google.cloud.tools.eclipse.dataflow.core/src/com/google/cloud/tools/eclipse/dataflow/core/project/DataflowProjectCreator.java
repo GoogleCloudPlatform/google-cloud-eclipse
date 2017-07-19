@@ -200,7 +200,7 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
     checkCancelled(progress);
 
     Archetype archetype = new Archetype();
-    archetype.setGroupId(DataflowArtifactRetriever.DATAFLOW_GROUP_ID);
+    archetype.setGroupId(DataflowMavenCoordinates.GROUP_ID);
     archetype.setArtifactId(template.getArchetype());
 
     Properties archetypeProperties = new Properties();
