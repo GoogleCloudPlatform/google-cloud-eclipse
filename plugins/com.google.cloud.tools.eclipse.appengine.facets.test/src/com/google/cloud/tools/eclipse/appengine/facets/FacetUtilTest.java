@@ -25,6 +25,7 @@ import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import org.eclipse.core.resources.IFolder;
@@ -264,7 +265,7 @@ public class FacetUtilTest {
     IFacetedProjectWorkingCopy testProject = projectCreator.getFacetedProject().createWorkingCopy();
     testProject.addProjectFacet(AppEngineStandardFacet.JRE7);
     IProjectFacetVersion highestSatisfyingVersion =
-        FacetUtil.getHighestSatisfyingVersion(testProject, WebFacetUtils.WEB_FACET);
+        FacetUtil.getHighestSatisfyingVersion(testProject, WebFacetUtils.WEB_FACET, null);
     assertEquals(WebFacetUtils.WEB_25, highestSatisfyingVersion);
   }
 
@@ -274,6 +275,11 @@ public class FacetUtilTest {
     testProject.addProjectFacet(AppEngineStandardFacet.JRE7);
     assertFalse(FacetUtil.conflictsWith(testProject, WebFacetUtils.WEB_25));
     assertTrue(FacetUtil.conflictsWith(testProject, WebFacetUtils.WEB_31));
+
+    // verify ignores the ignore list
+    assertTrue(FacetUtil.conflictsWith(testProject, WebFacetUtils.WEB_31, null));
+    assertFalse(FacetUtil.conflictsWith(testProject, WebFacetUtils.WEB_31,
+        Arrays.asList(AppEngineStandardFacet.FACET)));
   }
 
   private static void createEmptyFile(IProject project, IPath relativePath) throws CoreException {
