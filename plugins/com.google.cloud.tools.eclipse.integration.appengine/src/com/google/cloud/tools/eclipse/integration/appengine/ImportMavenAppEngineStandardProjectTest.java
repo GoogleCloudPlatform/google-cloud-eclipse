@@ -31,6 +31,9 @@ import java.net.URL;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
+import org.eclipse.jdt.launching.environments.IExecutionEnvironmentsManager;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
@@ -38,6 +41,7 @@ import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.common.project.facet.core.util.internal.ZipUtil;
+import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -59,9 +63,10 @@ public class ImportMavenAppEngineStandardProjectTest extends BaseProjectTest {
   
   @Test
   public void runImport() throws Exception {
+    Assume.assumeTrue("No JavaSE 8 JRE found", hasJavaSE8());
     assertFalse(projectExists("springboot-appengine-standard"));
 
-    File extractedLocation = extractZip(new URL(
+    extractZip(new URL(
         "platform:/plugin/com.google.cloud.tools.eclipse.integration.appengine/test-projects/springboot-appengine-standard.zip"),
         tempFolder.getRoot());
     project = SwtBotAppEngineActions.importMavenProject(bot, "springboot-appengine-standard",
@@ -84,6 +89,15 @@ public class ImportMavenAppEngineStandardProjectTest extends BaseProjectTest {
 
     ArrayAssertions.assertIsEmpty("runtime classpath should be empty for Maven projects",
         NewMavenBasedAppEngineProjectWizardTest.getAppEngineServerRuntimeClasspathEntries(project));
+  }
+
+  /**
+   * Check that we have a Java 8 compatible VM available.
+   */
+  private boolean hasJavaSE8() {
+    IExecutionEnvironmentsManager manager = JavaRuntime.getExecutionEnvironmentsManager();
+    IExecutionEnvironment java8 = manager.getEnvironment("JavaSE-1.8");
+    return java8 != null && java8.getCompatibleVMs().length > 0;
   }
 
   private static File extractZip(URL zipProjectLocation, File destination) throws IOException {
