@@ -39,7 +39,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.widgets.Display;
 import org.junit.After;
 import org.junit.Before;
@@ -74,7 +73,6 @@ public class ProjectSelectorSelectionChangedListenerTest {
     when(projectSelector.getDisplay()).thenReturn(Display.getCurrent());
     when(accountSelector.getSelectedCredential()).thenReturn(mock(Credential.class));
 
-    TableViewer viewer = mock(TableViewer.class);
     IStructuredSelection projectSelection = mock(IStructuredSelection.class);
     when(projectSelector.getSelection()).thenReturn(projectSelection);
     when(projectSelection.isEmpty()).thenReturn(false);
