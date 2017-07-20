@@ -16,10 +16,10 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertThat;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.ArrayAssertions;
@@ -69,8 +69,9 @@ public class XsltSourceQuickFixTest {
     IEditorPart editorPart = WorkbenchUtil.openInEditor(workbench, file);
     ITextViewer viewer = ValidationTestUtils.getViewer(file);
     String preContents = viewer.getDocument().get();
+    workbench.getDisplay().readAndDispatch(); // spin the event loop
 
-    assertTrue(preContents.contains("application"));
+    assertThat(preContents, containsString("application"));
 
     ProjectUtils.waitForProjects(project);
     assertEquals(1, file.findMarkers(BLACKLIST_MARKER, true, IResource.DEPTH_ZERO).length);
@@ -81,8 +82,8 @@ public class XsltSourceQuickFixTest {
 
     IDocument document = viewer.getDocument();
     String contents = document.get();
-    assertFalse(contents.contains("application"));
-    assertFalse(contents.contains("?><appengine"));
+    assertThat(contents, not(containsString("application")));
+    assertThat(contents, not(containsString("?><appengine")));
 
     // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1527
     editorPart.doSave(new NullProgressMonitor());
