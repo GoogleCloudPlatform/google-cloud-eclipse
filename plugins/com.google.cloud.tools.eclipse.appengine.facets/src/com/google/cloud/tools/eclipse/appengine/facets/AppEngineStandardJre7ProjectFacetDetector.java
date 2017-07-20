@@ -20,6 +20,7 @@ import com.google.cloud.tools.appengine.AppEngineDescriptor;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.logging.Logger;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -39,8 +40,16 @@ public class AppEngineStandardJre7ProjectFacetDetector extends ProjectFacetDetec
   @Override
   public void detect(IFacetedProjectWorkingCopy workingCopy, IProgressMonitor monitor)
       throws CoreException {
-    SubMonitor progress = SubMonitor.convert(monitor, 5);
     String projectName = workingCopy.getProjectName();
+    SubMonitor progress = SubMonitor.convert(monitor, 5);
+
+    // Check if there are some fundamental conflicts with AESv7 other than Java and DWP versions
+    if (FacetUtil.conflictsWith(workingCopy, AppEngineStandardFacet.JRE7,
+        Arrays.asList(JavaFacet.FACET, WebFacetUtils.WEB_FACET))) {
+      logger.warning(
+          "skipping " + projectName + ": project conflicts with AES java8 runtime");
+      return;
+    }
 
     IFile appEngineWebXml =
         WebProjectUtil.findInWebInf(workingCopy.getProject(), new Path("appengine-web.xml"));

@@ -61,18 +61,22 @@ public class AppEngineStandardFacetVersionChangeTests {
         AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8.getVersionString());
   }
 
-  /** Should be able to change an App Engine Standard JRE7 project to JRE8 with no other changes. */
+  /** Fail changing an App Engine Standard JRE7 project to JRE8 with no other changes. */
   @Test
   public void testChange_AESJ7_AESJ8() throws CoreException, IOException, SAXException {
     IFacetedProject project = jre7Project.getFacetedProject();
     assertDescriptorRuntimeIsJre7(project);
 
-    Set<Action> actions = new HashSet<>();
-    actions.add(new Action(Action.Type.VERSION_CHANGE,
-        AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8, null));
-    project.modify(actions, null);
-
-    assertDescriptorRuntimeIsJre8(project);
+    try {
+      Set<Action> actions = new HashSet<>();
+      actions.add(new Action(Action.Type.VERSION_CHANGE,
+          AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8, null));
+      project.modify(actions, null);
+      fail("should fail as still has Java 7 facet");
+    } catch (CoreException ex) {
+      // expected
+      assertDescriptorRuntimeIsJre7(project);
+    }
   }
 
   /** Fail changing AppEngine Standard JRE8 to JRE7 with no other changes. */

@@ -16,11 +16,11 @@
 
 package com.google.cloud.tools.eclipse.dataflow.core.project;
 
+import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.model.Bucket;
 import com.google.api.services.storage.model.Buckets;
-import com.google.cloud.tools.eclipse.dataflow.core.util.CouldNotCreateCredentialsException;
-import com.google.cloud.tools.eclipse.dataflow.core.util.Transport;
+import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.common.base.Strings;
 import java.io.IOException;
 import java.util.List;
@@ -38,9 +38,9 @@ public class GcsDataflowProjectClient {
 
   private final Storage gcsClient;
 
-  public static GcsDataflowProjectClient createWithDefaultClient()
-      throws CouldNotCreateCredentialsException {
-    return new GcsDataflowProjectClient(Transport.newStorageClient().build());
+  public static GcsDataflowProjectClient create(
+      IGoogleApiFactory apiFactory, Credential credential) {
+    return new GcsDataflowProjectClient(apiFactory.newStorageApi(credential));
   }
 
   private GcsDataflowProjectClient(Storage gcsClient) {

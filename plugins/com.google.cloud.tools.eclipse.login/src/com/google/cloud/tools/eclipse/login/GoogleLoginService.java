@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.login;
 
+import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
 import com.google.cloud.tools.eclipse.login.ui.LoginServiceUi;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
@@ -25,6 +26,7 @@ import com.google.cloud.tools.login.JavaPreferenceOAuthDataStore;
 import com.google.cloud.tools.login.LoggerFacade;
 import com.google.cloud.tools.login.OAuthDataStore;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -143,6 +145,19 @@ public class GoogleLoginService implements IGoogleLoginService {
     synchronized (loginState) {
       return new HashSet<>(accounts);
     }
+  }
+
+  @Override
+  public Credential getCredential(String email) {
+    Preconditions.checkNotNull(email, "email cannot be null.");
+    synchronized (loginState) {
+      for (Account account : accounts) {
+        if (account.getEmail().equals(email)) {
+          return account.getOAuth2Credential();
+        }
+      }
+    }
+    return null;
   }
 
   private static final Logger logger = Logger.getLogger(GoogleLoginService.class.getName());

@@ -23,6 +23,7 @@ import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.logging.Logger;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -41,10 +42,20 @@ public class AppEngineStandardJre8ProjectFacetDetector extends ProjectFacetDetec
   @Override
   public void detect(IFacetedProjectWorkingCopy workingCopy, IProgressMonitor monitor)
       throws CoreException {
+    String projectName = workingCopy.getProjectName();
     SubMonitor progress = SubMonitor.convert(monitor, 5);
+
+    // Check if there are some fundamental conflicts with AESv8 other than Java and DWP versions
+    if (FacetUtil.conflictsWith(workingCopy,
+        AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8,
+        Arrays.asList(JavaFacet.FACET, WebFacetUtils.WEB_FACET))) {
+      logger.warning(
+          "skipping " + projectName + ": project conflicts with AES java8 runtime");
+      return;
+    }
+
     IFile appEngineWebXml =
         WebProjectUtil.findInWebInf(workingCopy.getProject(), new Path("appengine-web.xml"));
-    String projectName = workingCopy.getProjectName();
     if (appEngineWebXml == null || !appEngineWebXml.exists()) {
       logger.fine("skipping " + projectName + ": no appengine-web.xml found");
       return;
@@ -59,11 +70,6 @@ public class AppEngineStandardJre8ProjectFacetDetector extends ProjectFacetDetec
       }
       logger.fine(projectName + ": appengine-web.xml has runtime=java8");
 
-      if (FacetUtil.conflictsWith(workingCopy,
-          AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8)) {
-        logger.warning("skipping " + projectName + ": project conflicts with AES java8 runtime");
-        return;
-      }
       workingCopy.addProjectFacet(AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8);
       progress.worked(1);
 

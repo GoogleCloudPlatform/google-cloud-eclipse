@@ -19,12 +19,23 @@ package com.google.cloud.tools.eclipse.dataflow.ui.launcher;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import com.google.cloud.tools.eclipse.dataflow.core.launcher.PipelineConfigurationAttr;
 import com.google.cloud.tools.eclipse.dataflow.core.project.MajorVersion;
+import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -47,9 +58,32 @@ public class PipelineArgumentsTabTest {
 
   public static class TabTest {
 
+    @Rule public ShellTestResource shellResource = new ShellTestResource();
+
     @Test
     public void testGetName() {
       Assert.assertEquals("Pipeline Arguments", new PipelineArgumentsTab().getName());
+    }
+
+    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2165
+    @Test
+    public void testInitializeForm_noExceptionForNonAccessibleProject() throws CoreException {
+      IWorkspaceRoot workspaceRoot = mock(IWorkspaceRoot.class);
+      when(workspaceRoot.getProject(anyString())).thenReturn(mock(IProject.class));
+
+      ILaunchConfiguration configuration = mock(ILaunchConfiguration.class);
+      when(configuration.getAttribute(
+          eq(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME), anyString()))
+          .thenReturn("my-project");
+      when(configuration.getAttribute(
+          eq(PipelineConfigurationAttr.RUNNER_ARGUMENT.toString()), anyString()))
+          .thenReturn("DirectPipelineRunner");
+
+      PipelineArgumentsTab tab = new PipelineArgumentsTab(workspaceRoot);
+      tab.createControl(shellResource.getShell());
+      tab.initializeFrom(configuration);  // Should not throw NPE.
+
+      ProjectUtils.waitForProjects();  // Suppress some non-terminated-job error logs
     }
   }
 

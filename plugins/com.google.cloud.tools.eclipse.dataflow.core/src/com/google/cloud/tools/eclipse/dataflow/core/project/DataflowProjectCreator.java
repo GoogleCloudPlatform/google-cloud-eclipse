@@ -21,6 +21,19 @@ import com.google.cloud.tools.eclipse.dataflow.core.natures.DataflowJavaProjectN
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.WritableDataflowPreferences;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSortedSet;
+import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.NavigableSet;
+import java.util.Properties;
+import java.util.Set;
+import java.util.regex.Pattern;
 import org.apache.maven.archetype.catalog.Archetype;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
@@ -37,19 +50,6 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.project.IProjectConfigurationManager;
 import org.eclipse.m2e.core.project.ProjectImportConfiguration;
-import java.io.File;
-import java.lang.reflect.InvocationTargetException;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.NavigableSet;
-import java.util.Properties;
-import java.util.Set;
-import java.util.regex.Pattern;
 
 /**
  * An {@code IRunnableWithProgress} that creates a new Cloud Dataflow Java Project.
@@ -79,6 +79,7 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
   private String packageString;
   private String archetypeVersion;
 
+  private String defaultAccountEmail;
   private String defaultProject;
   private String defaultStagingLocation;
 
@@ -173,6 +174,10 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
     this.archetypeVersion = archetypeVersion;
   }
 
+  public void setDefaultAccountEmail(String defaultAccountEmail) {
+    this.defaultAccountEmail = defaultAccountEmail;
+  }
+
   public void setDefaultProject(String defaultProject) {
     this.defaultProject = defaultProject;
   }
@@ -264,8 +269,9 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
 
   private void setPreferences(IProject project) {
     WritableDataflowPreferences prefs = WritableDataflowPreferences.forProject(project);
-    prefs.setDefaultProject(this.defaultProject);
-    prefs.setDefaultStagingLocation(this.defaultStagingLocation);
+    prefs.setDefaultAccountEmail(defaultAccountEmail);
+    prefs.setDefaultProject(defaultProject);
+    prefs.setDefaultStagingLocation(defaultStagingLocation);
     prefs.save();
   }
 
