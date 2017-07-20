@@ -56,7 +56,7 @@ public abstract class CreateAppEngineWtpProjectTest {
   protected final AppEngineProjectConfig config = new AppEngineProjectConfig();
   protected IProject project;
 
-  abstract protected CreateAppEngineWtpProject newCreateAppEngineWtpProject();
+  protected abstract CreateAppEngineWtpProject newCreateAppEngineWtpProject();
 
   // Let subclasses throw arbitrary exceptions during "setUp()"
   @Before
