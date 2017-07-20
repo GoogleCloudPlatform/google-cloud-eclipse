@@ -46,6 +46,8 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
    */
   private static final IProjectFacetVersion DEFAULT_DYNAMIC_WEB_VERSION = WebFacetUtils.WEB_25;
 
+  private static final IClasspathEntry[] NO_CLASSPATH_ENTRIES = {};
+
   private static final Logger logger = Logger.getLogger(ServletClasspathProvider.class.getName());
 
   @Inject
@@ -54,7 +56,7 @@ public class ServletClasspathProvider extends RuntimeClasspathProviderDelegate {
   @Override
   public IClasspathEntry[] resolveClasspathContainer(IProject project, IRuntime runtime) {
     if (project != null && MavenUtils.hasMavenNature(project)) { // Maven handles its own classpath
-      return null;
+      return NO_CLASSPATH_ENTRIES;
     }
 
     // Runtime is expected to provide Servlet and JSP APIs

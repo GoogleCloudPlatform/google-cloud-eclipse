@@ -17,22 +17,20 @@
 package com.google.cloud.tools.eclipse.googleapis.internal;
 
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.googleapis.util.Utils;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson.JacksonFactory;
 import com.google.api.services.appengine.v1.Appengine;
 import com.google.api.services.appengine.v1.Appengine.Apps;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects;
 import com.google.api.services.storage.Storage;
-import com.google.cloud.tools.eclipse.googleapis.GoogleApiException;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
-import java.util.concurrent.ExecutionException;
 import org.eclipse.core.net.proxy.IProxyChangeEvent;
 import org.eclipse.core.net.proxy.IProxyChangeListener;
 import org.eclipse.core.net.proxy.IProxyService;
@@ -50,7 +48,7 @@ public class GoogleApiFactory implements IGoogleApiFactory {
 
   private IProxyService proxyService;
 
-  private final JsonFactory jsonFactory = new JacksonFactory();
+  private final JsonFactory jsonFactory = Utils.getDefaultJsonFactory();
   private final ProxyFactory proxyFactory;
   private LoadingCache<GoogleApiUrl, HttpTransport> transportCache;
 
@@ -80,53 +78,42 @@ public class GoogleApiFactory implements IGoogleApiFactory {
   }
 
   @Override
-  public Projects newProjectsApi(Credential credential) throws GoogleApiException {
-    try {
-      Preconditions.checkNotNull(transportCache, "transportCache is null");
-      HttpTransport transport = transportCache.get(GoogleApiUrl.CLOUDRESOURCE_MANAGER_API);
-      Preconditions.checkNotNull(transport, "transport is null");
-      Preconditions.checkNotNull(jsonFactory, "jsonFactory is null");
-      
-      CloudResourceManager resourceManager =
-          new CloudResourceManager.Builder(transport, jsonFactory, credential)
-              .setApplicationName(CloudToolsInfo.USER_AGENT).build();
-      return resourceManager.projects();
-    } catch (ExecutionException ex) {
-      throw new GoogleApiException(ex);
-    }
-  }
-  
-  @Override
-  public Storage newStorageApi(Credential credential) throws GoogleApiException {
-    try {
-      Preconditions.checkNotNull(transportCache, "transportCache is null");
-      HttpTransport transport = transportCache.get(GoogleApiUrl.CLOUD_STORAGE_API);
-      Preconditions.checkNotNull(transport, "transport is null");
-      Preconditions.checkNotNull(jsonFactory, "jsonFactory is null");
+  public Projects newProjectsApi(Credential credential) {
+    Preconditions.checkNotNull(transportCache, "transportCache is null");
+    HttpTransport transport = transportCache.getUnchecked(GoogleApiUrl.CLOUDRESOURCE_MANAGER_API);
+    Preconditions.checkNotNull(transport, "transport is null");
+    Preconditions.checkNotNull(jsonFactory, "jsonFactory is null");
 
-      Storage.Builder builder = new Storage.Builder(transport, jsonFactory, credential);
-      Storage storage = builder.build();
-      return storage;
-    } catch (ExecutionException ex) {
-      throw new GoogleApiException(ex);
-    }
+    CloudResourceManager resourceManager =
+        new CloudResourceManager.Builder(transport, jsonFactory, credential)
+            .setApplicationName(CloudToolsInfo.USER_AGENT).build();
+    return resourceManager.projects();
   }
 
   @Override
-  public Apps newAppsApi(Credential credential) throws GoogleApiException {
-    try {
-      Preconditions.checkNotNull(transportCache, "transportCache is null");
-      HttpTransport transport = transportCache.get(GoogleApiUrl.APPENGINE_ADMIN_API);
-      Preconditions.checkNotNull(transport, "transport is null");
-      Preconditions.checkNotNull(jsonFactory, "jsonFactory is null");
+  public Storage newStorageApi(Credential credential) {
+    Preconditions.checkNotNull(transportCache, "transportCache is null");
+    HttpTransport transport = transportCache.getUnchecked(GoogleApiUrl.CLOUD_STORAGE_API);
+    Preconditions.checkNotNull(transport, "transport is null");
+    Preconditions.checkNotNull(jsonFactory, "jsonFactory is null");
 
-      Appengine appengine =
-          new Appengine.Builder(transport, jsonFactory, credential)
-              .setApplicationName(CloudToolsInfo.USER_AGENT).build();
-      return appengine.apps();
-    } catch (ExecutionException ex) {
-      throw new GoogleApiException(ex);
-    }
+    Storage.Builder builder = new Storage.Builder(transport, jsonFactory, credential)
+        .setApplicationName(CloudToolsInfo.USER_AGENT);
+    Storage storage = builder.build();
+    return storage;
+  }
+
+  @Override
+  public Apps newAppsApi(Credential credential) {
+    Preconditions.checkNotNull(transportCache, "transportCache is null");
+    HttpTransport transport = transportCache.getUnchecked(GoogleApiUrl.APPENGINE_ADMIN_API);
+    Preconditions.checkNotNull(transport, "transport is null");
+    Preconditions.checkNotNull(jsonFactory, "jsonFactory is null");
+
+    Appengine appengine =
+        new Appengine.Builder(transport, jsonFactory, credential)
+            .setApplicationName(CloudToolsInfo.USER_AGENT).build();
+    return appengine.apps();
   }
 
   @Reference(policy=ReferencePolicy.DYNAMIC, cardinality=ReferenceCardinality.OPTIONAL)

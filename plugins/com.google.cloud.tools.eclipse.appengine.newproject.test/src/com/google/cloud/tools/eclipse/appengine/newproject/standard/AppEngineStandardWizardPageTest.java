@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.newproject.standard;
 
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
@@ -53,6 +54,13 @@ public class AppEngineStandardWizardPageTest {
         page.getDescription());
   }
   
+  @Test
+  public void testDefaultRuntime() {
+    Assert.assertEquals(AppEngineRuntime.STANDARD_JAVA_7,
+        AppEngineStandardWizardPage.DEFAULT_RUNTIME);
+    Assert.assertEquals(AppEngineStandardWizardPage.DEFAULT_RUNTIME.getId(), page.getRuntimeId());
+  }
+
   @Test
   public void testValidatePage() {
     Assert.assertFalse(page.validatePage());

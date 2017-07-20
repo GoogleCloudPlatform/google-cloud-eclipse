@@ -89,7 +89,7 @@ public class AppEngineApplicationQueryJob extends Job {
         if (!projectSelector.isDisposed()
             && isLatestAppQueryJob.apply(thisJob) /* intentionally checking in UI context */
             // Covers the case where user switches accounts.
-            && !projectSelector.getViewer().getSelection().isEmpty()) {
+            && !projectSelector.getSelection().isEmpty()) {
           projectSelector.setStatusLink(statusMessage, statusTooltip);
         }
       }

@@ -16,6 +16,8 @@
 
 package com.google.cloud.tools.eclipse.bugreport.ui;
 
+import com.google.cloud.tools.appengine.api.AppEngineException;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.escape.Escaper;
@@ -36,8 +38,9 @@ public class BugReportCommandHandler extends AbstractHandler {
   private static final String BODY_TEMPLATE =
       "(please ensure you are running the latest version of CT4E with _Help > Check for Updates_)\n"
       + "- Cloud Tools for Eclipse version: {0}\n"
-      + "- OS: {1} {2}\n"
-      + "- Java version: {3}\n"
+      + "- Google Cloud SDK version: {1}\n"
+      + "- OS: {2} {3}\n"
+      + "- Java version: {4}\n"
       + "\n"
       + "**What did you do?**\n"
       + "\n"
@@ -57,10 +60,19 @@ public class BugReportCommandHandler extends AbstractHandler {
   @VisibleForTesting
   static String formatReportUrl() {
     String body = MessageFormat.format(BODY_TEMPLATE, CloudToolsInfo.getToolsVersion(),
-        System.getProperty("os.name"), System.getProperty("os.version"),
+        getCloudSdkVersion(), System.getProperty("os.name"), System.getProperty("os.version"),
         System.getProperty("java.version"));
 
     Escaper escaper = UrlEscapers.urlFormParameterEscaper();
     return BUG_REPORT_URL + "?body=" + escaper.escape(body);
+  }
+
+  private static String getCloudSdkVersion() {
+    try {
+      CloudSdk sdk = new CloudSdk.Builder().build();
+      return sdk.getVersion().toString();
+    } catch (AppEngineException ex) {
+      return ex.toString();
+    }
   }
 }

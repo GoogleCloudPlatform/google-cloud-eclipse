@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
 import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
 import com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerBehaviour;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
 import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities.ConsoleFactory;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -42,7 +43,10 @@ public class LocalAppEngineConsole extends MessageConsole {
   };
 
   private LocalAppEngineConsole(String name, LocalAppEngineServerBehaviour serverBehaviour) {
-    super(name, null);
+    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2140
+    // todo: setting "javaStackTraceConsole" as the console type seems distasteful
+    // but is required to get stack-trace linking to work
+    super(name, "javaStackTraceConsole", AppEngineImages.appEngine(16), true);
     this.unprefixedName = name;
     this.serverBehaviour = serverBehaviour;
   }

@@ -36,7 +36,7 @@ import com.google.cloud.tools.eclipse.projectselector.ProjectSelector;
 import com.google.cloud.tools.eclipse.projectselector.model.AppEngine;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
@@ -75,9 +75,8 @@ public class ProjectSelectorSelectionChangedListenerTest {
     when(accountSelector.getSelectedCredential()).thenReturn(mock(Credential.class));
 
     TableViewer viewer = mock(TableViewer.class);
-    ISelection projectSelection = mock(ISelection.class);
-    when(projectSelector.getViewer()).thenReturn(viewer);
-    when(viewer.getSelection()).thenReturn(projectSelection);
+    IStructuredSelection projectSelection = mock(IStructuredSelection.class);
+    when(projectSelector.getSelection()).thenReturn(projectSelection);
     when(projectSelection.isEmpty()).thenReturn(false);
 
     listener = new ProjectSelectorSelectionChangedListener(accountSelector, projectRepository,

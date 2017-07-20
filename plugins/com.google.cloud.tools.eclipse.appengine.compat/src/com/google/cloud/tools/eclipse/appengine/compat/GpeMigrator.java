@@ -33,7 +33,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -66,7 +65,7 @@ public class GpeMigrator {
   /**
    * Removes various GPE-related remnants: classpath entries, nature, runtime, and facets. Any error
    * during operation is logged but ignored.
-   * 
+   *
    * @return true if this was a GPE project
    * @throws CoreException if the project is unusable (e.g., not open, doesn't exist, out of sync)
    */
@@ -76,11 +75,15 @@ public class GpeMigrator {
     IProject project = facetedProject.getProject();
     boolean wasGpeProject = false;
 
-    wasGpeProject |= removeGpeClasspathEntries(project);
-    subMonitor.worked(10);
+    wasGpeProject |= removeGpeClasspathEntries(project, subMonitor.newChild(10));
+    if (subMonitor.isCanceled()) {
+      return wasGpeProject;
+    }
 
-    wasGpeProject |= removeGpeNature(project);
-    subMonitor.worked(10);
+    wasGpeProject |= removeGpeNature(project, subMonitor.newChild(10));
+    if (subMonitor.isCanceled()) {
+      return wasGpeProject;
+    }
 
     wasGpeProject |= removeGpeRuntimeAndFacets(facetedProject);
     subMonitor.worked(20);
@@ -89,7 +92,7 @@ public class GpeMigrator {
   }
 
   @VisibleForTesting
-  static boolean removeGpeClasspathEntries(IProject project) {
+  static boolean removeGpeClasspathEntries(IProject project, IProgressMonitor monitor) {
     boolean foundGpeEntries = false;
     try {
       IJavaProject javaProject = JavaCore.create(project);
@@ -103,8 +106,8 @@ public class GpeMigrator {
       }
 
       IClasspathEntry[] rawEntries = newEntries.toArray(new IClasspathEntry[0]);
-      javaProject.setRawClasspath(rawEntries, new NullProgressMonitor());
-      javaProject.save(new NullProgressMonitor(), true);
+      javaProject.setRawClasspath(rawEntries, monitor);
+      javaProject.save(monitor, true);
     } catch (JavaModelException ex) {
       logger.log(Level.WARNING, "Failed to remove GPE classpath entries.", ex);
     }
@@ -121,9 +124,9 @@ public class GpeMigrator {
   }
 
   @VisibleForTesting
-  static boolean removeGpeNature(IProject project) throws CoreException {
+  static boolean removeGpeNature(IProject project, IProgressMonitor monitor) throws CoreException {
     boolean hadNature = NatureUtils.hasNature(project, GPE_GAE_NATURE_ID);
-    NatureUtils.removeNature(project, GPE_GAE_NATURE_ID);
+    NatureUtils.removeNature(project, GPE_GAE_NATURE_ID, monitor);
     return hadNature;
   }
 

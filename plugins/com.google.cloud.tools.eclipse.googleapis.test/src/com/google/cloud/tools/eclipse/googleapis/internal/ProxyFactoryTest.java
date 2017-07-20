@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.googleapis.internal;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -41,94 +42,106 @@ public class ProxyFactoryTest {
 
   @Mock private IProxyService proxyService;
 
+  private URI exampleUri;
   private ProxyFactory proxyFactory;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() throws URISyntaxException {
     proxyFactory = new ProxyFactory();
+    exampleUri = new URI("https://example.com");
   }
 
-  @Test(expected = NullPointerException.class)
-  public void testCreateProxy_nullArgument() throws URISyntaxException {
-    proxyFactory.createProxy(null);
+  @Test
+  public void testCreateProxy_nullArgument() {
+    try {
+      proxyFactory.createProxy(null);
+      fail();
+    } catch (NullPointerException ex) {
+      assertThat(ex.getMessage(), is("uri is null"));
+    }
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testCreateProxy_httpSchemeIsUnsupported() throws URISyntaxException {
-    proxyFactory.createProxy("http://exmaple.com");
+    URI httpUri = new URI("http://example.com");
+    try {
+      proxyFactory.createProxy(httpUri);
+      fail();
+    } catch (IllegalArgumentException ex) {
+      assertThat(ex.getMessage(), is("http is not a supported schema"));
+    }
   }
 
   @Test
-  public void testCreateProxy_noProxyServiceCreatesDirectConnection() throws URISyntaxException {
-    assertThat(proxyFactory.createProxy("https://exmaple.com").type(), is(Proxy.Type.DIRECT));
+  public void testCreateProxy_noProxyServiceCreatesDirectConnection() {
+    assertThat(proxyFactory.createProxy(exampleUri).type(), is(Proxy.Type.DIRECT));
   }
 
   @Test
-  public void testCreateProxy_noProxyDataCreatesDirectConnection() throws URISyntaxException {
+  public void testCreateProxy_noProxyDataCreatesDirectConnection() {
     proxyFactory.setProxyService(proxyService);
     when(proxyService.select(any(URI.class))).thenReturn(new IProxyData[0]);
-    assertThat(proxyFactory.createProxy("https://exmaple.com").type(), is(Proxy.Type.DIRECT));
+    assertThat(proxyFactory.createProxy(exampleUri).type(), is(Proxy.Type.DIRECT));
   }
 
   @Test
-  public void testCreateProxy_httpsProxyData() throws URISyntaxException {
+  public void testCreateProxy_httpsProxyData() {
     proxyFactory.setProxyService(proxyService);
     IProxyData proxyData = createProxyData(IProxyData.HTTPS_PROXY_TYPE, PROXY_HOST, PROXY_PORT);
     when(proxyService.select(any(URI.class))).thenReturn(new IProxyData[]{ proxyData });
 
-    assertThat(proxyFactory.createProxy("https://exmaple.com").type(), is(Proxy.Type.HTTP));
+    assertThat(proxyFactory.createProxy(exampleUri).type(), is(Proxy.Type.HTTP));
   }
 
   @Test
-  public void testCreateProxy_socksProxyData() throws URISyntaxException {
+  public void testCreateProxy_socksProxyData() {
     proxyFactory.setProxyService(proxyService);
     IProxyData proxyData = createProxyData(IProxyData.SOCKS_PROXY_TYPE, PROXY_HOST, PROXY_PORT);
     when(proxyService.select(any(URI.class))).thenReturn(new IProxyData[]{ proxyData });
 
-    assertThat(proxyFactory.createProxy("https://exmaple.com").type(), is(Proxy.Type.SOCKS));
+    assertThat(proxyFactory.createProxy(exampleUri).type(), is(Proxy.Type.SOCKS));
   }
 
   @Test
-  public void testCreateProxy_unsupportedProxyData() throws URISyntaxException {
+  public void testCreateProxy_unsupportedProxyData() {
     proxyFactory.setProxyService(proxyService);
     IProxyData proxyData = createProxyData(IProxyData.HTTP_PROXY_TYPE, PROXY_HOST, PROXY_PORT);
     when(proxyService.select(any(URI.class))).thenReturn(new IProxyData[]{ proxyData });
 
-    assertThat(proxyFactory.createProxy("https://exmaple.com").type(), is(Proxy.Type.DIRECT));
+    assertThat(proxyFactory.createProxy(exampleUri).type(), is(Proxy.Type.DIRECT));
   }
 
   @Test
-  public void testCreateProxy_ifHttpsIsFirstItWillBeUsed() throws URISyntaxException {
+  public void testCreateProxy_ifHttpsIsFirstItWillBeUsed() {
     proxyFactory.setProxyService(proxyService);
     IProxyData httpsProxyData = createProxyData(IProxyData.HTTPS_PROXY_TYPE, PROXY_HOST, PROXY_PORT);
     IProxyData socksProxyData = createProxyData(IProxyData.SOCKS_PROXY_TYPE, PROXY_HOST, PROXY_PORT);
     when(proxyService.select(any(URI.class)))
         .thenReturn(new IProxyData[]{ httpsProxyData, socksProxyData });
 
-    assertThat(proxyFactory.createProxy("https://exmaple.com").type(), is(Proxy.Type.HTTP));
+    assertThat(proxyFactory.createProxy(exampleUri).type(), is(Proxy.Type.HTTP));
   }
 
   @Test
-  public void testCreateProxy_ifSocksIsFirstItWillBeUsed() throws URISyntaxException {
+  public void testCreateProxy_ifSocksIsFirstItWillBeUsed() {
     proxyFactory.setProxyService(proxyService);
     IProxyData httpsProxyData = createProxyData(IProxyData.HTTPS_PROXY_TYPE, PROXY_HOST, PROXY_PORT);
     IProxyData socksProxyData = createProxyData(IProxyData.SOCKS_PROXY_TYPE, PROXY_HOST, PROXY_PORT);
     when(proxyService.select(any(URI.class)))
         .thenReturn(new IProxyData[]{ socksProxyData, httpsProxyData });
 
-    assertThat(proxyFactory.createProxy("https://exmaple.com").type(), is(Proxy.Type.SOCKS));
+    assertThat(proxyFactory.createProxy(exampleUri).type(), is(Proxy.Type.SOCKS));
   }
 
   @Test
-  public void testCreateProxy_settingProxyServiceToNullCreatesDirectConnection()
-      throws URISyntaxException {
+  public void testCreateProxy_settingProxyServiceToNullCreatesDirectConnection() {
     proxyFactory.setProxyService(proxyService);
     IProxyData proxyData = createProxyData(IProxyData.HTTPS_PROXY_TYPE, PROXY_HOST, PROXY_PORT);
     when(proxyService.select(any(URI.class))).thenReturn(new IProxyData[]{ proxyData });
 
-    assertThat(proxyFactory.createProxy("https://exmaple.com").type(), is(Proxy.Type.HTTP));
+    assertThat(proxyFactory.createProxy(exampleUri).type(), is(Proxy.Type.HTTP));
     proxyFactory.setProxyService(null);
-    assertThat(proxyFactory.createProxy("https://exmaple.com").type(), is(Proxy.Type.DIRECT));
+    assertThat(proxyFactory.createProxy(exampleUri).type(), is(Proxy.Type.DIRECT));
   }
 
   private IProxyData createProxyData(String proxyType, String host, int port) {

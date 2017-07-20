@@ -18,11 +18,17 @@ package com.google.cloud.tools.eclipse.projectselector;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import java.util.Arrays;
 import java.util.List;
+import org.eclipse.core.databinding.property.value.IValueProperty;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.TableColumn;
@@ -53,10 +59,14 @@ public class ProjectSelectorTest {
         new ProjectSelector(shellResource.getShell());
     projectSelector.setProjects(getUnsortedProjectList());
 
-    assertThat(((GcpProject) projectSelector.getViewer().getElementAt(0)).getName(), is("a"));
-    assertThat(((GcpProject) projectSelector.getViewer().getElementAt(1)).getName(), is("b"));
-    assertThat(((GcpProject) projectSelector.getViewer().getElementAt(2)).getName(), is("c"));
-    assertThat(((GcpProject) projectSelector.getViewer().getElementAt(3)).getName(), is("d"));
+    assertThat(getVisibleProjectAtIndex(projectSelector, 0).getName(), is("a"));
+    assertThat(getVisibleProjectAtIndex(projectSelector, 1).getName(), is("b"));
+    assertThat(getVisibleProjectAtIndex(projectSelector, 2).getName(), is("c"));
+    assertThat(getVisibleProjectAtIndex(projectSelector, 3).getName(), is("d"));
+  }
+
+  private static GcpProject getVisibleProjectAtIndex(ProjectSelector projectSelector, int index) {
+    return (GcpProject) projectSelector.getViewer().getTable().getItem(index).getData();
   }
 
   @Test
@@ -73,6 +83,16 @@ public class ProjectSelectorTest {
     assertThat(selection.size(), is(1));
     assertThat((GcpProject) selection.getFirstElement(), is(selectedProject));
   }
+
+  @Test
+  public void testMatches() {
+    IValueProperty property = mock(IValueProperty.class);
+    when(property.getValue(any())).thenReturn("a");
+    assertTrue(ProjectSelector.matches(new String[] { "a" }, new Object(), new IValueProperty[] { property }));
+    assertFalse(
+        ProjectSelector.matches(new String[] {"b"}, new Object(), new IValueProperty[] {property}));
+  }
+
 
   private List<GcpProject> getUnsortedProjectList() {
     return Arrays.asList(new GcpProject("b", "b"),

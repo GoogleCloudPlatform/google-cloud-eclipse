@@ -20,7 +20,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.cloud.tools.eclipse.dataflow.core.DataflowCorePlugin;
 import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowProjectCreator.Template;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -44,8 +43,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 /**
@@ -57,36 +54,10 @@ import javax.xml.xpath.XPathFactory;
  * Maven for available versions. Additionally, M2E APIs are internal and unstable, and thus may
  * change between versions.
  *
- * <p>The artifact retriever reads Maven Central metadata xml files to retrieve available and latest
+ * <p>The artifact retriever reads Maven Central metadata XML files to retrieve available and latest
  * versions.
  */
 public class DataflowArtifactRetriever {
-  /**
-   * Versions which are known to have been released.
-   */
-  private static final NavigableSet<ArtifactVersion> KNOWN_VERSIONS =
-      ImmutableSortedSet.<ArtifactVersion>of(
-          new DefaultArtifactVersion("1.9.0"), new DefaultArtifactVersion("2.0.0-beta1"));
-
-  private static final XPath X_PATH = XPathFactory.newInstance().newXPath();
-
-  private static XPathExpression createLatestVersionExpression() {
-    try {
-      return X_PATH.compile("/metadata/versioning/latest");
-    } catch (XPathExpressionException e) {
-      throw new IllegalStateException(
-          "Could not create constant expression to select latest version", e);
-    }
-  }
-
-  private static XPathExpression createAllVersionsExpression() {
-    try {
-      return X_PATH.compile("/metadata/versioning/versions/version");
-    } catch (XPathExpressionException e) {
-      throw new IllegalStateException(
-          "Could not create constant expression to select all versions", e);
-    }
-  }
 
   private static URL getMetadataUrl(String artifactId) {
     try {
@@ -100,23 +71,17 @@ public class DataflowArtifactRetriever {
     }
   }
 
-  static final String DATAFLOW_GROUP_ID = "com.google.cloud.dataflow";
-
-  @VisibleForTesting
-  static final String DATAFLOW_SDK_ARTIFACT = "google-cloud-dataflow-java-sdk-all";
-
   private final LoadingCache<String, ArtifactVersion> latestVersion =
       CacheBuilder.newBuilder()
           .refreshAfterWrite(4, TimeUnit.HOURS)
           .build(
               new CacheLoader<String, ArtifactVersion>() {
-                private final XPathExpression latestVersionExpression =
-                    createLatestVersionExpression();
 
                 @Override
                 public ArtifactVersion load(String artifactId) throws Exception {
+                  XPath xpath = XPathFactory.newInstance().newXPath();
                   Document document = getMetadataDocument(artifactId);
-                  String result = latestVersionExpression.evaluate(document);
+                  String result = xpath.evaluate("/metadata/versioning/latest", document);
                   return new DefaultArtifactVersion(result);
                 }
               });
@@ -126,14 +91,15 @@ public class DataflowArtifactRetriever {
           .refreshAfterWrite(4, TimeUnit.HOURS)
           .build(
               new CacheLoader<String, NavigableSet<ArtifactVersion>>() {
-                private final XPathExpression allVersionsExpression =
-                    createAllVersionsExpression();
 
                 @Override
                 public NavigableSet<ArtifactVersion> load(String artifactId) throws Exception {
+                  XPath xpath = XPathFactory.newInstance().newXPath();
                   Document document = getMetadataDocument(artifactId);
-                  NodeList versionNodes =
-                      (NodeList) allVersionsExpression.evaluate(document, XPathConstants.NODESET);
+                  NodeList versionNodes = (NodeList) xpath.evaluate(
+                    "/metadata/versioning/versions/version",
+                    document,
+                    XPathConstants.NODESET);
                   Builder<ArtifactVersion> versions = ImmutableSortedSet.naturalOrder();
                   for (int i = 0; i < versionNodes.getLength(); i++) {
                     String versionString = versionNodes.item(i).getTextContent();
@@ -154,7 +120,7 @@ public class DataflowArtifactRetriever {
    * version.
    */
   public ArtifactVersion getLatestSdkVersion(VersionRange versionRange) {
-    return getLatestIncrementalVersion(DATAFLOW_SDK_ARTIFACT, versionRange);
+    return getLatestIncrementalVersion(DataflowMavenCoordinates.GROUP_ID, versionRange);
   }
 
   /**
@@ -193,7 +159,7 @@ public class DataflowArtifactRetriever {
       DataflowCorePlugin.logWarning(
           e, "Could not retrieve available versions for Artifact %s", artifactId);
     }
-    return getLatestInRange(versionRange, KNOWN_VERSIONS);
+    return getLatestInRange(versionRange, DataflowMavenCoordinates.KNOWN_VERSIONS);
   }
 
   private ArtifactVersion getLatestInRange(

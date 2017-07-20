@@ -17,30 +17,16 @@
 package com.google.cloud.tools.eclipse.appengine.facets;
 
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.IJobChangeListener;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 
 /**
- * For private use in {@link NonSystemJobSuspender} only. Listens for every job being scheduled
- * and cancels it if the suspender is active.
+ * For private use in {@link ConvertJobSuspender} only. Listens for every job being scheduled
+ * and cancels it if it is {@link org.eclipse.wst.jsdt.web.core.internal.project.ConvertJob} while
+ * the suspender is active.
  */
-class NonSystemJobScheduleListener implements IJobChangeListener {
+class ConvertJobScheduleListener extends JobChangeAdapter {
   @Override
   public void scheduled(IJobChangeEvent event) {
-    NonSystemJobSuspender.suspendJob(event.getJob(), event.getDelay());
+    ConvertJobSuspender.suspendJob(event.getJob(), event.getDelay());
   }
-
-  @Override
-  public void aboutToRun(IJobChangeEvent event) {}
-
-  @Override
-  public void awake(IJobChangeEvent event) {}
-
-  @Override
-  public void done(IJobChangeEvent event) {}
-
-  @Override
-  public void running(IJobChangeEvent event) {}
-
-  @Override
-  public void sleeping(IJobChangeEvent event) {}
 }

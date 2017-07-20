@@ -16,19 +16,26 @@
 
 package com.google.cloud.tools.eclipse.googleapis.internal;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 public enum GoogleApiUrl {
 
   APPENGINE_ADMIN_API("https://appengine.googleapis.com"),
   CLOUDRESOURCE_MANAGER_API("https://cloudresourcemanager.googleapis.com"),
   CLOUD_STORAGE_API("https://www.googleapis.com/storage/v1");
 
-  private final String url;
+  private final URI uri;
 
   private GoogleApiUrl(String url) {
-    this.url = url;
+    try {
+      uri = new URI(url);
+    } catch (URISyntaxException ex) {
+      throw new RuntimeException("Fix URL");
+    }
   }
 
-  public String getUrl() {
-    return url;
+  public URI toUri() {
+    return uri;
   }
 }

@@ -28,12 +28,10 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.services.appengine.v1.Appengine.Apps;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects;
-import com.google.cloud.tools.eclipse.googleapis.GoogleApiException;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.common.cache.LoadingCache;
 import java.io.IOException;
 import java.net.URI;
-import java.util.concurrent.ExecutionException;
 import org.eclipse.core.net.proxy.IProxyChangeListener;
 import org.eclipse.core.net.proxy.IProxyData;
 import org.eclipse.core.net.proxy.IProxyService;
@@ -51,28 +49,29 @@ public class GoogleApiFactoryWithProxyServerTest {
   @Mock private JsonFactory jsonFactory;
   @Mock private IProxyService proxyService;
   @Mock private Credential credential;
-  @Mock LoadingCache<GoogleApiUrl, HttpTransport> transportCache;
+  @Mock private LoadingCache<GoogleApiUrl, HttpTransport> transportCache;
   @Captor private ArgumentCaptor<IProxyChangeListener> proxyListenerCaptor =
       ArgumentCaptor.forClass(IProxyChangeListener.class);
 
   private GoogleApiFactory googleApiFactory;
 
   @Before
-  public void setUp() throws ExecutionException {
+  public void setUp() {
     googleApiFactory = new GoogleApiFactory();
-    when(transportCache.get(any(GoogleApiUrl.class))).thenReturn(mock(HttpTransport.class));
+    when(transportCache.getUnchecked(any(GoogleApiUrl.class)))
+        .thenReturn(mock(HttpTransport.class));
     googleApiFactory.setTransportCache(transportCache);
   }
 
   @Test
-  public void testNewAppsApi_userAgentIsSet() throws IOException, GoogleApiException {
+  public void testNewAppsApi_userAgentIsSet() throws IOException {
     Apps api = googleApiFactory.newAppsApi(mock(Credential.class));
     assertThat(api.get("").getRequestHeaders().getUserAgent(),
                containsString(CloudToolsInfo.USER_AGENT));
   }
 
   @Test
-  public void testNewProjectsApi_userAgentIsSet() throws IOException, GoogleApiException {
+  public void testNewProjectsApi_userAgentIsSet() throws IOException {
     Projects api = googleApiFactory.newProjectsApi(mock(Credential.class));
     assertThat(api.get("").getRequestHeaders().getUserAgent(),
                containsString(CloudToolsInfo.USER_AGENT));

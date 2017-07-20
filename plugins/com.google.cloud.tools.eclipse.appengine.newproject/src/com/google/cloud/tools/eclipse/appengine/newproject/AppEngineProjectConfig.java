@@ -35,6 +35,7 @@ public class AppEngineProjectConfig {
   private IProject project;
   private List<Library> appEngineLibraries = Collections.emptyList();
   private String serviceName;
+  private String runtimeId;
 
   private boolean useMaven;
   private String mavenGroupId;
@@ -90,6 +91,14 @@ public class AppEngineProjectConfig {
 
   public void setServiceName(String serviceName) {
     this.serviceName = serviceName;
+  }
+
+  public String getRuntimeId() {
+    return runtimeId;
+  }
+
+  public void setRuntimeId(String runtimeId) {
+    this.runtimeId = runtimeId;
   }
 
   public void setUseMaven(String mavenGroupId, String mavenArtifactId, String mavenVersion) {

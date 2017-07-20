@@ -19,7 +19,6 @@ package com.google.cloud.tools.eclipse.dataflow.ui.preferences;
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.DataflowPreferences;
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.WritableDataflowPreferences;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.DialogPageMessageTarget;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.preference.PreferencePage;
@@ -71,6 +70,7 @@ public class DefaultRunOptionsPage
    * Updates the internal preferences from the input elements.
    */
   private void updatePreferencesFromInputs() {
+    preferences.setDefaultAccountEmail(runOptionsComponent.getAccountEmail());
     preferences.setDefaultProject(runOptionsComponent.getProject());
     preferences.setDefaultStagingLocation(runOptionsComponent.getStagingLocation());
   }

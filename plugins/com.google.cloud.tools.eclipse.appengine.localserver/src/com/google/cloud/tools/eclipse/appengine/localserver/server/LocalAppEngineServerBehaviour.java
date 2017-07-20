@@ -22,6 +22,7 @@ import com.google.cloud.tools.appengine.api.devserver.DefaultRunConfiguration;
 import com.google.cloud.tools.appengine.api.devserver.DefaultStopConfiguration;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineDevServer1;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineDevServer2;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessExitListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessStartListener;
@@ -301,7 +302,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
    * @param console the stream (Eclipse console) to send development server process output to
    */
   void startDevServer(DefaultRunConfiguration devServerRunConfiguration,
-      Path javaHomePath, MessageConsoleStream console)
+      Path javaHomePath, MessageConsoleStream outputStream, MessageConsoleStream errorStream)
       throws CoreException {
     
     PortChecker portInUse = new PortChecker() {
@@ -335,7 +336,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     setServerState(IServer.STATE_STARTING);
 
     // Create dev app server instance
-    initializeDevServer(console, javaHomePath);
+    initializeDevServer(outputStream, errorStream, javaHomePath);
 
     // Run server
     try {
@@ -350,22 +351,26 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     return value != null ? value : defaultValue;
   }
 
-  private void initializeDevServer(MessageConsoleStream console, Path javaHomePath) {
-    MessageConsoleWriterOutputLineListener outputListener =
-        new MessageConsoleWriterOutputLineListener(console);
+  private void initializeDevServer(MessageConsoleStream stdout, MessageConsoleStream stderr,
+      Path javaHomePath) {
+    MessageConsoleWriterOutputLineListener stdoutListener =
+        new MessageConsoleWriterOutputLineListener(stdout);
+    MessageConsoleWriterOutputLineListener stderrListener =
+        new MessageConsoleWriterOutputLineListener(stderr);
 
     // dev_appserver output goes to stderr
     cloudSdk = new CloudSdk.Builder()
         .javaHome(javaHomePath)
-        .addStdOutLineListener(outputListener)
-        .addStdErrLineListener(outputListener)
+        .addStdOutLineListener(stdoutListener).addStdErrLineListener(stderrListener)
         .addStdErrLineListener(serverOutputListener)
         .startListener(localAppEngineStartListener)
         .exitListener(localAppEngineExitListener)
         .async(true)
         .build();
 
-    devServer = new CloudSdkAppEngineDevServer1(cloudSdk);
+    devServer = LocalAppEngineServerLaunchConfigurationDelegate.DEV_APPSERVER2
+        ? new CloudSdkAppEngineDevServer2(cloudSdk)
+        : new CloudSdkAppEngineDevServer1(cloudSdk);
     moduleToUrlMap.clear();
   }
   

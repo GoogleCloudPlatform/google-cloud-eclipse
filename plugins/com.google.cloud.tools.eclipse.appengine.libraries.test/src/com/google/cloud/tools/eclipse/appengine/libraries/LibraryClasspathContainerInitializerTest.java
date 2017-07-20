@@ -234,7 +234,7 @@ public class LibraryClasspathContainerInitializerTest {
   }
 
   @Test
-  public void testComparisonIDUnique() throws IOException, CoreException {
+  public void testComparisonIdUnique() {
     LibraryClasspathContainerInitializer containerInitializer =
         new LibraryClasspathContainerInitializer();
     assertEquals("comparisonID should be equal for same paths",

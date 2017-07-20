@@ -23,6 +23,8 @@ import static org.junit.Assert.assertTrue;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.Before;
 import org.junit.Rule;
@@ -33,7 +35,10 @@ public class NatureUtilsTest {
   // FacetedProjectNature.NATURE_ID = FacetCorePlugin.PLUGIN_ID + ".nature"
   private static final String FACETED_NATURE_ID =
       "org.eclipse.wst.common.project.facet.core.nature";
+
   @Rule public final TestProjectCreator projectCreator = new TestProjectCreator();
+
+  private final IProgressMonitor monitor = new NullProgressMonitor();
 
   private IProject project;
 
@@ -45,14 +50,14 @@ public class NatureUtilsTest {
   @Test
   public void testAddNature() throws CoreException {
     assertFalse(NatureUtils.hasNature(project, JavaCore.NATURE_ID));
-    NatureUtils.addNature(project, JavaCore.NATURE_ID);
+    NatureUtils.addNature(project, JavaCore.NATURE_ID, monitor);
     assertTrue(NatureUtils.hasNature(project, JavaCore.NATURE_ID));
   }
 
   @Test
   public void testRemoveNature() throws CoreException {
-    NatureUtils.addNature(project, JavaCore.NATURE_ID);
-    NatureUtils.removeNature(project, JavaCore.NATURE_ID);
+    NatureUtils.addNature(project, JavaCore.NATURE_ID, monitor);
+    NatureUtils.removeNature(project, JavaCore.NATURE_ID, monitor);
     assertFalse(project.hasNature(JavaCore.NATURE_ID));
   }
 
@@ -61,7 +66,7 @@ public class NatureUtilsTest {
     // By default, project has faceted project nature.
     assertArrayEquals(new String[] {FACETED_NATURE_ID}, project.getDescription().getNatureIds());
 
-    NatureUtils.removeNature(project, JavaCore.NATURE_ID);
+    NatureUtils.removeNature(project, JavaCore.NATURE_ID, monitor);
     assertArrayEquals(new String[] {FACETED_NATURE_ID}, project.getDescription().getNatureIds());
   }
 }

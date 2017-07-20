@@ -23,7 +23,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.cloud.tools.eclipse.dataflow.ui.util.SelectFirstMatchingPrefixListener.OnCompleteListener;
 import com.google.common.collect.ImmutableSortedSet;
 import java.util.SortedSet;
 import org.eclipse.swt.events.ModifyEvent;
@@ -34,30 +33,24 @@ import org.eclipse.swt.widgets.Widget;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.runners.MockitoJUnitRunner;
 
 /**
  * Tests for {@link SelectFirstMatchingPrefixListener}.
  */
-@RunWith(JUnit4.class)
+@RunWith(MockitoJUnitRunner.class)
 public class SelectFirstMatchingPrefixListenerTest {
   @Mock
   private Combo combo;
   private SortedSet<String> elements =
       ImmutableSortedSet.of("collidingText1", "collidingText222", "exampleText");
   private SelectFirstMatchingPrefixListener listener;
-  @Mock
-  private OnCompleteListener onCompleteListener;
 
   @Before
   public void setup() {
-    MockitoAnnotations.initMocks(this);
-
     listener = new SelectFirstMatchingPrefixListener(combo);
     listener.setContents(elements);
-    listener.addOnCompleteListener(onCompleteListener);
   }
 
   @Test

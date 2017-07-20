@@ -17,6 +17,8 @@
 package com.google.cloud.tools.eclipse.ui.util;
 
 import com.google.cloud.tools.eclipse.util.AdapterUtil;
+import java.util.ArrayList;
+import java.util.List;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
@@ -26,14 +28,30 @@ import org.eclipse.ui.handlers.HandlerUtil;
 
 public class ProjectFromSelectionHelper {
 
-  public static IProject getProject(ExecutionEvent event) throws ExecutionException {
+  public static List<IProject> getProjects(ExecutionEvent event) throws ExecutionException {
+    List<IProject> projects = new ArrayList<>();
+
     ISelection selection = HandlerUtil.getCurrentSelectionChecked(event);
     if (selection instanceof IStructuredSelection) {
       IStructuredSelection structuredSelection = (IStructuredSelection) selection;
-      if (structuredSelection.size() == 1) {
-        return AdapterUtil.adapt(structuredSelection.getFirstElement(), IProject.class);
+      for (Object selected : structuredSelection.toList()) {
+        IProject project = AdapterUtil.adapt(selected, IProject.class);
+        if (project != null) {
+          projects.add(project);
+        }
       }
     }
-    return null;
+
+    return projects;
   }
+
+  public static IProject getFirstProject(ExecutionEvent event) throws ExecutionException {
+    List<IProject> projects = getProjects(event);
+    if (projects.isEmpty()) {
+      return null;
+    } else {
+      return projects.get(0);
+    }
+  }
+
 }

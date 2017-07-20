@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.libraries;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -29,10 +30,6 @@ import org.eclipse.jdt.core.IJavaProject;
  * Service interface to resolve {@link LibraryClasspathContainer}s.
  */
 public interface ILibraryClasspathContainerResolverService {
-
-  enum AppEngineRuntime {
-    STANDARD_JAVA_7
-  }
 
   /**
    * Resolves all {@link LibraryClasspathContainer}s found on the classpath of

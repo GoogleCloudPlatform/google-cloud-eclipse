@@ -76,6 +76,8 @@ import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IMemoryBlock;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.IThread;
+import org.eclipse.debug.ui.IDebugUIConstants;
+import org.eclipse.debug.ui.console.ConsoleColorProvider;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.AbstractJavaLaunchConfigurationDelegate;
@@ -84,6 +86,7 @@ import org.eclipse.jdt.launching.IVMConnector;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.SocketUtil;
+import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerListener;
@@ -94,7 +97,7 @@ import org.eclipse.wst.server.core.ServerUtil;
 public class LocalAppEngineServerLaunchConfigurationDelegate
     extends AbstractJavaLaunchConfigurationDelegate {
 
-  private static final boolean DEV_APPSERVER2 = false;
+  static final boolean DEV_APPSERVER2 = false;
   
   private static final Logger logger =
       Logger.getLogger(LocalAppEngineServerLaunchConfigurationDelegate.class.getName());
@@ -128,9 +131,9 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
   @Override
   public ILaunch getLaunch(ILaunchConfiguration configuration, String mode) throws CoreException {
     IServer server = ServerUtil.getServer(configuration);
-    DefaultRunConfiguration runConfig = generateServerRunConfiguration(configuration, server);
+    DefaultRunConfiguration runConfig = generateServerRunConfiguration(configuration, server, mode);
     ILaunch[] launches = getLaunchManager().getLaunches();
-    checkConflictingLaunches(configuration.getType(), runConfig, launches);
+    checkConflictingLaunches(configuration.getType(), mode, runConfig, launches);
     return super.getLaunch(configuration, mode);
   }
 
@@ -194,7 +197,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
   }
 
   @VisibleForTesting
-  void checkConflictingLaunches(ILaunchConfigurationType launchConfigType,
+  void checkConflictingLaunches(ILaunchConfigurationType launchConfigType, String mode,
       DefaultRunConfiguration runConfig, ILaunch[] launches) throws CoreException {
     
     for (ILaunch launch : launches) {
@@ -205,7 +208,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       }
       IServer otherServer = ServerUtil.getServer(launch.getLaunchConfiguration());
       DefaultRunConfiguration otherRunConfig =
-          generateServerRunConfiguration(launch.getLaunchConfiguration(), otherServer);
+          generateServerRunConfiguration(launch.getLaunchConfiguration(), otherServer, mode);
       IStatus conflicts = checkConflicts(runConfig, otherRunConfig,
           new MultiStatus(Activator.PLUGIN_ID, 0,
               MessageFormat.format("Conflicts with running server \"{0}\"", otherServer.getName()),
@@ -223,7 +226,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
    */
   @VisibleForTesting
   DefaultRunConfiguration generateServerRunConfiguration(ILaunchConfiguration configuration,
-      IServer server) throws CoreException {
+      IServer server, String mode) throws CoreException {
 
     DefaultRunConfiguration devServerRunConfiguration = new DefaultRunConfiguration();
     // Iterate through our different configurable parameters
@@ -240,12 +243,15 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       devServerRunConfiguration.setPort(serverPort);
     }
 
-    if (DEV_APPSERVER2) {
-      // default to 1 instance to simplify debugging
-      devServerRunConfiguration.setMaxModuleInstances(1);
 
-      // don't restart server when on-disk changes detected
-      devServerRunConfiguration.setAutomaticRestart(false);
+    // only restart server on on-disk changes detected when in RUN mode
+    devServerRunConfiguration.setAutomaticRestart(ILaunchManager.RUN_MODE.equals(mode));
+
+    if (DEV_APPSERVER2) {
+      if (ILaunchManager.DEBUG_MODE.equals(mode)) {
+        // default to 1 instance to simplify debugging
+        devServerRunConfiguration.setMaxModuleInstances(1);
+      }
       
       String adminHost = getAttribute(LocalAppEngineServerBehaviour.ADMIN_HOST_ATTRIBUTE_NAME,
           LocalAppEngineServerBehaviour.DEFAULT_ADMIN_HOST, configuration, server);
@@ -423,11 +429,17 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       runnables.add(deployPath.toFile());
     }
 
+    // configure the console for output
+    ConsoleColorProvider colorProvider = new ConsoleColorProvider();
     LocalAppEngineConsole console =
         MessageConsoleUtilities.findOrCreateConsole(configuration.getName(),
             new LocalAppEngineConsole.Factory(serverBehaviour));
     console.clearConsole();
     console.activate();
+    MessageConsoleStream outputStream = console.newMessageStream();
+    MessageConsoleStream errorStream = console.newMessageStream();
+    outputStream.setColor(colorProvider.getColor(IDebugUIConstants.ID_STANDARD_OUTPUT_STREAM));
+    errorStream.setColor(colorProvider.getColor(IDebugUIConstants.ID_STANDARD_ERROR_STREAM));
 
     // A launch must have at least one debug target or process, or it becomes a zombie
     CloudSdkDebugTarget target = new CloudSdkDebugTarget(launch, serverBehaviour);
@@ -440,7 +452,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     }
     try {
       DefaultRunConfiguration devServerRunConfiguration =
-          generateServerRunConfiguration(configuration, server);
+          generateServerRunConfiguration(configuration, server, mode);
       devServerRunConfiguration.setServices(runnables);
       if (ILaunchManager.DEBUG_MODE.equals(mode)) {
         int debugPort = getDebugPort();
@@ -452,7 +464,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       
       String javaHome = vmInstall.getInstallLocation().getAbsolutePath();
       serverBehaviour.startDevServer(devServerRunConfiguration, Paths.get(javaHome),
-          console.newMessageStream());
+          outputStream, errorStream);
     } catch (CoreException ex) {
       launch.terminate();
       throw ex;

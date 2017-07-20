@@ -18,14 +18,18 @@ package com.google.cloud.tools.eclipse.appengine.facets;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.eclipse.core.runtime.jobs.Job;
 
 /**
- * Prevents scheduling all future non-system jobs once {@link #suspendFutureJobs} is called, until
- * {@link #resume} is called. Jobs already scheduled are not affected and will run to completion.
+ * Prevents scheduling all future {@link org.eclipse.wst.jsdt.web.core.internal.project.ConvertJob}s
+ * once {@link #suspendConvertJobs} is called, until {@link #resume} is called. Jobs already
+ * scheduled are not affected and will run to completion.
  *
  * The class is for https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1155. The
  * purpose of the class is to prevent the second ConvertJob from running. The second ConvertJob is
@@ -33,7 +37,15 @@ import org.eclipse.core.runtime.jobs.Job;
  *
  * Not recommended to use for other situations, although the workings of the class are general.
  */
-class NonSystemJobSuspender {
+// TODO(chanseok): not needed after we drop support for Mars and Neon, as Oxygen has fixed the
+// issue. Remove this and related code when that happens.
+class ConvertJobSuspender {
+
+  private static final Logger logger = Logger.getLogger(ConvertJobSuspender.class.getName());
+
+  @VisibleForTesting
+  static final String CONVERT_JOB_CLASS_NAME =
+      "org.eclipse.wst.jsdt.web.core.internal.project.ConvertJob";
 
   private static class SuspendedJob {
     private Job job;
@@ -45,15 +57,24 @@ class NonSystemJobSuspender {
     }
   }
 
+  @VisibleForTesting
+  static Predicate<Job> isConvertJob = new Predicate<Job>() {
+    @Override
+    public boolean apply(Job job) {
+      Preconditions.checkNotNull(job);
+      return CONVERT_JOB_CLASS_NAME.equals(job.getClass().getName());
+    }
+  };
+
   private static final AtomicBoolean suspended = new AtomicBoolean(false);
 
   private static final List<SuspendedJob> suspendedJobs = new ArrayList<>();
 
-  private static final NonSystemJobScheduleListener jobScheduleListener =
-      new NonSystemJobScheduleListener();
+  private static final ConvertJobScheduleListener jobScheduleListener =
+      new ConvertJobScheduleListener();
 
   /** Once called, it is imperative to call {@link #resume()} later. */
-  public static void suspendFutureJobs() {
+  public static void suspendFutureConvertJobs() {
     synchronized (suspendedJobs) {
       Preconditions.checkState(!suspended.getAndSet(true), "Already suspended.");
       Job.getJobManager().addJobChangeListener(jobScheduleListener);
@@ -83,7 +104,7 @@ class NonSystemJobSuspender {
   }
 
   static void suspendJob(Job job, long scheduleDelay) {
-    if (job.isSystem()) {
+    if (!isConvertJob.apply(job)) {
       return;
     }
     synchronized (suspendedJobs) {
@@ -104,8 +125,10 @@ class NonSystemJobSuspender {
           job.schedule(scheduleDelay);
         }
       }
+    } else {
+      logger.log(Level.SEVERE, "job already running: " + job);
     }
   }
 
-  private NonSystemJobSuspender() {}
+  private ConvertJobSuspender() {}
 }

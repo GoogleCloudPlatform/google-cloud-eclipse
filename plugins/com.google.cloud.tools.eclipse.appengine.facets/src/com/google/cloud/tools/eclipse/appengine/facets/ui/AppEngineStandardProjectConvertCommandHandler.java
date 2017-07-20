@@ -37,7 +37,7 @@ public class AppEngineStandardProjectConvertCommandHandler extends AbstractHandl
   public Object execute(ExecutionEvent event) throws ExecutionException {
     Shell shell = HandlerUtil.getActiveShellChecked(event);
     try {
-      IProject project = ProjectFromSelectionHelper.getProject(event);
+      IProject project = ProjectFromSelectionHelper.getFirstProject(event);
       if (project == null) {
         throw new NullPointerException("Convert menu enabled for non-project resources");
       }
