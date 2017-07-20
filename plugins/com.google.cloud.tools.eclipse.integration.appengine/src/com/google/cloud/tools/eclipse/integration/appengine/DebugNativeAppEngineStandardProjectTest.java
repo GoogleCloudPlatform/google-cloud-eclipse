@@ -107,9 +107,8 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
 
     SwtBotTreeUtilities.waitUntilTreeHasItems(bot, launchTree);
     SWTBotTreeItem[] allItems = launchTree.getAllItems();
-    SwtBotTreeUtilities.waitUntilTreeHasText(bot, allItems[0]);
-    assertThat("No App Engine launch found", allItems[0].getText(),
-        Matchers.containsString("App Engine Standard at localhost"));
+    SwtBotTreeUtilities.waitUntilTreeContainsText(bot, allItems[0],
+        "App Engine Standard at localhost");
 
     SWTBotView consoleView = bot.viewById("org.eclipse.ui.console.ConsoleView"); // IConsoleConstants.ID_CONSOLE_VIEW
     consoleView.show();
@@ -121,9 +120,21 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
     SwtBotTestingUtilities.waitUntilStyledTextContains(bot,
         "Module instance default is running at http://localhost:8080", consoleContents);
 
+    // Server is now running
     assertEquals("Hello App Engine!",
         getUrlContents(new URL("http://localhost:8080/hello"), (int) SWTBotPreferences.TIMEOUT));
 
+    {
+      SWTBotView serversView = bot.viewById("org.eclipse.wst.server.ui.ServersView");
+      serversView.show();
+      SWTBotTree serversTree =
+          new SWTBotTree(bot.widget(widgetOfType(Tree.class), serversView.getWidget()));
+      SwtBotTreeUtilities.waitUntilTreeHasItems(bot, serversTree);
+      SWTBotTreeItem[] serverItems = serversTree.getAllItems();
+      SwtBotTreeUtilities.waitUntilTreeContainsText(bot, serverItems[0], "[Debugging,");
+    }
+
+    // Stop the server
     SWTBotToolbarButton stopServerButton = null;
     for (SWTBotToolbarButton button : consoleView.getToolbarButtons()) {
       if ("Stop the server".equals(button.getToolTipText())) {
