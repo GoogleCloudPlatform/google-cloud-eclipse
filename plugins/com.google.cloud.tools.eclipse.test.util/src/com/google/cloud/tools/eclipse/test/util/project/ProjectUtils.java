@@ -320,8 +320,17 @@ public class ProjectUtils {
     Collections.addAll(jobs, jobManager.find("org.eclipse.wst.server.ui.family"));
     Collections.addAll(jobs, jobManager.find(ValidationBuilder.FAMILY_VALIDATION_JOB));
     for (IProject project : projects) {
-      Collections.addAll(jobs, jobManager.find(
-          project.getName() + ValidatorManager.VALIDATOR_JOB_FAMILY));
+      Collections.addAll(jobs,
+          jobManager.find(project.getName() + ValidatorManager.VALIDATOR_JOB_FAMILY));
+    }
+    // some jobs are not part of a family
+    for (Job job : jobManager.find(null)) {
+      switch (job.getClass().getName()) {
+        case "org.eclipse.m2e.core.ui.internal.wizards.ImportMavenProjectsJob":
+        case "org.eclipse.m2e.core.internal.project.registry.ProjectRegistryRefreshJob":
+          jobs.add(job);
+          break;
+      }
     }
     return jobs;
   }

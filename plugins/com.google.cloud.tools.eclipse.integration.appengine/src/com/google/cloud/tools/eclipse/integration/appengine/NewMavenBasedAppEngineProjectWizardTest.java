@@ -117,7 +117,7 @@ public class NewMavenBasedAppEngineProjectWizardTest extends BaseProjectTest {
     ArrayAssertions.assertIsEmpty("runtime classpath should be empty for Maven projects", getAppEngineServerRuntimeClasspathEntries(project));
   }
 
-  private IClasspathEntry[] getAppEngineServerRuntimeClasspathEntries(IProject project) {
+  static IClasspathEntry[] getAppEngineServerRuntimeClasspathEntries(IProject project) {
     IJavaProject javaProject = JavaCore.create(project);
     IPath containerPath = new Path(
         "org.eclipse.jst.server.core.container/com.google.cloud.tools.eclipse.appengine.standard.runtimeClasspathProvider");

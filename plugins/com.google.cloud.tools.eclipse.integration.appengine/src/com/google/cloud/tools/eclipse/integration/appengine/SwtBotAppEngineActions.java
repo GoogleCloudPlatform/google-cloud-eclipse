@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.integration.appengine;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotTestingUtilities;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotTimeoutManager;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotWorkbenchActions;
+import java.io.File;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -27,6 +28,7 @@ import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.TimeoutException;
+import org.eclipse.wst.common.project.facet.core.FacetedProjectFramework;
 
 /**
  * Useful App Engine-related actions for Google Cloud Tools for Eclipse.
@@ -102,17 +104,50 @@ public class SwtBotAppEngineActions {
       throw ex;
     }
     SwtBotTimeoutManager.resetTimeout();
-    IProject project = waitUntilProjectExists(bot, getWorkspaceRoot().getProject(projectName));
+    IProject project = waitUntilFacetedProjectExists(bot, getWorkspaceRoot().getProject(projectName));
     SwtBotWorkbenchActions.waitForProjects(bot, project);
     return project;
   }
 
   /**
-   * Spin until the given project actually exists.
+   * Import a Maven project from a zip file
+   */
+  public static IProject importMavenProject(SWTWorkbenchBot bot, String projectName,
+      File extractedLocation) {
+
+    bot.menu("File").menu("Import...").click();
+
+    SWTBotShell shell = bot.shell("Import");
+    shell.activate();
+
+    bot.tree().expandNode("Maven").select("Existing Maven Projects");
+    bot.button("Next >").click();
+
+    bot.comboBoxWithLabel("Root Directory:").setText(extractedLocation.getAbsolutePath());
+    bot.button("Refresh").click();
+
+    try {
+      SwtBotTestingUtilities.clickButtonAndWaitForWindowClose(bot, bot.button("Finish"));
+    } catch (TimeoutException ex) {
+      System.err.println("FATAL: timed out while waiting for the wizard to close. Forcibly killing "
+          + "all shells: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1925");
+      System.err.println("FATAL: You will see tons of related errors: \"Widget is disposed\", "
+          + "\"Failed to execute runnable\", \"IllegalStateException\", etc.");
+      SwtBotWorkbenchActions.killAllShells(bot);
+      throw ex;
+    }
+    SwtBotTimeoutManager.resetTimeout();
+    IProject project = waitUntilFacetedProjectExists(bot, getWorkspaceRoot().getProject(projectName));
+    SwtBotWorkbenchActions.waitForProjects(bot, project);
+    return project;
+  }
+
+  /**
+   * Spin until the given project actually exists and is facetd.
    *
    * @return the project
    */
-  private static IProject waitUntilProjectExists(SWTBot bot, final IProject project) {
+  private static IProject waitUntilFacetedProjectExists(SWTBot bot, final IProject project) {
     bot.waitUntil(new DefaultCondition() {
       @Override
       public String getFailureMessage() {
@@ -121,7 +156,7 @@ public class SwtBotAppEngineActions {
 
       @Override
       public boolean test() throws Exception {
-        return project.exists();
+        return project.exists() && FacetedProjectFramework.isFacetedProject(project);
       }
     });
     return project;
@@ -132,4 +167,5 @@ public class SwtBotAppEngineActions {
   }
 
   private SwtBotAppEngineActions() {}
+
 }

@@ -125,4 +125,16 @@
            class="com.google.cloud.tools.eclipse.appengine.standard.java8.AppEngineStandardJre8ProjectFacetDetector">
      </detector>
   </extension>
+  <extension
+        point="org.eclipse.m2e.core.lifecycleMappingMetadataSource">
+  </extension>
+  <extension
+        point="org.eclipse.m2e.core.projectConfigurators">
+     <configurator
+           class="com.google.cloud.tools.eclipse.appengine.standard.java8.m2e.AppEngineStandardProjectDetector"
+           id="com.google.cloud.tools.eclipse.appengine.standard.m2e.configurator"
+           name="App Engine standard conversion"
+           runsAfter="org.eclipse.m2e.jdt.javaConfigurator,org.maven.ide.eclipse.configuration.wtp.configurator">
+     </configurator>
+  </extension>
 </plugin>
