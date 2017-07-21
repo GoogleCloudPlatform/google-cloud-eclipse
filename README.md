@@ -140,7 +140,7 @@ as described below.
 The Eclipse version used for the target platform is affected by the
 `eclipse.target` property, described below.
 
-You must regenerate the target platform and reconfigure the IDE's
+You must regenerate the target platform and reload the IDE's
 target platform whenever dependencies are updated.
 
 ### Steps to import into the Eclipse IDE
@@ -177,28 +177,12 @@ target platform whenever dependencies are updated.
 
   0. As described above, you must first build the target platform with Maven:
   
-     `$ mvn -Pide-target-platform package`
+     `$ (cd eclipse; mvn package)`
      
-  1. Open the `Preferences` dialog, go to `Plug-in Development` > `Target Platform`.
+  1. Open the `ide-target-platform/gcp-ide-target-platform.target` file.
   
-  2. Click `Add...` > `Nothing` to create a new Target Platform.
+  2. Click the _Set as target platform_ link in the upper-right.
   
-  3. Name it `GCP IDE Target Platform`.
-  
-  4. Select `Add` > `Software Site`.
-  
-  5. Select the `Add...` button (found beside the `Work with:` field) and then select `Local`
-     to find a local repository. Navigate to `.../eclipse/ide-target-platform/target/repository`,
-     and click `OK`.
-     
-  6. Once the main content populates, check the `Uncategorized` item to pull in all items. Click `Finish`.
-  
-  7. Click `Finish` to complete the new target platform definition.
-  
-  8. Select your new target platform (instead of Running Platform) in the `Target Platform` preferences.
-  
-  9. Click `OK` to load this new target platform.
-      
   10. Eclipse will load the target.
 
 3. Import the projects
@@ -312,12 +296,9 @@ Both the `.tpd` and `.target` files should be committed.
 The IDE Target Platform needs to be rebuilt at the command line 
 and reimported into Eclipse when dependency versions are changed:
 
-1. `mvn -Pide-target-platform package`
-2. Preferences > Plug-in Development > Target Platforms
-3. Select your target ("GCP IDE Target Platform") and click Edit
-4. Select the location and click Reload to cause any cached info to be discarded.
-5. Click Edit and then select Uncategorized.
-6. Finish / OK until done.
+1. `(cd eclipse; mvn package)`
+2. Open `ide-target-platform/gcp-ide-target-platform.target`.
+3. Click the _Reload Target Platform_ link in the top-right.
 
 ### Updating the Eclipse IDE Target Platforms
 
