@@ -57,7 +57,7 @@ import java.util.Set;
  */
 public class DataflowPipelineLaunchDelegateTest {
   private DataflowPipelineLaunchDelegate dataflowDelegate;
-  private NullProgressMonitor monitor = new NullProgressMonitor();
+  private final NullProgressMonitor monitor = new NullProgressMonitor();
 
   @Mock
   private DataflowDependencyManager dependencyManager;
