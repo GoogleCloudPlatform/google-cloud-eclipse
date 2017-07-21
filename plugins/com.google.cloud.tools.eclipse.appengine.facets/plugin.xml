@@ -34,9 +34,7 @@
         point="org.eclipse.wst.common.project.facet.core.presets">
      <static-preset
            id="com.google.cloud.tools.eclipse.appengine.standard.java7.preset">
-        <label>
-           App Engine standard environment with Java 7, Servlet 2.5
-        </label>
+        <label>%appengine.standard.jre7.preset</label>
         <facet
               id="com.google.cloud.tools.eclipse.appengine.facets.standard"
               version="JRE7">
@@ -163,10 +161,8 @@
   <extension
         point="org.eclipse.wst.common.project.facet.core.presets">
      <static-preset
-           id="com.google.cloud.tools.eclipse.appengine.flexible.java8.preset">
-        <label>
-           App Engine flexible environment with Java 8, Servlet 3.1
-        </label>
+           id="com.google.cloud.tools.eclipse.appengine.flexible.war.preset">
+        <label>%appengine.flexible.war.preset</label>
         <facet
               id="com.google.cloud.tools.eclipse.appengine.facets.flex"
               version="1">
