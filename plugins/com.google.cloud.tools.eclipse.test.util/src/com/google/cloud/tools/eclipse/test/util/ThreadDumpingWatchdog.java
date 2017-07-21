@@ -17,7 +17,10 @@
 package com.google.cloud.tools.eclipse.test.util;
 
 import com.google.cloud.tools.eclipse.test.util.reflection.ReflectionUtil;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.ComparisonChain;
+import com.google.common.collect.Ordering;
 import java.lang.Thread.State;
 import java.lang.management.LockInfo;
 import java.lang.management.ManagementFactory;
@@ -29,6 +32,7 @@ import java.util.Comparator;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
+import org.eclipse.core.internal.jobs.InternalJob;
 import org.eclipse.core.internal.jobs.JobManager;
 import org.eclipse.core.internal.jobs.LockManager;
 import org.eclipse.core.runtime.jobs.Job;
@@ -47,6 +51,11 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
   private Description description;
   private Timer timer;
   private Stopwatch stopwatch;
+
+  /** Dump report right now. */
+  public static void report() {
+    new ThreadDumpingWatchdog(0, TimeUnit.DAYS).run();
+  }
 
   public ThreadDumpingWatchdog(long period, TimeUnit unit) {
     this(period, unit, true);
@@ -104,9 +113,15 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
 
     StringBuilder sb = new StringBuilder();
     sb.append("\n+-------------------------------------------------------------------------------");
-    sb.append("\n| STACK DUMP @ ").append(stopwatch).append(": ").append(description);
+    sb.append("\n| STACK DUMP @ ").append(stopwatch);
+    if (description != null) {
+      sb.append(": ").append(description);
+    }
     sb.append("\n|");
     dumpEclipseLocks(sb, "| ");
+
+    sb.append("\n|");
+    dumpEclipseJobs(sb, "| ");
 
     int uselessThreadsCount = 0;
     for (ThreadInfo tinfo : infos) {
@@ -175,6 +190,79 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
       sb.append("\n").append(linePrefix).append("Eclipse Lock information not available");
     }
   }
+
+  /**
+   * Dump details on current jobs.
+   */
+  private void dumpEclipseJobs(StringBuilder sb, String linePrefix) {
+    Job[] otherJobs = Job.getJobManager().find(null);
+    if (otherJobs.length == 0) {
+      return;
+    }
+
+    Arrays.sort(otherJobs, new Ordering<Job>() {
+      @Override
+      public int compare(Job j1, Job j2) {
+        Preconditions.checkNotNull(j1);
+        Preconditions.checkNotNull(j2);
+        //@formatter:off
+        return ComparisonChain.start()
+            .compareTrueFirst(j1.isBlocking(), j2.isBlocking())
+            .compare(j2.getState(), j1.getState()) // descending order so RUNNING is first
+            .compare(j1.getPriority(), j2.getPriority())
+            .compareTrueFirst(j1.isUser(), j2.isUser())
+            .compareTrueFirst(j1.isSystem(), j2.isSystem())
+            .compare(j1.getRule(), j2.getRule(), Ordering.usingToString().nullsLast())
+            .result();
+        //@formatter:on
+      }
+    });
+
+    sb.append("\n").append(linePrefix).append(otherJobs.length + " jobs:");
+    for (Job job : otherJobs) {
+      String status;
+      switch (job.getState()) {
+        case Job.RUNNING:
+          status = "RUNNING";
+          break;
+        case Job.WAITING:
+          status = "WAITING";
+          break;
+        case Job.SLEEPING:
+          status = "SLEEPING";
+          break;
+        case Job.NONE:
+          status = "NONE";
+          break;
+        default:
+          status = "UNKNOWN(" + job.getState() + ")";
+          break;
+      }
+      Object blockingJob = null;
+      try {
+        blockingJob = ReflectionUtil.invoke(Job.getJobManager(), "findBlockingJob",
+            new Class<?>[] {InternalJob.class}, InternalJob.class, job);
+      } catch (Exception ex) {
+        System.err.println("Unable to fetch blocking-job: " + ex);
+      }
+      //@formatter:off
+      sb.append("\n").append(linePrefix).append(String.format(" + %s%s{pri=%d%s%s%s%s} %s (%s)\n",
+          status,
+          (job.isBlocking() ? "<BLOCKING>" : ""), 
+          job.getPriority(), 
+          (job.getRule() != null ? ",rule=" + job.getRule() : ""),
+          (job.isSystem() ? ",system" : ""),
+          (job.isUser() ? ",user" : ""),
+          (job.getThread() != null ? ",thr=" + job.getThread() : ""),
+          job,
+          job.getClass().getName()));
+      //@formatter:on
+      if (blockingJob != null) {
+        sb.append("\n").append(linePrefix).append("    - blocked by: " + blockingJob);
+      }
+    }
+  }
+
 
   /**
    * Identify useless threads, like idle worker pool threads.
