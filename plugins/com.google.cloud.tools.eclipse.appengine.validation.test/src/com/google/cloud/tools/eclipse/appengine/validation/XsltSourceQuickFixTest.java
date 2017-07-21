@@ -68,9 +68,11 @@ public class XsltSourceQuickFixTest {
     IWorkbench workbench = PlatformUI.getWorkbench();
     IEditorPart editorPart = WorkbenchUtil.openInEditor(workbench, file);
     ITextViewer viewer = ValidationTestUtils.getViewer(file);
-    String preContents = viewer.getDocument().get();
-    workbench.getDisplay().readAndDispatch(); // spin the event loop
+    while(workbench.getDisplay().readAndDispatch()) {
+      // spin the event loop
+    }
 
+    String preContents = viewer.getDocument().get();
     assertThat(preContents, containsString("application"));
 
     ProjectUtils.waitForProjects(project);
