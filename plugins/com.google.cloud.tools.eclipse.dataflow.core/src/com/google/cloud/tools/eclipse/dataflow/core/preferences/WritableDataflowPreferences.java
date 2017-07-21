@@ -17,11 +17,9 @@
 package com.google.cloud.tools.eclipse.dataflow.core.preferences;
 
 import com.google.cloud.tools.eclipse.dataflow.core.DataflowCorePlugin;
-
-import org.eclipse.core.resources.IProject;
-
 import java.util.HashMap;
 import java.util.Map;
+import org.eclipse.core.resources.IProject;
 
 /**
  * An implementation of {@link DataflowPreferences} that references methods of an underlying {@link
@@ -47,6 +45,15 @@ public class WritableDataflowPreferences implements DataflowPreferences {
 
   private WritableDataflowPreferences(PreferenceStore preferenceStore) {
     this.preferenceStore = preferenceStore;
+  }
+
+  public void setDefaultAccountEmail(String accountEmail) {
+    preferenceStore.setOption(ACCOUNT_EMAIL_PROPERTY, accountEmail);
+  }
+
+  @Override
+  public String getDefaultAccountEmail() {
+    return preferenceStore.getOption(ACCOUNT_EMAIL_PROPERTY);
   }
 
   public void setDefaultProject(String project) {
@@ -79,6 +86,11 @@ public class WritableDataflowPreferences implements DataflowPreferences {
   @Override
   public Map<String, String> asDefaultPropertyMap() {
     Map<String, String> result = new HashMap<>();
+    String defaultAccountEmail = getDefaultAccountEmail();
+    if (defaultAccountEmail != null) {
+      result.put(ACCOUNT_EMAIL_PROPERTY, defaultAccountEmail);
+    }
+
     String defaultProject = getDefaultProject();
     if (defaultProject != null) {
       result.put(PROJECT_PROPERTY, defaultProject);

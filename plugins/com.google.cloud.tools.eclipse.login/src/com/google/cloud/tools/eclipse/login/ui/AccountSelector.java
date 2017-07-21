@@ -190,4 +190,19 @@ public class AccountSelector extends Composite {
   public void setToolTipText(String string) {
     combo.setToolTipText(string);
   }
+
+  @Override
+  public String getToolTipText() {
+    return combo.getToolTipText();
+  }
+
+  @Override
+  public void setEnabled(boolean enabled) {
+    combo.setEnabled(enabled);
+  }
+
+  @Override
+  public boolean getEnabled() {
+    return combo.getEnabled();
+  }
 }

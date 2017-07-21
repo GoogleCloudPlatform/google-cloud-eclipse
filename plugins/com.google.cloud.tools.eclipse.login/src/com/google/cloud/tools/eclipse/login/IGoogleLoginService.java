@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.login;
 
+import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.login.Account;
 import java.util.Set;
 
@@ -57,4 +58,12 @@ public interface IGoogleLoginService {
    * @return never {@code null}
    */
   Set<Account> getAccounts();
+
+  /**
+   * Returns a {@code Credential} for the given {@code email}, if available.
+   *
+   * @return {@code Credential} object if the account for the email is logged in;
+   *     {@code null} otherwise
+   */
+  Credential getCredential(String email);
 }

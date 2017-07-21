@@ -18,15 +18,27 @@ package com.google.cloud.tools.eclipse.dataflow.core.launcher;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.dataflow.core.DataflowCorePlugin;
 import com.google.cloud.tools.eclipse.dataflow.core.launcher.options.PipelineOptionsHierarchy;
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.DataflowPreferences;
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.ProjectOrWorkspaceDataflowPreferences;
 import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowDependencyManager;
 import com.google.cloud.tools.eclipse.dataflow.core.project.MajorVersion;
+import com.google.cloud.tools.eclipse.login.CredentialHelper;
+import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -37,15 +49,13 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.ILaunchConfigurationDelegate;
 import org.eclipse.debug.core.model.ILaunchConfigurationDelegate2;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.JavaLaunchDelegate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 
 /**
  * The {@link ILaunchConfigurationDelegate} to launch a Google Cloud Dataflow Pipeline.
@@ -60,6 +70,9 @@ public class DataflowPipelineLaunchDelegate extends ForwardingLaunchConfiguratio
       "dataflow_tmp_config_working_copy-";
   @VisibleForTesting
   static final String RUNNER_COMMAND_LINE_STRING = "runner";
+  @VisibleForTesting
+  static final String GOOGLE_APPLICATION_CREDENTIALS_ENVIRONMENT_VARIABLE =
+      "GOOGLE_APPLICATION_CREDENTIALS";
 
   private static final Joiner SPACE_JOINER = Joiner.on(" ").skipNulls();
 
@@ -67,13 +80,15 @@ public class DataflowPipelineLaunchDelegate extends ForwardingLaunchConfiguratio
   private final PipelineOptionsHierarchyFactory optionsRetrieverFactory;
   private final IWorkspaceRoot workspaceRoot;
   private final DataflowDependencyManager dependencyManager;
+  private final IGoogleLoginService loginService;
 
   public DataflowPipelineLaunchDelegate() {
     this(
         new JavaLaunchDelegate(),
         new ClasspathPipelineOptionsHierarchyFactory(),
         DataflowDependencyManager.create(),
-        ResourcesPlugin.getWorkspace().getRoot());
+        ResourcesPlugin.getWorkspace().getRoot(),
+        getLoginService());
   }
 
   @VisibleForTesting
@@ -81,11 +96,13 @@ public class DataflowPipelineLaunchDelegate extends ForwardingLaunchConfiguratio
       JavaLaunchDelegate javaLaunchDelegate,
       PipelineOptionsHierarchyFactory optionsHierarchyFactory,
       DataflowDependencyManager dependencyManager,
-      IWorkspaceRoot workspaceRoot) {
+      IWorkspaceRoot workspaceRoot,
+      IGoogleLoginService loginService) {
     this.delegate = javaLaunchDelegate;
     this.optionsRetrieverFactory = optionsHierarchyFactory;
     this.dependencyManager = dependencyManager;
     this.workspaceRoot = workspaceRoot;
+    this.loginService = loginService;
   }
 
   @Override
@@ -96,8 +113,7 @@ public class DataflowPipelineLaunchDelegate extends ForwardingLaunchConfiguratio
     PipelineLaunchConfiguration pipelineConfig =
         PipelineLaunchConfiguration.fromLaunchConfiguration(configuration);
 
-    String projectName =
-        configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, "");
+    String projectName = pipelineConfig.getEclipseProjectName();
     IProject project = workspaceRoot.getProject(projectName);
     checkArgument(
         project.exists(),
@@ -114,25 +130,81 @@ public class DataflowPipelineLaunchDelegate extends ForwardingLaunchConfiguratio
           "Could not retrieve Pipeline Options Hierarchy for project " + projectName, e));
     }
 
-    if (!pipelineConfig.isValid(hierarchy, getPreferences(pipelineConfig))) {
+    DataflowPreferences preferences = ProjectOrWorkspaceDataflowPreferences.forProject(project);
+    if (!pipelineConfig.isValid(hierarchy, preferences)) {
       throw new IllegalArgumentException(
           "Provided Dataflow Pipeline Configuration is not valid: " + pipelineConfig.toString());
     }
 
-    List<String> argComponents = getArguments(configuration, pipelineConfig, hierarchy);
+    Map<String, String> effectiveArguments = getEffectiveArguments(pipelineConfig, preferences);
+
+    List<String> argComponents =
+        getArguments(configuration, pipelineConfig, hierarchy, effectiveArguments);
 
     ILaunchConfigurationWorkingCopy workingCopy =
         configuration.copy(DATAFLOW_LAUNCH_CONFIG_WORKING_COPY_PREFIX + configuration.getName());
     workingCopy.setAttribute(
         IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, SPACE_JOINER.join(argComponents));
 
+    String accountEmail = effectiveArguments.get("accountEmail");
+    setLoginCredential(workingCopy, accountEmail);
+
     delegate.launch(workingCopy, mode, launch, progress.newChild(1));
+  }
+
+  @VisibleForTesting
+  void setLoginCredential(ILaunchConfigurationWorkingCopy workingCopy, String accountEmail)
+      throws CoreException {
+    Preconditions.checkNotNull(accountEmail,
+        "account email missing in launch configuration or preferences");
+
+    try {
+      if (accountEmail.isEmpty()) {
+        String message = "No Google account selected for this launch.";
+        throw new CoreException(new Status(Status.ERROR, DataflowCorePlugin.PLUGIN_ID, message));
+      }
+
+      Credential credential = loginService.getCredential(accountEmail);
+      if (credential == null) {
+        String message = "The Google account saved for this lanuch is not logged in.";
+        throw new CoreException(new Status(Status.ERROR, DataflowCorePlugin.PLUGIN_ID, message));
+      }
+
+      // Dataflow SDK doesn't yet support reading credentials from an arbitrary JSON, so we use the
+      // workaround of setting the "GOOGLE_APPLICATION_CREDENTIALS" environment variable.
+      Map<String, String> variableMap = workingCopy.getAttribute(
+          ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, new HashMap<String, String>());
+      if (variableMap.containsKey(GOOGLE_APPLICATION_CREDENTIALS_ENVIRONMENT_VARIABLE)) {
+        String message = "You cannot define the environment variable GOOGLE_APPLICATION_CREDENTIALS"
+            + " when launching Dataflow pipelines from Cloud Tools for Eclipse.";
+        throw new CoreException(new Status(Status.ERROR, DataflowCorePlugin.PLUGIN_ID, message));
+      }
+
+      Path jsonCredential = Files.createTempFile("google-ct4e-" + workingCopy.getName(), ".json");
+      CredentialHelper.toJsonFile(credential, jsonCredential);
+      jsonCredential.toFile().deleteOnExit();
+
+      variableMap.put(GOOGLE_APPLICATION_CREDENTIALS_ENVIRONMENT_VARIABLE,
+          jsonCredential.toAbsolutePath().toString());
+      workingCopy.setAttribute(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, variableMap);
+    } catch (IOException ex) {
+      throw new CoreException(
+          new Status(Status.ERROR, DataflowCorePlugin.PLUGIN_ID, ex.getMessage(), ex));
+    }
+  }
+
+  private static IGoogleLoginService getLoginService() {
+    BundleContext bundleContext =
+        FrameworkUtil.getBundle(DataflowPipelineLaunchDelegate.class).getBundleContext();
+    return bundleContext.getService(
+        bundleContext.getServiceReference(IGoogleLoginService.class));
   }
 
   private List<String> getArguments(
       ILaunchConfiguration configuration,
       PipelineLaunchConfiguration pipelineConfig,
-      PipelineOptionsHierarchy optionsHierarchy)
+      PipelineOptionsHierarchy optionsHierarchy,
+      Map<String, String> effectiveArguments)
       throws CoreException {
     List<String> argComponents = new ArrayList<>();
 
@@ -148,14 +220,8 @@ public class DataflowPipelineLaunchDelegate extends ForwardingLaunchConfiguratio
       pipelineArgs =
           optionsHierarchy.getPropertyNames(pipelineConfig.getRunner().getOptionsClass());
     }
-    Map<String, String> argumentValues = new HashMap<>(pipelineConfig.getArgumentValues());
 
-    if (pipelineConfig.isUseDefaultLaunchOptions()) {
-      DataflowPreferences preferences = getPreferences(pipelineConfig);
-      argumentValues.putAll(preferences.asDefaultPropertyMap());
-    }
-
-    for (Map.Entry<String, String> argValueEntry : argumentValues.entrySet()) {
+    for (Map.Entry<String, String> argValueEntry : effectiveArguments.entrySet()) {
       if (!Strings.isNullOrEmpty(argValueEntry.getValue())
           && pipelineArgs.contains(argValueEntry.getKey())) {
         argComponents.add(
@@ -168,14 +234,17 @@ public class DataflowPipelineLaunchDelegate extends ForwardingLaunchConfiguratio
     return argComponents;
   }
 
-  private DataflowPreferences getPreferences(PipelineLaunchConfiguration config) {
-    if (config.getEclipseProjectName() != null) {
-      IProject project = workspaceRoot.getProject(config.getEclipseProjectName());
-      if (project.exists()) {
-        return ProjectOrWorkspaceDataflowPreferences.forProject(project);
-      }
+  /**
+   * Returns effective argument values of {@link PipelineLaunchConfiguration} that take into
+   * account the project-specific or workspace-wide default values when needed.
+   */
+  private Map<String, String> getEffectiveArguments(
+      PipelineLaunchConfiguration pipelineConfig, DataflowPreferences preferences) {
+    Map<String, String> argumentValues = new HashMap<>(pipelineConfig.getArgumentValues());
+    if (pipelineConfig.isUseDefaultLaunchOptions()) {
+      argumentValues.putAll(preferences.asDefaultPropertyMap());
     }
-    return ProjectOrWorkspaceDataflowPreferences.forWorkspace();
+    return argumentValues;
   }
 
   @Override

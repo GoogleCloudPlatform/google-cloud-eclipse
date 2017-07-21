@@ -20,8 +20,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.test.util.ArrayAssertions;
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
@@ -31,7 +33,13 @@ import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.IClasspathContainer;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
@@ -105,5 +113,29 @@ public class NewMavenBasedAppEngineProjectWizardTest extends BaseProjectTest {
     }
     ProjectUtils.waitForProjects(project); // App Engine runtime is added via a Job, so wait.
     ProjectUtils.failIfBuildErrors("New Maven project has errors", project);
+    
+    ArrayAssertions.assertIsEmpty("runtime classpath should be empty for Maven projects", getAppEngineServerRuntimeClasspathEntries(project));
+  }
+
+  private IClasspathEntry[] getAppEngineServerRuntimeClasspathEntries(IProject project) {
+    IJavaProject javaProject = JavaCore.create(project);
+    IPath containerPath = new Path(
+        "org.eclipse.jst.server.core.container/com.google.cloud.tools.eclipse.appengine.standard.runtimeClasspathProvider");
+    try {
+      for (IClasspathEntry entry : javaProject.getRawClasspath()) {
+        if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER
+            && containerPath.isPrefixOf(entry.getPath())) {
+          // resolve and return the entries
+          IClasspathContainer container =
+              JavaCore.getClasspathContainer(entry.getPath(), javaProject);
+          return container.getClasspathEntries();
+        }
+      }
+    } catch (JavaModelException ex) {
+      fail(ex.toString());
+      /* NOTREACHED */
+    }
+    fail("AppEngine Server Runtime classpath container not found");
+    return null;
   }
 }
