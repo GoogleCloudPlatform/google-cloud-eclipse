@@ -39,12 +39,12 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSortedSet;
-import java.util.Locale;
 import java.util.SortedSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusAdapter;
@@ -123,7 +123,7 @@ public class RunOptionsDefaultsComponent {
 
     Label comboLabel = new Label(target, SWT.NULL);
     stagingLocationInput = new Combo(target, SWT.DROP_DOWN);
-    createButton = ButtonFactory.newPushButton(target, "&Create");
+    createButton = ButtonFactory.newPushButton(target, "&Create Bucket");
     createButton.setEnabled(false);
 
     accountSelector.selectAccount(preferences.getDefaultAccountEmail());
@@ -259,16 +259,19 @@ public class RunOptionsDefaultsComponent {
       // FIXME: this has no effect, as "VerifyStagingLocationJob" doesn't honor cancellation.
       verifyJob.cancel();
     }
-    if (trimBucketName().isEmpty()) {
-      // If the staging location is empty, we don't have anything to verify; and we don't have any
-      // interesting messaging.
-      setPageComplete(true);
+
+    IStatus status = validateStagingLocation();
+    if (!status.isOK()) {
+      messageTarget.setError(status.getMessage());
       return;
     }
 
-    IStatus status = bucketNameStatus();
-    if (!status.isOK()) {
-      messageTarget.setError(status.getMessage());
+    final String bucketNamePart = extractBucketNamePart();
+    // Validation may succeed with an empty bucket name (but only when there is no GCS object name).
+    if (bucketNamePart.isEmpty()) {
+      // If the bucket name is empty, we don't have anything to verify; and we don't have any
+      // interesting messaging.
+      setPageComplete(true);
       return;
     }
 
@@ -294,16 +297,16 @@ public class RunOptionsDefaultsComponent {
               }
 
               if (result.accessible) {
-                messageTarget.setInfo("Found staging location " + stagingLocation);
+                messageTarget.setInfo("Verified bucket %s is accessible." + bucketNamePart);
                 createButton.setEnabled(false);
                 setPageComplete(true);
               } else {
-                messageTarget.setError(String.format("Couldn't fetch bucket %s", stagingLocation));
+                messageTarget.setError(String.format("Couldn't fetch bucket %s", bucketNamePart));
                 createButton.setEnabled(true);
                 setPageComplete(false);
               }
             } catch (InterruptedException | ExecutionException e) {
-              messageTarget.setError(String.format("Couldn't fetch bucket %s", stagingLocation));
+              messageTarget.setError(String.format("Couldn't fetch bucket %s", bucketNamePart));
               setPageComplete(false);
             }
           }
@@ -389,23 +392,27 @@ public class RunOptionsDefaultsComponent {
 
   private static final BucketNameValidator bucketNameValidator = new BucketNameValidator();
 
-  private String trimBucketName() {
-    String bucketName = stagingLocationInput.getText().trim();
-    if (bucketName.toLowerCase(Locale.US).startsWith("gs://")) {
-      bucketName = bucketName.substring(5);
-    }
-    return bucketName;
+  private String extractBucketNamePart() {
+    return GcsDataflowProjectClient.toGcsBucketName(stagingLocationInput.getText());
   }
 
-  private IStatus bucketNameStatus() {
-    return bucketNameValidator.validate(trimBucketName());
+  private IStatus validateStagingLocation() {
+    String bucketName = extractBucketNamePart();
+    if (bucketName.isEmpty()) {
+      String gcsPath = GcsDataflowProjectClient.stripGcsPrefix(stagingLocationInput.getText());
+      if (!gcsPath.isEmpty()) {
+        // Object part is not null; for example, input value is "/something" or 'gs:///something'.
+        return new Status(IStatus.ERROR, DataflowUiPlugin.PLUGIN_ID, "Bucket name part is empty.");
+      }
+    }
+    return bucketNameValidator.validate(bucketName);
   }
 
   private class EnableCreateButton implements ModifyListener {
 
     @Override
     public void modifyText(ModifyEvent event) {
-      boolean enabled = !trimBucketName().isEmpty() && bucketNameStatus().isOK();
+      boolean enabled = !extractBucketNamePart().isEmpty() && validateStagingLocation().isOK();
       createButton.setEnabled(enabled);
     }
 

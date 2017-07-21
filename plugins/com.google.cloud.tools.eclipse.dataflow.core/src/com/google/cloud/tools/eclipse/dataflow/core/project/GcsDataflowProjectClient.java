@@ -88,13 +88,9 @@ public class GcsDataflowProjectClient {
     }
   }
 
-  private static String toGcsBucketName(String stagingLocation) {
-    String gcsLocation;
-    if (stagingLocation.startsWith(GCS_PREFIX)) {
-      gcsLocation = stagingLocation.substring(GCS_PREFIX.length());
-    } else {
-      gcsLocation = stagingLocation;
-    }
+  public static String toGcsBucketName(String stagingLocation) {
+    String gcsLocation = stripGcsPrefix(stagingLocation);
+
     String bucketName;
     if (gcsLocation.indexOf('/') < 0) {
       bucketName = gcsLocation;
@@ -102,6 +98,14 @@ public class GcsDataflowProjectClient {
       bucketName = gcsLocation.substring(0, gcsLocation.indexOf('/'));
     }
     return bucketName;
+  }
+
+  public static String stripGcsPrefix(String gcsPath) {
+    if (gcsPath.startsWith(GCS_PREFIX)) {
+      return gcsPath.substring(GCS_PREFIX.length());
+    } else {
+      return gcsPath;
+    }
   }
 
   public static String toGcsLocationUri(String location) {
