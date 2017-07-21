@@ -43,11 +43,16 @@ public class AppEngineStandardJre7ProjectFacetDetector extends ProjectFacetDetec
     String projectName = workingCopy.getProjectName();
     SubMonitor progress = SubMonitor.convert(monitor, 5);
 
+    if (workingCopy.hasProjectFacet(AppEngineStandardFacet.FACET)) {
+      logger.warning("skipping " + projectName + ": project already has AES facet");
+      return;
+    }
+
     // Check if there are some fundamental conflicts with AESv7 other than Java and DWP versions
     if (FacetUtil.conflictsWith(workingCopy, AppEngineStandardFacet.JRE7,
         Arrays.asList(JavaFacet.FACET, WebFacetUtils.WEB_FACET))) {
       logger.warning(
-          "skipping " + projectName + ": project conflicts with AES java8 runtime");
+          "skipping " + projectName + ": project conflicts with AES Java 7 runtime");
       return;
     }
 
