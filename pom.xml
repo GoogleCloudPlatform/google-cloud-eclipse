@@ -117,11 +117,11 @@
     -->
     <tycho.toolchains>SYSTEM</tycho.toolchains>
 
-     <!-- OS-specific JVM flags, empty for the default case but redefined below -->
-     <os-jvm-flags/>
-     <org.eclipse.swtbot.search.timeout>30000</org.eclipse.swtbot.search.timeout>
+    <!-- OS-specific JVM flags, empty for the default case but redefined below -->
+    <os-jvm-flags/>
+    <org.eclipse.swtbot.search.timeout>30000</org.eclipse.swtbot.search.timeout>
 
-     <jgit.dirtyWorkingTree>warning</jgit.dirtyWorkingTree>
+    <jgit.dirtyWorkingTree>warning</jgit.dirtyWorkingTree>
   </properties>
 
   <!--
@@ -188,6 +188,26 @@
       <version>1.17</version>
     </dependency>
   </dependencies>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.12</version>
+      </dependency>
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-core</artifactId>
+        <version>1.10.19</version>
+      </dependency>
+      <dependency>
+        <groupId>org.objenesis</groupId>
+        <artifactId>objenesis</artifactId>
+        <version>2.2</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <build>
     <plugins>
@@ -335,6 +355,17 @@
           <groupId>org.jacoco</groupId>
           <artifactId>jacoco-maven-plugin</artifactId>
           <version>0.7.8</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>2.5.1</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.12.4</version>
         </plugin>
       </plugins>
     </pluginManagement>
