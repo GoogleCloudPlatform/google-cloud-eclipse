@@ -115,7 +115,12 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   private final IWorkspaceRoot workspaceRoot;
 
   public PipelineArgumentsTab() {
-    workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
+    this(ResourcesPlugin.getWorkspace().getRoot());
+  }
+
+  @VisibleForTesting
+  PipelineArgumentsTab(IWorkspaceRoot workspaceRoot) {
+    this.workspaceRoot = workspaceRoot;
     hierarchy = pipelineOptionsHierarchyFactory.global(new NullProgressMonitor());
   }
 
@@ -291,7 +296,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
       IProject project = getProject();
       MajorVersion majorVersion = MajorVersion.ONE;
-      if (project != null) {
+      if (project != null && project.isAccessible()) {
          majorVersion = dependencyManager.getProjectMajorVersion(project);
          if (majorVersion == null) {
             majorVersion = MajorVersion.ONE;

@@ -456,7 +456,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       IVMInstall vmInstall = JavaRuntime.getVMInstall(javaProject);
       
       String javaHome = vmInstall.getInstallLocation().getAbsolutePath();
-      serverBehaviour.startDevServer(devServerRunConfiguration, Paths.get(javaHome),
+      serverBehaviour.startDevServer(mode, devServerRunConfiguration, Paths.get(javaHome),
           outputStream, errorStream);
     } catch (CoreException ex) {
       launch.terminate();

@@ -20,7 +20,7 @@
           <and>
              <requires
                    facet="java"
-                   version="1.7,1.8">
+                   version="1.8">
              </requires>
              <requires
                    facet="jst.web"
@@ -58,7 +58,7 @@
          </facet>
          <facet
                id="java"
-               version="1.7,1.8">
+               version="1.8">
          </facet>
       </supported>
 	</extension>
