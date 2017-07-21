@@ -29,7 +29,29 @@
         </constraint>
     </project-facet-version>
   </extension>
-  
+
+  <extension
+        point="org.eclipse.wst.common.project.facet.core.presets">
+     <static-preset
+           id="com.google.cloud.tools.eclipse.appengine.standard.java7.preset">
+        <label>
+           App Engine standard environment with Java 7, Servlet 2.5
+        </label>
+        <facet
+              id="com.google.cloud.tools.eclipse.appengine.facets.standard"
+              version="JRE7">
+        </facet>
+        <facet
+              id="java"
+              version="1.7">
+        </facet>
+        <facet
+              id="jst.web"
+              version="2.5">
+        </facet>
+     </static-preset>
+  </extension>
+
   <extension
         point="org.eclipse.wst.common.project.facet.core.aliases">
      <!--
@@ -136,6 +158,28 @@
         </and>
       </constraint>
     </project-facet-version>
+  </extension>
+
+  <extension
+        point="org.eclipse.wst.common.project.facet.core.presets">
+     <static-preset
+           id="com.google.cloud.tools.eclipse.appengine.flexible.java8.preset">
+        <label>
+           App Engine flexible environment with Java 8, Servlet 3.1
+        </label>
+        <facet
+              id="com.google.cloud.tools.eclipse.appengine.facets.flex"
+              version="1">
+        </facet>
+        <facet
+              id="java"
+              version="1.8">
+        </facet>
+        <facet
+              id="jst.web"
+              version="3.1">
+        </facet>
+     </static-preset>
   </extension>
 
   <extension point="org.eclipse.wst.common.project.facet.core.facets">

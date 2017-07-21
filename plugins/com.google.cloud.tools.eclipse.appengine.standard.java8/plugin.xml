@@ -30,6 +30,28 @@
         </constraint>
     </project-facet-version>
    </extension>
+
+   <extension
+        point="org.eclipse.wst.common.project.facet.core.presets">
+     <static-preset
+           id="com.google.cloud.tools.eclipse.appengine.standard.java8.preset">
+        <label>
+           App Engine standard environment with Java 8 (beta), Servlet 3.1
+        </label>
+        <facet
+              id="com.google.cloud.tools.eclipse.appengine.facets.standard"
+              version="JRE8">
+        </facet>
+        <facet
+              id="java"
+              version="1.8">
+        </facet>
+        <facet
+              id="jst.web"
+              version="3.1">
+        </facet>
+     </static-preset>
+   </extension>
    
    <!-- allow downgrading from 3.1 to 2.5 for App Engine apps -->
    <extension
