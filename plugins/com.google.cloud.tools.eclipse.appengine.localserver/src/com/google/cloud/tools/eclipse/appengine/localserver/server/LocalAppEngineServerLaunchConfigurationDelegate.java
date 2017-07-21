@@ -284,6 +284,13 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     if (!vmArguments.isEmpty()) {
       devServerRunConfiguration.setJvmFlags(vmArguments);
     }
+    // programArguments is exactly as supplied by the user in the dialog box
+    String programArgumentString = getProgramArguments(configuration);
+    List<String> programArguments =
+        Arrays.asList(DebugPlugin.parseArguments(programArgumentString));
+    if (!programArguments.isEmpty()) {
+      devServerRunConfiguration.setAdditionalArguments(programArguments);
+    }
 
     return devServerRunConfiguration;
   }
