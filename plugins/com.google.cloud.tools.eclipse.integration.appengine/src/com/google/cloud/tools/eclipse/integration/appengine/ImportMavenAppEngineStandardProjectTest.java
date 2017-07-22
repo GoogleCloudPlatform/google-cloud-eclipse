@@ -65,7 +65,6 @@ public class ImportMavenAppEngineStandardProjectTest extends BaseProjectTest {
   public void runImport() throws Exception {
     Assume.assumeTrue("No JavaSE 8 JRE found", hasJavaSE8());
     assertFalse(projectExists("springboot-appengine-standard"));
-
     extractZip(new URL(
         "platform:/plugin/com.google.cloud.tools.eclipse.integration.appengine/test-projects/springboot-appengine-standard.zip"),
         tempFolder.getRoot());
@@ -81,7 +80,7 @@ public class ImportMavenAppEngineStandardProjectTest extends BaseProjectTest {
     IProjectFacetVersion appEngineFacetVersion =
         facetedProject.getProjectFacetVersion(AppEngineStandardFacet.FACET);
     if (appEngineFacetVersion == null) {
-      new ThreadDumpingWatchdog(0, TimeUnit.DAYS).run();
+      ThreadDumpingWatchdog.report();
     }
     assertNotNull("Project does not have AES facet", appEngineFacetVersion);
     assertEquals("Project should have AES Java 8", "JRE8",

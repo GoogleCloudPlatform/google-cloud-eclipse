@@ -29,6 +29,8 @@ import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
@@ -123,6 +125,7 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
     sb.append("\n|");
     dumpEclipseJobs(sb, "| ");
 
+    sb.append("\n|");
     int uselessThreadsCount = 0;
     for (ThreadInfo tinfo : infos) {
       // Unfortunately ThreadInfo#toString() only dumps up to 8 stackframes, and
@@ -195,12 +198,12 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
    * Dump details on current jobs.
    */
   private void dumpEclipseJobs(StringBuilder sb, String linePrefix) {
-    Job[] otherJobs = Job.getJobManager().find(null);
-    if (otherJobs.length == 0) {
+    Job[] jobs = Job.getJobManager().find(null);
+    if (jobs.length == 0) {
       return;
     }
 
-    Arrays.sort(otherJobs, new Ordering<Job>() {
+    Arrays.sort(jobs, new Ordering<Job>() {
       @Override
       public int compare(Job j1, Job j2) {
         Preconditions.checkNotNull(j1);
@@ -218,51 +221,74 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
       }
     });
 
-    sb.append("\n").append(linePrefix).append(otherJobs.length + " jobs:");
-    for (Job job : otherJobs) {
-      String status;
-      switch (job.getState()) {
-        case Job.RUNNING:
-          status = "RUNNING";
-          break;
-        case Job.WAITING:
-          status = "WAITING";
-          break;
-        case Job.SLEEPING:
-          status = "SLEEPING";
-          break;
-        case Job.NONE:
-          status = "NONE";
-          break;
-        default:
-          status = "UNKNOWN(" + job.getState() + ")";
-          break;
+    sb.append("\n").append(linePrefix).append(jobs.length + " jobs:");
+    for (int index = 0; index < jobs.length; index++) {
+      Job job = jobs[index];
+      dumpJob(sb, linePrefix, job, job.getThread());
+    }
+
+    // Try to dump ThreadJobs, which are threads that access ISchedulingRules
+    try {
+      Object implicitJobs =
+          ReflectionUtil.getField(Job.getJobManager(), "implicitJobs", Object.class);
+      Map<?, ?> threadJobs =
+          ReflectionUtil.getField(implicitJobs, "threadJobs", Map.class); /* <Thread,ThreadJob> */
+      if (!threadJobs.isEmpty()) {
+        sb.append("\n").append(linePrefix).append(threadJobs.size() + " ThreadJobs:");
+        for (Entry entry : threadJobs.entrySet()) {
+          dumpJob(sb, linePrefix, (Job) entry.getValue(), (Thread) entry.getKey());
+        }
       }
-      Object blockingJob = null;
-      try {
-        blockingJob = ReflectionUtil.invoke(Job.getJobManager(), "findBlockingJob",
-            new Class<?>[] {InternalJob.class}, InternalJob.class, job);
-      } catch (Exception ex) {
-        System.err.println("Unable to fetch blocking-job: " + ex);
-      }
-      //@formatter:off
-      sb.append("\n").append(linePrefix).append(String.format(" + %s%s{pri=%d%s%s%s%s} %s (%s)\n",
-          status,
-          (job.isBlocking() ? "<BLOCKING>" : ""), 
-          job.getPriority(), 
-          (job.getRule() != null ? ",rule=" + job.getRule() : ""),
-          (job.isSystem() ? ",system" : ""),
-          (job.isUser() ? ",user" : ""),
-          (job.getThread() != null ? ",thr=" + job.getThread() : ""),
-          job,
-          job.getClass().getName()));
-      //@formatter:on
-      if (blockingJob != null) {
-        sb.append("\n").append(linePrefix).append("    - blocked by: " + blockingJob);
-      }
+    } catch (Exception ex) {
+      System.err.println("Unable to obtain JobManager.implicitJobs: " + ex);
     }
   }
 
+
+  private void dumpJob(StringBuilder sb, String linePrefix, Job job, Thread thread) {
+    String status;
+    switch (job.getState()) {
+      case Job.RUNNING:
+        status = "RUNNING";
+        break;
+      case Job.WAITING:
+        status = "WAITING";
+        break;
+      case Job.SLEEPING:
+        status = "SLEEPING";
+        break;
+      case Job.NONE:
+        status = "NONE";
+        break;
+      default:
+        status = "UNKNOWN(" + job.getState() + ")";
+        break;
+    }
+    Object blockingJob = null;
+    try {
+      blockingJob = ReflectionUtil.invoke(Job.getJobManager(), "findBlockingJob",
+          new Class<?>[] {InternalJob.class}, InternalJob.class, job);
+    } catch (Exception ex) {
+      System.err.println("Unable to fetch blocking-job: " + ex);
+    }
+    sb.append("\n").append(linePrefix);
+    //@formatter:off
+    sb.append(String.format("  %s%s{pri=%d%s%s%s%s} %s (%s)%s",
+        status,
+        (job.isBlocking() ? "<BLOCKING>" : ""), 
+        job.getPriority(), 
+        (job.isSystem() ? ",system" : ""),
+        (job.isUser() ? ",user" : ""),
+        (job.getRule() != null ? ",rule=" + job.getRule() : ""),
+        (thread != null ? ",thr=" + thread : ""),
+        job,
+        job.getClass().getName(),
+        (job.getJobGroup() != null ? " [group=" + job.getJobGroup() + "]" : "")));
+    //@formatter:on
+    if (blockingJob != null) {
+      sb.append("\n").append(linePrefix).append("    - blocked by: " + blockingJob);
+    }
+  }
 
   /**
    * Identify useless threads, like idle worker pool threads.
