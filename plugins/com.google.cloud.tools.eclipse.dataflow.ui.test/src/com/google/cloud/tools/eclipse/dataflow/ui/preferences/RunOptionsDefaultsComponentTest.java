@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.dataflow.ui.preferences;
 
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -171,5 +172,14 @@ public class RunOptionsDefaultsComponentTest {
       Thread.sleep(50);
     }
     Assert.assertArrayEquals(buckets, combo.getItems());
+  }
+
+  @Test
+  public void testBucketNameStatus_gscPathWithObjectIsOk() {
+    component.setStagingLocationText("bucket/object");
+    assertTrue(component.bucketNameStatus().isOK());
+
+    component.setStagingLocationText("gs://bucket/object");
+    assertTrue(component.bucketNameStatus().isOK());
   }
 }

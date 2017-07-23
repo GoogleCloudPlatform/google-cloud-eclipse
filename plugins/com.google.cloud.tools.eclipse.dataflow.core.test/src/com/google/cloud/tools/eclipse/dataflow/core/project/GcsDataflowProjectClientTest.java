@@ -55,5 +55,18 @@ public class GcsDataflowProjectClientTest {
     String location = "foo-bar";
     assertEquals("gs://foo-bar", GcsDataflowProjectClient.toGcsLocationUri(location));
   }
+
+  @Test
+  public void testToGcsBucketName_stripsLeadingForwardSlashes() {
+    assertEquals("my-bucket", GcsDataflowProjectClient.toGcsBucketName("my-bucket"));
+    assertEquals("my-bucket", GcsDataflowProjectClient.toGcsBucketName("/my-bucket"));
+    assertEquals("my-bucket", GcsDataflowProjectClient.toGcsBucketName("///my-bucket/"));
+    assertEquals("my-bucket", GcsDataflowProjectClient.toGcsBucketName("///my-bucket/object"));
+
+    assertEquals("my-bucket", GcsDataflowProjectClient.toGcsBucketName("gs://my-bucket"));
+    assertEquals("my-bucket", GcsDataflowProjectClient.toGcsBucketName("gs:///my-bucket"));
+    assertEquals("my-bucket", GcsDataflowProjectClient.toGcsBucketName("gs://///my-bucket/"));
+    assertEquals("my-bucket", GcsDataflowProjectClient.toGcsBucketName("gs://///my-bucket/object"));
+  }
 }
 
