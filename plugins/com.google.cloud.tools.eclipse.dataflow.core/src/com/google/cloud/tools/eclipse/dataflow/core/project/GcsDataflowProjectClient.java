@@ -21,6 +21,7 @@ import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.model.Bucket;
 import com.google.api.services.storage.model.Buckets;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
+import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
 import java.io.IOException;
 import java.util.List;
@@ -89,7 +90,14 @@ public class GcsDataflowProjectClient {
   }
 
   public static String toGcsBucketName(String stagingLocation) {
-    String gcsLocation = stripGcsPrefix(stagingLocation);
+    String gcsLocation;
+    if (stagingLocation.startsWith(GCS_PREFIX)) {
+      gcsLocation = stagingLocation.substring(GCS_PREFIX.length());
+    } else {
+      gcsLocation = stagingLocation;
+    }
+
+    gcsLocation = CharMatcher.is('/').trimLeadingFrom(gcsLocation);
 
     String bucketName;
     if (gcsLocation.indexOf('/') < 0) {
@@ -98,14 +106,6 @@ public class GcsDataflowProjectClient {
       bucketName = gcsLocation.substring(0, gcsLocation.indexOf('/'));
     }
     return bucketName;
-  }
-
-  public static String stripGcsPrefix(String gcsPath) {
-    if (gcsPath.startsWith(GCS_PREFIX)) {
-      return gcsPath.substring(GCS_PREFIX.length());
-    } else {
-      return gcsPath;
-    }
   }
 
   public static String toGcsLocationUri(String location) {

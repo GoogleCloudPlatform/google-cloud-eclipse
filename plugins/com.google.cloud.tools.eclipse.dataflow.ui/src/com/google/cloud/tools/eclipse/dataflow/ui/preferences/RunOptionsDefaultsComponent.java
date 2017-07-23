@@ -44,7 +44,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusAdapter;
@@ -260,18 +259,17 @@ public class RunOptionsDefaultsComponent {
       verifyJob.cancel();
     }
 
-    IStatus status = validateStagingLocation();
-    if (!status.isOK()) {
-      messageTarget.setError(status.getMessage());
-      return;
-    }
-
     final String bucketNamePart = extractBucketNamePart();
-    // Validation may succeed with an empty bucket name (but only when there is no GCS object name).
     if (bucketNamePart.isEmpty()) {
       // If the bucket name is empty, we don't have anything to verify; and we don't have any
       // interesting messaging.
       setPageComplete(true);
+      return;
+    }
+
+    IStatus status = bucketNameStatus();
+    if (!status.isOK()) {
+      messageTarget.setError(status.getMessage());
       return;
     }
 
@@ -297,16 +295,17 @@ public class RunOptionsDefaultsComponent {
               }
 
               if (result.accessible) {
-                messageTarget.setInfo("Verified bucket %s is accessible." + bucketNamePart);
+                messageTarget.setInfo(
+                    String.format("Verified bucket %s is accessible.", bucketNamePart));
                 createButton.setEnabled(false);
                 setPageComplete(true);
               } else {
-                messageTarget.setError(String.format("Couldn't fetch bucket %s", bucketNamePart));
+                messageTarget.setError(String.format("Couldn't fetch bucket %s.", bucketNamePart));
                 createButton.setEnabled(true);
                 setPageComplete(false);
               }
             } catch (InterruptedException | ExecutionException e) {
-              messageTarget.setError(String.format("Couldn't fetch bucket %s", bucketNamePart));
+              messageTarget.setError(String.format("Couldn't fetch bucket %s.", bucketNamePart));
               setPageComplete(false);
             }
           }
@@ -396,23 +395,16 @@ public class RunOptionsDefaultsComponent {
     return GcsDataflowProjectClient.toGcsBucketName(stagingLocationInput.getText());
   }
 
-  private IStatus validateStagingLocation() {
-    String bucketName = extractBucketNamePart();
-    if (bucketName.isEmpty()) {
-      String gcsPath = GcsDataflowProjectClient.stripGcsPrefix(stagingLocationInput.getText());
-      if (!gcsPath.isEmpty()) {
-        // Object part is not null; for example, input value is "/something" or 'gs:///something'.
-        return new Status(IStatus.ERROR, DataflowUiPlugin.PLUGIN_ID, "Bucket name part is empty.");
-      }
-    }
-    return bucketNameValidator.validate(bucketName);
+  @VisibleForTesting
+  IStatus bucketNameStatus() {
+    return bucketNameValidator.validate(extractBucketNamePart());
   }
 
   private class EnableCreateButton implements ModifyListener {
 
     @Override
     public void modifyText(ModifyEvent event) {
-      boolean enabled = !extractBucketNamePart().isEmpty() && validateStagingLocation().isOK();
+      boolean enabled = !extractBucketNamePart().isEmpty() && bucketNameStatus().isOK();
       createButton.setEnabled(enabled);
     }
 
