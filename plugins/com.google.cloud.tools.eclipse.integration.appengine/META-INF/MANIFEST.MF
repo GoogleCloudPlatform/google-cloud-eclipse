@@ -18,7 +18,7 @@ Require-Bundle: org.eclipse.core.resources;bundle-version="3.10.1",
  com.google.cloud.tools.eclipse.appengine.standard.java8;bundle-version="0.1.0",
  com.google.cloud.tools.eclipse.appengine.localserver;bundle-version="0.1.0",
  com.google.cloud.tools.eclipse.appengine.facets;bundle-version="0.1.0"
-Import-Package: com.google.cloud.tools.appengine.cloudsdk;version="0.2.6",
+Import-Package: com.google.cloud.tools.appengine.cloudsdk;version="0.3.6",
  com.google.cloud.tools.eclipse.swtbot,
  com.google.cloud.tools.eclipse.test.util,
  com.google.cloud.tools.eclipse.test.util.project,
