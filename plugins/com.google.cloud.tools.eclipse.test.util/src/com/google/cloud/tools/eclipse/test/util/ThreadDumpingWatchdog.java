@@ -50,14 +50,27 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
   private final TimeUnit unit;
   private final boolean ignoreUselessThreads;
 
+  private String title;
   private Description description;
   private Timer timer;
   private Stopwatch stopwatch;
+  private Stopwatch dumpingTime;
 
   /** Dump report right now. */
   public static void report() {
     new ThreadDumpingWatchdog(0, TimeUnit.DAYS).run();
   }
+
+  /**
+   * Dump report with new title.
+   */
+  public static void report(String title, Stopwatch stopwatch) {
+    ThreadDumpingWatchdog watchdog = new ThreadDumpingWatchdog(0, TimeUnit.DAYS);
+    watchdog.title = title;
+    watchdog.stopwatch = stopwatch;
+    watchdog.run();
+  }
+
 
   public ThreadDumpingWatchdog(long period, TimeUnit unit) {
     this(period, unit, true);
@@ -103,7 +116,7 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
 
   @Override
   public void run() {
-    Stopwatch dumpingTime = Stopwatch.createStarted();
+    dumpingTime = Stopwatch.createStarted();
     ThreadMXBean bean = ManagementFactory.getThreadMXBean();
     ThreadInfo[] infos = bean.dumpAllThreads(true, true);
     Arrays.sort(infos, new Comparator<ThreadInfo>() {
@@ -116,14 +129,14 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
     StringBuilder sb = new StringBuilder();
     sb.append("\n+-------------------------------------------------------------------------------");
     sb.append("\n| STACK DUMP @ ").append(stopwatch);
+    if (title != null) {
+      sb.append(": ").append(title);
+    }
     if (description != null) {
       sb.append(": ").append(description);
     }
     sb.append("\n|");
     dumpEclipseLocks(sb, "| ");
-
-    sb.append("\n|");
-    dumpEclipseJobs(sb, "| ");
 
     sb.append("\n|");
     int uselessThreadsCount = 0;
@@ -189,6 +202,7 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
       sb.append("\n").append(linePrefix);
       sb.append("\n").append(linePrefix).append("Eclipse Locks:");
       sb.append("\n").append(linePrefix).append(debugOutput.replace("\n", "\n" + linePrefix));
+      sb.append("\n").append(linePrefix).append("[").append(dumpingTime).append("]");
     } catch (SecurityException | IllegalArgumentException | ReflectiveOperationException ex) {
       sb.append("\n").append(linePrefix).append("Eclipse Lock information not available");
     }
@@ -226,6 +240,7 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
       Job job = jobs[index];
       dumpJob(sb, linePrefix, job, job.getThread());
     }
+    sb.append("\n").append(linePrefix).append("[").append(dumpingTime).append("]");
 
     // Try to dump ThreadJobs, which are threads that access ISchedulingRules
     try {
@@ -239,6 +254,7 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
           dumpJob(sb, linePrefix, (Job) entry.getValue(), (Thread) entry.getKey());
         }
       }
+      sb.append("\n").append(linePrefix).append("[").append(dumpingTime).append("]");
     } catch (Exception ex) {
       System.err.println("Unable to obtain JobManager.implicitJobs: " + ex);
     }
@@ -267,7 +283,7 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
     Object blockingJob = null;
     try {
       blockingJob = ReflectionUtil.invoke(Job.getJobManager(), "findBlockingJob",
-          new Class<?>[] {InternalJob.class}, InternalJob.class, job);
+          InternalJob.class, new Class<?>[] {InternalJob.class}, job);
     } catch (Exception ex) {
       System.err.println("Unable to fetch blocking-job: " + ex);
     }
@@ -284,10 +300,11 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
         job,
         job.getClass().getName(),
         (job.getJobGroup() != null ? " [group=" + job.getJobGroup() + "]" : "")));
-    //@formatter:on
     if (blockingJob != null) {
-      sb.append("\n").append(linePrefix).append("    - blocked by: " + blockingJob);
+      sb.append("\n").append(linePrefix)
+          .append(String.format("    - blocked by: %s (%s)", blockingJob, blockingJob.getClass()));
     }
+    //@formatter:on
   }
 
   /**
@@ -429,5 +446,4 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
       sb.append(" (in native code)");
     }
   }
-
 }
