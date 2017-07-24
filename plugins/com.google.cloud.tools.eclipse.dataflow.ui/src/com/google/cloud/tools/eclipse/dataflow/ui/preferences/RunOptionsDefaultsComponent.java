@@ -286,6 +286,10 @@ public class RunOptionsDefaultsComponent {
         new Runnable() {
           @Override
           public void run() {
+            if (target.isDisposed()) {
+              return;
+            }
+
             try {
               VerifyStagingLocationResult result = resultFuture.get();
               if (!result.email.equals(accountSelector.getSelectedEmail())
@@ -370,6 +374,10 @@ public class RunOptionsDefaultsComponent {
      */
     @Override
     public void run() {
+      if (target.isDisposed()) {
+        return;
+      }
+
       try {
         SortedSet<String> stagingLocations = stagingLocationsFuture.get();
         messageTarget.clear();

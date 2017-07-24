@@ -404,6 +404,10 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
         new Runnable() {
           @Override
           public void run() {
+            if (internalComposite.isDisposed()) {
+              return;
+            }
+
             try {
               pipelineOptionsForm.updateForm(launchConfiguration, optionsHierarchyFuture.get());
               updateLaunchConfigurationDialog();
