@@ -392,6 +392,7 @@ public class RunOptionsDefaultsComponent {
   private static final BucketNameValidator bucketNameValidator = new BucketNameValidator();
 
   private String extractBucketNamePart() {
+    // Don't trim text unless you consistently trim everywhere else (e.g., "getStagingLocation()").
     return GcsDataflowProjectClient.toGcsBucketName(stagingLocationInput.getText());
   }
 

@@ -21,10 +21,11 @@ import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.model.Bucket;
 import com.google.api.services.storage.model.Buckets;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
-import com.google.common.base.CharMatcher;
+import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -91,26 +92,21 @@ public class GcsDataflowProjectClient {
 
   public static String toGcsBucketName(String stagingLocation) {
     String gcsLocation;
-    if (stagingLocation.startsWith(GCS_PREFIX)) {
+    if (stagingLocation.toLowerCase(Locale.US).startsWith(GCS_PREFIX)) {
       gcsLocation = stagingLocation.substring(GCS_PREFIX.length());
     } else {
       gcsLocation = stagingLocation;
     }
 
-    gcsLocation = CharMatcher.is('/').trimLeadingFrom(gcsLocation);
-
-    String bucketName;
-    if (gcsLocation.indexOf('/') < 0) {
-      bucketName = gcsLocation;
-    } else {
-      bucketName = gcsLocation.substring(0, gcsLocation.indexOf('/'));
-    }
-    return bucketName;
+    List<String> splitted = Splitter.on('/').omitEmptyStrings().splitToList(gcsLocation);
+    return splitted.isEmpty() ? "" : splitted.get(0);
   }
 
   public static String toGcsLocationUri(String location) {
-    if (Strings.isNullOrEmpty(location) || location.startsWith(GCS_PREFIX)) {
+    if (Strings.isNullOrEmpty(location)) {
       return location;
+    } else if (location.toLowerCase(Locale.US).startsWith(GCS_PREFIX)) {
+      return GCS_PREFIX + location.substring(GCS_PREFIX.length());
     }
     return GCS_PREFIX + location;
   }
