@@ -25,14 +25,6 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.ImmutableSortedSet.Builder;
-import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
-import org.apache.maven.artifact.versioning.VersionRange;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Status;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -44,6 +36,14 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+import org.apache.maven.artifact.versioning.VersionRange;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Status;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 /**
  * {@link DataflowArtifactRetriever} provides access to Maven artifacts for Dataflow projects, as
@@ -120,7 +120,7 @@ public class DataflowArtifactRetriever {
    * version.
    */
   public ArtifactVersion getLatestSdkVersion(VersionRange versionRange) {
-    return getLatestIncrementalVersion(DataflowMavenCoordinates.GROUP_ID, versionRange);
+    return getLatestIncrementalVersion(DataflowMavenCoordinates.ARTIFACT_ID, versionRange);
   }
 
   /**

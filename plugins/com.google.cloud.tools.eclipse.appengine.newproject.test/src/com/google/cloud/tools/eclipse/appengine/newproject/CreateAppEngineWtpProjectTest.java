@@ -48,7 +48,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-abstract public class CreateAppEngineWtpProjectTest {
+public abstract class CreateAppEngineWtpProjectTest {
 
   @Rule public ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
 
@@ -56,9 +56,9 @@ abstract public class CreateAppEngineWtpProjectTest {
   protected final AppEngineProjectConfig config = new AppEngineProjectConfig();
   protected IProject project;
 
-  abstract protected CreateAppEngineWtpProject newCreateAppEngineWtpProject();
+  protected abstract CreateAppEngineWtpProject newCreateAppEngineWtpProject();
 
-  @SuppressWarnings("unused")  // Let subclasses throw arbitrary exceptions during "setUp()"
+  // Let subclasses throw arbitrary exceptions during "setUp()"
   @Before
   public void setUp() throws Exception {
     IWorkspace workspace = ResourcesPlugin.getWorkspace();
