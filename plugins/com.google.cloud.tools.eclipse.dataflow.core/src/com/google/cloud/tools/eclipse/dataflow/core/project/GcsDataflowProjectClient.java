@@ -90,15 +90,22 @@ public class GcsDataflowProjectClient {
     }
   }
 
-  public static String toGcsBucketName(String stagingLocation) {
-    String gcsLocation;
-    if (stagingLocation.toLowerCase(Locale.US).startsWith(GCS_PREFIX)) {
-      gcsLocation = stagingLocation.substring(GCS_PREFIX.length());
+  /**
+   * Extracts a bucket name from a given GCS URL. For example, {@code "/bucket/object"} returns
+   * {@code "bucket"}.
+   *
+   * @param gcsUrl GCS URL, which may or may not start with case-insensitive {@link #GCS_PREFIX}
+   * @return bucket name, which can be an empty string
+   */
+  public static String toGcsBucketName(String gcsUrl) {
+    String noPrefixUrl;
+    if (gcsUrl.toLowerCase(Locale.US).startsWith(GCS_PREFIX)) {
+      noPrefixUrl = gcsUrl.substring(GCS_PREFIX.length());
     } else {
-      gcsLocation = stagingLocation;
+      noPrefixUrl = gcsUrl;
     }
 
-    List<String> splitted = Splitter.on('/').omitEmptyStrings().splitToList(gcsLocation);
+    List<String> splitted = Splitter.on('/').omitEmptyStrings().splitToList(noPrefixUrl);
     return splitted.isEmpty() ? "" : splitted.get(0);
   }
 
