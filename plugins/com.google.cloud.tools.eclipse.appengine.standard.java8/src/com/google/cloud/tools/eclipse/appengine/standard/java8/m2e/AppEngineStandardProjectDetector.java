@@ -18,6 +18,8 @@ package com.google.cloud.tools.eclipse.appengine.standard.java8.m2e;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -32,6 +34,8 @@ import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
  * Configure facets on Maven import.
  */
 public class AppEngineStandardProjectDetector extends AbstractProjectConfigurator {
+  private static final Logger logger =
+      Logger.getLogger(AppEngineStandardProjectDetector.class.getName());
 
   @Override
   public void configure(ProjectConfigurationRequest request, IProgressMonitor monitor)
@@ -39,12 +43,19 @@ public class AppEngineStandardProjectDetector extends AbstractProjectConfigurato
     IProject project = request.getProject();
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);
     if (facetedProject == null || facetedProject.hasProjectFacet(AppEngineStandardFacet.FACET)) {
+      logger.info("Project " + project.getName() + " already has AES facet");
       return;
     }
     IFile appEngineWebXml = WebProjectUtil.findInWebInf(project, new Path("appengine-web.xml"));
     if (appEngineWebXml != null && appEngineWebXml.exists()) {
+      logger.warning("Project " + project.getName() + " about to install AES facet");
+      try {
       AppEngineStandardFacet.installAppEngineFacet(facetedProject, true, monitor);
+      } catch(Exception ex) {
+        logger.log(Level.SEVERE, "Project " + project.getName() + " error installing AES facet", ex);
+      }
+    } else {
+      logger.warning("Project " + project.getName() + " cannot find appengine-web.xml");
     }
   }
-
 }
