@@ -13,8 +13,26 @@
   <packaging>eclipse-plugin</packaging>
 
   <!--
+    This project provides versions of the standard test libraries from Maven Central with
+    appropriate package-uses information.  Projects can simply `Require-Bundle:
+    com.google.cloud.tools.eclipse.test.dependencies` and write tests.
+
+    This project is necessary as some of the standard testing libraries (and their Eclipse Orbit
+    counterparts) have missing or broken OSGi metadata.  Basically, this project does
+    two things:
+
+      - it uses `Require-Bundle` to pull in and re-export the existing Hamcrest and JUnit bundles
+      - it copies all Maven dependencies with test-scope into the `lib` directory using
+        the `dependency:copy-dependencies` goal, and then exports their packages.
+
+    This approach ideally requires use of Ian Brandt's "Maven Dependency Plugin" for m2e, which
+    causes the `dependency:copy-dependencies` to be performed during the _process-sources_ phase
+    on a full build.
+   -->
+
+  <!--
     Dependencies that are then exported to OSGi bundles.
-    We pull junit and hamcrest from Orbit.
+    JUnit and Hamcrest are obtained from Orbit.
   -->
   <dependencies>
     <dependency>
@@ -31,6 +49,7 @@
 
   <build>
     <plugins>
+      <!-- Copy all test-dependencies to lib/ -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
