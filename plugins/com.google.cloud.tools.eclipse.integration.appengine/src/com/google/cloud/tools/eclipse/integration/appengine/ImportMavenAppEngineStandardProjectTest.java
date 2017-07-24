@@ -25,7 +25,6 @@ import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.ArrayAssertions;
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
-import com.google.common.base.Stopwatch;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -38,7 +37,6 @@ import org.eclipse.jdt.launching.environments.IExecutionEnvironmentsManager;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
-import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
@@ -76,29 +74,14 @@ public class ImportMavenAppEngineStandardProjectTest extends BaseProjectTest {
 
     ProjectUtils.failIfBuildErrors("Imported Maven project has errors", project);
 
-    final IFacetedProject facetedProject = ProjectFacetsManager.create(project);
+    IFacetedProject facetedProject = ProjectFacetsManager.create(project);
     assertNotNull("m2e-wtp should create a faceted project", facetedProject);
-
-    final Stopwatch stopwatch = Stopwatch.createStarted();
-    bot.waitUntil(new DefaultCondition() {
-      @Override
-      public boolean test() throws Exception {
-        IProjectFacetVersion facetVersion =
-            facetedProject.getProjectFacetVersion(AppEngineStandardFacet.FACET);
-        if (facetVersion == null) {
-          ThreadDumpingWatchdog.report("Waiting for App Engine Standard facet", stopwatch);
-        }
-        return facetVersion != null;
-      }
-
-      @Override
-      public String getFailureMessage() {
-        return "Project does not have AES facet!";
-      }
-    });
 
     IProjectFacetVersion appEngineFacetVersion =
         facetedProject.getProjectFacetVersion(AppEngineStandardFacet.FACET);
+    if (appEngineFacetVersion == null) {
+      ThreadDumpingWatchdog.report();
+    }
     assertNotNull("Project does not have AES facet", appEngineFacetVersion);
     assertEquals("Project should have AES Java 8", "JRE8",
         appEngineFacetVersion.getVersionString());
