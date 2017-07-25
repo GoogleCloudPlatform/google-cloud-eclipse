@@ -92,7 +92,8 @@ public class GcsDataflowProjectClient {
 
   /**
    * Extracts a bucket name from a given GCS URL. For example, {@code "/bucket/object"} returns
-   * {@code "bucket"}.
+   * {@code "bucket"}. The method assumes that the input is a valid GCS URL. (It just returns
+   * the first segment split by {@code '/'}, ignoring leading {@code '/'}s and empty segments.)
    *
    * @param gcsUrl GCS URL, which may or may not start with case-insensitive {@link #GCS_PREFIX}
    * @return bucket name, which can be an empty string
