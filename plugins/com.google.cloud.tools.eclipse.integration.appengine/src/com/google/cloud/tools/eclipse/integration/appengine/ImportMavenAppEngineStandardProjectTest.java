@@ -109,6 +109,4 @@ public class ImportMavenAppEngineStandardProjectTest extends BaseProjectTest {
     ZipUtil.unzip(zippedFile, destination, new NullProgressMonitor());
     return destination;
   }
-
-
 }
