@@ -34,7 +34,7 @@
    <extension
         point="org.eclipse.wst.common.project.facet.core.presets">
      <static-preset
-           id="com.google.cloud.tools.eclipse.appengine.standard.java8.preset">
+           id="com.google.cloud.tools.eclipse.appengine.standard.jre8.preset">
         <label>%appengine.standard.jre8.preset</label>
         <facet
               id="com.google.cloud.tools.eclipse.appengine.facets.standard"

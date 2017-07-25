@@ -34,7 +34,7 @@ public class AppEngineStandardJava8PresetTest {
   @Test
   public void presetExists() {
     IPreset preset = ProjectFacetsManager
-        .getPreset("com.google.cloud.tools.eclipse.appengine.standard.java8.preset");
+        .getPreset("com.google.cloud.tools.eclipse.appengine.standard.jre8.preset");
     assertNotNull(preset);
     assertEquals("App Engine standard environment with Java 8 (beta), Servlet 3.1",
         preset.getLabel());
