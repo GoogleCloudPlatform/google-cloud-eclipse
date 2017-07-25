@@ -79,9 +79,6 @@ public class ImportMavenAppEngineStandardProjectTest extends BaseProjectTest {
 
     IProjectFacetVersion appEngineFacetVersion =
         facetedProject.getProjectFacetVersion(AppEngineStandardFacet.FACET);
-    if (appEngineFacetVersion == null) {
-      ThreadDumpingWatchdog.report();
-    }
     assertNotNull("Project does not have AES facet", appEngineFacetVersion);
     assertEquals("Project should have AES Java 8", "JRE8",
         appEngineFacetVersion.getVersionString());
