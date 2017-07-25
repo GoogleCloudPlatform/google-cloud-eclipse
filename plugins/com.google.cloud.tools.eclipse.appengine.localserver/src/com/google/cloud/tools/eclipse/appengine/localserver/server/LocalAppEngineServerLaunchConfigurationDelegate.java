@@ -38,7 +38,7 @@ import com.google.common.net.InetAddresses;
 import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -98,7 +98,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     extends AbstractJavaLaunchConfigurationDelegate {
 
   static final boolean DEV_APPSERVER2 = false;
-  
+
   private static final Logger logger =
       Logger.getLogger(LocalAppEngineServerLaunchConfigurationDelegate.class.getName());
 
@@ -199,7 +199,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
   @VisibleForTesting
   void checkConflictingLaunches(ILaunchConfigurationType launchConfigType, String mode,
       DefaultRunConfiguration runConfig, ILaunch[] launches) throws CoreException {
-    
+
     for (ILaunch launch : launches) {
       if (launch.isTerminated()
           || launch.getLaunchConfiguration() == null
@@ -236,7 +236,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     if (server.getHost() != null) {
       devServerRunConfiguration.setHost(server.getHost());
     }
-    
+
     int serverPort = getPortAttribute(LocalAppEngineServerBehaviour.SERVER_PORT_ATTRIBUTE_NAME,
         LocalAppEngineServerBehaviour.DEFAULT_SERVER_PORT, configuration, server);
     if (serverPort >= 0) {
@@ -252,13 +252,13 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
         // default to 1 instance to simplify debugging
         devServerRunConfiguration.setMaxModuleInstances(1);
       }
-      
+
       String adminHost = getAttribute(LocalAppEngineServerBehaviour.ADMIN_HOST_ATTRIBUTE_NAME,
           LocalAppEngineServerBehaviour.DEFAULT_ADMIN_HOST, configuration, server);
       if (!Strings.isNullOrEmpty(adminHost)) {
         devServerRunConfiguration.setAdminHost(adminHost);
       }
-  
+
       int adminPort = getPortAttribute(LocalAppEngineServerBehaviour.ADMIN_PORT_ATTRIBUTE_NAME,
           -1, configuration, server);
       if (adminPort >= 0) {
@@ -420,7 +420,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
 
     LocalAppEngineServerBehaviour serverBehaviour = (LocalAppEngineServerBehaviour) server
         .loadAdapter(LocalAppEngineServerBehaviour.class, null);
-   
+
     setDefaultSourceLocator(launch, configuration);
 
     List<File> runnables = new ArrayList<>();
@@ -458,12 +458,12 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
         int debugPort = getDebugPort();
         setupDebugTarget(devServerRunConfiguration, launch, debugPort, monitor);
       }
-      
+
       IJavaProject javaProject = JavaCore.create(modules[0].getProject());
       IVMInstall vmInstall = JavaRuntime.getVMInstall(javaProject);
-      
-      String javaHome = vmInstall.getInstallLocation().getAbsolutePath();
-      serverBehaviour.startDevServer(mode, devServerRunConfiguration, Paths.get(javaHome),
+
+      Path javaHome = vmInstall.getInstallLocation().toPath();
+      serverBehaviour.startDevServer(mode, devServerRunConfiguration, javaHome,
           outputStream, errorStream);
     } catch (CoreException ex) {
       launch.terminate();

@@ -43,6 +43,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jdt.launching.JavaRuntime;
 
 /**
  * Executes a job that deploys a project to App Engine standard or flexible environment.
@@ -169,7 +173,7 @@ public class DeployJob extends WorkspaceJob {
   }
 
   private IStatus stageProject(Path credentialFile,
-      IPath stagingDirectory, IProgressMonitor monitor) {
+      IPath stagingDirectory, IProgressMonitor monitor) throws CoreException {
     SubMonitor progress = SubMonitor.convert(monitor, 100);
     RecordProcessError stagingExitListener = new RecordProcessError();
     CloudSdk cloudSdk = getCloudSdk(credentialFile, stagingStdoutLineListener, stagingExitListener);
@@ -191,7 +195,7 @@ public class DeployJob extends WorkspaceJob {
   }
 
   private IStatus deployProject(Path credentialFile, IPath stagingDirectory,
-      IProgressMonitor monitor) {
+      IProgressMonitor monitor) throws CoreException {
     RecordProcessError deployExitListener = new RecordProcessError();
     CloudSdk cloudSdk = getCloudSdk(credentialFile, deployStdoutLineListener, deployExitListener);
 
@@ -205,9 +209,9 @@ public class DeployJob extends WorkspaceJob {
     return deployExitListener.getExitStatus();
   }
 
-  private CloudSdk getCloudSdk(Path credentialFile,
-      ProcessOutputLineListener stdoutLineListener, ProcessExitListener processExitListener) {
-    CloudSdk cloudSdk = new CloudSdk.Builder()
+  private CloudSdk getCloudSdk(Path credentialFile, ProcessOutputLineListener stdoutLineListener,
+      ProcessExitListener processExitListener) throws CoreException {
+    CloudSdk.Builder builder = new CloudSdk.Builder()
         .addStdOutLineListener(stdoutLineListener)
         .addStdErrLineListener(stderrLineListener)
         .addStdErrLineListener(errorCollectingLineListener)
@@ -216,9 +220,16 @@ public class DeployJob extends WorkspaceJob {
         .exitListener(processExitListener)
         .appCommandMetricsEnvironment(CloudToolsInfo.METRICS_NAME)
         .appCommandMetricsEnvironmentVersion(CloudToolsInfo.getToolsVersion())
-        .appCommandOutputFormat("json")
-        .build();
-    return cloudSdk;
+        .appCommandOutputFormat("json");
+
+    IJavaProject javaProject = JavaCore.create(project);
+    IVMInstall vmInstall = JavaRuntime.getVMInstall(javaProject);
+    if (vmInstall != null) {
+      Path javaHome = vmInstall.getInstallLocation().toPath();
+      builder.javaHome(javaHome);
+    }
+
+    return builder.build();
   }
 
   private IStatus openAppInBrowser() {
