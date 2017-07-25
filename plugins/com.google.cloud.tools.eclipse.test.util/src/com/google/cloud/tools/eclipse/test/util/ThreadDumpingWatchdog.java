@@ -240,7 +240,6 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
       Job job = jobs[index];
       dumpJob(sb, linePrefix, job, job.getThread());
     }
-    sb.append("\n").append(linePrefix).append("[").append(dumpingTime).append("]");
 
     // Try to dump ThreadJobs, which are threads that access ISchedulingRules
     try {
@@ -254,7 +253,6 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
           dumpJob(sb, linePrefix, (Job) entry.getValue(), (Thread) entry.getKey());
         }
       }
-      sb.append("\n").append(linePrefix).append("[").append(dumpingTime).append("]");
     } catch (Exception ex) {
       System.err.println("Unable to obtain JobManager.implicitJobs: " + ex);
     }

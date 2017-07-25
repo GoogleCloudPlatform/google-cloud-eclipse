@@ -8,6 +8,7 @@ Bundle-Vendor: Google, Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.google.cloud.tools.appengine;version="0.3.5",
  com.google.cloud.tools.eclipse.appengine.facets.convert,
+ com.google.cloud.tools.eclipse.test.util,
  com.google.cloud.tools.eclipse.test.util.project,
  com.google.cloud.tools.eclipse.util.io,
  org.eclipse.core.runtime;version="3.5.0",

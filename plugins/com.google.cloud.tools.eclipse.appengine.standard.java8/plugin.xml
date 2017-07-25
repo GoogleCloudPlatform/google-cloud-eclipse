@@ -110,7 +110,7 @@
   </extension>
   <extension
         id="appengineWeb"
-        name="App Engine Standard Java 8 runtime"
+        name="%appengine.standard.builder.name"
         point="org.eclipse.core.resources.builders">
      <builder
            callOnEmptyDelta="false">
@@ -133,7 +133,7 @@
      <configurator
            class="com.google.cloud.tools.eclipse.appengine.standard.java8.m2e.AppEngineStandardProjectDetector"
            id="com.google.cloud.tools.eclipse.appengine.standard.m2e.configurator"
-           name="App Engine standard conversion"
+           name="%appengine.standard.configurator.name"
            runsAfter="org.eclipse.m2e.jdt.javaConfigurator,org.maven.ide.eclipse.configuration.wtp.configurator">
      </configurator>
   </extension>
