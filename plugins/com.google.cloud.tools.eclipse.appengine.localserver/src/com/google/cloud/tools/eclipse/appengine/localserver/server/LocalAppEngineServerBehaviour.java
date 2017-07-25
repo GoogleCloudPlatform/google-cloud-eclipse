@@ -299,9 +299,10 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
   /**
    * Starts the development server.
    *
+   * @param mode the launch mode (see ILaunchManager.*_MODE constants)
    * @param console the stream (Eclipse console) to send development server process output to
    */
-  void startDevServer(DefaultRunConfiguration devServerRunConfiguration,
+  void startDevServer(String mode, DefaultRunConfiguration devServerRunConfiguration,
       Path javaHomePath, MessageConsoleStream outputStream, MessageConsoleStream errorStream)
       throws CoreException {
     
@@ -334,6 +335,7 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
         ifNull(devServerRunConfiguration.getApiPort(), DEFAULT_API_PORT), portInUse);
 
     setServerState(IServer.STATE_STARTING);
+    setMode(mode);
 
     // Create dev app server instance
     initializeDevServer(outputStream, errorStream, javaHomePath);

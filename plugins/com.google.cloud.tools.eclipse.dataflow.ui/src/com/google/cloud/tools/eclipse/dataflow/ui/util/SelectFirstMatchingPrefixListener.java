@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.dataflow.ui.util;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSortedSet;
 import java.util.SortedSet;
 import org.eclipse.swt.events.ModifyEvent;
@@ -29,25 +30,32 @@ import org.eclipse.swt.widgets.Combo;
  */
 public class SelectFirstMatchingPrefixListener implements ModifyListener {
   private final Combo targetCombo;
-  private String lastString;
+  @VisibleForTesting
+  String lastString = "";
+  @VisibleForTesting
+  String lastAutoSet = "";
 
   private SortedSet<String> contents;
 
   public SelectFirstMatchingPrefixListener(Combo targetCombo) {
     this.targetCombo = targetCombo;
-    lastString = "";
     contents = ImmutableSortedSet.of();
   }
 
   public void setContents(SortedSet<String> contents) {
     this.contents = ImmutableSortedSet.copyOf(contents);
+    lastString = "";
+    lastAutoSet = "";
   }
 
   @Override
   public void modifyText(ModifyEvent event) {
-    String lastAsOfEvent = lastString;
     String prefix = targetCombo.getText();
+    if (lastAutoSet.equals(prefix) || lastString.equals(prefix)){
+      return;
+    }
 
+    String lastAsOfEvent = lastString;
     lastString = prefix;
     // If content was deleted, don't immediately replace it
     if (prefix.length() < lastAsOfEvent.length()) {
@@ -65,9 +73,11 @@ public class SelectFirstMatchingPrefixListener implements ModifyListener {
     if (!firstMatch.startsWith(prefix) || firstMatch.equals(prefix)) {
       return;
     }
+
     int comboIndex = contents.size() - matchesAndLater.size();
     // Don't fire on this modification of the combo
     targetCombo.removeModifyListener(this);
+    lastAutoSet = firstMatch;
     targetCombo.select(comboIndex);
 
     // Select the text that was added

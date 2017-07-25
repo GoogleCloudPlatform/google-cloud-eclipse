@@ -39,7 +39,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSortedSet;
-import java.util.Locale;
 import java.util.SortedSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -123,7 +122,7 @@ public class RunOptionsDefaultsComponent {
 
     Label comboLabel = new Label(target, SWT.NULL);
     stagingLocationInput = new Combo(target, SWT.DROP_DOWN);
-    createButton = ButtonFactory.newPushButton(target, "&Create");
+    createButton = ButtonFactory.newPushButton(target, "&Create Bucket");
     createButton.setEnabled(false);
 
     accountSelector.selectAccount(preferences.getDefaultAccountEmail());
@@ -259,8 +258,10 @@ public class RunOptionsDefaultsComponent {
       // FIXME: this has no effect, as "VerifyStagingLocationJob" doesn't honor cancellation.
       verifyJob.cancel();
     }
-    if (trimBucketName().isEmpty()) {
-      // If the staging location is empty, we don't have anything to verify; and we don't have any
+
+    final String bucketNamePart = extractBucketNamePart();
+    if (bucketNamePart.isEmpty()) {
+      // If the bucket name is empty, we don't have anything to verify; and we don't have any
       // interesting messaging.
       setPageComplete(true);
       return;
@@ -286,6 +287,10 @@ public class RunOptionsDefaultsComponent {
         new Runnable() {
           @Override
           public void run() {
+            if (target.isDisposed()) {
+              return;
+            }
+
             try {
               VerifyStagingLocationResult result = resultFuture.get();
               if (!result.email.equals(accountSelector.getSelectedEmail())
@@ -294,16 +299,17 @@ public class RunOptionsDefaultsComponent {
               }
 
               if (result.accessible) {
-                messageTarget.setInfo("Found staging location " + stagingLocation);
+                messageTarget.setInfo(
+                    String.format("Verified bucket %s is accessible.", bucketNamePart));
                 createButton.setEnabled(false);
                 setPageComplete(true);
               } else {
-                messageTarget.setError(String.format("Couldn't fetch bucket %s", stagingLocation));
+                messageTarget.setError(String.format("Couldn't fetch bucket %s.", bucketNamePart));
                 createButton.setEnabled(true);
                 setPageComplete(false);
               }
             } catch (InterruptedException | ExecutionException e) {
-              messageTarget.setError(String.format("Couldn't fetch bucket %s", stagingLocation));
+              messageTarget.setError(String.format("Couldn't fetch bucket %s.", bucketNamePart));
               setPageComplete(false);
             }
           }
@@ -370,6 +376,10 @@ public class RunOptionsDefaultsComponent {
      */
     @Override
     public void run() {
+      if (target.isDisposed()) {
+        return;
+      }
+
       try {
         SortedSet<String> stagingLocations = stagingLocationsFuture.get();
         messageTarget.clear();
@@ -389,23 +399,21 @@ public class RunOptionsDefaultsComponent {
 
   private static final BucketNameValidator bucketNameValidator = new BucketNameValidator();
 
-  private String trimBucketName() {
-    String bucketName = stagingLocationInput.getText().trim();
-    if (bucketName.toLowerCase(Locale.US).startsWith("gs://")) {
-      bucketName = bucketName.substring(5);
-    }
-    return bucketName;
+  private String extractBucketNamePart() {
+    // Don't trim text unless you consistently trim everywhere else (e.g., "getStagingLocation()").
+    return GcsDataflowProjectClient.toGcsBucketName(stagingLocationInput.getText());
   }
 
-  private IStatus bucketNameStatus() {
-    return bucketNameValidator.validate(trimBucketName());
+  @VisibleForTesting
+  IStatus bucketNameStatus() {
+    return bucketNameValidator.validate(extractBucketNamePart());
   }
 
   private class EnableCreateButton implements ModifyListener {
 
     @Override
     public void modifyText(ModifyEvent event) {
-      boolean enabled = !trimBucketName().isEmpty() && bucketNameStatus().isOK();
+      boolean enabled = !extractBucketNamePart().isEmpty() && bucketNameStatus().isOK();
       createButton.setEnabled(enabled);
     }
 

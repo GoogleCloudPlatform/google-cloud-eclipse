@@ -8,6 +8,7 @@ Bundle-ClassPath: .
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Fragment-Host: com.google.cloud.tools.eclipse.dataflow.core
+Require-Bundle: com.google.cloud.tools.eclipse.test.dependencies
 Import-Package: com.google.api.client.googleapis.auth.oauth2;version="1.22.0",
  com.google.api.client.http;version="1.22.0",
  com.google.api.client.json;version="1.22.0",
@@ -15,12 +16,4 @@ Import-Package: com.google.api.client.googleapis.auth.oauth2;version="1.22.0",
  org.eclipse.core.runtime.content,
  org.eclipse.core.runtime.jobs,
  org.eclipse.core.runtime.preferences,
- org.eclipse.jdt.core,
- org.hamcrest;version="1.1.0",
- org.junit;version="4.12.0",
- org.junit.rules;version="4.12.0",
- org.junit.runner;version="4.12.0",
- org.junit.runners;version="4.12.0",
- org.mockito;provider=google;version="1.10.19",
- org.mockito.runners;provider=google;version="1.10.19",
- org.mockito.stubbing;provider=google;version="1.10.19"
+ org.eclipse.jdt.core
