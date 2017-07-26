@@ -147,8 +147,7 @@ public class DeployJob extends WorkspaceJob {
     }
   }
 
-  @VisibleForTesting
-  static Path getProjectVm(IProject project) throws CoreException {
+  private static Path getProjectVm(IProject project) throws CoreException {
     IJavaProject javaProject = JavaCore.create(project);
     IVMInstall vmInstall = JavaRuntime.getVMInstall(javaProject);
     if (vmInstall != null) {

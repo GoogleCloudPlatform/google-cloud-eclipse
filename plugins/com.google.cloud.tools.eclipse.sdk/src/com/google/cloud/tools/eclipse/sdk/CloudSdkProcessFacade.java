@@ -43,8 +43,8 @@ public class CloudSdkProcessFacade {
 
   private CloudSdk cloudSdk;
 
-  public Process process;
-  public boolean canceled;
+  private Process process;
+  private boolean canceled;
   private IStatus exitStatus = Status.OK_STATUS;
   private ProcessOutputLineListener stdOutCaptor;
 
