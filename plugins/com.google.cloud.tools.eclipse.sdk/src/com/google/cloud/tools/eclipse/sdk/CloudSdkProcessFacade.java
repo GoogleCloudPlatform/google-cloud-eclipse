@@ -112,9 +112,11 @@ public class CloudSdkProcessFacade {
   }
 
   public void cancel() {
-    canceled = true;  // not to miss destruction due to race condition
-    if (process != null) {
-      process.destroy();
+    synchronized (this) {
+      canceled = true;  // not to miss destruction due to race condition
+      if (process != null) {
+        process.destroy();
+      }
     }
   }
 
@@ -130,9 +132,11 @@ public class CloudSdkProcessFacade {
   private class StoreProcessObjectListener implements ProcessStartListener {
     @Override
     public void onStart(Process proces) {
-      process = proces;
-      if (canceled) {
-        process.destroy();
+      synchronized (this) {
+        process = proces;
+        if (canceled) {
+          process.destroy();
+        }
       }
     }
   }
