@@ -17,14 +17,14 @@
 package com.google.cloud.tools.eclipse.appengine.deploy;
 
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.cloud.tools.appengine.api.deploy.DefaultDeployConfiguration;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
 import com.google.cloud.tools.eclipse.login.CredentialHelper;
 import com.google.cloud.tools.eclipse.sdk.CloudSdkProcessFacade;
+import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListener;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import com.google.gson.JsonParseException;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -40,6 +40,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.ui.console.MessageConsoleStream;
 
 /**
  * Executes a job that deploys a project to App Engine standard or flexible environment.
@@ -66,8 +67,7 @@ public class DeployJob extends WorkspaceJob {
   private final IPath workDirectory;
   private final ProcessOutputLineListener stagingStdoutLineListener;
   private final ProcessOutputLineListener stderrLineListener;
-  private final DefaultDeployConfiguration deployConfiguration;
-  private final boolean includeOptionalConfigurationFiles;
+  private final DeployPreferences deployPreferences;
   private final StagingDelegate stager;
 
   private CloudSdkProcessFacade deployCloudSdkFacade;
@@ -77,31 +77,27 @@ public class DeployJob extends WorkspaceJob {
   /**
    * @param workDirectory temporary work directory the job can safely use (e.g., for creating and
    *     copying various files to stage and deploy)
-   * @param stagingStdoutLineListener {@link ProcessOutputLineListener} passed to {@link CloudSdk}
-   *     to capture the staging operation stdout (where {@code appcfg.sh} outputs user-visible
-   *     log messages)
-   * @param stderrLineListener {@link ProcessOutputLineListener} passed to {@link CloudSdk} to
-   *     capture the deploy operation stderr (where {@code gcloud app deploy} outputs user-visible
-   *     log messages)
-   * @param deployConfiguration configuration passed to {@link CloudSdk} that describes what and
-   *     how to deploy
-   * @param includeOptionalConfigurationFiles if true, deploys optional XML configuration files
-   *     (e.g., {@code queue.yaml}) together
+   * @param stagingOutputStream {@link MessageConsoleStream} to stream the staging operation stdout
+   *     (where {@code appcfg.sh} outputs user-visible log messages)
+   * @param stderrStream {@link MessageConsoleStream} to stream the deploy operation stderr (where
+   *     {@code gcloud app deploy} outputs user-visible log messages) and the staging operation
+   *     stderr
+   * @param deployPreferences deploy preferences describing what and how to deploy
    */
   public DeployJob(IProject project, Credential credential, IPath workDirectory,
-      ProcessOutputLineListener stagingStdoutLineListener,
-      ProcessOutputLineListener stderrLineListener,
-      DefaultDeployConfiguration deployConfiguration,
-      boolean includeOptionalConfigurationFiles,
+      MessageConsoleStream stagingOutputStream,
+      MessageConsoleStream stderrStream,
+      DeployPreferences deployPreferences,
       StagingDelegate stager) {
     super(Messages.getString("deploy.job.name")); //$NON-NLS-1$
+    Preconditions.checkNotNull(deployPreferences.getProjectId());
+    Preconditions.checkArgument(!deployPreferences.getProjectId().isEmpty());
     this.project = project;
     this.credential = credential;
     this.workDirectory = workDirectory;
-    this.stagingStdoutLineListener = stagingStdoutLineListener;
-    this.stderrLineListener = stderrLineListener;
-    this.deployConfiguration = deployConfiguration;
-    this.includeOptionalConfigurationFiles = includeOptionalConfigurationFiles;
+    stagingStdoutLineListener = new MessageConsoleWriterOutputLineListener(stagingOutputStream);
+    stderrLineListener = new MessageConsoleWriterOutputLineListener(stderrStream);
+    this.deployPreferences = deployPreferences;
     this.stager = stager;
   }
 
@@ -200,12 +196,12 @@ public class DeployJob extends WorkspaceJob {
 
   private IStatus deployProject(IPath stagingDirectory, IProgressMonitor monitor) {
     IPath optionalConfigurationFilesDirectory = null;
-    if (includeOptionalConfigurationFiles) {
+    if (deployPreferences.isIncludeOptionalConfigurationFiles()) {
       optionalConfigurationFilesDirectory = stager.getOptionalConfigurationFilesDirectory();
     }
 
     new AppEngineProjectDeployer().deploy(stagingDirectory, deployCloudSdkFacade.getCloudSdk(),
-        deployConfiguration, optionalConfigurationFilesDirectory, monitor);
+        deployPreferences, optionalConfigurationFilesDirectory, monitor);
     return deployCloudSdkFacade.getExitStatus();
   }
 
@@ -214,9 +210,9 @@ public class DeployJob extends WorkspaceJob {
       String rawDeployOutput = deployCloudSdkFacade.getStdOutAsString();
       AppEngineDeployOutput structuredOutput = AppEngineDeployOutput.parse(rawDeployOutput);
 
-      boolean promoted = deployConfiguration.getPromote();
+      boolean promoted = deployPreferences.isAutoPromote();
       String appLocation = getDeployedAppUrl(promoted, structuredOutput);
-      String project = deployConfiguration.getProject();
+      String project = deployPreferences.getProjectId();
       String browserTitle = Messages.getString("browser.launch.title", project);
       WorkbenchUtil.openInBrowserInUiThread(appLocation, null, browserTitle, browserTitle);
       return Status.OK_STATUS;

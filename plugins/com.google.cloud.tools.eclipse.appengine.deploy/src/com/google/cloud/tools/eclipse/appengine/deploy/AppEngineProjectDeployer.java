@@ -45,8 +45,7 @@ public class AppEngineProjectDeployer {
    * @param optionalConfigurationFilesDirectory if not {@code null}, searches optional configuration
    * files (such as {@code cron.yaml}) in this directory and deploys them together
    */
-  public void deploy(IPath stagingDirectory, CloudSdk cloudSdk,
-                     DefaultDeployConfiguration configuration,
+  public void deploy(IPath stagingDirectory, CloudSdk cloudSdk, DeployPreferences deployPreferences,
                      IPath optionalConfigurationFilesDirectory, IProgressMonitor monitor) {
     if (monitor.isCanceled()) {
       throw new OperationCanceledException();
@@ -57,6 +56,9 @@ public class AppEngineProjectDeployer {
     try {
       List<File> deployables =
           computeDeployables(stagingDirectory, optionalConfigurationFilesDirectory);
+
+      DefaultDeployConfiguration configuration =
+          DeployPreferencesConverter.toDeployConfiguration(deployPreferences);
       configuration.setDeployables(deployables);
       CloudSdkAppEngineDeployment deployment = new CloudSdkAppEngineDeployment(cloudSdk);
       deployment.deploy(configuration);
