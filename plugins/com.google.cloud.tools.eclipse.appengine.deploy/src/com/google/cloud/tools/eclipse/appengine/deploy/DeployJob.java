@@ -21,6 +21,7 @@ import com.google.cloud.tools.appengine.api.deploy.DefaultDeployConfiguration;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
 import com.google.cloud.tools.eclipse.login.CredentialHelper;
+import com.google.cloud.tools.eclipse.sdk.CloudSdkProcessFacade;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -121,7 +122,6 @@ public class DeployJob extends WorkspaceJob {
         if (canceled) {
           return Status.CANCEL_STATUS;
         }
-
         deployCloudSdkFacade = CloudSdkProcessFacade.forDeploy(credentialFile, stderrLineListener);
         stagingCloudSdkFacade = CloudSdkProcessFacade.forStandardStaging(getProjectVm(project),
             stagingStdoutLineListener, stderrLineListener);
