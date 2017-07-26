@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.test.util.project;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import com.google.cloud.tools.eclipse.test.util.ZipUtil;
 import com.google.cloud.tools.eclipse.test.util.reflection.ReflectionUtil;
 import com.google.common.base.Joiner;
 import com.google.common.base.Stopwatch;
@@ -49,13 +50,13 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.wst.common.project.facet.core.util.internal.ZipUtil;
 import org.eclipse.wst.validation.internal.operations.ValidationBuilder;
 import org.eclipse.wst.validation.internal.operations.ValidatorManager;
 import org.osgi.framework.Bundle;
@@ -107,7 +108,8 @@ public class ProjectUtils {
     IWorkspaceRoot root = getWorkspace().getRoot();
     // extract projects into our workspace using WTP internal utility class
     // assumes projects are contained in subdirectories within the zip
-    ZipUtil.unzip(zippedFile, root.getLocation().toFile(), progress.newChild(10));
+    IStatus status = ZipUtil.unzip(zippedFile, root.getLocation().toFile(), progress.newChild(10));
+    assertTrue("failed to extract: " + status, status.isOK());
 
     List<IPath> projectFiles = new ArrayList<>();
     try (ZipFile zip = new ZipFile(zippedFile)) {

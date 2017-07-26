@@ -24,12 +24,14 @@ import static org.junit.Assert.assertTrue;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.ArrayAssertions;
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
+import com.google.cloud.tools.eclipse.test.util.ZipUtil;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
@@ -40,7 +42,6 @@ import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
-import org.eclipse.wst.common.project.facet.core.util.internal.ZipUtil;
 import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
@@ -106,7 +107,8 @@ public class ImportMavenAppEngineStandardProjectTest extends BaseProjectTest {
     }
     File zippedFile = new File(zipLocation.getPath());
     assertTrue(zippedFile.exists());
-    ZipUtil.unzip(zippedFile, destination, new NullProgressMonitor());
+    IStatus status = ZipUtil.unzip(zippedFile, destination, new NullProgressMonitor());
+    assertTrue("failed to extract: " + status, status.isOK());
     return destination;
   }
 }
