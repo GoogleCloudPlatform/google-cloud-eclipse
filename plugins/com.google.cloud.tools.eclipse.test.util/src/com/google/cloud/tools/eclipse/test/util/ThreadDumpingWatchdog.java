@@ -131,8 +131,7 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
     sb.append("\n| STACK DUMP @ ").append(stopwatch);
     if (title != null) {
       sb.append(": ").append(title);
-    }
-    if (description != null) {
+    } else if (description != null) {
       sb.append(": ").append(description);
     }
     sb.append("\n|");
