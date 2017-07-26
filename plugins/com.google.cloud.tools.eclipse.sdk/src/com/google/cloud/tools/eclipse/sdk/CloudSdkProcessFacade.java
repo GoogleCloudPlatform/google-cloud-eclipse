@@ -26,6 +26,7 @@ import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import org.eclipse.core.runtime.IStatus;
@@ -56,7 +57,8 @@ public class CloudSdkProcessFacade {
    */
   public static CloudSdkProcessFacade forDeploy(Path credentialFile,
       ProcessOutputLineListener normalOutputListener) {
-    Preconditions.checkNotNull(credentialFile);
+    Preconditions.checkNotNull(credentialFile, "credential required for deploying");
+    Preconditions.checkArgument(Files.exists(credentialFile), "non-existing credential file");
 
     // Normal operation output goes to stderr.
     ProcessOutputLineListener stdErrListener = normalOutputListener;
