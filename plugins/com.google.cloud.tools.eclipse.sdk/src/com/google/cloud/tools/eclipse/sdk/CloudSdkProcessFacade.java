@@ -23,6 +23,7 @@ import com.google.cloud.tools.appengine.cloudsdk.process.ProcessStartListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.StringBuilderProcessOutputLineListener;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
@@ -83,8 +84,7 @@ public class CloudSdkProcessFacade {
   public static CloudSdkProcessFacade forStandardStaging(Path javaHome,
       ProcessOutputLineListener stdOutListener, ProcessOutputLineListener stdErrListener) {
     CloudSdkProcessFacade cloudSdkRunner = new CloudSdkProcessFacade();
-    CloudSdk.Builder cloudSdkBuilder =
-        cloudSdkRunner.getBaseCloudSdkBuilder(stdErrListener);
+    CloudSdk.Builder cloudSdkBuilder = cloudSdkRunner.getBaseCloudSdkBuilder(stdErrListener);
     if (javaHome != null) {
       cloudSdkBuilder.javaHome(javaHome);
     }
@@ -137,11 +137,13 @@ public class CloudSdkProcessFacade {
     }
   }
 
-  private class ProcessExitRecorder implements ProcessExitListener {
+  @VisibleForTesting
+  class ProcessExitRecorder implements ProcessExitListener {
 
     private final CollectingLineListener errorMessageCollector;
 
-    private ProcessExitRecorder(CollectingLineListener errorMessageCollector) {
+    @VisibleForTesting
+    ProcessExitRecorder(CollectingLineListener errorMessageCollector) {
       this.errorMessageCollector = errorMessageCollector;
     }
 

@@ -19,11 +19,17 @@ package com.google.cloud.tools.eclipse.sdk;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import com.google.cloud.tools.eclipse.sdk.CloudSdkProcessFacade.ProcessExitRecorder;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
+import org.eclipse.core.runtime.Status;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -61,4 +67,43 @@ public class CloudSdkProcessFacadeTest {
     assertNotNull(facade.getCloudSdk());
   }
 
+  @Test
+  public void testGetCloudSdk_forStandardStaging() {
+    CloudSdkProcessFacade facade = CloudSdkProcessFacade.forStandardStaging(null, null, null);
+    assertNotNull(facade.getCloudSdk());
+  }
+
+  @Test
+  public void testProcessExitRecorder_onErrorExitWithNullErrorMessageCollector() {
+    CloudSdkProcessFacade facade = CloudSdkProcessFacade.forStandardStaging(null, null, null);
+
+    ProcessExitRecorder recorder = facade.new ProcessExitRecorder(null /* errorMessageCollector */);
+    recorder.onExit(15);
+
+    assertEquals(Status.ERROR, facade.getExitStatus().getSeverity());
+    assertEquals("Process exited with error code: 15", facade.getExitStatus().getMessage());
+  }
+
+  @Test
+  public void testProcessExitRecorder_onErrorExit() {
+    CloudSdkProcessFacade facade = CloudSdkProcessFacade.forStandardStaging(null, null, null);
+    CollectingLineListener errorMessageCollector = mock(CollectingLineListener.class);
+    when(errorMessageCollector.getCollectedMessages()).thenReturn(Arrays.asList("got ", " errors"));
+
+    ProcessExitRecorder recorder = facade.new ProcessExitRecorder(errorMessageCollector);
+    recorder.onExit(23);
+
+    assertEquals(Status.ERROR, facade.getExitStatus().getSeverity());
+    assertEquals("got \n errors", facade.getExitStatus().getMessage());
+  }
+
+  @Test
+  public void testProcessExitRecorder_onOkExit() {
+    CloudSdkProcessFacade facade = CloudSdkProcessFacade.forStandardStaging(null, null, null);
+
+    ProcessExitRecorder recorder = facade.new ProcessExitRecorder(null /* errorMessageCollector */);
+    recorder.onExit(0);
+
+    assertTrue(facade.getExitStatus().isOK());
+  }
 }
