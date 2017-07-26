@@ -132,7 +132,7 @@ public class CloudSdkProcessFacade {
   private class StoreProcessObjectListener implements ProcessStartListener {
     @Override
     public void onStart(Process proces) {
-      synchronized (this) {
+      synchronized (CloudSdkProcessFacade.this) {
         process = proces;
         if (canceled) {
           process.destroy();
