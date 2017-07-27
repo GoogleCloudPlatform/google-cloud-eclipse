@@ -129,8 +129,7 @@ public abstract class DeployCommandHandler extends AbstractHandler {
     return severity != IMarker.SEVERITY_ERROR;
   }
 
-  private void launchDeployJob(IProject project, Credential credential)
-                                                            throws IOException, ExecutionException {
+  private void launchDeployJob(IProject project, Credential credential) throws IOException {
     AnalyticsPingManager.getInstance().sendPing(
         AnalyticsEvents.APP_ENGINE_DEPLOY, AnalyticsEvents.APP_ENGINE_DEPLOY_STANDARD, null);
 
@@ -151,7 +150,7 @@ public abstract class DeployCommandHandler extends AbstractHandler {
     StagingDelegate stagingDelegate = getStagingDelegate(project);
 
     DeployJob deploy = new DeployJob(project, credential, workDirectory, outputStream, errorStream,
-        deployPreferences, stagingDelegate);
+        stagingDelegate);
     messageConsole.setJob(deploy);
     deploy.addJobChangeListener(new JobChangeAdapter() {
 
