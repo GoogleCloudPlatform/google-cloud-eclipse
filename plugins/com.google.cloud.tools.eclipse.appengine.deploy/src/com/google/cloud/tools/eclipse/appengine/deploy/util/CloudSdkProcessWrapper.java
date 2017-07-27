@@ -21,10 +21,10 @@ import com.google.cloud.tools.appengine.cloudsdk.process.ProcessExitListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessStartListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.StringBuilderProcessOutputLineListener;
+import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
 import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardStagingDelegate;
 import com.google.cloud.tools.eclipse.sdk.CollectingLineListener;
 import com.google.cloud.tools.eclipse.sdk.MessageConsoleWriterOutputLineListener;
-import com.google.cloud.tools.eclipse.sdk.Messages;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -39,7 +39,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.console.MessageConsoleStream;
 
 /**
- * Helper class wrapping {@link CloudSdk} to hide a bulk of low-level work dealing with process
+ * Helper class wrapping {@link CloudSdk} to hide the bulk of low-level work dealing with process
  * cancellation, process exit monitoring, error output line collection, standard output collection,
  * etc. Intended to be used exclusively by {@link StandardStagingDelegate} and
  * {@link AppEngineDeployer} for their convenience.
@@ -113,7 +113,7 @@ public class CloudSdkProcessWrapper {
   }
 
   public CloudSdk getCloudSdk() {
-    Preconditions.checkNotNull(cloudSdk);
+    Preconditions.checkNotNull(cloudSdk, "wrapper not set up");
     return cloudSdk;
   }
 

@@ -53,9 +53,10 @@ public class CloudSdkProcessWrapperTest {
 
   @Test
   public void testSetUpDeployCloudSdk_nonExistingCredentialFile() {
+    Path credential = tempFolder.getRoot().toPath().resolve("non-existing-file");
+    assertFalse(Files.exists(credential));
+
     try {
-      Path credential = tempFolder.getRoot().toPath().resolve("non-existing-file");
-      assertFalse(Files.exists(credential));
       wrapper.setUpDeployCloudSdk(credential, null);
       fail();
     } catch (IllegalArgumentException ex) {
@@ -87,6 +88,29 @@ public class CloudSdkProcessWrapperTest {
   }
 
   @Test
+  public void testSetUpDeployCloudSdk_cannotSetUpTwice() throws IOException {
+    Path credential = tempFolder.newFile().toPath();
+    wrapper.setUpDeployCloudSdk(credential, null);
+    try {
+      wrapper.setUpDeployCloudSdk(credential, null);
+      fail();
+    } catch (IllegalStateException ex) {
+      assertEquals(ex.getMessage(), "CloudSdk already set up");
+    }
+  }
+
+  @Test
+  public void testSetUpStandardStagingCloudSdk_cannotSetUpTwice() {
+    wrapper.setUpStandardStagingCloudSdk(null, null, null);
+    try {
+      wrapper.setUpStandardStagingCloudSdk(null, null, null);
+      fail();
+    } catch (IllegalStateException ex) {
+      assertEquals(ex.getMessage(), "CloudSdk already set up");
+    }
+  }
+
+  @Test
   public void testProcessExitRecorder_onErrorExitWithNullErrorMessageCollector() {
     wrapper.setUpStandardStagingCloudSdk(null, null, null);
 
@@ -94,7 +118,7 @@ public class CloudSdkProcessWrapperTest {
     recorder.onExit(15);
 
     assertEquals(Status.ERROR, wrapper.getExitStatus().getSeverity());
-    assertEquals("Process exited with error code: 15", wrapper.getExitStatus().getMessage());
+    assertEquals("Process exited with error code 15", wrapper.getExitStatus().getMessage());
   }
 
   @Test
