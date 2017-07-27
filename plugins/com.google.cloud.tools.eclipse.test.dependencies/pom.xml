@@ -17,35 +17,19 @@
     appropriate package-uses information.  Projects can simply `Require-Bundle:
     com.google.cloud.tools.eclipse.test.dependencies` and write tests.
 
-    This project is necessary as some of the standard testing libraries (and their Eclipse Orbit
+    This project is necessary as some of the standard testing libraries (or their Eclipse Orbit
     counterparts) have missing or broken OSGi metadata.  Basically, this project does
     two things:
 
       - it uses `Require-Bundle` to pull in and re-export the existing Hamcrest and JUnit bundles
+        (which are ok)
       - it copies all Maven dependencies with test-scope into the `lib` directory using
-        the `dependency:copy-dependencies` goal, and then exports their packages.
+        the `dependency:copy` goal, and then exports their packages.
 
     This approach ideally requires use of Ian Brandt's "Maven Dependency Plugin" for m2e, which
     causes the `dependency:copy-dependencies` to be performed during the _process-sources_ phase
     on a full build.
    -->
-
-  <!--
-    Dependencies that are then exported to OSGi bundles.
-    JUnit and Hamcrest are obtained from Orbit.
-  -->
-  <dependencies>
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-core</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.objenesis</groupId>
-      <artifactId>objenesis</artifactId>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
 
   <build>
     <plugins>
@@ -57,16 +41,23 @@
           <execution>
             <id>copy</id>
             <goals>
-              <goal>copy-dependencies</goal>
+              <goal>copy</goal>
             </goals>
             <configuration>
               <outputDirectory>lib</outputDirectory>
-              <ignoredDependencies>
-                <!-- ignore ourselves; otherwise copies our Bundle-Classpath -->
-                <ignoreDependency>com.google.cloud.tools.eclipse:com.google.cloud.tools.eclipse.test.dependencies</ignoreDependency>
-              </ignoredDependencies>
-              <!-- includeScope defaults to test -->
-              <excludeScope>runtime</excludeScope>
+              <!--
+                Dependencies that are then exported to OSGi bundles.
+              -->
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.mockito</groupId>
+                  <artifactId>mockito-core</artifactId>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.objenesis</groupId>
+                  <artifactId>objenesis</artifactId>
+                </artifactItem>
+              </artifactItems>
             </configuration>
           </execution>
         </executions>
