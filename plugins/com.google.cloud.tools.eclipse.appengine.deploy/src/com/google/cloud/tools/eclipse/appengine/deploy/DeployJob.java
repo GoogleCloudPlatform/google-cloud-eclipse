@@ -79,12 +79,12 @@ public class DeployJob extends WorkspaceJob {
    *     copying various files to stage and deploy)
    * @param stagingOutputStream {@link MessageConsoleStream} to stream the staging operation stdout
    *     (where {@code appcfg.sh} outputs user-visible log messages)
-   * @param stderrStream {@link MessageConsoleStream} to stream the deploy operation stderr (where
-   *     {@code gcloud app deploy} outputs user-visible log messages) and the staging operation
-   *     stderr
+   * @param stderrOutputStream {@link MessageConsoleStream} to stream the deploy operation stderr
+   *     (where {@code gcloud app deploy} outputs user-visible log messages) and the staging
+   *     operation stderr
    */
   public DeployJob(IProject project, Credential credential, IPath workDirectory,
-      MessageConsoleStream stagingOutputStream, MessageConsoleStream stderrStream,
+      MessageConsoleStream stagingOutputStream, MessageConsoleStream stderrOutputStream,
       StagingDelegate stager) {
     super(Messages.getString("deploy.job.name")); //$NON-NLS-1$
     deployPreferences = new DeployPreferences(project);
@@ -94,7 +94,7 @@ public class DeployJob extends WorkspaceJob {
     this.credential = credential;
     this.workDirectory = workDirectory;
     stagingStdoutLineListener = new MessageConsoleWriterOutputLineListener(stagingOutputStream);
-    stderrLineListener = new MessageConsoleWriterOutputLineListener(stderrStream);
+    stderrLineListener = new MessageConsoleWriterOutputLineListener(stderrOutputStream);
     this.stager = stager;
   }
 
