@@ -79,7 +79,8 @@ public class CloudSdkProcessFacade {
   /**
    * Creates a wrapper/facade of {@link CloudSdk} to be used for App Engine standard staging.
    *
-   * @param javaHome JDK/JRE to run gcloud, which is also used to compile JSPs during staging
+   * @param javaHome JDK/JRE to 1) run {@code com.google.appengine.tools.admin.AppCfg} from
+   *     {@code appengine-tools-api.jar}; and 2) compile JSPs during staging
    */
   public static CloudSdkProcessFacade forStandardStaging(Path javaHome,
       ProcessOutputLineListener stdOutListener, ProcessOutputLineListener stdErrListener) {

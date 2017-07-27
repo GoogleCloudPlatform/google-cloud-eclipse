@@ -78,7 +78,8 @@ public class DeployJob extends WorkspaceJob {
    * @param workDirectory temporary work directory the job can safely use (e.g., for creating and
    *     copying various files to stage and deploy)
    * @param stagingOutputStream {@link MessageConsoleStream} to stream the staging operation stdout
-   *     (where {@code appcfg.sh} outputs user-visible log messages)
+   *     (where {@code com.google.appengine.tools.admin.AppCfg} from {@code appengine-tools-api.jar}
+   *     outputs user-visible log messages)
    * @param stderrOutputStream {@link MessageConsoleStream} to stream the deploy operation stderr
    *     (where {@code gcloud app deploy} outputs user-visible log messages) and the staging
    *     operation stderr
