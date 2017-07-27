@@ -18,7 +18,6 @@ package com.google.cloud.tools.eclipse.appengine.deploy.ui.standard;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
 import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardStagingDelegate;
-import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardStagingDelegate.PathProvider;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployCommandHandler;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.DeployPreferencesDialog;
 import com.google.cloud.tools.eclipse.appengine.deploy.ui.Messages;
@@ -45,25 +44,22 @@ public class StandardDeployCommandHandler extends DeployCommandHandler {
 
   @Override
   protected StagingDelegate getStagingDelegate(IProject project) {
-    return new StandardStagingDelegate(new SimpleJavaHomeProvider(project));
+    // TODO: this may still not be a JDK (although it will be very likely):
+    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2195#issuecomment-318439239
+    Path javaHome = getProjectVm(project);
+    return new StandardStagingDelegate(javaHome);
   }
 
-  private static class SimpleJavaHomeProvider implements PathProvider {
-
-    private final IProject project;
-
-    public SimpleJavaHomeProvider(IProject project) {
-      this.project = project;
-    }
-
-    @Override
-    public Path get() throws CoreException {
+  private Path getProjectVm(IProject project) {
+    try {
       IJavaProject javaProject = JavaCore.create(project);
       IVMInstall vmInstall = JavaRuntime.getVMInstall(javaProject);
       if (vmInstall != null) {
         return vmInstall.getInstallLocation().toPath();
       }
-      return null;
+    } catch (CoreException ex) {
+      // Give up.
     }
+    return null;
   }
 }

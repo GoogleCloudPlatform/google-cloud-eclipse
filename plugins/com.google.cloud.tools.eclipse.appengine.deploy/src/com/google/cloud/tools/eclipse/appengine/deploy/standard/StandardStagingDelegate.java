@@ -35,18 +35,18 @@ import org.eclipse.ui.console.MessageConsoleStream;
 
 public class StandardStagingDelegate implements StagingDelegate {
 
-  private final PathProvider javaHomeProvider;
+  private final Path javaHome;
   private final CloudSdkProcessWrapper cloudSdkWrapper;
 
   private IPath optionalConfigurationFilesDirectory;
 
-  public StandardStagingDelegate(PathProvider javaHomeProvider) {
-    this(javaHomeProvider, new CloudSdkProcessWrapper());
+  public StandardStagingDelegate(Path javaHome) {
+    this(javaHome, new CloudSdkProcessWrapper());
   }
 
   @VisibleForTesting
-  StandardStagingDelegate(PathProvider javaHomeProvider, CloudSdkProcessWrapper cloudSdkWrapper) {
-    this.javaHomeProvider = javaHomeProvider;
+  StandardStagingDelegate(Path javaHome, CloudSdkProcessWrapper cloudSdkWrapper) {
+    this.javaHome = javaHome;
     this.cloudSdkWrapper = cloudSdkWrapper;
   }
 
@@ -57,8 +57,8 @@ public class StandardStagingDelegate implements StagingDelegate {
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
 
     try {
-      cloudSdkWrapper.setUpStandardStagingCloudSdk(javaHomeProvider.get(),
-          stdoutOutputStream, stderrOutputStream);
+      cloudSdkWrapper.setUpStandardStagingCloudSdk(
+          javaHome, stdoutOutputStream, stderrOutputStream);
 
       WarPublisher.publishExploded(project, safeWorkDirectory, subMonitor.newChild(40));
       CloudSdkStagingHelper.stageStandard(safeWorkDirectory, stagingDirectory,
@@ -84,9 +84,5 @@ public class StandardStagingDelegate implements StagingDelegate {
   @Override
   public void interrupt() {
     cloudSdkWrapper.interrupt();
-  }
-
-  public interface PathProvider {
-    Path get() throws CoreException;
   }
 }
