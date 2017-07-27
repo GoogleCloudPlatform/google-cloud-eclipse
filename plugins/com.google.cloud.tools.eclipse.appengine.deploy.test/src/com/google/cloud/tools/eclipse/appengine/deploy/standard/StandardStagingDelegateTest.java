@@ -18,15 +18,18 @@ package com.google.cloud.tools.eclipse.appengine.deploy.standard;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessExitListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
+import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardStagingDelegate.PathProvider;
+import com.google.cloud.tools.eclipse.appengine.deploy.util.CloudSdkProcessWrapper;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
@@ -41,22 +44,28 @@ public class StandardStagingDelegateTest {
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator().withFacetVersions(
       JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7);
 
-  private final CloudSdk cloudSdk = new CloudSdk.Builder()
-      .addStdOutLineListener(new OutputListener())
-      .addStdErrLineListener(new OutputListener())
-      .exitListener(new ExitListener())
-      .build();
-
   private int cloudSdkExitCode = -1;
   private IProject project;
   private IPath safeWorkDirectory;
   private IPath stagingDirectory;
+  private StagingDelegate delegate;
 
   @Before
   public void setUp() {
     project = projectCreator.getProject();
     safeWorkDirectory = project.getFolder("safe-work-directory").getLocation();
     stagingDirectory = project.getFolder("staging-result").getLocation();
+
+    CloudSdk cloudSdk = new CloudSdk.Builder()
+        .addStdOutLineListener(new OutputListener())
+        .addStdErrLineListener(new OutputListener())
+        .exitListener(new ExitListener())
+        .build();
+
+    CloudSdkProcessWrapper wrapper = mock(CloudSdkProcessWrapper.class);
+    when(wrapper.getCloudSdk()).thenReturn(cloudSdk);
+
+    delegate = new StandardStagingDelegate(mock(PathProvider.class), wrapper);
   }
 
   @After
@@ -65,9 +74,8 @@ public class StandardStagingDelegateTest {
   }
 
   @Test
-  public void testStage() throws CoreException {
-    StagingDelegate delegate = new StandardStagingDelegate();
-    delegate.stage(project, stagingDirectory, safeWorkDirectory, cloudSdk,
+  public void testStage() {
+    delegate.stage(project, stagingDirectory, safeWorkDirectory, null, null,
         new NullProgressMonitor());
 
     assertTrue(stagingDirectory.append("WEB-INF").toFile().exists());
@@ -77,9 +85,8 @@ public class StandardStagingDelegateTest {
   }
 
   @Test
-  public void testGetOptionalConfigurationFilesDirectory() throws CoreException {
-    StagingDelegate delegate = new StandardStagingDelegate();
-    delegate.stage(project, stagingDirectory, safeWorkDirectory, cloudSdk,
+  public void testGetOptionalConfigurationFilesDirectory() {
+    delegate.stage(project, stagingDirectory, safeWorkDirectory, null, null,
         new NullProgressMonitor());
 
     assertEquals(stagingDirectory.append("WEB-INF/appengine-generated"),

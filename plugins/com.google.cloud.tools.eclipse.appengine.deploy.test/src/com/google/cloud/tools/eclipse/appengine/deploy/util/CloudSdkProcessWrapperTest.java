@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.sdk;
+package com.google.cloud.tools.eclipse.appengine.deploy.util;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -24,7 +24,8 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.google.cloud.tools.eclipse.sdk.CloudSdkProcessFacade.ProcessExitRecorder;
+import com.google.cloud.tools.eclipse.appengine.deploy.util.CloudSdkProcessWrapper.ProcessExitRecorder;
+import com.google.cloud.tools.eclipse.sdk.CollectingLineListener;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,14 +35,16 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-public class CloudSdkProcessFacadeTest {
+public class CloudSdkProcessWrapperTest {
 
   @Rule public TemporaryFolder tempFolder = new TemporaryFolder();
 
+  private final CloudSdkProcessWrapper wrapper = new CloudSdkProcessWrapper();
+
   @Test
-  public void testForDeploy_nullCredentialFile() {
+  public void testSetUpDeployCloudSdk_nullCredentialFile() {
     try {
-      CloudSdkProcessFacade.forDeploy(null, null);
+      wrapper.setUpDeployCloudSdk(null, null);
       fail();
     } catch (NullPointerException ex) {
       assertEquals(ex.getMessage(), "credential required for deploying");
@@ -49,11 +52,11 @@ public class CloudSdkProcessFacadeTest {
   }
 
   @Test
-  public void testForDeploy_nonExistingCredentialFile() {
+  public void testSetUpDeployCloudSdk_nonExistingCredentialFile() {
     try {
       Path credential = tempFolder.getRoot().toPath().resolve("non-existing-file");
       assertFalse(Files.exists(credential));
-      CloudSdkProcessFacade.forDeploy(credential, null);
+      wrapper.setUpDeployCloudSdk(credential, null);
       fail();
     } catch (IllegalArgumentException ex) {
       assertEquals(ex.getMessage(), "non-existing credential file");
@@ -61,49 +64,59 @@ public class CloudSdkProcessFacadeTest {
   }
 
   @Test
+  public void testGetCloudSdk_beforeSetUp() {
+    try {
+      wrapper.getCloudSdk();
+      fail();
+    } catch (NullPointerException ex) {
+      assertEquals("wrapper not set up", ex.getMessage());
+    }
+  }
+
+  @Test
   public void testGetCloudSdk_forDeploy() throws IOException {
     Path credential = tempFolder.newFile().toPath();
-    CloudSdkProcessFacade facade = CloudSdkProcessFacade.forDeploy(credential, null);
-    assertNotNull(facade.getCloudSdk());
+    wrapper.setUpDeployCloudSdk(credential, null);
+    assertNotNull(wrapper.getCloudSdk());
   }
 
   @Test
   public void testGetCloudSdk_forStandardStaging() {
-    CloudSdkProcessFacade facade = CloudSdkProcessFacade.forStandardStaging(null, null, null);
-    assertNotNull(facade.getCloudSdk());
+    wrapper.setUpStandardStagingCloudSdk(null, null, null);
+    assertNotNull(wrapper.getCloudSdk());
   }
 
   @Test
   public void testProcessExitRecorder_onErrorExitWithNullErrorMessageCollector() {
-    CloudSdkProcessFacade facade = CloudSdkProcessFacade.forStandardStaging(null, null, null);
+    wrapper.setUpStandardStagingCloudSdk(null, null, null);
 
-    ProcessExitRecorder recorder = facade.new ProcessExitRecorder(null /* errorMessageCollector */);
+    ProcessExitRecorder recorder = wrapper.new ProcessExitRecorder(null /* errorMessageCollector */);
     recorder.onExit(15);
 
-    assertEquals(Status.ERROR, facade.getExitStatus().getSeverity());
-    assertEquals("Process exited with error code: 15", facade.getExitStatus().getMessage());
+    assertEquals(Status.ERROR, wrapper.getExitStatus().getSeverity());
+    assertEquals("Process exited with error code: 15", wrapper.getExitStatus().getMessage());
   }
 
   @Test
   public void testProcessExitRecorder_onErrorExit() {
-    CloudSdkProcessFacade facade = CloudSdkProcessFacade.forStandardStaging(null, null, null);
+    wrapper.setUpStandardStagingCloudSdk(null, null, null);
     CollectingLineListener errorMessageCollector = mock(CollectingLineListener.class);
     when(errorMessageCollector.getCollectedMessages()).thenReturn(Arrays.asList("got ", " errors"));
 
-    ProcessExitRecorder recorder = facade.new ProcessExitRecorder(errorMessageCollector);
+    ProcessExitRecorder recorder = wrapper.new ProcessExitRecorder(errorMessageCollector);
     recorder.onExit(23);
 
-    assertEquals(Status.ERROR, facade.getExitStatus().getSeverity());
-    assertEquals("got \n errors", facade.getExitStatus().getMessage());
+    assertEquals(Status.ERROR, wrapper.getExitStatus().getSeverity());
+    assertEquals("got \n errors", wrapper.getExitStatus().getMessage());
   }
 
   @Test
   public void testProcessExitRecorder_onOkExit() {
-    CloudSdkProcessFacade facade = CloudSdkProcessFacade.forStandardStaging(null, null, null);
+    wrapper.setUpStandardStagingCloudSdk(null, null, null);
 
-    ProcessExitRecorder recorder = facade.new ProcessExitRecorder(null /* errorMessageCollector */);
+    ProcessExitRecorder recorder = wrapper.new ProcessExitRecorder(null /* errorMessageCollector */);
     recorder.onExit(0);
 
-    assertTrue(facade.getExitStatus().isOK());
+    assertTrue(wrapper.getExitStatus().isOK());
   }
 }

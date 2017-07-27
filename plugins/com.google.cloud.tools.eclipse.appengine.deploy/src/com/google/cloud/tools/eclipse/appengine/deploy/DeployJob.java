@@ -17,10 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.deploy;
 
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
 import com.google.cloud.tools.eclipse.login.CredentialHelper;
-import com.google.cloud.tools.eclipse.sdk.CloudSdkProcessFacade;
-import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListener;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -36,10 +33,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.launching.IVMInstall;
-import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.ui.console.MessageConsoleStream;
 
 /**
@@ -65,27 +58,18 @@ public class DeployJob extends WorkspaceJob {
   private final IProject project;
   private final Credential credential;
   private final IPath workDirectory;
-  private final ProcessOutputLineListener stagingStdoutLineListener;
-  private final ProcessOutputLineListener stderrLineListener;
+  private final MessageConsoleStream stdoutOutputStream;
+  private final MessageConsoleStream stderrOutputStream;
   private final DeployPreferences deployPreferences;
   private final StagingDelegate stager;
-
-  private CloudSdkProcessFacade deployCloudSdkFacade;
-  private CloudSdkProcessFacade stagingCloudSdkFacade;
-  private boolean canceled;
+  private final AppEngineProjectDeployer deployer = new AppEngineProjectDeployer();
 
   /**
    * @param workDirectory temporary work directory the job can safely use (e.g., for creating and
    *     copying various files to stage and deploy)
-   * @param stagingOutputStream {@link MessageConsoleStream} to stream the staging operation stdout
-   *     (where {@code com.google.appengine.tools.admin.AppCfg} from {@code appengine-tools-api.jar}
-   *     outputs user-visible log messages)
-   * @param stderrOutputStream {@link MessageConsoleStream} to stream the deploy operation stderr
-   *     (where {@code gcloud app deploy} outputs user-visible log messages) and the staging
-   *     operation stderr
    */
   public DeployJob(IProject project, Credential credential, IPath workDirectory,
-      MessageConsoleStream stagingOutputStream, MessageConsoleStream stderrOutputStream,
+      MessageConsoleStream stdoutOutputStream, MessageConsoleStream stderrOutputStream,
       StagingDelegate stager) {
     super(Messages.getString("deploy.job.name")); //$NON-NLS-1$
     deployPreferences = new DeployPreferences(project);
@@ -94,8 +78,8 @@ public class DeployJob extends WorkspaceJob {
     this.project = project;
     this.credential = credential;
     this.workDirectory = workDirectory;
-    stagingStdoutLineListener = new MessageConsoleWriterOutputLineListener(stagingOutputStream);
-    stderrLineListener = new MessageConsoleWriterOutputLineListener(stderrOutputStream);
+    this.stdoutOutputStream = stdoutOutputStream;
+    this.stderrOutputStream = stderrOutputStream;
     this.stager = stager;
   }
 
@@ -112,15 +96,6 @@ public class DeployJob extends WorkspaceJob {
         return saveStatus;
       }
 
-      synchronized (this) {
-        if (canceled) {
-          return Status.CANCEL_STATUS;
-        }
-        deployCloudSdkFacade = CloudSdkProcessFacade.forDeploy(credentialFile, stderrLineListener);
-        stagingCloudSdkFacade = CloudSdkProcessFacade.forStandardStaging(getProjectVm(project),
-            stagingStdoutLineListener, stderrLineListener);
-      }
-
       IStatus stagingStatus = stageProject(stagingDirectory, progress.newChild(30));
       if (stagingStatus != Status.OK_STATUS) {
         return stagingStatus;
@@ -128,7 +103,7 @@ public class DeployJob extends WorkspaceJob {
         return Status.CANCEL_STATUS;
       }
 
-      IStatus deployStatus = deployProject(stagingDirectory, progress.newChild(70));
+      IStatus deployStatus = deployProject(credentialFile, stagingDirectory, progress.newChild(70));
       if (deployStatus != Status.OK_STATUS) {
         return deployStatus;
       } else if (monitor.isCanceled()) {
@@ -141,26 +116,10 @@ public class DeployJob extends WorkspaceJob {
     }
   }
 
-  private static Path getProjectVm(IProject project) throws CoreException {
-    IJavaProject javaProject = JavaCore.create(project);
-    IVMInstall vmInstall = JavaRuntime.getVMInstall(javaProject);
-    if (vmInstall != null) {
-      return vmInstall.getInstallLocation().toPath();
-    }
-    return null;
-  }
-
   @Override
   protected void canceling() {
-    synchronized (this) {
-      canceled = true;
-      if (deployCloudSdkFacade != null) {
-        deployCloudSdkFacade.cancel();
-      }
-      if (stagingCloudSdkFacade != null) {
-        stagingCloudSdkFacade.cancel();
-      }
-    }
+    stager.interrupt();
+    deployer.interrupt();
     super.canceling();
   }
 
@@ -179,12 +138,8 @@ public class DeployJob extends WorkspaceJob {
     try {
       getJobManager().beginRule(project, progress.newChild(1));
       IPath safeWorkDirectory = workDirectory.append(SAFE_STAGING_WORK_DIRECTORY_NAME);
-      IStatus status = stager.stage(project, stagingDirectory, safeWorkDirectory,
-          stagingCloudSdkFacade.getCloudSdk(), progress.newChild(99));
-      if (stagingCloudSdkFacade.getExitStatus() != Status.OK_STATUS) {
-        return stagingCloudSdkFacade.getExitStatus();
-      }
-      return status;
+      return stager.stage(project, stagingDirectory, safeWorkDirectory,
+          stdoutOutputStream, stderrOutputStream, progress.newChild(99));
     } catch (IllegalArgumentException ex) {
       return StatusUtil.error(this, Messages.getString("deploy.job.staging.failed"), ex);
     } finally {
@@ -192,20 +147,19 @@ public class DeployJob extends WorkspaceJob {
     }
   }
 
-  private IStatus deployProject(IPath stagingDirectory, IProgressMonitor monitor) {
+  private IStatus deployProject(Path credentialFile, IPath stagingDirectory, IProgressMonitor monitor) {
     IPath optionalConfigurationFilesDirectory = null;
     if (deployPreferences.isIncludeOptionalConfigurationFiles()) {
       optionalConfigurationFilesDirectory = stager.getOptionalConfigurationFilesDirectory();
     }
 
-    new AppEngineProjectDeployer().deploy(stagingDirectory, deployCloudSdkFacade.getCloudSdk(),
-        deployPreferences, optionalConfigurationFilesDirectory, monitor);
-    return deployCloudSdkFacade.getExitStatus();
+    return deployer.deploy(stagingDirectory, credentialFile, deployPreferences,
+        optionalConfigurationFilesDirectory, stdoutOutputStream, monitor);
   }
 
   private IStatus openAppInBrowser() {
     try {
-      String rawDeployOutput = deployCloudSdkFacade.getStdOutAsString();
+      String rawDeployOutput = deployer.getJsonDeployResult();
       AppEngineDeployOutput structuredOutput = AppEngineDeployOutput.parse(rawDeployOutput);
 
       boolean promoted = deployPreferences.isAutoPromote();

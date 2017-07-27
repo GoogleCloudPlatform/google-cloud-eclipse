@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.sdk.ui;
-
-import org.eclipse.ui.console.MessageConsoleStream;
+package com.google.cloud.tools.eclipse.sdk;
 
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
+import org.eclipse.ui.console.MessageConsoleStream;
 
 public class MessageConsoleWriterOutputLineListener implements ProcessOutputLineListener {
   private MessageConsoleStream stream;

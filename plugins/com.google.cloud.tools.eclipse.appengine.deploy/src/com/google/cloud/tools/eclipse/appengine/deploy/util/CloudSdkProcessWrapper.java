@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.sdk;
+package com.google.cloud.tools.eclipse.appengine.deploy.util;
 
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessExitListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessStartListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.StringBuilderProcessOutputLineListener;
+import com.google.cloud.tools.eclipse.appengine.deploy.standard.StandardStagingDelegate;
+import com.google.cloud.tools.eclipse.sdk.CollectingLineListener;
+import com.google.cloud.tools.eclipse.sdk.MessageConsoleWriterOutputLineListener;
+import com.google.cloud.tools.eclipse.sdk.Messages;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -32,8 +36,15 @@ import java.nio.file.Path;
 import java.util.List;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.ui.console.MessageConsoleStream;
 
-public class CloudSdkProcessFacade {
+/**
+ * Helper class wrapping {@link CloudSdk} to hide a bulk of low-level work dealing with process
+ * cancellation, process exit monitoring, error output line collection, standard output collection,
+ * etc. Intended to be used exclusively by {@link StandardStagingDelegate} and
+ * {@link AppEngineDeployer} for their convenience.
+ */
+public class CloudSdkProcessWrapper {
 
   private static final String ERROR_MESSAGE_PREFIX = "ERROR:";
   private static final Predicate<String> IS_ERROR_LINE = new Predicate<String>() {
@@ -46,60 +57,53 @@ public class CloudSdkProcessFacade {
   private CloudSdk cloudSdk;
 
   private Process process;
-  private boolean canceled;
+  private boolean interrupted;
   private IStatus exitStatus = Status.OK_STATUS;
   private ProcessOutputLineListener stdOutCaptor;
 
-  private CloudSdkProcessFacade() {  // empty private constructor
-  }
-
   /**
-   * Creates a wrapper/facade of {@link CloudSdk} to be used for App Engine deploy.
+   * Sets up a {@link CloudSdk} to be used for App Engine deploy.
    */
-  public static CloudSdkProcessFacade forDeploy(Path credentialFile,
-      ProcessOutputLineListener normalOutputListener) {
+  public void setUpDeployCloudSdk(Path credentialFile, MessageConsoleStream normalOutputStream) {
     Preconditions.checkNotNull(credentialFile, "credential required for deploying");
     Preconditions.checkArgument(Files.exists(credentialFile), "non-existing credential file");
+    Preconditions.checkState(cloudSdk == null, "CloudSdk already set up");
+
+    // Structured deploy result (in JSON format) goes to stdout, so prepare to capture that.
+    stdOutCaptor = new StringBuilderProcessOutputLineListener();
 
     // Normal operation output goes to stderr.
-    ProcessOutputLineListener stdErrListener = normalOutputListener;
-    // Structured deploy result (in JSON format) goes to stdout, so prepare to capture that.
-    ProcessOutputLineListener stdOutCaptor = new StringBuilderProcessOutputLineListener();
-
-    CloudSdkProcessFacade facade = new CloudSdkProcessFacade();
-    CloudSdk.Builder cloudSdkBuilder = facade.getBaseCloudSdkBuilder(stdErrListener);
+    MessageConsoleStream stdErrOutputStream = normalOutputStream;
+    CloudSdk.Builder cloudSdkBuilder = getBaseCloudSdkBuilder(stdErrOutputStream);
     cloudSdkBuilder.appCommandCredentialFile(credentialFile.toFile());
     cloudSdkBuilder.addStdOutLineListener(stdOutCaptor);
-    facade.cloudSdk = cloudSdkBuilder.build();
-    facade.stdOutCaptor = stdOutCaptor;
-
-    return facade;
+    cloudSdk = cloudSdkBuilder.build();
   }
 
   /**
-   * Creates a wrapper/facade of {@link CloudSdk} to be used for App Engine standard staging.
+   * Sets up a {@link CloudSdk} to be used for App Engine standard staging.
    *
    * @param javaHome JDK/JRE to 1) run {@code com.google.appengine.tools.admin.AppCfg} from
    *     {@code appengine-tools-api.jar}; and 2) compile JSPs during staging
    */
-  public static CloudSdkProcessFacade forStandardStaging(Path javaHome,
-      ProcessOutputLineListener stdOutListener, ProcessOutputLineListener stdErrListener) {
-    CloudSdkProcessFacade cloudSdkRunner = new CloudSdkProcessFacade();
-    CloudSdk.Builder cloudSdkBuilder = cloudSdkRunner.getBaseCloudSdkBuilder(stdErrListener);
+  public void setUpStandardStagingCloudSdk(Path javaHome,
+      MessageConsoleStream stdoutOutputStream, MessageConsoleStream stderrOutputStream) {
+    Preconditions.checkState(cloudSdk == null, "CloudSdk already set up");
+
+    CloudSdk.Builder cloudSdkBuilder = getBaseCloudSdkBuilder(stderrOutputStream);
     if (javaHome != null) {
       cloudSdkBuilder.javaHome(javaHome);
     }
-    cloudSdkBuilder.addStdOutLineListener(stdOutListener);
-    cloudSdkRunner.cloudSdk = cloudSdkBuilder.build();
-
-    return cloudSdkRunner;
+    cloudSdkBuilder.addStdOutLineListener(
+        new MessageConsoleWriterOutputLineListener(stdoutOutputStream));
+    cloudSdk = cloudSdkBuilder.build();
   }
 
-  private CloudSdk.Builder getBaseCloudSdkBuilder(ProcessOutputLineListener stdErrListener) {
+  private CloudSdk.Builder getBaseCloudSdkBuilder(MessageConsoleStream stdErrListener) {
     CollectingLineListener errorMessageCollector = new CollectingLineListener(IS_ERROR_LINE);
 
     return new CloudSdk.Builder()
-        .addStdErrLineListener(stdErrListener)
+        .addStdErrLineListener(new MessageConsoleWriterOutputLineListener(stdErrListener))
         .addStdErrLineListener(errorMessageCollector)
         .startListener(new StoreProcessObjectListener())
         .exitListener(new ProcessExitRecorder(errorMessageCollector))
@@ -109,12 +113,13 @@ public class CloudSdkProcessFacade {
   }
 
   public CloudSdk getCloudSdk() {
+    Preconditions.checkNotNull(cloudSdk);
     return cloudSdk;
   }
 
-  public void cancel() {
+  public void interrupt() {
     synchronized (this) {
-      canceled = true;  // not to miss destruction due to race condition
+      interrupted = true;  // not to miss destruction due to race condition
       if (process != null) {
         process.destroy();
       }
@@ -133,9 +138,9 @@ public class CloudSdkProcessFacade {
   private class StoreProcessObjectListener implements ProcessStartListener {
     @Override
     public void onStart(Process proces) {
-      synchronized (CloudSdkProcessFacade.this) {
+      synchronized (CloudSdkProcessWrapper.this) {
         process = proces;
-        if (canceled) {
+        if (interrupted) {
           process.destroy();
         }
       }

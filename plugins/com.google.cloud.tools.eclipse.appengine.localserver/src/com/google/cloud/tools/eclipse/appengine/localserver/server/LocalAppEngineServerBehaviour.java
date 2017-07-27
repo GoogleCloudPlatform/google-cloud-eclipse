@@ -29,7 +29,7 @@ import com.google.cloud.tools.appengine.cloudsdk.process.ProcessStartListener;
 import com.google.cloud.tools.appengine.cloudsdk.serialization.CloudSdkVersion;
 import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
 import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
-import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListener;
+import com.google.cloud.tools.eclipse.sdk.MessageConsoleWriterOutputLineListener;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
