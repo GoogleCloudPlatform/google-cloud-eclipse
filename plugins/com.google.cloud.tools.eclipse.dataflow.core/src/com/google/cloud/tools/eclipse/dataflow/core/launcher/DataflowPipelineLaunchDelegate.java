@@ -196,8 +196,7 @@ public class DataflowPipelineLaunchDelegate extends ForwardingLaunchConfiguratio
   private static IGoogleLoginService getLoginService() {
     BundleContext bundleContext =
         FrameworkUtil.getBundle(DataflowPipelineLaunchDelegate.class).getBundleContext();
-    return bundleContext.getService(
-        bundleContext.getServiceReference(IGoogleLoginService.class));
+    return bundleContext.getService(bundleContext.getServiceReference(IGoogleLoginService.class));
   }
 
   private List<String> getArguments(
