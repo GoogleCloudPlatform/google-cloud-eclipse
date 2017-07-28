@@ -63,6 +63,11 @@
                 </artifactItem>
                 <artifactItem>
                   <groupId>com.google.apis</groupId>
+                  <artifactId>google-api-services-servicemanagement</artifactId>
+                  <version>v1-rev358-1.22.0</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>com.google.apis</groupId>
                   <artifactId>google-api-services-storage</artifactId>
                   <version>v1-rev109-1.22.0</version>
                 </artifactItem>

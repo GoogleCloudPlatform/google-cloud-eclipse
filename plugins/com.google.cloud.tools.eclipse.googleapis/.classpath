@@ -2,7 +2,7 @@
 <classpath>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
-	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="src/"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-api-client-1.22.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-api-services-appengine-v1-rev26-1.22.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-api-services-bigquery-v2-rev353-1.22.0.jar"/>
@@ -12,6 +12,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/google-api-services-datastore-v1beta3-rev35-1.22.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-api-services-oauth2-v2-rev127-1.22.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-api-services-pubsub-v1beta2-rev364-1.22.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/google-api-services-servicemanagement-v1-rev358-1.22.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-api-services-storage-v1-rev109-1.22.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-http-client-1.22.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/google-http-client-jackson-1.22.0.jar"/>
