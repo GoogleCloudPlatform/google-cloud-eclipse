@@ -27,6 +27,7 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.MonitorInfo;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Map;
@@ -252,7 +253,8 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
           dumpJob(sb, linePrefix, (Job) entry.getValue(), (Thread) entry.getKey());
         }
       }
-    } catch (Exception ex) {
+    } catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException
+        | SecurityException ex) {
       System.err.println("Unable to obtain JobManager.implicitJobs: " + ex);
     }
   }
@@ -281,7 +283,8 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
     try {
       blockingJob = ReflectionUtil.invoke(Job.getJobManager(), "findBlockingJob",
           InternalJob.class, new Class<?>[] {InternalJob.class}, job);
-    } catch (Exception ex) {
+    } catch (NoSuchMethodException | SecurityException | IllegalAccessException
+        | IllegalArgumentException | InvocationTargetException ex) {
       System.err.println("Unable to fetch blocking-job: " + ex);
     }
     sb.append("\n").append(linePrefix);
