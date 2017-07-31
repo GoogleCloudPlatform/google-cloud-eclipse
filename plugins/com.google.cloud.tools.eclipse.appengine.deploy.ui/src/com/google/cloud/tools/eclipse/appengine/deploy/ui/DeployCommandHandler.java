@@ -192,6 +192,7 @@ public abstract class DeployCommandHandler extends AbstractHandler {
   }
 
   private static IPath getTempDir() {
+    // DeployJob.class: create in the non-UI bundle.
     return Platform.getStateLocation(FrameworkUtil.getBundle(DeployJob.class))
         .append("tmp");
   }
