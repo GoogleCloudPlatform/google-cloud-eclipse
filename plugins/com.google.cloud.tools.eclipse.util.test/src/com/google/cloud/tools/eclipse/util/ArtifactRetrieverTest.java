@@ -31,17 +31,19 @@ public class ArtifactRetrieverTest {
   
   @Test
   public void testGetServletLatest() {
+    // group and version IDs changed with 3.0 so this should be stable
     ArtifactVersion servlet = retriever.getLatestArtifactVersion("javax.servlet", "servlet-api");
-    Assert.assertEquals(3, servlet.getMajorVersion());
-    // todo do we want to retrieve the latest non-beat version? Maybe in a separate method?
-    // Assert.assertEquals("", servlet.getQualifier());
+    Assert.assertEquals(2, servlet.getMajorVersion());
+    Assert.assertEquals(5, servlet.getMinorVersion());
+    Assert.assertNull(servlet.getQualifier());
   }
   
   @Test
   public void testGetGuava() {
     ArtifactVersion guava = retriever.getLatestArtifactVersion("com.google.guava", "guava");
-    Assert.assertTrue(guava.getMajorVersion() > 3);
+    Assert.assertTrue(guava.getMajorVersion() > 19);
     Assert.assertTrue(guava.getMinorVersion() >= 0);
+    Assert.assertNull(guava.getQualifier());
   }
     
   @Test
@@ -58,7 +60,6 @@ public class ArtifactRetrieverTest {
         new URL("https://repo1.maven.org/maven2/com/google/foo/bar-baz/maven-metadata.xml"),
         retriever.getMetadataUrl("com.google.foo", "bar-baz"));
   }
-
 
   @Test
   public void testIdToKey() {

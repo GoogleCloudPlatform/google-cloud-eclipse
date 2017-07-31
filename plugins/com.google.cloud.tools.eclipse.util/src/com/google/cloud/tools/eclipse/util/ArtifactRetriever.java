@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.util;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -84,21 +85,6 @@ public class ArtifactRetriever {
                 }
               });
 
-  private final LoadingCache<String, ArtifactVersion> latestVersion =
-      CacheBuilder.newBuilder()
-          .refreshAfterWrite(4, TimeUnit.HOURS)
-          .build(
-              new CacheLoader<String, ArtifactVersion>() {
-
-                @Override
-                public ArtifactVersion load(String coordinates) throws Exception {
-                  Document document = metadataCache.get(coordinates);
-                  XPath xpath = XPathFactory.newInstance().newXPath();
-                  String result = xpath.evaluate("/metadata/versioning/latest", document);
-                  return new DefaultArtifactVersion(result);
-                }
-              });
-
   private final LoadingCache<String, NavigableSet<ArtifactVersion>> availableVersions =
       CacheBuilder.newBuilder()
           .refreshAfterWrite(4, TimeUnit.HOURS)
@@ -146,16 +132,15 @@ public class ArtifactRetriever {
   }
 
   /**
-   * Returns the latest published artifact version, or null if there is no such version.
+   * Returns the latest published non-beta artifact version, or null if there is no such version.
    */
-  // can we exclude beta versions?
   public ArtifactVersion getLatestArtifactVersion(String groupId, String artifactId) {
     return getLatestIncrementalVersion(idToKey(groupId, artifactId), null);
   }
 
   /**
-   * Returns the latest published artifact version in the version range, or null if there is no such
-   * version.
+   * Returns the latest published non-beta artifact version in the version range, 
+   * or null if there is no such version.
    */
   public ArtifactVersion getLatestArtifactVersion(
       String groupId, String artifactId, VersionRange range) {
@@ -163,14 +148,16 @@ public class ArtifactRetriever {
   }
 
   /**
-   * Returns the latest version of the specified artifact in the version range, or null if there is
-   * no such version.
+   * Returns the latest non-beta sversion of the specified artifact in the version range,
+   * or null if there is no such version.
    * 
    * @param coordinates Maven coordinates in the form groupId:artifactId
    */
   private ArtifactVersion getLatestIncrementalVersion(String coordinates, VersionRange range) {
     try {
-      ArtifactVersion latest = latestVersion.get(coordinates);
+      NavigableSet<ArtifactVersion> allVersions = availableVersions.get(coordinates);
+      ArtifactVersion latest = getLatestReleasedVersion(allVersions);
+      
       if (range == null || range.containsVersion(latest)) {
         return latest;
       }
@@ -194,6 +181,16 @@ public class ArtifactRetriever {
     }
   }
 
+  private static ArtifactVersion getLatestReleasedVersion(
+      NavigableSet<ArtifactVersion> allVersions) {
+    for (ArtifactVersion version : allVersions.descendingSet()) {
+      if (Strings.isNullOrEmpty(version.getQualifier())) {
+        return version;
+      }
+    }
+    return null;
+  }
+  
   private static ArtifactVersion getLatestInRange(
       VersionRange versionRange, NavigableSet<ArtifactVersion> allVersions) {
     for (ArtifactVersion version : allVersions.descendingSet()) {
