@@ -30,6 +30,7 @@ import com.google.cloud.tools.eclipse.dataflow.ui.Messages;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.MessageTarget;
 import com.google.cloud.tools.eclipse.dataflow.ui.util.ButtonFactory;
 import com.google.cloud.tools.eclipse.dataflow.ui.util.SelectFirstMatchingPrefixListener;
+import com.google.cloud.tools.eclipse.googleapis.GcpProjectServicesJob;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
@@ -48,7 +49,9 @@ import java.util.Objects;
 import java.util.SortedSet;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -99,6 +102,9 @@ public class RunOptionsDefaultsComponent {
   private final MiniSelector projectInput;
   private final Combo stagingLocationInput;
   private final Button createButton;
+
+  private GcpProjectServicesJob checkProjectConfigurationJob;
+  private VerifyStagingLocationJob verifyJob;
   private SelectFirstMatchingPrefixListener completionListener;
   private ControlDecoration stagingLocationResults;
 
@@ -198,7 +204,6 @@ public class RunOptionsDefaultsComponent {
         validate();
       }
     });
-
     completionListener = new SelectFirstMatchingPrefixListener(stagingLocationInput);
     stagingLocationInput.addModifyListener(completionListener);
     stagingLocationInput.addModifyListener(new ModifyListener() {
@@ -307,6 +312,50 @@ public class RunOptionsDefaultsComponent {
         createButton.setEnabled(true);
       }
     }
+  }
+
+  /**
+   * @param text
+   */
+  protected void checkProjectConfiguration(String projectId) {
+    Credential selectedCredential = accountSelector.getSelectedCredential();
+    if (selectedCredential == null) {
+      return;
+    }
+    if (checkProjectConfigurationJob != null) {
+      checkProjectConfigurationJob.cancel();
+    }
+
+    checkProjectConfigurationJob =
+        new GcpProjectServicesJob(apiFactory, selectedCredential, projectId);
+    checkProjectConfigurationJob.addJobChangeListener(new JobChangeAdapter() {
+      @Override
+      public void done(final IJobChangeEvent event) {
+        final Control control = getControl();
+        if (control != null && !control.isDisposed()) {
+          control.getDisplay().asyncExec(new Runnable() {
+            @Override
+            public void run() {
+              if (control != null && !control.isDisposed()) {
+                /* GoogleApiUrl.DATAFLOW_API.getServiceId() */
+                String DATAFLOW_SERVICE_ID = "dataflow.googleapis.com";
+                try {
+                  if (event.getResult().isOK() && checkProjectConfigurationJob
+                      .getProjectServiceIDs().get().contains(DATAFLOW_SERVICE_ID)) {
+                    messageTarget.setError(event.getResult().getMessage());
+                  } else {
+                    messageTarget.setError(event.getResult().getMessage());
+                  }
+                } catch (ExecutionException | InterruptedException ex) {
+                  messageTarget.setError(ex.toString());
+                }
+              }
+            }
+          });
+        }
+      }
+    });
+    checkProjectConfigurationJob.schedule();
   }
 
   private GcsDataflowProjectClient getGcsClient() {
