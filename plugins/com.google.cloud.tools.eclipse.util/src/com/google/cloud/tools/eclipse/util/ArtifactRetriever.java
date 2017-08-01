@@ -72,18 +72,6 @@ public class ArtifactRetriever {
           "Could not construct metadata URL for artifact " + artifactId, ex);
     }
   }
-  
-  private final LoadingCache<String, Document> metadataCache =
-      CacheBuilder.newBuilder()
-          .refreshAfterWrite(4, TimeUnit.HOURS)
-          .build(
-              new CacheLoader<String, Document>() {
-
-                @Override
-                public Document load(String coordinates) throws Exception {
-                  return getMetadataDocument(coordinates);
-                }
-              });
 
   private final LoadingCache<String, NavigableSet<ArtifactVersion>> availableVersions =
       CacheBuilder.newBuilder()
@@ -93,7 +81,7 @@ public class ArtifactRetriever {
 
                 @Override
                 public NavigableSet<ArtifactVersion> load(String coordinates) throws Exception {
-                  Document document = metadataCache.get(coordinates);
+                  Document document = getMetadataDocument(coordinates);
                   XPath xpath = XPathFactory.newInstance().newXPath();
                   NodeList versionNodes = (NodeList) xpath.evaluate(
                       "/metadata/versioning/versions/version",
@@ -148,7 +136,7 @@ public class ArtifactRetriever {
   }
 
   /**
-   * Returns the latest non-beta sversion of the specified artifact in the version range,
+   * Returns the latest non-beta version of the specified artifact in the version range,
    * or null if there is no such version.
    * 
    * @param coordinates Maven coordinates in the form groupId:artifactId
