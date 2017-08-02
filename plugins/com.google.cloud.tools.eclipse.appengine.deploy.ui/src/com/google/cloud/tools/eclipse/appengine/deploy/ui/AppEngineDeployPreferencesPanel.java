@@ -90,8 +90,8 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
 
   private static final String APPENGINE_VERSIONS_URL =
       "https://console.cloud.google.com/appengine/versions";
-  private static final String CREATE_GCP_PROJECT_WITH_GAE_URL =
-      "https://console.cloud.google.com/projectselector/appengine/create?lang=java";
+  private static final String CREATE_GCP_PROJECT_URL =
+      "https://console.cloud.google.com/projectcreate";
 
   private static final Logger logger = Logger.getLogger(
       AppEngineDeployPreferencesPanel.class.getName());
@@ -335,7 +335,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     Composite linkComposite = new Composite(this, SWT.NONE);
     Link createNewProject = new Link(linkComposite, SWT.WRAP);
     createNewProject.setText(Messages.getString("projectselector.createproject",
-                                                CREATE_GCP_PROJECT_WITH_GAE_URL));
+                                                CREATE_GCP_PROJECT_URL));
     createNewProject.setToolTipText(Messages.getString("projectselector.createproject.tooltip"));
     FontUtil.convertFontToItalic(createNewProject);
     createNewProject.addSelectionListener(
