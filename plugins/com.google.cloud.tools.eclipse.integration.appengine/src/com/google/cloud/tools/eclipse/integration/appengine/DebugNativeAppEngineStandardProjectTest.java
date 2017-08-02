@@ -149,6 +149,13 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
     assertTrue("App Engine console should mark as stopped",
         consoleView.getViewReference().getContentDescription().startsWith("<stopped>"));
     assertFalse("Stop Server button should be disabled", stopServerButton.isEnabled());
+
+    // should also cause console to be discarded
+    launchTree.contextMenu("Remove All Terminated").click();
+    SwtBotTreeUtilities.waitUntilTreeHasNoItems(bot, launchTree);
+    assertThat("App Engine console should be removed",
+        consoleView.getViewReference().getContentDescription(),
+        Matchers.is("No consoles to display at this time."));
   }
 
   /**

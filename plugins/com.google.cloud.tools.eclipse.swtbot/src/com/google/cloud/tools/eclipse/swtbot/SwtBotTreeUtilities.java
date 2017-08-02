@@ -341,6 +341,26 @@ public class SwtBotTreeUtilities {
   }
 
   /**
+   * Wait until the given tree has not items.
+   * 
+   * @throws TimeoutException if no items appear within the default timeout
+   */
+  public static void waitUntilTreeHasNoItems(SWTWorkbenchBot bot, final SWTBotTree tree) {
+    bot.waitUntil(new DefaultCondition() {
+      @Override
+      public String getFailureMessage() {
+        return "Tree items never disappeared";
+      }
+
+      @Override
+      public boolean test() throws Exception {
+        return !tree.hasItems();
+      }
+    });
+  }
+
+
+  /**
    * Wait until the tree item contains the given text with the
    * timeout {@link SWTBotPreferences#TIMEOUT}.
    */
