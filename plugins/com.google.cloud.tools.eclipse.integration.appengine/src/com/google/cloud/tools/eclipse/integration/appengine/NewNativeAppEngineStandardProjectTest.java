@@ -22,6 +22,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import java.util.concurrent.TimeUnit;
@@ -49,7 +50,7 @@ public class NewNativeAppEngineStandardProjectTest extends BaseProjectTest {
     String[] projectFiles = {"src/main/java/HelloAppEngine.java",
         "src/main/webapp/META-INF/MANIFEST.MF", "src/main/webapp/WEB-INF/appengine-web.xml",
         "src/main/webapp/WEB-INF/web.xml", "src/main/webapp/index.html"};
-    createAndCheck("appWithDefault", null, projectFiles);
+    createAndCheck("appWithDefault", null /* packageName */, null /* runtime */, projectFiles);
   }
 
   @Test
@@ -57,24 +58,45 @@ public class NewNativeAppEngineStandardProjectTest extends BaseProjectTest {
     String[] projectFiles = {"src/main/java/app/engine/test/HelloAppEngine.java",
         "src/main/webapp/META-INF/MANIFEST.MF", "src/main/webapp/WEB-INF/appengine-web.xml",
         "src/main/webapp/WEB-INF/web.xml", "src/main/webapp/index.html",};
-    createAndCheck("appWithPackage", "app.engine.test", projectFiles);
+    createAndCheck("appWithPackage", "app.engine.test", null /* runtime */, projectFiles);
+  }
+
+  @Test
+  public void testWithPackage_java8() throws Exception {
+    String[] projectFiles = {"src/main/java/app/engine/test/HelloAppEngine.java",
+        "src/main/webapp/META-INF/MANIFEST.MF", "src/main/webapp/WEB-INF/appengine-web.xml",
+        "src/main/webapp/WEB-INF/web.xml", "src/main/webapp/index.html",};
+    createAndCheck("appWithPackage", "app.engine.test", AppEngineRuntime.STANDARD_JAVA_8,
+        projectFiles);
   }
 
   /** Create a project with the given parameters. */
-  private void createAndCheck(String projectName, String packageName, String[] projectFiles)
-                                                                              throws CoreException {
+  private void createAndCheck(String projectName, String packageName, AppEngineRuntime runtime,
+      String[] projectFiles) throws CoreException {
     assertFalse(projectExists(projectName));
-    project = SwtBotAppEngineActions.createNativeWebAppProject(bot, projectName, null, packageName);
+    project = SwtBotAppEngineActions.createNativeWebAppProject(bot, projectName, null, packageName,
+        runtime);
     assertTrue(project.exists());
 
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);
     assertNotNull("Native App Engine projects should be faceted", facetedProject);
 
-    assertEquals("Project does not have standard facet", AppEngineStandardFacet.JRE7,
-        facetedProject.getProjectFacetVersion(AppEngineStandardFacet.FACET));
-    assertEquals(JavaFacet.VERSION_1_7, facetedProject.getProjectFacetVersion(JavaFacet.FACET));
-    assertEquals(WebFacetUtils.WEB_25,
-        facetedProject.getProjectFacetVersion(WebFacetUtils.WEB_FACET));
+    if (runtime == null || runtime == AppEngineRuntime.STANDARD_JAVA_7) {
+      assertEquals("Project does not have standard facet", AppEngineStandardFacet.JRE7,
+          facetedProject.getProjectFacetVersion(AppEngineStandardFacet.FACET));
+      assertEquals(JavaFacet.VERSION_1_7, facetedProject.getProjectFacetVersion(JavaFacet.FACET));
+      assertEquals(WebFacetUtils.WEB_25,
+          facetedProject.getProjectFacetVersion(WebFacetUtils.WEB_FACET));
+    } else {
+      // we don't currently export a JRE8 facet version
+      assertNotNull("Project does not have standard facet",
+          facetedProject.getProjectFacetVersion(AppEngineStandardFacet.FACET));
+      assertEquals("Project does not have standard facet", "JRE8",
+          facetedProject.getProjectFacetVersion(AppEngineStandardFacet.FACET).getVersionString());
+      assertEquals(JavaFacet.VERSION_1_8, facetedProject.getProjectFacetVersion(JavaFacet.FACET));
+      assertEquals(WebFacetUtils.WEB_31,
+          facetedProject.getProjectFacetVersion(WebFacetUtils.WEB_FACET));
+    }
 
     for (String projectFile : projectFiles) {
       Path projectFilePath = new Path(projectFile);

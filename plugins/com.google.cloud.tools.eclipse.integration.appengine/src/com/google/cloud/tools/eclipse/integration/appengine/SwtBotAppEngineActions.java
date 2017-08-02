@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.integration.appengine;
 
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotTestingUtilities;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotTimeoutManager;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotWorkbenchActions;
@@ -29,6 +30,7 @@ import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.TimeoutException;
 import org.eclipse.wst.common.project.facet.core.FacetedProjectFramework;
+import org.junit.Assert;
 
 /**
  * Useful App Engine-related actions for Google Cloud Tools for Eclipse.
@@ -46,15 +48,20 @@ public class SwtBotAppEngineActions {
    * @return the project
    */
   public static IProject createNativeWebAppProject(SWTWorkbenchBot bot, String projectName,
-      String location, String javaPackage) {
-    return createWebAppProject(bot, projectName, location, javaPackage, null /* extraBotActions */);
+      String location, String javaPackage, AppEngineRuntime runtime) {
+    return createWebAppProject(bot, projectName, location, javaPackage, runtime,
+        null /* extraBotActions */);
   }
 
-  /** Create a new project with the Maven-based Google App Engine Standard Java Project wizard */
+  /**
+   * Create a new project with the Maven-based Google App Engine Standard Java Project wizard
+   * 
+   * @param runtime
+   */
   public static IProject createMavenWebAppProject(final SWTWorkbenchBot bot, String projectName,
-      String location, String javaPackage,
-      final String mavenGroupId, final String mavenArtifactId) {
-    return createWebAppProject(bot, projectName, location, javaPackage, new Runnable() {
+      String location, String javaPackage, AppEngineRuntime runtime, final String mavenGroupId,
+      final String mavenArtifactId) {
+    return createWebAppProject(bot, projectName, location, javaPackage, runtime, new Runnable() {
       @Override
       public void run() {
         bot.checkBox("Create as Maven project").click();
@@ -65,7 +72,7 @@ public class SwtBotAppEngineActions {
   }
 
   public static IProject createWebAppProject(SWTWorkbenchBot bot, String projectName,
-      String location, String javaPackage, Runnable extraBotActions) {
+      String location, String javaPackage, AppEngineRuntime runtime, Runnable extraBotActions) {
     bot.menu("File").menu("New").menu("Project...").click();
 
     SWTBotShell shell = bot.shell("New Project");
@@ -88,6 +95,15 @@ public class SwtBotAppEngineActions {
     }
     if (javaPackage != null) {
       bot.textWithLabel("Java package:").setText(javaPackage);
+    }
+    if (runtime != null) {
+      if (runtime == AppEngineRuntime.STANDARD_JAVA_7) {
+        bot.comboBoxWithLabel("Java version:").setSelection("Java 7, Servlet 2.5");
+      } else if (runtime == AppEngineRuntime.STANDARD_JAVA_8) {
+        bot.comboBoxWithLabel("Java version:").setSelection("Java 8, Servlet 3.1 (beta)");
+      } else {
+        Assert.fail("Runtime not handled: " + runtime);
+      }
     }
 
     // can take a loooong time to resolve jars (e.g. servlet-api.jar) from Maven Central

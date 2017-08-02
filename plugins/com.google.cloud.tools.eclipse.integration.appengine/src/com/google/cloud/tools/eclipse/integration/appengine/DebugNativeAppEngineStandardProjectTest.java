@@ -81,7 +81,7 @@ public class DebugNativeAppEngineStandardProjectTest extends BaseProjectTest {
     assertNoService(new URL("http://localhost:8080/hello"));
 
     project = SwtBotAppEngineActions.createNativeWebAppProject(bot, "testapp", null,
-        "app.engine.test");
+        "app.engine.test", null);
     assertTrue(project.exists());
 
     SWTBotTreeItem testappProject = SwtBotProjectActions.selectProject(bot, "testapp");

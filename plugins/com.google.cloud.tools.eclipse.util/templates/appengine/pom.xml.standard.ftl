@@ -14,8 +14,8 @@
     <appengine.maven.plugin.version>1.3.1</appengine.maven.plugin.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <maven.compiler.source>1.7</maven.compiler.source>
-    <maven.compiler.target>1.7</maven.compiler.target>
+    <maven.compiler.source>${compilerVersion}</maven.compiler.source>
+    <maven.compiler.target>${compilerVersion}</maven.compiler.target>
     <maven.compiler.showDeprecation>true</maven.compiler.showDeprecation>
   </properties>
 
@@ -27,8 +27,13 @@
     <!-- Compile/runtime dependencies -->
     <dependency>
       <groupId>javax.servlet</groupId>
+<#if servletVersion == "2.5">
       <artifactId>servlet-api</artifactId>
       <version>2.5</version>
+<#else>
+      <artifactId>javax.servlet-api</artifactId>
+      <version>3.1.0</version>
+</#if>
       <scope>provided</scope>
     </dependency>
     <dependency>
