@@ -68,11 +68,8 @@ public class JavaProjectPipelineOptionsHierarchy implements PipelineOptionsHiera
       IJavaProject project, MajorVersion version, IProgressMonitor monitor)
       throws JavaModelException {
     IType rootType = project.findType(PipelineOptionsNamespaces.rootType(version));
-    if (rootType == null || !rootType.exists()) {
-      throw new IllegalArgumentException(
-          "Tried to create a TypeHierarchyPipelineOptionsHierarchy for a Java Project "
-              + "where no PipelineOptions type exists");
-    }
+    Preconditions.checkNotNull(rootType, "project has no PipelineOptions type");
+    Preconditions.checkArgument(rootType.exists(), "PipelineOptions does not exist in project");
 
     // Flatten the class hierarchy, recording all the classes present
     ITypeHierarchy hierarchy = rootType.newTypeHierarchy(monitor);
