@@ -45,10 +45,7 @@ public class LocalAppEngineConsole extends MessageConsole {
   };
 
   private LocalAppEngineConsole(String name, LocalAppEngineServerBehaviour serverBehaviour) {
-    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2140
-    // todo: setting "javaStackTraceConsole" as the console type seems distasteful
-    // but is required to get stack-trace linking to work
-    super(name, "javaStackTraceConsole", AppEngineImages.appEngine(16), true);
+    super(name, AppEngineImages.appEngine(16), true);
     this.unprefixedName = name;
     this.serverBehaviour = serverBehaviour;
   }
