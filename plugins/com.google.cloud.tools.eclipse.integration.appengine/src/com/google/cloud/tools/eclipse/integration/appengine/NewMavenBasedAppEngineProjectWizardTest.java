@@ -26,6 +26,7 @@ import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import com.google.cloud.tools.eclipse.test.util.ArrayAssertions;
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
+import com.google.cloud.tools.eclipse.test.util.project.JavaRuntimeUtils;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
 import java.io.File;
@@ -46,6 +47,7 @@ import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
+import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -71,6 +73,7 @@ public class NewMavenBasedAppEngineProjectWizardTest extends BaseProjectTest {
 
   @Test
   public void testHelloWorld_java8() throws Exception {
+    Assume.assumeTrue("Requires a Java 8 JRE", JavaRuntimeUtils.hasJavaSE8());
     String[] projectFiles =
         {"src/main/webapp/WEB-INF/appengine-web.xml", "src/main/webapp/WEB-INF/web.xml", "pom.xml"};
     createAndCheck("appWithPackageProject", null, "com.example.baz",
