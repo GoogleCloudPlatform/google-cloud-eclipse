@@ -77,8 +77,8 @@ public class CodeTemplatesTest {
     AppEngineProjectConfig config = new AppEngineProjectConfig();
     config.setRuntimeId(AppEngineRuntime.STANDARD_JAVA_8.getId());
     IFile mostImportant = CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
-    validateNonConfigFiles(mostImportant, "http://java.sun.com/xml/ns/javaee",
-        "http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd", "2.5");
+    validateNonConfigFiles(mostImportant, "http://xmlns.jcp.org/xml/ns/javaee",
+        "http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd", "3.1");
     validateAppEngineWebXml(AppEngineRuntime.STANDARD_JAVA_8);
   }
 
