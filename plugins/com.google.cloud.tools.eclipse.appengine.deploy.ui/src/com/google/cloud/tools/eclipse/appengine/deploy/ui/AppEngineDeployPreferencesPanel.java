@@ -38,6 +38,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
+import com.google.common.net.UrlEscapers;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -90,8 +91,11 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
 
   private static final String APPENGINE_VERSIONS_URL =
       "https://console.cloud.google.com/appengine/versions";
+  private static final String APP_ENGINE_APPLICATION_CREATE_PATH =
+      "/projectselector/appengine/create?lang=java";
   private static final String CREATE_GCP_PROJECT_URL =
-      "https://console.cloud.google.com/projectcreate";
+      "https://console.cloud.google.com/projectcreate?previousPage="
+          + UrlEscapers.urlFormParameterEscaper().escape(APP_ENGINE_APPLICATION_CREATE_PATH);
 
   private static final Logger logger = Logger.getLogger(
       AppEngineDeployPreferencesPanel.class.getName());
