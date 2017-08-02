@@ -55,8 +55,6 @@ public class SwtBotAppEngineActions {
 
   /**
    * Create a new project with the Maven-based Google App Engine Standard Java Project wizard
-   * 
-   * @param runtime
    */
   public static IProject createMavenWebAppProject(final SWTWorkbenchBot bot, String projectName,
       String location, String javaPackage, AppEngineRuntime runtime, final String mavenGroupId,
