@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -95,6 +96,12 @@ public class AppEngineDeployPreferencesPanelTest {
     when(account2.getOAuth2Credential()).thenReturn(mock(Credential.class));
     oneAccountSet = new HashSet<>(Arrays.asList(account1));
     twoAccountSet = new HashSet<>(Arrays.asList(account1, account2));
+  }
+
+  @Test
+  public void testCreateGcpProjectUrl() {
+    assertEquals("https://console.cloud.google.com/projectcreate?previousPage=%2Fprojectselector%2Fappengine%2Fcreate%3Flang%3Djava",
+        AppEngineDeployPreferencesPanel.CREATE_GCP_PROJECT_URL);
   }
 
   @Test
