@@ -17,15 +17,12 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.cloud.tools.appengine.api.deploy.DefaultDeployConfiguration;
 import com.google.cloud.tools.eclipse.appengine.deploy.CleanupOldDeploysJob;
 import com.google.cloud.tools.eclipse.appengine.deploy.DeployJob;
 import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferences;
-import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferencesConverter;
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
-import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListener;
 import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities;
 import com.google.cloud.tools.eclipse.ui.util.ProjectFromSelectionHelper;
 import com.google.cloud.tools.eclipse.ui.util.ServiceUtils;
@@ -64,6 +61,7 @@ import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
+import org.osgi.framework.FrameworkUtil;
 
 /**
  * Command handler to deploy a web application project to App Engine.
@@ -131,16 +129,12 @@ public abstract class DeployCommandHandler extends AbstractHandler {
     return severity != IMarker.SEVERITY_ERROR;
   }
 
-  private void launchDeployJob(IProject project, Credential credential)
-                                                            throws IOException, ExecutionException {
+  private void launchDeployJob(IProject project, Credential credential) throws IOException {
     AnalyticsPingManager.getInstance().sendPing(
         AnalyticsEvents.APP_ENGINE_DEPLOY, AnalyticsEvents.APP_ENGINE_DEPLOY_STANDARD, null);
 
     IPath workDirectory = createWorkDirectory();
     DeployPreferences deployPreferences = new DeployPreferences(project);
-    DefaultDeployConfiguration deployConfiguration = toDeployConfiguration(deployPreferences);
-    boolean includeOptionalConfigurationFiles =
-        deployPreferences.isIncludeOptionalConfigurationFiles();
 
     DeployConsole messageConsole =
         MessageConsoleUtilities.createConsole(getConsoleName(deployPreferences.getProjectId()),
@@ -155,10 +149,8 @@ public abstract class DeployCommandHandler extends AbstractHandler {
 
     StagingDelegate stagingDelegate = getStagingDelegate(project);
 
-    DeployJob deploy = new DeployJob(project, credential, workDirectory,
-        new MessageConsoleWriterOutputLineListener(outputStream),
-        new MessageConsoleWriterOutputLineListener(errorStream),
-        deployConfiguration, includeOptionalConfigurationFiles, stagingDelegate);
+    DeployJob deploy = new DeployJob(project, credential, workDirectory, outputStream, errorStream,
+        stagingDelegate);
     messageConsole.setJob(deploy);
     deploy.addJobChangeListener(new JobChangeAdapter() {
 
@@ -188,14 +180,6 @@ public abstract class DeployCommandHandler extends AbstractHandler {
                                 nowString);
   }
 
-  private static DefaultDeployConfiguration toDeployConfiguration(
-      DeployPreferences deployPreferences) throws ExecutionException {
-    if (deployPreferences.getProjectId() == null || deployPreferences.getProjectId().isEmpty()) {
-      throw new ExecutionException(Messages.getString("error.projectId.missing"));
-    }
-    return DeployPreferencesConverter.toDeployConfiguration(deployPreferences);
-  }
-
   private static IPath createWorkDirectory() throws IOException {
     String now = Long.toString(System.currentTimeMillis());
     IPath workDirectory = getTempDir().append(now);
@@ -208,8 +192,8 @@ public abstract class DeployCommandHandler extends AbstractHandler {
   }
 
   private static IPath getTempDir() {
-    return Platform
-        .getStateLocation(Platform.getBundle("com.google.cloud.tools.eclipse.appengine.deploy"))
+    // DeployJob.class: create in the non-UI bundle.
+    return Platform.getStateLocation(FrameworkUtil.getBundle(DeployJob.class))
         .append("tmp");
   }
 }

@@ -54,7 +54,7 @@ public class AppEngineWebBuilderTest {
   @Test
   public void testAddedBuilder() throws CoreException {
     testProject.withFacetVersions(AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8,
-        JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25).getFacetedProject();
+        JavaFacet.VERSION_1_8, WebFacetUtils.WEB_25).getFacetedProject();
 
     assertProjectHasBuilder();
   }
@@ -63,7 +63,7 @@ public class AppEngineWebBuilderTest {
   @Test
   public void testBuilderRemoved() throws CoreException {
     testProject.withFacetVersions(AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8,
-        JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25).getFacetedProject();
+        JavaFacet.VERSION_1_8, WebFacetUtils.WEB_25).getFacetedProject();
     assertProjectHasBuilder();
 
     Action uninstallAction =
@@ -126,7 +126,7 @@ public class AppEngineWebBuilderTest {
   @Test
   public void testRemovingJava8Runtime_webFacet() throws CoreException {
     testProject.withFacetVersions(AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8,
-        JavaFacet.VERSION_1_7, WebFacetUtils.WEB_31).getFacetedProject();
+        JavaFacet.VERSION_1_8, WebFacetUtils.WEB_31).getFacetedProject();
     assertProjectHasBuilder();
 
     IFile appEngineWebDescriptor =

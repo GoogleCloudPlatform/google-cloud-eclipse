@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.dataflow.ui.preferences;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.DataflowPreferences;
 import com.google.cloud.tools.eclipse.dataflow.core.project.FetchStagingLocationsJob;
 import com.google.cloud.tools.eclipse.dataflow.core.project.GcsDataflowProjectClient;
@@ -25,15 +26,19 @@ import com.google.cloud.tools.eclipse.dataflow.core.project.GcsDataflowProjectCl
 import com.google.cloud.tools.eclipse.dataflow.core.project.VerifyStagingLocationJob;
 import com.google.cloud.tools.eclipse.dataflow.core.project.VerifyStagingLocationJob.VerifyStagingLocationResult;
 import com.google.cloud.tools.eclipse.dataflow.core.proxy.ListenableFutureProxy;
-import com.google.cloud.tools.eclipse.dataflow.core.util.CouldNotCreateCredentialsException;
 import com.google.cloud.tools.eclipse.dataflow.ui.DataflowUiPlugin;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.MessageTarget;
 import com.google.cloud.tools.eclipse.dataflow.ui.util.ButtonFactory;
 import com.google.cloud.tools.eclipse.dataflow.ui.util.DisplayExecutor;
 import com.google.cloud.tools.eclipse.dataflow.ui.util.SelectFirstMatchingPrefixListener;
+import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
+import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
+import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
 import com.google.cloud.tools.eclipse.ui.util.databinding.BucketNameValidator;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import java.util.Locale;
+import com.google.common.collect.ImmutableSortedSet;
 import java.util.SortedSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -54,7 +59,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.statushandlers.StatusManager;
+import org.eclipse.ui.PlatformUI;
 
 /**
  * Collects default run options for Dataflow Pipelines and provides means to create and modify them.
@@ -63,41 +68,64 @@ public class RunOptionsDefaultsComponent {
 
   private static final int PROJECT_INPUT_SPENT_COLUMNS = 1;
   private static final int STAGING_LOCATION_SPENT_COLUMNS = 2;
+  private static final int ACCOUNT_SPENT_COLUMNS = 1;
 
   private static final long VERIFY_LOCATION_DELAY_MS = 250L;
 
-  private final GcsDataflowProjectClient client;
   private final DisplayExecutor executor;
   private final MessageTarget messageTarget;
   private final Composite target;
   private final Text projectInput;
   private final Combo stagingLocationInput;
   private final Button createButton;
+  private final AccountSelector accountSelector;
+  private final IGoogleApiFactory apiFactory;
 
   private VerifyStagingLocationJob verifyJob;
   private SelectFirstMatchingPrefixListener completionListener;
   private WizardPage page = null;
 
   public RunOptionsDefaultsComponent(
+      Composite target, int columns, MessageTarget messageTarget, DataflowPreferences preferences) {
+    this(target, columns, messageTarget, preferences, null);
+  }
+
+  public RunOptionsDefaultsComponent(Composite target, int columns, MessageTarget messageTarget,
+      DataflowPreferences preferences, WizardPage page) {
+    this(target, columns, messageTarget, preferences, page,
+        PlatformUI.getWorkbench().getService(IGoogleLoginService.class),
+        PlatformUI.getWorkbench().getService(IGoogleApiFactory.class));
+  }
+
+  @VisibleForTesting
+  RunOptionsDefaultsComponent(
       Composite target,
       int columns,
       MessageTarget messageTarget,
       DataflowPreferences preferences,
-      WizardPage page) {
+      WizardPage page,
+      IGoogleLoginService loginService,
+      IGoogleApiFactory apiFactory) {
     checkArgument(columns >= 3, "DefaultRunOptions must be in a Grid with at least 3 columns");
     this.target = target;
     this.page = page;
     this.messageTarget = messageTarget;
     this.executor = DisplayExecutor.create(target.getDisplay());
-    this.client = setupGcsClient();
+    this.apiFactory = apiFactory;
+
+    Label accountLabel = new Label(target, SWT.NULL);
+    accountLabel.setText("&Account:");
+    accountSelector = new AccountSelector(target, loginService, "Add a new account...");
 
     Label projectInputLabel = new Label(target, SWT.NULL);
     projectInput = new Text(target, SWT.SINGLE | SWT.BORDER);
 
     Label comboLabel = new Label(target, SWT.NULL);
     stagingLocationInput = new Combo(target, SWT.DROP_DOWN);
-    createButton = ButtonFactory.newPushButton(target, "&Create");
+    createButton = ButtonFactory.newPushButton(target, "&Create Bucket");
     createButton.setEnabled(false);
+
+    accountSelector.selectAccount(preferences.getDefaultAccountEmail());
 
     projectInputLabel.setText("Cloud Platform &Project ID:");
 
@@ -110,6 +138,11 @@ public class RunOptionsDefaultsComponent {
     String stagingLocation = preferences.getDefaultStagingLocation();
     stagingLocationInput.setText(Strings.nullToEmpty(stagingLocation));
 
+    // Account selection occupies a single row
+    accountLabel.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false, 1, 1));
+    accountSelector.setLayoutData(new GridData(
+        SWT.FILL, SWT.CENTER, true, false, columns - ACCOUNT_SPENT_COLUMNS, 1));
+
     // Project input occupies a single row
     projectInputLabel.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false, 1, 1));
     projectInput.setLayoutData(
@@ -120,9 +153,17 @@ public class RunOptionsDefaultsComponent {
     stagingLocationInput.setLayoutData(new GridData(
         SWT.FILL, SWT.CENTER, true, false, columns - STAGING_LOCATION_SPENT_COLUMNS, 1));
 
-    GetProjectStagingLocationsListener getProjectStagingLocationsListener =
-        new GetProjectStagingLocationsListener();
-    projectInput.addFocusListener(getProjectStagingLocationsListener);
+    accountSelector.addSelectionListener(new Runnable() {
+      @Override
+      public void run() {
+        // Don't use "removeAll()", as it will clear the text field too.
+        stagingLocationInput.remove(0, stagingLocationInput.getItemCount() - 1);
+        completionListener.setContents(ImmutableSortedSet.<String>of());
+        updateStagingLocations(getProject());
+      }
+    });
+
+    projectInput.addFocusListener(new GetProjectStagingLocationsListener());
 
     completionListener = new SelectFirstMatchingPrefixListener(stagingLocationInput);
     stagingLocationInput.addModifyListener(completionListener);
@@ -140,26 +181,26 @@ public class RunOptionsDefaultsComponent {
     messageTarget.setInfo("Set Pipeline Run Option Defaults");
   }
 
-  public RunOptionsDefaultsComponent(
-      Composite composite, int numColumns, MessageTarget messageTarget, DataflowPreferences prefs) {
-    this(composite, numColumns, messageTarget, prefs, null);
-  }
-
-  private static GcsDataflowProjectClient setupGcsClient() {
-    try {
-      return GcsDataflowProjectClient.createWithDefaultClient();
-    } catch (CouldNotCreateCredentialsException e) {
-      StatusManager.getManager().handle(e.getStatus(), StatusManager.SHOW);
-      return null;
-    }
+  private GcsDataflowProjectClient getGcsClient() {
+    Preconditions.checkNotNull(accountSelector.getSelectedCredential());
+    Credential credential = accountSelector.getSelectedCredential();
+    return GcsDataflowProjectClient.create(apiFactory, credential);
   }
 
   public Control getControl() {
-    return this.target;
+    return target;
+  }
+
+  public void selectAccount(String accountEmail) {
+    accountSelector.selectAccount(accountEmail);
   }
 
   public void setCloudProjectText(String project) {
     projectInput.setText(project);
+  }
+
+  public String getAccountEmail() {
+    return accountSelector.getSelectedEmail();
   }
 
   public String getProject() {
@@ -174,12 +215,17 @@ public class RunOptionsDefaultsComponent {
     return GcsDataflowProjectClient.toGcsLocationUri(stagingLocationInput.getText());
   }
 
+  public void addAccountSelectionListener(Runnable listener) {
+    accountSelector.addSelectionListener(listener);
+  }
+
   public void addModifyListener(ModifyListener listener) {
     projectInput.addModifyListener(listener);
     stagingLocationInput.addModifyListener(listener);
   }
 
   public void setEnabled(boolean enabled) {
+    accountSelector.setEnabled(enabled);
     projectInput.setEnabled(enabled);
     stagingLocationInput.setEnabled(enabled);
   }
@@ -189,10 +235,11 @@ public class RunOptionsDefaultsComponent {
    * combo.
    */
   private void updateStagingLocations(String project) {
-    // We can't retrieve staging locations because no project was input or we're not authenticated.
-    if (!Strings.isNullOrEmpty(project) && client != null) {
+    // We can't retrieve staging locations if no project was input or we're not authenticated.
+    Credential credential = accountSelector.getSelectedCredential();
+    if (!Strings.isNullOrEmpty(project) && credential != null) {
       ListenableFutureProxy<SortedSet<String>> stagingLocationsFuture =
-          FetchStagingLocationsJob.schedule(client, project);
+          FetchStagingLocationsJob.schedule(getGcsClient(), project);
       UpdateStagingLocationComboListener updateComboListener =
           new UpdateStagingLocationComboListener(stagingLocationsFuture);
       stagingLocationsFuture.addListener(updateComboListener, executor);
@@ -211,8 +258,10 @@ public class RunOptionsDefaultsComponent {
       // FIXME: this has no effect, as "VerifyStagingLocationJob" doesn't honor cancellation.
       verifyJob.cancel();
     }
-    if (trimBucketName().isEmpty()) {
-      // If the staging location is empty, we don't have anything to verify; and we don't have any
+
+    final String bucketNamePart = extractBucketNamePart();
+    if (bucketNamePart.isEmpty()) {
+      // If the bucket name is empty, we don't have anything to verify; and we don't have any
       // interesting messaging.
       setPageComplete(true);
       return;
@@ -224,11 +273,13 @@ public class RunOptionsDefaultsComponent {
       return;
     }
 
-    if (client == null) {
-      // We can't verify the staging location because we don't have a GCS client
+    if (accountSelector.getSelectedCredential() == null) {
+      // We can't verify the staging location because no account was selected
       return;
     }
-    verifyJob = VerifyStagingLocationJob.create(client, stagingLocation);
+
+    String email = accountSelector.getSelectedEmail();
+    verifyJob = VerifyStagingLocationJob.create(getGcsClient(), email, stagingLocation);
     verifyJob.schedule(VERIFY_LOCATION_DELAY_MS);
     final ListenableFutureProxy<VerifyStagingLocationResult> resultFuture =
         verifyJob.getVerifyResult();
@@ -236,20 +287,29 @@ public class RunOptionsDefaultsComponent {
         new Runnable() {
           @Override
           public void run() {
+            if (target.isDisposed()) {
+              return;
+            }
+
             try {
               VerifyStagingLocationResult result = resultFuture.get();
-              if (result.getStagingLocation().equals(stagingLocationInput.getText())
-                  && result.isAccessible()) {
-                messageTarget.setInfo("Found staging location " + stagingLocation);
+              if (!result.email.equals(accountSelector.getSelectedEmail())
+                  || !result.stagingLocation.equals(stagingLocationInput.getText())) {
+                return;  // Input form changed; validation result no longer applicable
+              }
+
+              if (result.accessible) {
+                messageTarget.setInfo(
+                    String.format("Verified bucket %s is accessible.", bucketNamePart));
                 createButton.setEnabled(false);
                 setPageComplete(true);
               } else {
-                messageTarget.setError(String.format("Couldn't fetch bucket %s", stagingLocation));
+                messageTarget.setError(String.format("Couldn't fetch bucket %s.", bucketNamePart));
                 createButton.setEnabled(true);
                 setPageComplete(false);
               }
             } catch (InterruptedException | ExecutionException e) {
-              messageTarget.setError(String.format("Couldn't fetch bucket %s", stagingLocation));
+              messageTarget.setError(String.format("Couldn't fetch bucket %s.", bucketNamePart));
               setPageComplete(false);
             }
           }
@@ -276,12 +336,13 @@ public class RunOptionsDefaultsComponent {
   private class CreateStagingLocationListener extends SelectionAdapter {
     @Override
     public void widgetSelected(SelectionEvent event) {
-      if (client == null) {
+      if (accountSelector.getSelectedCredential() == null) {
         return;
       }
+
       String projectName = projectInput.getText();
       String stagingLocation = stagingLocationInput.getText();
-      StagingLocationVerificationResult result = client.createStagingLocation(
+      StagingLocationVerificationResult result = getGcsClient().createStagingLocation(
           projectName, stagingLocation, new NullProgressMonitor());
       if (result.isSuccessful()) {
         messageTarget.setInfo("Created staging location at " + stagingLocation);
@@ -315,6 +376,10 @@ public class RunOptionsDefaultsComponent {
      */
     @Override
     public void run() {
+      if (target.isDisposed()) {
+        return;
+      }
+
       try {
         SortedSet<String> stagingLocations = stagingLocationsFuture.get();
         messageTarget.clear();
@@ -334,23 +399,21 @@ public class RunOptionsDefaultsComponent {
 
   private static final BucketNameValidator bucketNameValidator = new BucketNameValidator();
 
-  private String trimBucketName() {
-    String bucketName = stagingLocationInput.getText().trim();
-    if (bucketName.toLowerCase(Locale.US).startsWith("gs://")) {
-      bucketName = bucketName.substring(5);
-    }
-    return bucketName;
+  private String extractBucketNamePart() {
+    // Don't trim text unless you consistently trim everywhere else (e.g., "getStagingLocation()").
+    return GcsDataflowProjectClient.toGcsBucketName(stagingLocationInput.getText());
   }
 
-  private IStatus bucketNameStatus() {
-    return bucketNameValidator.validate(trimBucketName());
+  @VisibleForTesting
+  IStatus bucketNameStatus() {
+    return bucketNameValidator.validate(extractBucketNamePart());
   }
 
   private class EnableCreateButton implements ModifyListener {
 
     @Override
     public void modifyText(ModifyEvent event) {
-      boolean enabled = !trimBucketName().isEmpty() && bucketNameStatus().isOK();
+      boolean enabled = !extractBucketNamePart().isEmpty() && bucketNameStatus().isOK();
       createButton.setEnabled(enabled);
     }
 

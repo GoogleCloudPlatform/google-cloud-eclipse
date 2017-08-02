@@ -23,8 +23,8 @@ import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
 public class DataflowMavenCoordinates {
 
-  static final String DATAFLOW_GROUP_ID = "com.google.cloud.dataflow";
-  static final String DATAFLOW_SDK_ARTIFACT = "google-cloud-dataflow-java-sdk-all";
+  static final String GROUP_ID = "com.google.cloud.dataflow";
+  static final String ARTIFACT_ID = "google-cloud-dataflow-java-sdk-all";
 
   /** Versions which are known to have been released. */
   static final NavigableSet<ArtifactVersion> KNOWN_VERSIONS =

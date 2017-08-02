@@ -19,16 +19,21 @@ package com.google.cloud.tools.eclipse.appengine.deploy;
 import com.google.cloud.tools.appengine.api.deploy.DefaultDeployConfiguration;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineDeployment;
+import com.google.cloud.tools.eclipse.appengine.deploy.util.CloudSdkProcessWrapper;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.ui.console.MessageConsoleStream;
 
 /**
  * Deploys a staged App Engine project. The project must be staged first (e.g. using {@link
@@ -41,25 +46,35 @@ public class AppEngineProjectDeployer {
   static final List<String> APP_ENGINE_CONFIG_FILES = Collections.unmodifiableList(Arrays.asList(
       "cron.yaml", "dispatch.yaml", "dos.yaml", "index.yaml", "queue.yaml"));
 
+  private final CloudSdkProcessWrapper cloudSdkProcessWrapper = new CloudSdkProcessWrapper();
+
   /**
    * @param optionalConfigurationFilesDirectory if not {@code null}, searches optional configuration
    * files (such as {@code cron.yaml}) in this directory and deploys them together
+   * @return
    */
-  public void deploy(IPath stagingDirectory, CloudSdk cloudSdk,
-                     DefaultDeployConfiguration configuration,
-                     IPath optionalConfigurationFilesDirectory, IProgressMonitor monitor) {
+  public IStatus deploy(IPath stagingDirectory, Path credentialFile,
+      DeployPreferences deployPreferences, IPath optionalConfigurationFilesDirectory,
+      MessageConsoleStream stdoutOutputStream, IProgressMonitor monitor) {
     if (monitor.isCanceled()) {
       throw new OperationCanceledException();
     }
+
+    cloudSdkProcessWrapper.setUpDeployCloudSdk(credentialFile, stdoutOutputStream);
+    CloudSdk cloudSdk = cloudSdkProcessWrapper.getCloudSdk();
 
     SubMonitor progress = SubMonitor.convert(monitor, 1);
     progress.setTaskName(Messages.getString("task.name.deploy.project")); //$NON-NLS-1$
     try {
       List<File> deployables =
           computeDeployables(stagingDirectory, optionalConfigurationFilesDirectory);
+
+      DefaultDeployConfiguration configuration =
+          DeployPreferencesConverter.toDeployConfiguration(deployPreferences);
       configuration.setDeployables(deployables);
       CloudSdkAppEngineDeployment deployment = new CloudSdkAppEngineDeployment(cloudSdk);
       deployment.deploy(configuration);
+      return cloudSdkProcessWrapper.getExitStatus();
     } finally {
       progress.worked(1);
     }
@@ -80,5 +95,14 @@ public class AppEngineProjectDeployer {
       }
     }
     return deployables;
+  }
+
+  public void interrupt() {
+    cloudSdkProcessWrapper.interrupt();
+  }
+
+  public String getJsonDeployResult() {
+    Preconditions.checkNotNull(cloudSdkProcessWrapper);
+    return cloudSdkProcessWrapper.getStdOutAsString();
   }
 }

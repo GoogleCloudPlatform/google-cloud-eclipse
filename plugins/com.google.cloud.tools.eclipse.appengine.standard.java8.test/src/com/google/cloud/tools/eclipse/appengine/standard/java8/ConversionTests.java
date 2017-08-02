@@ -85,8 +85,8 @@ public class ConversionTests {
     conversionJob.join();
     assertIsOk("conversion should never fail", conversionJob.getResult());
 
-    // ensure facet versions haven't been downgraded
-    assertFacetVersions(project, JavaFacet.VERSION_1_7, WebFacetUtils.WEB_31,
+    // ensure that java facet upgraded, and web facet versions not downgraded
+    assertFacetVersions(project, JavaFacet.VERSION_1_8, WebFacetUtils.WEB_31,
         AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8);
     assertJava8Runtime(project);
   }

@@ -34,7 +34,6 @@ import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.junit.After;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 
 /**
  * Test end-to-end conversion of existing GPE projects.
@@ -45,26 +44,25 @@ public class GpeConversionTest {
   @After
   public void tearDown() throws CoreException {
     if (project != null) {
+      ProjectUtils.waitForProjects(project);
       project.delete(true, null);
     }
   }
 
   @Test
-  public void gpeClassicProject()
-      throws CoreException, IOException, InterruptedException, SAXException {
+  public void gpeClassicProject() throws CoreException, IOException, InterruptedException {
     convertGpeProject(new URL(
         "platform:/fragment/com.google.cloud.tools.eclipse.appengine.compat.test/test-projects/GPE-classic-project.zip"));
   }
 
   @Test
-  public void gpeFacetedProject()
-      throws CoreException, IOException, InterruptedException, SAXException {
+  public void gpeFacetedProject() throws CoreException, IOException, InterruptedException {
     convertGpeProject(new URL(
         "platform:/fragment/com.google.cloud.tools.eclipse.appengine.compat.test/test-projects/GPE-faceted-project.zip"));
   }
 
   private void convertGpeProject(URL zipFile)
-      throws CoreException, IOException, InterruptedException, SAXException {
+      throws CoreException, IOException, InterruptedException {
     List<IProject> projects =
         ProjectUtils.importProjects(zipFile,
         false /* checkBuildErrors */, null);

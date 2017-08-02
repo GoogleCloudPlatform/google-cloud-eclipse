@@ -17,18 +17,25 @@
 package com.google.cloud.tools.eclipse.test.util;
 
 import com.google.cloud.tools.eclipse.test.util.reflection.ReflectionUtil;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.ComparisonChain;
+import com.google.common.collect.Ordering;
 import java.lang.Thread.State;
 import java.lang.management.LockInfo;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MonitorInfo;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
+import org.eclipse.core.internal.jobs.InternalJob;
 import org.eclipse.core.internal.jobs.JobManager;
 import org.eclipse.core.internal.jobs.LockManager;
 import org.eclipse.core.runtime.jobs.Job;
@@ -44,9 +51,27 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
   private final TimeUnit unit;
   private final boolean ignoreUselessThreads;
 
+  private String title;
   private Description description;
   private Timer timer;
   private Stopwatch stopwatch;
+  private Stopwatch dumpingTime;
+
+  /** Dump report right now. */
+  public static void report() {
+    new ThreadDumpingWatchdog(0, TimeUnit.DAYS).run();
+  }
+
+  /**
+   * Dump report with new title.
+   */
+  public static void report(String title, Stopwatch stopwatch) {
+    ThreadDumpingWatchdog watchdog = new ThreadDumpingWatchdog(0, TimeUnit.DAYS);
+    watchdog.title = title;
+    watchdog.stopwatch = stopwatch;
+    watchdog.run();
+  }
+
 
   public ThreadDumpingWatchdog(long period, TimeUnit unit) {
     this(period, unit, true);
@@ -92,7 +117,7 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
 
   @Override
   public void run() {
-    Stopwatch dumpingTime = Stopwatch.createStarted();
+    dumpingTime = Stopwatch.createStarted();
     ThreadMXBean bean = ManagementFactory.getThreadMXBean();
     ThreadInfo[] infos = bean.dumpAllThreads(true, true);
     Arrays.sort(infos, new Comparator<ThreadInfo>() {
@@ -104,10 +129,16 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
 
     StringBuilder sb = new StringBuilder();
     sb.append("\n+-------------------------------------------------------------------------------");
-    sb.append("\n| STACK DUMP @ ").append(stopwatch).append(": ").append(description);
+    sb.append("\n| STACK DUMP @ ").append(stopwatch);
+    if (title != null) {
+      sb.append(": ").append(title);
+    } else if (description != null) {
+      sb.append(": ").append(description);
+    }
     sb.append("\n|");
     dumpEclipseLocks(sb, "| ");
 
+    sb.append("\n|");
     int uselessThreadsCount = 0;
     for (ThreadInfo tinfo : infos) {
       // Unfortunately ThreadInfo#toString() only dumps up to 8 stackframes, and
@@ -171,9 +202,109 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
       sb.append("\n").append(linePrefix);
       sb.append("\n").append(linePrefix).append("Eclipse Locks:");
       sb.append("\n").append(linePrefix).append(debugOutput.replace("\n", "\n" + linePrefix));
+      sb.append("\n").append(linePrefix).append("[").append(dumpingTime).append("]");
     } catch (SecurityException | IllegalArgumentException | ReflectiveOperationException ex) {
       sb.append("\n").append(linePrefix).append("Eclipse Lock information not available");
     }
+  }
+
+  /**
+   * Dump details on current jobs.
+   */
+  private void dumpEclipseJobs(StringBuilder sb, String linePrefix) {
+    Job[] jobs = Job.getJobManager().find(null);
+    if (jobs.length == 0) {
+      return;
+    }
+
+    Arrays.sort(jobs, new Ordering<Job>() {
+      @Override
+      public int compare(Job j1, Job j2) {
+        Preconditions.checkNotNull(j1);
+        Preconditions.checkNotNull(j2);
+        //@formatter:off
+        return ComparisonChain.start()
+            .compareTrueFirst(j1.isBlocking(), j2.isBlocking())
+            .compare(j2.getState(), j1.getState()) // descending order so RUNNING is first
+            .compare(j1.getPriority(), j2.getPriority())
+            .compareTrueFirst(j1.isUser(), j2.isUser())
+            .compareTrueFirst(j1.isSystem(), j2.isSystem())
+            .compare(j1.getRule(), j2.getRule(), Ordering.usingToString().nullsLast())
+            .result();
+        //@formatter:on
+      }
+    });
+
+    sb.append("\n").append(linePrefix).append(jobs.length + " jobs:");
+    for (int index = 0; index < jobs.length; index++) {
+      Job job = jobs[index];
+      dumpJob(sb, linePrefix, job, job.getThread());
+    }
+
+    // Try to dump ThreadJobs, which are threads that access ISchedulingRules
+    try {
+      Object implicitJobs =
+          ReflectionUtil.getField(Job.getJobManager(), "implicitJobs", Object.class);
+      Map<?, ?> threadJobs =
+          ReflectionUtil.getField(implicitJobs, "threadJobs", Map.class); /* <Thread,ThreadJob> */
+      if (!threadJobs.isEmpty()) {
+        sb.append("\n").append(linePrefix).append(threadJobs.size() + " ThreadJobs:");
+        for (Entry entry : threadJobs.entrySet()) {
+          dumpJob(sb, linePrefix, (Job) entry.getValue(), (Thread) entry.getKey());
+        }
+      }
+    } catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException
+        | SecurityException ex) {
+      System.err.println("Unable to obtain JobManager.implicitJobs: " + ex);
+    }
+  }
+
+
+  private void dumpJob(StringBuilder sb, String linePrefix, Job job, Thread thread) {
+    String status;
+    switch (job.getState()) {
+      case Job.RUNNING:
+        status = "RUNNING";
+        break;
+      case Job.WAITING:
+        status = "WAITING";
+        break;
+      case Job.SLEEPING:
+        status = "SLEEPING";
+        break;
+      case Job.NONE:
+        status = "NONE";
+        break;
+      default:
+        status = "UNKNOWN(" + job.getState() + ")";
+        break;
+    }
+    Object blockingJob = null;
+    try {
+      blockingJob = ReflectionUtil.invoke(Job.getJobManager(), "findBlockingJob",
+          InternalJob.class, new Class<?>[] {InternalJob.class}, job);
+    } catch (NoSuchMethodException | SecurityException | IllegalAccessException
+        | IllegalArgumentException | InvocationTargetException ex) {
+      System.err.println("Unable to fetch blocking-job: " + ex);
+    }
+    sb.append("\n").append(linePrefix);
+    //@formatter:off
+    sb.append(String.format("  %s%s{pri=%d%s%s%s%s} %s (%s)%s",
+        status,
+        (job.isBlocking() ? "<BLOCKING>" : ""), 
+        job.getPriority(), 
+        (job.isSystem() ? ",system" : ""),
+        (job.isUser() ? ",user" : ""),
+        (job.getRule() != null ? ",rule=" + job.getRule() : ""),
+        (thread != null ? ",thr=" + thread : ""),
+        job,
+        job.getClass().getName(),
+        (job.getJobGroup() != null ? " [group=" + job.getJobGroup() + "]" : "")));
+    if (blockingJob != null) {
+      sb.append("\n").append(linePrefix)
+          .append(String.format("    - blocked by: %s (%s)", blockingJob, blockingJob.getClass()));
+    }
+    //@formatter:on
   }
 
   /**
@@ -315,5 +446,4 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
       sb.append(" (in native code)");
     }
   }
-
 }

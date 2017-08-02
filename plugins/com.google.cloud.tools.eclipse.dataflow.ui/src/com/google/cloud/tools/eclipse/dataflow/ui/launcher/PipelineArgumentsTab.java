@@ -100,8 +100,9 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
   private PipelineLaunchConfiguration launchConfiguration;
 
-  private final DataflowDependencyManager dependencyManager;
-  private final PipelineOptionsHierarchyFactory pipelineOptionsHierarchyFactory;
+  private final DataflowDependencyManager dependencyManager = DataflowDependencyManager.create();
+  private final PipelineOptionsHierarchyFactory pipelineOptionsHierarchyFactory =
+      new ClasspathPipelineOptionsHierarchyFactory();
 
   /*
    * TODO: By default, this may include all PipelineOptions types, including custom user types that
@@ -111,23 +112,16 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
    */
   private PipelineOptionsHierarchy hierarchy;
 
-  private IWorkspaceRoot workspaceRoot;
+  private final IWorkspaceRoot workspaceRoot;
 
   public PipelineArgumentsTab() {
-    this(
-        DataflowDependencyManager.create(),
-        new ClasspathPipelineOptionsHierarchyFactory(),
-        ResourcesPlugin.getWorkspace().getRoot());
+    this(ResourcesPlugin.getWorkspace().getRoot());
   }
 
-  private PipelineArgumentsTab(
-      DataflowDependencyManager dependencyManager,
-      PipelineOptionsHierarchyFactory retrieverFactory,
-      IWorkspaceRoot workspaceRoot) {
-    this.dependencyManager = dependencyManager;
-    this.pipelineOptionsHierarchyFactory = retrieverFactory;
+  @VisibleForTesting
+  PipelineArgumentsTab(IWorkspaceRoot workspaceRoot) {
     this.workspaceRoot = workspaceRoot;
-    hierarchy = retrieverFactory.global(new NullProgressMonitor());
+    hierarchy = pipelineOptionsHierarchyFactory.global(new NullProgressMonitor());
   }
 
   @Override
@@ -253,10 +247,11 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     defaultOptionsComponent =
         new DefaultedPipelineOptionsComponent(composite, layoutData, target, getPreferences());
 
-    defaultOptionsComponent.addButtonSelectionListener(
-        new UpdateLaunchConfigurationDialogChangedListener());
-    defaultOptionsComponent.addModifyListener(
-        new UpdateLaunchConfigurationDialogChangedListener());
+    UpdateLaunchConfigurationDialogChangedListener dialogChangedListener =
+        new UpdateLaunchConfigurationDialogChangedListener();
+    defaultOptionsComponent.addAccountSelectionListener(dialogChangedListener);
+    defaultOptionsComponent.addButtonSelectionListener(dialogChangedListener);
+    defaultOptionsComponent.addModifyListener(dialogChangedListener);
   }
 
   @Override
@@ -276,11 +271,10 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     if (!defaultOptionsComponent.isUseDefaultOptions()) {
       overallArgValues.putAll(defaultOptionsComponent.getValues());
     }
-
     overallArgValues.putAll(getNonDefaultOptions());
-    launchConfiguration.setUserOptionsName(userOptionsSelector.getText());
-
     launchConfiguration.setArgumentValues(overallArgValues);
+
+    launchConfiguration.setUserOptionsName(userOptionsSelector.getText());
 
     launchConfiguration.toLaunchConfiguration(configuration);
   }
@@ -302,7 +296,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
       IProject project = getProject();
       MajorVersion majorVersion = MajorVersion.ONE;
-      if (project != null) {
+      if (project != null && project.isAccessible()) {
          majorVersion = dependencyManager.getProjectMajorVersion(project);
          if (majorVersion == null) {
             majorVersion = MajorVersion.ONE;
@@ -410,6 +404,10 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
         new Runnable() {
           @Override
           public void run() {
+            if (internalComposite.isDisposed()) {
+              return;
+            }
+
             try {
               pipelineOptionsForm.updateForm(launchConfiguration, optionsHierarchyFuture.get());
               updateLaunchConfigurationDialog();
@@ -499,20 +497,21 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   }
 
   /**
-   * When the default options button is selected or a launch configuration property changes,
-   * ensure 1) the validation state is reflected in the arguments tab; and 2) the min size of the
-   * {@code ScrolledComposite} is updated to fit the entire form.
+   * When 1) the default options button is selected; or 2) a launch configuration property changes;
+   * or 3) account selection changes, then ensure 1) the validation state is reflected in the
+   * arguments tab; and 2) the min size of the {@code ScrolledComposite} is updated to fit the
+   * entire form.
    */
   private class UpdateLaunchConfigurationDialogChangedListener
-      extends SelectionAdapter implements ModifyListener, IExpansionListener {
+      extends SelectionAdapter implements ModifyListener, IExpansionListener, Runnable {
     @Override
     public void widgetSelected(SelectionEvent event) {
-      updateLaunchConfigurationDialog();
+      run();
     }
 
     @Override
     public void modifyText(ModifyEvent event) {
-      updateLaunchConfigurationDialog();
+      run();
     }
 
     @Override
@@ -521,6 +520,11 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
     @Override
     public void expansionStateChanged(ExpansionEvent event) {
+      run();
+    }
+
+    @Override
+    public void run() {
       updateLaunchConfigurationDialog();
     }
   }

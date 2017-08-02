@@ -82,8 +82,8 @@ public class DataflowDependencyManager {
   }
 
   private static boolean isDataflowDependency(Dependency dependency) {
-    return dependency.getGroupId().equals(DataflowArtifactRetriever.DATAFLOW_GROUP_ID)
-        && dependency.getArtifactId().equals(DataflowArtifactRetriever.DATAFLOW_SDK_ARTIFACT);
+    return dependency.getGroupId().equals(DataflowMavenCoordinates.GROUP_ID)
+        && dependency.getArtifactId().equals(DataflowMavenCoordinates.ARTIFACT_ID);
   }
 
   /**

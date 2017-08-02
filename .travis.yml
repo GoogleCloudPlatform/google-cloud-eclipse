@@ -19,6 +19,8 @@ env:
     - JAVA_RUNTIME=JavaSE-1.8 ECLIPSE_TARGET=oxygen MAVEN_FLAGS=-Pjacoco
   global:
     - PATH=$PWD/google-cloud-sdk/bin:$PATH
+    # Our maven build typically reports about 512m
+    - MAVEN_OPTS=-Xmx700m
     - CLOUDSDK_CORE_DISABLE_USAGE_REPORTING=true
     - DISPLAY=:99.0
 before_script:
@@ -26,7 +28,7 @@ before_script:
   - sleep 3 # give xvfb some time to start
   - metacity --sm-disable --replace &
   - sleep 3 # give metacity some time to start
-script: ./mvnw -B -Ptravis --fail-at-end verify ${MAVEN_FLAGS}
+script: ./mvnw -V -B -Ptravis --fail-at-end verify ${MAVEN_FLAGS}
      ${ECLIPSE_TARGET:+-Declipse.target=${ECLIPSE_TARGET}}
      --toolchains=.travis-toolchains.xml
      -Dtoolchain.java.runtime=${JAVA_RUNTIME}

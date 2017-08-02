@@ -20,11 +20,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.login.ui.LoginServiceUi;
 import com.google.cloud.tools.login.Account;
 import com.google.cloud.tools.login.GoogleLoginState;
@@ -142,6 +144,35 @@ public class GoogleLoginServiceTest {
 
     assertFalse(loginService.hasAccounts());
     assertTrue(loginService.getAccounts().isEmpty());
+  }
+
+  @Test
+  public void testGetCredential_nullEmail() {
+    try {
+      new GoogleLoginService(loginState).getCredential(null);
+      fail();
+    } catch (NullPointerException ex) {
+      assertEquals("email cannot be null.", ex.getMessage());
+    }
+  }
+
+  @Test
+  public void testGetCredential() {
+    GoogleLoginService loginService = newLoginServiceWithMockLoginState(true);
+    loginService.logIn(null /* no dialog message */);
+    assertEquals(1, loginService.getAccounts().size());
+
+    Credential credential = loginService.getCredential("some-email-1@example.com");
+    assertEquals(account1.getOAuth2Credential(), credential);
+  }
+
+  @Test
+  public void testGetCredential_emailNotLoggedIn() {
+    GoogleLoginService loginService = newLoginServiceWithMockLoginState(true);
+    loginService.logIn(null /* no dialog message */);
+    assertEquals(1, loginService.getAccounts().size());
+
+    assertNull(loginService.getCredential("non-existing@example.com"));
   }
 
   @Test
