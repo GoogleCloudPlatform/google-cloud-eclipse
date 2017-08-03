@@ -4,7 +4,6 @@ Bundle-Name: Java 8 development support for App Engine standard
 Bundle-SymbolicName: com.google.cloud.tools.eclipse.appengine.standard.java8;singleton:=true
 Bundle-Version: 0.1.0.qualifier
 Bundle-Vendor: Google, Inc.
-Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Localization: plugin
 Require-Bundle: com.google.cloud.tools.eclipse.appengine.localserver;bundle-version="0.1.0",
