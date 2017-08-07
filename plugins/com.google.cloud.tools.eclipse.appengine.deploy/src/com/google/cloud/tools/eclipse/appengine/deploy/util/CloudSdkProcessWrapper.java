@@ -137,11 +137,11 @@ public class CloudSdkProcessWrapper {
 
   private class StoreProcessObjectListener implements ProcessStartListener {
     @Override
-    public void onStart(Process proces) {
+    public void onStart(Process process) {
       synchronized (CloudSdkProcessWrapper.this) {
-        process = proces;
+        CloudSdkProcessWrapper.this.process = process;
         if (interrupted) {
-          process.destroy();
+          CloudSdkProcessWrapper.this.process.destroy();
         }
       }
     }

@@ -115,7 +115,7 @@ public class RunOptionsDefaultsComponent {
 
     Label accountLabel = new Label(target, SWT.NULL);
     accountLabel.setText("&Account:");
-    accountSelector = new AccountSelector(target, loginService, "Add a new account...");
+    accountSelector = new AccountSelector(target, loginService, "Sign into another account...");
 
     Label projectInputLabel = new Label(target, SWT.NULL);
     projectInput = new Text(target, SWT.SINGLE | SWT.BORDER);

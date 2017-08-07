@@ -61,6 +61,14 @@
                     value="com.google.cloud.tools.eclipse.appengine.newproject.AppEngineFlex">
               </parameter>
            </command>
+           <command
+                 commandId="org.eclipse.ui.newWizard"
+                 style="push">
+              <parameter
+                    name="newWizardId"
+                    value="com.google.cloud.tools.eclipse.dataflow.ui.wizard.NewDataflowProjectWizard">
+              </parameter>
+           </command>
         </menu>
         <separator
               name="launch"
