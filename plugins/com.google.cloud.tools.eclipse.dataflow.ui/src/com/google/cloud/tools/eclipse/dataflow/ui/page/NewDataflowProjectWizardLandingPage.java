@@ -21,6 +21,7 @@ import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowProjectCreat
 import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowProjectCreator.Template;
 import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowProjectValidationStatus;
 import com.google.cloud.tools.eclipse.dataflow.core.project.MajorVersion;
+import com.google.cloud.tools.eclipse.dataflow.ui.Messages;
 import com.google.cloud.tools.eclipse.dataflow.ui.util.ButtonFactory;
 import com.google.common.base.Strings;
 import org.apache.maven.artifact.versioning.ArtifactVersion;

@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.dataflow.ui.preferences;
 
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.DataflowPreferences;
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.WritableDataflowPreferences;
+import com.google.cloud.tools.eclipse.dataflow.ui.Messages;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.DialogPageMessageTarget;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
@@ -48,7 +49,7 @@ public class DefaultRunOptionsPage
     Composite composite = new Composite(parent, SWT.NULL);
     composite.setLayout(new GridLayout(1, false));
     Group group = new Group(composite, SWT.NULL);
-    group.setText("Execution Options for Google Cloud Platform");
+    group.setText(Messages.getString("execution.options.for.google.cloud.platform")); //$NON-NLS-1$
     int numColumns = 3;
     group.setLayout(new GridLayout(numColumns, false));
     group.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
@@ -90,7 +91,7 @@ public class DefaultRunOptionsPage
     this.selectedProject = element.getAdapter(IProject.class);
     if (selectedProject == null) {
       throw new IllegalArgumentException(
-          "Provided element " + element + " isn't adaptable to a project.");
+          "Provided element " + element + " isn't adaptable to a project."); //$NON-NLS-1$ //$NON-NLS-2$
     } else {
       this.preferences = WritableDataflowPreferences.forProject(this.selectedProject);
     }

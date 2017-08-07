@@ -19,6 +19,8 @@ package com.google.cloud.tools.eclipse.dataflow.ui.page;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.google.cloud.tools.eclipse.dataflow.ui.Messages;
+
 public class MessagesTest {
 
   @Test

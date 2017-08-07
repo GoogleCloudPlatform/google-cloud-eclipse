@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.dataflow.ui.page;
 
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.DataflowPreferences;
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.ProjectOrWorkspaceDataflowPreferences;
+import com.google.cloud.tools.eclipse.dataflow.ui.Messages;
 import com.google.cloud.tools.eclipse.dataflow.ui.preferences.RunOptionsDefaultsComponent;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;

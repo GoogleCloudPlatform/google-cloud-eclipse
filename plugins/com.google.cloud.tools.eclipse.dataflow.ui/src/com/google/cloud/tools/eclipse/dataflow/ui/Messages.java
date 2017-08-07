@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.dataflow.ui.page;
+package com.google.cloud.tools.eclipse.dataflow.ui;
 
 import java.text.MessageFormat;
 import java.util.MissingResourceException;
