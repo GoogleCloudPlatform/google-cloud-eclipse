@@ -148,6 +148,9 @@ public class StandardFacetInstallDelegate extends AppEngineFacetInstallDelegate 
     if (appEngineWebXml.exists()) {
       return;
     }
+    if (!webInfDir.exists()) {
+      ResourceUtils.createFolders(webInfDir, progress.newChild(1));
+    }
 
     appEngineWebXml.create(new ByteArrayInputStream(new byte[0]), true, progress.newChild(2));
     String configFileLocation = appEngineWebXml.getLocation().toString();
