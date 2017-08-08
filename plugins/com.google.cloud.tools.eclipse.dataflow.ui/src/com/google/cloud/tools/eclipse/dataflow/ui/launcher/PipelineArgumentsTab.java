@@ -161,7 +161,9 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     runnerOptionsGroup.setLayout(new GridLayout());
 
     userOptionsSelector = new TextAndButtonComponent(
-        runnerOptionsGroup, new GridData(SWT.FILL, SWT.BEGINNING, true, false), "&Search..."); //$NON-NLS-1$
+        runnerOptionsGroup,
+        new GridData(SWT.FILL, SWT.BEGINNING, true, false), 
+        Messages.getString("search")); //$NON-NLS-1$
     userOptionsSelector.addButtonSelectionListener(openPipelineOptionsSearchListener());
 
     pipelineOptionsForm =
