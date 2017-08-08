@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Google Inc.
+ * Copyright 2017 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,25 @@ public class MessagesTest {
   @Test
   public void testNewCloudDataflowProject() {
     Assert.assertEquals("New Cloud Dataflow Project", Messages.getString("new.cloud.dataflow.project"));
+  }
+  
+  @Test
+  public void testRunOptions() {
+    Assert.assertEquals(
+        "Set Default Cloud Dataflow Run Options", Messages.getString("SET_RUN_OPTIONS"));
+  }
+  
+  @Test
+  public void testWizardDescription() {
+    Assert.assertEquals(
+        "This wizard creates a new Google Cloud Dataflow project.",
+        Messages.getString("WIZARD_DESCRIPTION"));
+  }
+  
+  @Test
+  public void testLocationToolTip() {
+    Assert.assertEquals("The location where the project will be created. Must be an existing local directory.",
+        Messages.getString("LOCATION_TOOLTIP"));
   }
 
 }
