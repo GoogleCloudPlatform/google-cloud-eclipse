@@ -387,7 +387,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
   @Override
   public String getName() {
-    return Messages.getString("PipelineArgumentsTab.1"); //$NON-NLS-1$
+    return Messages.getString("pipeline.arguments"); //$NON-NLS-1$
   }
 
   private void updatePipelineOptionsForm() {
