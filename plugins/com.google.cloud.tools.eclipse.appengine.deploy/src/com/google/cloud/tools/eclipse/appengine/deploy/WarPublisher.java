@@ -17,14 +17,25 @@
 package com.google.cloud.tools.eclipse.appengine.deploy;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jst.j2ee.internal.deployables.J2EEFlexProjDeployable;
 import org.eclipse.wst.common.componentcore.ComponentCore;
+import org.eclipse.wst.server.core.IModule;
+import org.eclipse.wst.server.core.model.IModuleResource;
+import org.eclipse.wst.server.core.util.ModuleFile;
+import org.eclipse.wst.server.core.util.ProjectModule;
 import org.eclipse.wst.server.core.util.PublishHelper;
 
 /**
@@ -63,10 +74,39 @@ public class WarPublisher {
     J2EEFlexProjDeployable deployable =
         new J2EEFlexProjDeployable(project, ComponentCore.createComponent(project));
 
+    List<IModuleResource> resourcesToDeploy = Lists.newArrayList(deployable.members());
+    resourcesToDeploy.addAll(computeWebFragmentJarResources(deployable, progress));
+    IModuleResource[] resources = resourcesToDeploy.toArray(new IModuleResource[0]);
+
     if (exploded) {
-      publishHelper.publishSmart(deployable.members(), destination, progress.newChild(100));
+      publishHelper.publishFull(resources, destination, progress.newChild(100));
     } else {
-      publishHelper.publishZip(deployable.members(), destination, progress.newChild(100));
+      publishHelper.publishZip(resources, destination, progress.newChild(100));
     }
+  }
+
+  private static List<IModuleResource> computeWebFragmentJarResources(
+      J2EEFlexProjDeployable deployable, IProgressMonitor monitor) throws CoreException {
+    List<IModuleResource> webFragmentJars = new ArrayList<>();
+
+    IModule[] childModules = deployable.getChildModules();
+    for (IModule module : childModules) {
+      if ("jst.webfragment".equals(module.getModuleType().getId())
+          && module.getName().toLowerCase(Locale.US).endsWith(".jar")) {
+        ProjectModule projectModule = (ProjectModule)
+            module.loadAdapter(ProjectModule.class, monitor);
+
+        for (IModuleResource resource : projectModule.members()) {
+          IFile file = resource.getAdapter(IFile.class);
+          File file2 = resource.getAdapter(File.class);
+          if (file != null) {
+            webFragmentJars.add(new ModuleFile(file, resource.getName(), new Path("WEB-INF/lib")));
+          } else if (file2 != null) {
+            webFragmentJars.add(new ModuleFile(file2, resource.getName(), new Path("WEB-INF/lib")));
+          }
+        }
+      }
+    }
+    return webFragmentJars;
   }
 }
