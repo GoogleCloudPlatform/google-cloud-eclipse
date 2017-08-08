@@ -315,9 +315,10 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
       userOptionsSelector.setText(userOptionsName == null ? "" : userOptionsName); //$NON-NLS-1$
 
       updatePipelineOptionsForm();
-    } catch (CoreException e) {
+    } catch (CoreException ex) {
       // TODO: Handle
-      DataflowUiPlugin.logError(e, "Error while initializing from existing configuration"); //$NON-NLS-1$
+      DataflowUiPlugin.logError(ex, 
+          "Error while initializing from existing configuration"); //$NON-NLS-1$
     }
   }
 
