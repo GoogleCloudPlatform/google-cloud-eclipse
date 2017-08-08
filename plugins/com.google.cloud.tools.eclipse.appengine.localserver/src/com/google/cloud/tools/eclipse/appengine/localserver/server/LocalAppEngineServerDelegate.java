@@ -38,6 +38,7 @@ import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 import org.eclipse.wst.server.core.IModule;
 import org.eclipse.wst.server.core.IModuleType;
 import org.eclipse.wst.server.core.IServer;
+import org.eclipse.wst.server.core.internal.Server;
 import org.eclipse.wst.server.core.internal.facets.FacetUtil;
 import org.eclipse.wst.server.core.model.IURLProvider;
 import org.eclipse.wst.server.core.model.ServerDelegate;
@@ -73,6 +74,17 @@ public class LocalAppEngineServerDelegate extends ServerDelegate implements IURL
     }
     return serverDelegate;
   }
+
+  @Override
+  public void setDefaults(IProgressMonitor monitor) {
+    super.setDefaults(monitor);
+
+    // Configure the server to auto-publish immediately on change, and to auto-publish
+    // any changes, not just on builds.
+    setAttribute(Server.PROP_AUTO_PUBLISH_SETTING, Server.AUTO_PUBLISH_RESOURCE);
+    setAttribute(Server.PROP_AUTO_PUBLISH_TIME, 0);
+  }
+
 
   /**
    * Returns OK status if the projects associated with modules to be added support the App Engine
