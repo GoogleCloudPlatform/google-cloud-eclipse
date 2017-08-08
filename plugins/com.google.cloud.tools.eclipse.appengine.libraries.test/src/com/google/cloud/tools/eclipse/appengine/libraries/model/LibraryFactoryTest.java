@@ -19,7 +19,6 @@ package com.google.cloud.tools.eclipse.appengine.libraries.model;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
 public class LibraryFactoryTest {

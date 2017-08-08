@@ -140,7 +140,7 @@ public class PipelineOptionsSelectionDialog extends FilteredItemsSelectionDialog
         return null;
       }
       String simpleName = Signature.getSimpleName(element.toString());
-      return String.format("%s - %s", simpleName, element.toString());
+      return String.format("%s - %s", simpleName, element.toString()); //$NON-NLS-1$
     }
   }
 }
