@@ -17,11 +17,10 @@
 package com.google.cloud.tools.eclipse.appengine.deploy;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -30,12 +29,12 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.jst.j2ee.internal.deployables.J2EEFlexProjDeployable;
-import org.eclipse.wst.common.componentcore.ComponentCore;
+import org.eclipse.jst.server.core.IWebFragmentModule;
 import org.eclipse.wst.server.core.IModule;
+import org.eclipse.wst.server.core.ServerUtil;
 import org.eclipse.wst.server.core.model.IModuleResource;
+import org.eclipse.wst.server.core.model.ModuleDelegate;
 import org.eclipse.wst.server.core.util.ModuleFile;
-import org.eclipse.wst.server.core.util.ProjectModule;
 import org.eclipse.wst.server.core.util.PublishHelper;
 
 /**
@@ -71,12 +70,7 @@ public class WarPublisher {
     progress.setTaskName(Messages.getString("task.name.publish.war"));
 
     PublishHelper publishHelper = new PublishHelper(null);
-    J2EEFlexProjDeployable deployable =
-        new J2EEFlexProjDeployable(project, ComponentCore.createComponent(project));
-
-    List<IModuleResource> resourcesToDeploy = Lists.newArrayList(deployable.members());
-    resourcesToDeploy.addAll(computeWebFragmentJarResources(deployable, progress));
-    IModuleResource[] resources = resourcesToDeploy.toArray(new IModuleResource[0]);
+    IModuleResource[] resources = flattenResources(project, progress);
 
     if (exploded) {
       publishHelper.publishFull(resources, destination, progress.newChild(100));
@@ -85,28 +79,46 @@ public class WarPublisher {
     }
   }
 
-  private static List<IModuleResource> computeWebFragmentJarResources(
-      J2EEFlexProjDeployable deployable, IProgressMonitor monitor) throws CoreException {
-    List<IModuleResource> webFragmentJars = new ArrayList<>();
+  private static IModuleResource[] flattenResources(
+      IProject project, IProgressMonitor monitor) throws CoreException {
+    List<IModuleResource> resources = new ArrayList<>();
 
-    IModule[] childModules = deployable.getChildModules();
-    for (IModule module : childModules) {
-      if ("jst.webfragment".equals(module.getModuleType().getId())
-          && module.getName().toLowerCase(Locale.US).endsWith(".jar")) {
-        ProjectModule projectModule = (ProjectModule)
-            module.loadAdapter(ProjectModule.class, monitor);
+    IModule[] modules = ServerUtil.getModules(project);
+    for (IModule module : modules) {
+      ModuleDelegate delegate = (ModuleDelegate) module.loadAdapter(ModuleDelegate.class, monitor);
+      if (delegate == null) {
+        continue;
+      }
 
-        for (IModuleResource resource : projectModule.members()) {
-          IFile file = resource.getAdapter(IFile.class);
-          File file2 = resource.getAdapter(File.class);
-          if (file != null) {
-            webFragmentJars.add(new ModuleFile(file, resource.getName(), new Path("WEB-INF/lib")));
-          } else if (file2 != null) {
-            webFragmentJars.add(new ModuleFile(file2, resource.getName(), new Path("WEB-INF/lib")));
-          }
+      // module references can either be as members or child modules (http://eclip.se/467759)
+      Collections.addAll(resources, delegate.members());
+
+      // now handle web fragment child modules, if they exist
+      for (IModule child : delegate.getChildModules()) {
+        ModuleDelegate childDelegate = (ModuleDelegate)
+            child.loadAdapter(ModuleDelegate.class, monitor);
+        IWebFragmentModule webFragmentModule = (IWebFragmentModule)
+            child.loadAdapter(IWebFragmentModule.class, monitor);
+        if (childDelegate == null || webFragmentModule == null || !webFragmentModule.isBinary()) {
+          continue;
+        }
+
+        // e.g., "WEB-INF/lib/spring-web-4.3.6.RELEASE.jar"
+        IPath zip = new Path(delegate.getPath(child));
+        IPath zipParent = zip.removeLastSegments(1);
+
+        // per "isBinary()" Javadoc, "members()" should have a single resource.
+        IModuleResource zipResource = childDelegate.members()[0];
+        File javaIoFile = zipResource.getAdapter(File.class);
+        IFile iFile = zipResource.getAdapter(IFile.class);
+
+        if (javaIoFile != null) {
+          resources.add(new ModuleFile(javaIoFile, zipResource.getName(), zipParent));
+        } else if (iFile != null) {
+          resources.add(new ModuleFile(iFile, zipResource.getName(), zipParent));
         }
       }
     }
-    return webFragmentJars;
+    return resources.toArray(new IModuleResource[0]);
   }
 }
