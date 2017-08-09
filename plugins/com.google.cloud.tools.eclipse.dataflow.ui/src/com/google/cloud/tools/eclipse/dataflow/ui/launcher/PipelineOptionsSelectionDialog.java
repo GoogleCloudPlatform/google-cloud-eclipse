@@ -114,7 +114,7 @@ public class PipelineOptionsSelectionDialog extends FilteredItemsSelectionDialog
     }
   }
 
-  private class PipelineOptionsLabelProvider implements ILabelProvider {
+  private static class PipelineOptionsLabelProvider implements ILabelProvider {
     @Override
     public void addListener(ILabelProviderListener listener) {}
 

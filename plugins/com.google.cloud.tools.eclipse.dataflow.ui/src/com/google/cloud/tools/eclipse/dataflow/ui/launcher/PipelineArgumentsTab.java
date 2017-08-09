@@ -39,6 +39,7 @@ import com.google.cloud.tools.eclipse.dataflow.ui.util.DisplayExecutor;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.SettableFuture;
@@ -314,7 +315,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
       defaultOptionsComponent.setCustomValues(launchConfiguration.getArgumentValues());
 
       String userOptionsName = launchConfiguration.getUserOptionsName();
-      userOptionsSelector.setText(userOptionsName == null ? "" : userOptionsName); //$NON-NLS-1$
+      userOptionsSelector.setText(Strings.nullToEmpty(userOptionsName));
 
       updatePipelineOptionsForm();
     } catch (CoreException ex) {
@@ -346,7 +347,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
    * Asynchronously updates the project hierarchy.
    */
   private void updateHierarchy(final MajorVersion majorVersion) {
-    Job job = new Job("Update Hierarchy") { //$NON-NLS-1$
+    Job job = new Job(Messages.getString("update.hierarchy")) { //$NON-NLS-1$
       @Override
       public IStatus run(IProgressMonitor progress) {
         hierarchy = getPipelineOptionsHierarchy(majorVersion, progress);
@@ -444,7 +445,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     Map.Entry<String, Set<PipelineOptionsProperty>> missingGroupEntry =
         Iterables.getFirst(validationFailures.getMissingGroups().entrySet(), null);
     if (missingGroupEntry != null) {
-      StringBuilder errorBuilder = new StringBuilder("Missing value for group ");
+      StringBuilder errorBuilder = new StringBuilder("Missing value for group "); //$NON-NLS-1$
       errorBuilder.append(missingGroupEntry.getKey());
       errorBuilder.append(". Properties satisfying group requirement are "); //$NON-NLS-1$
       Set<String> groupMembers = new HashSet<>();
@@ -463,7 +464,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     PipelineOptionsProperty missingProperty =
         Iterables.getFirst(validationFailures.getMissingProperties(), null);
     if (missingProperty != null) {
-      setErrorMessage("Missing required property " + missingProperty.getName()); //$NON-NLS-1$
+      setErrorMessage(Messages.getString("missing.required.property", missingProperty.getName())); //$NON-NLS-1$
       return false;
     }
     return true;
