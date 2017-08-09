@@ -21,6 +21,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -41,6 +43,8 @@ import org.eclipse.wst.server.core.util.PublishHelper;
  * Writes a WAR file of a project, or the exploded contents of it to a destination directory.
  */
 public class WarPublisher {
+
+  public static final Logger logger = Logger.getLogger(WarPublisher.class.getName());
 
   /**
    * It does a smart export, i.e. considers the resources to be copied and if the destination
@@ -100,10 +104,12 @@ public class WarPublisher {
         IWebFragmentModule webFragmentModule = (IWebFragmentModule)
             child.loadAdapter(IWebFragmentModule.class, monitor);
         if (childDelegate == null || webFragmentModule == null || !webFragmentModule.isBinary()) {
+          logger.log(Level.WARNING, "child modules other than web fragments are not supported:"
+              + " module=" + module + ", moduleType=" + module.getModuleType());
           continue;
         }
 
-        // e.g., "WEB-INF/lib/spring-web-4.3.6.RELEASE.jar"
+        // destination (not an actual zip), e.g., "WEB-INF/lib/spring-web-4.3.6.RELEASE.jar"
         IPath zip = new Path(delegate.getPath(child));
         IPath zipParent = zip.removeLastSegments(1);
 
