@@ -51,8 +51,7 @@ public final class PipelineOptionsNamespaces {
     return VERSION_PREFIXES.get(majorVersion) + VALIDATION_ANNOTATION;
   }
 
-  public static String validationRequiredGroupField(
-      @SuppressWarnings("unused") MajorVersion majorVersion) {
+  public static String validationRequiredGroupField(MajorVersion majorVersion) {
     return VALIDATION_REQUIRED_GROUPS;
   }
 

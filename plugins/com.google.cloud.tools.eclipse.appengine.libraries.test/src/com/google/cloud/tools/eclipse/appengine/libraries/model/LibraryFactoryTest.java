@@ -24,8 +24,9 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 public class LibraryFactoryTest {
-  
+
   private LibraryFactory factory = new LibraryFactory();
+
   // todo is there a simple way to load this up from XML instead?
   private IConfigurationElement configuration;
   private IConfigurationElement[] libraryFiles = new IConfigurationElement[1];
@@ -34,14 +35,8 @@ public class LibraryFactoryTest {
   @Before
   public void setUp() {
     configuration = Mockito.mock(IConfigurationElement.class);
-        Mockito.when(configuration.getAttribute("id")).thenReturn("guava");
-    Mockito.when(configuration.getAttribute("group")).thenReturn("com.google.guava");
-    Mockito.when(configuration.getName()).thenReturn("library");
-    Mockito.when(configuration.getAttribute("siteUri"))
-        .thenReturn(
-        "https://cloud.google.com/storage/docs/reference/libraries#client-libraries-install-java");
-    Mockito.when(configuration.getChildren("libraryDependency"))
-        .thenReturn(new IConfigurationElement[0]);
+    Mockito.when(configuration.getAttribute("id")).thenReturn("guava");
+    
     
     libraryFiles[0] = Mockito.mock(IConfigurationElement.class);
     Mockito.when(libraryFiles[0].getAttribute("mavenCoordinates")).thenReturn("mavenCoordinates");
@@ -49,6 +44,14 @@ public class LibraryFactoryTest {
     mavenCoordinates[0] = Mockito.mock(IConfigurationElement.class);
     Mockito.when(mavenCoordinates[0].getAttribute("groupId")).thenReturn("com.google.guava");
     Mockito.when(mavenCoordinates[0].getAttribute("artifactId")).thenReturn("guava");
+    
+    Mockito.when(configuration.getAttribute("group")).thenReturn("com.google.guava");
+    Mockito.when(configuration.getName()).thenReturn("library");
+    Mockito.when(configuration.getAttribute("siteUri"))
+        .thenReturn(
+        "https://cloud.google.com/storage/docs/reference/libraries#client-libraries-install-java");
+    Mockito.when(configuration.getChildren("libraryDependency"))
+        .thenReturn(new IConfigurationElement[0]);
     
     Mockito.when(libraryFiles[0].getChildren("mavenCoordinates")).thenReturn(mavenCoordinates);
     Mockito.when(libraryFiles[0].getName()).thenReturn("libraryFile");
@@ -84,16 +87,16 @@ public class LibraryFactoryTest {
     Library library = factory.create(configuration);
     Assert.assertEquals("com.google.guava", library.getGroup());
   }
-  
+
   @Test
   public void testCreate_null() throws LibraryFactoryException {
     try {
       factory.create(null);
       Assert.fail();
     } catch (NullPointerException ex) {
-    } 
+    }
   }
-  
+
   @Test
   public void testCreate_nonLibrary() {
     IConfigurationElement configuration = Mockito.mock(IConfigurationElement.class);
@@ -102,7 +105,7 @@ public class LibraryFactoryTest {
       Assert.fail();
     } catch (LibraryFactoryException ex) {
       Assert.assertNotNull(ex.getMessage());
-    } 
+    }
   }
-  
+
 }

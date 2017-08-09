@@ -61,7 +61,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
   private LocalAppEngineServerBehaviour serverBehavior;
 
   @Before
-  public void setUp() throws CoreException {
+  public void setUp() {
     when(server.loadAdapter(any(Class.class), any(IProgressMonitor.class)))
         .thenReturn(serverBehavior);
   }
@@ -264,6 +264,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
   @Test
   public void testGenerateRunConfiguration_withVMArgs() throws CoreException {
     // DebugPlugin.parseArguments() only supports double-quotes on Windows
+    when(launchConfiguration.getAttribute(anyString(), anyString())).thenReturn("");
     when(launchConfiguration.getAttribute(eq(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS),
         anyString())).thenReturn("a b \"c d\"");
 
@@ -274,6 +275,23 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
     assertEquals(Arrays.asList("a", "b", "c d"), config.getJvmFlags());
     verify(launchConfiguration)
         .getAttribute(eq(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS), anyString());
+  }
+
+  @Test
+  public void testGenerateRunConfiguration_withProgramArgs() throws CoreException {
+    // DebugPlugin.parseArguments() only supports double-quotes on Windows
+    when(launchConfiguration.getAttribute(anyString(), anyString())).thenReturn("");
+    when(launchConfiguration
+        .getAttribute(eq(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS), anyString()))
+            .thenReturn("e f \"g h\"");
+
+    DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
+        .generateServerRunConfiguration(launchConfiguration, server, ILaunchManager.RUN_MODE);
+
+    assertNotNull(config.getAdditionalArguments());
+    assertEquals(Arrays.asList("e", "f", "g h"), config.getAdditionalArguments());
+    verify(launchConfiguration)
+        .getAttribute(eq(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS), anyString());
   }
 
 

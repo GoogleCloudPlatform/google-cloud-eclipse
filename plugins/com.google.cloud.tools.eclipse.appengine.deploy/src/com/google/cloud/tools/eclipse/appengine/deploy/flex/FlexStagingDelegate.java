@@ -17,7 +17,6 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.flex;
 
 import com.google.cloud.tools.appengine.api.AppEngineException;
-import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.eclipse.appengine.deploy.CloudSdkStagingHelper;
 import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
@@ -28,9 +27,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.ui.console.MessageConsoleStream;
 
 public class FlexStagingDelegate implements StagingDelegate {
 
@@ -42,14 +41,15 @@ public class FlexStagingDelegate implements StagingDelegate {
 
   @Override
   public IStatus stage(IProject project, IPath stagingDirectory, IPath safeWorkDirectory,
-      CloudSdk cloudSdk, IProgressMonitor monitor) {
+      MessageConsoleStream stdoutOutputStream, MessageConsoleStream stderrOutputStream,
+      IProgressMonitor monitor) {
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
 
     boolean result = stagingDirectory.toFile().mkdirs();
     if (!result) {
       return StatusUtil.error(this, "Could not create staging directory " + stagingDirectory);
     }
-    
+
     IPath war = safeWorkDirectory.append("app-to-deploy.war");
     try {
       WarPublisher.publishWar(project, war, subMonitor.newChild(40));
@@ -60,14 +60,19 @@ public class FlexStagingDelegate implements StagingDelegate {
       return StatusUtil.error(this, Messages.getString("deploy.job.staging.failed"), ex);
     } catch (CoreException ex) {
       return StatusUtil.error(this, "war publishing failed", ex);
-    } catch (OperationCanceledException ex) {
-      return Status.CANCEL_STATUS; 
+    } finally {
+      subMonitor.done();
     }
   }
 
   @Override
   public IPath getOptionalConfigurationFilesDirectory() {
     return appEngineDirectory;
+  }
+
+  @Override
+  public void interrupt() {
+    // It's enough to leave it to the normal cancellation flow through monitor.
   }
 
 }

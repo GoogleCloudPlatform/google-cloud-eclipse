@@ -85,8 +85,8 @@ public class ConversionTests {
     conversionJob.join();
     assertIsOk("conversion should never fail", conversionJob.getResult());
 
-    // ensure facet versions haven't been downgraded
-    assertFacetVersions(project, JavaFacet.VERSION_1_7, WebFacetUtils.WEB_31,
+    // ensure that java facet upgraded, and web facet versions not downgraded
+    assertFacetVersions(project, JavaFacet.VERSION_1_8, WebFacetUtils.WEB_31,
         AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8);
     assertJava8Runtime(project);
   }
@@ -363,8 +363,7 @@ public class ConversionTests {
 
   /*******************************************************************/
 
-  private void createAppEngineWebWithNoRuntime(IFacetedProject project)
-      throws CoreException, IOException {
+  private void createAppEngineWebWithNoRuntime(IFacetedProject project) throws CoreException {
     IFolder webInf = project.getProject().getFolder("WebContent/WEB-INF");
     ResourceUtils.createFolders(webInf, null);
     IFile appEngineWeb = webInf.getFile("appengine-web.xml");
@@ -375,8 +374,7 @@ public class ConversionTests {
         true, null);
   }
 
-  private void createAppEngineWebWithJava8Runtime(IFacetedProject project)
-      throws CoreException, IOException {
+  private void createAppEngineWebWithJava8Runtime(IFacetedProject project) throws CoreException {
     IFolder webInf = project.getProject().getFolder("WebContent/WEB-INF");
     ResourceUtils.createFolders(webInf, null);
     IFile appengineWebXml = webInf.getFile("appengine-web.xml");

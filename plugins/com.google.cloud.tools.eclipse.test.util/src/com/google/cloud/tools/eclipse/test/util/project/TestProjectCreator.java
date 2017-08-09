@@ -21,6 +21,7 @@ import static org.junit.Assert.assertTrue;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.FacetUtil;
 import com.google.cloud.tools.eclipse.appengine.facets.WebProjectUtil;
+import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.util.ClasspathUtil;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -30,6 +31,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -93,6 +95,9 @@ public final class TestProjectCreator extends ExternalResource {
           ProjectUtils.waitForProjects(project);
         }
         project.delete(true, null);
+      } catch (IllegalArgumentException ex) {
+        new ThreadDumpingWatchdog(0, TimeUnit.DAYS).run();
+        throw ex;
       } catch (CoreException ex) {
         throw new AssertionError("Could not delete project", ex);
       }

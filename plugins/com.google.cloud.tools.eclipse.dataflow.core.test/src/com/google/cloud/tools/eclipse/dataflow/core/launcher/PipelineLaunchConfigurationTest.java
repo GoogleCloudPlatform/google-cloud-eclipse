@@ -43,7 +43,7 @@ import org.mockito.Mockito;
  * Tests for {@link PipelineLaunchConfiguration}.
  */
 public class PipelineLaunchConfigurationTest {
-  private MajorVersion majorVersion = MajorVersion.ONE;
+  private final MajorVersion majorVersion = MajorVersion.ONE;
 
   @Test
   public void testCreateDefaultCreatesWithDefaultValues() {

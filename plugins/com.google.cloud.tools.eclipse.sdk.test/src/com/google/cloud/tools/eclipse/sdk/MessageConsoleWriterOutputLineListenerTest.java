@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.sdk.ui;
+package com.google.cloud.tools.eclipse.sdk;
 
 import static org.mockito.Mockito.verify;
 

@@ -19,11 +19,9 @@ package com.google.cloud.tools.eclipse.sdk;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import java.util.List;
 import org.junit.Test;
 
@@ -36,18 +34,16 @@ public class CollectingLineListenerTest {
 
   @Test
   public void testGetCollectedMessage_whenPredicateIsFalseNoMessageIsCollected() {
-    Predicate<String> predicate = mock(Predicate.class);
-    when(predicate.apply(anyString())).thenReturn(false);
-    CollectingLineListener listener = new CollectingLineListener(predicate);
+    Predicate<String> alwaysFalse = Predicates.alwaysFalse();
+    CollectingLineListener listener = new CollectingLineListener(alwaysFalse);
     listener.onOutputLine("Error message");
     assertTrue(listener.getCollectedMessages().isEmpty());
   }
 
   @Test
   public void testGetCollectedMessage_whenPredicateIsTrueMessagesArecollected() {
-    Predicate<String> predicate = mock(Predicate.class);
-    when(predicate.apply(anyString())).thenReturn(true);
-    CollectingLineListener listener = new CollectingLineListener(predicate);
+    Predicate<String> alwaysTrue = Predicates.alwaysTrue();
+    CollectingLineListener listener = new CollectingLineListener(alwaysTrue);
     listener.onOutputLine("Error message1");
     listener.onOutputLine("Error message2");
     List<String> collectedMessages = listener.getCollectedMessages();

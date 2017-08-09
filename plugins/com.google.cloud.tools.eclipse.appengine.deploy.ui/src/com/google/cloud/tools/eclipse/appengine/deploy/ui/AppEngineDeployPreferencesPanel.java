@@ -38,6 +38,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
+import com.google.common.net.UrlEscapers;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -90,8 +91,12 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
 
   private static final String APPENGINE_VERSIONS_URL =
       "https://console.cloud.google.com/appengine/versions";
-  private static final String CREATE_GCP_PROJECT_WITH_GAE_URL =
-      "https://console.cloud.google.com/projectselector/appengine/create?lang=java";
+  private static final String APP_ENGINE_APPLICATION_CREATE_PATH =
+      "/projectselector/appengine/create?lang=java";
+  @VisibleForTesting
+  static final String CREATE_GCP_PROJECT_URL =
+      "https://console.cloud.google.com/projectcreate?previousPage="
+          + UrlEscapers.urlFormParameterEscaper().escape(APP_ENGINE_APPLICATION_CREATE_PATH);
 
   private static final Logger logger = Logger.getLogger(
       AppEngineDeployPreferencesPanel.class.getName());
@@ -335,7 +340,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     Composite linkComposite = new Composite(this, SWT.NONE);
     Link createNewProject = new Link(linkComposite, SWT.WRAP);
     createNewProject.setText(Messages.getString("projectselector.createproject",
-                                                CREATE_GCP_PROJECT_WITH_GAE_URL));
+                                                CREATE_GCP_PROJECT_URL));
     createNewProject.setToolTipText(Messages.getString("projectselector.createproject.tooltip"));
     FontUtil.convertFontToItalic(createNewProject);
     createNewProject.addSelectionListener(

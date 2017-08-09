@@ -71,7 +71,7 @@
     <wizard
           category="com.google.cloud.tools.eclipse.wizards"
           class="com.google.cloud.tools.eclipse.dataflow.ui.wizard.NewDataflowProjectWizard"
-          icon="icons/Dataflow_128.png"
+          icon="icons/Dataflow_16.png"
           id="com.google.cloud.tools.eclipse.dataflow.ui.wizard.NewDataflowProjectWizard"
           name="%dataflowWizardName"
           project="true">

@@ -33,38 +33,41 @@ import org.eclipse.wst.server.core.ServerEvent;
  * A console that displays information for a run/debug session of the App Engine runtime
  */
 public class LocalAppEngineConsole extends MessageConsole {
-  private LocalAppEngineServerBehaviour serverBehaviour;
-  private String unprefixedName;
-  private IServerListener serverStateListener = new IServerListener() {
+  private final LocalAppEngineServerBehaviour serverBehaviour;
+  private final String unprefixedName;
+  private final IServerListener serverStateListener = new IServerListener() {
     @Override
     public void serverChanged(ServerEvent event) {
-      updateName(event.getState());
+      if ((event.getKind() & ServerEvent.SERVER_CHANGE) != 0) {
+        update(event.getState());
+      }
     }
   };
 
   private LocalAppEngineConsole(String name, LocalAppEngineServerBehaviour serverBehaviour) {
-    // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2140
-    // todo: setting "javaStackTraceConsole" as the console type seems distasteful
-    // but is required to get stack-trace linking to work
-    super(name, "javaStackTraceConsole", AppEngineImages.appEngine(16), true);
+    super(name, AppEngineImages.appEngine(16), true);
     this.unprefixedName = name;
     this.serverBehaviour = serverBehaviour;
+  }
+
+  private void update(int serverState) {
+    if (serverState == IServer.STATE_STOPPED) {
+      disengage(); // we should no longer update
+    }
+    updateName(serverState);
   }
 
   /**
    * Update the shown name with the server stop/stopping state.
    */
-  protected void updateName(int state) {
+  private void updateName(int serverState) {
     final String computedName;
-    if (state == IServer.STATE_STARTING) {
-      computedName =
-          Messages.getString("SERVER_STARTING_TEMPLATE", unprefixedName);
-    } else if (state == IServer.STATE_STOPPING) {
-      computedName =
-          Messages.getString("SERVER_STOPPING_TEMPLATE", unprefixedName);
-    } else if (state == IServer.STATE_STOPPED) {
-      computedName =
-          Messages.getString("SERVER_STOPPED_TEMPLATE", unprefixedName);
+    if (serverState == IServer.STATE_STARTING) {
+      computedName = Messages.getString("SERVER_STARTING_TEMPLATE", unprefixedName);
+    } else if (serverState == IServer.STATE_STOPPING) {
+      computedName = Messages.getString("SERVER_STOPPING_TEMPLATE", unprefixedName);
+    } else if (serverState == IServer.STATE_STOPPED) {
+      computedName = Messages.getString("SERVER_STOPPED_TEMPLATE", unprefixedName);
     } else {
       computedName = unprefixedName;
     }
@@ -86,19 +89,25 @@ public class LocalAppEngineConsole extends MessageConsole {
   @Override
   protected void init() {
     super.init();
+    updateName(serverBehaviour.getServer().getServerState());
     serverBehaviour.getServer().addServerListener(serverStateListener);
   }
 
   @Override
   protected void dispose() {
-    serverBehaviour.getServer().removeServerListener(serverStateListener);
+    disengage();
     super.dispose();
+  }
+
+  /** Stop reacting to server state changes. */
+  private void disengage() {
+    serverBehaviour.getServer().removeServerListener(serverStateListener);
   }
 
 
   public static class Factory implements ConsoleFactory<LocalAppEngineConsole> {
 
-    private LocalAppEngineServerBehaviour serverBehaviour;
+    private final LocalAppEngineServerBehaviour serverBehaviour;
 
     public Factory(LocalAppEngineServerBehaviour serverBehaviour) {
       this.serverBehaviour = serverBehaviour;

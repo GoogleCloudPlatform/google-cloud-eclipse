@@ -20,6 +20,7 @@ import com.google.cloud.tools.appengine.AppEngineDescriptor;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.logging.Logger;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -39,14 +40,27 @@ public class AppEngineStandardJre7ProjectFacetDetector extends ProjectFacetDetec
   @Override
   public void detect(IFacetedProjectWorkingCopy workingCopy, IProgressMonitor monitor)
       throws CoreException {
-    SubMonitor progress = SubMonitor.convert(monitor, 5);
     String projectName = workingCopy.getProjectName();
+    SubMonitor progress = SubMonitor.convert(monitor, 5);
+
+    if (workingCopy.hasProjectFacet(AppEngineStandardFacet.FACET)) {
+      logger.info("skipping " + projectName + ": project already has AES facet");
+      return;
+    }
+
+    // Check if there are some fundamental conflicts with AESv7 other than Java and DWP versions
+    if (FacetUtil.conflictsWith(workingCopy, AppEngineStandardFacet.JRE7,
+        Arrays.asList(JavaFacet.FACET, WebFacetUtils.WEB_FACET))) {
+      logger.warning(
+          "skipping " + projectName + ": project conflicts with AES Java 7 runtime");
+      return;
+    }
 
     IFile appEngineWebXml =
         WebProjectUtil.findInWebInf(workingCopy.getProject(), new Path("appengine-web.xml"));
     progress.worked(1);
     if (appEngineWebXml == null || !appEngineWebXml.exists()) {
-      logger.fine("skipping " + projectName + ": no appengine-web.xml found");
+      logger.fine("skipping " + projectName + ": cannot find appengine-web.xml");
       return;
     }
     try (InputStream content = appEngineWebXml.getContents()) {
@@ -58,16 +72,16 @@ public class AppEngineStandardJre7ProjectFacetDetector extends ProjectFacetDetec
       }
       logger.fine(projectName + ": appengine-web.xml has java7 runtime");
       
-      logger.fine(projectName + ": setting App Engine Standard JRE7 facet");
+      logger.info(projectName + ": setting App Engine Standard JRE7 facet");
       workingCopy.addProjectFacet(AppEngineStandardFacet.JRE7);
       progress.worked(1);
 
       if (!workingCopy.hasProjectFacet(JavaFacet.VERSION_1_7)) {
         if (workingCopy.hasProjectFacet(JavaFacet.FACET)) {
-          logger.fine(projectName + ": changing to Java 7 facet");
+          logger.info(projectName + ": changing to Java 7 facet");
           workingCopy.changeProjectFacetVersion(JavaFacet.VERSION_1_7);
         } else {
-          logger.fine(projectName + ": setting Java 7 facet");
+          logger.info(projectName + ": setting Java 7 facet");
           Object javaModel = FacetUtil.createJavaDataModel(workingCopy.getProject());
           workingCopy.addProjectFacet(JavaFacet.VERSION_1_7);
           workingCopy.setProjectFacetActionConfig(JavaFacet.FACET, javaModel);
@@ -77,10 +91,10 @@ public class AppEngineStandardJre7ProjectFacetDetector extends ProjectFacetDetec
 
       if (!workingCopy.hasProjectFacet(WebFacetUtils.WEB_25)) {
         if (workingCopy.hasProjectFacet(WebFacetUtils.WEB_FACET)) {
-          logger.fine(projectName + ": changing to Dynamic Web 2.5 facet");
+          logger.info(projectName + ": changing to Dynamic Web 2.5 facet");
           workingCopy.changeProjectFacetVersion(WebFacetUtils.WEB_25);
         } else {
-          logger.fine(projectName + ": setting Dynamic Web 2.5 facet");
+          logger.info(projectName + ": setting Dynamic Web 2.5 facet");
           Object webModel =
               FacetUtil.createWebFacetDataModel(appEngineWebXml.getParent().getParent());
           workingCopy.addProjectFacet(WebFacetUtils.WEB_25);

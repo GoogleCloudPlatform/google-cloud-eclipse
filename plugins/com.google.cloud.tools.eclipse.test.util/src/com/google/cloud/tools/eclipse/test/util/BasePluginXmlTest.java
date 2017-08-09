@@ -16,11 +16,11 @@
 
 package com.google.cloud.tools.eclipse.test.util;
 
+import com.google.common.collect.Sets;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Set;
-
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.RegistryFactory;
@@ -34,8 +34,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import com.google.common.collect.Sets;
 
 /**
  * Generic tests that should be true of all plugins.
@@ -117,6 +115,7 @@ public abstract class BasePluginXmlTest {
     testIncludedIfPresent(includes, "OSGI-INF/");
     testIncludedIfPresent(includes, "fragment.xml");
     testIncludedIfPresent(includes, "fragment.properties");
+    testIncludedIfPresent(includes, "lifecycle-mapping-metadata.xml"); // for m2e extensions
   }
 
   private static void testIncludedIfPresent(Set<String> includes, String name) 

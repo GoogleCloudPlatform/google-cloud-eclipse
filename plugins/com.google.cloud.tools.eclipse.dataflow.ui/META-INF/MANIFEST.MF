@@ -11,13 +11,16 @@ Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
 Export-Package: com.google.cloud.tools.eclipse.dataflow.ui.page,
  com.google.cloud.tools.eclipse.dataflow.ui.wizard
-Import-Package: com.google.cloud.tools.eclipse.dataflow.core.launcher,
+Import-Package: com.google.api.client.auth.oauth2;version="1.22.0",
+ com.google.cloud.tools.eclipse.dataflow.core.launcher,
  com.google.cloud.tools.eclipse.dataflow.core.launcher.options,
  com.google.cloud.tools.eclipse.dataflow.core.natures,
  com.google.cloud.tools.eclipse.dataflow.core.preferences,
  com.google.cloud.tools.eclipse.dataflow.core.project,
  com.google.cloud.tools.eclipse.dataflow.core.proxy,
- com.google.cloud.tools.eclipse.dataflow.core.util,
+ com.google.cloud.tools.eclipse.googleapis,
+ com.google.cloud.tools.eclipse.login,
+ com.google.cloud.tools.eclipse.login.ui,
  com.google.cloud.tools.eclipse.ui.util,
  com.google.cloud.tools.eclipse.ui.util.databinding,
  com.google.common.annotations;version="[20.0.0,21.0.0)",
@@ -59,7 +62,7 @@ Import-Package: com.google.cloud.tools.eclipse.dataflow.core.launcher,
  org.eclipse.ui.handlers,
  org.eclipse.ui.model,
  org.eclipse.ui.plugin,
+ org.eclipse.ui.services,
  org.eclipse.ui.statushandlers,
  org.osgi.framework
 Require-Bundle: org.eclipse.m2e.maven.runtime
-

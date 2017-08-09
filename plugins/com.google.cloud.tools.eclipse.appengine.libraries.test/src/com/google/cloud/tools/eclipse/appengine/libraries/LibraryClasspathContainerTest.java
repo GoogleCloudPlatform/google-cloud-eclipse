@@ -45,6 +45,7 @@ public class LibraryClasspathContainerTest {
                                                        mockClasspathEntry);
   }
 
+  @Test
   public void testConstructor_nullPath() {
     try {
       new LibraryClasspathContainer(null, "description", mockClasspathEntry);
@@ -54,6 +55,7 @@ public class LibraryClasspathContainerTest {
     }
   }
 
+  @Test
   public void testConstructor_nullDescription() {
     try {
       new LibraryClasspathContainer(new Path("container/path"), null, mockClasspathEntry);
@@ -63,15 +65,17 @@ public class LibraryClasspathContainerTest {
     }
   }
 
+  @Test
   public void testConstructor_emptyDescription() {
     try {
       new LibraryClasspathContainer(new Path("container/path"), "", mockClasspathEntry);
-      fail("Expected NullPointerException");
-    } catch (NullPointerException ex) {
+      fail("Expected IllegalArgumentException");
+    } catch (IllegalArgumentException ex) {
       assertNotNull(ex.getMessage());
     }
   }
 
+  @Test
   public void testConstructor_nullClasspathEntries() {
     try {
       new LibraryClasspathContainer(new Path("container/path"), "description", null);
@@ -92,7 +96,7 @@ public class LibraryClasspathContainerTest {
   }
 
   @Test
-  public void testGetKind_returnsApplication() throws Exception {
+  public void testGetKind_returnsApplication() {
     assertThat(classpathContainer.getKind(), is(IClasspathContainer.K_APPLICATION));
   }
 

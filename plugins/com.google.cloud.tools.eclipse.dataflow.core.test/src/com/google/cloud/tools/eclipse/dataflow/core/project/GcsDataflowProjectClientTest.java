@@ -35,6 +35,13 @@ public class GcsDataflowProjectClientTest {
   }
 
   @Test
+  public void testToGcsLocationUri_caseInsensitivePrefixDetection() {
+    assertEquals("gs://foo/bar", GcsDataflowProjectClient.toGcsLocationUri("GS://foo/bar"));
+    assertEquals("gs://foo/bar", GcsDataflowProjectClient.toGcsLocationUri("gS://foo/bar"));
+    assertEquals("gs://foo/bar", GcsDataflowProjectClient.toGcsLocationUri("Gs://foo/bar"));
+  }
+
+  @Test
   public void testToGcsLocationUriWithNullReturnsNull() {
     assertEquals(null, GcsDataflowProjectClient.toGcsLocationUri(null));
   }
@@ -54,6 +61,32 @@ public class GcsDataflowProjectClientTest {
   public void testToGcsLocationUriWithBucketNameOnlyReturnsWithPrefix() {
     String location = "foo-bar";
     assertEquals("gs://foo-bar", GcsDataflowProjectClient.toGcsLocationUri(location));
+  }
+
+  @Test
+  public void testToGcsBucketName_withoutObject() {
+    assertEquals("my-bucket", GcsDataflowProjectClient.toGcsBucketName("my-bucket"));
+    assertEquals("my-bucket", GcsDataflowProjectClient.toGcsBucketName("my-bucket/object"));
+  }
+
+  @Test
+  public void testToGcsBucketName_withObject() {
+    assertEquals("my-bucket", GcsDataflowProjectClient.toGcsBucketName("my-bucket/object"));
+    assertEquals("my-bucket", GcsDataflowProjectClient.toGcsBucketName("gs://my-bucket/object"));
+    assertEquals("my-bucket", GcsDataflowProjectClient.toGcsBucketName("GS://my-bucket/object"));
+  }
+
+  @Test
+  public void testToGcsBucketName_stripsLeadingForwardSlashes() {
+    assertEquals("my-bucket", GcsDataflowProjectClient.toGcsBucketName("my-bucket"));
+    assertEquals("my-bucket", GcsDataflowProjectClient.toGcsBucketName("/my-bucket"));
+    assertEquals("my-bucket", GcsDataflowProjectClient.toGcsBucketName("///my-bucket/"));
+    assertEquals("my-bucket", GcsDataflowProjectClient.toGcsBucketName("///my-bucket/object"));
+
+    assertEquals("my-bucket", GcsDataflowProjectClient.toGcsBucketName("gs://my-bucket"));
+    assertEquals("my-bucket", GcsDataflowProjectClient.toGcsBucketName("gs:///my-bucket"));
+    assertEquals("my-bucket", GcsDataflowProjectClient.toGcsBucketName("gs://///my-bucket/"));
+    assertEquals("my-bucket", GcsDataflowProjectClient.toGcsBucketName("gs://///my-bucket/object"));
   }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Google Inc.
+ * Copyright 2017 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,10 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.ui.util.databinding;
+package com.google.cloud.tools.eclipse.appengine.ui;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import com.google.cloud.tools.eclipse.test.util.BasePluginXmlTest;
 
-import org.junit.Test;
-
-public class BooleanConverterTest {
-
-  @Test
-  public void testNegate() {
-    assertTrue((Boolean) BooleanConverter.negate().convert(Boolean.FALSE));
-    assertFalse((Boolean) BooleanConverter.negate().convert(Boolean.TRUE));
-  }
+public class PluginXmlTest extends BasePluginXmlTest {
 
 }
