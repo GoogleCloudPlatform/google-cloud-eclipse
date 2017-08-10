@@ -75,7 +75,7 @@ public class DataflowDependencyManagerTest {
   }
 
   @Test
-  public void testGetDataflowDependencyNoTrackDependsUpToNextMajorVersion() throws Exception {
+  public void testGetDataflowDependencyNoTrackDependsUpToNextMajorVersion() {
     ArtifactVersion baseVersion = new DefaultArtifactVersion("1.2.3");
     when(artifactRetriever.getLatestSdkVersion(MajorVersion.ONE.getVersionRange()))
         .thenReturn(baseVersion);
@@ -87,8 +87,7 @@ public class DataflowDependencyManagerTest {
   }
 
   @Test
-  public void testGetDataflowDependencyNoTrackNoVersionInRangeDependsOnUnstableMajorVersionRange()
-      throws Exception {
+  public void testGetDataflowDependencyNoTrackNoVersionInRangeDependsOnUnstableMajorVersionRange() {
     when(artifactRetriever.getLatestSdkVersion(MajorVersion.QUALIFIED_TWO.getVersionRange()))
         .thenReturn(null);
 
@@ -99,8 +98,7 @@ public class DataflowDependencyManagerTest {
   }
 
   @Test
-  public void testGetDataflowDependencyNoTrackNoVersionInRangeDependsOnMajorVersionRange()
-      throws Exception {
+  public void testGetDataflowDependencyNoTrackNoVersionInRangeDependsOnMajorVersionRange() {
     when(artifactRetriever.getLatestSdkVersion(MajorVersion.TWO.getVersionRange()))
         .thenReturn(null);
 

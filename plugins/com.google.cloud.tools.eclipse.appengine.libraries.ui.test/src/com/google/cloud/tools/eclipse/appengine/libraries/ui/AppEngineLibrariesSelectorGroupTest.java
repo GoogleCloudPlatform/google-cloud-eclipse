@@ -52,7 +52,7 @@ public class AppEngineLibrariesSelectorGroupTest {
   private SWTBotCheckBox objectifyButton;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     shell = shellTestResource.getShell();
     shell.setLayout(new FillLayout());
     librariesSelector = new LibrarySelectorGroup(shell, CloudLibraries.APP_ENGINE_GROUP);

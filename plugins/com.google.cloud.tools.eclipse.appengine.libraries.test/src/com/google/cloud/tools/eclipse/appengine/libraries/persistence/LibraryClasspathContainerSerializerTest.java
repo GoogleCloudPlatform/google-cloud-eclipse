@@ -90,7 +90,7 @@ public class LibraryClasspathContainerSerializerTest {
   private LibraryClasspathContainer container;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     List<IClasspathEntry> classpathEntries = Arrays.asList(
         newClasspathEntry(IClasspathEntry.CPE_LIBRARY, "/test/path/to/jar",
             "/test/path/to/src", new IClasspathAttribute[] {newAttribute("attrName", "attrValue")},

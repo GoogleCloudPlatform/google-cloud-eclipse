@@ -29,6 +29,7 @@ import com.google.cloud.tools.eclipse.projectselector.ProjectRepositoryException
 import com.google.cloud.tools.eclipse.projectselector.ProjectSelector;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import java.util.List;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.runtime.jobs.Job;
@@ -121,12 +122,10 @@ public class GcpProjectQueryJobTest {
     ProjectRepository projectRepository2 = mock(ProjectRepository.class);
     when(projectRepository2.getProjects(staleCredential)).thenReturn(anotherProjectList);
 
-    Predicate<Job> notLatest = mock(Predicate.class);
+    // This second job is stale, i.e., it was fired, but user has selected another credential.
+    Predicate<Job> notLatest = Predicates.alwaysFalse();
     Job staleJob = new GcpProjectQueryJob(staleCredential, projectRepository2,
         projectSelector, dataBindingContext, notLatest);
-
-    // This second job is stale, i.e., it was fired, but user has selected another credential.
-    when(notLatest.apply(staleJob)).thenReturn(false);
 
     queryJob.schedule();
     queryJob.join();

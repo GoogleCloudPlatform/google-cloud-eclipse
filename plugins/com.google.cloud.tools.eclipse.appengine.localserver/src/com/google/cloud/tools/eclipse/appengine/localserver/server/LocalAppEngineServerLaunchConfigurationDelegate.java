@@ -590,10 +590,10 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
    * </ul>
    */
   private class CloudSdkDebugTarget extends DebugElement implements IDebugTarget {
-    private ILaunch launch;
-    private LocalAppEngineServerBehaviour serverBehaviour;
-    private IServer server;
-    private IOConsole console;
+    private final ILaunch launch;
+    private final LocalAppEngineServerBehaviour serverBehaviour;
+    private final IServer server;
+    private final IOConsole console;
 
     // Fire a {@link DebugEvent#TERMINATED} event when the server is stopped
     private IServerListener serverEventsListener = new IServerListener() {
@@ -655,7 +655,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       }
     };
 
-    CloudSdkDebugTarget(ILaunch launch, LocalAppEngineServerBehaviour serverBehaviour,
+    private CloudSdkDebugTarget(ILaunch launch, LocalAppEngineServerBehaviour serverBehaviour,
         IOConsole console) {
       super(null);
       this.launch = launch;
@@ -664,13 +664,12 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
       this.console = console;
     }
 
-    protected void removeConsole() {
+    private void removeConsole() {
       ConsolePlugin plugin = ConsolePlugin.getDefault();
       IConsoleManager manager = plugin.getConsoleManager();
       manager.removeConsoles(new IConsole[] {console});
       console.destroy();
     }
-
 
     /** Add required listeners */
     private void engage() {

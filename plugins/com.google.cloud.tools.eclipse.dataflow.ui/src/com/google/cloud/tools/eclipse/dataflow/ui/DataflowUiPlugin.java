@@ -19,7 +19,6 @@ package com.google.cloud.tools.eclipse.dataflow.ui;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -49,13 +48,6 @@ public class DataflowUiPlugin extends AbstractUIPlugin {
     super.stop(context);
   }
 
-  /**
-   * Returns the shared instance.
-   */
-  public static DataflowUiPlugin getDefault() {
-    return plugin;
-  }
-
   public static IDialogSettings getDialogSettingsSection(String sectionName) {
     IDialogSettings settings = plugin.getDialogSettings();
     IDialogSettings section = settings.getSection(sectionName);
@@ -65,15 +57,8 @@ public class DataflowUiPlugin extends AbstractUIPlugin {
     return section;
   }
 
-  /**
-   * Returns an image descriptor for the image file at the given plug-in relative path.
-   */
-  public static ImageDescriptor getImageDescriptor(String path) {
-    return imageDescriptorFromPlugin(PLUGIN_ID, path);
-  }
-
   private static void log(IStatus status) {
-    getDefault().getLog().log(status);
+    plugin.getLog().log(status);
   }
 
   public static void logInfo(String message, Object... fArgs) {
@@ -90,6 +75,6 @@ public class DataflowUiPlugin extends AbstractUIPlugin {
   }
 
   public static Shell getActiveWindowShell() {
-    return getDefault().getWorkbench().getActiveWorkbenchWindow().getShell();
+    return plugin.getWorkbench().getActiveWorkbenchWindow().getShell();
   }
 }

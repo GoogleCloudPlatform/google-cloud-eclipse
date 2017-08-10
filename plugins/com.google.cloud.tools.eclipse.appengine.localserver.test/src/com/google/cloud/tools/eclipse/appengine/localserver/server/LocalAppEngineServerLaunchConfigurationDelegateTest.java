@@ -61,7 +61,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
   private LocalAppEngineServerBehaviour serverBehavior;
 
   @Before
-  public void setUp() throws CoreException {
+  public void setUp() {
     when(server.loadAdapter(any(Class.class), any(IProgressMonitor.class)))
         .thenReturn(serverBehavior);
   }

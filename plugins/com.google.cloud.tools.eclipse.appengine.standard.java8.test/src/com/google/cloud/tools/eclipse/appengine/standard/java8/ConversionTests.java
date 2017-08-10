@@ -363,8 +363,7 @@ public class ConversionTests {
 
   /*******************************************************************/
 
-  private void createAppEngineWebWithNoRuntime(IFacetedProject project)
-      throws CoreException, IOException {
+  private void createAppEngineWebWithNoRuntime(IFacetedProject project) throws CoreException {
     IFolder webInf = project.getProject().getFolder("WebContent/WEB-INF");
     ResourceUtils.createFolders(webInf, null);
     IFile appEngineWeb = webInf.getFile("appengine-web.xml");
@@ -375,8 +374,7 @@ public class ConversionTests {
         true, null);
   }
 
-  private void createAppEngineWebWithJava8Runtime(IFacetedProject project)
-      throws CoreException, IOException {
+  private void createAppEngineWebWithJava8Runtime(IFacetedProject project) throws CoreException {
     IFolder webInf = project.getProject().getFolder("WebContent/WEB-INF");
     ResourceUtils.createFolders(webInf, null);
     IFile appengineWebXml = webInf.getFile("appengine-web.xml");

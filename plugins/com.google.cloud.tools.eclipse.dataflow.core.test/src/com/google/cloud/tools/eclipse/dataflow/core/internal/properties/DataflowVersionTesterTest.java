@@ -49,7 +49,7 @@ public class DataflowVersionTesterTest {
   private IProject project;
 
   @Before
-  public void setup() throws Exception {
+  public void setup() {
     MockitoAnnotations.initMocks(this);
 
     tester = new DataflowVersionTester(dependencyManager);

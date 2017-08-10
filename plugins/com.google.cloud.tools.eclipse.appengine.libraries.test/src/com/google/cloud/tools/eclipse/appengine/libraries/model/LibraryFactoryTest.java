@@ -22,9 +22,9 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 public class LibraryFactoryTest {
-  
+
   private LibraryFactory factory = new LibraryFactory();
-  
+
   @Test
   public void testCreate() throws LibraryFactoryException {
     IConfigurationElement configuration = Mockito.mock(IConfigurationElement.class);
@@ -42,16 +42,16 @@ public class LibraryFactoryTest {
     Library library = factory.create(configuration);
     Assert.assertEquals("com.google.guava", library.getGroup());
   }
-  
+
   @Test
   public void testCreate_null() throws LibraryFactoryException {
     try {
       factory.create(null);
       Assert.fail();
     } catch (NullPointerException ex) {
-    } 
+    }
   }
-  
+
   @Test
   public void testCreate_nonLibrary() {
     IConfigurationElement configuration = Mockito.mock(IConfigurationElement.class);
@@ -60,7 +60,7 @@ public class LibraryFactoryTest {
       Assert.fail();
     } catch (LibraryFactoryException ex) {
       Assert.assertNotNull(ex.getMessage());
-    } 
+    }
   }
-  
+
 }
