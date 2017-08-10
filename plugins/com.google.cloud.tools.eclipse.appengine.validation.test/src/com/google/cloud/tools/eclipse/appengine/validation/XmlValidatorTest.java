@@ -108,10 +108,12 @@ public class XmlValidatorTest {
     file.create(new ByteArrayInputStream(badXml), true, null);
 
     Stopwatch elapsed = Stopwatch.createStarted();
-    while (elapsed.elapsed(TimeUnit.SECONDS) < 300
-        && file.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO).length == 0) {
+    IMarker[] markers;
+    do {
       ProjectUtils.waitForProjects(project); // Wait until Eclipse puts an error marker.
-    }
+      markers = file.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
+      System.out.printf("%s: %d problem markers found\n", elapsed, markers.length);
+    } while (elapsed.elapsed(TimeUnit.SECONDS) < 300 && markers.length == 0);
 
 
     IMarker[] markers = file.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
