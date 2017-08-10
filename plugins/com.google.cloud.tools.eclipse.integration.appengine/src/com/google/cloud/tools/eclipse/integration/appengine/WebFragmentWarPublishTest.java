@@ -72,16 +72,16 @@ public class WebFragmentWarPublishTest {
   @Test
   public void testPublishWar_webFragmentJarPublished() throws CoreException {
     IFile war = project.getFile("my-app.war");
-    IFolder exploded = project.getFolder("exploded-war");
+    IFolder unzipped = project.getFolder("unzipped");
     try {
       WarPublisher.publishWar(project, war.getLocation(), monitor);
 
-      ZipUtil.unzip(war.getLocation().toFile(), exploded.getLocation().toFile(), monitor);
-      exploded.refreshLocal(IResource.DEPTH_INFINITE, monitor);
-      assertTrue(exploded.getFile("WEB-INF/lib/spring-web-4.3.8.RELEASE.jar").exists());
+      ZipUtil.unzip(war.getLocation().toFile(), unzipped.getLocation().toFile(), monitor);
+      unzipped.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+      assertTrue(unzipped.getFile("WEB-INF/lib/spring-web-4.3.8.RELEASE.jar").exists());
     } finally {
       war.delete(true, monitor);
-      exploded.delete(true, monitor);
+      unzipped.delete(true, monitor);
     }
   }
 }
