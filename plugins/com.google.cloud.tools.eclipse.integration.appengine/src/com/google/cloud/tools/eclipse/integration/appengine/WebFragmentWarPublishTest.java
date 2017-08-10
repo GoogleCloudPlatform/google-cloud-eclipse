@@ -31,16 +31,25 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class WebFragmentWarPublishTest {
 
-  private final IProgressMonitor monitor = new NullProgressMonitor();
-  private IProject project;
+  private static final IProgressMonitor monitor = new NullProgressMonitor();
+  private static IProject project;
 
-  @After
-  public void tearDown() throws CoreException {
+  @BeforeClass
+  public static void setUp() throws IOException, CoreException {
+    List<IProject> projects = ProjectUtils.importProjects(WebFragmentWarPublishTest.class,
+        "test-projects/web-fragment-example.zip", false /* checkBuildErrors */, monitor);
+    assertEquals(1, projects.size());
+    project = projects.get(0);
+  }
+
+  @AfterClass
+  public static void tearDown() throws CoreException {
     if (project != null) {
       ProjectUtils.waitForProjects(project);
       project.delete(true, null);
@@ -48,32 +57,31 @@ public class WebFragmentWarPublishTest {
   }
 
   @Test
-  public void testPublishExploded_webFragmentJarPublished() throws IOException, CoreException {
-    List<IProject> projects = ProjectUtils.importProjects(getClass(),
-        "test-projects/web-fragment-example.zip", false /* checkBuildErrors */, monitor);
-    assertEquals(1, projects.size());
-    project = projects.get(0);
+  public void testPublishExploded_webFragmentJarPublished() throws CoreException {
+    IFolder exploded = project.getFolder("exploded-war");
+    try {
+      WarPublisher.publishExploded(project, exploded.getLocation(), monitor);
 
-    IFolder exploded = project.getFolder("exloded-war");
-    WarPublisher.publishExploded(project, exploded.getLocation(), monitor);
-
-    exploded.refreshLocal(IResource.DEPTH_INFINITE, monitor);
-    assertTrue(exploded.getFile("WEB-INF/lib/spring-web-4.3.6.RELEASE.jar").exists());
+      exploded.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+      assertTrue(exploded.getFile("WEB-INF/lib/spring-web-4.3.8.RELEASE.jar").exists());
+    } finally {
+      exploded.delete(true, monitor);
+    }
   }
 
   @Test
-  public void testPublishWar_webFragmentJarPublished() throws IOException, CoreException {
-    List<IProject> projects = ProjectUtils.importProjects(getClass(),
-        "test-projects/web-fragment-example.zip", false /* checkBuildErrors */, monitor);
-    assertEquals(1, projects.size());
-    project = projects.get(0);
-
+  public void testPublishWar_webFragmentJarPublished() throws CoreException {
     IFile war = project.getFile("my-app.war");
-    WarPublisher.publishWar(project, war.getLocation(), monitor);
+    IFolder exploded = project.getFolder("exploded-war");
+    try {
+      WarPublisher.publishWar(project, war.getLocation(), monitor);
 
-    IFolder exploded = project.getFolder("exloded-war");
-    ZipUtil.unzip(war.getLocation().toFile(), exploded.getLocation().toFile(), monitor);
-    exploded.refreshLocal(IResource.DEPTH_INFINITE, monitor);
-    assertTrue(exploded.getFile("WEB-INF/lib/spring-web-4.3.6.RELEASE.jar").exists());
+      ZipUtil.unzip(war.getLocation().toFile(), exploded.getLocation().toFile(), monitor);
+      exploded.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+      assertTrue(exploded.getFile("WEB-INF/lib/spring-web-4.3.8.RELEASE.jar").exists());
+    } finally {
+      war.delete(true, monitor);
+      exploded.delete(true, monitor);
+    }
   }
 }

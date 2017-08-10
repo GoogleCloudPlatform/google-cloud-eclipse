@@ -104,17 +104,17 @@ public class WarPublisher {
         IWebFragmentModule webFragmentModule = (IWebFragmentModule)
             child.loadAdapter(IWebFragmentModule.class, monitor);
         if (childDelegate == null || webFragmentModule == null || !webFragmentModule.isBinary()) {
-          logger.log(Level.WARNING, "child modules other than web fragments are not supported:"
-              + " module=" + module + ", moduleType=" + module.getModuleType());
+          logger.log(Level.WARNING, "child modules other than binary web-fragments are not "
+              + "supported: module=" + module + ", moduleType=" + module.getModuleType());
           continue;
         }
 
+        // per "isBinary()" Javadoc, "members()" should have a single resource.
+        IModuleResource zipResource = childDelegate.members()[0];
         // destination (not an actual zip), e.g., "WEB-INF/lib/spring-web-4.3.6.RELEASE.jar"
         IPath zip = new Path(delegate.getPath(child));
         IPath zipParent = zip.removeLastSegments(1);
 
-        // per "isBinary()" Javadoc, "members()" should have a single resource.
-        IModuleResource zipResource = childDelegate.members()[0];
         File javaIoFile = zipResource.getAdapter(File.class);
         IFile iFile = zipResource.getAdapter(IFile.class);
 
