@@ -21,6 +21,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.common.base.Stopwatch;
@@ -113,6 +114,9 @@ public class XmlValidatorTest {
       ProjectUtils.waitForProjects(project); // Wait until Eclipse puts an error marker.
       markers = file.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
       System.out.printf("%s: %d problem markers found\n", elapsed, markers.length);
+      if (markers.length == 0) {
+        ThreadDumpingWatchdog.report("Expected a problem marker", elapsed);
+      }
     } while (elapsed.elapsed(TimeUnit.SECONDS) < 300 && markers.length == 0);
 
     markers = file.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
