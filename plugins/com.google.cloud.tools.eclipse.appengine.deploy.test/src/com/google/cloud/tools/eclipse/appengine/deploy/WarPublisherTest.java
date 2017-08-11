@@ -69,7 +69,7 @@ public class WarPublisherTest {
   @Test
   public void testPublishExploded() throws CoreException {
     IProject project = projectCreator.getProject();
-    IFolder exploded = project.getFolder("exloded-war");
+    IFolder exploded = project.getFolder("exploded-war");
     WarPublisher.publishExploded(project, exploded.getLocation(), monitor);
 
     exploded.refreshLocal(IResource.DEPTH_INFINITE, monitor);
