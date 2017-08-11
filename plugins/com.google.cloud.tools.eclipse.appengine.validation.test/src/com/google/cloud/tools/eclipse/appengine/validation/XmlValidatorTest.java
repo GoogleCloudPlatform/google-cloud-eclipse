@@ -115,8 +115,7 @@ public class XmlValidatorTest {
       System.out.printf("%s: %d problem markers found\n", elapsed, markers.length);
     } while (elapsed.elapsed(TimeUnit.SECONDS) < 300 && markers.length == 0);
 
-
-    IMarker[] markers = file.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
+    markers = file.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
     assertEquals(1, markers.length);
 
     String resultMessage = (String) markers[0].getAttribute(IMarker.MESSAGE);
