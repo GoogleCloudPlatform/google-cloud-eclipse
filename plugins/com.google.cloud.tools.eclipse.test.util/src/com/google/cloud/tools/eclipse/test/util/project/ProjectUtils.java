@@ -328,6 +328,7 @@ public class ProjectUtils {
     // some jobs are not part of a family
     for (Job job : jobManager.find(null)) {
       switch (job.getClass().getName()) {
+        case "org.eclipse.wst.jsdt.web.core.internal.project.ConvertJob":
         case "org.eclipse.m2e.core.ui.internal.wizards.ImportMavenProjectsJob":
         case "org.eclipse.m2e.core.internal.project.registry.ProjectRegistryRefreshJob":
           jobs.add(job);

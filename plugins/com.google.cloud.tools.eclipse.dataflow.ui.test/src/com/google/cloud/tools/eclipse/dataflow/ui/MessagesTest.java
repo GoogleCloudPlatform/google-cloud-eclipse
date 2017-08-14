@@ -29,20 +29,27 @@ public class MessagesTest {
   @Test
   public void testRunOptions() {
     Assert.assertEquals(
-        "Set Default Cloud Dataflow Run Options", Messages.getString("SET_RUN_OPTIONS"));
+        "Set Default Cloud Dataflow Run Options", Messages.getString("set.run.options"));
   }
   
   @Test
   public void testWizardDescription() {
     Assert.assertEquals(
         "This wizard creates a new Google Cloud Dataflow project.",
-        Messages.getString("WIZARD_DESCRIPTION"));
+        Messages.getString("wizard.description"));
   }
   
   @Test
   public void testLocationToolTip() {
-    Assert.assertEquals("The directory where the project will be created. Must be an existing local directory.",
-        Messages.getString("LOCATION_TOOLTIP"));
+    Assert.assertEquals("An Existing Local Directory where the Project Will Be Created",
+        Messages.getString("location.tooltip"));
   }
+  
+  @Test
+  public void testCouldntFetchBucket() {
+    Assert.assertEquals("Couldn't fetch bucket foo.",
+        Messages.getString("couldnt.fetch.bucket", "foo"));
+  }
+
 
 }

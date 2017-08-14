@@ -209,14 +209,14 @@
          </separator>
          <command commandId="com.google.cloud.tools.eclipse.dataflow.ui.dataflowNature.add"
              label="Enable Dataflow Nature"
-             tooltip="Enables the Dataflow Java Project Nature for this project">
+             tooltip="Enables the Dataflow Java Project Nature for this Project">
            <visibleWhen>
              <reference definitionId="com.google.cloud.tools.eclipse.dataflow.ui.isNonDataflowProjectSelected" />
            </visibleWhen>
          </command>
          <command commandId="com.google.cloud.tools.eclipse.dataflow.ui.dataflowNature.remove"
              label="Disable Dataflow Nature"
-             tooltip="Disables the Dataflow Java Project Nature for this project">
+             tooltip="Disables the Dataflow Java Project Nature for this Project">
            <visibleWhen>
              <reference definitionId="com.google.cloud.tools.eclipse.dataflow.ui.isDataflowProjectSelected" />
            </visibleWhen>
@@ -227,21 +227,21 @@
          </separator>
          <command commandId="com.google.cloud.tools.eclipse.dataflow.ui.dataflowVersion.pin"
              label="Pin Dataflow Version"
-             tooltip="Pin the Dataflow version for this project to the current latest version">
+             tooltip="Pin the Dataflow Version for this Project to the Current Latest Version">
            <visibleWhen>
              <reference definitionId="com.google.cloud.tools.eclipse.dataflow.ui.tracksDataflowVersion" />
            </visibleWhen>
          </command>
          <command commandId="com.google.cloud.tools.eclipse.dataflow.ui.dataflowVersion.track"
              label="Track Dataflow Version"
-             tooltip="Tracks the Latest Dataflow version in this project">
+             tooltip="Tracks the Latest Dataflow Version in this Project">
            <visibleWhen>
              <reference definitionId="com.google.cloud.tools.eclipse.dataflow.ui.pinnedDataflowVersion" />
            </visibleWhen>
          </command>
          <command commandId="com.google.cloud.tools.eclipse.dataflow.ui.dataflowVersion.update"
              label="Update Dataflow Version"
-             tooltip="Update the Dataflow version in this project to the latest version">
+             tooltip="Update the Dataflow Version in this Project to the Latest Version">
            <visibleWhen>
              <reference definitionId="com.google.cloud.tools.eclipse.dataflow.ui.pinnedDataflowVersion" />
            </visibleWhen>

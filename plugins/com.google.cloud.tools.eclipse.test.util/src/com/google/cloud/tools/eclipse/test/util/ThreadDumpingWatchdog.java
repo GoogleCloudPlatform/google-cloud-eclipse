@@ -137,7 +137,8 @@ public class ThreadDumpingWatchdog extends TimerTask implements TestRule {
     }
     sb.append("\n|");
     dumpEclipseLocks(sb, "| ");
-
+    sb.append("\n|");
+    dumpEclipseJobs(sb, "| ");
     sb.append("\n|");
     int uselessThreadsCount = 0;
     for (ThreadInfo tinfo : infos) {

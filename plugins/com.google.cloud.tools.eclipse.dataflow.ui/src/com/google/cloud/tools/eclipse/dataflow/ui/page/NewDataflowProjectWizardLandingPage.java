@@ -57,7 +57,6 @@ import java.util.Map;
  * The landing page for the New Cloud Dataflow Project wizard.
  */
 public class NewDataflowProjectWizardLandingPage extends WizardPage  {
-  private static final String EXAMPLE_GROUP_ID = "com.company.product";
 
   private DataflowDependencyManager dependencyManager;
   private final DataflowProjectCreator targetCreator;
@@ -79,7 +78,7 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     this.dependencyManager = DataflowDependencyManager.create();
     this.targetCreator = targetCreator;
     setTitle(Messages.getString("CREATE_DATAFLOW_PROJECT")); //$NON-NLS-1$
-    setDescription(Messages.getString("WIZARD_DESCRIPTION")); //$NON-NLS-1$
+    setDescription(Messages.getString("wizard.description")); //$NON-NLS-1$
     setImageDescriptor(getDataflowIcon());
     setPageComplete(false);
   }
@@ -103,7 +102,8 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     return widget;
   }
 
-  private static Button addCheckbox(Composite formComposite, String labelText, boolean initialValue) {
+  private static Button addCheckbox(Composite formComposite, String labelText,
+      boolean initialValue) {
     Button checkbox = new Button(formComposite, SWT.CHECK);
     checkbox.setText(labelText);
     checkbox.setLayoutData(gridSpan(SWT.NULL, 3));
@@ -133,49 +133,52 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     formComposite.setLayout(new GridLayout(3, false));
     setControl(formComposite);
 
-    groupIdInput = addLabeledText(formComposite, "&Group ID:");
-    groupIdInput.setMessage(EXAMPLE_GROUP_ID);
-    groupIdInput.setToolTipText(Messages.getString("GROUP_ID_TOOLTIP"));
-    artifactIdInput = addLabeledText(formComposite, "&Artifact ID:");
-    artifactIdInput.setToolTipText(Messages.getString("ARTIFACT_ID_TOOLTIP"));
+    groupIdInput = addLabeledText(formComposite, Messages.getString("group.id")); //$NON-NLS-1$
+    groupIdInput.setMessage(Messages.getString("example.group.id"));//$NON-NLS-1$
+    groupIdInput.setToolTipText(Messages.getString("GROUP_ID_TOOLTIP")); //$NON-NLS-1$
+    artifactIdInput = addLabeledText(formComposite, Messages.getString("artifact.id")); //$NON-NLS-1$
+    artifactIdInput.setToolTipText(Messages.getString("ARTIFACT_ID_TOOLTIP")); //$NON-NLS-1$
 
-    templateDropdown = addCombo(formComposite, "Project &Template:", true);
+    templateDropdown = addCombo(formComposite, 
+        Messages.getString("project.template"), true); //$NON-NLS-1$
     for (Template template : Template.values()) {
       templateDropdown.add(template.getLabel());
     }
-    templateVersionDropdown = addCombo(formComposite, "Project Dataflow &Version", false);
+    templateVersionDropdown = addCombo(formComposite, 
+        Messages.getString("dataflow.version"), false); //$NON-NLS-1$
 
     templateDropdown.select(0);
     updateAvailableVersions();
 
-    packageInput = addLabeledText(formComposite, "&Package:");
-    packageInput.setToolTipText(Messages.getString("UNSET_PACKAGE_TOOLTIP"));
-    packageInput.setMessage(EXAMPLE_GROUP_ID);
+    packageInput = addLabeledText(formComposite, Messages.getString("package")); //$NON-NLS-1$
+    packageInput.setToolTipText(Messages.getString("UNSET_PACKAGE_TOOLTIP")); //$NON-NLS-1$
+    packageInput.setMessage(Messages.getString("example.group.id"));//$NON-NLS-1$
 
     // Add a labeled text and button for the default location.
     Group locationGroup = new Group(formComposite, SWT.NULL);
     locationGroup.setLayoutData(gridSpan(GridData.FILL_HORIZONTAL, 3));
     locationGroup.setLayout(new GridLayout(3, false));
 
-    useDefaultLocation = addCheckbox(locationGroup, "Use default &Workspace location", true);
+    useDefaultLocation = addCheckbox(locationGroup, 
+        Messages.getString("use.default.workspace.location"), true); //$NON-NLS-1$
 
-    addLabel(locationGroup, "&Location:");
+    addLabel(locationGroup, Messages.getString("location")); //$NON-NLS-1$
 
     String defaultLocation = ResourcesPlugin.getWorkspace().getRoot().getLocation().toString();
     locationInput = new Text(locationGroup, SWT.SINGLE | SWT.BORDER);
     locationInput.setText(defaultLocation);
     locationInput.setEnabled(false);
     locationInput.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-    locationInput.setToolTipText(Messages.getString("LOCATION_TOOLTIP"));
+    locationInput.setToolTipText(Messages.getString("location.tooltip")); //$NON-NLS-1$
 
-    locationBrowse = ButtonFactory.newPushButton(locationGroup, "&Browse");
+    locationBrowse = ButtonFactory.newPushButton(locationGroup, Messages.getString("browse")); //$NON-NLS-1$
     locationBrowse.setEnabled(false);
 
-    projectNameTemplate = addCombo(formComposite, "Name &template:", false);
+    projectNameTemplate = addCombo(formComposite, Messages.getString("name.template"), false); //$NON-NLS-1$
     projectNameTemplate.setToolTipText(
-        "Optional Eclipse project name template such as [groupId]-[artifactId].");
-    projectNameTemplate.add("[artifactId]");
-    projectNameTemplate.add("[groupId]-[artifactId]");
+        Messages.getString("name.template.tooltip")); //$NON-NLS-1$
+    projectNameTemplate.add("[artifactId]"); //$NON-NLS-1$
+    projectNameTemplate.add("[groupId]-[artifactId]"); //$NON-NLS-1$
     projectNameTemplate.setLayoutData(gridSpan(GridData.FILL_HORIZONTAL, 1));
 
     // Register all the listeners
@@ -338,7 +341,7 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
 
   private SelectionListener showDefaultOrCustomValueListener(final String defaultValue) {
     return new SelectionAdapter() {
-      private String customValue = "";
+      private String customValue = ""; //$NON-NLS-1$
 
       @Override
       public void widgetSelected(SelectionEvent event) {
@@ -419,7 +422,7 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
       @Override
       public void widgetSelected(SelectionEvent event) {
         DirectoryDialog dialog = new DirectoryDialog(shell);
-        dialog.setMessage(Messages.getString("SELECT_PROJECT_LOCATION"));
+        dialog.setMessage(Messages.getString("SELECT_PROJECT_LOCATION")); //$NON-NLS-1$
         String result = dialog.open();
         if (!Strings.isNullOrEmpty(result)) {
           locationInput.setText(result);
