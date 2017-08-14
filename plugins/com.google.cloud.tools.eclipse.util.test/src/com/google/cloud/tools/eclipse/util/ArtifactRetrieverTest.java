@@ -18,9 +18,6 @@ package com.google.cloud.tools.eclipse.util;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
-import org.apache.maven.artifact.versioning.VersionRange;
 import org.junit.Assert;
 import org.junit.Test;
 
