@@ -23,12 +23,6 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.ImmutableSortedSet.Builder;
-import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
-import org.apache.maven.artifact.versioning.VersionRange;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -44,6 +38,12 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+import org.apache.maven.artifact.versioning.VersionRange;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 /**
  * {@link ArtifactRetriever} provides access to Maven artifacts using low-level URL and XPath APIs
@@ -55,11 +55,11 @@ import javax.xml.xpath.XPathFactory;
  * versions.
  */
 public class ArtifactRetriever {
-  
+
   private static final Logger logger = Logger.getLogger(ArtifactRetriever.class.getName());
-  
+
   private final String repositoryUrl;
-  
+
   @VisibleForTesting
   URL getMetadataUrl(String groupId, String artifactId) {
     String groupPath = groupId.replace('.', '/');
@@ -71,7 +71,7 @@ public class ArtifactRetriever {
           "Could not construct metadata URL for artifact " + artifactId, ex);
     }
   }
-  
+
   private final LoadingCache<String, Document> metadataCache =
       CacheBuilder.newBuilder()
           .refreshAfterWrite(4, TimeUnit.HOURS)
@@ -123,7 +123,7 @@ public class ArtifactRetriever {
               });
 
   /**
-   * @param repositoryUrl the base URL of the maven mirror such as 
+   * @param repositoryUrl the base URL of the maven mirror such as
    *     "https://repo1.maven.org/maven2/"
    * @throws URISyntaxException if the argument is not a valid URL
    */
@@ -134,7 +134,7 @@ public class ArtifactRetriever {
     if (!repositoryUrl.endsWith("/")) {
       repositoryUrl = repositoryUrl + "/";
     }
-    
+
     this.repositoryUrl = repositoryUrl;
   }
 
@@ -164,7 +164,7 @@ public class ArtifactRetriever {
   /**
    * Returns the latest version of the specified artifact in the version range, or null if there is
    * no such version.
-   * 
+   *
    * @param coordinates Maven coordinates in the form groupId:artifactId
    */
   private ArtifactVersion getLatestIncrementalVersion(String coordinates, VersionRange range) {
