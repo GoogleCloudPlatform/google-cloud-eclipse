@@ -173,8 +173,8 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     projectNameTemplate = addCombo(formComposite, "Name &template:", false);
     projectNameTemplate.setToolTipText(
         "Optional Eclipse Project Name Template such as [groupId]-[artifactId].");
-    projectNameTemplate.add("[artifactId]");
-    projectNameTemplate.add("[groupId]-[artifactId]");
+    projectNameTemplate.add("[artifactId]"); //$NON-NLS-1$
+    projectNameTemplate.add("[groupId]-[artifactId]"); //$NON-NLS-1$
     projectNameTemplate.setLayoutData(gridSpan(GridData.FILL_HORIZONTAL, 1));
 
     // Register all the listeners
