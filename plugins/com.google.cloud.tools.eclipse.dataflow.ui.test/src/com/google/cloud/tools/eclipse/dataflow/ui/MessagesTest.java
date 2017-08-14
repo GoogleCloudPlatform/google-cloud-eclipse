@@ -41,7 +41,7 @@ public class MessagesTest {
   
   @Test
   public void testLocationToolTip() {
-    Assert.assertEquals("An Existing Local Directory where the Project will be Created",
+    Assert.assertEquals("An Existing Local Directory where the Project Will Be Created",
         Messages.getString("LOCATION_TOOLTIP"));
   }
   
