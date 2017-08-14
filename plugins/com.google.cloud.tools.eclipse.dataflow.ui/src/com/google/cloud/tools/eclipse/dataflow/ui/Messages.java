@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.dataflow.ui.page;
+package com.google.cloud.tools.eclipse.dataflow.ui;
 
 import java.text.MessageFormat;
 import java.util.MissingResourceException;
@@ -22,7 +22,7 @@ import java.util.ResourceBundle;
 
 public class Messages {
   private static final String BUNDLE_NAME =
-      "com.google.cloud.tools.eclipse.dataflow.ui.page.messages"; //$NON-NLS-1$
+      "com.google.cloud.tools.eclipse.dataflow.ui.messages"; //$NON-NLS-1$
 
   private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME);
 

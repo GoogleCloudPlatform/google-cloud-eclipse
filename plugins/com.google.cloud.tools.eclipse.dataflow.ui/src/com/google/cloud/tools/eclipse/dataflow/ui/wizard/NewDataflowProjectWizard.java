@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.dataflow.ui.wizard;
 
 import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowProjectCreator;
 import com.google.cloud.tools.eclipse.dataflow.ui.DataflowUiPlugin;
+import com.google.cloud.tools.eclipse.dataflow.ui.Messages;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.NewDataflowProjectWizardDefaultRunOptionsPage;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.NewDataflowProjectWizardLandingPage;
 import java.lang.reflect.InvocationTargetException;
@@ -43,8 +44,8 @@ public class NewDataflowProjectWizard extends Wizard implements INewWizard {
 
     if (!creator.isValid()) {
       String message =
-          "Tried to finish the New Dataflow Project Wizard "
-              + "when the project creator is not valid. Reasons: " + creator.validate();
+          "Tried to finish the New Dataflow Project Wizard " //$NON-NLS-1$
+              + "when the project creator is not valid. Reasons: " + creator.validate(); //$NON-NLS-1$
       IllegalStateException ex = new IllegalStateException(message);
       DataflowUiPlugin.logError(ex, message);
       throw ex;
@@ -71,7 +72,7 @@ public class NewDataflowProjectWizard extends Wizard implements INewWizard {
   @Override
   public void init(IWorkbench workbench, IStructuredSelection selection) {
     setHelpAvailable(false);
-    setWindowTitle("New Cloud Dataflow Project");
+    setWindowTitle(Messages.getString("new.cloud.dataflow.project")); //$NON-NLS-1$
     setNeedsProgressMonitor(true);
   }
 }

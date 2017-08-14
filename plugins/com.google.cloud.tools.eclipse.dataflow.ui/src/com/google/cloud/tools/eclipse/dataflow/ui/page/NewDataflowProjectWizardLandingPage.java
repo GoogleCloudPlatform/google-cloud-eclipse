@@ -21,6 +21,7 @@ import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowProjectCreat
 import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowProjectCreator.Template;
 import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowProjectValidationStatus;
 import com.google.cloud.tools.eclipse.dataflow.core.project.MajorVersion;
+import com.google.cloud.tools.eclipse.dataflow.ui.Messages;
 import com.google.cloud.tools.eclipse.dataflow.ui.util.ButtonFactory;
 import com.google.common.base.Strings;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -73,19 +74,19 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
   private Combo projectNameTemplate;
 
   public NewDataflowProjectWizardLandingPage(DataflowProjectCreator targetCreator) {
-    super("newDataflowProjectWizardLandingPage");
+    super("newDataflowProjectWizardLandingPage"); //$NON-NLS-1$
     this.dependencyManager = DataflowDependencyManager.create();
     this.targetCreator = targetCreator;
-    setTitle(Messages.getString("CREATE_DATAFLOW_PROJECT"));
-    setDescription(Messages.getString("WIZARD_DESCRIPTION"));
+    setTitle(Messages.getString("CREATE_DATAFLOW_PROJECT")); //$NON-NLS-1$
+    setDescription(Messages.getString("WIZARD_DESCRIPTION")); //$NON-NLS-1$
     setImageDescriptor(getDataflowIcon());
     setPageComplete(false);
   }
 
   private static ImageDescriptor getDataflowIcon() {
-    String imageFilePath = "icons/Dataflow_64.png";
+    String imageFilePath = "icons/Dataflow_64.png"; //$NON-NLS-1$
     return AbstractUIPlugin.imageDescriptorFromPlugin(
-        "com.google.cloud.tools.eclipse.dataflow.ui", imageFilePath);
+        "com.google.cloud.tools.eclipse.dataflow.ui", imageFilePath); //$NON-NLS-1$
   }
   
   private static void addLabel(Composite formComposite, String labelText) {
