@@ -10,7 +10,7 @@
 
   <!ENTITY artifact-id "&lt;b&gt;Artifact ID:&lt;/b&gt; The Maven Artifact ID. Should be an alphanumeric name separated by dashes.">
 
-  <!ENTITY version "&lt;b&gt;Version:&lt;/b&gt; The Maven version. Best in the form &lt;major version>.&lt;minor version>.&lt;incremental version>-&lt;qualifier>">
+  <!ENTITY mavenversion "&lt;b&gt;Version:&lt;/b&gt; The Maven version. Best in the form &lt;major version>.&lt;minor version>.&lt;incremental version>-&lt;qualifier>">
 ]>
 <contexts>
   <context id="NewStandardProjectContext" title="Create App Engine Standard Project">
@@ -28,7 +28,7 @@
 
       &artifact-id;
       
-      &version;
+      &mavenversion;
 
       &lt;b&gt;Libraries to add to build path:&lt;/b&gt; Adds useful libraries for the App Engine standard environment to your project build path.
     </description>
@@ -47,7 +47,7 @@
 
       &artifact-id;
       
-      &version;
+      &mavenversion;
 
     </description>
   </context>
