@@ -50,6 +50,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import java.io.File;
 import java.net.URI;
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -179,27 +180,31 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
 
     // Register all the listeners
     addListeners(defaultLocation);
-
-    // setErrorMessage(null);
     
     formComposite.layout();
     parent.layout();
   }
 
   private void validateAndSetError() {
-    if (targetCreator.isValid()) {
-      setMessage(null);
-      setPageComplete(true);
-      return;
-    } else {
-      for (DataflowProjectValidationStatus status : targetCreator.validate()) {
-        if (!status.isValid()) {
-          setMessage(status.getMessage());
-          break;
-        }
+    Collection<DataflowProjectValidationStatus> validations = targetCreator.validate();
+    for (DataflowProjectValidationStatus status : validations) {
+      if (status.isError()) {
+        setErrorMessage(status.getMessage());
+        setPageComplete(false);
+        return;
       }
     }
-    setPageComplete(false);
+    for (DataflowProjectValidationStatus status : validations) {
+      if (status.isMissing()) {
+        setErrorMessage(null);
+        setMessage(status.getMessage());
+        setPageComplete(false);
+        return;
+      }
+    }
+    setMessage(null);
+    setErrorMessage(null);
+    setPageComplete(true);
   }
 
   private void addListeners(String defaultProjectLocation) {

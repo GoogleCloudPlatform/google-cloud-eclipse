@@ -347,8 +347,10 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
   }
 
   private DataflowProjectValidationStatus validatePackage() {
-    if (Strings.isNullOrEmpty(packageString)
-        || !JAVA_PACKAGE_REGEX.matcher(packageString).matches()) {
+    if (Strings.isNullOrEmpty(packageString)) {
+      return DataflowProjectValidationStatus.OK;
+    }
+    if (!JAVA_PACKAGE_REGEX.matcher(packageString).matches()) {
       return DataflowProjectValidationStatus.ILLEGAL_PACKAGE;
     }
     return DataflowProjectValidationStatus.OK;

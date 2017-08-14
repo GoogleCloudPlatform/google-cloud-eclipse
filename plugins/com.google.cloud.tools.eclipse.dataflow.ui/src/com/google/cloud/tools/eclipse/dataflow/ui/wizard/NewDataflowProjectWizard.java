@@ -52,9 +52,9 @@ public class NewDataflowProjectWizard extends Wizard implements INewWizard {
     }
     try {
       getContainer().run(true, true, creator);
-    } catch (InvocationTargetException | InterruptedException e) {
+    } catch (InvocationTargetException | InterruptedException ex) {
       // TODO: handle
-      DataflowUiPlugin.logError(e, "Error encountered when trying to create project");
+      DataflowUiPlugin.logError(ex, "Error encountered when trying to create project");
       return false;
     }
     return true;
