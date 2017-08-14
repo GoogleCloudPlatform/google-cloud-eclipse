@@ -138,11 +138,11 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     artifactIdInput = addLabeledText(formComposite, "&Artifact ID:");
     artifactIdInput.setToolTipText(Messages.getString("ARTIFACT_ID_TOOLTIP"));
 
-    templateDropdown = addCombo(formComposite, "Project &Template:", true);
+    templateDropdown = addCombo(formComposite, "Project &template:", true);
     for (Template template : Template.values()) {
       templateDropdown.add(template.getLabel());
     }
-    templateVersionDropdown = addCombo(formComposite, "Project Dataflow &Version", false);
+    templateVersionDropdown = addCombo(formComposite, "Dataflow &version:", false);
 
     templateDropdown.select(0);
     updateAvailableVersions();
