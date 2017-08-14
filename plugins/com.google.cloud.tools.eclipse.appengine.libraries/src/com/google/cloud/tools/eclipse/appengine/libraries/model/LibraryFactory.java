@@ -141,7 +141,6 @@ class LibraryFactory {
     // Only look up latest version if version isn't specified in file.
     String version = mavenCoordinatesElement.getAttribute(ATTRIBUTE_NAME_VERSION);
     if (Strings.isNullOrEmpty(version) || "LATEST".equals(version)) {
-      // todo don't load beta versions
       version = retriever.getLatestArtifactVersion(groupId, artifactId).toString(); 
     } 
     
