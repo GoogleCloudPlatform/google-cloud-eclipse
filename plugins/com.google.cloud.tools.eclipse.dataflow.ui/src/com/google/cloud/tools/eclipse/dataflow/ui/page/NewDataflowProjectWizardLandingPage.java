@@ -156,7 +156,7 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     locationGroup.setLayoutData(gridSpan(GridData.FILL_HORIZONTAL, 3));
     locationGroup.setLayout(new GridLayout(3, false));
 
-    useDefaultLocation = addCheckbox(locationGroup, "Use default &Workspace location", true);
+    useDefaultLocation = addCheckbox(locationGroup, "Use default &workspace location", true);
 
     addLabel(locationGroup, "&Location:");
 
