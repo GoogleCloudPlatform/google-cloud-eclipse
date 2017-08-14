@@ -60,7 +60,11 @@ public enum DataflowProjectValidationStatus {
   /**
    * The Java package is invalid.
    */
-  ILLEGAL_PACKAGE(Status.ERROR, "Invalid Java Package"),
+  ILLEGAL_PACKAGE(Status.ERROR, "Invalid Java package"),
+  /**
+   * The Java package is not set.
+   */
+  MISSING_PACKAGE(Status.MISSING, "Enter a Java package"),
   /**
    * The provided project name is not a valid segment. See {@link IPath#isValidSegment(String)}
    */
