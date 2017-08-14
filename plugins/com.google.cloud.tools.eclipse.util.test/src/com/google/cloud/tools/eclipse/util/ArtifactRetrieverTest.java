@@ -29,31 +29,6 @@ public class ArtifactRetrieverTest {
   private ArtifactRetriever retriever = new ArtifactRetriever();
   
   @Test
-  public void testGetServletLatest() {
-    // group and version IDs changed with 3.0 so this should be stable
-    ArtifactVersion servlet = retriever.getLatestArtifactVersion("javax.servlet", "servlet-api");
-    Assert.assertEquals(2, servlet.getMajorVersion());
-    Assert.assertEquals(5, servlet.getMinorVersion());
-    Assert.assertNull(servlet.getQualifier());
-  }
-  
-  @Test
-  public void testGetGuava() {
-    ArtifactVersion guava = retriever.getLatestArtifactVersion("com.google.guava", "guava");
-    Assert.assertTrue(guava.getMajorVersion() > 19);
-    Assert.assertTrue(guava.getMinorVersion() >= 0);
-    Assert.assertNull(guava.getQualifier());
-  }
-    
-  @Test
-  public void testGetGuava19() throws InvalidVersionSpecificationException {
-    VersionRange range = VersionRange.createFromVersionSpec("[1.0,19.0]");
-    ArtifactVersion guava = retriever.getLatestArtifactVersion("com.google.guava", "guava", range);
-    Assert.assertEquals(19, guava.getMajorVersion());
-    Assert.assertEquals(0, guava.getMinorVersion());
-  }
-  
-  @Test
   public void testGetMetadataUrl() throws MalformedURLException {
     Assert.assertEquals(
         new URL("https://repo1.maven.org/maven2/com/google/foo/bar-baz/maven-metadata.xml"),
