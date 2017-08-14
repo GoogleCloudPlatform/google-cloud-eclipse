@@ -120,14 +120,14 @@ public class ArtifactRetriever {
   }
 
   /**
-   * Returns the latest published non-beta artifact version, or null if there is no such version.
+   * Returns the latest published release artifact version, or null if there is no such version.
    */
   public ArtifactVersion getLatestArtifactVersion(String groupId, String artifactId) {
     return getLatestIncrementalVersion(idToKey(groupId, artifactId), null);
   }
 
   /**
-   * Returns the latest published non-beta artifact version in the version range, 
+   * Returns the latest published release artifact version in the version range, 
    * or null if there is no such version.
    */
   public ArtifactVersion getLatestArtifactVersion(
@@ -136,7 +136,7 @@ public class ArtifactRetriever {
   }
 
   /**
-   * Returns the latest non-beta version of the specified artifact in the version range,
+   * Returns the latest release version of the specified artifact in the version range,
    * or null if there is no such version.
    * 
    * @param coordinates Maven coordinates in the form groupId:artifactId
