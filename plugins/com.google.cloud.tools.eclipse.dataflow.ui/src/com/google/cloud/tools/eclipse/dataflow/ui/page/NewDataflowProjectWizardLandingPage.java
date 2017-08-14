@@ -180,19 +180,21 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     // Register all the listeners
     addListeners(defaultLocation);
 
+    // setErrorMessage(null);
+    
     formComposite.layout();
     parent.layout();
   }
 
   private void validateAndSetError() {
     if (targetCreator.isValid()) {
-      setErrorMessage(null);
+      setMessage(null);
       setPageComplete(true);
       return;
     } else {
       for (DataflowProjectValidationStatus status : targetCreator.validate()) {
         if (!status.isValid()) {
-          setErrorMessage(status.getMessage());
+          setMessage(status.getMessage());
           break;
         }
       }
