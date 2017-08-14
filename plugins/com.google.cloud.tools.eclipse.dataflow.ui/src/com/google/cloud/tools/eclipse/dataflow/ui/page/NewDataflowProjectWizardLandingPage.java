@@ -77,7 +77,7 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     this.dependencyManager = DataflowDependencyManager.create();
     this.targetCreator = targetCreator;
     setTitle(Messages.getString("CREATE_DATAFLOW_PROJECT")); //$NON-NLS-1$
-    setDescription(Messages.getString("WIZARD_DESCRIPTION")); //$NON-NLS-1$
+    setDescription(Messages.getString("wizard.description")); //$NON-NLS-1$
     setImageDescriptor(getDataflowIcon());
     setPageComplete(false);
   }
