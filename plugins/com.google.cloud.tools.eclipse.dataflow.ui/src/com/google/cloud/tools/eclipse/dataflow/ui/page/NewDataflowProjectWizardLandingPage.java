@@ -56,7 +56,6 @@ import java.util.Map;
  * The landing page for the New Cloud Dataflow Project wizard.
  */
 public class NewDataflowProjectWizardLandingPage extends WizardPage  {
-  private static final String EXAMPLE_GROUP_ID = "com.company.product";
 
   private DataflowDependencyManager dependencyManager;
   private final DataflowProjectCreator targetCreator;
@@ -133,7 +132,7 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     setControl(formComposite);
 
     groupIdInput = addLabeledText(formComposite, "&Group ID:");
-    groupIdInput.setMessage(EXAMPLE_GROUP_ID);
+    groupIdInput.setMessage(Messages.getString("example.group.id"));//$NON-NLS-1$
     groupIdInput.setToolTipText(Messages.getString("GROUP_ID_TOOLTIP"));
     artifactIdInput = addLabeledText(formComposite, "&Artifact ID:");
     artifactIdInput.setToolTipText(Messages.getString("ARTIFACT_ID_TOOLTIP"));
@@ -149,14 +148,14 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
 
     packageInput = addLabeledText(formComposite, "&Package:");
     packageInput.setToolTipText(Messages.getString("UNSET_PACKAGE_TOOLTIP"));
-    packageInput.setMessage(EXAMPLE_GROUP_ID);
+    packageInput.setMessage(Messages.getString("example.group.id"));//$NON-NLS-1$
 
     // Add a labeled text and button for the default location.
     Group locationGroup = new Group(formComposite, SWT.NULL);
     locationGroup.setLayoutData(gridSpan(GridData.FILL_HORIZONTAL, 3));
     locationGroup.setLayout(new GridLayout(3, false));
 
-    useDefaultLocation = addCheckbox(locationGroup, "Use default &Workspace location", true);
+    useDefaultLocation = addCheckbox(locationGroup, "Use default &workspace location", true);
 
     addLabel(locationGroup, "&Location:");
 
@@ -173,8 +172,8 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     projectNameTemplate = addCombo(formComposite, "Name &template:", false);
     projectNameTemplate.setToolTipText(
         "Optional Eclipse project name template such as [groupId]-[artifactId].");
-    projectNameTemplate.add("[artifactId]");
-    projectNameTemplate.add("[groupId]-[artifactId]");
+    projectNameTemplate.add("[artifactId]"); //$NON-NLS-1$
+    projectNameTemplate.add("[groupId]-[artifactId]"); //$NON-NLS-1$
     projectNameTemplate.setLayoutData(gridSpan(GridData.FILL_HORIZONTAL, 1));
 
     // Register all the listeners
