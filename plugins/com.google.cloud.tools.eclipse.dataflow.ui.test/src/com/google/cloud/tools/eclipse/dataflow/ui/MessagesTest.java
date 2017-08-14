@@ -44,5 +44,12 @@ public class MessagesTest {
     Assert.assertEquals("An Existing Local Directory where the Project will be Created",
         Messages.getString("LOCATION_TOOLTIP"));
   }
+  
+  @Test
+  public void testCouldntFetchBucket() {
+    Assert.assertEquals("Couldn't fetch bucket foo.",
+        Messages.getString("couldnt.fetch.bucket", "foo"));
+  }
+
 
 }
