@@ -145,9 +145,10 @@ public class ArtifactRetriever {
     try {
       NavigableSet<ArtifactVersion> versions = availableVersions.get(coordinates);
       for (ArtifactVersion version : versions.descendingSet()) {
-        if (version != null && Strings.isNullOrEmpty(version.getQualifier())
-            && range.containsVersion(version)) {
-          return version;
+        if (Strings.isNullOrEmpty(version.getQualifier())) {
+          if (range == null || range.containsVersion(version)) {
+            return version;
+          }
         }
       }
     } catch (ExecutionException ex) {
