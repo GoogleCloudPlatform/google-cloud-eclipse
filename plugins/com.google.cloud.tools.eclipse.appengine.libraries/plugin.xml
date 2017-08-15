@@ -291,7 +291,6 @@
         <mavenCoordinates
               artifactId="google-api-services-storage"
               groupId="com.google.apis"
-<<<<<<< HEAD
               version="v1-rev102-1.22.0" />
       </libraryFile>
     </library>
