@@ -123,7 +123,7 @@ public class ArtifactRetriever {
    * Returns the latest published release artifact version, or null if there is no such version.
    */
   public ArtifactVersion getLatestArtifactVersion(String groupId, String artifactId) {
-    return getLatestIncrementalVersion(idToKey(groupId, artifactId), null);
+    return getLatestReleaseVersion(idToKey(groupId, artifactId), null);
   }
 
   /**
@@ -132,7 +132,7 @@ public class ArtifactRetriever {
    */
   public ArtifactVersion getLatestArtifactVersion(
       String groupId, String artifactId, VersionRange range) {
-    return getLatestIncrementalVersion(idToKey(groupId, artifactId), range);
+    return getLatestReleaseVersion(idToKey(groupId, artifactId), range);
   }
 
   /**
@@ -141,50 +141,19 @@ public class ArtifactRetriever {
    * 
    * @param coordinates Maven coordinates in the form groupId:artifactId
    */
-  private ArtifactVersion getLatestIncrementalVersion(String coordinates, VersionRange range) {
+  private ArtifactVersion getLatestReleaseVersion(String coordinates, VersionRange range) {
     try {
       NavigableSet<ArtifactVersion> allVersions = availableVersions.get(coordinates);
-      ArtifactVersion latest = getLatestReleasedVersion(allVersions);
-      
-      if (range == null || range.containsVersion(latest)) {
-        return latest;
+      for (ArtifactVersion av : allVersions.descendingSet()) {
+        if (Strings.isNullOrEmpty(av.getQualifier()) && range.containsVersion(av)) {
+          return av;
+        }
       }
     } catch (ExecutionException ex) {
       logger.log(
           Level.WARNING,
-          "Could not retrieve latest version for artifact " + coordinates,
+          "Could not retrieve version for artifact " + coordinates,
           ex.getCause());
-    }
-
-    try {
-      NavigableSet<ArtifactVersion> allVersions = availableVersions.get(coordinates);
-      ArtifactVersion latest = getLatestInRange(range, allVersions);
-      return latest;
-    } catch (ExecutionException ex) {
-      logger.log(
-          Level.WARNING,
-          "Could not retrieve available versions for artifact " + coordinates,
-          ex.getCause());
-      return null;
-    }
-  }
-
-  private static ArtifactVersion getLatestReleasedVersion(
-      NavigableSet<ArtifactVersion> allVersions) {
-    for (ArtifactVersion version : allVersions.descendingSet()) {
-      if (Strings.isNullOrEmpty(version.getQualifier())) {
-        return version;
-      }
-    }
-    return null;
-  }
-  
-  private static ArtifactVersion getLatestInRange(
-      VersionRange versionRange, NavigableSet<ArtifactVersion> allVersions) {
-    for (ArtifactVersion version : allVersions.descendingSet()) {
-      if (versionRange.containsVersion(version)) {
-        return version;
-      }
     }
     return null;
   }
