@@ -19,7 +19,7 @@ package com.google.cloud.tools.eclipse.dataflow.core.project;
 import org.eclipse.core.runtime.IPath;
 
 /**
- * The result of validation a Dataflow Project, pre-creation.
+ * The result of validation of a Dataflow Project field, pre-creation.
  */
 public enum DataflowProjectValidationStatus {
   
