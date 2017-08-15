@@ -58,7 +58,7 @@ import java.util.Map;
  */
 public class NewDataflowProjectWizardLandingPage extends WizardPage  {
 
-  private DataflowDependencyManager dependencyManager;
+  private final DataflowDependencyManager dependencyManager;
   private final DataflowProjectCreator targetCreator;
 
   private Text groupIdInput;
