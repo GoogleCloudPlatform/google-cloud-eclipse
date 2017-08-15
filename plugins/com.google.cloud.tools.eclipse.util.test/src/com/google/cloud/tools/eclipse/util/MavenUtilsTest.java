@@ -43,5 +43,10 @@ public class MavenUtilsTest {
 
     Assert.assertFalse(MavenUtils.hasMavenNature(project));
   }
+  
+  @Test
+  public void testCreateRepository() throws CoreException {
+    MavenUtils.createRepository("foo", "http://www.example.com");
+  }
 
 }
