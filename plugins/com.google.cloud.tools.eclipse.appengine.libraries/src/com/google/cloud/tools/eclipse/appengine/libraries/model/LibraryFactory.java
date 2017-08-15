@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Logger;
+
+import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.InvalidRegistryObjectException;
 
@@ -141,7 +143,10 @@ class LibraryFactory {
     // Only look up latest version if version isn't specified in file.
     String version = mavenCoordinatesElement.getAttribute(ATTRIBUTE_NAME_VERSION);
     if (Strings.isNullOrEmpty(version) || "LATEST".equals(version)) {
-      version = retriever.getLatestArtifactVersion(groupId, artifactId).toString(); 
+      ArtifactVersion artifactVersion = retriever.getLatestArtifactVersion(groupId, artifactId);
+      if (artifactVersion != null) {
+        version = artifactVersion.toString();
+      }
     } 
     
     if (!Strings.isNullOrEmpty(version)) {
