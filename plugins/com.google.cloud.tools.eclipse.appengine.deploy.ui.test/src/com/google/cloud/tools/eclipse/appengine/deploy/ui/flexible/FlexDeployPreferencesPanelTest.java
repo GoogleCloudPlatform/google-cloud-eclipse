@@ -49,9 +49,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class FlexDeployPreferencesPanelTest {
 
-  private static final String APP_YAML_FIELD_TOOLTIP =
-      "app.yaml path, either absolute or relative to the project.";
-
   @Mock private IGoogleLoginService loginService;
   @Mock private ProjectRepository projectRepository;
   @Mock private Runnable layoutHandler;
@@ -135,7 +132,9 @@ public class FlexDeployPreferencesPanelTest {
     return (Text) CompositeUtil.findControl(panel, new Predicate<Control>() {
       @Override
       public boolean apply(Control control) {
-        return control instanceof Text && APP_YAML_FIELD_TOOLTIP.equals(control.getToolTipText());
+        return control instanceof Text && 
+            "app.yaml Path, Either Absolute or Relative to the Project.".equals(
+                control.getToolTipText());
       }
     });
   }
