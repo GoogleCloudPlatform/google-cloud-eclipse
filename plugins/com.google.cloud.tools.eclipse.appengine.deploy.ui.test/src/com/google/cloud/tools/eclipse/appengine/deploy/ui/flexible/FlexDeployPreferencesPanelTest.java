@@ -39,6 +39,7 @@ import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Text;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -129,13 +130,19 @@ public class FlexDeployPreferencesPanelTest {
   }
 
   private static Text findAppYamlField(Composite panel) {
-    return (Text) CompositeUtil.findControl(panel, new Predicate<Control>() {
+    Predicate<Control> predicate = new Predicate<Control>() {
       @Override
       public boolean apply(Control control) {
         return control instanceof Text && 
-            "app.yaml Path, Either Absolute or Relative to the Project.".equals(
+            "app.yaml Path, either Absolute or Relative to the Project".equals(
                 control.getToolTipText());
       }
-    });
+    };
+    
+    Control control = CompositeUtil.findControl(panel, predicate);
+    if (control == null) {
+      Assert.fail("Could not locate app.yaml field"); 
+    }
+    return (Text) control;
   }
 }
