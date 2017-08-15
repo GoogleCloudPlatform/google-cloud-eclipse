@@ -63,6 +63,7 @@ public enum PipelineRunner {
         ImmutableSetMultimap.builder();
     for (PipelineRunner runner : PipelineRunner.values()) {
       runnersByName.put(runner.getRunnerName(), runner);
+      runnersInVersion.put(MajorVersion.ALL, runner); // ALL is special
       for (MajorVersion supported : runner.supportedVersions) {
         runnersInVersion.put(supported, runner);
       }

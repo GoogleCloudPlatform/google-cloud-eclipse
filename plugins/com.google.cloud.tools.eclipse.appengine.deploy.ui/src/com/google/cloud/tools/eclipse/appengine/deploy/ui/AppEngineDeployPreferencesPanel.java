@@ -38,6 +38,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
+import com.google.common.net.UrlEscapers;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -66,6 +67,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
@@ -88,8 +91,12 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
 
   private static final String APPENGINE_VERSIONS_URL =
       "https://console.cloud.google.com/appengine/versions";
-  private static final String CREATE_GCP_PROJECT_WITH_GAE_URL =
-      "https://console.cloud.google.com/projectselector/appengine/create?lang=java";
+  private static final String APP_ENGINE_APPLICATION_CREATE_PATH =
+      "/projectselector/appengine/create?lang=java";
+  @VisibleForTesting
+  static final String CREATE_GCP_PROJECT_URL =
+      "https://console.cloud.google.com/projectcreate?previousPage="
+          + UrlEscapers.urlFormParameterEscaper().escape(APP_ENGINE_APPLICATION_CREATE_PATH);
 
   private static final Logger logger = Logger.getLogger(
       AppEngineDeployPreferencesPanel.class.getName());
@@ -333,7 +340,7 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     Composite linkComposite = new Composite(this, SWT.NONE);
     Link createNewProject = new Link(linkComposite, SWT.WRAP);
     createNewProject.setText(Messages.getString("projectselector.createproject",
-                                                CREATE_GCP_PROJECT_WITH_GAE_URL));
+                                                CREATE_GCP_PROJECT_URL));
     createNewProject.setToolTipText(Messages.getString("projectselector.createproject.tooltip"));
     FontUtil.convertFontToItalic(createNewProject);
     createNewProject.addSelectionListener(
@@ -353,6 +360,13 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
     Composite projectSelectorComposite = new Composite(this, SWT.NONE);
     GridLayoutFactory.fillDefaults().numColumns(2).spacing(0, 0).applyTo(projectSelectorComposite);
     GridDataFactory.fillDefaults().grab(true, false).applyTo(projectSelectorComposite);
+
+    final Text filterField = new Text(projectSelectorComposite,
+        SWT.BORDER | SWT.SEARCH | SWT.ICON_SEARCH | SWT.ICON_CANCEL);
+    filterField.setMessage(Messages.getString("projectselector.filter"));
+    GridDataFactory.fillDefaults().applyTo(filterField);
+
+    new Label(projectSelectorComposite, SWT.NONE); // spacer
 
     projectSelector = new ProjectSelector(projectSelectorComposite);
     GridDataFactory.fillDefaults().grab(true, false).hint(SWT.DEFAULT, 200)
@@ -375,6 +389,12 @@ public abstract class AppEngineDeployPreferencesPanel extends DeployPreferencesP
         new ProjectSelectorSelectionChangedListener(accountSelector,
                                                     projectRepository,
                                                     projectSelector));
+    filterField.addModifyListener(new ModifyListener() {
+      @Override
+      public void modifyText(ModifyEvent event) {
+        projectSelector.setFilter(filterField.getText());
+      }
+    });
   }
 
   private void createProjectVersionSection() {

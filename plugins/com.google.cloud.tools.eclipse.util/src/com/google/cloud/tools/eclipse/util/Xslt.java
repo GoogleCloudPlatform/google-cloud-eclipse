@@ -20,24 +20,23 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
 import java.net.URL;
-
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 
 public class Xslt {
 
   private Xslt() {}
-  
+
   private static final TransformerFactory factory = TransformerFactory.newInstance();
 
-  public static void transformInPlace(IFile file, URL xslt) 
+  public static void transformInPlace(IFile file, URL xslt)
       throws IOException, CoreException, TransformerException {
     try (InputStream in = file.getContents();
         InputStream stylesheetStream = xslt.openStream();
@@ -55,12 +54,22 @@ public class Xslt {
    */
   public static InputStream applyXslt(InputStream document, InputStream stylesheet)
       throws IOException, TransformerException {
+    return applyXslt(new StreamSource(document), stylesheet);
+  }
+
+  public static InputStream applyXslt(Reader document, InputStream stylesheet)
+      throws IOException, TransformerException {
+    return applyXslt(new StreamSource(document), stylesheet);
+  }
+
+  private static InputStream applyXslt(StreamSource document, InputStream stylesheet)
+      throws IOException, TransformerException {
     try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
       Transformer transformer = factory.newTransformer(new StreamSource(stylesheet));
-      transformer.transform(new StreamSource(document), new StreamResult(outputStream));
+      transformer.transform(document, new StreamResult(outputStream));
 
       return new ByteArrayInputStream(outputStream.toByteArray());
     }
   }
-  
+
 }

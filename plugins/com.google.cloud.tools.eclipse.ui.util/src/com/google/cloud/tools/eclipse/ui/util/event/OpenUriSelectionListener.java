@@ -105,7 +105,7 @@ public class OpenUriSelectionListener implements SelectionListener {
     Map<String, String> getParameters();
   }
 
-  public static class EmptyQueryParameterProvider implements QueryParameterProvider {
+  private static class EmptyQueryParameterProvider implements QueryParameterProvider {
     @Override
     public Map<String, String> getParameters() {
       return Collections.emptyMap();

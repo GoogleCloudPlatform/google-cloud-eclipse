@@ -27,7 +27,6 @@ import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
@@ -36,6 +35,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -43,15 +43,12 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.junit.JUnitCore;
-import org.eclipse.wst.common.componentcore.internal.ComponentResource;
-import org.eclipse.wst.common.componentcore.internal.StructureEdit;
-import org.eclipse.wst.common.componentcore.internal.WorkbenchComponent;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-abstract public class CreateAppEngineWtpProjectTest {
+public abstract class CreateAppEngineWtpProjectTest {
 
   @Rule public ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
 
@@ -59,9 +56,9 @@ abstract public class CreateAppEngineWtpProjectTest {
   protected final AppEngineProjectConfig config = new AppEngineProjectConfig();
   protected IProject project;
 
-  abstract protected CreateAppEngineWtpProject newCreateAppEngineWtpProject();
+  protected abstract CreateAppEngineWtpProject newCreateAppEngineWtpProject();
 
-  @SuppressWarnings("unused")  // Let subclasses throw arbitrary exceptions during "setUp()"
+  // Let subclasses throw arbitrary exceptions during "setUp()"
   @Before
   public void setUp() throws Exception {
     IWorkspace workspace = ResourcesPlugin.getWorkspace();
@@ -97,6 +94,7 @@ abstract public class CreateAppEngineWtpProjectTest {
   public void testUnitTestCreated() throws InvocationTargetException, CoreException {
     CreateAppEngineWtpProject creator = newCreateAppEngineWtpProject();
     creator.execute(monitor);
+    ProjectUtils.waitForProjects(project);
 
     assertJunitAndHamcrestAreOnClasspath();
   }
@@ -143,30 +141,16 @@ abstract public class CreateAppEngineWtpProjectTest {
   }
 
   @Test
-  public void testNoTestClassesInDeploymentAssembly()
-      throws InvocationTargetException, CoreException {
+  public void testNoTestClassesInDeploymentAssembly() throws InvocationTargetException,
+      CoreException, OperationCanceledException, InterruptedException {
     CreateAppEngineWtpProject creator = newCreateAppEngineWtpProject();
     creator.execute(monitor);
+    creator.deployAssemblyEntryRemoveJob.join(180000 /* 3 minutes */, monitor);
 
-    assertNoTestClassesInDeploymentAssembly();
-  }
-
-  private void assertNoTestClassesInDeploymentAssembly() throws CoreException {
-    StructureEdit core = StructureEdit.getStructureEditForRead(project);
-    WorkbenchComponent component = core.getComponent();
-    assertNotNull(component);
-
-    boolean seenMainSourcePath = false;
-    List<ComponentResource> resources = component.getResources();
-    for (ComponentResource resource : resources) {
-      assertFalse(containsSegment(resource.getSourcePath(), "test"));
-
-      if (resource.getSourcePath().equals(new Path("/src/main/java"))
-          && resource.getRuntimePath().equals(new Path("/WEB-INF/classes"))) {
-        seenMainSourcePath = true;
-      }
-    }
-    assertTrue(seenMainSourcePath);
+    assertFalse(DeployAssemblyEntryRemoveJobTest.hasSourcePathInDeployAssembly(project,
+        new Path("src/test/java")));
+    assertTrue(DeployAssemblyEntryRemoveJobTest.hasSourcePathInDeployAssembly(project,
+        new Path("src/main/java")));
   }
 
   @Test
@@ -208,7 +192,7 @@ abstract public class CreateAppEngineWtpProjectTest {
 
   @Test
   public void testNoJUnit4ClasspathIfUsingMaven() throws InvocationTargetException, CoreException {
-    config.setUseMaven("my.group.id", "my-artifact-id", "12.34.56");
+    config.setUseMaven("my.group.id", "my-other-artifact-id", "12.34.56");
 
     CreateAppEngineWtpProject creator = newCreateAppEngineWtpProject();
     creator.execute(monitor);

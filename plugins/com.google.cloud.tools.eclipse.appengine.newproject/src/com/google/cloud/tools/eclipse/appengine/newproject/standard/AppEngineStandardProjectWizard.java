@@ -17,12 +17,11 @@
 package com.google.cloud.tools.eclipse.appengine.newproject.standard;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.ILibraryClasspathContainerResolverService;
-import com.google.cloud.tools.eclipse.appengine.libraries.ILibraryClasspathContainerResolverService.AppEngineRuntime;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectConfig;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectWizard;
-import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineWizardPage;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsPingManager;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
@@ -34,7 +33,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
-public class AppEngineStandardProjectWizard extends AppEngineProjectWizard {
+public class AppEngineStandardProjectWizard
+    extends AppEngineProjectWizard {
 
   @Inject
   private ILibraryClasspathContainerResolverService resolverService;
@@ -44,7 +44,7 @@ public class AppEngineStandardProjectWizard extends AppEngineProjectWizard {
   }
 
   @Override
-  public AppEngineWizardPage createWizardPage() {
+  public AppEngineStandardWizardPage createWizardPage() {
     AnalyticsPingManager.getInstance().sendPing(
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD,
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,

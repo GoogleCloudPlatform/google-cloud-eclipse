@@ -24,6 +24,11 @@ import java.util.Map;
  */
 public interface DataflowPreferences {
   /**
+   * The PipelineOptions property representing the account email to use.
+   */
+  String ACCOUNT_EMAIL_PROPERTY = "accountEmail";
+
+  /**
    * The PipelineOptions property representing the GCP project to run in.
    */
   String PROJECT_PROPERTY = "project";
@@ -43,6 +48,11 @@ public interface DataflowPreferences {
    */
   ImmutableSet<String> SUPPORTED_DEFAULT_PROPERTIES =
       ImmutableSet.of(PROJECT_PROPERTY, STAGING_LOCATION_PROPERTY, GCP_TEMP_LOCATION_PROPERTY);
+
+  /**
+   * Gets the default account email.
+   */
+  String getDefaultAccountEmail();
 
   /**
    * Gets the default project.

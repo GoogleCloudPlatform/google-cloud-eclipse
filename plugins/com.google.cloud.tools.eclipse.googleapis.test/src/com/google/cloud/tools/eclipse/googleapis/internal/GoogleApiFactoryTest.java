@@ -33,11 +33,9 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.services.appengine.v1.Appengine.Apps;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects;
 import com.google.api.services.storage.Storage;
-import com.google.cloud.tools.eclipse.googleapis.GoogleApiException;
 import com.google.cloud.tools.eclipse.util.CloudToolsInfo;
 import com.google.common.cache.LoadingCache;
 import java.io.IOException;
-import java.util.concurrent.ExecutionException;
 import org.eclipse.core.net.proxy.IProxyChangeEvent;
 import org.eclipse.core.net.proxy.IProxyChangeListener;
 import org.eclipse.core.net.proxy.IProxyService;
@@ -55,7 +53,7 @@ public class GoogleApiFactoryTest {
   @Mock private JsonFactory jsonFactory;
   @Mock private IProxyService proxyService;
   @Mock private Credential credential;
-  @Mock LoadingCache<GoogleApiUrl, HttpTransport> transportCache;
+  @Mock private LoadingCache<GoogleApiUrl, HttpTransport> transportCache;
   @Mock private ProxyFactory proxyFactory;
   @Captor private ArgumentCaptor<IProxyChangeListener> proxyChangeListenerCaptor =
       ArgumentCaptor.forClass(IProxyChangeListener.class);
@@ -63,46 +61,31 @@ public class GoogleApiFactoryTest {
   private GoogleApiFactory googleApiFactory;
 
   @Before
-  public void setUp() throws ExecutionException {
+  public void setUp() {
     googleApiFactory = new GoogleApiFactory(proxyFactory);
-    when(transportCache.get(any(GoogleApiUrl.class))).thenReturn(mock(HttpTransport.class));
+    when(transportCache.getUnchecked(any(GoogleApiUrl.class)))
+        .thenReturn(mock(HttpTransport.class));
     googleApiFactory.setTransportCache(transportCache);
   }
 
   @Test
-  public void testNewStorageApi_Url() throws GoogleApiException {
+  public void testNewStorageApi_Url() {
     Storage storage = googleApiFactory.newStorageApi(mock(Credential.class));
     assertEquals("https://www.googleapis.com/", storage.getRootUrl());
   }
-  
+
   @Test
-  public void testNewAppsApi_userAgentIsSet() throws IOException, GoogleApiException {
+  public void testNewAppsApi_userAgentIsSet() throws IOException {
     Apps api = googleApiFactory.newAppsApi(mock(Credential.class));
     assertThat(api.get("").getRequestHeaders().getUserAgent(),
                containsString(CloudToolsInfo.USER_AGENT));
   }
 
-  @Test(expected = GoogleApiException.class)
-  public void testNewAppsApi_transportCacheErrorTranslatedToGoogleApiException()
-      throws ExecutionException, GoogleApiException {
-    when(transportCache.get(any(GoogleApiUrl.class)))
-        .thenThrow(new ExecutionException(new Exception("test")));
-    googleApiFactory.newAppsApi(mock(Credential.class));
-  }
-
   @Test
-  public void testNewProjectsApi_userAgentIsSet() throws IOException, GoogleApiException {
+  public void testNewProjectsApi_userAgentIsSet() throws IOException {
     Projects api = googleApiFactory.newProjectsApi(mock(Credential.class));
     assertThat(api.get("").getRequestHeaders().getUserAgent(),
                containsString(CloudToolsInfo.USER_AGENT));
-  }
-
-  @Test(expected = GoogleApiException.class)
-  public void testNewProjectsApi_transportCacheErrorTranslatedToGoogleApiException()
-      throws ExecutionException, GoogleApiException {
-    when(transportCache.get(any(GoogleApiUrl.class)))
-        .thenThrow(new ExecutionException(new Exception("test")));
-    googleApiFactory.newProjectsApi(mock(Credential.class));
   }
 
   @Test

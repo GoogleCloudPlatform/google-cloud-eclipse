@@ -22,10 +22,12 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotProjectActions;
+import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import java.io.ByteArrayInputStream;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -45,10 +47,12 @@ import org.junit.Test;
 
 public class RunAppEngineShortcutTest {
 
+  public ThreadDumpingWatchdog watchdog = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
+
   @Rule public TestProjectCreator emptyProjectCreator = new TestProjectCreator();
   @Rule public TestProjectCreator appEngineProjectCreator = new TestProjectCreator()
       .withFacetVersions(
-          JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineStandardFacet.FACET_VERSION);
+          JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7);
 
   @Test
   public void testRunAppEngine_enabledForAppEngineProject() {

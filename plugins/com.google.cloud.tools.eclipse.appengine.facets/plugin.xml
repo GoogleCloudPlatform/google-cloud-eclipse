@@ -7,39 +7,60 @@
     <project-facet id="com.google.cloud.tools.eclipse.appengine.facets.standard">
        <label>%standardFacetName</label>
        <description>%standardFacetDescription</description>
+       <version-comparator
+             class="com.google.cloud.tools.eclipse.appengine.facets.StringVersionComparator">
+       </version-comparator>
+       <default-version
+             version="JRE7">
+       </default-version>
     </project-facet>
-    <project-facet-version facet="com.google.cloud.tools.eclipse.appengine.facets.standard" version="1">
+    <project-facet-version facet="com.google.cloud.tools.eclipse.appengine.facets.standard" version="JRE7">
        <constraint>
           <and>
              <requires
-                   group="com.google.cloud.tools.eclipse.appengine.facets.standard.constraints.servlet">
+                   facet="java"
+                   version="1.7">
              </requires>
              <requires
-                   group="com.google.cloud.tools.eclipse.appengine.facets.standard.constraints.jre">
+                   facet="jst.web"
+                   version="2.5">
              </requires>
           </and>
         </constraint>
     </project-facet-version>
   </extension>
-   <extension
-         point="org.eclipse.wst.common.project.facet.core.groups">
-      <group
-            id="com.google.cloud.tools.eclipse.appengine.facets.standard.constraints.servlet">
-         <label>supported Dynamic Web Module APIs</label>
-         <include
-               facet="jst.web"
-               versions="2.5">
-         </include>
-      </group>
-      <group
-            id="com.google.cloud.tools.eclipse.appengine.facets.standard.constraints.jre">
-         <label>supported Java Runtimes</label>
-         <include
-               facet="java"
-               versions="1.7">
-         </include>
-      </group>
-   </extension>
+
+  <extension
+        point="org.eclipse.wst.common.project.facet.core.presets">
+     <static-preset
+           id="com.google.cloud.tools.eclipse.appengine.standard.jre7.preset">
+        <label>%appengine.standard.jre7.preset</label>
+        <facet
+              id="com.google.cloud.tools.eclipse.appengine.facets.standard"
+              version="JRE7">
+        </facet>
+        <facet
+              id="java"
+              version="1.7">
+        </facet>
+        <facet
+              id="jst.web"
+              version="2.5">
+        </facet>
+     </static-preset>
+  </extension>
+
+  <extension
+        point="org.eclipse.wst.common.project.facet.core.aliases">
+     <!--
+	   CT4E had been deployed with a single version of the App Engine Standard facet, 
+	   which was subsequently replaced with two facet versions with different IDs. 
+     -->
+     <facet-version-alias
+           facet="com.google.cloud.tools.eclipse.appengine.facets.standard"
+           version="JRE7"
+           alias="1" />
+  </extension>
 
   <extension point="org.eclipse.wst.common.project.facet.core.facets">
     <action
@@ -53,6 +74,12 @@
       facet="com.google.cloud.tools.eclipse.appengine.facets.standard"
       type="UNINSTALL">
       <delegate class="com.google.cloud.tools.eclipse.appengine.facets.StandardFacetUninstallDelegate"/>
+    </action>
+    <action
+      id="com.google.cloud.tools.eclipse.appengine.facets.standard.version.action"
+      facet="com.google.cloud.tools.eclipse.appengine.facets.standard"
+      type="VERSION_CHANGE">
+      <delegate class="com.google.cloud.tools.eclipse.appengine.facets.StandardFacetVersionChangeDelegate"/>
     </action>
   </extension>
 
@@ -113,14 +140,42 @@
   <!-- begin App Engine flex facet -->
   <extension point="org.eclipse.wst.common.project.facet.core.facets">
     <project-facet id="com.google.cloud.tools.eclipse.appengine.facets.flex">
-       <label>%flexFacetName</label>
-       <description>%flexFacetDescription</description>
+      <label>%flexFacetName</label>
+      <description>%flexFacetDescription</description>
     </project-facet>
     <project-facet-version facet="com.google.cloud.tools.eclipse.appengine.facets.flex" version="1">
-       <constraint>
+      <constraint>
+        <and>
           <conflicts facet="com.google.cloud.tools.eclipse.appengine.facets.standard"/>
-        </constraint>
+          <requires facet="jst.web"
+                    version="2.5,3.0,3.1">
+          </requires>
+          <requires facet="java"
+                    version="1.7,1.8">
+          </requires>
+        </and>
+      </constraint>
     </project-facet-version>
+  </extension>
+
+  <extension
+        point="org.eclipse.wst.common.project.facet.core.presets">
+     <static-preset
+           id="com.google.cloud.tools.eclipse.appengine.flexible.war.preset">
+        <label>%appengine.flexible.war.preset</label>
+        <facet
+              id="com.google.cloud.tools.eclipse.appengine.facets.flex"
+              version="1">
+        </facet>
+        <facet
+              id="java"
+              version="1.8">
+        </facet>
+        <facet
+              id="jst.web"
+              version="3.1">
+        </facet>
+     </static-preset>
   </extension>
 
   <extension point="org.eclipse.wst.common.project.facet.core.facets">
@@ -144,5 +199,11 @@
         name="YAML"
         file-extensions="yaml,yml"
         base-type="org.eclipse.core.runtime.text" />
+  </extension>
+  <extension
+        point="org.eclipse.wst.common.project.facet.core.detectors">
+     <detector
+           class="com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardJre7ProjectFacetDetector">
+     </detector>
   </extension>
 </plugin>

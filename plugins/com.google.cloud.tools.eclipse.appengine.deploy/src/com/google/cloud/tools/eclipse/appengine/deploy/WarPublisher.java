@@ -17,20 +17,34 @@
 package com.google.cloud.tools.eclipse.appengine.deploy;
 
 import com.google.common.base.Preconditions;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.jst.j2ee.internal.deployables.J2EEFlexProjDeployable;
-import org.eclipse.wst.common.componentcore.ComponentCore;
+import org.eclipse.jst.server.core.IWebFragmentModule;
+import org.eclipse.wst.server.core.IModule;
+import org.eclipse.wst.server.core.ServerUtil;
+import org.eclipse.wst.server.core.model.IModuleResource;
+import org.eclipse.wst.server.core.model.ModuleDelegate;
+import org.eclipse.wst.server.core.util.ModuleFile;
 import org.eclipse.wst.server.core.util.PublishHelper;
 
 /**
  * Writes a WAR file of a project, or the exploded contents of it to a destination directory.
  */
 public class WarPublisher {
+
+  public static final Logger logger = Logger.getLogger(WarPublisher.class.getName());
 
   /**
    * It does a smart export, i.e. considers the resources to be copied and if the destination
@@ -60,13 +74,57 @@ public class WarPublisher {
     progress.setTaskName(Messages.getString("task.name.publish.war"));
 
     PublishHelper publishHelper = new PublishHelper(null);
-    J2EEFlexProjDeployable deployable =
-        new J2EEFlexProjDeployable(project, ComponentCore.createComponent(project));
+    IModuleResource[] resources = flattenResources(project, progress);
 
     if (exploded) {
-      publishHelper.publishSmart(deployable.members(), destination, progress.newChild(100));
+      publishHelper.publishFull(resources, destination, progress.newChild(100));
     } else {
-      publishHelper.publishZip(deployable.members(), destination, progress.newChild(100));
+      publishHelper.publishZip(resources, destination, progress.newChild(100));
     }
+  }
+
+  private static IModuleResource[] flattenResources(
+      IProject project, IProgressMonitor monitor) throws CoreException {
+    List<IModuleResource> resources = new ArrayList<>();
+
+    IModule[] modules = ServerUtil.getModules(project);
+    for (IModule module : modules) {
+      ModuleDelegate delegate = (ModuleDelegate) module.loadAdapter(ModuleDelegate.class, monitor);
+      if (delegate == null) {
+        continue;
+      }
+
+      // module references can either be as members or child modules (http://eclip.se/467759)
+      Collections.addAll(resources, delegate.members());
+
+      // now handle web fragment child modules, if they exist
+      for (IModule child : delegate.getChildModules()) {
+        ModuleDelegate childDelegate = (ModuleDelegate)
+            child.loadAdapter(ModuleDelegate.class, monitor);
+        IWebFragmentModule webFragmentModule = (IWebFragmentModule)
+            child.loadAdapter(IWebFragmentModule.class, monitor);
+        if (childDelegate == null || webFragmentModule == null || !webFragmentModule.isBinary()) {
+          logger.log(Level.WARNING, "child modules other than binary web-fragments are not "
+              + "supported: module=" + module + ", moduleType=" + module.getModuleType());
+          continue;
+        }
+
+        // per "isBinary()" Javadoc, "members()" should have a single resource.
+        IModuleResource zipResource = childDelegate.members()[0];
+        // destination (not an actual zip), e.g., "WEB-INF/lib/spring-web-4.3.6.RELEASE.jar"
+        IPath zip = new Path(delegate.getPath(child));
+        IPath zipParent = zip.removeLastSegments(1);
+
+        File javaIoFile = zipResource.getAdapter(File.class);
+        IFile iFile = zipResource.getAdapter(IFile.class);
+
+        if (javaIoFile != null) {
+          resources.add(new ModuleFile(javaIoFile, zipResource.getName(), zipParent));
+        } else if (iFile != null) {
+          resources.add(new ModuleFile(iFile, zipResource.getName(), zipParent));
+        }
+      }
+    }
+    return resources.toArray(new IModuleResource[0]);
   }
 }

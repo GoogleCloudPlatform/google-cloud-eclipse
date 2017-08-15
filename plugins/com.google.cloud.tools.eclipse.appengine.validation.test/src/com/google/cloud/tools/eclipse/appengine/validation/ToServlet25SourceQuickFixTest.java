@@ -46,7 +46,7 @@ public class ToServlet25SourceQuickFixTest {
   @Rule
   public TestProjectCreator appEngineStandardProject =
       new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25,
-          AppEngineStandardFacet.FACET_VERSION);
+          AppEngineStandardFacet.JRE7);
 
   @Test
   public void testConvertServlet() throws CoreException {

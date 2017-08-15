@@ -27,6 +27,7 @@ import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 
 import com.google.common.collect.Iterables;
+import java.util.Arrays;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.Restriction;
@@ -35,7 +36,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-import java.util.Arrays;
 
 /**
  * Tests for {@link MajorVersion}.
@@ -62,7 +62,7 @@ public class MajorVersionTest {
   }
 
   @Test
-  public void testTruncatedVersionAtBeginningInternallyBackwardsIncompatible() throws Exception {
+  public void testTruncatedVersionAtBeginningInternallyBackwardsIncompatible() {
     assumeFalse(majorVersion.hasStableApi());
     assertEquals(
         VersionRange.createFromVersion(majorVersion.getInitialVersion().toString()),
@@ -123,7 +123,7 @@ public class MajorVersionTest {
   }
 
   @Test
-  public void testVersionRangeFromSpec() throws Exception {
+  public void testVersionRangeFromSpec() {
     VersionRange versionRange = majorVersion.getVersionRange();
     Restriction restriction = Iterables.getOnlyElement(versionRange.getRestrictions());
     assertEquals(majorVersion.getVersionRange(), majorVersion.getVersionRange());

@@ -16,15 +16,21 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertThat;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.test.util.ArrayAssertions;
+import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
+import com.google.common.base.Function;
+import java.util.concurrent.TimeUnit;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -51,8 +57,11 @@ public class XsltSourceQuickFixTest {
       + "</appengine-web-app>";
 
   @Rule
+  public ThreadDumpingWatchdog timer = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
+
+  @Rule
   public TestProjectCreator appEngineStandardProject = new TestProjectCreator().withFacetVersions(
-      JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineStandardFacet.FACET_VERSION);
+      JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25, AppEngineStandardFacet.JRE7);
 
   @Test
   public void testApply() throws CoreException {
@@ -64,9 +73,12 @@ public class XsltSourceQuickFixTest {
     IWorkbench workbench = PlatformUI.getWorkbench();
     IEditorPart editorPart = WorkbenchUtil.openInEditor(workbench, file);
     ITextViewer viewer = ValidationTestUtils.getViewer(file);
-    String preContents = viewer.getDocument().get();
+    while (workbench.getDisplay().readAndDispatch()) {
+      // spin the event loop
+    }
 
-    assertTrue(preContents.contains("application"));
+    String preContents = viewer.getDocument().get();
+    assertThat(preContents, containsString("application"));
 
     ProjectUtils.waitForProjects(project);
     assertEquals(1, file.findMarkers(BLACKLIST_MARKER, true, IResource.DEPTH_ZERO).length);
@@ -77,14 +89,21 @@ public class XsltSourceQuickFixTest {
 
     IDocument document = viewer.getDocument();
     String contents = document.get();
-    assertFalse(contents.contains("application"));
-    assertFalse(contents.contains("?><appengine"));
+    assertThat(contents, not(containsString("application")));
+    assertThat(contents, not(containsString("?><appengine")));
 
     // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1527
     editorPart.doSave(new NullProgressMonitor());
 
     ProjectUtils.waitForProjects(project);
-    assertEquals(0, file.findMarkers(BLACKLIST_MARKER, true, IResource.DEPTH_ZERO).length);
+
+    IMarker[] markers = file.findMarkers(BLACKLIST_MARKER, true, IResource.DEPTH_ZERO);
+    ArrayAssertions.assertIsEmpty(markers, new Function<IMarker, String>() {
+      @Override
+      public String apply(IMarker marker) {
+        return ProjectUtils.formatProblem(marker);
+      }
+    });
   }
 
 }

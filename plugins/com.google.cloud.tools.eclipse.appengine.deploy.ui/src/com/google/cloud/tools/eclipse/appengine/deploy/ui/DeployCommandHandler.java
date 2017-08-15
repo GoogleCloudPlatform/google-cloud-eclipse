@@ -17,15 +17,12 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.ui;
 
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.cloud.tools.appengine.api.deploy.DefaultDeployConfiguration;
 import com.google.cloud.tools.eclipse.appengine.deploy.CleanupOldDeploysJob;
 import com.google.cloud.tools.eclipse.appengine.deploy.DeployJob;
 import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferences;
-import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferencesConverter;
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
-import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListener;
 import com.google.cloud.tools.eclipse.ui.util.MessageConsoleUtilities;
 import com.google.cloud.tools.eclipse.ui.util.ProjectFromSelectionHelper;
 import com.google.cloud.tools.eclipse.ui.util.ServiceUtils;
@@ -52,6 +49,8 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.debug.ui.IDebugUIConstants;
+import org.eclipse.debug.ui.console.ConsoleColorProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
@@ -62,6 +61,7 @@ import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
+import org.osgi.framework.FrameworkUtil;
 
 /**
  * Command handler to deploy a web application project to App Engine.
@@ -74,7 +74,7 @@ public abstract class DeployCommandHandler extends AbstractHandler {
   @Override
   public Object execute(ExecutionEvent event) throws ExecutionException {
     try {
-      IProject project = ProjectFromSelectionHelper.getProject(event);
+      IProject project = ProjectFromSelectionHelper.getFirstProject(event);
       if (project == null) {
         throw new NullPointerException("Deploy menu enabled for non-project resources");
       }
@@ -129,29 +129,28 @@ public abstract class DeployCommandHandler extends AbstractHandler {
     return severity != IMarker.SEVERITY_ERROR;
   }
 
-  private void launchDeployJob(IProject project, Credential credential)
-                                                            throws IOException, ExecutionException {
+  private void launchDeployJob(IProject project, Credential credential) throws IOException {
     AnalyticsPingManager.getInstance().sendPing(
         AnalyticsEvents.APP_ENGINE_DEPLOY, AnalyticsEvents.APP_ENGINE_DEPLOY_STANDARD, null);
 
+    IPath workDirectory = createWorkDirectory();
     DeployPreferences deployPreferences = new DeployPreferences(project);
+
     DeployConsole messageConsole =
         MessageConsoleUtilities.createConsole(getConsoleName(deployPreferences.getProjectId()),
                                               new DeployConsole.Factory());
     IConsoleManager consoleManager = ConsolePlugin.getDefault().getConsoleManager();
     consoleManager.showConsoleView(messageConsole);
-
-    IPath workDirectory = createWorkDirectory();
+    ConsoleColorProvider colorProvider = new ConsoleColorProvider();
     MessageConsoleStream outputStream = messageConsole.newMessageStream();
-    DefaultDeployConfiguration deployConfiguration = toDeployConfiguration(deployPreferences);
-    boolean includeOptionalConfigurationFiles =
-        deployPreferences.isIncludeOptionalConfigurationFiles();
+    MessageConsoleStream errorStream = messageConsole.newMessageStream();
+    outputStream.setColor(colorProvider.getColor(IDebugUIConstants.ID_STANDARD_OUTPUT_STREAM));
+    errorStream.setColor(colorProvider.getColor(IDebugUIConstants.ID_STANDARD_ERROR_STREAM));
+
     StagingDelegate stagingDelegate = getStagingDelegate(project);
 
-    DeployJob deploy = new DeployJob(project, credential, workDirectory,
-        new MessageConsoleWriterOutputLineListener(outputStream),
-        new MessageConsoleWriterOutputLineListener(outputStream),
-        deployConfiguration, includeOptionalConfigurationFiles, stagingDelegate);
+    DeployJob deploy = new DeployJob(project, credential, workDirectory, outputStream, errorStream,
+        stagingDelegate);
     messageConsole.setJob(deploy);
     deploy.addJobChangeListener(new JobChangeAdapter() {
 
@@ -181,14 +180,6 @@ public abstract class DeployCommandHandler extends AbstractHandler {
                                 nowString);
   }
 
-  private static DefaultDeployConfiguration toDeployConfiguration(
-      DeployPreferences deployPreferences) throws ExecutionException {
-    if (deployPreferences.getProjectId() == null || deployPreferences.getProjectId().isEmpty()) {
-      throw new ExecutionException(Messages.getString("error.projectId.missing"));
-    }
-    return DeployPreferencesConverter.toDeployConfiguration(deployPreferences);
-  }
-
   private static IPath createWorkDirectory() throws IOException {
     String now = Long.toString(System.currentTimeMillis());
     IPath workDirectory = getTempDir().append(now);
@@ -201,8 +192,8 @@ public abstract class DeployCommandHandler extends AbstractHandler {
   }
 
   private static IPath getTempDir() {
-    return Platform
-        .getStateLocation(Platform.getBundle("com.google.cloud.tools.eclipse.appengine.deploy"))
+    // DeployJob.class: create in the non-UI bundle.
+    return Platform.getStateLocation(FrameworkUtil.getBundle(DeployJob.class))
         .append("tmp");
   }
 }

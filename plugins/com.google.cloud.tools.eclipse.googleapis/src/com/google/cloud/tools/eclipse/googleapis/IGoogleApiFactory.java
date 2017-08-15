@@ -32,16 +32,16 @@ public interface IGoogleApiFactory {
   /**
    * @return a Google Cloud Storage API client
    */
-  Storage newStorageApi(Credential credential) throws GoogleApiException;  
-  
+  Storage newStorageApi(Credential credential);
+
   /**
    * @return an Appengine Apps API client
    */
-  Apps newAppsApi(Credential credential) throws GoogleApiException;
+  Apps newAppsApi(Credential credential);
 
   /**
    * @return a CloudResourceManager/Projects API client
    */
-  Projects newProjectsApi(Credential credential) throws GoogleApiException;
+  Projects newProjectsApi(Credential credential);
 
 }

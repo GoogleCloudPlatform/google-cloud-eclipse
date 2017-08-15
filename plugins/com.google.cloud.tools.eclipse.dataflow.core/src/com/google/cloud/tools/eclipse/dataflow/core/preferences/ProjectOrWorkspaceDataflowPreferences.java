@@ -17,13 +17,11 @@
 package com.google.cloud.tools.eclipse.dataflow.core.preferences;
 
 import com.google.common.collect.Lists;
-
-import org.eclipse.core.resources.IProject;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.eclipse.core.resources.IProject;
 
 /**
  * A {@link DataflowPreferences} hierarchy. {@code ChainedDataflowPreferences} returns the earliest
@@ -51,6 +49,17 @@ public class ProjectOrWorkspaceDataflowPreferences implements DataflowPreference
 
   private ProjectOrWorkspaceDataflowPreferences(DataflowPreferences... preferences) {
     preferenceChain = Arrays.asList(preferences);
+  }
+
+  @Override
+  public String getDefaultAccountEmail() {
+    for (DataflowPreferences subPref : preferenceChain) {
+      String defaultAccountEmail = subPref.getDefaultAccountEmail();
+      if (defaultAccountEmail != null) {
+        return defaultAccountEmail;
+      }
+    }
+    return null;
   }
 
   @Override

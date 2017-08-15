@@ -7,6 +7,7 @@ Bundle-SymbolicName: com.google.cloud.tools.eclipse.login.test
 Bundle-Vendor: Google Inc.
 Bundle-Version: 0.1.0.qualifier
 Fragment-Host: com.google.cloud.tools.eclipse.login
+Require-Bundle: com.google.cloud.tools.eclipse.test.dependencies
 Import-Package: com.google.api.client.http.javanet;version="[1.22.0,1.23.0)",
  com.google.api.client.json.jackson;version="[1.22.0,1.23.0)",
  com.google.cloud.tools.eclipse.test.util,
@@ -14,11 +15,4 @@ Import-Package: com.google.api.client.http.javanet;version="[1.22.0,1.23.0)",
  com.google.cloud.tools.eclipse.test.util.ui,
  org.eclipse.swt.graphics,
  org.eclipse.swt.widgets,
- org.eclipse.swtbot.swt.finder.widgets,
- org.hamcrest;version="1.1.0",
- org.junit;version="4.12.0",
- org.junit.rules;version="4.12.0",
- org.junit.runner;version="4.12.0",
- org.mockito;provider=google;version="1.10.19",
- org.mockito.runners;provider=google;version="1.10.19",
- org.mockito.stubbing;provider=google;version="1.10.19"
+ org.eclipse.swtbot.swt.finder.widgets

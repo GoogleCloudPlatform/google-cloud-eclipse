@@ -22,13 +22,14 @@ import com.google.cloud.tools.appengine.api.devserver.DefaultRunConfiguration;
 import com.google.cloud.tools.appengine.api.devserver.DefaultStopConfiguration;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdk;
 import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineDevServer1;
+import com.google.cloud.tools.appengine.cloudsdk.CloudSdkAppEngineDevServer2;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessExitListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessOutputLineListener;
 import com.google.cloud.tools.appengine.cloudsdk.process.ProcessStartListener;
 import com.google.cloud.tools.appengine.cloudsdk.serialization.CloudSdkVersion;
 import com.google.cloud.tools.eclipse.appengine.localserver.Activator;
 import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
-import com.google.cloud.tools.eclipse.sdk.ui.MessageConsoleWriterOutputLineListener;
+import com.google.cloud.tools.eclipse.sdk.MessageConsoleWriterOutputLineListener;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -298,10 +299,11 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
   /**
    * Starts the development server.
    *
+   * @param mode the launch mode (see ILaunchManager.*_MODE constants)
    * @param console the stream (Eclipse console) to send development server process output to
    */
-  void startDevServer(DefaultRunConfiguration devServerRunConfiguration,
-      Path javaHomePath, MessageConsoleStream console)
+  void startDevServer(String mode, DefaultRunConfiguration devServerRunConfiguration,
+      Path javaHomePath, MessageConsoleStream outputStream, MessageConsoleStream errorStream)
       throws CoreException {
     
     PortChecker portInUse = new PortChecker() {
@@ -333,9 +335,10 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
         ifNull(devServerRunConfiguration.getApiPort(), DEFAULT_API_PORT), portInUse);
 
     setServerState(IServer.STATE_STARTING);
+    setMode(mode);
 
     // Create dev app server instance
-    initializeDevServer(console, javaHomePath);
+    initializeDevServer(outputStream, errorStream, javaHomePath);
 
     // Run server
     try {
@@ -350,22 +353,26 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
     return value != null ? value : defaultValue;
   }
 
-  private void initializeDevServer(MessageConsoleStream console, Path javaHomePath) {
-    MessageConsoleWriterOutputLineListener outputListener =
-        new MessageConsoleWriterOutputLineListener(console);
+  private void initializeDevServer(MessageConsoleStream stdout, MessageConsoleStream stderr,
+      Path javaHomePath) {
+    MessageConsoleWriterOutputLineListener stdoutListener =
+        new MessageConsoleWriterOutputLineListener(stdout);
+    MessageConsoleWriterOutputLineListener stderrListener =
+        new MessageConsoleWriterOutputLineListener(stderr);
 
     // dev_appserver output goes to stderr
     cloudSdk = new CloudSdk.Builder()
         .javaHome(javaHomePath)
-        .addStdOutLineListener(outputListener)
-        .addStdErrLineListener(outputListener)
+        .addStdOutLineListener(stdoutListener).addStdErrLineListener(stderrListener)
         .addStdErrLineListener(serverOutputListener)
         .startListener(localAppEngineStartListener)
         .exitListener(localAppEngineExitListener)
         .async(true)
         .build();
 
-    devServer = new CloudSdkAppEngineDevServer1(cloudSdk);
+    devServer = LocalAppEngineServerLaunchConfigurationDelegate.DEV_APPSERVER2
+        ? new CloudSdkAppEngineDevServer2(cloudSdk)
+        : new CloudSdkAppEngineDevServer1(cloudSdk);
     moduleToUrlMap.clear();
   }
   

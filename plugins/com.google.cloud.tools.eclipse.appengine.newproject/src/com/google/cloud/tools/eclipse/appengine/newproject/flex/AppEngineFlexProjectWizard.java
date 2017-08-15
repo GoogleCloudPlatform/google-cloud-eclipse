@@ -19,7 +19,6 @@ package com.google.cloud.tools.eclipse.appengine.newproject.flex;
 import com.google.cloud.tools.eclipse.appengine.libraries.repository.ILibraryRepositoryService;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectConfig;
 import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineProjectWizard;
-import com.google.cloud.tools.eclipse.appengine.newproject.AppEngineWizardPage;
 import com.google.cloud.tools.eclipse.appengine.newproject.CreateAppEngineWtpProject;
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
 import com.google.cloud.tools.eclipse.usagetracker.AnalyticsEvents;
@@ -38,7 +37,7 @@ public class AppEngineFlexProjectWizard extends AppEngineProjectWizard {
   }
 
   @Override
-  public AppEngineWizardPage createWizardPage() {
+  public AppEngineFlexWizardPage createWizardPage() {
     AnalyticsPingManager.getInstance().sendPing(
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD,
         AnalyticsEvents.APP_ENGINE_NEW_PROJECT_WIZARD_TYPE,

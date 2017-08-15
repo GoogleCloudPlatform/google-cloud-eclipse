@@ -28,9 +28,9 @@ import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.databinding.swt.ISWTObservableValue;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -72,10 +72,8 @@ public class FlexDeployPreferencesPanel extends AppEngineDeployPreferencesPanel 
     browse.setText(Messages.getString("deploy.preferences.dialog.browse"));
     browse.addSelectionListener(new RelativeFileFieldSetter(appYamlField, project.getLocation()));
 
-    GridLayoutFactory.fillDefaults().numColumns(2).applyTo(secondColumn);
-    GridData fillGridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
-    secondColumn.setLayoutData(fillGridData);
-    appYamlField.setLayoutData(fillGridData);
+    GridLayoutFactory.fillDefaults().numColumns(2).generateLayout(secondColumn);
+    GridDataFactory.fillDefaults().applyTo(secondColumn);
 
     // Part 2. set up data binding
     ISWTObservableValue fieldValue = WidgetProperties.text(SWT.Modify).observe(appYamlField);

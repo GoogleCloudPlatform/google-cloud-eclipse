@@ -16,18 +16,17 @@
 
 package com.google.cloud.tools.eclipse.appengine.validation;
 
+import com.google.common.io.CharStreams;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import java.util.Map;
-import com.google.common.io.CharStreams;
 
 /**
  * Utility methods for validating XML files.
@@ -35,7 +34,7 @@ import com.google.common.io.CharStreams;
 public class ValidationUtils {
 
   private static final Logger logger = Logger.getLogger(ValidationUtils.class.getName());
-  
+
   /**
    * Creates a {@link Map} of {@link BannedElement}s and their respective document-relative
    * character offsets.
@@ -60,10 +59,10 @@ public class ValidationUtils {
     }
     return bannedElementOffsetMap;
   }
-  
-  static String convertStreamToString(InputStream is, String charset) throws IOException {
-    String result = CharStreams.toString(new InputStreamReader(is, charset));
+
+  static String convertStreamToString(InputStream stream, String charset) throws IOException {
+    String result = CharStreams.toString(new InputStreamReader(stream, charset));
     return result;
   }
- 
+
 }

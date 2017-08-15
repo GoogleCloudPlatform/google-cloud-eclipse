@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.appengine.facets;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
@@ -24,6 +25,7 @@ import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.util.io.ResourceUtils;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import org.eclipse.core.resources.IFolder;
@@ -38,6 +40,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
 import org.eclipse.wst.common.project.facet.core.IFacetedProject;
+import org.eclipse.wst.common.project.facet.core.IFacetedProjectWorkingCopy;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -138,18 +141,18 @@ public class FacetUtilTest {
   @Test
   public void testAddFacetToBatch_facetDoesNotExistInProject() {
     FacetUtil facetUtil = new FacetUtil(mockFacetedProject)
-        .addFacetToBatch(AppEngineStandardFacet.FACET_VERSION, null);
+        .addFacetToBatch(AppEngineStandardFacet.JRE7, null);
 
     Assert.assertEquals(1, facetUtil.facetInstallSet.size());
-    Assert.assertEquals(AppEngineStandardFacet.FACET_VERSION,
+    Assert.assertEquals(AppEngineStandardFacet.JRE7,
         facetUtil.facetInstallSet.iterator().next().getProjectFacetVersion());
   }
 
   @Test
   public void testAddFacetToBatch_facetExistsInProject() {
-    when(mockFacetedProject.hasProjectFacet(AppEngineStandardFacet.FACET_VERSION)).thenReturn(true);
+    when(mockFacetedProject.hasProjectFacet(AppEngineStandardFacet.JRE7)).thenReturn(true);
     FacetUtil facetUtil = new FacetUtil(mockFacetedProject)
-        .addFacetToBatch(AppEngineStandardFacet.FACET_VERSION, null);
+        .addFacetToBatch(AppEngineStandardFacet.JRE7, null);
 
     Assert.assertEquals(0, facetUtil.facetInstallSet.size());
   }
@@ -176,19 +179,15 @@ public class FacetUtilTest {
 
   private static boolean hasWtpClasspathContainers(IProject project) throws JavaModelException {
     boolean seenWebContainer = false;
-    boolean seenModuleContainer = false;
     IJavaProject javaProject = JavaCore.create(project);
     for (IClasspathEntry entry : javaProject.getRawClasspath()) {
       if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
         if (entry.getPath().equals(new Path("org.eclipse.jst.j2ee.internal.web.container"))) {
           seenWebContainer = true;
         }
-        if (entry.getPath().equals(new Path("org.eclipse.jst.j2ee.internal.module.container"))) {
-          seenModuleContainer = true;
-        }
       }
     }
-    return seenWebContainer && seenModuleContainer;
+    return seenWebContainer;
   }
 
   @Test
@@ -259,6 +258,28 @@ public class FacetUtilTest {
 
     IPath mainWebApp = FacetUtil.findMainWebAppDirectory(project);
     Assert.assertEquals(new Path("webapps/first-webapp"), mainWebApp);
+  }
+
+  @Test
+  public void testHighestSatisfyingFacet() throws CoreException {
+    IFacetedProjectWorkingCopy testProject = projectCreator.getFacetedProject().createWorkingCopy();
+    testProject.addProjectFacet(AppEngineStandardFacet.JRE7);
+    IProjectFacetVersion highestSatisfyingVersion =
+        FacetUtil.getHighestSatisfyingVersion(testProject, WebFacetUtils.WEB_FACET, null);
+    assertEquals(WebFacetUtils.WEB_25, highestSatisfyingVersion);
+  }
+
+  @Test
+  public void testConflictsWith() throws CoreException {
+    IFacetedProjectWorkingCopy testProject = projectCreator.getFacetedProject().createWorkingCopy();
+    testProject.addProjectFacet(AppEngineStandardFacet.JRE7);
+    assertFalse(FacetUtil.conflictsWith(testProject, WebFacetUtils.WEB_25));
+    assertTrue(FacetUtil.conflictsWith(testProject, WebFacetUtils.WEB_31));
+
+    // verify ignores the ignore list
+    assertTrue(FacetUtil.conflictsWith(testProject, WebFacetUtils.WEB_31, null));
+    assertFalse(FacetUtil.conflictsWith(testProject, WebFacetUtils.WEB_31,
+        Arrays.asList(AppEngineStandardFacet.FACET)));
   }
 
   private static void createEmptyFile(IProject project, IPath relativePath) throws CoreException {

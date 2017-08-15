@@ -23,7 +23,6 @@ import com.google.api.services.appengine.v1.model.Application;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects;
 import com.google.api.services.cloudresourcemanager.model.ListProjectsResponse;
 import com.google.api.services.cloudresourcemanager.model.Project;
-import com.google.cloud.tools.eclipse.googleapis.GoogleApiException;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.projectselector.model.AppEngine;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
@@ -60,7 +59,7 @@ public class ProjectRepository {
       ListProjectsResponse execute =
           projects.list().setPageSize(PROJECT_LIST_PAGESIZE).execute();
       return convertToGcpProjects(execute.getProjects());
-    } catch (IOException | GoogleApiException ex) {
+    } catch (IOException ex) {
       throw new ProjectRepositoryException(ex);
     }
   }
@@ -78,7 +77,7 @@ public class ProjectRepository {
       } else {
         return null;
       }
-    } catch (IOException | GoogleApiException ex) {
+    } catch (IOException ex) {
       throw new ProjectRepositoryException(ex);
     }
   }
@@ -130,7 +129,7 @@ public class ProjectRepository {
         }
         throw new ProjectRepositoryException(message, ex);
       }
-    } catch (IOException | GoogleApiException ex) {
+    } catch (IOException ex) {
       throw new ProjectRepositoryException(ex);
     }
   }

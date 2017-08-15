@@ -16,9 +16,11 @@
 
 package com.google.cloud.tools.eclipse.integration.appengine;
 
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotTestingUtilities;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotTimeoutManager;
 import com.google.cloud.tools.eclipse.swtbot.SwtBotWorkbenchActions;
+import java.io.File;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -27,6 +29,8 @@ import org.eclipse.swtbot.swt.finder.SWTBot;
 import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.swtbot.swt.finder.widgets.TimeoutException;
+import org.eclipse.wst.common.project.facet.core.FacetedProjectFramework;
+import org.junit.Assert;
 
 /**
  * Useful App Engine-related actions for Google Cloud Tools for Eclipse.
@@ -44,15 +48,18 @@ public class SwtBotAppEngineActions {
    * @return the project
    */
   public static IProject createNativeWebAppProject(SWTWorkbenchBot bot, String projectName,
-      String location, String javaPackage) {
-    return createWebAppProject(bot, projectName, location, javaPackage, null /* extraBotActions */);
+      String location, String javaPackage, AppEngineRuntime runtime) {
+    return createWebAppProject(bot, projectName, location, javaPackage, runtime,
+        null /* extraBotActions */);
   }
 
-  /** Create a new project with the Maven-based Google App Engine Standard Java Project wizard */
+  /**
+   * Create a new project with the Maven-based Google App Engine Standard Java Project wizard
+   */
   public static IProject createMavenWebAppProject(final SWTWorkbenchBot bot, String projectName,
-      String location, String javaPackage,
-      final String mavenGroupId, final String mavenArtifactId) {
-    return createWebAppProject(bot, projectName, location, javaPackage, new Runnable() {
+      String location, String javaPackage, AppEngineRuntime runtime, final String mavenGroupId,
+      final String mavenArtifactId) {
+    return createWebAppProject(bot, projectName, location, javaPackage, runtime, new Runnable() {
       @Override
       public void run() {
         bot.checkBox("Create as Maven project").click();
@@ -63,7 +70,7 @@ public class SwtBotAppEngineActions {
   }
 
   public static IProject createWebAppProject(SWTWorkbenchBot bot, String projectName,
-      String location, String javaPackage, Runnable extraBotActions) {
+      String location, String javaPackage, AppEngineRuntime runtime, Runnable extraBotActions) {
     bot.menu("File").menu("New").menu("Project...").click();
 
     SWTBotShell shell = bot.shell("New Project");
@@ -87,6 +94,15 @@ public class SwtBotAppEngineActions {
     if (javaPackage != null) {
       bot.textWithLabel("Java package:").setText(javaPackage);
     }
+    if (runtime != null) {
+      if (runtime == AppEngineRuntime.STANDARD_JAVA_7) {
+        bot.comboBoxWithLabel("Java version:").setSelection("Java 7, Servlet 2.5");
+      } else if (runtime == AppEngineRuntime.STANDARD_JAVA_8) {
+        bot.comboBoxWithLabel("Java version:").setSelection("Java 8, Servlet 3.1 (beta)");
+      } else {
+        Assert.fail("Runtime not handled: " + runtime);
+      }
+    }
 
     // can take a loooong time to resolve jars (e.g. servlet-api.jar) from Maven Central
     int libraryResolutionTimeout = 300 * 1000/* ms */;
@@ -102,17 +118,50 @@ public class SwtBotAppEngineActions {
       throw ex;
     }
     SwtBotTimeoutManager.resetTimeout();
-    IProject project = waitUntilProjectExists(bot, getWorkspaceRoot().getProject(projectName));
+    IProject project = waitUntilFacetedProjectExists(bot, getWorkspaceRoot().getProject(projectName));
     SwtBotWorkbenchActions.waitForProjects(bot, project);
     return project;
   }
 
   /**
-   * Spin until the given project actually exists.
+   * Import a Maven project from a zip file
+   */
+  public static IProject importMavenProject(SWTWorkbenchBot bot, String projectName,
+      File extractedLocation) {
+
+    bot.menu("File").menu("Import...").click();
+
+    SWTBotShell shell = bot.shell("Import");
+    shell.activate();
+
+    bot.tree().expandNode("Maven").select("Existing Maven Projects");
+    bot.button("Next >").click();
+
+    bot.comboBoxWithLabel("Root Directory:").setText(extractedLocation.getAbsolutePath());
+    bot.button("Refresh").click();
+
+    try {
+      SwtBotTestingUtilities.clickButtonAndWaitForWindowClose(bot, bot.button("Finish"));
+    } catch (TimeoutException ex) {
+      System.err.println("FATAL: timed out while waiting for the wizard to close. Forcibly killing "
+          + "all shells: https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1925");
+      System.err.println("FATAL: You will see tons of related errors: \"Widget is disposed\", "
+          + "\"Failed to execute runnable\", \"IllegalStateException\", etc.");
+      SwtBotWorkbenchActions.killAllShells(bot);
+      throw ex;
+    }
+    SwtBotTimeoutManager.resetTimeout();
+    IProject project = waitUntilFacetedProjectExists(bot, getWorkspaceRoot().getProject(projectName));
+    SwtBotWorkbenchActions.waitForProjects(bot, project);
+    return project;
+  }
+
+  /**
+   * Spin until the given project actually exists and is facetd.
    *
    * @return the project
    */
-  private static IProject waitUntilProjectExists(SWTBot bot, final IProject project) {
+  private static IProject waitUntilFacetedProjectExists(SWTBot bot, final IProject project) {
     bot.waitUntil(new DefaultCondition() {
       @Override
       public String getFailureMessage() {
@@ -121,7 +170,7 @@ public class SwtBotAppEngineActions {
 
       @Override
       public boolean test() throws Exception {
-        return project.exists();
+        return project.exists() && FacetedProjectFramework.isFacetedProject(project);
       }
     });
     return project;
@@ -132,4 +181,5 @@ public class SwtBotAppEngineActions {
   }
 
   private SwtBotAppEngineActions() {}
+
 }

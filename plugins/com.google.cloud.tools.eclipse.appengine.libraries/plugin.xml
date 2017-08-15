@@ -192,23 +192,30 @@
           siteUri="https://googlecloudplatform.github.io/google-cloud-java/" >
       <libraryDependency id="googleapiclient" />
       <libraryFile
-            javadocUri="https://googlecloudplatform.github.io/google-cloud-java/0.10.0/apidocs/">
+            javadocUri="https://googlecloudplatform.github.io/google-cloud-java/0.20.1/apidocs/">
         <mavenCoordinates
               artifactId="google-cloud-core"
               groupId="com.google.cloud"
-              version="1.0.0" />
+              version="1.2.1" />
+      </libraryFile>
+      <libraryFile
+            javadocUri="https://googlecloudplatform.github.io/google-cloud-java/0.20.1/apidocs/">
+        <mavenCoordinates
+              artifactId="google-cloud-core-http"
+              groupId="com.google.cloud"
+              version="1.2.1" />
       </libraryFile>
       <libraryFile>  <!-- todo javadoc if it's published -->
         <mavenCoordinates
               artifactId="google-auth-library-oauth2-http"
               groupId="com.google.auth"
-              version="0.6.1" />
+              version="0.7.0" />
       </libraryFile>
       <libraryFile> <!-- todo javadoc if it's published -->
         <mavenCoordinates
               artifactId="google-auth-library-credentials"
               groupId="com.google.auth"
-              version="0.6.1" />
+              version="0.7.0" />
       </libraryFile>
       <libraryFile javadocUri="http://www.joda.org/joda-time/apidocs/">
         <mavenCoordinates
@@ -216,39 +223,52 @@
               groupId="joda-time"
               version="2.9.2" />
       </libraryFile>
-       <libraryFile javadocUri="https://stleary.github.io/JSON-java/">
+      <libraryFile javadocUri="https://stleary.github.io/JSON-java/">
         <mavenCoordinates
               artifactId="json"
               groupId="org.json"
-              version="20151123" />
+              version="20160810" />
       </libraryFile>
       <libraryFile
             javadocUri="https://developers.google.com/protocol-buffers/docs/reference/java/">
         <mavenCoordinates
               artifactId="protobuf-java"
               groupId="com.google.protobuf"
-              version="3.0.0" />
+              version="3.3.0" />
       </libraryFile>
       <libraryFile
             javadocUri="https://developers.google.com/protocol-buffers/docs/reference/java/">
         <mavenCoordinates
               artifactId="protobuf-java-util"
               groupId="com.google.protobuf"
-              version="3.0.0" />
+              version="3.3.0" />
       </libraryFile>
       <libraryFile
             javadocUri="https://google.github.io/guava/releases/19.0/api/docs/">
         <mavenCoordinates
               artifactId="guava"
               groupId="com.google.guava"
-              version="19.0" />
+              version="20.0" />
       </libraryFile>
      <!-- todo javadoc -->
      <libraryFile>
         <mavenCoordinates
               artifactId="gax"
               groupId="com.google.api"
-              version="1.0.0" />
+              version="1.4.1" />
+     </libraryFile>
+     <libraryFile>
+        <mavenCoordinates
+              artifactId="api-common"
+              groupId="com.google.api"
+              version="1.1.0" />
+      </libraryFile>
+      <libraryFile>
+        <!-- pulled in by gax-rpc but used by google-cloud-core -->
+        <mavenCoordinates
+              artifactId="threetenbp"
+              groupId="org.threeten"
+              version="1.3.3" />
       </libraryFile>
     </library>
     
@@ -260,17 +280,18 @@
           siteUri="https://cloud.google.com/storage/docs/reference/libraries#client-libraries-install-java" >
       <libraryDependency id="googlecloudcore" />
       <libraryFile
-            javadocUri="https://googlecloudplatform.github.io/google-cloud-java/0.10.0/apidocs/">
+            javadocUri="https://googlecloudplatform.github.io/google-cloud-java/0.20.1/apidocs/">
         <mavenCoordinates
               artifactId="google-cloud-storage"
               groupId="com.google.cloud"
-              version="1.0.0" />
+              version="1.2.1" />
       </libraryFile>
       <libraryFile
             javadocUri="https://developers.google.com/resources/api-libraries/documentation/storage/v1/java/latest/index.html">
         <mavenCoordinates
               artifactId="google-api-services-storage"
               groupId="com.google.apis"
+<<<<<<< HEAD
               version="v1-rev102-1.22.0" />
       </libraryFile>
     </library>
@@ -287,7 +308,7 @@
         <mavenCoordinates
               artifactId="google-api-services-appengine"
               groupId="com.google.apis"
-              version="v1-rev24-1.22.0" />
+              version="v1-rev100-1.22.0" />
       </libraryFile>
     </library>
     

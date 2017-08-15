@@ -24,22 +24,20 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.tools.eclipse.dataflow.core.DataflowCorePlugin;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.QualifiedName;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.runners.MockitoJUnitRunner;
 
 /**
  * Tests for {@link ProjectPreferenceStore}.
  */
-@RunWith(JUnit4.class)
+@RunWith(MockitoJUnitRunner.class)
 public class ProjectPreferenceStoreTest {
   @Mock
   private IProject project;
@@ -47,9 +45,7 @@ public class ProjectPreferenceStoreTest {
   private ProjectPreferenceStore prefs;
 
   @Before
-  public void testSetup() {
-    MockitoAnnotations.initMocks(this);
-
+  public void setUp() {
     prefs = new ProjectPreferenceStore(project);
   }
 

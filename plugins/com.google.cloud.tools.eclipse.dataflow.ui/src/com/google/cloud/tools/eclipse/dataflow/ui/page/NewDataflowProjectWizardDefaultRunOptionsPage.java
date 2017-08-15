@@ -18,8 +18,8 @@ package com.google.cloud.tools.eclipse.dataflow.ui.page;
 
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.DataflowPreferences;
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.ProjectOrWorkspaceDataflowPreferences;
+import com.google.cloud.tools.eclipse.dataflow.ui.Messages;
 import com.google.cloud.tools.eclipse.dataflow.ui.preferences.RunOptionsDefaultsComponent;
-
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
@@ -29,14 +29,14 @@ import org.eclipse.swt.widgets.Composite;
  * An optional Page to input default run options for a Dataflow Project.
  */
 public class NewDataflowProjectWizardDefaultRunOptionsPage extends WizardPage {
-  private static final String PAGE_NAME = Messages.getString("RUN_OPTIONS");
+  private static final String PAGE_NAME = Messages.getString("RUN_OPTIONS"); //$NON-NLS-1$
 
   private RunOptionsDefaultsComponent runOptionsDefaultsComponent;
 
   public NewDataflowProjectWizardDefaultRunOptionsPage() {
     super(PAGE_NAME);
-    setTitle(Messages.getString("SET_RUN_OPTIONS"));
-    setDescription(Messages.getString("DATAFLOW_PIPELINE_OPTIONS"));
+    setTitle(Messages.getString("set.run.options")); //$NON-NLS-1$
+    setDescription(Messages.getString("DATAFLOW_PIPELINE_OPTIONS")); //$NON-NLS-1$
     setPageComplete(true);
   }
 
@@ -50,6 +50,10 @@ public class NewDataflowProjectWizardDefaultRunOptionsPage extends WizardPage {
         composite, numColumns, new DialogPageMessageTarget(this), prefs, this);
 
     setControl(runOptionsDefaultsComponent.getControl());
+  }
+
+  public String getAccountEmail() {
+    return runOptionsDefaultsComponent.getAccountEmail();
   }
 
   public String getProjectId() {

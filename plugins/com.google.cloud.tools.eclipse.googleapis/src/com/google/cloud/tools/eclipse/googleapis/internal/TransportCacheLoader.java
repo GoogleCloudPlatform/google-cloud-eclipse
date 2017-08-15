@@ -22,17 +22,19 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.common.cache.CacheLoader;
 
 class TransportCacheLoader extends CacheLoader<GoogleApiUrl, HttpTransport> {
-  
+
   private final ProxyFactory proxyFactory;
 
   TransportCacheLoader(ProxyFactory proxyFactory) {
     this.proxyFactory = proxyFactory;
   }
 
+  // Should not throw any checked exception, as cache clients use "getUnchecked()" instead of
+  // "get()": https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2130
   @Override
-  public HttpTransport load(GoogleApiUrl url) throws Exception {
+  public HttpTransport load(GoogleApiUrl url) {
     ConnectionFactory connectionFactory =
-        new TimeoutAwareConnectionFactory(proxyFactory.createProxy(url.getUrl()));
+        new TimeoutAwareConnectionFactory(proxyFactory.createProxy(url.toUri()));
     return new NetHttpTransport.Builder().setConnectionFactory(connectionFactory).build();
   }
 }

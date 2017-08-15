@@ -54,13 +54,13 @@ import org.w3c.dom.NodeList;
  * Validator for web.xml.
  */
 public class WebXmlValidator implements XmlValidationHelper {
-  
+
   private static final Logger logger = Logger.getLogger(WebXmlValidator.class.getName());
   private static final XPathFactory FACTORY = XPathFactory.newInstance();
   private Document document;
   private IResource resource;
   private ArrayList<BannedElement> blacklist;
-  
+
   @Override
   public ArrayList<BannedElement> checkForElements(IResource resource, Document document) {
     this.document = document;
@@ -72,7 +72,7 @@ public class WebXmlValidator implements XmlValidationHelper {
     validateJsp();
     return blacklist;
   }
-  
+
   /**
    * Validates that web.xml specifies a compatible deployment descriptor version.
    */
@@ -93,7 +93,7 @@ public class WebXmlValidator implements XmlValidationHelper {
       }
     }
   }
-  
+
   /**
    * Validates that all <servlet-class> elements exist in the project.
    */
@@ -111,7 +111,7 @@ public class WebXmlValidator implements XmlValidationHelper {
       }
     }
   }
-  
+
   /**
    * Adds all defined servlet names to a set, then adds a
    * {@link ServletMappingElement} to the blacklist for all
@@ -149,7 +149,7 @@ public class WebXmlValidator implements XmlValidationHelper {
       throw new RuntimeException("Invalid XPath expression");
     }
   }
-  
+
   /**
    * Verifies that every <jsp-file> element exists in the project.
    */
@@ -174,7 +174,7 @@ public class WebXmlValidator implements XmlValidationHelper {
       }
     }
   }
-  
+
   private static boolean resolveJsp(IVirtualFolder root, String fileName) {
     // For a typical Maven project:
     // WEB-INF         -> src/main/webapp/WEB-INF
@@ -198,13 +198,13 @@ public class WebXmlValidator implements XmlValidationHelper {
     // as test.jsp in web.xml.
     return false;
   }
-  
+
   private boolean isVersion25() {
     Node node = document.getFirstChild();
     String versionString = (String) node.getUserData("version");
     return "2.5".equals(versionString);
   }
-  
+
   private static IJavaProject getProject(IResource resource) {
     if (resource != null) {
       return JavaCore.create(resource.getProject());
@@ -217,7 +217,7 @@ public class WebXmlValidator implements XmlValidationHelper {
     if (Strings.isNullOrEmpty(typeName)) {
       return false;
     }
-    SearchPattern pattern = SearchPattern.createPattern(typeName, 
+    SearchPattern pattern = SearchPattern.createPattern(typeName,
         IJavaSearchConstants.CLASS,
         IJavaSearchConstants.DECLARATIONS,
         SearchPattern.R_EXACT_MATCH | SearchPattern.R_ERASURE_MATCH);
@@ -225,7 +225,7 @@ public class WebXmlValidator implements XmlValidationHelper {
         : SearchEngine.createJavaSearchScope(new IJavaElement[] {project});
     return performSearch(pattern, scope, null);
   }
-  
+
   /**
    * Searches for a class that matches a pattern.
    */
@@ -244,10 +244,4 @@ public class WebXmlValidator implements XmlValidationHelper {
       return false;
     }
   }
-
-  @Override
-  public String getXsd() {
-    return null;
-  }
-
 }

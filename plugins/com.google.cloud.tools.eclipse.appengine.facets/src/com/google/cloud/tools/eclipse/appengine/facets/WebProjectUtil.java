@@ -16,16 +16,14 @@
 
 package com.google.cloud.tools.eclipse.appengine.facets;
 
+import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -38,9 +36,15 @@ import org.eclipse.wst.common.componentcore.resources.IVirtualFolder;
  * Utility classes for processing WTP Web Projects (jst.web and jst.utility).
  */
 public class WebProjectUtil {
-  final static String DEFAULT_WEB_PATH = "src/main/webapp";
+  /** Default top-level locations for WEB_INF */
+  public static final String DEFAULT_WEB_PATH = "src/main/webapp";
 
-  final static String WEB_INF = "WEB-INF/";
+  /** All possible top-level locations for WEB_INF */
+  private static final ImmutableList<String> DEFAULT_WEB_PATHS =
+      ImmutableList.of(DEFAULT_WEB_PATH, "WebContent", "war", "web");
+
+  static final String WEB_INF = "WEB-INF";
+
 
   /**
    * Return the project's <code>WEB-INF</code> directory. There is no guarantee that the contents
@@ -59,22 +63,18 @@ public class WebProjectUtil {
       }
     }
     // Otherwise it's seemingly fair game
-    IFolder defaultLocation = project.getFolder(DEFAULT_WEB_PATH).getFolder(WEB_INF);
-    if (defaultLocation.exists()) {
-      return defaultLocation;
-    } else {
-      return null;
+    for (String possibleWebInfContainer : DEFAULT_WEB_PATHS) {
+      // simplify mocking: get the location as two parts and check for null despite that getFolder()
+      // should be @NonNull
+      IFolder defaultLocation = project.getFolder(possibleWebInfContainer);
+      if (defaultLocation != null && defaultLocation.exists()) {
+        defaultLocation = defaultLocation.getFolder(WEB_INF);
+        if (defaultLocation != null && defaultLocation.exists()) {
+          return defaultLocation;
+        }
+      }
     }
-  }
-
-  public static void removeWebDeploymentAssemblyEntry(IProject project, Path path)
-      throws CoreException {
-    IVirtualComponent component = ComponentCore.createComponent(project);
-    if (component != null && component.exists()) {
-      IVirtualFolder rootFolder = component.getRootFolder();
-      // Removes an entry in ".settings/org.eclipse.wst.common.component".
-      rootFolder.removeLink(path, IVirtualFolder.FORCE, new NullProgressMonitor());
-    }
+    return null;
   }
 
   /**

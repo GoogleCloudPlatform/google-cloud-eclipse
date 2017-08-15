@@ -25,6 +25,12 @@
                 <id>org.eclipse.ui.intro</id>
                 <versionRange>0.0.0</versionRange>
               </requirement>
+              <requirement>
+                <!-- to bring in the GPE projects for import -->
+                <type>eclipse-plugin</type>
+                <id>com.google.cloud.tools.eclipse.appengine.compat.test</id>
+                <versionRange>0.0.0</versionRange>
+              </requirement>
             </extraRequirements>
           </dependency-resolution>
         </configuration>

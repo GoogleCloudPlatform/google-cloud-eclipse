@@ -40,6 +40,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.wst.server.core.IServer;
 import org.junit.Before;
@@ -183,7 +184,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
         .thenAnswer(AdditionalAnswers.returnsSecondArg());
 
     DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
-        .generateServerRunConfiguration(launchConfiguration, server);
+        .generateServerRunConfiguration(launchConfiguration, server, ILaunchManager.RUN_MODE);
     assertNull(config.getHost());
     assertEquals((Integer) LocalAppEngineServerBehaviour.DEFAULT_SERVER_PORT, config.getPort());
     assertNull(config.getApiPort());
@@ -199,7 +200,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
         .thenAnswer(AdditionalAnswers.returnsSecondArg());
     when(server.getHost()).thenReturn("example.com");
     DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
-        .generateServerRunConfiguration(launchConfiguration, server);
+        .generateServerRunConfiguration(launchConfiguration, server, ILaunchManager.RUN_MODE);
     assertEquals("example.com", config.getHost());
     verify(server, atLeastOnce()).getHost();
   }
@@ -213,7 +214,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
             .thenReturn(9999);
 
     DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
-        .generateServerRunConfiguration(launchConfiguration, server);
+        .generateServerRunConfiguration(launchConfiguration, server, ILaunchManager.RUN_MODE);
 
     assertNotNull(config.getPort());
     assertEquals(9999, (int) config.getPort());
@@ -231,7 +232,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
             .thenReturn(9999);
 
     DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
-        .generateServerRunConfiguration(launchConfiguration, server);
+        .generateServerRunConfiguration(launchConfiguration, server, ILaunchManager.RUN_MODE);
 
     assertNull(config.getAdminPort());
     verify(launchConfiguration, never())
@@ -254,7 +255,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
     // dev_appserver waits on localhost by default
     try (ServerSocket socket = new ServerSocket(8080, 100, InetAddress.getLoopbackAddress())) {
       DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
-          .generateServerRunConfiguration(launchConfiguration, server);
+          .generateServerRunConfiguration(launchConfiguration, server, ILaunchManager.RUN_MODE);
 
       assertNull(config.getAdminPort());
     }
@@ -263,16 +264,51 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
   @Test
   public void testGenerateRunConfiguration_withVMArgs() throws CoreException {
     // DebugPlugin.parseArguments() only supports double-quotes on Windows
+    when(launchConfiguration.getAttribute(anyString(), anyString())).thenReturn("");
     when(launchConfiguration.getAttribute(eq(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS),
         anyString())).thenReturn("a b \"c d\"");
 
     DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
-        .generateServerRunConfiguration(launchConfiguration, server);
+        .generateServerRunConfiguration(launchConfiguration, server, ILaunchManager.RUN_MODE);
 
     assertNotNull(config.getJvmFlags());
     assertEquals(Arrays.asList("a", "b", "c d"), config.getJvmFlags());
     verify(launchConfiguration)
         .getAttribute(eq(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS), anyString());
+  }
+
+  @Test
+  public void testGenerateRunConfiguration_withProgramArgs() throws CoreException {
+    // DebugPlugin.parseArguments() only supports double-quotes on Windows
+    when(launchConfiguration.getAttribute(anyString(), anyString())).thenReturn("");
+    when(launchConfiguration
+        .getAttribute(eq(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS), anyString()))
+            .thenReturn("e f \"g h\"");
+
+    DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
+        .generateServerRunConfiguration(launchConfiguration, server, ILaunchManager.RUN_MODE);
+
+    assertNotNull(config.getAdditionalArguments());
+    assertEquals(Arrays.asList("e", "f", "g h"), config.getAdditionalArguments());
+    verify(launchConfiguration)
+        .getAttribute(eq(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS), anyString());
+  }
+
+
+  @Test
+  public void testGenerateRunConfiguration_restart_run() throws CoreException {
+    when(launchConfiguration.getAttribute(anyString(), anyString())).thenReturn("");
+    DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
+        .generateServerRunConfiguration(launchConfiguration, server, ILaunchManager.RUN_MODE);
+    assertTrue(config.getAutomaticRestart());
+  }
+
+  @Test
+  public void testGenerateRunConfiguration_restart_debug() throws CoreException {
+    when(launchConfiguration.getAttribute(anyString(), anyString())).thenReturn("");
+    DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
+        .generateServerRunConfiguration(launchConfiguration, server, ILaunchManager.DEBUG_MODE);
+    assertFalse(config.getAutomaticRestart());
   }
 
   // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1609
@@ -283,6 +319,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
     when(launch.getLaunchConfiguration()).thenReturn(null);
 
     new LocalAppEngineServerLaunchConfigurationDelegate()
-        .checkConflictingLaunches(null, mock(DefaultRunConfiguration.class), launches);
+        .checkConflictingLaunches(null, ILaunchManager.RUN_MODE,
+            mock(DefaultRunConfiguration.class), launches);
   }
 }

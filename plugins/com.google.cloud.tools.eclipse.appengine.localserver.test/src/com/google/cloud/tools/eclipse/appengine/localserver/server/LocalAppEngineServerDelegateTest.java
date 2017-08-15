@@ -41,6 +41,7 @@ import org.eclipse.wst.server.core.IServer;
 import org.eclipse.wst.server.core.IServerWorkingCopy;
 import org.eclipse.wst.server.core.ServerCore;
 import org.eclipse.wst.server.core.internal.ModuleType;
+import org.eclipse.wst.server.core.internal.Server;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -66,7 +67,7 @@ public class LocalAppEngineServerDelegateTest {
   @Rule
   public TestProjectCreator appEngineStandardProject =
       new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25,
-          AppEngineStandardFacet.FACET_VERSION);
+          AppEngineStandardFacet.JRE7);
 
   @Test
   public void testCanModifyModules() throws CoreException {
@@ -220,6 +221,14 @@ public class LocalAppEngineServerDelegateTest {
     URL url = delegate.getModuleRootURL(module1);
     assertNotNull(url);
     assertEquals("http://foo:9999", url.toString());
+  }
+
+  @Test
+  public void testPublishChangesImmediately() throws CoreException {
+    delegate = getDelegateWithServer();
+    Server server = (Server) delegate.getServer();
+    assertEquals(Server.AUTO_PUBLISH_RESOURCE, server.getAutoPublishSetting());
+    assertEquals(0, server.getAutoPublishTime());
   }
 
   private LocalAppEngineServerDelegate getDelegateWithServer() throws CoreException {

@@ -53,8 +53,8 @@ public class FlexStagingDelegateTest {
   @Test
   public void testStage() {
     StagingDelegate delegate = new FlexStagingDelegate(appEngineDirectory);
-    IStatus status = delegate.stage(project, stagingDirectory, safeWorkDirectory, 
-        null /* cloudSdk */, new NullProgressMonitor());
+    IStatus status = delegate.stage(project, stagingDirectory, safeWorkDirectory,
+        null, null, new NullProgressMonitor());
 
     assertTrue(stagingDirectory.append("app-to-deploy.war").toFile().exists());
     assertTrue(stagingDirectory.append("app.yaml").toFile().exists());

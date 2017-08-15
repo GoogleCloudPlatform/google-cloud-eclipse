@@ -74,16 +74,16 @@ public class DataflowDependencyManager {
   }
 
   /**
-   * Retrieves a dependency on the Dataflow Java SDK. If trackUpdates is true, the version is
-   * LATEST. Otherwise, the version is [Current Version, Next Major Version).
+   * Retrieves a dependency on the Dataflow Java SDK or null if there is no version in the range.
+   * The version is [Current Version, Next Major Version).
    */
   public ArtifactVersion getLatestDataflowDependencyInRange(VersionRange currentVersionRange) {
     return artifactRetriever.getLatestSdkVersion(currentVersionRange);
   }
 
   private static boolean isDataflowDependency(Dependency dependency) {
-    return dependency.getGroupId().equals(DataflowArtifactRetriever.DATAFLOW_GROUP_ID)
-        && dependency.getArtifactId().equals(DataflowArtifactRetriever.DATAFLOW_SDK_ARTIFACT);
+    return dependency.getGroupId().equals(DataflowMavenCoordinates.GROUP_ID)
+        && dependency.getArtifactId().equals(DataflowMavenCoordinates.ARTIFACT_ID);
   }
 
   /**

@@ -18,8 +18,9 @@ package com.google.cloud.tools.eclipse.appengine.newproject;
 
 import static org.junit.Assert.assertFalse;
 
+import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
-import com.google.cloud.tools.eclipse.util.templates.appengine.AppEngineTemplateUtility;
+import com.google.cloud.tools.eclipse.util.Templates;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -67,7 +68,18 @@ public class CodeTemplatesTest {
     IFile mostImportant = CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
     validateNonConfigFiles(mostImportant, "http://java.sun.com/xml/ns/javaee",
         "http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd", "2.5");
-    validateAppEngineWebXml();
+    validateAppEngineWebXml(AppEngineRuntime.STANDARD_JAVA_7);
+  }
+
+  @Test
+  public void testMaterializeAppEngineStandardFiles_java8()
+      throws CoreException, ParserConfigurationException, SAXException, IOException {
+    AppEngineProjectConfig config = new AppEngineProjectConfig();
+    config.setRuntimeId(AppEngineRuntime.STANDARD_JAVA_8.getId());
+    IFile mostImportant = CodeTemplates.materializeAppEngineStandardFiles(project, config, monitor);
+    validateNonConfigFiles(mostImportant, "http://xmlns.jcp.org/xml/ns/javaee",
+        "http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd", "3.1");
+    validateAppEngineWebXml(AppEngineRuntime.STANDARD_JAVA_8);
   }
 
   @Test
@@ -146,7 +158,7 @@ public class CodeTemplatesTest {
     Assert.assertTrue(mockServletResponse.exists());
   }
 
-  private void validateAppEngineWebXml()
+  private void validateAppEngineWebXml(AppEngineRuntime runtime)
       throws ParserConfigurationException, SAXException, IOException, CoreException {
     IFolder webinf = project.getFolder("src/main/webapp/WEB-INF");
     IFile appengineWebXml = webinf.getFile("appengine-web.xml");
@@ -162,6 +174,15 @@ public class CodeTemplatesTest {
         1, sessionsEnabledElements.getLength());
     String sessionsEnabled = sessionsEnabledElements.item(0).getTextContent();
     Assert.assertEquals("false", sessionsEnabled);
+
+    NodeList runtimeElements = doc.getDocumentElement().getElementsByTagName("runtime");
+    if (runtime.getId() == null) {
+      Assert.assertEquals("should not have a <runtime> element", 0, runtimeElements.getLength());
+    } else {
+      Assert.assertEquals("should have exactly 1 <runtime> element", 1,
+          runtimeElements.getLength());
+      Assert.assertEquals(runtime.getId(), runtimeElements.item(0).getTextContent());
+    }
   }
 
   private void validateAppYaml() throws IOException, CoreException {
@@ -221,7 +242,7 @@ public class CodeTemplatesTest {
     values.put("package", "com.google.foo.bar");
 
     IFile child = CodeTemplates.createChildFile("HelloAppEngine.java",
-        AppEngineTemplateUtility.HELLO_APPENGINE_TEMPLATE, parent, values, monitor);
+        Templates.HELLO_APPENGINE_TEMPLATE, parent, values, monitor);
     Assert.assertTrue(child.exists());
     Assert.assertEquals("HelloAppEngine.java", child.getName());
     try (InputStream in = child.getContents(true);

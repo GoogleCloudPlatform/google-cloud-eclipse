@@ -18,20 +18,15 @@ package com.google.cloud.tools.eclipse.dataflow.ui.handler;
 
 import com.google.cloud.tools.eclipse.dataflow.core.natures.DataflowJavaProjectNature;
 import com.google.cloud.tools.eclipse.dataflow.ui.DataflowUiPlugin;
+import com.google.cloud.tools.eclipse.ui.util.ProjectFromSelectionHelper;
 import com.google.common.annotations.VisibleForTesting;
-
+import java.util.List;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.ui.handlers.HandlerUtil;
-
-import java.util.Iterator;
 
 /**
  * A handler that updates the Dataflow nature of a selected project.
@@ -47,18 +42,18 @@ public class ModifyDataflowNatureHandler extends AbstractHandler {
 
   @Override
   public Object execute(ExecutionEvent event) throws ExecutionException {
-    ISelection selection = HandlerUtil.getCurrentSelection(event);
-    return handleCommand(event.getCommand().getId(), selection);
+    List<IProject> projects = ProjectFromSelectionHelper.getProjects(event);
+    return handleCommand(event.getCommand().getId(), projects);
   }
 
   @VisibleForTesting
-  Object handleCommand(String commandId, ISelection selection) {
+  Object handleCommand(String commandId, List<IProject> projects) {
     switch (commandId) {
       case ADD_NATURE_COMMAND_ID:
-        setDataflowNatureOfSelection(selection, true);
+        setDataflowNatureOfSelection(projects, true);
         break;
       case REMOVE_NATURE_COMMAND_ID:
-        setDataflowNatureOfSelection(selection, false);
+        setDataflowNatureOfSelection(projects, false);
         break;
       default:
         DataflowUiPlugin.logWarning(
@@ -67,30 +62,19 @@ public class ModifyDataflowNatureHandler extends AbstractHandler {
     return null;
   }
 
-  private void setDataflowNatureOfSelection(ISelection selection, boolean enable) {
-    if (!(selection instanceof IStructuredSelection)) {
-      // The selection doesn't contain any elements
-      return;
-    }
-    IStructuredSelection structuredSelection = (IStructuredSelection) selection;
-    Iterator<?> selectionIter = structuredSelection.iterator();
-    while (selectionIter.hasNext()) {
-      Object selectionElement = selectionIter.next();
-      if (selectionElement instanceof IAdaptable) {
-        IAdaptable adaptable = (IAdaptable) selectionElement;
-        IProject project = adaptable.getAdapter(IProject.class);
-        try {
-          if (enable) {
-            DataflowJavaProjectNature
-                .addDataflowJavaNatureToProject(project, new NullProgressMonitor());
-          } else {
-            DataflowJavaProjectNature
-                .removeDataflowJavaNatureFromProject(project, new NullProgressMonitor());
-          }
-        } catch (CoreException e) {
-          DataflowUiPlugin.logError(e,
-              "Exception while trying to remove Dataflow Nature from Project %s", project);
+  private void setDataflowNatureOfSelection(List<IProject> projects, boolean enable) {
+    for (IProject project : projects) {
+      try {
+        if (enable) {
+          DataflowJavaProjectNature
+              .addDataflowJavaNatureToProject(project, new NullProgressMonitor());
+        } else {
+          DataflowJavaProjectNature
+              .removeDataflowJavaNatureFromProject(project, new NullProgressMonitor());
         }
+      } catch (CoreException e) {
+        DataflowUiPlugin.logError(e,
+            "Exception while trying to remove Dataflow Nature from Project %s", project);
       }
     }
   }

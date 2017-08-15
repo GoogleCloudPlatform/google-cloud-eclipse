@@ -17,13 +17,14 @@
 package com.google.cloud.tools.eclipse.googleapis.internal;
 
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.api.client.http.HttpTransport;
 import java.net.Proxy;
+import java.net.URI;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -35,11 +36,12 @@ public class TransportCacheLoaderTest {
   @Mock private ProxyFactory proxyFactory;
 
   @Test
-  public void test() throws Exception {
-    when(proxyFactory.createProxy(anyString())).thenReturn(mock(Proxy.class));
-    HttpTransport load = new TransportCacheLoader(proxyFactory).load(GoogleApiUrl.APPENGINE_ADMIN_API);
+  public void test() {
+    when(proxyFactory.createProxy(any(URI.class))).thenReturn(mock(Proxy.class));
+    HttpTransport load = new TransportCacheLoader(proxyFactory)
+        .load(GoogleApiUrl.APPENGINE_ADMIN_API);
     assertNotNull(load);
-    verify(proxyFactory).createProxy(GoogleApiUrl.APPENGINE_ADMIN_API.getUrl());
+    verify(proxyFactory).createProxy(GoogleApiUrl.APPENGINE_ADMIN_API.toUri());
   }
 
 }
