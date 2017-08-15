@@ -36,7 +36,7 @@ public class NewDataflowProjectWizardDefaultRunOptionsPage extends WizardPage {
   public NewDataflowProjectWizardDefaultRunOptionsPage() {
     super(PAGE_NAME);
     setTitle(Messages.getString("set.run.options")); //$NON-NLS-1$
-    setDescription(Messages.getString("DATAFLOW_PIPELINE_OPTIONS")); //$NON-NLS-1$
+    setDescription(Messages.getString("dataflow.pipeline.options")); //$NON-NLS-1$
     setPageComplete(true);
   }
 

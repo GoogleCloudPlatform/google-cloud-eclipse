@@ -76,7 +76,7 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     super("newDataflowProjectWizardLandingPage"); //$NON-NLS-1$
     this.dependencyManager = DataflowDependencyManager.create();
     this.targetCreator = targetCreator;
-    setTitle(Messages.getString("CREATE_DATAFLOW_PROJECT")); //$NON-NLS-1$
+    setTitle(Messages.getString("create.dataflow.project")); //$NON-NLS-1$
     setDescription(Messages.getString("wizard.description")); //$NON-NLS-1$
     setImageDescriptor(getDataflowIcon());
     setPageComplete(false);
@@ -147,7 +147,7 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     updateAvailableVersions();
 
     packageInput = addLabeledText(formComposite, Messages.getString("package")); //$NON-NLS-1$
-    packageInput.setToolTipText(Messages.getString("UNSET_PACKAGE_TOOLTIP")); //$NON-NLS-1$
+    packageInput.setToolTipText(Messages.getString("package.tooltip")); //$NON-NLS-1$
     packageInput.setMessage(Messages.getString("example.group.id"));//$NON-NLS-1$
 
     // Add a labeled text and button for the default location.
@@ -411,7 +411,7 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
       @Override
       public void widgetSelected(SelectionEvent event) {
         DirectoryDialog dialog = new DirectoryDialog(shell);
-        dialog.setMessage(Messages.getString("SELECT_PROJECT_LOCATION")); //$NON-NLS-1$
+        dialog.setMessage(Messages.getString("select.project.location")); //$NON-NLS-1$
         String result = dialog.open();
         if (!Strings.isNullOrEmpty(result)) {
           locationInput.setText(result);
