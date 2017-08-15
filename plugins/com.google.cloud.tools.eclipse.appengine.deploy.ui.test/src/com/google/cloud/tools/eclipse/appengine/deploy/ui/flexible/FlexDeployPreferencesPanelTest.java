@@ -28,7 +28,6 @@ import com.google.cloud.tools.eclipse.projectselector.ProjectRepository;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
-import com.google.common.base.Predicate;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.resources.IProject;
@@ -130,16 +129,8 @@ public class FlexDeployPreferencesPanelTest {
   }
 
   private static Text findAppYamlField(Composite panel) {
-    Predicate<Control> predicate = new Predicate<Control>() {
-      @Override
-      public boolean apply(Control control) {
-        return control instanceof Text && 
-            "app.yaml Path, either Absolute or Relative to the Project".equals(
-                control.getToolTipText());
-      }
-    };
+    Control control = CompositeUtil.findControlAfterLabel(panel, Text.class, "app.yaml:");
     
-    Control control = CompositeUtil.findControl(panel, predicate);
     if (control == null) {
       Assert.fail("Could not locate app.yaml field"); 
     }
