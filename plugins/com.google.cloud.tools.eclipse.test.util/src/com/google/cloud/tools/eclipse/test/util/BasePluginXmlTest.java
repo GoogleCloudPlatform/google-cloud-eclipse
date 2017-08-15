@@ -151,7 +151,7 @@ public abstract class BasePluginXmlTest {
   private void assertPropertyDefined(String name) {
     if (name.startsWith("%")) {
       String value = pluginProperties.get(name.substring(1));
-      Assert.assertNotNull(name + " is not defined");
+      Assert.assertNotNull(name + " is not defined", value);
       Assert.assertFalse(name + " is not defined", value.isEmpty());
     }
   }
