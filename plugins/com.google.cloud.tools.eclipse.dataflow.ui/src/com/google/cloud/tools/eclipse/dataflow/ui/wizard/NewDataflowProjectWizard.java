@@ -45,16 +45,18 @@ public class NewDataflowProjectWizard extends Wizard implements INewWizard {
     if (!creator.isValid()) {
       String message =
           "Tried to finish the New Dataflow Project Wizard " //$NON-NLS-1$
-              + "when the project creator is not valid. Reasons: " + creator.validate(); //$NON-NLS-1$
+              + "when the project creator is not valid. Reasons: " //$NON-NLS-1$ 
+              + creator.validate();
       IllegalStateException ex = new IllegalStateException(message);
       DataflowUiPlugin.logError(ex, message);
       throw ex;
     }
     try {
       getContainer().run(true, true, creator);
-    } catch (InvocationTargetException | InterruptedException e) {
+    } catch (InvocationTargetException | InterruptedException ex) {
       // TODO: handle
-      DataflowUiPlugin.logError(e, "Error encountered when trying to create project");
+      DataflowUiPlugin.logError(ex, 
+          "Error encountered when trying to create project"); //$NON-NLS-1$
       return false;
     }
     return true;
@@ -71,6 +73,7 @@ public class NewDataflowProjectWizard extends Wizard implements INewWizard {
 
   @Override
   public void init(IWorkbench workbench, IStructuredSelection selection) {
+    // todo add help
     setHelpAvailable(false);
     setWindowTitle(Messages.getString("new.cloud.dataflow.project")); //$NON-NLS-1$
     setNeedsProgressMonitor(true);

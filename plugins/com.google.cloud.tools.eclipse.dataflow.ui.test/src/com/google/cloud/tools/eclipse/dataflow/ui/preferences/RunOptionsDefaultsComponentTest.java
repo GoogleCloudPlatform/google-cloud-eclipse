@@ -166,7 +166,7 @@ public class RunOptionsDefaultsComponentTest {
 
   private void assertStagingLocationCombo(String... buckets) throws InterruptedException {
     Combo combo = CompositeUtil.findControlAfterLabel(shell,
-        Combo.class, "Cloud Storage Staging &Location:");
+        Combo.class, "Cloud Storage staging &location:");
     for (int i = 0; i < 200 && combo.getItemCount() != buckets.length; i++) {
       while (Display.getCurrent().readAndDispatch()) {}  // spin
       Thread.sleep(50);

@@ -21,7 +21,6 @@ import com.google.common.base.Preconditions;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.MessageFormat;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -62,28 +61,6 @@ public class MavenUtils {
           coreException);
       return false;
     }
-  }
-
-  /**
-   * Returns the latest version of the maven artifact specified via <code>groupId</code> and
-   * <code>artifactId</code> or the <code>defaultVersion</code> if an error occurs while fetching
-   * the latest version.
-   */
-  public static String resolveLatestReleasedArtifactVersion(IProgressMonitor monitor,
-      String groupId, String artifactId, String type, String defaultVersion) {
-    try {
-      Artifact artifact = resolveArtifact(monitor, groupId, artifactId, type, MAVEN_LATEST_VERSION);
-      return artifact.getVersion();
-    } catch (CoreException ex) {
-      logger.log(Level.WARNING,
-          MessageFormat.format("Unable to resolve artifact {0}:{1}", groupId, artifactId), ex);
-      return defaultVersion;
-    }
-  }
-
-  public static Artifact resolveArtifact(IProgressMonitor monitor, String groupId,
-      String artifactId, String type, String version) throws CoreException {
-    return resolveArtifact(monitor, groupId, artifactId, type, version, null, null);
   }
 
   public static Artifact resolveArtifact(IProgressMonitor monitor, String groupId,
