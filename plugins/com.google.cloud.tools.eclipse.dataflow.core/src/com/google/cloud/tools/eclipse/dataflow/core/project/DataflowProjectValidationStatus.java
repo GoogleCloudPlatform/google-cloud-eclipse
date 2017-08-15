@@ -42,19 +42,19 @@ public enum DataflowProjectValidationStatus {
    */
   LOCATION_NOT_DIRECTORY(Status.ERROR, "Location must be a directory"),
   /**
-   * There is no provided maven group ID.
+   * There is no provided Maven group ID.
    */
   NO_GROUP_ID(Status.MISSING, "Enter a Group ID"),
   /**
-   * The provided maven group ID is not valid.
+   * The provided Maven group ID is not valid.
    */
   ILLEGAL_GROUP_ID(Status.ERROR, "Invalid Group ID"),
   /**
-   * There is no provided maven artifact ID.
+   * There is no provided Maven artifact ID.
    */
   NO_ARTIFACT_ID(Status.MISSING, "Enter an Artifact ID"),
   /**
-   * The provided maven artifact ID is not valid.
+   * The provided Maven artifact ID is not valid.
    */
   ILLEGAL_ARTIFACT_ID(Status.ERROR, "Invalid Artifact ID"),
   /**
@@ -90,21 +90,21 @@ public enum DataflowProjectValidationStatus {
   }
 
   /**
-   * Returns if the dataflow project being validated can be created with the current arguments.
+   * @retunr true if a dataflow project can be created with the current argument
    */
   public boolean isValid() {
     return status == Status.VALID;
   }
   
   /**
-   * Returns if the dataflow project being validated can be created with the current arguments.
+   * @return true if the argument has not been entered, false otherwise
    */
   public boolean isMissing() {
     return status == Status.MISSING;
   }
   
   /**
-   * Returns if one of the inputs to create the dataflow project has a syntax error.
+   * @return true if the argument is syntactically incorrect
    */
   public boolean isError() {
     return status == Status.ERROR;
