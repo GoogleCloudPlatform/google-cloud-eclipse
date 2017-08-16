@@ -30,6 +30,7 @@ public class LibraryFactoryTest {
     IConfigurationElement configuration = Mockito.mock(IConfigurationElement.class);
     Mockito.when(configuration.getAttribute("id")).thenReturn("guava");
     Mockito.when(configuration.getAttribute("group")).thenReturn("com.google.guava");
+    Mockito.when(configuration.getAttribute("javaVersion")).thenReturn("1.8");
     Mockito.when(configuration.getName()).thenReturn("library");
     Mockito.when(configuration.getAttribute("siteUri"))
         .thenReturn(
@@ -41,6 +42,7 @@ public class LibraryFactoryTest {
 
     Library library = factory.create(configuration);
     Assert.assertEquals("com.google.guava", library.getGroup());
+    Assert.assertEquals("1.8", library.getVersion());
   }
 
   @Test

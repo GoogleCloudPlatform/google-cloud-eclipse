@@ -32,7 +32,9 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 
+import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
 import com.google.cloud.tools.eclipse.appengine.libraries.BuildPath;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
@@ -59,7 +61,13 @@ public abstract class CloudLibrariesPage extends WizardPage implements IClasspat
     Composite composite = new Composite(parent, SWT.BORDER);
     composite.setLayout(new GridLayout(2, true));
     
-    librariesSelector = new LibrarySelectorGroup(composite, group);
+    boolean java8Project = true;
+    IProjectFacetVersion facetVersion = AppEngineStandardFacet.getProjectFacetVersion(project.getProject());
+    if (facetVersion != null && facetVersion.getVersionString().equals("JRE7")) {
+      java8Project = false;
+    }
+    
+    librariesSelector = new LibrarySelectorGroup(composite, group, java8Project);
     
     setControl(composite);
   }

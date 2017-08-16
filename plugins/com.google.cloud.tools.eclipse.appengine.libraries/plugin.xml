@@ -300,6 +300,7 @@
           group="clientapis"
           name="%clouddatastore.name"
           tooltip="%clouddatastore.tooltip"
+          javaVersion="1.8"
           siteUri="https://cloud.google.com/datastore/docs/reference/libraries#client-libraries-install-java" >
       <libraryDependency id="googlecloudcore" />
       <libraryFile
