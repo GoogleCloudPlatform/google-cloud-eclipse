@@ -22,7 +22,8 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 
 final class LibraryComparator implements Comparator<Library> {
   @Override
-  public int compare(Library l1, Library l2) {
-    return l1.getId().compareTo(l2.getId());
+  public int compare(Library library1, Library library2) {
+    return library1.getId().compareTo(library2.getId());
   }
+
 }

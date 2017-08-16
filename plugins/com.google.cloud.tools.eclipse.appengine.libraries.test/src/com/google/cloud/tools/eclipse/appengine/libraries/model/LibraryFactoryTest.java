@@ -42,7 +42,7 @@ public class LibraryFactoryTest {
 
     Library library = factory.create(configuration);
     Assert.assertEquals("com.google.guava", library.getGroup());
-    Assert.assertEquals("1.8", library.getVersion());
+    Assert.assertEquals("1.8", library.getJavaVersion());
   }
 
   @Test

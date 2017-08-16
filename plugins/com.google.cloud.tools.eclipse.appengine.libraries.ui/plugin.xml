@@ -8,24 +8,11 @@
        name="App Engine Libraries"
        class="com.google.cloud.tools.eclipse.appengine.libraries.ui.AppEngineLibrariesPage">
     </classpathContainerPage>
-    
-    <!-- todo how to show this only in java environment? 
-         can we use https://wiki.eclipse.org/Platform_Expression_Framework 
-         doesn;t seem to work. Could we add this in Java instead? -->
+
     <classpathContainerPage
        id="com.google.cloud.tools.eclipse.appengine.libraries"
        name="Google API Libraries"
        class="com.google.cloud.tools.eclipse.appengine.libraries.ui.ApiClientLibrariesPage">
-       
-             <enabledWhen>
-        <and>
-          <count value="1" />
-          <iterate>
-            <reference definitionId="com.google.cloud.tools.eclipse.appengine.onlyInFlexProjects" />
-          </iterate>
-        </and>
-      </enabledWhen>
-       
     </classpathContainerPage>
     
  </extension>

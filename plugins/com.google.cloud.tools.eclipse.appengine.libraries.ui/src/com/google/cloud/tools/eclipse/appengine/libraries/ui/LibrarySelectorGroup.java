@@ -67,7 +67,7 @@ public class LibrarySelectorGroup implements ISelectionProvider {
     Collection<Library> availableLibraries = CloudLibraries.getLibraries(groupName);
     this.availableLibraries = new LinkedHashMap<>();
     for (Library library : availableLibraries) {
-      if (java8Project || !library.getVersion().equals("1.8")) {
+      if (java8Project || !library.getJavaVersion().equals("1.8")) {
         this.availableLibraries.put(library.getId(), library);
       }
     }

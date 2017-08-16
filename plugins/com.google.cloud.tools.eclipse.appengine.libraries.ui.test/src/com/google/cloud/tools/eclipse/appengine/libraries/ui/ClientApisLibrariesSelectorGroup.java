@@ -96,8 +96,8 @@ public class ClientApisLibrariesSelectorGroup {
     apiClientButton.click();
     List<Library> selectedLibraries = getSelectedLibrariesSorted();
     assertNotNull(selectedLibraries);
-    assertThat(selectedLibraries.size(), is(1));
-    assertThat(selectedLibraries.get(0).getId(), is("googleapiclient"));
+    assertEquals(1, selectedLibraries.size());
+    assertEquals("googleapiclient", selectedLibraries.get(0).getId());
   }
 
   @Test
@@ -105,9 +105,9 @@ public class ClientApisLibrariesSelectorGroup {
     cloudCoreButton.click();
     List<Library> selectedLibraries = getSelectedLibrariesSorted();
     assertNotNull(selectedLibraries);
-    assertThat(selectedLibraries.size(), is(2));
-    assertThat(selectedLibraries.get(0).getId(), is("googleapiclient"));
-    assertThat(selectedLibraries.get(1).getId(), is("googlecloudcore"));
+    assertEquals(2, selectedLibraries.size());
+    assertEquals("googleapiclient", selectedLibraries.get(0).getId());
+    assertEquals("googlecloudcore", selectedLibraries.get(1).getId());
   }
   
   @Test
@@ -115,10 +115,10 @@ public class ClientApisLibrariesSelectorGroup {
     cloudStorageButton.click();
     List<Library> selectedLibraries = getSelectedLibrariesSorted();
     assertNotNull(selectedLibraries);
-    assertThat(selectedLibraries.size(), is(3));
-    assertThat(selectedLibraries.get(0).getId(), is("googleapiclient"));
-    assertThat(selectedLibraries.get(1).getId(), is("googlecloudcore"));
-    assertThat(selectedLibraries.get(2).getId(), is("googlecloudstorage"));
+    assertEquals(3, selectedLibraries.size());
+    assertEquals("googleapiclient", selectedLibraries.get(0).getId());
+    assertEquals("googlecloudcore", selectedLibraries.get(1).getId());
+    assertEquals("googlecloudstorage", selectedLibraries.get(2).getId());
   }
 
   @Test

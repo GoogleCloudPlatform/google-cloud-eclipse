@@ -57,7 +57,6 @@ public final class Library {
     this.id = id;
     this.libraryFiles = libraryFiles;
   }
-
   
   public String getId() {
     return id;
@@ -78,7 +77,7 @@ public final class Library {
   /**
    * @return minimum Java version required for this library
    */
-  public String getVersion() {
+  public String getJavaVersion() {
     return javaVersion;
   }
 
