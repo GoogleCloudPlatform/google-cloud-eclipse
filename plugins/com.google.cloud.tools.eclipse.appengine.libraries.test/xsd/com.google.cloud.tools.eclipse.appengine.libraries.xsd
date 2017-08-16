@@ -125,6 +125,13 @@ limitations under the License.
                </xs:documentation>
             </xs:annotation>
          </xs:attribute>
+         <xs:attribute name="javaVersion" type="xs:string">
+            <xs:annotation>
+               <xs:documentation>
+                  Minimum Java version required to use this library.
+               </xs:documentation>
+            </xs:annotation>
+         </xs:attribute>
          <xs:attribute name="recommendation" type="recommendationType">
             <xs:annotation>
                <xs:documentation>
