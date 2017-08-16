@@ -33,6 +33,8 @@ limitations under the License.
       </xs:documentation>
    </xs:annotation>
 
+  <xs:include schemaLocation="schema://org.eclipse.core.expressions/schema/expressionLanguage.exsd"/>  
+
    <xs:element name="plugin">
       <xs:complexType>
          <xs:choice minOccurs="1" maxOccurs="unbounded">
@@ -89,6 +91,9 @@ limitations under the License.
       </xs:annotation>
       <xs:complexType>
          <xs:sequence>
+            <xs:choice minOccurs="0" maxOccurs="1">
+               <xs:element ref="enablement" />
+            </xs:choice>
             <xs:choice minOccurs="0" maxOccurs="unbounded">
                <xs:element ref="libraryDependency" />
             </xs:choice>
@@ -201,6 +206,51 @@ unspecified, the javadoc will be downloaded from the artifact location if availa
          </xs:attribute>
       </xs:complexType>
    </xs:element>
+<!--  
+   <xs:element name="enablement">
+      <xs:annotation>
+         <xs:documentation>
+            An Eclipse core expressions enablement element.
+            See http://help.eclipse.org/neon/index.jsp?topic=%2Forg.eclipse.platform.doc.isv%2Freference%2Fapi%2Forg%2Feclipse%2Fcore%2Fexpressions%2Fpackage-summary.html
+            This schema is very restricted and needs to be expanded.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+           <xs:element ref="count"/>
+           <xs:element ref="not"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+   
+   <xs:element name="count">
+     <xs:complexType>
+        <xs:attribute name="value" use="required"/>
+     </xs:complexType>
+   </xs:element>
+   
+   <xs:element name="reference">
+     <xs:complexType>
+        <xs:attribute name="definitionId" use="required"/>
+     </xs:complexType>
+   </xs:element>
+
+   <xs:element name="iterate">
+     <xs:complexType>
+        <xs:sequence>
+          <xs:element ref="reference"/>
+        </xs:sequence>
+     </xs:complexType>
+   </xs:element>
+
+   <xs:element name="not">
+     <xs:complexType>
+        <xs:sequence>
+          <xs:element ref="iterate"/>
+        </xs:sequence>
+     </xs:complexType>
+   </xs:element> -->
+
 
    <xs:element name="libraryDependency">
       <xs:annotation>

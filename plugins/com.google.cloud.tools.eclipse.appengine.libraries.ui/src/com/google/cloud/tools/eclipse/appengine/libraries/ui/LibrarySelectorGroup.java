@@ -28,7 +28,16 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import org.eclipse.core.expressions.EvaluationContext;
+import org.eclipse.core.expressions.EvaluationResult;
+import org.eclipse.core.expressions.Expression;
+import org.eclipse.core.expressions.IEvaluationContext;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -42,6 +51,10 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 
 /**
  * A checkbox group to choose libraries defined in plugin.xml.
@@ -73,17 +86,65 @@ public class LibrarySelectorGroup implements ISelectionProvider {
     Group apiGroup = new Group(parentContainer, SWT.NONE);
     apiGroup.setText(Messages.getString("appengine.libraries.group")); //$NON-NLS-1$
 
+    IProject project = getSelectedProject();
     for (Library library : availableLibraries.values()) {
-      Button libraryButton = new Button(apiGroup, SWT.CHECK);
-      libraryButton.setText(getLibraryName(library));
-      if (library.getToolTip() != null) {
-        libraryButton.setToolTipText(library.getToolTip());
+      if (enabled(library, project)) {
+        Button libraryButton = new Button(apiGroup, SWT.CHECK);
+        libraryButton.setText(getLibraryName(library));
+        if (library.getToolTip() != null) {
+          libraryButton.setToolTipText(library.getToolTip());
+        }
+        libraryButton.setData(library);
+        libraryButton.addSelectionListener(new ManualSelectionTracker());
+        libraryButtons.put(library, libraryButton);
       }
-      libraryButton.setData(library);
-      libraryButton.addSelectionListener(new ManualSelectionTracker());
-      libraryButtons.put(library, libraryButton);
     }
     GridLayoutFactory.swtDefaults().generateLayout(apiGroup);
+  }
+
+  private static boolean enabled(Library library, IProject project) {
+    Expression expression = library.getEnablement();
+    if (expression == null) {
+      return true; 
+    }
+
+    // fill in the default variable with the currently selected project
+    // todo when creating a new project, the currently selected project may not be the right one
+    List<Object> defaultVariable = new ArrayList<>();
+    if (project != null) {
+      defaultVariable.add(project);
+    } else {
+      defaultVariable.add("foo");
+    }
+    IEvaluationContext context = new EvaluationContext(null, defaultVariable);
+    try {
+      EvaluationResult result = expression.evaluate(context);
+      return result == EvaluationResult.TRUE;
+    } catch (CoreException ex) {
+      // default to including the library
+      return true;
+    }
+  }
+
+  private static IProject getSelectedProject() {
+    // todo is this the best way to grab the selection? If so move to a utility package? 
+    // maybe we should pass the project into the constructor, so it can be null even
+    // if we are using the wizard but a different project is selected
+    IWorkbench workbench = PlatformUI.getWorkbench();
+    IWorkbenchWindow activeWorkbenchWindow = workbench.getActiveWorkbenchWindow();
+    IWorkbenchPage activePage = activeWorkbenchWindow.getActivePage();
+    ISelection selection = activePage.getSelection();
+    if (selection instanceof IStructuredSelection) {
+      IStructuredSelection structuredSelection = (IStructuredSelection) selection;
+      Object element = structuredSelection.getFirstElement();
+      if (element instanceof IResource) {
+         IResource resource = (IResource) element;
+         return resource.getProject();
+      } else if (element instanceof IJavaProject) {
+        return ((IJavaProject) element).getProject();
+     }
+    }
+    return null;
   }
 
   /**

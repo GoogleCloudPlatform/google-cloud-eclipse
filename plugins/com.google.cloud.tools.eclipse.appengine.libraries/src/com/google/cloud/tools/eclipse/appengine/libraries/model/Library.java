@@ -22,6 +22,8 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import org.eclipse.core.expressions.Expression;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
@@ -44,6 +46,8 @@ public final class Library {
 
   // IDs of other libraries that also need to be added to the build path with this library
   private List<String> libraryDependencies = new ArrayList<>();
+
+  private Expression expression;
 
   public Library(String id) {
     Preconditions.checkNotNull(id, "id null");
@@ -144,5 +148,21 @@ public final class Library {
 
   public String getGroup() {
     return group;
+  }
+
+  /**
+   * @param expression an expression to be evaluated to determine whether
+   *     this library is enabled in context
+   */
+  void setEnablement(Expression expression) {
+    this.expression = expression;
+  }
+
+  /**
+   * @return an expression to be evaluated to determine whether
+   *     this library is enabled in context
+   */
+  public Expression getEnablement() {
+    return this.expression;
   }
 }

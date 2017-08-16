@@ -23,7 +23,12 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.eclipse.core.expressions.Expression;
+import org.eclipse.core.expressions.ExpressionConverter;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.InvalidRegistryObjectException;
 
@@ -77,6 +82,10 @@ class LibraryFactory {
         }
         library.setLibraryDependencies(getLibraryDependencies(
             configurationElement.getChildren(ELEMENT_NAME_LIBRARY_DEPENDENCY)));
+        
+        Expression expression = getEnabled(configurationElement);
+        library.setEnablement(expression);
+        
         return library;
       } else {
         throw new LibraryFactoryException(
@@ -86,6 +95,22 @@ class LibraryFactory {
     } catch (InvalidRegistryObjectException | URISyntaxException | IllegalArgumentException ex) {
       throw new LibraryFactoryException(Messages.getString("CreateLibraryError"), ex);
     }
+  }
+  
+
+  private static Expression getEnabled(IConfigurationElement element) {
+    IConfigurationElement[] enablements = element.getChildren("enablement");
+    // todo can there be more than one of these? Do we need to loop?
+    if (enablements.length > 0) {
+      try {
+        Expression expression = ExpressionConverter.getDefault().perform(enablements[0]);
+        return expression;
+      } catch (CoreException ex) {
+        logger.log(Level.WARNING, "Malformed enablement expression in plugin.xml", ex);
+        return null;
+      }
+    }
+    return null;
   }
 
   private static List<LibraryFile> getLibraryFiles(IConfigurationElement[] children)

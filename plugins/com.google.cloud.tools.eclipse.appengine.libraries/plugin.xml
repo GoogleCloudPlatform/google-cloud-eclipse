@@ -31,6 +31,11 @@
           name="Google Cloud Endpoints"
           tooltip="%endpoints.tooltip"
           siteUri="https://cloud.google.com/appengine/docs/java/endpoints/" >
+       <enablement>
+		      <iterate>
+		        <reference definitionId="com.google.cloud.tools.eclipse.appengine.onlyInFlexProjects" />
+		      </iterate>
+      </enablement>
       <libraryDependency id="appengine-api" />
       <libraryFile
             javadocUri="https://cloud.google.com/appengine/docs/java/endpoints/javadoc/">
@@ -292,6 +297,31 @@
               artifactId="google-api-services-storage"
               groupId="com.google.apis"
               version="v1-rev100-1.22.0" />
+      </libraryFile>
+    </library>
+    
+    <library
+          id="stackdrivermonitoring"
+          group="clientapis"
+          name="%stackdrivermonitoring.name"
+          tooltip="%stackdrivermonitoring.tooltip"
+          siteUri="https://cloud.google.com/monitoring/api/v3/">
+      <enablement>
+	      <count value="1" />
+	      <not>
+		      <iterate>
+		        <reference definitionId="com.google.cloud.tools.eclipse.appengine.onlyInStandardProjects" />
+		      </iterate>
+	      </not>
+      </enablement>
+          
+      <libraryDependency id="googlecloudcore" />
+      <libraryFile
+            javadocUri="https://developers.google.com/resources/api-libraries/documentation/monitoring/v3/java/latest/">
+        <mavenCoordinates
+              artifactId="google-cloud-monitoring"
+              groupId="com.google.cloud"
+              version="0.17.2-alpha" />
       </libraryFile>
     </library>
   </extension>
