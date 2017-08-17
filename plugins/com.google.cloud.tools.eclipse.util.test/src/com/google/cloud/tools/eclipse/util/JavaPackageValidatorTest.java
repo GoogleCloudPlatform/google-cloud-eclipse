@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.newproject;
+package com.google.cloud.tools.eclipse.util;
 
 import org.eclipse.core.runtime.IStatus;
 import org.junit.Assert;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Google Inc.
+ * Copyright 2017 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.newproject;
+package com.google.cloud.tools.eclipse.util;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 public class MessagesTest {
-
   @Test
-  public void testNewAppEngineStandardProject() {
+  public void testPackageEndsWithPeriod() {
     Assert.assertEquals(
-        "New App Engine Standard Project", 
-        Messages.getString("new.app.engine.standard.project"));
+        "com.google. ends with a period.", 
+        Messages.getString("package.ends.with.period", "com.google."));
   }
-
+  
   @Test
-  public void testWizardDescription() {
+  public void testPackageContainsWhiteSpace() {
     Assert.assertEquals(
-        "Create a new Eclipse project for App Engine standard environment development.",
-        Messages.getString("create.app.engine.standard.project"));
+        "com google foo contains white space.", 
+        Messages.getString("package.contains.whitespace", "com google foo"));
   }
+  
 
 }
