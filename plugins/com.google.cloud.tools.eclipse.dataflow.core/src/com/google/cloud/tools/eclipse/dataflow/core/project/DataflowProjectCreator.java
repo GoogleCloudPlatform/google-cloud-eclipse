@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.dataflow.core.project;
 import com.google.cloud.tools.eclipse.dataflow.core.DataflowCorePlugin;
 import com.google.cloud.tools.eclipse.dataflow.core.natures.DataflowJavaProjectNature;
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.WritableDataflowPreferences;
+import com.google.cloud.tools.eclipse.util.JavaPackageValidator;
 import com.google.cloud.tools.eclipse.util.MavenCoordinatesValidator;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSortedSet;
@@ -34,7 +35,6 @@ import java.util.List;
 import java.util.NavigableSet;
 import java.util.Properties;
 import java.util.Set;
-import java.util.regex.Pattern;
 import org.apache.maven.archetype.catalog.Archetype;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
@@ -56,11 +56,6 @@ import org.eclipse.m2e.core.project.ProjectImportConfiguration;
  * An {@code IRunnableWithProgress} that creates a new Cloud Dataflow Java Project.
  */
 public class DataflowProjectCreator implements IRunnableWithProgress {
-  
-  // todo use JavaConventions.validatePackageName or JavaPackageValidator instead
-  // this doesn't allow non-ASCII packages, among other problems
-  private static final Pattern JAVA_PACKAGE_REGEX =
-      Pattern.compile("([a-zA-Z_$][a-zA-Z0-9_$]*\\.)*[a-zA-Z_$][a-zA-Z0-9_$]*");
 
   private static final String DEFAULT_JAVA_VERSION = JavaCore.VERSION_1_7;
   private static final List<String> JAVA_VERSION_BLACKLIST =
@@ -353,7 +348,7 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
     if (Strings.isNullOrEmpty(packageString)) {
       return DataflowProjectValidationStatus.MISSING_PACKAGE;
     }
-    if (!JAVA_PACKAGE_REGEX.matcher(packageString).matches()) {
+    if (!JavaPackageValidator.validate(packageString, DataflowCorePlugin.PLUGIN_ID).isOK()) {
       return DataflowProjectValidationStatus.ILLEGAL_PACKAGE;
     }
     return DataflowProjectValidationStatus.OK;
