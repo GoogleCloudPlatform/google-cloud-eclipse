@@ -49,9 +49,6 @@ import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
  */
 public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
 
-  private static final String PLUGIN_ID = 
-      "com.google.cloud.tools.eclipse.appengine.newproject.AppEngineStandard"; //$NON-NLS-1$
-  
   private LibrarySelectorGroup appEngineLibrariesSelectorGroup;
   private Text javaPackageField;
   private Text serviceNameField;
@@ -123,8 +120,8 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
   /**
    * Creates a Runtime section. Composite is laid out with 2 columns.
    */
-  protected void createRuntimeField(Composite composite) {
-    // default: do nothing
+  protected void createRuntimeField(@SuppressWarnings("unused") Composite composite) {
+    // default: do nothing; used by subclasses
   }
 
   public String getRuntimeId() {
@@ -181,7 +178,7 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
 
   private boolean validateLocalFields() {
     String packageName = javaPackageField.getText();
-    IStatus packageStatus = JavaPackageValidator.validate(packageName, PLUGIN_ID);
+    IStatus packageStatus = JavaPackageValidator.validate(packageName);
     if (!packageStatus.isOK()) {
       String message = Messages.getString("illegal.package.name",  //$NON-NLS-1$
           packageName, packageStatus.getMessage());
@@ -283,7 +280,7 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
    */
   @VisibleForTesting
   static String suggestPackageName(String groupId) {
-    if (JavaPackageValidator.validate(groupId, PLUGIN_ID).isOK()) {
+    if (JavaPackageValidator.validate(groupId).isOK()) {
       return groupId;
     }
 

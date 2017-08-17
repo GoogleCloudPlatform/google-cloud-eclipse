@@ -348,7 +348,7 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
     if (Strings.isNullOrEmpty(packageString)) {
       return DataflowProjectValidationStatus.MISSING_PACKAGE;
     }
-    if (!JavaPackageValidator.validate(packageString, DataflowCorePlugin.PLUGIN_ID).isOK()) {
+    if (!JavaPackageValidator.validate(packageString).isOK()) {
       return DataflowProjectValidationStatus.ILLEGAL_PACKAGE;
     }
     return DataflowProjectValidationStatus.OK;
