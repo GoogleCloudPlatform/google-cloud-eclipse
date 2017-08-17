@@ -112,7 +112,11 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
    * hierarchy should be restricted to only showing options available from the current project, if
    * able.
    */
+  // There is an async job updating this field. All other access should be done in the UI thread
+  // and should check if the field is being updated (i.e., if it is null).
   private PipelineOptionsHierarchy hierarchy;
+  private Job latestHierarchyUpdateJob;
+  private Job latestHierarchyUiUpdateJob;
 
   private final IWorkspaceRoot workspaceRoot;
 
@@ -163,7 +167,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
     userOptionsSelector = new TextAndButtonComponent(
         runnerOptionsGroup,
-        new GridData(SWT.FILL, SWT.BEGINNING, true, false), 
+        new GridData(SWT.FILL, SWT.BEGINNING, true, false),
         Messages.getString("search")); //$NON-NLS-1$
     userOptionsSelector.addButtonSelectionListener(openPipelineOptionsSearchListener());
 
@@ -186,6 +190,8 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     return new TextAndButtonSelectionListener() {
       @Override
       public void widgetSelected(SelectionEvent event) {
+        Preconditions.checkNotNull(hierarchy,
+            "concurrency bug: the button should be disabled while the field is being updated");
         Map<String, PipelineOptionsType> optionsTypes = hierarchy.getAllPipelineOptionsTypes();
         PipelineOptionsSelectionDialog dialog =
             new PipelineOptionsSelectionDialog(getShell(), optionsTypes);
@@ -320,7 +326,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
       updatePipelineOptionsForm();
     } catch (CoreException ex) {
       // TODO: Handle
-      DataflowUiPlugin.logError(ex, 
+      DataflowUiPlugin.logError(ex,
           "Error while initializing from existing configuration"); //$NON-NLS-1$
     }
   }
@@ -347,14 +353,28 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
    * Asynchronously updates the project hierarchy.
    */
   private void updateHierarchy(final MajorVersion majorVersion) {
-    Job job = new Job(Messages.getString("update.hierarchy")) { //$NON-NLS-1$
+    userOptionsSelector.setEnabled(false);
+    hierarchy = null;
+
+    latestHierarchyUpdateJob = new Job(Messages.getString("update.hierarchy")) { //$NON-NLS-1$
       @Override
       public IStatus run(IProgressMonitor progress) {
-        hierarchy = getPipelineOptionsHierarchy(majorVersion, progress);
+        final Job thisJob = this;
+        final PipelineOptionsHierarchy newHierarchy =
+            getPipelineOptionsHierarchy(majorVersion, progress);
+        getControl().getDisplay().syncExec(new Runnable() {
+          @Override
+          public void run() {
+            if (thisJob == latestHierarchyUpdateJob) {
+              userOptionsSelector.setEnabled(true);
+              hierarchy = newHierarchy;
+            }
+          }
+        });
         return Status.OK_STATUS;
       }
     };
-    job.schedule();
+    latestHierarchyUpdateJob.schedule();
   }
 
   private DataflowPreferences getPreferences() {
@@ -397,19 +417,40 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   private void updatePipelineOptionsForm() {
     final SettableFuture<Map<PipelineOptionsType, Set<PipelineOptionsProperty>>>
         optionsHierarchyFuture = SettableFuture.create();
-    Job job = new Job("Update Pipeline Options Form") { //$NON-NLS-1$
+    final PipelineOptionsHierarchy[] hierarchyHolder = new PipelineOptionsHierarchy[1];
+
+    final Job job = new Job("Update Pipeline Options Form") { //$NON-NLS-1$
       @Override
       protected IStatus run(IProgressMonitor monitor) {
-        optionsHierarchyFuture.set(launchConfiguration.getOptionsHierarchy(hierarchy));
+        final Job thisJob = this;
+        final boolean[] die = new boolean[1];
+        getControl().getDisplay().syncExec(new Runnable() {
+          @Override
+          public void run() {
+            die[0] = internalComposite.isDisposed() || thisJob != latestHierarchyUiUpdateJob;
+            hierarchyHolder[0] = hierarchy;
+          }
+        });
+        if (die[0]) {
+          return Status.OK_STATUS;
+        }
+
+        if (hierarchyHolder[0] == null) {
+          schedule(50 /* ms */);  // 'hierarchy' update job still running; try the next chance
+        } else {
+          optionsHierarchyFuture.set(launchConfiguration.getOptionsHierarchy(hierarchyHolder[0]));
+        }
         return Status.OK_STATUS;
       }
     };
+    latestHierarchyUiUpdateJob = job;
     job.schedule();
     optionsHierarchyFuture.addListener(
         new Runnable() {
           @Override
           public void run() {
-            if (internalComposite.isDisposed()) {
+            if (internalComposite.isDisposed()
+                || hierarchy != hierarchyHolder[0] || job != latestHierarchyUiUpdateJob) {
               return;
             }
 
@@ -433,12 +474,18 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   }
 
   private boolean validatePage() {
-    MissingRequiredProperties validationFailures =
-        launchConfiguration.getMissingRequiredProperties(hierarchy, getPreferences());
+    // We can't validate pipeline options if they are being loaded. Unfortunately, it is possible
+    // that validation will fail if it would be checked after loading is complete, but there is
+    // not much we can do here.
+    if (hierarchy != null) {
+      MissingRequiredProperties validationFailures =
+          launchConfiguration.getMissingRequiredProperties(hierarchy, getPreferences());
 
-    setErrorMessage(null);
-    return validateRequiredProperties(validationFailures)
-        && validateRequiredGroups(validationFailures);
+      setErrorMessage(null);
+      return validateRequiredProperties(validationFailures)
+          && validateRequiredGroups(validationFailures);
+    }
+    return true;
   }
 
   private boolean validateRequiredGroups(MissingRequiredProperties validationFailures) {
