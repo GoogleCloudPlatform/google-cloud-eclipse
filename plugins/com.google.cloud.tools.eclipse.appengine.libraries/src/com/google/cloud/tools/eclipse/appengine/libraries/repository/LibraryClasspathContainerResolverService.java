@@ -61,7 +61,7 @@ public class LibraryClasspathContainerResolverService
     implements ILibraryClasspathContainerResolverService {
 
   private static final String CLASSPATH_ATTRIBUTE_SOURCE_URL =
-      "com.google.cloud.tools.eclipse.appengine.libraries.sourceUrl";
+      "com.google.cloud.tools.eclipse.appengine.libraries.sourceUrl"; //$NON-NLS-1$
 
   private ILibraryRepositoryService repositoryService;
   private LibraryClasspathContainerSerializer serializer;
@@ -72,8 +72,8 @@ public class LibraryClasspathContainerResolverService
       IStatus status = Status.OK_STATUS;
       IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
       SubMonitor subMonitor = SubMonitor.convert(monitor,
-                                                 Messages.getString("TaskResolveLibraries"),
-                                                 getTotalwork(rawClasspath));
+          Messages.getString("TaskResolveLibraries"), //$NON-NLS-1$
+          getTotalwork(rawClasspath));
       for (IClasspathEntry classpathEntry : rawClasspath) {
         if (classpathEntry.getPath().segment(0).equals(Library.CONTAINER_PATH_PREFIX)) {
           status = StatusUtil.merge(status, resolveContainer(javaProject,
@@ -83,7 +83,8 @@ public class LibraryClasspathContainerResolverService
       }
       return status;
     } catch (CoreException ex) {
-      return StatusUtil.error(this, Messages.getString("TaskResolveLibrariesError"), ex);
+      return StatusUtil.error(this, 
+          Messages.getString("TaskResolveLibrariesError"), ex); //$NON-NLS-1$
     }
   }
 
@@ -91,7 +92,8 @@ public class LibraryClasspathContainerResolverService
   public IClasspathEntry[] resolveLibraryAttachSourcesSync(String libraryId) throws CoreException {
     Library library = CloudLibraries.getLibrary(libraryId);
     if (library == null) {
-      throw new CoreException(StatusUtil.error(this, Messages.getString("InvalidLibraryId",
+      throw new CoreException(
+          StatusUtil.error(this, Messages.getString("InvalidLibraryId", //$NON-NLS-1$
           libraryId)));
     }
 
@@ -222,14 +224,13 @@ public class LibraryClasspathContainerResolverService
   private IClasspathEntry resolveLibraryFileAttachSourceSync(final LibraryFile libraryFile)
       throws CoreException {
 
-    final Artifact artifact =
-        repositoryService.resolveArtifact(libraryFile, new NullProgressMonitor());
+    Artifact artifact = repositoryService.resolveArtifact(libraryFile, new NullProgressMonitor());
     IPath libraryPath = new Path(artifact.getFile().getAbsolutePath());
     IPath sourceAttachmentPath = null;
     sourceAttachmentPath = repositoryService.resolveSourceArtifact(libraryFile,
                                                                    artifact.getVersion(),
                                                                    new NullProgressMonitor());
-    final IClasspathEntry newLibraryEntry =
+    IClasspathEntry newLibraryEntry =
         JavaCore.newLibraryEntry(libraryPath,
                                  sourceAttachmentPath,
                                  null /*  sourceAttachmentRootPath */,

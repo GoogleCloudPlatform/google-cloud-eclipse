@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.newproject.maven;
+package com.google.cloud.tools.eclipse.util;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -22,6 +22,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 public class MavenCoordinatesValidatorTest {
+
   @Test
   public void testValidateArtifactId() {
     assertTrue(MavenCoordinatesValidator.validateArtifactId("foo"));

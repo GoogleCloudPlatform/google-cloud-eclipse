@@ -19,74 +19,99 @@ package com.google.cloud.tools.eclipse.dataflow.core.project;
 import org.eclipse.core.runtime.IPath;
 
 /**
- * The result of validation a Dataflow Project, pre-creation.
+ * The result of validation of a Dataflow Project field, pre-creation.
  */
 public enum DataflowProjectValidationStatus {
+  
+  // todo externalize these messages
+  
   /**
    * The project is valid and can be created with the current settings.
    */
-  OK(true, null),
+  OK(Status.VALID, null),
   /**
    * The location specified to put the project is not local.
    */
-  LOCATION_NOT_LOCAL(false, "Location must be a local directory"),
+  LOCATION_NOT_LOCAL(Status.ERROR, "Location must be a local directory"),
   /**
    * The location specified to put the project does not exist.
    */
-  NO_SUCH_LOCATION(false, "Location must be an existing directory"),
+  NO_SUCH_LOCATION(Status.ERROR, "Location must be an existing directory"),
   /**
    * The location specified exists, but is not a directory.
    */
-  LOCATION_NOT_DIRECTORY(false, "Location must be a directory"),
+  LOCATION_NOT_DIRECTORY(Status.ERROR, "Location must be a directory"),
   /**
-   * There is no provided maven group ID.
+   * There is no provided Maven group ID.
    */
-  NO_GROUP_ID(false, "Enter a Group ID"),
+  NO_GROUP_ID(Status.MISSING, "Enter a Group ID"),
   /**
-   * The provided maven group ID is not valid.
+   * The provided Maven group ID is not valid.
    */
-  ILLEGAL_GROUP_ID(false, "Invalid Group ID"),
+  ILLEGAL_GROUP_ID(Status.ERROR, "Invalid Group ID"),
   /**
-   * There is no provided maven artifact ID.
+   * There is no provided Maven artifact ID.
    */
-  NO_ARTIFACT_ID(false, "Enter an Artifact ID"),
+  NO_ARTIFACT_ID(Status.MISSING, "Enter an Artifact ID"),
   /**
-   * The provided maven artifact ID is not valid.
+   * The provided Maven artifact ID is not valid.
    */
-  ILLEGAL_ARTIFACT_ID(false, "Invalid Artifact ID"),
+  ILLEGAL_ARTIFACT_ID(Status.ERROR, "Invalid Artifact ID"),
   /**
    * The Java package is invalid.
    */
-  ILLEGAL_PACKAGE(false, "Invalid Java Package"),
+  ILLEGAL_PACKAGE(Status.ERROR, "Invalid Java package"),
+  /**
+   * The Java package is not set.
+   */
+  MISSING_PACKAGE(Status.MISSING, "Enter a Java package"),
   /**
    * The provided project name is not a valid segment. See {@link IPath#isValidSegment(String)}
    */
-  PROJECT_NAME_NOT_SEGMENT(false, "Invalid Project Name"),
+  PROJECT_NAME_NOT_SEGMENT(Status.ERROR, "Invalid Project Name"),
   /**
    * The target platform is not supported by the Dataflow SDK.
    */
   UNSUPPORTED_TARGET_PLATFORM(
-      false,
+      Status.ERROR,
       "Unsupported Target Platform."
       + " Please ensure that the JDK Compiler Compliance Level is set to 1.7 or higher.");
 
-  private final boolean valid;
+  private final Status status;
   private final String message;
-
-  private DataflowProjectValidationStatus(boolean valid, String message) {
-    this.valid = valid;
+  
+  public enum Status {
+    VALID, ERROR, MISSING 
+  }
+ 
+  private DataflowProjectValidationStatus(Status status, String message) {
+    this.status = status;
     this.message = message;
   }
 
   /**
-   * Returns if the dataflow project being validated can be created with the current arguments.
+   * @retunr true if a dataflow project can be created with the current argument
    */
   public boolean isValid() {
-    return valid;
+    return status == Status.VALID;
+  }
+  
+  /**
+   * @return true if the argument has not been entered, false otherwise
+   */
+  public boolean isMissing() {
+    return status == Status.MISSING;
+  }
+  
+  /**
+   * @return true if the argument is syntactically incorrect
+   */
+  public boolean isError() {
+    return status == Status.ERROR;
   }
 
   /**
-   * Returns the error message for this {@link DataflowProjectValidationStatus}, or null if the
+   * Returns the message for this {@link DataflowProjectValidationStatus}, or null if the
    * status is valid.
    */
   public String getMessage() {

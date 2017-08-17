@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.dataflow.core.project;
 import com.google.cloud.tools.eclipse.dataflow.core.DataflowCorePlugin;
 import com.google.cloud.tools.eclipse.dataflow.core.natures.DataflowJavaProjectNature;
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.WritableDataflowPreferences;
+import com.google.cloud.tools.eclipse.util.MavenCoordinatesValidator;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSortedSet;
 import java.io.File;
@@ -55,7 +56,9 @@ import org.eclipse.m2e.core.project.ProjectImportConfiguration;
  * An {@code IRunnableWithProgress} that creates a new Cloud Dataflow Java Project.
  */
 public class DataflowProjectCreator implements IRunnableWithProgress {
-  private static final Pattern MAVEN_ID_REGEX = Pattern.compile("[A-Za-z0-9_\\-.]+");
+  
+  // todo use JavaConventions.validatePackageName or JavaPackageValidator instead
+  // this doesn't allow non-ASCII packages, among other problems
   private static final Pattern JAVA_PACKAGE_REGEX =
       Pattern.compile("([a-zA-Z_$][a-zA-Z0-9_$]*\\.)*[a-zA-Z_$][a-zA-Z0-9_$]*");
 
@@ -330,7 +333,7 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
     if (Strings.isNullOrEmpty(mavenArtifactId)) {
       return DataflowProjectValidationStatus.NO_ARTIFACT_ID;
     }
-    if (!MAVEN_ID_REGEX.matcher(mavenArtifactId).matches()) {
+    if (!MavenCoordinatesValidator.validateArtifactId(mavenArtifactId)) {
       return DataflowProjectValidationStatus.ILLEGAL_ARTIFACT_ID;
     }
     return DataflowProjectValidationStatus.OK;
@@ -340,15 +343,17 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
     if (Strings.isNullOrEmpty(mavenGroupId)) {
       return DataflowProjectValidationStatus.NO_GROUP_ID;
     }
-    if (!MAVEN_ID_REGEX.matcher(mavenGroupId).matches()) {
+    if (!MavenCoordinatesValidator.validateGroupId(mavenGroupId)) {
       return DataflowProjectValidationStatus.ILLEGAL_GROUP_ID;
     }
     return DataflowProjectValidationStatus.OK;
   }
 
   private DataflowProjectValidationStatus validatePackage() {
-    if (Strings.isNullOrEmpty(packageString)
-        || !JAVA_PACKAGE_REGEX.matcher(packageString).matches()) {
+    if (Strings.isNullOrEmpty(packageString)) {
+      return DataflowProjectValidationStatus.MISSING_PACKAGE;
+    }
+    if (!JAVA_PACKAGE_REGEX.matcher(packageString).matches()) {
       return DataflowProjectValidationStatus.ILLEGAL_PACKAGE;
     }
     return DataflowProjectValidationStatus.OK;

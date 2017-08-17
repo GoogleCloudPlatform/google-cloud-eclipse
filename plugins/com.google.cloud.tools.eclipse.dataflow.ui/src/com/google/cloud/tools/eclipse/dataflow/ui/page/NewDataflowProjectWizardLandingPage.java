@@ -50,6 +50,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import java.io.File;
 import java.net.URI;
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -57,7 +58,7 @@ import java.util.Map;
  */
 public class NewDataflowProjectWizardLandingPage extends WizardPage  {
 
-  private DataflowDependencyManager dependencyManager;
+  private final DataflowDependencyManager dependencyManager;
   private final DataflowProjectCreator targetCreator;
 
   private Text groupIdInput;
@@ -76,7 +77,7 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     super("newDataflowProjectWizardLandingPage"); //$NON-NLS-1$
     this.dependencyManager = DataflowDependencyManager.create();
     this.targetCreator = targetCreator;
-    setTitle(Messages.getString("CREATE_DATAFLOW_PROJECT")); //$NON-NLS-1$
+    setTitle(Messages.getString("create.dataflow.project")); //$NON-NLS-1$
     setDescription(Messages.getString("wizard.description")); //$NON-NLS-1$
     setImageDescriptor(getDataflowIcon());
     setPageComplete(false);
@@ -101,7 +102,8 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     return widget;
   }
 
-  private static Button addCheckbox(Composite formComposite, String labelText, boolean initialValue) {
+  private static Button addCheckbox(Composite formComposite, String labelText,
+      boolean initialValue) {
     Button checkbox = new Button(formComposite, SWT.CHECK);
     checkbox.setText(labelText);
     checkbox.setLayoutData(gridSpan(SWT.NULL, 3));
@@ -137,17 +139,19 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     artifactIdInput = addLabeledText(formComposite, Messages.getString("artifact.id")); //$NON-NLS-1$
     artifactIdInput.setToolTipText(Messages.getString("ARTIFACT_ID_TOOLTIP")); //$NON-NLS-1$
 
-    templateDropdown = addCombo(formComposite, Messages.getString("project.template"), true); //$NON-NLS-1$
+    templateDropdown = addCombo(formComposite, 
+        Messages.getString("project.template"), true); //$NON-NLS-1$
     for (Template template : Template.values()) {
       templateDropdown.add(template.getLabel());
     }
-    templateVersionDropdown = addCombo(formComposite, Messages.getString("dataflow.version"), false); //$NON-NLS-1$
+    templateVersionDropdown = addCombo(formComposite, 
+        Messages.getString("dataflow.version"), false); //$NON-NLS-1$
 
     templateDropdown.select(0);
     updateAvailableVersions();
 
     packageInput = addLabeledText(formComposite, Messages.getString("package")); //$NON-NLS-1$
-    packageInput.setToolTipText(Messages.getString("UNSET_PACKAGE_TOOLTIP")); //$NON-NLS-1$
+    packageInput.setToolTipText(Messages.getString("package.tooltip")); //$NON-NLS-1$
     packageInput.setMessage(Messages.getString("example.group.id"));//$NON-NLS-1$
 
     // Add a labeled text and button for the default location.
@@ -155,7 +159,8 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     locationGroup.setLayoutData(gridSpan(GridData.FILL_HORIZONTAL, 3));
     locationGroup.setLayout(new GridLayout(3, false));
 
-    useDefaultLocation = addCheckbox(locationGroup, Messages.getString("use.default.workspace.location"), true); //$NON-NLS-1$
+    useDefaultLocation = addCheckbox(locationGroup, 
+        Messages.getString("use.default.workspace.location"), true); //$NON-NLS-1$
 
     addLabel(locationGroup, Messages.getString("location")); //$NON-NLS-1$
 
@@ -178,25 +183,31 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
 
     // Register all the listeners
     addListeners(defaultLocation);
-
+    
     formComposite.layout();
     parent.layout();
   }
 
   private void validateAndSetError() {
-    if (targetCreator.isValid()) {
-      setErrorMessage(null);
-      setPageComplete(true);
-      return;
-    } else {
-      for (DataflowProjectValidationStatus status : targetCreator.validate()) {
-        if (!status.isValid()) {
-          setErrorMessage(status.getMessage());
-          break;
-        }
+    Collection<DataflowProjectValidationStatus> validations = targetCreator.validate();
+    for (DataflowProjectValidationStatus status : validations) {
+      if (status.isError()) {
+        setErrorMessage(status.getMessage());
+        setPageComplete(false);
+        return;
       }
     }
-    setPageComplete(false);
+    for (DataflowProjectValidationStatus status : validations) {
+      if (status.isMissing()) {
+        setErrorMessage(null);
+        setMessage(status.getMessage());
+        setPageComplete(false);
+        return;
+      }
+    }
+    setMessage(null);
+    setErrorMessage(null);
+    setPageComplete(true);
   }
 
   private void addListeners(String defaultProjectLocation) {
@@ -411,7 +422,7 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
       @Override
       public void widgetSelected(SelectionEvent event) {
         DirectoryDialog dialog = new DirectoryDialog(shell);
-        dialog.setMessage(Messages.getString("SELECT_PROJECT_LOCATION")); //$NON-NLS-1$
+        dialog.setMessage(Messages.getString("select.project.location")); //$NON-NLS-1$
         String result = dialog.open();
         if (!Strings.isNullOrEmpty(result)) {
           locationInput.setText(result);

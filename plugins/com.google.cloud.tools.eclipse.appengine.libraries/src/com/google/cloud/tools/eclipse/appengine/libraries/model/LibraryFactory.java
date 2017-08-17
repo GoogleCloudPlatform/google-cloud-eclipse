@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.Messages;
+import com.google.cloud.tools.eclipse.util.ArtifactRetriever;
 import com.google.common.base.Strings;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -24,6 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Logger;
+
+import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.InvalidRegistryObjectException;
 
@@ -55,6 +58,8 @@ class LibraryFactory {
   private static final String ATTRIBUTE_NAME_EXPORT = "export"; //$NON-NLS-1$
   private static final String ATTRIBUTE_NAME_RECOMMENDATION = "recommendation"; //$NON-NLS-1$
   
+  private static final ArtifactRetriever retriever = new ArtifactRetriever();
+
   // todo this should be static
   Library create(IConfigurationElement configurationElement) throws LibraryFactoryException {
     try {
@@ -139,8 +144,16 @@ class LibraryFactory {
     if (!Strings.isNullOrEmpty(repository)) {
       mavenCoordinates.setRepository(repository);
     }
-    
+
+    // Only look up latest version if version isn't specified in file.
     String version = mavenCoordinatesElement.getAttribute(ATTRIBUTE_NAME_VERSION);
+    if (Strings.isNullOrEmpty(version) || "LATEST".equals(version)) {
+      ArtifactVersion artifactVersion = retriever.getLatestArtifactVersion(groupId, artifactId);
+      if (artifactVersion != null) {
+        version = artifactVersion.toString();
+      }
+    } 
+    
     if (!Strings.isNullOrEmpty(version)) {
       mavenCoordinates.setVersion(version);
     }

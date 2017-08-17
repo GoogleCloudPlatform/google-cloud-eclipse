@@ -45,7 +45,7 @@ public class CloudLibraries {
    * Library files for all Java servlet applications; specifically
    * servlet.jar and jsp-api.jar.
    */
-  public static final String SERVLET_GROUP = "servlet";
+  public static final String SERVLET_GROUP = "servlet"; //$NON-NLS-1$
   
   private static final Logger logger = Logger.getLogger(CloudLibraries.class.getName());
   private static final ImmutableMap<String, Library> libraries = loadLibraryDefinitions();

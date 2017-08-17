@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.newproject.maven;
+package com.google.cloud.tools.eclipse.util;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;

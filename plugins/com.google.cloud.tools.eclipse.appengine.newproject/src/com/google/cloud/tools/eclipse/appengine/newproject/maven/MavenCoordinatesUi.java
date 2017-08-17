@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.newproject.maven;
 
 import com.google.cloud.tools.eclipse.appengine.newproject.Messages;
+import com.google.cloud.tools.eclipse.util.MavenCoordinatesValidator;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
