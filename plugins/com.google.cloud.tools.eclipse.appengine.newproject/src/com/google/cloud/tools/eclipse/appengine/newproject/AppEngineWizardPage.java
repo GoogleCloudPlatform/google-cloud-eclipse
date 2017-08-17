@@ -49,6 +49,9 @@ import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
  */
 public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
 
+  private static final String PLUGIN_ID = 
+      "com.google.cloud.tools.eclipse.appengine.newproject.AppEngineStandard"; //$NON-NLS-1$
+  
   private LibrarySelectorGroup appEngineLibrariesSelectorGroup;
   private Text javaPackageField;
   private Text serviceNameField;
@@ -178,7 +181,7 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
 
   private boolean validateLocalFields() {
     String packageName = javaPackageField.getText();
-    IStatus packageStatus = JavaPackageValidator.validate(packageName);
+    IStatus packageStatus = JavaPackageValidator.validate(packageName, PLUGIN_ID);
     if (!packageStatus.isOK()) {
       String message = Messages.getString("illegal.package.name",  //$NON-NLS-1$
           packageName, packageStatus.getMessage());
@@ -271,7 +274,7 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
       }
     }
   }
-
+  
   /**
    * Helper function returning a suggested package name based on {@code groupId}.
    * It does basic string filtering/manipulation, which does not completely eliminate
@@ -280,7 +283,7 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
    */
   @VisibleForTesting
   static String suggestPackageName(String groupId) {
-    if (JavaPackageValidator.validate(groupId).isOK()) {
+    if (JavaPackageValidator.validate(groupId, PLUGIN_ID).isOK()) {
       return groupId;
     }
 

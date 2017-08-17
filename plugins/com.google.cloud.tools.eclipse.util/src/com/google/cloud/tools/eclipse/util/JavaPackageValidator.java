@@ -23,24 +23,21 @@ import org.eclipse.jdt.core.JavaCore;
 
 public class JavaPackageValidator {
 
-  private static final String PLUGIN_ID = 
-      "com.google.cloud.tools.eclipse.appengine.newproject.AppEngineStandard"; //$NON-NLS-1$
-  
   /**
    * Check if a string is a legal Java package name.
    */
-  public static IStatus validate(String packageName) {
+  public static IStatus validate(String packageName, String pluginId) {
     if (packageName == null) {
-      return new Status(IStatus.ERROR, PLUGIN_ID, 45, "null package name", null);
+      return new Status(IStatus.ERROR, pluginId, 45, "null package name", null);
     } else if (packageName.isEmpty()) { // default package is allowed
       return Status.OK_STATUS;
     } else if (packageName.endsWith(".")) { //$NON-NLS-1$
       // todo or allow this and strip the period
-      return new Status(IStatus.ERROR, PLUGIN_ID, 46, 
+      return new Status(IStatus.ERROR, pluginId, 46, 
           Messages.getString("package.ends.with.period", packageName), null); //$NON-NLS-1$
     } else if (containsWhitespace(packageName)) {
       // very weird condition because validatePackageName allows internal white space
-      return new Status(IStatus.ERROR, PLUGIN_ID, 46, 
+      return new Status(IStatus.ERROR, pluginId, 46, 
           Messages.getString("package.contains.whitespace", packageName), null); //$NON-NLS-1$
     } else {
       return JavaConventions.validatePackageName(
