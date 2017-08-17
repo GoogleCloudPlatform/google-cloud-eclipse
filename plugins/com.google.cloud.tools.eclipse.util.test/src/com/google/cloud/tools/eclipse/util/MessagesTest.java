@@ -30,8 +30,7 @@ public class MessagesTest {
   @Test
   public void testPackageContainsWhiteSpace() {
     Assert.assertEquals(
-        ""
-        + "\"com google foo\" contains whitespace.", 
+        "\"com google foo\" contains whitespace.", 
         Messages.getString("package.contains.whitespace", "com google foo"));
   }
   
