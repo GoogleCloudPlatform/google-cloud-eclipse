@@ -112,8 +112,8 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
    * hierarchy should be restricted to only showing options available from the current project, if
    * able.
    */
-  // There is an async job updating this field. All other access should be done in the UI thread
-  // and should check if the field is being updated (i.e., if it is null).
+  // There is an async job updating this field. All other access should be through the UI thread.
+  // Readers should also check first if the async job is running (i.e., if the field is null).
   private PipelineOptionsHierarchy hierarchy;
   private Job latestHierarchyUpdateJob;
   private Job latestHierarchyUiUpdateJob;
@@ -191,7 +191,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
       @Override
       public void widgetSelected(SelectionEvent event) {
         Preconditions.checkNotNull(hierarchy,
-            "concurrency bug: the button should be disabled while the field is being updated");
+            "concurrency bug: the button should be disabled while this field is being updated");
         Map<String, PipelineOptionsType> optionsTypes = hierarchy.getAllPipelineOptionsTypes();
         PipelineOptionsSelectionDialog dialog =
             new PipelineOptionsSelectionDialog(getShell(), optionsTypes);
@@ -417,7 +417,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   private void updatePipelineOptionsForm() {
     final SettableFuture<Map<PipelineOptionsType, Set<PipelineOptionsProperty>>>
         optionsHierarchyFuture = SettableFuture.create();
-    final PipelineOptionsHierarchy[] hierarchyHolder = new PipelineOptionsHierarchy[1];
+    final PipelineOptionsHierarchy[] hierarchyAssigned = new PipelineOptionsHierarchy[1];
 
     final Job job = new Job("Update Pipeline Options Form") { //$NON-NLS-1$
       @Override
@@ -428,17 +428,17 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
           @Override
           public void run() {
             die[0] = internalComposite.isDisposed() || thisJob != latestHierarchyUiUpdateJob;
-            hierarchyHolder[0] = hierarchy;
+            hierarchyAssigned[0] = hierarchy;
           }
         });
         if (die[0]) {
           return Status.OK_STATUS;
         }
 
-        if (hierarchyHolder[0] == null) {
+        if (hierarchyAssigned[0] == null) {
           schedule(50 /* ms */);  // 'hierarchy' update job still running; try the next chance
         } else {
-          optionsHierarchyFuture.set(launchConfiguration.getOptionsHierarchy(hierarchyHolder[0]));
+          optionsHierarchyFuture.set(launchConfiguration.getOptionsHierarchy(hierarchyAssigned[0]));
         }
         return Status.OK_STATUS;
       }
@@ -450,7 +450,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
           @Override
           public void run() {
             if (internalComposite.isDisposed()
-                || hierarchy != hierarchyHolder[0] || job != latestHierarchyUiUpdateJob) {
+                || hierarchy != hierarchyAssigned[0] || job != latestHierarchyUiUpdateJob) {
               return;
             }
 
@@ -475,7 +475,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
   private boolean validatePage() {
     // We can't validate pipeline options if they are being loaded. Unfortunately, it is possible
-    // that validation will fail if it would be checked after loading is complete, but there is
+    // that validation may fail if we do the validation after loading is complete, but there is
     // not much we can do here.
     if (hierarchy != null) {
       MissingRequiredProperties validationFailures =
