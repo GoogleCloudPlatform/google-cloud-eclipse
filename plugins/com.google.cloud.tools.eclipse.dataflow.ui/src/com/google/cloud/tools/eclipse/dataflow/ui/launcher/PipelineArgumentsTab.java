@@ -364,11 +364,9 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
         display.syncExec(new Runnable() {
           @Override
           public void run() {
-            if (thisJob == latestHierarchyUpdateJob) {
+            if (!internalComposite.isDisposed() && thisJob == latestHierarchyUpdateJob) {
               hierarchy = newHierarchy;
-              if (!internalComposite.isDisposed()) {
-                userOptionsSelector.setEnabled(true);
-              }
+              userOptionsSelector.setEnabled(true);
             }
           }
         });
@@ -421,18 +419,18 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
       protected IStatus run(IProgressMonitor monitor) {
         final Job thisJob = this;
         final boolean[] die = new boolean[1];
-        final PipelineOptionsHierarchy[] hierarchyAssigned = new PipelineOptionsHierarchy[1];
+        final PipelineOptionsHierarchy[] hierarchyToUse = new PipelineOptionsHierarchy[1];
 
         display.syncExec(new Runnable() {
           @Override
           public void run() {
             die[0] = internalComposite.isDisposed() || thisJob != latestHierarchyUiUpdateJob;
-            hierarchyAssigned[0] = hierarchy;
+            hierarchyToUse[0] = hierarchy;
           }
         });
         if (die[0]) {
           return Status.OK_STATUS;
-        } else if (hierarchyAssigned[0] == null) {
+        } else if (hierarchyToUse[0] == null) {
           schedule(50 /* ms */);  // 'hierarchy' update job still running; try the next chance
           return Status.OK_STATUS;
         }
@@ -440,13 +438,13 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
         // TODO(chanseok): It is not safe to access "launchConfiguration" asynchronously.
         // Fix https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2289.
         final Map<PipelineOptionsType, Set<PipelineOptionsProperty>> types =
-            launchConfiguration.getOptionsHierarchy(hierarchyAssigned[0]);
+            launchConfiguration.getOptionsHierarchy(hierarchyToUse[0]);
 
         display.syncExec(new Runnable() {
           @Override
           public void run() {
-            if (!internalComposite.isDisposed()
-                && hierarchy == hierarchyAssigned[0] && thisJob == latestHierarchyUiUpdateJob) {
+            if (!internalComposite.isDisposed() && thisJob == latestHierarchyUiUpdateJob
+                && hierarchy == hierarchyToUse[0]) {
               pipelineOptionsForm.updateForm(launchConfiguration, types);
               updateLaunchConfigurationDialog();
             }
