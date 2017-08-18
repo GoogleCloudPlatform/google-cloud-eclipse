@@ -40,7 +40,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-public class ClientApisLibrariesSelectorGroup {
+public class ClientApisLibrariesSelectorGroupTest {
 
   @Rule public ShellTestResource shellTestResource = new ShellTestResource();
 
@@ -62,7 +62,7 @@ public class ClientApisLibrariesSelectorGroup {
   }
 
   @Test
-  public void testButtonOrder() {
+  public void testButtonSetup() {
     Control groupAsControl = shell.getChildren()[0];
     assertThat(groupAsControl, instanceOf(Group.class));
     Control[] buttonsAsControls = ((Group) groupAsControl).getChildren();
