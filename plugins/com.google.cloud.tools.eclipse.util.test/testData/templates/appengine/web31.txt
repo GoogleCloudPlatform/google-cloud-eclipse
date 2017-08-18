@@ -13,5 +13,6 @@
   </servlet-mapping>
   <welcome-file-list>
     <welcome-file>index.html</welcome-file>
+    <welcome-file>index.jsp</welcome-file>
   </welcome-file-list>
 </web-app>
