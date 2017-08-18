@@ -38,6 +38,20 @@ public class StatusUtilTest {
     IStatus error = StatusUtil.error(StatusUtil.class, "test error msg");
     verifyStatus(error);
   }
+  
+  @Test
+  public void testNullSource() {
+    IStatus error = StatusUtil.error(null, "test error msg");
+    verifyStatus(error);
+  }
+
+  @Test
+  public void testNonOsgiSource() {
+    IStatus error = StatusUtil.error("a string from the system classloader", "test error msg");
+    assertThat(error.getSeverity(), is(IStatus.ERROR));
+    assertThat(error.getMessage(), is("test error msg"));
+    assertThat(error.getPlugin(), is("java.lang.String"));
+  }
 
   @Test
   public void testError_withClassAndException() {
