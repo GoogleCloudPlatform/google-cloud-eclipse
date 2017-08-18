@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.dataflow.core.project;
 
+import com.google.cloud.tools.eclipse.util.ArtifactRetriever;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.HashBasedTable;
@@ -44,28 +45,28 @@ import org.eclipse.m2e.core.project.IMavenProjectRegistry;
  * Dataflow Examples.
  */
 public class DataflowDependencyManager {
-  private final DataflowArtifactRetriever artifactRetriever;
 
+  private final ArtifactRetriever artifactRetriever;
   private final IMaven maven;
   private final IMavenProjectRegistry mavenProjectRegistry;
 
   public static DataflowDependencyManager create() {
     return create(
-        DataflowArtifactRetriever.defaultInstance(),
+        new ArtifactRetriever(),
         MavenPlugin.getMaven(),
         MavenPlugin.getMavenProjectRegistry());
   }
 
   @VisibleForTesting
   static DataflowDependencyManager create(
-      DataflowArtifactRetriever artifactRetriever,
+      ArtifactRetriever artifactRetriever,
       IMaven maven,
       IMavenProjectRegistry mavenProjectRegistry) {
     return new DataflowDependencyManager(artifactRetriever, maven, mavenProjectRegistry);
   }
 
   private DataflowDependencyManager(
-      DataflowArtifactRetriever artifactRetriever,
+      ArtifactRetriever artifactRetriever,
       IMaven maven,
       IMavenProjectRegistry mavenProjectRegistry) {
     this.artifactRetriever = artifactRetriever;
@@ -78,7 +79,10 @@ public class DataflowDependencyManager {
    * The version is [Current Version, Next Major Version).
    */
   public ArtifactVersion getLatestDataflowDependencyInRange(VersionRange currentVersionRange) {
-    return artifactRetriever.getLatestSdkVersion(currentVersionRange);
+    return artifactRetriever.getLatestArtifactVersion(
+        DataflowMavenCoordinates.GROUP_ID,
+        DataflowMavenCoordinates.ARTIFACT_ID,
+        currentVersionRange);
   }
 
   private static boolean isDataflowDependency(Dependency dependency) {

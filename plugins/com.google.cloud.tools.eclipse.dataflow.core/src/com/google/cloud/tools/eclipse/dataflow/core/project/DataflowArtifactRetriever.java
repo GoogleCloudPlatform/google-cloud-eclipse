@@ -116,14 +116,6 @@ class DataflowArtifactRetriever {
   ////////////////////////////////////////////////////////////////////////////////////////////////
 
   /**
-   * Returns the latest published SDK Version in the version range, or null if there is no such
-   * version.
-   */
-  ArtifactVersion getLatestSdkVersion(VersionRange versionRange) {
-    return getLatestIncrementalVersion(DataflowMavenCoordinates.ARTIFACT_ID, versionRange);
-  }
-
-  /**
    * Returns the latest published Archetype Version in the version range, or null if there is no
    * such version.
    */
