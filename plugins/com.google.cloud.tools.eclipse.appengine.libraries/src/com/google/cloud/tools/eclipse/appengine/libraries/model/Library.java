@@ -18,7 +18,6 @@ package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 
 import java.net.URI;
 import java.util.ArrayList;
