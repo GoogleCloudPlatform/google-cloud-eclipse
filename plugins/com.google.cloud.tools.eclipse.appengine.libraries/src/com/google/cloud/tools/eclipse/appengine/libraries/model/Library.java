@@ -18,6 +18,8 @@ package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -155,5 +157,13 @@ public final class Library {
 
   public String getGroup() {
     return group;
+  }
+  
+  @Override
+  /**
+   * @return a string suitable fo rdebugging
+   */
+  public String toString() {
+    return "Library: id=" + id + "; name=" + name;
   }
 }
