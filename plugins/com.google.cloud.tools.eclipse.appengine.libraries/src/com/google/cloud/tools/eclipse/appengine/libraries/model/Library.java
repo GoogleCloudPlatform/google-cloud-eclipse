@@ -144,6 +144,9 @@ public final class Library {
     this.recommendation = recommendation;
   }
 
+  /**
+   * @return the level of recommendation for this library
+   */
   public LibraryRecommendation getRecommendation() {
     return recommendation;
   }
@@ -155,13 +158,16 @@ public final class Library {
     this.group = group;
   }
 
+  /**
+   * @return the collection to which this library belongs
+   */
   public String getGroup() {
     return group;
   }
   
   @Override
   /**
-   * @return a string suitable fo rdebugging
+   * @return a string suitable for debugging
    */
   public String toString() {
     return "Library: id=" + id + "; name=" + name;
