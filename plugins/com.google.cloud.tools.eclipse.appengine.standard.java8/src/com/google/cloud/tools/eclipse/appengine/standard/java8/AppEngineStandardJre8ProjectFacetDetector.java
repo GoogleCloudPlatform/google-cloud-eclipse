@@ -46,7 +46,6 @@ public class AppEngineStandardJre8ProjectFacetDetector extends ProjectFacetDetec
     SubMonitor progress = SubMonitor.convert(monitor, 5);
 
     if (workingCopy.hasProjectFacet(AppEngineStandardFacet.FACET)) {
-      logger.info("skipping " + projectName + ": project already has AES facet");
       return;
     }
 
@@ -62,7 +61,6 @@ public class AppEngineStandardJre8ProjectFacetDetector extends ProjectFacetDetec
     IFile appEngineWebXml =
         WebProjectUtil.findInWebInf(workingCopy.getProject(), new Path("appengine-web.xml"));
     if (appEngineWebXml == null || !appEngineWebXml.exists()) {
-      logger.fine("skipping " + projectName + ": cannot find appengine-web.xml");
       return;
     }
     progress.worked(1);
@@ -70,22 +68,17 @@ public class AppEngineStandardJre8ProjectFacetDetector extends ProjectFacetDetec
       AppEngineDescriptor descriptor = AppEngineDescriptor.parse(content);
       progress.worked(1);
       if (!descriptor.isJava8()) {
-        logger.fine("skipping " + projectName + ": appengine-web.xml is not java8");
         return;
       }
-      logger.fine(projectName + ": appengine-web.xml has runtime=java8");
-
-      logger.info(projectName + ": setting App Engine Standard JRE8 facet");
+      
       workingCopy.addProjectFacet(AppEngineStandardFacetChangeListener.APP_ENGINE_STANDARD_JRE8);
       progress.worked(1);
 
       // Always change to the Java 8 facet
       if (!workingCopy.hasProjectFacet(JavaFacet.VERSION_1_8)) {
         if (workingCopy.hasProjectFacet(JavaFacet.FACET)) {
-          logger.info(projectName + ": changing to Java 8 facet");
           workingCopy.changeProjectFacetVersion(JavaFacet.VERSION_1_8);
         } else {
-          logger.info(projectName + ": setting Java 8 facet");
           Object javaModel = FacetUtil.createJavaDataModel(workingCopy.getProject());
           workingCopy.addProjectFacet(JavaFacet.VERSION_1_8);
           workingCopy.setProjectFacetActionConfig(JavaFacet.FACET, javaModel);
@@ -96,7 +89,6 @@ public class AppEngineStandardJre8ProjectFacetDetector extends ProjectFacetDetec
       // But we don't touch the Dynamic Web facet unless required
       if (!workingCopy.hasProjectFacet(WebFacetUtils.WEB_FACET)) {
         // Should we attempt to detect the version from web.xml? what if web.xml doesn't exist?
-        logger.info(projectName + ": setting Dynamic Web 3.1 facet");
         Object webModel =
             FacetUtil.createWebFacetDataModel(appEngineWebXml.getParent().getParent());
         workingCopy.addProjectFacet(WebFacetUtils.WEB_31);

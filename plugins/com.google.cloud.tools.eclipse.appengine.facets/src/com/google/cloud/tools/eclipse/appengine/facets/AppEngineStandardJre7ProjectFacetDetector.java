@@ -44,7 +44,6 @@ public class AppEngineStandardJre7ProjectFacetDetector extends ProjectFacetDetec
     SubMonitor progress = SubMonitor.convert(monitor, 5);
 
     if (workingCopy.hasProjectFacet(AppEngineStandardFacet.FACET)) {
-      logger.info("skipping " + projectName + ": project already has AES facet");
       return;
     }
 
@@ -70,18 +69,14 @@ public class AppEngineStandardJre7ProjectFacetDetector extends ProjectFacetDetec
         logger.fine("skipping " + projectName + ": appengine-web.xml is not java7");
         return;
       }
-      logger.fine(projectName + ": appengine-web.xml has java7 runtime");
       
-      logger.info(projectName + ": setting App Engine Standard JRE7 facet");
       workingCopy.addProjectFacet(AppEngineStandardFacet.JRE7);
       progress.worked(1);
 
       if (!workingCopy.hasProjectFacet(JavaFacet.VERSION_1_7)) {
         if (workingCopy.hasProjectFacet(JavaFacet.FACET)) {
-          logger.info(projectName + ": changing to Java 7 facet");
           workingCopy.changeProjectFacetVersion(JavaFacet.VERSION_1_7);
         } else {
-          logger.info(projectName + ": setting Java 7 facet");
           Object javaModel = FacetUtil.createJavaDataModel(workingCopy.getProject());
           workingCopy.addProjectFacet(JavaFacet.VERSION_1_7);
           workingCopy.setProjectFacetActionConfig(JavaFacet.FACET, javaModel);
@@ -91,10 +86,8 @@ public class AppEngineStandardJre7ProjectFacetDetector extends ProjectFacetDetec
 
       if (!workingCopy.hasProjectFacet(WebFacetUtils.WEB_25)) {
         if (workingCopy.hasProjectFacet(WebFacetUtils.WEB_FACET)) {
-          logger.info(projectName + ": changing to Dynamic Web 2.5 facet");
           workingCopy.changeProjectFacetVersion(WebFacetUtils.WEB_25);
         } else {
-          logger.info(projectName + ": setting Dynamic Web 2.5 facet");
           Object webModel =
               FacetUtil.createWebFacetDataModel(appEngineWebXml.getParent().getParent());
           workingCopy.addProjectFacet(WebFacetUtils.WEB_25);
