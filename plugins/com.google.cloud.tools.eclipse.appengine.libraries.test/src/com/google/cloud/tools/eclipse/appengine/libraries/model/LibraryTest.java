@@ -166,4 +166,14 @@ public class LibraryTest {
   public void testSetRecommendation_null() {
     library.setRecommendation(null);
   }
+  
+  @Test
+  public void testToString() {
+    library.setName("foo");
+    String s = library.toString();
+
+    assertTrue(s, s.startsWith("Library"));
+    assertTrue(s, s.contains(library.getName()));
+    assertTrue(s, s.contains(library.getId()));
+  }
 }

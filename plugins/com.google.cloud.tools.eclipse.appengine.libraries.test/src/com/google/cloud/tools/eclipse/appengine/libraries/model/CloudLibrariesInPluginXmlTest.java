@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -43,7 +44,10 @@ public class CloudLibrariesInPluginXmlTest {
   @Test
   public void testLibrarySize() {
     assertThat(CloudLibraries.getLibraries("appengine").size(), is(3));
-    assertThat(CloudLibraries.getLibraries("servlet").size(), is(2));
+    List<Library> servletLibraries = CloudLibraries.getLibraries("servlet");
+    // todo in Eclipse this returns 4 (versions 2 and 3 of JSP and servlet libs)
+    // figure out why
+    assertEquals("wrong number of servlet libraries", 2, servletLibraries.size());
   }
 
   @Test
@@ -71,7 +75,7 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(mavenCoordinates.getRepository(), is("central"));
     assertThat(mavenCoordinates.getGroupId(), is("com.google.appengine"));
     assertThat(mavenCoordinates.getArtifactId(), is("appengine-api-1.0-sdk"));
-    assertThat(mavenCoordinates.getVersion(), is("1.9.51"));
+    assertThat(mavenCoordinates.getVersion(), is("1.9.54"));
     assertThat(mavenCoordinates.getType(), is("jar"));
     assertNull(mavenCoordinates.getClassifier());
 
@@ -113,7 +117,7 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(mavenCoordinates.getRepository(), is("central"));
     assertThat(mavenCoordinates.getGroupId(), is("com.google.appengine"));
     assertThat(mavenCoordinates.getArtifactId(), is("appengine-endpoints"));
-    assertThat(mavenCoordinates.getVersion(), is("1.9.51"));
+    assertThat(mavenCoordinates.getVersion(), is("1.9.54"));
     assertThat(mavenCoordinates.getType(), is("jar"));
     assertNull(mavenCoordinates.getClassifier());
     assertThat(libraryFile.getJavadocUri(),
@@ -148,14 +152,14 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(objectifyMavenCoordinates.getRepository(), is("central"));
     assertThat(objectifyMavenCoordinates.getGroupId(), is("com.googlecode.objectify"));
     assertThat(objectifyMavenCoordinates.getArtifactId(), is("objectify"));
-    assertThat(objectifyMavenCoordinates.getVersion(), is("5.1.17"));
+    assertThat(objectifyMavenCoordinates.getVersion(), is("5.1.21"));
     assertThat(objectifyMavenCoordinates.getType(), is("jar"));
     assertNull(objectifyMavenCoordinates.getClassifier());
 
     assertNotNull(objectifyLibraryFile.getFilters());
     assertTrue(objectifyLibraryFile.getFilters().isEmpty());
     assertThat(objectifyLibraryFile.getJavadocUri(),
-        is(new URI("http://static.javadoc.io/com.googlecode.objectify/objectify/5.1.14/")));
+        is(new URI("https://www.javadoc.io/doc/com.googlecode.objectify/objectify/5.1.21")));
 
     LibraryFile guavaLibraryFile = objectifyLibrary.getLibraryFiles().get(1);
     assertThat(guavaLibraryFile.getJavadocUri(),

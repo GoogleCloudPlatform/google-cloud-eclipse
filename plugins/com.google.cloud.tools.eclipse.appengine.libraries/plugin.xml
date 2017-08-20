@@ -18,7 +18,7 @@
         <mavenCoordinates
               artifactId="appengine-api-1.0-sdk"
               groupId="com.google.appengine" 
-              version="1.9.51" />
+              version="1.9.54" />
         <exclusionFilter pattern="com/google/appengine/repackaged/**" />
         <exclusionFilter pattern="com/google/appengine/labs/repackaged/**" />
         <inclusionFilter pattern="com/google/apphosting/api/**" />
@@ -37,7 +37,7 @@
         <mavenCoordinates
               artifactId="appengine-endpoints"
               groupId="com.google.appengine" 
-              version="1.9.51" />
+              version="1.9.54" />
         <exclusionFilter pattern="com/google/appengine/repackaged/**" />
       </libraryFile>
     </library>
@@ -49,11 +49,11 @@
           siteUri="https://github.com/objectify/objectify/wiki" >
       <libraryDependency id="appengine-api" />
       <libraryFile
-            javadocUri="http://static.javadoc.io/com.googlecode.objectify/objectify/5.1.14/">
+            javadocUri="https://www.javadoc.io/doc/com.googlecode.objectify/objectify/5.1.21">
         <mavenCoordinates
               artifactId="objectify"
               groupId="com.googlecode.objectify"
-              version="5.1.17" />
+              version="5.1.21" />
       </libraryFile>
       <libraryFile
             javadocUri="https://google.github.io/guava/releases/20.0/api/docs/">
