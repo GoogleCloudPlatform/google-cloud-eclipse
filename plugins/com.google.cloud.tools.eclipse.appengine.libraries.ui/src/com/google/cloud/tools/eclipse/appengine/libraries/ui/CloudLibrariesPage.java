@@ -61,13 +61,14 @@ public abstract class CloudLibrariesPage extends WizardPage implements IClasspat
     Composite composite = new Composite(parent, SWT.BORDER);
     composite.setLayout(new GridLayout(2, true));
     
-    boolean java8Project = true;
-    IProjectFacetVersion facetVersion = AppEngineStandardFacet.getProjectFacetVersion(project.getProject());
+    boolean java7AppEngineStandardProject = false;
+    IProjectFacetVersion facetVersion =
+        AppEngineStandardFacet.getProjectFacetVersion(project.getProject());
     if (facetVersion != null && facetVersion.getVersionString().equals("JRE7")) {
-      java8Project = false;
+      java7AppEngineStandardProject = true;
     }
     
-    librariesSelector = new LibrarySelectorGroup(composite, group, java8Project);
+    librariesSelector = new LibrarySelectorGroup(composite, group, java7AppEngineStandardProject);
     
     setControl(composite);
   }

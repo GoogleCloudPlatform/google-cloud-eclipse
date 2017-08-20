@@ -61,13 +61,16 @@ public class LibrarySelectorGroup implements ISelectionProvider {
     this(parentContainer, groupName, true);
   }
   
-  LibrarySelectorGroup(Composite parentContainer, String groupName, boolean java8Project) {
+  /**
+   * @param restrictedEnvironment white-listed App Engine Standard Java JRE, android, etc.
+   */
+  LibrarySelectorGroup(Composite parentContainer, String groupName, boolean restrictedEnvironment) {
     Preconditions.checkNotNull(parentContainer, "parentContainer is null");
     
     Collection<Library> availableLibraries = CloudLibraries.getLibraries(groupName);
     this.availableLibraries = new LinkedHashMap<>();
     for (Library library : availableLibraries) {
-      if (java8Project || !library.getJavaVersion().equals("1.8")) {
+      if (!restrictedEnvironment || !library.getJavaVersion().equals("1.8")) {
         this.availableLibraries.put(library.getId(), library);
       }
     }
