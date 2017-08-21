@@ -66,8 +66,8 @@ public class ClientApisLibrariesSelectorGroupTest {
     Control groupAsControl = shell.getChildren()[0];
     assertThat(groupAsControl, instanceOf(Group.class));
     Control[] buttonsAsControls = ((Group) groupAsControl).getChildren();
-    String[] expectedLibraryOrder =
-        new String[] {"googleapiclient", "googlecloudcore", "googlecloudstorage"};
+    String[] expectedLibraryOrder = new String[] {
+        "googleapiclient", "googlecloudcore", "googlecloudstorage", "googlecloudtranslate"};
     for (int i = 0; i < buttonsAsControls.length; i++) {
       Control control = buttonsAsControls[i];
       assertThat(control, instanceOf(Button.class));
@@ -123,8 +123,8 @@ public class ClientApisLibrariesSelectorGroupTest {
 
   @Test
   public void testUnselectCloudStorage() {
-    cloudStorageButton.click();
-    cloudStorageButton.click();
+    cloudStorageButton.click(); // select
+    cloudStorageButton.click(); // unselect
     List<Library> selectedLibraries = getSelectedLibrariesSorted();
     assertNotNull(selectedLibraries);
     assertEquals(0, selectedLibraries.size());
