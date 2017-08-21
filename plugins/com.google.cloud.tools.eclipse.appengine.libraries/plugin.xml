@@ -192,14 +192,14 @@
           siteUri="https://googlecloudplatform.github.io/google-cloud-java/" >
       <libraryDependency id="googleapiclient" />
       <libraryFile
-            javadocUri="https://googlecloudplatform.github.io/google-cloud-java/0.20.1/apidocs/">
+            javadocUri="https://googlecloudplatform.github.io/google-cloud-java/0.21.0/apidocs/">
         <mavenCoordinates
               artifactId="google-cloud-core"
               groupId="com.google.cloud"
               version="1.2.1" />
       </libraryFile>
       <libraryFile
-            javadocUri="https://googlecloudplatform.github.io/google-cloud-java/0.20.1/apidocs/">
+            javadocUri="https://googlecloudplatform.github.io/google-cloud-java/0.21.0/apidocs/">
         <mavenCoordinates
               artifactId="google-cloud-core-http"
               groupId="com.google.cloud"
@@ -280,7 +280,7 @@
           siteUri="https://cloud.google.com/storage/docs/reference/libraries#client-libraries-install-java" >
       <libraryDependency id="googlecloudcore" />
       <libraryFile
-            javadocUri="https://googlecloudplatform.github.io/google-cloud-java/0.20.1/apidocs/">
+            javadocUri="https://googlecloudplatform.github.io/google-cloud-java/0.21.0/apidocs/">
         <mavenCoordinates
               artifactId="google-cloud-storage"
               groupId="com.google.cloud"
@@ -304,7 +304,7 @@
           siteUri="https://cloud.google.com/datastore/docs/reference/libraries#client-libraries-install-java" >
       <libraryDependency id="googlecloudcore" />
       <libraryFile
-            javadocUri="https://googlecloudplatform.github.io/google-cloud-java/0.20.0/apidocs/index.html?com/google/cloud/datastore/package-summary.html">    
+            javadocUri="https://googlecloudplatform.github.io/google-cloud-java/0.21.0/apidocs/index.html?com/google/cloud/datastore/package-summary.html">    
         <mavenCoordinates
               artifactId="google-cloud-datastore"
               groupId="com.google.cloud"
@@ -321,7 +321,7 @@
           siteUri="https://cloud.google.com/translate/docs/reference/libraries" >
       <libraryDependency id="googlecloudcore" />
       <libraryFile
-            javadocUri="https://googlecloudplatform.github.io/google-cloud-java/0.20.0/apidocs/index.html?com/google/cloud/translate/package-summary.html">    
+            javadocUri="https://googlecloudplatform.github.io/google-cloud-java/0.21.0/apidocs/index.html?com/google/cloud/translate/package-summary.html">    
         <mavenCoordinates
               artifactId="google-cloud-translate"
               groupId="com.google.cloud"
