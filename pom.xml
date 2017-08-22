@@ -339,7 +339,7 @@
               - maven.artifact.threads=1 to workaround repository corruption seen in
                 https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2284
             -->
-            <argLine>${jacoco.agentArgLine} -DDmaven.artifact.threads=1 -Dorg.eclipse.swtbot.search.timeout=${org.eclipse.swtbot.search.timeout} -Xms40m -Xmx1G -XX:MaxPermSize=512m -Djava.awt.headless=true ${os-jvm-flags}</argLine>
+            <argLine>${jacoco.agentArgLine} -Dmaven.artifact.threads=1 -Dorg.eclipse.swtbot.search.timeout=${org.eclipse.swtbot.search.timeout} -Xms40m -Xmx1G -XX:MaxPermSize=512m -Djava.awt.headless=true ${os-jvm-flags}</argLine>
           </configuration>
         </plugin>
 
