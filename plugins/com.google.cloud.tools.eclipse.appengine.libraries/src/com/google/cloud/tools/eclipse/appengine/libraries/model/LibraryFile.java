@@ -40,7 +40,6 @@ public class LibraryFile {
     this.mavenCoordinates = mavenCoordinates;
   }
 
-  // todo Danger! This exposes mutable internal state
   public MavenCoordinates getMavenCoordinates() {
     return mavenCoordinates;
   }

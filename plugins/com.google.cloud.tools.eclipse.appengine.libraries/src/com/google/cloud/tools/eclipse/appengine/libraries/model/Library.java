@@ -164,10 +164,10 @@ public final class Library {
     return group;
   }
   
-  @Override
   /**
    * @return a string suitable for debugging
    */
+  @Override
   public String toString() {
     return "Library: id=" + id + "; name=" + name;
   }

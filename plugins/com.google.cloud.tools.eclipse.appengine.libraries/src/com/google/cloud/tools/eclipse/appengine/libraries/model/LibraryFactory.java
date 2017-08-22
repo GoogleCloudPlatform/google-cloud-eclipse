@@ -139,10 +139,14 @@ class LibraryFactory {
     IConfigurationElement mavenCoordinatesElement = children[0];
     String groupId = mavenCoordinatesElement.getAttribute(ATTRIBUTE_NAME_GROUP_ID);
     String artifactId = mavenCoordinatesElement.getAttribute(ATTRIBUTE_NAME_ARTIFACT_ID);
-    MavenCoordinates mavenCoordinates = new MavenCoordinates(groupId, artifactId);
+    
+    MavenCoordinates.Builder builder = new MavenCoordinates.Builder()
+        .setGroupId(groupId)
+        .setArtifactId(artifactId);
+    
     String repository = mavenCoordinatesElement.getAttribute(ATTRIBUTE_NAME_REPOSITORY_URI);
     if (!Strings.isNullOrEmpty(repository)) {
-      mavenCoordinates.setRepository(repository);
+      builder.setRepository(repository);
     }
 
     // Only look up latest version if version isn't specified in file.
@@ -155,17 +159,17 @@ class LibraryFactory {
     } 
     
     if (!Strings.isNullOrEmpty(version)) {
-      mavenCoordinates.setVersion(version);
+      builder.setVersion(version);
     }
     String type = mavenCoordinatesElement.getAttribute(ATTRIBUTE_NAME_TYPE);
     if (!Strings.isNullOrEmpty(type)) {
-      mavenCoordinates.setType(type);
+      builder.setType(type);
     }
     String classifier = mavenCoordinatesElement.getAttribute(ATTRIBUTE_NAME_CLASSIFIER);
     if (!Strings.isNullOrEmpty(classifier)) {
-      mavenCoordinates.setClassifier(classifier);
+      builder.setClassifier(classifier);
     }
-    return mavenCoordinates;
+    return builder.build();
   }
 
   private static List<Filter> getFilters(IConfigurationElement[] children) {
