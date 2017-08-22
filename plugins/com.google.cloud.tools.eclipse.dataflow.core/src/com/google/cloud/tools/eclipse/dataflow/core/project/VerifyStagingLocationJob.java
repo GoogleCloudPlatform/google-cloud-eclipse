@@ -16,7 +16,7 @@
 
 package com.google.cloud.tools.eclipse.dataflow.core.project;
 
-import com.google.cloud.tools.eclipse.dataflow.core.proxy.ListenableFutureProxy;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -32,12 +32,7 @@ public class VerifyStagingLocationJob extends Job {
   private final String stagingLocation;
   private final SettableFuture<VerifyStagingLocationResult> future;
 
-  public static VerifyStagingLocationJob create(
-      GcsDataflowProjectClient client, String email, String stagingLocation) {
-    return new VerifyStagingLocationJob(client, email, stagingLocation);
-  }
-
-  private VerifyStagingLocationJob(GcsDataflowProjectClient client,
+  public VerifyStagingLocationJob(GcsDataflowProjectClient client,
       String email, String stagingLocation) {
     super("Verify Staging Location " + stagingLocation);
     this.client = client;
@@ -54,8 +49,16 @@ public class VerifyStagingLocationJob extends Job {
     return Status.OK_STATUS;
   }
 
-  public ListenableFutureProxy<VerifyStagingLocationResult> getVerifyResult() {
-    return new ListenableFutureProxy<>(future);
+  public ListenableFuture<VerifyStagingLocationResult> getVerifyResult() {
+    return future;
+  }
+
+  public String getEmail() {
+    return email;
+  }
+
+  public String getStagingLocation() {
+    return stagingLocation;
   }
 
   /**

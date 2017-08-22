@@ -16,9 +16,14 @@
 
 package com.google.cloud.tools.eclipse.dataflow.ui.preferences;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.api.client.auth.oauth2.Credential;
@@ -37,9 +42,12 @@ import com.google.common.collect.Sets;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -61,6 +69,12 @@ public class RunOptionsDefaultsComponentTest {
   private RunOptionsDefaultsComponent component;
   private Shell shell;
 
+  private AccountSelector selector;
+  private Text projectID;
+  private Combo stagingLocations;
+  private Button createButton;
+
+
   @Before
   public void setUp() throws IOException {
     Account account1 = mock(Account.class);
@@ -81,6 +95,12 @@ public class RunOptionsDefaultsComponentTest {
     shell = shellResource.getShell();
     component = new RunOptionsDefaultsComponent(
         shell, 3, messageTarget, preferences, null, loginService, apiFactory);
+    selector = CompositeUtil.findControl(shell, AccountSelector.class);
+    projectID =
+        CompositeUtil.findControlAfterLabel(shell, Text.class, "Cloud Platform &project ID:");
+    stagingLocations =
+        CompositeUtil.findControlAfterLabel(shell, Combo.class, "Cloud Storage staging &location:");
+    createButton = CompositeUtil.findControl(shell, Button.class);
   }
 
   private void mockStorageApiBucketList(Credential credential, String... bucketNames)
@@ -100,8 +120,16 @@ public class RunOptionsDefaultsComponentTest {
       Bucket bucket = new Bucket();
       bucket.setName(bucketName);
       bucketList.add(bucket);
+
+      Storage.Buckets.Get get = mock(Storage.Buckets.Get.class);
+      when(bucketsApi.get(bucketName)).thenReturn(get);
+      when(get.execute()).thenReturn(bucket);
     }
     buckets.setItems(bucketList);
+
+    Storage.Buckets.Get exceptionGet = mock(Storage.Buckets.Get.class);
+    when(bucketsApi.get(anyString())).thenReturn(exceptionGet);
+    when(exceptionGet.execute()).thenThrow(new IOException("bucket does not exist"));
   }
 
   @Test
@@ -112,12 +140,6 @@ public class RunOptionsDefaultsComponentTest {
     } catch (IllegalArgumentException ex) {
       Assert.assertNotNull(ex.getMessage());
     }
-  }
-
-  @Test
-  public void testStagingLocation() {
-    component.setStagingLocationText("foobar");
-    Assert.assertEquals("gs://foobar", component.getStagingLocation());
   }
 
   @Test
@@ -134,13 +156,11 @@ public class RunOptionsDefaultsComponentTest {
 
   @Test
   public void testAccountSelector() {
-    AccountSelector selector = CompositeUtil.findControl(shell, AccountSelector.class);
     Assert.assertNotNull(selector);
   }
 
   @Test
   public void testAccountSelector_init() {
-    AccountSelector selector = CompositeUtil.findControl(shell, AccountSelector.class);
     Assert.assertEquals(2, selector.getAccountCount());
 
     int index1 = selector.selectAccount("alice@example.com");
@@ -153,11 +173,81 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
-  public void testAccountSelector_loadBucketCombo() throws InterruptedException {
-    component.setCloudProjectText("some-gcp-project-id");
-    AccountSelector selector = CompositeUtil.findControl(shell, AccountSelector.class);
+  public void testEnablement_initial() {
+    assertTrue(selector.isEnabled());
+    assertNull(selector.getSelectedCredential());
+    assertFalse(projectID.isEnabled());
+    assertFalse(stagingLocations.isEnabled());
+    assertFalse(createButton.isEnabled());
+  }
 
+  @Test
+  public void testEnablement_selectedAccount() {
     selector.selectAccount("alice@example.com");
+    assertTrue(selector.isEnabled());
+    assertNotNull(selector.getSelectedCredential());
+    assertTrue(projectID.isEnabled());
+    assertFalse(stagingLocations.isEnabled());
+    assertFalse(createButton.isEnabled());
+  }
+
+  @Test
+  public void testEnablement_selectedProject() {
+    selector.selectAccount("alice@example.com");
+    component.setCloudProjectText("project");
+    assertTrue(selector.isEnabled());
+    assertNotNull(selector.getSelectedCredential());
+    assertTrue(projectID.isEnabled());
+    assertTrue(stagingLocations.isEnabled());
+    assertFalse(createButton.isEnabled());
+  }
+
+  @Test
+  public void testEnablement_existingStagingLocation() {
+    selector.selectAccount("alice@example.com");
+    component.setCloudProjectText("project");
+    component.setStagingLocationText("alice-bucket-1");
+    assertTrue(selector.isEnabled());
+    assertNotNull(selector.getSelectedCredential());
+    assertTrue(projectID.isEnabled());
+    assertTrue(stagingLocations.isEnabled());
+    assertFalse(createButton.isEnabled());
+  }
+
+  @Test
+  public void testEnablement_nonExistentStagingLocation()
+      throws OperationCanceledException, InterruptedException {
+    selector.selectAccount("alice@example.com");
+    component.setCloudProjectText("project");
+    component.setStagingLocationText("non-existent-bucket");
+    component.startStagingLocationCheck(0); // force right now
+    for (int i = 0; i < 200 && !component.getVerifyStagingLocationResult().isDone(); i++) {
+      while (Display.getCurrent().readAndDispatch()) {
+      } // spin
+      Thread.sleep(50);
+    }
+    assertTrue(component.getVerifyStagingLocationResult().isDone());
+    assertTrue(selector.isEnabled());
+    assertNotNull(selector.getSelectedCredential());
+    assertTrue(projectID.isEnabled());
+    assertTrue(stagingLocations.isEnabled());
+    assertTrue(createButton.isEnabled());
+  }
+
+  @Test
+  public void testStagingLocation() {
+    selector.selectAccount("alice@example.com");
+    component.setCloudProjectText("project");
+    component.setStagingLocationText("foobar");
+    Assert.assertEquals("gs://foobar", component.getStagingLocation());
+  }
+
+  @Test
+  public void testAccountSelector_loadBucketCombo() throws InterruptedException {
+    selector.selectAccount("alice@example.com");
+    component.setCloudProjectText("some-gcp-project-id");
+    component.updateStagingLocations("some-gcp-project-id", 0);
+
     assertStagingLocationCombo("gs://alice-bucket-1", "gs://alice-bucket-2");
 
     selector.selectAccount("bob@example.com");
@@ -165,21 +255,23 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   private void assertStagingLocationCombo(String... buckets) throws InterruptedException {
-    Combo combo = CompositeUtil.findControlAfterLabel(shell,
-        Combo.class, "Cloud Storage staging &location:");
-    for (int i = 0; i < 200 && combo.getItemCount() != buckets.length; i++) {
+    for (int i = 0; i < 200 && stagingLocations.getItemCount() != buckets.length; i++) {
       while (Display.getCurrent().readAndDispatch()) {}  // spin
       Thread.sleep(50);
     }
-    Assert.assertArrayEquals(buckets, combo.getItems());
+    Assert.assertArrayEquals(buckets, stagingLocations.getItems());
   }
 
   @Test
   public void testBucketNameStatus_gscPathWithObjectIsOk() {
+    component.selectAccount("alice@example.com");
     component.setStagingLocationText("bucket/object");
-    assertTrue(component.bucketNameStatus().isOK());
+    verify(messageTarget, never()).setError(anyString());
+  }
 
+  @Test
+  public void testBucketNameStatus_gscUrlPathWithObjectIsOk() {
     component.setStagingLocationText("gs://bucket/object");
-    assertTrue(component.bucketNameStatus().isOK());
+    verify(messageTarget, never()).setError(anyString());
   }
 }

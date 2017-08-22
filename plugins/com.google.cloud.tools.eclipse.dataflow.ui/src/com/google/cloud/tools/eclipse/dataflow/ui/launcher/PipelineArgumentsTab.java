@@ -234,11 +234,13 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
       @Override
       public void setInfo(String message) {
         setMessage(message);
+        getLaunchConfigurationDialog().updateMessage();
       }
 
       @Override
       public void setError(String message) {
         setErrorMessage(message);
+        getLaunchConfigurationDialog().updateMessage();
       }
 
       @Override
