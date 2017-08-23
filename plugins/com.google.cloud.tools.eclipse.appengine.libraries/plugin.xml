@@ -310,6 +310,24 @@
               groupId="com.google.cloud"
               version="LATEST" />
       </libraryFile>
+      <libraryFile>
+        <mavenCoordinates
+            artifactId="com.google.cloud.datastore"
+            groupId="datastore-v1-protos"
+            version="LATEST" />
+      </libraryFile>
+      <libraryFile>
+        <mavenCoordinates
+            artifactId="com.google.cloud.datastore"
+            groupId="datastore-v1-proto-client"
+            version="LATEST" />
+      </libraryFile>
+      <libraryFile>
+        <mavenCoordinates
+            artifactId="com.google.api.grpc"
+            groupId="grpc-google-common-protos"
+            version="LATEST" />
+      </libraryFile>
     </library>
     
     <library
