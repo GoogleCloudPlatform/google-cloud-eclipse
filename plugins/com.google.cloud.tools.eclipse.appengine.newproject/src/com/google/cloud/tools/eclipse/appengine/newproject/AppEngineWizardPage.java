@@ -20,8 +20,9 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
 import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.libraries.ui.LibrarySelectorGroup;
 import com.google.cloud.tools.eclipse.appengine.newproject.maven.MavenCoordinatesUi;
-import com.google.cloud.tools.eclipse.appengine.newproject.maven.MavenCoordinatesValidator;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineImages;
+import com.google.cloud.tools.eclipse.util.JavaPackageValidator;
+import com.google.cloud.tools.eclipse.util.MavenCoordinatesValidator;
 import com.google.cloud.tools.project.ServiceNameValidator;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.CharMatcher;
@@ -119,8 +120,8 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
   /**
    * Creates a Runtime section. Composite is laid out with 2 columns.
    */
-  protected void createRuntimeField(Composite composite) {
-    // default: do nothing
+  protected void createRuntimeField(@SuppressWarnings("unused") Composite composite) {
+    // default: do nothing; used by subclasses
   }
 
   public String getRuntimeId() {
@@ -270,7 +271,7 @@ public abstract class AppEngineWizardPage extends WizardNewProjectCreationPage {
       }
     }
   }
-
+  
   /**
    * Helper function returning a suggested package name based on {@code groupId}.
    * It does basic string filtering/manipulation, which does not completely eliminate

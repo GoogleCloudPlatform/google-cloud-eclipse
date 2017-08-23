@@ -51,7 +51,6 @@ public class AppEngineProjectDeployer {
   /**
    * @param optionalConfigurationFilesDirectory if not {@code null}, searches optional configuration
    * files (such as {@code cron.yaml}) in this directory and deploys them together
-   * @return
    */
   public IStatus deploy(IPath stagingDirectory, Path credentialFile,
       DeployPreferences deployPreferences, IPath optionalConfigurationFilesDirectory,

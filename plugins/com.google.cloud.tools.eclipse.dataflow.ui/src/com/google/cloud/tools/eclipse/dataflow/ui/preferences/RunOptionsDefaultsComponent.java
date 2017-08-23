@@ -27,6 +27,7 @@ import com.google.cloud.tools.eclipse.dataflow.core.project.VerifyStagingLocatio
 import com.google.cloud.tools.eclipse.dataflow.core.project.VerifyStagingLocationJob.VerifyStagingLocationResult;
 import com.google.cloud.tools.eclipse.dataflow.core.proxy.ListenableFutureProxy;
 import com.google.cloud.tools.eclipse.dataflow.ui.DataflowUiPlugin;
+import com.google.cloud.tools.eclipse.dataflow.ui.Messages;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.MessageTarget;
 import com.google.cloud.tools.eclipse.dataflow.ui.util.ButtonFactory;
 import com.google.cloud.tools.eclipse.dataflow.ui.util.DisplayExecutor;
@@ -106,7 +107,7 @@ public class RunOptionsDefaultsComponent {
       WizardPage page,
       IGoogleLoginService loginService,
       IGoogleApiFactory apiFactory) {
-    checkArgument(columns >= 3, "DefaultRunOptions must be in a Grid with at least 3 columns");
+    checkArgument(columns >= 3, "DefaultRunOptions must be in a Grid with at least 3 columns"); //$NON-NLS-1$
     this.target = target;
     this.page = page;
     this.messageTarget = messageTarget;
@@ -114,26 +115,28 @@ public class RunOptionsDefaultsComponent {
     this.apiFactory = apiFactory;
 
     Label accountLabel = new Label(target, SWT.NULL);
-    accountLabel.setText("&Account:");
-    accountSelector = new AccountSelector(target, loginService, "Sign into another account...");
+    accountLabel.setText(Messages.getString("account")); //$NON-NLS-1$
+    accountSelector = new AccountSelector(target, loginService, 
+        Messages.getString("sign.into.another.account")); //$NON-NLS-1$
 
     Label projectInputLabel = new Label(target, SWT.NULL);
     projectInput = new Text(target, SWT.SINGLE | SWT.BORDER);
 
     Label comboLabel = new Label(target, SWT.NULL);
     stagingLocationInput = new Combo(target, SWT.DROP_DOWN);
-    createButton = ButtonFactory.newPushButton(target, "&Create Bucket");
+    createButton = ButtonFactory.newPushButton(target, 
+        Messages.getString("create.bucket")); //$NON-NLS-1$
     createButton.setEnabled(false);
 
     accountSelector.selectAccount(preferences.getDefaultAccountEmail());
 
-    projectInputLabel.setText("Cloud Platform &Project ID:");
+    projectInputLabel.setText(Messages.getString("cloud.platform.project.id")); //$NON-NLS-1$
 
     // Initialize the Default Project, which is used to populate the Staging Location field
     String project = preferences.getDefaultProject();
     projectInput.setText(Strings.nullToEmpty(project));
 
-    comboLabel.setText("Cloud Storage Staging &Location:");
+    comboLabel.setText(Messages.getString("cloud.storage.staging.location")); //$NON-NLS-1$
 
     String stagingLocation = preferences.getDefaultStagingLocation();
     stagingLocationInput.setText(Strings.nullToEmpty(stagingLocation));
@@ -178,7 +181,7 @@ public class RunOptionsDefaultsComponent {
     stagingLocationInput.addModifyListener(new EnableCreateButton());
 
     updateStagingLocations(project);
-    messageTarget.setInfo("Set Pipeline Run Option Defaults");
+    messageTarget.setInfo(Messages.getString("set.pipeline.run.option.defaults")); //$NON-NLS-1$
   }
 
   private GcsDataflowProjectClient getGcsClient() {
@@ -300,16 +303,18 @@ public class RunOptionsDefaultsComponent {
 
               if (result.accessible) {
                 messageTarget.setInfo(
-                    String.format("Verified bucket %s is accessible.", bucketNamePart));
+                    Messages.getString("verified.bucket.is.accessible", bucketNamePart)); //$NON-NLS-1$
                 createButton.setEnabled(false);
                 setPageComplete(true);
               } else {
-                messageTarget.setError(String.format("Couldn't fetch bucket %s.", bucketNamePart));
+                messageTarget.setError(
+                    Messages.getString("couldnt.fetch.bucket", bucketNamePart)); //$NON-NLS-1$
                 createButton.setEnabled(true);
                 setPageComplete(false);
               }
-            } catch (InterruptedException | ExecutionException e) {
-              messageTarget.setError(String.format("Couldn't fetch bucket %s.", bucketNamePart));
+            } catch (InterruptedException | ExecutionException ex) {
+              messageTarget.setError(
+                  Messages.getString("couldnt.fetch.bucket", bucketNamePart)); //$NON-NLS-1$
               setPageComplete(false);
             }
           }
@@ -345,11 +350,13 @@ public class RunOptionsDefaultsComponent {
       StagingLocationVerificationResult result = getGcsClient().createStagingLocation(
           projectName, stagingLocation, new NullProgressMonitor());
       if (result.isSuccessful()) {
-        messageTarget.setInfo("Created staging location at " + stagingLocation);
+        messageTarget.setInfo(
+            Messages.getString("created.staging.location.at", stagingLocation)); //$NON-NLS-1$
         setPageComplete(true);
         createButton.setEnabled(false);
       } else {
-        messageTarget.setError("Could not create staging location at " + stagingLocation);
+        messageTarget.setError(
+            Messages.getString("could.not.create.staging.location", stagingLocation)); //$NON-NLS-1$
         setPageComplete(false);
       }
     }
@@ -391,8 +398,9 @@ public class RunOptionsDefaultsComponent {
         }
         completionListener.setContents(stagingLocations);
       } catch (InterruptedException | ExecutionException ex) {
-        messageTarget.setError("Could not retrieve buckets for project " + projectInput.getText());
-        DataflowUiPlugin.logError(ex, "Exception while retrieving potential staging locations");
+        messageTarget.setError(
+            Messages.getString("could.not.retrieve.buckets.for.project", projectInput.getText())); //$NON-NLS-1$
+        DataflowUiPlugin.logError(ex, "Exception while retrieving staging locations"); //$NON-NLS-1$
         setPageComplete(false);
       }
     }

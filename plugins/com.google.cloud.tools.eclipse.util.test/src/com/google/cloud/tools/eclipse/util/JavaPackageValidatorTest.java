@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.newproject;
+package com.google.cloud.tools.eclipse.util;
 
 import org.eclipse.core.runtime.IStatus;
 import org.junit.Assert;
@@ -22,6 +22,8 @@ import org.junit.Test;
 
 public class JavaPackageValidatorTest {
 
+  private static final String PLUGIN_ID = "com.google.cloud.tools.eclipse.util";
+  
   @Test
   public void testUsualPackage() {
     Assert.assertTrue(JavaPackageValidator.validate("com.google.eclipse").isOK());
@@ -32,6 +34,7 @@ public class JavaPackageValidatorTest {
     IStatus status = JavaPackageValidator.validate("com.google.eclipse.");
     Assert.assertFalse(status.isOK());
     Assert.assertEquals("com.google.eclipse. ends with a period.", status.getMessage());
+    Assert.assertEquals(PLUGIN_ID, status.getPlugin());
   }
   
   @Test
@@ -43,7 +46,8 @@ public class JavaPackageValidatorTest {
 
   @Test
   public void testOneWord() {
-    Assert.assertTrue(JavaPackageValidator.validate("word").isOK());
+    IStatus status = JavaPackageValidator.validate("word");
+    Assert.assertTrue(status.isOK());
   }
   
   @Test

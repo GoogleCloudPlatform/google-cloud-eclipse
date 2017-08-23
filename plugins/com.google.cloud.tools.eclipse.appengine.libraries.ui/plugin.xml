@@ -8,6 +8,7 @@
        name="App Engine Libraries"
        class="com.google.cloud.tools.eclipse.appengine.libraries.ui.AppEngineLibrariesPage">
     </classpathContainerPage>
+
     <classpathContainerPage
        id="com.google.cloud.tools.eclipse.appengine.libraries"
        name="Google API Libraries"

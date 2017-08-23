@@ -58,13 +58,21 @@ public class LibrarySelectorGroup implements ISelectionProvider {
   private final ListenerList/* <ISelectedChangeListener> */ listeners = new ListenerList/* <> */();
 
   public LibrarySelectorGroup(Composite parentContainer, String groupName) {
-    Collection<Library> availableLibraries = CloudLibraries.getLibraries(groupName);
+    this(parentContainer, groupName, true);
+  }
+  
+  /**
+   * @param restrictedEnvironment white-listed App Engine Standard Java JRE, android, etc.
+   */
+  LibrarySelectorGroup(Composite parentContainer, String groupName, boolean restrictedEnvironment) {
     Preconditions.checkNotNull(parentContainer, "parentContainer is null");
-    Preconditions.checkNotNull(availableLibraries, "availableLibraries is null");
-
+    
+    Collection<Library> availableLibraries = CloudLibraries.getLibraries(groupName);
     this.availableLibraries = new LinkedHashMap<>();
     for (Library library : availableLibraries) {
-      this.availableLibraries.put(library.getId(), library);
+      if (!restrictedEnvironment || !library.getJavaVersion().equals("1.8")) {
+        this.availableLibraries.put(library.getId(), library);
+      }
     }
     createContents(parentContainer);
   }

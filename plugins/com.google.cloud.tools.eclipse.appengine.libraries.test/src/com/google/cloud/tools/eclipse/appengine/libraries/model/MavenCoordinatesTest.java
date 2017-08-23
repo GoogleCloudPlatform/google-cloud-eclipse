@@ -59,12 +59,12 @@ public class MavenCoordinatesTest {
 
   @Test(expected = NullPointerException.class)
   public void testSetRepositoryNull() {
-    new MavenCoordinates("a", "b").setRepository(null);
+    new MavenCoordinates.Builder().setRepository(null);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testSetEmptyRepository() {
-    new MavenCoordinates("a", "b").setRepository("");
+    new MavenCoordinates.Builder().setRepository("");
   }
 
   @Test
@@ -75,45 +75,54 @@ public class MavenCoordinatesTest {
 
   @Test(expected = NullPointerException.class)
   public void testSetNullVersion() {
-    MavenCoordinates mavenCoordinates = new MavenCoordinates("groupId", "artifactId");
-    mavenCoordinates.setVersion(null);
+    new MavenCoordinates.Builder().setVersion(null);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testSetEmptyVersion() {
-    MavenCoordinates mavenCoordinates = new MavenCoordinates("groupId", "artifactId");
-    mavenCoordinates.setVersion("");
+    new MavenCoordinates.Builder().setVersion("");
   }
 
   @Test
   public void setVersion() {
-    MavenCoordinates mavenCoordinates = new MavenCoordinates("groupId", "artifactId");
-    mavenCoordinates.setVersion("1");
+    MavenCoordinates mavenCoordinates = new MavenCoordinates.Builder()
+       .setGroupId("g")
+       .setArtifactId("a")
+       .setVersion("1")
+       .build();
     assertThat(mavenCoordinates.getVersion(), is("1"));
   }
 
   @Test
   public void testTypeDefaultsToJar() {
-    MavenCoordinates mavenCoordinates = new MavenCoordinates("groupId", "artifactId");
+    MavenCoordinates mavenCoordinates = new MavenCoordinates.Builder()
+        .setGroupId("g")
+        .setArtifactId("a")
+        .build();
     assertThat(mavenCoordinates.getType(), is(MavenCoordinates.JAR_TYPE));
   }
 
   @Test(expected = NullPointerException.class)
   public void testSetNullType() {
-    MavenCoordinates mavenCoordinates = new MavenCoordinates("groupId", "artifactId");
-    mavenCoordinates.setType(null);
+    new MavenCoordinates.Builder()
+        .setGroupId("g")
+        .setArtifactId("a")
+        .setType(null)
+        .build();
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testSetEmptyType() {
-    MavenCoordinates mavenCoordinates = new MavenCoordinates("groupId", "artifactId");
-    mavenCoordinates.setType("");
+    new MavenCoordinates.Builder().setGroupId("g").setArtifactId("a").setType("").build();
   }
 
   @Test
   public void testSetType() {
-    MavenCoordinates mavenCoordinates = new MavenCoordinates("groupId", "artifactId");
-    mavenCoordinates.setType("war");
+    MavenCoordinates mavenCoordinates = new MavenCoordinates.Builder()
+        .setGroupId("g")
+        .setArtifactId("a")
+        .setType("war")
+        .build();
     assertThat(mavenCoordinates.getType(), is("war"));
   }
 
@@ -125,22 +134,31 @@ public class MavenCoordinatesTest {
 
   @Test
   public void testSetClassifier() {
-    MavenCoordinates mavenCoordinates = new MavenCoordinates("groupId", "artifactId");
-    mavenCoordinates.setClassifier("d");
+    MavenCoordinates mavenCoordinates = new MavenCoordinates.Builder()
+        .setGroupId("g")
+        .setArtifactId("a")
+        .setClassifier("d")
+        .build();
     assertThat(mavenCoordinates.getClassifier(), is("d"));
   }
 
   @Test
   public void testSetNullClassifier() {
-    MavenCoordinates mavenCoordinates = new MavenCoordinates("groupId", "artifactId");
-    mavenCoordinates.setClassifier(null);
+    MavenCoordinates mavenCoordinates = new MavenCoordinates.Builder()
+        .setGroupId("g")
+        .setArtifactId("a")
+        .setClassifier(null)
+        .build();
     assertNull(mavenCoordinates.getClassifier());
   }
 
   @Test
   public void testSetEmptyClassifier() {
-    MavenCoordinates mavenCoordinates = new MavenCoordinates("groupId", "artifactId");
-    mavenCoordinates.setClassifier("");
+    MavenCoordinates mavenCoordinates = new MavenCoordinates.Builder()
+        .setGroupId("g")
+        .setArtifactId("a")
+        .setClassifier("")
+        .build();
     assertThat(mavenCoordinates.getClassifier(), is(""));
   }
 }

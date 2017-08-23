@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,6 +42,7 @@ public final class Library {
   private List<LibraryFile> libraryFiles = Collections.emptyList();
   private LibraryRecommendation recommendation = LibraryRecommendation.OPTIONAL;
   private String group;
+  private String javaVersion="1.7";
 
   // IDs of other libraries that also need to be added to the build path with this library
   private List<String> libraryDependencies = new ArrayList<>();
@@ -56,7 +58,6 @@ public final class Library {
     this.id = id;
     this.libraryFiles = libraryFiles;
   }
-
   
   public String getId() {
     return id;
@@ -72,6 +73,17 @@ public final class Library {
 
   void setName(String name) {
     this.name = name;
+  }
+  
+  /**
+   * @return minimum Java version required for this library
+   */
+  public String getJavaVersion() {
+    return javaVersion;
+  }
+
+  void setJavaVersion(String version) {
+    this.javaVersion = version;
   }
   
   public String getToolTip() {
@@ -131,6 +143,9 @@ public final class Library {
     this.recommendation = recommendation;
   }
 
+  /**
+   * @return the level of recommendation for this library
+   */
   public LibraryRecommendation getRecommendation() {
     return recommendation;
   }
@@ -142,7 +157,18 @@ public final class Library {
     this.group = group;
   }
 
+  /**
+   * @return the collection to which this library belongs
+   */
   public String getGroup() {
     return group;
+  }
+  
+  /**
+   * @return a string suitable for debugging
+   */
+  @Override
+  public String toString() {
+    return "Library: id=" + id + "; name=" + name;
   }
 }

@@ -40,7 +40,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class WarPublisherTest {
 
-  @Mock IProgressMonitor monitor;
+  @Mock private IProgressMonitor monitor;
 
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator()
       .withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25);
@@ -69,8 +69,7 @@ public class WarPublisherTest {
   @Test
   public void testPublishExploded() throws CoreException {
     IProject project = projectCreator.getProject();
-    IFolder exploded = project.getFolder("exloded-war");
-    exploded.create(true, true, monitor);
+    IFolder exploded = project.getFolder("exploded-war");
     WarPublisher.publishExploded(project, exploded.getLocation(), monitor);
 
     exploded.refreshLocal(IResource.DEPTH_INFINITE, monitor);

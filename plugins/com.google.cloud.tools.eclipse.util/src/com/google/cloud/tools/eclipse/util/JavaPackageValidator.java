@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.tools.eclipse.appengine.newproject;
+package com.google.cloud.tools.eclipse.util;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -22,10 +22,9 @@ import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 
 public class JavaPackageValidator {
-
-  private static final String PLUGIN_ID = 
-      "com.google.cloud.tools.eclipse.appengine.newproject.AppEngineStandard"; //$NON-NLS-1$
   
+  private static final String PLUGIN_ID = "com.google.cloud.tools.eclipse.util"; //$NON-NLS-1$
+
   /**
    * Check if a string is a legal Java package name.
    */

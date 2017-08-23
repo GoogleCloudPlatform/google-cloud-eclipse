@@ -88,8 +88,7 @@ public class Templates {
 
   private static Configuration createConfiguration() {
     Configuration configuration = new Configuration(Configuration.VERSION_2_3_25);
-    configuration.setClassForTemplateLoading(
-        Templates.class, "/templates/appengine");
+    configuration.setClassForTemplateLoading(Templates.class, "/templates/appengine");
     configuration.setDefaultEncoding(StandardCharsets.UTF_8.name());
     configuration.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
     configuration.setLogTemplateExceptions(false);

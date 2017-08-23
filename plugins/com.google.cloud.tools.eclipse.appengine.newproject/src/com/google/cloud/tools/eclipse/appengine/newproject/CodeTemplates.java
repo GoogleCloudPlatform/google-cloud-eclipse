@@ -75,6 +75,11 @@ public class CodeTemplates {
    */
   private static IFile materialize(IProject project, AppEngineProjectConfig config,
       boolean isStandardProject, IProgressMonitor monitor) throws CoreException {
+    
+    // todo this method is getting overly long and complex.
+    // break up into smaller methods and consider whether we can/should use a single map for 
+    // all templates.
+    
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
     subMonitor.setTaskName("Generating code");
     boolean force = true;
@@ -97,6 +102,12 @@ public class CodeTemplates {
     } else {
       templateValues.put("package", ""); //$NON-NLS-1$ //$NON-NLS-2$
     }
+    if (isStandardProject
+        && Objects.equal(AppEngineRuntime.STANDARD_JAVA_7.getId(), config.getRuntimeId())) {
+      templateValues.put("servletVersion", "2.5"); //$NON-NLS-1$ //$NON-NLS-2$
+    } else {
+      templateValues.put("servletVersion", "3.1"); //$NON-NLS-1$ //$NON-NLS-2$
+    }    
 
     IFolder packageFolder = createFoldersForPackage(java, packageName, subMonitor.newChild(5));
     IFile hello = createChildFile("HelloAppEngine.java", //$NON-NLS-1$
@@ -144,11 +155,11 @@ public class CodeTemplates {
     packageMap.put("package", packageValue);  //$NON-NLS-1$
     if (isStandardProject
         && Objects.equal(AppEngineRuntime.STANDARD_JAVA_7.getId(), config.getRuntimeId())) {
-      packageMap.put("version", "2.5"); //$NON-NLS-1$ //$NON-NLS-2$
+      packageMap.put("servletVersion", "2.5"); //$NON-NLS-1$ //$NON-NLS-2$
       packageMap.put("namespace", "http://java.sun.com/xml/ns/javaee"); //$NON-NLS-1$ //$NON-NLS-2$
       packageMap.put("schemaUrl", "http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"); //$NON-NLS-1$ //$NON-NLS-2$
     } else {
-      packageMap.put("version", "3.1"); //$NON-NLS-1$ //$NON-NLS-2$
+      packageMap.put("servletVersion", "3.1"); //$NON-NLS-1$ //$NON-NLS-2$
       packageMap.put("namespace", "http://xmlns.jcp.org/xml/ns/javaee"); //$NON-NLS-1$ //$NON-NLS-2$
       packageMap.put("schemaUrl", "http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"); //$NON-NLS-1$ //$NON-NLS-2$
     }

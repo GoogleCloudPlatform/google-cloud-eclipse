@@ -32,7 +32,7 @@ import org.eclipse.ui.IEditorInput;
 
 /**
  * A Platform/Debug Presentation to provide an icon for our
- * {@link LocalAppEngineServerLaunchConfigurationDelegate.CloudSdkDebugTarget} instances.
+ * {@code LocalAppEngineServerLaunchConfigurationDelegate.CloudSdkDebugTarget} instances.
  */
 public class CloudSdkDebugTargetPresentation extends LabelProvider
     implements IDebugModelPresentation {

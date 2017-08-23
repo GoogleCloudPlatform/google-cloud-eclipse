@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -153,9 +154,26 @@ public class LibraryTest {
     library.setRecommendation(LibraryRecommendation.REQUIRED);
     assertThat(library.getRecommendation(), is(LibraryRecommendation.REQUIRED));
   }
+  
+  @Test
+  public void testSetJavaVersion() {
+    assertEquals("1.7", library.getJavaVersion());
+    library.setJavaVersion("1.9");
+    assertEquals("1.9", library.getJavaVersion());
+  }
 
   @Test(expected = NullPointerException.class)
   public void testSetRecommendation_null() {
     library.setRecommendation(null);
+  }
+  
+  @Test
+  public void testToString() {
+    library.setName("foo");
+    String s = library.toString();
+
+    assertTrue(s, s.startsWith("Library"));
+    assertTrue(s, s.contains(library.getName()));
+    assertTrue(s, s.contains(library.getId()));
   }
 }
