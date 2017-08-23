@@ -308,7 +308,7 @@
         <mavenCoordinates
               artifactId="google-cloud-datastore"
               groupId="com.google.cloud"
-              version="1.0.1" />
+              version="LATEST" />
       </libraryFile>
     </library>
     
@@ -325,7 +325,24 @@
         <mavenCoordinates
               artifactId="google-cloud-translate"
               groupId="com.google.cloud"
-              version="1.3.1" />
+              version="LATEST" />
+      </libraryFile>
+    </library>
+
+    <library
+          id="cloudlogging"
+          group="clientapis"
+          name="%stackdriverlogging.name"
+          tooltip="%stackdriverlogging.tooltip"
+          javaVersion="1.8"
+          siteUri="https://cloud.google.com/translate/docs/reference/libraries" >
+      <libraryDependency id="googlecloudcore" />
+      <libraryFile
+            javadocUri="https://googlecloudplatform.github.io/google-cloud-java/latest/apidocs/index.html?com/google/cloud/logging/package-summary.html">    
+        <mavenCoordinates
+              artifactId="google-cloud-logging"
+              groupId="com.google.cloud"
+              version="LATEST" />
       </libraryFile>
     </library>
   </extension>
