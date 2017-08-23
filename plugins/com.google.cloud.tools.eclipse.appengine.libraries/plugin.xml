@@ -326,7 +326,7 @@
         <mavenCoordinates
             artifactId="grpc-google-common-protos"
             groupId="com.google.api.grpc"
-            version="0.1.15" />
+            version="LATEST" />
       </libraryFile>
     </library>
     
@@ -348,13 +348,23 @@
     </library>
 
     <library
+          id="grpc"
+          group="clientapis"
+          name="%grpc.name"
+          tooltip="%grpc.tooltip"
+          javaVersion="1.8"
+          siteUri="https://cloud.google.com/translate/docs/reference/libraries" >
+    </library>
+
+    <library
           id="cloudlogging"
           group="clientapis"
           name="%stackdriverlogging.name"
           tooltip="%stackdriverlogging.tooltip"
           javaVersion="1.8"
-          siteUri="https://cloud.google.com/translate/docs/reference/libraries" >
+          siteUri="https://cloud.google.com/logging/docs/reference/libraries#client-libraries-install-java" >
       <libraryDependency id="googlecloudcore" />
+      <libraryDependency id="grpc" />
       <libraryFile
             javadocUri="https://googlecloudplatform.github.io/google-cloud-java/latest/apidocs/index.html?com/google/cloud/logging/package-summary.html">    
         <mavenCoordinates
