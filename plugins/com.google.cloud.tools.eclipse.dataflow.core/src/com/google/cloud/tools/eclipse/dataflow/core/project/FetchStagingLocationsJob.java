@@ -33,15 +33,15 @@ public class FetchStagingLocationsJob extends Job {
   private final GcsDataflowProjectClient gcsClient;
 
   private final String accountEmail;
-  private final String cloudProject;
+  private final String cloudProjectId;
   private final SettableFuture<SortedSet<String>> stagingLocations;
 
   public FetchStagingLocationsJob(GcsDataflowProjectClient gcsClient, String accountEmail,
-      String cloudProject) {
-    super("Update Status Locations for project " + cloudProject);
+      String cloudProjectId) {
+    super("Update Status Locations for project " + cloudProjectId);
     this.gcsClient = gcsClient;
     this.accountEmail = accountEmail;
-    this.cloudProject = cloudProject;
+    this.cloudProjectId = cloudProjectId;
     this.stagingLocations = SettableFuture.create();
   }
 
@@ -50,13 +50,13 @@ public class FetchStagingLocationsJob extends Job {
   }
 
   public String getProject() {
-    return cloudProject;
+    return cloudProjectId;
   }
 
   @Override
   protected IStatus run(IProgressMonitor monitor) {
     try {
-      SortedSet<String> locations = gcsClient.getPotentialStagingLocations(cloudProject);
+      SortedSet<String> locations = gcsClient.getPotentialStagingLocations(cloudProjectId);
       stagingLocations.set(locations);
     } catch (IOException ex) {
       stagingLocations.setException(ex);

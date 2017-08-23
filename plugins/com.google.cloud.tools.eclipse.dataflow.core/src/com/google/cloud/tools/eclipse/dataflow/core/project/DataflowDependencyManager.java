@@ -134,10 +134,10 @@ public class DataflowDependencyManager {
         if (!Strings.isNullOrEmpty(version)) {
           try {
             return VersionRange.createFromVersionSpec(version);
-          } catch (InvalidVersionSpecificationException e) {
+          } catch (InvalidVersionSpecificationException ex) {
             String message =
                 String.format("Could not create version range from existing version %s", version);
-            throw new IllegalStateException(message, e);
+            throw new IllegalStateException(message, ex);
           }
         }
       }
