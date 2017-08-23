@@ -128,7 +128,7 @@ public class ProjectUtils {
     List<IProject> projects = new ArrayList<>(projectFiles.size());
     System.out.printf("Importing %d projects:\n", projectFiles.size());
     for (IPath projectFile : projectFiles) {
-      System.out.println("  " + projectFile);
+      System.out.println("   " + projectFile);
       IProjectDescription descriptor =
           root.getWorkspace().loadProjectDescription(projectFile);
       IProject project = root.getProject(descriptor.getName());
