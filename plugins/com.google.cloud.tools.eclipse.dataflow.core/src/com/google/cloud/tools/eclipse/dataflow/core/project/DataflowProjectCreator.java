@@ -67,7 +67,7 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
 
   private final IProjectConfigurationManager projectConfigurationManager;
 
-  private DataflowArchetype template;
+  private DataflowProjectArchetype template;
   // TODO: Configure in constructor
   private MajorVersion majorVersion = MajorVersion.ONE;
   private String projectNameTemplate;
@@ -85,7 +85,7 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
   private DataflowProjectCreator(IProjectConfigurationManager projectConfigurationManager) {
     this.projectConfigurationManager = projectConfigurationManager;
 
-    template = DataflowArchetype.STARTER_POM_WITH_PIPELINE;
+    template = DataflowProjectArchetype.STARTER_POM_WITH_PIPELINE;
   }
 
   public static DataflowProjectCreator create() {
@@ -124,7 +124,7 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
     this.mavenArtifactId = mavenArtifactId;
   }
 
-  public void setTemplate(DataflowArchetype template) {
+  public void setTemplate(DataflowProjectArchetype template) {
     this.template = template;
   }
 
@@ -222,7 +222,7 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
   
   private static final ArtifactRetriever retriever = new ArtifactRetriever();
 
-  private Set<ArtifactVersion> defaultArchetypeVersions(DataflowArchetype template, MajorVersion version) {
+  private Set<ArtifactVersion> defaultArchetypeVersions(DataflowProjectArchetype template, MajorVersion version) {
     checkArgument(template.getSdkVersions().contains(majorVersion));
     
     String artifactId = template.getArtifactId();

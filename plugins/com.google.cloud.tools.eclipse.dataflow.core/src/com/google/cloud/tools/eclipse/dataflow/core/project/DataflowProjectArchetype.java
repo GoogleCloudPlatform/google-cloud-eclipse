@@ -23,7 +23,7 @@ import com.google.common.collect.ImmutableSortedSet;
 /**
  * Enumeration of the Archetype templates available for project creation.
  */
-public enum DataflowArchetype {
+public enum DataflowProjectArchetype {
   STARTER_POM_WITH_PIPELINE(
       "Starter project with a simple pipeline",
       "google-cloud-dataflow-java-archetypes-starter",
@@ -37,7 +37,7 @@ public enum DataflowArchetype {
   private final String artifactId;
   private final ImmutableSortedSet<MajorVersion> sdkVersions;
 
-  private DataflowArchetype(String label, String artifactId,
+  private DataflowProjectArchetype(String label, String artifactId,
       NavigableSet<MajorVersion> sdkVersions) {
     this.label = label;
     this.artifactId = artifactId;

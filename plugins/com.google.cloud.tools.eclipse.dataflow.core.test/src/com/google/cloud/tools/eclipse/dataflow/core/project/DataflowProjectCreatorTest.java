@@ -30,7 +30,7 @@ public class DataflowProjectCreatorTest {
   
   @Test
   public void testTemplates() {
-    for (DataflowArchetype template : DataflowArchetype.values()) {
+    for (DataflowProjectArchetype template : DataflowProjectArchetype.values()) {
       Assert.assertTrue(MavenCoordinatesValidator.validateArtifactId(template.getArtifactId()));
       Assert.assertFalse(template.getSdkVersions().isEmpty());
       Assert.assertFalse(template.getLabel().isEmpty());
