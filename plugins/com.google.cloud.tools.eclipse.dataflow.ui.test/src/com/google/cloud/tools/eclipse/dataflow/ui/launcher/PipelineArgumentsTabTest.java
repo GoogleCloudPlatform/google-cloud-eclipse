@@ -35,6 +35,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.ui.ILaunchConfigurationDialog;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -71,6 +72,7 @@ public class PipelineArgumentsTabTest {
       IWorkspaceRoot workspaceRoot = mock(IWorkspaceRoot.class);
       when(workspaceRoot.getProject(anyString())).thenReturn(mock(IProject.class));
 
+      ILaunchConfigurationDialog dialog = mock(ILaunchConfigurationDialog.class);
       ILaunchConfiguration configuration = mock(ILaunchConfiguration.class);
       when(configuration.getAttribute(
           eq(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME), anyString()))
@@ -80,6 +82,7 @@ public class PipelineArgumentsTabTest {
           .thenReturn("DirectPipelineRunner");
 
       PipelineArgumentsTab tab = new PipelineArgumentsTab(workspaceRoot);
+      tab.setLaunchConfigurationDialog(dialog);
       tab.createControl(shellResource.getShell());
       tab.initializeFrom(configuration);  // Should not throw NPE.
 

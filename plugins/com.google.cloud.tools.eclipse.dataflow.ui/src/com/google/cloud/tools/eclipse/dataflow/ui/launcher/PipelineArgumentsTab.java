@@ -43,6 +43,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.SettableFuture;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -54,15 +55,14 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -87,7 +87,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
   private static final String ARGUMENTS_SEPARATOR = "="; //$NON-NLS-1$
 
-  private Executor executor;
+  private Executor displayExecutor;
 
   private ScrolledComposite composite;
   private Composite internalComposite;
@@ -129,7 +129,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   @Override
   public void createControl(Composite parent) {
     launchConfiguration = PipelineLaunchConfiguration.createDefault();
-    executor = DisplayExecutor.create(parent.getDisplay());
+    displayExecutor = DisplayExecutor.create(parent.getDisplay());
     composite = new ScrolledComposite(parent, SWT.V_SCROLL);
     composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     composite.setLayout(new GridLayout(1, false));
@@ -318,7 +318,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
       userOptionsSelector.setText(Strings.nullToEmpty(userOptionsName));
 
       updatePipelineOptionsForm();
-    } catch (CoreException ex) {
+    } catch (CoreException | InvocationTargetException | InterruptedException ex) {
       // TODO: Handle
       DataflowUiPlugin.logError(ex, 
           "Error while initializing from existing configuration"); //$NON-NLS-1$
@@ -345,16 +345,19 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
   /**
    * Asynchronously updates the project hierarchy.
+   * 
+   * @throws InterruptedException if the update is interrupted
+   * @throws InvocationTargetException if an exception occurred during the update
    */
-  private void updateHierarchy(final MajorVersion majorVersion) {
-    Job job = new Job(Messages.getString("update.hierarchy")) { //$NON-NLS-1$
+  private void updateHierarchy(final MajorVersion majorVersion)
+      throws InvocationTargetException, InterruptedException {
+    getLaunchConfigurationDialog().run(true, true, new IRunnableWithProgress() {
       @Override
-      public IStatus run(IProgressMonitor progress) {
-        hierarchy = getPipelineOptionsHierarchy(majorVersion, progress);
-        return Status.OK_STATUS;
+      public void run(IProgressMonitor monitor)
+          throws InvocationTargetException, InterruptedException {
+        hierarchy = getPipelineOptionsHierarchy(majorVersion, monitor);
       }
-    };
-    job.schedule();
+    });
   }
 
   private DataflowPreferences getPreferences() {
@@ -395,33 +398,38 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   }
 
   private void updatePipelineOptionsForm() {
-    final SettableFuture<Map<PipelineOptionsType, Set<PipelineOptionsProperty>>>
-        optionsHierarchyFuture = SettableFuture.create();
-    Job job = new Job("Update Pipeline Options Form") { //$NON-NLS-1$
+    final SettableFuture<Map<PipelineOptionsType, Set<PipelineOptionsProperty>>> optionsHierarchyFuture =
+        SettableFuture.create();
+    optionsHierarchyFuture.addListener(new Runnable() {
       @Override
-      protected IStatus run(IProgressMonitor monitor) {
-        optionsHierarchyFuture.set(launchConfiguration.getOptionsHierarchy(hierarchy));
-        return Status.OK_STATUS;
-      }
-    };
-    job.schedule();
-    optionsHierarchyFuture.addListener(
-        new Runnable() {
+      public void run() {
+        if (internalComposite.isDisposed()) {
+          return;
+        }
+        BusyIndicator.showWhile(internalComposite.getDisplay(), new Runnable() {
           @Override
           public void run() {
-            if (internalComposite.isDisposed()) {
-              return;
-            }
-
             try {
               pipelineOptionsForm.updateForm(launchConfiguration, optionsHierarchyFuture.get());
               updateLaunchConfigurationDialog();
-            } catch (InterruptedException | ExecutionException e) {
-              DataflowUiPlugin.logError(e, "Exception while updating available Pipeline Options"); //$NON-NLS-1$
+            } catch (InterruptedException | ExecutionException ex) {
+              DataflowUiPlugin.logError(ex, "Exception while updating available Pipeline Options"); //$NON-NLS-1$
             }
           }
-        },
-        executor);
+        });
+      }
+    }, displayExecutor);
+    try {
+      getLaunchConfigurationDialog().run(true, true, new IRunnableWithProgress() {
+        @Override
+        public void run(IProgressMonitor monitor)
+            throws InvocationTargetException, InterruptedException {
+          optionsHierarchyFuture.set(launchConfiguration.getOptionsHierarchy(hierarchy));
+        }
+      });
+    } catch (InvocationTargetException | InterruptedException ex) {
+      DataflowUiPlugin.logError(ex, "Exception occurred while updating available Pipeline Options");
+    }
   }
 
   private Map<String, String> getNonDefaultOptions() {
