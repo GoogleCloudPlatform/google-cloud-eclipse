@@ -48,10 +48,6 @@ public class MavenCoordinatesUi {
   private Label artifactIdLabel;
   private Label versionLabel;
 
-  /**
-   * @param dynamicEnabling if {@code true}, creates a master check box that enables or disables
-   *     the Maven coordinate area; otherwise, always enables the area
-   */
   public MavenCoordinatesUi(Composite container) {
     asMavenProjectButton = new Button(container, SWT.CHECK);
     asMavenProjectButton.setText(Messages.getString("CREATE_AS_MAVEN_PROJECT")); //$NON-NLS-1$

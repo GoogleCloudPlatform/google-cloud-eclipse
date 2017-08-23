@@ -138,7 +138,7 @@ public class MavenCoordinates {
     }
 
     /**
-     * @param groupId the Maven artifact ID
+     * @param artifactId the Maven artifact ID
      */
     public Builder setArtifactId(String artifactId) {
       Preconditions.checkNotNull(artifactId, "artifactId null");

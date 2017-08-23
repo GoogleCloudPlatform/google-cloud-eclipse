@@ -300,7 +300,6 @@ public class LocalAppEngineServerBehaviour extends ServerBehaviourDelegate
    * Starts the development server.
    *
    * @param mode the launch mode (see ILaunchManager.*_MODE constants)
-   * @param console the stream (Eclipse console) to send development server process output to
    */
   void startDevServer(String mode, DefaultRunConfiguration devServerRunConfiguration,
       Path javaHomePath, MessageConsoleStream outputStream, MessageConsoleStream errorStream)
