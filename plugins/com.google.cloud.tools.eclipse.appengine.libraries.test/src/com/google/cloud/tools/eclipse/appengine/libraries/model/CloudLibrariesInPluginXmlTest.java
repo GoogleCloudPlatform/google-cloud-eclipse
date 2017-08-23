@@ -100,12 +100,13 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(endpointsLibrary.getId(), is(CLOUD_ENDPOINTS_LIBRARY_ID));
     assertThat(endpointsLibrary.getName(), is("Google Cloud Endpoints"));
     assertThat(endpointsLibrary.getGroup(), is("appengine"));
-    assertThat(endpointsLibrary.getSiteUri(),
-        is(new URI("https://cloud.google.com/appengine/docs/java/endpoints/")));
+    assertThat(endpointsLibrary.getSiteUri(), is(new URI(
+        "https://cloud.google.com/endpoints/docs/frameworks/java/about-cloud-endpoints-frameworks")));
     assertTrue(endpointsLibrary.isExport());
     assertNotNull(endpointsLibrary.getLibraryDependencies());
     assertThat(endpointsLibrary.getLibraryDependencies().size(), is(1));
     assertThat(endpointsLibrary.getLibraryDependencies().get(0), is("appengine-api"));
+    assertTrue(endpointsLibrary.getToolTip().contains("v2"));
 
     assertThat(endpointsLibrary.getLibraryFiles().size(), is(1));
     LibraryFile libraryFile = endpointsLibrary.getLibraryFiles().get(0);
@@ -115,13 +116,13 @@ public class CloudLibrariesInPluginXmlTest {
     assertNotNull(libraryFile.getMavenCoordinates());
     MavenCoordinates mavenCoordinates = libraryFile.getMavenCoordinates();
     assertThat(mavenCoordinates.getRepository(), is("central"));
-    assertThat(mavenCoordinates.getGroupId(), is("com.google.appengine"));
-    assertThat(mavenCoordinates.getArtifactId(), is("appengine-endpoints"));
-    assertThat(mavenCoordinates.getVersion(), is("1.9.54"));
+    assertThat(mavenCoordinates.getGroupId(), is("com.google.endpoints"));
+    assertThat(mavenCoordinates.getArtifactId(), is("endpoints-framework"));
+    assertThat(mavenCoordinates.getVersion(), is("2.0.7"));
     assertThat(mavenCoordinates.getType(), is("jar"));
     assertNull(mavenCoordinates.getClassifier());
     assertThat(libraryFile.getJavadocUri(),
-        is(new URI("https://cloud.google.com/appengine/docs/java/endpoints/javadoc/")));
+        is(new URI("https://cloud.google.com/endpoints/docs/frameworks/java/javadoc/")));
 
     assertNotNull(libraryFile.getFilters());
     List<Filter> filters = libraryFile.getFilters();

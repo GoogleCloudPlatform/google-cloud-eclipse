@@ -30,14 +30,14 @@
           group="appengine"
           name="Google Cloud Endpoints"
           tooltip="%endpoints.tooltip"
-          siteUri="https://cloud.google.com/appengine/docs/java/endpoints/" >
+          siteUri="https://cloud.google.com/endpoints/docs/frameworks/java/about-cloud-endpoints-frameworks" >
       <libraryDependency id="appengine-api" />
       <libraryFile
-            javadocUri="https://cloud.google.com/appengine/docs/java/endpoints/javadoc/">
+            javadocUri="https://cloud.google.com/endpoints/docs/frameworks/java/javadoc/">
         <mavenCoordinates
-              artifactId="appengine-endpoints"
-              groupId="com.google.appengine" 
-              version="1.9.54" />
+              artifactId="endpoints-framework"
+              groupId="com.google.endpoints" 
+              version="2.0.7" />
         <exclusionFilter pattern="com/google/appengine/repackaged/**" />
       </libraryFile>
     </library>
