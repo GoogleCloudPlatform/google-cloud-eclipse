@@ -2,6 +2,9 @@
 
 </#if>import java.io.IOException;
 
+<#if servletVersion == "3.1">
+import javax.servlet.annotation.WebServlet;
+</#if>
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
