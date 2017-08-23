@@ -35,20 +35,16 @@ import com.google.cloud.tools.eclipse.dataflow.ui.page.MessageTarget;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.component.LabeledTextMapComponent;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.component.TextAndButtonComponent;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.component.TextAndButtonSelectionListener;
-import com.google.cloud.tools.eclipse.dataflow.ui.util.DisplayExecutor;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.common.util.concurrent.SettableFuture;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -74,6 +70,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.forms.events.ExpansionEvent;
@@ -87,7 +84,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
   private static final String ARGUMENTS_SEPARATOR = "="; //$NON-NLS-1$
 
-  private Executor executor;
+  private Display display;
 
   private ScrolledComposite composite;
   private Composite internalComposite;
@@ -112,7 +109,11 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
    * hierarchy should be restricted to only showing options available from the current project, if
    * able.
    */
+  // There is an async job updating this field. All access should be through the UI thread. Readers
+  // should also check first if the async job is running (i.e., if the field is null).
   private PipelineOptionsHierarchy hierarchy;
+  private Job latestHierarchyUpdateJob;
+  private Job latestHierarchyUiUpdateJob;
 
   private final IWorkspaceRoot workspaceRoot;
 
@@ -129,7 +130,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   @Override
   public void createControl(Composite parent) {
     launchConfiguration = PipelineLaunchConfiguration.createDefault();
-    executor = DisplayExecutor.create(parent.getDisplay());
+    display = parent.getDisplay();
     composite = new ScrolledComposite(parent, SWT.V_SCROLL);
     composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     composite.setLayout(new GridLayout(1, false));
@@ -163,7 +164,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
     userOptionsSelector = new TextAndButtonComponent(
         runnerOptionsGroup,
-        new GridData(SWT.FILL, SWT.BEGINNING, true, false), 
+        new GridData(SWT.FILL, SWT.BEGINNING, true, false),
         Messages.getString("search")); //$NON-NLS-1$
     userOptionsSelector.addButtonSelectionListener(openPipelineOptionsSearchListener());
 
@@ -186,6 +187,8 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
     return new TextAndButtonSelectionListener() {
       @Override
       public void widgetSelected(SelectionEvent event) {
+        Preconditions.checkNotNull(hierarchy,
+            "concurrency bug: the button should be disabled while this field is being updated");
         Map<String, PipelineOptionsType> optionsTypes = hierarchy.getAllPipelineOptionsTypes();
         PipelineOptionsSelectionDialog dialog =
             new PipelineOptionsSelectionDialog(getShell(), optionsTypes);
@@ -320,7 +323,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
       updatePipelineOptionsForm();
     } catch (CoreException ex) {
       // TODO: Handle
-      DataflowUiPlugin.logError(ex, 
+      DataflowUiPlugin.logError(ex,
           "Error while initializing from existing configuration"); //$NON-NLS-1$
     }
   }
@@ -347,14 +350,30 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
    * Asynchronously updates the project hierarchy.
    */
   private void updateHierarchy(final MajorVersion majorVersion) {
-    Job job = new Job(Messages.getString("update.hierarchy")) { //$NON-NLS-1$
+    hierarchy = null;
+    userOptionsSelector.setEnabled(false);
+
+    latestHierarchyUpdateJob = new Job(Messages.getString("update.hierarchy")) { //$NON-NLS-1$
       @Override
       public IStatus run(IProgressMonitor progress) {
-        hierarchy = getPipelineOptionsHierarchy(majorVersion, progress);
+        final Job thisJob = this;
+        // TODO(chanseok): It is not safe to call "getPipelineOptionsHierarchy" asynchronously.
+        // Fix https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2289.
+        final PipelineOptionsHierarchy newHierarchy =
+            getPipelineOptionsHierarchy(majorVersion, progress);
+        display.syncExec(new Runnable() {
+          @Override
+          public void run() {
+            if (!internalComposite.isDisposed() && thisJob == latestHierarchyUpdateJob) {
+              hierarchy = newHierarchy;
+              userOptionsSelector.setEnabled(true);
+            }
+          }
+        });
         return Status.OK_STATUS;
       }
     };
-    job.schedule();
+    latestHierarchyUpdateJob.schedule();
   }
 
   private DataflowPreferences getPreferences() {
@@ -395,33 +414,46 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   }
 
   private void updatePipelineOptionsForm() {
-    final SettableFuture<Map<PipelineOptionsType, Set<PipelineOptionsProperty>>>
-        optionsHierarchyFuture = SettableFuture.create();
-    Job job = new Job("Update Pipeline Options Form") { //$NON-NLS-1$
+    latestHierarchyUiUpdateJob = new Job("Update Pipeline Options Form") { //$NON-NLS-1$
       @Override
       protected IStatus run(IProgressMonitor monitor) {
-        optionsHierarchyFuture.set(launchConfiguration.getOptionsHierarchy(hierarchy));
+        final Job thisJob = this;
+        final boolean[] die = new boolean[1];
+        final PipelineOptionsHierarchy[] hierarchyToUse = new PipelineOptionsHierarchy[1];
+
+        display.syncExec(new Runnable() {
+          @Override
+          public void run() {
+            die[0] = internalComposite.isDisposed() || thisJob != latestHierarchyUiUpdateJob;
+            hierarchyToUse[0] = hierarchy;
+          }
+        });
+        if (die[0]) {
+          return Status.OK_STATUS;
+        } else if (hierarchyToUse[0] == null) {
+          schedule(50 /* ms */);  // 'hierarchy' update job still running; try the next chance
+          return Status.OK_STATUS;
+        }
+
+        // TODO(chanseok): It is not safe to access "launchConfiguration" asynchronously.
+        // Fix https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/2289.
+        final Map<PipelineOptionsType, Set<PipelineOptionsProperty>> types =
+            launchConfiguration.getOptionsHierarchy(hierarchyToUse[0]);
+
+        display.syncExec(new Runnable() {
+          @Override
+          public void run() {
+            if (!internalComposite.isDisposed() && thisJob == latestHierarchyUiUpdateJob
+                && hierarchy == hierarchyToUse[0]) {
+              pipelineOptionsForm.updateForm(launchConfiguration, types);
+              updateLaunchConfigurationDialog();
+            }
+          }
+        });
         return Status.OK_STATUS;
       }
     };
-    job.schedule();
-    optionsHierarchyFuture.addListener(
-        new Runnable() {
-          @Override
-          public void run() {
-            if (internalComposite.isDisposed()) {
-              return;
-            }
-
-            try {
-              pipelineOptionsForm.updateForm(launchConfiguration, optionsHierarchyFuture.get());
-              updateLaunchConfigurationDialog();
-            } catch (InterruptedException | ExecutionException e) {
-              DataflowUiPlugin.logError(e, "Exception while updating available Pipeline Options"); //$NON-NLS-1$
-            }
-          }
-        },
-        executor);
+    latestHierarchyUiUpdateJob.schedule();
   }
 
   private Map<String, String> getNonDefaultOptions() {
@@ -433,12 +465,18 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
   }
 
   private boolean validatePage() {
-    MissingRequiredProperties validationFailures =
-        launchConfiguration.getMissingRequiredProperties(hierarchy, getPreferences());
+    // We can't validate pipeline options if they are being loaded. Unfortunately, it is possible
+    // that validation may fail if we do the validation after loading is complete, but there is
+    // not much we can do here.
+    if (hierarchy != null) {
+      MissingRequiredProperties validationFailures =
+          launchConfiguration.getMissingRequiredProperties(hierarchy, getPreferences());
 
-    setErrorMessage(null);
-    return validateRequiredProperties(validationFailures)
-        && validateRequiredGroups(validationFailures);
+      setErrorMessage(null);
+      return validateRequiredProperties(validationFailures)
+          && validateRequiredGroups(validationFailures);
+    }
+    return true;
   }
 
   private boolean validateRequiredGroups(MissingRequiredProperties validationFailures) {
