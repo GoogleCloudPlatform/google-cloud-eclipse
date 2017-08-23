@@ -19,10 +19,14 @@ package com.google.cloud.tools.eclipse.dataflow.core.project;
 import com.google.cloud.tools.eclipse.dataflow.core.DataflowCorePlugin;
 import com.google.cloud.tools.eclipse.dataflow.core.natures.DataflowJavaProjectNature;
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.WritableDataflowPreferences;
+import com.google.cloud.tools.eclipse.util.ArtifactRetriever;
 import com.google.cloud.tools.eclipse.util.JavaPackageValidator;
 import com.google.cloud.tools.eclipse.util.MavenCoordinatesValidator;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSortedSet;
+
+import static com.google.common.base.Preconditions.checkArgument;
+
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
@@ -63,7 +67,6 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
           JavaCore.VERSION_1_3, JavaCore.VERSION_1_4, JavaCore.VERSION_1_5, JavaCore.VERSION_1_6,
           JavaCore.VERSION_CLDC_1_1));
 
-  private final DataflowArtifactRetriever artifactRetriever;
   private final IProjectConfigurationManager projectConfigurationManager;
 
   private Template template;
@@ -99,7 +102,7 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
     private final String archetype;
     private final ImmutableSortedSet<MajorVersion> sdkVersions;
 
-    Template(String label, String archetype, NavigableSet<MajorVersion> sdkVersions) {
+    private Template(String label, String archetype, NavigableSet<MajorVersion> sdkVersions) {
       this.label = label;
       this.archetype = archetype;
       this.sdkVersions = ImmutableSortedSet.copyOf(sdkVersions);
@@ -109,6 +112,9 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
       return label;
     }
 
+    /**
+     * @return the artifact ID of the archetype
+     */
     public String getArchetype() {
       return archetype;
     }
@@ -118,18 +124,14 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
     }
   }
 
-  DataflowProjectCreator(
-      DataflowArtifactRetriever artifactRetriever,
-      IProjectConfigurationManager projectConfigurationManager) {
-    this.artifactRetriever = artifactRetriever;
+  private DataflowProjectCreator(IProjectConfigurationManager projectConfigurationManager) {
     this.projectConfigurationManager = projectConfigurationManager;
 
     template = Template.STARTER_POM_WITH_PIPELINE;
   }
 
   public static DataflowProjectCreator create() {
-    return new DataflowProjectCreator(
-        DataflowArtifactRetriever.defaultInstance(), MavenPlugin.getProjectConfigurationManager());
+    return new DataflowProjectCreator(MavenPlugin.getProjectConfigurationManager());
   }
 
   public Collection<DataflowProjectValidationStatus> validate() {
@@ -259,10 +261,18 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
     monitor.done();
   }
 
-  private Set<ArtifactVersion> defaultArchetypeVersions(Template template, MajorVersion mv) {
-    ArtifactVersion latestArchetype = artifactRetriever.getLatestArchetypeVersion(template, mv);
+  
+  private static final ArtifactRetriever retriever = new ArtifactRetriever();
+
+  private Set<ArtifactVersion> defaultArchetypeVersions(Template template, MajorVersion version) {
+    checkArgument(template.getSdkVersions().contains(majorVersion));
+    
+    String artifactId = template.getArchetype();
+    ArtifactVersion latestArchetype = retriever.getLatestArtifactVersion(
+        DataflowMavenCoordinates.GROUP_ID, artifactId, majorVersion.getVersionRange());
+    
     return Collections.singleton(
-        latestArchetype == null ? mv.getInitialVersion() : latestArchetype);
+        latestArchetype == null ? version.getInitialVersion() : latestArchetype);
   }
 
   private void setPreferences(IProject project) {

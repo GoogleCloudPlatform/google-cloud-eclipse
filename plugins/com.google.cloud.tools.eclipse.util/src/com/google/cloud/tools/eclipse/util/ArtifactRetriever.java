@@ -96,6 +96,7 @@ public class ArtifactRetriever {
                 }
               });
 
+  // todo consider a factory to create or build retrievers for each repo
   /**
    * @param repositoryUrl the base URL of the maven mirror such as
    *     "https://repo1.maven.org/maven2/"
