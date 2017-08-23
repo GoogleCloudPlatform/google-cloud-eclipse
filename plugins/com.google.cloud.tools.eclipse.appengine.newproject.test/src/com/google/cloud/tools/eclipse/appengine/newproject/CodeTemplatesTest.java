@@ -144,8 +144,10 @@ public class CodeTemplatesTest {
         root.getAttribute("xsi:schemaLocation"));
     Assert.assertEquals(servletVersion, root.getAttribute("version"));
     Element servletClass = (Element) root.getElementsByTagName("servlet-class").item(0);
-    Assert.assertEquals("HelloAppEngine", servletClass.getTextContent());
-
+    if (servletClass != null) { // servlet 2.5
+      Assert.assertEquals("HelloAppEngine", servletClass.getTextContent());
+    }
+    
     IFile htmlFile = webapp.getFile("index.html");
     Element html = buildDocument(htmlFile).getDocumentElement();
     Assert.assertEquals("html", html.getNodeName());
@@ -240,6 +242,7 @@ public class CodeTemplatesTest {
   public void testCreateChildFile() throws CoreException, IOException {
     Map<String, String> values = new HashMap<>();
     values.put("package", "com.google.foo.bar");
+    values.put("servletVersion", "2.5");
 
     IFile child = CodeTemplates.createChildFile("HelloAppEngine.java",
         Templates.HELLO_APPENGINE_TEMPLATE, parent, values, monitor);

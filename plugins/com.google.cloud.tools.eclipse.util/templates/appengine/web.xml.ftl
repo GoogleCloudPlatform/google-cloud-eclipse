@@ -2,7 +2,8 @@
 <web-app xmlns="${namespace}"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="${namespace} ${schemaUrl}"
-         version="${version}">
+         version="${servletVersion}">
+<#if servletVersion == "2.5">
   <servlet>
     <servlet-name>HelloAppEngine</servlet-name>
     <servlet-class>${package}HelloAppEngine</servlet-class>
@@ -11,6 +12,7 @@
     <servlet-name>HelloAppEngine</servlet-name>
     <url-pattern>/hello</url-pattern>
   </servlet-mapping>
+</#if>
   <welcome-file-list>
     <welcome-file>index.html</welcome-file>
     <welcome-file>index.jsp</welcome-file>
