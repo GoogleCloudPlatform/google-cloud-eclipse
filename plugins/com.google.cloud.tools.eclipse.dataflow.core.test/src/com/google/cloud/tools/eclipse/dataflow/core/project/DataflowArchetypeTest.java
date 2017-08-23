@@ -21,13 +21,8 @@ import org.junit.Test;
 
 import com.google.cloud.tools.eclipse.util.MavenCoordinatesValidator;
 
-public class DataflowProjectCreatorTest {
+public class DataflowArchetypeTest {
 
-  @Test
-  public void testCreate() {
-    Assert.assertNotNull(DataflowProjectCreator.create());
-  }
-  
   @Test
   public void testTemplates() {
     for (DataflowArchetype template : DataflowArchetype.values()) {

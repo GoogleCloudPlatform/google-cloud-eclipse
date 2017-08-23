@@ -16,9 +16,9 @@
 
 package com.google.cloud.tools.eclipse.dataflow.ui.page;
 
+import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowArchetype;
 import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowDependencyManager;
 import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowProjectCreator;
-import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowProjectCreator.Template;
 import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowProjectValidationStatus;
 import com.google.cloud.tools.eclipse.dataflow.core.project.MajorVersion;
 import com.google.cloud.tools.eclipse.dataflow.ui.Messages;
@@ -141,7 +141,7 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
 
     templateDropdown = addCombo(formComposite, 
         Messages.getString("project.template"), true); //$NON-NLS-1$
-    for (Template template : Template.values()) {
+    for (DataflowArchetype template : DataflowArchetype.values()) {
       templateDropdown.add(template.getLabel());
     }
     templateVersionDropdown = addCombo(formComposite, 
@@ -276,7 +276,7 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     return new SelectionAdapter() {
       @Override
       public void widgetSelected(SelectionEvent event) {
-        targetCreator.setTemplate(Template.values()[templateDropdown.getSelectionIndex()]);
+        targetCreator.setTemplate(DataflowArchetype.values()[templateDropdown.getSelectionIndex()]);
         updateAvailableVersions();
       }
     };
@@ -292,7 +292,7 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     String selected = templateVersionDropdown.getText();
     templateVersionDropdown.removeAll();
 
-    Template template = Template.values()[templateDropdown.getSelectionIndex()];
+    DataflowArchetype template = DataflowArchetype.values()[templateDropdown.getSelectionIndex()];
     Map<ArtifactVersion, MajorVersion> availableVersions =
         dependencyManager.getLatestVersions(template.getSdkVersions());
 
