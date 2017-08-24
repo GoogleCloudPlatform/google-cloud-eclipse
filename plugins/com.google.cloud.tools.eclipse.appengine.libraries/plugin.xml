@@ -284,22 +284,32 @@
             groupId="io.netty"
             artifactId="netty-tcnative-boringssl-static"
             version="2.0.3.Final" />
+      </libraryFile>
+      <libraryFile>
         <mavenCoordinates
             groupId="com.google.cloud"
             artifactId="google-cloud-core-grpc"
             version="LATEST" />
+      </libraryFile>
+      <libraryFile>
         <mavenCoordinates
             groupId="com.google.api"
             artifactId="gax-grpc"
             version="0.22.0" />
+      </libraryFile>
+      <libraryFile>
         <mavenCoordinates
             groupId="com.google.api.grpc"
             artifactId="proto-google-cloud-logging-v2"
             version="0.1.15" />
+      </libraryFile>
+      <libraryFile>
         <mavenCoordinates
             groupId="io.grpc"
             artifactId="grpc-netty"
             version="1.4.0" />
+      </libraryFile>
+      <libraryFile>
          <mavenCoordinates
             groupId="io.grpc"
             artifactId="grpc-stub"
