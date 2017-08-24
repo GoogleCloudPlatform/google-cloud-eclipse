@@ -426,6 +426,12 @@
               groupId="com.google.cloud"
               version="LATEST" />
       </libraryFile>
+      <libraryFile>
+        <mavenCoordinates
+              artifactId="grpc-google-logging-v2"
+              groupId="com.google.api.grpc"
+              version="0.0.7" />
+      </libraryFile>
     </library>
   </extension>
 
