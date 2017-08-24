@@ -316,6 +316,12 @@
             version="1.4.0" />
       </libraryFile>
       <libraryFile>
+        <mavenCoordinates
+            groupId="io.grpc"
+            artifactId="grpc-core"
+            version="1.4.0" />
+      </libraryFile>
+      <libraryFile>
          <mavenCoordinates
             groupId="io.grpc"
             artifactId="grpc-protobuf"
