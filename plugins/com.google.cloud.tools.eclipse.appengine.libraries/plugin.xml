@@ -271,6 +271,41 @@
               version="1.3.3" />
       </libraryFile>
     </library>
+  
+    <library
+          id="grpc"
+          group="clientapis"
+          name="%grpc.name"
+          tooltip="%grpc.infotip"
+          javaVersion="1.8"
+          siteUri="https://grpc.io/docs/tutorials/basic/java.html" >
+      <libraryFile>
+        <mavenCoordinates
+            groupId="io.netty"
+            artifactId="netty-tcnative-boringssl-static"
+            version="2.0.3.Final" />
+        <mavenCoordinates
+            groupId="com.google.cloud"
+            artifactId="google-cloud-core-grpc"
+            version="LATEST" />
+        <mavenCoordinates
+            groupId="com.google.api"
+            artifactId="gax-grpc"
+            version="0.22.0" />
+        <mavenCoordinates
+            groupId="com.google.api.grpc"
+            artifactId="proto-google-cloud-logging-v2"
+            version="0.1.15" />
+        <mavenCoordinates
+            groupId="io.grpc"
+            artifactId="grpc-netty"
+            version="1.4.0" />
+         <mavenCoordinates
+            groupId="io.grpc"
+            artifactId="grpc-stub"
+            version="1.4.0" />
+      </libraryFile>
+    </library>
     
     <library
           id="googlecloudstorage"
@@ -344,41 +379,6 @@
               artifactId="google-cloud-translate"
               groupId="com.google.cloud"
               version="LATEST" />
-      </libraryFile>
-    </library>
-
-    <library
-          id="grpc"
-          group="clientapis"
-          name="%grpc.name"
-          tooltip="%grpc.tooltip"
-          javaVersion="1.8"
-          siteUri="https://grpc.io/docs/tutorials/basic/java.html" >
-      <libraryFile>
-        <mavenCoordinates
-            groupId="io.netty"
-            artifactId="netty-tcnative-boringssl-static"
-            version="2.0.3.Final" />
-        <mavenCoordinates
-            groupId="com.google.cloud"
-            artifactId="google-cloud-core-grpc"
-            version="LATEST" />
-        <mavenCoordinates
-            groupId="com.google.api"
-            artifactId="gax-grpc"
-            version="0.22.0" />
-        <mavenCoordinates
-            groupId="com.google.api.grpc"
-            artifactId="proto-google-cloud-logging-v2"
-            version="0.1.15" />
-        <mavenCoordinates
-            groupId="io.grpc"
-            artifactId="grpc-netty"
-            version="1.4.0" />
-         <mavenCoordinates
-            groupId="io.grpc"
-            artifactId="grpc-stub"
-            version="1.4.0" />
       </libraryFile>
     </library>
 
