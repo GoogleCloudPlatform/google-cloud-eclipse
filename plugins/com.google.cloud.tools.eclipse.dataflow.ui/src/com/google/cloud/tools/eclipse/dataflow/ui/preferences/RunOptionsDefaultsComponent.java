@@ -65,6 +65,7 @@ import org.eclipse.ui.PlatformUI;
 
 /**
  * Collects default run options for Dataflow Pipelines and provides means to create and modify them.
+ * Assumed to be executed solely within the SWT UI thread.
  */
 public class RunOptionsDefaultsComponent {
   private static final int PROJECT_INPUT_SPENT_COLUMNS = 1;
@@ -89,7 +90,8 @@ public class RunOptionsDefaultsComponent {
   private SelectFirstMatchingPrefixListener completionListener;
 
   private FetchStagingLocationsJob fetchStagingLocationsJob;
-  private VerifyStagingLocationJob verifyStagingLocationJob;
+  @VisibleForTesting
+  VerifyStagingLocationJob verifyStagingLocationJob;
 
   public RunOptionsDefaultsComponent(Composite target, int columns, MessageTarget messageTarget,
       DataflowPreferences preferences) {
@@ -232,8 +234,10 @@ public class RunOptionsDefaultsComponent {
     }
     
     // we have a project and staging location, so a fetch-staging-locations job should be under way
-    Future<SortedSet<String>> stagingLocationsFuture = getStagingLocationsResult();
-    Preconditions.checkNotNull(stagingLocationsFuture, "Fetch staging locations job should be underway");
+    Preconditions.checkNotNull(fetchStagingLocationsJob,
+        "Fetch staging locations job should be underway");
+    Future<SortedSet<String>> stagingLocationsFuture =
+        fetchStagingLocationsJob.getStagingLocations();
     if (stagingLocationsFuture.isDone()) {
       try {
         // on error, will raise an exception
@@ -249,16 +253,16 @@ public class RunOptionsDefaultsComponent {
     }
 
     // we have a project and staging location, so a verify job should be under way
-    Future<VerifyStagingLocationResult> future = getVerifyStagingLocationResult();
-    Preconditions.checkNotNull(future, "verification job should be underway");
-    if (!future.isDone()) {
+    Preconditions.checkNotNull(verifyStagingLocationJob, "Verification job should be underway");
+    Future<VerifyStagingLocationResult> verifyStagingLocationFuture = verifyStagingLocationJob.getVerifyResult();
+    if (!verifyStagingLocationFuture.isDone()) {
       messageTarget.setInfo("Verifying staging location...");
       createButton.setEnabled(false);
       return;
     }
 
     try {
-      VerifyStagingLocationResult result = future.get();
+      VerifyStagingLocationResult result = verifyStagingLocationFuture.get();
       if (!result.email.equals(accountSelector.getSelectedEmail())
           || !result.stagingLocation.equals(getStagingLocation())) {
         // stale; perhaps we should initiate verification of the staging location?
@@ -332,31 +336,26 @@ public class RunOptionsDefaultsComponent {
 
 
   /**
-   * Return the fetched staging locations result future, or null if no job is yet scheduled.
-   */
-  private synchronized Future<SortedSet<String>> getStagingLocationsResult() {
-    return fetchStagingLocationsJob == null ? null : fetchStagingLocationsJob.getStagingLocations();
-  }
-
-  /**
    * Fetch the staging locations from GCS in a background task and update the Staging Locations
    * combo.
    */
   @VisibleForTesting
-  synchronized void updateStagingLocations(String project, long scheduleDelay) {
-    // We can't retrieve staging locations if no project was input or we're not authenticated.
+  void updateStagingLocations(String project, long scheduleDelay) {
     Credential credential = accountSelector.getSelectedCredential();
     String selectedEmail = accountSelector.getSelectedEmail();
+    // Retrieving staging locations requires an authenticated user and project.
+    // Check if there is an update is in progress; if it matches our user and project,
+    // then quick-return, otherwise it is stale and should be cancelled.
     if (fetchStagingLocationsJob != null) {
       if (Objects.equals(project, fetchStagingLocationsJob.getProject())
           && Objects.equals(selectedEmail, fetchStagingLocationsJob.getAccountEmail())
           && fetchStagingLocationsJob.getState() == Job.RUNNING) {
-        // an update is in progress
         return;
       }
       fetchStagingLocationsJob.cancel();
     }
     fetchStagingLocationsJob = null;
+
     if (!Strings.isNullOrEmpty(project) && credential != null) {
       final FetchStagingLocationsJob thisJob = fetchStagingLocationsJob =
           new FetchStagingLocationsJob(getGcsClient(), selectedEmail, project);
@@ -375,7 +374,7 @@ public class RunOptionsDefaultsComponent {
               }
               completionListener.setContents(stagingLocations);
             } catch (InterruptedException | ExecutionException ex) {
-              // ignore: handled by validate()
+              // ignored: handled by validate()
             }
             validate();
           }
@@ -386,18 +385,10 @@ public class RunOptionsDefaultsComponent {
   }
 
   /**
-   * Return the staging location verification result future, or null if no job is yet scheduled.
-   */
-  @VisibleForTesting
-  synchronized Future<VerifyStagingLocationResult> getVerifyStagingLocationResult() {
-    return verifyStagingLocationJob == null ? null : verifyStagingLocationJob.getVerifyResult();
-  }
-
-  /**
    * Ensure the staging location specified in the input combo is valid.
    */
   @VisibleForTesting
-  synchronized void startStagingLocationCheck(long schedulingDelay) {
+  void startStagingLocationCheck(long schedulingDelay) {
     String accountEmail = getAccountEmail();
     String stagingLocation = getStagingLocation();
 

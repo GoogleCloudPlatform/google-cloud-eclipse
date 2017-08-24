@@ -31,6 +31,7 @@ import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.model.Bucket;
 import com.google.api.services.storage.model.Buckets;
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.DataflowPreferences;
+import com.google.cloud.tools.eclipse.dataflow.core.project.VerifyStagingLocationJob.VerifyStagingLocationResult;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.MessageTarget;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
@@ -39,6 +40,7 @@ import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import com.google.cloud.tools.login.Account;
 import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.ListenableFuture;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -221,12 +223,16 @@ public class RunOptionsDefaultsComponentTest {
     component.setCloudProjectText("project");
     component.setStagingLocationText("non-existent-bucket");
     component.startStagingLocationCheck(0); // force right now
-    for (int i = 0; i < 200 && !component.getVerifyStagingLocationResult().isDone(); i++) {
+    ListenableFuture<VerifyStagingLocationResult> verifyResult =
+        component.verifyStagingLocationJob.getVerifyResult();
+    for (int i = 0; i < 200
+        && !verifyResult.isDone(); i++) {
       while (Display.getCurrent().readAndDispatch()) {
-      } // spin
+        // spin
+      }
       Thread.sleep(50);
     }
-    assertTrue(component.getVerifyStagingLocationResult().isDone());
+    assertTrue(verifyResult.isDone());
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
     assertTrue(projectID.isEnabled());
@@ -263,14 +269,14 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
-  public void testBucketNameStatus_gscPathWithObjectIsOk() {
+  public void testBucketNameStatus_gcsPathWithObjectIsOk() {
     component.selectAccount("alice@example.com");
     component.setStagingLocationText("bucket/object");
     verify(messageTarget, never()).setError(anyString());
   }
 
   @Test
-  public void testBucketNameStatus_gscUrlPathWithObjectIsOk() {
+  public void testBucketNameStatus_gcsUrlPathWithObjectIsOk() {
     component.setStagingLocationText("gs://bucket/object");
     verify(messageTarget, never()).setError(anyString());
   }

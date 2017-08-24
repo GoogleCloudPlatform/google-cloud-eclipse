@@ -57,6 +57,10 @@ public class FetchStagingLocationsJob extends Job {
   protected IStatus run(IProgressMonitor monitor) {
     try {
       SortedSet<String> locations = gcsClient.getPotentialStagingLocations(cloudProjectId);
+      if (monitor.isCanceled()) {
+        stagingLocations.cancel(false);
+        return Status.CANCEL_STATUS;
+      }
       stagingLocations.set(locations);
     } catch (IOException ex) {
       stagingLocations.setException(ex);

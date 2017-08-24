@@ -45,6 +45,10 @@ public class VerifyStagingLocationJob extends Job {
   protected IStatus run(IProgressMonitor monitor) {
     VerifyStagingLocationResult result = new VerifyStagingLocationResult(
         email, stagingLocation, client.locationIsAccessible(stagingLocation));
+    if (monitor.isCanceled()) {
+      future.cancel(false);
+      return Status.CANCEL_STATUS;
+    }
     future.set(result);
     return Status.OK_STATUS;
   }
