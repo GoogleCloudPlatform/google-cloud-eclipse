@@ -225,8 +225,7 @@ public class RunOptionsDefaultsComponentTest {
     component.startStagingLocationCheck(0); // force right now
     ListenableFuture<VerifyStagingLocationResult> verifyResult =
         component.verifyStagingLocationJob.getVerifyResult();
-    for (int i = 0; i < 200
-        && !verifyResult.isDone(); i++) {
+    for (int i = 0; i < 200 && !createButton.isEnabled(); i++) {
       while (Display.getCurrent().readAndDispatch()) {
         // spin
       }
