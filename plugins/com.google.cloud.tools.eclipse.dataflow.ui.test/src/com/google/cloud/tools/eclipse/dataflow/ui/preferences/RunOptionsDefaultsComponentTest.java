@@ -21,6 +21,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -118,20 +119,20 @@ public class RunOptionsDefaultsComponentTest {
     when(bucketsApi.list(anyString())).thenReturn(listApi);
     when(listApi.execute()).thenReturn(buckets);
 
+    Storage.Buckets.Get exceptionGet = mock(Storage.Buckets.Get.class);
+    when(bucketsApi.get(anyString())).thenReturn(exceptionGet);
+    when(exceptionGet.execute()).thenThrow(new IOException("bucket does not exist"));
+
     for (String bucketName : bucketNames) {
       Bucket bucket = new Bucket();
       bucket.setName(bucketName);
       bucketList.add(bucket);
 
       Storage.Buckets.Get get = mock(Storage.Buckets.Get.class);
-      when(bucketsApi.get(bucketName)).thenReturn(get);
+      when(bucketsApi.get(eq(bucketName))).thenReturn(get);
       when(get.execute()).thenReturn(bucket);
     }
     buckets.setItems(bucketList);
-
-    Storage.Buckets.Get exceptionGet = mock(Storage.Buckets.Get.class);
-    when(bucketsApi.get(anyString())).thenReturn(exceptionGet);
-    when(exceptionGet.execute()).thenThrow(new IOException("bucket does not exist"));
   }
 
   @Test
@@ -205,10 +206,20 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
-  public void testEnablement_existingStagingLocation() {
+  public void testEnablement_existingStagingLocation() throws InterruptedException {
     selector.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
     component.setStagingLocationText("alice-bucket-1");
+    component.startStagingLocationCheck(0); // force right now
+    ListenableFuture<VerifyStagingLocationResult> verifyResult =
+        component.verifyStagingLocationJob.getVerifyResult();
+    int i = 0;
+    do {
+      while (Display.getCurrent().readAndDispatch()) {
+        // spin
+      }
+      Thread.sleep(50);
+    } while (i++ < 200 && !verifyResult.isDone());
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
     assertTrue(projectID.isEnabled());
@@ -225,12 +236,13 @@ public class RunOptionsDefaultsComponentTest {
     component.startStagingLocationCheck(0); // force right now
     ListenableFuture<VerifyStagingLocationResult> verifyResult =
         component.verifyStagingLocationJob.getVerifyResult();
-    for (int i = 0; i < 200 && !createButton.isEnabled(); i++) {
+    int i = 0;
+    do {
       while (Display.getCurrent().readAndDispatch()) {
         // spin
       }
       Thread.sleep(50);
-    }
+    } while(i++ < 200 && !createButton.isEnabled());
     assertTrue(verifyResult.isDone());
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
@@ -260,10 +272,13 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   private void assertStagingLocationCombo(String... buckets) throws InterruptedException {
-    for (int i = 0; i < 200 && stagingLocations.getItemCount() != buckets.length; i++) {
-      while (Display.getCurrent().readAndDispatch()) {}  // spin
+    int i = 0;
+    do {
+      while (Display.getCurrent().readAndDispatch()) {
+        // spin
+      }
       Thread.sleep(50);
-    }
+    } while(i++ < 200 && stagingLocations.getItemCount() != buckets.length);
     Assert.assertArrayEquals(buckets, stagingLocations.getItems());
   }
 
