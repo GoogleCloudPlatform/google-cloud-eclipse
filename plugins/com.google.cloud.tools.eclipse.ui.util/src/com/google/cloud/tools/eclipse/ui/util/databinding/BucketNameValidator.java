@@ -40,7 +40,7 @@ import org.eclipse.core.runtime.IStatus;
  * because it contains two dots in a row)</li>
  * <li>Has a <em>public suffix</em> (although GCS states it should ends with a TLD, due to the
  * domain verification requirements</li>
- * </ul>
+ * </ul></li>
  * </ul>
  * The actual rules that govern the bucket naming are more complex. See the complete list of bucket
  * name requirements for more information: https://cloud.google.com/storage/docs/naming
