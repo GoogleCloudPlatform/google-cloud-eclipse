@@ -182,16 +182,10 @@ public class RunOptionsDefaultsComponent {
       @Override
       public void modifyText(ModifyEvent event) {
         startStagingLocationCheck(NEXT_KEY_DELAY_MS);
-      }
-    });
-    createButton.addSelectionListener(new CreateStagingLocationListener());
-
-    stagingLocationInput.addModifyListener(new ModifyListener() {
-      @Override
-      public void modifyText(ModifyEvent e) {
         validate();
       }
     });
+    createButton.addSelectionListener(new CreateStagingLocationListener());
 
     updateStagingLocations(project, 0); // no delay
     messageTarget.setInfo(Messages.getString("set.pipeline.run.option.defaults")); //$NON-NLS-1$
