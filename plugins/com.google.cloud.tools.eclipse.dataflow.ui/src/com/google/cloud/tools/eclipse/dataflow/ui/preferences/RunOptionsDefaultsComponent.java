@@ -45,6 +45,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusAdapter;
@@ -53,6 +55,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
@@ -85,6 +88,7 @@ public class RunOptionsDefaultsComponent {
   private VerifyStagingLocationJob verifyJob;
   private SelectFirstMatchingPrefixListener completionListener;
   private WizardPage page = null;
+  private ControlDecoration stagingLocationResults;
 
   public RunOptionsDefaultsComponent(
       Composite target, int columns, MessageTarget messageTarget, DataflowPreferences preferences) {
@@ -127,6 +131,13 @@ public class RunOptionsDefaultsComponent {
     createButton = ButtonFactory.newPushButton(target, 
         Messages.getString("create.bucket")); //$NON-NLS-1$
     createButton.setEnabled(false);
+
+    FieldDecorationRegistry registry = FieldDecorationRegistry.getDefault();
+    stagingLocationResults = new ControlDecoration(stagingLocationInput, SWT.TOP | SWT.LEFT);
+    // error image is required for the hover to be correctly placed
+    Image errorImage = registry.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage();
+    stagingLocationResults.setImage(errorImage);
+    stagingLocationResults.hide();
 
     accountSelector.selectAccount(preferences.getDefaultAccountEmail());
 
@@ -173,6 +184,7 @@ public class RunOptionsDefaultsComponent {
     stagingLocationInput.addModifyListener(new ModifyListener() {
       @Override
       public void modifyText(ModifyEvent event) {
+        stagingLocationResults.hide();
         verifyStagingLocation(stagingLocationInput.getText());
       }
     });
@@ -344,6 +356,7 @@ public class RunOptionsDefaultsComponent {
       if (accountSelector.getSelectedCredential() == null) {
         return;
       }
+      stagingLocationResults.hide();
 
       String projectName = projectInput.getText();
       String stagingLocation = stagingLocationInput.getText();
@@ -357,6 +370,8 @@ public class RunOptionsDefaultsComponent {
       } else {
         messageTarget.setError(
             Messages.getString("could.not.create.staging.location", stagingLocation)); //$NON-NLS-1$
+        stagingLocationResults.show();
+        stagingLocationResults.showHoverText(result.getMessage());
         setPageComplete(false);
       }
     }

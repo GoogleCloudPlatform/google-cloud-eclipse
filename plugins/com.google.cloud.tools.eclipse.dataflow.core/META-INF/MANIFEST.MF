@@ -16,6 +16,7 @@ Export-Package: com.google.cloud.tools.eclipse.dataflow.core,
  com.google.cloud.tools.eclipse.dataflow.core.project,
  com.google.cloud.tools.eclipse.dataflow.core.proxy
 Import-Package: com.google.api.client.auth.oauth2;version="1.22.0",
+ com.google.api.client.googleapis.json;version="1.22.0",
  com.google.api.client.googleapis.services;version="1.22.0",
  com.google.api.services.storage;version="1.22.0",
  com.google.api.services.storage.model;version="1.22.0",
