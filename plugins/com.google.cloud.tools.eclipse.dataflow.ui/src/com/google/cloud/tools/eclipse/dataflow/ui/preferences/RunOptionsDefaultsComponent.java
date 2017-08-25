@@ -199,6 +199,7 @@ public class RunOptionsDefaultsComponent {
     });
     createButton.addSelectionListener(new CreateStagingLocationListener());
 
+    startStagingLocationCheck(0); // no delay
     updateStagingLocations(project, 0); // no delay
     messageTarget.setInfo(Messages.getString("set.pipeline.run.option.defaults")); //$NON-NLS-1$
     validate();
@@ -239,27 +240,29 @@ public class RunOptionsDefaultsComponent {
       return;
     }
     
-    // we have a project and staging location, so a fetch-staging-locations job should be under way
-    Preconditions.checkNotNull(fetchStagingLocationsJob,
-        "Fetch staging locations job should be underway");
-    Future<SortedSet<String>> stagingLocationsFuture =
-        fetchStagingLocationsJob.getStagingLocations();
-    if (stagingLocationsFuture.isDone()) {
-      try {
-        // on error, will raise an exception
-        stagingLocationsFuture.get();
-      } catch (ExecutionException ex) {
-        messageTarget.setError(Messages.getString("could.not.retrieve.buckets.for.project", //$NON-NLS-1$
-            projectInput.getText()));
-        DataflowUiPlugin.logError(ex, "Exception while retrieving staging locations"); //$NON-NLS-1$
-        return;
-      } catch (InterruptedException ex) {
-        DataflowUiPlugin.logError(ex, "Interrupted while retrieving staging locations"); //$NON-NLS-1$
+    if (fetchStagingLocationsJob != null) {
+      Future<SortedSet<String>> stagingLocationsFuture =
+          fetchStagingLocationsJob.getStagingLocations();
+      if (stagingLocationsFuture.isDone()) {
+        try {
+          // on error, will raise an exception
+          stagingLocationsFuture.get();
+        } catch (ExecutionException ex) {
+          messageTarget.setError(Messages.getString("could.not.retrieve.buckets.for.project", //$NON-NLS-1$
+              projectInput.getText()));
+          DataflowUiPlugin.logError(ex, "Exception while retrieving staging locations"); //$NON-NLS-1$
+          return;
+        } catch (InterruptedException ex) {
+          DataflowUiPlugin.logError(ex, "Interrupted while retrieving staging locations"); //$NON-NLS-1$
+        }
       }
     }
 
-    // we have a project and staging location, so a verify job should be under way
-    Preconditions.checkNotNull(verifyStagingLocationJob, "Verification job should be underway");
+    if (verifyStagingLocationJob == null) {
+      messageTarget.setInfo("Verifying staging location...");
+      createButton.setEnabled(false);
+      return;
+    }
     Future<VerifyStagingLocationResult> verifyStagingLocationFuture = verifyStagingLocationJob.getVerifyResult();
     if (!verifyStagingLocationFuture.isDone()) {
       messageTarget.setInfo("Verifying staging location...");
