@@ -17,6 +17,8 @@
 package com.google.cloud.tools.eclipse.dataflow.ui.page;
 
 import org.eclipse.jface.dialogs.DialogPage;
+import org.eclipse.jface.preference.PreferencePage;
+import org.eclipse.jface.wizard.WizardPage;
 
 /**
  * A {@link MessageTarget} that sets messages on a {@code DialogPage}.
@@ -41,6 +43,15 @@ public class DialogPageMessageTarget implements MessageTarget {
   @Override
   public void clear() {
     target.setMessage(null);
+  }
+
+  @Override
+  public void setValid(boolean valid) {
+    if(target instanceof WizardPage) {
+      ((WizardPage)target).setPageComplete(valid);
+    } else if (target instanceof PreferencePage) {
+      ((PreferencePage) target).setValid(valid);
+    }
   }
 }
 

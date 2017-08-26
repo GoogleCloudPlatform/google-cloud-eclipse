@@ -248,6 +248,12 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
         setErrorMessage(null);
         setMessage(null);
       }
+
+      @Override
+      public void setValid(boolean valid) {
+        // will call back into isValid()
+        getLaunchConfigurationDialog().updateButtons();
+      }
     };
 
     defaultOptionsComponent =
@@ -448,7 +454,7 @@ public class PipelineArgumentsTab extends AbstractLaunchConfigurationTab {
 
     setErrorMessage(null);
     return validateRequiredProperties(validationFailures)
-        && validateRequiredGroups(validationFailures);
+        && validateRequiredGroups(validationFailures) && defaultOptionsComponent.isValid();
   }
 
   private boolean validateRequiredGroups(MissingRequiredProperties validationFailures) {

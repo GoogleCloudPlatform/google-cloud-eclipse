@@ -96,8 +96,8 @@ public class RunOptionsDefaultsComponentTest {
     mockStorageApiBucketList(credential2, "bob-bucket");
 
     shell = shellResource.getShell();
-    component = new RunOptionsDefaultsComponent(
-        shell, 3, messageTarget, preferences, null, loginService, apiFactory);
+    component = new RunOptionsDefaultsComponent(shell, 3, messageTarget, preferences, false,
+        loginService, apiFactory);
     selector = CompositeUtil.findControl(shell, AccountSelector.class);
     projectID =
         CompositeUtil.findControlAfterLabel(shell, Text.class, "Cloud Platform &project ID:");
@@ -138,11 +138,44 @@ public class RunOptionsDefaultsComponentTest {
   @Test
   public void testConstructor_testGrid() {
     try {
-      new RunOptionsDefaultsComponent(null, 0, null, null);
+      new RunOptionsDefaultsComponent(null, 0, null, null, false);
       Assert.fail("didn't check grid");
     } catch (IllegalArgumentException ex) {
       Assert.assertNotNull(ex.getMessage());
     }
+  }
+
+  @Test
+  public void testClearIsOk() {
+    component = new RunOptionsDefaultsComponent(shell, 3, messageTarget, preferences, true,
+        loginService, apiFactory);
+    assertTrue(component.isClear());
+    assertTrue(component.isValid());
+  }
+
+  @Test
+  public void testIsClear_empty() {
+    assertTrue(component.isClear());
+  }
+
+  @Test
+  public void testIsClear_nonEmpty() {
+    selector.selectAccount("alice@example.com");
+    assertFalse(component.isClear());
+    component.setCloudProjectText("some-gcp-project-id");
+    assertFalse(component.isClear());
+    component.updateStagingLocations("some-gcp-project-id", 0);
+    assertFalse(component.isClear());
+  }
+
+  @Test
+  public void testClear() {
+    selector.selectAccount("alice@example.com");
+    component.setCloudProjectText("some-gcp-project-id");
+    component.updateStagingLocations("some-gcp-project-id", 0);
+    assertFalse(component.isClear());
+    component.clear();
+    assertTrue(component.isClear());
   }
 
   @Test
@@ -182,6 +215,7 @@ public class RunOptionsDefaultsComponentTest {
     assertFalse(projectID.isEnabled());
     assertFalse(stagingLocations.isEnabled());
     assertFalse(createButton.isEnabled());
+    assertFalse(component.isValid());
   }
 
   @Test
@@ -192,6 +226,7 @@ public class RunOptionsDefaultsComponentTest {
     assertTrue(projectID.isEnabled());
     assertFalse(stagingLocations.isEnabled());
     assertFalse(createButton.isEnabled());
+    assertFalse(component.isValid());
   }
 
   @Test
@@ -203,6 +238,7 @@ public class RunOptionsDefaultsComponentTest {
     assertTrue(projectID.isEnabled());
     assertTrue(stagingLocations.isEnabled());
     assertFalse(createButton.isEnabled());
+    assertFalse(component.isValid());
   }
 
   @Test
@@ -219,12 +255,13 @@ public class RunOptionsDefaultsComponentTest {
         // spin
       }
       Thread.sleep(50);
-    } while (i++ < 200 && !verifyResult.isDone());
+    } while (i++ < 200 && !verifyResult.isDone() && !component.isValid());
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
     assertTrue(projectID.isEnabled());
     assertTrue(stagingLocations.isEnabled());
     assertFalse(createButton.isEnabled());
+    assertTrue(component.isValid());
   }
 
   @Test
@@ -249,6 +286,8 @@ public class RunOptionsDefaultsComponentTest {
     assertTrue(projectID.isEnabled());
     assertTrue(stagingLocations.isEnabled());
     assertTrue(createButton.isEnabled());
+
+    assertFalse(component.isValid()); // since bucket doesn't exist
   }
 
   @Test

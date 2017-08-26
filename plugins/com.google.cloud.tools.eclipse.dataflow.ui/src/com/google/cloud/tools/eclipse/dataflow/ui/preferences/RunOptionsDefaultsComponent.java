@@ -48,7 +48,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
-import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
@@ -81,7 +80,6 @@ public class RunOptionsDefaultsComponent {
   private static final BucketNameValidator bucketNameValidator = new BucketNameValidator();
 
   private final IGoogleApiFactory apiFactory;
-  private final WizardPage page;
   private final DisplayExecutor displayExecutor;
   private final MessageTarget messageTarget;
   private final Composite target;
@@ -92,33 +90,30 @@ public class RunOptionsDefaultsComponent {
   private final Button createButton;
   private SelectFirstMatchingPrefixListener completionListener;
   private ControlDecoration stagingLocationResults;
+  private boolean valid = false;
 
   private FetchStagingLocationsJob fetchStagingLocationsJob;
   @VisibleForTesting
   VerifyStagingLocationJob verifyStagingLocationJob;
+  private boolean clearIsOk;
 
   public RunOptionsDefaultsComponent(Composite target, int columns, MessageTarget messageTarget,
-      DataflowPreferences preferences) {
-    this(target, columns, messageTarget, preferences, null);
-  }
-
-  public RunOptionsDefaultsComponent(Composite target, int columns, MessageTarget messageTarget,
-      DataflowPreferences preferences, WizardPage page) {
-    this(target, columns, messageTarget, preferences, page,
+      DataflowPreferences preferences, boolean clearIsOk) {
+    this(target, columns, messageTarget, preferences, clearIsOk,
         PlatformUI.getWorkbench().getService(IGoogleLoginService.class),
         PlatformUI.getWorkbench().getService(IGoogleApiFactory.class));
   }
 
   @VisibleForTesting
   RunOptionsDefaultsComponent(Composite target, int columns, MessageTarget messageTarget,
-      DataflowPreferences preferences, WizardPage page, IGoogleLoginService loginService,
+      DataflowPreferences preferences, boolean clearIsOk, IGoogleLoginService loginService,
       IGoogleApiFactory apiFactory) {
     checkArgument(columns >= 3, "DefaultRunOptions must be in a Grid with at least 3 columns"); //$NON-NLS-1$
     this.target = target;
-    this.page = page;
     this.messageTarget = messageTarget;
     this.displayExecutor = DisplayExecutor.create(target.getDisplay());
     this.apiFactory = apiFactory;
+    this.clearIsOk = clearIsOk;
 
     Label accountLabel = new Label(target, SWT.NULL);
     accountLabel.setText(Messages.getString("account")); //$NON-NLS-1$
@@ -130,6 +125,7 @@ public class RunOptionsDefaultsComponent {
     projectInput = new Text(target, SWT.SINGLE | SWT.BORDER);
 
     Label comboLabel = new Label(target, SWT.NULL);
+    comboLabel.setText(Messages.getString("cloud.storage.staging.location")); //$NON-NLS-1$
     stagingLocationInput = new Combo(target, SWT.DROP_DOWN);
     createButton = ButtonFactory.newPushButton(target, Messages.getString("create.bucket")); //$NON-NLS-1$
     createButton.setEnabled(false);
@@ -140,17 +136,6 @@ public class RunOptionsDefaultsComponent {
     Image errorImage = registry.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage();
     stagingLocationResults.setImage(errorImage);
     stagingLocationResults.hide();
-
-    accountSelector.selectAccount(preferences.getDefaultAccountEmail());
-
-    // Initialize the Default Project, which is used to populate the Staging Location field
-    String project = preferences.getDefaultProject();
-    projectInput.setText(Strings.nullToEmpty(project));
-
-    comboLabel.setText(Messages.getString("cloud.storage.staging.location")); //$NON-NLS-1$
-
-    String stagingLocation = preferences.getDefaultStagingLocation();
-    stagingLocationInput.setText(Strings.nullToEmpty(stagingLocation));
 
     // Account selection occupies a single row
     accountLabel.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false, 1, 1));
@@ -199,19 +184,49 @@ public class RunOptionsDefaultsComponent {
     });
     createButton.addSelectionListener(new CreateStagingLocationListener());
 
-    startStagingLocationCheck(0); // no delay
-    updateStagingLocations(project, 0); // no delay
+    initializeFrom(preferences);
+
     messageTarget.setInfo(Messages.getString("set.pipeline.run.option.defaults")); //$NON-NLS-1$
+  }
+
+  public boolean isClear() {
+    return accountSelector.getSelectedCredential() == null && Strings.isNullOrEmpty(getProject())
+        && Strings.isNullOrEmpty(getStagingLocation());
+  }
+
+  /**
+   * Clear all contents.
+   */
+  public void clear() {
+    accountSelector.selectAccount(null);
+    projectInput.setText("");
+    stagingLocationInput.setText("");
     validate();
   }
 
+  private void initializeFrom(DataflowPreferences preferences) {
+    accountSelector.selectAccount(preferences.getDefaultAccountEmail());
+
+    // Initialize the Default Project, which is used to populate the Staging Location field
+    String project = preferences.getDefaultProject();
+    projectInput.setText(Strings.nullToEmpty(project));
+
+    String stagingLocation = preferences.getDefaultStagingLocation();
+    stagingLocationInput.setText(Strings.nullToEmpty(stagingLocation));
+
+    startStagingLocationCheck(0); // no delay
+    updateStagingLocations(getProject(), 0); // no delay
+  }
+
   private void validate() {
-    setPageComplete(false);
+    setValid(false);
+    messageTarget.clear();
     Credential selectedCredential = accountSelector.getSelectedCredential();
     if (selectedCredential == null) {
       projectInput.setEnabled(false);
       stagingLocationInput.setEnabled(false);
       createButton.setEnabled(false);
+      setValid(clearIsOk);
       return;
     }
 
@@ -221,7 +236,27 @@ public class RunOptionsDefaultsComponent {
       createButton.setEnabled(false);
       return;
     }
-    // FIXME: incorporate project verification here
+    
+    // improve project verification?
+    if (fetchStagingLocationsJob != null) {
+      Future<SortedSet<String>> stagingLocationsFuture =
+          fetchStagingLocationsJob.getStagingLocations();
+      if (stagingLocationsFuture.isDone()) {
+        try {
+          // on error, will raise an exception
+          stagingLocationsFuture.get();
+        } catch (ExecutionException ex) {
+          messageTarget.setError(Messages.getString("could.not.retrieve.buckets.for.project", //$NON-NLS-1$
+              projectInput.getText()));
+          DataflowUiPlugin.logError(ex, "Exception while retrieving staging locations"); //$NON-NLS-1$
+          stagingLocationInput.setEnabled(false);
+          createButton.setEnabled(false);
+          return;
+        } catch (InterruptedException ex) {
+          DataflowUiPlugin.logError(ex, "Interrupted while retrieving staging locations"); //$NON-NLS-1$
+        }
+      }
+    }
 
     stagingLocationInput.setEnabled(true);
 
@@ -238,24 +273,6 @@ public class RunOptionsDefaultsComponent {
       messageTarget.setError(status.getMessage());
       createButton.setEnabled(false);
       return;
-    }
-    
-    if (fetchStagingLocationsJob != null) {
-      Future<SortedSet<String>> stagingLocationsFuture =
-          fetchStagingLocationsJob.getStagingLocations();
-      if (stagingLocationsFuture.isDone()) {
-        try {
-          // on error, will raise an exception
-          stagingLocationsFuture.get();
-        } catch (ExecutionException ex) {
-          messageTarget.setError(Messages.getString("could.not.retrieve.buckets.for.project", //$NON-NLS-1$
-              projectInput.getText()));
-          DataflowUiPlugin.logError(ex, "Exception while retrieving staging locations"); //$NON-NLS-1$
-          return;
-        } catch (InterruptedException ex) {
-          DataflowUiPlugin.logError(ex, "Interrupted while retrieving staging locations"); //$NON-NLS-1$
-        }
-      }
     }
 
     if (verifyStagingLocationJob == null) {
@@ -282,7 +299,7 @@ public class RunOptionsDefaultsComponent {
       if (result.accessible) {
         messageTarget.setInfo(Messages.getString("verified.bucket.is.accessible", bucketNamePart)); //$NON-NLS-1$
         createButton.setEnabled(false);
-        setPageComplete(true);
+        setValid(true);
       } else {
         // user must create this bucket; feels odd that this is flagged as an error
         messageTarget.setError(Messages.getString("could.not.fetch.bucket", bucketNamePart)); //$NON-NLS-1$
@@ -461,21 +478,27 @@ public class RunOptionsDefaultsComponent {
           stagingLocation, new NullProgressMonitor());
       if (result.isSuccessful()) {
         messageTarget.setInfo(Messages.getString("created.staging.location.at", stagingLocation)); //$NON-NLS-1$
-        setPageComplete(true);
+        setValid(true);
         createButton.setEnabled(false);
       } else {
         messageTarget.setError(
             Messages.getString("could.not.create.staging.location", stagingLocation)); //$NON-NLS-1$
         stagingLocationResults.show();
         stagingLocationResults.showHoverText(result.getMessage());
-        setPageComplete(false);
+        setValid(false);
       }
     }
   }
 
-  private void setPageComplete(boolean complete) {
-    if (page != null) {
-      page.setPageComplete(complete);
-    }
+  private void setValid(boolean valid) {
+    this.valid = valid;
+    messageTarget.setValid(valid);
+  }
+
+  /**
+   * Return true if this page is valid (valid).
+   */
+  public boolean isValid() {
+    return valid;
   }
 }

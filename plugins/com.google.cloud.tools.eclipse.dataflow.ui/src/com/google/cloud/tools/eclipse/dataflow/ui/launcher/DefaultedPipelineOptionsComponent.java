@@ -67,8 +67,15 @@ public class DefaultedPipelineOptionsComponent {
     useDefaultsButton.setLayoutData(
         new GridData(SWT.BEGINNING, SWT.CENTER, true, false, numColumns, 1));
 
-    defaultOptions =
-        new RunOptionsDefaultsComponent(defaultsGroup, numColumns, messageTarget, preferences);
+    defaultOptions = new RunOptionsDefaultsComponent(defaultsGroup, numColumns, messageTarget,
+        preferences, false);
+  }
+
+  /**
+   * Return true if this component is valid.
+   */
+  public boolean isValid() {
+    return useDefaultsButton.getSelection() || defaultOptions.isValid();
   }
 
   public void setUseDefaultValues(boolean useDefaultValues) {

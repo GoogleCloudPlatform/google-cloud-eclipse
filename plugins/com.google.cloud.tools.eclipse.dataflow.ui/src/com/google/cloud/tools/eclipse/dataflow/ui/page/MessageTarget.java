@@ -28,4 +28,7 @@ public interface MessageTarget {
 
   /** Clears the message. */
   void clear();
+
+  /** Set the validity. */
+  void setValid(boolean valid);
 }

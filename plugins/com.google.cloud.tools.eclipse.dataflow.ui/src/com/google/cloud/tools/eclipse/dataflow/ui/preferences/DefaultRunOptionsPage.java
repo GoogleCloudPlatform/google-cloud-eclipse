@@ -54,8 +54,8 @@ public class DefaultRunOptionsPage
     group.setLayout(new GridLayout(numColumns, false));
     group.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 
-    runOptionsComponent = new RunOptionsDefaultsComponent(
-        group, numColumns, new DialogPageMessageTarget(this), preferences);
+    runOptionsComponent = new RunOptionsDefaultsComponent(group, numColumns,
+        new DialogPageMessageTarget(this), preferences, true /* clearIsOk */);
 
     return composite;
   }
@@ -65,6 +65,13 @@ public class DefaultRunOptionsPage
     updatePreferencesFromInputs();
     preferences.save();
     return super.performOk();
+  }
+
+  @Override
+  protected void performDefaults() {
+    // should project-properties be cleared?
+    runOptionsComponent.clear();
+    super.performDefaults();
   }
 
   /**
@@ -96,5 +103,6 @@ public class DefaultRunOptionsPage
       this.preferences = WritableDataflowPreferences.forProject(this.selectedProject);
     }
   }
+
 
 }
