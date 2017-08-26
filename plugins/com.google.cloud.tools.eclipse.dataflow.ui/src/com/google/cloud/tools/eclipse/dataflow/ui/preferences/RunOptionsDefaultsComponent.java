@@ -96,6 +96,7 @@ public class RunOptionsDefaultsComponent {
   @VisibleForTesting
   VerifyStagingLocationJob verifyStagingLocationJob;
   private boolean clearIsOk;
+  private boolean enabled = true;
 
   public RunOptionsDefaultsComponent(Composite target, int columns, MessageTarget messageTarget,
       DataflowPreferences preferences, boolean clearIsOk) {
@@ -219,8 +220,10 @@ public class RunOptionsDefaultsComponent {
   }
 
   private void validate() {
+    // if !enabled, still need to validate the contents but no fields should be enabled
     setValid(false);
     messageTarget.clear();
+
     Credential selectedCredential = accountSelector.getSelectedCredential();
     if (selectedCredential == null) {
       projectInput.setEnabled(false);
@@ -230,7 +233,7 @@ public class RunOptionsDefaultsComponent {
       return;
     }
 
-    projectInput.setEnabled(true);
+    projectInput.setEnabled(this.enabled);
     if (Strings.isNullOrEmpty(projectInput.getText())) {
       stagingLocationInput.setEnabled(false);
       createButton.setEnabled(false);
@@ -258,7 +261,7 @@ public class RunOptionsDefaultsComponent {
       }
     }
 
-    stagingLocationInput.setEnabled(true);
+    stagingLocationInput.setEnabled(this.enabled);
 
     final String bucketNamePart = GcsDataflowProjectClient.toGcsBucketName(getStagingLocation());
     if (bucketNamePart.isEmpty()) {
@@ -303,7 +306,7 @@ public class RunOptionsDefaultsComponent {
       } else {
         // user must create this bucket; feels odd that this is flagged as an error
         messageTarget.setError(Messages.getString("could.not.fetch.bucket", bucketNamePart)); //$NON-NLS-1$
-        createButton.setEnabled(true);
+        createButton.setEnabled(this.enabled);
       }
     } catch (InterruptedException | ExecutionException ex) {
       DataflowUiPlugin.logWarning("Unable to verify staging location", ex);
@@ -355,6 +358,7 @@ public class RunOptionsDefaultsComponent {
   }
 
   public void setEnabled(boolean enabled) {
+    this.enabled = enabled;
     accountSelector.setEnabled(enabled);
     projectInput.setEnabled(enabled);
     stagingLocationInput.setEnabled(enabled);

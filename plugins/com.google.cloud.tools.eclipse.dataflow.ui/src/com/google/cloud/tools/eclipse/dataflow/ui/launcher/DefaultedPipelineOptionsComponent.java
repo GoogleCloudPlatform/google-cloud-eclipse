@@ -68,14 +68,15 @@ public class DefaultedPipelineOptionsComponent {
         new GridData(SWT.BEGINNING, SWT.CENTER, true, false, numColumns, 1));
 
     defaultOptions = new RunOptionsDefaultsComponent(defaultsGroup, numColumns, messageTarget,
-        preferences, false);
+        preferences, false /* clearIsOk */);
   }
 
   /**
    * Return true if this component is valid.
    */
   public boolean isValid() {
-    return useDefaultsButton.getSelection() || defaultOptions.isValid();
+    // when useDefaultsButton is true, defaults are copied into defaultOptions
+    return defaultOptions.isValid();
   }
 
   public void setUseDefaultValues(boolean useDefaultValues) {
@@ -101,6 +102,7 @@ public class DefaultedPipelineOptionsComponent {
         .customValues.put(
             DataflowPreferences.GCP_TEMP_LOCATION_PROPERTY,
             customValues.get(DataflowPreferences.STAGING_LOCATION_PROPERTY));
+    updateDefaultableInputValues();
   }
 
   public void setPreferences(DataflowPreferences preferences) {

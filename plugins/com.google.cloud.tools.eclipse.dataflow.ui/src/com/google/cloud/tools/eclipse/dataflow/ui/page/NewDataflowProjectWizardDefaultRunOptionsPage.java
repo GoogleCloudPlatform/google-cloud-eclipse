@@ -47,7 +47,7 @@ public class NewDataflowProjectWizardDefaultRunOptionsPage extends WizardPage {
     int numColumns = 3;
     composite.setLayout(new GridLayout(numColumns, false));
     runOptionsDefaultsComponent = new RunOptionsDefaultsComponent(composite, numColumns,
-        new DialogPageMessageTarget(this), prefs, false /* clearIsOk */);
+        new DialogPageMessageTarget(this), prefs, true /* clearIsOk */);
 
     setControl(runOptionsDefaultsComponent.getControl());
   }
