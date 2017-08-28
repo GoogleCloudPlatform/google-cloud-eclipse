@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.dataflow.ui.preferences;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -249,18 +250,18 @@ public class RunOptionsDefaultsComponentTest {
     component.startStagingLocationCheck(0); // force right now
     ListenableFuture<VerifyStagingLocationResult> verifyResult =
         component.verifyStagingLocationJob.getVerifyResult();
-    int i = 0;
-    do {
-      while (Display.getCurrent().readAndDispatch()) {
-        // spin
-      }
+    spinEvents();
+    for (int i = 0; i++ < 200 && !verifyResult.isDone() && !component.isValid(); i++) {
       Thread.sleep(50);
-    } while (i++ < 200 && !verifyResult.isDone() && !component.isValid());
+      spinEvents();
+    }
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
     assertTrue(projectID.isEnabled());
     assertTrue(stagingLocations.isEnabled());
     assertFalse(createButton.isEnabled());
+
+    assertEquals(verifyResult, component.verifyStagingLocationJob.getVerifyResult());
     assertTrue(component.isValid());
   }
 
@@ -273,13 +274,11 @@ public class RunOptionsDefaultsComponentTest {
     component.startStagingLocationCheck(0); // force right now
     ListenableFuture<VerifyStagingLocationResult> verifyResult =
         component.verifyStagingLocationJob.getVerifyResult();
-    int i = 0;
-    do {
-      while (Display.getCurrent().readAndDispatch()) {
-        // spin
-      }
+    spinEvents();
+    for (int i = 0; i < 200 && !createButton.isEnabled(); i++) {
       Thread.sleep(50);
-    } while(i++ < 200 && !createButton.isEnabled());
+      spinEvents();
+    }
     assertTrue(verifyResult.isDone());
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
@@ -311,13 +310,11 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   private void assertStagingLocationCombo(String... buckets) throws InterruptedException {
-    int i = 0;
-    do {
-      while (Display.getCurrent().readAndDispatch()) {
-        // spin
-      }
+    spinEvents();
+    for (int i = 0; i < 200 && stagingLocations.getItemCount() != buckets.length; i++) {
       Thread.sleep(50);
-    } while(i++ < 200 && stagingLocations.getItemCount() != buckets.length);
+      spinEvents();
+    }
     Assert.assertArrayEquals(buckets, stagingLocations.getItems());
   }
 
@@ -332,5 +329,11 @@ public class RunOptionsDefaultsComponentTest {
   public void testBucketNameStatus_gcsUrlPathWithObjectIsOk() {
     component.setStagingLocationText("gs://bucket/object");
     verify(messageTarget, never()).setError(anyString());
+  }
+
+  private void spinEvents() {
+    while (Display.getCurrent().readAndDispatch()) {
+      // spin
+    }
   }
 }
