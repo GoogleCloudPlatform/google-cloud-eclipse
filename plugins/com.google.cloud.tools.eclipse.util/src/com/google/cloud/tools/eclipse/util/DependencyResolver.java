@@ -55,20 +55,9 @@ import org.eclipse.aether.connector.basic.BasicRepositoryConnectorFactory;
 
 public class DependencyResolver {
 
-  public static List<String> getTransitiveDependencies(
-      String groupId, String artifactId, String version) throws DependencyResolutionException, CoreException {
-       
-    Artifact artifact = new DefaultArtifact(groupId + ":" + artifactId + ":" + version);
-
-    DependencyFilter filter = DependencyFilterUtils.classpathFilter(JavaScopes.COMPILE);
-
-    CollectRequest collectRequest = new CollectRequest();
-    collectRequest.setRoot( new Dependency(artifact, JavaScopes.COMPILE));
-    
-    final RepositorySystem system = newRepositorySystem();
-    // RepositorySystem system = MavenPluginActivator.getDefault().getRepositorySystem();
-    collectRequest.setRepositories(newRepositories(system));
-    final DependencyRequest request = new DependencyRequest(collectRequest, filter);
+  public static List<String> getTransitiveDependencies(final String groupId,
+      final String artifactId, final String version)
+      throws DependencyResolutionException, CoreException {
 
     IMavenExecutionContext context = MavenPlugin.getMaven().createExecutionContext();
     
@@ -76,6 +65,15 @@ public class DependencyResolver {
       @Override
       public List<String> call(IMavenExecutionContext context, IProgressMonitor monitor)
           throws CoreException {
+        DependencyFilter filter = DependencyFilterUtils.classpathFilter(JavaScopes.COMPILE);
+        Artifact artifact = new DefaultArtifact(groupId + ":" + artifactId + ":" + version);
+
+        final CollectRequest collectRequest = new CollectRequest();
+        collectRequest.setRoot(new Dependency(artifact, JavaScopes.COMPILE));
+        final RepositorySystem system = newRepositorySystem();
+        // RepositorySystem system = MavenPluginActivator.getDefault().getRepositorySystem();
+        collectRequest.setRepositories(newRepositories(system));
+        final DependencyRequest request = new DependencyRequest(collectRequest, filter);
         List<String> dependencies = new ArrayList<>();
         RepositorySystemSession session = context.getRepositorySession();
         try {
