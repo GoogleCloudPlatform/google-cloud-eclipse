@@ -16,12 +16,9 @@
 
 package com.google.cloud.tools.eclipse.util;
 
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.eclipse.aether.resolution.ArtifactResult;
-import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
-import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.artifact.Artifact;
@@ -30,6 +27,7 @@ import org.eclipse.aether.collection.CollectRequest;
 import org.eclipse.aether.graph.Dependency;
 import org.eclipse.aether.graph.DependencyFilter;
 import org.eclipse.aether.repository.RemoteRepository;
+import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.DependencyRequest;
 import org.eclipse.aether.resolution.DependencyResolutionException;
 import org.eclipse.aether.util.artifact.JavaScopes;
@@ -41,31 +39,32 @@ import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.ICallable;
 import org.eclipse.m2e.core.embedder.IMavenExecutionContext;
 import org.eclipse.m2e.core.internal.MavenPluginActivator;
-import com.google.cloud.tools.eclipse.util.status.StatusUtil;
-
 
 public class DependencyResolver {
 
-  public static List<String> getTransitiveDependencies(final String groupId,
-      final String artifactId, final String version)
-      throws DependencyResolutionException, CoreException {
+  public static List<String> getTransitiveDependencies(
+      String groupId, String artifactId, String version) throws DependencyResolutionException, CoreException {
+       
+    final Artifact artifact = new DefaultArtifact(groupId + ":" + artifactId + ":" + version);
 
-    Artifact artifact = new DefaultArtifact(groupId + ":" + artifactId + ":" + version);
+//    final RepositorySystem system = newRepositorySystem();
+    // RepositorySystem system = MavenPluginActivator.getDefault().getRepositorySystem();
     IMavenExecutionContext context = MavenPlugin.getMaven().createExecutionContext();
-
-    final DependencyFilter filter = DependencyFilterUtils.classpathFilter(JavaScopes.COMPILE);
-    final RepositorySystem system = MavenPluginActivator.getDefault().getRepositorySystem();
-    final CollectRequest collectRequest = new CollectRequest();
-    collectRequest.setRoot(new Dependency(artifact, JavaScopes.COMPILE));
-    collectRequest.setRepositories(newRepositories(system));
     
     ICallable<List<String>> callable = new ICallable<List<String>>() {
       @Override
       public List<String> call(IMavenExecutionContext context, IProgressMonitor monitor)
           throws CoreException {
-        final DependencyRequest request = new DependencyRequest(collectRequest, filter);
         List<String> dependencies = new ArrayList<>();
+        DependencyFilter filter = DependencyFilterUtils.classpathFilter(JavaScopes.COMPILE);
+        RepositorySystem system = MavenPluginActivator.getDefault().getRepositorySystem();
+        
+        CollectRequest collectRequest = new CollectRequest();
+        collectRequest.setRoot( new Dependency(artifact, JavaScopes.COMPILE));
+        collectRequest.setRepositories(centralRepository(system));
+        final DependencyRequest request = new DependencyRequest(collectRequest, filter);
         RepositorySystemSession session = context.getRepositorySession();
+
         try {
           List<ArtifactResult> artifacts =
               system.resolveDependencies(session, request).getArtifactResults();
@@ -83,7 +82,7 @@ public class DependencyResolver {
     return x;
   }
 
-  private static List<RemoteRepository> newRepositories(RepositorySystem system) {
+  private static List<RemoteRepository> centralRepository(RepositorySystem system) {
     RemoteRepository.Builder builder =
         new RemoteRepository.Builder("central", "default", "https://repo.maven.apache.org/maven2/");
     RemoteRepository repository = builder.build();
