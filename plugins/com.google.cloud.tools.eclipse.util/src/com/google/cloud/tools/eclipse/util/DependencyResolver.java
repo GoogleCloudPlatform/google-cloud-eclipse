@@ -47,8 +47,6 @@ public class DependencyResolver {
        
     final Artifact artifact = new DefaultArtifact(groupId + ":" + artifactId + ":" + version);
 
-//    final RepositorySystem system = newRepositorySystem();
-    // RepositorySystem system = MavenPluginActivator.getDefault().getRepositorySystem();
     IMavenExecutionContext context = MavenPlugin.getMaven().createExecutionContext();
     
     ICallable<List<String>> callable = new ICallable<List<String>>() {
@@ -60,7 +58,7 @@ public class DependencyResolver {
         RepositorySystem system = MavenPluginActivator.getDefault().getRepositorySystem();
         
         CollectRequest collectRequest = new CollectRequest();
-        collectRequest.setRoot( new Dependency(artifact, JavaScopes.COMPILE));
+        collectRequest.setRoot(new Dependency(artifact, JavaScopes.COMPILE));
         collectRequest.setRepositories(centralRepository(system));
         final DependencyRequest request = new DependencyRequest(collectRequest, filter);
         RepositorySystemSession session = context.getRepositorySession();
@@ -72,8 +70,8 @@ public class DependencyResolver {
             dependencies.add(result.toString());
           }
           return dependencies;
-        } catch (DependencyResolutionException ex) {
-          throw new CoreException(StatusUtil.error(ex, "Ooops"));
+        } catch (DependencyResolutionException | NullPointerException ex) {
+          throw new CoreException(StatusUtil.error(ex, "Could not resolve dependencies"));
         }
       }
       
