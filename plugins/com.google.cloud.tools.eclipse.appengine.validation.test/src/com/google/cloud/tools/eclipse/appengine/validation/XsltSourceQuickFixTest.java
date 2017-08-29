@@ -22,13 +22,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
-import com.google.cloud.tools.eclipse.test.util.ArrayAssertions;
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
-import com.google.common.base.Function;
-import com.google.common.base.Stopwatch;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -81,8 +78,9 @@ public class XsltSourceQuickFixTest {
     String preContents = viewer.getDocument().get();
     assertThat(preContents, containsString("application"));
 
-    ProjectUtils.waitForProjects(project);
-    assertEquals(1, file.findMarkers(BLACKLIST_MARKER, true, IResource.DEPTH_ZERO).length);
+    IMarker[] markers = ProjectUtils.waitUntilMarkersFound(file, BLACKLIST_MARKER,
+        true /* includeSubtypes */, IResource.DEPTH_ZERO);
+    assertEquals(1, markers.length);
 
     XsltSourceQuickFix quickFix = new XsltSourceQuickFix("/xslt/removeApplication.xsl",
         Messages.getString("remove.application.element"));
@@ -96,23 +94,8 @@ public class XsltSourceQuickFixTest {
     // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1527
     editorPart.doSave(new NullProgressMonitor());
 
-    Stopwatch elapsed = Stopwatch.createStarted();
-    IMarker[] markers;
-    do {
-      ProjectUtils.waitForProjects(project);
-      markers = file.findMarkers(BLACKLIST_MARKER, true, IResource.DEPTH_ZERO);
-      System.out.printf("%s: %d blacklist markers found\n", elapsed, markers.length);
-      if (markers.length > 0) {
-        ThreadDumpingWatchdog.report("Expected no blacklist markers", elapsed);
-      }
-    } while (elapsed.elapsed(TimeUnit.SECONDS) < 300 && markers.length > 0);
-
-    ArrayAssertions.assertIsEmpty(markers, new Function<IMarker, String>() {
-      @Override
-      public String apply(IMarker marker) {
-        return ProjectUtils.formatProblem(marker);
-      }
-    });
+    ProjectUtils.waitUntilNoMarkersFound(file, BLACKLIST_MARKER, true /* includeSubtypes */,
+        IResource.DEPTH_ZERO);
   }
 
 }

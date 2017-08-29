@@ -19,8 +19,11 @@ package com.google.cloud.tools.eclipse.test.util.project;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import com.google.cloud.tools.eclipse.test.util.ArrayAssertions;
+import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.ZipUtil;
 import com.google.cloud.tools.eclipse.test.util.reflection.ReflectionUtil;
+import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Stopwatch;
 import java.io.File;
@@ -340,6 +343,57 @@ public class ProjectUtils {
 
   private static IWorkspace getWorkspace() {
     return ResourcesPlugin.getWorkspace();
+  }
+
+
+  /**
+   * Wait until the project has finished building and markers have been registered.
+   * 
+   * @throws AssertionError if markers are still present
+   */
+  public static IMarker[] waitUntilNoMarkersFound(IResource resource, String markerType,
+      boolean includeSubtypes, int depth) throws CoreException {
+    Stopwatch elapsed = Stopwatch.createStarted();
+    IMarker[] markers;
+    do {
+      ProjectUtils.waitForProjects(resource.getProject());
+      markers = resource.findMarkers(markerType, includeSubtypes, depth);
+      if (markers.length > 0) {
+        System.err.printf("[WARNING][TESTS] %s: %d markers found of type %s\n", elapsed,
+            markers.length, markerType);
+        ThreadDumpingWatchdog.report("Expected no markers of type " + markerType, elapsed);
+      }
+    } while (elapsed.elapsed(TimeUnit.SECONDS) < 300 && markers.length > 0);
+
+    ArrayAssertions.assertIsEmpty(markers, new Function<IMarker, String>() {
+      @Override
+      public String apply(IMarker marker) {
+        return ProjectUtils.formatProblem(marker);
+      }
+    });
+    return markers;
+  }
+
+  /**
+   * Wait until the project has finished building and markers have disappeared.
+   * 
+   * @throws AssertionError if there are no markers by the timeout
+   */
+  public static IMarker[] waitUntilMarkersFound(IResource resource, String markerType,
+      boolean includeSubtypes, int depth) throws CoreException {
+    Stopwatch elapsed = Stopwatch.createStarted();
+    IMarker[] markers;
+    do {
+      ProjectUtils.waitForProjects(resource.getProject());
+      markers = resource.findMarkers(markerType, includeSubtypes, depth);
+      if (markers.length == 0) {
+        System.err.printf("[WARNING][TESTS] %s: no markers found of type %s\n", elapsed,
+            markerType);
+        ThreadDumpingWatchdog.report("Expected to find markers of type " + markerType, elapsed);
+      }
+    } while (elapsed.elapsed(TimeUnit.SECONDS) < 300 && markers.length == 0);
+    assertTrue("No markers found", markers.length > 0);
+    return markers;
   }
 
   private ProjectUtils() {}

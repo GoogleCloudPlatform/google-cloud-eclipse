@@ -21,14 +21,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
-import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
-import com.google.common.base.Stopwatch;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.TimeUnit;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -101,25 +98,16 @@ public class XmlValidatorTest {
 
     // This method should not apply any markers for malformed XML
     validator.validate(resource, badXml);
-    IMarker[] emptyMarkers = resource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
+    IMarker[] emptyMarkers = ProjectUtils.waitUntilNoMarkersFound(resource, IMarker.PROBLEM,
+        true /* includeSubtypes */, IResource.DEPTH_ZERO);
     assertEquals(0, emptyMarkers.length);
 
     IProject project = dynamicWebProjectCreator.getProject();
     IFile file = project.getFile("src/bad.xml");
     file.create(new ByteArrayInputStream(badXml), true, null);
 
-    Stopwatch elapsed = Stopwatch.createStarted();
-    IMarker[] markers;
-    do {
-      ProjectUtils.waitForProjects(project); // Wait until Eclipse puts an error marker.
-      markers = file.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
-      System.out.printf("%s: %d problem markers found\n", elapsed, markers.length);
-      if (markers.length == 0) {
-        ThreadDumpingWatchdog.report("Expected a problem marker", elapsed);
-      }
-    } while (elapsed.elapsed(TimeUnit.SECONDS) < 300 && markers.length == 0);
-
-    markers = file.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
+    IMarker[] markers = ProjectUtils.waitUntilMarkersFound(file, IMarker.PROBLEM,
+        true /* includeSubtypes */, IResource.DEPTH_ZERO);
     assertEquals(1, markers.length);
 
     String resultMessage = (String) markers[0].getAttribute(IMarker.MESSAGE);
