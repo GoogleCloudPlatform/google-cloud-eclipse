@@ -219,14 +219,11 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
     monitor.done();
   }
 
-  
-  private static final ArtifactRetriever retriever = new ArtifactRetriever();
-
   private Set<ArtifactVersion> defaultArchetypeVersions(DataflowProjectArchetype template, MajorVersion version) {
     checkArgument(template.getSdkVersions().contains(majorVersion));
     
     String artifactId = template.getArtifactId();
-    ArtifactVersion latestArchetype = retriever.getLatestArtifactVersion(
+    ArtifactVersion latestArchetype = ArtifactRetriever.DEFAULT.getLatestArtifactVersion(
         DataflowMavenCoordinates.GROUP_ID, artifactId, majorVersion.getVersionRange());
     
     return Collections.singleton(

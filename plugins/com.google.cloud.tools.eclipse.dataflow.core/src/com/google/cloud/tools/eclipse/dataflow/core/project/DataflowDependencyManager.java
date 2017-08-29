@@ -52,7 +52,7 @@ public class DataflowDependencyManager {
 
   public static DataflowDependencyManager create() {
     return create(
-        new ArtifactRetriever(),
+        ArtifactRetriever.DEFAULT,
         MavenPlugin.getMaven(),
         MavenPlugin.getMavenProjectRegistry());
   }

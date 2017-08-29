@@ -57,6 +57,11 @@ import org.xml.sax.SAXException;
  */
 public class ArtifactRetriever {
 
+  /**
+   * A retriever attached to Maven Central https://repo1.maven.org/maven2/
+   */
+  public static final ArtifactRetriever DEFAULT = new ArtifactRetriever();
+  
   private static final Logger logger = Logger.getLogger(ArtifactRetriever.class.getName());
 
   private final String repositoryUrl;
@@ -116,7 +121,7 @@ public class ArtifactRetriever {
   /**
    * Retrieve from https://repo1.maven.org/maven2/
    */
-  public ArtifactRetriever() {
+  private ArtifactRetriever() {
     this.repositoryUrl = "https://repo1.maven.org/maven2/";
   }
 
