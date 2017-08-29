@@ -57,9 +57,11 @@ class LibraryFactory {
   private static final String ATTRIBUTE_NAME_CLASSIFIER = "classifier"; //$NON-NLS-1$
   private static final String ATTRIBUTE_NAME_EXPORT = "export"; //$NON-NLS-1$
   private static final String ATTRIBUTE_NAME_RECOMMENDATION = "recommendation"; //$NON-NLS-1$
+
+  // prevent instantiation
+  private LibraryFactory() {}
   
-  // todo this should be static
-  Library create(IConfigurationElement configurationElement) throws LibraryFactoryException {
+  static Library create(IConfigurationElement configurationElement) throws LibraryFactoryException {
     try {
       if (ELEMENT_NAME_LIBRARY.equals(configurationElement.getName())) {
         Library library = new Library(configurationElement.getAttribute(ATTRIBUTE_NAME_ID));

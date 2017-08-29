@@ -25,8 +25,6 @@ import org.mockito.Mockito;
 
 public class LibraryFactoryTest {
 
-  private LibraryFactory factory = new LibraryFactory();
-
   // todo is there a simple way to load this up from XML instead?
   private IConfigurationElement configuration;
   private IConfigurationElement[] libraryFiles = new IConfigurationElement[1];
@@ -36,8 +34,7 @@ public class LibraryFactoryTest {
   public void setUp() {
     configuration = Mockito.mock(IConfigurationElement.class);
     Mockito.when(configuration.getAttribute("id")).thenReturn("guava");
-    
-    
+
     libraryFiles[0] = Mockito.mock(IConfigurationElement.class);
     Mockito.when(libraryFiles[0].getAttribute("mavenCoordinates")).thenReturn("mavenCoordinates");
     Mockito.when(libraryFiles[0].getChildren()).thenReturn(new IConfigurationElement[0]);
@@ -62,7 +59,7 @@ public class LibraryFactoryTest {
   public void testCreate_useLatestVersion() throws LibraryFactoryException {
     Mockito.when(configuration.getChildren("libraryFile")).thenReturn(libraryFiles);
     
-    Library library = factory.create(configuration);
+    Library library = LibraryFactory.create(configuration);
     String version = library.getLibraryFiles().get(0).getMavenCoordinates().getVersion();
     DefaultArtifactVersion artifactVersion = new DefaultArtifactVersion(version);
     int majorVersion = artifactVersion.getMajorVersion();
@@ -74,7 +71,7 @@ public class LibraryFactoryTest {
     Mockito.when(configuration.getChildren("libraryFile")).thenReturn(libraryFiles);
     Mockito.when(mavenCoordinates[0].getAttribute("version")).thenReturn("19.0");
     
-    Library library = factory.create(configuration);
+    Library library = LibraryFactory.create(configuration);
     String version = library.getLibraryFiles().get(0).getMavenCoordinates().getVersion();
     int majorVersion = new DefaultArtifactVersion(version).getMajorVersion();
     Assert.assertEquals(19, majorVersion);
@@ -85,7 +82,7 @@ public class LibraryFactoryTest {
   public void testCreate() throws LibraryFactoryException {
     Mockito.when(configuration.getChildren("libraryFile")).thenReturn(new IConfigurationElement[0]);
 
-    Library library = factory.create(configuration);
+    Library library = LibraryFactory.create(configuration);
     Assert.assertEquals("com.google.guava", library.getGroup());
     Assert.assertEquals("1.8", library.getJavaVersion());
   }
@@ -93,7 +90,7 @@ public class LibraryFactoryTest {
   @Test
   public void testCreate_null() throws LibraryFactoryException {
     try {
-      factory.create(null);
+      LibraryFactory.create(null);
       Assert.fail();
     } catch (NullPointerException ex) {
     }
@@ -103,7 +100,7 @@ public class LibraryFactoryTest {
   public void testCreate_nonLibrary() {
     IConfigurationElement configuration = Mockito.mock(IConfigurationElement.class);
     try {
-      factory.create(configuration);
+      LibraryFactory.create(configuration);
       Assert.fail();
     } catch (LibraryFactoryException ex) {
       Assert.assertNotNull(ex.getMessage());
