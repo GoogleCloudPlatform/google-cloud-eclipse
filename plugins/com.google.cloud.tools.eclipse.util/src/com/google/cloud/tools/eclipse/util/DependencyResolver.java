@@ -29,14 +29,9 @@ import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.collection.CollectRequest;
 import org.eclipse.aether.graph.Dependency;
 import org.eclipse.aether.graph.DependencyFilter;
-import org.eclipse.aether.impl.DefaultServiceLocator;
-import org.eclipse.aether.repository.LocalRepository;
 import org.eclipse.aether.repository.RemoteRepository;
 import org.eclipse.aether.resolution.DependencyRequest;
 import org.eclipse.aether.resolution.DependencyResolutionException;
-import org.eclipse.aether.spi.connector.RepositoryConnectorFactory;
-import org.eclipse.aether.spi.connector.transport.TransporterFactory;
-import org.eclipse.aether.transport.wagon.WagonTransporterFactory;
 import org.eclipse.aether.util.artifact.JavaScopes;
 import org.eclipse.aether.util.filter.DependencyFilterUtils;
 import org.eclipse.core.runtime.CoreException;
@@ -45,12 +40,8 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.ICallable;
 import org.eclipse.m2e.core.embedder.IMavenExecutionContext;
-
+import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
-
-import org.eclipse.aether.connector.basic.BasicRepositoryConnectorFactory;
-// import org.eclipse.aether.transport.file.FileTransporterFactory;
-// import org.eclipse.aether.transport.http.HttpTransporterFactory;
 
 
 public class DependencyResolver {
@@ -59,20 +50,19 @@ public class DependencyResolver {
       final String artifactId, final String version)
       throws DependencyResolutionException, CoreException {
 
+    Artifact artifact = new DefaultArtifact(groupId + ":" + artifactId + ":" + version);
     IMavenExecutionContext context = MavenPlugin.getMaven().createExecutionContext();
+
+    final DependencyFilter filter = DependencyFilterUtils.classpathFilter(JavaScopes.COMPILE);
+    final RepositorySystem system = MavenPluginActivator.getDefault().getRepositorySystem();
+    final CollectRequest collectRequest = new CollectRequest();
+    collectRequest.setRoot(new Dependency(artifact, JavaScopes.COMPILE));
+    collectRequest.setRepositories(newRepositories(system));
     
     ICallable<List<String>> callable = new ICallable<List<String>>() {
       @Override
       public List<String> call(IMavenExecutionContext context, IProgressMonitor monitor)
           throws CoreException {
-        DependencyFilter filter = DependencyFilterUtils.classpathFilter(JavaScopes.COMPILE);
-        Artifact artifact = new DefaultArtifact(groupId + ":" + artifactId + ":" + version);
-
-        final CollectRequest collectRequest = new CollectRequest();
-        collectRequest.setRoot(new Dependency(artifact, JavaScopes.COMPILE));
-        final RepositorySystem system = newRepositorySystem();
-        // RepositorySystem system = MavenPluginActivator.getDefault().getRepositorySystem();
-        collectRequest.setRepositories(newRepositories(system));
         final DependencyRequest request = new DependencyRequest(collectRequest, filter);
         List<String> dependencies = new ArrayList<>();
         RepositorySystemSession session = context.getRepositorySession();
@@ -91,39 +81,6 @@ public class DependencyResolver {
     };
     List<String> x = context.execute(callable, new NullProgressMonitor());
     return x;
-    // RepositorySystemSession session = newRepositorySystemSession(system);    
-
-
-  }
-
-  private static RepositorySystem newRepositorySystem() {
-    DefaultServiceLocator locator = MavenRepositorySystemUtils.newServiceLocator();
-    locator.addService(RepositoryConnectorFactory.class, BasicRepositoryConnectorFactory.class);
-    // locator.addService(TransporterFactory.class, FileTransporterFactory.class);
-    // locator.addService(TransporterFactory.class, HttpTransporterFactory.class);
-     locator.addService(TransporterFactory.class, WagonTransporterFactory.class);
-
-    locator.setErrorHandler(new DefaultServiceLocator.ErrorHandler() {
-      @Override
-      public void serviceCreationFailed(Class<?> type, Class<?> impl, Throwable ex) {
-        ex.printStackTrace();
-      }
-    });
-
-    return locator.getService(RepositorySystem.class);
-  }
-
-   private static DefaultRepositorySystemSession newRepositorySystemSession(RepositorySystem system) {
-      DefaultRepositorySystemSession session = MavenRepositorySystemUtils.newSession();
-
-    LocalRepository localRepository = new LocalRepository("target/local-repo");
-    session.setLocalRepositoryManager(system.newLocalRepositoryManager(session, localRepository));
-/*
-      session.setTransferListener(new ConsoleTransferListener() );
-      session.setRepositoryListener( new ConsoleRepositoryListener() );
-*/
-      
-      return session;
   }
 
   private static List<RemoteRepository> newRepositories(RepositorySystem system) {
