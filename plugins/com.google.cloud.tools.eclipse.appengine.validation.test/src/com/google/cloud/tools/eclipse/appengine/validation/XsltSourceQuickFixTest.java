@@ -28,6 +28,7 @@ import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import com.google.cloud.tools.eclipse.test.util.project.TestProjectCreator;
 import com.google.cloud.tools.eclipse.ui.util.WorkbenchUtil;
 import com.google.common.base.Function;
+import com.google.common.base.Stopwatch;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -95,9 +96,17 @@ public class XsltSourceQuickFixTest {
     // https://github.com/GoogleCloudPlatform/google-cloud-eclipse/issues/1527
     editorPart.doSave(new NullProgressMonitor());
 
-    ProjectUtils.waitForProjects(project);
+    Stopwatch elapsed = Stopwatch.createStarted();
+    IMarker[] markers;
+    do {
+      ProjectUtils.waitForProjects(project);
+      markers = file.findMarkers(BLACKLIST_MARKER, true, IResource.DEPTH_ZERO);
+      System.out.printf("%s: %d blacklist markers found\n", elapsed, markers.length);
+      if (markers.length > 0) {
+        ThreadDumpingWatchdog.report("Expected no blacklist markers", elapsed);
+      }
+    } while (elapsed.elapsed(TimeUnit.SECONDS) < 300 && markers.length > 0);
 
-    IMarker[] markers = file.findMarkers(BLACKLIST_MARKER, true, IResource.DEPTH_ZERO);
     ArrayAssertions.assertIsEmpty(markers, new Function<IMarker, String>() {
       @Override
       public String apply(IMarker marker) {
