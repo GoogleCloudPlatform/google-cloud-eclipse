@@ -74,11 +74,10 @@ public class CloudLibraries {
   private static ImmutableMap<String, Library> loadLibraryDefinitions() {
     IConfigurationElement[] elements = RegistryFactory.getRegistry().getConfigurationElementsFor(
         "com.google.cloud.tools.eclipse.appengine.libraries");
-    LibraryFactory factory = new LibraryFactory();
     ImmutableMap.Builder<String, Library> builder = ImmutableMap.builder();
     for (IConfigurationElement element : elements) {
       try {
-        Library library = factory.create(element);
+        Library library = LibraryFactory.create(element);
         builder.put(library.getId(), library);
       } catch (LibraryFactoryException ex) {
         logger.log(Level.SEVERE, "Error loading library definition", ex);

@@ -126,25 +126,23 @@ public class DataflowDependencyManager {
   }
 
   public VersionRange getDataflowVersionRange(IProject project) {
-    Dependency dfDependency =
-        getDataflowDependencyFromModel(getModelFromProject(project));
-    if (dfDependency != null) {
-      String version = dfDependency.getVersion();
-      if (Strings.isNullOrEmpty(version)) {
-        return allVersions();
-      } else {
-        try {
-          return VersionRange.createFromVersionSpec(version);
-        } catch (InvalidVersionSpecificationException e) {
-          throw new IllegalStateException(
-              String.format(
-                  "Could not create version range from existing version %s", version),
-              e);
+    Model model = getModelFromProject(project);
+    if (model != null) {
+      Dependency dependency = getDataflowDependencyFromModel(model);
+      if (dependency != null) {
+        String version = dependency.getVersion();
+        if (!Strings.isNullOrEmpty(version)) {
+          try {
+            return VersionRange.createFromVersionSpec(version);
+          } catch (InvalidVersionSpecificationException ex) {
+            String message =
+                String.format("Could not create version range from existing version %s", version);
+            throw new IllegalStateException(message, ex);
+          }
         }
       }
-    } else {
-      return allVersions();
     }
+    return allVersions();
   }
 
   private VersionRange allVersions() {

@@ -96,7 +96,7 @@ public class AccountSelector extends Composite {
   }
 
   /**
-   * @exception IllegalArgumentException if there is no account logged in
+   * @throws IllegalArgumentException if there is no account logged in
    */
   public String getFirstEmail() {
     Preconditions.checkState(getAccountCount() > 0);

@@ -23,7 +23,6 @@ import com.google.cloud.tools.eclipse.util.ArtifactRetriever;
 import com.google.cloud.tools.eclipse.util.JavaPackageValidator;
 import com.google.cloud.tools.eclipse.util.MavenCoordinatesValidator;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableSortedSet;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -36,7 +35,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.NavigableSet;
 import java.util.Properties;
 import java.util.Set;
 import org.apache.maven.archetype.catalog.Archetype;
@@ -69,7 +67,7 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
 
   private final IProjectConfigurationManager projectConfigurationManager;
 
-  private Template template;
+  private DataflowProjectArchetype template;
   // TODO: Configure in constructor
   private MajorVersion majorVersion = MajorVersion.ONE;
   private String projectNameTemplate;
@@ -84,50 +82,10 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
   private String defaultProject;
   private String defaultStagingLocation;
 
-
-  /**
-   * Enumeration of the Archetype templates available for project creation.
-   */
-  public enum Template {
-    STARTER_POM_WITH_PIPELINE(
-        "Starter project with a simple pipeline",
-        "google-cloud-dataflow-java-archetypes-starter",
-        ImmutableSortedSet.of(MajorVersion.ONE, MajorVersion.QUALIFIED_TWO, MajorVersion.TWO)),
-    EXAMPLES(
-        "Example pipelines",
-        "google-cloud-dataflow-java-archetypes-examples",
-        ImmutableSortedSet.of(MajorVersion.ONE, MajorVersion.QUALIFIED_TWO, MajorVersion.TWO));
-
-    private final String label;
-    private final String archetype;
-    private final ImmutableSortedSet<MajorVersion> sdkVersions;
-
-    private Template(String label, String archetype, NavigableSet<MajorVersion> sdkVersions) {
-      this.label = label;
-      this.archetype = archetype;
-      this.sdkVersions = ImmutableSortedSet.copyOf(sdkVersions);
-    }
-
-    public String getLabel() {
-      return label;
-    }
-
-    /**
-     * @return the artifact ID of the archetype
-     */
-    public String getArchetype() {
-      return archetype;
-    }
-
-    public NavigableSet<MajorVersion> getSdkVersions() {
-      return sdkVersions;
-    }
-  }
-
   private DataflowProjectCreator(IProjectConfigurationManager projectConfigurationManager) {
     this.projectConfigurationManager = projectConfigurationManager;
 
-    template = Template.STARTER_POM_WITH_PIPELINE;
+    template = DataflowProjectArchetype.STARTER_POM_WITH_PIPELINE;
   }
 
   public static DataflowProjectCreator create() {
@@ -166,7 +124,7 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
     this.mavenArtifactId = mavenArtifactId;
   }
 
-  public void setTemplate(Template template) {
+  public void setTemplate(DataflowProjectArchetype template) {
     this.template = template;
   }
 
@@ -206,7 +164,7 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
 
     Archetype archetype = new Archetype();
     archetype.setGroupId(DataflowMavenCoordinates.GROUP_ID);
-    archetype.setArtifactId(template.getArchetype());
+    archetype.setArtifactId(template.getArtifactId());
 
     Properties archetypeProperties = new Properties();
     archetypeProperties.setProperty("targetPlatform", getTargetPlatform());
@@ -264,10 +222,10 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
   
   private static final ArtifactRetriever retriever = new ArtifactRetriever();
 
-  private Set<ArtifactVersion> defaultArchetypeVersions(Template template, MajorVersion version) {
+  private Set<ArtifactVersion> defaultArchetypeVersions(DataflowProjectArchetype template, MajorVersion version) {
     checkArgument(template.getSdkVersions().contains(majorVersion));
     
-    String artifactId = template.getArchetype();
+    String artifactId = template.getArtifactId();
     ArtifactVersion latestArchetype = retriever.getLatestArtifactVersion(
         DataflowMavenCoordinates.GROUP_ID, artifactId, majorVersion.getVersionRange());
     

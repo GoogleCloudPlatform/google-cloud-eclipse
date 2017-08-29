@@ -60,8 +60,10 @@ class LibraryFactory {
   
   private static final ArtifactRetriever retriever = new ArtifactRetriever();
 
-  // todo this should be static
-  Library create(IConfigurationElement configurationElement) throws LibraryFactoryException {
+  // prevent instantiation
+  private LibraryFactory() {}
+  
+  static Library create(IConfigurationElement configurationElement) throws LibraryFactoryException {
     try {
       if (ELEMENT_NAME_LIBRARY.equals(configurationElement.getName())) {
         Library library = new Library(configurationElement.getAttribute(ATTRIBUTE_NAME_ID));
