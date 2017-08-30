@@ -81,6 +81,7 @@ public class DependencyResolver {
           }
           return dependencies;
         } catch (DependencyResolutionException | NullPointerException ex) {
+          ex.printStackTrace();
           throw new CoreException(StatusUtil.error(ex, "Could not resolve dependencies"));
         }
       }
