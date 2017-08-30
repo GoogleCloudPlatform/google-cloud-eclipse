@@ -65,6 +65,7 @@ public class DependencyResolver {
           throws CoreException {
         List<String> dependencies = new ArrayList<>();
         DependencyFilter filter = DependencyFilterUtils.classpathFilter(JavaScopes.RUNTIME);
+        // todo we'd prefer not to depend on m2e here
         RepositorySystem system = MavenPluginActivator.getDefault().getRepositorySystem();
         
         CollectRequest collectRequest = new CollectRequest();
@@ -77,13 +78,16 @@ public class DependencyResolver {
           List<ArtifactResult> artifacts =
               system.resolveDependencies(session, request).getArtifactResults();
           for (ArtifactResult result : artifacts) {
-            Artifact artifact = result.getArtifact();
-            dependencies.add(
-                artifact.getGroupId() + ":" + artifact.getArtifactId() + ":" + artifact.getVersion());
+            Artifact dependency = result.getArtifact();
+            dependencies.add(dependency.getGroupId() + ":" + dependency.getArtifactId() + ":"
+                + dependency.getVersion());
           }
           return dependencies;
-        } catch (DependencyResolutionException | NullPointerException ex) {
+        } catch (DependencyResolutionException ex) {
           throw new CoreException(StatusUtil.error(ex, "Could not resolve dependencies"));
+        } catch (NullPointerException ex) {
+          throw new CoreException(StatusUtil.error(ex,
+              "Possible corrupt artifact in local .m2 repository for " + artifact));
         }
       }
       
