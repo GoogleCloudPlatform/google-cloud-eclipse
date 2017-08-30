@@ -65,8 +65,6 @@ public class CloudLibrariesInPluginXmlTest {
 
     assertThat(appEngineLibrary.getLibraryFiles().size(), is(1));
     LibraryFile libraryFile = appEngineLibrary.getLibraryFiles().get(0);
-    assertThat(libraryFile.getJavadocUri(),
-        is(new URI("https://cloud.google.com/appengine/docs/java/javadoc/")));
     assertNull(libraryFile.getSourceUri());
     assertTrue("App Engine API not exported", libraryFile.isExport());
 
@@ -108,7 +106,7 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(endpointsLibrary.getLibraryDependencies().get(0), is("appengine-api"));
     assertTrue(endpointsLibrary.getToolTip().contains("v2"));
 
-    assertThat(endpointsLibrary.getLibraryFiles().size(), is(1));
+    assertTrue(endpointsLibrary.getLibraryFiles().size() > 10);
     LibraryFile libraryFile = endpointsLibrary.getLibraryFiles().get(0);
     assertNull(libraryFile.getSourceUri());
     assertTrue("Endpoints library not exported", libraryFile.isExport());
@@ -121,8 +119,6 @@ public class CloudLibrariesInPluginXmlTest {
     assertThat(mavenCoordinates.getVersion(), is("2.0.7"));
     assertThat(mavenCoordinates.getType(), is("jar"));
     assertNull(mavenCoordinates.getClassifier());
-    assertThat(libraryFile.getJavadocUri(),
-        is(new URI("https://cloud.google.com/endpoints/docs/frameworks/java/javadoc/")));
 
     assertNotNull(libraryFile.getFilters());
     List<Filter> filters = libraryFile.getFilters();
@@ -143,7 +139,7 @@ public class CloudLibrariesInPluginXmlTest {
         is(new URI("https://github.com/objectify/objectify/wiki")));
     assertTrue(objectifyLibrary.isExport());
 
-    assertThat(objectifyLibrary.getLibraryFiles().size(), is(2));
+    assertTrue(objectifyLibrary.getLibraryFiles().size() > 2);
     LibraryFile objectifyLibraryFile = objectifyLibrary.getLibraryFiles().get(0);
     assertNull(objectifyLibraryFile.getSourceUri());
     assertTrue("Objectify not exported", objectifyLibraryFile.isExport());
@@ -159,12 +155,8 @@ public class CloudLibrariesInPluginXmlTest {
 
     assertNotNull(objectifyLibraryFile.getFilters());
     assertTrue(objectifyLibraryFile.getFilters().isEmpty());
-    assertThat(objectifyLibraryFile.getJavadocUri(),
-        is(new URI("https://www.javadoc.io/doc/com.googlecode.objectify/objectify/5.1.21")));
 
     LibraryFile guavaLibraryFile = objectifyLibrary.getLibraryFiles().get(1);
-    assertThat(guavaLibraryFile.getJavadocUri(),
-        is(new URI("https://google.github.io/guava/releases/20.0/api/docs/")));
     assertNull(guavaLibraryFile.getSourceUri());
     assertTrue("Guava not exported", guavaLibraryFile.isExport());
 
@@ -198,8 +190,6 @@ public class CloudLibrariesInPluginXmlTest {
 
     assertThat(servletApiLibrary.getLibraryFiles().size(), is(1));
     LibraryFile libraryFile = servletApiLibrary.getLibraryFiles().get(0);
-    assertThat(libraryFile.getJavadocUri(), is(new URI(
-        "https://docs.oracle.com/cd/E17802_01/products/products/servlet/2.5/docs/servlet-2_5-mr2/")));
     assertNull(libraryFile.getSourceUri());
 
     assertNotNull(libraryFile.getMavenCoordinates());
@@ -232,8 +222,6 @@ public class CloudLibrariesInPluginXmlTest {
 
     assertThat(jspApiLibrary.getLibraryFiles().size(), is(2));
     LibraryFile jspApi = jspApiLibrary.getLibraryFiles().get(0);
-    assertThat(jspApi.getJavadocUri(), is(new URI(
-        "http://docs.oracle.com/cd/E17802_01/products/products/jsp/2.1/docs/jsp-2_1-pfd2/")));
     assertNull(jspApi.getSourceUri());
 
     assertNotNull(jspApi.getMavenCoordinates());
@@ -248,8 +236,6 @@ public class CloudLibrariesInPluginXmlTest {
     assertTrue(jspApi.getFilters().isEmpty());
 
     LibraryFile jstlApi = jspApiLibrary.getLibraryFiles().get(1);
-    assertThat(jstlApi.getJavadocUri(), 
-        is(new URI("https://tomcat.apache.org/taglibs/standard/apidocs/")));
     assertNull(jstlApi.getSourceUri());
 
     assertNotNull(jstlApi.getMavenCoordinates());
