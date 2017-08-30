@@ -40,6 +40,8 @@ import org.eclipse.m2e.core.embedder.IMavenExecutionContext;
 import org.eclipse.m2e.core.internal.MavenPluginActivator;
 
 public class DependencyResolver {
+  
+  private DependencyResolver() {}
 
   /**
    * Returns all transitive runtime dependencies of the specified Maven artifact
@@ -51,7 +53,7 @@ public class DependencyResolver {
    * @return a list of strings in the form groupId:artifactId:version
    * @throws CoreException if the dependencies could not be resolved
    */
-  public static List<String> getTransitiveDependencies(
+  public static List<Artifact> getTransitiveDependencies(
       String groupId, String artifactId, String version, IProgressMonitor monitor)
           throws CoreException {
        
@@ -59,11 +61,10 @@ public class DependencyResolver {
 
     IMavenExecutionContext context = MavenPlugin.getMaven().createExecutionContext();
     
-    ICallable<List<String>> callable = new ICallable<List<String>>() {
+    ICallable<List<Artifact>> callable = new ICallable<List<Artifact>>() {
       @Override
-      public List<String> call(IMavenExecutionContext context, IProgressMonitor monitor)
+      public List<Artifact> call(IMavenExecutionContext context, IProgressMonitor monitor)
           throws CoreException {
-        List<String> dependencies = new ArrayList<>();
         DependencyFilter filter = DependencyFilterUtils.classpathFilter(JavaScopes.RUNTIME);
         // todo we'd prefer not to depend on m2e here
         RepositorySystem system = MavenPluginActivator.getDefault().getRepositorySystem();
@@ -77,10 +78,12 @@ public class DependencyResolver {
         try {
           List<ArtifactResult> artifacts =
               system.resolveDependencies(session, request).getArtifactResults();
+          List<Artifact> dependencies = new ArrayList<>();
           for (ArtifactResult result : artifacts) {
             Artifact dependency = result.getArtifact();
-            dependencies.add(dependency.getGroupId() + ":" + dependency.getArtifactId() + ":"
-                + dependency.getVersion());
+            dependencies.add(dependency);
+            /* dependencies.add(dependency.getGroupId() + ":" + dependency.getArtifactId() + ":"
+                + dependency.getVersion()); */
           }
           return dependencies;
         } catch (DependencyResolutionException ex) {
@@ -92,8 +95,7 @@ public class DependencyResolver {
       }
       
     };
-    List<String> x = context.execute(callable, monitor);
-    return x;
+    return context.execute(callable, monitor);
   }
 
   private static List<RemoteRepository> centralRepository(RepositorySystem system) {

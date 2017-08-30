@@ -215,8 +215,8 @@ public class LibraryClasspathContainerResolverService
     return new SourceAttacherJob(javaProject, containerPath, libraryPath, new Callable<IPath>() {
       @Override
       public IPath call() throws Exception {
-          return repositoryService.resolveSourceArtifact(libraryFile, artifact.getVersion(),
-                                                         monitor);
+        return repositoryService.resolveSourceArtifact(libraryFile, artifact.getVersion(),
+                                                       monitor);
       }
     });
   }
