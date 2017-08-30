@@ -77,11 +77,12 @@ public class DependencyResolver {
           List<ArtifactResult> artifacts =
               system.resolveDependencies(session, request).getArtifactResults();
           for (ArtifactResult result : artifacts) {
-            dependencies.add(result.toString());
+            Artifact artifact = result.getArtifact();
+            dependencies.add(
+                artifact.getGroupId() + ":" + artifact.getArtifactId() + ":" + artifact.getVersion());
           }
           return dependencies;
         } catch (DependencyResolutionException | NullPointerException ex) {
-          ex.printStackTrace();
           throw new CoreException(StatusUtil.error(ex, "Could not resolve dependencies"));
         }
       }

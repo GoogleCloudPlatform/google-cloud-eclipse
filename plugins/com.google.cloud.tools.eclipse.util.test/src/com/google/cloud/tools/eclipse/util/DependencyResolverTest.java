@@ -18,7 +18,6 @@ package com.google.cloud.tools.eclipse.util;
 
 import java.util.List;
 
-import org.eclipse.aether.resolution.DependencyResolutionException;
 import org.eclipse.core.runtime.CoreException;
 import org.junit.Assert;
 import org.junit.Test;
@@ -26,27 +25,27 @@ import org.junit.Test;
 public class DependencyResolverTest {
 
   @Test
-  public void testStorage() throws DependencyResolutionException, CoreException {
+  public void testStorage() throws CoreException {
     List<String> dependencies = DependencyResolver.getTransitiveDependencies(
         "com.google.cloud", "google-cloud-storage", "1.4.0");
-    Assert.assertFalse(dependencies.isEmpty());
+    Assert.assertTrue(dependencies.contains("com.google.cloud:google-cloud-storage:1.4.0"));
   }
 
   @Test
-  public void testDatastore() throws DependencyResolutionException, CoreException {
+  public void testDatastore() throws CoreException {
     List<String> dependencies = DependencyResolver.getTransitiveDependencies(
         "com.google.cloud", "google-cloud-datastore", "1.4.0");
-    Assert.assertFalse(dependencies.isEmpty());
+    Assert.assertTrue(dependencies.contains("com.google.cloud:google-cloud-datastore:1.4.0"));
     for (String dep : dependencies) {
       System.out.println("Datastore" + " depends on " + dep);
     }
   }
 
   @Test
-  public void testGuava() throws DependencyResolutionException, CoreException {
+  public void testGuava() throws CoreException {
     List<String> dependencies = DependencyResolver.getTransitiveDependencies(
         "com.google.guava", "guava", "19.0");
-    Assert.assertFalse(dependencies.isEmpty());
+    Assert.assertTrue(dependencies.contains("com.google.guava:guava:19.0"));
     for (String dep : dependencies) {
       System.out.println("Guava" + " depends on " + dep);
     }
