@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.Messages;
 import com.google.cloud.tools.eclipse.util.ArtifactRetriever;
+import com.google.cloud.tools.eclipse.util.DependencyResolver;
 import com.google.common.base.Strings;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -27,8 +28,11 @@ import java.util.Locale;
 import java.util.logging.Logger;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.eclipse.aether.artifact.Artifact;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.InvalidRegistryObjectException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 class LibraryFactory {
 
@@ -44,8 +48,6 @@ class LibraryFactory {
   private static final String ATTRIBUTE_NAME_ID = "id"; //$NON-NLS-1$
   private static final String ATTRIBUTE_NAME_NAME = "name"; //$NON-NLS-1$
   private static final String ATTRIBUTE_NAME_SITE_URI = "siteUri"; //$NON-NLS-1$
-  private static final String ATTRIBUTE_NAME_SOURCE_URI = "sourceUri"; //$NON-NLS-1$
-  private static final String ATTRIBUTE_NAME_JAVADOC_URI = "javadocUri"; //$NON-NLS-1$
   private static final String ATTRIBUTE_NAME_PATTERN = "pattern"; //$NON-NLS-1$
   private static final String ATTRIBUTE_NAME_GROUP = "group"; //$NON-NLS-1$
   private static final String ATTRIBUTE_NAME_GROUP_ID = "groupId"; //$NON-NLS-1$
@@ -93,41 +95,35 @@ class LibraryFactory {
             Messages.getString("UnexpectedConfigurationElement",
                 configurationElement.getName(), ELEMENT_NAME_LIBRARY));
       }
-    } catch (InvalidRegistryObjectException | URISyntaxException | IllegalArgumentException ex) {
+    } catch (InvalidRegistryObjectException | URISyntaxException | IllegalArgumentException | CoreException ex) {
       throw new LibraryFactoryException(Messages.getString("CreateLibraryError"), ex);
     }
   }
 
   private static List<LibraryFile> getLibraryFiles(IConfigurationElement[] children)
-      throws InvalidRegistryObjectException, URISyntaxException {
+      throws InvalidRegistryObjectException, URISyntaxException, CoreException {
     List<LibraryFile> libraryFiles = new ArrayList<>();
     for (IConfigurationElement libraryFileElement : children) {
       if (ELEMENT_NAME_LIBRARY_FILE.equals(libraryFileElement.getName())) {
         MavenCoordinates mavenCoordinates = getMavenCoordinates(
             libraryFileElement.getChildren(ELEMENT_NAME_MAVEN_COORDINATES));
-        LibraryFile libraryFile = new LibraryFile(mavenCoordinates);
-        libraryFile.setFilters(getFilters(libraryFileElement.getChildren()));
-        // todo do we really want these next two to be required?
-        libraryFile.setSourceUri(
-            getUri(libraryFileElement.getAttribute(ATTRIBUTE_NAME_SOURCE_URI)));
-        libraryFile.setJavadocUri(
-            getUri(libraryFileElement.getAttribute(ATTRIBUTE_NAME_JAVADOC_URI)));
-        String exportString = libraryFileElement.getAttribute(ATTRIBUTE_NAME_EXPORT);
-        if (exportString != null) {
-          libraryFile.setExport(Boolean.parseBoolean(exportString));
+        
+        // todo real progress monitor
+        List<Artifact> dependencies = DependencyResolver.getTransitiveDependencies(mavenCoordinates.getGroupId(), 
+            mavenCoordinates.getArtifactId(), mavenCoordinates.getVersion(), new NullProgressMonitor());
+        
+        for (Artifact artifact : dependencies) {
+          MavenCoordinates coordinates = new MavenCoordinates.Builder()
+              .setGroupId(artifact.getGroupId())
+              .setArtifactId(artifact.getArtifactId())
+              .setVersion(artifact.getVersion())
+              .build();
+          LibraryFile libraryFile = new LibraryFile(coordinates);
+          libraryFiles.add(libraryFile);
         }
-        libraryFiles.add(libraryFile);
       }
     }
     return libraryFiles;
-  }
-
-  private static URI getUri(String uriString) throws URISyntaxException {
-    if (Strings.isNullOrEmpty(uriString)) {
-      return null;
-    } else {
-      return new URI(uriString);
-    }
   }
 
   private static MavenCoordinates getMavenCoordinates(IConfigurationElement[] children) {

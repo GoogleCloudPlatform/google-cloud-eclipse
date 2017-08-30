@@ -16,8 +16,10 @@
 
 package com.google.cloud.tools.eclipse.util;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -30,13 +32,22 @@ public class DependencyResolverTest {
 
   @Test
   public void testStorage() throws CoreException {
-    List<String> dependencies = DependencyResolver.getTransitiveDependencies(
+    List<Artifact> dependencies = DependencyResolver.getTransitiveDependencies(
         "com.google.cloud", "google-cloud-storage", "1.4.0", monitor);
-    Assert.assertTrue(dependencies.contains("com.google.cloud:google-cloud-storage:1.4.0"));
-    Assert.assertFalse(dependencies.contains("io.grpc:grpc-protobuf:1.4.0"));
-    Assert.assertTrue(dependencies.contains("com.fasterxml.jackson.core:jackson-core:2.1.3"));
+    List<String> actual = getMavenCoordinates(dependencies);
+    Assert.assertTrue(actual.contains("com.google.cloud:google-cloud-storage:1.4.0"));
+    Assert.assertFalse(actual.contains("io.grpc:grpc-protobuf:1.4.0"));
+    Assert.assertTrue(actual.contains("com.fasterxml.jackson.core:jackson-core:2.1.3"));
   }
   
+  private static List<String> getMavenCoordinates(List<Artifact> artifacts) {
+    List<String> actual = new ArrayList<>();
+    for (Artifact artifact : artifacts) {
+      actual.add(artifact.getGroupId() + ":" + artifact.getArtifactId() + ":" + artifact.getVersion());
+    }
+    return actual;
+  }
+
   @Test
   public void testBadDependency() throws CoreException {
     try {
@@ -50,18 +61,21 @@ public class DependencyResolverTest {
 
   @Test
   public void testDatastore() throws CoreException {
-    List<String> dependencies = DependencyResolver.getTransitiveDependencies(
+    List<Artifact> dependencies = DependencyResolver.getTransitiveDependencies(
         "com.google.cloud", "google-cloud-datastore", "1.4.0", monitor);
-    Assert.assertTrue(dependencies.contains("com.google.cloud:google-cloud-datastore:1.4.0"));
-    Assert.assertTrue(dependencies.contains("io.grpc:grpc-protobuf:1.4.0"));
-    Assert.assertTrue(dependencies.contains("com.fasterxml.jackson.core:jackson-core:2.1.3"));
+    List<String> actual = getMavenCoordinates(dependencies);
+
+    Assert.assertTrue(actual.contains("com.google.cloud:google-cloud-datastore:1.4.0"));
+    Assert.assertTrue(actual.contains("io.grpc:grpc-protobuf:1.4.0"));
+    Assert.assertTrue(actual.contains("com.fasterxml.jackson.core:jackson-core:2.1.3"));
   }
 
   @Test
   public void testGuava() throws CoreException {
-    List<String> dependencies = DependencyResolver.getTransitiveDependencies(
+    List<Artifact> dependencies = DependencyResolver.getTransitiveDependencies(
         "com.google.guava", "guava", "19.0", monitor);
-    Assert.assertTrue(dependencies.contains("com.google.guava:guava:19.0"));
+    List<String> actual = getMavenCoordinates(dependencies);
+    Assert.assertTrue(actual.contains("com.google.guava:guava:19.0"));
   }
 
 }
