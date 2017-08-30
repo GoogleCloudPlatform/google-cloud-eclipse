@@ -19,36 +19,49 @@ package com.google.cloud.tools.eclipse.util;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class DependencyResolverTest {
+  
+  private NullProgressMonitor monitor = new NullProgressMonitor();
 
   @Test
   public void testStorage() throws CoreException {
     List<String> dependencies = DependencyResolver.getTransitiveDependencies(
-        "com.google.cloud", "google-cloud-storage", "1.4.0");
+        "com.google.cloud", "google-cloud-storage", "1.4.0", monitor);
     Assert.assertTrue(dependencies.contains("com.google.cloud:google-cloud-storage:1.4.0"));
+    Assert.assertFalse(dependencies.contains("io.grpc:grpc-protobuf:1.4.0"));
+    Assert.assertTrue(dependencies.contains("com.fasterxml.jackson.core:jackson-core:2.1.3"));
+  }
+  
+  @Test
+  public void testBadDependency() throws CoreException {
+    try {
+      DependencyResolver.getTransitiveDependencies(
+          "com.google.cloud", "google-cloud-nonesuch", "1.4.0", monitor);
+      Assert.fail();
+    } catch (CoreException ex) {
+      Assert.assertEquals(IStatus.ERROR, ex.getStatus().getSeverity());
+    }
   }
 
   @Test
   public void testDatastore() throws CoreException {
     List<String> dependencies = DependencyResolver.getTransitiveDependencies(
-        "com.google.cloud", "google-cloud-datastore", "1.4.0");
+        "com.google.cloud", "google-cloud-datastore", "1.4.0", monitor);
     Assert.assertTrue(dependencies.contains("com.google.cloud:google-cloud-datastore:1.4.0"));
-    for (String dep : dependencies) {
-      System.out.println("Datastore" + " depends on " + dep);
-    }
+    Assert.assertTrue(dependencies.contains("io.grpc:grpc-protobuf:1.4.0"));
+    Assert.assertTrue(dependencies.contains("com.fasterxml.jackson.core:jackson-core:2.1.3"));
   }
 
   @Test
   public void testGuava() throws CoreException {
     List<String> dependencies = DependencyResolver.getTransitiveDependencies(
-        "com.google.guava", "guava", "19.0");
+        "com.google.guava", "guava", "19.0", monitor);
     Assert.assertTrue(dependencies.contains("com.google.guava:guava:19.0"));
-    for (String dep : dependencies) {
-      System.out.println("Guava" + " depends on " + dep);
-    }
   }
 
 }

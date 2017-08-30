@@ -34,7 +34,6 @@ import org.eclipse.aether.util.artifact.JavaScopes;
 import org.eclipse.aether.util.filter.DependencyFilterUtils;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.ICallable;
 import org.eclipse.m2e.core.embedder.IMavenExecutionContext;
@@ -46,14 +45,15 @@ public class DependencyResolver {
    * Returns all transitive runtime dependencies of the specified Maven artifact
    * including the artifact itself.
    * 
-   * @param groupId group ID of the Maven artifact 
-   * @param artifactId artifact ID of the Maven artifact 
-   * @param version version of the Maven artifact 
+   * @param groupId group ID of the Maven artifact to resolve
+   * @param artifactId artifact ID of the Maven artifact to resolve
+   * @param version version of the Maven artifact to resolve
    * @return a list of strings in the form groupId:artifactId:version
    * @throws CoreException if the dependencies could not be resolved
    */
   public static List<String> getTransitiveDependencies(
-      String groupId, String artifactId, String version) throws CoreException {
+      String groupId, String artifactId, String version, IProgressMonitor monitor)
+          throws CoreException {
        
     final Artifact artifact = new DefaultArtifact(groupId + ":" + artifactId + ":" + version);
 
@@ -88,7 +88,7 @@ public class DependencyResolver {
       }
       
     };
-    List<String> x = context.execute(callable, new NullProgressMonitor());
+    List<String> x = context.execute(callable, monitor);
     return x;
   }
 
