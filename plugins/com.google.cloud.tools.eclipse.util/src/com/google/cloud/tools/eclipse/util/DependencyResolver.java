@@ -42,8 +42,18 @@ import org.eclipse.m2e.core.internal.MavenPluginActivator;
 
 public class DependencyResolver {
 
+  /**
+   * Returns all transitive runtime dependencies of the specified Maven artifact
+   * including the artifact itself.
+   * 
+   * @param groupId group ID of the Maven artifact 
+   * @param artifactId artifact ID of the Maven artifact 
+   * @param version version of the Maven artifact 
+   * @return a list of strings in the form groupId:artifactId:version
+   * @throws CoreException if the dependencies could not be resolved
+   */
   public static List<String> getTransitiveDependencies(
-      String groupId, String artifactId, String version) throws DependencyResolutionException, CoreException {
+      String groupId, String artifactId, String version) throws CoreException {
        
     final Artifact artifact = new DefaultArtifact(groupId + ":" + artifactId + ":" + version);
 
@@ -54,11 +64,11 @@ public class DependencyResolver {
       public List<String> call(IMavenExecutionContext context, IProgressMonitor monitor)
           throws CoreException {
         List<String> dependencies = new ArrayList<>();
-        DependencyFilter filter = DependencyFilterUtils.classpathFilter(JavaScopes.COMPILE);
+        DependencyFilter filter = DependencyFilterUtils.classpathFilter(JavaScopes.RUNTIME);
         RepositorySystem system = MavenPluginActivator.getDefault().getRepositorySystem();
         
         CollectRequest collectRequest = new CollectRequest();
-        collectRequest.setRoot(new Dependency(artifact, JavaScopes.COMPILE));
+        collectRequest.setRoot(new Dependency(artifact, JavaScopes.RUNTIME));
         collectRequest.setRepositories(centralRepository(system));
         final DependencyRequest request = new DependencyRequest(collectRequest, filter);
         RepositorySystemSession session = context.getRepositorySession();

@@ -26,10 +26,30 @@ import org.junit.Test;
 public class DependencyResolverTest {
 
   @Test
-  public void testResolve() throws DependencyResolutionException, CoreException {
+  public void testStorage() throws DependencyResolutionException, CoreException {
     List<String> dependencies = DependencyResolver.getTransitiveDependencies(
         "com.google.cloud", "google-cloud-storage", "1.4.0");
     Assert.assertFalse(dependencies.isEmpty());
+  }
+
+  @Test
+  public void testDatastore() throws DependencyResolutionException, CoreException {
+    List<String> dependencies = DependencyResolver.getTransitiveDependencies(
+        "com.google.cloud", "google-cloud-datastore", "1.4.0");
+    Assert.assertFalse(dependencies.isEmpty());
+    for (String dep : dependencies) {
+      System.out.println("Datastore" + " depends on " + dep);
+    }
+  }
+
+  @Test
+  public void testGuava() throws DependencyResolutionException, CoreException {
+    List<String> dependencies = DependencyResolver.getTransitiveDependencies(
+        "com.google.guava", "guava", "19.0");
+    Assert.assertFalse(dependencies.isEmpty());
+    for (String dep : dependencies) {
+      System.out.println("Guava" + " depends on " + dep);
+    }
   }
 
 }
