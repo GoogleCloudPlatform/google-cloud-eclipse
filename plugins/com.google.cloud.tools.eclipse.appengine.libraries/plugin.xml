@@ -318,10 +318,10 @@
           name="%cloudtranslation.name"
           tooltip="%cloudtranslation.tooltip"
           javaVersion="1.8"
-          siteUri="https://cloud.google.com/translate/docs/reference/libraries" >
-      <libraryDependency id="googlecloudcore" />
+          siteUri="https://cloud.google.com/translate/docs/reference/libraries">
       <libraryFile
-            javadocUri="https://googlecloudplatform.github.io/google-cloud-java/0.21.0/apidocs/index.html?com/google/cloud/translate/package-summary.html">    
+          loadDependencies="true"
+          javadocUri="https://googlecloudplatform.github.io/google-cloud-java/0.21.0/apidocs/index.html?com/google/cloud/translate/package-summary.html">    
         <mavenCoordinates
               artifactId="google-cloud-translate"
               groupId="com.google.cloud"

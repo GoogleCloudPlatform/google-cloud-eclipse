@@ -189,7 +189,14 @@ WAR file of the project, under &lt;tt&gt;WEB-INF/lib&lt;/tt&gt; if the parent &l
                </xs:documentation>
             </xs:annotation>
          </xs:attribute>
-
+         <xs:attribute name="loadDependencies" type="xs:boolean" default="false">
+            <xs:annotation>
+               <xs:documentation>
+                  If the loadDependencies attribute is present and has the value true, 
+                  then all transitive dependencies of the Maven artifact should also be included.
+               </xs:documentation>
+            </xs:annotation>
+         </xs:attribute>
          <xs:attribute name="javadocUri" type="xs:anyURI">
             <xs:annotation>
                <xs:documentation>

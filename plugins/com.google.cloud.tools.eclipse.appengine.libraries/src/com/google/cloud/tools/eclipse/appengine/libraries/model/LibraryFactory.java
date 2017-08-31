@@ -18,15 +18,21 @@ package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.Messages;
 import com.google.cloud.tools.eclipse.util.ArtifactRetriever;
+import com.google.cloud.tools.eclipse.util.DependencyResolver;
 import com.google.common.base.Strings;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.eclipse.aether.artifact.Artifact;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.InvalidRegistryObjectException;
 
@@ -105,21 +111,54 @@ class LibraryFactory {
       if (ELEMENT_NAME_LIBRARY_FILE.equals(libraryFileElement.getName())) {
         MavenCoordinates mavenCoordinates = getMavenCoordinates(
             libraryFileElement.getChildren(ELEMENT_NAME_MAVEN_COORDINATES));
-        LibraryFile libraryFile = new LibraryFile(mavenCoordinates);
-        libraryFile.setFilters(getFilters(libraryFileElement.getChildren()));
-        // todo do we really want these next two to be required?
-        libraryFile.setSourceUri(
-            getUri(libraryFileElement.getAttribute(ATTRIBUTE_NAME_SOURCE_URI)));
-        libraryFile.setJavadocUri(
-            getUri(libraryFileElement.getAttribute(ATTRIBUTE_NAME_JAVADOC_URI)));
-        String exportString = libraryFileElement.getAttribute(ATTRIBUTE_NAME_EXPORT);
-        if (exportString != null) {
-          libraryFile.setExport(Boolean.parseBoolean(exportString));
+        String loadDependencies = libraryFileElement.getAttribute("loadDependencies");
+        if ("true".equalsIgnoreCase(loadDependencies)) {
+          Collection<LibraryFile> files = loadTransitiveDependencies(mavenCoordinates);
+          libraryFiles.addAll(files);
+        } else {
+          LibraryFile libraryFile = loadSingleFile(libraryFileElement, mavenCoordinates);
+          libraryFiles.add(libraryFile);
         }
-        libraryFiles.add(libraryFile);
       }
     }
     return libraryFiles;
+  }
+
+  private static Collection<LibraryFile> loadTransitiveDependencies(MavenCoordinates root) {
+    Set<LibraryFile> dependencies = new HashSet<>();
+    try {
+      Collection<Artifact> artifacts = DependencyResolver.getTransitiveDependencies(
+          root.getGroupId(), root.getArtifactId(), root.getVersion(), null);
+      for (Artifact artifact : artifacts) {
+        MavenCoordinates coordinates = new MavenCoordinates.Builder()
+            .setGroupId(artifact.getGroupId())
+            .setArtifactId(artifact.getArtifactId())
+            .setVersion(artifact.getVersion())
+            .build();
+        LibraryFile file = new LibraryFile(coordinates);
+        dependencies.add(file);
+      }
+    } catch (CoreException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    return dependencies;
+  }
+
+  private static LibraryFile loadSingleFile(IConfigurationElement libraryFileElement,
+      MavenCoordinates mavenCoordinates) throws URISyntaxException {
+    LibraryFile libraryFile = new LibraryFile(mavenCoordinates);
+    libraryFile.setFilters(getFilters(libraryFileElement.getChildren()));
+    // todo do we really want these next two to be required?
+    libraryFile.setSourceUri(
+        getUri(libraryFileElement.getAttribute(ATTRIBUTE_NAME_SOURCE_URI)));
+    libraryFile.setJavadocUri(
+        getUri(libraryFileElement.getAttribute(ATTRIBUTE_NAME_JAVADOC_URI)));
+    String exportString = libraryFileElement.getAttribute(ATTRIBUTE_NAME_EXPORT);
+    if (exportString != null) {
+      libraryFile.setExport(Boolean.parseBoolean(exportString));
+    }
+    return libraryFile;
   }
 
   private static URI getUri(String uriString) throws URISyntaxException {
