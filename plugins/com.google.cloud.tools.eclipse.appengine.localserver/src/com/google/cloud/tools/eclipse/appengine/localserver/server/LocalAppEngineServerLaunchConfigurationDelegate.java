@@ -76,6 +76,8 @@ import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IMemoryBlock;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.IThread;
+import org.eclipse.debug.internal.ui.DebugUIPlugin;
+import org.eclipse.debug.internal.ui.preferences.IDebugPreferenceConstants;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.debug.ui.console.ConsoleColorProvider;
 import org.eclipse.jdt.core.IJavaProject;
@@ -86,6 +88,7 @@ import org.eclipse.jdt.launching.IVMConnector;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.SocketUtil;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
@@ -434,15 +437,19 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     }
 
     // configure the console for output
+    IPreferenceStore store = DebugUIPlugin.getDefault().getPreferenceStore();
     ConsoleColorProvider colorProvider = new ConsoleColorProvider();
     LocalAppEngineConsole console = MessageConsoleUtilities.findOrCreateConsole(
         configuration.getName(), new LocalAppEngineConsole.Factory(serverBehaviour));
     console.clearConsole();
     console.activate();
     MessageConsoleStream outputStream = console.newMessageStream();
-    MessageConsoleStream errorStream = console.newMessageStream();
     outputStream.setColor(colorProvider.getColor(IDebugUIConstants.ID_STANDARD_OUTPUT_STREAM));
+    outputStream
+        .setActivateOnWrite(store.getBoolean(IDebugPreferenceConstants.CONSOLE_OPEN_ON_OUT));
+    MessageConsoleStream errorStream = console.newMessageStream();
     errorStream.setColor(colorProvider.getColor(IDebugUIConstants.ID_STANDARD_ERROR_STREAM));
+    errorStream.setActivateOnWrite(store.getBoolean(IDebugPreferenceConstants.CONSOLE_OPEN_ON_ERR));
 
     // A launch must have at least one debug target or process, or it becomes a zombie
     CloudSdkDebugTarget target = new CloudSdkDebugTarget(launch, serverBehaviour, console);
