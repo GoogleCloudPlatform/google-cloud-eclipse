@@ -18,7 +18,9 @@ package com.google.cloud.tools.eclipse.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.core.runtime.CoreException;
@@ -66,7 +68,7 @@ public class DependencyResolverTest {
    * Easier to check for inclusion by Maven coordinates.
    */
   private static Collection<String> getMavenCoordinates(Collection<Artifact> artifacts) {
-    List<String> actual = new ArrayList<>();
+    Set<String> actual = new HashSet<>();
     for (Artifact artifact : artifacts) {
       actual.add(
           artifact.getGroupId() + ":" + artifact.getArtifactId() + ":" + artifact.getVersion());
