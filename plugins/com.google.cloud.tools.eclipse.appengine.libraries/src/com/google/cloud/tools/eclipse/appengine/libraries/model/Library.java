@@ -119,12 +119,6 @@ public final class Library {
     Preconditions.checkNotNull(libraryFiles);
     this.libraryFiles = new ArrayList<>(libraryFiles);
   }
-  
-  // todo should Library have a method to resolve transitive dependencies?
-  // e.g. resolveTransitiveDependencies() plus a private boolean resolved to see
-  // if dependencies are resolved or not? or maybe LibraryFile should have that? or both?
-  // That lets us defer loading until we need it. E.g. not at wizard display time.
-  
 
   public boolean isExport() {
     return export;
