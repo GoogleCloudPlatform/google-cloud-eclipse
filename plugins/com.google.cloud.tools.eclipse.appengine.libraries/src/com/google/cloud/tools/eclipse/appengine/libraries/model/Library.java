@@ -127,7 +127,7 @@ public final class Library {
   }
 
   /**
-   * @param libraryDependencies list of libraryIds that are dependencies of this library
+   * @param libraryDependencies list of library IDs that are dependencies of this library
    *     and should be added to the classpath, cannot be <code>null</code>
    */
   void setLibraryDependencies(List<String> libraryDependencies) {

@@ -105,7 +105,7 @@ class LibraryFactory {
   }
 
   private static List<LibraryFile> getLibraryFiles(IConfigurationElement[] children)
-      throws InvalidRegistryObjectException, URISyntaxException {
+      throws InvalidRegistryObjectException, URISyntaxException, LibraryFactoryException {
     List<LibraryFile> libraryFiles = new ArrayList<>();
     for (IConfigurationElement libraryFileElement : children) {
       if (ELEMENT_NAME_LIBRARY_FILE.equals(libraryFileElement.getName())) {
@@ -113,8 +113,13 @@ class LibraryFactory {
             libraryFileElement.getChildren(ELEMENT_NAME_MAVEN_COORDINATES));
         String loadDependencies = libraryFileElement.getAttribute("loadDependencies");
         if ("true".equalsIgnoreCase(loadDependencies)) {
-          Collection<LibraryFile> files = loadTransitiveDependencies(mavenCoordinates);
-          libraryFiles.addAll(files);
+          try {
+            Collection<LibraryFile> files = loadTransitiveDependencies(mavenCoordinates);
+            libraryFiles.addAll(files);
+          } catch (CoreException ex) {
+            throw new LibraryFactoryException(
+                "Problem loading transitive dependencies for " + mavenCoordinates, ex);
+          }
         } else {
           LibraryFile libraryFile = loadSingleFile(libraryFileElement, mavenCoordinates);
           libraryFiles.add(libraryFile);
@@ -124,23 +129,19 @@ class LibraryFactory {
     return libraryFiles;
   }
 
-  private static Collection<LibraryFile> loadTransitiveDependencies(MavenCoordinates root) {
+  private static Collection<LibraryFile> loadTransitiveDependencies(MavenCoordinates root) 
+      throws CoreException {
     Set<LibraryFile> dependencies = new HashSet<>();
-    try {
-      Collection<Artifact> artifacts = DependencyResolver.getTransitiveDependencies(
-          root.getGroupId(), root.getArtifactId(), root.getVersion(), null);
-      for (Artifact artifact : artifacts) {
-        MavenCoordinates coordinates = new MavenCoordinates.Builder()
-            .setGroupId(artifact.getGroupId())
-            .setArtifactId(artifact.getArtifactId())
-            .setVersion(artifact.getVersion())
-            .build();
-        LibraryFile file = new LibraryFile(coordinates);
-        dependencies.add(file);
-      }
-    } catch (CoreException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+    Collection<Artifact> artifacts = DependencyResolver.getTransitiveDependencies(
+        root.getGroupId(), root.getArtifactId(), root.getVersion(), null);
+    for (Artifact artifact : artifacts) {
+      MavenCoordinates coordinates = new MavenCoordinates.Builder()
+          .setGroupId(artifact.getGroupId())
+          .setArtifactId(artifact.getArtifactId())
+          .setVersion(artifact.getVersion())
+          .build();
+      LibraryFile file = new LibraryFile(coordinates);
+      dependencies.add(file);
     }
     return dependencies;
   }
