@@ -88,6 +88,8 @@ public class BuildPath {
           throws JavaModelException, CoreException {
 
     // todo or we could grab the transitive dependency graph here if needed
+    // at this point we have the Java project so we could even filter
+    // entries already present in other libraries
     
     return prepareLibraries(javaProject, libraries, monitor, true);
   }
