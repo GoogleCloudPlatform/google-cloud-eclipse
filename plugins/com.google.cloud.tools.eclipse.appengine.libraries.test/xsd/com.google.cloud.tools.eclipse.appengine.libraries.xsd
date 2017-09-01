@@ -132,13 +132,14 @@ limitations under the License.
                </xs:documentation>
             </xs:annotation>
          </xs:attribute>
-         <xs:attribute name="includesAllDependencies" type="xs:boolean" default="true">
+         <xs:attribute name="dependencies" type="dependencyStrategy" default="ignore">
           <xs:annotation>
                <xs:documentation>
-                  If the includesAllDependencies attribute is absent or has the value true, 
-                  then all transitive dependencies of the Maven artifact are included
-                  in the local XML as libraryFile elements. 
-                  Note: we are likely to make the default value false in the future. 
+                  If the dependencies attribute has the value ignore, only the 
+                  explicitly listed library files are added to the library. 
+                  If the dependencies attribute has the value include, the 
+                  explicitly listed library files and all their transitive dependencies
+                  are added to the library. 
                </xs:documentation>
             </xs:annotation>
          </xs:attribute>
@@ -346,6 +347,12 @@ will determine how to resolve the entries associated with the container.
       </xs:documentation>
    </xs:annotation>
 
+  <xs:simpleType name = "dependencyStrategy">
+    <xs:restriction base = "xs:string">
+      <xs:enumeration value = "include"/>
+      <xs:enumeration value = "ignore"/>
+    </xs:restriction>
+  </xs:simpleType>
 
    <xs:simpleType name="recommendationType">
         <xs:annotation>
