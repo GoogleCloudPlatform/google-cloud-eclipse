@@ -132,6 +132,16 @@ limitations under the License.
                </xs:documentation>
             </xs:annotation>
          </xs:attribute>
+         <xs:attribute name="includesAllDependencies" type="xs:boolean" default="true">
+          <xs:annotation>
+               <xs:documentation>
+                  If the includesAllDependencies attribute is absent or has the value true, 
+                  then all transitive dependencies of the Maven artifact are included
+                  in the local XML as libraryFile elements. 
+                  Note: we are likely to make the default value false in the future. 
+               </xs:documentation>
+            </xs:annotation>
+         </xs:attribute>
          <xs:attribute name="recommendation" type="recommendationType">
             <xs:annotation>
                <xs:documentation>
@@ -186,14 +196,6 @@ element's &lt;tt&gt;export&lt;/tt&gt; attribute is false, the &lt;tt&gt;export&l
 WAR file of the project, under &lt;tt&gt;WEB-INF/lib&lt;/tt&gt; if the parent &lt;tt&gt;library&lt;/tt&gt; element's
 &lt;tt&gt;export&lt;/tt&gt; attribute is also true. If the parent &lt;tt&gt;library&lt;/tt&gt; element's
 &lt;tt&gt;export&lt;/tt&gt; attribute is false, this attribute will be disregarded. Defaults to true.
-               </xs:documentation>
-            </xs:annotation>
-         </xs:attribute>
-         <xs:attribute name="loadDependencies" type="xs:boolean" default="false">
-            <xs:annotation>
-               <xs:documentation>
-                  If the loadDependencies attribute is present and has the value true, 
-                  then all transitive dependencies of the Maven artifact should also be included.
                </xs:documentation>
             </xs:annotation>
          </xs:attribute>

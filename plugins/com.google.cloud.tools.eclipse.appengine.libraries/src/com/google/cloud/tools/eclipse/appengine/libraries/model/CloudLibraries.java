@@ -82,9 +82,6 @@ public class CloudLibraries {
       try {
         Library library = LibraryFactory.create(element);
         builder.put(library.getId(), library);
-        
-        // todo this may be too early, especially to resolve transitive dependencies
-        // maybe we should wait until the library is added to a project
       } catch (LibraryFactoryException ex) {
         logger.log(Level.SEVERE, "Error loading library definition", ex);
       }

@@ -83,6 +83,10 @@ class LibraryFactory {
         if (exportString != null) {
           library.setExport(Boolean.parseBoolean(exportString));
         }
+        String includesAllDependencies = configurationElement.getAttribute("listsAllDependencies"); //$NON-NLS-1$
+        if (includesAllDependencies != null) {
+          library.setResolved(Boolean.parseBoolean(includesAllDependencies));
+        }
         String versionString = configurationElement.getAttribute("javaVersion"); //$NON-NLS-1$
         if (versionString != null) {
           library.setJavaVersion(versionString);
@@ -111,25 +115,14 @@ class LibraryFactory {
       if (ELEMENT_NAME_LIBRARY_FILE.equals(libraryFileElement.getName())) {
         MavenCoordinates mavenCoordinates = getMavenCoordinates(
             libraryFileElement.getChildren(ELEMENT_NAME_MAVEN_COORDINATES));
-        String loadDependencies = libraryFileElement.getAttribute("loadDependencies");
-        if ("true".equalsIgnoreCase(loadDependencies)) {
-          try {
-            Collection<LibraryFile> files = loadTransitiveDependencies(mavenCoordinates);
-            libraryFiles.addAll(files);
-          } catch (CoreException ex) {
-            throw new LibraryFactoryException(
-                "Problem loading transitive dependencies for " + mavenCoordinates, ex);
-          }
-        } else {
-          LibraryFile libraryFile = loadSingleFile(libraryFileElement, mavenCoordinates);
-          libraryFiles.add(libraryFile);
-        }
+        LibraryFile libraryFile = loadSingleFile(libraryFileElement, mavenCoordinates);
+        libraryFiles.add(libraryFile);
       }
     }
     return libraryFiles;
   }
 
-  private static Collection<LibraryFile> loadTransitiveDependencies(MavenCoordinates root) 
+  static Collection<LibraryFile> loadTransitiveDependencies(MavenCoordinates root) 
       throws CoreException {
     Set<LibraryFile> dependencies = new HashSet<>();
     // todo need a progress monitor here

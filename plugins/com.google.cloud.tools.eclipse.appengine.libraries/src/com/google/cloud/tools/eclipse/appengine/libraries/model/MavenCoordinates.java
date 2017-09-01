@@ -16,6 +16,8 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
+import java.text.MessageFormat;
+
 import com.google.common.base.Preconditions;
 
 /**
@@ -94,7 +96,7 @@ public class MavenCoordinates {
 
   @Override
   public String toString() {
-    return String.format("MavenCoordinates [repository={0}, {1}:{2}:{3}:{4}:{5}]", repository,
+    return MessageFormat.format("MavenCoordinates [repository={0}, {1}:{2}:{3}:{4}:{5}]", repository,
         groupId, artifactId, type, classifier, version);
   }
   
