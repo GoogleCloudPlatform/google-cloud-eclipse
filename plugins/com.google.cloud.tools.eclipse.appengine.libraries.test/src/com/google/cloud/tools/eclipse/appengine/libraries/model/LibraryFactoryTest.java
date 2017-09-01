@@ -16,8 +16,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
-import java.util.List;
-
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.junit.Assert;
@@ -55,26 +53,6 @@ public class LibraryFactoryTest {
     
     Mockito.when(libraryFiles[0].getChildren("mavenCoordinates")).thenReturn(mavenCoordinates);
     Mockito.when(libraryFiles[0].getName()).thenReturn("libraryFile");
-  }
-  
-  @Test
-  public void testCreate_transitive() throws LibraryFactoryException {
-    Mockito.when(configuration.getChildren("libraryFile")).thenReturn(libraryFiles);
-    Mockito.when(libraryFiles[0].getAttribute("loadDependencies")).thenReturn("true");
-
-    Library library = LibraryFactory.create(configuration);
-    List<LibraryFile> files = library.getLibraryFiles();
-    Assert.assertTrue(files.size() > 1);
-  }
-  
-  @Test
-  public void testCreate_notTransitive() throws LibraryFactoryException {
-    Mockito.when(configuration.getChildren("libraryFile")).thenReturn(libraryFiles);
-    Mockito.when(libraryFiles[0].getAttribute("loadDependencies")).thenReturn("false");
-
-    Library library = LibraryFactory.create(configuration);
-    List<LibraryFile> files = library.getLibraryFiles();
-    Assert.assertEquals(1, files.size());
   }
   
   @Test
