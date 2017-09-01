@@ -113,6 +113,10 @@ public final class Library {
     Preconditions.checkNotNull(libraryFiles);
     this.libraryFiles = new ArrayList<>(libraryFiles);
   }
+  
+  // todo should Library have a method to resolve transitive dependencies?
+  // e.g. resolveTransitiveDependencies() plus a boolean to see
+  // if dependencies are resolved or not? or maybe LibraryFile should have that? or both?
 
   public boolean isExport() {
     return export;
