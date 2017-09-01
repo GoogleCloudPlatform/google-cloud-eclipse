@@ -133,6 +133,8 @@ public class LibraryTest {
   public void testSetExport() {
     library.setExport(false);
     assertFalse(library.isExport());
+    library.setExport(true);
+    assertTrue(library.isExport());
   }
 
   @Test
