@@ -87,6 +87,8 @@ public class BuildPath {
       IJavaProject javaProject, List<Library> libraries, IProgressMonitor monitor)
           throws JavaModelException, CoreException {
 
+    // todo or we could grab the transitive dependency graph here if needed
+    
     return prepareLibraries(javaProject, libraries, monitor, true);
   }
 
