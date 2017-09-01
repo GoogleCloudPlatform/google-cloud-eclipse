@@ -132,6 +132,7 @@ class LibraryFactory {
   private static Collection<LibraryFile> loadTransitiveDependencies(MavenCoordinates root) 
       throws CoreException {
     Set<LibraryFile> dependencies = new HashSet<>();
+    // todo need a progress monitor here
     Collection<Artifact> artifacts = DependencyResolver.getTransitiveDependencies(
         root.getGroupId(), root.getArtifactId(), root.getVersion(), null);
     for (Artifact artifact : artifacts) {

@@ -98,8 +98,7 @@ public class LibraryFactoryTest {
     int majorVersion = new DefaultArtifactVersion(version).getMajorVersion();
     Assert.assertEquals(19, majorVersion);
   }
-  
-  
+
   @Test
   public void testCreate() throws LibraryFactoryException {
     Mockito.when(configuration.getChildren("libraryFile")).thenReturn(new IConfigurationElement[0]);
