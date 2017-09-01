@@ -75,6 +75,8 @@ class LibraryFactory {
         library.setSiteUri(new URI(configurationElement.getAttribute(ATTRIBUTE_NAME_SITE_URI)));
         library.setGroup(configurationElement.getAttribute(ATTRIBUTE_NAME_GROUP));
         library.setToolTip(configurationElement.getAttribute(ATTRIBUTE_NAME_TOOLTIP));
+        library.setLibraryDependencies(getLibraryDependencies(
+            configurationElement.getChildren(ELEMENT_NAME_LIBRARY_DEPENDENCY)));
         library.setLibraryFiles(
             getLibraryFiles(configurationElement.getChildren(ELEMENT_NAME_LIBRARY_FILE)));
         String exportString = configurationElement.getAttribute(ATTRIBUTE_NAME_EXPORT);
@@ -91,8 +93,6 @@ class LibraryFactory {
           library.setRecommendation(
               LibraryRecommendation.valueOf(recommendationString.toUpperCase(Locale.US)));
         }
-        library.setLibraryDependencies(getLibraryDependencies(
-            configurationElement.getChildren(ELEMENT_NAME_LIBRARY_DEPENDENCY)));
         return library;
       } else {
         throw new LibraryFactoryException(
