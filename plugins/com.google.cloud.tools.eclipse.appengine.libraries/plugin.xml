@@ -319,7 +319,7 @@
           tooltip="%cloudtranslation.tooltip"
           javaVersion="1.8"
           siteUri="https://cloud.google.com/translate/docs/reference/libraries"
-          listsAllDependencies="false">
+          includesAllDependencies="false">
       <libraryFile
           javadocUri="https://googlecloudplatform.github.io/google-cloud-java/0.21.0/apidocs/index.html?com/google/cloud/translate/package-summary.html">    
         <mavenCoordinates

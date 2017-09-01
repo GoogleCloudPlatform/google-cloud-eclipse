@@ -83,7 +83,8 @@ class LibraryFactory {
         if (exportString != null) {
           library.setExport(Boolean.parseBoolean(exportString));
         }
-        String includesAllDependencies = configurationElement.getAttribute("listsAllDependencies"); //$NON-NLS-1$
+        String includesAllDependencies =
+            configurationElement.getAttribute("includesAllDependencies"); //$NON-NLS-1$
         if (includesAllDependencies != null) {
           library.setResolved(Boolean.parseBoolean(includesAllDependencies));
         }
