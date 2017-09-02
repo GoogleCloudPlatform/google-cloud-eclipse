@@ -20,6 +20,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -32,6 +34,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects;
+import com.google.api.services.cloudresourcemanager.model.ListProjectsResponse;
+import com.google.api.services.cloudresourcemanager.model.Project;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.model.Bucket;
 import com.google.api.services.storage.model.Buckets;
@@ -41,6 +46,7 @@ import com.google.cloud.tools.eclipse.dataflow.ui.page.MessageTarget;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
+import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import com.google.cloud.tools.login.Account;
@@ -56,7 +62,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Text;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -81,7 +86,7 @@ public class RunOptionsDefaultsComponentTest {
   private Shell shell;
 
   private AccountSelector selector;
-  private Text projectID;
+  private Combo projectID;
   private Combo stagingLocations;
   private Button createButton;
 
@@ -93,17 +98,20 @@ public class RunOptionsDefaultsComponentTest {
     when(account1.getEmail()).thenReturn("alice@example.com");
     when(account1.getOAuth2Credential()).thenReturn(credential1);
     mockStorageApiBucketList(credential1, "project", "alice-bucket-1", "alice-bucket-2");
+    mockProjectList(credential1, new GcpProject("project", "project"),
+        new GcpProject("foo", "foo"));
 
     Account account2 = mock(Account.class, "bob@example.com");
     Credential credential2 = mock(Credential.class, "bob@example.com");
     when(account2.getEmail()).thenReturn("bob@example.com");
     when(account2.getOAuth2Credential()).thenReturn(credential2);
     mockStorageApiBucketList(credential2, "project", "bob-bucket");
-
-    when(loginService.getAccounts()).thenReturn(Sets.newHashSet(account1, account2));
+    mockProjectList(credential2, new GcpProject("project", "project"));
 
     doCallRealMethod().when(page).setPageComplete(anyBoolean());
     doCallRealMethod().when(page).isPageComplete();
+
+    when(loginService.getAccounts()).thenReturn(Sets.newHashSet(account1, account2));
 
     shell = shellResource.getShell();
     component = new RunOptionsDefaultsComponent(
@@ -111,15 +119,36 @@ public class RunOptionsDefaultsComponentTest {
         apiFactory);
     selector = CompositeUtil.findControl(shell, AccountSelector.class);
     projectID =
-        CompositeUtil.findControlAfterLabel(shell, Text.class, "Cloud Platform &project ID:");
+        CompositeUtil.findControlAfterLabel(shell, Combo.class, "Cloud Platform &project ID:");
     stagingLocations =
         CompositeUtil.findControlAfterLabel(shell, Combo.class, "Cloud Storage staging &location:");
     createButton = CompositeUtil.findControl(shell, Button.class);
   }
   
+  private void mockProjectList(Credential credential, GcpProject... gcpProjects) {
+    Projects projectsApi = mock(Projects.class);
+    Projects.List listApi = mock(Projects.List.class);
+    List<Project> projectsList = new ArrayList<>();
+    for (GcpProject gcpProject : gcpProjects) {
+      Project project = new Project();
+      project.setName(gcpProject.getName());
+      project.setProjectId(gcpProject.getId());
+      projectsList.add(project);
+    }
+    ListProjectsResponse response = new ListProjectsResponse();
+    response.setProjects(projectsList);
+    try {
+      doReturn(projectsApi).when(apiFactory).newProjectsApi(credential);
+      doReturn(listApi).when(listApi).setPageSize(any(Integer.class));
+      doReturn(listApi).when(projectsApi).list();
+      doReturn(response).when(listApi).execute();
+    } catch (IOException ex) {
+      fail(ex.toString());
+    }
+  }
+
   private void mockStorageApiBucketList(Credential credential, String projectId,
-      String... bucketNames)
-      throws IOException {
+      String... bucketNames) throws IOException {
     Storage storageApi = mock(Storage.class);
     Storage.Buckets bucketsApi = mock(Storage.Buckets.class);
     Storage.Buckets.List listApi = mock(Storage.Buckets.List.class);
@@ -160,9 +189,12 @@ public class RunOptionsDefaultsComponentTest {
 
   @Test
   public void testCloudProjectText() {
-    Assert.assertEquals("", component.getProject());
+    Assert.assertNull(component.getProject());
+    selector.selectAccount("alice@example.com");
     component.setCloudProjectText("foo");
-    Assert.assertEquals("foo", component.getProject());
+    spinEvents();
+    Assert.assertNotNull(component.getProject());
+    Assert.assertEquals("foo", component.getProject().getId());
   }
 
   @Test
@@ -211,6 +243,7 @@ public class RunOptionsDefaultsComponentTest {
   public void testEnablement_selectedProject() {
     selector.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
+    spinEvents();
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
     assertTrue(projectID.isEnabled());
@@ -242,7 +275,7 @@ public class RunOptionsDefaultsComponentTest {
   public void testEnablement_existingStagingLocation() throws InterruptedException {
     selector.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
-    component.updateStagingLocations("project", 0);
+    spinEvents();
     component.setStagingLocationText("alice-bucket-1");
     component.startStagingLocationCheck(0); // force right now
     ListenableFuture<SortedSet<String>> fetchResult =
@@ -269,6 +302,7 @@ public class RunOptionsDefaultsComponentTest {
       throws OperationCanceledException, InterruptedException {
     selector.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
+    spinEvents();
     component.setStagingLocationText("non-existent-bucket");
     component.startStagingLocationCheck(0); // force right now
     ListenableFuture<VerifyStagingLocationResult> verifyResult =
@@ -293,6 +327,7 @@ public class RunOptionsDefaultsComponentTest {
   public void testStagingLocation() {
     selector.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
+    spinEvents();
     component.setStagingLocationText("foobar");
     Assert.assertEquals("gs://foobar", component.getStagingLocation());
   }
@@ -301,11 +336,14 @@ public class RunOptionsDefaultsComponentTest {
   public void testAccountSelector_loadBucketCombo() throws InterruptedException {
     selector.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
-    component.updateStagingLocations("project", 0);
+    spinEvents();
+    component.updateStagingLocations(0); // force update
 
     assertStagingLocationCombo("gs://alice-bucket-1", "gs://alice-bucket-2");
 
     selector.selectAccount("bob@example.com");
+    spinEvents();
+    component.updateStagingLocations(0); // force update
     assertStagingLocationCombo("gs://bob-bucket");
   }
 
@@ -323,12 +361,17 @@ public class RunOptionsDefaultsComponentTest {
   @Test
   public void testBucketNameStatus_gcsPathWithObjectIsOk() {
     component.selectAccount("alice@example.com");
+    component.setCloudProjectText("project");
+    spinEvents();
     component.setStagingLocationText("bucket/object");
     verify(messageTarget, never()).setError(anyString());
   }
 
   @Test
   public void testBucketNameStatus_gcsUrlPathWithObjectIsOk() {
+    component.selectAccount("alice@example.com");
+    component.setCloudProjectText("project");
+    spinEvents();
     component.setStagingLocationText("gs://bucket/object");
     verify(messageTarget, never()).setError(anyString());
   }
@@ -360,5 +403,10 @@ public class RunOptionsDefaultsComponentTest {
     } while (i++ < 200 && !page.isPageComplete());
 
     assertTrue("should be complete with account and project", page.isPageComplete());
+  }
+
+  private void spinEvents() {
+    Thread.yield();
+    while (Display.getCurrent().readAndDispatch());
   }
 }

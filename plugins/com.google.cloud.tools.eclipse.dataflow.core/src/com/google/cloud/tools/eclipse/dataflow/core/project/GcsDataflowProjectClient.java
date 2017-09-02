@@ -54,12 +54,14 @@ public class GcsDataflowProjectClient {
   /**
    * Gets a collection of potential Staging Locations.
    */
-  public SortedSet<String> getPotentialStagingLocations(String projectName) throws IOException {
+  public SortedSet<String> getPotentialStagingLocations(String projectId) throws IOException {
     SortedSet<String> result = new TreeSet<>();
-    Buckets buckets = gcsClient.buckets().list(projectName).execute();
+    Buckets buckets = gcsClient.buckets().list(projectId).execute();
     List<Bucket> bucketList = buckets.getItems();
-    for (Bucket bucket : bucketList) {
-      result.add(GCS_PREFIX + bucket.getName());
+    if (bucketList != null) {
+      for (Bucket bucket : bucketList) {
+        result.add(GCS_PREFIX + bucket.getName());
+      }
     }
     return result;
   }
@@ -69,7 +71,7 @@ public class GcsDataflowProjectClient {
    * exist. This may be a long-running blocking operation.
    */
   public StagingLocationVerificationResult createStagingLocation(
-      String projectName, String stagingLocation, IProgressMonitor progressMonitor) {
+      String projectId, String stagingLocation, IProgressMonitor progressMonitor) {
     SubMonitor monitor = SubMonitor.convert(progressMonitor, 2);
     String bucketName = toGcsBucketName(stagingLocation);
     if (locationIsAccessible(stagingLocation)) { // bucket already exists
@@ -82,7 +84,7 @@ public class GcsDataflowProjectClient {
     try {
       Bucket newBucket = new Bucket();
       newBucket.setName(bucketName);
-      gcsClient.buckets().insert(projectName, newBucket).execute();
+      gcsClient.buckets().insert(projectId, newBucket).execute();
       return new StagingLocationVerificationResult(
           String.format("Bucket %s created", bucketName), true);
     } catch (GoogleJsonResponseException ex) {

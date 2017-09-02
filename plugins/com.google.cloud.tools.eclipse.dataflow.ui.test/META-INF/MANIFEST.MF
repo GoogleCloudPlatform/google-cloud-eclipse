@@ -10,6 +10,8 @@ Bundle-ActivationPolicy: lazy
 Fragment-Host: com.google.cloud.tools.eclipse.dataflow.ui
 Require-Bundle: com.google.cloud.tools.eclipse.test.dependencies
 Import-Package: com.google.api.client.googleapis.services;version="1.22.0",
+ com.google.api.services.cloudresourcemanager;version="1.22.0",
+ com.google.api.services.cloudresourcemanager.model;version="1.22.0",
  com.google.api.services.storage;version="1.22.0",
  com.google.api.services.storage.model;version="1.22.0",
  com.google.cloud.tools.eclipse.test.util,

@@ -49,7 +49,7 @@ public class FetchStagingLocationsJob extends Job {
     return accountEmail;
   }
 
-  public String getProject() {
+  public String getProjectId() {
     return cloudProjectId;
   }
 

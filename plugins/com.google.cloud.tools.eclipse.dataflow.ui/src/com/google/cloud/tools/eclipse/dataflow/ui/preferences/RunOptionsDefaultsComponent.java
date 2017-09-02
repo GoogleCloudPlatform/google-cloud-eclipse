@@ -33,6 +33,8 @@ import com.google.cloud.tools.eclipse.dataflow.ui.util.SelectFirstMatchingPrefix
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
+import com.google.cloud.tools.eclipse.projectselector.MiniSelector;
+import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.cloud.tools.eclipse.ui.util.DisplayExecutor;
 import com.google.cloud.tools.eclipse.ui.util.databinding.BucketNameValidator;
 import com.google.common.annotations.VisibleForTesting;
@@ -48,10 +50,10 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.FocusAdapter;
-import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -62,8 +64,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 
 /**
@@ -92,7 +94,7 @@ public class RunOptionsDefaultsComponent {
   private final boolean allowIncomplete;
 
   private final AccountSelector accountSelector;
-  private final Text projectInput;
+  private final MiniSelector projectInput;
   private final Combo stagingLocationInput;
   private final Button createButton;
   private SelectFirstMatchingPrefixListener completionListener;
@@ -135,7 +137,7 @@ public class RunOptionsDefaultsComponent {
 
     Label projectInputLabel = new Label(target, SWT.NULL);
     projectInputLabel.setText(Messages.getString("cloud.platform.project.id")); //$NON-NLS-1$
-    projectInput = new Text(target, SWT.SINGLE | SWT.BORDER);
+    projectInput = new MiniSelector(target, apiFactory);
 
     Label comboLabel = new Label(target, SWT.NULL);
     stagingLocationInput = new Combo(target, SWT.DROP_DOWN);
@@ -152,8 +154,9 @@ public class RunOptionsDefaultsComponent {
     accountSelector.selectAccount(preferences.getDefaultAccountEmail());
 
     // Initialize the Default Project, which is used to populate the Staging Location field
-    String project = preferences.getDefaultProject();
-    projectInput.setText(Strings.nullToEmpty(project));
+    projectInput.setCredential(accountSelector.getSelectedCredential());
+    String projectId = preferences.getDefaultProject();
+    projectInput.setProject(projectId);
 
     comboLabel.setText(Messages.getString("cloud.storage.staging.location")); //$NON-NLS-1$
 
@@ -167,7 +170,7 @@ public class RunOptionsDefaultsComponent {
 
     // Project input occupies a single row
     projectInputLabel.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false, 1, 1));
-    projectInput.setLayoutData(
+    projectInput.getControl().setLayoutData(
         new GridData(SWT.FILL, SWT.CENTER, true, false, columns - PROJECT_INPUT_SPENT_COLUMNS, 1));
 
     // Staging Location, Combo, and Label occupy a single line
@@ -181,19 +184,19 @@ public class RunOptionsDefaultsComponent {
         // Don't use "removeAll()", as it will clear the text field too.
         stagingLocationInput.remove(0, stagingLocationInput.getItemCount() - 1);
         completionListener.setContents(ImmutableSortedSet.<String>of());
-        updateStagingLocations(getProject(), 0); // no delay
+        projectInput.setCredential(accountSelector.getSelectedCredential());
+        updateStagingLocations(0); // no delay
         validate();
       }
     });
 
-    projectInput.addModifyListener(new ModifyListener() {
+    projectInput.addSelectionChangedListener(new ISelectionChangedListener() {
       @Override
-      public void modifyText(ModifyEvent e) {
-        updateStagingLocations(getProject(), NEXT_KEY_DELAY_MS);
+      public void selectionChanged(SelectionChangedEvent event) {
+        updateStagingLocations(NEXT_KEY_DELAY_MS);
         validate();
       }
     });
-    projectInput.addFocusListener(new GetProjectStagingLocationsListener());
 
     completionListener = new SelectFirstMatchingPrefixListener(stagingLocationInput);
     stagingLocationInput.addModifyListener(completionListener);
@@ -208,7 +211,7 @@ public class RunOptionsDefaultsComponent {
     createButton.addSelectionListener(new CreateStagingLocationListener());
 
     startStagingLocationCheck(0); // no delay
-    updateStagingLocations(project, 0); // no delay
+    updateStagingLocations(0); // no delay
     messageTarget.setInfo(Messages.getString("set.pipeline.run.option.defaults")); //$NON-NLS-1$
     validate();
   }
@@ -228,7 +231,7 @@ public class RunOptionsDefaultsComponent {
     }
 
     projectInput.setEnabled(true);
-    if (Strings.isNullOrEmpty(projectInput.getText())) {
+    if (projectInput.getProject() == null) {
       stagingLocationInput.setEnabled(false);
       createButton.setEnabled(false);
       setPageComplete(allowIncomplete);
@@ -248,7 +251,7 @@ public class RunOptionsDefaultsComponent {
           stagingLocationsFuture.get();
         } catch (ExecutionException ex) {
           messageTarget.setError(Messages.getString("could.not.retrieve.buckets.for.project", //$NON-NLS-1$
-              projectInput.getText()));
+              projectInput.getProject().getName()));
           DataflowUiPlugin.logError(ex, "Exception while retrieving staging locations"); //$NON-NLS-1$
           return;
         } catch (InterruptedException ex) {
@@ -327,15 +330,15 @@ public class RunOptionsDefaultsComponent {
   }
 
   public void setCloudProjectText(String project) {
-    projectInput.setText(project);
+    projectInput.setProject(project);
   }
 
   public String getAccountEmail() {
     return accountSelector.getSelectedEmail();
   }
 
-  public String getProject() {
-    return projectInput.getText();
+  public GcpProject getProject() {
+    return projectInput.getProject();
   }
 
   public void setStagingLocationText(String stagingLocation) {
@@ -350,8 +353,13 @@ public class RunOptionsDefaultsComponent {
     accountSelector.addSelectionListener(listener);
   }
 
-  public void addModifyListener(ModifyListener listener) {
-    projectInput.addModifyListener(listener);
+  public void addModifyListener(final ModifyListener listener) {
+    projectInput.addSelectionChangedListener(new ISelectionChangedListener() {
+      @Override
+      public void selectionChanged(SelectionChangedEvent event) {
+        listener.modifyText(new ModifyEvent(new Event()));
+      }
+    });
     stagingLocationInput.addModifyListener(listener);
   }
 
@@ -367,14 +375,16 @@ public class RunOptionsDefaultsComponent {
    * combo.
    */
   @VisibleForTesting
-  void updateStagingLocations(String project, long scheduleDelay) {
+  void updateStagingLocations(long scheduleDelay) {
     Credential credential = accountSelector.getSelectedCredential();
     String selectedEmail = accountSelector.getSelectedEmail();
+    GcpProject project = projectInput.getProject();
     // Retrieving staging locations requires an authenticated user and project.
     // Check if there is an update is in progress; if it matches our user and project,
     // then quick-return, otherwise it is stale and should be cancelled.
     if (fetchStagingLocationsJob != null) {
-      if (Objects.equals(project, fetchStagingLocationsJob.getProject())
+      if (project != null
+          && Objects.equals(project.getId(), fetchStagingLocationsJob.getProjectId())
           && Objects.equals(selectedEmail, fetchStagingLocationsJob.getAccountEmail())
           && fetchStagingLocationsJob.getState() == Job.RUNNING) {
         return;
@@ -383,9 +393,9 @@ public class RunOptionsDefaultsComponent {
     }
     fetchStagingLocationsJob = null;
 
-    if (!Strings.isNullOrEmpty(project) && credential != null) {
+    if (project != null && credential != null) {
       final FetchStagingLocationsJob thisJob = fetchStagingLocationsJob =
-          new FetchStagingLocationsJob(getGcsClient(), selectedEmail, project);
+          new FetchStagingLocationsJob(getGcsClient(), selectedEmail, project.getId());
       fetchStagingLocationsJob.getStagingLocations().addListener(new Runnable() {
         @Override
         public void run() {
@@ -450,18 +460,6 @@ public class RunOptionsDefaultsComponent {
   }
 
   /**
-   * Whenever focus is lost, retrieve all of the buckets and update the target combo with the
-   * retrieved buckets, and update the {@link SelectFirstMatchingPrefixListener} with new
-   * autocompletions.
-   */
-  private class GetProjectStagingLocationsListener extends FocusAdapter {
-    @Override
-    public void focusLost(FocusEvent event) {
-      updateStagingLocations(getProject(), 0); // no delay
-    }
-  }
-
-  /**
    * Create a GCS bucket in the project specified in the project input at the location specified in
    * the staging location input.
    */
@@ -473,10 +471,10 @@ public class RunOptionsDefaultsComponent {
       }
       stagingLocationResults.hide();
 
-      String projectName = getProject();
+      GcpProject project = getProject();
       String stagingLocation = getStagingLocation();
-      StagingLocationVerificationResult result = getGcsClient().createStagingLocation(projectName,
-          stagingLocation, new NullProgressMonitor());
+      StagingLocationVerificationResult result = getGcsClient()
+          .createStagingLocation(project.getId(), stagingLocation, new NullProgressMonitor());
       if (result.isSuccessful()) {
         messageTarget.setInfo(Messages.getString("created.staging.location.at", stagingLocation)); //$NON-NLS-1$
         setPageComplete(true);
