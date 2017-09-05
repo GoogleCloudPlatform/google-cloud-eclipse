@@ -47,7 +47,7 @@ public final class Library {
   private String group;
   private String javaVersion="1.7";
   
-  // true if the library files for this library contain the complete dependency graph
+  // true if the dependencies for this library have been loaded
   private boolean resolved = true;
 
   // IDs of other libraries that also need to be added to the build path with this library

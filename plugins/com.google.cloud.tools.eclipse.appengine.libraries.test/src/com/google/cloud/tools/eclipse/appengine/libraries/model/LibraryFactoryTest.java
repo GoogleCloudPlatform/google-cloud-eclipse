@@ -84,6 +84,19 @@ public class LibraryFactoryTest {
     Library library = LibraryFactory.create(configuration);
     Assert.assertEquals("com.google.guava", library.getGroup());
     Assert.assertEquals("1.8", library.getJavaVersion());
+    Assert.assertTrue(library.isResolved());
+    Assert.assertTrue(library.isExport());
+  }
+
+  @Test
+  public void testCreate_nonDefaults() throws LibraryFactoryException {
+    Mockito.when(configuration.getChildren("libraryFile")).thenReturn(new IConfigurationElement[0]);
+    Mockito.when(configuration.getAttribute("dependencies")).thenReturn("include");
+    Mockito.when(configuration.getAttribute("export")).thenReturn("false");
+
+    Library library = LibraryFactory.create(configuration);
+    Assert.assertFalse(library.isResolved());
+    Assert.assertFalse(library.isExport());
   }
 
   @Test
