@@ -24,7 +24,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyMap;
+import static org.mockito.Matchers.anyMapOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
@@ -306,7 +306,8 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
     Map<String, String> definedMap = new HashMap<>();
     definedMap.put("foo", "bar");
     definedMap.put("baz", "${env_var:PATH}");
-    when(launchConfiguration.getAttribute(eq(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES), anyMap()))
+    when(launchConfiguration.getAttribute(eq(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES),
+        anyMapOf(String.class, String.class)))
         .thenReturn(definedMap);
 
     DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
@@ -317,7 +318,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
     assertEquals("bar", parsedEnvironment.get("foo"));
     assertEquals(System.getenv("PATH"), parsedEnvironment.get("baz"));
     verify(launchConfiguration).getAttribute(eq(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES),
-        anyMap());
+        anyMapOf(String.class, String.class));
     verify(launchConfiguration, atLeastOnce())
         .getAttribute(eq(ILaunchManager.ATTR_APPEND_ENVIRONMENT_VARIABLES),
         anyBoolean());
@@ -328,7 +329,7 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
     when(launchConfiguration.getAttribute(eq(ILaunchManager.ATTR_APPEND_ENVIRONMENT_VARIABLES),
         anyBoolean())).thenReturn(false);
 
-    DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
+    new LocalAppEngineServerLaunchConfigurationDelegate()
         .generateServerRunConfiguration(launchConfiguration, server, ILaunchManager.RUN_MODE);
   }
 
