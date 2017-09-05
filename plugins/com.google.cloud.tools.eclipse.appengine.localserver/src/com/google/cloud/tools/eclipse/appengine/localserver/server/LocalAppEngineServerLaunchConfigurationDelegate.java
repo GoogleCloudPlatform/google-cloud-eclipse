@@ -42,7 +42,6 @@ import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -305,10 +304,15 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     if (!environmentAppend) {
       throw new CoreException(StatusUtil.error(this, "'Replace environment' not yet supported"));
     }
-    Map<String, String> environment = configuration.getAttribute(
-        ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, Collections.<String, String>emptyMap());
-    if (!environment.isEmpty() || !environmentAppend) {
-      devServerRunConfiguration.setEnvironment(environment);
+    // getEnvironment() applies var substitutions, but also then joins the key-value pairs
+    String[] environment = getEnvironment(configuration);
+    if (environment != null) {
+      Map<String, String> asMap = new HashMap<String, String>();
+      for (String joined : environment) {
+        int index = joined.indexOf('=');
+        asMap.put(joined.substring(0, index), joined.substring(index + 1));
+      }
+      devServerRunConfiguration.setEnvironment(asMap);
     }
 
     return devServerRunConfiguration;

@@ -38,7 +38,8 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.ILaunch;
@@ -302,18 +303,23 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
 
   @Test
   public void testGenerateRunConfiguration_withEnvironment() throws CoreException {
+    Map<String, String> definedMap = new HashMap<>();
+    definedMap.put("foo", "bar");
+    definedMap.put("baz", "${env_var:PATH}");
     when(launchConfiguration.getAttribute(eq(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES), anyMap()))
-        .thenReturn(Collections.singletonMap("foo", "bar"));
+        .thenReturn(definedMap);
 
     DefaultRunConfiguration config = new LocalAppEngineServerLaunchConfigurationDelegate()
         .generateServerRunConfiguration(launchConfiguration, server, ILaunchManager.RUN_MODE);
 
-    assertNotNull(config.getEnvironment());
-    assertEquals(1, config.getEnvironment().size());
-    assertEquals(Collections.singletonMap("foo", "bar"), config.getEnvironment());
+    Map<String, String> parsedEnvironment = config.getEnvironment();
+    assertNotNull(parsedEnvironment);
+    assertEquals("bar", parsedEnvironment.get("foo"));
+    assertEquals(System.getenv("PATH"), parsedEnvironment.get("baz"));
     verify(launchConfiguration).getAttribute(eq(ILaunchManager.ATTR_ENVIRONMENT_VARIABLES),
         anyMap());
-    verify(launchConfiguration).getAttribute(eq(ILaunchManager.ATTR_APPEND_ENVIRONMENT_VARIABLES),
+    verify(launchConfiguration, atLeastOnce())
+        .getAttribute(eq(ILaunchManager.ATTR_APPEND_ENVIRONMENT_VARIABLES),
         anyBoolean());
   }
 
