@@ -73,7 +73,7 @@ public class LibraryClasspathContainerResolverService
       IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
       SubMonitor subMonitor = SubMonitor.convert(monitor,
           Messages.getString("TaskResolveLibraries"), //$NON-NLS-1$
-          getTotalwork(rawClasspath));
+          getTotalWork(rawClasspath));
       for (IClasspathEntry classpathEntry : rawClasspath) {
         if (classpathEntry.getPath().segment(0).equals(Library.CONTAINER_PATH_PREFIX)) {
           status = StatusUtil.merge(status, resolveContainer(javaProject,
@@ -241,11 +241,11 @@ public class LibraryClasspathContainerResolverService
 
   }
 
-  private static int getTotalwork(IClasspathEntry[] rawClasspath) {
+  private static int getTotalWork(IClasspathEntry[] rawClasspath) {
     int sum = 0;
     for (IClasspathEntry element : rawClasspath) {
       if (isLibraryClasspathEntry(element.getPath())) {
-        ++sum;
+        sum++;
       }
     }
     return sum;

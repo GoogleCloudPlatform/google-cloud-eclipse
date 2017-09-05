@@ -29,6 +29,7 @@ import com.google.common.base.Preconditions;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
@@ -43,6 +44,7 @@ import org.eclipse.wst.server.core.ServerCore;
 import org.eclipse.wst.server.core.internal.ModuleType;
 import org.eclipse.wst.server.core.internal.Server;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -69,6 +71,12 @@ public class LocalAppEngineServerDelegateTest {
       new TestProjectCreator().withFacetVersions(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25,
           AppEngineStandardFacet.JRE7);
 
+  @Before
+  public void setUp() {
+    when(module1.exists()).thenReturn(true);
+    when(module2.exists()).thenReturn(true);
+    when(module3.exists()).thenReturn(true);
+  }
   @Test
   public void testCanModifyModules() throws CoreException {
     delegate = getDelegateWithServer();
@@ -92,6 +100,15 @@ public class LocalAppEngineServerDelegateTest {
     when(module1.getProject()).thenReturn(appEngineStandardProject.getProject());
     Assert.assertEquals(Status.OK_STATUS, delegate.checkProjectFacets(add));
   }
+
+  @Test
+  public void testCheckProjectFacets_deletedModule() throws CoreException {
+    delegate = getDelegateWithServer();
+    IModule[] add = new IModule[] {module1};
+    when(module1.exists()).thenReturn(false);
+    Assert.assertEquals(Status.ERROR, delegate.checkProjectFacets(add).getSeverity());
+  }
+
 
   @Test
   public void testCheckConflictingId_defaultServiceIds() throws CoreException {
@@ -129,6 +146,26 @@ public class LocalAppEngineServerDelegateTest {
     when(module1.getName()).thenReturn("module1");
     Assert.assertEquals(Status.OK, delegate.checkConflictingServiceIds(new IModule[] {module1},
         new IModule[] {module1}, null).getSeverity());
+  }
+
+  @Test
+  public void testCheckConflictingId_deletedModules() throws CoreException {
+    delegate = getDelegateWithServer();
+    delegate.serviceIdFunction = new ModuleNameFunction();
+    when(module1.exists()).thenReturn(false);
+    IStatus status;
+
+    // it should be ok when we currently have a deleted module
+    status = delegate.checkConflictingServiceIds(new IModule[] {module1}, null, null);
+    Assert.assertEquals(Status.OK, status.getSeverity());
+
+    // it should be an error to add a deleted module
+    status = delegate.checkConflictingServiceIds(new IModule[0], new IModule[] {module1}, null);
+    Assert.assertEquals(Status.ERROR, status.getSeverity());
+
+    // it should be ok to remove a deleted module
+    status = delegate.checkConflictingServiceIds(new IModule[0], null, new IModule[] {module1});
+    Assert.assertEquals(Status.OK, status.getSeverity());
   }
 
   @Test

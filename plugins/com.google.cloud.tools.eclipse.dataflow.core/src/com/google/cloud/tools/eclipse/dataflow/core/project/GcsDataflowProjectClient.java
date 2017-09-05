@@ -17,6 +17,8 @@
 package com.google.cloud.tools.eclipse.dataflow.core.project;
 
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.googleapis.json.GoogleJsonError;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.model.Bucket;
 import com.google.api.services.storage.model.Buckets;
@@ -83,6 +85,9 @@ public class GcsDataflowProjectClient {
       gcsClient.buckets().insert(projectName, newBucket).execute();
       return new StagingLocationVerificationResult(
           String.format("Bucket %s created", bucketName), true);
+    } catch (GoogleJsonResponseException ex) {
+      GoogleJsonError error = ex.getDetails();
+      return new StagingLocationVerificationResult(error.getMessage(), false);
     } catch (IOException e) {
       return new StagingLocationVerificationResult(e.getMessage(), false);
     } finally {
@@ -148,7 +153,7 @@ public class GcsDataflowProjectClient {
     /**
      * Gets the message associated with this attempt to create a staging location.
      */
-    String getMessage() {
+    public String getMessage() {
       return message;
     }
 

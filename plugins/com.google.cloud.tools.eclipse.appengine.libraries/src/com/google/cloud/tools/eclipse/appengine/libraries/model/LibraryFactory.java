@@ -18,15 +18,21 @@ package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
 import com.google.cloud.tools.eclipse.appengine.libraries.Messages;
 import com.google.cloud.tools.eclipse.util.ArtifactRetriever;
+import com.google.cloud.tools.eclipse.util.DependencyResolver;
 import com.google.common.base.Strings;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.eclipse.aether.artifact.Artifact;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.InvalidRegistryObjectException;
 
@@ -57,11 +63,11 @@ class LibraryFactory {
   private static final String ATTRIBUTE_NAME_CLASSIFIER = "classifier"; //$NON-NLS-1$
   private static final String ATTRIBUTE_NAME_EXPORT = "export"; //$NON-NLS-1$
   private static final String ATTRIBUTE_NAME_RECOMMENDATION = "recommendation"; //$NON-NLS-1$
-  
-  private static final ArtifactRetriever retriever = new ArtifactRetriever();
 
-  // todo this should be static
-  Library create(IConfigurationElement configurationElement) throws LibraryFactoryException {
+  // prevent instantiation
+  private LibraryFactory() {}
+  
+  static Library create(IConfigurationElement configurationElement) throws LibraryFactoryException {
     try {
       if (ELEMENT_NAME_LIBRARY.equals(configurationElement.getName())) {
         Library library = new Library(configurationElement.getAttribute(ATTRIBUTE_NAME_ID));
@@ -69,11 +75,18 @@ class LibraryFactory {
         library.setSiteUri(new URI(configurationElement.getAttribute(ATTRIBUTE_NAME_SITE_URI)));
         library.setGroup(configurationElement.getAttribute(ATTRIBUTE_NAME_GROUP));
         library.setToolTip(configurationElement.getAttribute(ATTRIBUTE_NAME_TOOLTIP));
+        library.setLibraryDependencies(getLibraryDependencies(
+            configurationElement.getChildren(ELEMENT_NAME_LIBRARY_DEPENDENCY)));
         library.setLibraryFiles(
             getLibraryFiles(configurationElement.getChildren(ELEMENT_NAME_LIBRARY_FILE)));
         String exportString = configurationElement.getAttribute(ATTRIBUTE_NAME_EXPORT);
         if (exportString != null) {
           library.setExport(Boolean.parseBoolean(exportString));
+        }
+        String dependencies = configurationElement.getAttribute("dependencies"); //$NON-NLS-1$
+        if ("include".equals(dependencies)) { //$NON-NLS-1$
+          // Load the dependencies from Maven Central later
+          library.setResolved(false);
         }
         String versionString = configurationElement.getAttribute("javaVersion"); //$NON-NLS-1$
         if (versionString != null) {
@@ -85,8 +98,6 @@ class LibraryFactory {
           library.setRecommendation(
               LibraryRecommendation.valueOf(recommendationString.toUpperCase(Locale.US)));
         }
-        library.setLibraryDependencies(getLibraryDependencies(
-            configurationElement.getChildren(ELEMENT_NAME_LIBRARY_DEPENDENCY)));
         return library;
       } else {
         throw new LibraryFactoryException(
@@ -99,27 +110,51 @@ class LibraryFactory {
   }
 
   private static List<LibraryFile> getLibraryFiles(IConfigurationElement[] children)
-      throws InvalidRegistryObjectException, URISyntaxException {
+      throws InvalidRegistryObjectException, URISyntaxException, LibraryFactoryException {
     List<LibraryFile> libraryFiles = new ArrayList<>();
     for (IConfigurationElement libraryFileElement : children) {
       if (ELEMENT_NAME_LIBRARY_FILE.equals(libraryFileElement.getName())) {
         MavenCoordinates mavenCoordinates = getMavenCoordinates(
             libraryFileElement.getChildren(ELEMENT_NAME_MAVEN_COORDINATES));
-        LibraryFile libraryFile = new LibraryFile(mavenCoordinates);
-        libraryFile.setFilters(getFilters(libraryFileElement.getChildren()));
-        // todo do we really want these next two to be required?
-        libraryFile.setSourceUri(
-            getUri(libraryFileElement.getAttribute(ATTRIBUTE_NAME_SOURCE_URI)));
-        libraryFile.setJavadocUri(
-            getUri(libraryFileElement.getAttribute(ATTRIBUTE_NAME_JAVADOC_URI)));
-        String exportString = libraryFileElement.getAttribute(ATTRIBUTE_NAME_EXPORT);
-        if (exportString != null) {
-          libraryFile.setExport(Boolean.parseBoolean(exportString));
-        }
+        LibraryFile libraryFile = loadSingleFile(libraryFileElement, mavenCoordinates);
         libraryFiles.add(libraryFile);
       }
     }
     return libraryFiles;
+  }
+
+  static Collection<LibraryFile> loadTransitiveDependencies(MavenCoordinates root) 
+      throws CoreException {
+    Set<LibraryFile> dependencies = new HashSet<>();
+    // todo need a progress monitor here
+    Collection<Artifact> artifacts = DependencyResolver.getTransitiveDependencies(
+        root.getGroupId(), root.getArtifactId(), root.getVersion(), null);
+    for (Artifact artifact : artifacts) {
+      MavenCoordinates coordinates = new MavenCoordinates.Builder()
+          .setGroupId(artifact.getGroupId())
+          .setArtifactId(artifact.getArtifactId())
+          .setVersion(artifact.getVersion())
+          .build();
+      LibraryFile file = new LibraryFile(coordinates);
+      dependencies.add(file);
+    }
+    return dependencies;
+  }
+
+  private static LibraryFile loadSingleFile(IConfigurationElement libraryFileElement,
+      MavenCoordinates mavenCoordinates) throws URISyntaxException {
+    LibraryFile libraryFile = new LibraryFile(mavenCoordinates);
+    libraryFile.setFilters(getFilters(libraryFileElement.getChildren()));
+    // todo do we really want these next two to be required?
+    libraryFile.setSourceUri(
+        getUri(libraryFileElement.getAttribute(ATTRIBUTE_NAME_SOURCE_URI)));
+    libraryFile.setJavadocUri(
+        getUri(libraryFileElement.getAttribute(ATTRIBUTE_NAME_JAVADOC_URI)));
+    String exportString = libraryFileElement.getAttribute(ATTRIBUTE_NAME_EXPORT);
+    if (exportString != null) {
+      libraryFile.setExport(Boolean.parseBoolean(exportString));
+    }
+    return libraryFile;
   }
 
   private static URI getUri(String uriString) throws URISyntaxException {
@@ -152,7 +187,8 @@ class LibraryFactory {
     // Only look up latest version if version isn't specified in file.
     String version = mavenCoordinatesElement.getAttribute(ATTRIBUTE_NAME_VERSION);
     if (Strings.isNullOrEmpty(version) || "LATEST".equals(version)) {
-      ArtifactVersion artifactVersion = retriever.getLatestArtifactVersion(groupId, artifactId);
+      ArtifactVersion artifactVersion =
+          ArtifactRetriever.DEFAULT.getLatestArtifactVersion(groupId, artifactId);
       if (artifactVersion != null) {
         version = artifactVersion.toString();
       }

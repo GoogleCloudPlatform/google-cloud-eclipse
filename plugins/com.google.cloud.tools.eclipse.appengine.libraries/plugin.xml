@@ -14,7 +14,8 @@
           name="App Engine API"
           tooltip="%appengine.api.tooltip"
           siteUri="https://cloud.google.com/appengine/docs/java/" >
-      <libraryFile javadocUri="https://cloud.google.com/appengine/docs/java/javadoc/">
+      <libraryFile javadocUri="https://cloud.google.com/appengine/docs/java/javadoc/"
+          export="true">
         <mavenCoordinates
               artifactId="appengine-api-1.0-sdk"
               groupId="com.google.appengine" 
@@ -32,12 +33,12 @@
           tooltip="%endpoints.tooltip"
           siteUri="https://cloud.google.com/endpoints/docs/frameworks/java/about-cloud-endpoints-frameworks" >
       <libraryDependency id="appengine-api" />
-      <libraryFile
+      <libraryFile export="true" 
             javadocUri="https://cloud.google.com/endpoints/docs/frameworks/java/javadoc/">
         <mavenCoordinates
               artifactId="endpoints-framework"
               groupId="com.google.endpoints" 
-              version="2.0.7" />
+              version="2.0.7"/>
         <exclusionFilter pattern="com/google/appengine/repackaged/**" />
       </libraryFile>
     </library>
@@ -49,14 +50,16 @@
           siteUri="https://github.com/objectify/objectify/wiki" >
       <libraryDependency id="appengine-api" />
       <libraryFile
-            javadocUri="https://www.javadoc.io/doc/com.googlecode.objectify/objectify/5.1.21">
+          export="true"
+          javadocUri="https://www.javadoc.io/doc/com.googlecode.objectify/objectify/5.1.21">
         <mavenCoordinates
               artifactId="objectify"
               groupId="com.googlecode.objectify"
               version="5.1.21" />
       </libraryFile>
       <libraryFile
-            javadocUri="https://google.github.io/guava/releases/20.0/api/docs/">
+          export="true" 
+          javadocUri="https://google.github.io/guava/releases/20.0/api/docs/">
         <mavenCoordinates
               artifactId="guava"
               groupId="com.google.guava"
@@ -318,10 +321,10 @@
           name="%cloudtranslation.name"
           tooltip="%cloudtranslation.tooltip"
           javaVersion="1.8"
-          siteUri="https://cloud.google.com/translate/docs/reference/libraries" >
-      <libraryDependency id="googlecloudcore" />
+          siteUri="https://cloud.google.com/translate/docs/reference/libraries"
+          dependencies="include">
       <libraryFile
-            javadocUri="https://googlecloudplatform.github.io/google-cloud-java/0.21.0/apidocs/index.html?com/google/cloud/translate/package-summary.html">    
+          javadocUri="https://googlecloudplatform.github.io/google-cloud-java/0.21.0/apidocs/index.html?com/google/cloud/translate/package-summary.html">    
         <mavenCoordinates
               artifactId="google-cloud-translate"
               groupId="com.google.cloud"

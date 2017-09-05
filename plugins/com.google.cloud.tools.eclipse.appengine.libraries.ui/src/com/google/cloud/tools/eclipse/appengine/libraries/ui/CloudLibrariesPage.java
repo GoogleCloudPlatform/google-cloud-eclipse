@@ -107,6 +107,11 @@ public abstract class CloudLibrariesPage extends WizardPage implements IClasspat
         BuildPath.addMavenLibraries(project.getProject(), libraries, new NullProgressMonitor());
         return new IClasspathEntry[0];
       } else {
+        for (Library library : libraries) {
+          if (!library.isResolved()) {
+            library.resolveDependencies();
+          }
+        }
         IClasspathEntry[] added =
             BuildPath.listAdditionalLibraries(project, libraries, new NullProgressMonitor());
         return added;

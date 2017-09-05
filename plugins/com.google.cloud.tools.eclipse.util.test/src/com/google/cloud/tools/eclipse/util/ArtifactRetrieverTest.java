@@ -22,14 +22,12 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class ArtifactRetrieverTest {
-  
-  private ArtifactRetriever retriever = new ArtifactRetriever();
-  
+    
   @Test
   public void testGetMetadataUrl() throws MalformedURLException {
     Assert.assertEquals(
         new URL("https://repo1.maven.org/maven2/com/google/foo/bar-baz/maven-metadata.xml"),
-        retriever.getMetadataUrl("com.google.foo", "bar-baz"));
+        ArtifactRetriever.DEFAULT.getMetadataUrl("com.google.foo", "bar-baz"));
   }
 
   @Test

@@ -21,8 +21,11 @@ import com.google.common.base.Preconditions;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
@@ -43,6 +46,9 @@ public final class Library {
   private LibraryRecommendation recommendation = LibraryRecommendation.OPTIONAL;
   private String group;
   private String javaVersion="1.7";
+  
+  // true if the dependencies for this library have been loaded
+  private boolean resolved = true;
 
   // IDs of other libraries that also need to be added to the build path with this library
   private List<String> libraryDependencies = new ArrayList<>();
@@ -102,14 +108,14 @@ public final class Library {
     this.siteUri = siteUri;
   }
 
-  public List<LibraryFile> getLibraryFiles() {
+  public synchronized List<LibraryFile> getLibraryFiles() {
     return new ArrayList<>(libraryFiles);
   }
 
   /**
    * @param libraryFiles artifacts associated with this library, cannot be <code>null</code>
    */
-  void setLibraryFiles(List<LibraryFile> libraryFiles) {
+  synchronized void setLibraryFiles(List<LibraryFile> libraryFiles) {
     Preconditions.checkNotNull(libraryFiles);
     this.libraryFiles = new ArrayList<>(libraryFiles);
   }
@@ -122,15 +128,19 @@ public final class Library {
     this.export = export;
   }
 
+  /**
+   * @return list of library IDs that are dependencies of this library
+   *     and should be added to the classpath, cannot be <code>null</code>
+   */
   public List<String> getLibraryDependencies() {
     return new ArrayList<>(libraryDependencies);
   }
 
   /**
-   * @param libraryDependencies list of libraryIds that are dependencies of this library
+   * @param libraryDependencies list of library IDs that are dependencies of this library
    *     and should be added to the classpath, cannot be <code>null</code>
    */
-  void setLibraryDependencies(List<String> libraryDependencies) {
+   void setLibraryDependencies(List<String> libraryDependencies) {
     Preconditions.checkNotNull(libraryDependencies);
     this.libraryDependencies = new ArrayList<>(libraryDependencies);
   }
@@ -164,6 +174,37 @@ public final class Library {
     return group;
   }
   
+  public synchronized boolean isResolved() {
+    return this.resolved;
+  }
+  
+  /**
+   * @param resolved true iff this library contains its complete dependency graph
+   */
+  synchronized void setResolved(boolean resolved) {
+    this.resolved = resolved;
+  }
+  
+  /**
+   * A potentially long running operation that connects to the
+   * local and remote Maven repos and adds all library files in the
+   * transitive dependency graph to the list.
+   *  
+   * @throws CoreException error loading transitive dependencies
+   */
+  public synchronized void resolveDependencies() throws CoreException {
+    if (!resolved) {
+      List<LibraryFile> transitiveDependencies = new ArrayList<>();
+      for (LibraryFile artifact : this.libraryFiles) {
+        MavenCoordinates coordinates = artifact.getMavenCoordinates();
+        Collection<LibraryFile> dependencies = LibraryFactory.loadTransitiveDependencies(coordinates);
+        transitiveDependencies.addAll(dependencies);
+      }
+      this.libraryFiles = transitiveDependencies;
+      this.resolved = true;
+    }
+  }
+  
   /**
    * @return a string suitable for debugging
    */
@@ -171,4 +212,5 @@ public final class Library {
   public String toString() {
     return "Library: id=" + id + "; name=" + name;
   }
+
 }

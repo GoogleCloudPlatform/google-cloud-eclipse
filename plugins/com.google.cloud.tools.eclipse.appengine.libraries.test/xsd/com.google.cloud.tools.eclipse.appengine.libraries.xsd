@@ -132,6 +132,17 @@ limitations under the License.
                </xs:documentation>
             </xs:annotation>
          </xs:attribute>
+         <xs:attribute name="dependencies" type="dependencyStrategy" default="ignore">
+          <xs:annotation>
+               <xs:documentation>
+                  If the dependencies attribute has the value ignore, only the 
+                  explicitly listed library files are added to the library. 
+                  If the dependencies attribute has the value include, the 
+                  explicitly listed library files and all their transitive dependencies
+                  are added to the library. 
+               </xs:documentation>
+            </xs:annotation>
+         </xs:attribute>
          <xs:attribute name="recommendation" type="recommendationType">
             <xs:annotation>
                <xs:documentation>
@@ -189,7 +200,6 @@ WAR file of the project, under &lt;tt&gt;WEB-INF/lib&lt;/tt&gt; if the parent &l
                </xs:documentation>
             </xs:annotation>
          </xs:attribute>
-
          <xs:attribute name="javadocUri" type="xs:anyURI">
             <xs:annotation>
                <xs:documentation>
@@ -337,6 +347,12 @@ will determine how to resolve the entries associated with the container.
       </xs:documentation>
    </xs:annotation>
 
+  <xs:simpleType name = "dependencyStrategy">
+    <xs:restriction base = "xs:string">
+      <xs:enumeration value = "include"/>
+      <xs:enumeration value = "ignore"/>
+    </xs:restriction>
+  </xs:simpleType>
 
    <xs:simpleType name="recommendationType">
         <xs:annotation>

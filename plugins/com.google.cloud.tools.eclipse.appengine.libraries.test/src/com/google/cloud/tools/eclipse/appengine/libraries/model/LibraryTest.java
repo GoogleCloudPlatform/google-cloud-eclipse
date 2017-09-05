@@ -28,6 +28,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
+
+import org.eclipse.core.runtime.CoreException;
 import org.junit.Test;
 
 public class LibraryTest {
@@ -120,9 +122,19 @@ public class LibraryTest {
   }
 
   @Test
+  public void testResolvedDefaultsToTrue() throws CoreException {
+    assertTrue(library.isResolved());
+    library.resolveDependencies(); // no-op because the library is marked resolved
+    library.setResolved(false);
+    assertFalse(library.isResolved());
+  }
+  
+  @Test
   public void testSetExport() {
     library.setExport(false);
     assertFalse(library.isExport());
+    library.setExport(true);
+    assertTrue(library.isExport());
   }
 
   @Test

@@ -68,17 +68,19 @@ public class CloudLibraries {
    * @return the library with the specified ID, or null if not found
    */
   public static Library getLibrary(String id) {
+    // todo this method is only called by LibraryClasspathContainerResolverService and tests.
+    // Perhaps here or in LibraryClasspathContainerResolverService is where we should 
+    // resolve the transitive dependencies
     return libraries.get(id);
   }
   
   private static ImmutableMap<String, Library> loadLibraryDefinitions() {
     IConfigurationElement[] elements = RegistryFactory.getRegistry().getConfigurationElementsFor(
         "com.google.cloud.tools.eclipse.appengine.libraries");
-    LibraryFactory factory = new LibraryFactory();
     ImmutableMap.Builder<String, Library> builder = ImmutableMap.builder();
     for (IConfigurationElement element : elements) {
       try {
-        Library library = factory.create(element);
+        Library library = LibraryFactory.create(element);
         builder.put(library.getId(), library);
       } catch (LibraryFactoryException ex) {
         logger.log(Level.SEVERE, "Error loading library definition", ex);

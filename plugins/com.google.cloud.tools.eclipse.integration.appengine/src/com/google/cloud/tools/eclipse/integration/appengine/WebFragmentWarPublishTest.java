@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.WarPublisher;
+import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.ZipUtil;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import java.io.IOException;
@@ -42,6 +43,8 @@ public class WebFragmentWarPublishTest {
 
   @BeforeClass
   public static void setUp() throws IOException, CoreException {
+    ThreadDumpingWatchdog.report("WebFragmentWarPublishTest.setUp() from " + Thread.currentThread()
+        + " at " + System.nanoTime(), null);
     List<IProject> projects = ProjectUtils.importProjects(WebFragmentWarPublishTest.class,
         "test-projects/web-fragment-example.zip", false /* checkBuildErrors */, monitor);
     assertEquals(1, projects.size());

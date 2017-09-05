@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.ui.util.databinding;
 
 import com.google.cloud.tools.eclipse.ui.util.Messages;
+import com.google.common.net.InternetDomainName;
 import java.util.regex.Pattern;
 import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.databinding.validation.ValidationStatus;
@@ -26,14 +27,23 @@ import org.eclipse.core.runtime.IStatus;
  * Implements a simplified (more permissive) bucket name validation for Google Cloud Storage.
  * <p>
  * The following rules are verified:
- * <p>
- * Use lowercase letters, numbers, hyphens (-), and underscores (_). You can also use a dot (.) to form a valid
- * top-level domain (e.g., example.com). Format: You must start and end the name with a number or letter. Bucket
- * names must contain 3 to 63 characters. Names containing dots can contain up to 222 characters, but each
- * dot-separated component can be no longer than 63 characters.
- * <p>
- * The actual rules that govern the bucket naming are more complex. See the complete list of bucket name requirements
- * for more information: https://cloud.google.com/storage/docs/naming
+ * <ul>
+ * <li>Use lowercase letters, numbers, hyphens (-), and underscores (_). You can also use a dot (.)
+ * to form a valid top-level domain (e.g., example.com). Format: You must start and end the name
+ * with a number or letter. Bucket names must contain 3 to 63 characters. Names containing dots can
+ * contain up to 222 characters, but each dot-separated component can be no longer than 63
+ * characters.</li>
+ * <li>Cloud Storage considers bucket names that contain dots to be domain names, and as such these
+ * bucket names must:
+ * <ul>
+ * <li>Be syntactically valid DNS names (for example, <code>bucket..example.com</code> is not valid
+ * because it contains two dots in a row)</li>
+ * <li>Has a <em>public suffix</em> (although GCS states it should ends with a TLD, due to the
+ * domain verification requirements</li>
+ * </ul></li>
+ * </ul>
+ * The actual rules that govern the bucket naming are more complex. See the complete list of bucket
+ * name requirements for more information: https://cloud.google.com/storage/docs/naming
  */
 // todo logic really belongs in appengine-plugins-core
 public class BucketNameValidator implements IValidator {
@@ -48,10 +58,10 @@ public class BucketNameValidator implements IValidator {
     String value = (String) input;
     if (value.isEmpty()) {
       return ValidationStatus.ok();
-    } else if (CLOUD_STORAGE_BUCKET_NAME_PATTERN.matcher(value).matches()) {
-      return allComponentsLengthAreValid(value);
-    } else {
+    } else if (!CLOUD_STORAGE_BUCKET_NAME_PATTERN.matcher(value).matches()) {
       return ValidationStatus.error(Messages.getString("bucket.name.invalid", value)); //$NON-NLS-1$
+    } else {
+      return allComponentsLengthAreValid(value);
     }
   }
 
@@ -59,8 +69,12 @@ public class BucketNameValidator implements IValidator {
     String[] components = value.split("\\.");
     for (String component : components) {
       if (component.length() == 0 || component.length() > 63) {
-        return ValidationStatus.error(Messages.getString("bucket.name.invalid"));
+        return ValidationStatus.error(Messages.getString("bucket.name.invalid", value));
       }
+    }
+    // if contains dots then must be a valid domain name
+    if (components.length > 1 && !InternetDomainName.isValid(value)) {
+      return ValidationStatus.error(Messages.getString("bucket.name.invalid", value));
     }
     return ValidationStatus.ok();
   }

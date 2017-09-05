@@ -47,8 +47,8 @@ public class MessagesTest {
   
   @Test
   public void testCouldntFetchBucket() {
-    Assert.assertEquals("Couldn't fetch bucket foo.",
-        Messages.getString("couldnt.fetch.bucket", "foo"));
+    Assert.assertEquals("Could not fetch bucket foo.",
+        Messages.getString("could.not.fetch.bucket", "foo"));
   }
 
 

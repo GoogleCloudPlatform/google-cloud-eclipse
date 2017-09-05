@@ -16,7 +16,7 @@
 
 package com.google.cloud.tools.eclipse.dataflow.core.project;
 
-import com.google.cloud.tools.eclipse.dataflow.core.proxy.ListenableFutureProxy;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import java.io.IOException;
 import java.util.SortedSet;
@@ -32,34 +32,43 @@ import org.eclipse.core.runtime.jobs.Job;
 public class FetchStagingLocationsJob extends Job {
   private final GcsDataflowProjectClient gcsClient;
 
-  private final String cloudProject;
+  private final String accountEmail;
+  private final String cloudProjectId;
   private final SettableFuture<SortedSet<String>> stagingLocations;
 
-  private FetchStagingLocationsJob(GcsDataflowProjectClient gcsClient, String cloudProject) {
-    super("Update Status Locations for project " + cloudProject);
+  public FetchStagingLocationsJob(GcsDataflowProjectClient gcsClient, String accountEmail,
+      String cloudProjectId) {
+    super("Update Status Locations for project " + cloudProjectId);
     this.gcsClient = gcsClient;
-    this.cloudProject = cloudProject;
+    this.accountEmail = accountEmail;
+    this.cloudProjectId = cloudProjectId;
     this.stagingLocations = SettableFuture.create();
+  }
+
+  public String getAccountEmail() {
+    return accountEmail;
+  }
+
+  public String getProject() {
+    return cloudProjectId;
   }
 
   @Override
   protected IStatus run(IProgressMonitor monitor) {
     try {
-      stagingLocations.set(gcsClient.getPotentialStagingLocations(cloudProject));
+      SortedSet<String> locations = gcsClient.getPotentialStagingLocations(cloudProjectId);
+      if (monitor.isCanceled()) {
+        stagingLocations.cancel(false);
+        return Status.CANCEL_STATUS;
+      }
+      stagingLocations.set(locations);
     } catch (IOException ex) {
       stagingLocations.setException(ex);
     }
     return Status.OK_STATUS;
   }
 
-  /**
-   * Creates a new {@link FetchStagingLocationsJob} for the specified project using the specified
-   * client, schedules the job, and returns a future containing the results of the job.
-   */
-  public static ListenableFutureProxy<SortedSet<String>> schedule(
-      GcsDataflowProjectClient client, String project) {
-    FetchStagingLocationsJob job = new FetchStagingLocationsJob(client, project);
-    job.schedule();
-    return new ListenableFutureProxy<>(job.stagingLocations);
+  public ListenableFuture<SortedSet<String>> getStagingLocations() {
+    return stagingLocations;
   }
 }
