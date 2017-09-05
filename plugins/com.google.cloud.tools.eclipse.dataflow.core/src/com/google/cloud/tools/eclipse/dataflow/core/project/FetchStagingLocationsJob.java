@@ -38,7 +38,7 @@ public class FetchStagingLocationsJob extends Job {
 
   public FetchStagingLocationsJob(GcsDataflowProjectClient gcsClient, String accountEmail,
       String cloudProjectId) {
-    super("Update Status Locations for project " + cloudProjectId);
+    super("Update Staging Locations for project " + cloudProjectId);
     this.gcsClient = gcsClient;
     this.accountEmail = accountEmail;
     this.cloudProjectId = cloudProjectId;
