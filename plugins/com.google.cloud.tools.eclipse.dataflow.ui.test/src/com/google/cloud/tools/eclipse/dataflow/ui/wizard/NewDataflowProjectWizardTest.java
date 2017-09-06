@@ -27,7 +27,7 @@ public class NewDataflowProjectWizardTest {
   public void testInit() {
     wizard.init(null, null);
     Assert.assertEquals("New Cloud Dataflow Project", wizard.getWindowTitle());
-    Assert.assertFalse(wizard.isHelpAvailable());
+    Assert.assertTrue(wizard.isHelpAvailable());
     Assert.assertTrue(wizard.needsProgressMonitor());
   }
 
