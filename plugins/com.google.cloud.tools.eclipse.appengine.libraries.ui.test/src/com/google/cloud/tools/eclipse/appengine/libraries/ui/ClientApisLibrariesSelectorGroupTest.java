@@ -115,10 +115,11 @@ public class ClientApisLibrariesSelectorGroupTest {
     cloudStorageButton.click();
     List<Library> selectedLibraries = getSelectedLibrariesSorted();
     assertNotNull(selectedLibraries);
-    assertEquals(3, selectedLibraries.size());
-    assertEquals("googleapiclient", selectedLibraries.get(0).getId());
-    assertEquals("googlecloudcore", selectedLibraries.get(1).getId());
-    assertEquals("googlecloudstorage", selectedLibraries.get(2).getId());
+    assertEquals(4, selectedLibraries.size());
+    assertEquals("appengine-api", selectedLibraries.get(0).getId());
+    assertEquals("googleapiclient", selectedLibraries.get(1).getId());
+    assertEquals("googlecloudcore", selectedLibraries.get(2).getId());
+    assertEquals("googlecloudstorage", selectedLibraries.get(3).getId());
   }
 
   @Test
