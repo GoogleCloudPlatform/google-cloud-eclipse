@@ -24,7 +24,6 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.ImmutableSortedSet.Builder;
-
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -49,8 +48,8 @@ import org.xml.sax.SAXException;
 
 /**
  * {@link ArtifactRetriever} provides access to Maven artifacts using low-level URL and XPath APIs
- * rather than using the M2E plugin in order to work around shortcomings in the ability of M2E to 
- * query Maven for available versions. Additionally, M2E APIs are internal and unstable, and thus 
+ * rather than using the M2E plugin in order to work around shortcomings in the ability of M2E to
+ * query Maven for available versions. Additionally, M2E APIs are internal and unstable, and thus
  * may change between versions.
  *
  * <p>The artifact retriever reads Maven Central metadata XML files to retrieve available and latest
@@ -96,7 +95,7 @@ public class ArtifactRetriever {
                   return versions.build();
                 }
               });
-  
+
   private static final LoadingCache<String, ArtifactRetriever> retrievers =
       CacheBuilder.newBuilder()
           .build(
@@ -112,7 +111,7 @@ public class ArtifactRetriever {
    * A retriever attached to Maven Central https://repo1.maven.org/maven2/
    */
   public static final ArtifactRetriever DEFAULT = central();
-  
+
   /**
    * Avoid some exception catching during initialization of
    * the known valid Maven Central URL.
@@ -120,7 +119,7 @@ public class ArtifactRetriever {
   private static ArtifactRetriever central() {
     return retrievers.getUnchecked("https://repo1.maven.org/maven2/");
   }
-  
+
   /**
    * @param repositoryUrl the base URL of the maven mirror such as
    *     "https://repo1.maven.org/maven2/"
@@ -134,13 +133,6 @@ public class ArtifactRetriever {
   }
 
   /**
-   * Retrieve from https://repo1.maven.org/maven2/
-   */
-  private ArtifactRetriever() {
-    this.repositoryUrl = "https://repo1.maven.org/maven2/";
-  }
-
-  /**
    * Returns the latest published release artifact version, or null if there is no such version.
    */
   public ArtifactVersion getLatestArtifactVersion(String groupId, String artifactId) {
@@ -148,7 +140,7 @@ public class ArtifactRetriever {
   }
 
   /**
-   * Returns the latest published release artifact version in the version range, 
+   * Returns the latest published release artifact version in the version range,
    * or null if there is no such version.
    */
   public ArtifactVersion getLatestArtifactVersion(
@@ -159,7 +151,7 @@ public class ArtifactRetriever {
   /**
    * Returns the latest release version of the specified artifact in the version range,
    * or null if there is no such version.
-   * 
+   *
    * @param coordinates Maven coordinates in the form groupId:artifactId
    */
   private ArtifactVersion getLatestReleaseVersion(String coordinates, VersionRange range) {
@@ -207,7 +199,7 @@ public class ArtifactRetriever {
 
   /**
    * Returns a possibly cached instance of a retriever connected to a particular repo.
-   * 
+   *
    * @param url the URL of the repository to retrieve from
    * @throws URISyntaxException if the argument is not a valid URL
    */
