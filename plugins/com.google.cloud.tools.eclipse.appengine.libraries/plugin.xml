@@ -282,6 +282,7 @@
           tooltip="%googlecloudstorage.tooltip"
           siteUri="https://cloud.google.com/storage/docs/reference/libraries#client-libraries-install-java" >
       <libraryDependency id="googlecloudcore" />
+      <libraryDependency id="appengine-api" />
       <libraryFile
             javadocUri="https://googlecloudplatform.github.io/google-cloud-java/0.21.0/apidocs/">
         <mavenCoordinates

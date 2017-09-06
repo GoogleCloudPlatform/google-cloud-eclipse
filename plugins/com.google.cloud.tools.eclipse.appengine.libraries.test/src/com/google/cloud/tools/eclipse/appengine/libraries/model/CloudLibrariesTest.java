@@ -51,9 +51,10 @@ public class CloudLibrariesTest {
   public void testTransitiveDependencies() {
     Library library = CloudLibraries.getLibrary("googlecloudstorage");
     List<String> dependencies = library.getLibraryDependencies();
-    Assert.assertEquals(2, dependencies.size());
-    Assert.assertEquals("googlecloudcore", dependencies.get(0));
-    Assert.assertEquals("googleapiclient", dependencies.get(1));
+    Assert.assertEquals(3, dependencies.size());
+    Assert.assertTrue(dependencies.contains("appengine-api"));
+    Assert.assertTrue(dependencies.contains("googlecloudcore"));
+    Assert.assertTrue(dependencies.contains("googleapiclient"));
   }
 
 }
