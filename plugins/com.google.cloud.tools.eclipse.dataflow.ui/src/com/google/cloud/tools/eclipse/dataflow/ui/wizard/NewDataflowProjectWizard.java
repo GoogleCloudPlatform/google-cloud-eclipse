@@ -73,8 +73,7 @@ public class NewDataflowProjectWizard extends Wizard implements INewWizard {
 
   @Override
   public void init(IWorkbench workbench, IStructuredSelection selection) {
-    // todo add help
-    setHelpAvailable(false);
+    setHelpAvailable(true);
     setWindowTitle(Messages.getString("new.cloud.dataflow.project")); //$NON-NLS-1$
     setNeedsProgressMonitor(true);
   }

@@ -52,7 +52,6 @@ public class AppEngineStandardWizardPage extends AppEngineWizardPage {
         "com.google.cloud.tools.eclipse.appengine.newproject.NewStandardProjectContext"); //$NON-NLS-1$
   }
 
-
   @Override
   protected void createRuntimeField(Composite composite) {
     Label runtimeLabel = new Label(composite, SWT.LEAD);
