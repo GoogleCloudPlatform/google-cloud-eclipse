@@ -53,7 +53,6 @@ import org.junit.runner.RunWith;
  * Import snapshot of <a href=
  * "https://github.com/GoogleCloudPlatform/getting-started-java/tree/master/appengine-standard-java8/springboot-appengine-standard">Hello
  * Spring Boot on App Engine standard environment</a>.
- *
  */
 @RunWith(SWTBotJunit4ClassRunner.class)
 public class ImportMavenAppEngineStandardProjectTest extends BaseProjectTest {
