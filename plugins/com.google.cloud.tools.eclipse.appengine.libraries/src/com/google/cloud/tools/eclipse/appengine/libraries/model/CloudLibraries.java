@@ -102,12 +102,6 @@ public class CloudLibraries {
       List<String> transitiveDependencies = Lists.newArrayList(directDependencies);
       for (String id : directDependencies) {
         Library dependency = map.get(id);
-        
-        // todo this should not be null. What exception to throw if it is?
-        if (dependency == null) {
-          throw new NullPointerException("Missing library: " + id); 
-        }
-        
         for (String dependencyId : dependency.getLibraryDependencies()) {
           if (!transitiveDependencies.contains(dependencyId)) {
             transitiveDependencies.add(dependencyId);
