@@ -106,8 +106,11 @@ public class LibrarySelectorGroup implements ISelectionProvider {
   private Collection<Library> getLibraryDependencies() {
     Collection<Library> dependencies = new HashSet<>();
     for (Library library : explicitSelectedLibraries) {
-      for (String depId : library.getLibraryDependencies()) {
-        dependencies.add(availableLibraries.get(depId));
+      for (String dependencyId : library.getLibraryDependencies()) {
+        Library dependency = CloudLibraries.getLibrary(dependencyId);
+        if (dependency != null) {
+          dependencies.add(dependency);
+        }
       }
     }
     return dependencies;
@@ -181,8 +184,7 @@ public class LibrarySelectorGroup implements ISelectionProvider {
   }
 
   private void fireSelectionListeners() {
-    SelectionChangedEvent event =
-        new SelectionChangedEvent(this, getSelection());
+    SelectionChangedEvent event = new SelectionChangedEvent(this, getSelection());
     for (Object listener : listeners.getListeners()) {
       ((ISelectionChangedListener) listener).selectionChanged(event);
     }

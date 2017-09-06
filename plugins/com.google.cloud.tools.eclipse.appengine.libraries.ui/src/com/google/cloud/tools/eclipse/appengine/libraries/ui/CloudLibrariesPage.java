@@ -108,6 +108,7 @@ public abstract class CloudLibrariesPage extends WizardPage implements IClasspat
         return new IClasspathEntry[0];
       } else {
         for (Library library : libraries) {
+          // todo how is library null here?
           if (!library.isResolved()) {
             library.resolveDependencies();
           }
