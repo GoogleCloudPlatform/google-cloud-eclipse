@@ -50,12 +50,16 @@ import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import com.google.cloud.tools.login.Account;
+import com.google.common.base.Stopwatch;
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
+import java.util.concurrent.TimeUnit;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.widgets.Button;
@@ -192,7 +196,12 @@ public class RunOptionsDefaultsComponentTest {
     Assert.assertNull(component.getProject());
     selector.selectAccount("alice@example.com");
     component.setCloudProjectText("foo");
-    spinEvents();
+    spinEvents(new Supplier<Boolean>() {
+      @Override
+      public Boolean get() {
+        return component.getProject() == null;
+      }
+    });
     Assert.assertNotNull(component.getProject());
     Assert.assertEquals("foo", component.getProject().getId());
   }
@@ -243,7 +252,7 @@ public class RunOptionsDefaultsComponentTest {
   public void testEnablement_selectedProject() {
     selector.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
-    spinEvents();
+    spinEventsUntilResolvedProject();
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
     assertTrue(projectID.isEnabled());
@@ -275,20 +284,19 @@ public class RunOptionsDefaultsComponentTest {
   public void testEnablement_existingStagingLocation() throws InterruptedException {
     selector.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
-    spinEvents();
+    spinEventsUntilResolvedProject();
     component.setStagingLocationText("alice-bucket-1");
     component.startStagingLocationCheck(0); // force right now
-    ListenableFuture<SortedSet<String>> fetchResult =
+    final ListenableFuture<SortedSet<String>> fetchResult =
         component.fetchStagingLocationsJob.getStagingLocations();
-    ListenableFuture<VerifyStagingLocationResult> verifyResult =
+    final ListenableFuture<VerifyStagingLocationResult> verifyResult =
         component.verifyStagingLocationJob.getVerifyResult();
-    int i = 0;
-    do {
-      while (Display.getCurrent().readAndDispatch()) {
-        // spin
+    spinEvents(new Supplier<Boolean>() {
+      @Override
+      public Boolean get() {
+        return !fetchResult.isDone() && !verifyResult.isDone();
       }
-      Thread.sleep(50);
-    } while (i++ < 200 && !fetchResult.isDone() && !verifyResult.isDone());
+    });
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
     assertTrue(projectID.isEnabled());
@@ -302,18 +310,17 @@ public class RunOptionsDefaultsComponentTest {
       throws OperationCanceledException, InterruptedException {
     selector.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
-    spinEvents();
+    spinEventsUntilResolvedProject();
     component.setStagingLocationText("non-existent-bucket");
     component.startStagingLocationCheck(0); // force right now
     ListenableFuture<VerifyStagingLocationResult> verifyResult =
         component.verifyStagingLocationJob.getVerifyResult();
-    int i = 0;
-    do {
-      while (Display.getCurrent().readAndDispatch()) {
-        // spin
+    spinEvents(new Supplier<Boolean>() {
+      @Override
+      public Boolean get() {
+        return !createButton.isEnabled();
       }
-      Thread.sleep(50);
-    } while(i++ < 200 && !createButton.isEnabled());
+    });
     assertTrue(verifyResult.isDone());
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
@@ -327,7 +334,8 @@ public class RunOptionsDefaultsComponentTest {
   public void testStagingLocation() {
     selector.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
-    spinEvents();
+    spinEventsUntilResolvedProject();
+
     component.setStagingLocationText("foobar");
     Assert.assertEquals("gs://foobar", component.getStagingLocation());
   }
@@ -336,25 +344,24 @@ public class RunOptionsDefaultsComponentTest {
   public void testAccountSelector_loadBucketCombo() throws InterruptedException {
     selector.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
-    spinEvents();
-    component.updateStagingLocations(0); // force update
+    spinEventsUntilResolvedProject();
+    component.updateStagingLocations(0); // force update immediately
 
     assertStagingLocationCombo("gs://alice-bucket-1", "gs://alice-bucket-2");
 
     selector.selectAccount("bob@example.com");
-    spinEvents();
+    spinEvents(Suppliers.ofInstance(false)); // spin once
     component.updateStagingLocations(0); // force update
     assertStagingLocationCombo("gs://bob-bucket");
   }
 
-  private void assertStagingLocationCombo(String... buckets) throws InterruptedException {
-    int i = 0;
-    do {
-      while (Display.getCurrent().readAndDispatch()) {
-        // spin
+  private void assertStagingLocationCombo(final String... buckets) throws InterruptedException {
+    spinEvents(new Supplier<Boolean>() {
+      @Override
+      public Boolean get() {
+        return stagingLocations.getItemCount() != buckets.length;
       }
-      Thread.sleep(50);
-    } while(i++ < 200 && stagingLocations.getItemCount() != buckets.length);
+    });
     Assert.assertArrayEquals(buckets, stagingLocations.getItems());
   }
 
@@ -362,8 +369,9 @@ public class RunOptionsDefaultsComponentTest {
   public void testBucketNameStatus_gcsPathWithObjectIsOk() {
     component.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
-    spinEvents();
+    spinEventsUntilResolvedProject();
     component.setStagingLocationText("bucket/object");
+    spinEvents(Suppliers.ofInstance(false)); // spin once
     verify(messageTarget, never()).setError(anyString());
   }
 
@@ -371,7 +379,7 @@ public class RunOptionsDefaultsComponentTest {
   public void testBucketNameStatus_gcsUrlPathWithObjectIsOk() {
     component.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
-    spinEvents();
+    spinEventsUntilResolvedProject();
     component.setStagingLocationText("gs://bucket/object");
     verify(messageTarget, never()).setError(anyString());
   }
@@ -405,8 +413,32 @@ public class RunOptionsDefaultsComponentTest {
     assertTrue("should be complete with account and project", page.isPageComplete());
   }
 
-  private void spinEvents() {
-    Thread.yield();
-    while (Display.getCurrent().readAndDispatch());
+  /**
+   * Spin the display loop while the waitCondition is true or we timeout.
+   * 
+   * @param waitCondition
+   */
+  private void spinEvents(Supplier<Boolean> waitCondition) {
+    Stopwatch timeout = Stopwatch.createStarted();
+    do {
+      if (timeout.elapsed(TimeUnit.SECONDS) > 5) {
+        fail("Waited longer than 5 seconds");
+      }
+      Thread.yield();
+      while (Display.getCurrent().readAndDispatch());
+    } while (waitCondition.get());
   }
+
+  /**
+   * Spin until the RunOptionsDefaultsComponent has a project.
+   */
+  private void spinEventsUntilResolvedProject() {
+    spinEvents(new Supplier<Boolean>() {
+      @Override
+      public Boolean get() {
+        return component.getProject() == null;
+      }
+    });
+  }
+
 }
