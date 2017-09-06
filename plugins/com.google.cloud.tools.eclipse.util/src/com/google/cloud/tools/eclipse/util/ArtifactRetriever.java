@@ -24,6 +24,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.ImmutableSortedSet.Builder;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -57,11 +58,6 @@ import org.xml.sax.SAXException;
  */
 public class ArtifactRetriever {
 
-  /**
-   * A retriever attached to Maven Central https://repo1.maven.org/maven2/
-   */
-  public static final ArtifactRetriever DEFAULT = new ArtifactRetriever();
-  
   private static final Logger logger = Logger.getLogger(ArtifactRetriever.class.getName());
 
   private final String repositoryUrl;
@@ -100,17 +96,36 @@ public class ArtifactRetriever {
                   return versions.build();
                 }
               });
+  
+  private static final LoadingCache<String, ArtifactRetriever> retrievers =
+      CacheBuilder.newBuilder()
+          .build(
+              new CacheLoader<String, ArtifactRetriever>() {
 
-  // todo consider a factory to create or build retrievers for each repo
+                @Override
+                public ArtifactRetriever load(String url) {
+                  return new ArtifactRetriever(url);
+                }
+              });
+
+  /**
+   * A retriever attached to Maven Central https://repo1.maven.org/maven2/
+   */
+  public static final ArtifactRetriever DEFAULT = central();
+  
+  /**
+   * Avoid some exception catching during initialization of
+   * the known valid Maven Central URL.
+   **/
+  private static ArtifactRetriever central() {
+    return retrievers.getUnchecked("https://repo1.maven.org/maven2/");
+  }
+  
   /**
    * @param repositoryUrl the base URL of the maven mirror such as
    *     "https://repo1.maven.org/maven2/"
-   * @throws URISyntaxException if the argument is not a valid URL
    */
-  public ArtifactRetriever(String repositoryUrl) throws URISyntaxException {
-    Preconditions.checkNotNull(repositoryUrl);
-    // check for URL syntax
-    new URI(repositoryUrl);
+  private ArtifactRetriever(String repositoryUrl) {
     if (!repositoryUrl.endsWith("/")) {
       repositoryUrl = repositoryUrl + "/";
     }
@@ -188,5 +203,18 @@ public class ArtifactRetriever {
   @VisibleForTesting
   static String[] keyToId(String coordinates) {
     return coordinates.split(":");
+  }
+
+  /**
+   * Returns a possibly cached instance of a retriever connected to a particular repo.
+   * 
+   * @param url the URL of the repository to retrieve from
+   * @throws URISyntaxException if the argument is not a valid URL
+   */
+  public static ArtifactRetriever getInstance(String url) throws URISyntaxException {
+    Preconditions.checkNotNull(url);
+    // check for URL syntax
+    new URI(url);
+    return retrievers.getUnchecked(url);
   }
 }
