@@ -23,15 +23,17 @@ import static org.mockito.Mockito.mock;
 import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowProjectCreator;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.NewDataflowProjectWizardLandingPage;
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
-import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 
 public class NewDataflowProjectWizardLandingPageTest {
 
-  @Rule public ShellTestResource shellResource = new ShellTestResource();
+  private Display display;
+  private Shell shell;
 
   private NewDataflowProjectWizardLandingPage page;
   private Combo templateDropdown;
@@ -39,18 +41,35 @@ public class NewDataflowProjectWizardLandingPageTest {
 
   @Before
   public void setUp() {
-    page = new NewDataflowProjectWizardLandingPage(mock(DataflowProjectCreator.class));
-    page.createControl(shellResource.getShell());
+    display = Display.getDefault();
+    display.syncExec(new Runnable() {
+      @Override
+      public void run() {
+        shell = new Shell(display);
+        page = new NewDataflowProjectWizardLandingPage(mock(DataflowProjectCreator.class));
+        page.createControl(shell);
 
-    templateDropdown = CompositeUtil.findControlAfterLabel(
-        shellResource.getShell(), Combo.class, "Project &template:");
-    templateVersionDropdown = CompositeUtil.findControlAfterLabel(
-        shellResource.getShell(), Combo.class, "Dataflow &version:");
+        templateDropdown =
+            CompositeUtil.findControlAfterLabel(shell, Combo.class, "Project &template:");
+        templateVersionDropdown =
+            CompositeUtil.findControlAfterLabel(shell, Combo.class, "Dataflow &version:");
+      }
+    });
+  }
+
+  @After
+  public void tearDown() {
+    display.syncExec(new Runnable() {
+      @Override
+      public void run() {
+        shell.dispose();
+      }
+    });
   }
 
   @Test
   public void testTemplateVersionsDropdown_starterTemplate() {
-    shellResource.getDisplay().syncExec(new Runnable() {
+    display.syncExec(new Runnable() {
       @Override
       public void run() {
         assertEquals(0, templateDropdown.getSelectionIndex());
@@ -62,7 +81,7 @@ public class NewDataflowProjectWizardLandingPageTest {
 
   @Test
   public void testTemplateVersionsDropdown_exampleTemplate() {
-    shellResource.getDisplay().syncExec(new Runnable() {
+    display.syncExec(new Runnable() {
       @Override
       public void run() {
         templateDropdown.select(1);
