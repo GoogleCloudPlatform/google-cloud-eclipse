@@ -288,8 +288,7 @@ public class NewDataflowProjectWizardLandingPage extends WizardPage  {
     String selected = templateVersionDropdown.getText();
     templateVersionDropdown.removeAll();
 
-    DataflowProjectArchetype template =
-        DataflowProjectArchetype.values()[templateDropdown.getSelectionIndex()];
+    DataflowProjectArchetype template = DataflowProjectArchetype.values()[templateDropdown.getSelectionIndex()];
     for (MajorVersion majorVersion : template.getSdkVersions().descendingSet()) {
       ArtifactVersion latestArtifact = ArtifactRetriever.DEFAULT.getLatestArtifactVersion(
           DataflowMavenCoordinates.GROUP_ID, template.getArtifactId(),

@@ -17,6 +17,7 @@
 package com.google.cloud.tools.eclipse.integration.appengine;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 
 import com.google.cloud.tools.eclipse.dataflow.core.project.DataflowProjectCreator;
@@ -33,20 +34,39 @@ public class NewDataflowProjectWizardLandingPageTest {
   @Rule public ShellTestResource shellResource = new ShellTestResource();
 
   private NewDataflowProjectWizardLandingPage page;
+  private Combo templateDropdown;
+  private Combo templateVersionDropdown;
 
   @Before
   public void setUp() {
     page = new NewDataflowProjectWizardLandingPage(mock(DataflowProjectCreator.class));
     page.createControl(shellResource.getShell());
+
+    templateDropdown = CompositeUtil.findControlAfterLabel(
+        shellResource.getShell(), Combo.class, "Project &template:");
+    templateVersionDropdown = CompositeUtil.findControlAfterLabel(
+        shellResource.getShell(), Combo.class, "Dataflow &version:");
   }
 
   @Test
-  public void testTemplateVersionsDropdown() {
+  public void testTemplateVersionsDropdown_starterTemplate() {
     shellResource.getDisplay().syncExec(new Runnable() {
       @Override
       public void run() {
-        Combo templateVersionDropdown = CompositeUtil.findControlAfterLabel(
-            shellResource.getShell(), Combo.class, "Dataflow &version:");
+        assertEquals(0, templateDropdown.getSelectionIndex());
+        assertEquals("Starter project with a simple pipeline", templateDropdown.getText());
+        assertArrayEquals(new String[] {"2.0.0", "1.9.0"}, templateVersionDropdown.getItems());
+      }
+    });
+  }
+
+  @Test
+  public void testTemplateVersionsDropdown_exampleTemplate() {
+    shellResource.getDisplay().syncExec(new Runnable() {
+      @Override
+      public void run() {
+        templateDropdown.select(1);
+        assertEquals("Example pipelines", templateDropdown.getText());
         assertArrayEquals(new String[] {"2.0.0", "1.9.0"}, templateVersionDropdown.getItems());
       }
     });
