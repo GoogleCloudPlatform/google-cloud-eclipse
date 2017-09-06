@@ -21,6 +21,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
@@ -324,13 +325,18 @@ public class LocalAppEngineServerLaunchConfigurationDelegateTest {
         anyBoolean());
   }
 
-  @Test(expected = CoreException.class)
+  @Test
   public void testGenerateRunConfiguration_replaceEnvironmentFails() throws CoreException {
     when(launchConfiguration.getAttribute(eq(ILaunchManager.ATTR_APPEND_ENVIRONMENT_VARIABLES),
         anyBoolean())).thenReturn(false);
 
-    new LocalAppEngineServerLaunchConfigurationDelegate()
-        .generateServerRunConfiguration(launchConfiguration, server, ILaunchManager.RUN_MODE);
+    try {
+      new LocalAppEngineServerLaunchConfigurationDelegate()
+          .generateServerRunConfiguration(launchConfiguration, server, ILaunchManager.RUN_MODE);
+      fail("should have thrown CoreException");
+    } catch (CoreException ex) {
+      /* expected */
+    }
   }
 
 

@@ -42,6 +42,7 @@ import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -61,6 +62,8 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.variables.IStringVariableManager;
+import org.eclipse.core.variables.VariablesPlugin;
 import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
@@ -304,15 +307,18 @@ public class LocalAppEngineServerLaunchConfigurationDelegate
     if (!environmentAppend) {
       throw new CoreException(StatusUtil.error(this, "'Replace environment' not yet supported"));
     }
-    // getEnvironment() applies var substitutions, but also then joins the key-value pairs
-    String[] environment = getEnvironment(configuration);
+    // Could use getEnvironment(), but it does `append` processing and joins as key-value pairs
+    Map<String, String> environment = configuration.getAttribute(
+        ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, Collections.<String, String>emptyMap());
     if (environment != null) {
-      Map<String, String> asMap = new HashMap<String, String>();
-      for (String joined : environment) {
-        int index = joined.indexOf('=');
-        asMap.put(joined.substring(0, index), joined.substring(index + 1));
+      Map<String, String> expanded = new HashMap<>();
+      IStringVariableManager variableEngine =
+          VariablesPlugin.getDefault().getStringVariableManager();
+      for (Map.Entry<String, String> entry : environment.entrySet()) {
+        // expand any variable references
+        expanded.put(entry.getKey(), variableEngine.performStringSubstitution(entry.getValue()));
       }
-      devServerRunConfiguration.setEnvironment(asMap);
+      devServerRunConfiguration.setEnvironment(expanded);
     }
 
     return devServerRunConfiguration;
