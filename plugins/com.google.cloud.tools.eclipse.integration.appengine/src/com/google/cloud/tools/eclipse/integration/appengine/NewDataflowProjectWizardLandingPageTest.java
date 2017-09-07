@@ -38,7 +38,7 @@ public class NewDataflowProjectWizardLandingPageTest {
 
   private NewDataflowProjectWizardLandingPage page;
   private Combo templateDropdown;
-  private Combo templateVersionDropdown;
+  private Combo dataflowVersionDropdown;
 
   @Before
   public void setUp() {
@@ -52,7 +52,7 @@ public class NewDataflowProjectWizardLandingPageTest {
 
         templateDropdown =
             CompositeUtil.findControlAfterLabel(shell, Combo.class, "Project &template:");
-        templateVersionDropdown =
+        dataflowVersionDropdown =
             CompositeUtil.findControlAfterLabel(shell, Combo.class, "Dataflow &version:");
       }
     });
@@ -75,7 +75,7 @@ public class NewDataflowProjectWizardLandingPageTest {
       public void run() {
         assertEquals(0, templateDropdown.getSelectionIndex());
         assertEquals("Starter project with a simple pipeline", templateDropdown.getText());
-        assertThat(templateVersionDropdown.getItems().length, greaterThan(0));
+        assertThat(dataflowVersionDropdown.getItems().length, greaterThan(0));
       }
     });
   }
@@ -87,7 +87,7 @@ public class NewDataflowProjectWizardLandingPageTest {
       public void run() {
         templateDropdown.select(1);
         assertEquals("Example pipelines", templateDropdown.getText());
-        assertThat(templateVersionDropdown.getItems().length, greaterThan(0));
+        assertThat(dataflowVersionDropdown.getItems().length, greaterThan(0));
       }
     });
   }
