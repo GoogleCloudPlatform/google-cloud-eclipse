@@ -14,7 +14,9 @@
 
       &artifact-id;
       
-      &lt;b&gt;Project template:&lt;/b&gt; @tgroh please suggest text
+      &lt;b&gt;Project template:&lt;/b&gt; The initial contents of the generated project.
+      Starter pipeline contains a simple pipeline which logs its input.
+      Example pipelines contains the Dataflow Word Count examples.       
       
       &lt;b&gt;Dataflow version:&lt;/b&gt; 1.9.x is ????. 2.x.x is based on Apache Beam.
       
