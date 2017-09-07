@@ -19,7 +19,7 @@
         <mavenCoordinates
               artifactId="appengine-api-1.0-sdk"
               groupId="com.google.appengine" 
-              version="1.9.54" />
+              version="1.9.55" />
         <exclusionFilter pattern="com/google/appengine/repackaged/**" />
         <exclusionFilter pattern="com/google/appengine/labs/repackaged/**" />
         <inclusionFilter pattern="com/google/apphosting/api/**" />
@@ -38,7 +38,7 @@
         <mavenCoordinates
               artifactId="endpoints-framework"
               groupId="com.google.endpoints" 
-              version="2.0.7"/>
+              version="2.0.8"/>
         <exclusionFilter pattern="com/google/appengine/repackaged/**" />
       </libraryFile>
     </library>
@@ -282,6 +282,7 @@
           tooltip="%googlecloudstorage.tooltip"
           siteUri="https://cloud.google.com/storage/docs/reference/libraries#client-libraries-install-java" >
       <libraryDependency id="googlecloudcore" />
+      <libraryDependency id="appengine-api" />
       <libraryFile
             javadocUri="https://googlecloudplatform.github.io/google-cloud-java/0.21.0/apidocs/">
         <mavenCoordinates

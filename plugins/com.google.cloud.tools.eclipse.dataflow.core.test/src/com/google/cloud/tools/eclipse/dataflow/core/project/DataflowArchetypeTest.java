@@ -16,10 +16,9 @@
 
 package com.google.cloud.tools.eclipse.dataflow.core.project;
 
+import com.google.cloud.tools.eclipse.util.MavenCoordinatesValidator;
 import org.junit.Assert;
 import org.junit.Test;
-
-import com.google.cloud.tools.eclipse.util.MavenCoordinatesValidator;
 
 public class DataflowArchetypeTest {
 
@@ -32,4 +31,17 @@ public class DataflowArchetypeTest {
     }
   }
 
+  // The Dataflow wizard assumes the last SDK version in the ordered set is the latest version.
+  @Test
+  public void testTemplateSdkVersions_inIncreasingMajorVersionOrder() {
+    for (DataflowProjectArchetype template : DataflowProjectArchetype.values()) {
+      MajorVersion previousVersion = null;
+      for (MajorVersion majorVersion : template.getSdkVersions()) {
+        if (previousVersion != null) {
+          int compared = previousVersion.getMaxVersion().compareTo(majorVersion.getMaxVersion());
+          Assert.assertTrue(compared < 0);
+        }
+      }
+    }
+  }
 }
