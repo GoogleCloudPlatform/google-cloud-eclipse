@@ -273,6 +273,12 @@
               groupId="org.threeten"
               version="1.3.3" />
       </libraryFile>
+      <libraryFile>
+        <mavenCoordinates
+              groupId="com.google.api.grpc"
+              artifactId="proto-google-common-protos"
+              version="0.1.15" />
+      </libraryFile>
     </library>
     
     <library
