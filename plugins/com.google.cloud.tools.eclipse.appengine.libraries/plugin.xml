@@ -312,7 +312,19 @@
         <mavenCoordinates
               artifactId="google-cloud-datastore"
               groupId="com.google.cloud"
-              version="1.0.1" />
+              version="1.4.0" />
+      </libraryFile>
+      <libraryFile>
+        <mavenCoordinates
+              artifactId="datastore-v1-protos"
+              groupId="com.google.cloud.datastore"
+              version="1.3.0" />
+      </libraryFile>
+      <libraryFile>
+        <mavenCoordinates
+              artifactId="datastore-v1-proto-client"
+              groupId="com.google.cloud.datastore"
+              version="1.4.0" />
       </libraryFile>
     </library>
     
