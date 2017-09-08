@@ -67,7 +67,7 @@ public class AppEngineFlexWarFacetTest {
   @Test
   public void testFacetLabel() {
     IProjectFacet projectFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexWarFacet.ID);
-    Assert.assertEquals("App Engine Java Flexible Environment", projectFacet.getLabel());
+    Assert.assertEquals("App Engine Java Flexible Environment (WAR)", projectFacet.getLabel());
   }
 
   @Test
