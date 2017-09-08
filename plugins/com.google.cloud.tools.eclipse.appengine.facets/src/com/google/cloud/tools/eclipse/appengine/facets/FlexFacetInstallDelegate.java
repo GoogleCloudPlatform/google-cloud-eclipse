@@ -31,7 +31,8 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 
 /**
- * Applies to both the WAR facet and the JAR facet.
+ * Creates {@code src/main/appengine/app.yaml} if not present. Applies to both the WAR facet and
+ * the JAR facet.
  */
 public class FlexFacetInstallDelegate extends AppEngineFacetInstallDelegate {
   @Override

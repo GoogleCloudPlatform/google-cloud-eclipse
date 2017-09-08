@@ -23,7 +23,7 @@ import org.eclipse.wst.common.project.facet.core.IDelegate;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 
 /**
- * Applies to both the WAR facet and the JAR facet.
+ * Applies to both the WAR facet and the JAR facet. Does nothing for now.
  */
 public class FlexFacetUninstallDelegate implements IDelegate {
 
