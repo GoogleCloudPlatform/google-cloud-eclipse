@@ -43,13 +43,23 @@ public class AppEngineFacetPresetsTest {
   }
 
   @Test
-  public void appEngineFlexiblePresetExists() {
+  public void appEngineFlexibleWarPresetExists() {
     IPreset preset = ProjectFacetsManager
         .getPreset("com.google.cloud.tools.eclipse.appengine.flexible.war.preset");
     assertNotNull(preset);
     assertEquals("App Engine flexible environment with Java 8, Servlet 3.1", preset.getLabel());
     assertThat(preset.getProjectFacets(), hasItem(JavaFacet.VERSION_1_8));
     assertThat(preset.getProjectFacets(), hasItem(WebFacetUtils.WEB_31));
-    assertThat(preset.getProjectFacets(), hasItem(AppEngineFlexFacet.FACET_VERSION));
+    assertThat(preset.getProjectFacets(), hasItem(AppEngineFlexWarFacet.FACET_VERSION));
+  }
+
+  @Test
+  public void appEngineFlexibleJarPresetExists() {
+    IPreset preset = ProjectFacetsManager
+        .getPreset("com.google.cloud.tools.eclipse.appengine.flexible.jar.preset");
+    assertNotNull(preset);
+    assertEquals("App Engine flexible environment with Java 8, runnable JAR", preset.getLabel());
+    assertThat(preset.getProjectFacets(), hasItem(JavaFacet.VERSION_1_8));
+    assertThat(preset.getProjectFacets(), hasItem(AppEngineFlexJarFacet.FACET_VERSION));
   }
 }
