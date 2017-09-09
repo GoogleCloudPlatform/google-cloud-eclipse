@@ -279,6 +279,12 @@
               artifactId="proto-google-common-protos"
               version="0.1.15" />
       </libraryFile>
+      <libraryFile>
+        <mavenCoordinates
+              groupId="com.google.http-client"
+              artifactId="google-http-client-protobuf"
+              version="1.22.0" />
+      </libraryFile>
     </library>
     
     <library
