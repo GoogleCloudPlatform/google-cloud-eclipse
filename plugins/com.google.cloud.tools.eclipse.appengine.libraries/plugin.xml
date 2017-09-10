@@ -274,6 +274,69 @@
               version="1.3.3" />
       </libraryFile>
     </library>
+  
+    <library
+          id="grpc"
+          group="clientapis"
+          name="%grpc.name"
+          tooltip="%grpc.infotip"
+          javaVersion="1.8"
+          siteUri="https://grpc.io/docs/tutorials/basic/java.html" >
+      <libraryFile>
+        <mavenCoordinates
+            groupId="io.netty"
+            artifactId="netty-tcnative-boringssl-static"
+            version="2.0.3.Final" />
+      </libraryFile>
+      <libraryFile>
+        <mavenCoordinates
+            groupId="com.google.cloud"
+            artifactId="google-cloud-core-grpc"
+            version="LATEST" />
+      </libraryFile>
+      <libraryFile>
+        <mavenCoordinates
+            groupId="com.google.api"
+            artifactId="gax-grpc"
+            version="0.23.0" />
+      </libraryFile>
+      <libraryFile>
+        <mavenCoordinates
+            groupId="com.google.api"
+            artifactId="gax"
+            version="1.6.0" />
+      </libraryFile>
+      <libraryFile>
+        <mavenCoordinates
+            groupId="com.google.api.grpc"
+            artifactId="proto-google-cloud-logging-v2"
+            version="0.1.15" />
+      </libraryFile>
+      <libraryFile>
+        <mavenCoordinates
+            groupId="io.grpc"
+            artifactId="grpc-netty"
+            version="1.4.0" />
+      </libraryFile>
+      <libraryFile>
+        <mavenCoordinates
+            groupId="io.grpc"
+            artifactId="grpc-core"
+            version="1.4.0" />
+      </libraryFile>
+      <libraryFile>
+         <mavenCoordinates
+            groupId="io.grpc"
+            artifactId="grpc-protobuf"
+            version="1.4.0" />
+      </libraryFile>
+      <libraryFile>
+         <mavenCoordinates
+            groupId="io.grpc"
+            artifactId="grpc-stub"
+            version="1.4.0" />
+      </libraryFile>
+    </library>
     
     <library
           id="googlecloudstorage"
@@ -312,7 +375,25 @@
         <mavenCoordinates
               artifactId="google-cloud-datastore"
               groupId="com.google.cloud"
-              version="1.0.1" />
+              version="LATEST" />
+      </libraryFile>
+      <libraryFile>
+        <mavenCoordinates
+            artifactId="datastore-v1-protos"
+            groupId="com.google.cloud.datastore"
+            version="LATEST" />
+      </libraryFile>
+      <libraryFile>
+        <mavenCoordinates
+            artifactId="datastore-v1-proto-client"
+            groupId="com.google.cloud.datastore"
+            version="LATEST" />
+      </libraryFile>
+      <libraryFile>
+        <mavenCoordinates
+            artifactId="grpc-google-common-protos"
+            groupId="com.google.api.grpc"
+            version="LATEST" />
       </libraryFile>
     </library>
     
@@ -329,7 +410,31 @@
         <mavenCoordinates
               artifactId="google-cloud-translate"
               groupId="com.google.cloud"
-              version="1.3.1" />
+              version="LATEST" />
+      </libraryFile>
+    </library>
+
+    <library
+          id="cloudlogging"
+          group="clientapis"
+          name="%stackdriverlogging.name"
+          tooltip="%stackdriverlogging.tooltip"
+          javaVersion="1.8"
+          siteUri="https://cloud.google.com/logging/docs/reference/libraries#client-libraries-install-java" >
+      <libraryDependency id="googlecloudcore" />
+      <libraryDependency id="grpc" />
+      <libraryFile
+            javadocUri="https://googlecloudplatform.github.io/google-cloud-java/latest/apidocs/index.html?com/google/cloud/logging/package-summary.html">    
+        <mavenCoordinates
+              artifactId="google-cloud-logging"
+              groupId="com.google.cloud"
+              version="LATEST" />
+      </libraryFile>
+      <libraryFile>
+        <mavenCoordinates
+              artifactId="grpc-google-logging-v2"
+              groupId="com.google.api.grpc"
+              version="0.0.7" />
       </libraryFile>
     </library>
   </extension>
