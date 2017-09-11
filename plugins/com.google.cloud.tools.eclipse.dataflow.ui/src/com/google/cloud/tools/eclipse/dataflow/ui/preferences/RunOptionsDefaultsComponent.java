@@ -19,6 +19,7 @@ package com.google.cloud.tools.eclipse.dataflow.ui.preferences;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.DataflowPreferences;
 import com.google.cloud.tools.eclipse.dataflow.core.project.FetchStagingLocationsJob;
 import com.google.cloud.tools.eclipse.dataflow.core.project.GcsDataflowProjectClient;
@@ -45,13 +46,12 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.base.Verify;
 import com.google.common.collect.ImmutableSortedSet;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.SortedSet;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -84,6 +84,10 @@ public class RunOptionsDefaultsComponent {
 
   /** Milliseconds to wait after a key before launching a job, to avoid needless computation. */
   private static final long NEXT_KEY_DELAY_MS = 250L;
+
+  /* GoogleApiUrl.DATAFLOW_API.getServiceId() */
+  private static final String DATAFLOW_SERVICE_ID = "dataflow.googleapis.com";
+
 
   private static final BucketNameValidator bucketNameValidator = new BucketNameValidator();
 
@@ -201,6 +205,7 @@ public class RunOptionsDefaultsComponent {
       @Override
       public void selectionChanged(SelectionChangedEvent event) {
         updateStagingLocations(0); // no delay
+        checkProjectConfiguration();
         validate();
       }
     });
@@ -251,6 +256,31 @@ public class RunOptionsDefaultsComponent {
       return;
     }
 
+    if (checkProjectConfigurationJob != null && checkProjectConfigurationJob.isCurrent()) {
+      Optional<Object> result = checkProjectConfigurationJob.getComputation();
+      if (!result.isPresent()) {
+        messageTarget.setInfo("Verifying that project is enabled for dataflow...");
+        return;
+      } else if (result.get() instanceof Exception) {
+        if (result.get() instanceof GoogleJsonResponseException) {
+          GoogleJsonResponseException exception = (GoogleJsonResponseException) result.get();
+          // FIXME: handle cases here
+          DataflowUiPlugin.logError(exception,
+              "Checking project " + checkProjectConfigurationJob.getProjectId());
+          messageTarget.setError("Error checking project: " + exception.getDetails());
+        } else {
+          messageTarget.setError("Could not check project: " + result.get());
+        }
+        return;
+      } else {
+        Verify.verify(result.get() instanceof Collection);
+        if (!((Collection<?>) result.get()).contains(DATAFLOW_SERVICE_ID)) {
+          messageTarget.setError("Project is not enabled for Cloud Dataflow");
+          return;
+        }
+      }
+    }
+    
     stagingLocationInput.setEnabled(true);
 
     // fetchStagingLocationsJob is a proxy for project checking
@@ -314,47 +344,31 @@ public class RunOptionsDefaultsComponent {
     }
   }
 
-  /**
-   * @param text
-   */
-  protected void checkProjectConfiguration(String projectId) {
+  protected void checkProjectConfiguration() {
     Credential selectedCredential = accountSelector.getSelectedCredential();
     if (selectedCredential == null) {
       return;
     }
+    GcpProject project = projectInput.getProject();
+    if (project == null) {
+      return;
+    }
     if (checkProjectConfigurationJob != null) {
+      if (project.getId().equals(checkProjectConfigurationJob.getProjectId())) {
+        // already in progress
+        return;
+      }
       checkProjectConfigurationJob.cancel();
     }
 
     checkProjectConfigurationJob =
-        new GcpProjectServicesJob(apiFactory, selectedCredential, projectId);
-    checkProjectConfigurationJob.addJobChangeListener(new JobChangeAdapter() {
+        new GcpProjectServicesJob(apiFactory, selectedCredential, project.getId());
+    checkProjectConfigurationJob.getFuture().addListener(new Runnable() {
       @Override
-      public void done(final IJobChangeEvent event) {
-        final Control control = getControl();
-        if (control != null && !control.isDisposed()) {
-          control.getDisplay().asyncExec(new Runnable() {
-            @Override
-            public void run() {
-              if (control != null && !control.isDisposed()) {
-                /* GoogleApiUrl.DATAFLOW_API.getServiceId() */
-                String DATAFLOW_SERVICE_ID = "dataflow.googleapis.com";
-                try {
-                  if (event.getResult().isOK() && checkProjectConfigurationJob
-                      .getProjectServiceIDs().get().contains(DATAFLOW_SERVICE_ID)) {
-                    messageTarget.setError(event.getResult().getMessage());
-                  } else {
-                    messageTarget.setError(event.getResult().getMessage());
-                  }
-                } catch (ExecutionException | InterruptedException ex) {
-                  messageTarget.setError(ex.toString());
-                }
-              }
-            }
-          });
-        }
+      public void run() {
+        validate();
       }
-    });
+    }, displayExecutor);
     checkProjectConfigurationJob.schedule();
   }
 

@@ -24,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doCallRealMethod;
@@ -38,6 +39,10 @@ import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager.Projects;
 import com.google.api.services.cloudresourcemanager.model.ListProjectsResponse;
 import com.google.api.services.cloudresourcemanager.model.Project;
+import com.google.api.services.servicemanagement.ServiceManagement;
+import com.google.api.services.servicemanagement.ServiceManagement.Services;
+import com.google.api.services.servicemanagement.model.ListServicesResponse;
+import com.google.api.services.servicemanagement.model.ManagedService;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.model.Bucket;
 import com.google.api.services.storage.model.Buckets;
@@ -106,6 +111,7 @@ public class RunOptionsDefaultsComponentTest {
     when(account1.getOAuth2Credential()).thenReturn(credential1);
     mockStorageApiBucketList(credential1, "project", "alice-bucket-1", "alice-bucket-2");
     mockProjectList(credential1, new GcpProject("project", "project"));
+    mockServiceApi(credential1, "project", "dataflow.googleapis.com");
 
     Account account2 = mock(Account.class, "bob@example.com");
     Credential credential2 = mock(Credential.class, "bob@example.com");
@@ -113,6 +119,7 @@ public class RunOptionsDefaultsComponentTest {
     when(account2.getOAuth2Credential()).thenReturn(credential2);
     mockStorageApiBucketList(credential2, "project", "bob-bucket");
     mockProjectList(credential2, new GcpProject("project", "project"));
+    mockServiceApi(credential2, "project", "dataflow.googleapis.com");
 
     doCallRealMethod().when(page).setPageComplete(anyBoolean());
     doCallRealMethod().when(page).isPageComplete();
@@ -183,6 +190,35 @@ public class RunOptionsDefaultsComponentTest {
     }
     buckets.setItems(bucketList);
   }
+
+  private void mockServiceApi(Credential credential, String projectId, String... serviceIds)
+      throws IOException {
+    ServiceManagement servicesManagementApi = mock(ServiceManagement.class);
+    Services servicesApi = mock(Services.class);
+    Services.List request = mock(Services.List.class);
+    ListServicesResponse response = new ListServicesResponse();
+    
+    doReturn(servicesManagementApi).when(apiFactory).newServiceManagementApi(credential);
+    doReturn(servicesApi).when(servicesManagementApi).services();
+
+    doReturn(request).when(servicesApi).list();
+    // List provides a fluent API
+    when(request.setFields(anyString())).thenReturn(request);
+    when(request.setConsumerId(anyString())).thenReturn(request);
+    when(request.setPageSize(anyInt())).thenReturn(request);
+    when(request.setPageToken(anyString())).thenReturn(request);
+    when(request.execute()).thenReturn(response);
+    
+    List<ManagedService> managedServices = new ArrayList<>();
+    for (String serviceId : serviceIds) {
+      ManagedService managedService = new ManagedService();
+      managedService.setServiceName(serviceId);
+      managedService.setProducerProjectId(projectId);
+      managedServices.add(managedService);
+    }
+    response.setServices(managedServices);
+  }
+
 
   @Test
   public void testConstructor_testGrid() {
@@ -360,7 +396,7 @@ public class RunOptionsDefaultsComponentTest {
     component.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
     waitUntilResolvedProject();
-    component.setStagingLocationText("bucket/object");
+    component.setStagingLocationText("alice-bucket-2/object");
     spinEvents();
     verify(messageTarget, never()).setError(anyString());
   }
@@ -370,7 +406,7 @@ public class RunOptionsDefaultsComponentTest {
     component.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
     waitUntilResolvedProject();
-    component.setStagingLocationText("gs://bucket/object");
+    component.setStagingLocationText("gs://alice-bucket-2/object");
     spinEvents();
     verify(messageTarget, never()).setError(anyString());
   }
