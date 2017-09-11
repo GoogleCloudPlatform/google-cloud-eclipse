@@ -243,8 +243,7 @@ public class RunOptionsDefaultsComponent {
 
     // fetchStagingLocationsJob is a proxy for project checking
     if (fetchStagingLocationsJob != null) {
-      Future<SortedSet<String>> stagingLocationsFuture =
-          fetchStagingLocationsJob.getStagingLocations();
+      Future<SortedSet<String>> stagingLocationsFuture = fetchStagingLocationsJob.getFuture();
       if (stagingLocationsFuture.isDone()) {
         try {
           // on error, will raise an exception
@@ -284,7 +283,8 @@ public class RunOptionsDefaultsComponent {
       createButton.setEnabled(false);
       return;
     }
-    Future<VerifyStagingLocationResult> verifyStagingLocationFuture = verifyStagingLocationJob.getVerifyResult();
+    Future<VerifyStagingLocationResult> verifyStagingLocationFuture =
+        verifyStagingLocationJob.getFuture();
     if (!verifyStagingLocationFuture.isDone()) {
       messageTarget.setInfo("Verifying staging location...");
       createButton.setEnabled(false);
@@ -396,14 +396,14 @@ public class RunOptionsDefaultsComponent {
     if (project != null && credential != null) {
       final FetchStagingLocationsJob thisJob = fetchStagingLocationsJob =
           new FetchStagingLocationsJob(getGcsClient(), selectedEmail, project.getId());
-      fetchStagingLocationsJob.getStagingLocations().addListener(new Runnable() {
+      fetchStagingLocationsJob.getFuture().addListener(new Runnable() {
         @Override
         public void run() {
           // check that this is same job (may have been cancelled in the interim)
           if (!target.isDisposed() && fetchStagingLocationsJob == thisJob) {
             // Update the Combo with the staging locations retrieved by the Job.
             try {
-              SortedSet<String> stagingLocations = fetchStagingLocationsJob.getStagingLocations().get();
+              SortedSet<String> stagingLocations = fetchStagingLocationsJob.getFuture().get();
               // Don't use "removeAll()", as it will clear the text field too.
               stagingLocationInput.remove(0, stagingLocationInput.getItemCount() - 1);
               for (String location : stagingLocations) {
@@ -447,7 +447,7 @@ public class RunOptionsDefaultsComponent {
 
     final VerifyStagingLocationJob thisJob = this.verifyStagingLocationJob =
         new VerifyStagingLocationJob(getGcsClient(), accountEmail, stagingLocation);
-    verifyStagingLocationJob.getVerifyResult().addListener(new Runnable() {
+    verifyStagingLocationJob.getFuture().addListener(new Runnable() {
       @Override
       public void run() {
         // check that this is same job (may have been cancelled in the interim)

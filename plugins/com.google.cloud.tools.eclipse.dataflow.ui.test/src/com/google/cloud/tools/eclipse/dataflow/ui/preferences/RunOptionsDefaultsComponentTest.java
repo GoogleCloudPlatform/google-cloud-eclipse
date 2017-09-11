@@ -16,6 +16,7 @@
 
 package com.google.cloud.tools.eclipse.dataflow.ui.preferences;
 
+import static org.eclipse.swtbot.swt.finder.waits.Conditions.widgetIsEnabled;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -50,22 +51,23 @@ import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import com.google.cloud.tools.login.Account;
-import com.google.common.base.Stopwatch;
-import com.google.common.base.Supplier;
-import com.google.common.base.Suppliers;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Future;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swtbot.swt.finder.SWTBot;
+import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotButton;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotCombo;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -86,6 +88,7 @@ public class RunOptionsDefaultsComponentTest {
   @Mock
   private WizardPage page;
 
+  private SWTBot bot;
   private RunOptionsDefaultsComponent component;
   private Shell shell;
 
@@ -118,6 +121,7 @@ public class RunOptionsDefaultsComponentTest {
     when(loginService.getAccounts()).thenReturn(Sets.newHashSet(account1, account2));
 
     shell = shellResource.getShell();
+    bot = new SWTBot(shell);
     component = new RunOptionsDefaultsComponent(
         shell, 3, messageTarget, preferences, page, false /* allowIncomplete */, loginService,
         apiFactory);
@@ -134,12 +138,12 @@ public class RunOptionsDefaultsComponentTest {
     Projects.List listApi = mock(Projects.List.class);
     List<Project> projectsList = new ArrayList<>();
     for (GcpProject gcpProject : gcpProjects) {
-      Project project = new Project();
+      Project project = new Project(); // cannot mock final classes
       project.setName(gcpProject.getName());
       project.setProjectId(gcpProject.getId());
       projectsList.add(project);
     }
-    ListProjectsResponse response = new ListProjectsResponse();
+    ListProjectsResponse response = new ListProjectsResponse(); // cannot mock final classes
     response.setProjects(projectsList);
     try {
       doReturn(projectsApi).when(apiFactory).newProjectsApi(credential);
@@ -196,12 +200,7 @@ public class RunOptionsDefaultsComponentTest {
     Assert.assertNull(component.getProject());
     selector.selectAccount("alice@example.com");
     component.setCloudProjectText("foo");
-    spinEvents(new Supplier<Boolean>() {
-      @Override
-      public Boolean get() {
-        return component.getProject() == null;
-      }
-    });
+    waitUntilResolvedProject();
     Assert.assertNotNull(component.getProject());
     Assert.assertEquals("foo", component.getProject().getId());
   }
@@ -252,7 +251,7 @@ public class RunOptionsDefaultsComponentTest {
   public void testEnablement_selectedProject() {
     selector.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
-    spinEventsUntilResolvedProject();
+    waitUntilResolvedProject();
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
     assertTrue(projectID.isEnabled());
@@ -265,7 +264,7 @@ public class RunOptionsDefaultsComponentTest {
     selector.selectAccount("alice@example.com");
     component.setCloudProjectText("doesnotexist");
     ListenableFuture<SortedSet<String>> verifyResult =
-        component.fetchStagingLocationsJob.getStagingLocations();
+        component.fetchStagingLocationsJob.getFuture();
     int i = 0;
     do {
       while (Display.getCurrent().readAndDispatch()) {
@@ -284,19 +283,14 @@ public class RunOptionsDefaultsComponentTest {
   public void testEnablement_existingStagingLocation() throws InterruptedException {
     selector.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
-    spinEventsUntilResolvedProject();
+    waitUntilResolvedProject();
     component.setStagingLocationText("alice-bucket-1");
     component.startStagingLocationCheck(0); // force right now
     final ListenableFuture<SortedSet<String>> fetchResult =
-        component.fetchStagingLocationsJob.getStagingLocations();
+        component.fetchStagingLocationsJob.getFuture();
     final ListenableFuture<VerifyStagingLocationResult> verifyResult =
-        component.verifyStagingLocationJob.getVerifyResult();
-    spinEvents(new Supplier<Boolean>() {
-      @Override
-      public Boolean get() {
-        return !fetchResult.isDone() && !verifyResult.isDone();
-      }
-    });
+        component.verifyStagingLocationJob.getFuture();
+    waitForFuture(verifyResult);
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
     assertTrue(projectID.isEnabled());
@@ -310,17 +304,12 @@ public class RunOptionsDefaultsComponentTest {
       throws OperationCanceledException, InterruptedException {
     selector.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
-    spinEventsUntilResolvedProject();
+    waitUntilResolvedProject();
     component.setStagingLocationText("non-existent-bucket");
     component.startStagingLocationCheck(0); // force right now
     ListenableFuture<VerifyStagingLocationResult> verifyResult =
-        component.verifyStagingLocationJob.getVerifyResult();
-    spinEvents(new Supplier<Boolean>() {
-      @Override
-      public Boolean get() {
-        return !createButton.isEnabled();
-      }
-    });
+        component.verifyStagingLocationJob.getFuture();
+    bot.waitUntil(widgetIsEnabled(new SWTBotButton(createButton)));
     assertTrue(verifyResult.isDone());
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
@@ -334,7 +323,7 @@ public class RunOptionsDefaultsComponentTest {
   public void testStagingLocation() {
     selector.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
-    spinEventsUntilResolvedProject();
+    waitUntilResolvedProject();
 
     component.setStagingLocationText("foobar");
     Assert.assertEquals("gs://foobar", component.getStagingLocation());
@@ -344,22 +333,28 @@ public class RunOptionsDefaultsComponentTest {
   public void testAccountSelector_loadBucketCombo() throws InterruptedException {
     selector.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
-    spinEventsUntilResolvedProject();
+    waitUntilResolvedProject();
     component.updateStagingLocations(0); // force update immediately
 
     assertStagingLocationCombo("gs://alice-bucket-1", "gs://alice-bucket-2");
 
     selector.selectAccount("bob@example.com");
-    spinEvents(Suppliers.ofInstance(false)); // spin once
+    bot.activeShell(); // does a syncExec which will spin the display loop
     component.updateStagingLocations(0); // force update
     assertStagingLocationCombo("gs://bob-bucket");
   }
 
   private void assertStagingLocationCombo(final String... buckets) throws InterruptedException {
-    spinEvents(new Supplier<Boolean>() {
+    bot.waitUntil(new DefaultCondition() {
+      
       @Override
-      public Boolean get() {
-        return stagingLocations.getItemCount() != buckets.length;
+      public boolean test() throws Exception {
+        return new SWTBotCombo(stagingLocations).itemCount() == buckets.length;
+      }
+      
+      @Override
+      public String getFailureMessage() {
+        return "missing staging buckets";
       }
     });
     Assert.assertArrayEquals(buckets, stagingLocations.getItems());
@@ -369,9 +364,9 @@ public class RunOptionsDefaultsComponentTest {
   public void testBucketNameStatus_gcsPathWithObjectIsOk() {
     component.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
-    spinEventsUntilResolvedProject();
+    waitUntilResolvedProject();
     component.setStagingLocationText("bucket/object");
-    spinEvents(Suppliers.ofInstance(false)); // spin once
+    bot.activeShell(); // uses syncExec so spins the display thread
     verify(messageTarget, never()).setError(anyString());
   }
 
@@ -379,8 +374,9 @@ public class RunOptionsDefaultsComponentTest {
   public void testBucketNameStatus_gcsUrlPathWithObjectIsOk() {
     component.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
-    spinEventsUntilResolvedProject();
+    waitUntilResolvedProject();
     component.setStagingLocationText("gs://bucket/object");
+    bot.activeShell(); // uses syncExec so spins the display thread
     verify(messageTarget, never()).setError(anyString());
   }
 
@@ -418,25 +414,33 @@ public class RunOptionsDefaultsComponentTest {
    * 
    * @param waitCondition
    */
-  private void spinEvents(Supplier<Boolean> waitCondition) {
-    Stopwatch timeout = Stopwatch.createStarted();
-    do {
-      if (timeout.elapsed(TimeUnit.SECONDS) > 5) {
-        fail("Waited longer than 5 seconds");
+  private void waitForFuture(final Future<?> future) {
+    bot.waitUntil(new DefaultCondition() {
+      @Override
+      public boolean test() throws Exception {
+        return future.isDone();
       }
-      Thread.yield();
-      while (Display.getCurrent().readAndDispatch());
-    } while (waitCondition.get());
+
+      @Override
+      public String getFailureMessage() {
+        return "Future never done";
+      }
+    });
   }
 
   /**
    * Spin until the RunOptionsDefaultsComponent has a project.
    */
-  private void spinEventsUntilResolvedProject() {
-    spinEvents(new Supplier<Boolean>() {
+  private void waitUntilResolvedProject() {
+    bot.waitUntil(new DefaultCondition() {
       @Override
-      public Boolean get() {
-        return component.getProject() == null;
+      public boolean test() throws Exception {
+        return component.getProject() != null;
+      }
+
+      @Override
+      public String getFailureMessage() {
+        return "RuntimeOptions project was never resolved";
       }
     });
   }

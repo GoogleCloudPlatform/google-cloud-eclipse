@@ -19,8 +19,9 @@ package com.google.cloud.tools.eclipse.projectselector;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.cloud.tools.eclipse.ui.util.DisplayExecutor;
+import com.google.cloud.tools.eclipse.util.jobs.FuturisticJob;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.SettableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -28,10 +29,6 @@ import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
@@ -43,8 +40,9 @@ public class ProjectsProvider implements IStructuredContentProvider {
   private static final Logger logger = Logger.getLogger(ProjectsProvider.class.getName());
   private static final Object[] EMPTY_OBJECTS = new Object[0];
 
+  // todo better than reusing Predicate?
   public interface Callback<T> {
-    void execute(T value);
+    void resolved(T value);
   }
 
   private final ProjectRepository projectRepository;
@@ -68,7 +66,7 @@ public class ProjectsProvider implements IStructuredContentProvider {
     }
     fetchProjectsJob = new FetchProjectsJob();
     fetchProjectsJob.schedule();
-    return fetchProjectsJob.getProjects();
+    return fetchProjectsJob.getFuture();
   }
 
   @Override
@@ -93,7 +91,7 @@ public class ProjectsProvider implements IStructuredContentProvider {
   @Override
   public Object[] getElements(Object inputElement) {
     if (fetchProjectsJob != null) {
-      Future<GcpProject[]> projectsFuture = fetchProjectsJob.getProjects();
+      Future<GcpProject[]> projectsFuture = fetchProjectsJob.getFuture();
       if (projectsFuture != null && projectsFuture.isDone()) {
         try {
           return projectsFuture.get();
@@ -113,22 +111,21 @@ public class ProjectsProvider implements IStructuredContentProvider {
     // since this happens after the inputChanged(), we should always happen after the
     // viewer is refreshed
     if (fetchProjectsJob != null) {
-      final ListenableFuture<GcpProject[]> projectsFuture = fetchProjectsJob.getProjects();
+      final ListenableFuture<GcpProject[]> projectsFuture = fetchProjectsJob.getFuture();
       projectsFuture.addListener(new Runnable() {
         @Override
         public void run() {
           try {
             for (GcpProject project : projectsFuture.get()) {
               if (projectId.equals(project.getId())) {
-                callback.execute(project);
+                callback.resolved(project);
               }
             }
           } catch (InterruptedException | ExecutionException ex) {
             logger.warning("Unable to fetch project list");
           }
         }
-      }, displayExecutor);
-
+      }, MoreExecutors.directExecutor());
     }
   }
 
@@ -141,39 +138,23 @@ public class ProjectsProvider implements IStructuredContentProvider {
   /**
    * Simple job for fetching projects accessible to the current account.
    */
-  private class FetchProjectsJob extends Job {
-    private Credential credential;
-    private SettableFuture<GcpProject[]> projectsFuture = SettableFuture.create();
+  private class FetchProjectsJob extends FuturisticJob<GcpProject[]> {
+    private final Credential credential;
 
     public FetchProjectsJob() {
       super("Determining accessible projects");
       this.credential = ProjectsProvider.this.credential;
     }
 
-    public ListenableFuture<GcpProject[]> getProjects() {
-      return projectsFuture;
+    @Override
+    protected GcpProject[] compute(IProgressMonitor monitor) throws Exception {
+      List<GcpProject> projects = projectRepository.getProjects(credential);
+      return projects.toArray(new GcpProject[projects.size()]);
     }
 
     @Override
-    protected IStatus run(IProgressMonitor monitor) {
-      checkCancelled(monitor);
-      try {
-        List<GcpProject> projects = projectRepository.getProjects(credential);
-        checkCancelled(monitor);
-        // FIXME: filter projects by criteria
-        projectsFuture.set(projects.toArray(new GcpProject[projects.size()]));
-      } catch (ProjectRepositoryException ex) {
-        checkCancelled(monitor);
-        projectsFuture.setException(ex);
-      }
-
-      return Status.OK_STATUS;
-    }
-
-    private void checkCancelled(IProgressMonitor monitor) {
-      if (monitor.isCanceled() || this.credential != ProjectsProvider.this.credential) {
-        throw new OperationCanceledException();
-      }
+    protected boolean isStale() {
+      return this.credential != ProjectsProvider.this.credential;
     }
   }
 }

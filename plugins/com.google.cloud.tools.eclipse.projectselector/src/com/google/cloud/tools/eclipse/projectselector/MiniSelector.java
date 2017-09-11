@@ -143,7 +143,7 @@ public class MiniSelector implements ISelectionProvider {
    */
   public void setProject(final String projectId) {
     projectsProvider.resolve(projectId, new ProjectsProvider.Callback<GcpProject>() {
-      public void execute(final GcpProject resolvedProject) {
+      public void resolved(final GcpProject resolvedProject) {
         displayExecutor.execute(new Runnable() {
           @Override
           public void run() {

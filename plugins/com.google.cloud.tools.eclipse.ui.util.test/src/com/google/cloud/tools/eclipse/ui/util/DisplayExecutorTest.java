@@ -18,7 +18,6 @@ package com.google.cloud.tools.eclipse.ui.util;
 
 import static org.mockito.Mockito.verify;
 
-import com.google.cloud.tools.eclipse.ui.util.DisplayExecutor;
 import org.eclipse.swt.widgets.Display;
 import org.junit.Before;
 import org.junit.Test;
