@@ -89,7 +89,7 @@ public class RunOptionsDefaultsComponent {
   /**
    * If true, then this component is allowed to be partially-complete.
    */
-  private final boolean partial;
+  private final boolean allowIncomplete;
 
   private final AccountSelector accountSelector;
   private final Text projectInput;
@@ -105,19 +105,19 @@ public class RunOptionsDefaultsComponent {
 
   public RunOptionsDefaultsComponent(Composite target, int columns, MessageTarget messageTarget,
       DataflowPreferences preferences) {
-    this(target, columns, messageTarget, preferences, null, false);
+    this(target, columns, messageTarget, preferences, null, false /* allowIncomplete */);
   }
 
   public RunOptionsDefaultsComponent(Composite target, int columns, MessageTarget messageTarget,
-      DataflowPreferences preferences, WizardPage page, boolean partial) {
-    this(target, columns, messageTarget, preferences, page, partial,
+      DataflowPreferences preferences, WizardPage page, boolean allowIncomplete) {
+    this(target, columns, messageTarget, preferences, page, allowIncomplete,
         PlatformUI.getWorkbench().getService(IGoogleLoginService.class),
         PlatformUI.getWorkbench().getService(IGoogleApiFactory.class));
   }
 
   @VisibleForTesting
   RunOptionsDefaultsComponent(Composite target, int columns, MessageTarget messageTarget,
-      DataflowPreferences preferences, WizardPage page, boolean partial,
+      DataflowPreferences preferences, WizardPage page, boolean allowIncomplete,
       IGoogleLoginService loginService,
       IGoogleApiFactory apiFactory) {
     checkArgument(columns >= 3, "DefaultRunOptions must be in a Grid with at least 3 columns"); //$NON-NLS-1$
@@ -126,7 +126,7 @@ public class RunOptionsDefaultsComponent {
     this.messageTarget = messageTarget;
     this.displayExecutor = DisplayExecutor.create(target.getDisplay());
     this.apiFactory = apiFactory;
-    this.partial = partial;
+    this.allowIncomplete = allowIncomplete;
 
     Label accountLabel = new Label(target, SWT.NULL);
     accountLabel.setText(Messages.getString("account")); //$NON-NLS-1$
@@ -214,7 +214,7 @@ public class RunOptionsDefaultsComponent {
   }
 
   private void validate() {
-    // we set pageComplete to the value of `partial` if the fields are valid
+    // we set pageComplete to the value of `allowIncomplete` if the fields are valid
     setPageComplete(false);
     messageTarget.clear();
 
@@ -223,7 +223,7 @@ public class RunOptionsDefaultsComponent {
       projectInput.setEnabled(false);
       stagingLocationInput.setEnabled(false);
       createButton.setEnabled(false);
-      setPageComplete(partial);
+      setPageComplete(allowIncomplete);
       return;
     }
 
@@ -231,7 +231,7 @@ public class RunOptionsDefaultsComponent {
     if (Strings.isNullOrEmpty(projectInput.getText())) {
       stagingLocationInput.setEnabled(false);
       createButton.setEnabled(false);
-      setPageComplete(partial);
+      setPageComplete(allowIncomplete);
       return;
     }
     // FIXME: incorporate project verification here
@@ -265,7 +265,7 @@ public class RunOptionsDefaultsComponent {
       // If the bucket name is empty, we don't have anything to verify; and we don't have any
       // interesting messaging.
       createButton.setEnabled(false);
-      setPageComplete(partial);
+      setPageComplete(allowIncomplete);
       return;
     }
 

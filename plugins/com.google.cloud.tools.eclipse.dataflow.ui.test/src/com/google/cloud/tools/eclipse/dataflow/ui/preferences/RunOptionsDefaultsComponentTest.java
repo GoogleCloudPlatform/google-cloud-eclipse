@@ -107,7 +107,8 @@ public class RunOptionsDefaultsComponentTest {
 
     shell = shellResource.getShell();
     component = new RunOptionsDefaultsComponent(
-        shell, 3, messageTarget, preferences, page, false /* partial */, loginService, apiFactory);
+        shell, 3, messageTarget, preferences, page, false /* allowIncomplete */, loginService,
+        apiFactory);
     selector = CompositeUtil.findControl(shell, AccountSelector.class);
     projectID =
         CompositeUtil.findControlAfterLabel(shell, Text.class, "Cloud Platform &project ID:");
@@ -335,7 +336,7 @@ public class RunOptionsDefaultsComponentTest {
   @Test
   public void testPartialValidity_allEmpty() {
     component = new RunOptionsDefaultsComponent(shell, 3, messageTarget, preferences, page,
-        true /* partial */, loginService, apiFactory);
+        true /* allowIncomplete */, loginService, apiFactory);
     assertTrue("should be complete when totally empty", page.isPageComplete());
   }
   
