@@ -86,6 +86,11 @@ public class RunOptionsDefaultsComponent {
   private final MessageTarget messageTarget;
   private final Composite target;
   
+  /**
+   * If true, then this component is allowed to be partially-complete.
+   */
+  private final boolean allowIncomplete;
+
   private final AccountSelector accountSelector;
   private final Text projectInput;
   private final Combo stagingLocationInput;
@@ -93,25 +98,27 @@ public class RunOptionsDefaultsComponent {
   private SelectFirstMatchingPrefixListener completionListener;
   private ControlDecoration stagingLocationResults;
 
-  private FetchStagingLocationsJob fetchStagingLocationsJob;
+  @VisibleForTesting
+  FetchStagingLocationsJob fetchStagingLocationsJob;
   @VisibleForTesting
   VerifyStagingLocationJob verifyStagingLocationJob;
 
   public RunOptionsDefaultsComponent(Composite target, int columns, MessageTarget messageTarget,
       DataflowPreferences preferences) {
-    this(target, columns, messageTarget, preferences, null);
+    this(target, columns, messageTarget, preferences, null, false /* allowIncomplete */);
   }
 
   public RunOptionsDefaultsComponent(Composite target, int columns, MessageTarget messageTarget,
-      DataflowPreferences preferences, WizardPage page) {
-    this(target, columns, messageTarget, preferences, page,
+      DataflowPreferences preferences, WizardPage page, boolean allowIncomplete) {
+    this(target, columns, messageTarget, preferences, page, allowIncomplete,
         PlatformUI.getWorkbench().getService(IGoogleLoginService.class),
         PlatformUI.getWorkbench().getService(IGoogleApiFactory.class));
   }
 
   @VisibleForTesting
   RunOptionsDefaultsComponent(Composite target, int columns, MessageTarget messageTarget,
-      DataflowPreferences preferences, WizardPage page, IGoogleLoginService loginService,
+      DataflowPreferences preferences, WizardPage page, boolean allowIncomplete,
+      IGoogleLoginService loginService,
       IGoogleApiFactory apiFactory) {
     checkArgument(columns >= 3, "DefaultRunOptions must be in a Grid with at least 3 columns"); //$NON-NLS-1$
     this.target = target;
@@ -119,6 +126,7 @@ public class RunOptionsDefaultsComponent {
     this.messageTarget = messageTarget;
     this.displayExecutor = DisplayExecutor.create(target.getDisplay());
     this.apiFactory = apiFactory;
+    this.allowIncomplete = allowIncomplete;
 
     Label accountLabel = new Label(target, SWT.NULL);
     accountLabel.setText(Messages.getString("account")); //$NON-NLS-1$
@@ -206,12 +214,16 @@ public class RunOptionsDefaultsComponent {
   }
 
   private void validate() {
+    // we set pageComplete to the value of `allowIncomplete` if the fields are valid
     setPageComplete(false);
+    messageTarget.clear();
+
     Credential selectedCredential = accountSelector.getSelectedCredential();
     if (selectedCredential == null) {
       projectInput.setEnabled(false);
       stagingLocationInput.setEnabled(false);
       createButton.setEnabled(false);
+      setPageComplete(allowIncomplete);
       return;
     }
 
@@ -219,27 +231,14 @@ public class RunOptionsDefaultsComponent {
     if (Strings.isNullOrEmpty(projectInput.getText())) {
       stagingLocationInput.setEnabled(false);
       createButton.setEnabled(false);
+      setPageComplete(allowIncomplete);
       return;
     }
     // FIXME: incorporate project verification here
 
     stagingLocationInput.setEnabled(true);
 
-    final String bucketNamePart = GcsDataflowProjectClient.toGcsBucketName(getStagingLocation());
-    if (bucketNamePart.isEmpty()) {
-      // If the bucket name is empty, we don't have anything to verify; and we don't have any
-      // interesting messaging.
-      createButton.setEnabled(false);
-      return;
-    }
-
-    IStatus status = bucketNameValidator.validate(bucketNamePart);
-    if (!status.isOK()) {
-      messageTarget.setError(status.getMessage());
-      createButton.setEnabled(false);
-      return;
-    }
-    
+    // fetchStagingLocationsJob is a proxy for project checking
     if (fetchStagingLocationsJob != null) {
       Future<SortedSet<String>> stagingLocationsFuture =
           fetchStagingLocationsJob.getStagingLocations();
@@ -255,7 +254,26 @@ public class RunOptionsDefaultsComponent {
         } catch (InterruptedException ex) {
           DataflowUiPlugin.logError(ex, "Interrupted while retrieving staging locations"); //$NON-NLS-1$
         }
+      } else {
+        // in progress
+        return;
       }
+    }
+
+    final String bucketNamePart = GcsDataflowProjectClient.toGcsBucketName(getStagingLocation());
+    if (bucketNamePart.isEmpty()) {
+      // If the bucket name is empty, we don't have anything to verify; and we don't have any
+      // interesting messaging.
+      createButton.setEnabled(false);
+      setPageComplete(allowIncomplete);
+      return;
+    }
+
+    IStatus status = bucketNameValidator.validate(bucketNamePart);
+    if (!status.isOK()) {
+      messageTarget.setError(status.getMessage());
+      createButton.setEnabled(false);
+      return;
     }
 
     if (verifyStagingLocationJob == null) {

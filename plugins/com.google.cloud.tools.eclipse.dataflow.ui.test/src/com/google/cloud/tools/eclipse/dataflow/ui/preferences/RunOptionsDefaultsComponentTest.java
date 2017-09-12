@@ -20,8 +20,12 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -45,7 +49,9 @@ import com.google.common.util.concurrent.ListenableFuture;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.SortedSet;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Display;
@@ -68,6 +74,8 @@ public class RunOptionsDefaultsComponentTest {
   @Mock private MessageTarget messageTarget;
   @Mock private IGoogleLoginService loginService;
   @Mock private IGoogleApiFactory apiFactory;
+  @Mock
+  private WizardPage page;
 
   private RunOptionsDefaultsComponent component;
   private Shell shell;
@@ -80,24 +88,27 @@ public class RunOptionsDefaultsComponentTest {
 
   @Before
   public void setUp() throws IOException {
-    Account account1 = mock(Account.class);
-    Account account2 = mock(Account.class);
-    Credential credential1 = mock(Credential.class);
-    Credential credential2 = mock(Credential.class);
-
+    Account account1 = mock(Account.class, "alice@example.com");
+    Credential credential1 = mock(Credential.class, "alice@example.com");
     when(account1.getEmail()).thenReturn("alice@example.com");
-    when(account2.getEmail()).thenReturn("bob@example.com");
     when(account1.getOAuth2Credential()).thenReturn(credential1);
+    mockStorageApiBucketList(credential1, "project", "alice-bucket-1", "alice-bucket-2");
+
+    Account account2 = mock(Account.class, "bob@example.com");
+    Credential credential2 = mock(Credential.class, "bob@example.com");
+    when(account2.getEmail()).thenReturn("bob@example.com");
     when(account2.getOAuth2Credential()).thenReturn(credential2);
+    mockStorageApiBucketList(credential2, "project", "bob-bucket");
 
     when(loginService.getAccounts()).thenReturn(Sets.newHashSet(account1, account2));
 
-    mockStorageApiBucketList(credential1, "alice-bucket-1", "alice-bucket-2");
-    mockStorageApiBucketList(credential2, "bob-bucket");
+    doCallRealMethod().when(page).setPageComplete(anyBoolean());
+    doCallRealMethod().when(page).isPageComplete();
 
     shell = shellResource.getShell();
     component = new RunOptionsDefaultsComponent(
-        shell, 3, messageTarget, preferences, null, loginService, apiFactory);
+        shell, 3, messageTarget, preferences, page, false /* allowIncomplete */, loginService,
+        apiFactory);
     selector = CompositeUtil.findControl(shell, AccountSelector.class);
     projectID =
         CompositeUtil.findControlAfterLabel(shell, Text.class, "Cloud Platform &project ID:");
@@ -105,8 +116,9 @@ public class RunOptionsDefaultsComponentTest {
         CompositeUtil.findControlAfterLabel(shell, Combo.class, "Cloud Storage staging &location:");
     createButton = CompositeUtil.findControl(shell, Button.class);
   }
-
-  private void mockStorageApiBucketList(Credential credential, String... bucketNames)
+  
+  private void mockStorageApiBucketList(Credential credential, String projectId,
+      String... bucketNames)
       throws IOException {
     Storage storageApi = mock(Storage.class);
     Storage.Buckets bucketsApi = mock(Storage.Buckets.class);
@@ -114,10 +126,11 @@ public class RunOptionsDefaultsComponentTest {
     Buckets buckets = new Buckets();
     List<Bucket> bucketList = new ArrayList<>();
 
-    when(apiFactory.newStorageApi(credential)).thenReturn(storageApi);
-    when(storageApi.buckets()).thenReturn(bucketsApi);
-    when(bucketsApi.list(anyString())).thenReturn(listApi);
-    when(listApi.execute()).thenReturn(buckets);
+    doReturn(storageApi).when(apiFactory).newStorageApi(credential);
+    doReturn(bucketsApi).when(storageApi).buckets();
+    doThrow(new IOException("not found")).when(bucketsApi).list(anyString());
+    doReturn(listApi).when(bucketsApi).list(eq(projectId));
+    doReturn(buckets).when(listApi).execute();
 
     Storage.Buckets.Get exceptionGet = mock(Storage.Buckets.Get.class);
     when(bucketsApi.get(anyString())).thenReturn(exceptionGet);
@@ -206,13 +219,11 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
-  public void testEnablement_existingStagingLocation() throws InterruptedException {
+  public void testEnablement_nonexistingProject() throws InterruptedException {
     selector.selectAccount("alice@example.com");
-    component.setCloudProjectText("project");
-    component.setStagingLocationText("alice-bucket-1");
-    component.startStagingLocationCheck(0); // force right now
-    ListenableFuture<VerifyStagingLocationResult> verifyResult =
-        component.verifyStagingLocationJob.getVerifyResult();
+    component.setCloudProjectText("doesnotexist");
+    ListenableFuture<SortedSet<String>> verifyResult =
+        component.fetchStagingLocationsJob.getStagingLocations();
     int i = 0;
     do {
       while (Display.getCurrent().readAndDispatch()) {
@@ -224,7 +235,33 @@ public class RunOptionsDefaultsComponentTest {
     assertNotNull(selector.getSelectedCredential());
     assertTrue(projectID.isEnabled());
     assertTrue(stagingLocations.isEnabled());
+    assertFalse(page.isPageComplete());
+  }
+
+  @Test
+  public void testEnablement_existingStagingLocation() throws InterruptedException {
+    selector.selectAccount("alice@example.com");
+    component.setCloudProjectText("project");
+    component.updateStagingLocations("project", 0);
+    component.setStagingLocationText("alice-bucket-1");
+    component.startStagingLocationCheck(0); // force right now
+    ListenableFuture<SortedSet<String>> fetchResult =
+        component.fetchStagingLocationsJob.getStagingLocations();
+    ListenableFuture<VerifyStagingLocationResult> verifyResult =
+        component.verifyStagingLocationJob.getVerifyResult();
+    int i = 0;
+    do {
+      while (Display.getCurrent().readAndDispatch()) {
+        // spin
+      }
+      Thread.sleep(50);
+    } while (i++ < 200 && !fetchResult.isDone() && !verifyResult.isDone());
+    assertTrue(selector.isEnabled());
+    assertNotNull(selector.getSelectedCredential());
+    assertTrue(projectID.isEnabled());
+    assertTrue(stagingLocations.isEnabled());
     assertFalse(createButton.isEnabled());
+    assertTrue(page.isPageComplete());
   }
 
   @Test
@@ -249,6 +286,7 @@ public class RunOptionsDefaultsComponentTest {
     assertTrue(projectID.isEnabled());
     assertTrue(stagingLocations.isEnabled());
     assertTrue(createButton.isEnabled());
+    assertFalse(page.isPageComplete());
   }
 
   @Test
@@ -262,8 +300,8 @@ public class RunOptionsDefaultsComponentTest {
   @Test
   public void testAccountSelector_loadBucketCombo() throws InterruptedException {
     selector.selectAccount("alice@example.com");
-    component.setCloudProjectText("some-gcp-project-id");
-    component.updateStagingLocations("some-gcp-project-id", 0);
+    component.setCloudProjectText("project");
+    component.updateStagingLocations("project", 0);
 
     assertStagingLocationCombo("gs://alice-bucket-1", "gs://alice-bucket-2");
 
@@ -293,5 +331,34 @@ public class RunOptionsDefaultsComponentTest {
   public void testBucketNameStatus_gcsUrlPathWithObjectIsOk() {
     component.setStagingLocationText("gs://bucket/object");
     verify(messageTarget, never()).setError(anyString());
+  }
+
+  @Test
+  public void testPartialValidity_allEmpty() {
+    component = new RunOptionsDefaultsComponent(shell, 3, messageTarget, preferences, page,
+        true /* allowIncomplete */, loginService, apiFactory);
+    assertTrue("should be complete when totally empty", page.isPageComplete());
+  }
+  
+  @Test
+  public void testPartialValidity_account() {
+    testPartialValidity_allEmpty();      
+    component.selectAccount("alice@example.com");
+    assertTrue("should be complete with account", page.isPageComplete());
+  }
+  
+  @Test
+  public void testPartialValidity_account_project() throws InterruptedException {
+    testPartialValidity_account();
+    component.setCloudProjectText("project");
+    int i = 0;
+    do {
+      while (Display.getCurrent().readAndDispatch()) {
+        // spin
+      }
+      Thread.sleep(50);
+    } while (i++ < 200 && !page.isPageComplete());
+
+    assertTrue("should be complete with account and project", page.isPageComplete());
   }
 }
