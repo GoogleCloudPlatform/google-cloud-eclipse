@@ -193,7 +193,7 @@ public class RunOptionsDefaultsComponent {
     projectInput.addSelectionChangedListener(new ISelectionChangedListener() {
       @Override
       public void selectionChanged(SelectionChangedEvent event) {
-        updateStagingLocations(NEXT_KEY_DELAY_MS);
+        updateStagingLocations(0); // no delay
         validate();
       }
     });

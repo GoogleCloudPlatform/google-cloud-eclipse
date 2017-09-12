@@ -105,8 +105,7 @@ public class RunOptionsDefaultsComponentTest {
     when(account1.getEmail()).thenReturn("alice@example.com");
     when(account1.getOAuth2Credential()).thenReturn(credential1);
     mockStorageApiBucketList(credential1, "project", "alice-bucket-1", "alice-bucket-2");
-    mockProjectList(credential1, new GcpProject("project", "project"),
-        new GcpProject("foo", "foo"));
+    mockProjectList(credential1, new GcpProject("project", "project"));
 
     Account account2 = mock(Account.class, "bob@example.com");
     Credential credential2 = mock(Credential.class, "bob@example.com");
@@ -199,10 +198,10 @@ public class RunOptionsDefaultsComponentTest {
   public void testCloudProjectText() {
     Assert.assertNull(component.getProject());
     selector.selectAccount("alice@example.com");
-    component.setCloudProjectText("foo");
+    component.setCloudProjectText("project");
     waitUntilResolvedProject();
     Assert.assertNotNull(component.getProject());
-    Assert.assertEquals("foo", component.getProject().getId());
+    Assert.assertEquals("project", component.getProject().getId());
   }
 
   @Test
@@ -260,22 +259,14 @@ public class RunOptionsDefaultsComponentTest {
   }
 
   @Test
-  public void testEnablement_nonexistingProject() throws InterruptedException {
+  public void testEnablement_nonExistentProject() throws InterruptedException {
     selector.selectAccount("alice@example.com");
     component.setCloudProjectText("doesnotexist");
-    ListenableFuture<SortedSet<String>> verifyResult =
-        component.fetchStagingLocationsJob.getFuture();
-    int i = 0;
-    do {
-      while (Display.getCurrent().readAndDispatch()) {
-        // spin
-      }
-      Thread.sleep(50);
-    } while (i++ < 200 && !verifyResult.isDone());
+    spinEvents();
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
     assertTrue(projectID.isEnabled());
-    assertTrue(stagingLocations.isEnabled());
+    assertFalse(stagingLocations.isEnabled());
     assertFalse(page.isPageComplete());
   }
 
@@ -291,6 +282,7 @@ public class RunOptionsDefaultsComponentTest {
     final ListenableFuture<VerifyStagingLocationResult> verifyResult =
         component.verifyStagingLocationJob.getFuture();
     waitForFuture(verifyResult);
+    waitForFuture(fetchResult);
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
     assertTrue(projectID.isEnabled());
@@ -309,6 +301,7 @@ public class RunOptionsDefaultsComponentTest {
     component.startStagingLocationCheck(0); // force right now
     ListenableFuture<VerifyStagingLocationResult> verifyResult =
         component.verifyStagingLocationJob.getFuture();
+    waitForFuture(verifyResult);
     bot.waitUntil(widgetIsEnabled(new SWTBotButton(createButton)));
     assertTrue(verifyResult.isDone());
     assertTrue(selector.isEnabled());
@@ -334,13 +327,12 @@ public class RunOptionsDefaultsComponentTest {
     selector.selectAccount("alice@example.com");
     component.setCloudProjectText("project");
     waitUntilResolvedProject();
-    component.updateStagingLocations(0); // force update immediately
-
+    waitForFuture(component.fetchStagingLocationsJob.getFuture());
     assertStagingLocationCombo("gs://alice-bucket-1", "gs://alice-bucket-2");
 
     selector.selectAccount("bob@example.com");
-    bot.activeShell(); // does a syncExec which will spin the display loop
-    component.updateStagingLocations(0); // force update
+    waitUntilResolvedProject();
+    waitForFuture(component.fetchStagingLocationsJob.getFuture());
     assertStagingLocationCombo("gs://bob-bucket");
   }
 
@@ -366,7 +358,7 @@ public class RunOptionsDefaultsComponentTest {
     component.setCloudProjectText("project");
     waitUntilResolvedProject();
     component.setStagingLocationText("bucket/object");
-    bot.activeShell(); // uses syncExec so spins the display thread
+    spinEvents();
     verify(messageTarget, never()).setError(anyString());
   }
 
@@ -376,7 +368,7 @@ public class RunOptionsDefaultsComponentTest {
     component.setCloudProjectText("project");
     waitUntilResolvedProject();
     component.setStagingLocationText("gs://bucket/object");
-    bot.activeShell(); // uses syncExec so spins the display thread
+    spinEvents();
     verify(messageTarget, never()).setError(anyString());
   }
 
@@ -418,6 +410,10 @@ public class RunOptionsDefaultsComponentTest {
     bot.waitUntil(new DefaultCondition() {
       @Override
       public boolean test() throws Exception {
+        if (Display.getCurrent() != null) {
+          // seems surprising that this is required?
+          while (Display.getCurrent().readAndDispatch());
+        }
         return future.isDone();
       }
 
@@ -435,6 +431,10 @@ public class RunOptionsDefaultsComponentTest {
     bot.waitUntil(new DefaultCondition() {
       @Override
       public boolean test() throws Exception {
+        if (Display.getCurrent() != null) {
+          // seems surprising that this is required?
+          while (Display.getCurrent().readAndDispatch());
+        }
         return component.getProject() != null;
       }
 
@@ -444,5 +444,14 @@ public class RunOptionsDefaultsComponentTest {
       }
     });
   }
+
+  /**
+   * Spin the event loop once.
+   */
+  private void spinEvents() {
+    // does a syncExec
+    bot.shells();
+  }
+
 
 }
