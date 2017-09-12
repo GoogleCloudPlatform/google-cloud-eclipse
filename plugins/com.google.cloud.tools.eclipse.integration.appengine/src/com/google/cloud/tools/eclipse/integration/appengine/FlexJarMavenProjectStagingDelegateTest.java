@@ -30,12 +30,15 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.junit.Assume;
 import org.junit.Test;
 
 public class FlexJarMavenProjectStagingDelegateTest {
 
   @Test
-  public void testStage() throws IOException, CoreException {
+  public void testStage_springBoot() throws IOException, CoreException {
+    Assume.assumeTrue("Only for JavaSE-8", ImportMavenAppEngineStandardProjectTest.hasJavaSE8());
+
     List<IProject> projects = ProjectUtils.importProjects(getClass(),
         "test-projects/spring-boot-test.zip", false /* checkBuildErrors */, null);
     assertEquals(1, projects.size());
@@ -48,13 +51,13 @@ public class FlexJarMavenProjectStagingDelegateTest {
     StagingDelegate delegate = new FlexJarMavenProjectStagingDelegate(appEngineDirectory);
     IStatus status = delegate.stage(project, stagingDirectory, safeWorkDirectory,
         null, null, new NullProgressMonitor());
+    assertTrue(status.isOK());
 
     project.refreshLocal(IResource.DEPTH_INFINITE, null);
     assertTrue(project.getFolder("target").exists());
     assertTrue(project.getFile("target/customized-final-artifact-name.jar").exists());
     assertTrue(stagingDirectory.append("app.yaml").toFile().exists());
     assertTrue(stagingDirectory.append("customized-final-artifact-name.jar").toFile().exists());
-    assertTrue(status.isOK());
 
     project.delete(true, null);
   }
