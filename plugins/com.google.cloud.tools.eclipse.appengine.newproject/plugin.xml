@@ -9,6 +9,8 @@
             name="%standard.wizard.name"
             class="com.google.cloud.tools.eclipse.util.service.ServiceContextFactory:com.google.cloud.tools.eclipse.appengine.newproject.standard.AppEngineStandardProjectWizard"
             icon="platform:/plugin/com.google.cloud.tools.eclipse.appengine.ui/icons/gae-16x16.png"
+            finalPerspective="org.eclipse.jst.j2ee.J2EEPerspective"
+            preferredPerspectives="org.eclipse.jst.j2ee.J2EEPerspective,org.eclipse.wst.web.ui.webDevPerspective"
             project="true"
             category="com.google.cloud.tools.eclipse.wizards">
          <description>%standard.wizard.description</description>

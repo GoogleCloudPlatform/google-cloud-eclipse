@@ -65,7 +65,7 @@ public class NewMavenBasedAppEngineProjectWizardTest extends BaseProjectTest {
   public void testHelloWorld_java7() throws Exception {
     String[] projectFiles =
         {"src/main/webapp/WEB-INF/appengine-web.xml", "src/main/webapp/WEB-INF/web.xml", "pom.xml"};
-    createAndCheck("appWithPackageProject", null, "com.example.baz",
+    createAndCheck("appWithPackageProjectJava7", null, "com.example.baz",
         AppEngineRuntime.STANDARD_JAVA_7, projectFiles);
     assertEquals("1.7", getPomProperty(project, "maven.compiler.source"));
     assertEquals("1.7", getPomProperty(project, "maven.compiler.target"));
@@ -76,7 +76,7 @@ public class NewMavenBasedAppEngineProjectWizardTest extends BaseProjectTest {
     Assume.assumeTrue("Requires a Java 8 JRE", JavaRuntimeUtils.hasJavaSE8());
     String[] projectFiles =
         {"src/main/webapp/WEB-INF/appengine-web.xml", "src/main/webapp/WEB-INF/web.xml", "pom.xml"};
-    createAndCheck("appWithPackageProject", null, "com.example.baz",
+    createAndCheck("appWithPackageProjectJava8", null, "com.example.baz",
         AppEngineRuntime.STANDARD_JAVA_8, projectFiles);
     assertEquals("1.8", getPomProperty(project, "maven.compiler.source"));
     assertEquals("1.8", getPomProperty(project, "maven.compiler.target"));
@@ -90,7 +90,7 @@ public class NewMavenBasedAppEngineProjectWizardTest extends BaseProjectTest {
 
     String[] projectFiles =
         {"src/main/webapp/WEB-INF/appengine-web.xml", "src/main/webapp/WEB-INF/web.xml", "pom.xml"};
-    createAndCheck("appWithPackageProjectInTemp", location.getAbsolutePath(), "com.example.foo",
+    createAndCheck("appWithPackageProjectJava7InTemp", location.getAbsolutePath(), "com.example.foo",
         AppEngineRuntime.STANDARD_JAVA_7, projectFiles);
   }
 

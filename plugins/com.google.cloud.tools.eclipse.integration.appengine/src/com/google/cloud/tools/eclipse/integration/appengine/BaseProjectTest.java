@@ -25,6 +25,7 @@ import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.widgets.TimeoutException;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.BeforeClass;
 
 /**
@@ -36,7 +37,7 @@ public class BaseProjectTest {
   protected IProject project;
 
   @BeforeClass
-  public static void setUp() throws Exception {
+  public static void setUpWorkbench() throws Exception {
     // verify we can find the Google Cloud SDK
     new CloudSdk.Builder().build().validateCloudSdk();
 
@@ -46,6 +47,13 @@ public class BaseProjectTest {
     } catch (WidgetNotFoundException ex) {
       // may receive WNFE: "There is no active view"
     }
+  }
+
+  @Before
+  public void setUp() {
+    // switch to J2EE to avoid new-project switch-perspective prompts
+    bot.perspectiveById("org.eclipse.jst.j2ee.J2EEPerspective").activate();
+
   }
 
   @After
@@ -60,6 +68,7 @@ public class BaseProjectTest {
         SwtBotProjectActions.deleteProject(bot, project.getName());
       } catch (TimeoutException ex) {
         // If this fails it shouldn't fail the test, which has already run
+        new RuntimeException("tearDown() timed out", ex).printStackTrace();
       }
       project = null;
     }

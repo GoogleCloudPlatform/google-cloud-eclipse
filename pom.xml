@@ -402,6 +402,7 @@
       <!-- build against a known target platform -->
       <modules>
         <module>eclipse/mars</module>
+        <module>third_party/patches/mars</module>
       </modules>
       <build>
         <plugins>
@@ -475,6 +476,7 @@
       <!-- build against a known target platform -->
       <modules>
         <module>eclipse/neon</module>
+        <module>third_party/patches/neon</module>
       </modules>
       <build>
         <plugins>
@@ -509,6 +511,7 @@
       <!-- build against a known target platform -->
       <modules>
         <module>eclipse/oxygen</module>
+        <module>third_party/patches/oxygen</module>
       </modules>
       <build>
         <plugins>
