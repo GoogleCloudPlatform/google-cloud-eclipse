@@ -25,6 +25,7 @@ import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import java.io.IOException;
 import java.util.List;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
@@ -48,8 +49,13 @@ public class FlexJarMavenProjectStagingDelegateTest {
     IStatus status = delegate.stage(project, stagingDirectory, safeWorkDirectory,
         null, null, new NullProgressMonitor());
 
-    assertTrue(stagingDirectory.append("customized-final-artifact-name.jar").toFile().exists());
+    project.refreshLocal(IResource.DEPTH_INFINITE, null);
+    assertTrue(project.getFolder("target").exists());
+    assertTrue(project.getFile("target/customized-final-artifact-name.jar").exists());
     assertTrue(stagingDirectory.append("app.yaml").toFile().exists());
+    assertTrue(stagingDirectory.append("customized-final-artifact-name.jar").toFile().exists());
     assertTrue(status.isOK());
+
+    project.delete(true, null);
   }
 }
