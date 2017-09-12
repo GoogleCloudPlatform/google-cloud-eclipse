@@ -38,9 +38,8 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.core.RefreshUtil;
 import org.eclipse.debug.core.model.IProcess;
-import org.eclipse.debug.ui.IDebugUIConstants;
-import org.eclipse.debug.ui.RefreshTab;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -121,12 +120,13 @@ public class FlexJarMavenProjectStagingDelegate extends FlexStagingDelegate {
 
     ILaunchConfigurationWorkingCopy workingCopy = launchConfigurationType.newInstance(
         null /*container*/, launchConfigName);
-    workingCopy.setAttribute(IDebugUIConstants.ATTR_PRIVATE, true);
-    workingCopy.setAttribute(IDebugUIConstants.ATTR_LAUNCH_IN_BACKGROUND, true);
+    workingCopy.setAttribute(ILaunchManager.ATTR_PRIVATE, true);
+    // IDebugUIConstants.ATTR_LAUNCH_IN_BACKGROUND;
+    workingCopy.setAttribute("org.eclipse.debug.ui.ATTR_LAUNCH_IN_BACKGROUND", true);
     workingCopy.setAttribute(MavenLaunchConstants.ATTR_POM_DIR, project.getLocation().toString());
     workingCopy.setAttribute(MavenLaunchConstants.ATTR_GOALS, "package");
-    workingCopy.setAttribute(RefreshTab.ATTR_REFRESH_SCOPE, "${project}");
-    workingCopy.setAttribute(RefreshTab.ATTR_REFRESH_RECURSIVE, true);
+    workingCopy.setAttribute(RefreshUtil.ATTR_REFRESH_SCOPE, "${project}");
+    workingCopy.setAttribute(RefreshUtil.ATTR_REFRESH_RECURSIVE, true);
 
     IPath jreContainerPath = getJreContainerPath(project);
     workingCopy.setAttribute(

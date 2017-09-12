@@ -32,8 +32,8 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.IProcess;
-import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.m2e.actions.MavenLaunchConstants;
@@ -61,11 +61,11 @@ public class FlexJarMavenProjectStagingDelegateTest {
     ILaunchConfiguration launchConfig =
         FlexJarMavenProjectStagingDelegate.createMavenPackagingLaunchConfiguration(project);
 
-    boolean privateConfig = launchConfig.getAttribute(IDebugUIConstants.ATTR_PRIVATE, false);
+    boolean privateConfig = launchConfig.getAttribute(ILaunchManager.ATTR_PRIVATE, false);
     assertTrue(privateConfig);
 
     boolean launchInBackground = launchConfig.getAttribute(
-        IDebugUIConstants.ATTR_LAUNCH_IN_BACKGROUND, false);
+        "org.eclipse.debug.ui.ATTR_LAUNCH_IN_BACKGROUND", false);
     assertTrue(launchInBackground);
 
     String jreContainerPath = launchConfig.getAttribute(
