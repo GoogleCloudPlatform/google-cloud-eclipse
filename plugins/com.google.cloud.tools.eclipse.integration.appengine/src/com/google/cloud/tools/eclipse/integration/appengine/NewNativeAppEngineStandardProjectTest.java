@@ -69,7 +69,7 @@ public class NewNativeAppEngineStandardProjectTest extends BaseProjectTest {
     String[] projectFiles = {"src/main/java/app/engine/test/HelloAppEngine.java",
         "src/main/webapp/META-INF/MANIFEST.MF", "src/main/webapp/WEB-INF/appengine-web.xml",
         "src/main/webapp/WEB-INF/web.xml", "src/main/webapp/index.html",};
-    createAndCheck("appWithPackage", "app.engine.test", AppEngineRuntime.STANDARD_JAVA_8,
+    createAndCheck("appWithPackage_java8", "app.engine.test", AppEngineRuntime.STANDARD_JAVA_8,
         projectFiles);
   }
 
