@@ -12,10 +12,5 @@ Import-Package: com.google.cloud.tools.eclipse.appengine.facets,
  com.google.cloud.tools.eclipse.test.util,
  com.google.cloud.tools.eclipse.test.util.project,
  org.eclipse.core.expressions,
- org.eclipse.debug.core,
- org.eclipse.debug.core.model,
- org.eclipse.debug.ui,
- org.eclipse.jdt.launching,
  org.eclipse.jst.common.project.facet.core,
- org.eclipse.jst.j2ee.web.project.facet,
- org.eclipse.m2e.actions
+ org.eclipse.jst.j2ee.web.project.facet
