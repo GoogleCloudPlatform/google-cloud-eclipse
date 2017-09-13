@@ -36,7 +36,7 @@ public class AppEngineStandardJava8PresetTest {
     IPreset preset = ProjectFacetsManager
         .getPreset("com.google.cloud.tools.eclipse.appengine.standard.jre8.preset");
     assertNotNull(preset);
-    assertEquals("App Engine standard environment with Java 8 (beta), Servlet 3.1",
+    assertEquals("App Engine standard environment with Java 8, Servlet 3.1",
         preset.getLabel());
     assertThat(preset.getProjectFacets(), hasItem(JavaFacet.VERSION_1_8));
     assertThat(preset.getProjectFacets(), hasItem(WebFacetUtils.WEB_31));
