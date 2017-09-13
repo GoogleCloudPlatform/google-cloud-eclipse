@@ -62,6 +62,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
@@ -213,7 +214,9 @@ public class RunOptionsDefaultsComponent {
     validate();
   }
 
-  private void validate() {
+  @VisibleForTesting
+  void validate() {
+    Preconditions.checkState(Display.getCurrent() != null, "Must be called on SWT UI thread");
     // we set pageComplete to the value of `allowIncomplete` if the fields are valid
     setPageComplete(false);
     messageTarget.clear();
