@@ -32,7 +32,7 @@ public class FetchStagingLocationsJob extends FuturisticJob<SortedSet<String>> {
 
   public FetchStagingLocationsJob(GcsDataflowProjectClient gcsClient, String accountEmail,
       String cloudProjectId) {
-    super("Update Status Locations for project " + cloudProjectId);
+    super("Update staging locations for project " + cloudProjectId);
     this.gcsClient = gcsClient;
     this.accountEmail = accountEmail;
     this.cloudProjectId = cloudProjectId;

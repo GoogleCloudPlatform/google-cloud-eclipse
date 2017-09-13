@@ -43,6 +43,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSortedSet;
 import java.util.Objects;
 import java.util.SortedSet;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import org.eclipse.core.runtime.IStatus;
@@ -88,7 +89,7 @@ public class RunOptionsDefaultsComponent {
   private final DisplayExecutor displayExecutor;
   private final MessageTarget messageTarget;
   private final Composite target;
-  
+
   /**
    * If true, then this component is allowed to be partially-complete.
    */
@@ -121,8 +122,7 @@ public class RunOptionsDefaultsComponent {
   @VisibleForTesting
   RunOptionsDefaultsComponent(Composite target, int columns, MessageTarget messageTarget,
       DataflowPreferences preferences, WizardPage page, boolean allowIncomplete,
-      IGoogleLoginService loginService,
-      IGoogleApiFactory apiFactory) {
+      IGoogleLoginService loginService, IGoogleApiFactory apiFactory) {
     checkArgument(columns >= 3, "DefaultRunOptions must be in a Grid with at least 3 columns"); //$NON-NLS-1$
     this.target = target;
     this.page = page;
@@ -220,6 +220,11 @@ public class RunOptionsDefaultsComponent {
   @VisibleForTesting
   void validate() {
     Preconditions.checkState(Display.getCurrent() != null, "Must be called on SWT UI thread");
+    // may be from deferred event
+    if (target.isDisposed()) {
+      return;
+    }
+
     // we set pageComplete to the value of `allowIncomplete` if the fields are valid
     setPageComplete(false);
     messageTarget.clear();
@@ -240,14 +245,13 @@ public class RunOptionsDefaultsComponent {
       setPageComplete(allowIncomplete);
       return;
     }
-    // FIXME: incorporate project verification here
 
     stagingLocationInput.setEnabled(true);
 
     // fetchStagingLocationsJob is a proxy for project checking
     if (fetchStagingLocationsJob != null) {
       Future<SortedSet<String>> stagingLocationsFuture = fetchStagingLocationsJob.getFuture();
-      if (stagingLocationsFuture.isDone()) {
+      if (stagingLocationsFuture.isDone() && !stagingLocationsFuture.isCancelled()) {
         try {
           // on error, will raise an exception
           stagingLocationsFuture.get();
@@ -399,29 +403,43 @@ public class RunOptionsDefaultsComponent {
     if (project != null && credential != null) {
       final FetchStagingLocationsJob thisJob = fetchStagingLocationsJob =
           new FetchStagingLocationsJob(getGcsClient(), selectedEmail, project.getId());
-      fetchStagingLocationsJob.getFuture().addListener(new Runnable() {
+      Runnable futureCallback = new Runnable() {
         @Override
         public void run() {
           // check that this is same job (may have been cancelled in the interim)
-          if (!target.isDisposed() && fetchStagingLocationsJob == thisJob) {
-            // Update the Combo with the staging locations retrieved by the Job.
+          if (fetchStagingLocationsJob == thisJob) {
             try {
+              // Update the Combo with the staging locations retrieved by the Job.
               SortedSet<String> stagingLocations = fetchStagingLocationsJob.getFuture().get();
-              // Don't use "removeAll()", as it will clear the text field too.
-              stagingLocationInput.remove(0, stagingLocationInput.getItemCount() - 1);
-              for (String location : stagingLocations) {
-                stagingLocationInput.add(location);
-              }
-              completionListener.setContents(stagingLocations);
+              updateStagingLocations(stagingLocations);
+            } catch (CancellationException exception) {
+              DataflowUiPlugin.logError(exception, "Exception while retrieving staging locations"); //$NON-NLS-1$
             } catch (InterruptedException | ExecutionException ex) {
               // ignored: handled by validate()
             }
-            validate();
+            validate(); // reports message back to UI
           }
         }
-      }, displayExecutor);
+      };
+      fetchStagingLocationsJob.getFuture().addListener(futureCallback, displayExecutor);
       fetchStagingLocationsJob.schedule(scheduleDelay);
     }
+  }
+
+  /**
+   * Update the suggested staging locations combo box with the provided locations.
+   */
+  protected void updateStagingLocations(SortedSet<String> stagingLocations) {
+    if (target.isDisposed()) {
+      return;
+    }
+    // Don't use "removeAll()", as it will clear the text field too.
+    stagingLocationInput.remove(0, stagingLocationInput.getItemCount() - 1);
+    for (String location : stagingLocations) {
+      stagingLocationInput.add(location);
+    }
+    completionListener.setContents(stagingLocations);
+    validate();
   }
 
   /**
@@ -454,7 +472,7 @@ public class RunOptionsDefaultsComponent {
       @Override
       public void run() {
         // check that this is same job (may have been cancelled in the interim)
-        if (!target.isDisposed() && verifyStagingLocationJob == thisJob) {
+        if (verifyStagingLocationJob == thisJob) {
           validate();
         }
       }
@@ -483,8 +501,8 @@ public class RunOptionsDefaultsComponent {
         setPageComplete(true);
         createButton.setEnabled(false);
       } else {
-        messageTarget.setError(
-            Messages.getString("could.not.create.staging.location", stagingLocation)); //$NON-NLS-1$
+        messageTarget
+            .setError(Messages.getString("could.not.create.staging.location", stagingLocation)); //$NON-NLS-1$
         stagingLocationResults.show();
         stagingLocationResults.showHoverText(result.getMessage());
         setPageComplete(false);

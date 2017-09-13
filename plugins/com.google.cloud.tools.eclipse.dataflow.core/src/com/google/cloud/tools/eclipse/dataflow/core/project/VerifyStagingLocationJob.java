@@ -21,7 +21,7 @@ import com.google.cloud.tools.eclipse.util.jobs.FuturisticJob;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 /**
- * A job that verifies a Staging Location.
+ * A job that verifies that a Staging Location exists.
  */
 public class VerifyStagingLocationJob extends FuturisticJob<VerifyStagingLocationResult> {
   private final GcsDataflowProjectClient client;
