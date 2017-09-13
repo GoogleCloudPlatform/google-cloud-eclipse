@@ -263,6 +263,7 @@ public class RunOptionsDefaultsComponentTest {
     selector.selectAccount("alice@example.com");
     component.setCloudProjectText("doesnotexist");
     spinEvents();
+    component.validate();
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
     assertTrue(projectID.isEnabled());
@@ -283,6 +284,7 @@ public class RunOptionsDefaultsComponentTest {
         component.verifyStagingLocationJob.getFuture();
     waitForFuture(verifyResult);
     waitForFuture(fetchResult);
+    component.validate();
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
     assertTrue(projectID.isEnabled());
@@ -302,6 +304,7 @@ public class RunOptionsDefaultsComponentTest {
     ListenableFuture<VerifyStagingLocationResult> verifyResult =
         component.verifyStagingLocationJob.getFuture();
     waitForFuture(verifyResult);
+    component.validate();
     bot.waitUntil(widgetIsEnabled(new SWTBotButton(createButton)));
     assertTrue(verifyResult.isDone());
     assertTrue(selector.isEnabled());
