@@ -37,15 +37,15 @@ import com.google.cloud.tools.eclipse.projectselector.MiniSelector;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.cloud.tools.eclipse.ui.util.DisplayExecutor;
 import com.google.cloud.tools.eclipse.ui.util.databinding.BucketNameValidator;
+import com.google.cloud.tools.eclipse.util.jobs.Consumer;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.google.common.base.Verify;
 import com.google.common.collect.ImmutableSortedSet;
 import java.util.Objects;
 import java.util.SortedSet;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
@@ -250,21 +250,17 @@ public class RunOptionsDefaultsComponent {
 
     // fetchStagingLocationsJob is a proxy for project checking
     if (fetchStagingLocationsJob != null) {
-      Future<SortedSet<String>> stagingLocationsFuture = fetchStagingLocationsJob.getFuture();
-      if (stagingLocationsFuture.isDone() && !stagingLocationsFuture.isCancelled()) {
-        try {
-          // on error, will raise an exception
-          stagingLocationsFuture.get();
-        } catch (ExecutionException ex) {
+      if (fetchStagingLocationsJob.isCurrent()
+          && fetchStagingLocationsJob.isComputationComplete()) {
+        Optional<Exception> error = fetchStagingLocationsJob.getComputationError();
+        if (error.isPresent()) {
           messageTarget.setError(Messages.getString("could.not.retrieve.buckets.for.project", //$NON-NLS-1$
               projectInput.getProject().getName()));
-          DataflowUiPlugin.logError(ex, "Exception while retrieving staging locations"); //$NON-NLS-1$
+          DataflowUiPlugin.logError(error.get(), "Exception while retrieving staging locations"); //$NON-NLS-1$
           return;
-        } catch (InterruptedException ex) {
-          DataflowUiPlugin.logError(ex, "Interrupted while retrieving staging locations"); //$NON-NLS-1$
         }
       } else {
-        // in progress
+        // check is still in progress or a new job is pending
         return;
       }
     }
@@ -285,28 +281,22 @@ public class RunOptionsDefaultsComponent {
       return;
     }
 
-    if (verifyStagingLocationJob == null) {
+    Optional<Object> verificationResult =
+        verifyStagingLocationJob != null && verifyStagingLocationJob.isCurrent()
+            ? verifyStagingLocationJob.getComputation()
+            : Optional.absent();
+    if (!verificationResult.isPresent()) {
       messageTarget.setInfo("Verifying staging location...");
       createButton.setEnabled(false);
       return;
-    }
-    Future<VerifyStagingLocationResult> verifyStagingLocationFuture =
-        verifyStagingLocationJob.getFuture();
-    if (!verifyStagingLocationFuture.isDone()) {
-      messageTarget.setInfo("Verifying staging location...");
-      createButton.setEnabled(false);
+    } else if (verificationResult.get() instanceof Exception) {
+      Exception error = (Exception) verificationResult.get();
+      DataflowUiPlugin.logWarning("Unable to verify staging location", error);
+      messageTarget.setError(Messages.getString("unable.verify.staging.location", bucketNamePart)); //$NON-NLS-1$
       return;
-    }
-
-    try {
-      VerifyStagingLocationResult result = verifyStagingLocationFuture.get();
-      if (!result.email.equals(accountSelector.getSelectedEmail())
-          || !result.stagingLocation.equals(getStagingLocation())) {
-        // stale; perhaps we should initiate verification of the staging location?
-        createButton.setEnabled(false);
-        return;
-      }
-
+    } else {
+      Verify.verify(verificationResult.get() instanceof VerifyStagingLocationResult);
+      VerifyStagingLocationResult result = (VerifyStagingLocationResult) verificationResult.get();
       if (result.accessible) {
         messageTarget.setInfo(Messages.getString("verified.bucket.is.accessible", bucketNamePart)); //$NON-NLS-1$
         createButton.setEnabled(false);
@@ -316,9 +306,6 @@ public class RunOptionsDefaultsComponent {
         messageTarget.setError(Messages.getString("could.not.fetch.bucket", bucketNamePart)); //$NON-NLS-1$
         createButton.setEnabled(true);
       }
-    } catch (InterruptedException | ExecutionException ex) {
-      DataflowUiPlugin.logWarning("Unable to verify staging location", ex);
-      messageTarget.setError(Messages.getString("unable.verify.staging.location", bucketNamePart)); //$NON-NLS-1$
     }
   }
 
@@ -396,32 +383,25 @@ public class RunOptionsDefaultsComponent {
           && fetchStagingLocationsJob.getState() == Job.RUNNING) {
         return;
       }
-      fetchStagingLocationsJob.cancel();
+      fetchStagingLocationsJob.abandon();
     }
     fetchStagingLocationsJob = null;
 
     if (project != null && credential != null) {
-      final FetchStagingLocationsJob thisJob = fetchStagingLocationsJob =
+      fetchStagingLocationsJob =
           new FetchStagingLocationsJob(getGcsClient(), selectedEmail, project.getId());
-      Runnable futureCallback = new Runnable() {
+      fetchStagingLocationsJob.onSuccess(displayExecutor, new Consumer<SortedSet<String>>() {
         @Override
-        public void run() {
-          // check that this is same job (may have been cancelled in the interim)
-          if (fetchStagingLocationsJob == thisJob) {
-            try {
-              // Update the Combo with the staging locations retrieved by the Job.
-              SortedSet<String> stagingLocations = fetchStagingLocationsJob.getFuture().get();
-              updateStagingLocations(stagingLocations);
-            } catch (CancellationException exception) {
-              DataflowUiPlugin.logError(exception, "Exception while retrieving staging locations"); //$NON-NLS-1$
-            } catch (InterruptedException | ExecutionException ex) {
-              // ignored: handled by validate()
-            }
-            validate(); // reports message back to UI
-          }
-        }
-      };
-      fetchStagingLocationsJob.getFuture().addListener(futureCallback, displayExecutor);
+        public void accept(SortedSet<String> stagingLocations) {
+          updateStagingLocations(stagingLocations);
+          validate(); // reports message back to UI
+        }});
+      fetchStagingLocationsJob.onError(displayExecutor, new Consumer<Exception>() {
+        @Override
+        public void accept(Exception exception) {
+          DataflowUiPlugin.logError(exception, "Exception while retrieving staging locations"); //$NON-NLS-1$
+          validate();
+        }});
       fetchStagingLocationsJob.schedule(scheduleDelay);
     }
   }
@@ -458,7 +438,7 @@ public class RunOptionsDefaultsComponent {
         return;
       }
       // Cancel any existing verifyStagingLocationJob
-      verifyStagingLocationJob.cancel();
+      verifyStagingLocationJob.abandon();
       verifyStagingLocationJob = null;
     }
 
@@ -466,17 +446,14 @@ public class RunOptionsDefaultsComponent {
       return;
     }
 
-    final VerifyStagingLocationJob thisJob = this.verifyStagingLocationJob =
+    verifyStagingLocationJob =
         new VerifyStagingLocationJob(getGcsClient(), accountEmail, stagingLocation);
-    verifyStagingLocationJob.getFuture().addListener(new Runnable() {
+    verifyStagingLocationJob.onSuccess(displayExecutor, new Runnable() {
       @Override
       public void run() {
-        // check that this is same job (may have been cancelled in the interim)
-        if (verifyStagingLocationJob == thisJob) {
-          validate();
-        }
+        validate();
       }
-    }, displayExecutor);
+    });
     verifyStagingLocationJob.schedule(schedulingDelay);
   }
 

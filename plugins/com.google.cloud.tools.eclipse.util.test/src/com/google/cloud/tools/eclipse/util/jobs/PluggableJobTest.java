@@ -131,7 +131,7 @@ public class PluggableJobTest {
   @Test
   public void testStaleFiresFutureListener() throws InterruptedException {
     Object obj = new Object();
-    final PluggableJob<Object> job =
+    PluggableJob<Object> job =
         new PluggableJob<Object>("name", Callables.returning(obj), Predicates.alwaysTrue());
     assertFalse(job.getFuture().isDone());
     final boolean[] listenerRun = new boolean[] {false};
@@ -148,4 +148,120 @@ public class PluggableJobTest {
     assertTrue(listenerRun[0]);
     assertEquals("Should be CANCEL", IStatus.CANCEL, job.getResult().getSeverity());
   }
+
+  @Test
+  public void testCompleteness_normal() throws InterruptedException {
+    Object obj = new Object();
+    PluggableJob<Object> job = new PluggableJob<Object>("name", Callables.returning(obj));
+    assertFalse(job.isComputationComplete());
+    job.schedule();
+    job.join();
+    assertTrue(job.isComputationComplete());
+    assertFalse(job.getComputationError().isPresent());
+    assertTrue(job.getComputationResult().isPresent());
+    assertEquals(obj, job.getComputationResult().get());
+    assertEquals(obj, job.getComputation().get());
+  }
+
+  @Test
+  public void testCompleteness_error() throws InterruptedException {
+    final Exception exception = new Exception("test");
+    PluggableJob<Object> job = new PluggableJob<Object>("name", new Callable<Object>() {
+      @Override
+      public Object call() throws Exception {
+        throw exception;
+      }
+    });
+    assertFalse(job.isComputationComplete());
+    job.schedule();
+    job.join();
+    assertTrue(job.isComputationComplete());
+    assertTrue(job.getComputationError().isPresent());
+    assertEquals(exception, job.getComputationError().get());
+    assertFalse(job.getComputationResult().isPresent());
+    assertEquals(exception, job.getComputation().get());
+  }
+
+  @Test
+  public void testOnSuccess_normal() throws InterruptedException {
+    Object obj = new Object();
+    PluggableJob<Object> job = new PluggableJob<Object>("name", Callables.returning(obj));
+    final boolean[] listenerRun = new boolean[] {false};
+    job.onSuccess(MoreExecutors.directExecutor(), new Runnable() {
+      @Override
+      public void run() {
+        listenerRun[0] = true;
+      }
+    });
+    assertFalse(listenerRun[0]);
+    job.schedule();
+    job.join();
+    assertTrue(listenerRun[0]);
+    assertTrue(job.isComputationComplete());
+  }
+
+  @Test
+  public void testOnSuccess_abandon() throws InterruptedException {
+    Object obj = new Object();
+    PluggableJob<Object> job =
+        new PluggableJob<Object>("name", Callables.returning(obj), Predicates.alwaysTrue());
+    final boolean[] listenerRun = new boolean[] {false};
+    job.onSuccess(MoreExecutors.directExecutor(), new Runnable() {
+      @Override
+      public void run() {
+        listenerRun[0] = true;
+      }
+    });
+    assertFalse(listenerRun[0]);
+    job.schedule(); // should be stale and cancelled
+    job.join();
+    assertFalse("onSuccess should not have been called", listenerRun[0]);
+  }
+
+  @Test
+  public void testOnError() throws InterruptedException {
+    PluggableJob<Object> job = new PluggableJob<Object>("name", new Callable<Object>() {
+      @Override
+      public Object call() throws Exception {
+        throw new Exception("test");
+      }
+    });
+    final boolean[] listenerRun = new boolean[] {false};
+    job.onError(MoreExecutors.directExecutor(), new Consumer<Exception>() {
+      @Override
+      public void accept(Exception result) {
+        listenerRun[0] = true;
+      }
+    });
+    assertFalse(listenerRun[0]);
+    job.schedule();
+    job.join();
+    assertTrue("onError should have been called", listenerRun[0]);
+  }
+
+  @Test
+  public void testIsCurrent_abandon() throws InterruptedException {
+    Object obj = new Object();
+    PluggableJob<Object> job = new PluggableJob<Object>("name", Callables.returning(obj));
+    assertTrue(job.isCurrent());
+    job.schedule(); // should be stale and cancelled
+    job.join();
+    assertTrue(job.isCurrent());
+    job.abandon();
+    assertFalse("Abandoned jobs should not be current", job.isCurrent());
+  }
+
+  @Test
+  public void testIsCurrent_stale() throws InterruptedException {
+    Object obj = new Object();
+    PluggableJob<Object> job =
+        new PluggableJob<Object>("name", Callables.returning(obj), Predicates.alwaysTrue());
+    assertTrue(job.isCurrent());
+    job.schedule(); // should be stale and self-cancel
+    job.join();
+    assertFalse(job.isCurrent());
+    job.abandon();
+    assertFalse("Stale jobs should not be current", job.isCurrent());
+  }
+
 }

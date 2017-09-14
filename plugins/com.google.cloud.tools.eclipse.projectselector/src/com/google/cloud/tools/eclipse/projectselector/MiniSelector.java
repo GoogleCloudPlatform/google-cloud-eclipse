@@ -20,6 +20,7 @@ import com.google.api.client.auth.oauth2.Credential;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.cloud.tools.eclipse.ui.util.DisplayExecutor;
+import com.google.cloud.tools.eclipse.util.jobs.Consumer;
 import java.util.concurrent.Executor;
 import java.util.logging.Logger;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -142,14 +143,9 @@ public class MiniSelector implements ISelectionProvider {
    * that ID.
    */
   public void setProject(final String projectId) {
-    projectsProvider.resolve(projectId, new ProjectsProvider.Callback<GcpProject>() {
-      public void resolved(final GcpProject resolvedProject) {
-        displayExecutor.execute(new Runnable() {
-          @Override
-          public void run() {
-            comboViewer.setSelection(new StructuredSelection(resolvedProject));
-          }
-        });
+    projectsProvider.resolve(projectId, displayExecutor, new Consumer<GcpProject>() {
+      public void accept(final GcpProject resolvedProject) {
+        comboViewer.setSelection(new StructuredSelection(resolvedProject));
       }
     });
   }
