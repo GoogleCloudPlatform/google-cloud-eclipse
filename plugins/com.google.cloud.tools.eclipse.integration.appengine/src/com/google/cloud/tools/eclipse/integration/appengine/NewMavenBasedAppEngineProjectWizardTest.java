@@ -76,7 +76,7 @@ public class NewMavenBasedAppEngineProjectWizardTest extends BaseProjectTest {
     Assume.assumeTrue("Requires a Java 8 JRE", JavaRuntimeUtils.hasJavaSE8());
     String[] projectFiles =
         {"src/main/webapp/WEB-INF/appengine-web.xml", "src/main/webapp/WEB-INF/web.xml", "pom.xml"};
-    createAndCheck("appWithPackageProject", null, "com.example.baz",
+    createAndCheck("appWithPackageProject_java8", null, "com.example.baz",
         AppEngineRuntime.STANDARD_JAVA_8, projectFiles);
     assertEquals("1.8", getPomProperty(project, "maven.compiler.source"));
     assertEquals("1.8", getPomProperty(project, "maven.compiler.target"));
@@ -139,7 +139,7 @@ public class NewMavenBasedAppEngineProjectWizardTest extends BaseProjectTest {
     }
     ProjectUtils.waitForProjects(project); // App Engine runtime is added via a Job, so wait.
     ProjectUtils.failIfBuildErrors("New Maven project has errors", project);
-    
+
     ArrayAssertions.assertIsEmpty("runtime classpath should be empty for Maven projects", getAppEngineServerRuntimeClasspathEntries(project));
   }
 

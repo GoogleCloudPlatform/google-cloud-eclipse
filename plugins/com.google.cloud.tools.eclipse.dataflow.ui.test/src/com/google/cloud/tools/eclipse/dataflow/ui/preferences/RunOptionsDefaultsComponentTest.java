@@ -231,6 +231,7 @@ public class RunOptionsDefaultsComponentTest {
       }
       Thread.sleep(50);
     } while (i++ < 200 && !verifyResult.isDone());
+    component.validate();
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
     assertTrue(projectID.isEnabled());
@@ -256,6 +257,7 @@ public class RunOptionsDefaultsComponentTest {
       }
       Thread.sleep(50);
     } while (i++ < 200 && !fetchResult.isDone() && !verifyResult.isDone());
+    component.validate();
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
     assertTrue(projectID.isEnabled());
@@ -280,6 +282,7 @@ public class RunOptionsDefaultsComponentTest {
       }
       Thread.sleep(50);
     } while(i++ < 200 && !createButton.isEnabled());
+    component.validate();
     assertTrue(verifyResult.isDone());
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
