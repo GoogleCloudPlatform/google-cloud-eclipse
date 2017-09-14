@@ -50,7 +50,7 @@ public class StandardDeployCommandHandler extends DeployCommandHandler {
     return new StandardStagingDelegate(javaHome);
   }
 
-  private Path getProjectVm(IProject project) {
+  private static Path getProjectVm(IProject project) {
     try {
       IJavaProject javaProject = JavaCore.create(project);
       IVMInstall vmInstall = JavaRuntime.getVMInstall(javaProject);

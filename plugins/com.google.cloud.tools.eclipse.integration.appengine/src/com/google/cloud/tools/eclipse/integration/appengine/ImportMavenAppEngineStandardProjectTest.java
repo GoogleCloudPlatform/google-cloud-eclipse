@@ -52,7 +52,7 @@ import org.junit.runner.RunWith;
  * Import snapshot of <a href=
  * "https://github.com/GoogleCloudPlatform/getting-started-java/tree/master/appengine-standard-java8/springboot-appengine-standard">Hello
  * Spring Boot on App Engine standard environment</a>.
- * 
+ *
  */
 @RunWith(SWTBotJunit4ClassRunner.class)
 public class ImportMavenAppEngineStandardProjectTest extends BaseProjectTest {
@@ -61,7 +61,7 @@ public class ImportMavenAppEngineStandardProjectTest extends BaseProjectTest {
 
   @Rule
   public TemporaryFolder tempFolder = new TemporaryFolder();
-  
+
   @Test
   public void runImport() throws Exception {
     Assume.assumeTrue("No JavaSE 8 JRE found", hasJavaSE8());
@@ -94,7 +94,7 @@ public class ImportMavenAppEngineStandardProjectTest extends BaseProjectTest {
   /**
    * Check that we have a Java 8 compatible VM available.
    */
-  private boolean hasJavaSE8() {
+  static boolean hasJavaSE8() {
     IExecutionEnvironmentsManager manager = JavaRuntime.getExecutionEnvironmentsManager();
     IExecutionEnvironment java8 = manager.getEnvironment("JavaSE-1.8");
     return java8 != null && java8.getCompatibleVMs().length > 0;
