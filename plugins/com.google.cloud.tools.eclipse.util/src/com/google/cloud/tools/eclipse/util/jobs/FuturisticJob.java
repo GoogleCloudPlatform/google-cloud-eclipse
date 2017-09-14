@@ -161,16 +161,16 @@ public abstract class FuturisticJob<T> extends Job {
   }
 
   /**
-   * Return true if this job appears to be current (i.e., not abandoned, and not cancelled).
+   * Return true if this job appears to be current (i.e., not abandoned, not cancelled, and not
+   * stale).
    */
   public boolean isCurrent() {
-    // a job with isStale() should eventually be cancelled
-    return !abandoned && !future.isCancelled();
+    return !abandoned && !future.isCancelled() && !isStale();
   }
 
   /**
    * Return true if this job's computation completed. The computation state is independent of
-   * whether the job has been abandoned or cancelled.
+   * whether the job {@link #isCurrent() is current}.
    * 
    * @see #getComputationResult()
    * @see #getComputationError()
@@ -182,7 +182,7 @@ public abstract class FuturisticJob<T> extends Job {
   /**
    * Return the result of the computation, if complete. The result will be an exception if an error
    * occurred, or the computation result. The computation state is independent of whether the job
-   * has been abandoned or cancelled.
+   * {@link #isCurrent() is current}.
    */
   public Optional<Object> getComputation() {
     if (isComputationComplete()) {
@@ -200,7 +200,7 @@ public abstract class FuturisticJob<T> extends Job {
 
   /**
    * If completed and successful, return the result of the computation. The computation state is
-   * independent of whether the job has been abandoned or cancelled.
+   * independent of whether the job {@link #isCurrent() is current}
    */
   public Optional<T> getComputationResult() {
     if (isComputationComplete()) {
@@ -215,7 +215,7 @@ public abstract class FuturisticJob<T> extends Job {
 
   /**
    * If completed and an error occurred, return the result of the computation. The computation state
-   * is independent of whether the job has been abandoned or cancelled.
+   * is independent of whether the job {@link #isCurrent() is current}
    */
   public Optional<Exception> getComputationError() {
     if (isComputationComplete()) {
@@ -255,7 +255,7 @@ public abstract class FuturisticJob<T> extends Job {
 
   /**
    * Return true if this job is stale: the provided starting parameters have been changed since the
-   * job was started. This method will be called from this job's thread.
+   * job was started. This method should be fast and must be able to be executed from any thread.
    */
   protected boolean isStale() {
     return false;

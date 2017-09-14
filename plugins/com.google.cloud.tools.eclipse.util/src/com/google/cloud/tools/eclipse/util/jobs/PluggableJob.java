@@ -28,7 +28,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 public class PluggableJob<T> extends FuturisticJob<T> {
   /**
    * A pluggable check for whether this instance is stale; extenders can override
-   * {@link #isStale()}.
+   * {@link #isStale()}. This check should be fast and must be able to be executed from any thread.
    */
   private final Predicate<? super FuturisticJob<T>> stalenessCheck;
 
@@ -49,11 +49,12 @@ public class PluggableJob<T> extends FuturisticJob<T> {
   }
 
   /**
-   * Create a new instance with pluggable runnable and stale check.
+   * Create a new instance with pluggable runnable and stale check. The staleness check should be
+   * fast and must be able to be executed from any thread.
    * 
    * @param name the job name, surfaced in UI; never {@code null}
    * @param computeTask the actual runnable to compute a result; never {@code null}
-   * @param stalenessCheck a predicate to check if this job is stale; never {@code null}
+   * @param stalenessCheck a predicate to check if this job is stale; never {@code null},
    */
   public PluggableJob(String name, Callable<? extends T> computeTask,
       Predicate<? super FuturisticJob<T>> stalenessCheck) {

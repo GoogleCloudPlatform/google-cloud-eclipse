@@ -23,6 +23,7 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.util.concurrent.Callables;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -131,7 +132,7 @@ public class PluggableJobTest {
   @Test
   public void testStaleFiresFutureListener() throws InterruptedException {
     Object obj = new Object();
-    PluggableJob<Object> job =
+    final PluggableJob<Object> job =
         new PluggableJob<Object>("name", Callables.returning(obj), Predicates.alwaysTrue());
     assertFalse(job.getFuture().isDone());
     final boolean[] listenerRun = new boolean[] {false};
@@ -254,13 +255,20 @@ public class PluggableJobTest {
   @Test
   public void testIsCurrent_stale() throws InterruptedException {
     Object obj = new Object();
-    PluggableJob<Object> job =
-        new PluggableJob<Object>("name", Callables.returning(obj), Predicates.alwaysTrue());
+    final boolean[] isStale = new boolean[] { false };
+    PluggableJob<Object> job = new PluggableJob<Object>("name", Callables.returning(obj),
+        new Predicate<FuturisticJob<?>>() {
+          @Override
+          public boolean apply(FuturisticJob<?> job) {
+            return isStale[0];
+          }
+        });
     assertTrue(job.isCurrent());
-    job.schedule(); // should be stale and self-cancel
+    job.schedule(); // should self-cancel
     job.join();
-    assertFalse(job.isCurrent());
-    job.abandon();
+    assertTrue(job.isCurrent());
+    isStale[0] = true;
+    // should now be stale 
     assertFalse("Stale jobs should not be current", job.isCurrent());
   }
 
