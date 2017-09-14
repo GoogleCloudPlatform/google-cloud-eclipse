@@ -5,20 +5,20 @@
   <!-- begin App Engine standard -->
   <extension point="org.eclipse.ui.commands">
     <command
-      description="%deployStandardCommandDescription"
-      id="com.google.cloud.tools.eclipse.appengine.standard.deploy"
-      name="%deployStandardCommandName">
+        description="%deployStandardCommandDescription"
+        id="com.google.cloud.tools.eclipse.appengine.standard.deploy"
+        name="%deployStandardCommandName">
     </command>
   </extension>
 
   <extension point="org.eclipse.ui.menus">
     <menuContribution
-      allPopups="false"
-      locationURI="popup:org.eclipse.ui.popup.any?after=additions">
+        allPopups="false"
+        locationURI="popup:org.eclipse.ui.popup.any?after=additions">
       <command
-        commandId="com.google.cloud.tools.eclipse.appengine.standard.deploy"
-        label="%deployStandardMenuLabel"
-        style="push">
+          commandId="com.google.cloud.tools.eclipse.appengine.standard.deploy"
+          label="%deployStandardMenuLabel"
+          style="push">
         <visibleWhen checkEnabled="true" />
       </command>
     </menuContribution>
@@ -26,8 +26,8 @@
 
   <extension point="org.eclipse.ui.handlers">
     <handler
-      class="com.google.cloud.tools.eclipse.appengine.deploy.ui.standard.StandardDeployCommandHandler"
-      commandId="com.google.cloud.tools.eclipse.appengine.standard.deploy">
+        class="com.google.cloud.tools.eclipse.appengine.deploy.ui.standard.StandardDeployCommandHandler"
+        commandId="com.google.cloud.tools.eclipse.appengine.standard.deploy">
       <enabledWhen>
         <and>
           <count value="1" />
@@ -53,20 +53,20 @@
   <!-- start App Engine flex -->
   <extension point="org.eclipse.ui.commands">
     <command
-      description="%deployFlexCommandDescription"
-      id="com.google.cloud.tools.eclipse.appengine.flex.deploy"
-      name="%deployFlexCommandName">
+        description="%deployFlexCommandDescription"
+        id="com.google.cloud.tools.eclipse.appengine.flex.deploy"
+        name="%deployFlexCommandName">
     </command>
   </extension>
 
   <extension point="org.eclipse.ui.menus">
     <menuContribution
-      allPopups="false"
-      locationURI="popup:org.eclipse.ui.popup.any?after=additions">
+        allPopups="false"
+        locationURI="popup:org.eclipse.ui.popup.any?after=additions">
       <command
-        commandId="com.google.cloud.tools.eclipse.appengine.flex.deploy"
-        label="%deployFlexMenuLabel"
-        style="push">
+          commandId="com.google.cloud.tools.eclipse.appengine.flex.deploy"
+          label="%deployFlexMenuLabel"
+          style="push">
         <visibleWhen checkEnabled="true" />
       </command>
     </menuContribution>
@@ -74,8 +74,8 @@
 
   <extension point="org.eclipse.ui.handlers">
     <handler
-      class="com.google.cloud.tools.eclipse.appengine.deploy.ui.flexible.FlexDeployCommandHandler"
-      commandId="com.google.cloud.tools.eclipse.appengine.flex.deploy">
+        class="com.google.cloud.tools.eclipse.appengine.deploy.ui.flexible.FlexDeployCommandHandler"
+        commandId="com.google.cloud.tools.eclipse.appengine.flex.deploy">
       <enabledWhen>
         <and>
           <count value="1" />
@@ -101,13 +101,13 @@
   <extension
     point="org.eclipse.ui.console.consolePatternMatchListeners">
     <consolePatternMatchListener
-      class="com.google.cloud.tools.eclipse.ui.util.console.PatternToHyperlinkConverter"
-      id="com.google.cloud.tools.eclipse.appengine.deploy.consolePatternMatchListener"
-      regex="https://[a-zA-Z0-9][a-zA-Z0-9-.]*[a-zA-Z0-9]\.appspot\.com">
+        class="com.google.cloud.tools.eclipse.ui.util.console.PatternToHyperlinkConverter"
+        id="com.google.cloud.tools.eclipse.appengine.deploy.consolePatternMatchListener"
+        regex="https://[a-zA-Z0-9][a-zA-Z0-9-.]*[a-zA-Z0-9]\.appspot\.com">
       <enablement>
         <test
-          property="org.eclipse.ui.console.consoleTypeTest"
-          value="com.google.cloud.tools.eclipse.appengine.deploy.consoleType">
+            property="org.eclipse.ui.console.consoleTypeTest"
+            value="com.google.cloud.tools.eclipse.appengine.deploy.consoleType">
         </test>
       </enablement>
     </consolePatternMatchListener>
@@ -145,8 +145,8 @@
         id="com.google.cloud.tools.eclipse.appengine.deploy.consolePageParticipant">
       <enablement>
         <test
-          property="org.eclipse.ui.console.consoleTypeTest"
-          value="com.google.cloud.tools.eclipse.appengine.deploy.consoleType">
+            property="org.eclipse.ui.console.consoleTypeTest"
+            value="com.google.cloud.tools.eclipse.appengine.deploy.consoleType">
         </test>
       </enablement>    
     </consolePageParticipant>
