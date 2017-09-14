@@ -16,8 +16,9 @@
 
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -27,6 +28,7 @@ import static org.junit.Assert.assertTrue;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import org.hamcrest.Matcher;
 import org.junit.Test;
 
 /**
@@ -40,14 +42,22 @@ public class CloudLibrariesInPluginXmlTest {
   private static final String OBJECTIFY_LIBRARY_ID = "objectify";
   private static final String SERVLET_API_LIBRARY_ID = "servlet-api-2.5";
   private static final String JSP_API_LIBRARY_ID = "jsp-api-2.1";
+  private static final String GUAVA_LIBRARY_ID = "guava-20";
 
   @Test
   public void testLibrarySize() {
-    assertThat(CloudLibraries.getLibraries("appengine").size(), is(3));
+    assertThat(CloudLibraries.getLibraries("appengine").size(), is(4));
+
+    // There may be 2 or 4 servlet libraries depending on whether the
+    // .appengine.java.standard.java8 bundle is present
     List<Library> servletLibraries = CloudLibraries.getLibraries("servlet");
-    // todo in Eclipse this returns 4 (versions 2 and 3 of JSP and servlet libs)
-    // figure out why
-    assertEquals("wrong number of servlet libraries", 2, servletLibraries.size());
+    // split out toString() matches because of type inference errors
+    Matcher<Library> servletToString =
+        hasToString("Library: id=servlet-api-2.5; name=Servlet API 2.5");
+    assertThat(servletLibraries, hasItem(servletToString));
+    Matcher<Library> jspToString =
+        hasToString("Library: id=jsp-api-2.1; name=Java Server Pages API 2.1");
+    assertThat(servletLibraries, hasItem(jspToString));
   }
 
   @Test
@@ -132,6 +142,32 @@ public class CloudLibrariesInPluginXmlTest {
   }
 
   @Test
+  public void testGuavaLibraryConfig() throws URISyntaxException {
+    Library guavaLibrary = CloudLibraries.getLibrary(GUAVA_LIBRARY_ID);
+    assertThat(guavaLibrary.getContainerPath().toString(),
+        is(Library.CONTAINER_PATH_PREFIX + "/" + GUAVA_LIBRARY_ID));
+    assertThat(guavaLibrary.getId(), is(GUAVA_LIBRARY_ID));
+    assertThat(guavaLibrary.getLibraryFiles().size(), is(1));
+    LibraryFile guavaLibraryFile = guavaLibrary.getLibraryFiles().get(0);
+    assertThat(guavaLibraryFile.getJavadocUri(),
+        is(new URI("https://google.github.io/guava/releases/20.0/api/docs/")));
+    assertNull(guavaLibraryFile.getSourceUri());
+    assertTrue("Guava not exported", guavaLibraryFile.isExport());
+
+    assertNotNull(guavaLibraryFile.getMavenCoordinates());
+    MavenCoordinates guavaMavenCoordinates = guavaLibraryFile.getMavenCoordinates();
+    assertThat(guavaMavenCoordinates.getRepository(), is("central"));
+    assertThat(guavaMavenCoordinates.getGroupId(), is("com.google.guava"));
+    assertThat(guavaMavenCoordinates.getArtifactId(), is("guava"));
+    assertThat(guavaMavenCoordinates.getVersion(), is("20.0"));
+    assertThat(guavaMavenCoordinates.getType(), is("jar"));
+    assertNull(guavaMavenCoordinates.getClassifier());
+
+    assertNotNull(guavaLibraryFile.getFilters());
+    assertTrue(guavaLibraryFile.getFilters().isEmpty());
+  }
+
+  @Test
   public void testObjectifyLibraryConfig() throws URISyntaxException {
     Library objectifyLibrary = CloudLibraries.getLibrary(OBJECTIFY_LIBRARY_ID);
     assertThat(objectifyLibrary.getContainerPath().toString(),
@@ -143,7 +179,8 @@ public class CloudLibrariesInPluginXmlTest {
         is(new URI("https://github.com/objectify/objectify/wiki")));
     assertTrue(objectifyLibrary.isExport());
 
-    assertThat(objectifyLibrary.getLibraryFiles().size(), is(2));
+    assertThat(objectifyLibrary.getLibraryFiles().size(), is(1));
+    assertThat(objectifyLibrary.getLibraryDependencies().size(), is(2));
     LibraryFile objectifyLibraryFile = objectifyLibrary.getLibraryFiles().get(0);
     assertNull(objectifyLibraryFile.getSourceUri());
     assertTrue("Objectify not exported", objectifyLibraryFile.isExport());
@@ -161,24 +198,6 @@ public class CloudLibrariesInPluginXmlTest {
     assertTrue(objectifyLibraryFile.getFilters().isEmpty());
     assertThat(objectifyLibraryFile.getJavadocUri(),
         is(new URI("https://www.javadoc.io/doc/com.googlecode.objectify/objectify/5.1.21")));
-
-    LibraryFile guavaLibraryFile = objectifyLibrary.getLibraryFiles().get(1);
-    assertThat(guavaLibraryFile.getJavadocUri(),
-        is(new URI("https://google.github.io/guava/releases/20.0/api/docs/")));
-    assertNull(guavaLibraryFile.getSourceUri());
-    assertTrue("Guava not exported", guavaLibraryFile.isExport());
-
-    assertNotNull(guavaLibraryFile.getMavenCoordinates());
-    MavenCoordinates guavaMavenCoordinates = guavaLibraryFile.getMavenCoordinates();
-    assertThat(guavaMavenCoordinates.getRepository(), is("central"));
-    assertThat(guavaMavenCoordinates.getGroupId(), is("com.google.guava"));
-    assertThat(guavaMavenCoordinates.getArtifactId(), is("guava"));
-    assertThat(guavaMavenCoordinates.getVersion(), is("20.0"));
-    assertThat(guavaMavenCoordinates.getType(), is("jar"));
-    assertNull(guavaMavenCoordinates.getClassifier());
-
-    assertNotNull(guavaLibraryFile.getFilters());
-    assertTrue(guavaLibraryFile.getFilters().isEmpty());
   }
 
   @Test

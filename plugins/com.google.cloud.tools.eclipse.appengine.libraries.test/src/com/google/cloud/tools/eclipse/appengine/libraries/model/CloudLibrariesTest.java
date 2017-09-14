@@ -31,7 +31,7 @@ public class CloudLibrariesTest {
       Assert.assertFalse(tooltip.isEmpty());
       Assert.assertFalse(tooltip, tooltip.startsWith("!"));
     }
-    Assert.assertEquals(3, libraries.size());
+    Assert.assertEquals(4, libraries.size());
   }
 
   @Test
@@ -51,10 +51,11 @@ public class CloudLibrariesTest {
   public void testTransitiveDependencies() {
     Library library = CloudLibraries.getLibrary("googlecloudstorage");
     List<String> dependencies = library.getLibraryDependencies();
-    Assert.assertEquals(3, dependencies.size());
+    Assert.assertEquals(4, dependencies.size());
     Assert.assertTrue(dependencies.contains("appengine-api"));
     Assert.assertTrue(dependencies.contains("googlecloudcore"));
     Assert.assertTrue(dependencies.contains("googleapiclient"));
+    Assert.assertTrue(dependencies.contains("guava-20"));
   }
 
 }

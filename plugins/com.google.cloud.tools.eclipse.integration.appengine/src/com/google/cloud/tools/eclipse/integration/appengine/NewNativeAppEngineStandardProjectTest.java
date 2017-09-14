@@ -22,12 +22,18 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineStandardFacet;
+import com.google.cloud.tools.eclipse.appengine.libraries.BuildPath;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.CloudLibraries;
+import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.appengine.ui.AppEngineRuntime;
 import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.project.JavaRuntimeUtils;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jst.common.project.facet.core.JavaFacet;
 import org.eclipse.jst.j2ee.web.project.facet.WebFacetUtils;
@@ -72,6 +78,24 @@ public class NewNativeAppEngineStandardProjectTest extends BaseProjectTest {
     createAndCheck("appWithPackage_java8", "app.engine.test", AppEngineRuntime.STANDARD_JAVA_8,
         projectFiles);
   }
+  
+  @Test
+  public void testWithAllLibraries() throws Exception {
+    String[] projectFiles = {"src/main/java/HelloAppEngine.java",
+        "src/main/webapp/META-INF/MANIFEST.MF", "src/main/webapp/WEB-INF/appengine-web.xml",
+        "src/main/webapp/WEB-INF/web.xml", "src/main/webapp/index.html"};
+    createAndCheck("appWithLibraries", null /* packageName */, null /* runtime */, projectFiles);
+
+    List<Library> allLibraries = new ArrayList<>();
+    allLibraries.addAll(CloudLibraries.getLibraries(CloudLibraries.APP_ENGINE_GROUP));
+    allLibraries.addAll(CloudLibraries.getLibraries(CloudLibraries.CLIENT_APIS_GROUP));
+    BuildPath.addLibraries(project, allLibraries, new NullProgressMonitor());
+    
+    ProjectUtils.waitForProjects(project); // App Engine runtime is added via a Job, so wait.
+    ProjectUtils.failIfBuildErrors(
+        "Project has build errors after adding all managed libraries", project);
+  }
+
 
   /** Create a project with the given parameters. */
   private void createAndCheck(String projectName, String packageName, AppEngineRuntime runtime,

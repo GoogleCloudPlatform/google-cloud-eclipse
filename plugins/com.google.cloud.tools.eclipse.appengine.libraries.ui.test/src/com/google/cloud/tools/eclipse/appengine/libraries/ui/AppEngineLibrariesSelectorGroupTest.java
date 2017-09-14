@@ -67,7 +67,7 @@ public class AppEngineLibrariesSelectorGroupTest {
     assertThat(groupAsControl, instanceOf(Group.class));
     Control[] buttonsAsControls = ((Group) groupAsControl).getChildren();
     String[] expectedLibraryOrder =
-        new String[] {"appengine-api", "appengine-endpoints", "objectify"};
+        new String[] {"appengine-api", "appengine-endpoints", "objectify", "guava-20"};
     for (int i = 0; i < buttonsAsControls.length; i++) {
       Control control = buttonsAsControls[i];
       assertThat(control, instanceOf(Button.class));
@@ -115,9 +115,10 @@ public class AppEngineLibrariesSelectorGroupTest {
     objectifyButton.click();
     List<Library> selectedLibraries = getSelectedLibrariesSorted();
     assertNotNull(selectedLibraries);
-    assertThat(selectedLibraries.size(), is(2));
+    assertThat(selectedLibraries.size(), is(3));
     assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
-    assertThat(selectedLibraries.get(1).getId(), is("objectify"));
+    assertThat(selectedLibraries.get(1).getId(), is("guava-20"));
+    assertThat(selectedLibraries.get(2).getId(), is("objectify"));
   }
 
   @Test
@@ -126,10 +127,11 @@ public class AppEngineLibrariesSelectorGroupTest {
     endpointsButton.click();
     List<Library> selectedLibraries = getSelectedLibrariesSorted();
     assertNotNull(selectedLibraries);
-    assertThat(selectedLibraries.size(), is(3));
+    assertThat(selectedLibraries.size(), is(4));
     assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
     assertThat(selectedLibraries.get(1).getId(), is("appengine-endpoints"));
-    assertThat(selectedLibraries.get(2).getId(), is("objectify"));
+    assertThat(selectedLibraries.get(2).getId(), is("guava-20"));
+    assertThat(selectedLibraries.get(3).getId(), is("objectify"));
   }
 
   @Test
@@ -151,9 +153,10 @@ public class AppEngineLibrariesSelectorGroupTest {
     endpointsButton.click();
     List<Library> selectedLibraries = getSelectedLibrariesSorted();
     assertNotNull(selectedLibraries);
-    assertThat(selectedLibraries.size(), is(2));
+    assertThat(selectedLibraries.size(), is(3));
     assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
-    assertThat(selectedLibraries.get(1).getId(), is("objectify"));
+    assertThat(selectedLibraries.get(1).getId(), is("guava-20"));
+    assertThat(selectedLibraries.get(2).getId(), is("objectify"));
   }
 
   @Test
@@ -209,9 +212,10 @@ public class AppEngineLibrariesSelectorGroupTest {
     objectifyButton.click();
     List<Library> selectedLibraries = getSelectedLibrariesSorted();
     assertNotNull(selectedLibraries);
-    assertThat(selectedLibraries.size(), is(2));
+    assertThat(selectedLibraries.size(), is(3));
     assertThat(selectedLibraries.get(0).getId(), is("appengine-api"));
-    assertThat(selectedLibraries.get(1).getId(), is("objectify"));
+    assertThat(selectedLibraries.get(1).getId(), is("guava-20"));
+    assertThat(selectedLibraries.get(2).getId(), is("objectify"));
     assertFalse(appengineButton.isEnabled());
     assertTrue(objectifyButton.isEnabled());
   }
