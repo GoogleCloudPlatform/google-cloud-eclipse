@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.projectselector;
 
-import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -39,7 +38,6 @@ import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -103,12 +101,10 @@ public class MiniSelectorTest {
 
     assertNotNull(selector.getSelection());
     assertTrue(selector.getSelection().isEmpty());
-    final AtomicInteger selectionEventSeen = new AtomicInteger(0);
     final AtomicReference<ISelection> lastSelection = new AtomicReference<>();
     selector.addSelectionChangedListener(new ISelectionChangedListener() {
       @Override
       public void selectionChanged(SelectionChangedEvent event) {
-        selectionEventSeen.incrementAndGet();
         lastSelection.set(event.getSelection());
       }
     });
@@ -116,7 +112,6 @@ public class MiniSelectorTest {
     selector.setProject("foo.id");
     waitUntilResolvedProject(selector); // waits for the project list to be returned
 
-    assertThat(selectionEventSeen.get(), greaterThan(0));
     assertThat(lastSelection.get(), instanceOf(IStructuredSelection.class));
     IStructuredSelection selection = (IStructuredSelection) lastSelection.get();
     assertEquals(1, selection.size());
