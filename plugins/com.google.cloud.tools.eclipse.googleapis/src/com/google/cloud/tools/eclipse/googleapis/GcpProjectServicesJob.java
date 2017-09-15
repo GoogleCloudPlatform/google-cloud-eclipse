@@ -94,8 +94,10 @@ public class GcpProjectServicesJob extends FuturisticJob<List<String>> {
       }
       response = request.execute();
 
-      for (ManagedService service : response.getServices()) {
-        serviceIds.add(service.getServiceName());
+      if (response.getServices() != null) {
+        for (ManagedService service : response.getServices()) {
+          serviceIds.add(service.getServiceName());
+        }
       }
     } while (response.getNextPageToken() != null);
 
