@@ -57,8 +57,8 @@ public class FlexDeployCommandHandler extends DeployCommandHandler {
     IFacetedProject facetedProject = ProjectFacetsManager.create(project);
     if (AppEngineFlexWarFacet.hasFacet(facetedProject)) {
       return new FlexStagingDelegate(appEngineDirectory);
-    }
-    if (AppEngineFlexJarFacet.hasFacet(facetedProject) && MavenUtils.hasMavenNature(project)) {
+    } else if (AppEngineFlexJarFacet.hasFacet(facetedProject)
+        && MavenUtils.hasMavenNature(project)) {
       return new FlexJarMavenProjectStagingDelegate(appEngineDirectory);
     }
     throw new IllegalStateException("BUG: command enabled for non-flex or non-Maven-flex projects");
