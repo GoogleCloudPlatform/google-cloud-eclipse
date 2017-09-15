@@ -208,6 +208,7 @@ public class RunOptionsDefaultsComponent {
         validate();
       }
     });
+
     completionListener = new SelectFirstMatchingPrefixListener(stagingLocationInput);
     stagingLocationInput.addModifyListener(completionListener);
     stagingLocationInput.addModifyListener(new ModifyListener() {
