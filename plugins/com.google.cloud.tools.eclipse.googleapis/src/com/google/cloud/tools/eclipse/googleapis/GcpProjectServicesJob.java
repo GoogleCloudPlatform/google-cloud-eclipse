@@ -18,6 +18,7 @@ package com.google.cloud.tools.eclipse.googleapis;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.client.http.HttpResponseException;
 import com.google.api.services.servicemanagement.ServiceManagement;
 import com.google.api.services.servicemanagement.ServiceManagement.Services;
 import com.google.api.services.servicemanagement.model.ListServicesResponse;
@@ -36,16 +37,14 @@ import org.eclipse.core.runtime.IProgressMonitor;
  * href="https://cloud.google.com/service-management/overview>GCP Service Management IDs</a> enabled
  * for the GCP Project.
  * <p>
- * On error, the {@link #getFuture() job's future} will be set with a meaningful exception:
- * <ul>
- * <li>HttpResponseException: on any non-2xx result</li>
- * <li>GoogleJsonResponseException: if the JSON is invalid (unexpected)</li>
- * </ul>
+ * On request error, the computation error will be an {@link HttpResponseException}, and most likely
+ * a {@link GoogleJsonResponseException}.
+ * <p>
+ * Equivalent command-line:
  * 
  * <pre>
  * $ gcloud service-management list --log-http --project foo
  * </pre>
- * 
  */
 public class GcpProjectServicesJob extends FuturisticJob<List<String>> {
   private final IGoogleApiFactory apiFactory;

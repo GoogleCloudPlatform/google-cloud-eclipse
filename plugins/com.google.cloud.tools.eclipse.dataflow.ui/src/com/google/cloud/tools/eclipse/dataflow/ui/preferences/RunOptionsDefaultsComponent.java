@@ -16,8 +16,6 @@
 
 package com.google.cloud.tools.eclipse.dataflow.ui.preferences;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.DataflowPreferences;
@@ -133,7 +131,8 @@ public class RunOptionsDefaultsComponent {
   RunOptionsDefaultsComponent(Composite target, int columns, MessageTarget messageTarget,
       DataflowPreferences preferences, WizardPage page, boolean allowIncomplete,
       IGoogleLoginService loginService, IGoogleApiFactory apiFactory) {
-    checkArgument(columns >= 3, "DefaultRunOptions must be in a Grid with at least 3 columns"); //$NON-NLS-1$
+    Preconditions.checkArgument(columns >= 3,
+        "DefaultRunOptions must be in a Grid with at least 3 columns"); //$NON-NLS-1$
     this.target = target;
     this.page = page;
     this.messageTarget = messageTarget;
@@ -262,12 +261,11 @@ public class RunOptionsDefaultsComponent {
         messageTarget.setInfo("Verifying that project is enabled for dataflow...");
         return;
       } else if (result.get() instanceof Exception) {
+        DataflowUiPlugin.logError((Exception) result.get(),
+            "Error checking project config for " + checkProjectConfigurationJob.getProjectId());
         if (result.get() instanceof GoogleJsonResponseException) {
           GoogleJsonResponseException exception = (GoogleJsonResponseException) result.get();
-          // FIXME: handle cases here
-          DataflowUiPlugin.logError(exception,
-              "Checking project " + checkProjectConfigurationJob.getProjectId());
-          messageTarget.setError("Error checking project: " + exception.getDetails());
+          messageTarget.setError("Error checking project: " + exception.getDetails().getMessage());
         } else {
           messageTarget.setError("Could not check project: " + result.get());
         }
@@ -289,9 +287,9 @@ public class RunOptionsDefaultsComponent {
           && fetchStagingLocationsJob.isComputationComplete()) {
         Optional<Exception> error = fetchStagingLocationsJob.getComputationError();
         if (error.isPresent()) {
+          DataflowUiPlugin.logError(error.get(), "Exception while retrieving staging locations"); //$NON-NLS-1$
           messageTarget.setError(Messages.getString("could.not.retrieve.buckets.for.project", //$NON-NLS-1$
               projectInput.getProject().getName()));
-          DataflowUiPlugin.logError(error.get(), "Exception while retrieving staging locations"); //$NON-NLS-1$
           return;
         }
       } else {
