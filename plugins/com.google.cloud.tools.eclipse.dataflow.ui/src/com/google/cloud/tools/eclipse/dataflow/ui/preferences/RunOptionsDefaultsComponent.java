@@ -31,6 +31,7 @@ import com.google.cloud.tools.eclipse.dataflow.ui.util.ButtonFactory;
 import com.google.cloud.tools.eclipse.dataflow.ui.util.SelectFirstMatchingPrefixListener;
 import com.google.cloud.tools.eclipse.googleapis.GcpProjectServicesJob;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
+import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApi;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
 import com.google.cloud.tools.eclipse.projectselector.MiniSelector;
@@ -82,10 +83,6 @@ public class RunOptionsDefaultsComponent {
 
   /** Milliseconds to wait after a key before launching a job, to avoid needless computation. */
   private static final long NEXT_KEY_DELAY_MS = 250L;
-
-  /* GoogleApiUrl.DATAFLOW_API.getServiceId() */
-  private static final String DATAFLOW_SERVICE_ID = "dataflow.googleapis.com";
-
 
   private static final BucketNameValidator bucketNameValidator = new BucketNameValidator();
 
@@ -273,7 +270,7 @@ public class RunOptionsDefaultsComponent {
         return;
       } else {
         Verify.verify(result.get() instanceof Collection);
-        if (!((Collection<?>) result.get()).contains(DATAFLOW_SERVICE_ID)) {
+        if (!((Collection<?>) result.get()).contains(GoogleApi.DATAFLOW_API.getServiceId())) {
           messageTarget.setError("Project is not enabled for Cloud Dataflow");
           return;
         }

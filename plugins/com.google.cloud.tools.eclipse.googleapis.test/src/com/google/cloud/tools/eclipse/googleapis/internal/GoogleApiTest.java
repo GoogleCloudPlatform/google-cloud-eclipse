@@ -20,24 +20,24 @@ import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
 
-public class GoogleApiUrlTest {
+public class GoogleApiTest {
   @Test
   public void testForServiceId() {
-    for (GoogleApiUrl api : GoogleApiUrl.values()) {
-      assertNotNull(GoogleApiUrl.forServiceID(api.getServiceId()));
+    for (GoogleApi api : GoogleApi.values()) {
+      assertNotNull(GoogleApi.forServiceID(api.getServiceId()));
     }
   }
 
   @Test
   public void testHasName() {
-    for (GoogleApiUrl api : GoogleApiUrl.values()) {
+    for (GoogleApi api : GoogleApi.values()) {
       assertNotNull(api.getName());
     }
   }
 
   @Test
   public void testHasUri() {
-    for (GoogleApiUrl api : GoogleApiUrl.values()) {
+    for (GoogleApi api : GoogleApi.values()) {
       assertNotNull(api.toUri());
     }
   }

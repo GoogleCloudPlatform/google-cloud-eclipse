@@ -32,7 +32,7 @@ import java.net.URISyntaxException;
  * <li>The service-management ID to check for project API enablement.</li>
  * </ol>
  */
-public enum GoogleApiUrl {
+public enum GoogleApi {
   APPENGINE_ADMIN_API(Messages.getString("api.appengine"), Appengine.DEFAULT_BASE_URL, //$NON-NLS-1$
       "appengine.googleapis.com"), //$NON-NLS-1$
   DATAFLOW_API(Messages.getString("api.dataflow"), Dataflow.DEFAULT_BASE_URL, //$NON-NLS-1$
@@ -53,8 +53,8 @@ public enum GoogleApiUrl {
    * 
    * @return the corresponding instance or {@code null} if not found
    */
-  public static GoogleApiUrl forServiceID(String serviceId) {
-    for (GoogleApiUrl api : values()) {
+  public static GoogleApi forServiceID(String serviceId) {
+    for (GoogleApi api : values()) {
       if (serviceId.equals(api.serviceId)) {
         return api;
       }
@@ -62,7 +62,7 @@ public enum GoogleApiUrl {
     return null;
   }
 
-  private GoogleApiUrl(String name, String url, String serviceId) {
+  private GoogleApi(String name, String url, String serviceId) {
     try {
       uri = new URI(url);
     } catch (URISyntaxException ex) {
