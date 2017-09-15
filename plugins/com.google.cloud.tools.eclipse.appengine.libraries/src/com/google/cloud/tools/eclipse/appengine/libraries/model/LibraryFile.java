@@ -33,7 +33,7 @@ public class LibraryFile {
   private MavenCoordinates mavenCoordinates;
   private URI javadocUri;
   private URI sourceUri;
-  private boolean export = false;
+  private boolean export = true;
 
   public LibraryFile(MavenCoordinates mavenCoordinates) {
     Preconditions.checkNotNull(mavenCoordinates, "mavenCoordinates is null");

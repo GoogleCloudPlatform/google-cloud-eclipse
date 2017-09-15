@@ -119,17 +119,17 @@ public class LibraryFileTest {
   }
 
   @Test
-  public void testExportDefaultsToFalse() {
+  public void testExportDefaultsToTrue() {
     MavenCoordinates mavenCoordinates = new MavenCoordinates("groupId", "artifactId");
     LibraryFile libraryFile = new LibraryFile(mavenCoordinates);
-    assertFalse(libraryFile.isExport());
+    assertTrue(libraryFile.isExport());
   }
 
   @Test
   public void testSetExport() {
     MavenCoordinates mavenCoordinates = new MavenCoordinates("groupId", "artifactId");
     LibraryFile libraryFile = new LibraryFile(mavenCoordinates);
-    libraryFile.setExport(true);
-    assertTrue(libraryFile.isExport());
+    libraryFile.setExport(false);
+    assertFalse(libraryFile.isExport());
   }
 }

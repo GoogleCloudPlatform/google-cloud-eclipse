@@ -16,18 +16,8 @@
 
 package com.google.cloud.tools.eclipse.dataflow.core.project;
 
-import com.google.common.collect.ImmutableSortedSet;
-import java.util.NavigableSet;
-import org.apache.maven.artifact.versioning.ArtifactVersion;
-import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
-
 public class DataflowMavenCoordinates {
 
-  static final String GROUP_ID = "com.google.cloud.dataflow";
+  public static final String GROUP_ID = "com.google.cloud.dataflow";
   static final String ARTIFACT_ID = "google-cloud-dataflow-java-sdk-all";
-
-  /** Versions which are known to have been released. */
-  static final NavigableSet<ArtifactVersion> KNOWN_VERSIONS =
-      ImmutableSortedSet.<ArtifactVersion>of(
-          new DefaultArtifactVersion("1.9.0"), new DefaultArtifactVersion("2.0.0"));
 }

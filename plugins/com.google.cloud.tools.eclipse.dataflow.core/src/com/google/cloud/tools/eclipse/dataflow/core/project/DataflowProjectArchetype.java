@@ -16,9 +16,8 @@
 
 package com.google.cloud.tools.eclipse.dataflow.core.project;
 
-import java.util.NavigableSet;
-
 import com.google.common.collect.ImmutableSortedSet;
+import java.util.NavigableSet;
 
 /**
  * Enumeration of the Archetype templates available for project creation.
@@ -51,7 +50,7 @@ public enum DataflowProjectArchetype {
   /**
    * @return the artifact ID of the archetype
    */
-  String getArtifactId() {
+  public String getArtifactId() {
     return artifactId;
   }
 

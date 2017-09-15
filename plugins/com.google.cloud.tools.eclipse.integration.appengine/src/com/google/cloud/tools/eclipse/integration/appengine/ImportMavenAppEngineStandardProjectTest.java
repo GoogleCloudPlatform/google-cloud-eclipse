@@ -94,7 +94,7 @@ public class ImportMavenAppEngineStandardProjectTest extends BaseProjectTest {
   /**
    * Check that we have a Java 8 compatible VM available.
    */
-  private boolean hasJavaSE8() {
+  static boolean hasJavaSE8() {
     IExecutionEnvironmentsManager manager = JavaRuntime.getExecutionEnvironmentsManager();
     IExecutionEnvironment java8 = manager.getEnvironment("JavaSE-1.8");
     return java8 != null && java8.getCompatibleVMs().length > 0;
