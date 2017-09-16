@@ -38,7 +38,6 @@ import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -101,19 +100,19 @@ public class MiniSelectorTest {
 
     assertNotNull(selector.getSelection());
     assertTrue(selector.getSelection().isEmpty());
-    final AtomicReference<ISelection> lastSelection = new AtomicReference<>();
+    final ISelection[] lastSelection = new ISelection[1];
     selector.addSelectionChangedListener(new ISelectionChangedListener() {
       @Override
       public void selectionChanged(SelectionChangedEvent event) {
-        lastSelection.set(event.getSelection());
+        lastSelection[0] = event.getSelection();
       }
     });
 
     selector.setProject("foo.id");
     waitUntilResolvedProject(selector); // waits for the project list to be returned
 
-    assertThat(lastSelection.get(), instanceOf(IStructuredSelection.class));
-    IStructuredSelection selection = (IStructuredSelection) lastSelection.get();
+    assertThat(lastSelection[0], instanceOf(IStructuredSelection.class));
+    IStructuredSelection selection = (IStructuredSelection) lastSelection[0];
     assertEquals(1, selection.size());
     assertThat(selection.getFirstElement(), instanceOf(GcpProject.class));
     GcpProject gcpProject = (GcpProject) selection.getFirstElement();
