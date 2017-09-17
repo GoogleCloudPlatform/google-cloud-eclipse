@@ -28,6 +28,7 @@ import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexWarFacet;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
+import com.google.common.base.Preconditions;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -47,14 +48,14 @@ public class FlexDeployCommandHandler extends DeployCommandHandler {
 
   @Override
   protected StagingDelegate getStagingDelegate(IProject project) throws CoreException {
+    IFacetedProject facetedProject = ProjectFacetsManager.create(project);
+    Preconditions.checkNotNull(facetedProject);
+
     String appYamlPath = new FlexDeployPreferences(project).getAppYamlPath();
     IFile appYaml = project.getFile(appYamlPath);
-    if (!appYaml.exists()) {
-      throw new IllegalStateException("Invalid app.yaml path from project preferences.");
-    }
+    Preconditions.checkState(appYaml.exists(), "Invalid app.yaml path from project preferences.");
     IPath appEngineDirectory = appYaml.getParent().getLocation();
 
-    IFacetedProject facetedProject = ProjectFacetsManager.create(project);
     if (AppEngineFlexWarFacet.hasFacet(facetedProject)) {
       return new FlexStagingDelegate(appEngineDirectory);
     } else if (AppEngineFlexJarFacet.hasFacet(facetedProject)) {
