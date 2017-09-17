@@ -128,7 +128,7 @@
           </iterate>
           <not>
             <iterate>
-              <reference definitionId="com.google.cloud.tools.eclipse.appengine.onlyInStandardProjects" />
+              <reference definitionId="com.google.cloud.tools.eclipse.appengine.onlyForStandardProjects" />
             </iterate>
           </not>
         </and>

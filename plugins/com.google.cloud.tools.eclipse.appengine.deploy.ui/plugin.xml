@@ -32,7 +32,7 @@
         <and>
           <count value="1" />
           <iterate>
-            <reference definitionId="com.google.cloud.tools.eclipse.appengine.onlyInStandardProjects" />
+            <reference definitionId="com.google.cloud.tools.eclipse.appengine.onlyForStandardProjects" />
           </iterate>
         </and>
       </enabledWhen>
@@ -40,7 +40,7 @@
   </extension>
 
   <extension point="org.eclipse.core.expressions.definitions">
-    <definition id="com.google.cloud.tools.eclipse.appengine.onlyInStandardProjects">
+    <definition id="com.google.cloud.tools.eclipse.appengine.onlyForStandardProjects">
       <adapt type="org.eclipse.core.resources.IProject">
         <test
             property="org.eclipse.wst.common.project.facet.core.projectFacet"
@@ -81,8 +81,8 @@
           <count value="1" />
           <iterate>
             <or>
-              <reference definitionId="com.google.cloud.tools.eclipse.appengine.onlyInFlexWarProjects" />
-              <reference definitionId="com.google.cloud.tools.eclipse.appengine.onlyInFlexJarMavenProjects" />
+              <reference definitionId="com.google.cloud.tools.eclipse.appengine.onlyForFlexWarProjects" />
+              <reference definitionId="com.google.cloud.tools.eclipse.appengine.onlyForFlexJarMavenProjects" />
             </or>
           </iterate>
         </and>
@@ -91,7 +91,7 @@
   </extension>
 
   <extension point="org.eclipse.core.expressions.definitions">
-    <definition id="com.google.cloud.tools.eclipse.appengine.onlyInFlexWarProjects">
+    <definition id="com.google.cloud.tools.eclipse.appengine.onlyForFlexWarProjects">
       <adapt type="org.eclipse.core.resources.IProject">
         <test
             property="org.eclipse.wst.common.project.facet.core.projectFacet"
@@ -101,7 +101,7 @@
   </extension>
 
   <extension point="org.eclipse.core.expressions.definitions">
-    <definition id="com.google.cloud.tools.eclipse.appengine.onlyInFlexJarMavenProjects">
+    <definition id="com.google.cloud.tools.eclipse.appengine.onlyForFlexJarMavenProjects">
       <adapt type="org.eclipse.core.resources.IProject">
         <and>
           <test
