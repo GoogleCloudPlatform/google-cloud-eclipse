@@ -125,7 +125,7 @@ public class MiniSelectorTest {
       @Override
       public boolean test() throws Exception {
         if (Display.getCurrent() != null) {
-          // seems surprising that this is required?
+          // seems surprising that waitUtil() doesn't spin the event loop
           while (Display.getCurrent().readAndDispatch());
         }
         return selector.getProject() != null;
