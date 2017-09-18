@@ -299,7 +299,6 @@ public class RunOptionsDefaultsComponentTest {
     selector.selectAccount("alice@example.com");
     component.setCloudProjectText("doesnotexist");
     spinEvents();
-    component.validate();
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
     assertTrue(projectID.isEnabled());
@@ -320,7 +319,6 @@ public class RunOptionsDefaultsComponentTest {
         component.verifyStagingLocationJob.getFuture();
     waitForFuture(verifyResult);
     waitForFuture(fetchResult);
-    component.validate();
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
     assertTrue(projectID.isEnabled());
@@ -340,7 +338,6 @@ public class RunOptionsDefaultsComponentTest {
     ListenableFuture<VerifyStagingLocationResult> verifyResult =
         component.verifyStagingLocationJob.getFuture();
     waitForFuture(verifyResult);
-    component.validate();
     bot.waitUntil(widgetIsEnabled(new SWTBotButton(createButton)));
     assertTrue(verifyResult.isDone());
     assertTrue(selector.isEnabled());
@@ -422,6 +419,7 @@ public class RunOptionsDefaultsComponentTest {
   public void testPartialValidity_account() {
     testPartialValidity_allEmpty();      
     component.selectAccount("alice@example.com");
+    spinEvents();
     assertTrue("should be complete with account", page.isPageComplete());
   }
   
@@ -429,13 +427,7 @@ public class RunOptionsDefaultsComponentTest {
   public void testPartialValidity_account_project() throws InterruptedException {
     testPartialValidity_account();
     component.setCloudProjectText("project");
-    int i = 0;
-    do {
-      while (Display.getCurrent().readAndDispatch()) {
-        // spin
-      }
-      Thread.sleep(50);
-    } while (i++ < 200 && !page.isPageComplete());
+    waitUntilResolvedProject();
 
     assertTrue("should be complete with account and project", page.isPageComplete());
   }
@@ -450,7 +442,7 @@ public class RunOptionsDefaultsComponentTest {
       @Override
       public boolean test() throws Exception {
         if (Display.getCurrent() != null) {
-          // seems surprising that this is required?
+          // surprising that waitUntil() doesn't spin the event loop
           while (Display.getCurrent().readAndDispatch());
         }
         return future.isDone();
@@ -461,6 +453,8 @@ public class RunOptionsDefaultsComponentTest {
         return "Future never done";
       }
     });
+    // and force a validation
+    component.validate();
   }
 
   /**
@@ -471,7 +465,7 @@ public class RunOptionsDefaultsComponentTest {
       @Override
       public boolean test() throws Exception {
         if (Display.getCurrent() != null) {
-          // seems surprising that this is required?
+          // surprising that waitUntil() doesn't spin the event loop
           while (Display.getCurrent().readAndDispatch());
         }
         return component.getProject() != null;
@@ -482,6 +476,8 @@ public class RunOptionsDefaultsComponentTest {
         return "RuntimeOptions project was never resolved";
       }
     });
+    // and force a validation
+    component.validate();
   }
 
   /**
@@ -490,6 +486,8 @@ public class RunOptionsDefaultsComponentTest {
   private void spinEvents() {
     // does a syncExec
     bot.shells();
+    // and force a validation
+    component.validate();
   }
 
 
