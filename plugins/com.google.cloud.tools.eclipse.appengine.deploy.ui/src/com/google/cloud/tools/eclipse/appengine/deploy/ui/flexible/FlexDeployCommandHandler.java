@@ -54,7 +54,7 @@ public class FlexDeployCommandHandler extends DeployCommandHandler {
 
     String appYamlPath = new FlexDeployPreferences(project).getAppYamlPath();
     IFile appYaml = project.getFile(appYamlPath);
-    if (appYaml.exists()) {
+    if (!appYaml.exists()) {
       throw new CoreException(StatusUtil.error(this, appYaml + " does not exist."));
     }
     IPath appEngineDirectory = appYaml.getParent().getLocation();
