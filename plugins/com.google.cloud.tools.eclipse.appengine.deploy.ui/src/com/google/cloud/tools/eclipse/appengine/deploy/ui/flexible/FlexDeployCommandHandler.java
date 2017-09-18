@@ -28,6 +28,7 @@ import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexWarFacet;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
+import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.base.Preconditions;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -53,7 +54,9 @@ public class FlexDeployCommandHandler extends DeployCommandHandler {
 
     String appYamlPath = new FlexDeployPreferences(project).getAppYamlPath();
     IFile appYaml = project.getFile(appYamlPath);
-    Preconditions.checkState(appYaml.exists(), "Invalid app.yaml path from project preferences.");
+    if (appYaml.exists()) {
+      throw new CoreException(StatusUtil.error(this, appYaml + " does not exist."));
+    }
     IPath appEngineDirectory = appYaml.getParent().getLocation();
 
     if (AppEngineFlexWarFacet.hasFacet(facetedProject)) {
