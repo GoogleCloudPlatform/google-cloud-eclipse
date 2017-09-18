@@ -22,14 +22,6 @@
     on a full build.
    -->
 
-  <!--
-    <dependency>
-      <groupId>com.google.cloud.tools.login</groupId>
-      <artifactId>plugins-login-common</artifactId>
-      <version>0.1.1-SNAPSHOT</version>
-    </dependency>
-  -->
-
   <build>
     <plugins>
       <!-- Copy listed dependencies to lib/ -->
@@ -138,6 +130,12 @@
                   <groupId>com.google.oauth-client</groupId>
                   <artifactId>google-oauth-client-java6</artifactId>
                   <version>1.22.0</version>
+                </artifactItem>
+
+                <artifactItem>
+                  <groupId>com.google.cloud.tools.login</groupId>
+                  <artifactId>plugins-login-common</artifactId>
+                  <version>0.1.0</version>
                 </artifactItem>
               </artifactItems>
             </configuration>
