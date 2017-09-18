@@ -16,8 +16,11 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.ui.flexible;
 
+import static org.hamcrest.CoreMatchers.endsWith;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexJarFacet;
 import com.google.cloud.tools.eclipse.appengine.facets.AppEngineFlexWarFacet;
@@ -47,6 +50,18 @@ public class FlexDeployCommandHandlerTest {
   @Rule public TestProjectCreator flexWarProjectCreator = new TestProjectCreator()
       .withFacetVersions(
           JavaFacet.VERSION_1_8, WebFacetUtils.WEB_31, AppEngineFlexWarFacet.FACET_VERSION);
+
+  @Test
+  public void testGetStagingDelegate_exceptionIfAppYamlDoesNotExist() {
+    try {
+      FlexDeployCommandHandler handler = new FlexDeployCommandHandler();
+      handler.getStagingDelegate(javaProjectCreator.getProject());
+      fail();
+    } catch (CoreException e) {
+      // The path separator is always '/' (IPath.SEPARATOR) regardless of platforms.
+      assertThat(e.getMessage(), endsWith("/src/main/appengine/app.yaml does not exist."));
+    }
+  }
 
   @Test
   public void testDeployContextMenu_hiddenForNonFlexProject() {
