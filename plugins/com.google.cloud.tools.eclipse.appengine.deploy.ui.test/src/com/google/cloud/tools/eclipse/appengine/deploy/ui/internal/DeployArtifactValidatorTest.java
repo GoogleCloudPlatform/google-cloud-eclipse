@@ -70,7 +70,7 @@ public class DeployArtifactValidatorTest {
 
     IStatus result = pathValidator.validate();
     assertEquals(IStatus.ERROR, result.getSeverity());
-    assertEquals("Enter WAR or JAR path.", result.getMessage());
+    assertEquals("Missing WAR or JAR path.", result.getMessage());
   }
 
   @Test

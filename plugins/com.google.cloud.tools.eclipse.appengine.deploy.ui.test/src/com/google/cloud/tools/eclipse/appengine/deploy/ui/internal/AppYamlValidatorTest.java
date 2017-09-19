@@ -72,7 +72,7 @@ public class AppYamlValidatorTest {
 
     IStatus result = pathValidator.validate();
     assertEquals(IStatus.ERROR, result.getSeverity());
-    assertEquals("Enter app.yaml path.", result.getMessage());
+    assertEquals("Missing app.yaml path.", result.getMessage());
   }
 
   @Test
