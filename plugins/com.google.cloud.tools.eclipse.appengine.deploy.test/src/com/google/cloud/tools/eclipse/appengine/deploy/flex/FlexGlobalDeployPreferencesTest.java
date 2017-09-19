@@ -17,71 +17,72 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.flex;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.service.prefs.BackingStoreException;
 
-public class FlexDeployPreferencesTest {
+public class FlexGlobalDeployPreferencesTest {
 
-  private FlexDeployPreferences preferences;
+  private FlexGlobalDeployPreferences preferences;
   private IEclipsePreferences preferenceStore;
 
   @Before
   public void setUp() {
-    IProject project = mock(IProject.class);
-    when(project.getName()).thenReturn("");
-    preferences = new FlexDeployPreferences(project);
+    preferences = new FlexGlobalDeployPreferences();
     preferenceStore =
-        new ProjectScope(project).getNode("com.google.cloud.tools.eclipse.appengine.deploy");
+        InstanceScope.INSTANCE.getNode("com.google.cloud.tools.eclipse.appengine.deploy");
   }
 
   @After
   public void tearDown() throws BackingStoreException {
-    preferenceStore.removeNode();
+    preferenceStore.clear();
   }
 
   @Test
   public void testDefaultAppYamlPath() {
-    assertEquals("src/main/appengine/app.yaml", FlexDeployPreferences.DEFAULT_APP_YAML_PATH);
-    assertEquals(preferences.getAppYamlPath(), "src/main/appengine/app.yaml");
+    assertEquals(preferences.getAppYamlPath(), "app.yaml");
   }
 
   @Test
   public void testSetAppYamlPath() {
-    assertEquals(preferences.getAppYamlPath(), "src/main/appengine/app.yaml");
-    preferences.setAppYamlPath("another/directory/app.yaml");
-    assertEquals("another/directory/app.yaml", preferences.getAppYamlPath());
+    preferences.setAppYamlPath("project/some/directory/app.yaml");
+    assertEquals("project/some/directory/app.yaml", preferences.getAppYamlPath());
     preferences.setAppYamlPath(null);
     assertEquals("", preferences.getAppYamlPath());
   }
 
   @Test
+  public void testSetDeployArtifactPath() {
+    preferences.setDeployArtifactPath("project/target/app.war");
+    assertEquals("project/target/app.war", preferences.getDeployArtifactPath());
+    preferences.setDeployArtifactPath(null);
+    assertEquals("", preferences.getDeployArtifactPath());
+  }
+
+  @Test
   public void testResetToDefault() {
-    preferences.setAppYamlPath("another/directory/app.yaml");
+    preferences.setAppYamlPath("project/some/directory/app.yaml");
     preferences.resetToDefaults();
-    assertEquals("src/main/appengine/app.yaml", preferences.getAppYamlPath());
+    assertEquals("app.yaml", preferences.getAppYamlPath());
   }
 
   @Test
   public void testDoesNotPersistWithoutSave() {
     assertEquals("", preferenceStore.get(FlexDeployPreferences.PREF_APP_YAML_PATH, ""));
-    preferences.setAppYamlPath("another/directory/app.yaml");
+    preferences.setAppYamlPath("project/some/directory/app.yaml");
     assertEquals("", preferenceStore.get(FlexDeployPreferences.PREF_APP_YAML_PATH, ""));
   }
 
   @Test
   public void testSave() throws BackingStoreException {
     assertEquals("", preferenceStore.get(FlexDeployPreferences.PREF_APP_YAML_PATH, ""));
-    preferences.setAppYamlPath("another/directory/app.yaml");
+    preferences.setAppYamlPath("project/some/directory/app.yaml");
     preferences.save();
-    assertEquals("another/directory/app.yaml",
+    assertEquals("project/some/directory/app.yaml",
         preferenceStore.get(FlexDeployPreferences.PREF_APP_YAML_PATH, ""));
   }
 }

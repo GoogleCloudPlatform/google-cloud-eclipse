@@ -45,8 +45,8 @@ public class FlexDeployPreferences extends DeployPreferences {
 
   @Override
   public void resetToDefaults() {
-    appYamlPath = DEFAULT_APP_YAML_PATH;
     super.resetToDefaults();
+    appYamlPath = DEFAULT_APP_YAML_PATH;
   }
 
   @Override

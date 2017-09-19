@@ -38,9 +38,9 @@ public class FlexGlobalDeployPreferences extends FlexDeployPreferences {
 
   @Override
   public void resetToDefaults() {
+    super.resetToDefaults();
     deployArtifactPath = DEFAULT_DEPLOY_ARTIFACT_PATH;
     setAppYamlPath(DEFAULT_APP_YAML_PATH);
-    super.resetToDefaults();
   }
 
   @Override
