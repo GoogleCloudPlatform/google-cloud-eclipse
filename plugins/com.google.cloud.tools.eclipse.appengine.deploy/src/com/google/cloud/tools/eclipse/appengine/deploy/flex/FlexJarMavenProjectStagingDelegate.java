@@ -16,9 +16,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.flex;
 
-import com.google.cloud.tools.appengine.api.AppEngineException;
-import com.google.cloud.tools.eclipse.appengine.deploy.CloudSdkStagingHelper;
-import com.google.cloud.tools.eclipse.appengine.deploy.Messages;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.maven.project.MavenProject;
@@ -26,10 +23,9 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
@@ -49,15 +45,11 @@ import org.eclipse.m2e.actions.MavenLaunchConstants;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.m2e.core.project.IMavenProjectRegistry;
-import org.eclipse.ui.console.MessageConsoleStream;
 
 public class FlexJarMavenProjectStagingDelegate extends FlexStagingDelegate {
 
-  private final IPath appEngineDirectory;
-
   public FlexJarMavenProjectStagingDelegate(IPath appEngineDirectory) {
     super(appEngineDirectory);
-    this.appEngineDirectory = appEngineDirectory;
   }
 
   @VisibleForTesting
@@ -136,35 +128,19 @@ public class FlexJarMavenProjectStagingDelegate extends FlexStagingDelegate {
   }
 
   @Override
-  public IStatus stage(IProject project, IPath stagingDirectory, IPath safeWorkDirectory,
-      MessageConsoleStream stdoutOutputStream, MessageConsoleStream stderrOutputStream,
-      IProgressMonitor monitor) {
+  protected IPath getDeployArtifact(IProject project, IPath safeWorkingDirectory,
+      IProgressMonitor monitor) throws CoreException {
     SubMonitor subMonitor = SubMonitor.convert(monitor, 200);
-
-    boolean result = stagingDirectory.toFile().mkdirs();
-    if (!result) {
-      return StatusUtil.error(this, "Could not create staging directory " + stagingDirectory);
-    }
 
     try {
       ILaunchConfiguration config = createMavenPackagingLaunchConfiguration(project);
       ILaunch launch = config.launch("run", subMonitor.newChild(100));
       if (!waitUntilLaunchTerminates(launch, monitor)) {
-        return Status.CANCEL_STATUS;
+        throw new OperationCanceledException();
       }
-
-      IPath jar = getFinalJarPath(project);
-      CloudSdkStagingHelper.stageFlexible(appEngineDirectory, jar, stagingDirectory,
-          subMonitor.newChild(60));
-      return Status.OK_STATUS;
-    } catch (AppEngineException ex) {
-      return StatusUtil.error(this, Messages.getString("deploy.job.staging.failed"), ex);
-    } catch (CoreException ex) {
-      return StatusUtil.error(this, "jar publishing failed", ex);
+      return getFinalJarPath(project);
     } catch (InterruptedException ex) {
-      return Status.CANCEL_STATUS;
-    } finally {
-      subMonitor.done();
+      throw new OperationCanceledException();
     }
   }
 
