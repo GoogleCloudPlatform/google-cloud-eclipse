@@ -54,7 +54,7 @@ public class DeployArtifactValidatorTest {
   }
 
   @Test
-  public void testContructor_nonAbsoluteBasePath() {
+  public void testConstructor_nonAbsoluteBasePath() {
     try {
       when(deployArtifactPath.getValue()).thenReturn("some.jar");
       new DeployArtifactValidator(new Path("non/absolute/base/path"), deployArtifactPath);

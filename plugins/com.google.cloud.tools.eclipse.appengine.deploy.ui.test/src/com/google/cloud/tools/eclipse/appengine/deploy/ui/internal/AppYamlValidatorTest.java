@@ -56,7 +56,7 @@ public class AppYamlValidatorTest {
   }
 
   @Test
-  public void testContructor_nonAbsoluteBasePath() {
+  public void testConstructor_nonAbsoluteBasePath() {
     try {
       when(appYamlPath.getValue()).thenReturn("app.yaml");
       new AppYamlValidator(new Path("non/absolute/base/path"), appYamlPath);
