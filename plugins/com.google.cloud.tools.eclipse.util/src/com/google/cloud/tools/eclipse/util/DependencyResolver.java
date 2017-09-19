@@ -45,7 +45,7 @@ public class DependencyResolver {
   /**
    * Returns all transitive runtime dependencies of the specified Maven artifact
    * including the artifact itself.
-   * 
+   *
    * @param groupId group ID of the Maven artifact to resolve
    * @param artifactId artifact ID of the Maven artifact to resolve
    * @param version version of the Maven artifact to resolve
@@ -55,11 +55,11 @@ public class DependencyResolver {
   public static Collection<Artifact> getTransitiveDependencies(
       String groupId, String artifactId, String version, IProgressMonitor monitor)
           throws CoreException {
-       
+
     final Artifact artifact = new DefaultArtifact(groupId + ":" + artifactId + ":" + version);
 
     IMavenExecutionContext context = MavenPlugin.getMaven().createExecutionContext();
-    
+
     ICallable<List<Artifact>> callable = new ICallable<List<Artifact>>() {
       @Override
       public List<Artifact> call(IMavenExecutionContext context, IProgressMonitor monitor)
@@ -67,17 +67,17 @@ public class DependencyResolver {
         DependencyFilter filter = DependencyFilterUtils.classpathFilter(JavaScopes.RUNTIME);
         // todo we'd prefer not to depend on m2e here
         RepositorySystem system = MavenPluginActivator.getDefault().getRepositorySystem();
-        
+
         CollectRequest collectRequest = new CollectRequest();
         collectRequest.setRoot(new Dependency(artifact, JavaScopes.RUNTIME));
         collectRequest.setRepositories(centralRepository(system));
-        final DependencyRequest request = new DependencyRequest(collectRequest, filter);
+        DependencyRequest request = new DependencyRequest(collectRequest, filter);
         RepositorySystemSession session = context.getRepositorySession();
 
         try {
           List<ArtifactResult> artifacts =
               system.resolveDependencies(session, request).getArtifactResults();
-          List<Artifact> dependencies = new ArrayList<>();    
+          List<Artifact> dependencies = new ArrayList<>();
           for (ArtifactResult result : artifacts) {
             Artifact dependency = result.getArtifact();
             dependencies.add(dependency);
@@ -90,7 +90,7 @@ public class DependencyResolver {
               "Possible corrupt artifact in local .m2 repository for " + artifact));
         }
       }
-      
+
     };
     return context.execute(callable, monitor);
   }

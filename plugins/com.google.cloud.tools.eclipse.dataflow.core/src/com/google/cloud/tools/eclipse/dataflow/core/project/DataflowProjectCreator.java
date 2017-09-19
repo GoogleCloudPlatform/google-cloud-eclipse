@@ -16,6 +16,8 @@
 
 package com.google.cloud.tools.eclipse.dataflow.core.project;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import com.google.cloud.tools.eclipse.dataflow.core.DataflowCorePlugin;
 import com.google.cloud.tools.eclipse.dataflow.core.natures.DataflowJavaProjectNature;
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.WritableDataflowPreferences;
@@ -23,9 +25,6 @@ import com.google.cloud.tools.eclipse.util.ArtifactRetriever;
 import com.google.cloud.tools.eclipse.util.JavaPackageValidator;
 import com.google.cloud.tools.eclipse.util.MavenCoordinatesValidator;
 import com.google.common.base.Strings;
-
-import static com.google.common.base.Preconditions.checkArgument;
-
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
@@ -221,11 +220,11 @@ public class DataflowProjectCreator implements IRunnableWithProgress {
 
   private Set<ArtifactVersion> defaultArchetypeVersions(DataflowProjectArchetype template, MajorVersion version) {
     checkArgument(template.getSdkVersions().contains(majorVersion));
-    
+
     String artifactId = template.getArtifactId();
     ArtifactVersion latestArchetype = ArtifactRetriever.DEFAULT.getLatestArtifactVersion(
         DataflowMavenCoordinates.GROUP_ID, artifactId, majorVersion.getVersionRange());
-    
+
     return Collections.singleton(
         latestArchetype == null ? version.getInitialVersion() : latestArchetype);
   }
