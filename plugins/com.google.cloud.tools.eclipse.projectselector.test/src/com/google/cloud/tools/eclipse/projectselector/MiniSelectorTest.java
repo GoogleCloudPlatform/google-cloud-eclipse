@@ -133,7 +133,7 @@ public class MiniSelectorTest {
 
       @Override
       public String getFailureMessage() {
-        return "MiniSelector project was never resolved";
+        return "project was never resolved: " + selector;
       }
     });
   }

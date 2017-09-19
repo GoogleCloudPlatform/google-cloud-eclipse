@@ -63,10 +63,12 @@ public class ProjectsProvider implements IStructuredContentProvider {
         @Override
         public void run() {
           if (!ProjectsProvider.this.viewer.getControl().isDisposed()) {
+            logger.info("FetchProjectsJob finished: triggering viewer.refresh()");
             ProjectsProvider.this.viewer.refresh();
           }
         }
       });
+      logger.info("inputChanged(): initiating FetchProjectsJob");
       fetchProjectsJob.schedule();
     } else {
       cancel();
@@ -95,12 +97,15 @@ public class ProjectsProvider implements IStructuredContentProvider {
         public void accept(GcpProject[] projects) {
           for (final GcpProject project : projects) {
             if (projectId.equals(project.getId())) {
+              logger.info("resolve(): initiating callback: found project " + project);
               callback.accept(project);
               return;
             }
           }
         }
       });
+    } else {
+      logger.warning("resolve(): no fetchProjectsJob found!");
     }
   }
 
@@ -124,6 +129,7 @@ public class ProjectsProvider implements IStructuredContentProvider {
     @Override
     protected GcpProject[] compute(IProgressMonitor monitor) throws Exception {
       List<GcpProject> projects = projectRepository.getProjects(credential);
+      logger.info("FetchProjectsJob: found: " + projects);
       return projects.toArray(new GcpProject[projects.size()]);
     }
 
