@@ -45,7 +45,7 @@ public class FlexGlobalDeployPreferences extends FlexDeployPreferences {
 
   @Override
   public void save() throws BackingStoreException {
-    preferenceStore.put(DEFAULT_DEPLOY_ARTIFACT_PATH, deployArtifactPath);
+    preferenceStore.put(PREF_DEPLOY_ARTIFACT_PATH, deployArtifactPath);
     super.save();
   }
 
