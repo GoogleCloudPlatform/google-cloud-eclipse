@@ -71,6 +71,7 @@ public class ProjectsProvider implements IStructuredContentProvider {
       logger.info("inputChanged(): initiating FetchProjectsJob");
       fetchProjectsJob.schedule();
     } else {
+      logger.info("cancel(): newInput = " + newInput);
       cancel();
     }
   }
@@ -79,6 +80,10 @@ public class ProjectsProvider implements IStructuredContentProvider {
   public Object[] getElements(Object inputElement) {
     if (fetchProjectsJob != null && inputElement == credential) {
       return fetchProjectsJob.getComputationResult().or(EMPTY_PROJECTS);
+    } else if (fetchProjectsJob == null) {
+      logger.warning("getElements(): fetchProjectsJobs is null");
+    } else if (inputElement != credential) {
+      logger.warning("getElements(): different credential: " + inputElement);
     }
     return EMPTY_PROJECTS;
   }
@@ -123,6 +128,7 @@ public class ProjectsProvider implements IStructuredContentProvider {
 
     public FetchProjectsJob() {
       super("Determining accessible projects");
+      logger.info("FetchProjectsJob() created");
       this.credential = ProjectsProvider.this.credential;
     }
 

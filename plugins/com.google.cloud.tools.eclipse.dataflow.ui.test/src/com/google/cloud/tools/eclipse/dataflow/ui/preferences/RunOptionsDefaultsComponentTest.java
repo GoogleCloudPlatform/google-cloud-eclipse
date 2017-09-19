@@ -53,6 +53,7 @@ import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
+import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import com.google.cloud.tools.login.Account;
@@ -63,6 +64,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.widgets.Button;
@@ -85,6 +87,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class RunOptionsDefaultsComponentTest {
 
   @Rule public ShellTestResource shellResource = new ShellTestResource();
+  @Rule
+  public ThreadDumpingWatchdog watchdog = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
 
   @Mock private DataflowPreferences preferences;
   @Mock private MessageTarget messageTarget;
