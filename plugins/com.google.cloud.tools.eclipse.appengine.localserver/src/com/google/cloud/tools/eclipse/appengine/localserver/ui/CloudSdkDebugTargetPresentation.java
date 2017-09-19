@@ -17,7 +17,6 @@
 package com.google.cloud.tools.eclipse.appengine.localserver.ui;
 
 import com.google.cloud.tools.eclipse.appengine.localserver.Messages;
-import com.google.cloud.tools.eclipse.appengine.localserver.server.LocalAppEngineServerLaunchConfigurationDelegate;
 import com.google.cloud.tools.eclipse.ui.util.images.SharedImages;
 import java.util.logging.Level;
 import java.util.logging.Logger;
