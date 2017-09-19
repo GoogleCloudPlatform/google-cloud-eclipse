@@ -130,12 +130,12 @@ public class FlexJarMavenProjectStagingDelegate extends FlexStagingDelegate {
   @Override
   protected IPath getDeployArtifact(IProject project, IPath safeWorkingDirectory,
       IProgressMonitor monitor) throws CoreException {
-    SubMonitor subMonitor = SubMonitor.convert(monitor, 200);
+    SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
 
     try {
       ILaunchConfiguration config = createMavenPackagingLaunchConfiguration(project);
-      ILaunch launch = config.launch("run", subMonitor.newChild(100));
-      if (!waitUntilLaunchTerminates(launch, monitor)) {
+      ILaunch launch = config.launch("run", subMonitor.newChild(10));
+      if (!waitUntilLaunchTerminates(launch, subMonitor.newChild(90))) {
         throw new OperationCanceledException();
       }
       return getFinalJarPath(project);
