@@ -74,15 +74,23 @@ public class FlexGlobalDeployPreferencesTest {
   public void testDoesNotPersistWithoutSave() {
     assertEquals("", preferenceStore.get(FlexDeployPreferences.PREF_APP_YAML_PATH, ""));
     preferences.setAppYamlPath("project/some/directory/app.yaml");
+    preferences.setDeployArtifactPath("project/target/app.war");
     assertEquals("", preferenceStore.get(FlexDeployPreferences.PREF_APP_YAML_PATH, ""));
+    assertEquals("", preferenceStore.get(
+        FlexGlobalDeployPreferences.PREF_DEPLOY_ARTIFACT_PATH, ""));
   }
 
   @Test
   public void testSave() throws BackingStoreException {
     assertEquals("", preferenceStore.get(FlexDeployPreferences.PREF_APP_YAML_PATH, ""));
+    assertEquals("", preferenceStore.get(
+        FlexGlobalDeployPreferences.PREF_DEPLOY_ARTIFACT_PATH, ""));
     preferences.setAppYamlPath("project/some/directory/app.yaml");
+    preferences.setDeployArtifactPath("project/target/app.war");
     preferences.save();
     assertEquals("project/some/directory/app.yaml",
         preferenceStore.get(FlexDeployPreferences.PREF_APP_YAML_PATH, ""));
+    assertEquals("project/target/app.war",
+        preferenceStore.get(FlexGlobalDeployPreferences.PREF_DEPLOY_ARTIFACT_PATH, ""));
   }
 }
