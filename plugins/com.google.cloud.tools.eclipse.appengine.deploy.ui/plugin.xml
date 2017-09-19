@@ -32,7 +32,7 @@
         <and>
           <count value="1" />
           <iterate>
-            <reference definitionId="com.google.cloud.tools.eclipse.appengine.onlyInStandardProjects" />
+            <reference definitionId="com.google.cloud.tools.eclipse.appengine.onlyForStandardProjects" />
           </iterate>
         </and>
       </enabledWhen>
@@ -40,7 +40,7 @@
   </extension>
 
   <extension point="org.eclipse.core.expressions.definitions">
-    <definition id="com.google.cloud.tools.eclipse.appengine.onlyInStandardProjects">
+    <definition id="com.google.cloud.tools.eclipse.appengine.onlyForStandardProjects">
       <adapt type="org.eclipse.core.resources.IProject">
         <test
             property="org.eclipse.wst.common.project.facet.core.projectFacet"
@@ -80,7 +80,10 @@
         <and>
           <count value="1" />
           <iterate>
-            <reference definitionId="com.google.cloud.tools.eclipse.appengine.onlyInFlexProjects" />
+            <or>
+              <reference definitionId="com.google.cloud.tools.eclipse.appengine.onlyForFlexWarProjects" />
+              <reference definitionId="com.google.cloud.tools.eclipse.appengine.onlyForFlexJarMavenProjects" />
+            </or>
           </iterate>
         </and>
       </enabledWhen>
@@ -88,11 +91,26 @@
   </extension>
 
   <extension point="org.eclipse.core.expressions.definitions">
-    <definition id="com.google.cloud.tools.eclipse.appengine.onlyInFlexProjects">
+    <definition id="com.google.cloud.tools.eclipse.appengine.onlyForFlexWarProjects">
       <adapt type="org.eclipse.core.resources.IProject">
         <test
             property="org.eclipse.wst.common.project.facet.core.projectFacet"
             value="com.google.cloud.tools.eclipse.appengine.facets.flex" />
+      </adapt>
+    </definition>
+  </extension>
+
+  <extension point="org.eclipse.core.expressions.definitions">
+    <definition id="com.google.cloud.tools.eclipse.appengine.onlyForFlexJarMavenProjects">
+      <adapt type="org.eclipse.core.resources.IProject">
+        <and>
+          <test
+              property="org.eclipse.wst.common.project.facet.core.projectFacet"
+              value="com.google.cloud.tools.eclipse.appengine.facets.flex.jar" />
+          <test
+              property="org.eclipse.core.resources.projectNature"
+              value="org.eclipse.m2e.core.maven2Nature" />
+        </and>
       </adapt>
     </definition>
   </extension>

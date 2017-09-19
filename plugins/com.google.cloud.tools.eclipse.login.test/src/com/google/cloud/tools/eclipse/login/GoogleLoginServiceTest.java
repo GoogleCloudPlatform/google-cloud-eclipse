@@ -211,7 +211,7 @@ public class GoogleLoginServiceTest {
 
   @Test
   public void testGetGoogleLoginUrl() {
-    String customRedirectUrl = "http://127.0.0.1:12345/Callback";
+    String customRedirectUrl = "http://127.0.0.1:12345/Consumer";
 
     String loginUrl = GoogleLoginService.getGoogleLoginUrl(customRedirectUrl);
     assertTrue(loginUrl.startsWith("https://accounts.google.com/o/oauth2/auth?"));

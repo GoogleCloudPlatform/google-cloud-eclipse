@@ -25,7 +25,7 @@ import org.eclipse.wst.common.project.facet.core.IProjectFacet;
 import org.eclipse.wst.common.project.facet.core.IProjectFacetVersion;
 import org.eclipse.wst.common.project.facet.core.ProjectFacetsManager;
 
-public class AppEngineFlexFacet {
+public class AppEngineFlexWarFacet {
   public static final String ID = "com.google.cloud.tools.eclipse.appengine.facets.flex";
   public static final String VERSION = "1";
 
@@ -33,10 +33,10 @@ public class AppEngineFlexFacet {
   public static final IProjectFacetVersion FACET_VERSION = FACET.getVersion(VERSION);
 
   /**
-   * Returns true if project has the App Engine Flex facet and false otherwise.
+   * Returns true if project has the App Engine Flex WAR facet and false otherwise.
    *
    * @param project should not be null
-   * @return true if project has the App Engine Flex facet and false otherwise
+   * @return true if project has the App Engine Flex WAR facet and false otherwise
    */
   public static boolean hasFacet(IFacetedProject project) {
     Preconditions.checkNotNull(project);
@@ -44,7 +44,7 @@ public class AppEngineFlexFacet {
   }
 
   /**
-   * Installs the App Engine Flexible facet if {@code facetedProject} does not have it already.
+   * Installs the App Engine Flexible WAR facet if {@code facetedProject} does not have it already.
    *
    * @param facetedProject the faceted project receiving the App Engine facet
    * @param installDependentFacets true if the facets required by the App Engine facet should be

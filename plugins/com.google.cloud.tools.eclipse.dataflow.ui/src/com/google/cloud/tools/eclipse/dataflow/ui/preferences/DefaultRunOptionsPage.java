@@ -20,6 +20,7 @@ import com.google.cloud.tools.eclipse.dataflow.core.preferences.DataflowPreferen
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.WritableDataflowPreferences;
 import com.google.cloud.tools.eclipse.dataflow.ui.Messages;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.DialogPageMessageTarget;
+import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.preference.PreferencePage;
@@ -72,7 +73,8 @@ public class DefaultRunOptionsPage
    */
   private void updatePreferencesFromInputs() {
     preferences.setDefaultAccountEmail(runOptionsComponent.getAccountEmail());
-    preferences.setDefaultProject(runOptionsComponent.getProject());
+    GcpProject project = runOptionsComponent.getProject();
+    preferences.setDefaultProject(project == null ? null : project.getId());
     preferences.setDefaultStagingLocation(runOptionsComponent.getStagingLocation());
   }
 

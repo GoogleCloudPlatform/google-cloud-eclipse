@@ -128,7 +128,7 @@
           </iterate>
           <not>
             <iterate>
-              <reference definitionId="com.google.cloud.tools.eclipse.appengine.onlyInStandardProjects" />
+              <reference definitionId="com.google.cloud.tools.eclipse.appengine.onlyForStandardProjects" />
             </iterate>
           </not>
         </and>
@@ -137,16 +137,17 @@
   </extension>
   <!-- end App Engine standard facet -->
 
-  <!-- begin App Engine flex facet -->
+  <!-- begin App Engine flex WAR facet -->
   <extension point="org.eclipse.wst.common.project.facet.core.facets">
     <project-facet id="com.google.cloud.tools.eclipse.appengine.facets.flex">
-      <label>%flexFacetName</label>
-      <description>%flexFacetDescription</description>
+      <label>%flexWarFacetName</label>
+      <description>%flexWarFacetDescription</description>
     </project-facet>
     <project-facet-version facet="com.google.cloud.tools.eclipse.appengine.facets.flex" version="1">
       <constraint>
         <and>
           <conflicts facet="com.google.cloud.tools.eclipse.appengine.facets.standard"/>
+          <conflicts facet="com.google.cloud.tools.eclipse.appengine.facets.flex.jar"/>
           <requires facet="jst.web"
                     version="2.5,3.0,3.1">
           </requires>
@@ -180,19 +181,71 @@
 
   <extension point="org.eclipse.wst.common.project.facet.core.facets">
     <action
-      id="com.google.cloud.tools.eclipse.appengine.facets.flex.install.action"
-      facet="com.google.cloud.tools.eclipse.appengine.facets.flex"
-      type="INSTALL">
+        id="com.google.cloud.tools.eclipse.appengine.facets.flex.install.action"
+        facet="com.google.cloud.tools.eclipse.appengine.facets.flex"
+        type="INSTALL">
       <delegate class="com.google.cloud.tools.eclipse.appengine.facets.FlexFacetInstallDelegate"/>
     </action>
     <action
-      id="com.google.cloud.tools.eclipse.appengine.facets.flex.uninstall.action"
-      facet="com.google.cloud.tools.eclipse.appengine.facets.flex"
-      type="UNINSTALL">
+        id="com.google.cloud.tools.eclipse.appengine.facets.flex.uninstall.action"
+        facet="com.google.cloud.tools.eclipse.appengine.facets.flex"
+        type="UNINSTALL">
       <delegate class="com.google.cloud.tools.eclipse.appengine.facets.FlexFacetUninstallDelegate"/>
     </action>
   </extension>
-  <!-- end App Engine flex facet -->
+  <!-- end App Engine flex WAR facet -->
+
+  <!-- begin App Engine flex JAR facet -->
+  <extension point="org.eclipse.wst.common.project.facet.core.facets">
+    <project-facet id="com.google.cloud.tools.eclipse.appengine.facets.flex.jar">
+      <label>%flexJarFacetName</label>
+      <description>%flexJarFacetDescription</description>
+    </project-facet>
+    <project-facet-version facet="com.google.cloud.tools.eclipse.appengine.facets.flex.jar" version="1">
+      <constraint>
+        <and>
+          <conflicts facet="com.google.cloud.tools.eclipse.appengine.facets.standard"/>
+          <conflicts facet="com.google.cloud.tools.eclipse.appengine.facets.flex"/>
+          <conflicts facet="jst.web"/>
+          <requires facet="java"
+                    version="1.7,1.8">
+          </requires>
+        </and>
+      </constraint>
+    </project-facet-version>
+  </extension>
+
+  <extension
+        point="org.eclipse.wst.common.project.facet.core.presets">
+     <static-preset
+           id="com.google.cloud.tools.eclipse.appengine.flexible.jar.preset">
+        <label>%appengine.flexible.jar.preset</label>
+        <facet
+              id="com.google.cloud.tools.eclipse.appengine.facets.flex.jar"
+              version="1">
+        </facet>
+        <facet
+              id="java"
+              version="1.8">
+        </facet>
+     </static-preset>
+  </extension>
+
+  <extension point="org.eclipse.wst.common.project.facet.core.facets">
+    <action
+        id="com.google.cloud.tools.eclipse.appengine.facets.flex.jar.install.action"
+        facet="com.google.cloud.tools.eclipse.appengine.facets.flex.jar"
+        type="INSTALL">
+      <delegate class="com.google.cloud.tools.eclipse.appengine.facets.FlexFacetInstallDelegate"/>
+    </action>
+    <action
+        id="com.google.cloud.tools.eclipse.appengine.facets.flex.jar.uninstall.action"
+        facet="com.google.cloud.tools.eclipse.appengine.facets.flex.jar"
+        type="UNINSTALL">
+      <delegate class="com.google.cloud.tools.eclipse.appengine.facets.FlexFacetUninstallDelegate"/>
+    </action>
+  </extension>
+  <!-- end App Engine flex JAR facet -->
 
   <extension point="org.eclipse.core.contenttype.contentTypes">
     <content-type id="yaml"

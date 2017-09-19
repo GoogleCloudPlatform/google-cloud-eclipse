@@ -16,9 +16,8 @@
 
 package com.google.cloud.tools.eclipse.dataflow.ui.preferences;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.cloud.tools.eclipse.dataflow.core.preferences.DataflowPreferences;
 import com.google.cloud.tools.eclipse.dataflow.core.project.FetchStagingLocationsJob;
 import com.google.cloud.tools.eclipse.dataflow.core.project.GcsDataflowProjectClient;
@@ -29,29 +28,35 @@ import com.google.cloud.tools.eclipse.dataflow.ui.DataflowUiPlugin;
 import com.google.cloud.tools.eclipse.dataflow.ui.Messages;
 import com.google.cloud.tools.eclipse.dataflow.ui.page.MessageTarget;
 import com.google.cloud.tools.eclipse.dataflow.ui.util.ButtonFactory;
-import com.google.cloud.tools.eclipse.dataflow.ui.util.DisplayExecutor;
 import com.google.cloud.tools.eclipse.dataflow.ui.util.SelectFirstMatchingPrefixListener;
+import com.google.cloud.tools.eclipse.googleapis.GcpProjectServicesJob;
 import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
+import com.google.cloud.tools.eclipse.googleapis.internal.GoogleApi;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
+import com.google.cloud.tools.eclipse.projectselector.MiniSelector;
+import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
+import com.google.cloud.tools.eclipse.ui.util.DisplayExecutor;
 import com.google.cloud.tools.eclipse.ui.util.databinding.BucketNameValidator;
+import com.google.cloud.tools.eclipse.util.jobs.Consumer;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.google.common.base.Verify;
 import com.google.common.collect.ImmutableSortedSet;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.SortedSet;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.FocusAdapter;
-import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -63,8 +68,8 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 
 /**
@@ -86,16 +91,19 @@ public class RunOptionsDefaultsComponent {
   private final DisplayExecutor displayExecutor;
   private final MessageTarget messageTarget;
   private final Composite target;
-  
+
   /**
    * If true, then this component is allowed to be partially-complete.
    */
   private final boolean allowIncomplete;
 
   private final AccountSelector accountSelector;
-  private final Text projectInput;
+  private final MiniSelector projectInput;
   private final Combo stagingLocationInput;
   private final Button createButton;
+
+  private GcpProjectServicesJob checkProjectConfigurationJob;
+  private VerifyStagingLocationJob verifyJob;
   private SelectFirstMatchingPrefixListener completionListener;
   private ControlDecoration stagingLocationResults;
 
@@ -119,9 +127,9 @@ public class RunOptionsDefaultsComponent {
   @VisibleForTesting
   RunOptionsDefaultsComponent(Composite target, int columns, MessageTarget messageTarget,
       DataflowPreferences preferences, WizardPage page, boolean allowIncomplete,
-      IGoogleLoginService loginService,
-      IGoogleApiFactory apiFactory) {
-    checkArgument(columns >= 3, "DefaultRunOptions must be in a Grid with at least 3 columns"); //$NON-NLS-1$
+      IGoogleLoginService loginService, IGoogleApiFactory apiFactory) {
+    Preconditions.checkArgument(columns >= 3,
+        "DefaultRunOptions must be in a Grid with at least 3 columns"); //$NON-NLS-1$
     this.target = target;
     this.page = page;
     this.messageTarget = messageTarget;
@@ -136,7 +144,7 @@ public class RunOptionsDefaultsComponent {
 
     Label projectInputLabel = new Label(target, SWT.NULL);
     projectInputLabel.setText(Messages.getString("cloud.platform.project.id")); //$NON-NLS-1$
-    projectInput = new Text(target, SWT.SINGLE | SWT.BORDER);
+    projectInput = new MiniSelector(target, apiFactory);
 
     Label comboLabel = new Label(target, SWT.NULL);
     stagingLocationInput = new Combo(target, SWT.DROP_DOWN);
@@ -153,8 +161,9 @@ public class RunOptionsDefaultsComponent {
     accountSelector.selectAccount(preferences.getDefaultAccountEmail());
 
     // Initialize the Default Project, which is used to populate the Staging Location field
-    String project = preferences.getDefaultProject();
-    projectInput.setText(Strings.nullToEmpty(project));
+    projectInput.setCredential(accountSelector.getSelectedCredential());
+    String projectId = preferences.getDefaultProject();
+    projectInput.setProject(projectId);
 
     comboLabel.setText(Messages.getString("cloud.storage.staging.location")); //$NON-NLS-1$
 
@@ -168,7 +177,7 @@ public class RunOptionsDefaultsComponent {
 
     // Project input occupies a single row
     projectInputLabel.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false, 1, 1));
-    projectInput.setLayoutData(
+    projectInput.getControl().setLayoutData(
         new GridData(SWT.FILL, SWT.CENTER, true, false, columns - PROJECT_INPUT_SPENT_COLUMNS, 1));
 
     // Staging Location, Combo, and Label occupy a single line
@@ -182,19 +191,20 @@ public class RunOptionsDefaultsComponent {
         // Don't use "removeAll()", as it will clear the text field too.
         stagingLocationInput.remove(0, stagingLocationInput.getItemCount() - 1);
         completionListener.setContents(ImmutableSortedSet.<String>of());
-        updateStagingLocations(getProject(), 0); // no delay
+        projectInput.setCredential(accountSelector.getSelectedCredential());
+        updateStagingLocations(0); // no delay
         validate();
       }
     });
 
-    projectInput.addModifyListener(new ModifyListener() {
+    projectInput.addSelectionChangedListener(new ISelectionChangedListener() {
       @Override
-      public void modifyText(ModifyEvent e) {
-        updateStagingLocations(getProject(), NEXT_KEY_DELAY_MS);
+      public void selectionChanged(SelectionChangedEvent event) {
+        updateStagingLocations(0); // no delay
+        checkProjectConfiguration();
         validate();
       }
     });
-    projectInput.addFocusListener(new GetProjectStagingLocationsListener());
 
     completionListener = new SelectFirstMatchingPrefixListener(stagingLocationInput);
     stagingLocationInput.addModifyListener(completionListener);
@@ -209,7 +219,7 @@ public class RunOptionsDefaultsComponent {
     createButton.addSelectionListener(new CreateStagingLocationListener());
 
     startStagingLocationCheck(0); // no delay
-    updateStagingLocations(project, 0); // no delay
+    updateStagingLocations(0); // no delay
     messageTarget.setInfo(Messages.getString("set.pipeline.run.option.defaults")); //$NON-NLS-1$
     validate();
   }
@@ -217,6 +227,11 @@ public class RunOptionsDefaultsComponent {
   @VisibleForTesting
   void validate() {
     Preconditions.checkState(Display.getCurrent() != null, "Must be called on SWT UI thread");
+    // may be from deferred event
+    if (target.isDisposed()) {
+      return;
+    }
+
     // we set pageComplete to the value of `allowIncomplete` if the fields are valid
     setPageComplete(false);
     messageTarget.clear();
@@ -231,34 +246,52 @@ public class RunOptionsDefaultsComponent {
     }
 
     projectInput.setEnabled(true);
-    if (Strings.isNullOrEmpty(projectInput.getText())) {
+    if (projectInput.getProject() == null) {
       stagingLocationInput.setEnabled(false);
       createButton.setEnabled(false);
       setPageComplete(allowIncomplete);
       return;
     }
-    // FIXME: incorporate project verification here
 
+    if (checkProjectConfigurationJob != null && checkProjectConfigurationJob.isCurrent()) {
+      Optional<Object> result = checkProjectConfigurationJob.getComputation();
+      if (!result.isPresent()) {
+        messageTarget.setInfo("Verifying that project is enabled for dataflow...");
+        return;
+      } else if (result.get() instanceof Exception) {
+        DataflowUiPlugin.logError((Exception) result.get(),
+            "Error checking project config for " + checkProjectConfigurationJob.getProjectId());
+        if (result.get() instanceof GoogleJsonResponseException) {
+          GoogleJsonResponseException exception = (GoogleJsonResponseException) result.get();
+          messageTarget.setError("Error checking project: " + exception.getDetails().getMessage());
+        } else {
+          messageTarget.setError("Could not check project: " + result.get());
+        }
+        return;
+      } else {
+        Verify.verify(result.get() instanceof Collection);
+        if (!((Collection<?>) result.get()).contains(GoogleApi.DATAFLOW_API.getServiceId())) {
+          messageTarget.setError("Project is not enabled for Cloud Dataflow");
+          return;
+        }
+      }
+    }
+    
     stagingLocationInput.setEnabled(true);
 
     // fetchStagingLocationsJob is a proxy for project checking
     if (fetchStagingLocationsJob != null) {
-      Future<SortedSet<String>> stagingLocationsFuture =
-          fetchStagingLocationsJob.getStagingLocations();
-      if (stagingLocationsFuture.isDone()) {
-        try {
-          // on error, will raise an exception
-          stagingLocationsFuture.get();
-        } catch (ExecutionException ex) {
+      if (fetchStagingLocationsJob.isCurrent()
+          && fetchStagingLocationsJob.isComputationComplete()) {
+        Optional<Exception> error = fetchStagingLocationsJob.getComputationError();
+        if (error.isPresent()) {
+          DataflowUiPlugin.logError(error.get(), "Exception while retrieving staging locations"); //$NON-NLS-1$
           messageTarget.setError(Messages.getString("could.not.retrieve.buckets.for.project", //$NON-NLS-1$
-              projectInput.getText()));
-          DataflowUiPlugin.logError(ex, "Exception while retrieving staging locations"); //$NON-NLS-1$
+              projectInput.getProject().getName()));
           return;
-        } catch (InterruptedException ex) {
-          DataflowUiPlugin.logError(ex, "Interrupted while retrieving staging locations"); //$NON-NLS-1$
         }
       } else {
-        // in progress
+        // check is still in progress or a new job is pending
         return;
       }
     }
@@ -279,27 +312,22 @@ public class RunOptionsDefaultsComponent {
       return;
     }
 
-    if (verifyStagingLocationJob == null) {
+    Optional<Object> verificationResult =
+        verifyStagingLocationJob != null && verifyStagingLocationJob.isCurrent()
+            ? verifyStagingLocationJob.getComputation()
+            : Optional.absent();
+    if (!verificationResult.isPresent()) {
       messageTarget.setInfo("Verifying staging location...");
       createButton.setEnabled(false);
       return;
-    }
-    Future<VerifyStagingLocationResult> verifyStagingLocationFuture = verifyStagingLocationJob.getVerifyResult();
-    if (!verifyStagingLocationFuture.isDone()) {
-      messageTarget.setInfo("Verifying staging location...");
-      createButton.setEnabled(false);
+    } else if (verificationResult.get() instanceof Exception) {
+      Exception error = (Exception) verificationResult.get();
+      DataflowUiPlugin.logWarning("Unable to verify staging location", error);
+      messageTarget.setError(Messages.getString("unable.verify.staging.location", bucketNamePart)); //$NON-NLS-1$
       return;
-    }
-
-    try {
-      VerifyStagingLocationResult result = verifyStagingLocationFuture.get();
-      if (!result.email.equals(accountSelector.getSelectedEmail())
-          || !result.stagingLocation.equals(getStagingLocation())) {
-        // stale; perhaps we should initiate verification of the staging location?
-        createButton.setEnabled(false);
-        return;
-      }
-
+    } else {
+      Verify.verify(verificationResult.get() instanceof VerifyStagingLocationResult);
+      VerifyStagingLocationResult result = (VerifyStagingLocationResult) verificationResult.get();
       if (result.accessible) {
         messageTarget.setInfo(Messages.getString("verified.bucket.is.accessible", bucketNamePart)); //$NON-NLS-1$
         createButton.setEnabled(false);
@@ -309,10 +337,35 @@ public class RunOptionsDefaultsComponent {
         messageTarget.setError(Messages.getString("could.not.fetch.bucket", bucketNamePart)); //$NON-NLS-1$
         createButton.setEnabled(true);
       }
-    } catch (InterruptedException | ExecutionException ex) {
-      DataflowUiPlugin.logWarning("Unable to verify staging location", ex);
-      messageTarget.setError(Messages.getString("unable.verify.staging.location", bucketNamePart)); //$NON-NLS-1$
     }
+  }
+
+  protected void checkProjectConfiguration() {
+    Credential selectedCredential = accountSelector.getSelectedCredential();
+    if (selectedCredential == null) {
+      return;
+    }
+    GcpProject project = projectInput.getProject();
+    if (project == null) {
+      return;
+    }
+    if (checkProjectConfigurationJob != null) {
+      if (project.getId().equals(checkProjectConfigurationJob.getProjectId())) {
+        // already in progress
+        return;
+      }
+      checkProjectConfigurationJob.cancel();
+    }
+
+    checkProjectConfigurationJob =
+        new GcpProjectServicesJob(apiFactory, selectedCredential, project.getId());
+    checkProjectConfigurationJob.getFuture().addListener(new Runnable() {
+      @Override
+      public void run() {
+        validate();
+      }
+    }, displayExecutor);
+    checkProjectConfigurationJob.schedule();
   }
 
   private GcsDataflowProjectClient getGcsClient() {
@@ -330,15 +383,15 @@ public class RunOptionsDefaultsComponent {
   }
 
   public void setCloudProjectText(String project) {
-    projectInput.setText(project);
+    projectInput.setProject(project);
   }
 
   public String getAccountEmail() {
     return accountSelector.getSelectedEmail();
   }
 
-  public String getProject() {
-    return projectInput.getText();
+  public GcpProject getProject() {
+    return projectInput.getProject();
   }
 
   public void setStagingLocationText(String stagingLocation) {
@@ -353,8 +406,13 @@ public class RunOptionsDefaultsComponent {
     accountSelector.addSelectionListener(listener);
   }
 
-  public void addModifyListener(ModifyListener listener) {
-    projectInput.addModifyListener(listener);
+  public void addModifyListener(final ModifyListener listener) {
+    projectInput.addSelectionChangedListener(new ISelectionChangedListener() {
+      @Override
+      public void selectionChanged(SelectionChangedEvent event) {
+        listener.modifyText(new ModifyEvent(new Event()));
+      }
+    });
     stagingLocationInput.addModifyListener(listener);
   }
 
@@ -370,48 +428,57 @@ public class RunOptionsDefaultsComponent {
    * combo.
    */
   @VisibleForTesting
-  void updateStagingLocations(String project, long scheduleDelay) {
+  void updateStagingLocations(long scheduleDelay) {
     Credential credential = accountSelector.getSelectedCredential();
     String selectedEmail = accountSelector.getSelectedEmail();
+    GcpProject project = projectInput.getProject();
     // Retrieving staging locations requires an authenticated user and project.
     // Check if there is an update is in progress; if it matches our user and project,
     // then quick-return, otherwise it is stale and should be cancelled.
     if (fetchStagingLocationsJob != null) {
-      if (Objects.equals(project, fetchStagingLocationsJob.getProject())
+      if (project != null
+          && Objects.equals(project.getId(), fetchStagingLocationsJob.getProjectId())
           && Objects.equals(selectedEmail, fetchStagingLocationsJob.getAccountEmail())
           && fetchStagingLocationsJob.getState() == Job.RUNNING) {
         return;
       }
-      fetchStagingLocationsJob.cancel();
+      fetchStagingLocationsJob.abandon();
     }
     fetchStagingLocationsJob = null;
 
-    if (!Strings.isNullOrEmpty(project) && credential != null) {
-      final FetchStagingLocationsJob thisJob = fetchStagingLocationsJob =
-          new FetchStagingLocationsJob(getGcsClient(), selectedEmail, project);
-      fetchStagingLocationsJob.getStagingLocations().addListener(new Runnable() {
+    if (project != null && credential != null) {
+      fetchStagingLocationsJob =
+          new FetchStagingLocationsJob(getGcsClient(), selectedEmail, project.getId());
+      fetchStagingLocationsJob.onSuccess(displayExecutor, new Consumer<SortedSet<String>>() {
         @Override
-        public void run() {
-          // check that this is same job (may have been cancelled in the interim)
-          if (!target.isDisposed() && fetchStagingLocationsJob == thisJob) {
-            // Update the Combo with the staging locations retrieved by the Job.
-            try {
-              SortedSet<String> stagingLocations = fetchStagingLocationsJob.getStagingLocations().get();
-              // Don't use "removeAll()", as it will clear the text field too.
-              stagingLocationInput.remove(0, stagingLocationInput.getItemCount() - 1);
-              for (String location : stagingLocations) {
-                stagingLocationInput.add(location);
-              }
-              completionListener.setContents(stagingLocations);
-            } catch (InterruptedException | ExecutionException ex) {
-              // ignored: handled by validate()
-            }
-            validate();
-          }
-        }
-      }, displayExecutor);
+        public void accept(SortedSet<String> stagingLocations) {
+          updateStagingLocations(stagingLocations);
+          validate(); // reports message back to UI
+        }});
+      fetchStagingLocationsJob.onError(displayExecutor, new Consumer<Exception>() {
+        @Override
+        public void accept(Exception exception) {
+          DataflowUiPlugin.logError(exception, "Exception while retrieving staging locations"); //$NON-NLS-1$
+          validate();
+        }});
       fetchStagingLocationsJob.schedule(scheduleDelay);
     }
+  }
+
+  /**
+   * Update the suggested staging locations combo box with the provided locations.
+   */
+  protected void updateStagingLocations(SortedSet<String> stagingLocations) {
+    if (target.isDisposed()) {
+      return;
+    }
+    // Don't use "removeAll()", as it will clear the text field too.
+    stagingLocationInput.remove(0, stagingLocationInput.getItemCount() - 1);
+    for (String location : stagingLocations) {
+      stagingLocationInput.add(location);
+    }
+    completionListener.setContents(stagingLocations);
+    validate();
   }
 
   /**
@@ -430,7 +497,7 @@ public class RunOptionsDefaultsComponent {
         return;
       }
       // Cancel any existing verifyStagingLocationJob
-      verifyStagingLocationJob.cancel();
+      verifyStagingLocationJob.abandon();
       verifyStagingLocationJob = null;
     }
 
@@ -438,30 +505,15 @@ public class RunOptionsDefaultsComponent {
       return;
     }
 
-    final VerifyStagingLocationJob thisJob = this.verifyStagingLocationJob =
+    verifyStagingLocationJob =
         new VerifyStagingLocationJob(getGcsClient(), accountEmail, stagingLocation);
-    verifyStagingLocationJob.getVerifyResult().addListener(new Runnable() {
+    verifyStagingLocationJob.onSuccess(displayExecutor, new Runnable() {
       @Override
       public void run() {
-        // check that this is same job (may have been cancelled in the interim)
-        if (!target.isDisposed() && verifyStagingLocationJob == thisJob) {
-          validate();
-        }
+        validate();
       }
-    }, displayExecutor);
+    });
     verifyStagingLocationJob.schedule(schedulingDelay);
-  }
-
-  /**
-   * Whenever focus is lost, retrieve all of the buckets and update the target combo with the
-   * retrieved buckets, and update the {@link SelectFirstMatchingPrefixListener} with new
-   * autocompletions.
-   */
-  private class GetProjectStagingLocationsListener extends FocusAdapter {
-    @Override
-    public void focusLost(FocusEvent event) {
-      updateStagingLocations(getProject(), 0); // no delay
-    }
   }
 
   /**
@@ -476,17 +528,17 @@ public class RunOptionsDefaultsComponent {
       }
       stagingLocationResults.hide();
 
-      String projectName = getProject();
+      GcpProject project = getProject();
       String stagingLocation = getStagingLocation();
-      StagingLocationVerificationResult result = getGcsClient().createStagingLocation(projectName,
-          stagingLocation, new NullProgressMonitor());
+      StagingLocationVerificationResult result = getGcsClient()
+          .createStagingLocation(project.getId(), stagingLocation, new NullProgressMonitor());
       if (result.isSuccessful()) {
         messageTarget.setInfo(Messages.getString("created.staging.location.at", stagingLocation)); //$NON-NLS-1$
         setPageComplete(true);
         createButton.setEnabled(false);
       } else {
-        messageTarget.setError(
-            Messages.getString("could.not.create.staging.location", stagingLocation)); //$NON-NLS-1$
+        messageTarget
+            .setError(Messages.getString("could.not.create.staging.location", stagingLocation)); //$NON-NLS-1$
         stagingLocationResults.show();
         stagingLocationResults.showHoverText(result.getMessage());
         setPageComplete(false);

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,26 +16,29 @@
 
 package com.google.cloud.tools.eclipse.googleapis.internal;
 
-import java.net.URI;
-import java.net.URISyntaxException;
+import static org.junit.Assert.assertNotNull;
 
-public enum GoogleApiUrl {
+import org.junit.Test;
 
-  APPENGINE_ADMIN_API("https://appengine.googleapis.com"),
-  CLOUDRESOURCE_MANAGER_API("https://cloudresourcemanager.googleapis.com"),
-  CLOUD_STORAGE_API("https://www.googleapis.com/storage/v1");
-
-  private final URI uri;
-
-  private GoogleApiUrl(String url) {
-    try {
-      uri = new URI(url);
-    } catch (URISyntaxException ex) {
-      throw new RuntimeException("Fix URL");
+public class GoogleApiTest {
+  @Test
+  public void testForServiceId() {
+    for (GoogleApi api : GoogleApi.values()) {
+      assertNotNull(GoogleApi.forServiceID(api.getServiceId()));
     }
   }
 
-  public URI toUri() {
-    return uri;
+  @Test
+  public void testHasName() {
+    for (GoogleApi api : GoogleApi.values()) {
+      assertNotNull(api.getName());
+    }
+  }
+
+  @Test
+  public void testHasUri() {
+    for (GoogleApi api : GoogleApi.values()) {
+      assertNotNull(api.toUri());
+    }
   }
 }

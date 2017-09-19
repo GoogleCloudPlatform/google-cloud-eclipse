@@ -20,7 +20,6 @@ import com.google.cloud.tools.eclipse.appengine.libraries.model.Library;
 import com.google.cloud.tools.eclipse.util.ClasspathUtil;
 import com.google.cloud.tools.eclipse.util.MavenUtils;
 import com.google.cloud.tools.eclipse.util.status.StatusUtil;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -83,7 +82,7 @@ public class BuildPath {
    * @return the entries added to the classpath.
    *     Does not include entries previously present in classpath.
    */
-  public static IClasspathEntry[] addLibraries(
+  static IClasspathEntry[] addLibraries(
       IJavaProject javaProject, List<Library> libraries, IProgressMonitor monitor)
           throws JavaModelException, CoreException {
 
@@ -129,8 +128,7 @@ public class BuildPath {
     return prepareLibraries(javaProject, libraries, monitor, false);
   }
 
-  @VisibleForTesting
-  static IClasspathEntry makeClasspathEntry(Library library) throws CoreException {
+  private static IClasspathEntry makeClasspathEntry(Library library) throws CoreException {
     IClasspathAttribute[] classpathAttributes = new IClasspathAttribute[1];
     if (library.isExport()) {
       boolean isWebApp = true;
