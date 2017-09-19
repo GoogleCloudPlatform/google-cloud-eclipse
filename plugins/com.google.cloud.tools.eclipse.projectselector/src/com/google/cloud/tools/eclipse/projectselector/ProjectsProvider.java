@@ -21,6 +21,7 @@ import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.cloud.tools.eclipse.ui.util.DisplayExecutor;
 import com.google.cloud.tools.eclipse.util.jobs.Consumer;
 import com.google.cloud.tools.eclipse.util.jobs.FuturisticJob;
+import com.google.common.annotations.VisibleForTesting;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.logging.Logger;
@@ -40,7 +41,9 @@ public class ProjectsProvider implements IStructuredContentProvider {
   private Executor displayExecutor;
   private Viewer viewer;
   private Credential credential; // the input
-  private FetchProjectsJob fetchProjectsJob;
+
+  @VisibleForTesting
+  FetchProjectsJob fetchProjectsJob;
 
   public ProjectsProvider(ProjectRepository projectRepository) {
     this.projectRepository = projectRepository;
@@ -55,24 +58,30 @@ public class ProjectsProvider implements IStructuredContentProvider {
   public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
     this.viewer = viewer;
     this.displayExecutor = DisplayExecutor.create(viewer.getControl().getDisplay());
-    if (newInput instanceof Credential && !viewer.getControl().isDisposed()) {
-      this.credential = (Credential) newInput;
-      cancel();
+    logger.info("ProjectsProvider.inputChanged(): newInput=" + newInput);
+    credential = (Credential) newInput;
+    if (fetchProjectsJob != null && !fetchProjectsJob.isStale()) {
+      logger.info("ProjectsProvider.inputChanged(): fetchProjectJob is still current; returning");
+      return;
+    }
+    if (fetchProjectsJob != null) {
+      logger.info("ProjectsProvider.inputChanged(): fetchProjectsJob.abandon()");
+      fetchProjectsJob.abandon();
+      fetchProjectsJob = null;
+    }
+    if (credential != null && viewer.getControl() != null && !viewer.getControl().isDisposed()) {
       fetchProjectsJob = new FetchProjectsJob();
       fetchProjectsJob.onSuccess(displayExecutor, new Runnable() {
         @Override
         public void run() {
           if (!ProjectsProvider.this.viewer.getControl().isDisposed()) {
-            logger.info("FetchProjectsJob finished: triggering viewer.refresh()");
+            logger.info("ProjectsProvider.FetchProjectsJob finished: triggering viewer.refresh()");
             ProjectsProvider.this.viewer.refresh();
           }
         }
       });
-      logger.info("inputChanged(): initiating FetchProjectsJob");
+      logger.info("ProjectsProvider.inputChanged(): scheduling new FetchProjectsJob");
       fetchProjectsJob.schedule();
-    } else {
-      logger.info("cancel(): newInput = " + newInput);
-      cancel();
     }
   }
 
@@ -123,7 +132,8 @@ public class ProjectsProvider implements IStructuredContentProvider {
   /**
    * Simple job for fetching projects accessible to the current account.
    */
-  private class FetchProjectsJob extends FuturisticJob<GcpProject[]> {
+  @VisibleForTesting
+  class FetchProjectsJob extends FuturisticJob<GcpProject[]> {
     private final Credential credential;
 
     public FetchProjectsJob() {

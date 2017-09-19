@@ -96,7 +96,8 @@ public class MiniSelector implements ISelectionProvider {
   public void setCredential(Credential credential) {
     // try to preserve the selection if possible
     GcpProject selected = getProject();
-    logger.info("setCredential(): selected project was " + selected);
+    logger.info(
+        "MiniSelector.setCredential(" + credential + "): saving selected project: " + selected);
     this.credential = credential;
     comboViewer.setInput(credential);
     if (selected != null) {
@@ -144,10 +145,12 @@ public class MiniSelector implements ISelectionProvider {
    * that ID.
    */
   public void setProject(final String projectId) {
-    logger.info("initiating provider.resolve(" + projectId + ")");
+    logger.info("MiniSelector.setProject(" + projectId + "): initiating provider.resolve("
+        + projectId + ")");
     projectsProvider.resolve(projectId, displayExecutor, new Consumer<GcpProject>() {
       public void accept(final GcpProject resolvedProject) {
-        logger.info("callback from provider.resolve(" + projectId + ")");
+        logger.info(
+            "MiniSelector: callback from provider.resolve(" + projectId + ")=" + resolvedProject);
         comboViewer.setSelection(new StructuredSelection(resolvedProject));
       }
     });
