@@ -38,7 +38,7 @@ public class FlexDeployPreferences extends DeployPreferences {
     this(new ProjectScope(project).getNode(PREFERENCE_STORE_QUALIFIER));
   }
 
-  public FlexDeployPreferences(IEclipsePreferences preferenceStore) {
+  protected FlexDeployPreferences(IEclipsePreferences preferenceStore) {
     super(preferenceStore);
     appYamlPath = preferenceStore.get(PREF_APP_YAML_PATH, DEFAULT_APP_YAML_PATH);
   }
