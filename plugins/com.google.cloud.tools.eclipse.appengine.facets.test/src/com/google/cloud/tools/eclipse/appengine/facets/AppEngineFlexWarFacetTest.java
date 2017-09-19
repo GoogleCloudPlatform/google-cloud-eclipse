@@ -33,102 +33,102 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AppEngineFlexFacetTest {
+public class AppEngineFlexWarFacetTest {
   @Mock private IFacetedProject facetedProject;
 
   @Test
   public void testFlexFacetExists() {
     Assert.assertEquals("com.google.cloud.tools.eclipse.appengine.facets.flex",
-        AppEngineFlexFacet.ID);
-    Assert.assertEquals("1", AppEngineFlexFacet.VERSION);
+        AppEngineFlexWarFacet.ID);
+    Assert.assertEquals("1", AppEngineFlexWarFacet.VERSION);
     Assert.assertTrue(
-        ProjectFacetsManager.isProjectFacetDefined(AppEngineFlexFacet.ID));
-    Assert.assertEquals(AppEngineFlexFacet.ID, AppEngineFlexFacet.FACET.getId());
-    Assert.assertEquals(AppEngineFlexFacet.VERSION,
-        AppEngineFlexFacet.FACET_VERSION.getVersionString());
+        ProjectFacetsManager.isProjectFacetDefined(AppEngineFlexWarFacet.ID));
+    Assert.assertEquals(AppEngineFlexWarFacet.ID, AppEngineFlexWarFacet.FACET.getId());
+    Assert.assertEquals(AppEngineFlexWarFacet.VERSION,
+        AppEngineFlexWarFacet.FACET_VERSION.getVersionString());
   }
 
   @Test
   public void testHasAppEngineFacet_withFacet() {
-    IProjectFacet projectFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexFacet.ID);
+    IProjectFacet projectFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexWarFacet.ID);
     when(facetedProject.hasProjectFacet(projectFacet)).thenReturn(true);
 
-    Assert.assertTrue(AppEngineFlexFacet.hasFacet(facetedProject));
+    Assert.assertTrue(AppEngineFlexWarFacet.hasFacet(facetedProject));
   }
 
   @Test
   public void testHasAppEngineFacet_withoutFacet() {
-    IProjectFacet projectFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexFacet.ID);
+    IProjectFacet projectFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexWarFacet.ID);
     when(facetedProject.hasProjectFacet(projectFacet)).thenReturn(false);
 
-    Assert.assertFalse(AppEngineFlexFacet.hasFacet(facetedProject));
+    Assert.assertFalse(AppEngineFlexWarFacet.hasFacet(facetedProject));
   }
 
   @Test
   public void testFacetLabel() {
-    IProjectFacet projectFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexFacet.ID);
-    Assert.assertEquals("App Engine Java Flexible Environment", projectFacet.getLabel());
+    IProjectFacet projectFacet = ProjectFacetsManager.getProjectFacet(AppEngineFlexWarFacet.ID);
+    Assert.assertEquals("App Engine Java Flexible Environment (WAR)", projectFacet.getLabel());
   }
 
   @Test
   public void testInstallConstraints_okWithJava7Servlet25() {
-    IConstraint constraint = AppEngineFlexFacet.FACET_VERSION.getConstraint();
+    IConstraint constraint = AppEngineFlexWarFacet.FACET_VERSION.getConstraint();
     IStatus result = constraint.check(Arrays.asList(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_25));
     Assert.assertTrue(result.isOK());
   }
 
   @Test
   public void testInstallConstraints_okWithJava7Servlet30() {
-    IConstraint constraint = AppEngineFlexFacet.FACET_VERSION.getConstraint();
+    IConstraint constraint = AppEngineFlexWarFacet.FACET_VERSION.getConstraint();
     IStatus result = constraint.check(Arrays.asList(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_30));
     Assert.assertTrue(result.isOK());
   }
 
   @Test
   public void testInstallConstraints_okWithJava7Servlet31() {
-    IConstraint constraint = AppEngineFlexFacet.FACET_VERSION.getConstraint();
+    IConstraint constraint = AppEngineFlexWarFacet.FACET_VERSION.getConstraint();
     IStatus result = constraint.check(Arrays.asList(JavaFacet.VERSION_1_7, WebFacetUtils.WEB_31));
     Assert.assertTrue(result.isOK());
   }
 
   @Test
   public void testInstallConstraints_okWithJava8Servlet25() {
-    IConstraint constraint = AppEngineFlexFacet.FACET_VERSION.getConstraint();
+    IConstraint constraint = AppEngineFlexWarFacet.FACET_VERSION.getConstraint();
     IStatus result = constraint.check(Arrays.asList(JavaFacet.VERSION_1_8, WebFacetUtils.WEB_25));
     Assert.assertTrue(result.isOK());
   }
 
   @Test
   public void testInstallConstraints_okWithJava8Servlet30() {
-    IConstraint constraint = AppEngineFlexFacet.FACET_VERSION.getConstraint();
+    IConstraint constraint = AppEngineFlexWarFacet.FACET_VERSION.getConstraint();
     IStatus result = constraint.check(Arrays.asList(JavaFacet.VERSION_1_8, WebFacetUtils.WEB_30));
     Assert.assertTrue(result.isOK());
   }
 
   @Test
   public void testInstallConstraints_okWithJava8Servlet31() {
-    IConstraint constraint = AppEngineFlexFacet.FACET_VERSION.getConstraint();
+    IConstraint constraint = AppEngineFlexWarFacet.FACET_VERSION.getConstraint();
     IStatus result = constraint.check(Arrays.asList(JavaFacet.VERSION_1_8, WebFacetUtils.WEB_31));
     Assert.assertTrue(result.isOK());
   }
 
   @Test
   public void testInstallConstraints_notOkWithNoJava() {
-    IConstraint constraint = AppEngineFlexFacet.FACET_VERSION.getConstraint();
+    IConstraint constraint = AppEngineFlexWarFacet.FACET_VERSION.getConstraint();
     IStatus result = constraint.check(Arrays.asList(WebFacetUtils.WEB_31));
     Assert.assertFalse(result.isOK());
   }
 
   @Test
   public void testInstallConstraints_notOkWithNoServlet() {
-    IConstraint constraint = AppEngineFlexFacet.FACET_VERSION.getConstraint();
+    IConstraint constraint = AppEngineFlexWarFacet.FACET_VERSION.getConstraint();
     IStatus result = constraint.check(Arrays.asList(JavaFacet.VERSION_1_8));
     Assert.assertFalse(result.isOK());
   }
 
   @Test
   public void testInstallConstraints_notOkWithServlet24() {
-    IConstraint constraint = AppEngineFlexFacet.FACET_VERSION.getConstraint();
+    IConstraint constraint = AppEngineFlexWarFacet.FACET_VERSION.getConstraint();
     IStatus result = constraint.check(Arrays.asList(JavaFacet.VERSION_1_8, WebFacetUtils.WEB_24));
     Assert.assertFalse(result.isOK());
   }

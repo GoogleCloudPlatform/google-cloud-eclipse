@@ -38,10 +38,14 @@ import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swtbot.swt.finder.SWTBot;
+import org.eclipse.swtbot.swt.finder.waits.DefaultCondition;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,6 +58,13 @@ public class MiniSelectorTest {
   public IGoogleApiFactory apiFactory;
   @Rule
   public ShellTestResource shellResource = new ShellTestResource();
+  
+  private SWTBot bot;
+
+  @Before
+  public void setUp() {
+    bot = new SWTBot(shellResource.getShell());
+  }
 
   @Test
   public void testNoCredential() {
@@ -72,7 +83,7 @@ public class MiniSelectorTest {
     assertNotNull(selector.getSelection());
     assertTrue(selector.getSelection().isEmpty());
     selector.setProject("foo.id");
-    spinEvents(); // setProject() waits for the project list to be returned
+    waitUntilResolvedProject(selector); // waits for the project list to be returned
 
     assertFalse(selector.getSelection().isEmpty());
     assertNotNull(selector.getProject());
@@ -89,30 +100,44 @@ public class MiniSelectorTest {
 
     assertNotNull(selector.getSelection());
     assertTrue(selector.getSelection().isEmpty());
-    final boolean[] calledAndCorrect = new boolean[] {false};
+    final ISelection[] lastSelection = new ISelection[1];
     selector.addSelectionChangedListener(new ISelectionChangedListener() {
       @Override
       public void selectionChanged(SelectionChangedEvent event) {
-        assertThat(event.getSelection(), instanceOf(IStructuredSelection.class));
-        IStructuredSelection selection = (IStructuredSelection) event.getSelection();
-        assertEquals(1, selection.size());
-        assertThat(selection.getFirstElement(), instanceOf(GcpProject.class));
-        GcpProject gcpProject = (GcpProject) selection.getFirstElement();
-        calledAndCorrect[0] =
-            "foo".equals(gcpProject.getName()) && "foo.id".equals(gcpProject.getId());
+        lastSelection[0] = event.getSelection();
       }
     });
-    assertFalse(calledAndCorrect[0]);
 
     selector.setProject("foo.id");
-    spinEvents(); // setProject() waits for the project list to be returned
+    waitUntilResolvedProject(selector); // waits for the project list to be returned
 
-    assertTrue(calledAndCorrect[0]);
+    assertThat(lastSelection[0], instanceOf(IStructuredSelection.class));
+    IStructuredSelection selection = (IStructuredSelection) lastSelection[0];
+    assertEquals(1, selection.size());
+    assertThat(selection.getFirstElement(), instanceOf(GcpProject.class));
+    GcpProject gcpProject = (GcpProject) selection.getFirstElement();
+    assertEquals("foo", gcpProject.getName());
+    assertEquals("foo.id", gcpProject.getId());
   }
 
-  private void spinEvents() {
-    while (Display.getCurrent().readAndDispatch());
+  private void waitUntilResolvedProject(final MiniSelector selector) {
+    bot.waitUntil(new DefaultCondition() {
+      @Override
+      public boolean test() throws Exception {
+        if (Display.getCurrent() != null) {
+          // seems surprising that waitUtil() doesn't spin the event loop
+          while (Display.getCurrent().readAndDispatch());
+        }
+        return selector.getProject() != null;
+      }
+
+      @Override
+      public String getFailureMessage() {
+        return "MiniSelector project was never resolved";
+      }
+    });
   }
+
 
   private void mockProjectsList(Credential credential,
       GcpProject... gcpProjects) {

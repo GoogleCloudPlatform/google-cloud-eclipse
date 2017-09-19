@@ -17,7 +17,6 @@
 package com.google.cloud.tools.eclipse.appengine.libraries.model;
 
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -27,6 +26,7 @@ import static org.junit.Assert.assertTrue;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import org.hamcrest.Matchers;
 import org.junit.Test;
 
 /**
@@ -44,10 +44,13 @@ public class CloudLibrariesInPluginXmlTest {
   @Test
   public void testLibrarySize() {
     assertThat(CloudLibraries.getLibraries("appengine").size(), is(3));
+    // There may be different number of servlet libraries depending on whether the
+    // .appengine.java.standard.java8 bundle is present
     List<Library> servletLibraries = CloudLibraries.getLibraries("servlet");
-    // todo in Eclipse this returns 4 (versions 2 and 3 of JSP and servlet libs)
-    // figure out why
-    assertEquals("wrong number of servlet libraries", 2, servletLibraries.size());
+    assertThat(servletLibraries, Matchers.hasItem(
+        Matchers.<Library>hasToString("Library: id=servlet-api-2.5; name=Servlet API 2.5")));
+    assertThat(servletLibraries, Matchers.hasItem(
+        Matchers.<Library>hasToString("Library: id=jsp-api-2.1; name=Java Server Pages API 2.1")));
   }
 
   @Test
