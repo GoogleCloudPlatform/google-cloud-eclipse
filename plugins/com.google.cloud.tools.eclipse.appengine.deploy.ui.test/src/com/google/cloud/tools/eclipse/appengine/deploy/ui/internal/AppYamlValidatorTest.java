@@ -67,6 +67,15 @@ public class AppYamlValidatorTest {
   }
 
   @Test
+  public void testValidate_emptyField() {
+    when(appYamlPath.getValue()).thenReturn("");
+
+    IStatus result = pathValidator.validate();
+    assertEquals(IStatus.ERROR, result.getSeverity());
+    assertEquals("Enter app.yaml path.", result.getMessage());
+  }
+
+  @Test
   public void testValidate_relativePathAndNoAppYaml() {
     when(appYamlPath.getValue()).thenReturn("relative/path/app.yaml");
 
