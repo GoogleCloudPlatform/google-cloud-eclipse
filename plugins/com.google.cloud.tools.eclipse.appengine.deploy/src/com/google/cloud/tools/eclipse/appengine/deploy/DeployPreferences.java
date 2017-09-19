@@ -16,7 +16,6 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
@@ -59,8 +58,7 @@ public class DeployPreferences {
     this(new ProjectScope(project).getNode(PREFERENCE_STORE_QUALIFIER));
   }
 
-  @VisibleForTesting
-  DeployPreferences(IEclipsePreferences preferenceStore) {
+  protected DeployPreferences(IEclipsePreferences preferenceStore) {
     this.preferenceStore = preferenceStore;
 
     accountEmail = preferenceStore.get(PREF_ACCOUNT_EMAIL, DEFAULT_ACCOUNT_EMAIL);

@@ -17,20 +17,29 @@
 package com.google.cloud.tools.eclipse.appengine.deploy.flex;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.DeployPreferences;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ProjectScope;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.osgi.service.prefs.BackingStoreException;
 
 public class FlexDeployPreferences extends DeployPreferences {
 
+  @VisibleForTesting
   static final String PREF_APP_YAML_PATH = "app.yaml.path";
 
-  public static final String DEFAULT_APP_YAML_PATH = "src/main/appengine/app.yaml";
+  @VisibleForTesting
+  static final String DEFAULT_APP_YAML_PATH = "src/main/appengine/app.yaml";
 
   private String appYamlPath;
 
   public FlexDeployPreferences(IProject project) {
-    super(project);
+    this(new ProjectScope(project).getNode(PREFERENCE_STORE_QUALIFIER));
+  }
+
+  public FlexDeployPreferences(IEclipsePreferences preferenceStore) {
+    super(preferenceStore);
     appYamlPath = preferenceStore.get(PREF_APP_YAML_PATH, DEFAULT_APP_YAML_PATH);
   }
 
