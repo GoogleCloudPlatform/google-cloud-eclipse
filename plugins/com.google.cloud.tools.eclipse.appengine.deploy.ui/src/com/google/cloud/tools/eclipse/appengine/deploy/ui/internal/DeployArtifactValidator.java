@@ -52,7 +52,8 @@ public class DeployArtifactValidator extends FixedMultiValidator {
     }
 
     if (!deployArtifact.exists()) {
-      return ValidationStatus.error(Messages.getString("error.deploy.artifact.non.existing"));
+      return ValidationStatus.error(
+          Messages.getString("error.deploy.artifact.non.existing", deployArtifact));
     } else if (!deployArtifact.isFile()) {
       return ValidationStatus.error(Messages.getString("error.not.a.file", deployArtifact));
     }

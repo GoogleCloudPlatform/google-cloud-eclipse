@@ -79,7 +79,8 @@ public class DeployArtifactValidatorTest {
 
     IStatus result = pathValidator.validate();
     assertEquals(IStatus.ERROR, result.getSeverity());
-    assertEquals("WAR or JAR does not exist.", result.getMessage());
+    assertEquals("File does not exist: "
+        + new Path(basePath + "/relative/path/some.jar").toOSString(), result.getMessage());
   }
 
   @Test
@@ -89,7 +90,8 @@ public class DeployArtifactValidatorTest {
 
     IStatus result = pathValidator.validate();
     assertEquals(IStatus.ERROR, result.getSeverity());
-    assertEquals("WAR or JAR does not exist.", result.getMessage());
+    assertEquals("File does not exist: " + new Path(absolutePath).toOSString(),
+        result.getMessage());
   }
 
   @Test
@@ -118,8 +120,8 @@ public class DeployArtifactValidatorTest {
 
     IStatus result = pathValidator.validate();
     assertEquals(IStatus.ERROR, result.getSeverity());
-    assertEquals("Not a file: " + new Path(basePath + "/some.war").toOSString(),
-        result.getMessage());
+    assertEquals("Path is a directory or not a normal file: "
+        + new Path(basePath + "/some.war").toOSString(), result.getMessage());
   }
 
   @Test
@@ -131,8 +133,8 @@ public class DeployArtifactValidatorTest {
 
     IStatus result = pathValidator.validate();
     assertEquals(IStatus.ERROR, result.getSeverity());
-    assertEquals("Not a file: " + new Path(basePath + "/some.war").toOSString(),
-        result.getMessage());
+    assertEquals("Path is a directory or not a normal file: "
+        + new Path(basePath + "/some.war").toOSString(), result.getMessage());
   }
 
   @Test
