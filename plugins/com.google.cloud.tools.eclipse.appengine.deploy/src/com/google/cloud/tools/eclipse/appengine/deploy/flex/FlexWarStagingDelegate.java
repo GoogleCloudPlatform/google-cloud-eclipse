@@ -16,12 +16,23 @@
 
 package com.google.cloud.tools.eclipse.appengine.deploy.flex;
 
+import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
 import com.google.cloud.tools.eclipse.appengine.deploy.WarPublisher;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+/**
+ * Copies a WAR (an App Engine flexible app) to the given staging directory (in addition to copying
+ * {@code app.yaml} handled by the base class) for projects with the App Engine flexible WAR facet
+ * (which includes WTP). The stager utilizes WTP to publish the WAR.
+ *
+ * See the Javadoc of {@link FlexStagingDelegate} for additional details.
+ *
+ * @see FlexStagingDelegate
+ * @see StagingDelegate
+ */
 public class FlexWarStagingDelegate extends FlexStagingDelegate {
 
   public FlexWarStagingDelegate(IPath appEngineDirectory) {
