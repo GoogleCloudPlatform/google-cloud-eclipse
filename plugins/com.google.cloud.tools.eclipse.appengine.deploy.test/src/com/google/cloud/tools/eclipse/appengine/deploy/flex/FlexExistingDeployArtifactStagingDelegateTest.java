@@ -35,7 +35,8 @@ public class FlexExistingDeployArtifactStagingDelegateTest {
 
   @Rule public TemporaryFolder tempFolder = new TemporaryFolder();
 
-  private final FlexGlobalDeployPreferences preferences = new FlexGlobalDeployPreferences();
+  private final FlexExistingArtifactDeployPreferences preferences =
+      new FlexExistingArtifactDeployPreferences();
 
   private IPath stagingDirectory;
   private IPath appEngineDirectory;

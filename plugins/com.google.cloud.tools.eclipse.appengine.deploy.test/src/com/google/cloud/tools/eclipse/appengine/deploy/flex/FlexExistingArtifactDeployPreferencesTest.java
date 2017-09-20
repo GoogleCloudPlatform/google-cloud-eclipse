@@ -25,14 +25,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.osgi.service.prefs.BackingStoreException;
 
-public class FlexGlobalDeployPreferencesTest {
+public class FlexExistingArtifactDeployPreferencesTest {
 
-  private FlexGlobalDeployPreferences preferences;
+  private FlexExistingArtifactDeployPreferences preferences;
   private IEclipsePreferences preferenceStore;
 
   @Before
   public void setUp() {
-    preferences = new FlexGlobalDeployPreferences();
+    preferences = new FlexExistingArtifactDeployPreferences();
     preferenceStore =
         InstanceScope.INSTANCE.getNode("com.google.cloud.tools.eclipse.appengine.deploy");
   }

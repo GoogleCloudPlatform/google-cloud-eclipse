@@ -42,7 +42,7 @@ public class FlexExistingDeployArtifactStagingDelegate extends FlexStagingDelega
   @Override
   protected IPath getDeployArtifact(IProject project, IPath safeWorkDirectory,
       IProgressMonitor monitor) throws CoreException {
-    String artifactPath = new FlexGlobalDeployPreferences().getDeployArtifactPath();
+    String artifactPath = new FlexExistingArtifactDeployPreferences().getDeployArtifactPath();
     return new Path(artifactPath);
   }
 }

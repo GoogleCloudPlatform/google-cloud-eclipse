@@ -31,7 +31,7 @@ import org.osgi.service.prefs.BackingStoreException;
  * The class additionally overrides the system default value for the {@code app.yaml} path (from
  * {@code src/main/appengine/app.yaml} to {@code app.yaml}.
  */
-public class FlexGlobalDeployPreferences extends FlexDeployPreferences {
+public class FlexExistingArtifactDeployPreferences extends FlexDeployPreferences {
 
   private static final String PREF_DEPLOY_ARTIFACT_PATH = "deploy.artifact.path";
 
@@ -40,7 +40,7 @@ public class FlexGlobalDeployPreferences extends FlexDeployPreferences {
 
   private String deployArtifactPath;
 
-  public FlexGlobalDeployPreferences() {
+  public FlexExistingArtifactDeployPreferences() {
     super(InstanceScope.INSTANCE.getNode(PREFERENCE_STORE_QUALIFIER));
     deployArtifactPath = preferenceStore.get(PREF_DEPLOY_ARTIFACT_PATH,
         DEFAULT_DEPLOY_ARTIFACT_PATH);
