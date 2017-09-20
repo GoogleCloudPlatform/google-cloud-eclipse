@@ -119,7 +119,7 @@ public class FlexMavenPackagedProjectStagingDelegate extends FlexStagingDelegate
     ILaunchConfigurationType launchConfigurationType = launchManager
         .getLaunchConfigurationType(MavenLaunchConstants.LAUNCH_CONFIGURATION_TYPE_ID);
 
-    String launchConfigName = "CT4E App Engine flexible deploy JAR packaging "
+    String launchConfigName = "CT4E App Engine flexible Maven deploy artifact packaging "
         + project.getLocation().toString().replaceAll("[^a-zA-Z0-9]", "_");
 
     ILaunchConfigurationWorkingCopy workingCopy = launchConfigurationType.newInstance(
