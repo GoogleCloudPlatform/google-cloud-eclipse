@@ -120,8 +120,8 @@ public class DeployArtifactValidatorTest {
 
     IStatus result = pathValidator.validate();
     assertEquals(IStatus.ERROR, result.getSeverity());
-    assertEquals("Path is a directory or not a normal file: "
-        + new Path(basePath + "/some.war").toOSString(), result.getMessage());
+    assertEquals("Path is a directory: " + new Path(basePath + "/some.war").toOSString(),
+        result.getMessage());
   }
 
   @Test
@@ -133,8 +133,8 @@ public class DeployArtifactValidatorTest {
 
     IStatus result = pathValidator.validate();
     assertEquals(IStatus.ERROR, result.getSeverity());
-    assertEquals("Path is a directory or not a normal file: "
-        + new Path(basePath + "/some.war").toOSString(), result.getMessage());
+    assertEquals("Path is a directory: " + new Path(basePath + "/some.war").toOSString(),
+        result.getMessage());
   }
 
   @Test

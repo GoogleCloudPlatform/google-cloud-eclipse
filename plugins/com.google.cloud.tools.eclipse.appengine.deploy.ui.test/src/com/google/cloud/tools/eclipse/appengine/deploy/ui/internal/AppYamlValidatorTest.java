@@ -124,8 +124,8 @@ public class AppYamlValidatorTest {
 
     IStatus result = pathValidator.validate();
     assertEquals(IStatus.ERROR, result.getSeverity());
-    assertEquals("Path is a directory or not a normal file: "
-        + new Path(basePath + "/app.yaml").toOSString(), result.getMessage());
+    assertEquals("Path is a directory: " + new Path(basePath + "/app.yaml").toOSString(),
+        result.getMessage());
   }
 
   @Test
@@ -137,8 +137,8 @@ public class AppYamlValidatorTest {
 
     IStatus result = pathValidator.validate();
     assertEquals(IStatus.ERROR, result.getSeverity());
-    assertEquals("Path is a directory or not a normal file: "
-        + new Path(basePath + "/app.yaml").toOSString(), result.getMessage());
+    assertEquals("Path is a directory: " + new Path(basePath + "/app.yaml").toOSString(),
+        result.getMessage());
   }
 
   @Test
