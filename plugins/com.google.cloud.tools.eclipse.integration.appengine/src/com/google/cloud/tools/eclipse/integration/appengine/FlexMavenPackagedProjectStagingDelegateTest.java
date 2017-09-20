@@ -20,7 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import com.google.cloud.tools.eclipse.appengine.deploy.StagingDelegate;
-import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexJarMavenProjectStagingDelegate;
+import com.google.cloud.tools.eclipse.appengine.deploy.flex.FlexMavenPackagedProjectStagingDelegate;
 import com.google.cloud.tools.eclipse.test.util.project.ProjectUtils;
 import java.io.IOException;
 import java.util.List;
@@ -33,7 +33,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.junit.Assume;
 import org.junit.Test;
 
-public class FlexJarMavenProjectStagingDelegateTest {
+public class FlexMavenPackagedProjectStagingDelegateTest {
 
   @Test
   public void testStage_springBoot() throws IOException, CoreException {
@@ -48,7 +48,7 @@ public class FlexJarMavenProjectStagingDelegateTest {
     IPath stagingDirectory = project.getFolder("staging-result").getLocation();
     IPath appEngineDirectory = project.getFolder("src/main/appengine").getLocation();
 
-    StagingDelegate delegate = new FlexJarMavenProjectStagingDelegate(appEngineDirectory);
+    StagingDelegate delegate = new FlexMavenPackagedProjectStagingDelegate(appEngineDirectory);
     IStatus status = delegate.stage(project, stagingDirectory, safeWorkDirectory,
         null, null, new NullProgressMonitor());
     assertTrue(status.isOK());

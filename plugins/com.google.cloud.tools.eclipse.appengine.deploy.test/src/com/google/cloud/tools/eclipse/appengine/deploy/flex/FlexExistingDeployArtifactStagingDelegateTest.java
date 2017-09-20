@@ -31,7 +31,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.osgi.service.prefs.BackingStoreException;
 
-public class FlexGlobalDeployArtifactStagingDelegateTest {
+public class FlexExistingDeployArtifactStagingDelegateTest {
 
   @Rule public TemporaryFolder tempFolder = new TemporaryFolder();
 
@@ -59,7 +59,7 @@ public class FlexGlobalDeployArtifactStagingDelegateTest {
 
   @Test
   public void testStage() {
-    StagingDelegate delegate = new FlexGlobalDeployArtifactStagingDelegate(appEngineDirectory);
+    StagingDelegate delegate = new FlexExistingDeployArtifactStagingDelegate(appEngineDirectory);
     IStatus status = delegate.stage(null, stagingDirectory, null, null, null, null);
 
     assertTrue(stagingDirectory.append("my-app.war").toFile().exists());

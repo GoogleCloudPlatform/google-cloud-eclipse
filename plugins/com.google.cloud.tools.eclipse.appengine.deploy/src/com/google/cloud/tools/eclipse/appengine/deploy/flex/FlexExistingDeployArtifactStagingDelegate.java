@@ -24,18 +24,18 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 
 /**
- * Copies a runnable JAR or a WAR (an App Engine flexible app) to the given staging directory (in
- * addition to copying {@code app.yaml} handled by the base class). This stager is for the global
- * WAR/JAR deploy dialog, where users directly specify a JAR/WAR to deploy.
+ * Copies an existing runnable JAR or a WAR (an App Engine flexible app) to the given staging
+ * directory (in addition to copying {@code app.yaml} handled by the base class). This stager is,
+ * e.g., for the global WAR/JAR deploy dialog, where users directly specify a JAR/WAR to deploy.
  *
  * See the Javadoc of {@link FlexStagingDelegate} for additional details.
  *
  * @see FlexStagingDelegate
  * @see StagingDelegate
  */
-public class FlexGlobalDeployArtifactStagingDelegate extends FlexStagingDelegate {
+public class FlexExistingDeployArtifactStagingDelegate extends FlexStagingDelegate {
 
-  public FlexGlobalDeployArtifactStagingDelegate(IPath appEngineDirectory) {
+  public FlexExistingDeployArtifactStagingDelegate(IPath appEngineDirectory) {
     super(appEngineDirectory);
   }
 

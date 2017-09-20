@@ -40,7 +40,7 @@ import org.eclipse.m2e.actions.MavenLaunchConstants;
 import org.junit.Rule;
 import org.junit.Test;
 
-public class FlexJarMavenProjectStagingDelegateTest {
+public class FlexMavenPackagedProjectStagingDelegateTest {
 
   @Rule public TestProjectCreator projectCreator = new TestProjectCreator().withFacetVersions(
       JavaFacet.VERSION_1_7);
@@ -48,7 +48,7 @@ public class FlexJarMavenProjectStagingDelegateTest {
   @Test
   public void testJreContainerPath() throws CoreException {
     IPath jreContainerPath =
-        FlexJarMavenProjectStagingDelegate.getJreContainerPath(projectCreator.getProject());
+        FlexMavenPackagedProjectStagingDelegate.getJreContainerPath(projectCreator.getProject());
     assertEquals("org.eclipse.jdt.launching.JRE_CONTAINER/"
         + "org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7",
         jreContainerPath.toString());
@@ -59,7 +59,7 @@ public class FlexJarMavenProjectStagingDelegateTest {
     IProject project = projectCreator.getProject();
 
     ILaunchConfiguration launchConfig =
-        FlexJarMavenProjectStagingDelegate.createMavenPackagingLaunchConfiguration(project);
+        FlexMavenPackagedProjectStagingDelegate.createMavenPackagingLaunchConfiguration(project);
 
     boolean privateConfig = launchConfig.getAttribute(ILaunchManager.ATTR_PRIVATE, false);
     assertTrue(privateConfig);
@@ -90,7 +90,7 @@ public class FlexJarMavenProjectStagingDelegateTest {
     ILaunch launch = mock(ILaunch.class);
     assertFalse(launch.isTerminated());
 
-    boolean normalExit = FlexJarMavenProjectStagingDelegate.waitUntilLaunchTerminates(
+    boolean normalExit = FlexMavenPackagedProjectStagingDelegate.waitUntilLaunchTerminates(
         launch, monitor);
     assertFalse(normalExit);
     verify(launch).terminate();
@@ -106,7 +106,7 @@ public class FlexJarMavenProjectStagingDelegateTest {
     when(launch.isTerminated()).thenReturn(true);
     when(launch.getProcesses()).thenReturn(new IProcess[] {process, process});
 
-    boolean normalExit = FlexJarMavenProjectStagingDelegate.waitUntilLaunchTerminates(
+    boolean normalExit = FlexMavenPackagedProjectStagingDelegate.waitUntilLaunchTerminates(
         launch, new NullProgressMonitor());
     assertTrue(normalExit);
   }
@@ -123,7 +123,7 @@ public class FlexJarMavenProjectStagingDelegateTest {
     when(launch.isTerminated()).thenReturn(true);
     when(launch.getProcesses()).thenReturn(new IProcess[] {process, nonZeroExitProcess});
 
-    boolean normalExit = FlexJarMavenProjectStagingDelegate.waitUntilLaunchTerminates(
+    boolean normalExit = FlexMavenPackagedProjectStagingDelegate.waitUntilLaunchTerminates(
         launch, new NullProgressMonitor());
     assertFalse(normalExit);
   }
