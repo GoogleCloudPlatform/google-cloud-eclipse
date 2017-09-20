@@ -477,6 +477,7 @@ public class RunOptionsDefaultsComponentTest {
 
       @Override
       public String getFailureMessage() {
+        System.err.println("Failed: project never resolved");
         return "RuntimeOptions project was never resolved";
       }
     });
