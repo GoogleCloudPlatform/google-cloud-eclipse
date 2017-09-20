@@ -58,7 +58,7 @@ public class ProjectsProvider implements IStructuredContentProvider {
   public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
     this.viewer = viewer;
     this.displayExecutor = DisplayExecutor.create(viewer.getControl().getDisplay());
-    logger.info("ProjectsProvider.inputChanged(): newInput=" + newInput);
+    new Throwable("ProjectsProvider.inputChanged(): newInput=" + newInput).printStackTrace();
     credential = (Credential) newInput;
     if (fetchProjectsJob != null && !fetchProjectsJob.isStale()) {
       logger.info("ProjectsProvider.inputChanged(): fetchProjectJob is still current; returning");
