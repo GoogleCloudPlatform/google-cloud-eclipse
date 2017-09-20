@@ -88,6 +88,7 @@ public class ProjectsProvider implements IStructuredContentProvider {
   @Override
   public Object[] getElements(Object inputElement) {
     if (fetchProjectsJob != null && inputElement == credential) {
+      logger.info("getElements(): returning results");
       return fetchProjectsJob.getComputationResult().or(EMPTY_PROJECTS);
     } else if (fetchProjectsJob == null) {
       logger.warning("getElements(): fetchProjectsJobs is null");

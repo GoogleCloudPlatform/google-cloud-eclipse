@@ -32,6 +32,8 @@ script: ./mvnw -V -B -Ptravis --fail-at-end verify ${MAVEN_FLAGS}
      ${ECLIPSE_TARGET:+-Declipse.target=${ECLIPSE_TARGET}}
      --toolchains=.travis-toolchains.xml
      -Dtoolchain.java.runtime=${JAVA_RUNTIME}
+     -DtestClass=com.google.cloud.tools.eclipse.dataflow.ui.preferences.RunOptionsDefaultsComponentTest
+     -DfailIfNotTests=false
 addons:
   apt:
     packages:
