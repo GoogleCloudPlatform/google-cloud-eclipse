@@ -21,6 +21,7 @@ import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
 import com.google.cloud.tools.eclipse.ui.util.DisplayExecutor;
 import com.google.cloud.tools.eclipse.util.jobs.Consumer;
 import com.google.cloud.tools.eclipse.util.jobs.FuturisticJob;
+import com.google.common.annotations.VisibleForTesting;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.logging.Logger;
@@ -40,7 +41,9 @@ public class ProjectsProvider implements IStructuredContentProvider {
   private Executor displayExecutor;
   private Viewer viewer;
   private Credential credential; // the input
-  private FetchProjectsJob fetchProjectsJob;
+
+  @VisibleForTesting
+  FetchProjectsJob fetchProjectsJob;
 
   public ProjectsProvider(ProjectRepository projectRepository) {
     this.projectRepository = projectRepository;
@@ -55,28 +58,42 @@ public class ProjectsProvider implements IStructuredContentProvider {
   public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
     this.viewer = viewer;
     this.displayExecutor = DisplayExecutor.create(viewer.getControl().getDisplay());
-    if (newInput instanceof Credential && !viewer.getControl().isDisposed()) {
-      this.credential = (Credential) newInput;
-      cancel();
+    new Throwable("ProjectsProvider.inputChanged(): newInput=" + newInput).printStackTrace();
+    credential = (Credential) newInput;
+    if (fetchProjectsJob != null && !fetchProjectsJob.isStale()) {
+      logger.info("ProjectsProvider.inputChanged(): fetchProjectJob is still current; returning");
+      return;
+    }
+    if (fetchProjectsJob != null) {
+      logger.info("ProjectsProvider.inputChanged(): fetchProjectsJob.abandon()");
+      fetchProjectsJob.abandon();
+      fetchProjectsJob = null;
+    }
+    if (credential != null && viewer.getControl() != null && !viewer.getControl().isDisposed()) {
       fetchProjectsJob = new FetchProjectsJob();
       fetchProjectsJob.onSuccess(displayExecutor, new Runnable() {
         @Override
         public void run() {
           if (!ProjectsProvider.this.viewer.getControl().isDisposed()) {
+            logger.info("ProjectsProvider.FetchProjectsJob finished: triggering viewer.refresh()");
             ProjectsProvider.this.viewer.refresh();
           }
         }
       });
+      logger.info("ProjectsProvider.inputChanged(): scheduling new FetchProjectsJob");
       fetchProjectsJob.schedule();
-    } else {
-      cancel();
     }
   }
 
   @Override
   public Object[] getElements(Object inputElement) {
     if (fetchProjectsJob != null && inputElement == credential) {
+      logger.info("getElements(): returning results");
       return fetchProjectsJob.getComputationResult().or(EMPTY_PROJECTS);
+    } else if (fetchProjectsJob == null) {
+      logger.warning("getElements(): fetchProjectsJobs is null");
+    } else if (inputElement != credential) {
+      logger.warning("getElements(): different credential: " + inputElement);
     }
     return EMPTY_PROJECTS;
   }
@@ -95,12 +112,15 @@ public class ProjectsProvider implements IStructuredContentProvider {
         public void accept(GcpProject[] projects) {
           for (final GcpProject project : projects) {
             if (projectId.equals(project.getId())) {
+              logger.info("resolve(): initiating callback: found project " + project);
               callback.accept(project);
               return;
             }
           }
         }
       });
+    } else {
+      logger.warning("resolve(): no fetchProjectsJob found!");
     }
   }
 
@@ -113,17 +133,20 @@ public class ProjectsProvider implements IStructuredContentProvider {
   /**
    * Simple job for fetching projects accessible to the current account.
    */
-  private class FetchProjectsJob extends FuturisticJob<GcpProject[]> {
+  @VisibleForTesting
+  class FetchProjectsJob extends FuturisticJob<GcpProject[]> {
     private final Credential credential;
 
     public FetchProjectsJob() {
       super("Determining accessible projects");
+      logger.info("FetchProjectsJob() created");
       this.credential = ProjectsProvider.this.credential;
     }
 
     @Override
     protected GcpProject[] compute(IProgressMonitor monitor) throws Exception {
       List<GcpProject> projects = projectRepository.getProjects(credential);
+      logger.info("FetchProjectsJob: found: " + projects);
       return projects.toArray(new GcpProject[projects.size()]);
     }
 

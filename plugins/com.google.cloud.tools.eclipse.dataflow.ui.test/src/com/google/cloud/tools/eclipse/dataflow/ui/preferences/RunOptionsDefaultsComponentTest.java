@@ -53,6 +53,7 @@ import com.google.cloud.tools.eclipse.googleapis.IGoogleApiFactory;
 import com.google.cloud.tools.eclipse.login.IGoogleLoginService;
 import com.google.cloud.tools.eclipse.login.ui.AccountSelector;
 import com.google.cloud.tools.eclipse.projectselector.model.GcpProject;
+import com.google.cloud.tools.eclipse.test.util.ThreadDumpingWatchdog;
 import com.google.cloud.tools.eclipse.test.util.ui.CompositeUtil;
 import com.google.cloud.tools.eclipse.test.util.ui.ShellTestResource;
 import com.google.cloud.tools.login.Account;
@@ -63,6 +64,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.widgets.Button;
@@ -85,6 +87,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class RunOptionsDefaultsComponentTest {
 
   @Rule public ShellTestResource shellResource = new ShellTestResource();
+  @Rule
+  public ThreadDumpingWatchdog watchdog = new ThreadDumpingWatchdog(2, TimeUnit.MINUTES);
 
   @Mock private DataflowPreferences preferences;
   @Mock private MessageTarget messageTarget;
@@ -299,7 +303,6 @@ public class RunOptionsDefaultsComponentTest {
     selector.selectAccount("alice@example.com");
     component.setCloudProjectText("doesnotexist");
     spinEvents();
-    component.validate();
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
     assertTrue(projectID.isEnabled());
@@ -320,7 +323,6 @@ public class RunOptionsDefaultsComponentTest {
         component.verifyStagingLocationJob.getFuture();
     waitForFuture(verifyResult);
     waitForFuture(fetchResult);
-    component.validate();
     assertTrue(selector.isEnabled());
     assertNotNull(selector.getSelectedCredential());
     assertTrue(projectID.isEnabled());
@@ -340,7 +342,6 @@ public class RunOptionsDefaultsComponentTest {
     ListenableFuture<VerifyStagingLocationResult> verifyResult =
         component.verifyStagingLocationJob.getFuture();
     waitForFuture(verifyResult);
-    component.validate();
     bot.waitUntil(widgetIsEnabled(new SWTBotButton(createButton)));
     assertTrue(verifyResult.isDone());
     assertTrue(selector.isEnabled());
@@ -422,6 +423,7 @@ public class RunOptionsDefaultsComponentTest {
   public void testPartialValidity_account() {
     testPartialValidity_allEmpty();      
     component.selectAccount("alice@example.com");
+    spinEvents();
     assertTrue("should be complete with account", page.isPageComplete());
   }
   
@@ -429,13 +431,7 @@ public class RunOptionsDefaultsComponentTest {
   public void testPartialValidity_account_project() throws InterruptedException {
     testPartialValidity_account();
     component.setCloudProjectText("project");
-    int i = 0;
-    do {
-      while (Display.getCurrent().readAndDispatch()) {
-        // spin
-      }
-      Thread.sleep(50);
-    } while (i++ < 200 && !page.isPageComplete());
+    waitUntilResolvedProject();
 
     assertTrue("should be complete with account and project", page.isPageComplete());
   }
@@ -450,7 +446,7 @@ public class RunOptionsDefaultsComponentTest {
       @Override
       public boolean test() throws Exception {
         if (Display.getCurrent() != null) {
-          // seems surprising that this is required?
+          // surprising that waitUntil() doesn't spin the event loop
           while (Display.getCurrent().readAndDispatch());
         }
         return future.isDone();
@@ -461,6 +457,8 @@ public class RunOptionsDefaultsComponentTest {
         return "Future never done";
       }
     });
+    // and force a validation
+    component.validate();
   }
 
   /**
@@ -471,7 +469,7 @@ public class RunOptionsDefaultsComponentTest {
       @Override
       public boolean test() throws Exception {
         if (Display.getCurrent() != null) {
-          // seems surprising that this is required?
+          // surprising that waitUntil() doesn't spin the event loop
           while (Display.getCurrent().readAndDispatch());
         }
         return component.getProject() != null;
@@ -479,9 +477,12 @@ public class RunOptionsDefaultsComponentTest {
 
       @Override
       public String getFailureMessage() {
+        System.err.println("Failed: project never resolved");
         return "RuntimeOptions project was never resolved";
       }
     });
+    // and force a validation
+    component.validate();
   }
 
   /**
@@ -490,6 +491,8 @@ public class RunOptionsDefaultsComponentTest {
   private void spinEvents() {
     // does a syncExec
     bot.shells();
+    // and force a validation
+    component.validate();
   }
 
 
